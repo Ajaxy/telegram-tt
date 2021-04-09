@@ -1,0 +1,43 @@
+.GifButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6.25rem;
+  background-color: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 1rem;
+  }
+
+  &.vertical {
+    grid-column-end: span 1;
+  }
+
+  &.horizontal {
+    grid-column-end: span 2;
+  }
+
+  .preview {
+    background-size: cover !important;
+    background: transparent no-repeat center;
+  }
+
+  .preview, video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:not(.shown) {
+    display: block !important;
+    visibility: hidden;
+  }
+
+  .Spinner {
+    position: absolute;
+    pointer-events: none;
+  }
+}

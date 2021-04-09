@@ -1,0 +1,93 @@
+import React, { FC } from '../../lib/teact/teact';
+import { getGlobal, setGlobal, withGlobal } from '../../lib/teact/teactn';
+import { GlobalState } from '../../global/types';
+
+document.ondblclick = () => {
+  const value = Math.random();
+  setGlobal({
+    ...getGlobal(),
+    // @ts-ignore
+    bValue: value,
+    aValue: value,
+  });
+};
+
+type AStateProps = Pick<GlobalState, 'authState'> & {
+  aValue: number;
+};
+
+type BStateProps = Pick<GlobalState, 'authState'> & {
+  bValue: number;
+  derivedAValue: number;
+};
+
+type BOwnProps = Pick<GlobalState, 'authState'> & {
+  aValue: number;
+};
+
+const TestA: FC<AStateProps> = ({ aValue }) => {
+  // eslint-disable-next-line no-console
+  console.log('!!! A MOUNT ', { aValue });
+
+  return (
+    <div>
+      <h1>A</h1>
+      <div>
+        aValue = {aValue}
+      </div>
+      <TestBContainer aValue={aValue} />
+    </div>
+  );
+};
+
+const TestB: FC<BStateProps & BOwnProps> = ({ bValue, aValue, derivedAValue }) => {
+  // eslint-disable-next-line no-console
+  console.log('!!! B MOUNT ', { bValue, aValue, derivedAValue });
+
+  return (
+    <div className="TestB">
+      <h2>B</h2>
+      <div>
+        bValue = {bValue}
+      </div>
+      <div>
+        aValue = {aValue}
+      </div>
+      <div>
+        derivedAValue = {derivedAValue}
+      </div>
+      {bValue > 0.5 ? (
+        <span key="hello" className="hello">Hello</span>
+      ) : (
+        <span key="world" className="world">World</span>
+      )}
+    </div>
+  );
+};
+
+
+const TestBContainer = withGlobal<BOwnProps>(
+  (global, { aValue }): BStateProps => {
+    // eslint-disable-next-line no-console
+    console.log('!!! B MAP', { aValue });
+
+    return {
+      // @ts-ignore
+      bValue: global.bValue,
+      derivedAValue: (aValue || 0) + 1,
+    };
+  },
+)(TestB);
+
+export default withGlobal(
+  (global): AStateProps => {
+    // @ts-ignore
+    // eslint-disable-next-line no-console
+    console.log('!!! A MAP', { aValue: global.aValue });
+
+    return {
+      // @ts-ignore
+      aValue: global.aValue,
+    };
+  },
+)(TestA);

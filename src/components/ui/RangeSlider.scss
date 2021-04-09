@@ -1,0 +1,141 @@
+@mixin thumb-styles() {
+  background: var(--slider-color);
+  border: none;
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: scale(1);
+  transition: transform .25s ease-in-out;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
+.RangeSlider {
+  --slider-color: var(--color-primary);
+
+  margin-bottom: 1rem;
+
+  &.disabled {
+    pointer-events: none;
+    --slider-color: var(--color-text-secondary);
+  }
+
+  .slider-top-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.625rem;
+
+    .value {
+      flex-shrink: 0;
+      margin-left: 1rem;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .slider-main {
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      left: 0;
+      top: 0.3125rem;
+      height: 0.125rem;
+      background-color: var(--color-borders);
+      border-radius: 0.125rem;
+      opacity: 0.5;
+      z-index: -1;
+    }
+  }
+
+  .slider-fill-track {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0.3125rem;
+    height: 0.125rem;
+    background-color: var(--slider-color);
+    border-radius: 0.125rem;
+    pointer-events: none;
+  }
+
+  // Reset range input browser styles
+  input[type="range"] {
+    -webkit-appearance: none;
+    display: block;
+    width: 100%;
+    height: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: transparent;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-ms-track {
+      width: 100%;
+      cursor: pointer;
+
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+    }
+  }
+
+  // Apply custom styles
+  input[type="range"] {
+    // Note that while we're repeating code here, that's necessary as you can't comma-separate these type of selectors.
+    // Browsers will drop the entire selector if it doesn't understand a part of it.
+    &::-webkit-slider-thumb {
+      @include thumb-styles();
+    }
+
+    &::-moz-range-thumb {
+      @include thumb-styles();
+    }
+
+    &::-ms-thumb {
+      @include thumb-styles();
+    }
+  }
+
+  .slider-options {
+    display: grid;
+    grid-template-rows: auto;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+  }
+
+  .slider-option {
+    font-size: 0.825rem;
+    text-align: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: color .2s ease;
+
+    &:hover, &.active {
+      color: var(--color-text);
+    }
+
+    &.active {
+      font-weight: 500;
+    }
+
+    &:first-child {
+      text-align: left;
+    }
+
+    &:last-child {
+      text-align: right;
+    }
+  }
+}

@@ -1,0 +1,657 @@
+.Transition {
+  position: relative;
+
+  > * {
+    width: 100%;
+    height: 100%;
+    animation-fill-mode: forwards !important;
+
+    &.from, &.to {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    &:not(.active):not(.from):not(.to) {
+      display: none !important; // Best performance when animating container
+      //transform: scale(0); // Shortest initial delay
+    }
+  }
+
+  /*
+   * scroll-slide
+   */
+
+  &.scroll-slide {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+
+    > * {
+      position: static;
+      flex-shrink: 0;
+
+      &:not(.active):not(.from):not(.to) {
+        display: block !important;
+        transform: scale(0);
+
+        &.through {
+          display: none !important;
+        }
+      }
+    }
+  }
+
+  /*
+   * slide
+   */
+
+  &.slide {
+    > .to {
+      transform: translateX(100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-out var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-in var(--slide-transition);
+      }
+    }
+  }
+
+  &.slide.backwards {
+    > .to {
+      transform: translateX(-100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-in-backwards var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-out-backwards var(--slide-transition);
+      }
+    }
+  }
+
+  /*
+   * mv-slide
+   */
+
+  &.mv-slide {
+    > * > div {
+      animation-fill-mode: forwards !important;
+    }
+
+    > .to > div {
+      transform: translateX(100vw);
+    }
+
+    &.animating {
+      > .from > div {
+        animation: mv-slide-out .4s ease;
+      }
+
+      > .to > div {
+        animation: mv-slide-in .4s ease;
+      }
+    }
+  }
+
+  &.mv-slide.backwards {
+    > .to > div {
+      transform: translateX(-100vw);
+    }
+
+    &.animating {
+      > .from > div {
+        animation: mv-slide-in-backwards .4s ease;
+      }
+
+      > .to > div {
+        animation: mv-slide-out-backwards .4s ease;
+      }
+    }
+  }
+
+  /*
+   * slide-fade
+   */
+  &.slide-fade {
+    > .from {
+      transform-origin: left;
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    > .to {
+      transform-origin: left;
+      transform: translateX(1.5rem);
+      opacity: 0;
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-out-opacity var(--slide-transition), slide-fade-out-move var(--slide-transition);
+      }
+
+      > .to {
+        animation: fade-in-opacity var(--slide-transition), slide-fade-in-move var(--slide-transition);
+      }
+    }
+  }
+
+  &.slide-fade.backwards {
+    > .from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    > .to {
+      transform: translateX(-1.5rem);
+      opacity: 0;
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-in-backwards-opacity var(--slide-transition), slide-fade-in-backwards-move var(--slide-transition);
+      }
+
+      > .to {
+        animation: fade-out-backwards-opacity var(--slide-transition), slide-fade-out-backwards-move var(--slide-transition);
+      }
+    }
+  }
+
+  /*
+   * zoom-fade
+   */
+  &.zoom-fade {
+    > .from {
+      transform-origin: center;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    > .to {
+      transform-origin: center;
+      opacity: 0;
+      // We can omit `transform: scale(1.1);` here because `opacity` is 0.
+      // We need to for proper position calculation in `InfiniteScroll`.
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-out-opacity .15s ease;
+      }
+
+      > .to {
+        animation: fade-in-opacity .15s ease, zoom-fade-in-move .15s ease;
+      }
+    }
+  }
+
+  &.zoom-fade.backwards {
+    > .from {
+      transform: scale(1);
+    }
+
+    > .to {
+      transform: scale(0.95);
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-in-backwards-opacity .1s ease, zoom-fade-in-backwards-move .15s ease;
+      }
+
+      > .to {
+        animation: fade-out-backwards-opacity .15s ease, zoom-fade-out-backwards-move .15s ease;
+      }
+    }
+  }
+
+  /*
+   * fade
+   */
+  &.fade {
+    > .from {
+      opacity: 1;
+    }
+
+    > .to {
+      opacity: 0;
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-out-opacity .15s ease;
+      }
+
+      > .to {
+        animation: fade-in-opacity .15s ease;
+      }
+    }
+  }
+
+  /*
+   * slide-layers
+   */
+
+  &.slide-layers {
+    --background-color: var(--color-white);
+    background: black;
+
+    > div {
+      background: var(--background-color);
+    }
+
+    > .to {
+      transform: translateX(100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-layers-out var(--layer-transition);
+      }
+
+      > .to {
+        animation: slide-in var(--layer-transition);
+      }
+    }
+  }
+
+  &.slide-layers.backwards {
+    > .to {
+      transform: translateX(-20%);
+      opacity: 0.75;
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-in-backwards var(--layer-transition);
+      }
+
+      > .to {
+        animation: slide-layers-out-backwards var(--layer-transition);
+      }
+    }
+  }
+
+  /*
+   * push-slide
+   */
+
+  &.push-slide {
+    > div {
+      background: white;
+    }
+
+    > .from {
+      transform-origin: center;
+      transform: scale(1);
+      opacity: 1;
+
+      .custom-scroll {
+        scrollbar-color: transparent !important;
+
+        &::-webkit-scrollbar-thumb {
+          background-color: transparent !important;
+        }
+      }
+    }
+
+    > .to {
+      transform: translateX(100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: push-out .3s ease-in-out;
+      }
+
+      > .to {
+        animation: slide-in-200 .3s ease-in-out;
+      }
+    }
+  }
+
+  &.push-slide.backwards {
+    > .to {
+      transform: scale(0.7);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-in-200-backwards .3s ease-in-out;
+      }
+
+      > .to {
+        animation: push-out-backwards .3s ease-in-out;
+      }
+    }
+  }
+
+  /*
+   * slide-fade
+   */
+  &.reveal {
+    > .to {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    &.animating {
+      > .to {
+        animation: reveal-in 350ms ease-in;
+      }
+    }
+  }
+
+  &.reveal.backwards {
+    > .from {
+      clip-path: inset(0 0 0 0);
+    }
+
+    > .to {
+      clip-path: none;
+    }
+
+    &.animating {
+      > .from {
+        animation: reveal-in-backwards 350ms ease-out;
+      }
+
+      > .to {
+        animation: none;
+      }
+    }
+  }
+}
+
+/*
+ * common
+ */
+@keyframes fade-in-opacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out-opacity {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-backwards-opacity {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out-backwards-opacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/*
+ * slide
+ */
+@keyframes slide-in {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-in-backwards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-out-backwards {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/*
+ * mv-slide
+ */
+@keyframes mv-slide-in {
+  0% {
+    transform: translateX(100vw);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes mv-slide-out {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100vw);
+  }
+}
+
+@keyframes mv-slide-in-backwards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+@keyframes mv-slide-out-backwards {
+  0% {
+    transform: translateX(-100vw);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/*
+ * slide-fade
+ */
+@keyframes slide-fade-in-move {
+  0% {
+    transform: translateX(1.5rem);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-fade-out-move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-1.5rem);
+  }
+}
+
+@keyframes slide-fade-in-backwards-move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(1.5rem);
+  }
+}
+
+@keyframes slide-fade-out-backwards-move {
+  0% {
+    transform: translateX(-1.5rem);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/*
+ * zoom-fade
+ */
+@keyframes zoom-fade-in-move {
+  0% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-fade-in-backwards-move {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes zoom-fade-out-backwards-move {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/*
+ * slide-layers
+ */
+@keyframes slide-layers-out {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-20%);
+    opacity: calc(1 - var(--layer-blackout-opacity));
+  }
+}
+
+@keyframes slide-layers-out-backwards {
+  0% {
+    transform: translateX(-20%);
+    opacity: calc(1 - var(--layer-blackout-opacity));
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/*
+ * push-slide
+ */
+
+@keyframes push-out {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes push-out-backwards {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*
+ * slide
+ */
+@keyframes slide-in-200 {
+  0% {
+    transform: translateX(200%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-200-backwards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/*
+ * slide
+ */
+@keyframes reveal-in {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/*
+ * slide
+ */
+@keyframes reveal-in-backwards {
+  0% {
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    clip-path: inset(0 100% 0 0);
+  }
+}

@@ -1,0 +1,9 @@
+.Sticker {
+  &:not(.inactive) {
+    cursor: pointer;
+  }
+
+  &.inactive {
+    pointer-events: none;
+  }
+}

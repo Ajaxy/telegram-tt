@@ -1,0 +1,46 @@
+.NewChat {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+
+  &-inner {
+    height: calc(100% - var(--header-height));
+    overflow: hidden;
+
+    &.step-2 {
+      padding: 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+
+      .note, .error {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        margin: 1.5rem 0.25rem;
+      }
+
+      .error {
+        color: var(--color-error);
+      }
+
+      .note {
+        margin-top: -0.5625rem;
+        color: var(--color-text-secondary);
+      }
+
+      .chat-members-heading {
+        color: var(--color-text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+        margin: 1rem 0.25rem;
+      }
+
+      .chat-members-list {
+        margin: 0 -1.25rem;
+        padding: 0 1rem 1rem;
+
+        overflow-x: hidden;
+        flex-grow: 1;
+      }
+    }
+  }
+}

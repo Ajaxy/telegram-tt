@@ -1,0 +1,57 @@
+.StickerButton {
+  display: inline-block;
+  width: 4rem;
+  height: 4rem;
+  margin: 0.5rem;
+  border-radius: var(--border-radius-messages-small);
+  background: transparent no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  transition: background-color .15s ease, opacity .3s ease !important;
+  position: relative;
+
+  @media (max-width: 600px) {
+    margin: 0.25rem;
+  }
+
+  &.set-button {
+    width: 2.75rem !important;
+    height: 2.75rem;
+    margin: 0 0.5rem;
+  }
+
+  .AnimatedSticker, img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    object-fit: contain;
+  }
+
+  .sticker-unfave-button {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0.125rem;
+
+    i {
+      font-size: 1rem;
+    }
+
+    opacity: 0;
+  }
+
+  &:hover {
+    background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+
+    .sticker-unfave-button {
+      opacity: 1;
+    }
+  }
+}

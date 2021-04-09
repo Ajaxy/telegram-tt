@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    // We don't care about this since Parcel runs Babel after TypeScript
+    "target": "esnext",
+    "lib": [
+      "dom",
+      "webworker",
+      "es7"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react"
+  },
+  "include": [
+    "src"
+  ]
+}

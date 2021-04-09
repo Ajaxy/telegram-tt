@@ -1,0 +1,278 @@
+.MessageList {
+  flex: 1;
+  width: 100%;
+  overflow-anchor: none;
+  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: overlay;
+
+  body.hide-mask-shadow .mask-image-disabled &,
+  .mask-image-enabled & {
+    mask-image: linear-gradient(to top, transparent 0, #000 1rem);
+  }
+
+  .custom-bg-image.mask-image-disabled & {
+    margin-bottom: .3rem;
+  }
+
+  @media (pointer: coarse) {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    touch-callout: none;
+  }
+
+  &.no-avatars .Message > .Avatar {
+    display: none;
+  }
+
+  .messages-container {
+    width: 100%;
+    max-width: var(--messages-container-width);
+    min-height: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    padding: 1rem 1rem .5rem 1.125rem;
+
+    .force-messages-scroll & {
+      margin-top: 100vh !important;
+    }
+
+    @media (max-width: 600px) {
+      width: 100vw;
+      padding: 2.75rem 0.5rem 0.5rem;
+      // Patch for an issue on Android when rotating device
+      margin: 0;
+    }
+  }
+
+  &.bottom-padding {
+    .messages-container {
+      padding-bottom: 1rem;
+    }
+
+    &-big {
+      .messages-container {
+        padding-bottom: 4.75rem;
+
+        @media (max-width: 600px) {
+          padding-bottom: 3.5rem;
+        }
+      }
+    }
+  }
+
+  &.select-mode-active {
+    .messages-container {
+      padding-bottom: 5.25rem;
+    }
+  }
+
+  .Message,
+  .ActionMessage {
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -0.3125rem;
+      bottom: -0.3125rem;
+      left: -50vw;
+      right: -50vw;
+      background: black;
+      z-index: -1;
+
+      opacity: 0;
+      transition: opacity var(--select-transition);
+
+      body.animation-level-0 & {
+        transition: none !important;
+      }
+    }
+
+    &:not(.last-in-group) {
+      &::before {
+        bottom: -0.1875rem;
+      }
+    }
+
+    &:not(.first-in-group) {
+      &::before {
+        top: -0.1875rem;
+      }
+    }
+
+    &.focused::before {
+      // @optimization
+      transition: none !important;
+    }
+
+    &.focused,
+    &.is-forwarding,
+    &.is-selected,
+    &.has-menu-open {
+      &::before {
+        opacity: 0.1;
+      }
+    }
+  }
+
+  > .empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sticky-date,
+  .local-action-message,
+  .ActionMessage,
+  .empty {
+    text-align: center;
+
+    > span {
+      display: inline-block;
+      background: rgba(var(--color-text-secondary-rgb), 0.45);
+      color: white;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      line-height: 1.5rem;
+      padding: 0 .5rem;
+      border-radius: 0.75rem;
+      word-break: break-word;
+    }
+
+    &.rich {
+      > span {
+        max-width: 80%;
+        text-align: left;
+      }
+
+      a {
+        &, &:visited {
+          color: var(--color-links-darker) !important;
+        }
+
+        &:hover, &:active {
+          color: var(--color-links-darker-hover) !important;
+        }
+      }
+    }
+  }
+
+  .sticky-date {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    z-index: var(--z-sticky-date);
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity .3s ease;
+
+    body:not(.is-scrolling-messages) &.stuck {
+      opacity: 0;
+    }
+
+    body.animation-level-0 & {
+      transition: none;
+    }
+  }
+
+  &.scrolled .sticky-date {
+    position: sticky;
+    top: 0.625rem;
+  }
+
+  .has-header-tools & .sticky-date {
+    top: 3.75rem;
+  }
+
+  .local-action-message,
+  .ActionMessage {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ActionMessage {
+    .action-link {
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .sticky-date + .ActionMessage {
+    margin-top: -0.5rem;
+  }
+
+  @media (min-width: 1276px) {
+    width: 100%;
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--layer-transition);
+
+    .messages-container {
+      width: calc(100% - var(--right-column-width));
+    }
+
+    body.animation-level-0 & {
+      transition: none;
+    }
+
+    #Main.right-column-open & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
+
+    body:not(.animating-right-column) #Main.right-column-open &.select-mode-active,
+    #Main.right-column-open &:not(.select-mode-active),
+    body.animating-right-column &:not(.select-mode-active) {
+      width: calc(100% - var(--right-column-width));
+
+      .messages-container {
+        width: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    transition: transform var(--layer-transition);
+
+    body.enable-symbol-menu-transforms & {
+      transform: translate3d(0, 0, 0);
+    }
+
+    body.is-symbol-menu-open & {
+      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
+    }
+  }
+
+  &.select-mode-active,
+  &.has-focusing,
+  body.has-context-menu &,
+  .animating > div > & {
+    /*
+      We need to remove the width of the scrollbar for the full-width selection and
+      compensate for it with a right padding
+    */
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+
+    padding-right: 0;
+
+    /* Styles for Firefox */
+    @supports (scrollbar-width: none) {
+      padding-right: .6875rem;
+      scrollbar-width: none;
+    }
+  }
+
+  .is-safari &.select-mode-active,
+  .is-safari &.has-focusing,
+  .is-safari.has-context-menu .messages-layout > & {
+    padding-right: .375rem;
+  }
+}

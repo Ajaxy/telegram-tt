@@ -1,0 +1,84 @@
+.SearchInput {
+  position: relative;
+  width: 100%;
+  color: rgba(var(--color-text-secondary-rgb), 0.5);
+  background-color: var(--color-chat-hover);
+  border: 2px solid var(--color-chat-hover);
+  border-radius: 1.375rem;
+  transition: border-color 0.15s ease;
+
+  &.with-picker-item {
+    display: flex;
+
+    .icon-search {
+      display: none;
+    }
+
+    input {
+      padding-left: .5rem;
+    }
+  }
+
+  &.has-focus {
+    border-color: var(--color-primary);
+    caret-color: var(--color-primary);
+    background-color: #fff;
+
+    input {
+      & + i {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  input {
+    height: 2.5rem;
+    margin-bottom: 0;
+    border: none !important;
+    border-radius: 1.375rem;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width)) calc(0.5rem - var(--border-width)) calc(2.625rem - var(--border-width));
+
+    &::placeholder {
+      color: var(--color-placeholders);
+    }
+  }
+
+  > i {
+    position: absolute;
+    top: .5rem;
+    left: .75rem;
+    font-size: 1.5rem;
+  }
+
+  .Loading {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    height: 1.5rem;
+
+    .Spinner {
+      --spinner-size: 1.5rem;
+    }
+  }
+
+  .Button {
+    position: absolute;
+    top: .125rem;
+    right: .125rem;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    input {
+      height: 2.5rem;
+      border-radius: 1.25rem;
+      padding-left: calc(2.625rem - var(--border-width));
+    }
+
+    i {
+      top: 0.5rem;
+    }
+  }
+}

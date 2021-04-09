@@ -1,0 +1,87 @@
+.VideoPlayer {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  #MediaViewer.zoomed & {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    > div {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    video {
+      max-height: none !important;
+    }
+  }
+
+  @media (min-width: 601px) {
+    // Safari: custom controls are not displayed after exiting full screen mode.
+    z-index: 1;
+  }
+
+  @media (max-width: 600px) {
+    overflow: visible;
+  }
+
+  @media (max-height: 640px) {
+    margin-bottom: 1.75rem;
+    @at-root .has-footer #{&} {
+      margin-bottom: 0;
+    }
+  }
+
+  video {
+    display: block;
+    max-height: calc(100vh - 8.25rem);
+    margin: auto;
+    object-fit: contain;
+    outline: none;
+    width: 100%;
+    height: 100%;
+    background: no-repeat 50% 50%;
+    background-size: contain;
+
+    @media (max-height: 640px) {
+      max-height: calc(100vh - 10rem);
+    }
+    @at-root .has-footer #{&} {
+      max-height: calc(100vh - 15rem);
+      @media (max-height: 640px) {
+        max-height: calc(100vh - 10rem);
+      }
+    }
+  }
+
+  .spinner-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .buffering {
+      background: rgba(0, 0, 0, 0.25);
+      color: #fff;
+      font-size: 0.75rem;
+      position: absolute;
+      left: 0.1875rem;
+      top: 0.1875rem;
+      z-index: 1;
+      padding: 0 0.375rem;
+      border-radius: 0.75rem;
+      line-height: 1.125rem;
+    }
+
+    .ProgressSpinner {
+      cursor: pointer;
+    }
+  }
+}

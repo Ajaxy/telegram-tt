@@ -1,0 +1,60 @@
+.ForwardPicker {
+  z-index: var(--z-media-viewer);
+
+  .modal-dialog {
+    height: 70%;
+    max-width: 25rem;
+
+    @media (max-width: 600px) {
+      height: 90%;
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+
+    .Button {
+      margin-right: 0.5rem;
+    }
+
+    .input-group {
+      margin: 0;
+    }
+
+    .form-control {
+      border: none;
+      box-shadow: none !important;
+
+      height: 2.75rem;
+      padding: 0.5rem;
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+  }
+
+  .modal-content {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .picker-list {
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0 1rem 1rem;
+    }
+  }
+
+  .no-results {
+    height: 100%;
+    margin: 0;
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+  }
+}

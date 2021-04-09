@@ -1,0 +1,203 @@
+@import 'reboot';
+@import 'variables';
+@import 'mixins';
+@import 'spacing';
+@import 'forms';
+@import 'icons';
+@import 'common';
+@import '../assets/fonts/roboto.css';
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--color-background);
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-family: Roboto, "Helvetica Neue", "Apple Color Emoji", sans-serif;
+  color: var(--color-text);
+  overflow: hidden;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+body.cursor-grabbing, body.cursor-grabbing * {
+  cursor: grabbing !important;
+}
+
+#root {
+  height: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+#middle-column-portals,
+#portals {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.no-selection {
+  user-select: none;
+  -webkit-user-select: none !important;
+}
+
+/*
+ See the article for more information on this visually-hidden pattern.
+ https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
+*/
+.visually-hidden {
+  position: absolute !important;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  z-index: -1;
+}
+
+.not-implemented {
+  opacity: 0.5;
+
+  &, & * {
+    cursor: not-allowed !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.custom-scroll,
+.custom-scroll-x {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 90, 90, 0) transparent;
+  transition: scrollbar-color .3s ease;
+
+  -webkit-overflow-scrolling: touch;
+  // Fix scroll lock on iOS
+  pointer-events: auto;
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(90, 90, 90, 0);
+    border-radius: 0.35rem;
+  }
+
+  &:hover, &:focus, &:focus-within {
+    scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(90, 90, 90, 0.3);
+    }
+  }
+}
+
+.custom-scroll {
+  &::-webkit-scrollbar {
+    width: .375rem;
+  }
+}
+
+.custom-scroll-x {
+  &::-webkit-scrollbar {
+    height: .35rem;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.emoji-small {
+  background: no-repeat;
+  background-size: 1.25rem;
+  color: transparent;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 1px;
+  overflow: hidden;
+
+  &::selection {
+    background-color: var(--color-selection-highlight-emoji);
+    color: transparent;
+  }
+}
+
+div[role="button"] {
+  outline: none !important;
+  cursor: pointer;
+}
+
+.opacity-transition {
+  opacity: 1;
+  transition: opacity .15s ease;
+
+  &:not(.open) {
+    opacity: 0;
+  }
+
+  &:not(.shown) {
+    display: none;
+  }
+
+  &.slow {
+    transition-duration: .3s;
+  }
+}
+
+.color-primary {
+  color: var(--color-primary) !important;
+}
+
+.color-danger {
+  color: var(--color-error) !important;
+}
+
+.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+@keyframes grow-icon {
+  0% {
+    transform: scale(0.5);
+    opacity: .8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hide-icon {
+  from {
+    transform: scale(1);
+    opacity: .4;
+  }
+  to {
+    transform: scale(.5);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,254 @@
+import React from '../../../lib/teact/teact';
+import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
+
+import { RE_LINK_TEMPLATE } from '../../../config';
+import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
+import { nativeToUnfified } from '../../../util/emoji';
+import buildClassName from '../../../util/buildClassName';
+
+import MentionLink from '../../middle/message/MentionLink';
+import SafeLink from '../SafeLink';
+
+type TextPart = string | Element;
+
+const RE_LETTER_OR_DIGIT = /^[\d\wа-яё]$/i;
+const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
+
+export default function renderText(
+  part: TextPart,
+  filters: Array<(
+    'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
+    'simple_markdown' | 'simple_markdown_html'
+  )> = ['emoji'],
+  params?: { highlight: string | undefined },
+): TextPart[] {
+  if (typeof part !== 'string') {
+    return [part];
+  }
+
+  return filters.reduce((text, filter) => {
+    switch (filter) {
+      case 'escape_html':
+        return escapeHtml(text);
+
+      case 'hq_emoji':
+        EMOJI_REGEX.lastIndex = 0;
+        return replaceEmojis(text, 'big', 'jsx');
+
+      case 'emoji':
+        EMOJI_REGEX.lastIndex = 0;
+        return replaceEmojis(text, 'small', 'jsx');
+
+      case 'emoji_html':
+        EMOJI_REGEX.lastIndex = 0;
+        return replaceEmojis(text, 'small', 'html');
+
+      case 'br':
+        return addLineBreaks(text, 'jsx');
+
+      case 'br_html':
+        return addLineBreaks(text, 'html');
+
+      case 'highlight':
+        return addHighlight(text, params!.highlight);
+
+      case 'links':
+        return addLinks(text);
+
+      case 'simple_markdown':
+        return replaceSimpleMarkdown(text, 'jsx');
+
+      case 'simple_markdown_html':
+        return replaceSimpleMarkdown(text, 'html');
+    }
+
+    return text;
+  }, [part] as TextPart[]);
+}
+
+function escapeHtml(textParts: TextPart[]): TextPart[] {
+  const divEl = document.createElement('div');
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string') {
+      return [...result, part];
+    }
+
+    divEl.innerText = part;
+
+    return [...result, divEl.innerHTML];
+  }, [] as TextPart[]);
+}
+
+function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx' | 'html'): TextPart[] {
+  if (IS_EMOJI_SUPPORTED) {
+    return textParts;
+  }
+
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string') {
+      return [...result, part];
+    }
+
+    const parts = part.split(EMOJI_REGEX);
+    const emojis = part.match(EMOJI_REGEX) || [];
+    result.push(parts[0]);
+
+    return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
+      const code = nativeToUnfified(removeVS16s(emoji));
+      const className = buildClassName(
+        'emoji',
+        size === 'small' && 'emoji-small',
+      );
+      if (type === 'jsx') {
+        emojiResult.push(
+          <img
+            className={className}
+            src={`./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`}
+            alt={emoji}
+          />,
+        );
+      }
+      if (type === 'html') {
+        emojiResult.push(
+          // For preventing extra spaces in html
+          // eslint-disable-next-line max-len
+          `<img draggable="false" class="${className}" src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png" alt="${emoji}" />`,
+        );
+      }
+
+      const index = i * 2 + 2;
+      if (parts[index]) {
+        emojiResult.push(parts[index]);
+      }
+
+      return emojiResult;
+    }, result);
+  }, [] as TextPart[]);
+}
+
+function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string') {
+      return [...result, part];
+    }
+
+    return [...result, ...part
+      .split(/\r\n|\r|\n/g)
+      .reduce((parts: TextPart[], line: string, i, source) => {
+        // This adds non-breaking space if line was indented with spaces, to preserve the indentation
+        const trimmedLine = line.trimLeft();
+        const indentLength = line.length - trimmedLine.length;
+        parts.push(String.fromCharCode(160).repeat(indentLength) + trimmedLine);
+
+        if (i !== source.length - 1) {
+          parts.push(
+            type === 'jsx' ? <br /> : '<br />',
+          );
+        }
+
+        return parts;
+      }, [])];
+  }, [] as TextPart[]);
+}
+
+function addHighlight(textParts: TextPart[], highlight: string | undefined): TextPart[] {
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string' || !highlight) {
+      return [...result, part];
+    }
+
+    const lowerCaseText = part.toLowerCase();
+    const queryPosition = lowerCaseText.indexOf(highlight.toLowerCase());
+    const nextSymbol = lowerCaseText[queryPosition + highlight.length];
+    if (queryPosition < 0 || (nextSymbol && nextSymbol.match(RE_LETTER_OR_DIGIT))) {
+      return [...result, part];
+    }
+
+    const newParts: TextPart[] = [];
+    newParts.push(part.substring(0, queryPosition));
+    newParts.push(
+      <span className="matching-text-highlight">
+        {part.substring(queryPosition, queryPosition + highlight.length)}
+      </span>,
+    );
+    newParts.push(part.substring(queryPosition + highlight.length));
+
+    return [...result, ...newParts];
+  }, [] as TextPart[]);
+}
+
+const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'ig');
+const RE_MENTION = /@[\w\d_-]+/ig;
+
+function addLinks(textParts: TextPart[]): TextPart[] {
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string') {
+      return [...result, part];
+    }
+
+    const links = [...(part.match(RE_LINK) || []), ...(part.match(RE_MENTION) || [])];
+    if (!links.length) {
+      return [...result, part];
+    }
+
+    const content: TextPart[] = [];
+
+    let nextLink = links.shift();
+    let lastIndex = 0;
+    while (nextLink) {
+      const index = part.indexOf(nextLink, lastIndex);
+      content.push(part.substring(lastIndex, index));
+      if (nextLink.startsWith('@')) {
+        content.push(
+          <MentionLink username={nextLink}>
+            {nextLink}
+          </MentionLink>,
+        );
+      } else {
+        content.push(
+          <SafeLink text={nextLink} url={nextLink} />,
+        );
+      }
+      lastIndex = index + nextLink.length;
+      nextLink = links.shift();
+    }
+    content.push(part.substring(lastIndex));
+
+    return [...result, ...content];
+  }, [] as TextPart[]);
+}
+
+function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
+  return textParts.reduce((result, part) => {
+    if (typeof part !== 'string') {
+      return [...result, part];
+    }
+
+    const parts = part.split(SIMPLE_MARKDOWN_REGEX);
+    const entities = part.match(SIMPLE_MARKDOWN_REGEX) || [];
+    result.push(parts[0]);
+
+    return entities.reduce((entityResult: TextPart[], entity, i) => {
+      if (type === 'jsx') {
+        entityResult.push(
+          entity.startsWith('**')
+            ? <b>{entity.replace(/\*\*/g, '')}</b>
+            : <i>{entity.replace(/__/g, '')}</i>,
+        );
+      } else {
+        entityResult.push(
+          entity.startsWith('**')
+            ? `<b>${entity.replace(/\*\*/g, '')}</b>`
+            : `<i>${entity.replace(/__/g, '')}</i>`,
+        );
+      }
+
+      const index = i * 2 + 2;
+      if (parts[index]) {
+        entityResult.push(parts[index]);
+      }
+
+      return entityResult;
+    }, result);
+  }, [] as TextPart[]);
+}

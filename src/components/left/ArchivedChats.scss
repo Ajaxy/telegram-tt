@@ -1,0 +1,8 @@
+.ArchivedChats {
+  height: 100%;
+  overflow: hidden;
+
+  .chat-list {
+    height: calc(100% - var(--header-height));
+  }
+}

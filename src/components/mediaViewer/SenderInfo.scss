@@ -1,0 +1,42 @@
+.SenderInfo {
+  display: flex;
+  align-content: center;
+  color: white;
+  cursor: pointer;
+
+  opacity: .5;
+  transition: .15s opacity;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .Avatar {
+    margin-right: 1rem;
+
+    @media (max-width: 600px) {
+      display: none;
+    }
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .title {
+    line-height: 1.45rem;
+    font-weight: 500;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .date {
+    line-height: 1.25rem;
+    font-size: 0.875rem;
+    letter-spacing: -0.01rem;
+  }
+}

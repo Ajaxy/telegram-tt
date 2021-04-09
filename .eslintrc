@@ -1,0 +1,65 @@
+{
+  "extends": [
+    "react-app",
+    "plugin:teactn/recommended",
+    "airbnb-typescript"
+  ],
+  "plugins": [
+    "no-async-without-await",
+    "teactn",
+    "no-null"
+  ],
+  "rules": {
+    "indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "max-len": [
+      "error",
+      120
+    ],
+    "array-bracket-newline": [2, "consistent"],
+    "no-null/no-null": 2,
+    "no-console": "error",
+    "semi": "error",
+    "no-implicit-coercion": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "arrow-body-style": "off",
+    "no-else-return": "off",
+    "no-plusplus": "off",
+    "no-void": "off",
+    "default-case": "off",
+    "no-param-reassign": "off",
+    "no-prototype-builtins": "off",
+    "no-await-in-loop": "off",
+    "no-nested-ternary": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/prefer-default-export": "off",
+    "import/named": "off",
+    "import/no-webpack-loader-syntax": "off",
+    "react/prop-types": "off",
+    "react/jsx-one-expression-per-line": "off",
+    // Teact feature
+    "react/style-prop-object": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/label-has-associated-control": "off",
+    "jsx-a11y/anchor-is-valid": "off",
+    "no-async-without-await/no-async-without-await": 1,
+    "@typescript-eslint/no-use-before-define": [
+      "error",
+      {
+        "functions": false
+      }
+    ],
+    "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/member-delimiter-style": "error",
+    "teactn/prefer-separate-component-file": "off"
+  },
+  "settings": {
+    "import/resolver": "webpack"
+  }
+}

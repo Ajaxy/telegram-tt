@@ -1,0 +1,23 @@
+.GifSearch {
+  height: 100%;
+  padding: 0.25rem;
+
+  .gif-container {
+    height: 100%;
+    overflow: auto;
+
+    &.grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-auto-rows: 6.25rem;
+      grid-gap: 0.25rem;
+      grid-auto-flow: dense;
+    }
+  }
+
+  .helper-text {
+    color: var(--color-text-meta);
+    margin-top: 2rem;
+    text-align: center;
+  }
+}

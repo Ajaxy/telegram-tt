@@ -1,0 +1,131 @@
+import { GlobalState } from '../../global/types';
+import { ShippingOption, PaymentStep } from '../../types';
+import { ApiMessage, ApiPaymentForm, ApiReceipt } from '../../api/types';
+
+export function updateShippingOptions(
+  global: GlobalState,
+  shippingOptions: ShippingOption[],
+): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      shippingOptions,
+    },
+  };
+}
+
+export function setRequestInfoId(global: GlobalState, id: string): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      formId: id,
+    },
+  };
+}
+
+export function setPaymentStep(global: GlobalState, step: PaymentStep): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      step,
+    },
+  };
+}
+
+export function setInvoiceMessageInfo(global: GlobalState, message: ApiMessage): GlobalState {
+  if (!message.content || !message.content.invoice) {
+    return global;
+  }
+  const {
+    title,
+    text,
+    description,
+    photoUrl,
+  } = message.content.invoice;
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      invoiceContent: {
+        title,
+        text,
+        description,
+        photoUrl,
+      },
+    },
+  };
+}
+
+export function setStripeCardInfo(global: GlobalState, cardInfo: { type: string; id: string }): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      stripeCredentials: {
+        ...cardInfo,
+      },
+    },
+  };
+}
+
+export function setPaymentForm(global: GlobalState, form: ApiPaymentForm): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      ...form,
+    },
+  };
+}
+
+export function setReceipt(
+  global: GlobalState,
+  receipt?: ApiReceipt,
+  message?: ApiMessage,
+): GlobalState {
+  if (!receipt || !message) {
+    return {
+      ...global,
+      payment: {
+        ...global.payment,
+        receipt: undefined,
+      },
+    };
+  }
+
+  const { invoice: messageInvoice } = message.content;
+  const { photoUrl, text, title } = (messageInvoice || {});
+
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      receipt: {
+        ...receipt,
+        photoUrl,
+        text,
+        title,
+      },
+    },
+  };
+}
+
+export function clearPayment(global: GlobalState): GlobalState {
+  return {
+    ...global,
+    payment: {},
+  };
+}
+
+export function closeInvoice(global: GlobalState): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      isPaymentModalOpen: false,
+    },
+  };
+}

@@ -1,0 +1,230 @@
+.Audio {
+  display: flex;
+  align-items: flex-start;
+
+  &.media-inner {
+    overflow: visible;
+  }
+
+  &.own {
+    --color-text-secondary: var(--accent-color);
+    --color-interactive-active: var(--color-text-green);
+    --color-interactive-inactive: rgba(var(--color-text-green-rgb), 0.4);
+    --color-interactive-buffered: rgba(var(--color-text-green-rgb), 0.4); // Overlays underlying inactive color
+
+    .Button {
+      --color-primary: var(--color-text-green);
+      --color-primary-shade: var(--color-green);
+      --color-primary-shade-darker: var(--color-green-darker);
+      --color-white: var(--color-background-own);
+    }
+  }
+
+  .toggle-play {
+    margin-right: .5rem;
+
+    &.smaller {
+      width: 3rem;
+      height: 3rem;
+      margin-right: .75rem;
+
+      i {
+        font-size: 1.625rem;
+        margin-top: -.025rem;
+      }
+    }
+
+    i {
+      position: absolute;
+
+      &.icon-play {
+        margin-left: .125rem;
+        @media (max-width: 600px) {
+          margin-left: .0625rem;
+        }
+      }
+    }
+
+    .icon-play, .icon-pause {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity .4s, transform .6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.play .icon-pause,
+    &.pause .icon-play,
+    &.loading .icon-play,
+    &.loading .icon-pause {
+      opacity: 0;
+      transform: scale(.5);
+    }
+  }
+
+  .content {
+    align-self: center;
+    min-width: 0;
+    flex-grow: 1;
+  }
+
+  .content-row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .title {
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .voice-duration {
+    margin: .25rem 0 0;
+    font-size: .875rem;
+    color: var(--color-text-secondary);
+
+    span {
+      margin-left: 0.25rem;
+      font-size: 1.5rem;
+      line-height: .875rem;
+      vertical-align: middle;
+    }
+  }
+
+  &:not(.own) .voice-duration span {
+    color: var(--color-primary);
+  }
+
+  .waveform {
+    cursor: pointer;
+    margin-left: 1px;
+  }
+
+  .meta,
+  .performer,
+  .date {
+    font-size: .875rem;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .duration {
+    margin: .1875rem 0 0;
+    font-size: .875rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .seekline {
+    width: calc(100% - 2px);
+    padding-left: 6px;
+    margin-bottom: .3125rem;
+    height: 12px;
+    position: relative;
+    margin-left: -6px;
+    top: 1px;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      left: 6px;
+      top: 6px;
+      height: 2px;
+      background-color: var(--color-interactive-inactive);
+      border-radius: 2px;
+    }
+  }
+
+  .seekline-buffered-progress, .seekline-play-progress {
+    position: absolute;
+    height: 2px;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+    top: 6px;
+    left: 6px;
+
+    i {
+      position: absolute;
+      width: 100%;
+      background-color: var(--color-interactive-active);
+      height: 2px;
+      border-radius: 2px;
+      right: 100%;
+    }
+  }
+
+  .seekline-buffered-progress i {
+    background-color: var(--color-interactive-buffered) !important;
+  }
+
+  .seekline-thumb {
+    position: absolute;
+    width: 100%;
+    top: 7px;
+    left: 0;
+
+    i {
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      right: 100%;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: -12px;
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background: var(--color-interactive-active);
+      }
+    }
+  }
+
+  &.bigger {
+    .content {
+      margin-top: .1875rem;
+    }
+
+    .title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+      line-height: 1.5rem;
+    }
+
+    .meta,
+    .performer,
+    .date {
+      line-height: 1.0625rem;
+    }
+
+    .seekline {
+      top: 2px;
+      margin-bottom: .5rem;
+    }
+
+    .duration {
+      line-height: 1rem;
+    }
+
+    .media-loading {
+      top: 0.1875rem;
+      left: 0.1875rem;
+    }
+  }
+
+  .ProgressSpinner.size-s svg {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}

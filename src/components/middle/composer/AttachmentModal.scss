@@ -1,0 +1,77 @@
+.AttachmentModal {
+  --border-radius-default: 0.625rem;
+
+  .modal-dialog {
+    max-width: 26.25rem;
+    @media(max-width: 600px) {
+      max-height: 100%;
+      padding-bottom: 1.5rem;
+    }
+  }
+
+  .modal-content {
+    padding: .5rem 1.25rem 1.875rem;
+    max-height: calc(100vh - 3.25rem);
+    @media(max-width: 600px) {
+      padding-bottom: .25rem;
+    }
+  }
+
+  .media-wrapper {
+    max-height: 26rem;
+    overflow: auto;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+
+    video,
+    img {
+      flex: 1;
+      width: calc(50% - 0.15rem);
+      height: 12rem;
+      margin-bottom: 0.3rem;
+      border-radius: var(--border-radius-default);
+      object-fit: cover;
+
+      &:only-child {
+        height: auto;
+        max-height: 25rem;
+        margin-bottom: 0;
+      }
+
+      &:nth-child(even) {
+        margin-left: 0.3rem;
+      }
+    }
+  }
+
+  .document-wrapper {
+    max-height: 25rem;
+    overflow: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    margin: .75rem 0 1.75rem;
+
+    .File:not(:last-child) {
+      margin-bottom: 1.5rem;
+    }
+
+    .file-icon {
+      cursor: default !important;
+    }
+  }
+
+  .attachment-caption-wrapper {
+    position: relative;
+
+    .form-control {
+      background: white;
+    }
+
+    .MentionMenu {
+      right: 0 !important;
+      z-index: 0;
+    }
+  }
+}

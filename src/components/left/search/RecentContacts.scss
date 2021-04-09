@@ -1,0 +1,81 @@
+.RecentContacts {
+  .Loading {
+    min-height: 75vh;
+  }
+
+  .top-peers-section {
+    padding: .5rem 1rem;
+  }
+
+  .top-peers {
+    height: 6rem;
+    margin: 0 -1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+
+    scrollbar-width: none;
+    scrollbar-color: rgba(0, 0, 0, 0);
+
+    &::-webkit-scrollbar {
+      height: 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
+
+  .top-peer-item {
+    display: inline-block;
+    width: 4.5rem;
+    height: 6rem;
+    padding: 0.625rem 0.25rem;
+    margin-left: 0.5rem;
+    border-radius: var(--border-radius-default);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    &:first-child {
+      margin-left: 0.125rem;
+    }
+
+    &:last-child {
+      margin-right: 0.125rem;
+    }
+
+    .Avatar {
+      margin: 0 auto 0.375rem;
+    }
+
+    &:hover {
+      background: var(--color-chat-hover);
+    }
+
+    .top-peer-name {
+      text-align: center;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      .emoji-small {
+        width: 1rem;
+        height: 1rem;
+        background-size: 1rem;
+        margin-right: 1px;
+        vertical-align: -3px;
+      }
+    }
+  }
+
+  .recent-chats-header {
+    display: flex;
+    align-items: center;
+
+    .Button {
+      margin-left: auto;
+    }
+  }
+}

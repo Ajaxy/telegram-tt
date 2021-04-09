@@ -1,0 +1,304 @@
+@mixin active-styles() {
+  &:not(.disabled):not(:disabled) {
+    &:hover, &:active, &.active, &:focus {
+      @content;
+    }
+  }
+}
+
+@mixin no-ripple-styles() {
+  body.animation-level-0 & {
+    &:not(.disabled):not(:disabled) {
+      &:active {
+        @content;
+      }
+    }
+  }
+}
+
+.Button {
+  outline: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 3.5rem;
+  border: 0;
+  border-radius: var(--border-radius-default);
+  background: transparent;
+  padding: 0.625rem;
+  color: white;
+  line-height: 1.2;
+  cursor: pointer;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background-color .15s, color .15s;
+  text-decoration: none !important;
+
+  // @optimization
+  &:active, &.clicked, body.animation-level-0 & {
+    transition: none !important;
+  }
+
+  &.disabled {
+    opacity: 0.5 !important;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &.round {
+    width: 3.5rem;
+    border-radius: 50%;
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+
+  &.primary {
+    background: var(--color-primary);
+    color: var(--color-white);
+    --ripple-color: rgba(0, 0, 0, .08);
+
+    @include active-styles() {
+      background: var(--color-primary-shade);
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-primary-shade-darker);
+    }
+  }
+
+  &.secondary {
+    background: var(--color-background);
+    color: rgba(var(--color-text-secondary-rgb), 0.75);
+    --ripple-color: rgba(0, 0, 0, .08);
+
+    @include active-styles() {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-primary-shade);
+    }
+  }
+
+  &.gray {
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    --ripple-color: rgba(0, 0, 0, .08);
+
+    @include active-styles() {
+      color: var(--color-primary);
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-chat-hover);
+    }
+  }
+
+  &.danger {
+    background: var(--color-background);
+    color: var(--color-error);
+    --ripple-color: rgba(var(--color-error-rgb), .16);
+
+    @include active-styles() {
+      background: var(--color-error);
+      color: var(--color-white);
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-error-shade);
+    }
+  }
+
+  &.text {
+    background: none;
+
+    &.primary {
+      color: var(--color-primary);
+      background: none;
+
+      @include active-styles() {
+        background: rgba(var(--color-primary-shade-rgb), .08);
+      }
+
+      @include no-ripple-styles() {
+        background: rgba(var(--color-primary-shade-rgb), .16);
+      }
+    }
+
+    &.secondary {
+      background: none;
+      color: var(--color-text-secondary);
+    }
+
+    &.danger {
+      @include active-styles() {
+        background: rgba(var(--color-error-rgb), .08);
+        color: var(--color-error);
+      }
+
+      @include no-ripple-styles() {
+        background: rgba(var(--color-error-rgb), .16);
+      }
+    }
+  }
+
+  &.faded {
+    opacity: 0.75;
+
+    @include active-styles() {
+      opacity: 1;
+    }
+
+    &.activated {
+      opacity: 1;
+    }
+  }
+
+  &.translucent {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+
+    --ripple-color: rgba(var(--color-text-secondary-rgb), 0.08);
+
+    @include active-styles() {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.16);
+    }
+
+    &.activated {
+      color: var(--color-primary);
+    }
+  }
+
+  &.translucent-white {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    --ripple-color: rgba(255, 255, 255, 0.08);
+
+    @include active-styles() {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(255, 255, 255, 0.16);
+    }
+  }
+
+  &.dark {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    --ripple-color: rgba(255, 255, 255, 0.08);
+
+    @include active-styles() {
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(0, 0, 0, 0.95);
+    }
+  }
+
+  &.smaller {
+    height: 2.75rem;
+    padding: 0.3125rem;
+
+    &.round {
+      width: 2.75rem;
+    }
+
+    &.pill {
+      height: 2.5rem;
+      border-radius: 1.25rem;
+      padding: 0.3125rem 1rem;
+    }
+
+    &.with-icon {
+      padding-left: 0.75rem;
+      padding-right: 1.25rem;
+
+      i {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      height: 2.5rem;
+
+      &.round {
+        width: 2.5rem;
+      }
+    }
+  }
+
+  &.tiny {
+    height: 2.25rem;
+    padding: .4375rem;
+    border-radius: var(--border-radius-default-small);
+    font-size: .875rem;
+    font-weight: 500;
+
+    &.round {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+    }
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    &.pill {
+      height: 2rem;
+      border-radius: 1rem;
+      padding: 0.3125rem 1rem;
+      font-size: 1rem;
+    }
+  }
+
+  &.fluid {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    width: auto;
+
+    &.tiny {
+      padding-left: 1.375rem;
+      padding-right: 1.375rem;
+    }
+  }
+
+  &.pill {
+    border-radius: 1.75rem;
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    text-transform: none;
+  }
+
+  &.loading {
+    position: relative;
+    pointer-events: none;
+
+    .Spinner {
+      position: absolute;
+      right: 0.875rem;
+      top: 0.875rem;
+
+      --spinner-size: 1.8rem;
+    }
+  }
+
+  .emoji {
+    vertical-align: -3px;
+  }
+}

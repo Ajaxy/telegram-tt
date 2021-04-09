@@ -1,0 +1,208 @@
+.File {
+  --secondary-color: var(--color-text-secondary);
+
+  .Message.own & {
+    --secondary-color: var(--color-text-green);
+  }
+
+  .content-inner & {
+    min-width: 14rem;
+  }
+
+  display: flex;
+  align-items: center;
+
+  .file-icon-container {
+    position: relative;
+  }
+
+  .file-progress,
+  .file-icon,
+  .file-preview {
+    width: 3.375rem;
+    height: 3.375rem;
+    margin-right: .75rem;
+    border-radius: var(--border-radius-messages-small);
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .file-icon {
+    padding: 1rem .75rem .5rem;
+    align-items: flex-end;
+    flex-shrink: 0;
+    position: relative;
+    color: white;
+
+    .file-ext {
+      font-size: 1rem;
+      font-weight: 500;
+      transition: opacity .15s;
+    }
+
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      border-bottom-left-radius: 0.25rem;
+      background: rgba(black, 0.25);
+      border-color: transparent var(--background-color) transparent var(--background-color);
+      border-width: 0 1.125rem 1.125rem 0;
+      border-style: solid;
+      transition: border-width .15s ease-in;
+    }
+  }
+
+  .file-preview {
+    background: transparent;
+    overflow: hidden;
+
+    & + .icon-download,
+    & + .file-progress {
+      background: rgba(black, 0.5);
+      border-radius: var(--border-radius-messages-small);
+    }
+
+    img {
+      object-fit: cover;
+    }
+  }
+
+  .icon-download {
+    color: #fff;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3.375rem;
+    height: 3.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+
+  &.interactive .file-icon-container {
+    cursor: pointer;
+
+    &:hover {
+      .file-icon::after {
+        border-width: 0;
+      }
+
+      .icon-download {
+        opacity: 1;
+
+        &.hidden {
+          opacity: 0;
+        }
+      }
+
+      .file-ext {
+        opacity: 0;
+      }
+    }
+  }
+
+  .file-info {
+    margin-top: .1875rem;
+    margin-right: .125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+
+    & + .Link {
+      font-size: .75rem;
+      color: var(--color-text-secondary);
+      padding-left: 1rem;
+      white-space: nowrap;
+    }
+  }
+
+  .file-title {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .emoji {
+      vertical-align: -4px;
+    }
+  }
+
+  .file-subtitle {
+    font-size: .875rem;
+    line-height: .9375rem;
+    color: var(--secondary-color);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    span + span {
+      &::before {
+        content: '\00a0\2022\00a0';
+      }
+    }
+  }
+
+  &.smaller {
+    --background-color: #fff;
+    --border-radius-messages-small: .3125rem;
+
+    .icon-download,
+    .file-progress,
+    .file-icon,
+    .file-preview {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .file-icon {
+      padding-bottom: .375rem;
+
+      &::after {
+        border-width: 0 1rem 1rem 0;
+      }
+    }
+
+    .file-info {
+      margin-top: -.125rem;
+    }
+
+    .file-title {
+      font-weight: 400;
+    }
+
+    .file-subtitle {
+      line-height: 1rem;
+    }
+  }
+}
+
+// Document extension colors
+.File .file-progress,
+.File .file-icon {
+  &.red {
+    background-color: var(--color-error);
+  }
+
+  &.orange {
+    background-color: var(--color-warning);
+  }
+
+  &.green {
+    background-color: var(--color-text-green);
+  }
+}

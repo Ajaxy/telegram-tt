@@ -1,0 +1,399 @@
+@font-face {
+  font-family: 'icomoon';
+  src: url('../assets/fonts/icomoon.woff2?7tsg0v') format('woff2'),
+    url('../assets/fonts/icomoon.woff?7tsg0v') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-darkmode:before {
+  content: "\e979";
+}
+.icon-animations:before {
+  content: "\e97a";
+}
+.icon-enter:before {
+  content: "\e97b";
+}
+.icon-fontsize:before {
+  content: "\e97c";
+}
+.icon-permissions:before {
+  content: "\e976";
+}
+.icon-card:before {
+  content: "\e977";
+}
+.icon-truck:before {
+  content: "\e978";
+}
+.icon-share-filled:before {
+  content: "\e95a";
+}
+.icon-bold:before {
+  content: "\e961";
+}
+.icon-bot-command:before {
+  content: "\e962";
+}
+.icon-calendar-filter:before {
+  content: "\e963";
+}
+.icon-comments:before {
+  content: "\e964";
+}
+.icon-comments-sticker:before {
+  content: "\e965";
+}
+.icon-arrow-down:before {
+  content: "\e966";
+}
+.icon-email:before {
+  content: "\e967";
+}
+.icon-italic:before {
+  content: "\e968";
+}
+.icon-link:before {
+  content: "\e969";
+}
+.icon-mention:before {
+  content: "\e96a";
+}
+.icon-monospace:before {
+  content: "\e96b";
+}
+.icon-next:before {
+  content: "\e96c";
+}
+.icon-password-off:before {
+  content: "\e96d";
+}
+.icon-pin-list:before {
+  content: "\e96e";
+}
+.icon-previous:before {
+  content: "\e96f";
+}
+.icon-replace:before {
+  content: "\e970";
+}
+.icon-schedule:before {
+  content: "\e971";
+}
+.icon-strikethrough:before {
+  content: "\e972";
+}
+.icon-underlined:before {
+  content: "\e973";
+}
+.icon-zoom-in:before {
+  content: "\e974";
+}
+.icon-zoom-out:before {
+  content: "\e975";
+}
+.icon-select:before {
+  content: "\e960";
+}
+.icon-folder:before {
+  content: "\e913";
+}
+.icon-bots:before {
+  content: "\e915";
+}
+.icon-calendar:before {
+  content: "\e916";
+}
+.icon-cloud-download:before {
+  content: "\e917";
+}
+.icon-colorize:before {
+  content: "\e918";
+}
+.icon-forward:before {
+  content: "\e927";
+}
+.icon-reply:before {
+  content: "\e947";
+}
+.icon-help:before {
+  content: "\e92a";
+}
+.icon-info:before {
+  content: "\e92b";
+}
+.icon-info-filled:before {
+  content: "\e91b";
+}
+.icon-delete-filled:before {
+  content: "\e91c";
+}
+.icon-delete:before {
+  content: "\e91d";
+}
+.icon-edit:before {
+  content: "\e923";
+}
+.icon-new-chat-filled:before {
+  content: "\e939";
+}
+.icon-send:before {
+  content: "\e94a";
+}
+.icon-send-outline:before {
+  content: "\e94b";
+}
+.icon-add-user-filled:before {
+  content: "\e904";
+}
+.icon-add-user:before {
+  content: "\e905";
+}
+.icon-delete-user:before {
+  content: "\e91e";
+}
+.icon-microphone:before {
+  content: "\e935";
+}
+.icon-microphone-alt:before {
+  content: "\e93b";
+}
+.icon-poll:before {
+  content: "\e938";
+}
+.icon-revote:before {
+  content: "\e93a";
+}
+.icon-photo:before {
+  content: "\e940";
+}
+.icon-document:before {
+  content: "\e91f";
+}
+.icon-camera:before {
+  content: "\e90e";
+}
+.icon-camera-add:before {
+  content: "\e90f";
+}
+.icon-logout:before {
+  content: "\e932";
+}
+.icon-saved-messages:before {
+  content: "\e948";
+}
+.icon-settings:before {
+  content: "\e94e";
+}
+.icon-phone:before {
+  content: "\e93f";
+}
+.icon-attach:before {
+  content: "\e909";
+}
+.icon-copy:before {
+  content: "\e91a";
+}
+.icon-channel:before {
+  content: "\e911";
+}
+.icon-group:before {
+  content: "\e929";
+}
+.icon-user:before {
+  content: "\e959";
+}
+.icon-non-contacts:before {
+  content: "\e928";
+}
+.icon-active-sessions:before {
+  content: "\e902";
+}
+.icon-admin:before {
+  content: "\e906";
+}
+.icon-download:before {
+  content: "\e921";
+}
+.icon-location:before {
+  content: "\e930";
+}
+.icon-stop:before {
+  content: "\e952";
+}
+.icon-archive:before {
+  content: "\e908";
+}
+.icon-unarchive:before {
+  content: "\e953";
+}
+.icon-readchats:before {
+  content: "\e933";
+}
+.icon-unread:before {
+  content: "\e957";
+}
+.icon-message:before {
+  content: "\e934";
+}
+.icon-lock:before {
+  content: "\e931";
+}
+.icon-unlock:before {
+  content: "\e954";
+}
+.icon-mute:before {
+  content: "\e937";
+}
+.icon-unmute:before {
+  content: "\e955";
+}
+.icon-pin:before {
+  content: "\e941";
+}
+.icon-unpin:before {
+  content: "\e956";
+}
+.icon-smallscreen:before {
+  content: "\e95e";
+}
+.icon-fullscreen:before {
+  content: "\e95f";
+}
+.icon-large-pause:before {
+  content: "\e92e";
+}
+.icon-large-play:before {
+  content: "\e92f";
+}
+.icon-pause:before {
+  content: "\e93d";
+}
+.icon-play:before {
+  content: "\e943";
+}
+.icon-channelviews:before {
+  content: "\e912";
+}
+.icon-message-succeeded:before {
+  content: "\e900";
+}
+.icon-message-read:before {
+  content: "\e901";
+}
+.icon-message-pending:before {
+  content: "\e94c";
+}
+.icon-message-failed:before {
+  content: "\e94d";
+}
+.icon-favorite:before {
+  content: "\e93e";
+}
+.icon-keyboard:before {
+  content: "\e944";
+}
+.icon-delete-left:before {
+  content: "\e945";
+}
+.icon-recent:before {
+  content: "\e946";
+}
+.icon-gifs:before {
+  content: "\e94f";
+}
+.icon-stickers:before {
+  content: "\e95b";
+}
+.icon-smile:before {
+  content: "\e950";
+}
+.icon-animals:before {
+  content: "\e907";
+}
+.icon-eats:before {
+  content: "\e922";
+}
+.icon-sport:before {
+  content: "\e951";
+}
+.icon-car:before {
+  content: "\e910";
+}
+.icon-lamp:before {
+  content: "\e92c";
+}
+.icon-language:before {
+  content: "\e92d";
+}
+.icon-flag:before {
+  content: "\e926";
+}
+.icon-more:before {
+  content: "\e936";
+}
+.icon-search:before {
+  content: "\e949";
+}
+.icon-remove:before {
+  content: "\e95c";
+}
+.icon-add:before {
+  content: "\e903";
+}
+.icon-check:before {
+  content: "\e914";
+}
+.icon-close:before {
+  content: "\e919";
+}
+.icon-arrow-left:before {
+  content: "\e90d";
+}
+.icon-arrow-right:before {
+  content: "\e93c";
+}
+.icon-down:before {
+  content: "\e920";
+}
+.icon-up:before {
+  content: "\e958";
+}
+.icon-eye-closed:before {
+  content: "\e925";
+}
+.icon-eye:before {
+  content: "\e924";
+}
+.icon-muted-chat:before {
+  content: "\e95d";
+}
+.icon-avatar-archived-chats:before {
+  content: "\e90a";
+}
+.icon-avatar-deleted-account:before {
+  content: "\e90b";
+}
+.icon-avatar-saved-messages:before {
+  content: "\e90c";
+}
+.icon-pinned-chat:before {
+  content: "\e942";
+}

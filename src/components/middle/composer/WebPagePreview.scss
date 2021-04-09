@@ -1,0 +1,41 @@
+.WebPagePreview {
+  display: flex;
+  align-items: center;
+  margin-bottom: -.75rem;
+  padding-right: 0.625rem;
+  padding-top: 0.45rem;
+
+  // TODO: Remove this when support for disabling webpage preview is added
+  padding-left: 3.375rem;
+
+  --accent-color: var(--color-primary);
+
+  .ComposerEmbeddedMessage + & {
+    margin-top: 0.75rem;
+  }
+
+  & > .Button {
+    flex-shrink: 0;
+    background: none !important;
+    width: 2.125rem;
+    height: 2.125rem;
+    margin: 0 0.625rem;
+    padding: 0;
+    align-self: center;
+  }
+
+  .WebPage {
+    flex-grow: 1;
+    margin: 0.1875rem 0 0.1875rem 0.125rem;
+
+    &::before {
+      top: .125rem;
+      bottom: .0625rem;
+    }
+
+    .site-title {
+      margin-top: .125rem;
+      margin-bottom: 0.1875rem;
+    }
+  }
+}

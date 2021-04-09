@@ -1,0 +1,45 @@
+.Notification-container {
+  position: relative;
+  width: 24rem;
+  max-width: 100vw;
+  margin: .25rem auto;
+  z-index: var(--z-notification);
+
+  @media (min-width: 1276px) {
+    transition: transform var(--layer-transition);
+
+    body.is-right-column-shown & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
+  }
+
+  &:first-of-type {
+    margin-top: 4.25rem;
+
+    .has-header-tools & {
+      margin-top: 7.375rem;
+    }
+  }
+}
+
+.Notification {
+  background: rgba(32, 32, 32, .8) url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGZpbGw9IiNGRkYiIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIvPjxjaXJjbGUgZmlsbD0iIzAwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBjeD0iMTIiIGN5PSI2LjUiIHI9IjEuNSIvPjxwYXRoIGQ9Ik0xMiA5LjVjLS41NTIgMC0xIC4zNy0xIC44MjZ2Ny4zNDhjMCAuNDU2LjQ0OC44MjYgMSAuODI2czEtLjM3IDEtLjgyNnYtNy4zNDhjMC0uNDU2LS40NDgtLjgyNi0xLS44MjZ6IiBmaWxsPSIjMDAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48L2c+PC9zdmc+") no-repeat .9375rem 50%;
+  background-size: 1.5rem;
+  border-radius: var(--border-radius-default);
+  padding: .9375rem .9375rem .9375rem 3.375rem;
+  color: #fff;
+  margin: 0 .5rem;
+
+  .text-entity-link,
+  .text-entity-link:hover,
+  .text-entity-link:active {
+    color: #fff !important;
+    text-decoration: underline;
+  }
+
+  .content {
+    line-height: 1.25;
+    word-break: break-word;
+    font-size: .9375rem;
+  }
+}

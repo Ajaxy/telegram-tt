@@ -1,0 +1,129 @@
+.EmbeddedMessage {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  margin: 0 -0.25rem .0625rem;
+  padding: .1875rem 0.25rem .1875rem .4375rem;
+  border-radius: var(--border-radius-messages-small);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+
+  body.animation-level-1 & {
+    .ripple-container {
+      display: none;
+    }
+  }
+
+  .custom-shape & {
+    max-width: 15rem;
+    padding: 0.5rem;
+    margin: 0;
+    background-color: var(--background-color);
+    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+
+    &::before {
+      left: .625rem;
+      top: .625rem;
+      bottom: .625rem;
+    }
+
+    img:not(.emoji) {
+      margin-left: .5rem;
+    }
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: .3125rem;
+    bottom: .3125rem;
+    left: .3125rem;
+    width: 2px;
+    background: var(--accent-color);
+    border-radius: 2px;
+  }
+
+  &:hover {
+    background-color: var(--hover-color);
+  }
+
+  &:active {
+    background-color: var(--active-color);
+  }
+
+  .message-text {
+    overflow: hidden;
+    margin-left: 0.5rem;
+
+    .message-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.125rem;
+    }
+
+    p {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 1.125rem;
+      margin-bottom: 0;
+
+      &::after {
+        content: none;
+        display: none;
+      }
+    }
+
+    .emoji {
+      width: 1.125rem !important;
+      height: 1.125rem !important;
+      vertical-align: -4px !important;
+    }
+  }
+
+  .embedded-action-message {
+    color: var(--accent-color);
+    opacity: 0.75;
+  }
+
+  img:not(.emoji) {
+    width: 2rem;
+    height: 2rem;
+    object-fit: cover;
+    border-radius: .25rem;
+    margin-left: .25rem;
+    flex-shrink: 0;
+  }
+
+  &.inside-input {
+    padding-left: 0.5625rem;
+    margin: 0 0 -.125rem -0.1875rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+    --accent-color: var(--color-primary);
+    --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
+
+    &::before {
+      bottom: .3125rem;
+    }
+
+    img:not(.emoji) {
+      margin-left: .125rem;
+    }
+
+    .message-text {
+      margin-left: .375rem;
+    }
+
+    .message-title {
+      font-weight: 500;
+      color: var(--accent-color);
+    }
+  }
+}

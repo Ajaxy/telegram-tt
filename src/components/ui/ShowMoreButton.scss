@@ -1,0 +1,19 @@
+.ShowMoreButton {
+  color: var(--text-color) !important;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  text-transform: none;
+  padding-left: .75rem !important;
+  opacity: 1 !important;
+
+  i {
+    font-size: 1.5rem;
+    margin-right: 2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .Spinner {
+    top: 0.4375rem;
+  }
+}

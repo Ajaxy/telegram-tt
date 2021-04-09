@@ -1,0 +1,152 @@
+.lovely-chart--container {
+  font: 300 13px '-apple-system', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+  color: #222222;
+  position: relative;
+  text-align: left;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+  &.lovely-chart--state-invisible > * {
+    display: none;
+  }
+
+  > canvas,
+  .lovely-chart--tooltip canvas {
+    margin-top: 10px;
+  }
+}
+
+.lovely-chart--container-type-pie {
+  &.lovely-chart--state-animating {
+    > canvas {
+      transform-origin: center calc(50% - 7.5px);
+    }
+
+    &.lovely-chart--state-zoomed-in > canvas {
+      animation: lovely-chart--animation-pie-transition-in 0.6s;
+      animation-timing-function: ease-out;
+    }
+
+    &:not(.lovely-chart--state-zoomed-in) > canvas {
+      animation: lovely-chart--animation-pie-transition-out 0.55s;
+      animation-timing-function: ease-in;
+    }
+  }
+}
+
+@keyframes lovely-chart--animation-pie-transition-in {
+  0% {
+    clip-path: circle(80% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+    transform: rotate(-360deg);
+  }
+
+  25% {
+    clip-path: circle(32% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(32% at center calc(50% - 7.5px));
+    transform: rotate(-360deg);
+  }
+
+  75% {
+    clip-path: circle(32% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(32% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+}
+
+@media (max-width: 480px) {
+  @keyframes lovely-chart--animation-pie-transition-in {
+    0% {
+      clip-path: circle(80% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+      transform: rotate(-360deg);
+    }
+
+    25% {
+      clip-path: circle(40% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+      transform: rotate(-360deg);
+    }
+
+    75% {
+      clip-path: circle(40% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+      transform: rotate(0);
+    }
+  }
+}
+
+@keyframes lovely-chart--animation-pie-transition-out {
+  0% {
+    clip-path: circle(32% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(32% at center calc(50% - 7.5px));
+    transform: rotate(360deg);
+  }
+
+  50% {
+    clip-path: circle(32% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(32% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+
+  75% {
+    clip-path: circle(80% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+}
+
+@media (max-width: 480px) {
+  @keyframes lovely-chart--animation-pie-transition-out {
+    0% {
+      clip-path: circle(40% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+      transform: rotate(360deg);
+    }
+
+    50% {
+      clip-path: circle(40% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+      transform: rotate(0);
+    }
+
+    75% {
+      clip-path: circle(80% at center calc(50% - 7.5px));
+      -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+      transform: rotate(0);
+    }
+  }
+}
+
+html.cursor-ew-resize, html.cursor-ew-resize * {
+  cursor: ew-resize !important;
+}
+
+html.cursor-grabbing, html.cursor-grabbing * {
+  cursor: grabbing !important;
+}
+
+.lovely-chart--spinner {
+  width: 16px;
+  height: 16px;
+  position: relative;
+
+  &.lovely-chart--size-big {
+    width: 64px;
+    height: 64px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='512px' height='512px' viewBox='0 0 16 16'%3E%3Cg%3E%3Cpath fill='%23D2D5D7' d='M9.9 0.2l-0.2 1c3 0.8 5.3 3.5 5.3 6.8 0 3.9-3.1 7-7 7s-7-3.1-7-7c0-3.3 2.3-6 5.3-6.8l-0.2-1c-3.5 0.9-6.1 4.1-6.1 7.8 0 4.4 3.6 8 8 8s8-3.6 8-8c0-3.7-2.6-6.9-6.1-7.8z' data-original='%23444444' class='active-path' data-old_color='%23444444'/%3E%3C/g%3E%3C/svg%3E%0A");
+    background-size: 100%;
+    animation: lovely-chart--animation-spin 1s infinite linear;
+  }
+}

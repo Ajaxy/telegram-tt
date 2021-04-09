@@ -1,0 +1,64 @@
+.StickerSearch {
+  height: 100%;
+  padding: 0 0.5rem;
+  overflow-y: auto;
+
+  .helper-text {
+    padding: 1rem;
+    margin-bottom: 0.125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .sticker-set {
+    margin-bottom: 1rem;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+
+      .title-wrapper {
+        overflow: hidden;
+      }
+
+      .title {
+        font-size: 1rem;
+        line-height: 1.6875rem;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .count {
+        color: var(--color-text-secondary);
+        margin: 0;
+      }
+
+      .Button {
+        flex-shrink: 0;
+        margin-left: 1rem;
+
+        &.is-added {
+          background: var(--color-chat-hover);
+          color: var(--color-text-secondary);
+
+          &:hover, &:active {
+            background: var(--color-chat-active) !important;
+          }
+        }
+      }
+    }
+
+    &-main {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  .StickerButton {
+    margin: 0.125rem;
+  }
+}

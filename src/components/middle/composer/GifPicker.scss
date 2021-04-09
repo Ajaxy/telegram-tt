@@ -1,0 +1,15 @@
+.GifPicker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 6.25rem;
+  grid-gap: 0.25rem;
+  grid-auto-flow: dense;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0.25rem;
+
+  .Loading, .picker-disabled {
+    grid-column: 1 / -1;
+    height: var(--menu-height);
+  }
+}

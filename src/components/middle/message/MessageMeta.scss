@@ -1,0 +1,110 @@
+.MessageMeta {
+  position: absolute;
+  height: 1.25rem;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  background: rgba(#999999, 0.6);
+  border-radius: .65rem;
+  padding: 0 .25rem;
+  color: white;
+  cursor: pointer;
+  max-width: 100%;
+
+  .message-time,
+  .message-signature,
+  .message-views {
+    font-size: .75rem;
+    white-space: nowrap;
+  }
+
+  .message-time {
+    margin-right: .1875rem;
+  }
+
+  .message-views {
+    margin-left: .1875rem;
+  }
+
+  .message-signature {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 0.375rem;
+  }
+
+  .icon-channelviews {
+    margin-left: 0.125rem;
+    margin-right: 0.375rem;
+    font-size: 1.125rem;
+    position: relative;
+    top: -0.0625rem;
+  }
+
+  .has-solid-background & {
+    color: rgba(var(--color-text-meta-rgb), 0.75);
+    background: none;
+  }
+
+  .media:not(.text) &,
+  .Message .custom-shape & {
+    background: rgba(0,0,0, 0.2);
+    color: white !important;
+    opacity: 1;
+    bottom: .25rem;
+    right: .25rem;
+    left: auto;
+    height: 1.125rem;
+    padding: 0 .3125rem 0 .375rem;
+
+    .MessageOutgoingStatus i {
+      background: transparent;
+    }
+  }
+
+  .is-forwarded.media:not(.text) & {
+    bottom: 0.9rem;
+    right: 0.8rem;
+  }
+
+  .emoji-only & {
+    right: 0;
+  }
+
+  .Message.own .has-solid-background & {
+    color: var(--color-text-green);
+  }
+
+  .MessageOutgoingStatus {
+    margin-left: -.1875rem;
+    font-size: 1.1875rem;
+  }
+
+  .message-content.has-replies:not(.custom-shape) & {
+    bottom: 3.375rem;
+  }
+
+  .message-content.has-replies.text:not(.custom-shape) & {
+    bottom: 3.4375rem;
+  }
+}
+
+.Message:not(.own) {
+  .custom-shape .reply-message + .MessageMeta {
+    right: auto;
+    left: 13.2rem;
+    bottom: 0.25rem;
+  }
+
+  .emoji-only-1 .reply-message + .MessageMeta {
+    left: 2.5rem;
+  }
+
+  .emoji-only-2 .reply-message + .MessageMeta {
+    left: 5.5rem;
+  }
+
+  .emoji-only-3 .reply-message + .MessageMeta {
+    left: 6.5rem;
+  }
+}

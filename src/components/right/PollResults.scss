@@ -1,0 +1,32 @@
+.PollResults {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+
+  > .Loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(white, 0.75);
+  }
+
+  .poll-question {
+    padding: .75rem 1.5rem;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+
+    @media (max-width: 600px) {
+      padding: 0 1rem;
+    }
+  }
+
+  .poll-results-list {
+    border-top: 1px solid var(--color-borders);
+    flex-grow: 1;
+    overflow: auto;
+  }
+}

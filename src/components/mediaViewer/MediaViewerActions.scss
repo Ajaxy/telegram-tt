@@ -1,0 +1,19 @@
+.MediaViewerActions {
+  display: flex;
+  margin-left: auto;
+  margin-right: -.375rem;
+
+  .Button {
+    margin-left: .25rem;
+  }
+}
+
+.MediaViewerActions-mobile {
+  position: relative;
+
+  .ProgressSpinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}

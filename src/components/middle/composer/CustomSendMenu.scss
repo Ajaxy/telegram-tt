@@ -1,0 +1,23 @@
+.CustomSendMenu {
+  position: relative;
+  bottom: 3.5rem;
+
+  .is-pointer-env & {
+    > .backdrop {
+      position: absolute;
+      top: -1rem;
+      left: auto;
+      right: 0;
+      width: 3.5rem;
+    }
+  }
+
+
+  .media-disabled > button {
+    white-space: normal;
+  }
+
+  .bubble {
+    width: 16rem;
+  }
+}

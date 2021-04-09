@@ -1,0 +1,83 @@
+.Tab {
+  flex: 1 1 auto;
+  appearance: none;
+  background: none;
+  width: auto;
+  margin: 0;
+  border: none;
+  padding: .625rem .25rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-top-left-radius: var(--border-radius-messages-small);
+  border-top-right-radius: var(--border-radius-messages-small);
+
+  &,
+  &:active,
+  &:focus {
+    outline: none;
+  }
+
+  &.active {
+    pointer-events: none;
+    cursor: default;
+    color: var(--color-primary);
+
+    i {
+      opacity: 1;
+    }
+  }
+
+  &:not(.active):hover {
+    background: rgba(var(--color-text-secondary-rgb), 0.08);
+  }
+
+  > span {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .badge {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.5rem;
+    background: var(--color-gray);
+    border-radius: 0.75rem;
+    padding: 0 .3125rem;
+    color: white;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    text-align: center;
+    flex-shrink: 0;
+
+    &.active {
+      background: var(--color-primary);
+    }
+  }
+
+  i {
+    position: absolute;
+    bottom: calc(-.625rem - 1px);
+    left: 0;
+    opacity: 0;
+    background-color: var(--color-primary);
+    height: .1875rem;
+    width: 100%;
+    border-radius: .1875rem .1875rem 0 0;
+    pointer-events: none;
+    padding-right: .5rem;
+    margin-left: -.25rem;
+    box-sizing: content-box;
+    transform-origin: left;
+
+    &.animate {
+      transition: transform var(--slide-transition);
+
+      body.animation-level-0 & {
+        transition: none !important;
+      }
+    }
+  }
+}

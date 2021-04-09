@@ -1,0 +1,66 @@
+.Badge-transition {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:not(.open) {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  &:not(.shown) {
+    display: none;
+  }
+
+  &.closing {
+    transition: transform .2s ease-out, opacity .2s ease-out;
+  }
+}
+
+.Badge-wrapper {
+  display: flex;
+  margin-left: 1.5rem;
+
+  .Badge {
+    margin-left: 0.5rem;
+  }
+}
+
+.Badge {
+  min-width: 1.5rem;
+  height: 1.5rem;
+  background: var(--color-gray);
+  border-radius: 0.75rem;
+  padding: 0 .45rem;
+  color: white;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+  flex-shrink: 0;
+
+  &.mention, &.unread:not(.muted) {
+    background: var(--color-green);
+  }
+
+  &.pinned {
+    width: 1.5rem;
+    padding: 0;
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+
+  &.mention {
+    width: 1.5rem;
+    padding: 0.25rem;
+
+    i {
+      font-size: 1rem;
+      vertical-align: super;
+    }
+  }
+}
+
+

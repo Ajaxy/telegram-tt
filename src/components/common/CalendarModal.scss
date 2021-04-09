@@ -1,0 +1,132 @@
+.CalendarModal {
+  .modal-dialog {
+    max-width: 26.25rem;
+    .modal-content {
+      padding: .375rem 1rem 1rem;
+    }
+  }
+
+  .timepicker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+
+    .form-control {
+      max-width: 5rem;
+      text-align: center;
+
+      &:first-child {
+        margin-right: 1rem;
+      }
+      &:last-child {
+        margin-left: 1rem;
+      }
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+
+    .Button {
+      text-transform: none;
+
+      + .Button {
+        margin-top: .5rem;
+      }
+    }
+  }
+
+  .month-selector {
+    display: flex;
+    align-items: center;
+
+    h4 {
+      flex: 1;
+      margin: 0 0 0 1.25rem;
+      font-size: 1.25rem;
+
+      @media (max-width: 600px) {
+        margin-left: .75rem;
+      }
+
+      & ~ .Button {
+        color: var(--color-primary)
+      }
+    }
+
+    .Button.hidden {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  .day-button {
+    position: relative;
+    border-radius: 4rem;
+    outline: none !important;
+    font-weight: 500;
+    margin: .125rem .625rem;
+
+    @media (max-width: 600px) {
+      margin: .25rem .375rem;
+    }
+
+    &.weekday {
+      margin-bottom: 0;
+      height: 1rem;
+    }
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+      }
+
+      &.selected {
+        background-color: var(--color-primary);
+        color: white;
+      }
+    }
+
+    &.disabled {
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    &::before {
+      content: "";
+      display: block;
+      padding-top: 100%;
+    }
+
+    span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+    }
+  }
+
+  .calendar-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 17rem;
+    margin: 1.5rem -0.5rem 0.5rem;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    width: 100%;
+  }
+}

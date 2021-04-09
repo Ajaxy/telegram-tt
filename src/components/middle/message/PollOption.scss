@@ -1,0 +1,115 @@
+.PollOption {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-bottom: 0.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .poll-option-text {
+    word-break: break-word;
+  }
+
+  .poll-option-share {
+    position: relative;
+    margin-top: .125rem;
+    width: 1.75rem;
+    margin-right: .5rem;
+    flex-shrink: 0;
+    font-weight: 500;
+    font-size: .875rem;
+    text-align: right;
+
+    &.limit-width {
+      display: inline-flex;
+      justify-content: center;
+      font-size: .75rem;
+    }
+  }
+
+  .poll-option-chosen {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    width: 1rem;
+    height: 1rem;
+    background: var(--accent-color);
+    color: #fff;
+    border-radius: .5rem;
+    font-size: .75rem;
+    text-align: center;
+
+    &.wrong {
+      background: var(--color-error);
+    }
+
+    .is-forwarded & > i {
+      margin-left: 1px;
+    }
+
+    &.animate {
+      opacity: 0;
+      animation-name: PollOptionIconAnimate;
+      animation-delay: .09s;
+      animation-duration: .3s;
+      animation-fill-mode: forwards;
+    }
+  }
+
+  .poll-option-right {
+    flex-grow: 1;
+  }
+
+  .poll-option-answer {
+    position: relative;
+  }
+
+  .poll-option-line {
+    position: relative;
+    width: 0;
+    height: 0.25rem;
+    min-width: 0.5rem;
+    border-radius: 0.125rem;
+    margin-top: 0.5rem;
+    background: var(--accent-color);
+
+    transform-origin: 0 0;
+    transition: transform .3s;
+    transition-delay: .09s;
+
+  }
+
+  .poll-line {
+    width: 30px;
+    height: 35px;
+    position: absolute;
+    left: -27px;
+    bottom: -5px;
+    transition: stroke-dashoffset .3s, stroke-dasharray .3s;
+    stroke-dashoffset: 0;
+    stroke-dasharray: 0, 200%
+  }
+
+  .poll-line path {
+    stroke-width: 4px;
+    stroke-linecap: round;
+    stroke: var(--accent-color);
+    fill:none
+  }
+
+  .wrong {
+    .poll-option-line {
+      background: var(--color-error);
+    }
+
+    .poll-line path {
+      stroke: var(--color-error);
+    }
+  }
+}
+
+@keyframes PollOptionIconAnimate {
+  0% { opacity: 0 }
+  100% { opacity: 1 }
+}

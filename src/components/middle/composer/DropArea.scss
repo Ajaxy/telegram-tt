@@ -1,0 +1,16 @@
+.DropArea {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 100vh;
+  z-index: var(--z-drop-area);
+  padding: 80px 20px 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  #Main.right-column-open & {
+    max-width: calc(100% - var(--right-column-width));
+  }
+}

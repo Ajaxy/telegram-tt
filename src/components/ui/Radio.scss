@@ -1,0 +1,108 @@
+.Radio {
+  display: block;
+  position: relative;
+  padding-left: 4.5rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  line-height: 1.5rem;
+  cursor: pointer;
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &.hidden-widget {
+    cursor: default;
+    .Radio-main {
+      &::before, &::after {
+        visibility: hidden;
+      }
+    }
+  }
+
+  > input {
+    position: absolute;
+    z-index: var(--z-below);
+    opacity: 0;
+  }
+
+  .Radio-main {
+    &::before, &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 1.0625rem;
+      top: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      transform: translateY(-50%);
+    }
+
+    &::before {
+      border: 2px solid var(--color-borders);
+      border-radius: 50%;
+      background-color: white;
+      opacity: 1;
+      transition: border-color .1s ease, opacity .1s ease;
+    }
+
+    &::after {
+      left: 1.375rem;
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      background: var(--color-primary);
+      opacity: 0;
+      transition: opacity .1s ease;
+    }
+
+    .label {
+      display: block;
+      word-break: break-word;
+    }
+
+    .subLabel {
+      display: block;
+      font-size: 0.875rem;
+      line-height: 1rem;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  input:checked ~ .Radio-main {
+    &::before {
+      border-color: var(--color-primary);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &.loading {
+    .Radio-main::before,
+    .Radio-main::after {
+      opacity: 0 !important;
+    }
+
+    .Spinner {
+      position: absolute;
+      left: 1.0625rem;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      animation: fade-in .2s ease forwards;
+      --spinner-size: 1.25rem;
+    }
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,20 @@
+.LastMessageMeta {
+  margin-right: .2rem;
+  padding: .3rem 0 .15rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+
+  .MessageOutgoingStatus {
+    color: var(--color-text-green);
+    margin-right: 0.1rem;
+    font-size: 1.15rem;
+  }
+
+  .time {
+    color: var(--color-text-meta);
+    line-height: 1.15rem;
+  }
+}

@@ -1,0 +1,32 @@
+.Album {
+  position: relative;
+  overflow: hidden;
+
+  .message-content.media.text & {
+    margin: -0.3125rem -0.5rem 0.3125rem;
+  }
+
+  .forwarded-message & {
+    margin-bottom: .125rem;
+
+    .message-content.media.text & {
+      margin: 0 0 0.3125rem;
+      --border-bottom-left-radius: inherit;
+      --border-bottom-right-radius: inherit;
+    }
+  }
+
+  &,
+  .message-content.media.text & {
+    > .album-item-select-wrapper .media-inner {
+      margin: 0 !important;
+    }
+  }
+
+  > .album-item-select-wrapper .media-inner {
+    &, & img, & video {
+      border-radius: 0 !important;
+      object-fit: cover;
+    }
+  }
+}

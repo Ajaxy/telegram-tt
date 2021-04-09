@@ -1,0 +1,78 @@
+.NewChatButton {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  transform: translateY(5rem);
+
+  transition: transform .25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  body.animation-level-0 & {
+    transform: none !important;
+    opacity: 0;
+
+    transition: opacity .15s;
+
+    &.revealed {
+      opacity: 1;
+    }
+  }
+
+  &.revealed {
+    transform: translateY(0);
+    @media (max-width: 600px) {
+      // Force rendering in the composite layer to fix the z-index rendering issue
+      transform: translate3d(0,0,10px);
+      transform-style: preserve-3d;
+    }
+  }
+
+  &.menu-is-open {
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -13rem;
+      left: -11rem;
+      right: -1rem;
+      bottom: -1rem;
+      z-index: -1;
+    }
+  }
+
+  .is-touch-env & {
+    .Menu > .backdrop {
+      position: absolute;
+      left: -100vw;
+      right: -100vw;
+      top: -100vh;
+      bottom: -100vh;
+    }
+  }
+
+  > .Button {
+    .icon-new-chat-filled,
+    .icon-close {
+      position: absolute;
+    }
+
+    &:not(.active) {
+      .icon-new-chat-filled {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-close {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.active {
+      .icon-close {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-new-chat-filled {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+  }
+}

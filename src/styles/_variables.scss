@@ -1,0 +1,197 @@
+@function toRGB($color) {
+  @return red($color) + ", " + green($color) + ", " + blue($color);
+}
+
+@function blend-normal ($foreground, $background) {
+  $opacity: opacity($foreground);
+  $background-opacity: opacity($background);
+
+  // calculate opacity
+  $bm-red: red($foreground) * $opacity + red($background) * $background-opacity * (1 - $opacity);
+  $bm-green: green($foreground) * $opacity + green($background) * $background-opacity * (1 - $opacity);
+  $bm-blue: blue($foreground) * $opacity + blue($background) * $background-opacity * (1 - $opacity);
+  @return rgb($bm-red, $bm-green, $bm-blue);
+}
+
+$color-primary: #50a2e9;
+
+$color-links: #52a1ef;
+
+$color-placeholders: #A2ACB4;
+
+$color-text-green: #4fae4e;
+$color-green: #4dcd5e;
+$color-light-green: #eefedf;
+
+$color-error: #e53935;
+
+$color-warning: #fb8c00;
+
+$color-yellow: #FDD764;
+
+$color-white: #ffffff;
+$color-black: #000000;
+$color-dark-gray: #2e3939;
+$color-gray: #c4c9cc;
+$color-text-secondary: #707579;
+$color-text-meta: #686c72;
+$color-borders: #dadce0;
+$color-chat-hover: #f4f4f5;
+$color-chat-active: #ededed;
+$color-selection: #3993fb;
+
+// https://github.com/telegramdesktop/tdesktop/wiki/Theme-Reference#user-content-standard-color-constants
+// Colors borrowed from https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/Resources/day-blue.tdesktop-theme
+// historyPeer[1-8]UserpicBg
+$color-user-1: #E17076;
+$color-user-2: #7BC862;
+//$color-user-3: #E5CA77;
+$color-user-4: #65aadd;
+$color-user-5: #a695e7;
+$color-user-6: #ee7aae;
+$color-user-7: #6ec9cb;
+$color-user-8: #faa774;
+
+:root {
+  --color-background: #{$color-white};
+  --color-background-selected: #f4f4f5;
+  --color-background-own: #{$color-light-green};
+  --color-background-own-selected: #{darken($color-light-green, 10%)};
+  --color-background-own-rgb: #{toRGB($color-light-green)};
+  --color-text: #{$color-black};
+  --color-text-lighter: #{$color-dark-gray};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-secondary-rgb: #{toRGB($color-text-secondary)};
+  --color-text-meta: #{$color-text-meta};
+  --color-text-meta-rgb: #{toRGB($color-text-meta)};
+  --color-text-green: #{$color-text-green};
+  --color-text-green-rgb: #{toRGB($color-text-green)};
+  --color-borders: #{$color-borders};
+  --color-webpage-initial-background: #{$color-dark-gray};
+  --color-interactive-active: var(--color-primary);
+  --color-interactive-inactive: rgba(var(--color-text-secondary-rgb), 0.25);
+  --color-interactive-buffered: rgba(var(--color-text-secondary-rgb), 0.25); // Overlays underlying inactive element
+
+  --color-primary: #{$color-primary};
+  --color-primary-rgb: #{toRGB($color-primary)};
+  --color-primary-shade: #{mix($color-primary, $color-black, 92%)};
+  --color-primary-shade-darker: #{mix($color-primary, $color-black, 84%)};
+  --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
+
+  --color-green: #{$color-green};
+  --color-green-darker: #{mix($color-green, $color-black, 84%)};
+
+  --color-error: #{$color-error};
+  --color-error-shade: #{mix($color-error, $color-black, 92%)};
+  --color-error-rgb: #{toRGB($color-error)};
+
+  --color-warning: #{$color-warning};
+
+  --color-yellow: #{$color-yellow};
+
+  --color-links: #{$color-links};
+  --color-links-hover: #{darken($color-links, 8%)};
+  --color-links-darker: #{darken($color-links, 15%)};
+  --color-links-darker-hover: #{darken($color-links, 23%)};
+
+  --color-placeholders: #{$color-placeholders};
+
+  --color-code: #4a729a;
+  --color-code-bg: #{rgba($color-text-secondary, .08)};
+  --color-code-own: #3c7940;
+  --color-code-own-bg: #{rgba($color-text-secondary, .08)};
+
+  --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
+  --color-reply-active: #{blend-normal(rgba($color-text-secondary, 0.16), $color-white)};
+  --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
+  --color-reply-own-active: #{blend-normal(rgba($color-text-green, 0.24), $color-light-green)};
+
+  --color-white: #{$color-white};
+  --color-gray: #{$color-gray};
+
+  --color-chat-hover: #{$color-chat-hover};
+  --color-chat-active: #{$color-chat-active};
+
+  --color-selection-highlight: #{$color-selection};
+  --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, .7);
+
+  --color-user-1: #{$color-user-1};
+  --color-user-2: #{$color-user-2};
+  --color-user-4: #{$color-user-4};
+  --color-user-5: #{$color-user-5};
+  --color-user-6: #{$color-user-6};
+  --color-user-7: #{$color-user-7};
+  --color-user-8: #{$color-user-8};
+
+  --border-radius-default: 0.75rem;
+  --border-radius-default-small: 0.625rem;
+  --border-radius-default-tiny: 0.375rem;
+  --border-radius-messages: 0.75rem;
+  --border-radius-messages-small: 0.375rem;
+  --messages-container-width: 45.5rem;
+  --right-column-width: 26.5rem;
+  --header-height: 3.625rem;
+
+  --symbol-menu-width: 26.25rem;
+  --symbol-menu-height: 23.25rem;
+  --symbol-menu-footer-height: 3rem;
+
+  @media (min-width: 1276px) and (max-width: 1680px) {
+    --right-column-width: 25vw;
+  }
+
+  @media (max-width: 600px) {
+    --right-column-width: 100vw;
+    --header-height: 3.5rem;
+    --symbol-menu-width: 100vw;
+    --symbol-menu-height: 14.6875rem;
+  }
+
+  --z-ui-loader-mask: 2000;
+  --z-right-column: 900;
+  --z-header-menu: 990;
+  --z-header-menu-backdrop: 980;
+  --z-modal: 1000;
+  --z-media-viewer: 1500;
+  --z-drop-area: 55;
+  --z-notification: 50;
+  --z-animation-fade: 50;
+  --z-menu-bubble: 21;
+  --z-menu-backdrop: 20;
+  --z-message-highlighted: 13;
+  --z-message-context-menu: 12;
+  --z-mobile-search: 11;
+  --z-middle-header: 10;
+  --z-middle-footer: 10;
+  --z-country-code-input-group: 10;
+  --z-message-select-control: 9;
+  --z-message-select-area: 8;
+  --z-sticky-date: 9;
+  --z-register-add-avatar: 5;
+  --z-media-viewer-head: 3;
+  --z-below: -1;
+
+  --spinner-white-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iI2ZmZmZmZiIvPjwvc3ZnPg==);
+  --spinner-white-thin-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTEyIDIzQzUuOSAyMyAxIDE4LjEgMSAxMlM1LjkgMSAxMiAxVjBDNS40IDAgMCA1LjQgMCAxMnM1LjQgMTIgMTIgMTIgMTItNS40IDEyLTEyaC0xYzAgNi4xLTQuOSAxMS0xMSAxMXoiLz48L3N2Zz4=);
+  --spinner-blue-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzRlYTRmNiIvPjwvc3ZnPg==);
+  --spinner-black-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzJlMzkzOSIvPjwvc3ZnPg==);
+  --spinner-green-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzRmYWU0ZSIvPjwvc3ZnPg==);
+  --spinner-gray-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzcwNzU3OSIvPjwvc3ZnPg==);
+
+  --drag-target-border: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%23DDDFE0' stroke-width='4' stroke-dasharray='9.1%2c 10.5' stroke-dashoffset='3' stroke-linecap='round'/%3e%3c/svg%3e");
+  --drag-target-border-hovered: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2363A2E3' stroke-width='4' stroke-dasharray='9.1%2c 10.5' stroke-dashoffset='3' stroke-linecap='round'/%3e%3c/svg%3e");
+
+  --layer-transition: 300ms cubic-bezier(0.33, 1, 0.68, 1);
+  --layer-blackout-opacity: 0.3;
+
+  --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  --select-transition: 200ms ease-out;
+
+  // For some reason these parameters cause worse animation in desktop Chrome
+  @media (max-width: 600px) {
+    --layer-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  --vh: 1vh;
+}

@@ -1,0 +1,25 @@
+.TabList {
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.875rem;
+  flex-wrap: nowrap;
+  box-shadow: 0 2px 2px rgba(114, 114, 114, 0.17);
+  background-color: white;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: none;
+  scrollbar-color: rgba(0, 0, 0, 0);
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+  }
+}

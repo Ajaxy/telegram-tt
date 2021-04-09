@@ -1,0 +1,58 @@
+#LeftColumn-main {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1;
+
+  > .Transition {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .ChatFolders {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .tabs-placeholder {
+      height: 2.625rem;
+      transition: height 150ms ease;
+
+      &:not(.open) {
+        height: 0;
+      }
+    }
+
+    .TabList {
+      justify-content: flex-start;
+      padding-left: .5625rem;
+      padding-bottom: 1px;
+      border-bottom: 0;
+      z-index: 1;
+    }
+
+    .Tab {
+      flex: 0 0 auto;
+      padding-left: 0.625rem;
+      padding-right: 0.625rem;
+
+      > span {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+
+    > .Transition {
+      flex: 1;
+      overflow: hidden;
+    }
+  }
+
+  .chat-list, .RecentContacts, .LeftSearch, .search-content {
+    height: 100%;
+    overflow-y: auto;
+  }
+}

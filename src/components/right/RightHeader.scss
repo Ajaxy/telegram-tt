@@ -1,0 +1,49 @@
+.RightHeader {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0.5rem .8125rem;
+  pointer-events: auto;
+
+  @media (max-width: 600px) {
+    padding: 0.5rem;
+  }
+
+  .close-button {
+    flex-shrink: 0;
+  }
+
+  > .Transition {
+    flex: 1;
+    height: 100%;
+
+    > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  h3 {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-left: 1.375rem;
+  }
+
+  .tools {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .SearchInput {
+    margin-left: 1rem;
+
+    @media (min-width: 600px) {
+      margin-right: 1rem;
+    }
+  }
+
+  .DropdownMenu {
+    margin-left: auto;
+  }
+}

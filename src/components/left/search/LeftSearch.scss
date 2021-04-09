@@ -1,0 +1,185 @@
+.LeftSearch {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  & > .Transition {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .TabList {
+    padding-bottom: 1px;
+    z-index: 1;
+  }
+
+  .documents-list {
+    padding: 0 1.25rem 1.25rem;
+
+    .ListItem + .ListItem {
+      margin-top: 1.25rem;
+    }
+  }
+
+  .section-heading {
+    position: relative;
+    padding-top: 1.25rem;
+    padding-left: 1.25rem;
+    margin: 0  0 1rem -1.25rem !important;
+
+    font-weight: 500;
+    font-size: .9375rem;
+    color: var(--color-text-secondary);
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: var(--color-borders);
+      left: .625rem;
+      top: -1px;
+    }
+  }
+
+  .LeftSearch .search-section .section-heading,
+  .RecentContacts .search-section .section-heading {
+    margin-left: -1rem !important;
+    width: calc(100% + 2rem);
+    box-shadow: 0 -1px 0 0 var(--color-borders);
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .WebLink {
+    display: flex;
+  }
+
+  .content:not(.with-seekline) {
+    align-self: center;
+    min-width: 0;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+  }
+
+  .message-date {
+    font-size: .75rem;
+    color: var(--color-text-secondary);
+    padding-left: 1rem;
+    white-space: nowrap;
+  }
+
+  .media-list {
+    display: grid;
+    padding: .5rem;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    grid-gap: .25rem;
+  }
+
+  .Audio {
+    .duration span {
+      padding: 0 .25rem;
+    }
+
+    .ProgressSpinner {
+      margin: -.1875rem 0 0 -.1875rem;
+    }
+  }
+
+  .ListItem.search-result {
+    .ChatInfo {
+      .handle {
+        color: var(--color-primary);
+
+        &::before {
+          content: '@';
+        }
+
+        &::after {
+          content: ', ';
+          color: var(--color-text-secondary);
+        }
+      }
+    }
+  }
+
+  .ListItem.search-result-message {
+    .sender-name {
+      color: var(--color-text);
+
+      &::after {
+        content: ': ';
+        white-space: pre;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ListItem {
+      margin: 0 -0.625rem;
+    }
+  }
+
+  .search-section {
+    padding: 0 1rem 0.5rem;
+
+    .section-heading {
+      color: var(--color-text-secondary);
+      font-size: .9375rem;
+      font-weight: 500;
+      margin-bottom: 0 !important;
+      padding-top: .875rem;
+
+      .Link {
+        float: right;
+        color: var(--color-links);
+        font-weight: 400;
+        margin-right: 1rem;
+
+        &:focus,
+        &:hover {
+          color: var(--color-links-hover);
+        }
+      }
+    }
+
+    .Loading {
+      height: 4.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .chat-selection {
+    padding-top: .5rem;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    box-shadow: inset 0 -1px 0 0 var(--color-borders);
+    background-color: white;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-color: rgba(0, 0, 0, 0);
+
+    > .PickerSelectedItem {
+      flex: 0 0 auto;
+
+      &:last-child {
+        margin-right: auto;
+      }
+    }
+  }
+
+  .NothingFound {
+    height: 100%;
+  }
+}

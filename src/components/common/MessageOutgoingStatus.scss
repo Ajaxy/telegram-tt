@@ -1,0 +1,22 @@
+.MessageOutgoingStatus {
+  position: relative;
+  width: 1.19rem;
+  height: 1.19rem;
+  overflow: hidden;
+  display: inline-block;
+  line-height: 1;
+  font-size: 1.1875rem;
+
+  i {
+    background: var(--background-color);
+  }
+
+  .icon-message-succeeded {
+    padding-left: 0.13rem;
+  }
+
+  .Transition {
+    width: 100%;
+    height: 100%;
+  }
+}

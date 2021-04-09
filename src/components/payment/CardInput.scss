@@ -1,0 +1,18 @@
+.CardInput {
+  position: relative;
+
+  .input-group.has-left-addon .form-control{
+    padding-left: 4rem;
+  }
+
+  .left-addon {
+    position: absolute;
+    top: .8rem;
+    left: 1rem;
+    z-index: 8;
+
+    img {
+      max-width: 2rem;
+    }
+  }
+}

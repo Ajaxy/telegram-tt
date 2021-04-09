@@ -1,0 +1,175 @@
+.Poll {
+  min-width: 15rem;
+
+  @media (max-width: 600px) {
+    min-width: 50vw;
+  }
+
+  .poll-question {
+    font-weight: 500;
+    line-height: 1.25rem;
+    margin: 0.125rem 0;
+    word-break: break-word;
+  }
+
+  .poll-type,
+  .poll-voters-count {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+  }
+
+  .poll-type {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    min-height: 1.375rem;
+  }
+
+  .poll-voters-count {
+    margin: .4375rem 0 .3125rem;
+    text-align: center;
+  }
+
+  .poll-answers {
+    padding-top: 0.25rem;
+    padding-bottom: 1rem;
+  }
+
+  .Checkbox,
+  .Radio {
+    padding-left: 2.25rem;
+
+    &:last-child {
+      margin-bottom: .75rem;
+    }
+
+    &.disabled {
+      opacity: 1 !important;
+      cursor: not-allowed;
+    }
+
+    .Checkbox-main,
+    .Radio-main {
+      &::before {
+        left: 0.125rem;
+        background-color: var(--background-color);
+
+        .Message.own & {
+          border-color: var(--accent-color);
+        }
+      }
+
+      &::after {
+        left: 0.4375rem;
+        background-color: var(--accent-color);
+      }
+    }
+
+    input:checked ~ .Radio-main,
+    input:checked ~ .Checkbox-main {
+      &::before {
+        border-color: var(--accent-color);
+      }
+    }
+
+    .Spinner {
+      left: 0.125rem;
+    }
+  }
+
+  .Checkbox {
+    .Checkbox-main {
+      &::after {
+        left: 0.125rem;
+        background-color: var(--color-primary);
+
+        .Message.own & {
+          background-color: var(--accent-color);
+        }
+      }
+    }
+  }
+
+  .Spinner > div {
+    // gray spinner
+    background-image: var(--spinner-gray-data);
+
+    .Message.own & {
+      // green spinner
+      background-image: var(--spinner-green-data);
+    }
+  }
+
+  .poll-recent-voters {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: text-bottom;
+    margin-left: .875rem;
+    margin-right: .5rem;
+    margin-top: -2px;
+
+    .Avatar {
+      border: 1px solid #fff;
+      margin-right: 0;
+      box-sizing: content-box;
+
+      &:not(:first-child) {
+        margin-left: -3px;
+      }
+    }
+  }
+
+  .poll-countdown {
+    margin-left: auto;
+    font-size: .75rem;
+    transition: color .2s;
+
+    &.hurry-up {
+      color: var(--color-error);
+
+      .poll-countdown-progress {
+        stroke: var(--color-error);
+      }
+    }
+
+    svg {
+      vertical-align: -3px;
+    }
+  }
+
+  .poll-countdown-progress {
+    stroke: var(--color-primary);
+    fill: transparent;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 2s, stroke .2s;
+  }
+
+  .poll-quiz-help {
+    margin: -.625rem 0 -.625rem auto;
+    .Message:not(.own) & {
+      color: var(--color-primary);
+    }
+  }
+
+  .poll-results,
+  .poll-answers {
+    padding-top: 0.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .Button {
+    text-transform: none;
+    font-size: 1rem;
+
+    .Message.own & {
+      color: var(--accent-color);
+      --color-primary-shade-rgb: var(--color-text-green-rgb);
+    }
+  }
+
+  > .Button {
+    margin-top: -.125rem;
+    margin-bottom: -.0625rem;
+  }
+}

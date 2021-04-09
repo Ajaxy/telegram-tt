@@ -1,0 +1,80 @@
+.PollModal {
+  .modal-dialog {
+    max-width: 26.25rem;
+    max-height: calc(100vh - 5rem);
+  }
+
+  .modal-content {
+    padding: .5rem 1.25rem 1.875rem;
+    min-height: 4.875rem;
+  }
+
+  .modal-header-condensed {
+    margin-bottom: 1rem;
+  }
+
+  .options-header {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 1.5rem 0.25rem;
+  }
+
+  .options-list {
+    margin: 1rem -0.75rem -0.5rem;
+    padding: 0 0.75rem;
+    border-top: 1px solid var(--color-chat-hover);
+    max-height: 20rem;
+    overflow: auto;
+
+    &.overflown {
+      padding: 0 0.4rem 0.5rem 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      overflow: hidden;
+      max-height: none;
+
+      &, &.overflown {
+        padding: 0 0.75rem;
+      }
+    }
+  }
+
+  .option-wrapper {
+    position: relative;
+
+    .option-remove-button {
+      position: absolute;
+      top: 0.3125rem;
+      right: 0.3125rem;
+    }
+  }
+
+  .quiz-mode {
+    margin-top: 1.5rem;
+
+    .options-header {
+      margin-bottom: 0.5rem;
+    }
+
+    .note {
+      margin-top: 0.5rem;
+    }
+  }
+
+  .note {
+    font-size: smaller;
+    color: var(--color-text-secondary)
+  }
+
+  .error {
+    font-size: smaller;
+    color: var(--color-error);
+    margin: -1rem 0 1rem .25rem;
+  }
+
+  .input-group:last-child {
+    margin-bottom: 0.5rem;
+  }
+}

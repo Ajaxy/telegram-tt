@@ -1,0 +1,67 @@
+.lovely-chart--button {
+  border: 1px solid #E6ECF0;
+  background-color: transparent;
+  padding: 7px 7px;
+  display: inline-block;
+  border-radius: 18px;
+  text-align: center;
+  text-decoration: none;
+  margin: 0 6px 8px 0;
+  // transition: background-color 300ms ease-out, border-color 300ms ease-out;
+  position: relative;
+
+  border-color: var(--text-color);
+  background: transparent;
+  color: var(--text-color);
+
+  &.lovely-chart--state-checked {
+    background-color: var(--text-color);
+    animation-duration: 500ms;
+
+    .lovely-chart--button-check {
+      opacity: 1;
+    }
+
+    .lovely-chart--button-label {
+      color: #ffffff;
+      transform: translateX(6px);
+    }
+  }
+
+  &.lovely-chart--state-shake {
+    animation-name: lovely-chart--animation-shake;
+  }
+}
+
+.lovely-chart--button-check {
+  display: inline-block;
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+
+  &::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    content: '';
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    margin-top: -6px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -256 1792 1792' version='1.1'%0A%3E%3Cg transform='matrix(1,0,0,-1,7.5932203,1217.0847)' id='g3003'%3E%3Cpath d='m 1671,970 q 0,-40 -28,-68 L 919,178 783,42 Q 755,14 715,14 675,14 647,42 L 511,178 149,540 q -28,28 -28,68 0,40 28,68 l 136,136 q 28,28 68,28 40,0 68,-28 l 294,-295 656,657 q 28,28 68,28 40,0 68,-28 l 136,-136 q 28,-28 28,-68 z' style='fill:white'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 100%;
+  }
+}
+
+.lovely-chart--button-label {
+  display: inline-block;
+  font-weight: 300;
+  line-height: 20px;
+  color: inherit;
+  padding: 0 13px;
+  transition: transform 300ms ease-out, color 300ms ease-out;
+}

@@ -1,0 +1,57 @@
+.SettingsFoldersChatsPicker {
+  height: calc(100% - var(--header-height));
+
+  .picker-header {
+    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+
+    .max-items-reached {
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .max-items-reached {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .picker-list {
+    padding: 0 0.5rem 0.5rem;
+
+    .no-results {
+      height: 10rem;
+    }
+  }
+
+  .ListItem.picker-list-item {
+    &.chat-type-item .ListItem-button {
+      padding: 0.875rem 0.75rem;
+    }
+
+    &.chat-item .ListItem-button {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .Checkbox {
+      margin-left: auto;
+      padding-left: 3.25rem;
+    }
+
+    .chat-type {
+      font-size: 1rem;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+
+  .settings-item-header {
+    margin-left: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .picker-list-divider {
+    margin: 0.5rem -0.5rem 0;
+    border-bottom: 1px solid var(--color-borders);
+  }
+}

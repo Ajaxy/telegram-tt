@@ -1,0 +1,87 @@
+.SettingsGeneralBackgroundColor {
+  &:not(.is-dragging) .handle {
+    transition: transform 300ms ease;
+  }
+
+  .color-picker, .hue-picker {
+    position: relative;
+  }
+
+  .color-picker {
+    margin-top: 1rem;
+    height: 12rem;
+  }
+
+  .hue-picker {
+    margin: 2rem 0;
+    height: 0.5rem;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius-default);
+    cursor: pointer;
+  }
+
+  .handle {
+    position: absolute;
+    top: -0.75rem;
+    left: -0.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.125rem solid white;
+    border-radius: 0.75rem;
+    cursor: grab;
+  }
+
+  .hue-picker .handle {
+    top: -0.5rem;
+  }
+
+  .tools {
+    margin-bottom: 0.625rem;
+    display: flex;
+
+    .input-group {
+      margin-bottom: 0;
+    }
+
+    .input-group:first-child {
+      margin-right: 0.5rem;
+    }
+
+    .input-group:last-child {
+      margin-left: 0.5rem;
+    }
+  }
+
+  .predefined-colors {
+    display: grid;
+    padding: .5rem;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    grid-gap: .25rem;
+
+    div {
+      cursor: pointer;
+      box-shadow: inset 0 0 0 0 white;
+      transition: box-shadow 300ms ease;
+
+      &.active {
+        border: 0.125rem solid var(--color-primary);
+        box-shadow: inset 0 0 0 0.3125rem white;
+      }
+
+      // A hack to make a square
+      &:before {
+        display: block;
+        content: "";
+        width: 100%;
+        padding-top: 100%;
+        pointer-events: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,203 @@
+import React, {
+  FC, useRef, useCallback, useEffect, memo,
+} from '../../lib/teact/teact';
+
+import { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
+import useLang from '../../hooks/useLang';
+import { countryList } from '../../util/phoneNumber';
+
+import InputText from '../ui/InputText';
+import Select from '../ui/Select';
+import Checkbox from '../ui/Checkbox';
+
+import './ShippingInfo.scss';
+
+export type OwnProps = {
+  state: FormState;
+  needEmail: boolean;
+  needPhone: boolean;
+  needName: boolean;
+  needAddress: boolean;
+  dispatch: FormEditDispatch;
+};
+
+const ShippingInfo: FC<OwnProps> = ({
+  state,
+  needEmail,
+  needPhone,
+  needName,
+  needAddress,
+  dispatch,
+}) => {
+  // eslint-disable-next-line no-null/no-null
+  const inputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const phoneRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const selectCountryRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    if (selectCountryRef.current
+      && selectCountryRef.current.value !== state.countryIso2) {
+      selectCountryRef.current.value = state.countryIso2;
+    }
+  }, [state.countryIso2]);
+
+  const lang = useLang();
+
+  useFocusAfterAnimation(inputRef);
+
+  const handleAddress1Change = useCallback((e) => {
+    dispatch({ type: 'changeAddress1', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleAddress2Change = useCallback((e) => {
+    dispatch({ type: 'changeAddress2', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleCityChange = useCallback((e) => {
+    dispatch({ type: 'changeCity', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleStateChange = useCallback((e) => {
+    dispatch({ type: 'changeState', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleCountryChange = useCallback((e) => {
+    dispatch({ type: 'changeCountry', payload: e.target.value });
+  }, [dispatch]);
+
+  const handlePostCodeChange = useCallback((e) => {
+    dispatch({ type: 'changePostCode', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleFullNameChange = useCallback((e) => {
+    dispatch({ type: 'changeFullName', payload: e.target.value });
+  }, [dispatch]);
+
+  const handleEmailChange = useCallback((e) => {
+    dispatch({ type: 'changeEmail', payload: e.target.value });
+  }, [dispatch]);
+
+  const handlePhoneChange = useCallback((e) => {
+    let { value } = e.target;
+    value = `+${value.replace(/\D/g, '')}`;
+    if (phoneRef.current) {
+      phoneRef.current.value = value;
+    }
+    dispatch({ type: 'changePhone', payload: value });
+  }, [dispatch]);
+
+  const handleSaveInfoChange = useCallback((e) => {
+    dispatch({ type: 'changeSaveInfo', payload: e.target.value });
+  }, [dispatch]);
+
+  const { formErrors } = state;
+  return (
+    <div className="ShippingInfo">
+      <form>
+        {needAddress ? (
+          <div>
+            <h5>{lang('PaymentShippingAddress')}</h5>
+            <InputText
+              ref={inputRef}
+              label="Address1 (Street)"
+              onChange={handleAddress1Change}
+              value={state.streetLine1}
+              inputMode="text"
+              error={formErrors.streetLine1}
+            />
+            <InputText
+              label="Address2 (Street)"
+              onChange={handleAddress2Change}
+              value={state.streetLine2}
+              inputMode="text"
+              error={formErrors.streetLine2}
+            />
+            <InputText
+              label="City"
+              onChange={handleCityChange}
+              value={state.city}
+              inputMode="text"
+              error={formErrors.city}
+            />
+            <InputText
+              label="State"
+              onChange={handleStateChange}
+              value={state.state}
+              inputMode="text"
+              error={formErrors.state}
+            />
+            <Select
+              label="Country"
+              placeholder="Country"
+              onChange={handleCountryChange}
+              value={state.countryIso2}
+              hasArrow={Boolean(true)}
+              id="shipping-country"
+              error={formErrors.countryIso2}
+              ref={selectCountryRef}
+            >
+              {countryList.map(({ name, id }) => (
+                <option
+                  value={id}
+                  className="county-item"
+                >
+                  {name}
+                </option>
+              ))}
+            </Select>
+
+            <InputText
+              label="Post Code"
+              onChange={handlePostCodeChange}
+              value={state.postCode}
+              inputMode="text"
+              error={formErrors.postCode}
+            />
+          </div>
+        ) : undefined}
+        { needName || needEmail || needPhone ? (
+          <h5>{lang('PaymentShippingReceiver')}</h5>
+        ) : undefined }
+        { needName && (
+          <InputText
+            label="Full name"
+            onChange={handleFullNameChange}
+            value={state.fullName}
+            inputMode="text"
+            error={formErrors.fullName}
+          />
+        ) }
+        { needEmail && (
+          <InputText
+            label="Email"
+            onChange={handleEmailChange}
+            value={state.email}
+            inputMode="email"
+            error={formErrors.email}
+          />
+        ) }
+        { needPhone && (
+          <InputText
+            label="Phone number"
+            onChange={handlePhoneChange}
+            value={state.phone}
+            inputMode="tel"
+            error={formErrors.phone}
+            ref={phoneRef}
+          />
+        ) }
+        <Checkbox
+          label={lang('PaymentShippingSave')}
+          subLabel={lang('PaymentShippingSaveInfo')}
+          checked={Boolean(state.saveInfo)}
+          onChange={handleSaveInfoChange}
+        />
+      </form>
+    </div>
+  );
+};
+
+export default memo(ShippingInfo);

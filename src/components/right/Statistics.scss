@@ -1,0 +1,87 @@
+.Statistics {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+  &.ready {
+    overflow-y: scroll !important;
+  }
+
+  .chat-container {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-borders);
+
+    opacity: 1;
+    transition: opacity .3s ease;
+
+    &.hidden {
+      opacity: 0;
+    }
+  }
+
+  .lovely-chart--container {
+    font: inherit !important;
+    font-size: 13px !important;
+  }
+
+  .lovely-chart--header {
+    margin: 0 1rem;
+  }
+
+  .lovely-chart--header,
+  .lovely-chart--tooltip-title,
+  .lovely-chart--tooltip-dataset-value,
+  .lovely-chart--percentage-title {
+    font-weight: 500 !important;
+  }
+
+  .lovely-chart--container-type-pie {
+    &.lovely-chart--state-zoomed-in > canvas {
+      animation-name: pie-slim-in !important;
+    }
+
+    &:not(.lovely-chart--state-zoomed-in) > canvas {
+      animation-name: pie-slim-out !important;
+    }
+  }
+}
+
+@keyframes pie-slim-in {
+  0% {
+    clip-path: circle(80% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+    transform: rotate(-360deg);
+  }
+
+  25% {
+    clip-path: circle(40% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+    transform: rotate(-360deg);
+  }
+
+  75% {
+    clip-path: circle(40% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+}
+
+@keyframes pie-slim-out {
+  0% {
+    clip-path: circle(40% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+    transform: rotate(360deg);
+  }
+
+  50% {
+    clip-path: circle(40% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(40% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+
+  75% {
+    clip-path: circle(80% at center calc(50% - 7.5px));
+    -webkit-clip-path: circle(80% at center calc(50% - 7.5px));
+    transform: rotate(0);
+  }
+}

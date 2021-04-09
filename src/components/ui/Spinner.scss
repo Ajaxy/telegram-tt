@@ -1,0 +1,86 @@
+.Spinner {
+  --spinner-size: 2rem;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+
+  > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-repeat: no-repeat;
+    background-size: 100%;
+
+    animation-name: spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  &.with-background {
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.125rem;
+      top: -0.125rem;
+      bottom: -0.125rem;
+      right: -0.125rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.25);
+    }
+  }
+
+  &.white {
+    > div {
+      background-image: var(--spinner-white-data);
+    }
+
+    &.with-background {
+      > div {
+        background-image: var(--spinner-white-thin-data);
+      }
+    }
+  }
+
+  &.blue {
+    > div {
+      background-image: var(--spinner-blue-data);
+    }
+  }
+
+  &.black {
+    > div {
+      background-image: var(--spinner-black-data);
+    }
+  }
+
+  &.green {
+    > div {
+      background-image: var(--spinner-green-data);
+    }
+  }
+
+  &.gray {
+    > div {
+      background-image: var(--spinner-gray-data);
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

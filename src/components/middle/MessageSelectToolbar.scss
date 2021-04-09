@@ -1,0 +1,138 @@
+.MessageSelectToolbar {
+  position: absolute;
+  bottom: 0.5rem;
+  left: .5rem;
+  right: .5rem;
+  width: auto;
+  z-index: 20;
+  justify-content: center;
+  margin: 0;
+
+  .mask-image-disabled &::before {
+    left: auto !important;
+    right: auto !important;
+    height: 3.5rem;
+    border-radius: var(--border-radius-messages);
+  }
+
+  @media (min-width: 601px) {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.25rem;
+
+    .no-composer & {
+      top: -4.75rem;
+    }
+  }
+
+  opacity: 1;
+
+  &-inner {
+    transform: scaleX(1);
+    transition: transform var(--select-transition), opacity var(--select-transition);
+  }
+
+  &.with-composer .MessageSelectToolbar-inner {
+    transform: scaleX(1) translateX(0);
+  }
+
+  .no-composer .messaging-disabled + & {
+    top: auto;
+  }
+
+  .no-composer .unpin-button-container + & {
+    top: auto;
+    margin-bottom: 1rem;
+  }
+
+  body.animation-level-0 & {
+    transition: none !important;
+  }
+
+  &:not(.shown) {
+    opacity: 0;
+    pointer-events: none;
+
+    &-inner {
+      transform: scaleX(var(--toolbar-hidden-scale, 1));
+    }
+
+    &.with-composer .MessageSelectToolbar-inner {
+      transform: scaleX(var(--toolbar-hidden-scale, 1)) translateX(var(--toolbar-translate-x, 0));
+    }
+  }
+
+  &::before {
+    z-index: -1;
+    max-width: 32rem;
+    width: 100%;
+    left: auto;
+    right: auto;
+  }
+
+  &-inner {
+    width: 100%;
+    max-width: 32rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
+
+    background: white;
+    border-radius: var(--border-radius-messages);
+    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+    font-weight: 500;
+
+    @media (max-width: 600px) {
+      padding: 0;
+      max-width: none;
+    }
+
+    > .Button {
+      width: 3rem;
+      height: 3rem;
+
+      @media (max-width: 600px) {
+        width: 2.875rem;
+        height: 2.875rem;
+      }
+    }
+  }
+
+  &-count {
+    margin-left: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (max-width: 600px) {
+      margin-right: 0.5rem;
+    }
+  }
+
+  &-actions {
+    margin-left: auto;
+    display: flex;
+
+    .MenuItem {
+      border-radius: var(--border-radius-default);
+      padding: 0.75rem 2rem 0.75rem 1rem;
+
+      i {
+        margin-right: 1rem;
+      }
+
+      @media (max-width: 600px) {
+        padding: 0.6875rem;
+        border-radius: 50%;
+
+        i {
+          margin-right: 0;
+        }
+
+        .item-text {
+          display: none;
+        }
+      }
+    }
+  }
+}

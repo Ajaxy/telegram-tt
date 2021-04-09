@@ -1,0 +1,9 @@
+.MessageContextMenu {
+  position: absolute;
+  font-size: 1rem;
+
+  .backdrop {
+    position: absolute;
+    touch-action: none;
+  }
+}

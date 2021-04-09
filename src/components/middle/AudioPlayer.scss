@@ -1,0 +1,106 @@
+.AudioPlayer {
+  display: flex;
+  margin-left: auto;
+  margin-top: -.25rem;
+  margin-bottom: -.25rem;
+
+  body.animation-level-0 & {
+    transition: none !important;
+  }
+
+  > .Button {
+    flex-shrink: 0;
+    margin: .125rem;
+  }
+
+  > .toggle-play {
+    --color-text-secondary: var(--color-primary);
+    --color-text-secondary-rgb: var(--color-primary-shade-rgb);
+    --color-primary-shade: var(--color-green);
+    --color-white: var(--color-background-own);
+  }
+
+  .MiddleHeader & + .HeaderActions {
+    margin-left: 1.5rem;
+  }
+
+  .toggle-play {
+    &.smaller {
+      width: 3rem;
+      height: 3rem;
+
+      i {
+        font-size: 1.625rem;
+        margin-top: -.025rem;
+      }
+    }
+
+    i {
+      position: absolute;
+      font-size: 1.9375rem;
+      margin-top: -.05rem;
+
+      &.icon-play {
+        margin-left: .1rem;
+      }
+    }
+
+    .icon-play, .icon-pause {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity .4s, transform .6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.play .icon-pause,
+    &.pause .icon-play,
+    &.loading .icon-play,
+    &.loading .icon-pause {
+      opacity: 0;
+      transform: scale(.5);
+    }
+  }
+
+  &-content {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    flex-shrink: 1;
+    padding: .25rem .5rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    max-width: 15rem;
+    border-radius: var(--border-radius-messages-small);
+
+    &:hover {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+    }
+
+    @media (min-width: 1440px) and (max-width: 1500px) {
+      max-width: 14rem;
+    }
+
+    .AudioPlayer & .title {
+      display: block;
+      font-weight: 500;
+      font-size: 0.875rem !important;
+      line-height: 1rem;
+      height: 1rem;
+      margin-bottom: 0.125rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subtitle {
+      font-size: 0.85rem !important;
+      color: var(--color-text-secondary);
+      line-height: 1.125rem;
+      height: 1.125rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+  }
+}

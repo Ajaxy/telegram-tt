@@ -1,0 +1,93 @@
+.Checkout {
+  padding: 0.5rem 0;
+
+  .description {
+    display: flex;
+    flex-direction: row;
+    margin: 0 1rem;
+
+    img {
+      height: 6rem;
+      margin: .5rem;
+    }
+
+    .text {
+      h5 {
+        margin-top: .5rem;
+        font-size: 1.125rem;
+      }
+
+      p {
+        font-size: 0.8rem;
+        line-height: 1rem;
+        color: var(--color-text-secondary);
+      }
+    }
+  }
+
+  .price-info {
+    margin: 1rem;
+
+    .price-info-item {
+      margin: 1rem .5rem;
+      display: flex;
+      flex-direction: row;
+      align-content: space-between;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+  
+      &-main{
+        color: var(--color-text);
+      }
+  
+      .title {
+        display: flex;
+        flex: 1 auto;
+      }
+    }
+  }
+
+  .invoice-info {
+    border-top: 1px var(--color-borders) solid;
+    padding: 1rem;
+
+    .checkout-info-item {
+      display: flex;
+      padding: .75rem .5rem 1rem;
+      text-align: left;
+
+      i {
+        font-size: 1.5rem;
+        color: var(--color-text-secondary);
+        margin-right: 2rem;
+        width: 1.5rem;
+      }
+
+      i.stripe-provider {
+        background: url('../../assets/stripe-logo.png') no-repeat center;
+        background-size: 2rem;
+        border-radius: 1rem;
+        height: 1.5rem;
+      }
+
+      .info {
+        .title {
+          font-size: 1rem;
+          line-height: 1.4375rem;
+          margin-bottom: 0;
+          font-weight: 400;
+          word-break: break-word;
+          color: var(--color-text);
+          text-transform: capitalize;
+        }
+
+        .data {
+          margin-bottom: 0;
+          font-size: 0.875rem;
+          color: var(--color-text-secondary);
+        }
+      }
+    }
+  }
+  
+}

@@ -1,0 +1,81 @@
+.DropTarget {
+  border-radius: var(--border-radius-default);
+  background: #fff;
+  padding: 1.25rem;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 43.75rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: .3125rem;
+  display: flex;
+  color: #A4ACB3;
+  box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+
+  @media (max-height: 350px) {
+    padding: .75rem;
+  }
+
+  &.hovered .target-content {
+    color: #63A2E3;
+    background-image: var(--drag-target-border-hovered);
+  }
+
+  & + & {
+    margin-top: .3125rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .target-content {
+    pointer-events: none;
+    background-image: var(--drag-target-border);
+    border-radius: .5rem;
+    flex: 1 1 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: .2s color, .2s background;
+  }
+
+  .icon {
+    font-size: 6.25rem;
+    line-height: 4.6875rem;
+    margin-bottom: 2.25rem;
+
+    @media (max-height: 520px) {
+      font-size: 4.25rem;
+      line-height: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-height: 450px) {
+      font-size: 2rem;
+      line-height: 1rem;
+      margin-bottom: .5rem;
+      margin-top: .25rem;
+    }
+  }
+
+  .title {
+    font-size: 1.3125rem;
+    font-weight: 500;
+    letter-spacing: -.18px;
+
+    @media (max-height: 450px) {
+      font-size: 1rem;
+    }
+  }
+
+  .description {
+    font-size: 1rem;
+    letter-spacing: .3px;
+
+    @media (max-height: 450px) {
+      font-size: .875rem;
+    }
+  }
+}

@@ -1,0 +1,28 @@
+.typing-status {
+  display: flex;
+  align-items: baseline;
+
+  .sender-name {
+    &::after {
+      content: '\00a0is\00a0';
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .ellipsis {
+    display: flex;
+    width: 1rem;
+    overflow: hidden;
+
+    &::after {
+      content: '...';
+      animation: typing-animation 1s steps(4, start) infinite;
+    }
+  }
+}
+
+@keyframes typing-animation {
+  from {
+    transform: translateX(-1rem);
+  }
+}

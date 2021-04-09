@@ -1,0 +1,108 @@
+#UiLoader {
+  height: 100%;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  .mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1680px;
+    height: 100%;
+    z-index: var(--z-ui-loader-mask);
+    display: flex;
+
+    .left {
+      flex: 1;
+      background: white;
+      min-width: 15.5rem;
+      max-width: 26.5rem;
+
+      @media (min-width: 1680px) {
+        border-left: 1px solid var(--color-borders);
+      }
+
+      @media (max-width: 1275px) {
+        flex: 2;
+      }
+
+      @media (max-width: 925px) {
+        min-width: 26.5rem;
+      }
+
+      @media (max-width: 600px) {
+        max-width: none;
+        width: 100vw;
+      }
+    }
+
+    .middle {
+      flex: 3;
+      border-left: 1px solid var(--color-borders);
+      border-right: 1px solid var(--color-borders);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
+        background-size: cover;
+        z-index: -1;
+        transform-origin: left center;
+      }
+
+      &.with-right-column::before {
+        transform: scale(0.67);
+      }
+
+      @media screen and (min-width: 1276px) {
+        &::before {
+          margin: -16rem -5rem -20rem 0;
+        }
+      }
+
+      &.custom-bg-image::before {
+        margin: -1rem;
+        background-image: none !important;
+      }
+
+      @media (max-width: 1275px) {
+        flex: 3;
+        border-right: none;
+      }
+
+      @media (max-width: 600px) {
+        display: none;
+      }
+    }
+
+    .right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      height: 100%;
+      width: var(--right-column-width);
+      min-width: 15.5rem;
+      max-width: 26.5rem;
+      border-left: 1px solid var(--color-borders);
+      background: white;
+    }
+  }
+
+  .blank {
+    flex: 1;
+    background: white;
+  }
+}

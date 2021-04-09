@@ -1,0 +1,157 @@
+.input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    padding: 0 0.25rem;
+    position: absolute;
+    left: 0.75rem;
+    top: 0.95rem;
+    background-color: var(--color-background);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-placeholders);
+    transition: transform 0.15s ease-out, color .15s ease-out;
+    cursor: text;
+    pointer-events: none;
+    transform-origin: left center;
+    white-space: nowrap;
+  }
+
+  &.with-arrow {
+    &::after {
+      content: '';
+      position: absolute;
+      height: .75rem;
+      width: .75rem;
+      border-left: 1px var(--color-text-secondary) solid;
+      border-bottom: 1px var(--color-text-secondary) solid;
+      transform: rotate(-45deg);
+      right: 2rem;
+      top: 1rem;
+    }
+  }
+
+  &.touched label,
+  &.error label,
+  &.success label,
+  .form-control:focus + label,
+  .form-control.focus + label {
+    transform: scale(.75) translate(-0.5rem, -2.25rem);
+  }
+
+  input::placeholder,
+  .form-control::placeholder {
+    color: var(--color-placeholders);
+  }
+
+  &.touched label {
+    color: var(--color-text-secondary);
+  }
+
+  &.error label {
+    color: var(--color-error) !important;
+  }
+
+  &.success label {
+    color: var(--color-text-green) !important;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.form-control {
+  --border-width: 1px;
+  display: block;
+  width: 100%;
+  height: 3.375rem;
+  padding: calc(0.75rem - var(--border-width)) calc(.9rem - var(--border-width));
+  border: var(--border-width) solid var(--color-borders);
+  border-radius: var(--border-radius-default);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s ease;
+  word-break: break-word;
+  -webkit-appearance: none;
+
+  font-size: 1rem;
+  line-height: 1.25rem;
+
+  &:hover {
+    border-color: var(--color-gray);
+  }
+
+  &:focus,
+  &.focus {
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    caret-color: var(--color-primary);
+
+    & + label {
+      color: var(--color-primary);
+    }
+  }
+
+  &:disabled {
+    background: none !important;
+  }
+
+  .error & {
+    border-color: var(--color-error);
+    box-shadow: inset 0 0 0 1px var(--color-error);
+    caret-color: var(--color-error);
+  }
+
+  .success & {
+    border-color: var(--color-text-green);
+    box-shadow: inset 0 0 0 1px var(--color-text-green);
+    caret-color: var(--color-text-green);
+  }
+}
+
+select.form-control {
+  option {
+    line-height: 2rem;
+  }
+}
+
+textarea.form-control {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.3125rem;
+  padding-top: calc(1rem - var(--border-width));
+  padding-bottom: calc(1rem - var(--border-width));
+}
+
+.input-group.password-input {
+  position: relative;
+
+  .form-control {
+    padding-right: 3.375rem;
+  }
+
+  .toggle-password {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3.375rem;
+    height: 3.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none !important;
+
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+    font-size: 1.5rem;
+
+    &:hover, &:focus {
+      opacity: 1;
+    }
+  }
+}

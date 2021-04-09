@@ -1,0 +1,369 @@
+.Composer {
+  align-items: flex-end;
+
+  .select-mode-active + .middle-column-footer & {
+    @media (min-width: 601px) {
+      position: absolute;
+      padding-right: 2rem;
+      margin-top: -.5rem;
+    }
+
+    @media (max-width: 600px) {
+      padding-right: 1rem;
+    }
+
+    &::before {
+      right: 2.125rem;
+
+      @media (max-width: 600px) {
+        right: 1rem;
+      }
+    }
+  }
+
+  .hide-mask-shadow &::before {
+    opacity: 0 !important;
+  }
+
+  > .Button {
+    flex-shrink: 0;
+    margin-left: .5rem;
+
+    @media (max-width: 600px) {
+      width: 2.875rem;
+      height: 2.875rem;
+    }
+
+    .icon-send,
+    .icon-microphone-alt,
+    .icon-check {
+      position: absolute;
+    }
+
+    &:not(:active):not(:focus):not(:hover) {
+      .icon-send,
+      .icon-check {
+        color: var(--color-primary);
+      }
+    }
+
+    &.cancel {
+      position: relative;
+      z-index: 1;
+
+      &:hover, &.active {
+        background: var(--color-chat-hover);
+      }
+    }
+
+    &.recording {
+      position: relative;
+      z-index: 0;
+      transition: box-shadow .1s;
+    }
+
+    &.send {
+      .icon-send {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-microphone-alt,
+      .icon-check {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.record {
+      .icon-microphone-alt {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-send,
+      .icon-check {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.edit {
+      .icon-send,
+      .icon-microphone-alt {
+        animation: hide-icon .4s forwards ease-out;
+      }
+
+      .icon-check {
+        animation: grow-icon .4s ease-out;
+      }
+    }
+
+    body.animation-level-0 &, body.animation-level-1 & {
+      .icon-send, .icon-microphone-alt, .icon-check {
+        animation-duration: 0ms !important;
+      }
+    }
+  }
+
+  .mobile-symbol-menu-button {
+    width: 2.875rem;
+    height: 2.875rem;
+    position: relative;
+
+    .icon-smile,
+    .icon-keyboard,
+    .Spinner {
+      position: absolute;
+    }
+
+    .Spinner {
+      --spinner-size: 1.5rem;
+    }
+
+    .icon-smile {
+      animation: grow-icon .4s ease-out;
+    }
+
+    .icon-keyboard, .Spinner {
+      animation: hide-icon .4s forwards ease-out;
+    }
+
+    &.is-loading {
+      .Spinner {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-keyboard, .icon-smile {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.menu-opened {
+      .icon-keyboard {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-smile, .Spinner {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+  }
+}
+
+#message-compose {
+  flex-grow: 1;
+  max-width: calc(100% - 4rem);
+  background: white;
+  border-radius: var(--border-radius-messages);
+  border-bottom-right-radius: 0;
+  box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+  position: relative;
+  z-index: 1;
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -.1875rem;
+    right: -.5625rem;
+    width: .5625rem;
+    height: 1.25rem;
+    // background-image: url('../../../../assets/chat-bubble-white.svg');
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGRlZnM+PGZpbHRlciB4PSItNTAlIiB5PSItMTQuNyUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjE0MS4yJSIgZmlsdGVyVW5pdHM9Im9iamVjdEJvdW5kaW5nQm94IiBpZD0iYSI+PGZlT2Zmc2V0IGR5PSIxIiBpbj0iU291cmNlQWxwaGEiIHJlc3VsdD0ic2hhZG93T2Zmc2V0T3V0ZXIxIi8+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMSIgaW49InNoYWRvd09mZnNldE91dGVyMSIgcmVzdWx0PSJzaGFkb3dCbHVyT3V0ZXIxIi8+PGZlQ29sb3JNYXRyaXggdmFsdWVzPSIwIDAgMCAwIDAuMDYyMTk2MjQ4MiAwIDAgMCAwIDAuMTM4NTc0MTQ0IDAgMCAwIDAgMC4xODUwMzczNjQgMCAwIDAgMC4xNSAwIiBpbj0ic2hhZG93Qmx1ck91dGVyMSIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0zIDE3aDZWMGMtLjE5MyAyLjg0LS44NzYgNS43NjctMi4wNSA4Ljc4Mi0uOTA0IDIuMzI1LTIuNDQ2IDQuNDg1LTQuNjI1IDYuNDhBMSAxIDAgMDAzIDE3eiIgaWQ9ImIiLz48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48dXNlIGZpbGw9IiMwMDAiIGZpbHRlcj0idXJsKCNhKSIgeGxpbms6aHJlZj0iI2IiLz48dXNlIGZpbGw9IiNGRkYiIHhsaW5rOmhyZWY9IiNiIi8+PC9nPjwvc3ZnPg==);
+    background-position: bottom left;
+    transform: scaleX(-1);
+  }
+
+  @media (max-width: 600px) {
+    max-width: calc(100% - 3rem);
+  }
+}
+
+.message-input-wrapper {
+  display: flex;
+
+  > .Button {
+    flex-shrink: 0;
+    background: none !important;
+    width: 3.375rem;
+    height: 3.375rem;
+    margin: 0;
+    padding: 0.625rem;
+    align-self: flex-end;
+
+    @media (max-width: 600px) {
+      width: 2.875rem;
+      height: 2.875rem;
+      margin: 0 0.25rem;
+    }
+
+    + .Button {
+      margin-left: -.25rem;
+    }
+
+    &.scheduled-button i::after {
+      content: '';
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      border: .1875rem solid #fff;
+      box-sizing: content-box;
+      width: .5rem;
+      height: .5rem;
+      border-radius: 50%;
+      background: var(--color-green-darker);
+      box-shadow: -.375rem -.25rem 0 -.1875rem #fff;
+      @media (max-width: 600px) {
+        top: .5rem;
+        right: .5rem;
+      }
+    }
+  }
+
+  > .input-group {
+    flex-grow: 1;
+    margin-bottom: 0;
+  }
+
+  .recording-state {
+    display: inline-block;
+    position: relative;
+    line-height: 3.5rem;
+    height: 3.5rem;
+    padding: 0 3.125rem 0 1rem;
+
+    &::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--color-error);
+      border-radius: 5px;
+      position: absolute;
+      top: 50%;
+      margin-top: -5px;
+      right: 1.375rem;
+    }
+
+    @media (max-width: 600px) {
+      height: 2.875rem;
+      line-height: 2.875rem;
+    }
+  }
+}
+
+#message-input-text,
+#caption-input-text {
+  position: relative;
+
+  .form-control {
+    padding-top: calc(1rem - var(--border-width));
+    padding-bottom: calc(1rem - var(--border-width));
+    overflow: hidden;
+    line-height: 1.5rem;
+
+    &.overflown {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    &.touched, &:focus {
+      & + .placeholder-text {
+        display: none;
+      }
+    }
+
+    &.focus-disabled {
+      pointer-events: none;
+    }
+  }
+
+  .placeholder-text {
+    position: absolute;
+    bottom: 1rem;
+    color: var(--color-placeholders);
+    pointer-events: none;
+
+    @media (max-width: 600px) {
+      bottom: 0.6875rem;
+    }
+  }
+
+  .text-entity-link {
+    color: var(--color-links) !important;
+    cursor: default;
+    text-decoration: none;
+
+    &:hover, &:active, &:visited {
+      color: var(--color-links-hover) !important;
+    }
+  }
+
+  .clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -10;
+  }
+}
+
+#message-input-text {
+  flex-grow: 1;
+
+  .form-control {
+    margin-bottom: 0;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    caret-color: var(--color-text);
+    min-height: 3.5rem;
+    max-height: 26rem;
+
+    @media (max-width: 600px) {
+      height: 2.875rem;
+      min-height: 2.875rem;
+      max-height: 16rem;
+      padding-top: calc(0.6875rem - var(--border-width));
+      padding-bottom: calc(0.6875rem - var(--border-width));
+    }
+
+    transition: height 100ms ease;
+
+    body.animation-level-0 & {
+      transition: none !important;
+    }
+  }
+
+  &:not(:only-child) {
+    .form-control {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .ComposerEmbeddedMessage + .message-input-wrapper &,
+  .WebPagePreview + .message-input-wrapper & {
+    .form-control.overflown {
+      margin-top: 0.75rem;
+    }
+  }
+
+  .emoji {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0 1px -5px;
+    vertical-align: 0;
+    pointer-events: none;
+  }
+}
+
+#caption-input-text {
+  .form-control {
+    min-height: 3.25rem;
+    max-height: 15rem;
+  }
+
+  .placeholder-text {
+    bottom: 1rem;
+    left: 1rem;
+  }
+}

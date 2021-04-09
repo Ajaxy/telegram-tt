@@ -1,0 +1,60 @@
+.settings-folders-recommended-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-folders-list-item {
+  .ChatInfo {
+    display: flex;
+    align-items: center;
+
+    .Avatar {
+      margin-left: -0.25rem;
+      margin-right: 1.5rem;
+    }
+
+    .title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.3125;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
+    }
+
+    .status {
+      display: none;
+    }
+  }
+
+  .ListItem-button {
+    i {
+      opacity: 0.9;
+    }
+  }
+
+  &.color-primary .ListItem-button {
+    color: var(--color-primary);
+
+    i {
+      opacity: 1;
+      color: inherit;
+    }
+  }
+}
+
+.settings-item .ShowMoreButton {
+  margin: 0 -1rem;
+  width: calc(100% + 2rem);
+  padding-left: 1rem !important;
+}

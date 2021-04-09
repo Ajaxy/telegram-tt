@@ -1,0 +1,90 @@
+.CountryCodeInput {
+
+  .input-group {
+    cursor: pointer;
+
+    z-index: var(--z-country-code-input-group);
+
+    .Spinner {
+      position: absolute;
+      top: 1rem;
+      right: 0.75rem;
+      opacity: 0.5;
+      --spinner-size: 1.5rem;
+    }
+
+    // Prevent loading additional 10 kB of icomoon font on initial load.
+    .css-icon-down {
+      position: absolute;
+      top: 1.125rem;
+      right: 1rem;
+      width: .75rem;
+      height: .75rem;
+      border: 2px solid var(--color-text-secondary);
+      border-top: 0;
+      border-left: 0;
+      transform: scaleY(1) rotate(45deg);
+      transition: color .2s ease, transform .2s ease, top .2s ease;
+
+      &.open {
+        border-color: var(--color-primary);
+        transform: scaleY(-1) rotate(45deg);
+        top: 1.5rem;
+      }
+    }
+  }
+
+  .bubble {
+    width: 100%;
+    max-height: 23.5rem;
+    overflow-y: auto;
+    transform-origin: top center !important;
+    transform: scale(0.95);
+
+    &.open {
+      transform: scaleY(1);
+    }
+  }
+
+  .MenuItem {
+    button {
+      display: flex;
+      align-items: center;
+    }
+
+    &.no-results button {
+      justify-content: center;
+      padding: .5rem 1rem;
+
+      span {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .country-flag {
+    font-size: 2rem;
+    margin-right: 2rem;
+
+    .emoji {
+      width: 2rem;
+      height: 2rem;
+      display: inline-block;
+      vertical-align: 4px;
+      margin: -.5rem .125rem;
+    }
+  }
+
+  .country-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 1rem;
+    text-align: left;
+  }
+
+  .country-code {
+    margin-left: auto;
+    opacity: 0.5;
+  }
+}

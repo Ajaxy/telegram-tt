@@ -1,0 +1,50 @@
+.KeyboardMenu {
+  .bubble {
+    width: 100% !important;
+    max-width: 27rem;
+    border-radius: var(--border-radius-default-small);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    padding: .1875rem .625rem;
+    max-height: 80vh;
+    overflow: auto;
+
+    @media (max-width: 600px) {
+      max-height: 75vh;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .row + .row {
+      margin-top: .375rem;
+    }
+
+    .Button {
+      flex: 1;
+      width: auto;
+      height: auto;
+      min-height: 3.0625rem;
+      border-radius: var(--border-radius-messages-small);
+      border: 2px solid var(--color-primary);
+      background: #fff;
+      color: var(--color-primary);
+      font-weight: 500;
+      text-transform: none;
+
+      &:hover {
+        color: #fff;
+        border-color: var(--color-primary-shade);
+      }
+    }
+
+    .Button + .Button {
+      margin-left: .375rem;
+    }
+  }
+}

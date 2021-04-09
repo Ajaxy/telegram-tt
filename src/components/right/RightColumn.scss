@@ -1,0 +1,139 @@
+#RightColumn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--right-column-width);
+  height: 100%;
+  transform: translate3d(var(--right-column-width), 0, 0);
+  background: var(--color-background);
+  border-left: 1px solid var(--color-borders);
+  z-index: var(--z-right-column);
+
+  transition: transform var(--layer-transition);
+
+  body.animation-level-0 & {
+    transition: none;
+  }
+
+  // @optimization
+  &:not(:hover) {
+    .Picker .chat-item-clickable:nth-child(n + 18) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 1275px) {
+    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+  }
+
+  @media (max-width: 600px) {
+    width: 100vw;
+    transform: translate3d(110vw, 0, 0);
+  }
+
+  > .Transition {
+    height: calc(100% - var(--header-height));
+    overflow: hidden;
+  }
+
+  .Management .section > .ChatInfo,
+  .profile-info > .ChatInfo {
+    padding: 0 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+
+    .Avatar {
+      margin: 0 auto .5rem;
+
+      &.no-photo {
+        cursor: default !important;
+      }
+    }
+
+    .title {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      h3 {
+        font-weight: 500;
+        font-size: 1.25rem;
+        line-height: 2rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .VerifiedIcon {
+        margin-left: 0.25rem;
+        margin-top: 0.1rem;
+      }
+
+      .emoji {
+        width: 1.5rem;
+        height: 1.5rem;
+        background-size: 1.5rem;
+      }
+    }
+
+    .status {
+      font-size: 0.875rem;
+      color: #868e96;
+    }
+  }
+}
+
+#RightColumn-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-right-column);
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+
+  @media (max-width: 1275px) {
+    position: fixed;
+  }
+
+  &.is-hidden {
+    display: none;
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: black;
+    opacity: 0;
+
+    @media (max-width: 600px) {
+      transition: opacity var(--layer-transition);
+
+      body.animation-level-0 & {
+        transition: none;
+      }
+    }
+  }
+
+  #Main.right-column-open &, body.animating-right-column & {
+    visibility: visible;
+  }
+
+  #Main.right-column-open & {
+    @media (max-width: 600px) {
+      .overlay-backdrop {
+        opacity: var(--layer-blackout-opacity);
+      }
+    }
+
+    #RightColumn {
+      pointer-events: auto;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+}

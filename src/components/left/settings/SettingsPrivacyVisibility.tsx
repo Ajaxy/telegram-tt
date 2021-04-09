@@ -1,0 +1,242 @@
+import React, {
+  FC, memo, useCallback, useMemo,
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
+
+import { GlobalActions } from '../../../global/types';
+import { ApiChat, ApiUser } from '../../../api/types';
+import { ApiPrivacySettings, SettingsScreens } from '../../../types';
+
+import useLang from '../../../hooks/useLang';
+import { pick } from '../../../util/iteratees';
+
+import ListItem from '../../ui/ListItem';
+import RadioGroup from '../../ui/RadioGroup';
+import { getPrivacyKey } from './helper/privacy';
+
+type OwnProps = {
+  screen: SettingsScreens;
+  onScreenSelect: (screen: SettingsScreens) => void;
+};
+
+type StateProps = Partial<ApiPrivacySettings> & {
+  chatsById?: Record<number, ApiChat>;
+  usersById?: Record<number, ApiUser>;
+};
+
+type DispatchProps = Pick<GlobalActions, 'setPrivacyVisibility'>;
+
+const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
+  screen,
+  onScreenSelect,
+  visibility,
+  allowUserIds,
+  allowChatIds,
+  blockUserIds,
+  blockChatIds,
+  chatsById,
+  setPrivacyVisibility,
+}) => {
+  const lang = useLang();
+
+  const visibilityOptions = useMemo(() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyProfilePhoto:
+      case SettingsScreens.PrivacyGroupChats:
+        return [
+          { value: 'everybody', label: lang('P2PEverybody') },
+          { value: 'contacts', label: lang('P2PContacts') },
+        ];
+
+      default:
+        return [
+          { value: 'everybody', label: lang('P2PEverybody') },
+          { value: 'contacts', label: lang('P2PContacts') },
+          { value: 'nobody', label: lang('P2PNobody') },
+        ];
+    }
+  }, [lang, screen]);
+
+  const exceptionLists = {
+    shouldShowDenied: visibility !== 'nobody',
+    shouldShowAllowed: visibility !== 'everybody',
+  };
+
+  const privacyKey = getPrivacyKey(screen);
+
+  const headerText = useMemo(() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyPhoneNumber:
+        return lang('PrivacyPhoneTitle');
+      case SettingsScreens.PrivacyLastSeen:
+        return lang('LastSeenTitle');
+      case SettingsScreens.PrivacyProfilePhoto:
+        return lang('PrivacyProfilePhotoTitle');
+      case SettingsScreens.PrivacyForwarding:
+        return lang('PrivacyForwardsTitle');
+      case SettingsScreens.PrivacyGroupChats:
+        return lang('WhoCanAddMe');
+      default:
+        return undefined;
+    }
+  }, [lang, screen]);
+
+  const descriptionText = useMemo(() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyLastSeen:
+        return lang('CustomHelp');
+      default:
+        return undefined;
+    }
+  }, [lang, screen]);
+
+  const allowedContactsScreen = (() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyPhoneNumber:
+        return SettingsScreens.PrivacyPhoneNumberAllowedContacts;
+      case SettingsScreens.PrivacyLastSeen:
+        return SettingsScreens.PrivacyLastSeenAllowedContacts;
+      case SettingsScreens.PrivacyProfilePhoto:
+        return SettingsScreens.PrivacyProfilePhotoAllowedContacts;
+      case SettingsScreens.PrivacyForwarding:
+        return SettingsScreens.PrivacyForwardingAllowedContacts;
+      default:
+        return SettingsScreens.PrivacyGroupChatsAllowedContacts;
+    }
+  })();
+
+  const deniedContactsScreen = (() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyPhoneNumber:
+        return SettingsScreens.PrivacyPhoneNumberDeniedContacts;
+      case SettingsScreens.PrivacyLastSeen:
+        return SettingsScreens.PrivacyLastSeenDeniedContacts;
+      case SettingsScreens.PrivacyProfilePhoto:
+        return SettingsScreens.PrivacyProfilePhotoDeniedContacts;
+      case SettingsScreens.PrivacyForwarding:
+        return SettingsScreens.PrivacyForwardingDeniedContacts;
+      default:
+        return SettingsScreens.PrivacyGroupChatsDeniedContacts;
+    }
+  })();
+
+  const allowedCount = useMemo(() => {
+    if (!allowUserIds || !allowChatIds || !chatsById) {
+      return 0;
+    }
+
+    return allowChatIds.reduce((result, chatId) => {
+      return result + (chatsById[chatId] ? chatsById[chatId].membersCount! : 0);
+    }, allowUserIds.length);
+  }, [allowChatIds, allowUserIds, chatsById]);
+
+  const blockCount = useMemo(() => {
+    if (!blockUserIds || !blockChatIds || !chatsById) {
+      return 0;
+    }
+
+    return blockChatIds.reduce((result, chatId) => {
+      return result + (chatsById[chatId] ? chatsById[chatId].membersCount! : 0);
+    }, blockUserIds.length);
+  }, [blockChatIds, blockUserIds, chatsById]);
+
+  const handleVisibilityChange = useCallback((value) => {
+    setPrivacyVisibility({
+      privacyKey,
+      visibility: value,
+    });
+  }, [privacyKey, setPrivacyVisibility]);
+
+  return (
+    <div className="settings-content custom-scroll">
+      <div className="settings-item">
+        <h4 className="settings-item-header">{headerText}</h4>
+
+        <RadioGroup
+          name={`visibility-${privacyKey}`}
+          options={visibilityOptions}
+          onChange={handleVisibilityChange}
+          selected={visibility}
+        />
+
+        {descriptionText && (
+          <p className="settings-item-description-larger">{descriptionText}</p>
+        )}
+      </div>
+
+      <div className="settings-item">
+        <h4 className="settings-item-header mb-4">{lang('PrivacyExceptions')}</h4>
+
+        {exceptionLists.shouldShowAllowed && (
+          <ListItem
+            narrow
+            icon="add-user"
+            onClick={() => { onScreenSelect(allowedContactsScreen); }}
+          >
+            <div className="multiline-menu-item full-size">
+              {allowedCount > 0 && <span className="date">+{allowedCount}</span>}
+              <span className="title">{lang('AlwaysShareWith')}</span>
+              <span className="subtitle">{lang('EditAdminAddUsers')}</span>
+            </div>
+          </ListItem>
+        )}
+        {exceptionLists.shouldShowDenied && (
+          <ListItem
+            narrow
+            icon="delete-user"
+            onClick={() => { onScreenSelect(deniedContactsScreen); }}
+          >
+            <div className="multiline-menu-item full-size">
+              {blockCount > 0 && <span className="date">&minus;{blockCount}</span>}
+              <span className="title">{lang('NeverShareWith')}</span>
+              <span className="subtitle">{lang('EditAdminAddUsers')}</span>
+            </div>
+          </ListItem>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default memo(withGlobal<OwnProps>(
+  (global, { screen }): StateProps => {
+    let privacySettings: ApiPrivacySettings | undefined;
+
+    const {
+      chats: { byId: chatsById },
+      settings: { privacy },
+    } = global;
+
+    switch (screen) {
+      case SettingsScreens.PrivacyPhoneNumber:
+        privacySettings = privacy.phoneNumber;
+        break;
+
+      case SettingsScreens.PrivacyLastSeen:
+        privacySettings = privacy.lastSeen;
+        break;
+
+      case SettingsScreens.PrivacyProfilePhoto:
+        privacySettings = privacy.profilePhoto;
+        break;
+
+      case SettingsScreens.PrivacyForwarding:
+        privacySettings = privacy.forwards;
+        break;
+
+      case SettingsScreens.PrivacyGroupChats:
+        privacySettings = privacy.chatInvite;
+        break;
+    }
+
+    if (!privacySettings) {
+      return {};
+    }
+
+    return {
+      ...privacySettings,
+      chatsById,
+    };
+  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['setPrivacyVisibility']),
+)(SettingsPrivacyVisibility));

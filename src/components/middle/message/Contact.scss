@@ -1,0 +1,34 @@
+.Contact {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+
+  &.interactive {
+    cursor: pointer;
+  }
+
+  .Avatar {
+    margin-right: 0.8rem;
+  }
+
+  .contact-info {
+    padding: 0.5rem;
+    padding-left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+
+    .contact-name {
+      font-size: 1rem;
+      line-height: 1rem;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .contact-phone {
+      line-height: 1rem;
+      color: var(--secondary-color);
+    }
+  }
+}
+
+

@@ -1,0 +1,25 @@
+.DateSuggest {
+  display: flex;
+  height: 2rem;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: .5rem;
+  margin-bottom: .5rem;
+
+  .date-item {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 8rem;
+    margin-top: .375rem;
+    cursor: pointer;
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+
+    .icon-calendar {
+      font-size: 1.25rem;
+      margin-right: .25rem;
+    }
+  }
+  
+}
