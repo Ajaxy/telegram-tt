@@ -37,7 +37,8 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   REQ_INFO_NAME_INVALID: 'The name you provided is not valid',
   REQ_INFO_PHONE_INVALID: 'The phone you provided is not valid',
   REQ_INFO_EMAIL_INVALID: 'The email you provided is not valid',
-  CHANNEL_INVALID: 'An error occurred. Please try again later',
+  // TODO Bring back after fixing the weird bug
+  // CHANNEL_INVALID: 'An error occurred. Please try again later',
   LINK_NOT_MODIFIED: 'This discussion is already linked to the channel',
 
   // Non-API errors
