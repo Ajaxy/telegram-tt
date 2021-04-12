@@ -158,7 +158,7 @@
   }
 
   &.smaller {
-    --background-color: #fff;
+    --background-color: var(--color-background);
     --border-radius-messages-small: .3125rem;
 
     .icon-download,

@@ -42,7 +42,7 @@
     &::before {
       border: 2px solid var(--color-borders);
       border-radius: 50%;
-      background-color: white;
+      background-color: var(--color-white);
       opacity: 1;
       transition: border-color .1s ease, opacity .1s ease;
     }

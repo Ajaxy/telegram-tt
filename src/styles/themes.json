@@ -1,0 +1,23 @@
+{
+  "--color-primary": ["#50A2E9", "#868DF5"],
+  "--color-background": ["#FFFFFF", "#212121"],
+  "--color-background-own": ["#EEFEDF", "#A45D37"],
+  "--color-chat-hover": ["#F4F4F5", "#2C2C2C"],
+  "--color-chat-active": ["#ededed", "#292929"],
+  "--color-text": ["#000000", "#FFFFFF"],
+  "--color-text-secondary": ["#707579", "#AAAAAA"],
+  "--color-borders": ["#DADCE0", "#100F10"],
+  "--color-borders-input": ["#DADCE0", "#5B5B5A"],
+  "--color-links": ["#52A1EF", "#868DF6"],
+  "--color-gray": ["#C4C9CC", "#808080"],
+  "--color-default-shadow": ["#72727240", "#00000099"],
+  "--color-light-shadow": ["#7272722B", "#00000040"],
+  "--color-green": ["#4DCD5E", "#868DF5"],
+  "--color-text-meta-colored": ["#4DCD5E", "#868DF5"],
+  "--color-reply-own-hover": ["#DBF4CE", "#A26947"],
+  "--color-reply-own-active": ["#C8EBBC", "#B0714C"],
+  "--color-accent-own": ["#4FAE4E", "#FFFFFF"],
+  "--color-message-meta-own": ["#4FAE4E", "#D9BDAD"],
+  "--color-own-links": ["#52A1EF", "#FFFFFF"],
+  "--color-code-own": ["#3C7940", "#FFFFFF"]
+}

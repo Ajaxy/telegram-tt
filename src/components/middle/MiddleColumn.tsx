@@ -59,6 +59,7 @@ type StateProps = {
   messageSendingRestrictionReason?: string;
   hasPinnedOrAudioMessage?: boolean;
   customBackground?: string;
+  isCustomBackgroundColor?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
   isMobileSearchActive?: boolean;
@@ -84,6 +85,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   messageSendingRestrictionReason,
   hasPinnedOrAudioMessage,
   customBackground,
+  isCustomBackgroundColor,
   isRightColumnShown,
   isBackgroundBlurred,
   isMobileSearchActive,
@@ -166,7 +168,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   const className = buildClassName(
     hasTools && 'has-header-tools',
-    customBackground && 'custom-bg-image',
+    customBackground && !isCustomBackgroundColor && 'custom-bg-image',
+    customBackground && isCustomBackgroundColor && 'custom-bg-color',
     customBackground && isBackgroundBlurred && 'blurred',
     MASK_IMAGE_ENABLED ? 'mask-image-enabled' : 'mask-image-disabled',
   );
@@ -293,12 +296,14 @@ export default memo(withGlobal(
   (global): StateProps => {
     const { isBackgroundBlurred, customBackground } = global.settings.byKey;
 
+    const isCustomBackgroundColor = Boolean((customBackground || '').match(/^#[a-f\d]{6,8}$/i));
     const currentMessageList = selectCurrentMessageList(global);
     const { chats: { listIds } } = global;
     if (!currentMessageList || !listIds.active) {
       return {
         customBackground,
         isBackgroundBlurred,
+        isCustomBackgroundColor,
       };
     }
 
@@ -320,6 +325,7 @@ export default memo(withGlobal(
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedOrAudioMessage: Boolean(pinnedIds && pinnedIds.length) || Boolean(audioChatId && audioMessageId),
       customBackground,
+      isCustomBackgroundColor,
       isRightColumnShown: selectIsRightColumnShown(global),
       isBackgroundBlurred,
       isMobileSearchActive: Boolean(IS_MOBILE_SCREEN && selectCurrentTextSearch(global)),

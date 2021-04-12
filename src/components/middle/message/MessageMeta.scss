@@ -72,12 +72,15 @@
   }
 
   .Message.own .has-solid-background & {
-    color: var(--color-text-green);
+    color: var(--color-message-meta-own);
   }
 
   .MessageOutgoingStatus {
     margin-left: -.1875rem;
     font-size: 1.1875rem;
+    .Message.own & {
+      color: var(--color-accent-own);
+    }
   }
 
   .message-content.has-replies:not(.custom-shape) & {

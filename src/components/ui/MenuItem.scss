@@ -24,6 +24,10 @@
     color: var(--color-text-secondary);
   }
 
+  .menu-item-name {
+    margin-right: 2rem;
+  }
+
   &.disabled {
     opacity: 0.5 !important;
     cursor: default !important;
@@ -40,5 +44,9 @@
   &:not(.has-ripple):not(.disabled):active {
     background-color: var(--color-chat-active);
     transition: none !important;
+  }
+
+  & > .Switcher {
+    margin-left: auto;
   }
 }

@@ -7,8 +7,8 @@
   align-items: flex-end;
   font-size: 0.875rem;
   flex-wrap: nowrap;
-  box-shadow: 0 2px 2px rgba(114, 114, 114, 0.17);
-  background-color: white;
+  box-shadow: 0 2px 2px var(--color-light-shadow);
+  background-color: var(--color-background);
   overflow-x: auto;
   overflow-y: hidden;
 

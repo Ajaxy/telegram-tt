@@ -163,7 +163,7 @@
     justify-content: space-between;
     align-items: flex-end;
     box-shadow: inset 0 -1px 0 0 var(--color-borders);
-    background-color: white;
+    background-color: var(--color-background);
     -webkit-overflow-scrolling: touch;
     overflow-x: auto;
     overflow-y: hidden;

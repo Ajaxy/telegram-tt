@@ -5,14 +5,17 @@
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: overlay;
+  padding-bottom: .3125rem;
 
   body.hide-mask-shadow .mask-image-disabled &,
   .mask-image-enabled & {
     mask-image: linear-gradient(to top, transparent 0, #000 1rem);
   }
 
+  .custom-bg-color.mask-image-disabled &,
   .custom-bg-image.mask-image-disabled & {
-    margin-bottom: .3rem;
+    margin-bottom: .3125rem;
+    padding-bottom: 0;
   }
 
   @media (pointer: coarse) {

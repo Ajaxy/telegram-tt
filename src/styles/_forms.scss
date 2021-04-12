@@ -70,9 +70,10 @@
   width: 100%;
   height: 3.375rem;
   padding: calc(0.75rem - var(--border-width)) calc(.9rem - var(--border-width));
-  border: var(--border-width) solid var(--color-borders);
+  border: var(--border-width) solid var(--color-borders-input);
   border-radius: var(--border-radius-default);
   color: var(--color-text);
+  background-color: var(--color-background);
   outline: none;
   transition: border-color 0.15s ease;
   word-break: break-word;
@@ -82,7 +83,11 @@
   line-height: 1.25rem;
 
   &:hover {
-    border-color: var(--color-gray);
+    border-color: var(--color-primary);
+
+    & + label {
+      color: var(--color-primary);
+    }
   }
 
   &:focus,

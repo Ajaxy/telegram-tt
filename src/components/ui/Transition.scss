@@ -5,6 +5,7 @@
     width: 100%;
     height: 100%;
     animation-fill-mode: forwards !important;
+    transition: background-color .2s;
 
     &.from, &.to {
       position: absolute;
@@ -245,7 +246,7 @@
    */
 
   &.slide-layers {
-    --background-color: var(--color-white);
+    --background-color: var(--color-background);
     background: black;
 
     > div {
@@ -290,7 +291,7 @@
 
   &.push-slide {
     > div {
-      background: white;
+      background: var(--color-background);
     }
 
     > .from {

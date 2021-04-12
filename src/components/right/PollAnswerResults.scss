@@ -14,7 +14,7 @@
     padding: 1rem .75rem .5rem 1rem;
     position: sticky;
     top: 0;
-    background: #fff;
+    background: var(--color-background);
 
     @media (max-width: 600px) {
       padding: .5rem .25rem .5rem .5rem;

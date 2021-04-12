@@ -55,7 +55,7 @@
     }
 
     &.filled {
-      background-color: white;
+      background-color: var(--color-background);
 
       &::after {
         content: '';

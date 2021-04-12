@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     flex-direction: row;
-    background: white;
+    background: var(--color-background);
     border-bottom: 1px var(--color-borders) solid;
 
     h3 {
@@ -51,7 +51,7 @@
     border-bottom-right-radius: 10px;
     width: 100%;
     padding: .75rem 1rem;
-    background: white;
+    background: var(--color-background);
     border-top: 1px var(--color-borders) solid;
 
     button {

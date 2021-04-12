@@ -19,8 +19,8 @@
     padding: 0.5rem 0;
     margin: 0;
     position: absolute;
-    background-color: white;
-    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+    background-color: var(--color-background);
+    box-shadow: 0 .25rem .5rem .1rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     min-width: 13.5rem;
     z-index: var(--z-menu-bubble);

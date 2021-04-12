@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { LeftColumnContent } from '../../../types';
+import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
@@ -12,6 +12,7 @@ import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { isChatArchived } from '../../../modules/helpers';
 import { formatDateToString } from '../../../util/dateFormat';
+import switchTheme from '../../../util/switchTheme';
 import useLang from '../../../hooks/useLang';
 
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -19,6 +20,7 @@ import MenuItem from '../../ui/MenuItem';
 import Button from '../../ui/Button';
 import SearchInput from '../../ui/SearchInput';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
+import Switcher from '../../ui/Switcher';
 
 import './LeftMainHeader.scss';
 
@@ -28,7 +30,6 @@ type OwnProps = {
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
   onSelectContacts: () => void;
-  onSelectNewGroup: () => void;
   onSelectArchived: () => void;
   onReset: () => void;
 };
@@ -39,11 +40,15 @@ type StateProps = {
   currentUserId?: number;
   globalSearchChatId?: number;
   searchDate?: number;
+  theme: ISettings['theme'];
+  animationLevel: 0 | 1 | 2;
   chatsById?: Record<number, ApiChat>;
 };
 
 type DispatchProps = Pick<GlobalActions,
-'openChat'| 'openSupportChat' | 'setGlobalSearchDate' | 'setGlobalSearchChatId'>;
+'openChat'| 'openSupportChat' | 'setGlobalSearchDate' | 'setGlobalSearchChatId' | 'setSettingOption'>;
+
+const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
@@ -51,7 +56,6 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onSearchQuery,
   onSelectSettings,
   onSelectContacts,
-  onSelectNewGroup,
   onSelectArchived,
   setGlobalSearchChatId,
   onReset,
@@ -60,10 +64,13 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   currentUserId,
   globalSearchChatId,
   searchDate,
+  theme,
+  animationLevel,
   chatsById,
   openChat,
   openSupportChat,
   setGlobalSearchDate,
+  setSettingOption,
 }) => {
   const hasMenu = content === LeftColumnContent.ChatList;
   const clearedDateSearchParam = { date: undefined };
@@ -113,6 +120,28 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: currentUserId });
   }, [currentUserId, openChat]);
 
+  const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+
+    setSettingOption({
+      theme: newTheme,
+      customBackground: newTheme === 'dark' ? '#0F0F0F' : undefined,
+    });
+    switchTheme(newTheme, animationLevel > 0);
+  }, [animationLevel, setSettingOption, theme]);
+
+  const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    const newLevel = animationLevel === 0 ? 2 : 0;
+    ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {
+      document.body.classList.toggle(`animation-level-${i}`, newLevel === i);
+    });
+
+    setSettingOption({ animationLevel: newLevel });
+  }, [animationLevel, setSettingOption]);
+
   const lang = useLang();
 
   const isSearchFocused = Boolean(globalSearchChatId)
@@ -130,10 +159,19 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           trigger={MainButton}
         >
           <MenuItem
-            icon="group"
-            onClick={onSelectNewGroup}
+            icon="saved-messages"
+            onClick={handleSelectSaved}
           >
-            {lang('NewGroup')}
+            {lang('SavedMessages')}
+          </MenuItem>
+          <MenuItem
+            icon="archive"
+            onClick={onSelectArchived}
+          >
+            <span className="menu-item-name">{lang('ArchivedChats')}</span>
+            {archivedUnreadChatsCount > 0 && (
+              <div className="archived-badge">{archivedUnreadChatsCount}</div>
+            )}
           </MenuItem>
           <MenuItem
             icon="user"
@@ -142,25 +180,32 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             {lang('Contacts')}
           </MenuItem>
           <MenuItem
-            icon="archive"
-            onClick={onSelectArchived}
-          >
-            {lang('Archived')}
-            {archivedUnreadChatsCount > 0 && (
-              <div className="archived-badge">{archivedUnreadChatsCount}</div>
-            )}
-          </MenuItem>
-          <MenuItem
-            icon="saved-messages"
-            onClick={handleSelectSaved}
-          >
-            {lang('Saved')}
-          </MenuItem>
-          <MenuItem
             icon="settings"
             onClick={onSelectSettings}
           >
             {lang('Settings')}
+          </MenuItem>
+          <MenuItem
+            icon="darkmode"
+            onClick={handleDarkModeToggle}
+          >
+            <span className="menu-item-name">Dark Mode</span>
+            <Switcher
+              id="darkmode"
+              label="Toggle Dark Mode"
+              checked={theme === 'dark'}
+            />
+          </MenuItem>
+          <MenuItem
+            icon="animations"
+            onClick={handleAnimationLevelChange}
+          >
+            <span className="menu-item-name">{lang('SettingsSearch.Synonyms.Appearance.Animations')}</span>
+            <Switcher
+              id="animations"
+              label="Toggle Animations"
+              checked={animationLevel > 0}
+            />
           </MenuItem>
           <MenuItem
             icon="help"
@@ -213,6 +258,7 @@ export default memo(withGlobal<OwnProps>(
     } = global.globalSearch;
     const { currentUserId } = global;
     const { byId: chatsById } = global.chats;
+    const { theme, animationLevel } = global.settings.byKey;
 
     return {
       searchQuery,
@@ -221,6 +267,8 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       globalSearchChatId: chatId,
       searchDate: date,
+      theme,
+      animationLevel,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -228,5 +276,6 @@ export default memo(withGlobal<OwnProps>(
     'openSupportChat',
     'setGlobalSearchDate',
     'setGlobalSearchChatId',
+    'setSettingOption',
   ]),
 )(LeftMainHeader));

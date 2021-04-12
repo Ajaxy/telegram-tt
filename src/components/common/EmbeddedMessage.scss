@@ -21,7 +21,7 @@
     padding: 0.5rem;
     margin: 0;
     background-color: var(--background-color);
-    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 1px 2px var(--color-default-shadow);
 
     &::before {
       left: .625rem;
