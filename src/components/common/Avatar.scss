@@ -6,7 +6,7 @@
   width: 3.375rem;
   height: 3.375rem;
   border-radius: 50%;
-  background: linear-gradient(white -125%, var(--color-user));
+  background: linear-gradient(var(--color-white) -125%, var(--color-user));
   color: white;
   font-weight: bold;
   display: flex;
@@ -109,7 +109,7 @@
       width: 0.875rem;
       height: 0.875rem;
       border-radius: 50%;
-      border: 2px solid white;
+      border: 2px solid var(--color-background);
       background-color: #0ac630;
       flex-shrink: 0;
     }

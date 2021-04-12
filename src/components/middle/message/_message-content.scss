@@ -98,7 +98,7 @@
   }
 
   &.has-shadow {
-    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 1px 2px var(--color-default-shadow);
   }
 
   &.has-solid-background, .is-album & {
@@ -123,6 +123,10 @@
         background-position: bottom right;
         background-image: url('data:image/svg+xml,%3Csvg width="9" height="20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"%3E%3Cdefs%3E%3Cfilter x="-50%25" y="-14.7%25" width="200%25" height="141.2%25" filterUnits="objectBoundingBox" id="a"%3E%3CfeOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/%3E%3CfeGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/%3E%3CfeColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/%3E%3C/filter%3E%3Cpath d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" id="b"/%3E%3C/defs%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cuse fill="%23000" filter="url(%23a)" xlink:href="%23b"/%3E%3Cuse fill="%23EEFFDE" xlink:href="%23b"/%3E%3C/g%3E%3C/svg%3E');
       }
+
+      .theme-dark &:not([data-has-custom-appendix])::before {
+        background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGRlZnM+PGZpbHRlciBpZD0iYSIgeD0iMCIgeT0iMCIgd2lkdGg9IjIwNSIgaGVpZ2h0PSIyMDAiPjxmZU9mZnNldCByZXN1bHQ9Im9mZk91dCIgaW49IlNvdXJjZUFscGhhIiBkeD0iLTEiIGR5PSIxIi8+PGZlQ29sb3JNYXRyaXggcmVzdWx0PSJtYXRyaXhPdXQiIGluPSJvZmZPdXQiIHZhbHVlcz0iMC4xMyAwIDAgMCAwIDAgMC4xMyAwIDAgMCAwIDAgMC4xMyAwIDAgMCAwIDAgMC42IDAiLz48ZmVHYXVzc2lhbkJsdXIgcmVzdWx0PSJibHVyT3V0IiBpbj0ibWF0cml4T3V0IiBzdGREZXZpYXRpb249IjEiLz48ZmVCbGVuZCBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJibHVyT3V0Ii8+PC9maWx0ZXI+PHBhdGggZD0iTTYgMTdIMFYwYy4xOTMgMi44NC44NzYgNS43NjcgMi4wNSA4Ljc4Mi45MDQgMi4zMjUgMi40NDYgNC40ODUgNC42MjUgNi40OEExIDEgMCAwMTYgMTd6IiBpZD0iYiIvPjwvZGVmcz48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjx1c2UgZmlsbD0iIzAwMCIgZmlsdGVyPSJ1cmwoI2EpIiB4bGluazpocmVmPSIjYiIvPjx1c2UgZmlsbD0iIzlBNUYzRiIgeGxpbms6aHJlZj0iI2IiLz48L2c+PC9zdmc+);
+      }
     }
 
     .Message:not(.own) & {
@@ -130,6 +134,10 @@
         left: -.5625rem;
         background-position: bottom left;
         background-image: url('data:image/svg+xml,%3Csvg width="9" height="20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"%3E%3Cdefs%3E%3Cfilter x="-50%25" y="-14.7%25" width="200%25" height="141.2%25" filterUnits="objectBoundingBox" id="a"%3E%3CfeOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/%3E%3CfeGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/%3E%3CfeColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/%3E%3C/filter%3E%3Cpath d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" id="b"/%3E%3C/defs%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cuse fill="%23000" filter="url(%23a)" xlink:href="%23b"/%3E%3Cuse fill="%23FFF" xlink:href="%23b"/%3E%3C/g%3E%3C/svg%3E');
+      }
+
+      .theme-dark &:not([data-has-custom-appendix])::before {
+        background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjA1IiBoZWlnaHQ9IjIwMCI+PGZlT2Zmc2V0IHJlc3VsdD0ib2ZmT3V0IiBpbj0iU291cmNlQWxwaGEiIGR5PSIxIi8+PGZlQ29sb3JNYXRyaXggcmVzdWx0PSJtYXRyaXhPdXQiIGluPSJvZmZPdXQiIHZhbHVlcz0iMC4xMyAwIDAgMCAwIDAgMC4xMyAwIDAgMCAwIDAgMC4xMyAwIDAgMCAwIDAgMC42IDAiLz48ZmVHYXVzc2lhbkJsdXIgcmVzdWx0PSJibHVyT3V0IiBpbj0ibWF0cml4T3V0IiBzdGREZXZpYXRpb249IjEiLz48ZmVCbGVuZCBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJibHVyT3V0Ii8+PC9maWx0ZXI+PC9kZWZzPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PHBhdGggZD0iTTMgMTdoNlYwYy0uMTkzIDIuODQtLjg3NiA1Ljc2Ny0yLjA1IDguNzgyLS45MDQgMi4zMjUtMi40NDYgNC40ODUtNC42MjUgNi40OEExIDEgMCAwMDMgMTd6IiBmaWxsPSIjMDAwIiBmaWx0ZXI9InVybCgjYSkiLz48cGF0aCBkPSJNMyAxN2g2VjBjLS4xOTMgMi44NC0uODc2IDUuNzY3LTIuMDUgOC43ODItLjkwNCAyLjMyNS0yLjQ0NiA0LjQ4NS00LjYyNSA2LjQ4QTEgMSAwIDAwMyAxN3oiIGZpbGw9IiMyMTIxMjEiLz48L2c+PC9zdmc+);
       }
     }
 

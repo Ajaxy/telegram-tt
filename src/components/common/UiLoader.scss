@@ -18,7 +18,7 @@
 
     .left {
       flex: 1;
-      background: white;
+      background: var(--color-background);
       min-width: 15.5rem;
       max-width: 26.5rem;
 
@@ -56,10 +56,19 @@
         left: 0;
         bottom: 0;
         right: 0;
-        background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
+        background: no-repeat center;
         background-size: cover;
         z-index: -1;
         transform-origin: left center;
+
+        .theme-dark body.initial & {
+          background-color: #0f0f0f;
+        }
+
+        .theme-light body.initial &,
+        body:not(.initial) & {
+          background-image: url('../../assets/chat-bg.jpg');
+        }
       }
 
       &.with-right-column::before {
@@ -97,12 +106,12 @@
       min-width: 15.5rem;
       max-width: 26.5rem;
       border-left: 1px solid var(--color-borders);
-      background: white;
+      background: var(--color-background);
     }
   }
 
   .blank {
     flex: 1;
-    background: white;
+    background: var(--color-background);
   }
 }

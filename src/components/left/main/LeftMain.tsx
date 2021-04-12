@@ -118,7 +118,6 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onSearchQuery={onSearchQuery}
         onSelectSettings={handleSelectSettings}
         onSelectContacts={handleSelectContacts}
-        onSelectNewGroup={handleSelectNewGroup}
         onSelectArchived={handleSelectArchived}
         onReset={onReset}
       />

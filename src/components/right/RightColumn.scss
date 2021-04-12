@@ -23,7 +23,7 @@
   }
 
   @media (max-width: 1275px) {
-    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+    box-shadow: 0 .25rem .5rem .1rem var(--color-default-shadow);
   }
 
   @media (max-width: 600px) {

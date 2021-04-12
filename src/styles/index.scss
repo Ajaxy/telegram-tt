@@ -83,6 +83,10 @@ body.cursor-grabbing, body.cursor-grabbing * {
   box-sizing: border-box;
 }
 
+.disable-animations #root * {
+  transition: none !important;
+}
+
 .custom-scroll,
 .custom-scroll-x {
   scrollbar-width: thin;

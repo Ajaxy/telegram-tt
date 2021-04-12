@@ -22,7 +22,7 @@
   &.has-focus {
     border-color: var(--color-primary);
     caret-color: var(--color-primary);
-    background-color: #fff;
+    background-color: var(--color-background);
 
     input {
       & + i {

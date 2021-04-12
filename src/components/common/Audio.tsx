@@ -1,10 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 
 import {
   ApiAudio, ApiMessage, ApiVoice,
 } from '../../api/types';
+import { ISettings } from '../../types';
 
 import { IS_MOBILE_SCREEN } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
@@ -49,6 +51,10 @@ type OwnProps = {
   onDateClick?: (messageId: number, chatId: number) => void;
 };
 
+type StateProps = {
+  theme: ISettings['theme'];
+};
+
 interface ISeekMethods {
   handleStartSeek: (e: React.MouseEvent<HTMLElement>) => void;
   handleSeek: (e: React.MouseEvent<HTMLElement>) => void;
@@ -61,7 +67,8 @@ const MAX_SPIKES = IS_MOBILE_SCREEN ? 50 : 75;
 // This is needed for browsers requiring user interaction before playing.
 const PRELOAD = true;
 
-const Audio: FC<OwnProps> = ({
+const Audio: FC<OwnProps & StateProps> = ({
+  theme,
   message,
   senderTitle,
   uploadProgress,
@@ -201,8 +208,8 @@ const Audio: FC<OwnProps> = ({
   const seekHandlers = { handleStartSeek, handleSeek, handleStopSeek };
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(
-    () => voice && renderWaveform(voice, playProgress, isOwn, seekHandlers),
-    [voice, playProgress, isOwn, seekHandlers],
+    () => voice && renderWaveform(voice, playProgress, isOwn, seekHandlers, theme),
+    [voice, playProgress, isOwn, seekHandlers, theme],
   );
 
   const fullClassName = buildClassName(
@@ -346,7 +353,11 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, isMediaUnread?: boo
 }
 
 function renderWaveform(
-  voice: ApiVoice, playProgress = 0, isOwn = false, { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
+  voice: ApiVoice,
+  playProgress = 0,
+  isOwn = false,
+  { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
+  theme: ISettings['theme'],
 ) {
   const { waveform, duration } = voice;
 
@@ -354,14 +365,18 @@ function renderWaveform(
     return undefined;
   }
 
+  const fillColor = theme === 'dark' ? '#494B75' : '#CBCBCB';
+  const fillOwnColor = theme === 'dark' ? '#C69C85' : '#B0DEA6';
+  const progressFillColor = theme === 'dark' ? '#868DF5' : '#54a3e6';
+  const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#53ad53';
   const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
   const spikesCount = Math.round(MIN_SPIKES + (MAX_SPIKES - MIN_SPIKES) * durationFactor);
   const decodedWaveform = decodeWaveform(new Uint8Array(waveform));
   const { data: spikes, peak } = interpolateArray(decodedWaveform, spikesCount);
   const { src, width, height } = renderWaveformToDataUri(spikes, playProgress, {
     peak,
-    fillStyle: isOwn ? '#B0DEA6' : '#CBCBCB',
-    progressFillStyle: isOwn ? '#53ad53' : '#54a3e6',
+    fillStyle: isOwn ? fillOwnColor : fillColor,
+    progressFillStyle: isOwn ? progressFillOwnColor : progressFillColor,
   });
 
   return (
@@ -414,4 +429,4 @@ function renderSeekline(
   );
 }
 
-export default memo(Audio);
+export default memo(withGlobal<OwnProps>((global) => ({ theme: global.settings.byKey.theme }))(Audio));

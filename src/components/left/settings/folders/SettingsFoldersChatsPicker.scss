@@ -2,7 +2,7 @@
   height: calc(100% - var(--header-height));
 
   .picker-header {
-    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 0 2px var(--color-default-shadow);
 
     .max-items-reached {
       margin-bottom: 0.5rem;

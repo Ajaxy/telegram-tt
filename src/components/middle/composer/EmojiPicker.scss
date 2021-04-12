@@ -17,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
-    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 0 2px var(--color-default-shadow);
 
     @media (max-width: 600px) {
       overflow-x: auto;

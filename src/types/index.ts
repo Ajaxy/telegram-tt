@@ -26,6 +26,7 @@ export interface ISettings extends Record<string, any> {
   isBackgroundBlurred?: boolean;
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
+  theme: 'light' | 'dark';
   shouldAutoDownloadMediaFromContacts: boolean;
   shouldAutoDownloadMediaInPrivateChats: boolean;
   shouldAutoDownloadMediaInGroups: boolean;

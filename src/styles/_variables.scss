@@ -64,9 +64,11 @@ $color-user-8: #faa774;
   --color-text-secondary-rgb: #{toRGB($color-text-secondary)};
   --color-text-meta: #{$color-text-meta};
   --color-text-meta-rgb: #{toRGB($color-text-meta)};
+  --color-text-meta-colored: #{$color-text-green};
   --color-text-green: #{$color-text-green};
   --color-text-green-rgb: #{toRGB($color-text-green)};
   --color-borders: #{$color-borders};
+  --color-borders-input: #{$color-borders};
   --color-webpage-initial-background: #{$color-dark-gray};
   --color-interactive-active: var(--color-primary);
   --color-interactive-inactive: rgba(var(--color-text-secondary-rgb), 0.25);
@@ -94,12 +96,17 @@ $color-user-8: #faa774;
   --color-links-darker: #{darken($color-links, 15%)};
   --color-links-darker-hover: #{darken($color-links, 23%)};
 
+  --color-own-links: #{$color-white};
+
   --color-placeholders: #{$color-placeholders};
 
   --color-code: #4a729a;
   --color-code-bg: #{rgba($color-text-secondary, .08)};
   --color-code-own: #3c7940;
   --color-code-own-bg: #{rgba($color-text-secondary, .08)};
+
+  --color-accent-own: #{$color-text-green};
+  --color-message-meta-own: #{$color-text-green};
 
   --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
   --color-reply-active: #{blend-normal(rgba($color-text-secondary, 0.16), $color-white)};
@@ -122,6 +129,9 @@ $color-user-8: #faa774;
   --color-user-6: #{$color-user-6};
   --color-user-7: #{$color-user-7};
   --color-user-8: #{$color-user-8};
+
+  --color-default-shadow: #72727240;
+  --color-light-shadow: #7272722B;
 
   --border-radius-default: 0.75rem;
   --border-radius-default-small: 0.625rem;

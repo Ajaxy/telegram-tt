@@ -32,7 +32,7 @@
   .button-wrapper {
     padding: 0.5rem 0;
     border-top: 1px solid var(--color-borders);
-    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 0 2px var(--color-default-shadow);
 
     button {
       display: inline-block;

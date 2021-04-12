@@ -4,15 +4,20 @@ import {
   IS_ANDROID, IS_IOS, IS_SAFARI, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import { setLanguage } from '../../../util/langProvider';
+import switchTheme from '../../../util/switchTheme';
 
 addReducer('init', (global) => {
-  const { animationLevel, messageTextSize, language } = global.settings.byKey;
+  const {
+    theme, animationLevel, messageTextSize, language,
+  } = global.settings.byKey;
 
   setLanguage(language);
 
   document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
+  document.body.classList.add('initial');
   document.body.classList.add(`animation-level-${animationLevel}`);
   document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
+  switchTheme(theme, animationLevel > 0);
 
   if (IS_SAFARI) {
     document.body.classList.add('is-safari');
@@ -26,6 +31,10 @@ addReducer('init', (global) => {
 
 addReducer('setIsUiReady', (global, actions, payload) => {
   const { uiReadyState } = payload!;
+
+  if (uiReadyState === 2) {
+    document.body.classList.remove('initial');
+  }
 
   return {
     ...global,

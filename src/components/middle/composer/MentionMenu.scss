@@ -4,14 +4,14 @@
   left: 0;
   width: calc(100% - 4rem);
   max-width: 20rem;
-  background: white;
+  background: var(--color-background);
   border-radius: var(--border-radius-messages);
   padding: 0.5rem 0;
   max-height: 15rem;
   overflow-x: hidden;
   overflow-y: auto;
 
-  box-shadow: 3px 3px 5px rgba(114, 114, 114, 0.25);
+  box-shadow: 3px 3px 5px var(--color-default-shadow);
   z-index: -1;
 
   opacity: 0;

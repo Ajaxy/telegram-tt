@@ -103,6 +103,7 @@ export const INITIAL_STATE: GlobalState = {
       isBackgroundBlurred: true,
       animationLevel: ANIMATION_LEVEL_DEFAULT,
       messageSendKeyCombo: 'enter',
+      theme: 'light',
       shouldAutoDownloadMediaFromContacts: true,
       shouldAutoDownloadMediaInPrivateChats: true,
       shouldAutoDownloadMediaInGroups: true,

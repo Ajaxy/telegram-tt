@@ -16,7 +16,7 @@
           height: 10rem;
         }
       }
-  
+
       .description-text {
         position: absolute;
         top: 0;
@@ -24,10 +24,10 @@
         margin: .25rem;
         background-color: rgba(90, 110, 70, 0.6);
         border-radius: var(--border-radius-messages-small);
-        color: var(--color-white);
+        color: var(--color-text);
         font-weight: 500;
       }
     }
-    
+
   }
 }

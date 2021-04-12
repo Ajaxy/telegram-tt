@@ -5,7 +5,7 @@
   margin-bottom: 0.375rem;
   position: relative;
 
-  --background-color: white;
+  --background-color: var(--color-background);
   --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
   --active-color: rgba(var(--color-text-secondary-rgb), 0.16);
   --max-width: 29rem;
@@ -81,16 +81,19 @@
   &.own {
     flex-direction: row-reverse;
     --background-color: var(--color-background-own);
-    --hover-color: rgba(var(--color-text-green-rgb), 0.12);
-    --active-color: rgba(var(--color-text-green-rgb), 0.24);
+    --hover-color: var(--color-reply-own-hover);
+    --active-color: var(--color-reply-own-active);
     --max-width: 30rem;
-    --accent-color: var(--color-text-green);
+    --accent-color: var(--color-accent-own);
     --accent-shade-color: var(--color-green);
-    --secondary-color: var(--color-text-green);
+    --secondary-color: var(--color-accent-own);
     --color-code: var(--color-code-own);
     --color-code-bg: var(--color-code-own-bg);
+    --color-links: var(--color-own-links);
+    --color-links-hover: var(--color-own-links);
     --meta-safe-area-base: 3.5rem;
     --deleting-translate-x: 50%;
+    --color-text-green: var(--color-accent-own);
 
     @media (max-width: 600px) {
       padding-right: 0.25rem;
@@ -176,6 +179,15 @@
     left: 1.063rem;
     bottom: 0.813rem;
   }
+
+  html.theme-dark &.own .Audio .ProgressSpinner {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUiIGhlaWdodD0iMTUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTguMjE4IDcuNWw1LjYzMy01LjYzM2EuNTA4LjUwOCAwIDEwLS43MTgtLjcxOEw3LjUgNi43ODIgMS44NjcgMS4xNDlhLjUwOC41MDggMCAxMC0uNzE4LjcxOEw2Ljc4MiA3LjVsLTUuNjMzIDUuNjMzYS41MDguNTA4IDAgMTAuNzE4LjcxOEw3LjUgOC4yMThsNS42MzMgNS42MzNhLjUwNi41MDYgMCAwMC43MTggMCAuNTA4LjUwOCAwIDAwMC0uNzE4TDguMjE4IDcuNXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSIjQTQ1RDM3IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+);
+
+    circle {
+      stroke: var(--background-color);
+    }
+  }
+
 
   .File {
     position: relative;

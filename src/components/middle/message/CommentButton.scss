@@ -1,6 +1,6 @@
 .CommentButton {
-  --background-color: #fff;
-  --hover-color: #f4f4f4;
+  --background-color: var(--color-background);
+  --hover-color: var(--color-chat-hover);
 
   display: flex;
   width: 100%;
@@ -30,9 +30,13 @@
     width: .5625rem;
     height: 1.25rem;
     background-position: bottom left;
-    background-image: url("data:image/svg+xml,%3Csvg width='9' height='20' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter x='-50%25' y='-14.7%25' width='200%25' height='141.2%25' filterUnits='objectBoundingBox' id='a'%3E%3CfeOffset dy='1' in='SourceAlpha' result='shadowOffsetOuter1'/%3E%3CfeGaussianBlur stdDeviation='1' in='shadowOffsetOuter1' result='shadowBlurOuter1'/%3E%3CfeColorMatrix values='0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0' in='shadowBlurOuter1'/%3E%3C/filter%3E%3Cpath d='M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z' id='b'/%3E%3C/defs%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cuse fill='%23000' filter='url(%23a)' xlink:href='%23b'/%3E%3Cuse fill='%23f4f4f4' xlink:href='%23b'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url('data:image/svg+xml,%3Csvg width="9" height="20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"%3E%3Cdefs%3E%3Cfilter x="-50%25" y="-14.7%25" width="200%25" height="141.2%25" filterUnits="objectBoundingBox" id="a"%3E%3CfeOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/%3E%3CfeGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/%3E%3CfeColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/%3E%3C/filter%3E%3Cpath d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" id="b"/%3E%3C/defs%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cuse fill="%23000" filter="url(%23a)" xlink:href="%23b"/%3E%3Cuse fill="%23FFF" xlink:href="%23b"/%3E%3C/g%3E%3C/svg%3E');
     opacity: 0;
-    transition: opacity .15s;
+    transition: opacity .15s, filter .15s;
+
+    .theme-dark #root & {
+      filter: invert(.83);
+    }
 
     body.animation-level-0 & {
       transition: none !important;
@@ -162,7 +166,7 @@
 
     .Avatar {
       transition: border .15s;
-      border: 2px solid #fff;
+      border: 2px solid var(--color-background);
       margin-right: 0;
       z-index: 3;
 

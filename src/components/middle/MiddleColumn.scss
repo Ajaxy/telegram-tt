@@ -7,7 +7,8 @@
   overflow: hidden;
   z-index: -1;
 
-  &::before {
+  &::before,
+  &::after {
     content: "";
     display: block;
     position: absolute;
@@ -15,13 +16,18 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-color: rgb(230, 235, 238);
+    background-color: #F2EBCE;
+  }
+
+  &::after {
     background-image: url('../../assets/chat-bg.jpg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
 
-    transition: background-image .3s ease;
+    .disable-animations #root & {
+      transition: opacity .2s !important;
+    }
 
     body.animation-level-0 & {
       transition: none;
@@ -32,19 +38,29 @@
     }
   }
 
-  .custom-bg-image > &::before {
+  .custom-bg-image > &::after {
     background-image: var(--custom-background) !important;
+    filter: blur(0);
+    transform: scale(1.1);
+  }
+
+  .custom-bg-color > &::before {
     background-color: var(--custom-background) !important;
     filter: blur(0);
     transform: scale(1.1);
   }
 
-  .custom-bg-image.blurred > &::before {
+  .custom-bg-image.blurred > &::after {
     filter: blur(12px);
   }
 
+  .custom-bg-color > &::after {
+    opacity: 0;
+  }
+
   @media screen and (min-width: 1276px) {
-    body.animation-level-2 &::before {
+    body.animation-level-2 &::before,
+    body.animation-level-2 &::after {
       margin: -16rem -5rem -20rem 0;
       overflow: hidden;
       transform: scale(1);
@@ -52,12 +68,12 @@
       transition: transform var(--layer-transition);
     }
 
-    body.animation-level-2 .custom-bg-image > &::before {
+    body.animation-level-2 .custom-bg-image > &::after {
       margin: -16rem -5rem -20rem -1rem;
-      transition: transform var(--layer-transition), background .3s ease;
+      transition: transform var(--layer-transition);
     }
 
-    body.animation-level-2 #Main.right-column-open :not(.custom-bg-image) > &::before {
+    body.animation-level-2 #Main.right-column-open :not(.custom-bg-image) > &::after {
       transform: scale(0.67);
     }
   }
@@ -101,10 +117,10 @@
       width: 100%;
       padding: 1rem;
       border-radius: var(--border-radius-messages);
-      background: white;
+      background: var(--color-background);
       color: var(--color-text-secondary);
       text-align: center;
-      box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+      box-shadow: 0 1px 2px var(--color-default-shadow);
     }
   }
 
@@ -312,6 +328,7 @@
     }
   }
 
+  .custom-bg-color &::before,
   .custom-bg-image &::before {
     display: none;
   }
@@ -330,7 +347,7 @@
     color: var(--color-black);
     height: 3.125rem;
     overflow: visible;
-    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+    box-shadow: 0 1px 2px var(--color-default-shadow);
 
     &:hover {
       .icon-unpin {

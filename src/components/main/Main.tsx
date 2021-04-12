@@ -9,6 +9,7 @@ import { pick } from '../../util/iteratees';
 import { selectIsForwardModalOpen, selectIsMediaViewerOpen, selectIsRightColumnShown } from '../../modules/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useShowTransition from '../../hooks/useShowTransition';
+import buildClassName from '../../util/buildClassName';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -19,7 +20,6 @@ import Notifications from './Notifications.async';
 import Errors from './Errors.async';
 
 import './Main.scss';
-import buildClassName from '../../util/buildClassName';
 
 type StateProps = {
   animationLevel: number;

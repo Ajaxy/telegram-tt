@@ -51,7 +51,7 @@
   flex-direction: column-reverse;
 
   .TabList {
-    background: #fff;
+    background: var(--color-background);
     top: -1px;
     .Tab {
       padding: .6875rem .25rem;
