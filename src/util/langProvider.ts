@@ -120,8 +120,10 @@ export function getTranslation(key: string, value?: any, format?: 'i') {
   }
 
   const template = langString[typeof value === 'number' ? getPluralOption(value) : 'value'];
-  if (!template) {
-    return key;
+  if (!template || !template.trim()) {
+    const parts = key.split('.');
+
+    return parts[parts.length - 1];
   }
 
   if (value !== undefined) {
