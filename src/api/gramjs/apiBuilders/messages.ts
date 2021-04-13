@@ -265,6 +265,10 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
     return undefined;
   }
 
+  if (media.ttlSeconds) {
+    return undefined;
+  }
+
   const sizes = media.photo.sizes
     .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
     .map(buildApiPhotoSize);
@@ -392,6 +396,10 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
 
 function buildDocumentFromMedia(media: GramJs.TypeMessageMedia) {
   if (!(media instanceof GramJs.MessageMediaDocument) || !media.document) {
+    return undefined;
+  }
+
+  if (media.ttlSeconds) {
     return undefined;
   }
 
