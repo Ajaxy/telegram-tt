@@ -25,7 +25,11 @@ type OwnProps = {
   children: any;
 };
 
-const FAB_THRESHOLD = 100;
+const FAB_THRESHOLD = 50;
+const FAB_FREEZE_TIMEOUT = 100;
+
+// Local flag is used because `freeze/unfreeze` methods are controlled by heavy animation
+let isFabFrozen = false;
 
 const MessageScroll: FC<OwnProps> = ({
   containerRef,
@@ -51,6 +55,10 @@ const MessageScroll: FC<OwnProps> = ({
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
   const updateFabVisibility = useCallback(() => {
+    if (isFabFrozen) {
+      return;
+    }
+
     if (!messageIds || !messageIds.length) {
       onFabToggle(false);
       return;
@@ -69,7 +77,11 @@ const MessageScroll: FC<OwnProps> = ({
     onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
   }, [messageIds, isViewportNewest, containerRef, onFabToggle, firstUnreadId]);
 
-  const { observe: observeIntersection, freeze, unfreeze } = useIntersectionObserver({
+  const {
+    observe: observeIntersection,
+    freeze: freezeForLoadMore,
+    unfreeze: unfreezeForLoadMore,
+  } = useIntersectionObserver({
     rootRef: containerRef,
     margin: MESSAGE_LIST_SENSITIVE_AREA,
   }, (entries) => {
@@ -93,18 +105,14 @@ const MessageScroll: FC<OwnProps> = ({
     }
   });
 
-  useOnChange(() => {
-    if (focusingId) {
-      freeze();
-    } else {
-      unfreeze();
-    }
-  }, [focusingId]);
-
   useOnIntersect(backwardsTriggerRef, observeIntersection);
   useOnIntersect(forwardsTriggerRef, observeIntersection);
 
-  const { observe: observeIntersectionForFab } = useIntersectionObserver({
+  const {
+    observe: observeIntersectionForFab,
+    freeze: freezeForFab,
+    unfreeze: unfreezeForFab,
+  } = useIntersectionObserver({
     rootRef: containerRef,
     margin: FAB_THRESHOLD,
   }, ([{ target }]) => {
@@ -114,6 +122,17 @@ const MessageScroll: FC<OwnProps> = ({
   });
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
+
+  // Do not load more and show FAB when focusing
+  useOnChange(() => {
+    if (focusingId) {
+      freezeForLoadMore();
+      freezeForFab();
+    } else {
+      unfreezeForFab();
+      unfreezeForLoadMore();
+    }
+  }, [focusingId]);
 
   // Remember scroll position before updating height
   useOnChange(() => {
@@ -135,6 +154,16 @@ const MessageScroll: FC<OwnProps> = ({
     anchorTopRef.current = anchor.getBoundingClientRect().top;
   }, [messageIds, containerHeight]);
 
+  // Workaround for FAB flickering with tall incoming message
+  useOnChange(() => {
+    isFabFrozen = true;
+
+    setTimeout(() => {
+      isFabFrozen = false;
+    }, FAB_FREEZE_TIMEOUT);
+  }, [messageIds]);
+
+  // Workaround for stuck FAB when many unread messages
   useEffect(updateFabVisibility, [firstUnreadId]);
 
   return (
