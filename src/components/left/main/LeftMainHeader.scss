@@ -57,6 +57,10 @@
     flex-shrink: 0;
   }
 
+  .Menu .bubble {
+    min-width: 17rem;
+  }
+
   // @optimization
   @include while-transition() {
     .Menu .bubble {

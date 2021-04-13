@@ -7,6 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
+import { APP_INFO, FEEDBACK_URL } from '../../../config';
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
@@ -45,8 +46,9 @@ type StateProps = {
   chatsById?: Record<number, ApiChat>;
 };
 
-type DispatchProps = Pick<GlobalActions,
-'openChat'| 'openSupportChat' | 'setGlobalSearchDate' | 'setGlobalSearchChatId' | 'setSettingOption'>;
+type DispatchProps = Pick<GlobalActions, (
+  'openChat' | 'openTipsChat' | 'setGlobalSearchDate' | 'setGlobalSearchChatId' | 'setSettingOption'
+)>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
@@ -68,7 +70,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   animationLevel,
   chatsById,
   openChat,
-  openSupportChat,
+  openTipsChat,
   setGlobalSearchDate,
   setSettingOption,
 }) => {
@@ -144,9 +146,11 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
-  const isSearchFocused = Boolean(globalSearchChatId)
-  || content === LeftColumnContent.GlobalSearch
-  || content === LeftColumnContent.Contacts;
+  const isSearchFocused = (
+    Boolean(globalSearchChatId)
+    || content === LeftColumnContent.GlobalSearch
+    || content === LeftColumnContent.Contacts
+  );
 
   const searchInputPlaceholder = content === LeftColumnContent.Contacts
     ? lang('SearchFriends')
@@ -157,6 +161,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
+          footer={APP_INFO}
         >
           <MenuItem
             icon="saved-messages"
@@ -209,9 +214,15 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           </MenuItem>
           <MenuItem
             icon="help"
-            onClick={openSupportChat}
+            onClick={openTipsChat}
           >
-            {lang('BotHelp')}
+            Telegram Features
+          </MenuItem>
+          <MenuItem
+            icon="bug"
+            href={FEEDBACK_URL}
+          >
+            Report Bug
           </MenuItem>
         </DropdownMenu>
         <SearchInput
@@ -273,7 +284,7 @@ export default memo(withGlobal<OwnProps>(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChat',
-    'openSupportChat',
+    'openTipsChat',
     'setGlobalSearchDate',
     'setGlobalSearchChatId',
     'setSettingOption',

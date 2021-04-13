@@ -16,6 +16,8 @@
 
   &:hover, &:focus {
     background-color: var(--color-chat-hover);
+    text-decoration: none;
+    color: inherit;
   }
 
   i {

@@ -1,3 +1,5 @@
+export const APP_INFO = process.env.APP_INFO || 'Telegram T';
+
 export const DEBUG = (
   process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf' && process.env.APP_ENV !== 'test'
 );
@@ -115,3 +117,5 @@ export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
 export const DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios'];
+export const TIPS_USERNAME = 'TelegramTips';
+export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';

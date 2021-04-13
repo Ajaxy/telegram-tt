@@ -14,6 +14,7 @@
   }
 
   .bubble {
+    overflow: hidden;
     display: block;
     list-style: none;
     padding: 0.5rem 0;
@@ -63,5 +64,17 @@
     &.right {
       right: var(--offset-x);
     }
+
+    &.with-footer {
+      padding-bottom: 0;
+    }
+  }
+
+  .footer {
+    padding: 0.5rem 0;
+    background: #F4F4F5;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    text-align: center;
   }
 }

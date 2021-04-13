@@ -103,6 +103,7 @@ module.exports = (env = {}, argv = {}) => {
         ignoreOrder: true,
       }),
       new EnvironmentPlugin({
+        APP_INFO: 'Telegram T',
         APP_ENV: 'production',
         TELEGRAM_T_API_ID: '',
         TELEGRAM_T_API_HASH: '',
