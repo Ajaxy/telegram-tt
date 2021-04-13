@@ -20,6 +20,7 @@ type OwnProps = {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;
+  footer?: string;
   noCloseOnBackdrop?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
@@ -41,6 +42,7 @@ const Menu: FC<OwnProps> = ({
   positionX = 'left',
   positionY = 'top',
   autoClose = false,
+  footer,
   noCloseOnBackdrop = false,
   onCloseAnimationEnd,
   onClose,
@@ -72,6 +74,14 @@ const Menu: FC<OwnProps> = ({
     noCloseOnBackdrop ? undefined : onClose,
   );
 
+  const bubbleClassName = buildClassName(
+    'bubble menu-container custom-scroll',
+    positionY,
+    positionX,
+    footer && 'with-footer',
+    transitionClassNames,
+  );
+
   return (
     <div
       className={buildClassName('Menu no-selection', className)}
@@ -87,12 +97,13 @@ const Menu: FC<OwnProps> = ({
       )}
       <div
         ref={menuRef}
-        className={buildClassName('bubble menu-container custom-scroll', positionY, positionX, transitionClassNames)}
+        className={bubbleClassName}
         // @ts-ignore teact feature
         style={`transform-origin: ${positionY} ${positionX}`}
         onClick={autoClose ? onClose : undefined}
       >
         {children}
+        {footer && <div className="footer">{footer}</div>}
       </div>
     </div>
   );

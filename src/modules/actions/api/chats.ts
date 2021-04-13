@@ -13,8 +13,9 @@ import {
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
   RE_TME_LINK,
-
+  TIPS_USERNAME,
 } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { callApi } from '../../../api/gramjs';
 import {
   addChats,
@@ -43,7 +44,6 @@ import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
   isChatSummaryOnly, isChatArchived, prepareChatList, isChatBasicGroup,
 } from '../../helpers';
-import { IS_TOUCH_ENV } from '../../../util/environment';
 
 const TOP_CHATS_PRELOAD_PAUSE = 200;
 // We expect this ID does not exist
@@ -134,6 +134,10 @@ addReducer('openSupportChat', (global, actions) => {
       actions.openChat({ id: result.chatId });
     }
   })();
+});
+
+addReducer('openTipsChat', (global, actions) => {
+  actions.openChatByUsername({ username: TIPS_USERNAME });
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {

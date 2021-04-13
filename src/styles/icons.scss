@@ -22,6 +22,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-bug:before {
+  content: "\e97d";
+}
 .icon-darkmode:before {
   content: "\e979";
 }

@@ -82,6 +82,8 @@ const MenuItem: FC<OwnProps> = (props) => {
         download={download}
         aria-label={ariaLabel}
         title={ariaLabel}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         {content}
       </a>

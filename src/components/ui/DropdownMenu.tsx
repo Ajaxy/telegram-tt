@@ -9,17 +9,18 @@ type OwnProps = {
   trigger: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
+  footer?: string;
   children: any;
 };
 
-const DropdownMenu: FC<OwnProps> = (props) => {
-  const {
-    trigger,
-    className,
-    children,
-    positionX = 'left',
-    positionY = 'top',
-  } = props;
+const DropdownMenu: FC<OwnProps> = ({
+  trigger,
+  className,
+  children,
+  positionX = 'left',
+  positionY = 'top',
+  footer,
+}) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -64,6 +65,7 @@ const DropdownMenu: FC<OwnProps> = (props) => {
         className={className || ''}
         positionX={positionX}
         positionY={positionY}
+        footer={footer}
         autoClose
         onClose={handleClose}
       >
