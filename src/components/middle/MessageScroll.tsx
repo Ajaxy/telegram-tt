@@ -1,5 +1,7 @@
 import { MutableRefObject } from 'react';
-import React, { FC, useCallback, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect, useRef,
+} from '../../lib/teact/teact';
 
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../config';
 import resetScroll from '../../util/resetScroll';
@@ -113,6 +115,7 @@ const MessageScroll: FC<OwnProps> = ({
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
 
+  // Remember scroll position before updating height
   useOnChange(() => {
     if (!listItemElementsRef.current) {
       return;
@@ -131,6 +134,8 @@ const MessageScroll: FC<OwnProps> = ({
     anchorIdRef.current = anchor.id;
     anchorTopRef.current = anchor.getBoundingClientRect().top;
   }, [messageIds, containerHeight]);
+
+  useEffect(updateFabVisibility, [firstUnreadId]);
 
   return (
     <div className={className} teactFastList>
