@@ -26,7 +26,7 @@
     background-size: cover;
 
     body:not(.animation-level-0) #root & {
-      transition: opacity .2s !important;
+      transition: transform var(--layer-transition), opacity .2s !important;
     }
 
     body.animation-level-0 & {
