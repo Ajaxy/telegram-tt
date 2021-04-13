@@ -40,7 +40,6 @@ interface StateProps {
   canSearch?: boolean;
   canMute?: boolean;
   canSelect?: boolean;
-  canSeeStatistics?: boolean;
   canLeave?: boolean;
 }
 
@@ -59,7 +58,6 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
   canSearch,
   canMute,
   canSelect,
-  canSeeStatistics,
   canLeave,
   isRightColumnShown,
   joinChannel,
@@ -172,7 +170,6 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           canSearch={canSearch}
           canMute={canMute}
           canSelect={canSelect}
-          canSeeStatistics={canSeeStatistics}
           canLeave={canLeave}
           onSubscribeChannel={handleSubscribeClick}
           onSearchClick={handleSearchClick}
@@ -207,7 +204,6 @@ export default memo(withGlobal<OwnProps>(
     const canSearch = isMainThread || isDiscussionThread;
     const canMute = isMainThread && !isChatWithSelf && !canSubscribe;
     const canSelect = !selectIsInSelectMode(global);
-    const canSeeStatistics = isMainThread;
     const canLeave = isMainThread && !canSubscribe;
 
     const noMenu = !(
@@ -215,7 +211,6 @@ export default memo(withGlobal<OwnProps>(
       || (IS_MOBILE_SCREEN && canSearch)
       || canMute
       || canSelect
-      || canSeeStatistics
       || canLeave
     );
 
@@ -228,7 +223,6 @@ export default memo(withGlobal<OwnProps>(
       canSearch,
       canMute,
       canSelect,
-      canSeeStatistics,
       canLeave,
     };
   },

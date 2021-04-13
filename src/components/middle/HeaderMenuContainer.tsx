@@ -22,7 +22,7 @@ import DeleteChatModal from '../common/DeleteChatModal';
 
 import './HeaderMenuContainer.scss';
 
-type DispatchProps = Pick<GlobalActions, 'updateChatMutedState' | 'toggleStatistics' | 'enterMessageSelectMode'>;
+type DispatchProps = Pick<GlobalActions, 'updateChatMutedState' | 'enterMessageSelectMode'>;
 
 export type OwnProps = {
   chatId: number;
@@ -34,7 +34,6 @@ export type OwnProps = {
   canSearch?: boolean;
   canMute?: boolean;
   canSelect?: boolean;
-  canSeeStatistics?: boolean;
   canLeave?: boolean;
   onSubscribeChannel: () => void;
   onSearchClick: () => void;
@@ -58,7 +57,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canSearch,
   canMute,
   canSelect,
-  canSeeStatistics,
   canLeave,
   chat,
   isPrivate,
@@ -69,7 +67,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   onCloseAnimationEnd,
   updateChatMutedState,
-  toggleStatistics,
   enterMessageSelectMode,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -107,11 +104,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     onSearchClick();
     closeMenu();
   }, [closeMenu, onSearchClick]);
-
-  const handleStatistics = useCallback(() => {
-    toggleStatistics();
-    closeMenu();
-  }, [closeMenu, toggleStatistics]);
 
   const handleSelectMessages = useCallback(() => {
     enterMessageSelectMode();
@@ -167,14 +159,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang('ReportSelectMessages')}
             </MenuItem>
           )}
-          {canSeeStatistics && (
-            <MenuItem
-              icon="poll"
-              onClick={handleStatistics}
-            >
-              {lang('Statistics')}
-            </MenuItem>
-          )}
           {canLeave && (
             <MenuItem
               destructive
@@ -213,7 +197,6 @@ export default memo(withGlobal<OwnProps>(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'updateChatMutedState',
-    'toggleStatistics',
     'enterMessageSelectMode',
   ]),
 )(HeaderMenuContainer));
