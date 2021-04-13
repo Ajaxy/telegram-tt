@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -25,8 +25,6 @@ import CalendarModal from '../common/CalendarModal.async';
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
-import DropdownMenu from '../ui/DropdownMenu';
-import MenuItem from '../ui/MenuItem';
 import './RightHeader.scss';
 
 type OwnProps = {
@@ -54,7 +52,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'setLocalTextSearchQuery' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
-  'searchTextMessagesLocal' | 'toggleManagement' | 'toggleStatistics' | 'searchMessagesByDate'
+  'searchTextMessagesLocal' | 'toggleManagement' | 'searchMessagesByDate'
 )>;
 
 const COLUMN_CLOSE_DELAY_MS = 300;
@@ -106,7 +104,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   setGifSearchQuery,
   searchTextMessagesLocal,
   toggleManagement,
-  toggleStatistics,
   searchMessagesByDate,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -189,22 +186,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   ) : isStatistics ? (
     HeaderContent.Statistics
   ) : -1; // Never reached
-
-  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
-      <Button
-        round
-        ripple={!IS_MOBILE_SCREEN}
-        size="smaller"
-        color="translucent"
-        className={isOpen ? 'active' : undefined}
-        onClick={onTrigger}
-        ariaLabel={lang('Common.More')}
-      >
-        <i className="icon-more" />
-      </Button>
-    );
-  }, [lang]);
 
   function renderHeaderContent() {
     switch (contentKey) {
@@ -289,12 +270,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
                   <i className="icon-edit" />
                 </Button>
               )}
-              <DropdownMenu
-                trigger={MenuButton}
-                positionX="right"
-              >
-                <MenuItem icon="poll" onClick={toggleStatistics}>{lang('Statistics')}</MenuItem>
-              </DropdownMenu>
             </section>
           </>
         );
@@ -380,7 +355,6 @@ export default memo(withGlobal<OwnProps>(
     'setGifSearchQuery',
     'searchTextMessagesLocal',
     'toggleManagement',
-    'toggleStatistics',
     'searchMessagesByDate',
   ]),
 )(RightHeader));
