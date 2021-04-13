@@ -138,6 +138,8 @@ const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 const SELECT_MODE_TRANSITION_MS = 200;
 const CAPTION_MAX_LENGTH = 1024;
 const SENDING_ANIMATION_DURATION = 350;
+// eslint-disable-next-line max-len
+const APPENDIX = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" class="corner"/></g></svg>';
 
 const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   dropAreaState,
@@ -184,6 +186,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   openChat,
   clearReceipt,
 }) => {
+  // eslint-disable-next-line no-null/no-null
+  const appendixRef = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState<string>('');
   const lastMessageSendTimeSeconds = useRef<number>();
   const prevDropAreaState = usePrevious(dropAreaState);
@@ -207,6 +211,14 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       loadScheduledHistory();
     }
   }, [chatId, loadScheduledHistory, lastSyncTime, threadId]);
+
+  useEffect(() => {
+    if (!appendixRef.current) {
+      return;
+    }
+
+    appendixRef.current.innerHTML = APPENDIX;
+  }, []);
 
   useEffect(() => {
     if (contentToBeScheduled) {
@@ -686,6 +698,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         usersById={usersById}
       />
       <div id="message-compose">
+        <div className="svg-appendix" ref={appendixRef} />
         <ComposerEmbeddedMessage />
         {allowedAttachmentOptions.canAttachEmbedLinks && (
           <WebPagePreview chatId={chatId} messageText={!attachments.length ? html : ''} />
