@@ -97,6 +97,8 @@ export async function destroy() {
 function handleGramJsUpdate(update: any) {
   if (update instanceof connection.UpdateConnectionState) {
     isConnected = update.state === connection.UpdateConnectionState.connected;
+  } else if (update instanceof GramJs.UpdatesTooLong) {
+    void handleTerminatedSession();
   }
 }
 
@@ -230,4 +232,19 @@ function injectUpdateEntities(result: GramJs.Updates | GramJs.UpdatesCombined) {
       (update as any)._entities = entities;
     }
   });
+}
+
+async function handleTerminatedSession() {
+  try {
+    await invokeRequest(new GramJs.users.GetFullUser({
+      id: new GramJs.InputUserSelf(),
+    }), undefined, true);
+  } catch (err) {
+    if (err.message === 'AUTH_KEY_UNREGISTERED') {
+      onUpdate({
+        '@type': 'updateConnectionState',
+        connectionState: 'connectionStateBroken',
+      });
+    }
+  }
 }
