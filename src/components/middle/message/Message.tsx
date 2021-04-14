@@ -671,7 +671,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       // @ts-ignore teact feature
       style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}
-      data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
       onClick={isInSelectMode ? handleMessageSelect : undefined}
       onDoubleClick={!isInSelectMode ? handleContainerDoubleClick : undefined}
       onMouseDown={!isInSelectMode ? handleBeforeContextMenu : undefined}
@@ -683,6 +682,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={bottomMarkerRef}
         className="bottom-marker"
         data-message-id={messageId}
+        data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-has-unread-mention={message.hasUnreadMention}
       />
       {!isInDocumentGroup && (
