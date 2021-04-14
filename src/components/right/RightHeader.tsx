@@ -18,6 +18,7 @@ import {
   selectIsChatWithSelf,
 } from '../../modules/selectors';
 import { isChatAdmin, isChatChannel, isChatPrivate } from '../../modules/helpers';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 
@@ -182,13 +183,19 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       HeaderContent.ManageGroupAdminRights
     ) : managementScreen === ManagementScreens.GroupMembers ? (
       HeaderContent.ManageGroupMembers
-    ) : -1 // Never reached
+    ) : undefined // Never reached
   ) : isStatistics ? (
     HeaderContent.Statistics
-  ) : -1; // Never reached
+  ) : undefined; // When column is closed
+
+  const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
 
   function renderHeaderContent() {
-    switch (contentKey) {
+    if (renderingContentKey === -1) {
+      return undefined;
+    }
+
+    switch (renderingContentKey) {
       case HeaderContent.PollResults:
         return <h3>{lang('PollResults')}</h3>;
       case HeaderContent.Search:
@@ -307,7 +314,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       </Button>
       <Transition
         name={shouldSkipTransition ? 'none' : 'slide-fade'}
-        activeKey={contentKey}
+        activeKey={renderingContentKey}
       >
         {renderHeaderContent}
       </Transition>
