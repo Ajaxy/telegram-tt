@@ -30,6 +30,7 @@
   }
 
   .messages-container {
+    position: relative;
     width: 100%;
     max-width: var(--messages-container-width);
     min-height: 100%;
@@ -41,6 +42,18 @@
 
     .force-messages-scroll & {
       margin-top: 100vh !important;
+    }
+
+    .backwards-trigger {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .forwards-trigger, .fab-trigger {
+      position: absolute;
+      left: 0;
+      bottom: 0;
     }
 
     @media (max-width: 600px) {
