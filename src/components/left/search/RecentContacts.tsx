@@ -34,6 +34,8 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
+const NBSP = '\u00A0';
+
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -77,7 +79,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
             {topUserIds.map((userId) => (
               <div className="top-peer-item" onClick={() => handleClick(userId)}>
                 <Avatar user={usersById[userId]} />
-                <div className="top-peer-name">{renderText(getUserFirstName(usersById[userId])!)}</div>
+                <div className="top-peer-name">{renderText(getUserFirstName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}
           </div>
