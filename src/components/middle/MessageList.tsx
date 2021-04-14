@@ -283,7 +283,9 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
     const container = containerRef.current!;
 
-    updateStickyDates(container, hasTools);
+    if (!memoFocusingIdRef.current) {
+      updateStickyDates(container, hasTools);
+    }
 
     runDebouncedForScroll(() => {
       fastRaf(() => {
