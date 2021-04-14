@@ -45,7 +45,7 @@ import { addMessageToLocalDb } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
 
-const FAST_SEND_TIMEOUT = 250;
+const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
 
 let onUpdate: OnApiUpdate;
