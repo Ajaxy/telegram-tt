@@ -205,7 +205,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             icon="animations"
             onClick={handleAnimationLevelChange}
           >
-            <span className="menu-item-name">{lang('SettingsSearch.Synonyms.Appearance.Animations')}</span>
+            <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
             <Switcher
               id="animations"
               label="Toggle Animations"
