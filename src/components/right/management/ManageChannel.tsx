@@ -9,7 +9,7 @@ import { ManagementScreens, ManagementProgress } from '../../../types';
 import { ApiChat, ApiMediaFormat } from '../../../api/types';
 
 import { pick } from '../../../util/iteratees';
-import { getChatAvatarHash } from '../../../modules/helpers';
+import { getChatAvatarHash, getHasAdminRight } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import { selectChat } from '../../../modules/selectors';
@@ -34,6 +34,7 @@ type StateProps = {
   chat: ApiChat;
   progress?: ManagementProgress;
   isSignaturesShown: boolean;
+  canChangeInfo?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -47,6 +48,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   progress,
   isSignaturesShown,
+  canChangeInfo,
   onScreenSelect,
   updateChat,
   toggleSignatures,
@@ -156,6 +158,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
           <AvatarEditable
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handleSetPhoto}
+            disabled={!canChangeInfo}
           />
           <InputText
             id="channel-title"
@@ -163,6 +166,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
             onChange={handleTitleChange}
             value={title}
             error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
+            disabled={!canChangeInfo}
           />
           <InputText
             id="channel-about"
@@ -170,6 +174,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
             label={lang('DescriptionPlaceholder')}
             onChange={handleAboutChange}
             value={about}
+            disabled={!canChangeInfo}
           />
           {chat.isCreator && (
             <ListItem icon="lock" ripple onClick={handleClickEditType}>
@@ -179,7 +184,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
               </div>
             </ListItem>
           )}
-          <ListItem icon="message" ripple onClick={handleClickDiscussion}>
+          <ListItem icon="message" ripple onClick={handleClickDiscussion} disabled={!canChangeInfo}>
             <div className="multiline-item">
               <span className="title">{lang('Discussion')}</span>
               <span className="subtitle">{hasLinkedChat ? lang('DiscussionUnlink') : lang('Add')}</span>
@@ -243,7 +248,12 @@ export default memo(withGlobal<OwnProps>(
     const { progress } = global.management;
     const isSignaturesShown = Boolean(chat && chat.isSignaturesShown);
 
-    return { chat, progress, isSignaturesShown };
+    return {
+      chat,
+      progress,
+      isSignaturesShown,
+      canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
+    };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'toggleSignatures', 'updateChat', 'closeManagement', 'leaveChannel', 'deleteChannel', 'openChat',

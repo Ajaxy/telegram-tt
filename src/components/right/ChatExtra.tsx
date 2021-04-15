@@ -4,7 +4,9 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiChat } from '../../api/types';
 
 import { selectChat } from '../../modules/selectors';
-import { getChatDescription, getChatLink } from '../../modules/helpers';
+import {
+  getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isUserRightBanned,
+} from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 
@@ -16,9 +18,10 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  canInviteUsers?: boolean;
 };
 
-const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
+const ChatExtra: FC<OwnProps & StateProps> = ({ chat, canInviteUsers }) => {
   const lang = useLang();
 
   if (!chat || chat.isRestricted) {
@@ -40,7 +43,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
           </div>
         </div>
       )}
-      {!!link.length && (
+      {canInviteUsers && !!link.length && (
         <div className="item">
           <i className="icon-mention" />
           <div>
@@ -57,6 +60,12 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
 
-    return { chat };
+
+    const canInviteUsers = chat && (
+      (!isChatChannel(chat) && !isUserRightBanned(chat, 'inviteUsers'))
+      || getHasAdminRight(chat, 'inviteUsers')
+    );
+
+    return { chat, canInviteUsers };
   },
 )(ChatExtra));
