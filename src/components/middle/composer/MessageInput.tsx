@@ -49,7 +49,6 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'editLastMessage'>;
 
-const DISABLE_MASK_SHADOW_THRESHOLD = 100;
 const MAX_INPUT_HEIGHT = IS_MOBILE_SCREEN ? 256 : 416;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
@@ -276,7 +275,6 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     const clone = cloneRef.current!;
     input.style.height = `${Math.min(clone.scrollHeight, MAX_INPUT_HEIGHT)}px`;
     input.classList.toggle('overflown', clone.scrollHeight > MAX_INPUT_HEIGHT);
-    document.body.classList.toggle('hide-mask-shadow', clone.scrollHeight > DISABLE_MASK_SHADOW_THRESHOLD);
   }
 
   useEffect(() => {

@@ -277,7 +277,11 @@
   display: flex;
   justify-content: center;
   position: relative;
+}
 
+.MessageSelectToolbar,
+.unpin-all-button,
+.messaging-disabled {
   .mask-image-disabled &::before {
     --shadow-color: #84a686;
 
@@ -287,7 +291,8 @@
     top: 0;
     left: 0.125rem;
     right: 0.125rem;
-    height: 1.5rem;
+    height: 3.5rem;
+    border-radius: var(--border-radius-messages);
     box-shadow: 0 0 .5rem .5rem var(--shadow-color);
     background: var(--shadow-color);
     z-index: -1;
@@ -304,7 +309,7 @@
     }
 
     @media screen and (min-height: 750px) {
-      --shadow-color: #759b72;
+      --shadow-color: #9bb281;;
     }
 
     @media screen and (min-width: 1276px) {
@@ -313,7 +318,7 @@
       }
 
       body.animation-level-2 #Main.right-column-open & {
-        --shadow-color: #84a686;
+        --shadow-color: #9cb186;
       }
 
       @media (min-height: 750px) {
@@ -322,7 +327,7 @@
         }
 
         body.animation-level-2 #Main.right-column-open & {
-          --shadow-color: #759b72;
+          --shadow-color: #97ae86;
         }
       }
     }
@@ -349,6 +354,10 @@
     overflow: visible;
     box-shadow: 0 1px 2px var(--color-default-shadow);
 
+    &::before {
+      height: 3.125rem;
+    }
+
     &:hover {
       .icon-unpin {
         color: var(--color-white);
@@ -357,11 +366,6 @@
 
     .select-mode-active + .middle-column-footer & {
       display: none;
-    }
-
-    .mask-image-disabled &::before {
-      height: 3.125rem;
-      border-radius: var(--border-radius-messages);
     }
 
     @media (max-width: 600px) {
