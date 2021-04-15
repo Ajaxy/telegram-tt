@@ -28,6 +28,10 @@
 
   .menu-item-name {
     margin-right: 2rem;
+
+    &.capitalize {
+      text-transform: capitalize;
+    }
   }
 
   &.disabled {
