@@ -8,7 +8,7 @@ import { ManagementScreens, ManagementProgress } from '../../../types';
 import { ApiChat, ApiChatBannedRights, ApiMediaFormat } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
-import { getChatAvatarHash, isChatBasicGroup } from '../../../modules/helpers';
+import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -37,6 +37,8 @@ type StateProps = {
   progress?: ManagementProgress;
   isBasicGroup: boolean;
   hasLinkedChannel: boolean;
+  canChangeInfo?: boolean;
+  canBanUsers?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -56,6 +58,8 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
   progress,
   isBasicGroup,
   hasLinkedChannel,
+  canChangeInfo,
+  canBanUsers,
   onScreenSelect,
   togglePreHistoryHidden,
   updateChat,
@@ -205,6 +209,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
           <AvatarEditable
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handleSetPhoto}
+            disabled={!canChangeInfo}
           />
           <InputText
             id="group-title"
@@ -212,6 +217,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
             onChange={handleTitleChange}
             value={title}
             error={error === GROUP_TITLE_EMPTY ? error : undefined}
+            disabled={!canChangeInfo}
           />
           <InputText
             id="group-about"
@@ -219,6 +225,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
             label={lang('DescriptionPlaceholder')}
             onChange={handleAboutChange}
             value={about}
+            disabled={!canChangeInfo}
           />
           {chat.isCreator && (
             <ListItem icon="lock" ripple onClick={handleClickEditType}>
@@ -236,7 +243,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
               </div>
             </ListItem>
           )}
-          <ListItem icon="permissions" ripple onClick={handleClickPermissions}>
+          <ListItem icon="permissions" ripple onClick={handleClickPermissions} disabled={!canBanUsers}>
             <div className="multiline-item">
               <span className="title">{lang('ChannelPermissions')}</span>
               <span className="subtitle">{enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}</span>
@@ -263,6 +270,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
                 checked={!chat.fullInfo.isPreHistoryHidden}
                 label={lang('ChatHistory')}
                 onChange={handleTogglePreHistory}
+                disabled={!canBanUsers}
               />
             </div>
           )}
@@ -313,6 +321,8 @@ export default memo(withGlobal<OwnProps>(
       progress,
       isBasicGroup: isChatBasicGroup(chat),
       hasLinkedChannel,
+      canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
+      canBanUsers: getHasAdminRight(chat, 'banUsers'),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

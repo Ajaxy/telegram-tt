@@ -71,6 +71,14 @@
 
     &.disabled {
       pointer-events: none;
+
+      i {
+        display: none;
+      }
+
+      &::after {
+        display: none;
+      }
     }
   }
 }
