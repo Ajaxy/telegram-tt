@@ -256,7 +256,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         </Button>
                       </div>
                     )}
-                    {!renderingCanPost && messageSendingRestrictionReason && (
+                    {!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason && (
                       <div className={messagingDisabledClassName}>
                         <div className="messaging-disabled-inner">
                           <span>
@@ -315,6 +315,7 @@ export default memo(withGlobal(
     const canPost = chat && getCanPostInChat(chat, threadId);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
+
     return {
       chatId,
       threadId,

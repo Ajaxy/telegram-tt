@@ -19,10 +19,10 @@
         right: 1rem;
       }
     }
-  }
 
-  .hide-mask-shadow &::before {
-    opacity: 0 !important;
+    .svg-appendix {
+      opacity: 0;
+    }
   }
 
   > .Button {
@@ -164,6 +164,7 @@
     right: -.5625rem;
     width: .5625rem;
     height: 1.25rem;
+    transition: opacity 200ms;
 
     .corner {
       fill: var(--color-background);
