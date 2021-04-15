@@ -53,7 +53,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{renderText(bio, ['br', 'links'])}</p>
+            <p className="title">{renderText(bio, ['br', 'links', 'emoji'])}</p>
             <p className="subtitle">{lang('UserBio')}</p>
           </div>
         </div>

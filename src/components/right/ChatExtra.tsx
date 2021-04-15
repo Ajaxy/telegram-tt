@@ -35,7 +35,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{renderText(description, ['br', 'links'])}</p>
+            <p className="title">{renderText(description, ['br', 'links', 'emoji'])}</p>
             <p className="subtitle">{lang('Info')}</p>
           </div>
         </div>
