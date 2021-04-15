@@ -56,6 +56,19 @@ const TEXT_FORMATTER_SAFE_AREA_PX = 90;
 // For some reason Safari inserts `<br>` after user removes text from input
 const SAFARI_BR = '<br>';
 
+function clearSelection() {
+  const selection = window.getSelection();
+  if (!selection) {
+    return;
+  }
+
+  if (selection.removeAllRanges) {
+    selection.removeAllRanges();
+  } else if (selection.empty) {
+    selection.empty();
+  }
+}
+
 const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   id,
   editableInputId,
@@ -105,6 +118,11 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 
     focusEditableElement(inputRef.current!);
   }, []);
+
+  const handleCloseTextFormatter = useCallback(() => {
+    closeTextFormatter();
+    clearSelection();
+  }, [closeTextFormatter]);
 
   function checkSelection() {
     // Disable the formatter on iOS devices for now.
@@ -326,7 +344,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         isOpen={isTextFormatterOpen}
         anchorPosition={textFormatterAnchorPosition}
         selectedRange={selectedRange}
-        onClose={closeTextFormatter}
+        onClose={handleCloseTextFormatter}
       />
     </div>
   );
