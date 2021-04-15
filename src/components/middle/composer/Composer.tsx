@@ -315,7 +315,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           focusEditableElement(messageInput);
         });
       }
-    } else if (IS_MOBILE_SCREEN) {
+    } else {
       setHtml(`${htmlRef.current!}${newHtml}`);
     }
   }, []);
