@@ -1,4 +1,4 @@
-import countryList from './countries';
+import countryList, { defaultPhoneNumberFormat } from './countries';
 
 export function getCountryById(id: string) {
   return countryList.find((c) => c.id === id) as Country;
@@ -6,21 +6,7 @@ export function getCountryById(id: string) {
 
 // Empty groups are used to preserve 5 callback arguments for `replace` method
 function getPhoneNumberFormat(country?: Country) {
-  const id = country ? country.id : 'UNKNOWN';
-
-  switch (id) {
-    case 'RU':
-    case 'US':
-      return /(\d{1,3})(\d{1,3})?(\d{1,2})?(\d{1,2})?()?/;
-    case 'GB':
-      return /(\d{1,4})(\d{1,5})?()?()?()?/;
-    case 'UA':
-    case 'FI':
-    case 'AE':
-      return /(\d{1,2})(\d{1,3})?(\d{1,2})?(\d{1,2})?()?/;
-    default:
-      return /(\d{1,3})(\d{1,3})?(\d{1,3})?(\d{1,3})?(\d{1,3})?/;
-  }
+  return country ? country.phoneFormat : defaultPhoneNumberFormat;
 }
 
 export function getCountryFromPhoneNumber(input: string) {
