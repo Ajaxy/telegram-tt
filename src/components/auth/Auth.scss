@@ -31,19 +31,6 @@
     background: url('../../assets/telegram-logo.svg') center no-repeat;
   }
 
-  // Prevent loading additional 10 kB of Roboto font on initial load.
-  .caption-image {
-    margin-bottom: 0.5rem;
-    height: 19px;
-    background: url('../../assets/auth-caption.png') center center no-repeat;
-    background-size: auto 100%;
-
-    @media (min-width: 600px) {
-      height: 48px;
-      background-size: 273px auto;
-    }
-  }
-
   h2 {
     font-size: 1.25rem;
     line-height: 1;

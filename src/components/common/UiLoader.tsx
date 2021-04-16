@@ -20,8 +20,6 @@ import './UiLoader.scss';
 // @ts-ignore
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 // @ts-ignore
-import authCaptionPath from '../../assets/auth-caption.png';
-// @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 import { selectIsRightColumnShown } from '../../modules/selectors';
 
@@ -70,13 +68,10 @@ const preloadTasks = {
     preloadAvatars(),
   ]),
   authPhoneNumber: () => Promise.all([
-    preloadImage(authCaptionPath),
+    preloadFonts(),
     preloadImage(telegramLogoPath),
   ]),
-  authCode: () => Promise.all([
-    preloadImage(monkeyPath),
-    preloadFonts(),
-  ]),
+  authCode: () => preloadImage(monkeyPath),
   authPassword: () => preloadImage(monkeyPath),
   authQrCode: preloadFonts,
 };
