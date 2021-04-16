@@ -50,6 +50,15 @@ const PasswordForm: FC<OwnProps> = ({
     }
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      requestAnimationFrame(() => {
+        inputRef.current!.focus();
+        inputRef.current!.select();
+      });
+    }
+  }, [error]);
+
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     if (error) {
       clearError();
