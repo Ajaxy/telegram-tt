@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../modules/selectors';
-import { getChatTitle, getUserFirstName, isChatPrivate } from '../../modules/helpers';
+import { getChatTitle, getUserFirstOrLastName, isChatPrivate } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
@@ -64,7 +64,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     );
 
     const name = !chat || (user && !user.isSelf)
-      ? getUserFirstName(user)
+      ? getUserFirstOrLastName(user)
       : getChatTitle(chat, user);
 
     titleText = name ? renderText(name) : undefined;

@@ -7,7 +7,7 @@ import { LangFn } from '../../hooks/useLang';
 
 const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
-export function getUserFirstName(user?: ApiUser) {
+export function getUserFirstOrLastName(user?: ApiUser) {
   if (!user) {
     return undefined;
   }
@@ -15,7 +15,7 @@ export function getUserFirstName(user?: ApiUser) {
   switch (user.type) {
     case 'userTypeBot':
     case 'userTypeRegular': {
-      return user.firstName;
+      return user.firstName || user.lastName;
     }
 
     case 'userTypeDeleted':

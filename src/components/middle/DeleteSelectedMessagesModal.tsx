@@ -6,7 +6,7 @@ import { GlobalActions } from '../../global/types';
 import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../modules/selectors';
 import {
   isChatPrivate,
-  getUserFirstName,
+  getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
@@ -27,7 +27,7 @@ export type OwnProps = {
 type StateProps = {
   selectedMessageIds?: number[];
   canDeleteForAll?: boolean;
-  contactFirstName?: string;
+  contactName?: string;
   willDeleteForCurrentUserOnly?: boolean;
   willDeleteForAll?: boolean;
 };
@@ -39,7 +39,7 @@ const DeleteSelectedMessagesModal: FC<OwnProps & StateProps & DispatchProps> = (
   isSchedule,
   selectedMessageIds,
   canDeleteForAll,
-  contactFirstName,
+  contactName,
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
   onClose,
@@ -89,8 +89,8 @@ const DeleteSelectedMessagesModal: FC<OwnProps & StateProps & DispatchProps> = (
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactFirstName ? 'me and ' : 'Everyone'}
-          {contactFirstName && renderText(contactFirstName)}
+          Delete for {contactName ? 'me and ' : 'Everyone'}
+          {contactName && renderText(contactName)}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
@@ -106,8 +106,8 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const { canDeleteForAll } = selectCanDeleteSelectedMessages(global);
     const chat = selectCurrentChat(global);
-    const contactFirstName = chat && isChatPrivate(chat.id)
-      ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
+    const contactName = chat && isChatPrivate(chat.id)
+      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
     const willDeleteForCurrentUserOnly = chat && isChatBasicGroup(chat) && !canDeleteForAll;
@@ -116,7 +116,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       selectedMessageIds,
       canDeleteForAll: !isSchedule && canDeleteForAll,
-      contactFirstName,
+      contactName,
       willDeleteForCurrentUserOnly,
       willDeleteForAll,
     };

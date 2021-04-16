@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
 
 import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/types';
 import { EDITABLE_INPUT_ID } from '../../../../config';
-import { getUserFirstName } from '../../../../modules/helpers';
+import { getUserFirstOrLastName } from '../../../../modules/helpers';
 import searchUserName from '../helpers/searchUserName';
 import { IS_MOBILE_SCREEN } from '../../../../util/environment';
 import focusEditableElement from '../../../../util/focusEditableElement';
@@ -62,7 +62,7 @@ export default function useMentionMenu(
   }, [canSuggestMembers, html, getFilteredMembers, markIsOpen, unmarkIsOpen]);
 
   const insertMention = useCallback((user: ApiUser, forceFocus = false) => {
-    if (!user.username && !getUserFirstName(user)) {
+    if (!user.username && !getUserFirstOrLastName(user)) {
       return;
     }
 
@@ -73,7 +73,7 @@ export default function useMentionMenu(
           data-entity-type="${ApiMessageEntityTypes.MentionName}"
           data-user-id="${user.id}"
           contenteditable="false"
-        >${getUserFirstName(user)}</a>`;
+        >${getUserFirstOrLastName(user)}</a>`;
 
     const atIndex = html.lastIndexOf('@');
     if (atIndex !== -1) {

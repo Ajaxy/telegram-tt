@@ -14,7 +14,7 @@ import {
 } from '../../modules/selectors';
 import {
   isChatPrivate,
-  getUserFirstName,
+  getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
@@ -36,7 +36,7 @@ export type OwnProps = {
 
 type StateProps = {
   canDeleteForAll?: boolean;
-  contactFirstName?: string;
+  contactName?: string;
   willDeleteForCurrentUserOnly?: boolean;
   willDeleteForAll?: boolean;
 };
@@ -49,7 +49,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
   album,
   canDeleteForAll,
-  contactFirstName,
+  contactName,
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
   onClose,
@@ -98,8 +98,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactFirstName ? 'me and ' : 'Everyone'}
-          {contactFirstName && renderText(contactFirstName)}
+          Delete for {contactName ? 'me and ' : 'Everyone'}
+          {contactName && renderText(contactName)}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
@@ -115,8 +115,8 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const { canDeleteForAll } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const chat = selectChat(global, message.chatId);
-    const contactFirstName = chat && isChatPrivate(chat.id)
-      ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
+    const contactName = chat && isChatPrivate(chat.id)
+      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
     const willDeleteForCurrentUserOnly = chat && isChatBasicGroup(chat) && !canDeleteForAll;
@@ -124,7 +124,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       canDeleteForAll: !isSchedule && canDeleteForAll,
-      contactFirstName,
+      contactName,
       willDeleteForCurrentUserOnly,
       willDeleteForAll,
     };

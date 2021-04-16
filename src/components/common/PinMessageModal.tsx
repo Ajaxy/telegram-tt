@@ -6,7 +6,7 @@ import { GlobalActions } from '../../global/types';
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
   isChatPrivate,
-  getUserFirstName,
+  getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
@@ -32,7 +32,7 @@ type StateProps = {
   isGroup: boolean;
   isSuperGroup: boolean;
   canPinForAll: boolean;
-  contactFirstName?: string;
+  contactName?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'pinMessage'>;
@@ -45,7 +45,7 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isGroup,
   isSuperGroup,
   canPinForAll,
-  contactFirstName,
+  contactName,
   onClose,
   pinMessage,
 }) => {
@@ -98,7 +98,7 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       </Button>
       {canPinForAll && (
         <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
-          {contactFirstName ? `Pin for me and ${contactFirstName}` : 'Pin and notify all memebers'}
+          {contactName ? `Pin for me and ${contactName}` : 'Pin and notify all memebers'}
         </Button>
       )}
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
@@ -115,8 +115,8 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = !!chat && isChatBasicGroup(chat);
     const isSuperGroup = !!chat && isChatSuperGroup(chat);
     const canPinForAll = (isPrivateChat && !isChatWithSelf) || isSuperGroup || isGroup;
-    const contactFirstName = chat && isChatPrivate(chat.id)
-      ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
+    const contactName = chat && isChatPrivate(chat.id)
+      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
     return {
@@ -126,7 +126,7 @@ export default memo(withGlobal<OwnProps>(
       isGroup,
       isSuperGroup,
       canPinForAll,
-      contactFirstName,
+      contactName,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['pinMessage']),
