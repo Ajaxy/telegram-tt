@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiUser } from '../../../api/types';
 
-import { getUserFirstName } from '../../../modules/helpers';
+import { getUserFirstOrLastName } from '../../../modules/helpers';
 import renderText from '../../common/helpers/renderText';
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
@@ -79,7 +79,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
             {topUserIds.map((userId) => (
               <div className="top-peer-item" onClick={() => handleClick(userId)}>
                 <Avatar user={usersById[userId]} />
-                <div className="top-peer-name">{renderText(getUserFirstName(usersById[userId]) || NBSP)}</div>
+                <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}
           </div>

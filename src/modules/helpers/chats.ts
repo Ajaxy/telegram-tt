@@ -9,7 +9,7 @@ import {
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
-import { getUserFirstName } from './users';
+import { getUserFirstOrLastName } from './users';
 import { getTranslation } from '../../util/langProvider';
 import { LangFn } from '../../hooks/useLang';
 
@@ -430,5 +430,5 @@ export function getMessageSenderName(chatId: number, sender?: ApiUser) {
     return 'You';
   }
 
-  return getUserFirstName(sender);
+  return getUserFirstOrLastName(sender);
 }

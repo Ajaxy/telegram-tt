@@ -7,7 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
   isChatPrivate,
-  getUserFirstName,
+  getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
@@ -37,7 +37,7 @@ type StateProps = {
   isSuperGroup: boolean;
   canDeleteForAll?: boolean;
   chatTitle: string;
-  contactFirstName?: string;
+  contactName?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'leaveChannel' | 'deleteHistory' | 'deleteChannel'>;
@@ -52,7 +52,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isSuperGroup,
   canDeleteForAll,
   chatTitle,
-  contactFirstName,
+  contactName,
   onClose,
   leaveChannel,
   deleteHistory,
@@ -129,7 +129,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
       return <p>Are you sure you want to leave group <strong>{chatTitle}</strong>?</p>;
     }
 
-    return <p>Are you sure you want to delete chat with <strong>{contactFirstName}</strong>?</p>;
+    return <p>Are you sure you want to delete chat with <strong>{contactName}</strong>?</p>;
   }
 
   function renderActionText() {
@@ -157,7 +157,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
       {renderMessage()}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactFirstName ? `me and ${contactFirstName}` : 'Everyone'}
+          Delete for {contactName ? `me and ${contactName}` : 'Everyone'}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
@@ -173,8 +173,8 @@ export default memo(withGlobal<OwnProps>(
     const isPrivateChat = isChatPrivate(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
     const canDeleteForAll = (isPrivateChat && !isChatWithSelf);
-    const contactFirstName = chat && isChatPrivate(chat.id)
-      ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
+    const contactName = chat && isChatPrivate(chat.id)
+      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
     return {
@@ -185,7 +185,7 @@ export default memo(withGlobal<OwnProps>(
       isSuperGroup: isChatSuperGroup(chat),
       canDeleteForAll,
       chatTitle: getChatTitle(chat),
-      contactFirstName,
+      contactName,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['leaveChannel', 'deleteHistory', 'deleteChannel']),

@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiUser, ApiTypingStatus } from '../../api/types';
 
 import { selectUser } from '../../modules/selectors';
-import { getUserFirstName } from '../../modules/helpers';
+import { getUserFirstOrLastName } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 
 import './TypingStatus.scss';
@@ -18,7 +18,7 @@ type StateProps = {
 };
 
 const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
-  const typingUserName = typingUser && !typingUser.isSelf && getUserFirstName(typingUser);
+  const typingUserName = typingUser && !typingUser.isSelf && getUserFirstOrLastName(typingUser);
 
   return (
     <p className="typing-status">
