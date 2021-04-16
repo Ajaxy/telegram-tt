@@ -12,6 +12,7 @@ const ApiErrors: { [k: string]: string } = {
   PHONE_NUMBER_INVALID: 'Invalid Phone Number',
   PHONE_CODE_INVALID: 'Invalid Code',
   PASSWORD_HASH_INVALID: 'Invalid Password',
+  PHONE_PASSWORD_FLOOD: 'You have tried logging in too many times',
 };
 
 const authController: {
