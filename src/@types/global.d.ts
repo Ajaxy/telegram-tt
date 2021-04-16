@@ -27,6 +27,7 @@ type Country = {
   name: string;
   flag: string;
   code: string;
+  phoneFormat: RegExp;
 };
 
 type EmojiCategory = {
