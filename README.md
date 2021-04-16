@@ -1,9 +1,5 @@
 # telegram-t
 
-## Demo
-
-https://telegram-t-rc-7.netlify.app/
-
 ## Local setup
 
 ```sh
