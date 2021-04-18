@@ -25,6 +25,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  currentUserId?: number;
   usersById: Record<number, ApiUser>;
   localContactIds?: number[];
   searchQuery?: string;
@@ -43,6 +44,7 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   onSelectedMemberIdsChange,
   onNextStep,
   onReset,
+  currentUserId,
   usersById,
   localContactIds,
   searchQuery,
@@ -65,18 +67,20 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [setGlobalSearchQuery]);
 
   const displayedIds = useMemo(() => {
+    const contactIds = localContactIds ? localContactIds.filter((id) => id !== currentUserId) : [];
+
     if (!searchQuery) {
-      return localContactIds || [];
+      return contactIds;
     }
 
-    const foundLocalContacts = localContactIds ? localContactIds.filter((id) => {
+    const foundLocalContacts = contactIds.filter((id) => {
       const user = usersById[id];
       if (!user) {
         return false;
       }
       const fullName = getUserFullName(user);
       return fullName && searchWords(fullName, searchQuery);
-    }) : [];
+    });
 
     return getSortedUserIds(
       unique([
@@ -87,7 +91,7 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
       usersById,
       selectedMemberIds,
     );
-  }, [searchQuery, localContactIds, localUsers, globalUsers, usersById, selectedMemberIds]);
+  }, [localContactIds, searchQuery, localUsers, globalUsers, usersById, selectedMemberIds, currentUserId]);
 
   const handleNextStep = useCallback(() => {
     if (selectedMemberIds.length) {
@@ -140,6 +144,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: localContactIds } = global.contactList || {};
     const { byId: usersById } = global.users;
+    const { currentUserId } = global;
 
     const {
       query: searchQuery,
@@ -151,6 +156,7 @@ export default memo(withGlobal<OwnProps>(
     const { users: localUsers } = localResults || {};
 
     return {
+      currentUserId,
       usersById,
       localContactIds,
       searchQuery,
