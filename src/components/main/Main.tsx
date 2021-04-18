@@ -1,15 +1,21 @@
 import React, { FC, useEffect, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
 import '../../modules/actions/all';
 import { ANIMATION_END_DELAY, DEBUG } from '../../config';
 import { pick } from '../../util/iteratees';
-import { selectIsForwardModalOpen, selectIsMediaViewerOpen, selectIsRightColumnShown } from '../../modules/selectors';
+import {
+  selectCountNotMutedUnread,
+  selectIsForwardModalOpen,
+  selectIsMediaViewerOpen,
+  selectIsRightColumnShown,
+} from '../../modules/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useShowTransition from '../../hooks/useShowTransition';
 import buildClassName from '../../util/buildClassName';
+import useShowTransition from '../../hooks/useShowTransition';
+import useBackgroundMode from '../../hooks/useBackgroundMode';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -34,9 +40,12 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
 
+const APP_NAME = 'Telegram';
 const ANIMATION_DURATION = 350;
+const NOTIFICATION_INTERVAL = 1000;
 
-let timeout: number | undefined;
+let rightColumnAnimationTimeout: number | undefined;
+let notificationInterval: number | undefined;
 
 let DEBUG_isLogged = false;
 
@@ -90,17 +99,42 @@ const Main: FC<StateProps & DispatchProps> = ({
       document.body.classList.add('animating-right-column');
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
 
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = undefined;
+      if (rightColumnAnimationTimeout) {
+        clearTimeout(rightColumnAnimationTimeout);
+        rightColumnAnimationTimeout = undefined;
       }
 
-      timeout = window.setTimeout(() => {
+      rightColumnAnimationTimeout = window.setTimeout(() => {
         document.body.classList.remove('animating-right-column');
-        timeout = undefined;
+        rightColumnAnimationTimeout = undefined;
       }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     }
   }, [animationLevel, isRightColumnShown]);
+
+  useBackgroundMode(() => {
+    const initialUnread = selectCountNotMutedUnread(getGlobal());
+    let index = 0;
+
+    notificationInterval = window.setInterval(() => {
+      if (index % 2 === 0) {
+        const newUnread = selectCountNotMutedUnread(getGlobal()) - initialUnread;
+        if (newUnread > 0) {
+          document.title = `${newUnread} notification${newUnread > 1 ? 's' : ''}`;
+          updateIcon(true);
+        }
+      } else {
+        document.title = APP_NAME;
+        updateIcon(false);
+      }
+
+      index++;
+    }, NOTIFICATION_INTERVAL);
+  }, () => {
+    clearInterval(notificationInterval);
+    notificationInterval = undefined;
+    document.title = APP_NAME;
+    updateIcon(false);
+  });
 
   function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
@@ -119,6 +153,19 @@ const Main: FC<StateProps & DispatchProps> = ({
     </div>
   );
 };
+
+function updateIcon(asUnread: boolean) {
+  document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')
+    .forEach((link) => {
+      if (asUnread) {
+        if (!link.href.includes('favicon-unread')) {
+          link.href = link.href.replace('favicon', 'favicon-unread');
+        }
+      } else {
+        link.href = link.href.replace('favicon-unread', 'favicon');
+      }
+    });
+}
 
 export default memo(withGlobal(
   (global): StateProps => ({

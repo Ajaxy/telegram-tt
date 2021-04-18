@@ -150,3 +150,22 @@ export function selectChatByUsername(global: GlobalState, username: string) {
     (chat) => chat.username && chat.username.toLowerCase() === usernameLowered,
   );
 }
+
+export function selectCountNotMutedUnread(global: GlobalState) {
+  const activeChatIds = global.chats.listIds.active;
+  if (!activeChatIds) {
+    return 0;
+  }
+
+  const chats = global.chats.byId;
+
+  return activeChatIds.reduce((acc, chatId) => {
+    const chat = chats[chatId];
+
+    if (chat && chat.unreadCount && !chat.isMuted) {
+      return acc + chat.unreadCount;
+    }
+
+    return acc;
+  }, 0);
+}
