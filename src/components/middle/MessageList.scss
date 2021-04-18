@@ -8,7 +8,7 @@
   margin-bottom: .3125rem;
 
   .mask-image-enabled & {
-    mask-image: linear-gradient(to top, transparent 0, #000 1rem);
+    mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
   }
 
   @media (pointer: coarse) {
@@ -30,7 +30,7 @@
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
-    padding: 1rem 1rem .5rem 1.125rem;
+    padding: 1rem 1rem 0 1.125rem;
 
     .force-messages-scroll & {
       margin-top: 100vh !important;
