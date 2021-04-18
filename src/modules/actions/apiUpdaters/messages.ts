@@ -18,7 +18,6 @@ import {
 } from '../../reducers';
 import { GlobalActions, GlobalState } from '../../../global/types';
 import {
-  selectChat,
   selectChatMessage,
   selectChatMessages,
   selectIsViewportNewest,
@@ -33,6 +32,7 @@ import {
   selectScheduledMessages,
   isMessageInCurrentMessageList,
   selectScheduledIds,
+  selectCurrentMessageList,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
 
@@ -45,12 +45,6 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, message as ApiMessage);
 
-      const chat = selectChat(global, chatId);
-      if (chat) {
-        const newMessage = selectChatMessage(global, chatId, id)!;
-        global = updateChatLastMessage(global, chatId, newMessage);
-      }
-
       if (message.threadInfo) {
         global = updateThreadInfo(
           global,
@@ -62,16 +56,35 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       setGlobal(global);
 
+      const newMessage = selectChatMessage(global, chatId, id)!;
+
       if (isMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
         if (message.isOutgoing && !(message.content && message.content.action)) {
-          // TODO Avoid duplicated focusing for the same message when content has not changed
-          actions.focusLastMessage();
+          const currentMessageList = selectCurrentMessageList(global);
+          if (currentMessageList) {
+            // We do not use `actions.focusLastMessage` as it may be set with a delay (see below)
+            actions.focusMessage({
+              chatId,
+              threadId: currentMessageList.threadId,
+              messageId: message.id,
+              noHighlight: true,
+            });
+          }
         }
 
         const { threadInfo } = selectThreadByMessage(global, chatId, message as ApiMessage) || {};
         if (threadInfo) {
           actions.requestThreadInfoUpdate({ chatId, threadId: threadInfo.threadId });
         }
+
+        // @perf Wait until scroll animation finishes or simply rely on delivery status update (which is itself delayed)
+        if (!message.isOutgoing) {
+          setTimeout(() => {
+            setGlobal(updateChatLastMessage(getGlobal(), chatId, newMessage));
+          }, ANIMATION_DELAY);
+        }
+      } else {
+        setGlobal(updateChatLastMessage(getGlobal(), chatId, newMessage));
       }
 
       // Edge case: New message in an old (not loaded) chat.
