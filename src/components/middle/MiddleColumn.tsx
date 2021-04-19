@@ -59,6 +59,7 @@ type StateProps = {
   messageSendingRestrictionReason?: string;
   hasPinnedOrAudioMessage?: boolean;
   customBackground?: string;
+  patternColor?: string;
   isCustomBackgroundColor?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
@@ -85,6 +86,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   messageSendingRestrictionReason,
   hasPinnedOrAudioMessage,
   customBackground,
+  patternColor,
   isCustomBackgroundColor,
   isRightColumnShown,
   isBackgroundBlurred,
@@ -203,6 +205,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         --toolbar-unpin-hidden-scale: ${toolbarForUnpinHiddenScale};
         --composer-translate-x: ${composerTranslateX}px;
         --toolbar-translate-x: ${toolbarTranslateX}px;
+        --pattern-color: ${patternColor};
       `}
     >
       <div
@@ -297,7 +300,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { isBackgroundBlurred, customBackground } = global.settings.byKey;
+    const { isBackgroundBlurred, customBackground, patternColor } = global.settings.byKey;
 
     const isCustomBackgroundColor = Boolean((customBackground || '').match(/^#[a-f\d]{6,8}$/i));
     const currentMessageList = selectCurrentMessageList(global);
@@ -329,6 +332,7 @@ export default memo(withGlobal(
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedOrAudioMessage: Boolean(pinnedIds && pinnedIds.length) || Boolean(audioChatId && audioMessageId),
       customBackground,
+      patternColor,
       isCustomBackgroundColor,
       isRightColumnShown: selectIsRightColumnShown(global),
       isBackgroundBlurred,

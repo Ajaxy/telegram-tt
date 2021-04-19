@@ -7,9 +7,11 @@ import { GlobalActions } from '../../../global/types';
 import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { ApiWallpaper } from '../../../api/types';
 
+import { DEFAULT_PATTERN_COLOR } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import { getAverageColor, getPatternColor } from '../../../util/colors';
 import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
@@ -69,12 +71,19 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onScreenSelect]);
 
   const handleResetToDefault = useCallback(() => {
-    setSettingOption({ customBackground: undefined });
+    setSettingOption({ customBackground: undefined, patternColor: DEFAULT_PATTERN_COLOR });
   }, [setSettingOption]);
 
   const handleWallPaperSelect = useCallback((slug: string) => {
     setSettingOption({ customBackground: slug });
-  }, [setSettingOption]);
+    const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
+    if (currentWallpaper && currentWallpaper.document.thumbnail) {
+      getAverageColor(currentWallpaper.document.thumbnail.dataUri)
+        .then((color) => {
+          setSettingOption({ patternColor: getPatternColor(color) });
+        });
+    }
+  }, [loadedWallpapers, setSettingOption]);
 
   const handleWallPaperBlurChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSettingOption({ isBackgroundBlurred: e.target.checked });

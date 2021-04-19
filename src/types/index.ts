@@ -23,6 +23,7 @@ export interface IAlbum {
 export interface ISettings extends Record<string, any> {
   messageTextSize: number;
   customBackground?: string;
+  patternColor?: string;
   isBackgroundBlurred?: boolean;
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';

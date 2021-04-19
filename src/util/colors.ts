@@ -5,6 +5,8 @@
 /* eslint-disable one-var */
 /* eslint-disable one-var-declaration-per-line */
 
+import { preloadImage } from './files';
+
 /**
  * HEX > RGB
  * input: 'xxxxxx' (ex. 'ed15fa') case-insensitive
@@ -131,4 +133,66 @@ export function hsb2rgb([h, s, v]: [number, number, number]): [number, number, n
     Math.round(g * 255),
     Math.round(b * 255),
   ];
+}
+
+export async function getAverageColor(url: string): Promise<[number, number, number]> {
+  // Only visit every 5 pixels
+  const blockSize = 5;
+  const defaultRGB: [number, number, number] = [0, 0, 0];
+  let data;
+  let width;
+  let height;
+  let i = -4;
+  let length;
+  let rgb: [number, number, number] = [0, 0, 0];
+  let count = 0;
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext && canvas.getContext('2d');
+  if (!context) {
+    return defaultRGB;
+  }
+
+  const image = await preloadImage(url);
+  height = image.naturalHeight || image.offsetHeight || image.height;
+  width = image.naturalWidth || image.offsetWidth || image.width;
+  canvas.height = height;
+  canvas.width = width;
+
+  context.drawImage(image, 0, 0);
+
+  try {
+    data = context.getImageData(0, 0, width, height);
+  } catch (e) {
+    return defaultRGB;
+  }
+
+  length = data.data.length;
+
+  // eslint-disable-next-line no-cond-assign
+  while ((i += blockSize * 4) < length) {
+    ++count;
+    rgb[0] += data.data[i];
+    rgb[1] += data.data[i + 1];
+    rgb[2] += data.data[i + 2];
+  }
+
+  rgb[0] = Math.floor(rgb[0] / count);
+  rgb[1] = Math.floor(rgb[1] / count);
+  rgb[2] = Math.floor(rgb[2] / count);
+
+  return rgb;
+}
+
+// eslint-disable-next-line max-len
+// Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
+export function getPatternColor(rgbColor: [number, number, number]) {
+  let [hue, saturation, value] = rgb2hsb(rgbColor);
+
+  saturation = Math.min(1, saturation + 0.05 + 0.1 * (1 - saturation));
+  value = value > 0.5
+    ? Math.max(0, value * 0.65)
+    : Math.max(0, Math.min(1, 1 - value * 0.65));
+
+  return `hsla(${hue * 360}, ${saturation * 100}%, ${value * 100}%, .4)`;
 }
