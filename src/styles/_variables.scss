@@ -100,6 +100,8 @@ $color-user-8: #faa774;
 
   --color-placeholders: #{$color-placeholders};
 
+  --color-pinned: #{$color-white};
+
   --color-code: #4a729a;
   --color-code-bg: #{rgba($color-text-secondary, .08)};
   --color-code-own: #3c7940;
