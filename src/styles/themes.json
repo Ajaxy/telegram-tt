@@ -10,6 +10,7 @@
   "--color-borders-input": ["#DADCE0", "#5B5B5A"],
   "--color-links": ["#52A1EF", "#868DF6"],
   "--color-gray": ["#C4C9CC", "#808080"],
+  "--color-pinned": ["#C4C9CC", "#707579"],
   "--color-default-shadow": ["#72727240", "#21212140"],
   "--color-light-shadow": ["#7272722B", "#00000040"],
   "--color-green": ["#4DCD5E", "#868DF5"],

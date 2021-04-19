@@ -73,7 +73,7 @@ function hexToRgb(hex: string): RGBAColor {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16),
-    a: result[4] ? parseInt(result[4], 16) : undefined,
+    a: result[4] !== undefined ? parseInt(result[4], 16) : undefined,
   };
 }
 
@@ -82,9 +82,12 @@ function applyColorAnimationStep(startIndex: number, endIndex: number, interpola
     const r = Math.round(lerp(propertyColors[startIndex].r, propertyColors[endIndex].r, interpolationRatio));
     const g = Math.round(lerp(propertyColors[startIndex].g, propertyColors[endIndex].g, interpolationRatio));
     const b = Math.round(lerp(propertyColors[startIndex].b, propertyColors[endIndex].b, interpolationRatio));
-    const a = propertyColors[startIndex].a
-      && Math.round(lerp(propertyColors[startIndex].a!, propertyColors[endIndex].a!, interpolationRatio));
+    const a = propertyColors[startIndex].a !== undefined
+      ? Math.round(lerp(propertyColors[startIndex].a!, propertyColors[endIndex].a!, interpolationRatio))
+      : undefined;
 
-    document.documentElement.style.setProperty(property, a ? `rgba(${r},${g},${b},${a / 255})` : `rgb(${r},${g},${b})`);
+    document.documentElement.style.setProperty(property, a !== undefined
+      ? `rgba(${r},${g},${b},${a / 255})`
+      : `rgb(${r},${g},${b})`);
   });
 }

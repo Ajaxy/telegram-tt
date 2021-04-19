@@ -43,7 +43,9 @@
     background: var(--color-green);
   }
 
-  &.pinned {
+  &.pinned:not(.unread) {
+    color: var(--color-pinned);
+    background: transparent;
     width: 1.5rem;
     padding: 0;
 
