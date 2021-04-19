@@ -279,63 +279,11 @@
   position: relative;
 }
 
-.MessageSelectToolbar,
+.MessageSelectToolbar-inner,
 .unpin-all-button,
 .messaging-disabled {
-  .mask-image-disabled &::before {
-    --shadow-color: #84a686;
-
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0.125rem;
-    right: 0.125rem;
-    height: 3.5rem;
-    border-radius: var(--border-radius-messages);
-    box-shadow: 0 0 .5rem .5rem var(--shadow-color);
-    background: var(--shadow-color);
-    z-index: -1;
-
-    @media (max-width: 600px) {
-      left: 0;
-      right: 0;
-      z-index: -1;
-      --shadow-color: #678a64;
-
-      body.is-symbol-menu-open & {
-        --shadow-color: #b4bf9e;
-      }
-    }
-
-    @media screen and (min-height: 750px) {
-      --shadow-color: #9bb281;;
-    }
-
-    @media screen and (min-width: 1276px) {
-      body.animation-level-2 & {
-        --shadow-color: #97af8e;
-      }
-
-      body.animation-level-2 #Main.right-column-open & {
-        --shadow-color: #9cb186;
-      }
-
-      @media (min-height: 750px) {
-        body.animation-level-2 & {
-          --shadow-color: #91a67f;
-        }
-
-        body.animation-level-2 #Main.right-column-open & {
-          --shadow-color: #97ae86;
-        }
-      }
-    }
-  }
-
-  .custom-bg-color &::before,
-  .custom-bg-image &::before {
-    display: none;
+  .mask-image-disabled & {
+    box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
   }
 }
 
@@ -344,19 +292,15 @@
   display: flex;
   justify-content: center;
   position: absolute;
-  margin-top: 0.25rem;
-  padding-bottom: 1rem;
+  padding-bottom: 1.25rem;
 
   .unpin-all-button {
     text-transform: capitalize;
     color: var(--color-black);
-    height: 3.125rem;
+    height: 3.5rem;
     overflow: visible;
-    box-shadow: 0 1px 2px var(--color-default-shadow);
-
-    &::before {
-      height: 3.125rem;
-    }
+    transform: scaleX(1);
+    transition: transform var(--select-transition), background-color .15s, color .15s;
 
     &:hover {
       .icon-unpin {
@@ -365,7 +309,8 @@
     }
 
     .select-mode-active + .middle-column-footer & {
-      display: none;
+      box-shadow: none;
+      transform: scaleX(var(--unpin-hidden-scale));
     }
 
     @media (max-width: 600px) {
@@ -377,6 +322,7 @@
       margin-left: -0.438rem;
       color: var(--color-text-secondary);
       font-size: 1.5rem;
+      transition: color .15s
     }
   }
 
