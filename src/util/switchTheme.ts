@@ -27,16 +27,21 @@ const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map
 }));
 
 export default (theme: ISettings['theme'], withAnimation: boolean) => {
+  const isDarkTheme = theme === 'dark';
   const shouldAnimate = isInitialized && withAnimation;
-  const startIndex = theme === 'dark' ? 0 : 1;
-  const endIndex = theme === 'dark' ? 1 : 0;
+  const startIndex = isDarkTheme ? 0 : 1;
+  const endIndex = isDarkTheme ? 1 : 0;
   const startAt = Date.now();
+  const themeColorTag = document.querySelector('meta[name="theme-color"]');
 
-  document.documentElement.classList.remove(`theme-${theme === 'dark' ? 'light' : 'dark'}`);
+  document.documentElement.classList.remove(`theme-${isDarkTheme ? 'light' : 'dark'}`);
   if (isInitialized) {
     document.documentElement.classList.add('disable-animations');
   }
   document.documentElement.classList.add(`theme-${theme}`);
+  if (themeColorTag) {
+    themeColorTag.setAttribute('content', isDarkTheme ? '#212121' : '#fff');
+  }
 
   setTimeout(() => {
     document.documentElement.classList.remove('disable-animations');
