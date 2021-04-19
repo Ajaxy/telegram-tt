@@ -10,6 +10,7 @@ import { pick } from '../../util/iteratees';
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import buildClassName from '../../util/buildClassName';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = Pick<GlobalState, 'connectionState' | 'authQrCode'>;
 type DispatchProps = Pick<GlobalActions, 'returnToAuthPhoneNumber'>;
@@ -39,6 +40,8 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
       size: 280,
     }, container);
   }, [connectionState, authQrCode]);
+
+  useHistoryBack(returnToAuthPhoneNumber);
 
   return (
     <div id="auth-qr-form" className="custom-scroll">

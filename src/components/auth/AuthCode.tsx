@@ -11,6 +11,7 @@ import { pick } from '../../util/iteratees';
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
 import TrackingMonkey from '../common/TrackingMonkey';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = Pick<GlobalState, 'authPhoneNumber' | 'authIsCodeViaApp' | 'authIsLoading' | 'authError'>;
 type DispatchProps = Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>;
@@ -32,6 +33,8 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
       inputRef.current!.focus();
     }
   }, []);
+
+  useHistoryBack(returnToAuthPhoneNumber);
 
   const onCodeChange = useCallback((e: FormEvent<HTMLInputElement>) => {
     if (authError) {
@@ -77,7 +80,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
           {authPhoneNumber}
           <div
             className="auth-number-edit"
-            onClick={() => returnToAuthPhoneNumber()}
+            onClick={returnToAuthPhoneNumber}
             role="button"
             tabIndex={0}
             title="Sign In with another phone number"
