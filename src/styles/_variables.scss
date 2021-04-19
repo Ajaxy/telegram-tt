@@ -36,8 +36,9 @@ $color-gray: #c4c9cc;
 $color-text-secondary: #707579;
 $color-text-meta: #686c72;
 $color-borders: #dadce0;
+$color-item-active: #ededed;
 $color-chat-hover: #f4f4f5;
-$color-chat-active: #ededed;
+$color-chat-active: #5B90E0;
 $color-selection: #3993fb;
 
 // https://github.com/telegramdesktop/tdesktop/wiki/Theme-Reference#user-content-standard-color-constants
@@ -120,6 +121,7 @@ $color-user-8: #faa774;
 
   --color-chat-hover: #{$color-chat-hover};
   --color-chat-active: #{$color-chat-active};
+  --color-item-active: #{$color-item-active};
 
   --color-selection-highlight: #{$color-selection};
   --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, .7);

@@ -48,7 +48,7 @@
   }
 
   &:not(.has-ripple):not(.disabled):active {
-    background-color: var(--color-chat-active);
+    background-color: var(--color-item-active);
     transition: none !important;
   }
 
