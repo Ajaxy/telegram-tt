@@ -49,6 +49,7 @@ export interface Thread {
   editingId?: number;
   editingScheduledId?: number;
   draft?: ApiFormattedText;
+  noWebPage?: boolean;
   threadInfo?: ApiThreadInfo;
   firstMessageId?: number;
 }
@@ -397,7 +398,7 @@ export type ActionTypes = (
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
-  'loadMessageLink' |
+  'loadMessageLink' | 'toggleMessageWebPage' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result

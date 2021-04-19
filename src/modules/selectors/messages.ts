@@ -137,6 +137,10 @@ export function selectDraft(global: GlobalState, chatId: number, threadId: numbe
   return selectThreadParam(global, chatId, threadId, 'draft');
 }
 
+export function selectNoWebPage(global: GlobalState, chatId: number, threadId: number) {
+  return selectThreadParam(global, chatId, threadId, 'noWebPage');
+}
+
 export function selectThreadInfo(global: GlobalState, chatId: number, threadId: number) {
   return selectThreadParam(global, chatId, threadId, 'threadInfo');
 }

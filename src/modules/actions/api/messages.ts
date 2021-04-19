@@ -48,6 +48,7 @@ import {
   selectEditingScheduledId,
   selectEditingMessage,
   selectScheduledMessage,
+  selectNoWebPage,
 } from '../../selectors';
 import { rafPromise } from '../../../util/schedulers';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -171,11 +172,13 @@ addReducer('sendMessage', (global, actions, payload) => {
   const chat = selectChat(global, chatId)!;
 
   actions.setReplyingToId({ messageId: undefined });
+  actions.clearWebPagePreview({ chatId, threadId, value: false });
 
   const params = {
     ...payload,
     chat,
     replyingTo: selectReplyingToId(global, chatId, threadId),
+    noWebPage: selectNoWebPage(global, chatId, threadId),
   };
 
   const isSingle = !payload.attachments || payload.attachments.length <= 1;
@@ -308,6 +311,12 @@ addReducer('clearDraft', (global, actions, payload) => {
   }
 
   return replaceThreadParam(global, chatId, threadId, 'draft', undefined);
+});
+
+addReducer('toggleMessageWebPage', (global, actions, payload) => {
+  const { chatId, threadId, noWebPage } = payload!;
+
+  return replaceThreadParam(global, chatId, threadId, 'noWebPage', noWebPage);
 });
 
 addReducer('pinMessage', (global, actions, payload) => {

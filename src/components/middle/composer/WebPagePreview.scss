@@ -5,9 +5,6 @@
   padding-right: 0.625rem;
   padding-top: 0.45rem;
 
-  // TODO: Remove this when support for disabling webpage preview is added
-  padding-left: 3.375rem;
-
   --accent-color: var(--color-primary);
 
   .ComposerEmbeddedMessage + & {
