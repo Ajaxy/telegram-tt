@@ -131,7 +131,7 @@
 
     > span {
       display: inline-block;
-      background: rgba(var(--color-text-secondary-rgb), 0.45);
+      background: var(--pattern-color);
       color: white;
       font-size: 0.9375rem;
       font-weight: 500;

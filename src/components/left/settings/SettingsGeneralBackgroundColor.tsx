@@ -9,7 +9,7 @@ import { SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import {
-  hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
+  getPatternColor, hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
 } from '../../../util/colors';
 import { captureEvents, RealTouchEvent } from '../../../util/captureEvents';
 import useFlag from '../../../hooks/useFlag';
@@ -139,7 +139,10 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
     setHexInput(color);
 
     if (!isFirstRunRef.current) {
-      setSettingOption({ customBackground: color });
+      setSettingOption({
+        customBackground: color,
+        patternColor: getPatternColor(rgb),
+      });
     }
     isFirstRunRef.current = false;
   }, [hsb, setSettingOption]);
