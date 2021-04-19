@@ -182,6 +182,7 @@ export function sendMessage(
     isSilent,
     scheduledAt,
     groupedId,
+    noWebPage,
   }: {
     chat: ApiChat;
     text?: string;
@@ -194,6 +195,7 @@ export function sendMessage(
     isSilent?: boolean;
     scheduledAt?: number;
     groupedId?: string;
+    noWebPage?: boolean;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -267,6 +269,7 @@ export function sendMessage(
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(replyingTo && { replyToMsgId: replyingTo }),
       ...(media && { media }),
+      ...(noWebPage && { noWebpage: noWebPage }),
     }), true);
   })();
 

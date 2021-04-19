@@ -3,33 +3,42 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../../global/types';
-import { ApiMessage, ApiMessageEntityTypes } from '../../../api/types';
+import { GlobalActions } from '../../../global/types';
+import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
 
+import { selectNoWebPage } from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
 import parseMessageInput from './helpers/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 
 import WebPage from '../message/WebPage';
+import Button from '../../ui/Button';
 
 import './WebPagePreview.scss';
 
 type OwnProps = {
   chatId: number;
+  threadId: number;
   messageText: string;
 };
 
-type StateProps = Pick<GlobalState, 'webPagePreview'>;
-type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview'>;
+type StateProps = {
+  webPagePreview?: ApiWebPage;
+  noWebPage?: boolean;
+};
+type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview' | 'toggleMessageWebPage'>;
 
 const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#][=&#a-zA-Z0-9]{2,128})?/;
 
 const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
+  threadId,
   messageText,
   webPagePreview,
+  noWebPage,
   loadWebPagePreview,
   clearWebPagePreview,
+  toggleMessageWebPage,
 }) => {
   const link = useMemo(() => {
     const { text, entities } = parseMessageInput(messageText);
@@ -52,14 +61,20 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
       loadWebPagePreview({ text: link });
     } else {
       clearWebPagePreview();
+      toggleMessageWebPage({ chatId, threadId });
     }
-  }, [clearWebPagePreview, link, loadWebPagePreview]);
+  }, [chatId, toggleMessageWebPage, clearWebPagePreview, link, loadWebPagePreview, threadId]);
 
   useOnChange(() => {
     clearWebPagePreview();
+    toggleMessageWebPage({ chatId, threadId });
   }, [chatId]);
 
-  if (!webPagePreview || !messageText.length) {
+  const handleClearWebpagePreview = () => {
+    toggleMessageWebPage({ chatId, threadId, noWebPage: true });
+  };
+
+  if (!webPagePreview || !messageText.length || noWebPage) {
     return undefined;
   }
 
@@ -73,12 +88,23 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="WebPagePreview">
+      <Button round color="translucent" ariaLabel="Clear Webpage Preview" onClick={handleClearWebpagePreview}>
+        <i className="icon-close" />
+      </Button>
       <WebPage message={messageStub} inPreview />
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => pick(global, ['webPagePreview']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadWebPagePreview', 'clearWebPagePreview']),
+  (global, { chatId, threadId }): StateProps => {
+    const noWebPage = selectNoWebPage(global, chatId, threadId);
+    return {
+      webPagePreview: global.webPagePreview,
+      noWebPage,
+    };
+  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadWebPagePreview', 'clearWebPagePreview', 'toggleMessageWebPage',
+  ]),
 )(WebPagePreview));
