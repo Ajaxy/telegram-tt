@@ -53,9 +53,10 @@
       &::before {
         left: 0.125rem;
         background-color: var(--background-color);
+        --color-borders: var(--color-white);
 
         .Message.own & {
-          border-color: var(--accent-color);
+          --color-borders: var(--accent-color);
         }
       }
 

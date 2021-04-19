@@ -25,18 +25,30 @@
 
   &.selected,
   &.selected:hover {
-    .Avatar.online::after {
-      border-color: var(--color-chat-active);
-    }
-    .ListItem-button {
-      --background-color: var(--color-chat-active) !important;
-      --color-text: var(--color-white);
-    }
     --background-color: var(--color-chat-active) !important;
     --color-text-meta-colored: var(--color-white);
     --color-text-meta: var(--color-white);
     --color-text-secondary: var(--color-white);
     --color-error: var(--color-white);
+    --color-pinned: var(--color-white);
+
+    .Avatar.online::after {
+      border-color: var(--color-chat-active);
+    }
+
+    .ListItem-button {
+      --background-color: var(--color-chat-active) !important;
+      --color-text: var(--color-white);
+    }
+
+    .icon-muted-chat {
+      color: var(--color-white) !important;
+    }
+
+    .Badge:not(.pinned) {
+      background: var(--color-white);
+      color: var(--color-chat-active);
+    }
   }
 
   .info {
