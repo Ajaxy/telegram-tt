@@ -1,9 +1,10 @@
 {
-  "--color-primary": ["#50A2E9", "#868DF5"],
+  "--color-primary": ["#50A2E9", "#8378DB"],
   "--color-background": ["#FFFFFF", "#212121"],
-  "--color-background-own": ["#EEFEDF", "#A45D37"],
+  "--color-background-own": ["#EEFEDF", "#8378DB"],
   "--color-chat-hover": ["#F4F4F5", "#2C2C2C"],
-  "--color-chat-active": ["#ededed", "#292929"],
+  "--color-chat-active": ["#4C90E6", "#8378DB"],
+  "--color-item-active": ["#ededed", "#292929"],
   "--color-text": ["#000000", "#FFFFFF"],
   "--color-text-secondary": ["#707579", "#AAAAAA"],
   "--color-borders": ["#DADCE0", "#100F10"],

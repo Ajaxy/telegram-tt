@@ -17,14 +17,26 @@
     transition: transform .2s ease-out;
   }
 
-  &:hover, &.selected, &.ListItem.has-menu-open {
+  &:hover, &.ListItem.has-menu-open {
     .Avatar.online::after {
       border-color: var(--color-chat-hover);
     }
   }
 
-  &.selected {
-    --background-color: var(--color-chat-hover);
+  &.selected,
+  &.selected:hover {
+    .Avatar.online::after {
+      border-color: var(--color-chat-active);
+    }
+    .ListItem-button {
+      --background-color: var(--color-chat-active) !important;
+      --color-text: var(--color-white);
+    }
+    --background-color: var(--color-chat-active) !important;
+    --color-text-meta-colored: var(--color-white);
+    --color-text-meta: var(--color-white);
+    --color-text-secondary: var(--color-white);
+    --color-error: var(--color-white);
   }
 
   .info {

@@ -47,7 +47,7 @@
     &:not(.has-ripple),
     body.animation-level-0 & {
       .ListItem-button:active {
-        --background-color: var(--color-chat-active) !important;
+        --background-color: var(--color-item-active) !important;
       }
     }
   }
