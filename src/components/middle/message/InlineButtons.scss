@@ -11,13 +11,13 @@
     flex: 1;
     width: auto;
     margin: 0.125rem;
-    background: rgba(90, 110, 70, 0.6);
+    background: rgba(102, 102, 102, 0.4);
     border-radius: var(--border-radius-messages-small);
     font-weight: 500;
     text-transform: none;
 
     &:hover {
-      background: rgba(90, 110, 70, 0.4) !important;
+      background: rgba(130, 130, 130, 0.4) !important;
     }
 
     &:first-of-type {
