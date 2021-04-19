@@ -13,6 +13,10 @@
     right: auto !important;
   }
 
+  .no-composer & {
+    width: 100%;
+  }
+
   @media (min-width: 601px) {
     left: 1rem;
     right: 1rem;
@@ -30,17 +34,13 @@
     transition: transform var(--select-transition), opacity var(--select-transition);
   }
 
-  &.with-composer .MessageSelectToolbar-inner {
+  & .MessageSelectToolbar-inner {
     transform: scaleX(1) translateX(0);
   }
 
+  .no-composer .unpin-button-container + &,
   .no-composer .messaging-disabled + & {
     top: auto;
-  }
-
-  .no-composer .unpin-button-container + & {
-    top: auto;
-    margin-bottom: 1rem;
   }
 
   body.animation-level-0 & {
@@ -57,6 +57,10 @@
 
     &.with-composer .MessageSelectToolbar-inner {
       transform: scaleX(var(--toolbar-hidden-scale, 1)) translateX(var(--toolbar-translate-x, 0));
+    }
+
+    &:not(.with-composer) .MessageSelectToolbar-inner {
+      transform: scaleX(var(--toolbar-unpin-hidden-scale)) translateX(0);
     }
   }
 

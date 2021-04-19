@@ -183,6 +183,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const {
     composerHiddenScale, toolbarHiddenScale,
     composerTranslateX, toolbarTranslateX,
+    unpinHiddenScale, toolbarForUnpinHiddenScale,
   } = useMemo(
     () => calculateMiddleFooterTransforms(windowWidth, renderingCanPost),
     [renderingCanPost, windowWidth],
@@ -198,6 +199,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       style={`
         --composer-hidden-scale: ${composerHiddenScale};
         --toolbar-hidden-scale: ${toolbarHiddenScale};
+        --unpin-hidden-scale: ${unpinHiddenScale};
+        --toolbar-unpin-hidden-scale: ${toolbarForUnpinHiddenScale};
         --composer-translate-x: ${composerTranslateX}px;
         --toolbar-translate-x: ${toolbarTranslateX}px;
       `}
