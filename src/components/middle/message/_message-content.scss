@@ -130,11 +130,11 @@
       fill: var(--background-color);
     }
     .Message.own & {
-      right: -.5625rem;
+      right: -.562rem; // This value is correct. Safari fix
     }
 
     .Message:not(.own) & {
-      left: -.5625rem;
+      left: -.562rem; // This value is correct. Safari fix
     }
   }
 

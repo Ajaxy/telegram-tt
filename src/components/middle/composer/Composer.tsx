@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -212,7 +212,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!appendixRef.current) {
       return;
     }
