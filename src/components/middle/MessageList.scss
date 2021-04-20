@@ -268,7 +268,7 @@
 
   .is-safari &.select-mode-active,
   .is-safari &.has-focusing,
-  .is-safari.has-context-menu .messages-layout > & {
+  .is-safari.has-context-menu .messages-layout & {
     padding-right: .375rem;
   }
 }
