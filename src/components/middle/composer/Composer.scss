@@ -161,7 +161,7 @@
   .svg-appendix {
     position: absolute;
     bottom: -.1875rem;
-    right: -.5625rem;
+    right: -.562rem; // This value is correct. Safari fix
     width: .5625rem;
     height: 1.25rem;
     transition: opacity 200ms;

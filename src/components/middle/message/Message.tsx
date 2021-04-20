@@ -3,7 +3,7 @@ import React, {
   FC,
   memo,
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
@@ -282,7 +282,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEnsureMessage(chatId, hasReply ? message.replyToMessageId : undefined, replyMessage, message.id);
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!appendixRef.current) {
       return;
     }
