@@ -2,7 +2,6 @@ import { StateHookSetter, useEffect } from '../../../../lib/teact/teact';
 import { ApiAttachment, ApiMessage } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
-import { EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_MESSAGE_LENGTH = 4096;
@@ -15,11 +14,6 @@ export default (
   useEffect(() => {
     async function handlePaste(e: ClipboardEvent) {
       if (!e.clipboardData) {
-        return;
-      }
-
-      const input = document.activeElement;
-      if (!input || ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID].includes(input.id)) {
         return;
       }
 
