@@ -12,6 +12,7 @@ import {
   ARCHIVED_FOLDER_ID,
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
+  RE_TME_INVITE_LINK,
   RE_TME_LINK,
   TIPS_USERNAME,
 } from '../../../config';
@@ -380,12 +381,28 @@ addReducer('toggleChatUnread', (global, actions, payload) => {
 
 addReducer('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
-  const match = RE_TME_LINK.exec(url)!;
+  let match = RE_TME_INVITE_LINK.exec(url);
 
-  const username = match[1];
-  const channelPostId = match[2] ? Number(match[2]) : undefined;
+  if (match) {
+    const hash = match[1];
 
-  void openChatByUsername(actions, username, channelPostId);
+    (async () => {
+      const chat = await callApi('openChatByInvite', hash);
+
+      if (!chat) {
+        return;
+      }
+
+      actions.openChat({ id: chat.id });
+    })();
+  } else {
+    match = RE_TME_LINK.exec(url)!;
+
+    const username = match[1];
+    const channelPostId = match[2] ? Number(match[2]) : undefined;
+
+    void openChatByUsername(actions, username, channelPostId);
+  }
 });
 
 addReducer('openChatByUsername', (global, actions, payload) => {

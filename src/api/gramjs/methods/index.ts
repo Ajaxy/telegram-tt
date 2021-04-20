@@ -12,7 +12,7 @@ export {
   fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
-  migrateChat,
+  migrateChat, openChatByInvite,
 } from './chats';
 
 export {

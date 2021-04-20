@@ -10,6 +10,7 @@ import { formatPastTimeShort } from '../../util/dateFormat';
 
 import Media from './Media';
 import Link from '../ui/Link';
+import SafeLink from './SafeLink';
 
 import './WebLink.scss';
 
@@ -75,9 +76,13 @@ const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
         {truncatedDescription && (
           <Link className="site-description" onClick={handleMessageClick}>{renderText(truncatedDescription)}</Link>
         )}
-        <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
+        <SafeLink
+          url={url}
+          className="site-name"
+          text=""
+        >
           {url.replace('mailto:', '') || displayUrl}
-        </a>
+        </SafeLink>
         {senderTitle && <div className="sender-name">{renderText(senderTitle)}</div>}
       </div>
       {senderTitle && (
