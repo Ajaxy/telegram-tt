@@ -251,7 +251,9 @@ export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: Gr
 }
 
 function getUserName(user: GramJs.User) {
-  return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
+  return user.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
+    : (user.lastName || undefined);
 }
 
 export function buildAvatarHash(photo: any) {
