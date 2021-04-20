@@ -885,6 +885,22 @@ export async function migrateChat(chat: ApiChat) {
   return buildApiChatFromPreview(result.chats[1]);
 }
 
+export async function openChatByInvite(hash: string) {
+  const result = await invokeRequest(new GramJs.messages.CheckChatInvite({ hash }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  if (result instanceof GramJs.ChatInvite) {
+    await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
+
+    return undefined;
+  } else {
+    return buildApiChatFromPreview(result.chat);
+  }
+}
+
 function preparePeers(
   result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.messages.PeerDialogs,
 ) {

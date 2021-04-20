@@ -3,7 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import convertPunycode from '../../lib/punycode';
 import { GlobalActions } from '../../global/types';
 
-import { DEBUG, RE_TME_LINK } from '../../config';
+import { DEBUG, RE_TME_INVITE_LINK, RE_TME_LINK } from '../../config';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 
@@ -26,7 +26,7 @@ const SafeLink: FC<OwnProps & DispatchProps> = ({
   const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (
       e.ctrlKey || e.altKey || e.shiftKey || e.metaKey
-      || !url || !url.match(RE_TME_LINK)
+      || !url || (!url.match(RE_TME_LINK) && !url.match(RE_TME_INVITE_LINK))
     ) {
       return true;
     }

@@ -55,6 +55,11 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   USER_KICKED: 'This user was kicked from this supergroup/channel',
   USER_NOT_MUTUAL_CONTACT: 'The provided user is not a mutual contact',
   USER_PRIVACY_RESTRICTED: 'The user\'s privacy settings do not allow you to do this',
+  INVITE_HASH_EMPTY: 'The invite hash is empty',
+  INVITE_HASH_EXPIRED: 'The invite link has expired',
+  INVITE_HASH_INVALID: 'The invite hash is invalid',
+  CHANNELS_TOO_MUCH: 'You have joined too many channels/supergroups',
+  USER_ALREADY_PARTICIPANT: 'You already in the group',
 };
 
 export default function getReadableErrorText(error: ApiError) {

@@ -2,7 +2,7 @@ import { addReducer, getDispatch } from '../../../lib/teact/teactn';
 
 import { ApiChat } from '../../../api/types';
 
-import { RE_TME_LINK } from '../../../config';
+import { RE_TME_INVITE_LINK, RE_TME_LINK } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { selectChatMessage, selectCurrentChat } from '../../selectors';
 
@@ -14,7 +14,7 @@ addReducer('clickInlineButton', (global, actions, payload) => {
       actions.sendBotCommand({ command: button.value });
       break;
     case 'url':
-      if (button.value.match(RE_TME_LINK)) {
+      if (button.value.match(RE_TME_INVITE_LINK) || button.value.match(RE_TME_LINK)) {
         actions.openTelegramLink({ url: button.value });
       } else {
         window.open(button.value);
