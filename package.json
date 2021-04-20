@@ -7,7 +7,7 @@
     "dev": "cross-env APP_ENV=development webpack-dev-server -d",
     "build": "webpack -p",
     "build:staging": "rm -rf dist/ && APP_ENV=staging npm run build && ./deploy/copy_to_dist.sh",
-    "build:production": "rm -rf dist/ && APP_INFO=\"Telegram WebZ alpha $(git rev-parse --short HEAD)\" APP_ENV=production npm run build -- --env.noSourceMap && ./deploy/copy_to_dist.sh",
+    "build:production": "rm -rf dist/ && APP_INFO=\"Telegram WebZ alpha $(git rev-parse --short HEAD)\" APP_ENV=production npm run build && ./deploy/copy_to_dist.sh",
     "deploy:contest": "./deploy/contest.sh",
     "perf:serve": "APP_ENV=perf parcel src/index-perf.html",
     "lint": "eslint . --ext .ts,.tsx",
