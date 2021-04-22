@@ -35,6 +35,18 @@ type OwnProps = {
   lastSyncTime?: number;
 };
 
+let currentOnRelease: NoneToVoidFunction;
+
+function createCapture(onRelease: NoneToVoidFunction) {
+  return () => {
+    if (currentOnRelease) {
+      currentOnRelease();
+    }
+
+    currentOnRelease = onRelease;
+  };
+}
+
 const RoundVideo: FC<OwnProps> = ({
   message,
   observeIntersection,
@@ -103,6 +115,18 @@ const RoundVideo: FC<OwnProps> = ({
 
   const shouldPlay = Boolean(mediaData && isIntersecting);
 
+  const stopPlaying = () => {
+    setIsActivated(false);
+    setProgress(0);
+    safePlay(playerRef.current!);
+
+    requestAnimationFrame(() => {
+      playingProgressRef.current!.innerHTML = '';
+    });
+  };
+
+  const capturePlaying = createCapture(stopPlaying);
+
   useEffect(() => {
     if (!playerRef.current) {
       return;
@@ -136,23 +160,14 @@ const RoundVideo: FC<OwnProps> = ({
     } else {
       playerEl.currentTime = 0;
       setIsActivated(true);
+      capturePlaying();
     }
-  }, [isActivated, mediaData]);
+  }, [capturePlaying, isActivated, mediaData]);
 
   const handleTimeUpdate = useCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
 
     setProgress(playerEl.currentTime / playerEl.duration);
-  }, []);
-
-  const handleEnded = useCallback(() => {
-    setIsActivated(false);
-    setProgress(0);
-    safePlay(playerRef.current!);
-
-    requestAnimationFrame(() => {
-      playingProgressRef.current!.innerHTML = '';
-    });
   }, []);
 
   const videoClassName = buildClassName('full-media', transitionClassNames);
@@ -187,7 +202,7 @@ const RoundVideo: FC<OwnProps> = ({
             loop={!isActivated}
             playsInline
             poster={thumbDataUri}
-            onEnded={isActivated ? handleEnded : undefined}
+            onEnded={isActivated ? stopPlaying : undefined}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...bufferingHandlers}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
