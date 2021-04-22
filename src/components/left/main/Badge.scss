@@ -41,6 +41,7 @@
 
   &.mention, &.unread:not(.muted) {
     background: var(--color-green);
+    color: var(--color-white);
   }
 
   &.pinned:not(.unread) {

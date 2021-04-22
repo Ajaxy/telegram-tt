@@ -239,6 +239,7 @@ export interface ApiMessage {
   adminTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
+  isFromScheduled?: boolean;
 }
 
 export interface ApiThreadInfo {
