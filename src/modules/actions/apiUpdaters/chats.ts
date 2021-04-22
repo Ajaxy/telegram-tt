@@ -15,6 +15,7 @@ import {
   selectCommonBoxChatId,
   selectIsChatListed,
   selectChatListType,
+  selectCurrentMessageList,
 } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
@@ -89,7 +90,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'newMessage': {
-      if (update.message.senderId === global.currentUserId) {
+      const { message } = update;
+      const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
+
+      if (message.chatId === currentChatId || (message.senderId === global.currentUserId && !message.isFromScheduled)) {
         return;
       }
 

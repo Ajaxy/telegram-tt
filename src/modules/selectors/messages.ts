@@ -523,14 +523,18 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number, threadI
   const lastReadId = selectRealLastReadId(global, chatId, threadId);
 
   if (outlyingIds) {
-    const found = outlyingIds.find((id) => !lastReadId || (id > lastReadId && byId[id] && !byId[id].isOutgoing));
+    const found = outlyingIds.find((id) => {
+      return !lastReadId || (id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled));
+    });
     if (found) {
       return found;
     }
   }
 
   if (listedIds) {
-    const found = listedIds.find((id) => !lastReadId || (id > lastReadId && byId[id] && !byId[id].isOutgoing));
+    const found = listedIds.find((id) => {
+      return !lastReadId || (id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled));
+    });
     if (found) {
       return found;
     }

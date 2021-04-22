@@ -151,6 +151,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
   const groupedId = mtpMessage.groupedId && mtpMessage.groupedId.toString();
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
+
   return {
     id: mtpMessage.id,
     chatId,
@@ -159,6 +160,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     date: mtpMessage.date,
     senderId: fromId || (mtpMessage.out && mtpMessage.post && currentUserId) || chatId,
     views: mtpMessage.views,
+    isFromScheduled: mtpMessage.fromScheduled,
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
