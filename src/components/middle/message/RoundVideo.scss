@@ -35,4 +35,10 @@
     stroke-opacity: .35;
     stroke-linecap: round;
   }
+
+  video::-internal-media-controls-cast-button,
+  video::-webkit-media-controls,
+  video::-webkit-media-controls-start-playback-button {
+    display: none;
+  }
 }
