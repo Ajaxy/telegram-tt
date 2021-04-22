@@ -115,6 +115,7 @@ const Main: FC<StateProps & DispatchProps> = ({
     const initialUnread = selectCountNotMutedUnread(getGlobal());
     let index = 0;
 
+    clearInterval(notificationInterval);
     notificationInterval = window.setInterval(() => {
       if (index % 2 === 0) {
         const newUnread = selectCountNotMutedUnread(getGlobal()) - initialUnread;
