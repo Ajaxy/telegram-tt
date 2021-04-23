@@ -19,6 +19,15 @@
   --select-message-scale: 0.9;
   --select-background-color: white;
 
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .2s ease, transform .2s ease;
+
+  &:not(.open) {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
   > .Avatar,
   > .message-content-wrapper {
     opacity: 1;
@@ -299,6 +308,7 @@
             .message-select-control:not(.group-select) {
               background: var(--background-color);
               border-color: var(--background-color);
+
               &::after {
                 background: var(--background-color);
                 border-color: rgba(var(--color-text-green-rgb), 0.5);
@@ -309,6 +319,7 @@
       }
 
     }
+
     &.focused,
     &.has-menu-open,
     &.is-forwarding,

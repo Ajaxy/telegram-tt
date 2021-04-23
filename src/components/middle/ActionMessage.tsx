@@ -1,4 +1,6 @@
-import React, { FC, memo, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useEffect, useRef,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
@@ -21,11 +23,14 @@ import useFocusMessage from './message/hooks/useFocusMessage';
 import useLang from '../../hooks/useLang';
 
 import ContextMenuContainer from './message/ContextMenuContainer.async';
+import useFlag from '../../hooks/useFlag';
+import useShowTransition from '../../hooks/useShowTransition';
 
 type OwnProps = {
   message: ApiMessage;
   observeIntersection?: ObserveFn;
   isEmbedded?: boolean;
+  appearanceOrder?: number;
 };
 
 type StateProps = {
@@ -38,10 +43,13 @@ type StateProps = {
   noFocusHighlight?: boolean;
 };
 
+const APPEARANCE_DELAY = 10;
+
 const ActionMessage: FC<OwnProps & StateProps> = ({
   message,
   observeIntersection,
   isEmbedded,
+  appearanceOrder = 0,
   sender,
   targetUser,
   targetMessage,
@@ -58,6 +66,17 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight);
 
   useLang();
+
+  const noAppearanceAnimation = appearanceOrder <= 0;
+  const [isShown, markShown] = useFlag(noAppearanceAnimation);
+  useEffect(() => {
+    if (noAppearanceAnimation) {
+      return;
+    }
+
+    setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
+  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+  const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
   const content = renderActionMessageText(
     message,
@@ -86,6 +105,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         'ActionMessage message-list-item',
         isFocused && !noFocusHighlight && 'focused',
         isContextMenuShown && 'has-menu-open',
+        transitionClassNames,
       )}
       data-message-id={message.id}
       onMouseDown={handleBeforeContextMenu}

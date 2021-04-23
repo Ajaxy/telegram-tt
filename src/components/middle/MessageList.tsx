@@ -153,6 +153,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const memoFirstUnreadIdRef = useRef<number>();
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
+  const shouldAnimateAppearanceRef = useRef(!messageIds);
 
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
   const [hasFocusing, setHasFocusing] = useState<boolean>(Boolean(focusingId));
@@ -165,6 +166,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     // We update local cached `scrollOffsetRef` when opening chat.
     // Then we update global version every second on scrolling.
     scrollOffsetRef.current = (type === 'thread' && selectScrollOffset(getGlobal(), chatId, threadId)) || 0;
+
+    // We need it just first time when message list appears
+    // TODO Figure out why `onTickEnd`/100ms is not enough
+    setTimeout(() => {
+      shouldAnimateAppearanceRef.current = false;
+    }, 1000);
   }, [Boolean(messageIds)]);
 
   useOnChange(() => {
@@ -516,6 +523,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           {messageGroups && renderMessages(
             lang,
             messageGroups,
+            shouldAnimateAppearanceRef.current ? messageIds.length : 0,
             observeIntersectionForReading,
             observeIntersectionForMedia,
             observeIntersectionForAnimatedStickers,
@@ -537,6 +545,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           {renderMessages(
             lang,
             groupMessages([lastMessage]),
+            0,
             observeIntersectionForReading,
             observeIntersectionForMedia,
             observeIntersectionForAnimatedStickers,
@@ -561,6 +570,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 function renderMessages(
   lang: LangFn,
   messageGroups: MessageDateGroup[],
+  messageCountToAnimate: number,
   observeIntersectionForReading: ObserveFn,
   observeIntersectionForMedia: ObserveFn,
   observeIntersectionForAnimatedStickers: ObserveFn,
@@ -579,6 +589,8 @@ function renderMessages(
       <span>{lang('UnreadMessages')}</span>
     </div>
   );
+
+  let appearanceIndex = 0;
 
   const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
@@ -599,6 +611,7 @@ function renderMessages(
             key={message.id}
             message={message}
             observeIntersection={observeIntersectionForReading}
+            appearanceOrder={messageCountToAnimate - ++appearanceIndex}
           />,
         ]);
       }
@@ -660,6 +673,7 @@ function renderMessages(
             threadId={threadId}
             messageListType={type}
             noComments={hasLinkedChat === false}
+            appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isFirstInGroup={position.isFirstInGroup}
             isLastInGroup={position.isLastInGroup}
             isFirstInDocumentGroup={position.isFirstInDocumentGroup}
