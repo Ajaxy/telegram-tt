@@ -3,6 +3,7 @@ import React, {
   FC,
   memo,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -64,6 +65,8 @@ import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserve
 import useFocusMessage from './hooks/useFocusMessage';
 import useWindowSize from '../../../hooks/useWindowSize';
 import useLang from '../../../hooks/useLang';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useFlag from '../../../hooks/useFlag';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -106,6 +109,7 @@ type OwnProps = {
   threadId: number;
   messageListType: MessageListType;
   noComments: boolean;
+  appearanceOrder: number;
 } & MessagePositionProperties;
 
 type StateProps = {
@@ -153,6 +157,7 @@ const GROUP_MESSAGE_HOVER_ATTRIBUTE = 'data-is-document-group-hover';
 const APPENDIX_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#EEFFDE" class="corner"/></g></svg>';
 // eslint-disable-next-line max-len
 const APPENDIX_NOT_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>';
+const APPEARANCE_DELAY = 10;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -163,6 +168,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   withAvatar,
   withSenderName,
   noComments,
+  appearanceOrder,
   isFirstInGroup,
   isLastInGroup,
   isFirstInDocumentGroup,
@@ -226,6 +232,17 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
+  const noAppearanceAnimation = appearanceOrder <= 0;
+  const [isShown, markShown] = useFlag(noAppearanceAnimation);
+  useEffect(() => {
+    if (noAppearanceAnimation) {
+      return;
+    }
+
+    setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
+  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+  const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
+
   const { chatId, id: messageId, threadInfo } = message;
 
   const isOwn = isOwnMessage(message);
@@ -264,6 +281,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isInSelectMode && 'is-in-selection-mode',
     isThreadTop && 'is-thread-top',
     Boolean(message.inlineButtons) && 'has-inline-buttons',
+    transitionClassNames,
   );
   const contentClassName = buildContentClassName(message, {
     hasReply,
