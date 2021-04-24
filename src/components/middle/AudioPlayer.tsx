@@ -24,6 +24,7 @@ import './AudioPlayer.scss';
 type OwnProps = {
   message: ApiMessage;
   className?: string;
+  noUi?: boolean;
 };
 
 type StateProps = {
@@ -33,7 +34,7 @@ type StateProps = {
 type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer'>;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, className, senderName, focusMessage, closeAudioPlayer,
+  message, className, noUi, senderName, focusMessage, closeAudioPlayer,
 }) => {
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
   const { playPause, isPlaying } = useAudioPlayer(
@@ -52,6 +53,10 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeAudioPlayer, isPlaying, playPause]);
 
   const lang = useLang();
+
+  if (noUi) {
+    return undefined;
+  }
 
   const audio = getMessageAudio(message);
 

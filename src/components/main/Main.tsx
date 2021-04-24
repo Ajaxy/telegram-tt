@@ -2,11 +2,13 @@ import React, { FC, useEffect, memo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+import { ApiMessage } from '../../api/types';
 
 import '../../modules/actions/all';
 import { ANIMATION_END_DELAY, DEBUG } from '../../config';
 import { pick } from '../../util/iteratees';
 import {
+  selectChatMessage,
   selectCountNotMutedUnread,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
@@ -21,9 +23,10 @@ import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
 import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
-import ForwardPicker from './ForwardPicker.async';
+import AudioPlayer from '../middle/AudioPlayer';
 import Notifications from './Notifications.async';
 import Errors from './Errors.async';
+import ForwardPicker from './ForwardPicker.async';
 
 import './Main.scss';
 
@@ -36,6 +39,7 @@ type StateProps = {
   isForwardModalOpen: boolean;
   hasNotifications: boolean;
   hasErrors: boolean;
+  audioMessage?: ApiMessage;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
@@ -59,6 +63,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   animationLevel,
   hasNotifications,
   hasErrors,
+  audioMessage,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -151,6 +156,7 @@ const Main: FC<StateProps & DispatchProps> = ({
       <ForwardPicker isOpen={isForwardModalOpen} />
       <Notifications isOpen={hasNotifications} />
       <Errors isOpen={hasErrors} />
+      {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
     </div>
   );
 };
@@ -169,15 +175,23 @@ function updateIcon(asUnread: boolean) {
 }
 
 export default memo(withGlobal(
-  (global): StateProps => ({
-    animationLevel: global.settings.byKey.animationLevel,
-    lastSyncTime: global.lastSyncTime,
-    isLeftColumnShown: global.isLeftColumnShown,
-    isRightColumnShown: selectIsRightColumnShown(global),
-    isMediaViewerOpen: selectIsMediaViewerOpen(global),
-    isForwardModalOpen: selectIsForwardModalOpen(global),
-    hasNotifications: Boolean(global.notifications.length),
-    hasErrors: Boolean(global.errors.length),
-  }),
+  (global): StateProps => {
+    const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
+    const audioMessage = audioChatId && audioMessageId
+      ? selectChatMessage(global, audioChatId, audioMessageId)
+      : undefined;
+
+    return {
+      animationLevel: global.settings.byKey.animationLevel,
+      lastSyncTime: global.lastSyncTime,
+      isLeftColumnShown: global.isLeftColumnShown,
+      isRightColumnShown: selectIsRightColumnShown(global),
+      isMediaViewerOpen: selectIsMediaViewerOpen(global),
+      isForwardModalOpen: selectIsForwardModalOpen(global),
+      hasNotifications: Boolean(global.notifications.length),
+      hasErrors: Boolean(global.errors.length),
+      audioMessage,
+    };
+  },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis']),
 )(Main));
