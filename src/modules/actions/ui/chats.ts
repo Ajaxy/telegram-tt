@@ -24,8 +24,8 @@ addReducer('openChat', (global, actions, payload) => {
 
   const currentMessageList = selectCurrentMessageList(global);
 
-  if (currentMessageList
-    && (
+  if (!currentMessageList
+    || (
       currentMessageList.chatId !== id
       || currentMessageList.threadId !== threadId
       || currentMessageList.type !== type
