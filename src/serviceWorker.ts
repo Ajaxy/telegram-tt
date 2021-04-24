@@ -36,7 +36,7 @@ self.addEventListener('fetch', (e: FetchEvent) => {
       return respondForProgressive(e);
     }
 
-    if (url.match(ASSET_CACHE_PATTERN)) {
+    if (url.startsWith('http') && url.match(ASSET_CACHE_PATTERN)) {
       return respondWithCache(e);
     }
 

@@ -92,11 +92,11 @@
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^4.2.2",
-    "worker-loader": "^2.0.0"
+    "worker-loader": "^2.0.0",
+    "@types/jest": "^26.0.15"
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
-    "@types/jest": "^26.0.15",
     "async-mutex": "^0.1.4",
     "big-integer": "painor/BigInteger.js",
     "croppie": "^2.6.4",
