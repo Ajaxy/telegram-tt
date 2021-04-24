@@ -28,6 +28,12 @@
     opacity: 0;
   }
 
+  // Restore stacking context
+  // https://developer.mozilla.org/ru/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
+  &.open.shown {
+    transform: none;
+  }
+
   > .Avatar,
   > .message-content-wrapper {
     opacity: 1;
