@@ -39,7 +39,7 @@ import {
   pick,
 } from '../../util/iteratees';
 import {
-  fastRaf, debounce, throttleWithTickEnd,
+  fastRaf, debounce, throttleWithTickEnd, onTickEnd,
 } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -143,12 +143,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const scrollOffsetRef = useRef<number>();
+  // We update local cached `scrollOffsetRef` when opening chat.
+  // Then we update global version every second on scrolling.
+  const scrollOffsetRef = useRef<number>((type === 'thread' && selectScrollOffset(getGlobal(), chatId, threadId)) || 0);
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
   const listItemElementsRef = useRef<HTMLDivElement[]>();
   // Updated when opening chat (to preserve divider even after messages are read)
-  const memoUnreadDividerBeforeIdRef = useRef<number>();
+  const memoUnreadDividerBeforeIdRef = useRef<number | undefined>(firstUnreadId);
   // Updated every time (to be used from intersection callback closure)
   const memoFirstUnreadIdRef = useRef<number>();
   const memoFocusingIdRef = useRef<number>();
@@ -158,21 +160,15 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
   const [hasFocusing, setHasFocusing] = useState<boolean>(Boolean(focusingId));
 
+  const areMessagesLoaded = Boolean(messageIds);
   useOnChange(() => {
-    anchorIdRef.current = undefined;
-
-    memoUnreadDividerBeforeIdRef.current = firstUnreadId;
-
-    // We update local cached `scrollOffsetRef` when opening chat.
-    // Then we update global version every second on scrolling.
-    scrollOffsetRef.current = (type === 'thread' && selectScrollOffset(getGlobal(), chatId, threadId)) || 0;
-
-    // We need it just first time when message list appears
-    // TODO Figure out why `onTickEnd`/100ms is not enough
-    setTimeout(() => {
-      shouldAnimateAppearanceRef.current = false;
-    }, 1000);
-  }, [Boolean(messageIds)]);
+    // We only need it first time when message list appears
+    if (areMessagesLoaded) {
+      onTickEnd(() => {
+        shouldAnimateAppearanceRef.current = false;
+      });
+    }
+  }, [areMessagesLoaded]);
 
   useOnChange(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
@@ -503,12 +499,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
       ) : botDescription ? (
         <div className="empty rich"><span>{renderText(lang(botDescription), ['br', 'emoji', 'links'])}</span></div>
-      ) : messageIds && messageGroups ? (
-        // @ts-ignore
+      ) : messageIds && !messageGroups ? (
+        <div className="empty"><span>{lang('NoMessages')}</span></div>
+      ) : ((messageIds && messageGroups) || lastMessage) ? (
         <MessageScroll
           containerRef={containerRef}
           className="messages-container"
-          messageIds={messageIds}
+          messageIds={messageIds || [lastMessage!.id]}
           containerHeight={containerHeight}
           listItemElementsRef={listItemElementsRef}
           focusingId={focusingId}
@@ -520,32 +517,9 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           firstUnreadId={firstUnreadId}
           onFabToggle={onFabToggle}
         >
-          {messageGroups && renderMessages(
-            lang,
-            messageGroups,
-            shouldAnimateAppearanceRef.current ? messageIds.length : 0,
-            observeIntersectionForReading,
-            observeIntersectionForMedia,
-            observeIntersectionForAnimatedStickers,
-            withUsers,
-            anchorIdRef,
-            memoUnreadDividerBeforeIdRef,
-            threadId,
-            type,
-            threadTopMessageId,
-            threadFirstMessageId,
-            hasLinkedChat,
-            type === 'scheduled',
-          )}
-        </MessageScroll>
-      ) : messageIds ? (
-        <div className="empty"><span>{lang('NoMessages')}</span></div>
-      ) : lastMessage ? (
-        <div className="messages-container">
           {renderMessages(
             lang,
-            groupMessages([lastMessage]),
-            0,
+            messageGroups || groupMessages([lastMessage!]),
             observeIntersectionForReading,
             observeIntersectionForMedia,
             observeIntersectionForAnimatedStickers,
@@ -557,9 +531,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
             threadTopMessageId,
             threadFirstMessageId,
             hasLinkedChat,
-            false,
+            messageGroups ? type === 'scheduled' : false,
+            !messageGroups || !shouldAnimateAppearanceRef.current,
           )}
-        </div>
+        </MessageScroll>
       ) : (
         <Loading color="white" />
       )}
@@ -570,7 +545,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 function renderMessages(
   lang: LangFn,
   messageGroups: MessageDateGroup[],
-  messageCountToAnimate: number,
   observeIntersectionForReading: ObserveFn,
   observeIntersectionForMedia: ObserveFn,
   observeIntersectionForAnimatedStickers: ObserveFn,
@@ -583,6 +557,7 @@ function renderMessages(
   threadFirstMessageId?: number,
   hasLinkedChat?: boolean,
   isSchedule = false,
+  noAppearanceAnimation = false,
 ) {
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
@@ -590,6 +565,9 @@ function renderMessages(
     </div>
   );
 
+  const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
+    return acc + flatten(messageGroup.senderGroups).length;
+  }, 0);
   let appearanceIndex = 0;
 
   const dateGroups = messageGroups.map((

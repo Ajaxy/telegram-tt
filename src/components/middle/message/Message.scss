@@ -19,21 +19,6 @@
   --select-message-scale: 0.9;
   --select-background-color: white;
 
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity .2s ease, transform .2s ease;
-
-  &:not(.open) {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-
-  // Restore stacking context
-  // https://developer.mozilla.org/ru/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
-  &.open.shown {
-    transform: none;
-  }
-
   > .Avatar,
   > .message-content-wrapper {
     opacity: 1;
