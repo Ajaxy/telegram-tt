@@ -16,6 +16,7 @@ export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
 export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 30;
+export const GLOBAL_STATE_CACHE_USER_LIST_LIMIT = 5000;
 
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';

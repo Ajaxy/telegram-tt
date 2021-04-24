@@ -12,7 +12,7 @@ import {
   GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GRAMJS_SESSION_ID_KEY,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN, GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
 } from '../config';
 import { IS_MOBILE_SCREEN } from '../util/environment';
 import { pick } from '../util/iteratees';
@@ -123,9 +123,13 @@ function reduceShowChatInfo(global: GlobalState): boolean {
 
 function reduceUsers(global: GlobalState): GlobalState['users'] {
   const { users: { byId, selectedId } } = global;
+  const idsToSave = [
+    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter((cid) => cid > 0),
+    ...Object.keys(byId),
+  ].slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 
   return {
-    byId,
+    byId: pick(byId, idsToSave as number[]),
     selectedId: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN ? selectedId : undefined,
   };
 }
