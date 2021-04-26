@@ -2,10 +2,9 @@ const MemorySession = require('./Memory')
 const AuthKey = require('../crypto/AuthKey')
 const utils = require('../Utils')
 
-const CACHE_NAME = 'GramJs'
 const STORAGE_KEY_BASE = 'GramJs-session-'
 
-class CacheApi extends MemorySession {
+class StorageSession extends MemorySession {
     constructor(sessionId) {
         super()
         this._storageKey = sessionId
@@ -18,7 +17,7 @@ class CacheApi extends MemorySession {
         }
 
         try {
-            const json = await this._fetchFromCache(this._storageKey)
+            const json = await this._fetchFromCache()
             const { mainDcId, keys, hashes } = JSON.parse(json)
             const { ipAddress, port } = utils.getDC(mainDcId)
 
@@ -94,20 +93,18 @@ class CacheApi extends MemorySession {
             sessionData.hashes[dcId] = authKey._hash
         })
 
-        await this._saveToCache(this._storageKey, JSON.stringify(sessionData))
+        await this._saveToCache(JSON.stringify(sessionData))
     }
 
     async delete() {
-        const request = new Request(this._storageKey)
-        const cache = await self.caches.open(CACHE_NAME)
-        await cache.delete(request)
-    }
-
-    async _fetchFromCache(key) {
         throw new Error('Not Implemented')
     }
 
-    async _saveToCache(key, data) {
+    async _fetchFromCache() {
+        throw new Error('Not Implemented')
+    }
+
+    async _saveToCache(data) {
         throw new Error('Not Implemented')
     }
 }
@@ -117,4 +114,4 @@ function generateStorageKey() {
     return `${STORAGE_KEY_BASE}${Date.now()}`
 }
 
-module.exports = CacheApi
+module.exports = StorageSession
