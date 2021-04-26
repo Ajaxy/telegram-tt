@@ -43,3 +43,56 @@ self.addEventListener('fetch', (e: FetchEvent) => {
     return fetch(e.request);
   })());
 });
+
+
+self.addEventListener('push', (e: PushEvent) => {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[SW] Push received event', e);
+    if (e.data) {
+      // eslint-disable-next-line no-console
+      console.log(`[SW] Push received with data "${e.data.text()}"`);
+    }
+  }
+  if (!e.data) return;
+  let obj;
+  try {
+    obj = e.data.json();
+  } catch (error) {
+    obj = e.data.text();
+  }
+
+  const title = obj.title || 'Telegram';
+  const body = obj.description || obj;
+  const options = {
+    body,
+    icon: 'android-chrome-192x192.png',
+  };
+
+  e.waitUntil(
+    self.registration.showNotification(title, options),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  const url = '/';
+  event.notification.close(); // Android needs explicit close.
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' })
+      .then((windowClients) => {
+        // Check if there is already a window/tab open with the target URL
+        for (let i = 0; i < windowClients.length; i++) {
+          const client = windowClients[i] as WindowClient;
+          // If so, just focus it.
+          if (client.url === url && client.focus) {
+            client.focus();
+            return;
+          }
+        }
+        // If not, then open the target URL in a new window/tab.
+        if (self.clients.openWindow) {
+          self.clients.openWindow(url);
+        }
+      }),
+  );
+});

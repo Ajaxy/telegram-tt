@@ -1,8 +1,8 @@
 import { scriptUrl } from 'service-worker-loader!../serviceWorker';
 
 import { DEBUG } from '../config';
-import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { getDispatch } from '../lib/teact/teactn';
+import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 
 if (IS_SERVICE_WORKER_SUPPORTED) {
   window.addEventListener('load', async () => {

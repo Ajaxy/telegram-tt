@@ -12,6 +12,7 @@ import {
   ApiUpdateCurrentUser,
 } from '../../../api/types';
 import { DEBUG } from '../../../config';
+import { setupPushNotifications } from '../../../util/setupPushNotifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 
@@ -138,6 +139,7 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
     getDispatch().sync();
+    setupPushNotifications();
   } else if (connectionState === 'connectionStateBroken') {
     getDispatch().signOut();
   }
