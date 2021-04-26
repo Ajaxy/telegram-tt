@@ -12,7 +12,7 @@ import { buildApiWallpaper, buildApiSession, buildPrivacyRules } from '../apiBui
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview, getApiChatIdFromMtpPeer } from '../apiBuilders/chats';
 import { buildInputPrivacyKey, buildInputPeer, buildPeer } from '../gramjsBuilders';
-import { invokeRequest, uploadFile } from './client';
+import { invokeRequest, uploadFile, getClient } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
@@ -277,6 +277,26 @@ export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
   updateLocalDb(result);
 
   return buildPrivacyRules(result.rules);
+}
+
+export function registerDevice(token: string) {
+  const client = getClient();
+  const secret = client.session.getAuthKey().getKey();
+  return invokeRequest(new GramJs.account.RegisterDevice({
+    tokenType: 10,
+    secret,
+    appSandbox: false,
+    otherUids: [],
+    token,
+  }));
+}
+
+export function unregisterDevice(token: string) {
+  return invokeRequest(new GramJs.account.UnregisterDevice({
+    tokenType: 10,
+    otherUids: [],
+    token,
+  }));
 }
 
 export async function setPrivacySettings(

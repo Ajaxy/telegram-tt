@@ -44,7 +44,7 @@ export {
   updateProfilePhoto, uploadProfilePhoto, fetchWallpapers, uploadWallpaper,
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   loadNotificationsSettings, updateContactSignUpNotification, updateNotificationSettings,
-  fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings,
+  fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
 } from './settings';
 
 export {

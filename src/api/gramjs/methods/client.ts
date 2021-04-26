@@ -94,6 +94,10 @@ export async function destroy() {
   await client.destroy();
 }
 
+export function getClient() {
+  return client;
+}
+
 function handleGramJsUpdate(update: any) {
   if (update instanceof connection.UpdateConnectionState) {
     isConnected = update.state === connection.UpdateConnectionState.connected;

@@ -2,6 +2,7 @@
     "name": "Telegram WebZ",
     "short_name": "Telegram WebZ",
     "start_url": "/",
+    "gcm_sender_id": "648693842861",
     "icons": [
         {
             "src": "android-chrome-192x192.png",
@@ -21,5 +22,8 @@
     ],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
-    "display": "standalone"
+    "display": "standalone",
+    "permissions": [
+       "notifications"
+    ]
 }
