@@ -53,6 +53,9 @@
   &.blue {
     > div {
       background-image: var(--spinner-blue-data);
+      .theme-dark & {
+        background-image: var(--spinner-dark-blue-data);
+      }
     }
   }
 
