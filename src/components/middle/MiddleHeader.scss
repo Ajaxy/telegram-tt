@@ -345,7 +345,7 @@
       }
 
       .pinned-message-border-wrapper {
-        background-color: rgba(var(--color-primary-rgb), 0.5);
+        background-color: var(--color-primary-opacity);
         position: relative;
         will-change: transform;
         transition: transform .25s ease-in-out;

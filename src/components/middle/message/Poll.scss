@@ -95,9 +95,16 @@
     // gray spinner
     background-image: var(--spinner-gray-data);
 
+    .theme-dark & {
+      background-image: var(--spinner-white-data);
+    }
+
     .Message.own & {
       // green spinner
       background-image: var(--spinner-green-data);
+      .theme-dark & {
+        background-image: var(--spinner-white-data);
+      }
     }
   }
 
@@ -165,7 +172,7 @@
 
     .Message.own & {
       color: var(--accent-color);
-      --color-primary-shade-rgb: var(--color-text-green-rgb);
+      --color-primary-shade-rgb: var(--color-accent-own);
     }
   }
 

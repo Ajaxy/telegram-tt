@@ -12,11 +12,21 @@
     --color-interactive-inactive: rgba(var(--color-text-green-rgb), 0.4);
     --color-interactive-buffered: rgba(var(--color-text-green-rgb), 0.4); // Overlays underlying inactive color
 
+    .theme-dark & {
+      --color-text-green-rgb: 255,255,255;
+      --color-text-green: var(--color-white);
+    }
+
     .Button {
       --color-primary: var(--color-text-green);
       --color-primary-shade: var(--color-green);
       --color-primary-shade-darker: var(--color-green-darker);
       --color-white: var(--color-background-own);
+
+      .theme-dark & {
+        --color-primary-shade: #fff;
+        --color-primary-shade-darker: #fff;
+      }
     }
   }
 

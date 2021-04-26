@@ -6,8 +6,8 @@
   position: relative;
 
   --background-color: var(--color-background);
-  --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
-  --active-color: rgba(var(--color-text-secondary-rgb), 0.16);
+  --hover-color: var(--color-reply-hover);
+  --active-color: var(--color-reply-active);
   --max-width: 29rem;
   --accent-color: var(--color-primary);
   --accent-shade-color: var(--color-primary-shade);
@@ -175,9 +175,19 @@
     }
   }
 
+  &.is-in-document-group .File.file-is-selected .file-icon,
+  &.has-menu-open.is-in-document-group .File .file-icon {
+    --background-color: var(--color-background-selected);
+  }
+
+  &.own.is-in-document-group .File.file-is-selected .file-icon,
+  &.own.has-menu-open.is-in-document-group .File .file-icon {
+    --background-color: var(--color-background-own-selected);
+  }
+
   .Audio .message-select-control {
-    left: 1.063rem;
-    bottom: 0.813rem;
+    left: 1.0625rem;
+    top: 1.375rem;
   }
 
   html.theme-dark &.own .Audio .ProgressSpinner {
