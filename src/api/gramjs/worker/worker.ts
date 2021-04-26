@@ -87,17 +87,16 @@ onmessage = async (message: OriginMessageEvent) => {
 };
 
 function handleErrors() {
-  // eslint-disable-next-line no-restricted-globals
   self.onerror = (e) => {
     // eslint-disable-next-line no-console
     console.error(e);
-    sendToOrigin({ type: 'unhandledError', error: { message: e.message || 'Uncaught exception in worker' } });
+    sendToOrigin({ type: 'unhandledError', error: { message: e.error.message || 'Uncaught exception in worker' } });
   };
-  // eslint-disable-next-line no-restricted-globals
+
   self.addEventListener('unhandledrejection', (e) => {
     // eslint-disable-next-line no-console
     console.error(e);
-    sendToOrigin({ type: 'unhandledError', error: { message: e.reason || 'Uncaught rejection in worker' } });
+    sendToOrigin({ type: 'unhandledError', error: { message: e.reason.message || 'Uncaught rejection in worker' } });
   });
 }
 
