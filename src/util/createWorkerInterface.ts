@@ -77,16 +77,16 @@ export default function createInterface(api: Record<string, Function>) {
 }
 
 function handleErrors() {
-  self.onerror = (err) => {
+  self.onerror = (e) => {
     // eslint-disable-next-line no-console
-    console.error(err);
-    sendToOrigin({ type: 'unhandledError', error: { message: 'Uncaught exception in worker' } });
+    console.error(e);
+    sendToOrigin({ type: 'unhandledError', error: { message: e.error.message || 'Uncaught exception in worker' } });
   };
 
-  self.addEventListener('unhandledrejection', (err) => {
+  self.addEventListener('unhandledrejection', (e) => {
     // eslint-disable-next-line no-console
-    console.error(err);
-    sendToOrigin({ type: 'unhandledError', error: { message: 'Uncaught rejection in worker' } });
+    console.error(e);
+    sendToOrigin({ type: 'unhandledError', error: { message: e.reason.message || 'Uncaught rejection in worker' } });
   });
 }
 
