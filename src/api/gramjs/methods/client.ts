@@ -37,7 +37,7 @@ export async function init(sessionId: string, _onUpdate: OnApiUpdate) {
 
   const session = IS_TEST
     ? new sessions.LocalStorageSession(sessionId)
-    : new sessions.CacheApiSession(sessionId);
+    : new sessions.IdbSession(sessionId);
 
   client = new TelegramClient(
     session,

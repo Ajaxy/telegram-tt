@@ -102,6 +102,7 @@
     "croppie": "^2.6.4",
     "emoji-data-ios": "github:korenskoy/emoji-data-ios#10073b1",
     "events": "^3.0.0",
+    "idb-keyval": "^5.0.5",
     "opus-recorder": "^6.2.0",
     "pako": "^1.0.10",
     "qr-creator": "^1.0.0",
