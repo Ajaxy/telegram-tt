@@ -20,6 +20,9 @@ import {
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
+// Enough to animate and mark as read in Message List
+const CURRENT_CHAT_UNREAD_DELAY = 1000;
+
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
@@ -93,7 +96,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const { message } = update;
       const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
 
-      if (message.chatId === currentChatId || (message.senderId === global.currentUserId && !message.isFromScheduled)) {
+      if (message.senderId === global.currentUserId && !message.isFromScheduled) {
         return;
       }
 
@@ -102,12 +105,18 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         return;
       }
 
-      setGlobal(updateChat(global, update.chatId, {
-        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-        ...(update.message.hasUnreadMention && {
-          unreadMentionsCount: chat.unreadMentionsCount ? chat.unreadMentionsCount + 1 : 1,
-        }),
-      }));
+      if (update.chatId === currentChatId) {
+        setTimeout(() => {
+          actions.requestChatUpdate({ chatId: update.chatId });
+        }, CURRENT_CHAT_UNREAD_DELAY);
+      } else {
+        setGlobal(updateChat(global, update.chatId, {
+          unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
+          ...(update.message.hasUnreadMention && {
+            unreadMentionsCount: chat.unreadMentionsCount ? chat.unreadMentionsCount + 1 : 1,
+          }),
+        }));
+      }
 
       break;
     }

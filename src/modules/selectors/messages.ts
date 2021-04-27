@@ -503,7 +503,7 @@ export function selectRealLastReadId(global: GlobalState, chatId: number, thread
 export function selectFirstUnreadId(global: GlobalState, chatId: number, threadId: number) {
   if (threadId === MAIN_THREAD_ID) {
     const chat = selectChat(global, chatId);
-    if (!chat || !chat.unreadCount) {
+    if (!chat) {
       return undefined;
     }
   } else {
