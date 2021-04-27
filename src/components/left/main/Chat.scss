@@ -28,7 +28,8 @@
     --background-color: var(--color-chat-active) !important;
 
     .Avatar.online::after {
-      border-color: var(--color-chat-active);
+      border-color: var(--color-chat-active) !important;
+      background: var(--color-white);
     }
 
     .ListItem-button {
