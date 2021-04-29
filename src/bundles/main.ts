@@ -1,4 +1,4 @@
-import { getDispatch } from '../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../lib/teact/teactn';
 
 import { DEBUG } from '../config';
 
@@ -9,4 +9,6 @@ if (DEBUG) {
   console.log('>>> FINISH LOAD MAIN BUNDLE');
 }
 
-getDispatch().initApi();
+if (!getGlobal().connectionState) {
+  getDispatch().initApi();
+}
