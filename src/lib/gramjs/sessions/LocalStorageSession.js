@@ -1,7 +1,7 @@
 const StorageSession = require('./StorageSession')
 
 class LocalStorageSession extends StorageSession {
-    async delete() {
+    async _delete() {
         return localStorage.removeItem(this._storageKey)
     }
 
