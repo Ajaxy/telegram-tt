@@ -32,7 +32,8 @@ class StorageSession extends MemorySession {
                 }
             })
         } catch (err) {
-            throw new Error(`Failed to retrieve or parse JSON from Cache for key ${this._storageKey}`)
+            console.warn('Failed to retrieve or parse session from storage')
+            console.warn(err)
         }
     }
 
@@ -93,17 +94,34 @@ class StorageSession extends MemorySession {
             sessionData.hashes[dcId] = authKey._hash
         })
 
-        await this._saveToCache(JSON.stringify(sessionData))
+        try {
+            await this._saveToCache(JSON.stringify(sessionData))
+        } catch (err) {
+            console.warn('Failed to update session in storage')
+            console.warn(err)
+        }
     }
 
     async delete() {
+        try {
+            return await this._delete()
+        } catch (err) {
+            console.warn('Failed to delete session from storage')
+            console.warn(err)
+        }
+    }
+
+    // @abstract
+    async _delete() {
         throw new Error('Not Implemented')
     }
 
+    // @abstract
     async _fetchFromCache() {
         throw new Error('Not Implemented')
     }
 
+    // @abstract
     async _saveToCache(data) {
         throw new Error('Not Implemented')
     }

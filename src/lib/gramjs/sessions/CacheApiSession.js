@@ -3,10 +3,10 @@ const StorageSession = require('./StorageSession')
 const CACHE_NAME = 'GramJs'
 
 class CacheApiSession extends StorageSession {
-    async delete() {
+    async _delete() {
         const request = new Request(this._storageKey)
         const cache = await self.caches.open(CACHE_NAME)
-        await cache.delete(request)
+        return cache.delete(request)
     }
 
     async _fetchFromCache() {

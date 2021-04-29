@@ -4,7 +4,7 @@ const idb = require('idb-keyval')
 const CACHE_NAME = 'GramJs'
 
 class IdbSession extends StorageSession {
-    async delete() {
+    async _delete() {
         return idb.del(`${CACHE_NAME}:${this._storageKey}`)
     }
 
