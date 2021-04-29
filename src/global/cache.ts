@@ -23,16 +23,20 @@ const UPDATE_THROTTLE = 1000;
 
 const updateCacheThrottled = throttle(updateCache, UPDATE_THROTTLE, false);
 
+let isAllowed = false;
+
 export function initCache() {
   if (GLOBAL_STATE_CACHE_DISABLED) {
     return;
   }
 
   addReducer('saveSession', () => {
+    isAllowed = true;
     addCallback(updateCacheThrottled);
   });
 
-  addReducer('signOut', () => {
+  addReducer('reset', () => {
+    isAllowed = false;
     removeCallback(updateCacheThrottled);
     localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
   });
@@ -42,8 +46,11 @@ export function loadCache(initialState: GlobalState) {
   if (!GLOBAL_STATE_CACHE_DISABLED) {
     const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
     if (hasActiveSession) {
+      isAllowed = true;
       addCallback(updateCacheThrottled);
       return readCache(initialState);
+    } else {
+      isAllowed = false;
     }
   }
 
@@ -80,6 +87,10 @@ function readCache(initialState: GlobalState) {
 
 function updateCache() {
   onIdle(() => {
+    if (!isAllowed) {
+      return;
+    }
+
     const global = getGlobal();
 
     if (global.isLoggingOut) {

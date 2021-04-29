@@ -4,9 +4,17 @@ import {
 
 import { GlobalState } from '../../../global/types';
 
-import { GRAMJS_SESSION_ID_KEY } from '../../../config';
+import {
+  LANG_CACHE_NAME,
+  CUSTOM_BG_CACHE_NAME,
+  GRAMJS_SESSION_ID_KEY,
+  MEDIA_CACHE_NAME,
+  MEDIA_CACHE_NAME_AVATARS,
+  MEDIA_PROGRESSIVE_CACHE_NAME,
+} from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribeFromPush } from '../../../util/pushNotifications';
+import * as cacheApi from '../../../util/cacheApi';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
@@ -98,16 +106,25 @@ addReducer('saveSession', (global, actions, payload) => {
 });
 
 addReducer('signOut', () => {
-  void signOut();
+  (async () => {
+    await unsubscribeFromPush();
+    await callApi('destroy');
+
+    getDispatch().reset();
+  })();
 });
 
-async function signOut() {
-  await unsubscribeFromPush();
-  await callApi('destroy');
+addReducer('reset', () => {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 
+  cacheApi.clear(MEDIA_CACHE_NAME);
+  cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
+  cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
+  cacheApi.clear(CUSTOM_BG_CACHE_NAME);
+  cacheApi.clear(LANG_CACHE_NAME);
+
   getDispatch().init();
-}
+});
 
 addReducer('loadNearestCountry', (global) => {
   if (global.connectionState !== 'connectionStateReady') {
