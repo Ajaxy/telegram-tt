@@ -3,20 +3,11 @@ import { ChangeEvent } from 'react';
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 
-import {
-  CUSTOM_BG_CACHE_NAME,
-  LANG_CACHE_NAME,
-  MEDIA_CACHE_NAME,
-  MEDIA_CACHE_NAME_AVATARS,
-  MEDIA_PROGRESSIVE_CACHE_NAME,
-} from '../../config';
-
 import { GlobalActions, GlobalState } from '../../global/types';
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
-import * as cacheApi from '../../util/cacheApi';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
@@ -38,8 +29,6 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 const MIN_NUMBER_LENGTH = 10;
-// Cache clearing may be heavy so we delay it
-const CLEAR_CACHE_DELAY = 2000;
 
 let isPreloadInitiated = false;
 
@@ -113,17 +102,6 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       inputRef.current.setSelectionRange(...lastSelection);
     }
   }, [lastSelection]);
-
-  // Media cache storage is always enabled, so we clear it only when user by any chance returned to the auth page
-  useEffect(() => {
-    setTimeout(() => {
-      cacheApi.clear(MEDIA_CACHE_NAME);
-      cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
-      cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
-      cacheApi.clear(CUSTOM_BG_CACHE_NAME);
-      cacheApi.clear(LANG_CACHE_NAME);
-    }, CLEAR_CACHE_DELAY);
-  }, []);
 
   const handlePhoneNumberChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (authError) {

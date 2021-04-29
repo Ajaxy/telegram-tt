@@ -16,12 +16,16 @@ import AuthQrCode from './AuthQrCode.async';
 import './Auth.scss';
 
 type StateProps = Pick<GlobalState, 'authState'>;
-type DispatchProps = Pick<GlobalActions, 'initApi'>;
+type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi'>;
 
-const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
+const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => {
   useEffect(() => {
+    reset();
     initApi();
-  }, [initApi]);
+  }, [reset, initApi]);
+
+  useEffect(() => {
+  }, []);
 
   switch (authState) {
     case 'authorizationStateWaitCode':
@@ -40,5 +44,5 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authState']),
-  (global, actions): DispatchProps => pick(actions, ['initApi']),
+  (global, actions): DispatchProps => pick(actions, ['reset', 'initApi']),
 )(Auth));
