@@ -12,7 +12,7 @@ import {
   ApiUpdateCurrentUser,
 } from '../../../api/types';
 import { DEBUG } from '../../../config';
-import { setupPushNotifications } from '../../../util/setupPushNotifications';
+import { subscribeToPush } from '../../../util/pushNotifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 
@@ -57,6 +57,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 });
 
 function onUpdateApiReady(global: GlobalState) {
+  subscribeToPush();
   setLanguage(global.settings.byKey.language);
 }
 
@@ -139,7 +140,6 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
     getDispatch().sync();
-    setupPushNotifications();
   } else if (connectionState === 'connectionStateBroken') {
     getDispatch().signOut();
   }
