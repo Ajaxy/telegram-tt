@@ -6,6 +6,7 @@ import { GlobalState } from '../../../global/types';
 
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
+import { unsubscribeFromPush } from '../../../util/pushNotifications';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
@@ -101,6 +102,7 @@ addReducer('signOut', () => {
 });
 
 async function signOut() {
+  await unsubscribeFromPush();
   await callApi('destroy');
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 

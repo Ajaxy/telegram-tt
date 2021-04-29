@@ -1,18 +1,20 @@
 import { callApi } from '../api/gramjs';
 import { DEBUG } from '../config';
+import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();
   return JSON.stringify({ endpoint: data.endpoint, keys: data.keys });
 }
 
-export async function setupPushNotifications() {
+export function isPushSupported() {
+  if (!IS_SERVICE_WORKER_SUPPORTED) return false;
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.log('[PUSH] Push notifications aren\'t supported.');
     }
-    return;
+    return false;
   }
 
   // Check the current Notification permission.
@@ -23,7 +25,7 @@ export async function setupPushNotifications() {
       // eslint-disable-next-line no-console
       console.log('[PUSH] The user has blocked push notifications.');
     }
-    return;
+    return false;
   }
 
   // Check if push messaging is supported
@@ -32,11 +34,20 @@ export async function setupPushNotifications() {
       // eslint-disable-next-line no-console
       console.log('[PUSH] Push messaging isn\'t supported.');
     }
+    return false;
   }
+  return true;
+}
 
+export async function unsubscribeFromPush() {
+  if (!isPushSupported) return;
   const serviceWorkerRegistration = await navigator.serviceWorker.ready;
-  let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+  const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
   if (subscription) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log('[PUSH] Unsubscribing', subscription);
+    }
     try {
       const deviceToken = getDeviceToken(subscription);
       await callApi('unregisterDevice', deviceToken);
@@ -48,22 +59,22 @@ export async function setupPushNotifications() {
       }
     }
   }
+}
 
+export async function subscribeToPush() {
+  if (!isPushSupported()) return;
+  await unsubscribeFromPush();
+  const serviceWorkerRegistration = await navigator.serviceWorker.ready;
   try {
-    subscription = await serviceWorkerRegistration.pushManager.subscribe({
+    const subscription = await serviceWorkerRegistration.pushManager.subscribe({
       userVisibleOnly: true,
     });
-
     const deviceToken = getDeviceToken(subscription);
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
-    const result = await callApi('registerDevice', deviceToken);
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[PUSH] registerDevice result', result);
-    }
+    await callApi('registerDevice', deviceToken);
   } catch (error) {
     if (Notification.permission === 'denied' as NotificationPermission) {
       // The user denied the notification permission which

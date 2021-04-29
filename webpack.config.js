@@ -105,6 +105,7 @@ module.exports = (env = {}, argv = {}) => {
       new EnvironmentPlugin({
         APP_INFO: 'Telegram T',
         APP_ENV: 'production',
+        APP_URL: 'https://webz.telegram.org/',
         TELEGRAM_T_API_ID: '',
         TELEGRAM_T_API_HASH: '',
       }),

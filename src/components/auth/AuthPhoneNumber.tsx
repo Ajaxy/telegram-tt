@@ -1,33 +1,33 @@
 import { ChangeEvent } from 'react';
-import React, {
-  FC, useState, useEffect, useCallback, useLayoutEffect, useRef, memo,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-
-import { GlobalState, GlobalActions } from '../../global/types';
-
-import {
-  MEDIA_CACHE_NAME,
-  MEDIA_CACHE_NAME_AVATARS,
-  MEDIA_PROGRESSIVE_CACHE_NAME,
-  CUSTOM_BG_CACHE_NAME,
-  LANG_CACHE_NAME,
-} from '../../config';
-import { IS_TOUCH_ENV } from '../../util/environment';
-import * as cacheApi from '../../util/cacheApi';
-import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../util/phoneNumber';
-import preloadFonts from '../../util/fonts';
-import { preloadImage } from '../../util/files';
-import { pick } from '../../util/iteratees';
-
-import Button from '../ui/Button';
-import InputText from '../ui/InputText';
-import CountryCodeInput from './CountryCodeInput';
-import Checkbox from '../ui/Checkbox';
-import Loading from '../ui/Loading';
 
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
+
+import {
+  CUSTOM_BG_CACHE_NAME,
+  LANG_CACHE_NAME,
+  MEDIA_CACHE_NAME,
+  MEDIA_CACHE_NAME_AVATARS,
+  MEDIA_PROGRESSIVE_CACHE_NAME,
+} from '../../config';
+
+import { GlobalActions, GlobalState } from '../../global/types';
+import React, {
+  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+} from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+import * as cacheApi from '../../util/cacheApi';
+import { IS_TOUCH_ENV } from '../../util/environment';
+import { preloadImage } from '../../util/files';
+import preloadFonts from '../../util/fonts';
+import { pick } from '../../util/iteratees';
+import { formatPhoneNumber, getCountryById, getCountryFromPhoneNumber } from '../../util/phoneNumber';
+
+import Button from '../ui/Button';
+import Checkbox from '../ui/Checkbox';
+import InputText from '../ui/InputText';
+import Loading from '../ui/Loading';
+import CountryCodeInput from './CountryCodeInput';
 
 type StateProps = Pick<GlobalState, (
   'connectionState' | 'authState' |
