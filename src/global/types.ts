@@ -375,6 +375,11 @@ export type GlobalState = {
     error?: string;
     waitingEmailCodeLength?: number;
   };
+
+  push?: {
+    deviceToken: string;
+    subscribedAt: number;
+  };
 };
 
 export type ActionTypes = (
@@ -439,7 +444,8 @@ export type ActionTypes = (
   'clickInlineButton' | 'sendBotCommand' |
   // misc
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
-  'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |
+  'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |
+  'deleteDeviceToken' |
   // payment
   'openPaymentModal' | 'closePaymentModal' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |

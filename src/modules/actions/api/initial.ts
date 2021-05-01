@@ -140,3 +140,20 @@ addReducer('loadNearestCountry', (global) => {
     });
   })();
 });
+
+
+addReducer('setDeviceToken', (global, actions, deviceToken) => {
+  setGlobal({
+    ...global,
+    push: {
+      deviceToken,
+      subscribedAt: Date.now(),
+    },
+  });
+});
+
+addReducer('deleteDeviceToken', (global) => {
+  const newGlobal = { ...global };
+  delete newGlobal.push;
+  setGlobal(newGlobal);
+});

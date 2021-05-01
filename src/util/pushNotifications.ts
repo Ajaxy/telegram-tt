@@ -1,5 +1,6 @@
 import { callApi } from '../api/gramjs';
 import { DEBUG } from '../config';
+import { getDispatch, getGlobal } from '../lib/teact/teactn';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 
 function getDeviceToken(subscription: PushSubscription) {
@@ -7,7 +8,7 @@ function getDeviceToken(subscription: PushSubscription) {
   return JSON.stringify({ endpoint: data.endpoint, keys: data.keys });
 }
 
-export function isPushSupported() {
+function checkIfSupported() {
   if (!IS_SERVICE_WORKER_SUPPORTED) return false;
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
@@ -39,19 +40,25 @@ export function isPushSupported() {
   return true;
 }
 
-export async function unsubscribeFromPush() {
-  if (!isPushSupported) return;
-  const serviceWorkerRegistration = await navigator.serviceWorker.ready;
-  const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+const expirationTime = 12 * 60 * 60 * 1000; // 12 hours
+
+function checkIfShouldResubscribe(subscription: PushSubscription | null) {
+  const global = getGlobal();
+  if (!global.push || !subscription) return true;
+  if (getDeviceToken(subscription) !== global.push.deviceToken) return true;
+  return Date.now() - global.push.subscribedAt > expirationTime;
+}
+
+async function unsubscribe(subscription: PushSubscription | null) {
+  const global = getGlobal();
+  const dispatch = getDispatch();
   if (subscription) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[PUSH] Unsubscribing', subscription);
-    }
     try {
       const deviceToken = getDeviceToken(subscription);
       await callApi('unregisterDevice', deviceToken);
       await subscription.unsubscribe();
+      dispatch.deleteDeviceToken();
+      return;
     } catch (error) {
       if (DEBUG) {
         // eslint-disable-next-line no-console
@@ -59,14 +66,27 @@ export async function unsubscribeFromPush() {
       }
     }
   }
+  if (global.push) {
+    await callApi('unregisterDevice', global.push.deviceToken);
+    dispatch.deleteDeviceToken();
+  }
+}
+
+export async function unsubscribeFromPush() {
+  if (!checkIfSupported()) return;
+  const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+  const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+  await unsubscribe(subscription);
 }
 
 export async function subscribeToPush() {
-  if (!isPushSupported()) return;
-  await unsubscribeFromPush();
+  if (!checkIfSupported()) return;
   const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+  let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+  if (!checkIfShouldResubscribe(subscription)) return;
+  await unsubscribe(subscription);
   try {
-    const subscription = await serviceWorkerRegistration.pushManager.subscribe({
+    subscription = await serviceWorkerRegistration.pushManager.subscribe({
       userVisibleOnly: true,
     });
     const deviceToken = getDeviceToken(subscription);
@@ -75,6 +95,7 @@ export async function subscribeToPush() {
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
     await callApi('registerDevice', deviceToken);
+    getDispatch().setDeviceToken(deviceToken);
   } catch (error) {
     if (Notification.permission === 'denied' as NotificationPermission) {
       // The user denied the notification permission which
@@ -93,4 +114,12 @@ export async function subscribeToPush() {
       console.log('[PUSH] Unable to subscribe to push.', error);
     }
   }
+}
+
+// Notify service worker that client is fully loaded
+export function notifyClientReady() {
+  if (!navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({
+    type: 'clientReady',
+  });
 }

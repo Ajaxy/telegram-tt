@@ -110,6 +110,7 @@ function updateCache() {
         'chatFolders',
         'topPeers',
         'recentEmojis',
+        'push',
       ]),
       isChatInfoShown: reduceShowChatInfo(global),
       users: reduceUsers(global),
