@@ -8,6 +8,8 @@ const MAX_DISTANCE = 1500;
 const MIN_JS_DURATION = 250;
 const MAX_JS_DURATION = 600;
 
+let isAnimating = false;
+
 export default function fastSmoothScroll(
   container: HTMLElement,
   element: HTMLElement,
@@ -16,6 +18,7 @@ export default function fastSmoothScroll(
   maxDistance = MAX_DISTANCE,
   forceDirection?: FocusDirection,
   forceDuration?: number,
+  forceCurrentContainerHeight?: boolean,
 ) {
   if (forceDirection === FocusDirection.Static) {
     element.scrollIntoView({ block: position });
@@ -39,17 +42,31 @@ export default function fastSmoothScroll(
     container.scrollTop = Math.max(0, offsetTop - maxDistance);
   }
 
+  isAnimating = true;
   fastRaf(() => {
     dispatchHeavyAnimationEvent(MAX_JS_DURATION);
-    scrollWithJs(container, element, position, margin, forceDuration);
+    scrollWithJs(container, element, position, margin, forceDuration, forceCurrentContainerHeight);
   });
 }
 
+export function isAnimatingScroll() {
+  return isAnimating;
+}
+
 function scrollWithJs(
-  container: HTMLElement, element: HTMLElement, position: ScrollLogicalPosition, margin = 0, forceDuration?: number,
+  container: HTMLElement,
+  element: HTMLElement,
+  position: ScrollLogicalPosition,
+  margin = 0,
+  forceDuration?: number,
+  forceCurrentContainerHeight?: boolean,
 ) {
   const { offsetTop: elementTop, offsetHeight: elementHeight } = element;
   const { scrollTop, offsetHeight: containerHeight, scrollHeight } = container;
+  const targetContainerHeight = !forceCurrentContainerHeight && container.dataset.normalHeight
+    ? Number(container.dataset.normalHeight)
+    : containerHeight;
+
   let path!: number;
 
   switch (position) {
@@ -57,13 +74,13 @@ function scrollWithJs(
       path = (elementTop - margin) - scrollTop;
       break;
     case 'end':
-      path = (elementTop + elementHeight + margin) - (scrollTop + containerHeight);
+      path = (elementTop + elementHeight + margin) - (scrollTop + targetContainerHeight);
       break;
     // 'nearest' is not supported yet
     case 'nearest':
     case 'center':
-      path = elementHeight < containerHeight
-        ? (elementTop + elementHeight / 2) - (scrollTop + containerHeight / 2)
+      path = elementHeight < targetContainerHeight
+        ? (elementTop + elementHeight / 2) - (scrollTop + targetContainerHeight / 2)
         : (elementTop - margin) - scrollTop;
       break;
   }
@@ -72,7 +89,7 @@ function scrollWithJs(
     const remainingPath = -scrollTop;
     path = Math.max(path, remainingPath);
   } else if (path > 0) {
-    const remainingPath = scrollHeight - (scrollTop + containerHeight);
+    const remainingPath = scrollHeight - (scrollTop + targetContainerHeight);
     path = Math.min(path, remainingPath);
   }
 
@@ -88,7 +105,9 @@ function scrollWithJs(
     const currentPath = path * (1 - transition(t));
     container.scrollTop = Math.round(target - currentPath);
 
-    return t < 1;
+    isAnimating = t < 1;
+
+    return isAnimating;
   });
 }
 

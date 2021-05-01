@@ -50,7 +50,7 @@ import useOnChange from '../../hooks/useOnChange';
 import useStickyDates from './hooks/useStickyDates';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import resetScroll from '../../util/resetScroll';
-import fastSmoothScroll from '../../util/fastSmoothScroll';
+import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 import useLang, { LangFn } from '../../hooks/useLang';
 
@@ -327,6 +327,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
+  }, []);
+
   // Workaround for an iOS bug when animated stickers sometimes disappear
   useLayoutEffect(() => {
     if (!IS_IOS) {
@@ -410,10 +414,20 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
-    if (isAtBottom && hasLastMessageChanged && !hasFirstMessageChanged) {
+
+    if (isAtBottom && hasLastMessageChanged && !hasFirstMessageChanged && !memoFocusingIdRef.current) {
       if (lastItemElement) {
         fastRaf(() => {
-          fastSmoothScroll(container, lastItemElement, 'end', BOTTOM_FOCUS_MARGIN);
+          fastSmoothScroll(
+            container,
+            lastItemElement,
+            'end',
+            BOTTOM_FOCUS_MARGIN,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          );
         });
       }
 
@@ -440,6 +454,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     );
 
     if (isAtBottom && isResized) {
+      if (isAnimatingScroll()) {
+        return;
+      }
+
       newScrollTop = scrollHeight - offsetHeight;
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;

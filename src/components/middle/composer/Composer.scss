@@ -317,6 +317,7 @@
     caret-color: var(--color-text);
     min-height: 3.5rem;
     max-height: 26rem;
+    line-height: 1.3125;
 
     @media (max-width: 600px) {
       height: 2.875rem;
