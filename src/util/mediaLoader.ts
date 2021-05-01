@@ -157,7 +157,6 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
     const media = await webpToPng(url, blob);
     if (media) {
       prepared = prepareMedia(media);
-      mimeType = blob.type;
     }
   }
 

@@ -6,7 +6,7 @@ import {
   ApiChatFolder,
 } from './chats';
 import {
-  ApiMessage, ApiPoll, ApiStickerSet, ApiThreadInfo,
+  ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 
@@ -60,6 +60,7 @@ export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: number;
   chat: Partial<ApiChat>;
+  newProfilePhoto?: ApiPhoto;
 };
 
 export type ApiUpdateChatJoin = {
@@ -240,6 +241,12 @@ export type ApiUpdateDeleteHistory = {
   chatId: number;
 };
 
+export type ApiUpdateDeleteProfilePhotos = {
+  '@type': 'deleteProfilePhotos';
+  ids: string[];
+  chatId: number;
+};
+
 export type ApiUpdateResetMessages = {
   '@type': 'resetMessages';
   id: number;
@@ -353,7 +360,7 @@ export type ApiUpdate = (
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiDeleteUser | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo |
+  ApiDeleteUser | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateDeleteProfilePhotos |
   ApiUpdateAvatar | ApiUpdateMessageImage |
   ApiUpdateError | ApiUpdateResetContacts |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet |

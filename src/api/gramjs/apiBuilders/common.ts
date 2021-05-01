@@ -1,7 +1,9 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
-import { ApiThumbnail } from '../../types';
+import {
+  ApiPhoto, ApiPhotoSize, ApiThumbnail,
+} from '../../types';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
 
@@ -57,5 +59,27 @@ export function buildApiThumbnailFromPath(
     dataUri,
     width: w,
     height: h,
+  };
+}
+
+export function buildApiPhoto(photo: GramJs.Photo): ApiPhoto {
+  const sizes = photo.sizes
+    .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
+    .map(buildApiPhotoSize);
+
+  return {
+    id: String(photo.id),
+    thumbnail: buildApiThumbnailFromStripped(photo.sizes),
+    sizes,
+  };
+}
+
+export function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
+  const { w, h, type } = photoSize;
+
+  return {
+    width: w,
+    height: h,
+    type: type as ('m' | 'x' | 'y'),
   };
 }

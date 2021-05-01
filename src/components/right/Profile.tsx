@@ -39,11 +39,10 @@ import TabList from '../ui/TabList';
 import Spinner from '../ui/Spinner';
 import ListItem from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import GroupChatInfo from '../common/GroupChatInfo';
+import ProfileInfo from './ProfileInfo';
 import Document from '../common/Document';
 import Audio from '../common/Audio';
-import UserExtra from './UserExtra';
-import GroupExtra from './ChatExtra';
+import ChatExtra from './ChatExtra';
 import Media from '../common/Media';
 import WebLink from '../common/WebLink';
 import NothingFound from '../common/NothingFound';
@@ -74,7 +73,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'setLocalMediaSearchType' | 'searchMediaMessagesLocal' | 'openMediaViewer' |
-  'openAudioPlayer' | 'openUserInfo' | 'focusMessage'
+  'openAudioPlayer' | 'openUserInfo' | 'focusMessage' | 'loadProfilePhotos'
 )>;
 
 const TABS = [
@@ -108,6 +107,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   openAudioPlayer,
   openUserInfo,
   focusMessage,
+  loadProfilePhotos,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -147,6 +147,12 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [setLocalMediaSearchType, tabType]);
 
   const profileId = resolvedUserId || chatId;
+
+  useEffect(() => {
+    if (lastSyncTime) {
+      loadProfilePhotos({ profileId });
+    }
+  }, [loadProfilePhotos, profileId, lastSyncTime]);
 
   const handleSelectMedia = useCallback((messageId: number) => {
     openMediaViewer({
@@ -331,23 +337,11 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 function renderProfileInfo(chatId: number, resolvedUserId?: number) {
   return (
     <div className="profile-info">
-      {resolvedUserId ? (
-        <>
-          <PrivateChatInfo
-            userId={resolvedUserId}
-            avatarSize="jumbo"
-            forceShowSelf={resolvedUserId !== chatId}
-            withMediaViewer
-            withFullInfo
-          />
-          <UserExtra userId={resolvedUserId} forceShowSelf={resolvedUserId !== chatId} />
-        </>
-      ) : (
-        <>
-          <GroupChatInfo chatId={chatId} avatarSize="jumbo" withMediaViewer withFullInfo />
-          <GroupExtra chatId={chatId} />
-        </>
-      )}
+      <ProfileInfo
+        userId={resolvedUserId || chatId}
+        forceShowSelf={resolvedUserId !== chatId}
+      />
+      <ChatExtra chatOrUserId={resolvedUserId || chatId} forceShowSelf={resolvedUserId !== chatId} />
     </div>
   );
 }
@@ -408,5 +402,6 @@ export default memo(withGlobal<OwnProps>(
     'openAudioPlayer',
     'openUserInfo',
     'focusMessage',
+    'loadProfilePhotos',
   ]),
 )(Profile));

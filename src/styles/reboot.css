@@ -123,7 +123,7 @@ sup {
 }
 
 a {
-  color: theme-color("primary");
+  color: var(--color-links);
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects;

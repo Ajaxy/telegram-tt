@@ -148,7 +148,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
     }
   }
 
-  const ghost = createGhost(bestImageData || toImage);
+  const ghost = createGhost(bestImageData || toImage, origin === MediaViewerOrigin.ProfileAvatar);
   applyStyles(ghost, {
     top: `${toTop}px`,
     left: `${toLeft}px`,
@@ -179,7 +179,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   });
 }
 
-function createGhost(source: string | HTMLImageElement | HTMLVideoElement) {
+function createGhost(source: string | HTMLImageElement | HTMLVideoElement, shouldAppendProfileInfo = false) {
   const ghost = document.createElement('div');
   ghost.classList.add('ghost');
 
@@ -194,6 +194,14 @@ function createGhost(source: string | HTMLImageElement | HTMLVideoElement) {
   }
 
   ghost.appendChild(img);
+
+  if (shouldAppendProfileInfo) {
+    ghost.classList.add('ProfileInfo');
+    const profileInfo = document.querySelector('#RightColumn .ProfileInfo .info');
+    if (profileInfo) {
+      ghost.appendChild(profileInfo.cloneNode(true));
+    }
+  }
 
   return ghost;
 }
@@ -283,7 +291,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       break;
 
     case MediaViewerOrigin.ProfileAvatar:
-      containerSelector = '#RightColumn .active .profile-info .Avatar';
+      containerSelector = '#RightColumn .ProfileInfo .active .ProfilePhoto';
       mediaSelector = 'img.avatar-media';
       break;
 
@@ -313,12 +321,12 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
       break;
 
     case MediaViewerOrigin.SharedMedia:
+    case MediaViewerOrigin.ProfileAvatar:
     case MediaViewerOrigin.SearchResult:
       (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
       break;
 
     case MediaViewerOrigin.MiddleHeaderAvatar:
-    case MediaViewerOrigin.ProfileAvatar:
       ghost.classList.add('circle');
       break;
   }

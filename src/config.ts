@@ -53,6 +53,7 @@ export const GLOBAL_SEARCH_SLICE = 20;
 export const CHANNEL_MEMBERS_LIMIT = 30;
 export const PINNED_MESSAGES_LIMIT = 50;
 export const BLOCKED_LIST_LIMIT = 100;
+export const PROFILE_PHOTOS_LIMIT = 40;
 
 export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 25;
 export const ALL_CHATS_PRELOAD_DISABLED = false;

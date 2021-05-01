@@ -31,7 +31,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         actions.loadTopChats();
       }
 
-      setGlobal(updateChat(global, update.id, update.chat));
+      setGlobal(updateChat(global, update.id, update.chat, update.newProfilePhoto));
 
       break;
     }
@@ -328,6 +328,18 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
 
+      break;
+    }
+
+    case 'deleteProfilePhotos': {
+      const { chatId, ids } = update;
+      const chat = global.chats.byId[chatId];
+
+      if (chat && chat.photos) {
+        setGlobal(updateChat(global, chatId, {
+          photos: chat.photos.filter((photo) => !ids.includes(photo.id)),
+        }));
+      }
       break;
     }
   }

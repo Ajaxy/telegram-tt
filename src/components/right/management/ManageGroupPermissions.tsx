@@ -240,11 +240,9 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
 
         <div className="section">
-          <ListItem icon="delete-user" ripple narrow onClick={handleRemovedUsersClick}>
-            <div className="multiline-item">
-              <span className="title">{lang('ChannelBlockedUsers')}</span>
-              <span className="subtitle">{removedUsersCount}</span>
-            </div>
+          <ListItem icon="delete-user" multiline ripple narrow onClick={handleRemovedUsersClick}>
+            <span className="title">{lang('ChannelBlockedUsers')}</span>
+            <span className="subtitle">{removedUsersCount}</span>
           </ListItem>
         </div>
 

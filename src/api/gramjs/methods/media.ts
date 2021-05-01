@@ -17,7 +17,7 @@ import { getEntityTypeById } from '../gramjsBuilders';
 import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
-type EntityType = 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'stickerSet';
+type EntityType = 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet';
 
 export default async function downloadMedia(
   {
@@ -70,7 +70,8 @@ async function download(
   end?: number,
   mediaFormat?: ApiMediaFormat,
 ) {
-  const mediaMatch = url.match(/(avatar|profile|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(\?size=\w+)?/);
+  // eslint-disable-next-line max-len
+  const mediaMatch = url.match(/(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
   }
@@ -89,7 +90,7 @@ async function download(
   let entityId: string | number = mediaMatch[2];
   const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : undefined;
   let entity: (
-    GramJs.User | GramJs.Chat | GramJs.Channel |
+    GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Photo |
     GramJs.Message | GramJs.Document | GramJs.StickerSet | undefined
   );
 
@@ -97,7 +98,7 @@ async function download(
     entityType = getEntityTypeById(Number(entityId));
     entityId = Math.abs(Number(entityId));
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet';
+    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo';
   }
 
   switch (entityType) {
@@ -116,6 +117,9 @@ async function download(
     case 'wallpaper':
       entity = localDb.documents[entityId as string];
       break;
+    case 'photo':
+      entity = localDb.photos[entityId as string];
+      break;
     case 'stickerSet':
       entity = localDb.stickerSets[entityId as string];
       break;
@@ -125,7 +129,7 @@ async function download(
     return undefined;
   }
 
-  if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif' || entityType === 'wallpaper') {
+  if (['msg', 'sticker', 'gif', 'wallpaper', 'photo'].includes(entityType)) {
     if (mediaFormat === ApiMediaFormat.Stream) {
       onProgress!.acceptsBuffer = true;
     }
@@ -141,6 +145,8 @@ async function download(
       if (entity.media instanceof GramJs.MessageMediaDocument && entity.media.document instanceof GramJs.Document) {
         fullSize = entity.media.document.size;
       }
+    } else if (entity instanceof GramJs.Photo) {
+      mimeType = 'image/jpeg';
     } else if (entityType === 'sticker' && sizeType) {
       mimeType = 'image/webp';
     } else {

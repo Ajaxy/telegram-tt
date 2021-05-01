@@ -297,6 +297,10 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
   );
 }
 
+export function isServiceMessageWithMedia(message: GramJs.MessageService) {
+  return 'photo' in message.action && message.action.photo instanceof GramJs.Photo;
+}
+
 export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
   if (photo instanceof GramJs.PhotoEmpty) {
     return new GramJs.ChatPhotoEmpty();

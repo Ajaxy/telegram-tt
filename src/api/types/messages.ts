@@ -11,6 +11,7 @@ export interface ApiThumbnail {
 }
 
 export interface ApiPhoto {
+  id: string;
   thumbnail?: ApiThumbnail;
   sizes: ApiPhotoSize[];
   blobUrl?: string;
@@ -144,6 +145,7 @@ export interface ApiAction {
   targetUserId?: number;
   targetChatId?: number;
   type: 'historyClear' | 'other';
+  photo?: ApiPhoto;
 }
 
 export interface ApiWebPage {
@@ -264,7 +266,7 @@ export interface ApiKeyboardButton {
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
 
-export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio';
+export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 
 export const MAIN_THREAD_ID = -1;

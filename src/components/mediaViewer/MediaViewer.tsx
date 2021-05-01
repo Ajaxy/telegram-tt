@@ -75,6 +75,7 @@ type StateProps = {
   senderId?: number;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
+  profilePhotoIndex?: number;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
   collectionIds?: number[];
@@ -92,6 +93,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   senderId,
   origin,
   avatarOwner,
+  profilePhotoIndex,
   message,
   chatMessages,
   collectionIds,
@@ -116,7 +118,9 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
   const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
   const isGhostAnimation = animationLevel === 2;
-  const fileName = avatarOwner ? `avatar${avatarOwner.id}.jpg` : message && getMessageMediaFilename(message);
+  const fileName = avatarOwner
+    ? `avatar${avatarOwner.id}-${profilePhotoIndex}.jpg`
+    : message && getMessageMediaFilename(message);
   const prevSenderId = usePrevious<number | undefined>(senderId);
   const [canPanZoomWrap, setCanPanZoomWrap] = useState(false);
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
@@ -137,8 +141,11 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }
 
   function getMediaHash(full?: boolean) {
-    if (avatarOwner) {
-      return getChatAvatarHash(avatarOwner, full ? 'big' : 'normal');
+    if (avatarOwner && profilePhotoIndex !== undefined) {
+      const { photos } = avatarOwner;
+      return photos && photos[profilePhotoIndex]
+        ? `photo${photos[profilePhotoIndex].id}?size=c`
+        : getChatAvatarHash(avatarOwner, full ? 'big' : 'normal');
     }
 
     return message && getMessageMediaHash(message, full ? 'viewerFull' : 'viewerPreview');
@@ -151,10 +158,13 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
+  const previewMediaHash = getMediaHash();
   const blobUrlPreview = useMedia(
-    getMediaHash(),
+    previewMediaHash,
     undefined,
-    avatarOwner ? ApiMediaFormat.DataUri : ApiMediaFormat.BlobUrl,
+    avatarOwner && previewMediaHash && previewMediaHash.startsWith('profilePhoto')
+      ? ApiMediaFormat.DataUri
+      : ApiMediaFormat.BlobUrl,
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
@@ -544,7 +554,7 @@ function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
 export default memo(withGlobal(
   (global): StateProps => {
     const {
-      chatId, threadId, messageId, avatarOwnerId, origin,
+      chatId, threadId, messageId, avatarOwnerId, profilePhotoIndex, origin,
     } = global.mediaViewer;
     const {
       animationLevel,
@@ -571,12 +581,13 @@ export default memo(withGlobal(
     }
 
     if (avatarOwnerId) {
-      const sender = selectChat(global, avatarOwnerId) || selectUser(global, avatarOwnerId);
+      const sender = selectUser(global, avatarOwnerId) || selectChat(global, avatarOwnerId);
 
       return {
         messageId: -1,
         senderId: avatarOwnerId,
         avatarOwner: sender,
+        profilePhotoIndex: profilePhotoIndex || 0,
         animationLevel,
         origin,
       };

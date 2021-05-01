@@ -173,10 +173,10 @@ export function deleteChatMessages(
   if (!byId) {
     return global;
   }
+  const newById = omit(byId, messageIds);
   const deletedForwardedPosts = Object.values(pickTruthy(byId, messageIds)).filter(
     ({ forwardInfo }) => forwardInfo && forwardInfo.isLinkedChannelPost,
   );
-  const newById = omit(byId, messageIds);
 
   const threadIds = Object.keys(global.messages.byChatId[chatId].threadsById).map(Number);
   threadIds.forEach((threadId) => {

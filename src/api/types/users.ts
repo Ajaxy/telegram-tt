@@ -1,3 +1,5 @@
+import { ApiPhoto } from './messages';
+
 export interface ApiUser {
   id: number;
   isMin: boolean;
@@ -12,6 +14,7 @@ export interface ApiUser {
   phoneNumber: string;
   accessHash?: string;
   avatarHash?: string;
+  photos?: ApiPhoto[];
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;

@@ -1,0 +1,44 @@
+.ProfilePhoto {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  position: relative;
+
+  img {
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .prev-avatar-media {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+  }
+
+  .spinner-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .spinner-wrapper,
+  &.deleted-account,
+  &.no-photo,
+  &.saved-messages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    background: linear-gradient(var(--color-white) -125%, var(--color-user));
+    cursor: default;
+  }
+
+  &.no-photo {
+    font-size: 14rem;
+  }
+
+  &.deleted-account,
+  &.saved-messages {
+    font-size: 20rem;
+  }
+}

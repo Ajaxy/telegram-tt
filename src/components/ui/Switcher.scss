@@ -9,6 +9,10 @@
     opacity: 0.5;
   }
 
+  &.inactive {
+    pointer-events: none;
+  }
+
   input {
     height: 0;
     width: 0;

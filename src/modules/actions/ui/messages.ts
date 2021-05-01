@@ -85,7 +85,7 @@ addReducer('editLastMessage', (global) => {
 
 addReducer('openMediaViewer', (global, actions, payload) => {
   const {
-    chatId, threadId, messageId, avatarOwnerId, origin,
+    chatId, threadId, messageId, avatarOwnerId, profilePhotoIndex, origin,
   } = payload!;
 
   return {
@@ -95,6 +95,7 @@ addReducer('openMediaViewer', (global, actions, payload) => {
       threadId,
       messageId,
       avatarOwnerId,
+      profilePhotoIndex,
       origin,
     },
     forwardMessages: {},

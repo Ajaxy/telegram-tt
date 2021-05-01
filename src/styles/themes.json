@@ -3,6 +3,8 @@
   "--color-primary-opacity": ["#50A2E980", "#8378DB80"],
   "--color-primary-shade": ["#4a95d6", "#7b71c6"],
   "--color-background": ["#FFFFFF", "#212121"],
+  "--color-background-secondary": ["#f4f4f5", "#121212"],
+  "--color-background-secondary-accent": ["#E4E4E5", "#100f10"],
   "--color-background-own": ["#EEFEDF", "#8378DB"],
   "--color-background-selected": ["#F4F4F5", "#2C2C2C"],
   "--color-background-own-selected": ["#d4fcae", "#7b71c6"],

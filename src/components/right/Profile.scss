@@ -3,6 +3,10 @@
   overflow-y: scroll;
   overflow-x: hidden;
 
+  @supports (overflow-y: overlay) {
+    overflow-y: overlay !important;
+  }
+
   > .profile-info > .ChatInfo {
     grid-area: chat_info;
 
@@ -11,37 +15,22 @@
     }
   }
 
-  > .profile-info >.ChatExtra {
-    padding: 0 1.5rem;
+  > .profile-info > .ChatExtra {
+    padding: .875rem .5rem .5rem;
+    box-shadow: inset 0 -.0625rem 0 0 var(--color-background-secondary-accent);
+    border-bottom: .625rem solid var(--color-background-secondary);
 
-    .item {
-      display: flex;
-      padding: .75rem 0 1rem;
-      text-align: left;
+    .narrow {
+      margin-bottom: 0;
+    }
 
-      i {
-        font-size: 1.5rem;
-        color: var(--color-text-secondary);
-        margin-right: 2rem;
-      }
+    .inactive.no-selection {
+      user-select: auto;
+      -webkit-user-select: auto !important;
+    }
 
-      .title {
-        font-size: 1rem;
-        line-height: 1.4375rem;
-        margin-bottom: 0;
-        font-weight: 400;
-        word-break: break-word;
-      }
-
-      a.title {
-        color: var(--color-text);
-      }
-
-      .subtitle {
-        margin-bottom: 0;
-        font-size: 0.875rem;
-        color: var(--color-text-secondary);
-      }
+    .Switcher {
+      margin-left: auto;
     }
   }
 }
@@ -54,10 +43,9 @@
     background: var(--color-background);
     top: -1px;
     .Tab {
-      padding: .6875rem .25rem;
+      padding: 1rem .25rem;
       i {
-        padding-right: 1.5rem;
-        margin-left: -.75rem;
+        bottom: -1rem;
       }
     }
   }
@@ -81,10 +69,9 @@
 
     &.media-list {
       display: grid;
-      padding: .5rem;
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;
-      grid-gap: .25rem;
+      grid-gap: .0625rem;
     }
 
     &.documents-list {

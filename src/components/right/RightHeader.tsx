@@ -264,7 +264,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       default:
         return (
           <>
-            <h3>{lang('Info')}</h3>
+            <h3>Profile</h3>
             <section className="tools">
               {canManage && (
                 <Button

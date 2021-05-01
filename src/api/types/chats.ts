@@ -1,4 +1,4 @@
-import { ApiMessage } from './messages';
+import { ApiMessage, ApiPhoto } from './messages';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
@@ -28,6 +28,7 @@ export interface ApiChat {
   membersCount?: number;
   joinDate?: number;
   isSupport?: boolean;
+  photos?: ApiPhoto[];
 
   // Current user permissions
   isNotJoined?: boolean;

@@ -8,7 +8,6 @@ import {
   buildApiMessageFromShortChat,
   buildMessageMediaContent,
   buildMessageTextContent,
-  resolveMessageApiChatId,
   buildPoll,
   buildPollResults,
   buildApiMessageFromNotification,
@@ -32,8 +31,9 @@ import {
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import { DEBUG } from '../../config';
-import { addMessageToLocalDb } from './helpers';
+import { addMessageToLocalDb, addPhotoToLocalDb, resolveMessageApiChatId } from './helpers';
 import { buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
+import { buildApiPhoto } from './apiBuilders/common';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -181,12 +181,16 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         if (localDb.chats[localDbChatId]) {
           localDb.chats[localDbChatId].photo = photo;
         }
+        addPhotoToLocalDb(action.photo);
 
         if (avatarHash) {
           onUpdate({
             '@type': 'updateChat',
             id: message.chatId,
-            chat: { avatarHash },
+            chat: {
+              avatarHash,
+            },
+            ...(action.photo instanceof GramJs.Photo && { newProfilePhoto: buildApiPhoto(action.photo) }),
           });
         }
       } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
@@ -264,11 +268,26 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     const ids = update.messages;
     const existingIds = ids.filter((id) => localDb.messages[`${chatId}-${id}`]);
     const missingIds = ids.filter((id) => !localDb.messages[`${chatId}-${id}`]);
+    const profilePhotoIds = ids.map((id) => {
+      const message = localDb.messages[`${chatId}-${id}`];
+
+      return message && message instanceof GramJs.MessageService && 'photo' in message.action
+        ? String(message.action.photo.id)
+        : undefined;
+    }).filter<string>(Boolean as any);
 
     if (existingIds.length) {
       onUpdate({
         '@type': 'deleteMessages',
         ids: existingIds,
+        chatId,
+      });
+    }
+
+    if (profilePhotoIds.length) {
+      onUpdate({
+        '@type': 'deleteProfilePhotos',
+        ids: profilePhotoIds,
         chatId,
       });
     }
