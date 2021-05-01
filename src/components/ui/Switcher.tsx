@@ -12,6 +12,7 @@ type OwnProps = {
   label: string;
   checked?: boolean;
   disabled?: boolean;
+  inactive?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onCheck?: (isChecked: boolean) => void;
 };
@@ -23,22 +24,24 @@ const Switcher: FC<OwnProps> = ({
   label,
   checked = false,
   disabled,
+  inactive,
   onChange,
   onCheck,
 }) => {
-  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
-      onChange(event);
+      onChange(e);
     }
 
     if (onCheck) {
-      onCheck(event.currentTarget.checked);
+      onCheck(e.currentTarget.checked);
     }
   }, [onChange, onCheck]);
 
   const className = buildClassName(
     'Switcher',
     disabled && 'disabled',
+    inactive && 'inactive',
   );
 
   return (

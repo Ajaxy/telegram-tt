@@ -1,5 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { ApiChat } from '../../api/types';
+import { ApiChat, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { omit } from '../../util/iteratees';
@@ -47,13 +47,16 @@ export function replaceChats(global: GlobalState, newById: Record<number, ApiCha
   };
 }
 
-export function updateChat(global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>): GlobalState {
+export function updateChat(
+  global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+): GlobalState {
   const { byId } = global.chats;
   const chat = byId[chatId];
   const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
   const updatedChat = {
     ...chat,
     ...(shouldOmitMinInfo ? omit(chatUpdate, ['isMin', 'accessHash']) : chatUpdate),
+    ...(photo && { photos: [photo, ...(chat.photos || [])] }),
   };
 
   if (!updatedChat.id || !updatedChat.type) {

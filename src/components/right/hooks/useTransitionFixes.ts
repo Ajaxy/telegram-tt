@@ -2,12 +2,13 @@ import { useCallback, useEffect } from '../../../lib/teact/teact';
 
 export default function useTransitionFixes(
   containerRef: { current: HTMLDivElement | null },
+  transitionElSelector = '.Transition.shared-media-transition',
 ) {
   // Set `min-height` for shared media container to prevent jumping when switching tabs
   useEffect(() => {
     function setMinHeight() {
       const container = containerRef.current!;
-      const transitionEl = container.querySelector<HTMLDivElement>('.Transition');
+      const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
       if (transitionEl && tabsEl) {
         transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
@@ -21,7 +22,7 @@ export default function useTransitionFixes(
     return () => {
       window.removeEventListener('resize', setMinHeight, false);
     };
-  }, [containerRef]);
+  }, [containerRef, transitionElSelector]);
 
   // Workaround for scrollable content flickering during animation.
   const applyTransitionFix = useCallback(() => {

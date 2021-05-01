@@ -276,6 +276,7 @@ export type GlobalState = {
     threadId?: number;
     messageId?: number;
     avatarOwnerId?: number;
+    profilePhotoIndex?: number;
     origin?: MediaViewerOrigin;
   };
 
@@ -392,6 +393,7 @@ export type ActionTypes = (
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
+  'loadProfilePhotos' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' |

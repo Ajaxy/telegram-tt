@@ -24,7 +24,6 @@ import {
   buildLocalMessage,
   buildWebPage,
   buildForwardedMessage,
-  resolveMessageApiChatId,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -36,12 +35,13 @@ import {
   buildInputPoll,
   buildMtpMessageEntity,
   isMessageWithMedia,
+  isServiceMessageWithMedia,
   calculateResultHash,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
-import { addMessageToLocalDb } from '../helpers';
+import { addMessageToLocalDb, resolveMessageApiChatId } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
 
@@ -766,6 +766,9 @@ export async function searchMessagesLocal({
     case 'voice':
       filter = new GramJs.InputMessagesFilterVoice();
       break;
+    case 'profilePhoto':
+      filter = new GramJs.InputMessagesFilterChatPhotos();
+      break;
     case 'text':
     default: {
       filter = new GramJs.InputMessagesFilterEmpty();
@@ -1085,7 +1088,9 @@ function updateLocalDb(result: (
   });
 
   result.messages.forEach((message) => {
-    if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
+    if ((message instanceof GramJs.Message && isMessageWithMedia(message))
+      || (message instanceof GramJs.MessageService && isServiceMessageWithMedia(message))
+    ) {
       addMessageToLocalDb(message);
     }
   });

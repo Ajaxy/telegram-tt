@@ -7,10 +7,11 @@ import { ManagementProgress } from '../../../types';
 
 import { debounce } from '../../../util/schedulers';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { isChatPrivate } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
-import { selectUser } from '../../selectors';
+import { selectChat, selectUser } from '../../selectors';
 import {
-  addChats, addUsers, updateManagementProgress, updateUser, updateUsers,
+  addChats, addUsers, updateChat, updateManagementProgress, updateUser, updateUsers,
 } from '../../reducers';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
@@ -170,3 +171,27 @@ async function deleteUser(userId: number) {
 
   await callApi('deleteUser', { id, accessHash });
 }
+
+addReducer('loadProfilePhotos', (global, actions, payload) => {
+  const { profileId } = payload!;
+  const isPrivate = isChatPrivate(profileId);
+  const user = isPrivate ? selectUser(global, profileId) : undefined;
+  const chat = !isPrivate ? selectChat(global, profileId) : undefined;
+
+  (async () => {
+    const result = await callApi('fetchProfilePhotos', user, chat);
+    if (!result || !result.photos) {
+      return;
+    }
+
+    let newGlobal = getGlobal();
+    if (isPrivate) {
+      newGlobal = updateUser(newGlobal, profileId, { photos: result.photos });
+    } else {
+      newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users!, 'id'));
+      newGlobal = updateChat(newGlobal, profileId, { photos: result.photos });
+    }
+
+    setGlobal(newGlobal);
+  })();
+});

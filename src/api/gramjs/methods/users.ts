@@ -1,7 +1,12 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate, ApiUser, ApiChat } from '../../types';
+import {
+  OnApiUpdate, ApiUser, ApiChat, ApiPhoto,
+} from '../../types';
 
+import { PROFILE_PHOTOS_LIMIT } from '../../../config';
 import { invokeRequest } from './client';
+import { searchMessagesLocal } from './messages';
 import {
   buildInputEntity,
   calculateResultHash,
@@ -9,8 +14,10 @@ import {
   buildInputContact,
 } from '../gramjsBuilders';
 import { buildApiUser, buildApiUserFromFull } from '../apiBuilders/users';
-import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildApiPhoto } from '../apiBuilders/common';
+import localDb from '../localDb';
+import { addPhotoToLocalDb } from '../helpers';
 
 let onUpdate: OnApiUpdate;
 
@@ -151,4 +158,50 @@ export async function deleteUser({
     '@type': 'deleteUser',
     id,
   });
+}
+
+export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
+  if (user) {
+    const { id, accessHash } = user;
+
+    const result = await invokeRequest(new GramJs.photos.GetUserPhotos({
+      userId: buildInputEntity(id, accessHash) as GramJs.InputUser,
+      limit: PROFILE_PHOTOS_LIMIT,
+      offset: 0,
+      maxId: BigInt('0'),
+    }));
+
+    if (!result) {
+      return undefined;
+    }
+
+    updateLocalDb(result);
+
+    return {
+      photos: result.photos
+        .filter((photo): photo is GramJs.Photo => photo instanceof GramJs.Photo)
+        .map(buildApiPhoto),
+    };
+  }
+
+  const result = await searchMessagesLocal({
+    chatOrUser: chat!,
+    type: 'profilePhoto',
+    limit: PROFILE_PHOTOS_LIMIT,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  const { messages, users } = result;
+
+  return {
+    photos: messages.map((message) => message.content.action!.photo).filter<ApiPhoto>(Boolean as any),
+    users,
+  };
+}
+
+function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice)) {
+  result.photos.forEach(addPhotoToLocalDb);
 }

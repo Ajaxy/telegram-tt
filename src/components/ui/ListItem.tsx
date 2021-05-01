@@ -33,6 +33,7 @@ type OwnProps = {
   inactive?: boolean;
   focus?: boolean;
   destructive?: boolean;
+  multiline?: boolean;
   contextActions?: MenuItemContextAction[];
   onClick?: OnClickHandler;
 };
@@ -48,9 +49,10 @@ const ListItem: FC<OwnProps> = (props) => {
     ripple,
     narrow,
     inactive,
-    contextActions,
     focus,
     destructive,
+    multiline,
+    contextActions,
     onClick,
   } = props;
 
@@ -118,6 +120,7 @@ const ListItem: FC<OwnProps> = (props) => {
     contextMenuPosition && 'has-menu-open',
     focus && 'focus',
     destructive && 'destructive',
+    multiline && 'multiline',
   );
 
   return (
@@ -138,7 +141,8 @@ const ListItem: FC<OwnProps> = (props) => {
         {icon && (
           <i className={`icon-${icon}`} />
         )}
-        {children}
+        {multiline && (<div className="multiline-item">{children}</div>)}
+        {!multiline && children}
         {!disabled && !inactive && ripple && (
           <RippleEffect />
         )}

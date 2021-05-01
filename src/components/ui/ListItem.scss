@@ -4,7 +4,6 @@
   .ListItem-button {
     width: 100%;
     background-color: var(--background-color);
-    ackground: none;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
@@ -22,6 +21,13 @@
       font-size: 1.5rem;
       margin-right: 2rem;
       color: var(--color-text-secondary);
+    }
+  }
+
+  &.multiline {
+    .ListItem-button > i {
+      position: relative;
+      top: .25rem;
     }
   }
 
@@ -242,6 +248,7 @@
 
   .multiline-item {
     white-space: initial;
+    overflow: hidden;
 
     .title, .subtitle {
       display: block;
@@ -250,6 +257,8 @@
 
     .title {
       line-height: 1.25rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .subtitle {
@@ -266,5 +275,4 @@
       }
     }
   }
-
 }

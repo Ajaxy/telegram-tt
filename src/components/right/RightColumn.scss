@@ -24,6 +24,7 @@
 
   @media (max-width: 1275px) {
     box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
+    border-left: none;
   }
 
   @media (max-width: 600px) {
@@ -36,8 +37,7 @@
     overflow: hidden;
   }
 
-  .Management .section > .ChatInfo,
-  .profile-info > .ChatInfo {
+  .Management .section > .ChatInfo {
     padding: 0 1.5rem;
     margin: 1rem 0;
     text-align: center;

@@ -56,6 +56,8 @@ $color-user-8: #faa774;
 :root {
   --color-background: #{$color-white};
   --color-background-selected: #f4f4f5;
+  --color-background-secondary: #f4f4f5;
+  --color-background-secondary-accent: #E4E4E5;
   --color-background-own: #{$color-light-green};
   --color-background-own-selected: #{darken($color-light-green, 10%)};
   --color-background-own-rgb: #{toRGB($color-light-green)};
@@ -144,7 +146,7 @@ $color-user-8: #faa774;
   --border-radius-messages-small: 0.375rem;
   --messages-container-width: 45.5rem;
   --right-column-width: 26.5rem;
-  --header-height: 3.625rem;
+  --header-height: 3.5rem;
 
   --symbol-menu-width: 26.25rem;
   --symbol-menu-height: 23.25rem;
@@ -156,7 +158,6 @@ $color-user-8: #faa774;
 
   @media (max-width: 600px) {
     --right-column-width: 100vw;
-    --header-height: 3.5rem;
     --symbol-menu-width: 100vw;
     --symbol-menu-height: 14.6875rem;
   }

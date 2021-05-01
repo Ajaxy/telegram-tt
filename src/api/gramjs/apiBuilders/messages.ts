@@ -3,7 +3,6 @@ import {
   ApiMessage,
   ApiMessageForwardInfo,
   ApiPhoto,
-  ApiPhotoSize,
   ApiSticker,
   ApiVideo,
   ApiVoice,
@@ -28,12 +27,14 @@ import { DELETED_COMMENTS_CHANNEL_ID, LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIO
 import { pick } from '../../../util/iteratees';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { buildStickerFromDocument } from './symbols';
-import { buildApiThumbnailFromStripped } from './common';
+import { buildApiPhoto, buildApiThumbnailFromStripped, buildApiPhotoSize } from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { getCurrencySign } from '../../../components/middle/helpers/getCurrencySign';
 import { buildPeer } from '../gramjsBuilders';
+import { addPhotoToLocalDb, resolveMessageApiChatId } from '../helpers';
 
-const LOCAL_VIDEO_TEMP_ID = 'temp';
+const LOCAL_IMAGE_UPLOADING_TEMP_ID = 'temp';
+const LOCAL_VIDEO_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
 
 let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
@@ -52,14 +53,6 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | un
   }
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
-}
-
-export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
-  if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
-    return undefined;
-  }
-
-  return getApiChatIdFromMtpPeer(mtpMessage.peerId);
 }
 
 export function buildApiMessageFromShort(mtpMessage: GramJs.UpdateShortMessage): ApiMessage {
@@ -271,24 +264,7 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
     return undefined;
   }
 
-  const sizes = media.photo.sizes
-    .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
-    .map(buildApiPhotoSize);
-
-  return {
-    thumbnail: buildApiThumbnailFromStripped(media.photo.sizes),
-    sizes,
-  };
-}
-
-function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
-  const { w, h, type } = photoSize;
-
-  return {
-    width: w,
-    height: h,
-    type: type as ('m' | 'x' | 'y'),
-  };
+  return buildApiPhoto(media.photo);
 }
 
 export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | undefined {
@@ -541,6 +517,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     ]),
     photo: photo && photo instanceof GramJs.Photo
       ? {
+        id: String(photo.id),
         thumbnail: buildApiThumbnailFromStripped(photo.sizes),
         sizes: photo.sizes
           .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
@@ -564,6 +541,7 @@ function buildAction(
 
   let text = '';
   let type: ApiAction['type'] = 'other';
+  let photo: ApiPhoto | undefined;
 
   const targetUserId = 'users' in action
     // Api returns array of userIds, but no action currently has multiple users in it
@@ -625,11 +603,17 @@ function buildAction(
     text = '%ACTION_NOT_IMPLEMENTED%';
   }
 
+  if ('photo' in action && action.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(action.photo);
+    photo = buildApiPhoto(action.photo);
+  }
+
   return {
     text,
     type,
     targetUserId,
     targetChatId,
+    photo, // TODO Only used internally now, will be used for the UI in future
   };
 }
 
@@ -814,6 +798,7 @@ function buildUploadingMedia(
     if (mimeType.startsWith('image/')) {
       return {
         photo: {
+          id: LOCAL_IMAGE_UPLOADING_TEMP_ID,
           sizes: [],
           thumbnail: { width, height, dataUri: '' }, // Used only for dimensions
           blobUrl,
@@ -822,7 +807,7 @@ function buildUploadingMedia(
     } else {
       return {
         video: {
-          id: LOCAL_VIDEO_TEMP_ID,
+          id: LOCAL_VIDEO_UPLOADING_TEMP_ID,
           mimeType,
           duration: duration || 0,
           fileName,

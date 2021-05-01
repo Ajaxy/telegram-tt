@@ -79,11 +79,9 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <ListItem icon="recent" ripple onClick={handleRecentActionsClick}>
-            <div className="multiline-item">
-              <span className="title">{lang('EventLog')}</span>
-              <span className="subtitle">{lang(isChannel ? 'EventLogInfoDetailChannel' : 'EventLogInfoDetail')}</span>
-            </div>
+          <ListItem icon="recent" multiline ripple onClick={handleRecentActionsClick}>
+            <span className="title">{lang('EventLog')}</span>
+            <span className="subtitle">{lang(isChannel ? 'EventLogInfoDetailChannel' : 'EventLogInfoDetail')}</span>
           </ListItem>
         </div>
 

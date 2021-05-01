@@ -94,3 +94,42 @@
     text-align: center;
   }
 }
+
+// Used by Avatar and ProfilePhoto components
+div {
+  &.color-bg-1 {
+    --color-user: var(--color-user-1);
+  }
+
+  &.color-bg-2 {
+    --color-user: var(--color-user-2);
+  }
+
+  &.color-bg-4 {
+    --color-user: var(--color-user-4);
+  }
+
+  &.color-bg-5 {
+    --color-user: var(--color-user-5);
+  }
+
+  &.color-bg-6 {
+    --color-user: var(--color-user-6);
+  }
+
+  &.color-bg-7 {
+    --color-user: var(--color-user-7);
+  }
+
+  &.color-bg-8 {
+    --color-user: var(--color-user-8);
+  }
+
+  &.saved-messages {
+    --color-user: var(--color-primary);
+  }
+
+  &.deleted-account {
+    --color-user: var(--color-gray);
+  }
+}

@@ -144,7 +144,6 @@ const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
             userId={user.id}
             avatarSize="jumbo"
             status="original name"
-            withMediaViewer
             withFullInfo
           />
           <InputText

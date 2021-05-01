@@ -177,24 +177,18 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
             disabled={!canChangeInfo}
           />
           {chat.isCreator && (
-            <ListItem icon="lock" ripple onClick={handleClickEditType}>
-              <div className="multiline-item">
-                <span className="title">{lang('ChannelType')}</span>
-                <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
-              </div>
+            <ListItem icon="lock" ripple multiline onClick={handleClickEditType}>
+              <span className="title">{lang('ChannelType')}</span>
+              <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
             </ListItem>
           )}
-          <ListItem icon="message" ripple onClick={handleClickDiscussion} disabled={!canChangeInfo}>
-            <div className="multiline-item">
-              <span className="title">{lang('Discussion')}</span>
-              <span className="subtitle">{hasLinkedChat ? lang('DiscussionUnlink') : lang('Add')}</span>
-            </div>
+          <ListItem icon="message" multiline ripple onClick={handleClickDiscussion} disabled={!canChangeInfo}>
+            <span className="title">{lang('Discussion')}</span>
+            <span className="subtitle">{hasLinkedChat ? lang('DiscussionUnlink') : lang('Add')}</span>
           </ListItem>
-          <ListItem icon="admin" ripple onClick={handleClickAdministrators}>
-            <div className="multiline-item">
-              <span className="title">{lang('ChannelAdministrators')}</span>
-              <span className="subtitle">{adminsCount}</span>
-            </div>
+          <ListItem icon="admin" multiline ripple onClick={handleClickAdministrators}>
+            <span className="title">{lang('ChannelAdministrators')}</span>
+            <span className="subtitle">{adminsCount}</span>
           </ListItem>
           <div className="ListItem no-selection narrow">
             <Checkbox
@@ -205,11 +199,9 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         </div>
         <div className="section">
-          <ListItem icon="group" ripple onClick={handleClickSubscribers}>
-            <div className="multiline-item">
-              <span className="title">{lang('ChannelSubscribers')}</span>
-              <span className="subtitle">{lang('Subscribers', chat.membersCount!, 'i')}</span>
-            </div>
+          <ListItem icon="group" multiline ripple onClick={handleClickSubscribers}>
+            <span className="title">{lang('ChannelSubscribers')}</span>
+            <span className="subtitle">{lang('Subscribers', chat.membersCount!, 'i')}</span>
           </ListItem>
         </div>
         <div className="section">

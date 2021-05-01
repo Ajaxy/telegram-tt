@@ -6,9 +6,10 @@ interface LocalDb {
   // Used for loading avatars and media through in-memory Gram JS instances.
   chats: Record<number, GramJs.Chat | GramJs.Channel>;
   users: Record<number, GramJs.User>;
-  messages: Record<string, GramJs.Message>;
+  messages: Record<string, GramJs.Message | GramJs.MessageService>;
   documents: Record<string, GramJs.Document>;
   stickerSets: Record<string, GramJs.StickerSet>;
+  photos: Record<string, GramJs.Photo>;
 }
 
 export default {
@@ -18,4 +19,5 @@ export default {
   messages: {},
   documents: {},
   stickerSets: {},
+  photos: {},
 } as LocalDb;

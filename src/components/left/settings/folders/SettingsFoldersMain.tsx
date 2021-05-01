@@ -156,12 +156,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
           <ListItem
             className="mb-2"
             narrow
+            multiline
             onClick={() => onEditFolder(foldersById[folder.id])}
           >
-            <div className="multiline-item">
-              <span className="title">{folder.title}</span>
-              <span className="subtitle">{folder.subtitle}</span>
-            </div>
+            <span className="title">{folder.title}</span>
+            <span className="subtitle">{folder.subtitle}</span>
           </ListItem>
         )) : userFolders && !userFolders.length ? (
           <p className="settings-item-description my-4">
