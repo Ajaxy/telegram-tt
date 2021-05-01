@@ -27,6 +27,7 @@ import TextFormatter from './TextFormatter';
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 350;
+const TRANSITION_DURATION_FACTOR = 50;
 
 type OwnProps = {
   id: string;
@@ -104,7 +105,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (prevHtml !== undefined && prevHtml !== html) {
-      updateInputHeight();
+      updateInputHeight(!html.length);
     }
   }, [html]);
 
@@ -270,11 +271,31 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     e.stopPropagation();
   }
 
-  function updateInputHeight() {
+  function updateInputHeight(willSend = false) {
     const input = inputRef.current!;
     const clone = cloneRef.current!;
-    input.style.height = `${Math.min(clone.scrollHeight, MAX_INPUT_HEIGHT)}px`;
-    input.classList.toggle('overflown', clone.scrollHeight > MAX_INPUT_HEIGHT);
+    const currentHeight = Number(input.style.height.replace('px', ''));
+    const newHeight = Math.min(clone.scrollHeight, MAX_INPUT_HEIGHT);
+    if (newHeight === currentHeight) {
+      return;
+    }
+
+    const transitionDuration = Math.round(
+      TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
+    );
+
+    const exec = () => {
+      input.style.height = `${newHeight}px`;
+      input.style.transitionDuration = `${transitionDuration}ms`;
+      input.classList.toggle('overflown', clone.scrollHeight > MAX_INPUT_HEIGHT);
+    };
+
+    if (willSend) {
+      // Sync with sending animation
+      requestAnimationFrame(exec);
+    } else {
+      exec();
+    }
   }
 
   useEffect(() => {
