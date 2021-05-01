@@ -12,6 +12,7 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { notifyClientReady } from '../../../util/pushNotifications';
 import {
   replaceChatListIds,
   replaceChats,
@@ -40,6 +41,9 @@ async function sync(afterSyncCallback: () => void) {
     // eslint-disable-next-line no-console
     console.log('>>> START SYNC');
   }
+
+  // Notify web worker that client is ready to receive messages
+  notifyClientReady();
 
   await callApi('fetchCurrentUser');
 

@@ -1,7 +1,7 @@
 import { DEBUG } from './config';
 import { respondForProgressive } from './serviceWorker/progressive';
 import { respondWithCache, clearAssetCache } from './serviceWorker/assetCache';
-import { handlePush, handleNotificationClick } from './serviceWorker/pushNotification';
+import { handlePush, handleNotificationClick, handleClientMessage } from './serviceWorker/pushNotification';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -48,3 +48,4 @@ self.addEventListener('fetch', (e: FetchEvent) => {
 
 self.addEventListener('push', handlePush);
 self.addEventListener('notificationclick', handleNotificationClick);
+self.addEventListener('message', handleClientMessage);
