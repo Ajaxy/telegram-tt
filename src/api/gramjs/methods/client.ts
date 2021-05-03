@@ -91,6 +91,7 @@ export async function init(sessionId: string, _onUpdate: OnApiUpdate) {
 }
 
 export async function destroy() {
+  await invokeRequest(new GramJs.auth.LogOut());
   await client.destroy();
 }
 
