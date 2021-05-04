@@ -17,7 +17,6 @@ export function selectRightColumnContentKey(global: GlobalState) {
   const {
     users,
     isChatInfoShown,
-    isStatisticsShown,
   } = global;
 
   const isPollResults = selectIsPollResultsOpen(global);
@@ -40,8 +39,6 @@ export function selectRightColumnContentKey(global: GlobalState) {
     RightColumnContent.Search
   ) : isManagement ? (
     RightColumnContent.Management
-  ) : isStatisticsShown ? (
-    RightColumnContent.Statistics
   ) : isStickerSearch ? (
     RightColumnContent.StickerSearch
   ) : isGifSearch ? (

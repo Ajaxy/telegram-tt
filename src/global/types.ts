@@ -56,7 +56,6 @@ export interface Thread {
 
 export type GlobalState = {
   isChatInfoShown: boolean;
-  isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
   uiReadyState: 0 | 1 | 2;
@@ -387,7 +386,7 @@ export type ActionTypes = (
   'init' | 'reset' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' | 'afterSync' |
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
-  'toggleChatInfo' | 'toggleStatistics' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
+  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' | 'clearCache' |

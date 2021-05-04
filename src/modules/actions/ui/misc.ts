@@ -57,13 +57,6 @@ addReducer('closeManagement', (global): GlobalState | undefined => {
   };
 });
 
-addReducer('toggleStatistics', (global) => {
-  return {
-    ...global,
-    isStatisticsShown: !global.isStatisticsShown,
-  };
-});
-
 addReducer('openChat', (global, actions, payload) => {
   if (!IS_MOBILE_SCREEN) {
     return undefined;
