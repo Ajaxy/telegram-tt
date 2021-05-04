@@ -325,7 +325,7 @@ function renderMessagePart(
   }
 
   if (shouldRenderAsHtml) {
-    return renderText(content, ['emoji_html', 'br_html']);
+    return renderText(content, ['escape_html', 'emoji_html', 'br_html']);
   }
 
   const emojiFilter = shouldRenderHqEmoji ? 'hq_emoji' : 'emoji';
