@@ -1,4 +1,3 @@
-import { MILISECONDS_IN_DAY } from '../lib/lovely-chart/constants';
 import { getTranslation } from './langProvider';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -11,6 +10,7 @@ const MONTHS_FULL_LOWERCASE = MONTHS_FULL.map((month) => month.toLowerCase());
 const MIN_SEARCH_YEAR = 2015;
 const MAX_DAY_IN_MONTH = 31;
 const MAX_MONTH_IN_YEAR = 12;
+export const MILISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
 
 export function getDayStart(datetime: number | Date) {
   const date = new Date(datetime);

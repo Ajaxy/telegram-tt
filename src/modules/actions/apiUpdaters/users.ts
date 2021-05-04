@@ -3,7 +3,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiUpdate, ApiUserStatus } from '../../../api/types';
 
 import { deleteUser, updateUser } from '../../reducers';
-import { throttle } from '../../../lib/lovely-chart/utils';
+import { throttle } from '../../../util/schedulers';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 

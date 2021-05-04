@@ -195,7 +195,6 @@ export enum RightColumnContent {
   UserInfo,
   Search,
   Management,
-  Statistics,
   StickerSearch,
   GifSearch,
   PollResults,

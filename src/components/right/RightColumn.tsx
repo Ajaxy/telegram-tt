@@ -23,7 +23,6 @@ import Profile from './Profile';
 import Transition from '../ui/Transition';
 import RightSearch from './RightSearch.async';
 import Management from './management/Management.async';
-import Statistics from './Statistics.async';
 import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
@@ -39,7 +38,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'toggleManagement' | 'toggleStatistics' | 'openUserInfo' |
+  'toggleChatInfo' | 'toggleManagement' | 'openUserInfo' |
   'closeLocalTextSearch' | 'closePollResults' |
   'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
@@ -63,7 +62,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   isChatSelected,
   toggleChatInfo,
   toggleManagement,
-  toggleStatistics,
   openUserInfo,
   closeLocalTextSearch,
   setStickerSearchQuery,
@@ -81,7 +79,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isProfile = contentKey === RightColumnContent.ChatInfo || contentKey === RightColumnContent.UserInfo;
   const isSearch = contentKey === RightColumnContent.Search;
   const isManagement = contentKey === RightColumnContent.Management;
-  const isStatistics = contentKey === RightColumnContent.Statistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
@@ -136,9 +133,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
         break;
       }
-      case RightColumnContent.Statistics:
-        toggleStatistics();
-        break;
       case RightColumnContent.Search: {
         blurSearchInput();
         closeLocalTextSearch();
@@ -156,7 +150,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         break;
     }
   }, [
-    contentKey, isScrolledDown, toggleChatInfo, openUserInfo, toggleStatistics, closePollResults,
+    contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
   ]);
 
@@ -224,8 +218,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
             onChatMemberSelect={handleSelectChatMember}
           />
         );
-      case RightColumnContent.Statistics:
-        return <Statistics />;
       case RightColumnContent.StickerSearch:
         return <StickerSearch />;
       case RightColumnContent.GifSearch:
@@ -250,7 +242,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isProfile={isProfile}
           isSearch={isSearch}
           isManagement={isManagement}
-          isStatistics={isStatistics}
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isPollResults={isPollResults}
@@ -287,7 +278,6 @@ export default memo(withGlobal(
     'openUserInfo',
     'toggleChatInfo',
     'toggleManagement',
-    'toggleStatistics',
     'closeLocalTextSearch',
     'setStickerSearchQuery',
     'setGifSearchQuery',

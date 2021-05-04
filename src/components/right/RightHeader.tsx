@@ -34,7 +34,6 @@ type OwnProps = {
   isProfile?: boolean;
   isSearch?: boolean;
   isManagement?: boolean;
-  isStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
@@ -64,7 +63,6 @@ enum HeaderContent {
   MemberList,
   SharedMedia,
   Search,
-  Statistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -88,7 +86,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isProfile,
   isSearch,
   isManagement,
-  isStatistics,
   isStickerSearch,
   isGifSearch,
   isPollResults,
@@ -184,8 +181,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     ) : managementScreen === ManagementScreens.GroupMembers ? (
       HeaderContent.ManageGroupMembers
     ) : undefined // Never reached
-  ) : isStatistics ? (
-    HeaderContent.Statistics
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -252,8 +247,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             onChange={handleGifSearchQueryChange}
           />
         );
-      case HeaderContent.Statistics:
-        return <h3>{lang('Statistics')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3>{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
