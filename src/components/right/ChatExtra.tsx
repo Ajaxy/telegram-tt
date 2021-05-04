@@ -110,7 +110,12 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           multiline
           narrow
           ripple
-          onClick={() => handleClick(printedDescription, lang(userId ? 'UserBio' : 'Info'))}
+          onClick={(e) => {
+            if (e.target instanceof HTMLAnchorElement) {
+              return;
+            }
+            handleClick(printedDescription, lang(userId ? 'UserBio' : 'Info'));
+          }}
         >
           <span className="title">{renderText(printedDescription, ['br', 'links', 'emoji'])}</span>
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
