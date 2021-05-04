@@ -12,6 +12,16 @@
     line-height: 1.3125;
   }
 
+  .theme-dark .Message.own & {
+    .text-entity-link {
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
   &:not(.custom-shape) {
     font-size: var(--message-text-size, 1rem);
   }
@@ -156,6 +166,12 @@
 
   &.document {
     padding: .5rem !important;
+
+    .File {
+      .theme-dark & {
+        --color-primary: var(--color-selection-highlight);
+      }
+    }
 
     .File + .text-content {
       margin-top: .313rem;
