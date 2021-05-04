@@ -500,6 +500,8 @@
   text-decoration: none;
   word-break: none;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 
   &:hover, &:active, &:visited {
     color: var(--color-links-hover) !important;
