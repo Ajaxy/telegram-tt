@@ -58,8 +58,9 @@ export function getPrivateChatUserId(chat: ApiChat) {
   return chat.id;
 }
 
-export function getChatTitle(chat: ApiChat, user?: ApiUser) {
-  if (user && chat.id === user.id && user.isSelf) {
+// TODO Get rid of `user`
+export function getChatTitle(chat: ApiChat, user?: ApiUser, isSelf = false) {
+  if (isSelf || (user && chat.id === user.id && user.isSelf)) {
     return getTranslation('SavedMessages');
   }
   return chat.title || getTranslation('HiddenName');
@@ -431,4 +432,37 @@ export function getMessageSenderName(chatId: number, sender?: ApiUser) {
   }
 
   return getUserFirstOrLastName(sender);
+}
+
+export function sortChatIds(
+  chatIds: number[],
+  chatsById: Record<number, ApiChat>,
+  shouldPrioritizeVerified = false,
+  priorityIds?: number[],
+) {
+  return orderBy(chatIds, (id) => {
+    const chat = chatsById[id];
+    if (!chat) {
+      return 0;
+    }
+
+    let priority = 0;
+
+    if (chat.lastMessage) {
+      priority += chat.lastMessage.date;
+    }
+
+    if (shouldPrioritizeVerified && chat.isVerified) {
+      priority += 3e9; // ~100 years in seconds
+    }
+
+    if (priorityIds && priorityIds.includes(id)) {
+      // Assuming that last message date can't be less than now,
+      // this should place prioritized on top of the list.
+      // Then we subtract index of `id` in `priorityIds` to preserve selected order
+      priority += Date.now() + (priorityIds.length - priorityIds.indexOf(id));
+    }
+
+    return priority;
+  }, 'desc');
 }

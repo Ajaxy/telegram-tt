@@ -4,7 +4,7 @@ import { ApiChatMember, ApiMessage, ApiUser } from '../../../api/types';
 import { ProfileTabType, SharedMediaType } from '../../../types';
 
 import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
-import { getMessageContentIds, getSortedUserIds } from '../../../modules/helpers';
+import { getMessageContentIds, sortUserIds } from '../../../modules/helpers';
 import useOnChange from '../../../hooks/useOnChange';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
@@ -27,7 +27,7 @@ export default function useProfileViewportIds(
       return undefined;
     }
 
-    return getSortedUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
+    return sortUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
   }, [groupChatMembers, usersById]);
 
   const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(

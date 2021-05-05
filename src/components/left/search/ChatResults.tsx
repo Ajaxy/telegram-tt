@@ -10,7 +10,7 @@ import { LoadMoreDirection } from '../../../types';
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import searchWords from '../../../util/searchWords';
 import { unique, pick } from '../../../util/iteratees';
-import { getUserFullName, getMessageSummaryText } from '../../../modules/helpers';
+import { getUserFullName, getMessageSummaryText, sortChatIds } from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
@@ -36,10 +36,10 @@ export type OwnProps = {
 type StateProps = {
   currentUserId?: number;
   localContactIds?: number[];
-  localChats?: ApiChat[];
-  localUsers?: ApiUser[];
-  globalChats?: ApiChat[];
-  globalUsers?: ApiUser[];
+  localChatIds?: number[];
+  localUserIds?: number[];
+  globalChatIds?: number[];
+  globalUserIds?: number[];
   foundIds?: string[];
   globalMessagesByChatId?: Record<number, { byId: Record<number, ApiMessage> }>;
   chatsById: Record<number, ApiChat>;
@@ -55,12 +55,11 @@ type DispatchProps = Pick<GlobalActions, (
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 4;
 const LESS_LIST_ITEMS_AMOUNT = 3;
 
-const sortSearchResults = (a: ApiChat | ApiUser, b: ApiChat | ApiUser) => Number(b.isVerified) - Number(a.isVerified);
 const runThrottled = throttle((cb) => cb(), 500, true);
 
 const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   searchQuery, searchDate, dateSearchQuery, currentUserId,
-  localContactIds, localChats, localUsers, globalChats, globalUsers,
+  localContactIds, localChatIds, localUserIds, globalChatIds, globalUserIds,
   foundIds, globalMessagesByChatId, chatsById, usersById, fetchingStatus, lastSyncTime,
   onReset, onSearchDateSelect, openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
 }) => {
@@ -102,7 +101,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
-    const foundLocalContacts = localContactIds
+    const foundContactIds = localContactIds
       ? localContactIds.filter((id) => {
         const user = usersById[id];
         if (!user) {
@@ -111,26 +110,26 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
         const fullName = getUserFullName(user);
         return (fullName && searchWords(fullName, searchQuery)) || searchWords(user.username, searchQuery);
-      }).map((id) => usersById[id])
+      })
       : [];
 
-    return unique([
-      ...(searchWords(getTranslation('SavedMessages'), searchQuery) ? [currentUserId] : []),
-      ...([
-        ...foundLocalContacts,
-        ...(localChats || []),
-        ...(localUsers || []),
-      ].sort(sortSearchResults).map((chat) => chat.id)),
-    ]) as number[];
-  }, [searchQuery, localContactIds, localChats, localUsers, usersById, currentUserId]);
+    return [
+      ...(currentUserId && searchWords(getTranslation('SavedMessages'), searchQuery) ? [currentUserId] : []),
+      ...sortChatIds(unique([
+        ...foundContactIds,
+        ...(localChatIds || []),
+        ...(localUserIds || []),
+      ]), chatsById),
+    ];
+  }, [searchQuery, localContactIds, currentUserId, localChatIds, localUserIds, chatsById, usersById]);
 
   const globalResults = useMemo(() => {
-    if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChats || !globalUsers) {
+    if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    return unique([...globalChats, ...globalUsers].sort(sortSearchResults).map((chat) => chat.id));
-  }, [globalChats, globalUsers, searchQuery]);
+    return sortChatIds(unique([...globalChatIds, ...globalUserIds]), chatsById, true);
+  }, [chatsById, globalChatIds, globalUserIds, searchQuery]);
 
   const foundMessages = useMemo(() => {
     if ((!searchQuery && !searchDate) || !foundIds || foundIds.length === 0) {
@@ -248,7 +247,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
             return (
               <LeftSearchResultChat
                 chatId={id}
-                withHandle
+                withUsername
                 onClick={handleChatClick}
               />
             );
@@ -283,21 +282,18 @@ export default memo(withGlobal<OwnProps>(
     const {
       fetchingStatus, globalResults, localResults, resultsByType,
     } = global.globalSearch;
-    const {
-      chats: globalChats,
-      users: globalUsers,
-    } = globalResults || {};
-    const { chats: localChats, users: localUsers } = localResults || {};
+    const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
+    const { chatIds: localChatIds, userIds: localUserIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;
     const { foundIds } = (resultsByType && resultsByType.text) || {};
 
     return {
       currentUserId,
       localContactIds,
-      localChats,
-      localUsers,
-      globalChats,
-      globalUsers,
+      localChatIds,
+      localUserIds,
+      globalChatIds,
+      globalUserIds,
       foundIds,
       globalMessagesByChatId,
       chatsById,

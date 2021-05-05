@@ -25,7 +25,7 @@ type OwnProps = {
   forceShowSelf?: boolean;
   status?: string;
   withMediaViewer?: boolean;
-  withHandle?: boolean;
+  withUsername?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   noStatusOrTyping?: boolean;
@@ -44,7 +44,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   avatarSize = 'medium',
   status,
   withMediaViewer,
-  withHandle,
+  withUsername,
   withFullInfo,
   withUpdatingStatus,
   noStatusOrTyping,
@@ -103,7 +103,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return (
       <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
-        {withHandle && user.username && <span className="handle">{user.username}</span>}
+        {withUsername && user.username && <span className="handle">{user.username}</span>}
         <span className="user-status">{getUserStatus(user, lang)}</span>
       </div>
     );
@@ -129,7 +129,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}
-        {!isSavedMessages && !noStatusOrTyping && renderStatusOrTyping()}
+        {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
     </div>
   );

@@ -65,7 +65,7 @@ addReducer('searchMessagesGlobal', (global, actions, payload) => {
 });
 
 async function searchChats(query: string) {
-  const result = await callApi('searchChats', { query, limit: GLOBAL_SEARCH_SLICE });
+  const result = await callApi('searchChats', { query });
 
   let global = getGlobal();
   const currentSearchQuery = selectCurrentGlobalSearchQuery(global);
@@ -89,13 +89,13 @@ async function searchChats(query: string) {
   global = updateGlobalSearchFetchingStatus(global, { chats: false });
   global = updateGlobalSearch(global, {
     localResults: {
-      chats: localChats,
-      users: localUsers,
+      chatIds: localChats.map(({ id }) => id),
+      userIds: localUsers.map(({ id }) => id),
     },
     globalResults: {
       ...global.globalSearch.globalResults,
-      chats: globalChats,
-      users: globalUsers,
+      chatIds: globalUsers.map(({ id }) => id),
+      userIds: globalChats.map(({ id }) => id),
     },
   });
 

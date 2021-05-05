@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { ApiChatMember, ApiUser } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 import { selectChat } from '../../../modules/selectors';
-import { getSortedUserIds, isChatChannel } from '../../../modules/helpers';
+import { sortUserIds, isChatChannel } from '../../../modules/helpers';
 import { pick } from '../../../util/iteratees';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -36,7 +36,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    return getSortedUserIds(members.map(({ userId }) => userId), usersById);
+    return sortUserIds(members.map(({ userId }) => userId), usersById);
   }, [members, usersById]);
 
   const handleMemberClick = useCallback((id: number) => {

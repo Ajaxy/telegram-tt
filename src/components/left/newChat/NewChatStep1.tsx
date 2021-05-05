@@ -4,12 +4,12 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiUser } from '../../../api/types';
+import { ApiChat, ApiUser } from '../../../api/types';
 
 import { pick, unique } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
-import { getSortedUserIds, getUserFullName } from '../../../modules/helpers';
+import { getUserFullName, sortChatIds } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 
 import Picker from '../../common/Picker';
@@ -27,11 +27,12 @@ export type OwnProps = {
 type StateProps = {
   currentUserId?: number;
   usersById: Record<number, ApiUser>;
+  chatsById: Record<number, ApiChat>;
   localContactIds?: number[];
   searchQuery?: string;
   isSearching?: boolean;
-  localUsers?: ApiUser[];
-  globalUsers?: ApiUser[];
+  localUserIds?: number[];
+  globalUserIds?: number[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setGlobalSearchQuery'>;
@@ -46,11 +47,12 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   onReset,
   currentUserId,
   usersById,
+  chatsById,
   localContactIds,
   searchQuery,
   isSearching,
-  localUsers,
-  globalUsers,
+  localUserIds,
+  globalUserIds,
   loadContactList,
   setGlobalSearchQuery,
 }) => {
@@ -67,13 +69,15 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [setGlobalSearchQuery]);
 
   const displayedIds = useMemo(() => {
-    const contactIds = localContactIds ? localContactIds.filter((id) => id !== currentUserId) : [];
+    const contactIds = localContactIds
+      ? sortChatIds(localContactIds.filter((id) => id !== currentUserId), chatsById)
+      : [];
 
     if (!searchQuery) {
       return contactIds;
     }
 
-    const foundLocalContacts = contactIds.filter((id) => {
+    const foundContactIds = contactIds.filter((id) => {
       const user = usersById[id];
       if (!user) {
         return false;
@@ -82,16 +86,19 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
       return fullName && searchWords(fullName, searchQuery);
     });
 
-    return getSortedUserIds(
+    return sortChatIds(
       unique([
-        ...foundLocalContacts,
-        ...(localUsers ? localUsers.map((user) => user.id) : []),
-        ...(globalUsers ? globalUsers.map((user) => user.id) : []),
-      ]) as number[],
-      usersById,
+        ...foundContactIds,
+        ...(localUserIds || []),
+        ...(globalUserIds || []),
+      ]),
+      chatsById,
+      false,
       selectedMemberIds,
     );
-  }, [localContactIds, searchQuery, localUsers, globalUsers, usersById, selectedMemberIds, currentUserId]);
+  }, [
+    localContactIds, searchQuery, localUserIds, globalUserIds, usersById, chatsById, selectedMemberIds, currentUserId,
+  ]);
 
   const handleNextStep = useCallback(() => {
     if (selectedMemberIds.length) {
@@ -144,6 +151,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: localContactIds } = global.contactList || {};
     const { byId: usersById } = global.users;
+    const { byId: chatsById } = global.chats;
     const { currentUserId } = global;
 
     const {
@@ -152,17 +160,18 @@ export default memo(withGlobal<OwnProps>(
       globalResults,
       localResults,
     } = global.globalSearch;
-    const { users: globalUsers } = globalResults || {};
-    const { users: localUsers } = localResults || {};
+    const { userIds: globalUserIds } = globalResults || {};
+    const { userIds: localUserIds } = localResults || {};
 
     return {
       currentUserId,
       usersById,
+      chatsById,
       localContactIds,
       searchQuery,
       isSearching: fetchingStatus && fetchingStatus.chats,
-      globalUsers,
-      localUsers,
+      globalUserIds,
+      localUserIds,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'setGlobalSearchQuery']),

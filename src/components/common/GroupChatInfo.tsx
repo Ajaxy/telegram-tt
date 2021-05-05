@@ -27,7 +27,7 @@ type OwnProps = {
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   withMediaViewer?: boolean;
-  withHandle?: boolean;
+  withUsername?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withChatType?: boolean;
@@ -45,7 +45,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   typingStatus,
   avatarSize = 'medium',
   withMediaViewer,
-  withHandle,
+  withUsername,
   withFullInfo,
   withUpdatingStatus,
   withChatType,
@@ -102,7 +102,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       );
     }
 
-    const handle = withHandle ? chat.username : undefined;
+    const handle = withUsername ? chat.username : undefined;
     const groupStatus = getGroupStatus(chat, lang);
     const onlineStatus = onlineCount ? `, ${lang('OnlineCount', onlineCount, 'i')}` : undefined;
 

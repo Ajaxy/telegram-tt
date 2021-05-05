@@ -7,7 +7,7 @@ import { ApiChatMember, ApiUser } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectChat } from '../../../modules/selectors';
-import { getSortedUserIds, isChatChannel } from '../../../modules/helpers';
+import { sortUserIds, isChatChannel } from '../../../modules/helpers';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
@@ -37,7 +37,7 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    return getSortedUserIds(members.filter((member) => !member.isOwner).map(({ userId }) => userId), usersById);
+    return sortUserIds(members.filter((member) => !member.isOwner).map(({ userId }) => userId), usersById);
   }, [members, usersById]);
 
   const handleExceptionMemberClick = useCallback((memberId: number) => {
