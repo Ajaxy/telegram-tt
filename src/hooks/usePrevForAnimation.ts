@@ -26,5 +26,5 @@ export default function usePrevForAnimation(current: any, duration?: number) {
     }
   }, [current]);
 
-  return !timeoutRef.current || !duration || isCurrentPresent ? current : prev;
+  return isCurrentPresent || (duration && !timeoutRef.current) ? current : prev;
 }

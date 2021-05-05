@@ -1,9 +1,17 @@
 .WebPagePreview {
-  display: flex;
-  align-items: center;
-  margin-bottom: -.75rem;
-  padding-right: 0.625rem;
-  padding-top: 0.45rem;
+  height: 2.625rem;
+  transition: height 150ms ease-out, opacity 150ms ease-out;
+
+  &:not(.open) {
+    height: 0 !important;
+  }
+
+  & > div {
+    display: flex;
+    align-items: center;
+    padding-right: 0.625rem;
+    padding-top: 0.45rem;
+  }
 
   --accent-color: var(--color-primary);
 
@@ -11,7 +19,7 @@
     margin-top: 0.75rem;
   }
 
-  & > .Button {
+  & > div > .Button {
     flex-shrink: 0;
     background: none !important;
     width: 2.125rem;
@@ -26,13 +34,18 @@
     margin: 0.1875rem 0 0.1875rem 0.125rem;
 
     &::before {
-      top: .125rem;
-      bottom: .0625rem;
+      bottom: .125rem;
     }
 
     .site-title {
       margin-top: .125rem;
       margin-bottom: 0.1875rem;
+    }
+
+    .site-description {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 }
