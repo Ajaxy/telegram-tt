@@ -95,6 +95,10 @@ export async function destroy() {
   await client.destroy();
 }
 
+export async function disconnect() {
+  await client.disconnect();
+}
+
 export function getClient() {
   return client;
 }

@@ -1,3 +1,6 @@
+export const PAGE_TITLE = 'Telegram';
+export const INACTIVE_MARKER = ' [Inactive]';
+
 export const APP_INFO = process.env.APP_INFO || 'Telegram T';
 
 export const DEBUG = (

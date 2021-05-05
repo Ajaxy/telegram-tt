@@ -1,4 +1,6 @@
-export { destroy, downloadMedia, fetchCurrentUser } from './client';
+export {
+  destroy, disconnect, downloadMedia, fetchCurrentUser,
+} from './client';
 
 export {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,

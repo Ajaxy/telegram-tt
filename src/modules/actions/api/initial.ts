@@ -126,6 +126,12 @@ addReducer('reset', () => {
   getDispatch().init();
 });
 
+addReducer('disconnect', () => {
+  (async () => {
+    await callApi('disconnect');
+  })();
+});
+
 addReducer('loadNearestCountry', (global) => {
   if (global.connectionState !== 'connectionStateReady') {
     return;

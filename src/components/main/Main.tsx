@@ -5,7 +5,9 @@ import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
 import '../../modules/actions/all';
-import { ANIMATION_END_DELAY, DEBUG } from '../../config';
+import {
+  ANIMATION_END_DELAY, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
+} from '../../config';
 import { pick } from '../../util/iteratees';
 import {
   selectChatMessage,
@@ -44,7 +46,6 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
 
-const APP_NAME = 'Telegram';
 const ANIMATION_DURATION = 350;
 const NOTIFICATION_INTERVAL = 1000;
 
@@ -122,6 +123,11 @@ const Main: FC<StateProps & DispatchProps> = ({
 
     clearInterval(notificationInterval);
     notificationInterval = window.setInterval(() => {
+      if (document.title.includes(INACTIVE_MARKER)) {
+        updateIcon(false);
+        return;
+      }
+
       if (index % 2 === 0) {
         const newUnread = selectCountNotMutedUnread(getGlobal()) - initialUnread;
         if (newUnread > 0) {
@@ -129,7 +135,7 @@ const Main: FC<StateProps & DispatchProps> = ({
           updateIcon(true);
         }
       } else {
-        document.title = APP_NAME;
+        document.title = PAGE_TITLE;
         updateIcon(false);
       }
 
@@ -138,7 +144,11 @@ const Main: FC<StateProps & DispatchProps> = ({
   }, () => {
     clearInterval(notificationInterval);
     notificationInterval = undefined;
-    document.title = APP_NAME;
+
+    if (!document.title.includes(INACTIVE_MARKER)) {
+      document.title = PAGE_TITLE;
+    }
+
     updateIcon(false);
   });
 

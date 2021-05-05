@@ -383,7 +383,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system
-  'init' | 'reset' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' | 'afterSync' |
+  'init' | 'reset' | 'disconnect' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' | 'afterSync' |
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
