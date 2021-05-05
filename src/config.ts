@@ -59,8 +59,8 @@ export const PINNED_MESSAGES_LIMIT = 50;
 export const BLOCKED_LIST_LIMIT = 100;
 export const PROFILE_PHOTOS_LIMIT = 40;
 
-export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 0;
-export const ALL_CHATS_PRELOAD_DISABLED = true;
+export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 25;
+export const ALL_CHATS_PRELOAD_DISABLED = false;
 
 export const ANIMATION_LEVEL_MIN = 0;
 export const ANIMATION_LEVEL_MED = 1;
