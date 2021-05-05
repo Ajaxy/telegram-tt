@@ -12,7 +12,7 @@ import {
   ApiChatAdminRights,
 } from '../../types';
 
-import { DEBUG, ARCHIVED_FOLDER_ID, CHANNEL_MEMBERS_LIMIT } from '../../../config';
+import { DEBUG, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE } from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiChatFromDialog,
@@ -156,11 +156,12 @@ export async function fetchChats({
 
 export function fetchFullChat(chat: ApiChat) {
   const { id, accessHash, adminRights } = chat;
+
   const input = buildInputEntity(id, accessHash);
 
   return input instanceof GramJs.InputChannel
-    ? getFullChannelInfo(input, adminRights)
-    : getFullChatInfo(input as number);
+    ? getFullChannelInfo(id, accessHash!, adminRights)
+    : getFullChatInfo(id);
 }
 
 export async function searchChats({ query }: { query: string }) {
@@ -298,7 +299,9 @@ async function getFullChatInfo(chatId: number): Promise<{
   fullInfo: ApiChatFullInfo;
   users?: ApiUser[];
 } | undefined> {
-  const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
+  const result = await invokeRequest(new GramJs.messages.GetFullChat({
+    chatId: buildInputEntity(chatId) as number,
+  }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
     return undefined;
@@ -328,10 +331,13 @@ async function getFullChatInfo(chatId: number): Promise<{
 }
 
 async function getFullChannelInfo(
-  channel: GramJs.InputChannel,
+  id: number,
+  accessHash: string,
   adminRights?: ApiChatAdminRights,
 ) {
-  const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
+  const result = await invokeRequest(new GramJs.channels.GetFullChannel({
+    channel: buildInputEntity(id, accessHash) as GramJs.InputChannel,
+  }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChannelFull)) {
     return undefined;
@@ -354,12 +360,12 @@ async function getFullChannelInfo(
     ? exportedInvite.link
     : undefined;
 
-  const { members, users } = (canViewParticipants && await getChannelMembers(channel)) || {};
+  const { members, users } = (canViewParticipants && await fetchMembers(id, accessHash)) || {};
   const { members: kickedMembers, users: bannedUsers } = (
-    canViewParticipants && adminRights && await getChannelMembers(channel, 'kicked')
+    canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'kicked')
   ) || {};
   const { members: adminMembers, users: adminUsers } = (
-    canViewParticipants && adminRights && await getChannelMembers(channel, 'admin')
+    canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'admin')
   ) || {};
 
   return {
@@ -785,9 +791,11 @@ export function toggleSignatures({
 
 type ChannelMembersFilter = 'kicked' | 'admin' | 'recent';
 
-async function getChannelMembers(
-  channel: GramJs.InputChannel,
+export async function fetchMembers(
+  chatId: number,
+  accessHash: string,
   memberFilter: ChannelMembersFilter = 'recent',
+  offset?: number,
 ) {
   let filter: GramJs.TypeChannelParticipantsFilter;
 
@@ -804,9 +812,10 @@ async function getChannelMembers(
   }
 
   const result = await invokeRequest(new GramJs.channels.GetParticipants({
-    channel,
+    channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
     filter,
-    limit: CHANNEL_MEMBERS_LIMIT,
+    offset,
+    limit: MEMBERS_LOAD_SLICE,
   }));
 
   if (!result || result instanceof GramJs.channels.ChannelParticipantsNotModified) {

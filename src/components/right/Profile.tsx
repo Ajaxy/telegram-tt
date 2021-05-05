@@ -14,10 +14,10 @@ import {
   MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType,
 } from '../../types';
 
-import { SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
+import { MEMBERS_SLICE, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
-  isChatAdmin, isChatChannel, isChatGroup, isChatPrivate,
+  isChatAdmin, isChatBasicGroup, isChatChannel, isChatGroup, isChatPrivate,
 } from '../../modules/helpers';
 import {
   selectChatMessages,
@@ -57,6 +57,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  isBasicGroup?: boolean;
   isChannel?: boolean;
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
@@ -72,7 +73,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'setLocalMediaSearchType' | 'searchMediaMessagesLocal' | 'openMediaViewer' |
+  'setLocalMediaSearchType' | 'loadMoreMembers' | 'searchMediaMessagesLocal' | 'openMediaViewer' |
   'openAudioPlayer' | 'openUserInfo' | 'focusMessage' | 'loadProfilePhotos'
 )>;
 
@@ -89,6 +90,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   profileState,
   onProfileStateChange,
+  isBasicGroup,
   isChannel,
   resolvedUserId,
   chatMessages,
@@ -102,6 +104,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   isRestricted,
   lastSyncTime,
   setLocalMediaSearchType,
+  loadMoreMembers,
   searchMediaMessagesLocal,
   openMediaViewer,
   openAudioPlayer,
@@ -125,7 +128,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   const tabType = tabs[activeTab].type as ProfileTabType;
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
-    isRightColumnShown, searchMediaMessagesLocal, tabType, mediaSearchType, members,
+    isRightColumnShown, loadMoreMembers, searchMediaMessagesLocal, tabType, mediaSearchType, members,
     usersById, chatMessages, foundIds, chatId, lastSyncTime,
   );
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
@@ -306,8 +309,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       itemSelector={buildInfiniteScrollItemSelector(resultType)}
       items={viewportIds}
       cacheBuster={cacheBuster}
-      preloadBackwards={SHARED_MEDIA_SLICE}
-      isDisabled={tabType === 'members'}
+      sensitiveArea={500}
+      preloadBackwards={resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE}
+      isDisabled={resultType === 'members' && isBasicGroup}
       noFastList
       onLoadMore={getMore}
       onScroll={handleScroll}
@@ -366,6 +370,7 @@ export default memo(withGlobal<OwnProps>(
     const { byId: usersById } = global.users;
 
     const isGroup = chat && isChatGroup(chat);
+    const isBasicGroup = chat && isChatBasicGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
     const members = chat && chat.fullInfo && chat.fullInfo.members;
@@ -379,6 +384,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
+      isBasicGroup,
       isChannel,
       resolvedUserId,
       chatMessages,
@@ -397,6 +403,7 @@ export default memo(withGlobal<OwnProps>(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'setLocalMediaSearchType',
+    'loadMoreMembers',
     'searchMediaMessagesLocal',
     'openMediaViewer',
     'openAudioPlayer',

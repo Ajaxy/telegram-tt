@@ -52,7 +52,7 @@ const TMP_CHAT_ID = -1;
 
 const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
-const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
+const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
 addReducer('preloadTopChatMessages', (global, actions) => {
   (async () => {
@@ -173,7 +173,7 @@ addReducer('loadFullChat', (global, actions, payload) => {
   if (force) {
     loadFullChat(chat);
   } else {
-    runDebouncedForFetchFullChat(() => loadFullChat(chat));
+    runDebouncedForLoadFullChat(() => loadFullChat(chat));
   }
 });
 
@@ -666,6 +666,40 @@ addReducer('unlinkDiscussionGroup', (global, actions, payload) => {
     if (chat) {
       loadFullChat(chat);
     }
+  })();
+});
+
+addReducer('loadMoreMembers', (global) => {
+  (async () => {
+    const { chatId } = selectCurrentMessageList(global) || {};
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+    if (!chat) {
+      return;
+    }
+
+    const offset = (chat.fullInfo && chat.fullInfo.members && chat.fullInfo.members.length) || undefined;
+    const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
+    if (!result) {
+      return;
+    }
+
+    const { members, users } = result;
+    if (!members || !members.length) {
+      return;
+    }
+
+    global = getGlobal();
+    global = addUsers(global, buildCollectionByKey(users, 'id'));
+    global = updateChat(global, chat.id, {
+      fullInfo: {
+        ...chat.fullInfo,
+        members: [
+          ...((chat.fullInfo || {}).members || []),
+          ...(members || []),
+        ],
+      },
+    });
+    setGlobal(global);
   })();
 });
 
