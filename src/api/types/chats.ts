@@ -46,8 +46,6 @@ export interface ApiChat {
 
   // Obtained from GetFullChat / GetFullChannel
   fullInfo?: ApiChatFullInfo;
-  // Obtained from GetOnlines
-  onlineCount?: number;
   // Obtained with UpdateUserTyping or UpdateChatUserTyping updates
   typingStatus?: ApiTypingStatus;
 }
@@ -60,6 +58,7 @@ export interface ApiTypingStatus {
 
 export interface ApiChatFullInfo {
   about?: string;
+  onlineCount?: number;
   members?: ApiChatMember[];
   kickedMembers?: ApiChatMember[];
   adminMembers?: ApiChatMember[];

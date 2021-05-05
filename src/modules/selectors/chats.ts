@@ -2,10 +2,10 @@ import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 import { GlobalState } from '../../global/types';
 
 import {
-  getPrivateChatUserId, isChatChannel, isChatPrivate, isChatSuperGroup, isHistoryClearMessage, isUserBot, isUserOnline,
+  getPrivateChatUserId, isChatChannel, isChatPrivate, isHistoryClearMessage, isUserBot, isUserOnline,
 } from '../helpers';
 import { selectUser } from './users';
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../config';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, CHANNEL_MEMBERS_LIMIT } from '../../config';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -34,21 +34,16 @@ export function selectSupportChat(global: GlobalState) {
 }
 
 export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
-  if (isChatPrivate(chat.id) || isChatChannel(chat)) {
+  if (isChatPrivate(chat.id) || isChatChannel(chat) || !chat.fullInfo) {
     return undefined;
   }
 
-  if (isChatSuperGroup(chat)) {
-    return chat.onlineCount;
+  if (!chat.fullInfo.members || chat.fullInfo.members.length === CHANNEL_MEMBERS_LIMIT) {
+    return chat.fullInfo.onlineCount;
   }
 
-  if (!chat.fullInfo || !chat.fullInfo.members) {
-    return undefined;
-  }
-
-  const memberIds = chat.fullInfo.members.map((m) => m.userId);
-  return memberIds.reduce((onlineCount, memberId) => {
-    if (global.users.byId[memberId] && isUserOnline(global.users.byId[memberId])) {
+  return chat.fullInfo.members.reduce((onlineCount, { userId }) => {
+    if (global.users.byId[userId] && isUserOnline(global.users.byId[userId]) && userId !== global.currentUserId) {
       return onlineCount + 1;
     }
 

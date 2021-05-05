@@ -39,7 +39,7 @@ type StateProps = {
   areMessagesLoaded: boolean;
 } & Pick<GlobalState, 'lastSyncTime'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines' | 'openMediaViewer'>;
+type DispatchProps = Pick<GlobalActions, 'loadFullChat' | 'openMediaViewer'>;
 
 const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   typingStatus,
@@ -54,7 +54,6 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   areMessagesLoaded,
   lastSyncTime,
   loadFullChat,
-  loadSuperGroupOnlines,
   openMediaViewer,
 }) => {
   const isSuperGroup = chat && isChatSuperGroup(chat);
@@ -63,12 +62,8 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     if (chatId && !isMin && withFullInfo && lastSyncTime) {
       loadFullChat({ chatId });
-
-      if (isSuperGroup) {
-        loadSuperGroupOnlines({ chatId });
-      }
     }
-  }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
+  }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, isSuperGroup]);
 
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (chat && hasPhoto) {
@@ -167,5 +162,5 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime, chat, onlineCount, areMessagesLoaded,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'loadSuperGroupOnlines', 'openMediaViewer']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'openMediaViewer']),
 )(GroupChatInfo));

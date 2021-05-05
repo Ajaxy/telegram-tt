@@ -53,7 +53,6 @@ const TMP_CHAT_ID = -1;
 const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
-const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
 
 addReducer('preloadTopChatMessages', (global, actions) => {
   (async () => {
@@ -176,16 +175,6 @@ addReducer('loadFullChat', (global, actions, payload) => {
   } else {
     runDebouncedForFetchFullChat(() => loadFullChat(chat));
   }
-});
-
-addReducer('loadSuperGroupOnlines', (global, actions, payload) => {
-  const { chatId } = payload!;
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return;
-  }
-
-  runDebouncedForFetchOnlines(() => callApi('fetchSuperGroupOnlines', chat));
 });
 
 addReducer('loadTopChats', () => {

@@ -163,25 +163,6 @@ export function fetchFullChat(chat: ApiChat) {
     : getFullChatInfo(input as number);
 }
 
-export async function fetchSuperGroupOnlines(chat: ApiChat) {
-  const { id, accessHash } = chat;
-
-  const peer = buildInputPeer(id, accessHash);
-  const result = await invokeRequest(new GramJs.messages.GetOnlines({ peer }));
-
-  if (!result) {
-    return;
-  }
-
-  const { onlines } = result;
-
-  onUpdate({
-    '@type': 'updateChat',
-    id,
-    chat: { onlineCount: onlines },
-  });
-}
-
 export async function searchChats({ query, limit }: { query: string; limit?: number }) {
   const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit }));
   if (!result) {
@@ -358,6 +339,7 @@ async function getFullChannelInfo(
 
   const {
     about,
+    onlineCount,
     exportedInvite,
     slowmodeSeconds,
     slowmodeNextSendDate,
@@ -383,6 +365,7 @@ async function getFullChannelInfo(
   return {
     fullInfo: {
       about,
+      onlineCount,
       inviteLink,
       slowMode: slowmodeSeconds ? {
         seconds: slowmodeSeconds,
