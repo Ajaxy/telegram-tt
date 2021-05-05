@@ -224,12 +224,12 @@ export type GlobalState = {
       messages?: boolean;
     };
     localResults?: {
-      chats?: ApiChat[];
-      users?: ApiUser[];
+      chatIds?: number[];
+      userIds?: number[];
     };
     globalResults?: {
-      chats?: ApiChat[];
-      users?: ApiUser[];
+      chatIds?: number[];
+      userIds?: number[];
     };
     resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
       totalCount?: number;

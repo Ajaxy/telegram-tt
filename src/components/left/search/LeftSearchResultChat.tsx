@@ -15,7 +15,7 @@ import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: number;
-  withHandle?: boolean;
+  withUsername?: boolean;
   onClick: (id: number) => void;
 };
 
@@ -30,7 +30,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   chat,
   privateChatUser,
   isPinned,
-  withHandle,
+  withUsername,
   onClick,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
@@ -53,9 +53,9 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       contextActions={contextActions}
     >
       {isChatPrivate(chatId) ? (
-        <PrivateChatInfo userId={chatId} withHandle={withHandle} avatarSize="large" />
+        <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" />
       ) : (
-        <GroupChatInfo chatId={chatId} withHandle={withHandle} avatarSize="large" />
+        <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
       )}
       <DeleteChatModal
         isOpen={isDeleteModalOpen}

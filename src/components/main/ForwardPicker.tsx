@@ -4,11 +4,12 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiChat, ApiUser } from '../../api/types';
+import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
 import { IS_MOBILE_SCREEN } from '../../util/environment';
-import { getChatTitle, prepareChatList, isChatPrivate } from '../../modules/helpers';
-import { selectUser } from '../../modules/selectors';
+import {
+  getCanPostInChat, getChatTitle, isChatPrivate, sortChatIds,
+} from '../../modules/helpers';
 import searchWords from '../../util/searchWords';
 import { pick } from '../../util/iteratees';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -31,9 +32,10 @@ export type OwnProps = {
 
 type StateProps = {
   chatsById: Record<number, ApiChat>;
-  listIds?: number[];
+  activeListIds?: number[];
+  archivedListIds?: number[];
   orderedPinnedIds?: number[];
-  currentUser?: ApiUser;
+  currentUserId?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setForwardChatId' | 'exitForwardMode' | 'loadMoreChats'>;
@@ -44,9 +46,9 @@ const MODAL_HIDE_DELAY_MS = 300;
 
 const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
-  listIds,
-  orderedPinnedIds,
-  currentUser,
+  activeListIds,
+  archivedListIds,
+  currentUserId,
   isOpen,
   setForwardChatId,
   exitForwardMode,
@@ -78,30 +80,31 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [isOpen]);
 
-  const chats = useMemo(() => {
-    const chatArrays = listIds ? prepareChatList(chatsById, listIds, orderedPinnedIds) : undefined;
-    if (!chatArrays) {
-      return undefined;
-    }
-
-    const chatWithSelf = currentUser ? chatsById[currentUser.id] : undefined;
-
-    return [
-      ...(chatWithSelf ? [chatWithSelf] : []),
-      ...chatArrays.pinnedChats.filter(({ id }) => !chatWithSelf || id !== chatWithSelf.id),
-      ...chatArrays.otherChats.filter(({ id }) => !chatWithSelf || id !== chatWithSelf.id),
-    ];
-  }, [chatsById, listIds, orderedPinnedIds, currentUser]);
-
   const chatIds = useMemo(() => {
-    if (!chats) {
-      return undefined;
-    }
+    const listIds = [
+      ...activeListIds || [],
+      ...archivedListIds || [],
+    ];
 
-    return chats
-      .filter((chat) => (!filter || searchWords(getChatTitle(chat, currentUser), filter)))
-      .map(({ id }) => id);
-  }, [chats, filter, currentUser]);
+    return sortChatIds([
+      ...listIds.filter((id) => {
+        const chat = chatsById[id];
+        if (!chat) {
+          return true;
+        }
+
+        if (!getCanPostInChat(chat, MAIN_THREAD_ID)) {
+          return false;
+        }
+
+        if (!filter) {
+          return true;
+        }
+
+        return searchWords(getChatTitle(chatsById[id], undefined, id === currentUserId), filter);
+      }),
+    ], chatsById, undefined, currentUserId ? [currentUserId] : undefined);
+  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter]);
 
   const [viewportIds, getMore] = useInfiniteScroll(loadMoreChats, chatIds, Boolean(filter));
 
@@ -152,7 +155,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
               onClick={() => setForwardChatId({ id })}
             >
               {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} />
+                <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
               ) : (
                 <GroupChatInfo chatId={id} />
               )}
@@ -174,16 +177,15 @@ export default memo(withGlobal<OwnProps>(
       chats: {
         byId: chatsById,
         listIds,
-        orderedPinnedIds,
       },
       currentUserId,
     } = global;
 
     return {
       chatsById,
-      listIds: listIds.active,
-      orderedPinnedIds: orderedPinnedIds.active,
-      currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
+      activeListIds: listIds.active,
+      archivedListIds: listIds.archived,
+      currentUserId,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatId', 'exitForwardMode', 'loadMoreChats']),

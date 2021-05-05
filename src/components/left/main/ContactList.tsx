@@ -10,7 +10,7 @@ import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
 import { pick } from '../../../util/iteratees';
-import { getUserFullName, getSortedUserIds } from '../../../modules/helpers';
+import { getUserFullName, sortUserIds } from '../../../modules/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -63,7 +63,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
       return fullName && searchWords(fullName, filter);
     }) : contactIds;
 
-    return getSortedUserIds(resultIds, usersById);
+    return sortUserIds(resultIds, usersById);
   }, [filter, usersById, contactIds]);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));

@@ -180,7 +180,7 @@ export function isUserBot(user: ApiUser) {
   return user.type === 'userTypeBot';
 }
 
-export function getSortedUserIds(
+export function sortUserIds(
   userIds: number[],
   usersById: Record<number, ApiUser>,
   priorityIds?: number[],
@@ -189,13 +189,10 @@ export function getSortedUserIds(
     const now = Date.now() / 1000;
 
     if (priorityIds && priorityIds.includes(id)) {
-      /*
-      ** Assuming that online status expiration date can't be as far as two days from now,
-      ** this should place priorityIds on top of the list.
-      **
-      ** We then subtract index of `id` in `priorityIds` to preserve selected order
-      */
-      return now + (48 * 60 * 60) - priorityIds.indexOf(id);
+      // Assuming that online status expiration date can't be as far as two days from now,
+      // this should place prioritized on top of the list.
+      // Then we subtract index of `id` in `priorityIds` to preserve selected order
+      return now + (48 * 60 * 60) - (priorityIds.length - priorityIds.indexOf(id));
     }
 
     const user = usersById[id];

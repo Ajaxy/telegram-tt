@@ -163,8 +163,8 @@ export function fetchFullChat(chat: ApiChat) {
     : getFullChatInfo(input as number);
 }
 
-export async function searchChats({ query, limit }: { query: string; limit?: number }) {
-  const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit }));
+export async function searchChats({ query }: { query: string }) {
+  const result = await invokeRequest(new GramJs.contacts.Search({ q: query }));
   if (!result) {
     return undefined;
   }

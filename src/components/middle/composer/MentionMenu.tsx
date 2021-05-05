@@ -152,7 +152,7 @@ const MentionMenu: FC<OwnProps> = ({
           <PrivateChatInfo
             userId={userId}
             avatarSize="small"
-            withHandle
+            withUsername
           />
         </ListItem>
       ))}
