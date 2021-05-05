@@ -3,13 +3,14 @@ import { useMemo, useRef } from '../../../lib/teact/teact';
 import { ApiChatMember, ApiMessage, ApiUser } from '../../../api/types';
 import { ProfileTabType, SharedMediaType } from '../../../types';
 
-import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
+import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getMessageContentIds, sortUserIds } from '../../../modules/helpers';
 import useOnChange from '../../../hooks/useOnChange';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 export default function useProfileViewportIds(
   isRightColumnShown: boolean,
+  loadMoreMembers: AnyToVoidFunction,
   searchMessages: AnyToVoidFunction,
   tabType: ProfileTabType,
   mediaSearchType?: SharedMediaType,
@@ -29,6 +30,10 @@ export default function useProfileViewportIds(
 
     return sortUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
   }, [groupChatMembers, usersById]);
+
+  const [memberViewportIds, getMoreMembers, noProfileInfoForMembers] = useInfiniteScrollForMembers(
+    resultType, loadMoreMembers, lastSyncTime, memberIds,
+  );
 
   const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(
     'media', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
@@ -52,8 +57,9 @@ export default function useProfileViewportIds(
 
   switch (resultType) {
     case 'members':
-      viewportIds = memberIds;
-      getMore = undefined;
+      viewportIds = memberViewportIds;
+      getMore = getMoreMembers;
+      noProfileInfo = noProfileInfoForMembers;
       break;
     case 'media':
       viewportIds = mediaViewportIds;
@@ -78,6 +84,24 @@ export default function useProfileViewportIds(
   }
 
   return [resultType, viewportIds, getMore, noProfileInfo] as const;
+}
+
+function useInfiniteScrollForMembers(
+  currentResultType?: ProfileTabType,
+  handleLoadMore?: AnyToVoidFunction,
+  lastSyncTime?: number,
+  memberIds?: number[],
+) {
+  const [viewportIds, getMore] = useInfiniteScroll(
+    lastSyncTime ? handleLoadMore : undefined,
+    memberIds,
+    undefined,
+    MEMBERS_SLICE,
+  );
+
+  const isOnTop = !viewportIds || !memberIds || viewportIds[0] === memberIds[0];
+
+  return [viewportIds, getMore, !isOnTop] as const;
 }
 
 function useInfiniteScrollForSharedMedia(

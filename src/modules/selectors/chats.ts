@@ -5,7 +5,7 @@ import {
   getPrivateChatUserId, isChatChannel, isChatPrivate, isHistoryClearMessage, isUserBot, isUserOnline,
 } from '../helpers';
 import { selectUser } from './users';
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, CHANNEL_MEMBERS_LIMIT } from '../../config';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE } from '../../config';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -38,7 +38,7 @@ export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
     return undefined;
   }
 
-  if (!chat.fullInfo.members || chat.fullInfo.members.length === CHANNEL_MEMBERS_LIMIT) {
+  if (!chat.fullInfo.members || chat.fullInfo.members.length === MEMBERS_LOAD_SLICE) {
     return chat.fullInfo.onlineCount;
   }
 

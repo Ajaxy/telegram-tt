@@ -36,7 +36,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
-  // Used to turn off restoring scroll position (e.g. for frequently re-ordered chat or user lists)
+  // Used to turn off preloading and restoring scroll position (e.g. for frequently re-ordered chat or user lists)
   isDisabled = false,
   noFastList,
   // Used to re-query `listItemElements` if rendering is delayed by transition
@@ -70,7 +70,7 @@ const InfiniteScroll: FC<OwnProps> = ({
 
   // Initial preload
   useEffect(() => {
-    if (!loadMoreBackwards) {
+    if (isDisabled || !loadMoreBackwards) {
       return;
     }
 
@@ -82,7 +82,7 @@ const InfiniteScroll: FC<OwnProps> = ({
         loadMoreBackwards();
       }
     }
-  }, [items, loadMoreBackwards, preloadBackwards]);
+  }, [isDisabled, items, loadMoreBackwards, preloadBackwards]);
 
   // Restore `scrollTop` after adding items
   useLayoutEffect(() => {
