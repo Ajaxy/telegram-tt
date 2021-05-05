@@ -700,9 +700,12 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       <div id="message-compose">
         <div className="svg-appendix" ref={appendixRef} />
         <ComposerEmbeddedMessage />
-        {allowedAttachmentOptions.canAttachEmbedLinks && (
-          <WebPagePreview chatId={chatId} threadId={threadId} messageText={!attachments.length ? html : ''} />
-        )}
+        <WebPagePreview
+          chatId={chatId}
+          threadId={threadId}
+          messageText={!attachments.length ? html : ''}
+          disabled={!allowedAttachmentOptions.canAttachEmbedLinks}
+        />
         <div className="message-input-wrapper">
           {IS_MOBILE_SCREEN ? (
             <Button

@@ -6,10 +6,14 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
 
+import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectNoWebPage } from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
 import parseMessageInput from './helpers/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
+import useShowTransition from '../../../hooks/useShowTransition';
+import usePrevForAnimation from '../../../hooks/usePrevForAnimation';
+import buildClassName from '../../../util/buildClassName';
 
 import WebPage from '../message/WebPage';
 import Button from '../../ui/Button';
@@ -20,6 +24,7 @@ type OwnProps = {
   chatId: number;
   threadId: number;
   messageText: string;
+  disabled?: boolean;
 };
 
 type StateProps = {
@@ -28,12 +33,13 @@ type StateProps = {
 };
 type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview' | 'toggleMessageWebPage'>;
 
-const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#][=&#a-zA-Z0-9]{2,128})?/;
+const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
 const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   threadId,
   messageText,
+  disabled,
   webPagePreview,
   noWebPage,
   loadWebPagePreview,
@@ -70,16 +76,21 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
     toggleMessageWebPage({ chatId, threadId });
   }, [chatId]);
 
+  const isShown = Boolean(webPagePreview && messageText.length && !noWebPage && !disabled);
+  const { shouldRender, transitionClassNames } = useShowTransition(isShown);
+
+  const renderingWebPage = usePrevForAnimation(webPagePreview);
+
+  if (!shouldRender || !renderingWebPage) {
+    return undefined;
+  }
+
   const handleClearWebpagePreview = () => {
     toggleMessageWebPage({ chatId, threadId, noWebPage: true });
   };
 
-  if (!webPagePreview || !messageText.length || noWebPage) {
-    return undefined;
-  }
-
   // TODO Refactor so `WebPage` can be used without message
-  const { photo, ...webPageWithoutPhoto } = webPagePreview;
+  const { photo, ...webPageWithoutPhoto } = renderingWebPage;
   const messageStub = {
     content: {
       webPage: webPageWithoutPhoto,
@@ -87,11 +98,13 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   } as ApiMessage;
 
   return (
-    <div className="WebPagePreview">
-      <Button round color="translucent" ariaLabel="Clear Webpage Preview" onClick={handleClearWebpagePreview}>
-        <i className="icon-close" />
-      </Button>
-      <WebPage message={messageStub} inPreview />
+    <div className={buildClassName('WebPagePreview', transitionClassNames)}>
+      <div>
+        <Button round color="translucent" ariaLabel="Clear Webpage Preview" onClick={handleClearWebpagePreview}>
+          <i className="icon-close" />
+        </Button>
+        <WebPage message={messageStub} inPreview />
+      </div>
     </div>
   );
 };

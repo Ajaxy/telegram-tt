@@ -1,12 +1,13 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
+import { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { getMessageWebPage } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import trimText from '../../../util/trimText';
-import { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import buildClassName from '../../../util/buildClassName';
 
 import SafeLink from '../../common/SafeLink';
 import Photo from './Photo';
@@ -63,12 +64,12 @@ const WebPage: FC<OwnProps> = ({
 
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
 
-  const className = [
+  const className = buildClassName(
     'WebPage',
     photo
       ? (isSquarePhoto && 'with-square-photo')
       : (!inPreview && 'without-photo'),
-  ].filter(Boolean).join(' ');
+  );
 
   return (
     <div
@@ -87,7 +88,7 @@ const WebPage: FC<OwnProps> = ({
       )}
       <div className="WebPage-text">
         <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
-        {title && (
+        {!inPreview && title && (
           <p className="site-title">{renderText(title)}</p>
         )}
         {truncatedDescription && (
