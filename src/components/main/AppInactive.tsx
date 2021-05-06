@@ -5,7 +5,6 @@ import Button from '../ui/Button';
 import appInactivePath from '../../assets/app-inactive.png';
 import './AppInactive.scss';
 
-
 const AppInactive: FC = () => {
   const handleReload = () => {
     window.location.reload();
