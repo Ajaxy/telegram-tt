@@ -414,8 +414,9 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
+    const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
-    if (isAtBottom && hasLastMessageChanged && !hasFirstMessageChanged && !memoFocusingIdRef.current) {
+    if (isAtBottom && hasLastMessageChanged && !hasFirstMessageChanged && !isAlreadyFocusing) {
       if (lastItemElement) {
         fastRaf(() => {
           fastSmoothScroll(
