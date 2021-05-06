@@ -14,10 +14,15 @@ import {
   MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType,
 } from '../../types';
 
-import { MEMBERS_SLICE, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
+import {
+  MEMBERS_SLICE,
+  PROFILE_SENSITIVE_AREA,
+  SHARED_MEDIA_SLICE,
+  SLIDE_TRANSITION_DURATION,
+} from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
-  isChatAdmin, isChatBasicGroup, isChatChannel, isChatGroup, isChatPrivate,
+  isChatAdmin, isChatChannel, isChatGroup, isChatPrivate,
 } from '../../modules/helpers';
 import {
   selectChatMessages,
@@ -57,7 +62,6 @@ type OwnProps = {
 };
 
 type StateProps = {
-  isBasicGroup?: boolean;
   isChannel?: boolean;
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
@@ -90,7 +94,6 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   profileState,
   onProfileStateChange,
-  isBasicGroup,
   isChannel,
   resolvedUserId,
   chatMessages,
@@ -307,11 +310,10 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       ref={containerRef}
       className="Profile custom-scroll"
       itemSelector={buildInfiniteScrollItemSelector(resultType)}
-      items={viewportIds}
+      items={canRenderContents ? viewportIds : undefined}
       cacheBuster={cacheBuster}
-      sensitiveArea={500}
-      preloadBackwards={resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE}
-      isDisabled={resultType === 'members' && isBasicGroup}
+      sensitiveArea={PROFILE_SENSITIVE_AREA}
+      preloadBackwards={canRenderContents ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
       noFastList
       onLoadMore={getMore}
       onScroll={handleScroll}
@@ -370,7 +372,6 @@ export default memo(withGlobal<OwnProps>(
     const { byId: usersById } = global.users;
 
     const isGroup = chat && isChatGroup(chat);
-    const isBasicGroup = chat && isChatBasicGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
     const members = chat && chat.fullInfo && chat.fullInfo.members;
@@ -384,7 +385,6 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
-      isBasicGroup,
       isChannel,
       resolvedUserId,
       chatMessages,
