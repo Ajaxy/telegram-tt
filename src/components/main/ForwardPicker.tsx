@@ -146,7 +146,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
           className="picker-list custom-scroll"
           items={viewportIds}
           onLoadMore={getMore}
-          isDisabled={Boolean(filter)}
+          noScrollRestore={Boolean(filter)}
         >
           {viewportIds.map((id) => (
             <ListItem

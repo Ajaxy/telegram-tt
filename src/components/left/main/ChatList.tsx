@@ -161,7 +161,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       onLoadMore={getMore}
       preloadBackwards={CHAT_LIST_SLICE}
       noFastList
-      isDisabled
+      noScrollRestore
     >
       {viewportIds && viewportIds.length && chatArrays ? (
         renderChats()

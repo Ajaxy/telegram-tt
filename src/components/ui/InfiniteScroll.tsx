@@ -17,7 +17,7 @@ type OwnProps = {
   itemSelector?: string;
   preloadBackwards?: number;
   sensitiveArea?: number;
-  isDisabled?: boolean;
+  noScrollRestore?: boolean;
   noFastList?: boolean;
   cacheBuster?: any;
   children: any;
@@ -36,8 +36,8 @@ const InfiniteScroll: FC<OwnProps> = ({
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
-  // Used to turn off preloading and restoring scroll position (e.g. for frequently re-ordered chat or user lists)
-  isDisabled = false,
+  // Used to turn off restoring scroll position (e.g. for frequently re-ordered chat or user lists)
+  noScrollRestore = false,
   noFastList,
   // Used to re-query `listItemElements` if rendering is delayed by transition
   cacheBuster,
@@ -70,19 +70,20 @@ const InfiniteScroll: FC<OwnProps> = ({
 
   // Initial preload
   useEffect(() => {
-    if (isDisabled || !loadMoreBackwards) {
+    if (!loadMoreBackwards) {
       return;
     }
 
-    if (!items || items.length < preloadBackwards) {
+    if (preloadBackwards > 0 && (!items || items.length < preloadBackwards)) {
       loadMoreBackwards();
-    } else {
-      const { scrollHeight, clientHeight } = containerRef.current!;
-      if (clientHeight && scrollHeight <= clientHeight) {
-        loadMoreBackwards();
-      }
+      return;
     }
-  }, [isDisabled, items, loadMoreBackwards, preloadBackwards]);
+
+    const { scrollHeight, clientHeight } = containerRef.current!;
+    if (clientHeight && scrollHeight <= clientHeight) {
+      loadMoreBackwards();
+    }
+  }, [items, loadMoreBackwards, preloadBackwards]);
 
   // Restore `scrollTop` after adding items
   useLayoutEffect(() => {
@@ -91,7 +92,7 @@ const InfiniteScroll: FC<OwnProps> = ({
 
     state.listItemElements = container.querySelectorAll<HTMLDivElement>(itemSelector);
 
-    if (isDisabled) {
+    if (noScrollRestore) {
       return;
     }
 
@@ -112,7 +113,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     resetScroll(container, newScrollTop);
 
     state.isScrollTopJustUpdated = true;
-  }, [isDisabled, itemSelector, items, cacheBuster]);
+  }, [noScrollRestore, itemSelector, items, cacheBuster]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {

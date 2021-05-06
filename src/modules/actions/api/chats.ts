@@ -673,7 +673,7 @@ addReducer('loadMoreMembers', (global) => {
   (async () => {
     const { chatId } = selectCurrentMessageList(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
-    if (!chat) {
+    if (!chat || isChatBasicGroup(chat)) {
       return;
     }
 
