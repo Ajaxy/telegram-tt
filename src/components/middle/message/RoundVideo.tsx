@@ -21,6 +21,7 @@ import buildClassName from '../../../util/buildClassName';
 import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import useBlurredMediaThumb from './hooks/useBlurredMediaThumb';
+import usePauseOnInactive from './hooks/usePauseOnInactive';
 import safePlay from '../../../util/safePlay';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -140,6 +141,8 @@ const RoundVideo: FC<OwnProps> = ({
   }, [shouldPlay]);
 
   useHeavyAnimationCheckForVideo(playerRef, shouldPlay);
+
+  usePauseOnInactive(playerRef, Boolean(mediaData));
 
   useVideoCleanup(playerRef, [mediaData]);
 
