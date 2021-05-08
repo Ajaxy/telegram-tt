@@ -13,7 +13,7 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
 } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
-import { unsubscribeFromPush } from '../../../util/pushNotifications';
+import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 
 addReducer('initApi', (global: GlobalState, actions) => {
@@ -107,7 +107,7 @@ addReducer('saveSession', (global, actions, payload) => {
 
 addReducer('signOut', () => {
   (async () => {
-    await unsubscribeFromPush();
+    await unsubscribe();
     await callApi('destroy');
 
     getDispatch().reset();

@@ -4,6 +4,7 @@ import { ApiUpdate } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
+import { showNewMessageNotification } from '../../../util/notifications';
 import {
   updateChat,
   replaceChatListIds,
@@ -110,6 +111,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
           actions.requestChatUpdate({ chatId: update.chatId });
         }, CURRENT_CHAT_UNREAD_DELAY);
       } else {
+        showNewMessageNotification({ chat, message });
         setGlobal(updateChat(global, update.chatId, {
           unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
           ...(update.message.hasUnreadMention && {

@@ -24,6 +24,7 @@ export type NotificationData = {
 };
 
 const clickBuffer: Record<string, NotificationData> = {};
+const shownNotifications = new Set();
 
 function getPushData(e: PushEvent | Notification): NotificationData | undefined {
   try {
@@ -51,6 +52,13 @@ export function handlePush(e: PushEvent) {
   // Do not show muted notifications
   if (!data || data.mute === Boolean.True) return;
 
+  // Dont show already triggered notification
+  const messageId = getMessageId(data);
+  if (shownNotifications.has(messageId)) {
+    shownNotifications.delete(messageId);
+    return;
+  }
+
   const title = data.title || process.env.APP_INFO!;
   const body = data.description;
 
@@ -58,7 +66,9 @@ export function handlePush(e: PushEvent) {
     self.registration.showNotification(title, {
       body,
       data,
-      icon: 'android-chrome-192x192.png',
+      icon: 'icon-192x192.png',
+      badge: 'icon-192x192.png',
+      vibrate: [200, 100, 200],
     }),
   );
 }
@@ -103,7 +113,6 @@ function focusChatMessage(client: WindowClient, data: NotificationData) {
 export function handleNotificationClick(e: NotificationEvent) {
   const appUrl = process.env.APP_URL!;
   e.notification.close(); // Android needs explicit close.
-
   const { data } = e.notification;
   const notifyClients = async () => {
     const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
@@ -127,13 +136,18 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     // eslint-disable-next-line no-console
     console.log('[SW] New message from client', e);
   }
-  if (e.data && e.data.type === 'clientReady') {
-    const source = e.source as WindowClient;
-
+  if (!e.data) return;
+  const source = e.source as WindowClient;
+  if (e.data.type === 'clientReady') {
     // focus on chat message when client is fully ready
     if (clickBuffer[source.id]) {
       focusChatMessage(source, clickBuffer[source.id]);
       delete clickBuffer[source.id];
     }
+  }
+  if (e.data.type === 'newMessageNotification') {
+    // store messageId for already shown notification
+    const { messageId } = e.data.payload;
+    shownNotifications.add(messageId);
   }
 }

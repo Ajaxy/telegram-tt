@@ -12,7 +12,7 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { notifyClientReady } from '../../../util/pushNotifications';
+import { notifyClientReady } from '../../../util/notifications';
 import {
   replaceChatListIds,
   replaceChats,
