@@ -33,7 +33,7 @@ import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useWindowSize from '../../hooks/useWindowSize';
-import usePrevForAnimation from '../../hooks/usePrevForAnimation';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import useLang from '../../hooks/useLang';
 
@@ -103,10 +103,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const [isFabShown, setIsFabShown] = useState(false);
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
-  const renderingChatId = usePrevForAnimation(chatId, CLOSE_ANIMATION_DURATION);
-  const renderingThreadId = usePrevForAnimation(threadId, CLOSE_ANIMATION_DURATION);
-  const renderingMessageListType = usePrevForAnimation(messageListType, CLOSE_ANIMATION_DURATION);
-  const renderingCanPost = usePrevForAnimation(canPost, CLOSE_ANIMATION_DURATION);
+  const renderingChatId = usePrevDuringAnimation(chatId, CLOSE_ANIMATION_DURATION);
+  const renderingThreadId = usePrevDuringAnimation(threadId, CLOSE_ANIMATION_DURATION);
+  const renderingMessageListType = usePrevDuringAnimation(messageListType, CLOSE_ANIMATION_DURATION);
+  const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION);
 
   useEffect(() => {
     return chatId

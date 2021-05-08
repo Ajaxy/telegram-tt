@@ -4,7 +4,7 @@ import usePrevious from './usePrevious';
 import useForceUpdate from './useForceUpdate';
 import useOnChange from './useOnChange';
 
-export default function usePrevForAnimation(current: any, duration?: number) {
+export default function usePrevDuringAnimation(current: any, duration?: number) {
   const prev = usePrevious(current, true);
   const timeoutRef = useRef<number>();
   const forceUpdate = useForceUpdate();
@@ -26,5 +26,5 @@ export default function usePrevForAnimation(current: any, duration?: number) {
     }
   }, [current]);
 
-  return isCurrentPresent || (duration && !timeoutRef.current) ? current : prev;
+  return !timeoutRef.current || !duration || isCurrentPresent ? current : prev;
 }
