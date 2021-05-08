@@ -12,7 +12,7 @@ import {
   ApiUpdateCurrentUser,
 } from '../../../api/types';
 import { DEBUG } from '../../../config';
-import { subscribeToPush } from '../../../util/pushNotifications';
+import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 
@@ -57,7 +57,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 });
 
 function onUpdateApiReady(global: GlobalState) {
-  subscribeToPush();
+  subscribe();
   setLanguage(global.settings.byKey.language);
 }
 

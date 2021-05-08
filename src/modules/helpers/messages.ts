@@ -64,7 +64,7 @@ export function getMessageSummaryText(message: ApiMessage, noEmoji = false) {
   }
 
   if (sticker) {
-    return `Sticker ${sticker.emoji}`;
+    return `${sticker.emoji} Sticker`;
   }
 
   if (audio) {
@@ -106,6 +106,60 @@ export function getMessageSummaryText(message: ApiMessage, noEmoji = false) {
 
   return CONTENT_NOT_SUPPORTED;
 }
+
+export function getNotificationText(message: ApiMessage) {
+  const {
+    text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
+  } = message.content;
+
+  if (message.groupedId) {
+    return `🖼 ${text ? text.text : 'Album'}`;
+  }
+
+  if (photo) {
+    return `🖼 ${text ? text.text : 'Photo'}`;
+  }
+
+  if (video) {
+    return `📹 ${text ? text.text : video.isGif ? 'GIF' : 'Video'}`;
+  }
+
+  if (sticker) {
+    return `${sticker.emoji} Sticker `;
+  }
+
+  if (audio) {
+    const caption = [audio.title, audio.performer].filter(Boolean).join(' — ') || (text && text.text);
+    return `🎧 ${caption || 'Audio'}`;
+  }
+
+  if (voice) {
+    return `🎤 ${text ? text.text : 'Voice Message'}`;
+  }
+
+  if (document) {
+    return `📎 ${text ? text.text : document.fileName}`;
+  }
+
+  if (contact) {
+    return 'Contact';
+  }
+
+  if (poll) {
+    return `📊 ${poll.summary.question}`;
+  }
+
+  if (invoice) {
+    return 'Invoice';
+  }
+
+  if (text) {
+    return text.text;
+  }
+
+  return CONTENT_NOT_SUPPORTED;
+}
+
 
 export function getMessageText(message: ApiMessage) {
   const {
