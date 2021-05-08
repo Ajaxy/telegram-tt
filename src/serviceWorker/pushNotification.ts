@@ -2,6 +2,11 @@ import { DEBUG } from '../config';
 
 declare const self: ServiceWorkerGlobalScope;
 
+enum Boolean {
+  True = '1',
+  False = '0'
+}
+
 export type NotificationData = {
   custom: {
     msg_id?: string;
@@ -9,8 +14,8 @@ export type NotificationData = {
     chat_id?: string;
     from_id?: string;
   };
-  mute: '0' | '1';
-  badge: '0' | '1';
+  mute: Boolean;
+  badge: Boolean;
   loc_key: string;
   loc_args: string[];
   random_id: number;
@@ -42,7 +47,9 @@ export function handlePush(e: PushEvent) {
     }
   }
   const data = getPushData(e);
-  if (!data) return;
+
+  // Do not show muted notifications
+  if (!data || data.mute === Boolean.True) return;
 
   const title = data.title || process.env.APP_INFO!;
   const body = data.description;
