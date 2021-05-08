@@ -1,0 +1,4 @@
+src/lib/gramjs/tl/types-generator/template.js
+src/lib/gramjs/tl/api.d.ts
+src/lib/gramjs/tl/apiTl.js
+src/lib/gramjs/tl/schemaTl.js

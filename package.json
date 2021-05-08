@@ -11,8 +11,9 @@
     "deploy:production": "npm run build:production && git add -A && git commit -a -m '[Build]' && git push",
     "perf:serve": "APP_ENV=perf parcel src/index-perf.html",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint:fix": "npm run lint -- --fix",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
+    "gramjs:lint:fix": "eslint ./src/lib/gramjs --ignore-path=src/lib/gramjs/.eslintignore --fix",
     "test": "APP_ENV=test jest --verbose --forceExit"
   },
   "engines": {
