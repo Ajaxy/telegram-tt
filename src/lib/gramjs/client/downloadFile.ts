@@ -4,13 +4,13 @@ import { getAppropriatedPartSize } from '../Utils';
 import { sleep } from '../Helpers';
 
 export interface progressCallback {
+    isCanceled?: boolean;
+    acceptsBuffer?: boolean;
+
     (
         progress: number, // Float between 0 and 1.
         ...args: any[]
     ): void;
-
-    isCanceled?: boolean;
-    acceptsBuffer?: boolean;
 }
 
 export interface DownloadFileParams {

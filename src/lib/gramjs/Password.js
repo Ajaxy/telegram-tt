@@ -1,10 +1,16 @@
-const BigInt = require('big-integer')
-const Factorizator = require('./crypto/Factorizator')
-const { constructors } = require('./tl')
-const { readBigIntFromBuffer, readBufferFromBigInt, sha256, bigIntMod, modExp,
-    generateRandomBytes } = require('./Helpers')
-const crypto = require('./crypto/crypto')
-const SIZE_FOR_HASH = 256
+const BigInt = require('big-integer');
+const Factorizator = require('./crypto/Factorizator');
+const { constructors } = require('./tl');
+const {
+    readBigIntFromBuffer,
+    readBufferFromBigInt,
+    sha256,
+    bigIntMod,
+    modExp,
+    generateRandomBytes,
+} = require('./Helpers');
+const crypto = require('./crypto/crypto');
+const SIZE_FOR_HASH = 256;
 
 /**
  *
@@ -12,6 +18,7 @@ const SIZE_FOR_HASH = 256
  * @param prime{BigInteger}
  * @param g{BigInteger}
  */
+
 /*
 We don't support changing passwords yet
 function checkPrimeAndGoodCheck(prime, g) {
@@ -80,13 +87,13 @@ function checkPrimeAndGood(primeBytes, g) {
         0x0D, 0xED, 0x28, 0x49, 0xF4, 0x7B, 0xF9, 0x59, 0xD9, 0x56, 0x85, 0x0C, 0xE9, 0x29, 0x85, 0x1F,
         0x0D, 0x81, 0x15, 0xF6, 0x35, 0xB1, 0x05, 0xEE, 0x2E, 0x4E, 0x15, 0xD0, 0x4B, 0x24, 0x54, 0xBF,
         0x6F, 0x4F, 0xAD, 0xF0, 0x34, 0xB1, 0x04, 0x03, 0x11, 0x9C, 0xD8, 0xE3, 0xB9, 0x2F, 0xCC, 0x5B,
-    ])
+    ]);
     if (goodPrime.equals(primeBytes)) {
-        if ([ 3, 4, 5, 7 ].includes(g)) {
-            return // It's good
+        if ([3, 4, 5, 7].includes(g)) {
+            return; // It's good
         }
     }
-    throw new Error("Changing passwords unsupported")
+    throw new Error('Changing passwords unsupported');
     //checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
 }
 
@@ -97,7 +104,8 @@ function checkPrimeAndGood(primeBytes, g) {
  * @returns {boolean}
  */
 function isGoodLarge(number, p) {
-    return (number.greater(BigInt(0)) && (p.subtract(number).greater(BigInt(0))))
+    return (number.greater(BigInt(0)) && (p.subtract(number)
+        .greater(BigInt(0))));
 }
 
 /**
@@ -106,7 +114,7 @@ function isGoodLarge(number, p) {
  * @returns {Buffer}
  */
 function numBytesForHash(number) {
-    return Buffer.concat([ Buffer.alloc(SIZE_FOR_HASH - number.length), number ])
+    return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
 }
 
 /**
@@ -115,7 +123,7 @@ function numBytesForHash(number) {
  * @returns {Buffer}
  */
 function bigNumForHash(g) {
-    return readBufferFromBigInt(g, SIZE_FOR_HASH, false)
+    return readBufferFromBigInt(g, SIZE_FOR_HASH, false);
 }
 
 /**
@@ -125,24 +133,24 @@ function bigNumForHash(g) {
  * @returns {Boolean}
  */
 function isGoodModExpFirst(modexp, prime) {
-    const diff = prime.subtract(modexp)
+    const diff = prime.subtract(modexp);
 
-    const minDiffBitsCount = 2048 - 64
-    const maxModExpSize = 256
+    const minDiffBitsCount = 2048 - 64;
+    const maxModExpSize = 256;
 
     return !(diff.lesser(BigInt(0)) || diff.bitLength() < minDiffBitsCount ||
         modexp.bitLength() < minDiffBitsCount ||
-        Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize)
+        Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
 }
 
 function xor(a, b) {
-    const length = Math.min(a.length, b.length)
+    const length = Math.min(a.length, b.length);
 
     for (let i = 0; i < length; i++) {
-        a[i] = a[i] ^ b[i]
+        a[i] = a[i] ^ b[i];
     }
 
-    return a
+    return a;
 }
 
 /**
@@ -154,7 +162,7 @@ function xor(a, b) {
  */
 
 function pbkdf2sha512(password, salt, iterations) {
-    return crypto.pbkdf2(password, salt, iterations, 64, 'sha512')
+    return crypto.pbkdf2(password, salt, iterations, 64, 'sha512');
 }
 
 /**
@@ -164,10 +172,10 @@ function pbkdf2sha512(password, salt, iterations) {
  * @returns {Buffer|*}
  */
 async function computeHash(algo, password) {
-    const hash1 = await sha256(Buffer.concat([ algo.salt1, Buffer.from(password, 'utf-8'), algo.salt1 ]))
-    const hash2 = await sha256(Buffer.concat([ algo.salt2, hash1, algo.salt2 ]))
-    const hash3 = await pbkdf2sha512(hash2, algo.salt1, 100000)
-    return sha256(Buffer.concat([ algo.salt2, hash3, algo.salt2 ]))
+    const hash1 = await sha256(Buffer.concat([algo.salt1, Buffer.from(password, 'utf-8'), algo.salt1]));
+    const hash2 = await sha256(Buffer.concat([algo.salt2, hash1, algo.salt2]));
+    const hash3 = await pbkdf2sha512(hash2, algo.salt1, 100000);
+    return sha256(Buffer.concat([algo.salt2, hash3, algo.salt2]));
 }
 
 /**
@@ -177,15 +185,15 @@ async function computeHash(algo, password) {
  */
 async function computeDigest(algo, password) {
     try {
-        checkPrimeAndGood(algo.p, algo.g)
+        checkPrimeAndGood(algo.p, algo.g);
     } catch (e) {
-        throw new Error('bad p/g in password')
+        throw new Error('bad p/g in password');
     }
 
     const value = modExp(BigInt(algo.g),
         readBigIntFromBuffer(await computeHash(algo, password), false),
-        readBigIntFromBuffer(algo.p, false))
-    return bigNumForHash(value)
+        readBigIntFromBuffer(algo.p, false));
+    return bigNumForHash(value);
 }
 
 /**
@@ -194,70 +202,70 @@ async function computeDigest(algo, password) {
  * @param password {string}
  */
 async function computeCheck(request, password) {
-    const algo = request.currentAlgo
+    const algo = request.currentAlgo;
     if (!(algo instanceof constructors.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow)) {
-        throw new Error(`Unsupported password algorithm ${algo.className}`)
+        throw new Error(`Unsupported password algorithm ${algo.className}`);
     }
 
-    const pwHash = await computeHash(algo, password)
-    const p = readBigIntFromBuffer(algo.p, false)
-    const g = algo.g
-    const B = readBigIntFromBuffer(request.srp_B, false)
+    const pwHash = await computeHash(algo, password);
+    const p = readBigIntFromBuffer(algo.p, false);
+    const g = algo.g;
+    const B = readBigIntFromBuffer(request.srp_B, false);
     try {
-        checkPrimeAndGood(algo.p, g)
+        checkPrimeAndGood(algo.p, g);
     } catch (e) {
-        throw new Error('bad /g in password')
+        throw new Error('bad /g in password');
     }
     if (!isGoodLarge(B, p)) {
-        throw new Error('bad b in check')
+        throw new Error('bad b in check');
     }
-    const x = readBigIntFromBuffer(pwHash, false)
-    const pForHash = numBytesForHash(algo.p)
-    const gForHash = bigNumForHash(g)
-    const bForHash = numBytesForHash(request.srp_B)
-    const gX = modExp(BigInt(g), x, p)
-    const k = readBigIntFromBuffer(await sha256(Buffer.concat([ pForHash, gForHash ])), false)
-    const kgX = bigIntMod(k.multiply(gX),p)
-    const generateAndCheckRandom =async () => {
-        const randomSize = 256
+    const x = readBigIntFromBuffer(pwHash, false);
+    const pForHash = numBytesForHash(algo.p);
+    const gForHash = bigNumForHash(g);
+    const bForHash = numBytesForHash(request.srp_B);
+    const gX = modExp(BigInt(g), x, p);
+    const k = readBigIntFromBuffer(await sha256(Buffer.concat([pForHash, gForHash])), false);
+    const kgX = bigIntMod(k.multiply(gX), p);
+    const generateAndCheckRandom = async () => {
+        const randomSize = 256;
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const random = generateRandomBytes(randomSize)
-            const a = readBigIntFromBuffer(random, false)
-            const A = modExp(BigInt(g), a, p)
+            const random = generateRandomBytes(randomSize);
+            const a = readBigIntFromBuffer(random, false);
+            const A = modExp(BigInt(g), a, p);
             if (isGoodModExpFirst(A, p)) {
-                const aForHash = bigNumForHash(A)
-                const u = readBigIntFromBuffer(await sha256(Buffer.concat([ aForHash, bForHash ])), false)
+                const aForHash = bigNumForHash(A);
+                const u = readBigIntFromBuffer(await sha256(Buffer.concat([aForHash, bForHash])), false);
                 if (u.greater(BigInt(0))) {
-                    return [ a, aForHash, u ]
+                    return [a, aForHash, u];
                 }
             }
         }
-    }
-    const [ a, aForHash, u ] =await  generateAndCheckRandom()
-    const gB = bigIntMod(B.subtract(kgX),p)
+    };
+    const [a, aForHash, u] = await generateAndCheckRandom();
+    const gB = bigIntMod(B.subtract(kgX), p);
     if (!isGoodModExpFirst(gB, p)) {
-        throw new Error('bad gB')
+        throw new Error('bad gB');
     }
 
-    const ux = u.multiply(x)
-    const aUx = a.add(ux)
-    const S = modExp(gB, aUx, p)
-    const [K, pSha ,gSha, salt1Sha, salt2Sha] = await Promise.all([
+    const ux = u.multiply(x);
+    const aUx = a.add(ux);
+    const S = modExp(gB, aUx, p);
+    const [K, pSha, gSha, salt1Sha, salt2Sha] = await Promise.all([
         sha256(bigNumForHash(S)),
         sha256(pForHash),
         sha256(gForHash),
         sha256(algo.salt1),
-        sha256(algo.salt2)
-    ])
+        sha256(algo.salt2),
+    ]);
     const M1 = await sha256(Buffer.concat([
-        xor(pSha,gSha),
+        xor(pSha, gSha),
         salt1Sha,
         salt2Sha,
         aForHash,
         bForHash,
         K,
-    ]))
+    ]));
 
 
     return new constructors.InputCheckPasswordSRP({
@@ -265,11 +273,11 @@ async function computeCheck(request, password) {
         A: Buffer.from(aForHash),
         M1: M1,
 
-    })
+    });
 }
 
 module.exports = {
     computeCheck,
     computeDigest,
-}
+};
 

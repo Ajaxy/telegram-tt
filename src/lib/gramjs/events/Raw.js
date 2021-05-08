@@ -1,21 +1,21 @@
-const { EventBuilder } = require('./common')
+const { EventBuilder } = require('./common');
 
 class Raw extends EventBuilder {
     constructor(args = {
         types: null,
         func: null,
     }) {
-        super()
+        super();
         if (!args.types) {
-            this.types = true
+            this.types = true;
         } else {
-            this.types = args.types
+            this.types = args.types;
         }
     }
 
     build(update, others = null) {
-        return update
+        return update;
     }
 }
 
-module.exports = Raw
+module.exports = Raw;

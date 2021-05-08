@@ -8,7 +8,7 @@
  */
 class ReadCancelledError extends Error {
     constructor() {
-        super('The read operation was cancelled.')
+        super('The read operation was cancelled.');
     }
 }
 
@@ -20,12 +20,12 @@ class TypeNotFoundError extends Error {
     constructor(invalidConstructorId, remaining) {
         super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
         read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
-         it should not be read. Remaining bytes: ${remaining.length}`)
+         it should not be read. Remaining bytes: ${remaining.length}`);
         if (typeof alert !== 'undefined') {
-            alert(`Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`)
+            alert(`Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`);
         }
-        this.invalidConstructorId = invalidConstructorId
-        this.remaining = remaining
+        this.invalidConstructorId = invalidConstructorId;
+        this.remaining = remaining;
     }
 }
 
@@ -35,9 +35,9 @@ class TypeNotFoundError extends Error {
  */
 class InvalidChecksumError extends Error {
     constructor(checksum, validChecksum) {
-        super(`Invalid checksum (${checksum} when ${validChecksum} was expected). This packet should be skipped.`)
-        this.checksum = checksum
-        this.validChecksum = validChecksum
+        super(`Invalid checksum (${checksum} when ${validChecksum} was expected). This packet should be skipped.`);
+        this.checksum = checksum;
+        this.validChecksum = validChecksum;
     }
 }
 
@@ -47,15 +47,15 @@ class InvalidChecksumError extends Error {
  */
 class InvalidBufferError extends Error {
     constructor(payload) {
-        let code = null
+        let code = null;
         if (payload.length === 4) {
-            code = -payload.readInt32LE(0)
-            super(`Invalid response buffer (HTTP code ${code})`)
+            code = -payload.readInt32LE(0);
+            super(`Invalid response buffer (HTTP code ${code})`);
         } else {
-            super(`Invalid response buffer (too short ${payload})`)
+            super(`Invalid response buffer (too short ${payload})`);
         }
-        this.code = code
-        this.payload = payload
+        this.code = code;
+        this.payload = payload;
     }
 }
 
@@ -65,9 +65,9 @@ class InvalidBufferError extends Error {
 class SecurityError extends Error {
     constructor(...args) {
         if (!args.length) {
-            args = ['A security check failed.']
+            args = ['A security check failed.'];
         }
-        super(...args)
+        super(...args);
     }
 }
 
@@ -77,7 +77,7 @@ class SecurityError extends Error {
  */
 class CdnFileTamperedError extends SecurityError {
     constructor() {
-        super('The CDN file has been altered and its download cancelled.')
+        super('The CDN file has been altered and its download cancelled.');
     }
 }
 
@@ -123,15 +123,15 @@ class BadMessageError extends Error {
             'the correct salt, and the message is to be re-sent with it).',
 
         64: 'Invalid container.',
-    }
+    };
 
-    constructor(request,code) {
+    constructor(request, code) {
         let errorMessage = BadMessageError.ErrorMessages[code] ||
-            `Unknown error code (this should not happen): ${code}.`
-        errorMessage+= `  Caused by ${request.className}`
-        super(errorMessage)
-        this.message = errorMessage
-        this.code = code
+            `Unknown error code (this should not happen): ${code}.`;
+        errorMessage += `  Caused by ${request.className}`;
+        super(errorMessage);
+        this.message = errorMessage;
+        this.code = code;
     }
 }
 
@@ -145,4 +145,4 @@ module.exports = {
     SecurityError,
     CdnFileTamperedError,
     BadMessageError,
-}
+};

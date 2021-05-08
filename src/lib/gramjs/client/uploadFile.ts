@@ -5,10 +5,10 @@ import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
 import { getAppropriatedPartSize } from '../Utils';
 
 interface OnProgress {
+    isCanceled?: boolean;
+
     // Float between 0 and 1.
     (progress: number): void;
-
-    isCanceled?: boolean;
 }
 
 export interface UploadFileParams {

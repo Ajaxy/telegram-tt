@@ -7,18 +7,18 @@ class RPCError extends Error {
             'RPCError {0}: {1}{2}'
                 .replace('{0}', code)
                 .replace('{1}', message)
-                .replace('{2}', RPCError._fmtRequest(request))
-        )
-        this.code = code
-        this.message = message
+                .replace('{2}', RPCError._fmtRequest(request)),
+        );
+        this.code = code;
+        this.message = message;
     }
 
     static _fmtRequest(request) {
         // TODO fix this
         if (request) {
-            return ` (caused by ${request.className})`
+            return ` (caused by ${request.className})`;
         } else {
-            return ''
+            return '';
         }
     }
 }
@@ -28,9 +28,9 @@ class RPCError extends Error {
  */
 class InvalidDCError extends RPCError {
     constructor(request, message, code) {
-        super(message, request, code)
-        this.code = code || 303
-        this.message = message || 'ERROR_SEE_OTHER'
+        super(message, request, code);
+        this.code = code || 303;
+        this.message = message || 'ERROR_SEE_OTHER';
     }
 }
 
@@ -40,8 +40,8 @@ class InvalidDCError extends RPCError {
  * notified that the data must be corrected before the query is repeated.
  */
 class BadRequestError extends RPCError {
-    code = 400
-    message = 'BAD_REQUEST'
+    code = 400;
+    message = 'BAD_REQUEST';
 }
 
 /**
@@ -49,8 +49,8 @@ class BadRequestError extends RPCError {
  * to authorized users.
  */
 class UnauthorizedError extends RPCError {
-    code = 401
-    message = 'UNAUTHORIZED'
+    code = 401;
+    message = 'UNAUTHORIZED';
 }
 
 /**
@@ -58,16 +58,16 @@ class UnauthorizedError extends RPCError {
  * someone who has blacklisted the current user.
  */
 class ForbiddenError extends RPCError {
-    code = 403
-    message = 'FORBIDDEN'
+    code = 403;
+    message = 'FORBIDDEN';
 }
 
 /**
  * An attempt to invoke a non-existent object, such as a method.
  */
 class NotFoundError extends RPCError {
-    code = 404
-    message = 'NOT_FOUND'
+    code = 404;
+    message = 'NOT_FOUND';
 }
 
 /**
@@ -75,8 +75,8 @@ class NotFoundError extends RPCError {
  * AUTH_KEY_DUPLICATED which can cause the connection to fail.
  */
 class AuthKeyError extends RPCError {
-    code = 406
-    message = 'AUTH_KEY'
+    code = 406;
+    message = 'AUTH_KEY';
 }
 
 /**
@@ -86,8 +86,8 @@ class AuthKeyError extends RPCError {
  * phone number.
  */
 class FloodError extends RPCError {
-    code = 420
-    message = 'FLOOD'
+    code = 420;
+    message = 'FLOOD';
 }
 
 /**
@@ -96,8 +96,8 @@ class FloodError extends RPCError {
  * storage
  */
 class ServerError extends RPCError {
-    code = 500 // Also witnessed as -500
-    message = 'INTERNAL'
+    code = 500; // Also witnessed as -500
+    message = 'INTERNAL';
 }
 
 /**
@@ -105,8 +105,8 @@ class ServerError extends RPCError {
  * call ``answerCallbackQuery`` will result in this "special" RPCError.
  */
 class TimedOutError extends RPCError {
-    code = 503 // Only witnessed as -503
-    message = 'Timeout'
+    code = 503; // Only witnessed as -503
+    message = 'Timeout';
 }
 
 module.exports = {
@@ -120,4 +120,4 @@ module.exports = {
     FloodError,
     ServerError,
     TimedOutError,
-}
+};
