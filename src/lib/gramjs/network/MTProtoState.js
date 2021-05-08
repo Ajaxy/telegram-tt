@@ -1,13 +1,19 @@
-const Helpers = require('../Helpers')
-const IGE = require('../crypto/IGE')
-const BinaryReader = require('../extensions/BinaryReader')
-const GZIPPacked = require('../tl/core/GZIPPacked')
-const { TLMessage } = require('../tl/core')
-const { SecurityError, InvalidBufferError } = require('../errors/Common')
-const { InvokeAfterMsg } = require('../tl').requests
-const BigInt = require('big-integer')
-const { toSignedLittleBuffer,readBufferFromBigInt } = require("../Helpers")
-const { readBigIntFromBuffer } = require("../Helpers")
+const Helpers = require('../Helpers');
+const IGE = require('../crypto/IGE');
+const BinaryReader = require('../extensions/BinaryReader');
+const GZIPPacked = require('../tl/core/GZIPPacked');
+const { TLMessage } = require('../tl/core');
+const {
+    SecurityError,
+    InvalidBufferError,
+} = require('../errors/Common');
+const { InvokeAfterMsg } = require('../tl').requests;
+const BigInt = require('big-integer');
+const {
+    toSignedLittleBuffer,
+    readBufferFromBigInt,
+} = require('../Helpers');
+const { readBigIntFromBuffer } = require('../Helpers');
 
 class MTProtoState {
     /**
@@ -36,13 +42,13 @@ class MTProtoState {
      * @param loggers
      */
     constructor(authKey, loggers) {
-        this.authKey = authKey
-        this._log = loggers
-        this.timeOffset = 0
-        this.salt = 0
+        this.authKey = authKey;
+        this._log = loggers;
+        this.timeOffset = 0;
+        this.salt = 0;
 
-        this.id = this._sequence = this._lastMsgId = null
-        this.reset()
+        this.id = this._sequence = this._lastMsgId = null;
+        this.reset();
     }
 
     /**
@@ -50,9 +56,9 @@ class MTProtoState {
      */
     reset() {
         // Session IDs can be random on every connection
-        this.id = Helpers.generateRandomLong(true)
-        this._sequence = 0
-        this._lastMsgId = BigInt(0)
+        this.id = Helpers.generateRandomLong(true);
+        this._sequence = 0;
+        this._lastMsgId = BigInt(0);
     }
 
     /**
@@ -61,7 +67,7 @@ class MTProtoState {
      * @param message
      */
     updateMessageId(message) {
-        message.msgId = this._getNewMsgId()
+        message.msgId = this._getNewMsgId();
     }
 
     /**
@@ -72,14 +78,17 @@ class MTProtoState {
      * @returns {{iv: Buffer, key: Buffer}}
      */
     async _calcKey(authKey, msgKey, client) {
-        const x = client === true ? 0 : 8
-        const [sha256a , sha256b] = await Promise.all([
+        const x = client === true ? 0 : 8;
+        const [sha256a, sha256b] = await Promise.all([
             Helpers.sha256(Buffer.concat([msgKey, authKey.slice(x, x + 36)])),
-            Helpers.sha256(Buffer.concat([authKey.slice(x + 40, x + 76), msgKey]))
-        ])
-        const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)])
-        const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)])
-        return { key, iv }
+            Helpers.sha256(Buffer.concat([authKey.slice(x + 40, x + 76), msgKey])),
+        ]);
+        const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)]);
+        const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)]);
+        return {
+            key,
+            iv,
+        };
     }
 
     /**
@@ -91,22 +100,22 @@ class MTProtoState {
      * @param afterId
      */
     async writeDataAsMessage(buffer, data, contentRelated, afterId) {
-        const msgId = this._getNewMsgId()
-        const seqNo = this._getSeqNo(contentRelated)
-        let body
+        const msgId = this._getNewMsgId();
+        const seqNo = this._getSeqNo(contentRelated);
+        let body;
         if (!afterId) {
-            body = await GZIPPacked.gzipIfSmaller(contentRelated, data)
+            body = await GZIPPacked.gzipIfSmaller(contentRelated, data);
         } else {
-            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, data).getBytes())
+            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, data).getBytes());
         }
-        const s = Buffer.alloc(4)
-        s.writeInt32LE(seqNo, 0)
-        const b = Buffer.alloc(4)
-        b.writeInt32LE(body.length, 0)
-        const m = toSignedLittleBuffer(msgId, 8)
-        buffer.write(Buffer.concat([m, s, b]))
-        buffer.write(body)
-        return msgId
+        const s = Buffer.alloc(4);
+        s.writeInt32LE(seqNo, 0);
+        const b = Buffer.alloc(4);
+        b.writeInt32LE(body.length, 0);
+        const m = toSignedLittleBuffer(msgId, 8);
+        buffer.write(Buffer.concat([m, s, b]));
+        buffer.write(body);
+        return msgId;
     }
 
     /**
@@ -115,21 +124,25 @@ class MTProtoState {
      * @param data
      */
     async encryptMessageData(data) {
-        await this.authKey.waitForKey()
-        const s = toSignedLittleBuffer(this.salt,8)
-        const i = toSignedLittleBuffer(this.id,8)
-        data = Buffer.concat([Buffer.concat([s,i]), data])
-        const padding = Helpers.generateRandomBytes(Helpers.mod(-(data.length + 12), 16) + 12)
+        await this.authKey.waitForKey();
+        const s = toSignedLittleBuffer(this.salt, 8);
+        const i = toSignedLittleBuffer(this.id, 8);
+        data = Buffer.concat([Buffer.concat([s, i]), data]);
+        const padding = Helpers.generateRandomBytes(Helpers.mod(-(data.length + 12), 16) + 12);
         // Being substr(what, offset, length); x = 0 for client
         // "msg_key_large = SHA256(substr(auth_key, 88+x, 32) + pt + padding)"
-        const msgKeyLarge = await Helpers.sha256(Buffer.concat([this.authKey.getKey().slice(88, 88 + 32), data, padding]))
+        const msgKeyLarge = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+            .slice(88, 88 + 32), data, padding]));
         // "msg_key = substr (msg_key_large, 8, 16)"
-        const msgKey = msgKeyLarge.slice(8, 24)
+        const msgKey = msgKeyLarge.slice(8, 24);
 
-        const { iv, key } = await this._calcKey(this.authKey.getKey(), msgKey, true)
+        const {
+            iv,
+            key,
+        } = await this._calcKey(this.authKey.getKey(), msgKey, true);
 
-        const keyId = Helpers.readBufferFromBigInt(this.authKey.keyId, 8)
-        return Buffer.concat([keyId, msgKey, new IGE(key,iv).encryptIge(Buffer.concat([data, padding]))])
+        const keyId = Helpers.readBufferFromBigInt(this.authKey.keyId, 8);
+        return Buffer.concat([keyId, msgKey, new IGE(key, iv).encryptIge(Buffer.concat([data, padding]))]);
     }
 
     /**
@@ -138,45 +151,49 @@ class MTProtoState {
      */
     async decryptMessageData(body) {
         if (body.length < 8) {
-            throw new InvalidBufferError(body)
+            throw new InvalidBufferError(body);
         }
 
         // TODO Check salt,sessionId, and sequenceNumber
-        const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8))
+        const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8));
         if (keyId.neq(this.authKey.keyId)) {
-            throw new SecurityError('Server replied with an invalid auth key')
+            throw new SecurityError('Server replied with an invalid auth key');
         }
 
-        const msgKey = body.slice(8, 24)
-        const { iv, key } = await this._calcKey(this.authKey.getKey(), msgKey, false)
-        body = new IGE(key,iv).decryptIge(body.slice(24))
+        const msgKey = body.slice(8, 24);
+        const {
+            iv,
+            key,
+        } = await this._calcKey(this.authKey.getKey(), msgKey, false);
+        body = new IGE(key, iv).decryptIge(body.slice(24));
 
         // https://core.telegram.org/mtproto/security_guidelines
         // Sections "checking sha256 hash" and "message length"
 
-        const ourKey = await Helpers.sha256(Buffer.concat([this.authKey.getKey().slice(96, 96 + 32), body]))
+        const ourKey = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+            .slice(96, 96 + 32), body]));
 
         if (!msgKey.equals(ourKey.slice(8, 24))) {
-            throw new SecurityError('Received msg_key doesn\'t match with expected one')
+            throw new SecurityError('Received msg_key doesn\'t match with expected one');
         }
 
-        const reader = new BinaryReader(body)
-        reader.readLong() // removeSalt
-        const serverId = reader.readLong()
+        const reader = new BinaryReader(body);
+        reader.readLong(); // removeSalt
+        const serverId = reader.readLong();
         if (serverId !== this.id) {
             // throw new SecurityError('Server replied with a wrong session ID');
         }
 
-        const remoteMsgId = reader.readLong()
-        const remoteSequence = reader.readInt()
-        reader.readInt() // msgLen for the inner object, padding ignored
+        const remoteMsgId = reader.readLong();
+        const remoteSequence = reader.readInt();
+        reader.readInt(); // msgLen for the inner object, padding ignored
 
         // We could read msg_len bytes and use those in a new reader to read
         // the next TLObject without including the padding, but since the
         // reader isn't used for anything else after this, it's unnecessary.
-        const obj = reader.tgReadObject()
+        const obj = reader.tgReadObject();
 
-        return new TLMessage(remoteMsgId, remoteSequence, obj)
+        return new TLMessage(remoteMsgId, remoteSequence, obj);
     }
 
     /**
@@ -185,14 +202,16 @@ class MTProtoState {
      * @private
      */
     _getNewMsgId() {
-        const now = new Date().getTime() / 1000 + this.timeOffset
-        const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9)
-        let newMsgId = (BigInt(Math.floor(now)).shiftLeft(BigInt(32))).or(BigInt(nanoseconds).shiftLeft(BigInt(2)))
+        const now = new Date().getTime() / 1000 + this.timeOffset;
+        const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
+        let newMsgId = (BigInt(Math.floor(now))
+            .shiftLeft(BigInt(32))).or(BigInt(nanoseconds)
+            .shiftLeft(BigInt(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-            newMsgId = this._lastMsgId.add(BigInt(4))
+            newMsgId = this._lastMsgId.add(BigInt(4));
         }
-        this._lastMsgId = newMsgId
-        return newMsgId
+        this._lastMsgId = newMsgId;
+        return newMsgId;
     }
 
     /**
@@ -201,20 +220,20 @@ class MTProtoState {
      * @param correctMsgId {BigInteger}
      */
     updateTimeOffset(correctMsgId) {
-        const bad = this._getNewMsgId()
-        const old = this.timeOffset
-        const now = Math.floor(new Date().getTime() / 1000)
-        const correct = correctMsgId.shiftRight(BigInt(32))
-        this.timeOffset = correct - now
+        const bad = this._getNewMsgId();
+        const old = this.timeOffset;
+        const now = Math.floor(new Date().getTime() / 1000);
+        const correct = correctMsgId.shiftRight(BigInt(32));
+        this.timeOffset = correct - now;
 
         if (this.timeOffset !== old) {
-            this._lastMsgId = BigInt(0)
+            this._lastMsgId = BigInt(0);
             this._log.debug(
                 `Updated time offset (old offset ${old}, bad ${bad}, good ${correctMsgId}, new ${this.timeOffset})`,
-            )
+            );
         }
 
-        return this.timeOffset
+        return this.timeOffset;
     }
 
     /**
@@ -225,13 +244,13 @@ class MTProtoState {
      */
     _getSeqNo(contentRelated) {
         if (contentRelated) {
-            const result = this._sequence * 2 + 1
-            this._sequence += 1
-            return result
+            const result = this._sequence * 2 + 1;
+            this._sequence += 1;
+            return result;
         } else {
-            return this._sequence * 2
+            return this._sequence * 2;
         }
     }
 }
 
-module.exports = MTProtoState
+module.exports = MTProtoState;

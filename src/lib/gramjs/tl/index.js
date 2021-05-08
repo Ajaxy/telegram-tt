@@ -1,6 +1,9 @@
-const api = require('./api')
-const { serializeBytes, serializeDate } = require('./generationHelpers')
-const patched = null
+const api = require('./api');
+const {
+    serializeBytes,
+    serializeDate,
+} = require('./generationHelpers');
+const patched = null;
 
 module.exports = {
     // TODO Refactor internal usages to always use `api`.
@@ -8,5 +11,5 @@ module.exports = {
     requests: api,
     patched,
     serializeBytes,
-    serializeDate
-}
+    serializeDate,
+};

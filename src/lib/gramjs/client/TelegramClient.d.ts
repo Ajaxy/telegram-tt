@@ -3,7 +3,7 @@ import { Api } from '..';
 import { BotAuthParams, UserAuthParams } from './auth';
 import { uploadFile, UploadFileParams } from './uploadFile';
 import { downloadFile, DownloadFileParams } from './downloadFile';
-import { updateTwoFaSettings, TwoFaParams } from './2fa';
+import { TwoFaParams, updateTwoFaSettings } from './2fa';
 
 declare class TelegramClient {
     constructor(...args: any)

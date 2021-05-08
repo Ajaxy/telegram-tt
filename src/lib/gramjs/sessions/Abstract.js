@@ -8,10 +8,48 @@ class Session {
      * @param toInstance {Session|null}
      * @returns {Session}
      */
+
     /* CONTEST
     clone(toInstance = null) {
         return toInstance || new this.constructor()
     }*/
+
+    /**
+     * Returns the currently-used data center ID.
+     */
+    get dcId() {
+        throw new Error('Not Implemented');
+    }
+
+    /**
+     * Returns the server address where the library should connect to.
+     */
+    get serverAddress() {
+        throw new Error('Not Implemented');
+    }
+
+    /**
+     * Returns the port to which the library should connect to.
+     */
+    get port() {
+        throw new Error('Not Implemented');
+    }
+
+    /**
+     * Returns an ``AuthKey`` instance associated with the saved
+     * data center, or `None` if a new one should be generated.
+     */
+    get authKey() {
+        throw new Error('Not Implemented');
+    }
+
+    /**
+     * Sets the ``AuthKey`` to be used for the saved data center.
+     * @param value
+     */
+    set authKey(value) {
+        throw new Error('Not Implemented');
+    }
 
     /**
      * Sets the information of the data center address and port that
@@ -22,44 +60,7 @@ class Session {
      * @param port {number}
      */
     setDC(dcId, serverAddress, port) {
-        throw new Error('Not implemented')
-    }
-
-    /**
-     * Returns the currently-used data center ID.
-     */
-    get dcId() {
-        throw new Error('Not Implemented')
-    }
-
-    /**
-     * Returns the server address where the library should connect to.
-     */
-    get serverAddress() {
-        throw new Error('Not Implemented')
-    }
-
-    /**
-     * Returns the port to which the library should connect to.
-     */
-    get port() {
-        throw new Error('Not Implemented')
-    }
-
-    /**
-     * Returns an ``AuthKey`` instance associated with the saved
-     * data center, or `None` if a new one should be generated.
-     */
-    get authKey() {
-        throw new Error('Not Implemented')
-    }
-
-    /**
-     * Sets the ``AuthKey`` to be used for the saved data center.
-     * @param value
-     */
-    set authKey(value) {
-        throw new Error('Not Implemented')
+        throw new Error('Not implemented');
     }
 
     /**
@@ -112,6 +113,7 @@ class Session {
      * Called on client disconnection. Should be used to
      * free any used resources. Can be left empty if none.
      */
+
     /*CONTEST
     close() {
 
@@ -124,7 +126,7 @@ class Session {
      * make persist the relevant session information to disk.
      */
     save() {
-        throw new Error('Not Implemented')
+        throw new Error('Not Implemented');
     }
 
     /**
@@ -133,7 +135,7 @@ class Session {
      */
 
     delete() {
-        throw new Error('Not Implemented')
+        throw new Error('Not Implemented');
     }
 
     /**
@@ -172,4 +174,4 @@ class Session {
      */
 }
 
-module.exports = Session
+module.exports = Session;

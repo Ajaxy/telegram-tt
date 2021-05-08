@@ -1,10 +1,10 @@
-const Helpers = require("../Helpers");
+const Helpers = require('../Helpers');
 
-const {IGE:aes_ige} = require('@cryptography/aes');
+const { IGE: aes_ige } = require('@cryptography/aes');
 
 class IGENEW {
     constructor(key, iv) {
-        this.ige = new aes_ige(key,iv);
+        this.ige = new aes_ige(key, iv);
     }
 
     /**
@@ -22,9 +22,9 @@ class IGENEW {
      * @returns {Buffer}
      */
     encryptIge(plainText) {
-        const padding = plainText.length % 16
+        const padding = plainText.length % 16;
         if (padding) {
-            plainText = Buffer.concat([plainText, Helpers.generateRandomBytes(16 - padding)])
+            plainText = Buffer.concat([plainText, Helpers.generateRandomBytes(16 - padding)]);
         }
 
         return Helpers.convertToLittle(this.ige.encrypt(plainText));
@@ -34,4 +34,4 @@ class IGENEW {
 
 }
 
-module.exports = IGENEW
+module.exports = IGENEW;

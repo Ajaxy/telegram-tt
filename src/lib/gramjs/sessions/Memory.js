@@ -1,45 +1,46 @@
-const utils = require('../Utils')
-const types = require('../tl').constructors
-const Session = require('./Abstract')
+const utils = require('../Utils');
+const types = require('../tl').constructors;
+const Session = require('./Abstract');
 
 class MemorySession extends Session {
     constructor() {
-        super()
+        super();
 
-        this._serverAddress = null
-        this._dcId = 0
-        this._port = null
-        this._takeoutId = null
+        this._serverAddress = null;
+        this._dcId = 0;
+        this._port = null;
+        this._takeoutId = null;
 
-        this._entities = new Set()
-        this._updateStates = {}
-    }
-
-    setDC(dcId, serverAddress, port) {
-        this._dcId = dcId | 0
-        this._serverAddress = serverAddress
-        this._port = port
+        this._entities = new Set();
+        this._updateStates = {};
     }
 
     get dcId() {
-        return this._dcId
+        return this._dcId;
     }
 
     get serverAddress() {
-        return this._serverAddress
+        return this._serverAddress;
     }
 
     get port() {
-        return this._port
+        return this._port;
     }
 
     get authKey() {
-        return this._authKey
+        return this._authKey;
     }
 
     set authKey(value) {
-        this._authKey = value
+        this._authKey = value;
     }
+
+    setDC(dcId, serverAddress, port) {
+        this._dcId = dcId | 0;
+        this._serverAddress = serverAddress;
+        this._port = port;
+    }
+
     /* CONTEST
     get takeoutId() {
         return this._takeoutId
@@ -253,4 +254,4 @@ class MemorySession extends Session {
     }*/
 }
 
-module.exports = MemorySession
+module.exports = MemorySession;

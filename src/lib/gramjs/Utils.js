@@ -1,18 +1,18 @@
-const { constructors } = require('./tl')
+const { constructors } = require('./tl');
 
 const USERNAME_RE = new RegExp('@|(?:https?:\\/\\/)?(?:www\\.)?' +
-    '(?:telegram\\.(?:me|dog)|t\\.me)\\/(@|joinchat\\/)?')
+    '(?:telegram\\.(?:me|dog)|t\\.me)\\/(@|joinchat\\/)?');
 
-const JPEG_HEADER = Buffer.from('ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e19282321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aadaad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c353c76414176f8a58ca5f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8ffc00011080000000003012200021101031101ffc4001f0000010501010101010100000000000000000102030405060708090a0bffc400b5100002010303020403050504040000017d01020300041105122131410613516107227114328191a1082342b1c11552d1f02433627282090a161718191a25262728292a3435363738393a434445464748494a535455565758595a636465666768696a737475767778797a838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae1e2e3e4e5e6e7e8e9eaf1f2f3f4f5f6f7f8f9faffc4001f0100030101010101010101010000000000000102030405060708090a0bffc400b51100020102040403040705040400010277000102031104052131061241510761711322328108144291a1b1c109233352f0156272d10a162434e125f11718191a262728292a35363738393a434445464748494a535455565758595a636465666768696a737475767778797a82838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f3f4f5f6f7f8f9faffda000c03010002110311003f00', 'hex')
-const JPEG_FOOTER = Buffer.from('ffd9', 'hex')
+const JPEG_HEADER = Buffer.from('ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e19282321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aadaad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c353c76414176f8a58ca5f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8ffc00011080000000003012200021101031101ffc4001f0000010501010101010100000000000000000102030405060708090a0bffc400b5100002010303020403050504040000017d01020300041105122131410613516107227114328191a1082342b1c11552d1f02433627282090a161718191a25262728292a3435363738393a434445464748494a535455565758595a636465666768696a737475767778797a838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae1e2e3e4e5e6e7e8e9eaf1f2f3f4f5f6f7f8f9faffc4001f0100030101010101010101010000000000000102030405060708090a0bffc400b51100020102040403040705040400010277000102031104052131061241510761711322328108144291a1b1c109233352f0156272d10a162434e125f11718191a262728292a35363738393a434445464748494a535455565758595a636465666768696a737475767778797a82838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f3f4f5f6f7f8f9faffda000c03010002110311003f00', 'hex');
+const JPEG_FOOTER = Buffer.from('ffd9', 'hex');
 
-const TG_JOIN_RE = new RegExp('tg:\\/\\/(join)\\?invite=')
+const TG_JOIN_RE = new RegExp('tg:\\/\\/(join)\\?invite=');
 
 const VALID_USERNAME_RE = new RegExp('^([a-z]((?!__)[\\w\\d]){3,30}[a-z\\d]|gif|vid|' +
-    'pic|bing|wiki|imdb|bold|vote|like|coub)$')
+    'pic|bing|wiki|imdb|bold|vote|like|coub)$');
 
 function _raiseCastFail(entity, target) {
-    throw new Error(`Cannot cast ${entity.className} to any kind of ${target}`)
+    throw new Error(`Cannot cast ${entity.className} to any kind of ${target}`);
 }
 
 /**
@@ -37,41 +37,41 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
         // e.g. custom.Dialog (can't cyclic import).
 
         if (allowSelf && 'inputEntity' in entity) {
-            return entity.inputEntity
+            return entity.inputEntity;
         } else if ('entity' in entity) {
-            return getInputPeer(entity.entity)
+            return getInputPeer(entity.entity);
         } else {
-            _raiseCastFail(entity, 'InputPeer')
+            _raiseCastFail(entity, 'InputPeer');
         }
     }
     if (entity.SUBCLASS_OF_ID === 0xc91c90b6) { // crc32(b'InputPeer')
-        return entity
+        return entity;
     }
 
     if (entity instanceof constructors.User) {
         if (entity.isSelf && allowSelf) {
-            return new constructors.InputPeerSelf()
+            return new constructors.InputPeerSelf();
         } else if (entity.accessHash !== undefined || !checkHash) {
             return new constructors.InputPeerUser({
                 userId: entity.id,
                 accessHash: entity.accessHash,
-            })
+            });
         } else {
-            throw new Error('User without accessHash or min info cannot be input')
+            throw new Error('User without accessHash or min info cannot be input');
         }
     }
     if (entity instanceof constructors.Chat || entity instanceof constructors.ChatEmpty ||
         entity instanceof constructors.ChatForbidden) {
-        return new constructors.InputPeerChat({ chatId: entity.id })
+        return new constructors.InputPeerChat({ chatId: entity.id });
     }
     if (entity instanceof constructors.Channel) {
         if (entity.accessHash !== undefined || !checkHash) {
             return new constructors.InputPeerChannel({
                 channelId: entity.id,
-                accessHash: entity.accessHash
-            })
+                accessHash: entity.accessHash,
+            });
         } else {
-            throw new TypeError('Channel without accessHash or min info cannot be input')
+            throw new TypeError('Channel without accessHash or min info cannot be input');
         }
     }
     if (entity instanceof constructors.ChannelForbidden) {
@@ -79,38 +79,38 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
         // also not optional, we assume that this truly is the case.
         return new constructors.InputPeerChannel({
             channelId: entity.id,
-            accessHash: entity.accessHash
-        })
+            accessHash: entity.accessHash,
+        });
     }
 
     if (entity instanceof constructors.InputUser) {
         return new constructors.InputPeerUser({
             userId: entity.userId,
-            accessHash: entity.accessHash
-        })
+            accessHash: entity.accessHash,
+        });
     }
     if (entity instanceof constructors.InputChannel) {
         return new constructors.InputPeerChannel({
             channelId: entity.channelId,
-            accessHash: entity.accessHash
-        })
+            accessHash: entity.accessHash,
+        });
     }
     if (entity instanceof constructors.UserEmpty) {
-        return new constructors.InputPeerEmpty()
+        return new constructors.InputPeerEmpty();
     }
     if (entity instanceof constructors.UserFull) {
-        return getInputPeer(entity.user)
+        return getInputPeer(entity.user);
     }
 
     if (entity instanceof constructors.ChatFull) {
-        return new constructors.InputPeerChat({ chatId: entity.id })
+        return new constructors.InputPeerChat({ chatId: entity.id });
     }
 
     if (entity instanceof constructors.PeerChat) {
-        return new constructors.InputPeerChat(entity.chatId)
+        return new constructors.InputPeerChat(entity.chatId);
     }
 
-    _raiseCastFail(entity, 'InputPeer')
+    _raiseCastFail(entity, 'InputPeer');
 }
 
 /**
@@ -228,6 +228,7 @@ function getInputDialog(dialog) {
     _raiseCastFail(dialog, 'InputDialogPeer')
 }
 */
+
 /*CONTEST
 
 function getInputMessage(message) {
@@ -259,12 +260,12 @@ function getInputMessage(message) {
 function strippedPhotoToJpg(stripped) {
     // Note: Changes here should update _stripped_real_length
     if (stripped.length < 3 || stripped[0] !== 1) {
-        return stripped
+        return stripped;
     }
-    const header = Buffer.from(JPEG_HEADER)
-    header[164] = stripped[1]
-    header[166] = stripped[2]
-    return Buffer.concat([header, stripped.slice(3), JPEG_FOOTER])
+    const header = Buffer.from(JPEG_HEADER);
+    header[164] = stripped[1];
+    header[166] = stripped[2];
+    return Buffer.concat([header, stripped.slice(3), JPEG_FOOTER]);
 }
 
 /*CONTEST
@@ -329,16 +330,16 @@ function getInputLocation(location) {
  */
 function getAppropriatedPartSize(fileSize) {
     if (fileSize <= 104857600) { // 100MB
-        return 128
+        return 128;
     }
     if (fileSize <= 786432000) { // 750MB
-        return 256
+        return 256;
     }
     if (fileSize <= 1572864000) { // 1500MB
-        return 512
+        return 512;
     }
 
-    throw new Error('File size too large')
+    throw new Error('File size too large');
 }
 
 /*CONTEST
@@ -480,6 +481,7 @@ function resolveId(markedId) {
  * @returns {{inputEntity: *, entity: *}}
  * @private
  */
+
 /*CONTEST
 
 function _getEntityPair(entityId, entities, cache, getInputPeer = getInputPeer) {
@@ -501,15 +503,15 @@ function _getEntityPair(entityId, entities, cache, getInputPeer = getInputPeer) 
 
 function getMessageId(message) {
     if (message === null || message === undefined) {
-        return null
+        return null;
     }
     if (typeof message == 'number') {
-        return message
+        return message;
     }
     if (message.SUBCLASS_OF_ID === 0x790009e3) { // crc32(b'Message')
-        return message.id
+        return message.id;
     }
-    throw new Error(`Invalid message type: ${message.constructor.name}`)
+    throw new Error(`Invalid message type: ${message.constructor.name}`);
 }
 
 
@@ -518,7 +520,8 @@ function getMessageId(message) {
  * @param phone
  */
 function parsePhone(phone) {
-    return phone.toString().replace(/[+()\s-]/gm, '')
+    return phone.toString()
+        .replace(/[+()\s-]/gm, '');
 }
 
 /**
@@ -531,6 +534,7 @@ function parsePhone(phone) {
 
  * @param username {string}
  */
+
 /*CONTEST
 
 function parseUsername(username) {
@@ -577,18 +581,18 @@ function rtrim(s, mask) {
 function getDisplayName(entity) {
     if (entity instanceof constructors.User) {
         if (entity.lastName && entity.firstName) {
-            return `${entity.firstName} ${entity.lastName}`
+            return `${entity.firstName} ${entity.lastName}`;
         } else if (entity.firstName) {
-            return entity.firstName
+            return entity.firstName;
         } else if (entity.lastName) {
-            return entity.lastName
+            return entity.lastName;
         } else {
-            return ''
+            return '';
         }
     } else if (entity instanceof constructors.Chat || entity instanceof constructors.Channel) {
-        return entity.title
+        return entity.title;
     }
-    return ''
+    return '';
 }
 
 /**
@@ -596,6 +600,7 @@ function getDisplayName(entity) {
  * @param item
  * @returns {boolean}
  */
+
 /*CONTEST
 Duplicate ?
 function isListLike(item) {
@@ -618,34 +623,34 @@ function getDC(dcId, cdn = false) {
             return {
                 id: 1,
                 ipAddress: 'pluto.web.telegram.org',
-                port: 443
-            }
+                port: 443,
+            };
         case 2:
             return {
                 id: 2,
                 ipAddress: 'venus.web.telegram.org',
-                port: 443
-            }
+                port: 443,
+            };
         case 3:
             return {
                 id: 3,
                 ipAddress: 'aurora.web.telegram.org',
-                port: 443
-            }
+                port: 443,
+            };
         case 4:
             return {
                 id: 4,
                 ipAddress: 'vesta.web.telegram.org',
-                port: 443
-            }
+                port: 443,
+            };
         case 5:
             return {
                 id: 5,
                 ipAddress: 'flora.web.telegram.org',
-                port: 443
-            }
+                port: 443,
+            };
         default:
-            throw new Error(`Cannot find the DC with the ID of ${dcId}`)
+            throw new Error(`Cannot find the DC with the ID of ${dcId}`);
     }
     // TODO chose based on current connection method
     /*
@@ -683,5 +688,5 @@ module.exports = {
     getAppropriatedPartSize,
     //getInputLocation,
     strippedPhotoToJpg,
-    getDC
-}
+    getDC,
+};

@@ -169,7 +169,7 @@ async function signInUserWithQrCode(
 
     const inputPromise = (async () => {
         while (1) {
-            if (isScanningComplete){
+            if (isScanningComplete) {
                 break;
             }
 

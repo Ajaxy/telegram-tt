@@ -1,5 +1,5 @@
-const BigInt = require('big-integer')
-const { modExp } = require('../Helpers')
+const BigInt = require('big-integer');
+const { modExp } = require('../Helpers');
 
 class Factorizator {
     /**
@@ -10,11 +10,11 @@ class Factorizator {
      */
     static gcd(a, b) {
         while (b.neq(BigInt.zero)) {
-            let temp = b
-            b = a.remainder(b)
-            a = temp
+            let temp = b;
+            b = a.remainder(b);
+            a = temp;
         }
-        return a
+        return a;
     }
 
     /**
@@ -23,57 +23,75 @@ class Factorizator {
      * @returns {{p: *, q: *}}
      */
     static factorize(pq) {
-        if (pq.remainder(2).equals(BigInt.zero)) {
-            return { p: BigInt(2), q: pq.divide(BigInt(2)) }
+        if (pq.remainder(2)
+            .equals(BigInt.zero)) {
+            return {
+                p: BigInt(2),
+                q: pq.divide(BigInt(2)),
+            };
         }
-        let y = BigInt.randBetween(BigInt(1),pq.minus(1))
-        const c = BigInt.randBetween(BigInt(1),pq.minus(1))
-        const m = BigInt.randBetween(BigInt(1),pq.minus(1))
+        let y = BigInt.randBetween(BigInt(1), pq.minus(1));
+        const c = BigInt.randBetween(BigInt(1), pq.minus(1));
+        const m = BigInt.randBetween(BigInt(1), pq.minus(1));
 
-        let g = BigInt.one
-        let r = BigInt.one
-        let q = BigInt.one
-        let x = BigInt.zero
-        let ys = BigInt.zero
-        let k
+        let g = BigInt.one;
+        let r = BigInt.one;
+        let q = BigInt.one;
+        let x = BigInt.zero;
+        let ys = BigInt.zero;
+        let k;
 
         while (g.eq(BigInt.one)) {
-            x = y
-            for (let i = 0; BigInt(i).lesser(r); i++) {
-                y = (modExp(y, BigInt(2), pq)).add(c).remainder(pq)
+            x = y;
+            for (let i = 0; BigInt(i)
+                .lesser(r); i++) {
+                y = (modExp(y, BigInt(2), pq)).add(c)
+                    .remainder(pq);
             }
-            k = BigInt.zero
+            k = BigInt.zero;
 
             while (k.lesser(r) && g.eq(BigInt.one)) {
 
-                ys = y
-                let condition = BigInt.min(m, r.minus(k))
-                for (let i = 0; BigInt(i).lesser(condition); i++) {
-                    y = (modExp(y, BigInt(2), pq)).add(c).remainder(pq)
-                    q = q.multiply(x.minus(y).abs()).remainder(pq)
+                ys = y;
+                let condition = BigInt.min(m, r.minus(k));
+                for (let i = 0; BigInt(i)
+                    .lesser(condition); i++) {
+                    y = (modExp(y, BigInt(2), pq)).add(c)
+                        .remainder(pq);
+                    q = q.multiply(x.minus(y)
+                        .abs())
+                        .remainder(pq);
                 }
-                g = Factorizator.gcd(q, pq)
-                k = k.add(m)
+                g = Factorizator.gcd(q, pq);
+                k = k.add(m);
             }
 
-            r = r.multiply(2)
+            r = r.multiply(2);
         }
 
 
         if (g.eq(pq)) {
             while (true) {
-                ys = (modExp(ys, BigInt(2), pq)).add(c).remainder(pq)
-                g = Factorizator.gcd(x.minus(ys).abs(), pq)
+                ys = (modExp(ys, BigInt(2), pq)).add(c)
+                    .remainder(pq);
+                g = Factorizator.gcd(x.minus(ys)
+                    .abs(), pq);
 
                 if (g.greater(1)) {
-                    break
+                    break;
                 }
             }
         }
-        const p = g
-        q = pq.divide(g)
-        return p < q ? { p: p, q: q } : { p: q, q: p }
+        const p = g;
+        q = pq.divide(g);
+        return p < q ? {
+            p: p,
+            q: q,
+        } : {
+            p: q,
+            q: p,
+        };
     }
 }
 
-module.exports = Factorizator
+module.exports = Factorizator;
