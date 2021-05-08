@@ -153,7 +153,12 @@ class MTProtoState {
         if (body.length < 8) {
             throw new InvalidBufferError(body);
         }
-
+        if (body.length < 0) { // length needs to be positive
+            throw new SecurityError('Server replied with negative length');
+        }
+        if (body.length % 4 !== 0) {
+            throw new SecurityError('Server replied with length not divisible by 4');
+        }
         // TODO Check salt,sessionId, and sequenceNumber
         const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8));
         if (keyId.neq(this.authKey.keyId)) {
@@ -180,13 +185,19 @@ class MTProtoState {
         const reader = new BinaryReader(body);
         reader.readLong(); // removeSalt
         const serverId = reader.readLong();
-        if (serverId !== this.id) {
-            // throw new SecurityError('Server replied with a wrong session ID');
+        if (!serverId.eq(this.id)) {
+            throw new SecurityError('Server replied with a wrong session ID');
         }
 
         const remoteMsgId = reader.readLong();
         const remoteSequence = reader.readInt();
-        reader.readInt(); // msgLen for the inner object, padding ignored
+        const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
+        const diff = body.length - containerLen;
+        // We want to check if it's between 12 and 1024
+        // https://core.telegram.org/mtproto/security_guidelines#checking-message-length
+        if (diff < 12 || diff > 1024) {
+            throw new SecurityError('Server replied with the wrong message padding');
+        }
 
         // We could read msg_len bytes and use those in a new reader to read
         // the next TLObject without including the padding, but since the
