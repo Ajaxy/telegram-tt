@@ -24,3 +24,15 @@ export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps:
 
   return true;
 }
+
+export function getUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral) {
+  const currentKeys = Object.keys(currentProps);
+  const currentKeysLength = currentKeys.length;
+  const newKeysLength = Object.keys(newProps).length;
+
+  if (currentKeysLength !== newKeysLength) {
+    return ['%LENGTH%'];
+  }
+
+  return currentKeys.filter((prop) => currentProps[prop] !== newProps[prop]);
+}
