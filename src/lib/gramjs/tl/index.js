@@ -3,6 +3,7 @@ const {
     serializeBytes,
     serializeDate,
 } = require('./generationHelpers');
+
 const patched = null;
 
 module.exports = {

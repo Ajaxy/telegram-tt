@@ -176,7 +176,7 @@ class MTProtoSender {
                 if (this._updateCallback && attempt === 0) {
                     this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
                 }
-                this._log.error('WebSocket connection failed attempt: ' + (attempt + 1));
+                this._log.error(`WebSocket connection failed attempt: ${attempt + 1}`);
                 await Helpers.sleep(this._delay);
             }
         }
@@ -223,7 +223,7 @@ class MTProtoSender {
         if (!this._user_connected) {
             throw new Error('Cannot send requests while disconnected');
         }
-        //CONTEST
+        // CONTEST
         const state = new RequestState(request);
         this._send_queue.append(state);
         return state.promise;
@@ -234,7 +234,7 @@ class MTProtoSender {
             return state.promise
         } else {
             throw new Error('not supported')
-        }*/
+        } */
     }
 
     /**
@@ -248,7 +248,7 @@ class MTProtoSender {
         this._log.info('Connecting to {0}...'.replace('{0}', this._connection));
         await this._connection.connect();
         this._log.debug('Connection success!');
-        //process.exit(0)
+        // process.exit(0)
         if (!this.authKey.getKey()) {
             const plain = new MtProtoPlainSender(this._connection, this._log);
             this._log.debug('New auth_key attempt ...');
@@ -319,7 +319,7 @@ class MTProtoSender {
                 this._last_acks.push(ack);
                 this._pending_ack.clear();
             }
-            this._log.debug('Waiting for messages to send...' + this._reconnecting);
+            this._log.debug(`Waiting for messages to send...${this._reconnecting}`);
             // TODO Wait for the connection send queue to be empty?
             // This means that while it's not empty we can wait for
             // more messages to be added to the send queue.
@@ -332,8 +332,8 @@ class MTProtoSender {
             if (!res) {
                 continue;
             }
-            let data = res.data;
-            const batch = res.batch;
+            let { data } = res;
+            const { batch } = res;
             this._log.debug(`Encrypting ${batch.length} message(s) in ${data.length} bytes for sending`);
 
             data = await this._state.encryptMessageData(data);
@@ -399,11 +399,11 @@ class MTProtoSender {
                     }
 
                     // We don't really need to do this if we're going to sign in again
-                    /*await this.authKey.setKey(null)
+                    /* await this.authKey.setKey(null)
 
                     if (this._authKeyCallback) {
                         await this._authKeyCallback(null)
-                    }*/
+                    } */
                     // We can disconnect at sign in
                     /* await this.disconnect()
                     */
@@ -568,7 +568,7 @@ class MTProtoSender {
             this._log.warn(`Note: ${message.obj.className} is not an update, not dispatching it`);
             return;
         }
-        this._log.debug('Handling update ' + message.obj.className);
+        this._log.debug(`Handling update ${message.obj.className}`);
         if (this._updateCallback) {
             this._updateCallback(message.obj);
         }
@@ -638,7 +638,6 @@ class MTProtoSender {
             // msg_seqno too high never seems to happen but just in case
             this._state._sequence -= 16;
         } else {
-
             for (const state of states) {
                 state.reject(new BadMessageError(state.request, badMsg.errorCode));
             }
@@ -793,7 +792,7 @@ class MTProtoSender {
 
         this._reconnecting = false;
         // uncomment this if you want to resend
-        //this._send_queue.extend(Object.values(this._pending_state))
+        // this._send_queue.extend(Object.values(this._pending_state))
         this._pending_state = {};
         if (this._autoReconnectCallback) {
             await this._autoReconnectCallback();

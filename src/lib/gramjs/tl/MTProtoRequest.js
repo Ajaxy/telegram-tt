@@ -31,7 +31,7 @@ class MTProtoRequest {
 
     // These should be overrode
     onSend() {
-        throw Error('Not overload ' + this.constructor.name);
+        throw Error(`Not overload ${this.constructor.name}`);
     }
 
     onResponse(buffer) {

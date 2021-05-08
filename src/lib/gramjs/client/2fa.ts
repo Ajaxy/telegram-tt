@@ -88,7 +88,7 @@ export async function updateTwoFaSettings(
 
     try {
         await client.invoke(new Api.account.UpdatePasswordSettings({
-            password: password,
+            password,
             newSettings: new Api.account.PasswordInputSettings({
                 newAlgo: pwd.newAlgo,
                 newPasswordHash: newPassword ? await computeDigest(pwd.newAlgo, newPassword) : Buffer.alloc(0),

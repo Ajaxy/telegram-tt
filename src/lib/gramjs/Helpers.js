@@ -1,5 +1,5 @@
-const crypto = require('./crypto/crypto');
 const BigInt = require('big-integer');
+const crypto = require('./crypto/crypto');
 
 /**
  * converts a buffer to big int
@@ -143,7 +143,7 @@ function generateRandomBytes(count) {
  * @returns {{iv: Buffer, key: Buffer}}
  */
 
-/*CONTEST
+/* CONTEST
 this is mtproto 1 (mostly used for secret chats)
 async function calcKey(sharedKey, msgKey, client) {
     const x = client === true ? 0 : 8
@@ -335,7 +335,7 @@ module.exports = {
     mod,
     crc32,
     generateRandomBytes,
-    //calcKey,
+    // calcKey,
     generateKeyDataFromNonce,
     sha1,
     sha256,
@@ -344,7 +344,7 @@ module.exports = {
     getRandomInt,
     sleep,
     getByteArray,
-    //isArrayLike,
+    // isArrayLike,
     toSignedLittleBuffer,
     convertToLittle,
 

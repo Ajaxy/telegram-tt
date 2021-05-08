@@ -1,12 +1,13 @@
+const BigInt = require('big-integer');
 const { readBufferFromBigInt } = require('../../Helpers');
 const {
     Connection,
     PacketCodec,
 } = require('./Connection');
-const BigInt = require('big-integer');
 
 class AbridgedPacketCodec extends PacketCodec {
     static tag = Buffer.from('ef', 'hex');
+
     static obfuscateTag = Buffer.from('efefefef', 'hex');
 
     constructor(props) {

@@ -1,3 +1,4 @@
+const os = require('os');
 const Logger = require('../extensions/Logger');
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
@@ -6,7 +7,6 @@ const Helpers = require('../Helpers');
 const { BinaryWriter } = require('../extensions');
 const utils = require('../Utils');
 const Session = require('../sessions/Abstract');
-const os = require('os');
 const { LAYER } = require('../tl/AllTLObjects');
 const {
     constructors,
@@ -69,7 +69,7 @@ class TelegramClient {
         this.apiHash = apiHash;
         this._useIPV6 = args.useIPV6;
         // this._entityCache = new Set()
-        if (typeof args.baseLogger == 'string') {
+        if (typeof args.baseLogger === 'string') {
             this._log = new Logger();
         } else {
             this._log = args.baseLogger;
@@ -294,7 +294,7 @@ class TelegramClient {
         const sender = new MTProtoSender(this.session.getAuthKey(dcId),
             {
                 logger: this._log,
-                dcId: dcId,
+                dcId,
                 retries: this._connectionRetries,
                 delay: this._retryDelay,
                 autoReconnect: this._autoReconnect,
@@ -313,12 +313,11 @@ class TelegramClient {
                 ));
                 if (this.session.dcId !== dcId) {
                     this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
-                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId: dcId }));
+                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
                     const req = this._initWith(new requests.auth.ImportAuthorization({
-                            id: auth.id,
-                            bytes: auth.bytes,
-                        },
-                    ));
+                        id: auth.id,
+                        bytes: auth.bytes,
+                    }));
                     await sender.send(req);
                 }
                 sender.dcId = dcId;
@@ -360,7 +359,7 @@ class TelegramClient {
             date = new Date().getTime();
             media = messageOrMedia;
         }
-        if (typeof media == 'string') {
+        if (typeof media === 'string') {
             throw new Error('not implemented');
         }
 
@@ -424,12 +423,12 @@ class TelegramClient {
         }
         try {
             return this.downloadFile(loc, {
-                dcId: dcId,
+                dcId,
             });
         } catch (e) {
             // TODO this should never raise
             throw e;
-            /*if (e.message === 'LOCATION_INVALID') {
+            /* if (e.message === 'LOCATION_INVALID') {
                 const ie = await this.getInputEntity(entity)
                 if (ie instanceof constructors.InputPeerChannel) {
                     const full = await this.invoke(new requests.channels.GetFullChannel({
@@ -441,7 +440,7 @@ class TelegramClient {
                 }
             } else {
                 throw e
-            }*/
+            } */
         }
     }
 
@@ -588,12 +587,12 @@ class TelegramClient {
             try {
                 const promise = this._sender.send(request);
                 const result = await promise;
-                //this.session.processEntities(result)
+                // this.session.processEntities(result)
                 // this._entityCache.add(result)
                 return result;
             } catch (e) {
-                if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL' ||
-                    e.message === 'RPC_MCGET_FAIL') {
+                if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
+                    || e.message === 'RPC_MCGET_FAIL') {
                     this._log.warn(`Telegram is having internal issues ${e.constructor.name}`);
                     await sleep(2000);
                 } else if (e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) {
@@ -603,8 +602,8 @@ class TelegramClient {
                     } else {
                         throw e;
                     }
-                } else if (e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError ||
-                    e instanceof errors.UserMigrateError) {
+                } else if (e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError
+                    || e instanceof errors.UserMigrateError) {
                     this._log.info(`Phone migrated to ${e.newDc}`);
                     const shouldRaise = e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError;
                     if (shouldRaise && await checkAuthorization(this)) {
@@ -658,7 +657,7 @@ class TelegramClient {
     }
 
     _handleUpdate(update) {
-        //this.session.processEntities(update)
+        // this.session.processEntities(update)
         // this._entityCache.add(update)
 
         if (update instanceof constructors.Updates || update instanceof constructors.UpdatesCombined) {
@@ -682,8 +681,8 @@ class TelegramClient {
     _processUpdate(update, others, entities) {
         update._entities = entities || [];
         const args = {
-            update: update,
-            others: others,
+            update,
+            others,
         };
         this._dispatchUpdate(args);
     }
@@ -707,7 +706,7 @@ class TelegramClient {
      * @returns {Promise<void>}
      * @private
      */
-    /*CONTEST
+    /* CONTEST
     async _getEntityFromString(string) {
         const phone = utils.parsePhone(string)
         if (phone) {
@@ -838,7 +837,7 @@ class TelegramClient {
      * @returns {Promise<>}
      */
 
-    /*CONTEST
+    /* CONTEST
     async getInputEntity(peer) {
         // Short-circuit if the input parameter directly maps to an InputPeer
         try {

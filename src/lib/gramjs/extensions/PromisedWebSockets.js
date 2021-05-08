@@ -1,4 +1,5 @@
-const Mutex = require('async-mutex').Mutex;
+const { Mutex } = require('async-mutex');
+
 const mutex = new Mutex();
 
 const WebSocketClient = require('websocket').w3cwebsocket;
@@ -7,7 +8,7 @@ const closeError = new Error('WebSocket was closed');
 
 class PromisedWebSockets {
     constructor() {
-        /*CONTEST
+        /* CONTEST
         this.isBrowser = typeof process === 'undefined' ||
             process.type === 'renderer' ||
             process.browser === true ||
@@ -23,7 +24,7 @@ class PromisedWebSockets {
         while (true) {
             const thisTime = await this.read(number);
             readData = Buffer.concat([readData, thisTime]);
-            number = number - thisTime.length;
+            number -= thisTime.length;
             if (!number) {
                 return readData;
             }
@@ -90,7 +91,7 @@ class PromisedWebSockets {
                 this.resolveRead(false);
                 this.closed = true;
             };
-            //CONTEST
+            // CONTEST
             // Seems to not be working, at least in a web worker
             self.addEventListener('offline', async () => {
                 await this.close();

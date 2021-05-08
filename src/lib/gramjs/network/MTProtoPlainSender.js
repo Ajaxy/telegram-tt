@@ -2,11 +2,11 @@
  *  This module contains the class used to communicate with Telegram's servers
  *  in plain text, when no authorization key has been created yet.
  */
+const BigInt = require('big-integer');
 const Helpers = require('../Helpers');
 const MTProtoState = require('./MTProtoState');
 const BinaryReader = require('../extensions/BinaryReader');
 const { InvalidBufferError } = require('../errors/Common');
-const BigInt = require('big-integer');
 const { toSignedLittleBuffer } = require('../Helpers');
 
 /**
@@ -29,7 +29,6 @@ class MTProtoPlainSender {
      * @param request
      */
     async send(request) {
-
         let body = request.getBytes();
         let msgId = this._state._getNewMsgId();
         const m = toSignedLittleBuffer(msgId, 8);
@@ -69,7 +68,6 @@ class MTProtoPlainSender {
          */
         return reader.tgReadObject();
     }
-
 }
 
 module.exports = MTProtoPlainSender;

@@ -52,7 +52,7 @@ export async function uploadFile(
     }
 
     for (let i = 0; i < partCount; i += workers) {
-        let sendingParts = [];
+        const sendingParts = [];
         let end = i + workers;
         if (end > partCount) {
             end = partCount;
@@ -86,7 +86,6 @@ export async function uploadFile(
                     onProgress(progress);
                 }
             })());
-
         }
         try {
             await Promise.race([

@@ -12,7 +12,7 @@ class Session {
     /* CONTEST
     clone(toInstance = null) {
         return toInstance || new this.constructor()
-    }*/
+    } */
 
     /**
      * Returns the currently-used data center ID.
@@ -67,7 +67,7 @@ class Session {
      * Returns an ID of the takeout process initialized for this session,
      * or `None` if there's no were any unfinished takeout requests.
      */
-    /*CONTEST
+    /* CONTEST
     get takeoutId() {
         throw new Error('Not Implemented')
     }
@@ -76,7 +76,7 @@ class Session {
      * Sets the ID of the unfinished takeout process for this session.
      * @param value
      */
-    /*CONTEST
+    /* CONTEST
     set takeoutId(value) {
         throw new Error('Not Implemented')
     }
@@ -88,7 +88,7 @@ class Session {
      * it should ``return None``.
      * @param entityId
      */
-    /*CONTEST
+    /* CONTEST
     getUpdateState(entityId) {
         throw new Error('Not Implemented')
     }
@@ -102,7 +102,7 @@ class Session {
      * @param entityId
      * @param state
      */
-    /*CONTEST
+    /* CONTEST
     setUpdateState(entityId, state) {
         throw new Error('Not Implemented')
     }
@@ -114,7 +114,7 @@ class Session {
      * free any used resources. Can be left empty if none.
      */
 
-    /*CONTEST
+    /* CONTEST
     close() {
 
     }
@@ -141,7 +141,7 @@ class Session {
     /**
      * Lists available sessions. Not used by the library itself.
      */
-    /*CONTEST
+    /* CONTEST
     listSessions() {
         throw new Error('Not Implemented')
     }
@@ -153,7 +153,7 @@ class Session {
      * whatever information is relevant (e.g., ID or access hash).
      * @param tlo
      */
-    /*CONTEST
+    /* CONTEST
     processEntities(tlo) {
         throw new Error('Not Implemented')
     }
@@ -166,7 +166,7 @@ class Session {
      * to suit several purposes (e.g. user only provided its ID or wishes
      * to use a cached username to avoid extra RPC).
      */
-    /*CONTEST
+    /* CONTEST
     getInputEntity(key) {
         throw new Error('Not Implemented')
     }

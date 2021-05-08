@@ -76,12 +76,11 @@ const fromLine = (line, isFunction) => {
         argsConfig: {},
         subclassOfId: crc32(match[3]),
         result: match[3],
-        isFunction: isFunction,
+        isFunction,
         namespace: null,
     };
     if (!currentConfig.constructorId) {
-
-        let hexId = '';
+        const hexId = '';
         let args;
 
         if (Object.values(currentConfig.argsConfig).length) {
@@ -122,7 +121,7 @@ const fromLine = (line, isFunction) => {
           delete  currentConfig.argsConfig[arg]
         }
       }
-    }*/
+    } */
     return currentConfig;
 };
 
@@ -143,7 +142,7 @@ function buildArgConfig(name, argType) {
     // less annoying to type. Currently the only type that can
     // be inferred is if the name is 'random_id', to which a
     // random ID will be assigned if left as None (the default)
-    let canBeInferred = name === 'random_id';
+    const canBeInferred = name === 'random_id';
 
     // The type can be an indicator that other arguments will be flags
     if (argType !== '#') {
@@ -186,8 +185,7 @@ function buildArgConfig(name, argType) {
         // @ts-ignore
         if (/^[a-z]$/.test(currentConfig.type.split('.')
             .pop()
-            .charAt(0),
-        )
+            .charAt(0))
         ) {
             currentConfig.skipConstructorId = true;
         }
@@ -270,7 +268,7 @@ const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES)
     // Once all objects have been parsed, replace the
     // string type from the arguments with references
     for (const obj of objAll) {
-        //console.log(obj)
+        // console.log(obj)
         if (AUTH_KEY_TYPES.has(obj.constructorId)) {
             for (const arg in obj.argsConfig) {
                 if (obj.argsConfig[arg].type === 'string') {
@@ -283,12 +281,11 @@ const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES)
     for (const obj of objAll) {
         yield obj;
     }
-
 };
 
 const findAll = (regex, str, matches = []) => {
-    if (!regex.flags.includes(`g`)) {
-        regex = new RegExp(regex.source, `g`);
+    if (!regex.flags.includes('g')) {
+        regex = new RegExp(regex.source, 'g');
     }
 
     const res = regex.exec(str);
@@ -303,7 +300,7 @@ const findAll = (regex, str, matches = []) => {
 
 function serializeBytes(data) {
     if (!(data instanceof Buffer)) {
-        if (typeof data == 'string') {
+        if (typeof data === 'string') {
             data = Buffer.from(data);
         } else {
             throw Error(`Bytes or str expected, not ${data.constructor.name}`);
@@ -330,7 +327,6 @@ function serializeBytes(data) {
         .fill(0));
 
     return Buffer.concat(r);
-
 }
 
 function serializeDate(dt) {
@@ -341,7 +337,7 @@ function serializeDate(dt) {
     if (dt instanceof Date) {
         dt = Math.floor((Date.now() - dt.getTime()) / 1000);
     }
-    if (typeof dt == 'number') {
+    if (typeof dt === 'number') {
         const t = Buffer.alloc(4);
         t.writeInt32LE(dt, 0);
         return t;

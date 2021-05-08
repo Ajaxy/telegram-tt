@@ -13,8 +13,8 @@ function RPCMessageToError(rpcError, request) {
         if (m) {
             const capture = m.length === 2 ? parseInt(m[1]) : null;
             return new Cls({
-                request: request,
-                capture: capture,
+                request,
+                capture,
             });
         }
     }

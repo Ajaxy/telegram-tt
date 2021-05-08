@@ -9,7 +9,7 @@ export interface UserAuthParams {
     phoneCode: (isCodeViaApp?: boolean) => Promise<string>;
     password: (hint?: string) => Promise<string>;
     firstAndLastNames: () => Promise<[string, string?]>;
-    qrCode: (qrCode: { token: Buffer, expires: number }) => Promise<void>;
+    qrCode: (qrCode: { token: Buffer; expires: number }) => Promise<void>;
     onError: (err: Error) => void;
     forceSMS?: boolean;
 }
@@ -19,8 +19,8 @@ export interface BotAuthParams {
 }
 
 interface ApiCredentials {
-    apiId: number,
-    apiHash: string,
+    apiId: number;
+    apiHash: string;
 }
 
 const QR_CODE_TIMEOUT = 30000;
@@ -247,9 +247,9 @@ async function signInUserWithQrCode(
 async function sendCode(
     client: TelegramClient, apiCredentials: ApiCredentials, phoneNumber: string, forceSMS = false,
 ): Promise<{
-    phoneCodeHash: string;
-    isCodeViaApp: boolean;
-}> {
+        phoneCodeHash: string;
+        isCodeViaApp: boolean;
+    }> {
     try {
         const { apiId, apiHash } = apiCredentials;
         const sendResult = await client.invoke(new Api.auth.SendCode({

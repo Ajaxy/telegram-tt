@@ -23,7 +23,7 @@ async function doAuthentication(sender, log) {
 
     const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
 
-    const resPQ = await sender.send(new requests.ReqPqMulti({ nonce: nonce }));
+    const resPQ = await sender.send(new requests.ReqPqMulti({ nonce }));
     log.debug('Starting authKey generation step 1');
 
     if (!(resPQ instanceof constructors.ResPQ)) {
@@ -50,11 +50,11 @@ async function doAuthentication(sender, log) {
 
     const pqInnerData = new constructors.PQInnerData({
         pq: Helpers.getByteArray(pq), // unsigned
-        p: p,
-        q: q,
+        p,
+        q,
         nonce: resPQ.nonce,
         serverNonce: resPQ.serverNonce,
-        newNonce: newNonce,
+        newNonce,
     });
 
     // sha_digest + data + random_bytes
@@ -75,8 +75,8 @@ async function doAuthentication(sender, log) {
         new requests.ReqDHParams({
             nonce: resPQ.nonce,
             serverNonce: resPQ.serverNonce,
-            p: p,
-            q: q,
+            p,
+            q,
             publicKeyFingerprint: targetFingerprint,
             encryptedData: cipherText,
         }),

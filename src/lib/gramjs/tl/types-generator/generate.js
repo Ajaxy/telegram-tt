@@ -18,9 +18,9 @@ function main() {
     const functions = [...apiConfig.functions, ...schemeConfig.functions];
     const constructors = [...apiConfig.constructors, ...schemeConfig.constructors];
     const generated = templateFn({
-        types: types,
-        functions: functions,
-        constructors: constructors,
+        types,
+        functions,
+        constructors,
     });
 
     fs.writeFileSync(OUTPUT_FILE, generated);
@@ -37,7 +37,7 @@ function extractParams(fileContent) {
             functions.push(def);
         } else {
             if (!types[def.result]) {
-                let [namespace, name] = def.result.includes('.') ? def.result.split('.') : [undefined, def.result];
+                const [namespace, name] = def.result.includes('.') ? def.result.split('.') : [undefined, def.result];
 
                 types[def.result] = {
                     namespace,

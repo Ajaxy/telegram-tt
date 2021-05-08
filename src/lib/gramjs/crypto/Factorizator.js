@@ -10,7 +10,7 @@ class Factorizator {
      */
     static gcd(a, b) {
         while (b.neq(BigInt.zero)) {
-            let temp = b;
+            const temp = b;
             b = a.remainder(b);
             a = temp;
         }
@@ -51,9 +51,8 @@ class Factorizator {
             k = BigInt.zero;
 
             while (k.lesser(r) && g.eq(BigInt.one)) {
-
                 ys = y;
-                let condition = BigInt.min(m, r.minus(k));
+                const condition = BigInt.min(m, r.minus(k));
                 for (let i = 0; BigInt(i)
                     .lesser(condition); i++) {
                     y = (modExp(y, BigInt(2), pq)).add(c)
@@ -85,8 +84,8 @@ class Factorizator {
         const p = g;
         q = pq.divide(g);
         return p < q ? {
-            p: p,
-            q: q,
+            p,
+            q,
         } : {
             p: q,
             q: p,

@@ -1,5 +1,6 @@
 class TLMessage {
     static SIZE_OVERHEAD = 12;
+
     static classType = 'constructor';
 
     constructor(msgId, seqNo, obj) {

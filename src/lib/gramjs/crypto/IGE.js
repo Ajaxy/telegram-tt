@@ -1,6 +1,6 @@
+const { IGE: aes_ige } = require('@cryptography/aes');
 const Helpers = require('../Helpers');
 
-const { IGE: aes_ige } = require('@cryptography/aes');
 
 class IGENEW {
     constructor(key, iv) {
@@ -28,10 +28,7 @@ class IGENEW {
         }
 
         return Helpers.convertToLittle(this.ige.encrypt(plainText));
-
-
     }
-
 }
 
 module.exports = IGENEW;

@@ -8,10 +8,10 @@ class Logger {
             _level = level || 'debug';
         }
 
-        this.isBrowser = typeof process === 'undefined' ||
-            process.type === 'renderer' ||
-            process.browser === true ||
-            process.__nwjs;
+        this.isBrowser = typeof process === 'undefined'
+            || process.type === 'renderer'
+            || process.browser === true
+            || process.__nwjs;
         if (!this.isBrowser) {
             this.colors = {
                 start: '\x1b[2m',
