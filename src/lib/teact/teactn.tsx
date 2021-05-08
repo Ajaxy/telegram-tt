@@ -1,12 +1,12 @@
 import React, {
-  FC, Props, useEffect, useState,
+  FC, FC_withDebug, Props, useEffect, useState,
 } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import generateIdFor from '../../util/generateIdFor';
 import { throttleWithRaf } from '../../util/schedulers';
-import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
 import { GlobalState, GlobalActions, ActionTypes } from '../../global/types';
 import { handleError } from '../../util/handleError';
@@ -164,6 +164,8 @@ export function withGlobal<OwnProps>(
 ) {
   return (Component: FC) => {
     return function TeactNContainer(props: OwnProps) {
+      (TeactNContainer as FC_withDebug).DEBUG_contentComponentName = Component.name;
+
       const [id] = useState(generateIdFor(containers));
       const forceUpdate = useForceUpdate();
 
@@ -209,18 +211,6 @@ export function withGlobal<OwnProps>(
       return <Component {...container.mappedProps} {...props} />;
     };
   };
-}
-
-function getUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral) {
-  const currentKeys = Object.keys(currentProps);
-  const currentKeysLength = currentKeys.length;
-  const newKeysLength = Object.keys(newProps).length;
-
-  if (currentKeysLength !== newKeysLength) {
-    return ['LENGTH'];
-  }
-
-  return currentKeys.filter((prop) => currentProps[prop] !== newProps[prop]);
 }
 
 if (DEBUG) {

@@ -3,12 +3,15 @@ import {
   fastRaf, onTickEnd, throttleWithPrimaryRaf, throttleWithRaf,
 } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
-import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
 import { removeAllDelegatedListeners } from './dom-events';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
+export type FC_withDebug = FC & {
+  DEBUG_contentComponentName?: string;
+};
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -444,6 +447,10 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
       value: initial,
       nextValue: initial,
       setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
+        if (!componentInstance.isMounted) {
+          return;
+        }
+
         if (byCursor[cursor].nextValue !== newValue) {
           byCursor[cursor].nextValue = typeof newValue === 'function'
             ? (newValue as (current: T) => T)(byCursor[cursor].value)
@@ -452,6 +459,20 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
           if (!componentInstance.scheduleNextState || !componentInstance.forceUpdate) {
             componentInstance.scheduleNextState = throttleWithPrimaryRaf(() => applyNextState(componentInstance));
             componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
+          }
+
+          if (DEBUG_MORE) {
+            // eslint-disable-next-line no-console
+            console.log(
+              '[Teact.useState]',
+              componentInstance.name,
+              // eslint-disable-next-line max-len
+              (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
+                ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
+                : '',
+              `Forced update at cursor #${cursor}, next value: `,
+              byCursor[cursor].nextValue,
+            );
           }
 
           componentInstance.scheduleNextState();
@@ -556,13 +577,21 @@ export function useRef<T>(initial?: T | null) {
   }), []);
 }
 
-export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual) {
+export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual, withDebug = false) {
   return function TeactMemoWrapper(props: Props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const propsRef = useRef(props);
     const renderedRef = useRef();
 
     if (!renderedRef.current || (propsRef.current && !areEqual(propsRef.current, props))) {
+      if (DEBUG && withDebug) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[Teact.memo] ${Component.name}: Update is caused by:`,
+          getUnequalProps(propsRef.current!, props).join(', '),
+        );
+      }
+
       propsRef.current = props;
       renderedRef.current = createElement(Component, props) as VirtualElementComponent;
     }
