@@ -92,10 +92,6 @@ const InfiniteScroll: FC<OwnProps> = ({
 
     state.listItemElements = container.querySelectorAll<HTMLDivElement>(itemSelector);
 
-    if (noScrollRestore) {
-      return;
-    }
-
     let newScrollTop;
 
     if (state.currentAnchor && Array.from(state.listItemElements).includes(state.currentAnchor)) {
@@ -104,10 +100,14 @@ const InfiniteScroll: FC<OwnProps> = ({
       newScrollTop = scrollTop + (newAnchorTop - state.currentAnchorTop);
     } else {
       const nextAnchor = state.listItemElements[0];
-      if (nextAnchor && nextAnchor.offsetParent) {
+      if (nextAnchor) {
         state.currentAnchor = nextAnchor;
         state.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
       }
+    }
+
+    if (noScrollRestore) {
+      return;
     }
 
     resetScroll(container, newScrollTop);
