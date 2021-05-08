@@ -1,4 +1,8 @@
 export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
+  if (currentProps === newProps) {
+    return true;
+  }
+
   const currentKeys = Object.keys(currentProps);
   const currentKeysLength = currentKeys.length;
   const newKeysLength = Object.keys(newProps).length;
@@ -7,5 +11,16 @@ export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps:
     return false;
   }
 
-  return currentKeys.every((prop) => currentProps[prop] === newProps[prop]);
+  if (currentKeysLength === 0) {
+    return true;
+  }
+
+  for (let i = 0; i < currentKeysLength; i++) {
+    const prop = currentKeys[i];
+    if (currentProps[prop] !== newProps[prop]) {
+      return false;
+    }
+  }
+
+  return true;
 }
