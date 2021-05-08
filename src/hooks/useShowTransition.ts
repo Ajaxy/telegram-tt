@@ -13,18 +13,18 @@ export default (
   const [isClosed, setIsClosed] = useState(!isOpen);
   const closeTimeoutRef = useRef<number>();
   // СSS class should be added in a separate tick to turn on CSS transition.
-  const [hasAsyncOpenClassName, setHasAsyncOpenClassName] = useState(false);
+  const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noOpenTransition);
 
   if (isOpen) {
     setIsClosed(false);
-    setHasAsyncOpenClassName(true);
+    setHasOpenClassName(true);
 
     if (closeTimeoutRef.current) {
       window.clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = undefined;
     }
   } else {
-    setHasAsyncOpenClassName(false);
+    setHasOpenClassName(false);
 
     if (!isClosed && !closeTimeoutRef.current) {
       closeTimeoutRef.current = window.setTimeout(() => {
@@ -39,7 +39,6 @@ export default (
     }
   }
 
-  const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
   const isClosing = Boolean(closeTimeoutRef.current);
   const shouldRender = isOpen || isClosing;
   const transitionClassNames = buildClassName(
