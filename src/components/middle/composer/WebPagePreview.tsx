@@ -12,7 +12,7 @@ import { pick } from '../../../util/iteratees';
 import parseMessageInput from './helpers/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';
-import usePrevForAnimation from '../../../hooks/usePrevForAnimation';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import buildClassName from '../../../util/buildClassName';
 
 import WebPage from '../message/WebPage';
@@ -79,7 +79,7 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   const isShown = Boolean(webPagePreview && messageText.length && !noWebPage && !disabled);
   const { shouldRender, transitionClassNames } = useShowTransition(isShown);
 
-  const renderingWebPage = usePrevForAnimation(webPagePreview);
+  const renderingWebPage = useCurrentOrPrev(webPagePreview);
 
   if (!shouldRender || !renderingWebPage) {
     return undefined;
