@@ -1,10 +1,11 @@
-const { serializeBytes } = require('../index');
 const { inflate } = require('pako/dist/pako_inflate');
+const { serializeBytes } = require('../index');
 
-//CONTEST const { deflate } = require('pako/dist/pako_deflate')
+// CONTEST const { deflate } = require('pako/dist/pako_deflate')
 
 class GZIPPacked {
     static CONSTRUCTOR_ID = 0x3072cfa1;
+
     static classType = 'constructor';
 
     constructor(data) {
@@ -26,7 +27,7 @@ class GZIPPacked {
     static gzip(input) {
         return Buffer.from(input);
         // TODO this usually makes it faster for large requests
-        //return Buffer.from(deflate(input, { level: 9, gzip: true }))
+        // return Buffer.from(deflate(input, { level: 9, gzip: true }))
     }
 
     static ungzip(input) {

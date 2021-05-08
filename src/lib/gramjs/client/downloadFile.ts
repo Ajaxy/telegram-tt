@@ -39,7 +39,9 @@ export async function downloadFile(
     inputLocation: Api.InputFileLocation,
     fileParams: DownloadFileParams,
 ) {
-    let { partSizeKb, fileSize, workers = 1, end } = fileParams;
+    let {
+        partSizeKb, fileSize, workers = 1, end,
+    } = fileParams;
     const { dcId, progressCallback, start = 0 } = fileParams;
 
     end = end && end < fileSize ? end : fileSize - 1;
@@ -151,6 +153,7 @@ export async function downloadFile(
 
 class Foreman {
     private deferred: Deferred | undefined;
+
     private activeWorkers = 0;
 
     constructor(private maxWorkers: number) {

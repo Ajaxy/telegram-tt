@@ -8,7 +8,6 @@ const BinaryReader = require('../extensions/BinaryReader');
 const { sleep } = require('../Helpers');
 
 class AuthKey {
-
     constructor(value, hash) {
         if (!hash || !value) {
             return;

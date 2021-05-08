@@ -41,6 +41,7 @@ class InvalidDCError extends RPCError {
  */
 class BadRequestError extends RPCError {
     code = 400;
+
     message = 'BAD_REQUEST';
 }
 
@@ -50,6 +51,7 @@ class BadRequestError extends RPCError {
  */
 class UnauthorizedError extends RPCError {
     code = 401;
+
     message = 'UNAUTHORIZED';
 }
 
@@ -59,6 +61,7 @@ class UnauthorizedError extends RPCError {
  */
 class ForbiddenError extends RPCError {
     code = 403;
+
     message = 'FORBIDDEN';
 }
 
@@ -67,6 +70,7 @@ class ForbiddenError extends RPCError {
  */
 class NotFoundError extends RPCError {
     code = 404;
+
     message = 'NOT_FOUND';
 }
 
@@ -76,6 +80,7 @@ class NotFoundError extends RPCError {
  */
 class AuthKeyError extends RPCError {
     code = 406;
+
     message = 'AUTH_KEY';
 }
 
@@ -87,6 +92,7 @@ class AuthKeyError extends RPCError {
  */
 class FloodError extends RPCError {
     code = 420;
+
     message = 'FLOOD';
 }
 
@@ -97,6 +103,7 @@ class FloodError extends RPCError {
  */
 class ServerError extends RPCError {
     code = 500; // Also witnessed as -500
+
     message = 'INTERNAL';
 }
 
@@ -106,6 +113,7 @@ class ServerError extends RPCError {
  */
 class TimedOutError extends RPCError {
     code = 503; // Only witnessed as -503
+
     message = 'Timeout';
 }
 

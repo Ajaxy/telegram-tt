@@ -11,7 +11,7 @@ const {
 const tlContent = require('./apiTl.js');
 const schemeContent = require('./schemaTl.js');
 
-/*CONTEST
+/* CONTEST
 const NAMED_AUTO_CASTS = new Set([
     'chatId,int'
 ])
@@ -223,13 +223,19 @@ function createClasses(classesType, params) {
 
         class VirtualClass {
             static CONSTRUCTOR_ID = constructorId;
+
             static SUBCLASS_OF_ID = subclassOfId;
+
             static className = fullName;
+
             static classType = classesType;
 
             CONSTRUCTOR_ID = constructorId;
+
             SUBCLASS_OF_ID = subclassOfId;
+
             className = fullName;
+
             classType = classesType;
 
             constructor(args) {
@@ -241,7 +247,6 @@ function createClasses(classesType, params) {
             }
 
             static fromReader(reader) {
-
                 const args = {};
 
                 for (const argName in argsConfig) {
@@ -249,10 +254,10 @@ function createClasses(classesType, params) {
                         const arg = argsConfig[argName];
                         if (arg.isFlag) {
                             if (arg.type === 'true') {
-                                args[argName] = Boolean(args['flags'] & 1 << arg.flagIndex);
+                                args[argName] = Boolean(args.flags & 1 << arg.flagIndex);
                                 continue;
                             }
-                            if (args['flags'] & 1 << arg.flagIndex) {
+                            if (args.flags & 1 << arg.flagIndex) {
                                 args[argName] = getArgFromReader(reader, arg);
                             } else {
                                 args[argName] = null;
@@ -287,7 +292,7 @@ function createClasses(classesType, params) {
                             }
                             const l = Buffer.alloc(4);
                             l.writeInt32LE(this[arg].length, 0);
-                            buffers.push(l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type))));
+                            buffers.push(l, Buffer.concat(this[arg].map((x) => argToBytes(x, argsConfig[arg].type))));
                         } else if (argsConfig[arg].flagIndicator) {
                             if (!Object.values(argsConfig)
                                 .some((f) => f.isFlag)) {
@@ -319,7 +324,6 @@ function createClasses(classesType, params) {
                             }
                         }
                     }
-
                 }
                 return Buffer.concat(buffers);
             }
@@ -332,8 +336,8 @@ function createClasses(classesType, params) {
                 const m = result.match(/Vector<(int|long)>/);
                 if (m) {
                     reader.readInt();
-                    let temp = [];
-                    let len = reader.readInt();
+                    const temp = [];
+                    const len = reader.readInt();
                     if (m[1] === 'int') {
                         for (let i = 0; i < len; i++) {
                             temp.push(reader.readInt());
@@ -349,7 +353,7 @@ function createClasses(classesType, params) {
                 }
             }
 
-            /*CONTEST
+            /* CONTEST
             async resolve(client, utils) {
 
                 if (classesType !== 'request') {
@@ -379,7 +383,7 @@ function createClasses(classesType, params) {
                         }
                     }
                 }
-            }*/
+            } */
         }
 
         if (namespace) {
@@ -387,7 +391,6 @@ function createClasses(classesType, params) {
                 classes[namespace] = {};
             }
             classes[namespace][name] = VirtualClass;
-
         } else {
             classes[name] = VirtualClass;
         }

@@ -1,4 +1,4 @@
-/*CONTEST
+/* CONTEST
 const { EventBuilder, EventCommon } = require('./common')
 const { constructors } = require('../tl')
 

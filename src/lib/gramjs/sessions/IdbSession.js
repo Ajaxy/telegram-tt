@@ -1,5 +1,5 @@
-const StorageSession = require('./StorageSession');
 const idb = require('idb-keyval');
+const StorageSession = require('./StorageSession');
 
 const CACHE_NAME = 'GramJs';
 

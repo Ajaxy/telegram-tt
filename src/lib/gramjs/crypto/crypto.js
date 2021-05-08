@@ -29,7 +29,6 @@ class Counter {
 
 class CTR {
     constructor(key, counter) {
-
         if (!(counter instanceof Counter)) {
             counter = new Counter(counter);
         }
@@ -91,8 +90,8 @@ class Hash {
     }
 
     update(data) {
-        //We shouldn't be needing new Uint8Array but it doesn't
-        //work without it
+        // We shouldn't be needing new Uint8Array but it doesn't
+        // work without it
         this.data = new Uint8Array(data);
     }
 

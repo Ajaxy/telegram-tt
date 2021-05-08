@@ -251,7 +251,7 @@ class MemorySession extends Session {
         } else {
             throw new Error('Could not find input entity with key ' + key)
         }
-    }*/
+    } */
 }
 
 module.exports = MemorySession;

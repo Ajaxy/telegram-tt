@@ -76,10 +76,10 @@ class ObfuscatedIO {
 
 class ConnectionTCPObfuscated extends ObfuscatedConnection {
     ObfuscatedIO = ObfuscatedIO;
+
     PacketCodecClass = AbridgedPacketCodec;
 }
 
 module.exports = {
     ConnectionTCPObfuscated,
 };
-

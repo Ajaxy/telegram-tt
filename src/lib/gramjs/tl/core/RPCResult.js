@@ -3,6 +3,7 @@ const GZIPPacked = require('./GZIPPacked');
 
 class RPCResult {
     static CONSTRUCTOR_ID = 0xf35c6d01;
+
     static classType = 'constructor';
 
     constructor(reqMsgId, body, error) {

@@ -1,15 +1,15 @@
 const { constructors } = require('./tl');
 
-const USERNAME_RE = new RegExp('@|(?:https?:\\/\\/)?(?:www\\.)?' +
-    '(?:telegram\\.(?:me|dog)|t\\.me)\\/(@|joinchat\\/)?');
+const USERNAME_RE = new RegExp('@|(?:https?:\\/\\/)?(?:www\\.)?'
+    + '(?:telegram\\.(?:me|dog)|t\\.me)\\/(@|joinchat\\/)?');
 
 const JPEG_HEADER = Buffer.from('ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e19282321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aadaad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c353c76414176f8a58ca5f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8ffc00011080000000003012200021101031101ffc4001f0000010501010101010100000000000000000102030405060708090a0bffc400b5100002010303020403050504040000017d01020300041105122131410613516107227114328191a1082342b1c11552d1f02433627282090a161718191a25262728292a3435363738393a434445464748494a535455565758595a636465666768696a737475767778797a838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae1e2e3e4e5e6e7e8e9eaf1f2f3f4f5f6f7f8f9faffc4001f0100030101010101010101010000000000000102030405060708090a0bffc400b51100020102040403040705040400010277000102031104052131061241510761711322328108144291a1b1c109233352f0156272d10a162434e125f11718191a262728292a35363738393a434445464748494a535455565758595a636465666768696a737475767778797a82838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f3f4f5f6f7f8f9faffda000c03010002110311003f00', 'hex');
 const JPEG_FOOTER = Buffer.from('ffd9', 'hex');
 
 const TG_JOIN_RE = new RegExp('tg:\\/\\/(join)\\?invite=');
 
-const VALID_USERNAME_RE = new RegExp('^([a-z]((?!__)[\\w\\d]){3,30}[a-z\\d]|gif|vid|' +
-    'pic|bing|wiki|imdb|bold|vote|like|coub)$');
+const VALID_USERNAME_RE = new RegExp('^([a-z]((?!__)[\\w\\d]){3,30}[a-z\\d]|gif|vid|'
+    + 'pic|bing|wiki|imdb|bold|vote|like|coub)$');
 
 function _raiseCastFail(entity, target) {
     throw new Error(`Cannot cast ${entity.className} to any kind of ${target}`);
@@ -60,8 +60,8 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
             throw new Error('User without accessHash or min info cannot be input');
         }
     }
-    if (entity instanceof constructors.Chat || entity instanceof constructors.ChatEmpty ||
-        entity instanceof constructors.ChatForbidden) {
+    if (entity instanceof constructors.Chat || entity instanceof constructors.ChatEmpty
+        || entity instanceof constructors.ChatForbidden) {
         return new constructors.InputPeerChat({ chatId: entity.id });
     }
     if (entity instanceof constructors.Channel) {
@@ -125,7 +125,7 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
  * @param entity
  * @returns {InputChannel|*}
  */
-/*CONTEST
+/* CONTEST
 function getInputChannel(entity) {
     if (entity.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(entity, 'InputChannel')
@@ -162,7 +162,7 @@ function getInputChannel(entity) {
 
  * @param entity
  */
-/*CONTEST
+/* CONTEST
 function getInputUser(entity) {
     if (entity.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(entity, 'InputUser')
@@ -206,7 +206,7 @@ function getInputUser(entity) {
  Similar to :meth:`get_input_peer`, but for dialogs
  * @param dialog
  */
-/*CONTEST
+/* CONTEST
 function getInputDialog(dialog) {
     try {
         if (dialog.SUBCLASS_OF_ID === 0xa21c9795) { // crc32(b'InputDialogPeer')
@@ -229,7 +229,7 @@ function getInputDialog(dialog) {
 }
 */
 
-/*CONTEST
+/* CONTEST
 
 function getInputMessage(message) {
     try {
@@ -268,7 +268,7 @@ function strippedPhotoToJpg(stripped) {
     return Buffer.concat([header, stripped.slice(3), JPEG_FOOTER]);
 }
 
-/*CONTEST
+/* CONTEST
 function getInputLocation(location) {
     try {
         if (!location.SUBCLASS_OF_ID) {
@@ -342,7 +342,7 @@ function getAppropriatedPartSize(fileSize) {
     throw new Error('File size too large');
 }
 
-/*CONTEST
+/* CONTEST
 function getPeer(peer) {
     try {
         if (typeof peer === 'number') {
@@ -405,7 +405,7 @@ function getPeer(peer) {
  * @param peer
  * @param addMark
  */
-/*CONTEST
+/* CONTEST
 function getPeerId(peer, addMark = true) {
     // First we assert it's a Peer TLObject, or early return for integers
     if (typeof peer == 'number') {
@@ -453,7 +453,7 @@ function getPeerId(peer, addMark = true) {
  * Given a marked ID, returns the original ID and its :tl:`Peer` type.
  * @param markedId
  */
-/*CONTEST
+/* CONTEST
 function resolveId(markedId) {
     if (markedId >= 0) {
         return [markedId, constructors.PeerUser]
@@ -482,7 +482,7 @@ function resolveId(markedId) {
  * @private
  */
 
-/*CONTEST
+/* CONTEST
 
 function _getEntityPair(entityId, entities, cache, getInputPeer = getInputPeer) {
     const entity = entities.get(entityId)
@@ -505,7 +505,7 @@ function getMessageId(message) {
     if (message === null || message === undefined) {
         return null;
     }
-    if (typeof message == 'number') {
+    if (typeof message === 'number') {
         return message;
     }
     if (message.SUBCLASS_OF_ID === 0x790009e3) { // crc32(b'Message')
@@ -535,7 +535,7 @@ function parsePhone(phone) {
  * @param username {string}
  */
 
-/*CONTEST
+/* CONTEST
 
 function parseUsername(username) {
     username = username.trim()
@@ -601,7 +601,7 @@ function getDisplayName(entity) {
  * @returns {boolean}
  */
 
-/*CONTEST
+/* CONTEST
 Duplicate ?
 function isListLike(item) {
     return (
@@ -667,26 +667,26 @@ function getDC(dcId, cdn = false) {
         if (DC.id === dcId && Boolean(DC.ipv6) === this._useIPV6 && Boolean(DC.cdn) === cdn) {
             return DC
         }
-    }*/
+    } */
 }
 
 module.exports = {
     getMessageId,
-    //_getEntityPair,
-    //getInputMessage,
-    //getInputDialog,
-    //getInputUser,
-    //getInputChannel,
+    // _getEntityPair,
+    // getInputMessage,
+    // getInputDialog,
+    // getInputUser,
+    // getInputChannel,
     getInputPeer,
-    //parsePhone,
-    //parseUsername,
-    //getPeer,
-    //getPeerId,
+    // parsePhone,
+    // parseUsername,
+    // getPeer,
+    // getPeerId,
     getDisplayName,
-    //resolveId,
-    //isListLike,
+    // resolveId,
+    // isListLike,
     getAppropriatedPartSize,
-    //getInputLocation,
+    // getInputLocation,
     strippedPhotoToJpg,
     getDC,
 };

@@ -1,6 +1,7 @@
 const MemorySession = require('./Memory');
 const AuthKey = require('../crypto/AuthKey');
 const BinaryReader = require('../extensions/BinaryReader');
+
 const CURRENT_VERSION = '1';
 
 

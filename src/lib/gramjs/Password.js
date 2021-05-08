@@ -10,6 +10,7 @@ const {
     generateRandomBytes,
 } = require('./Helpers');
 const crypto = require('./crypto/crypto');
+
 const SIZE_FOR_HASH = 256;
 
 /**
@@ -94,7 +95,7 @@ function checkPrimeAndGood(primeBytes, g) {
         }
     }
     throw new Error('Changing passwords unsupported');
-    //checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
+    // checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
 }
 
 /**
@@ -138,9 +139,9 @@ function isGoodModExpFirst(modexp, prime) {
     const minDiffBitsCount = 2048 - 64;
     const maxModExpSize = 256;
 
-    return !(diff.lesser(BigInt(0)) || diff.bitLength() < minDiffBitsCount ||
-        modexp.bitLength() < minDiffBitsCount ||
-        Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
+    return !(diff.lesser(BigInt(0)) || diff.bitLength() < minDiffBitsCount
+        || modexp.bitLength() < minDiffBitsCount
+        || Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
 }
 
 function xor(a, b) {
@@ -209,7 +210,7 @@ async function computeCheck(request, password) {
 
     const pwHash = await computeHash(algo, password);
     const p = readBigIntFromBuffer(algo.p, false);
-    const g = algo.g;
+    const { g } = algo;
     const B = readBigIntFromBuffer(request.srp_B, false);
     try {
         checkPrimeAndGood(algo.p, g);
@@ -271,7 +272,7 @@ async function computeCheck(request, password) {
     return new constructors.InputCheckPasswordSRP({
         srpId: request.srpId,
         A: Buffer.from(aForHash),
-        M1: M1,
+        M1,
 
     });
 }
@@ -280,4 +281,3 @@ module.exports = {
     computeCheck,
     computeDigest,
 };
-

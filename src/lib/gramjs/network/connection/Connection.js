@@ -27,7 +27,7 @@ class Connection {
         this._obfuscation = null; // TcpObfuscated and MTProxy
         this._sendArray = new AsyncQueue();
         this._recvArray = new AsyncQueue();
-        //this.socket = new PromiseSocket(new Socket())
+        // this.socket = new PromiseSocket(new Socket())
 
         this.socket = new PromisedWebSockets();
     }
@@ -101,7 +101,7 @@ class Connection {
                 }
             } catch (e) {
                 this._log.info('connection closed');
-                //await this._recvArray.push()
+                // await this._recvArray.push()
 
                 this.disconnect();
                 return;

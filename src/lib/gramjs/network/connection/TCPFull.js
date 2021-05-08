@@ -1,4 +1,4 @@
-//CONTEST
+// CONTEST
 // const { Connection, PacketCodec } = require('./Connection')
 // const { crc32 } = require('../../Helpers')
 // const { InvalidChecksumError } = require('../../errors/Common')

@@ -2,7 +2,9 @@ const TLMessage = require('./TLMessage');
 
 class MessageContainer {
     static CONSTRUCTOR_ID = 0x73f1f8dc;
+
     static classType = 'constructor';
+
     // Maximum size in bytes for the inner payload of the container.
     // Telegram will close the connection if the payload is bigger.
     // The overhead of the container itself is subtracted.
@@ -19,7 +21,6 @@ class MessageContainer {
     static MAXIMUM_LENGTH = 100;
 
     constructor(messages) {
-
         this.CONSTRUCTOR_ID = 0x73f1f8dc;
         this.messages = messages;
         this.classType = 'constructor';
