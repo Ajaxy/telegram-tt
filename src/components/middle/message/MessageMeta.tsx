@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
 
@@ -47,4 +47,4 @@ const MessageMeta: FC<OwnProps> = ({
   );
 };
 
-export default MessageMeta;
+export default memo(MessageMeta);

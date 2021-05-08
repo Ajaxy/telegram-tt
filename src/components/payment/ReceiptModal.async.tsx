@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './ReceiptModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const ReceiptModalAsync: FC<OwnProps> = (props) => {
   return ReceiptModal ? <ReceiptModal {...props} /> : undefined;
 };
 
-export default ReceiptModalAsync;
+export default memo(ReceiptModalAsync);

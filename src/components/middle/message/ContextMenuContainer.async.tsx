@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './ContextMenuContainer';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const ContextMenuContainerAsync: FC<OwnProps> = (props) => {
   return ContextMenuContainer ? <ContextMenuContainer {...props} /> : undefined;
 };
 
-export default ContextMenuContainerAsync;
+export default memo(ContextMenuContainerAsync);

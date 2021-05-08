@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 import { OwnProps } from './ForwardPicker';
 
@@ -12,4 +12,4 @@ const ForwardPickerAsync: FC<OwnProps> = (props) => {
   return ForwardPicker ? <ForwardPicker {...props} /> : undefined;
 };
 
-export default ForwardPickerAsync;
+export default memo(ForwardPickerAsync);

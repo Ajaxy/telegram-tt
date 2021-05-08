@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './MentionMenu';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const MentionMenuAsync: FC<OwnProps> = (props) => {
   return MentionMenu ? <MentionMenu {...props} /> : undefined;
 };
 
-export default MentionMenuAsync;
+export default memo(MentionMenuAsync);

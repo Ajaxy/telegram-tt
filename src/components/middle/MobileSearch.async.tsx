@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './MobileSearch';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const MobileSearchAsync: FC<OwnProps> = (props) => {
   return MobileSearch ? <MobileSearch {...props} /> : undefined;
 };
 
-export default MobileSearchAsync;
+export default memo(MobileSearchAsync);

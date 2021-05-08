@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 import { formatPastTimeShort } from '../../util/dateFormat';
@@ -21,4 +21,4 @@ const LastMessageMeta: FC<OwnProps> = ({ message, outgoingStatus }) => {
   );
 };
 
-export default LastMessageMeta;
+export default memo(LastMessageMeta);

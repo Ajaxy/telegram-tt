@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 import { OwnProps } from './ContactList';
 
@@ -12,4 +12,4 @@ const ContactListAsync: FC<OwnProps> = (props) => {
   return ContactList ? <ContactList {...props} /> : <Loading />;
 };
 
-export default ContactListAsync;
+export default memo(ContactListAsync);

@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './StickerSetModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const StickerSetModalAsync: FC<OwnProps> = (props) => {
   return StickerSetModal ? <StickerSetModal {...props} /> : undefined;
 };
 
-export default StickerSetModalAsync;
+export default memo(StickerSetModalAsync);

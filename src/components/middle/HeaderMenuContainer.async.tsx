@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './HeaderMenuContainer';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const HeaderMenuContainerAsync: FC<OwnProps> = (props) => {
   return HeaderMenuContainer ? <HeaderMenuContainer {...props} /> : undefined;
 };
 
-export default HeaderMenuContainerAsync;
+export default memo(HeaderMenuContainerAsync);

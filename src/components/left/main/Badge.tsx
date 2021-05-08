@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { ApiChat } from '../../../api/types';
 
@@ -65,4 +65,4 @@ const Badge: FC<OwnProps> = ({ chat, isPinned }) => {
   );
 };
 
-export default Badge;
+export default memo(Badge);

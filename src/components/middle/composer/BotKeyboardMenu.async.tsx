@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './BotKeyboardMenu';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const BotKeyboardMenuAsync: FC<OwnProps> = (props) => {
   return BotKeyboardMenu ? <BotKeyboardMenu {...props} /> : undefined;
 };
 
-export default BotKeyboardMenuAsync;
+export default memo(BotKeyboardMenuAsync);

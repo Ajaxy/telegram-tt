@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 import { OwnProps } from './MessageSelectToolbar';
 
@@ -12,4 +12,4 @@ const MessageSelectToolbarAsync: FC<OwnProps> = (props) => {
   return MessageSelectToolbar ? <MessageSelectToolbar {...props} /> : undefined;
 };
 
-export default MessageSelectToolbarAsync;
+export default memo(MessageSelectToolbarAsync);

@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './AttachmentModal';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const AttachmentModalAsync: FC<OwnProps> = (props) => {
   return AttachmentModal ? <AttachmentModal {...props} /> : undefined;
 };
 
-export default AttachmentModalAsync;
+export default memo(AttachmentModalAsync);
