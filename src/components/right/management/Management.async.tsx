@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import { OwnProps } from './Management';
@@ -14,4 +14,4 @@ const ManagementAsync: FC<OwnProps> = (props) => {
   return Management ? <Management {...props} /> : <Loading />;
 };
 
-export default ManagementAsync;
+export default memo(ManagementAsync);

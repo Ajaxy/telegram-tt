@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
@@ -10,4 +10,4 @@ const AuthPasswordAsync: FC = () => {
   return AuthPassword ? <AuthPassword /> : <Loading />;
 };
 
-export default AuthPasswordAsync;
+export default memo(AuthPasswordAsync);

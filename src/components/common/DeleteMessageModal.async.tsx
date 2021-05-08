@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './DeleteMessageModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const DeleteMessageModalAsync: FC<OwnProps> = (props) => {
   return DeleteMessageModal ? <DeleteMessageModal {...props} /> : undefined;
 };
 
-export default DeleteMessageModalAsync;
+export default memo(DeleteMessageModalAsync);

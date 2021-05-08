@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './PinMessageModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const PinMessageModalAsync: FC<OwnProps> = (props) => {
   return PinMessageModal ? <PinMessageModal {...props} /> : undefined;
 };
 
-export default PinMessageModalAsync;
+export default memo(PinMessageModalAsync);

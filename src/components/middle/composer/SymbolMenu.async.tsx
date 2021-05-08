@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './SymbolMenu';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const SymbolMenuAsync: FC<OwnProps> = (props) => {
   return SymbolMenu ? <SymbolMenu {...props} /> : undefined;
 };
 
-export default SymbolMenuAsync;
+export default memo(SymbolMenuAsync);

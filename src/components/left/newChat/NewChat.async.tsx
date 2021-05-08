@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import { OwnProps } from './NewChat';
@@ -13,4 +13,4 @@ const NewChatAsync: FC<OwnProps> = (props) => {
   return NewChat ? <NewChat {...props} /> : <Loading />;
 };
 
-export default NewChatAsync;
+export default memo(NewChatAsync);

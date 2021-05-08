@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './PaymentModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const PaymentModalAsync: FC<OwnProps> = (props) => {
   return PaymentModal ? <PaymentModal {...props} /> : undefined;
 };
 
-export default PaymentModalAsync;
+export default memo(PaymentModalAsync);

@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './CalendarModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const CalendarModalAsync: FC<OwnProps> = (props) => {
   return CalendarModal ? <CalendarModal {...props} /> : undefined;
 };
 
-export default CalendarModalAsync;
+export default memo(CalendarModalAsync);

@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './TextFormatter';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const TextFormatterAsync: FC<OwnProps> = (props) => {
   return TextFormatter ? <TextFormatter {...props} /> : undefined;
 };
 
-export default TextFormatterAsync;
+export default memo(TextFormatterAsync);

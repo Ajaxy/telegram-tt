@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import { OwnProps } from './Settings';
@@ -13,4 +13,4 @@ const SettingsAsync: FC<OwnProps> = (props) => {
   return Settings ? <Settings {...props} /> : <Loading />;
 };
 
-export default SettingsAsync;
+export default memo(SettingsAsync);

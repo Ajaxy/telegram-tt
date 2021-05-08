@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { OwnProps } from './AttachMenu';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const AttachMenuAsync: FC<OwnProps> = (props) => {
   return AttachMenu ? <AttachMenu {...props} /> : undefined;
 };
 
-export default AttachMenuAsync;
+export default memo(AttachMenuAsync);

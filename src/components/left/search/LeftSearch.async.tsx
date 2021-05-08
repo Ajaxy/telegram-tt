@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 import { OwnProps } from './LeftSearch';
 
@@ -12,4 +12,4 @@ const LeftSearchAsync: FC<OwnProps> = (props) => {
   return LeftSearch ? <LeftSearch {...props} /> : <Loading />;
 };
 
-export default LeftSearchAsync;
+export default memo(LeftSearchAsync);

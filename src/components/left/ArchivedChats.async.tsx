@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { OwnProps } from './ArchivedChats';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -12,4 +12,4 @@ const ArchivedChatsAsync: FC<OwnProps> = (props) => {
   return ArchivedChats ? <ArchivedChats {...props} /> : <Loading />;
 };
 
-export default ArchivedChatsAsync;
+export default memo(ArchivedChatsAsync);
