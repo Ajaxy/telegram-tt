@@ -16,7 +16,7 @@ import {
   ANIMATION_LEVEL_MAX,
   ANIMATION_END_DELAY,
 } from '../../config';
-import { IS_MOBILE_SCREEN, IS_TOUCH_ENV, MASK_IMAGE_ENABLED } from '../../util/environment';
+import { IS_MOBILE_SCREEN, IS_TOUCH_ENV, MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
@@ -173,7 +173,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     customBackground && !isCustomBackgroundColor && 'custom-bg-image',
     customBackground && isCustomBackgroundColor && 'custom-bg-color',
     customBackground && isBackgroundBlurred && 'blurred',
-    MASK_IMAGE_ENABLED ? 'mask-image-enabled' : 'mask-image-disabled',
+    MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
   );
 
   const messagingDisabledClassName = buildClassName(
