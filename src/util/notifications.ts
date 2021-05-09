@@ -161,8 +161,12 @@ export async function subscribe() {
   }
 }
 
-async function checkIfShouldNotify(chat: ApiChat) {
+async function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
   if (chat.isMuted) return false;
+
+  // Dont show notification for active chat if client has focus
+  if (isActive && document.hasFocus()) return false;
+
   await getDispatch().loadNotificationsSettings();
   const global = getGlobal();
   switch (chat.type) {
@@ -225,11 +229,12 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
 export async function showNewMessageNotification({
   chat,
   message,
-}: { chat: ApiChat; message: Partial<ApiMessage> }) {
+  isActiveChat,
+}: { chat: ApiChat; message: Partial<ApiMessage>; isActiveChat: boolean}) {
   if (!checkIfNotificationsSupported()) return;
   if (!message.id) return;
 
-  const shouldNotify = await checkIfShouldNotify(chat);
+  const shouldNotify = await checkIfShouldNotify(chat, isActiveChat);
   if (!shouldNotify) return;
 
   const {
@@ -260,6 +265,9 @@ export async function showNewMessageNotification({
       chatId: chat.id,
       messageId: message.id,
     });
+    if (window.focus) {
+      window.focus();
+    }
   };
 }
 

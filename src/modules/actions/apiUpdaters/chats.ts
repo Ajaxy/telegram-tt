@@ -106,12 +106,13 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         return;
       }
 
-      if (update.chatId === currentChatId) {
+      const isActiveChat = update.chatId === currentChatId;
+
+      if (isActiveChat) {
         setTimeout(() => {
           actions.requestChatUpdate({ chatId: update.chatId });
         }, CURRENT_CHAT_UNREAD_DELAY);
       } else {
-        showNewMessageNotification({ chat, message });
         setGlobal(updateChat(global, update.chatId, {
           unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
           ...(update.message.hasUnreadMention && {
@@ -119,6 +120,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
           }),
         }));
       }
+
+      showNewMessageNotification({ chat, message, isActiveChat });
 
       break;
     }
