@@ -10,7 +10,7 @@ import useFlag from '../../../../hooks/useFlag';
 
 const RE_NOT_USERNAME_SEARCH = /[^@_\d\wа-яё]+/i;
 
-export default function useMentionTooltip(
+export default function useMentionMenu(
   canSuggestMembers: boolean | undefined,
   html: string,
   onUpdateHtml: (html: string) => void,
@@ -90,9 +90,9 @@ export default function useMentionTooltip(
   }, [html, inputId, onUpdateHtml, unmarkIsOpen]);
 
   return {
-    isMentionTooltipOpen: isOpen,
+    isMentionMenuOpen: isOpen,
     mentionFilter: currentFilter,
-    closeMentionTooltip: unmarkIsOpen,
+    closeMentionMenu: unmarkIsOpen,
     insertMention,
     mentionFilteredMembers: filteredMembers,
   };

@@ -6,20 +6,19 @@ import './EmojiButton.scss';
 
 type OwnProps = {
   emoji: Emoji;
-  focus?: boolean;
   onClick: (emoji: string, name: string) => void;
 };
 
-const EmojiButton: FC<OwnProps> = ({ emoji, focus, onClick }) => {
+const EmojiButton: FC<OwnProps> = ({ emoji, onClick }) => {
   const handleClick = useCallback(() => {
     onClick(emoji.native, emoji.id);
   }, [emoji, onClick]);
 
   return (
     <div
-      className={`EmojiButton ${focus ? 'focus' : ''}`}
+      className="EmojiButton"
       onClick={handleClick}
-      title={`:${emoji.names[0]}:`}
+      title={emoji.colons}
     >
       {IS_EMOJI_SUPPORTED ? emoji.native : <img src={`/img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
     </div>

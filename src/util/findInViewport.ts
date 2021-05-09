@@ -4,10 +4,9 @@ export default function findInViewport(
   margin = 0,
   isDense = false,
   shouldContainBottom = false,
-  isHorizontal = false,
 ) {
-  const viewportY1 = container[isHorizontal ? 'scrollLeft' : 'scrollTop'];
-  const viewportY2 = viewportY1 + container[isHorizontal ? 'offsetWidth' : 'offsetHeight'];
+  const viewportY1 = container.scrollTop;
+  const viewportY2 = viewportY1 + container.offsetHeight;
   const allElements = typeof selectorOrElements === 'string'
     ? container.querySelectorAll<HTMLElement>(selectorOrElements)
     : selectorOrElements;
@@ -17,8 +16,8 @@ export default function findInViewport(
 
   for (let i = 0; i < length; i++) {
     const element = allElements[i];
-    const y1 = element[isHorizontal ? 'offsetLeft' : 'offsetTop'];
-    const y2 = y1 + element[isHorizontal ? 'offsetWidth' : 'offsetHeight'];
+    const y1 = element.offsetTop;
+    const y2 = y1 + element.offsetHeight;
     const isVisible = shouldContainBottom
       ? y2 >= viewportY1 - margin && y2 <= viewportY2 + margin
       : y1 <= viewportY2 + margin && y2 >= viewportY1 - margin;

@@ -36,7 +36,6 @@ type OwnProps = {
   placeholder: string;
   shouldSetFocus: boolean;
   shouldSupressFocus?: boolean;
-  shouldSupressTextFormatter?: boolean;
   onUpdate: (html: string) => void;
   onSupressedFocus?: () => void;
   onSend: () => void;
@@ -77,7 +76,6 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   placeholder,
   shouldSetFocus,
   shouldSupressFocus,
-  shouldSupressTextFormatter,
   onUpdate,
   onSupressedFocus,
   onSend,
@@ -141,8 +139,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     const selectionRange = selection.getRangeAt(0);
     const selectedText = selectionRange.toString().trim();
     if (
-      shouldSupressTextFormatter
-      || !isSelectionInsideInput(selectionRange)
+      !isSelectionInsideInput(selectionRange)
       || !selectedText
       || parseEmojiOnlyString(selectedText)
       || !selectionRange.START_TO_END

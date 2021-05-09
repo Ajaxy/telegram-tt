@@ -55,9 +55,8 @@ import useClipboardPaste from './hooks/useClipboardPaste';
 import useDraft from './hooks/useDraft';
 import useEditing from './hooks/useEditing';
 import usePrevious from '../../../hooks/usePrevious';
-import useStickerTooltip from './hooks/useStickerTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
-import useMentionTooltip from './hooks/useMentionTooltip';
+import useMentionMenu from './hooks/useMentionMenu';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
 
@@ -67,9 +66,8 @@ import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Spinner from '../../ui/Spinner';
 import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
-import MentionTooltip from './MentionTooltip.async';
+import MentionMenu from './MentionMenu.async';
 import CustomSendMenu from './CustomSendMenu.async';
-import StickerTooltip from './StickerTooltip.async';
 import EmojiTooltip from './EmojiTooltip.async';
 import BotKeyboardMenu from './BotKeyboardMenu.async';
 import MessageInput from './MessageInput';
@@ -114,7 +112,6 @@ type StateProps = {
   groupChatMembers?: ApiChatMember[];
   currentUserId?: number;
   usersById?: Record<number, ApiUser>;
-  recentEmojis: string[];
   lastSyncTime?: number;
   contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
   shouldSuggestStickers?: boolean;
@@ -174,7 +171,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
-  recentEmojis,
   sendMessage,
   editMessage,
   saveDraft,
@@ -259,10 +255,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const canShowCustomSendMenu = !shouldSchedule;
 
   const {
-    isMentionTooltipOpen, mentionFilter,
-    closeMentionTooltip, insertMention,
+    isMentionMenuOpen, mentionFilter,
+    closeMentionMenu, insertMention,
     mentionFilteredMembers,
-  } = useMentionTooltip(
+  } = useMentionMenu(
     canSuggestMembers && !attachments.length,
     html,
     setHtml,
@@ -286,19 +282,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const isAdmin = chat && isChatAdmin(chat);
   const slowMode = getChatSlowModeOptions(chat);
 
-  const { isStickerTooltipOpen, closeStickerTooltip } = useStickerTooltip(
+  const { isEmojiTooltipOpen, closeEmojiTooltip } = useEmojiTooltip(
     Boolean(shouldSuggestStickers && allowedAttachmentOptions.canSendStickers && !attachments.length),
     html,
     stickersForEmoji,
-  );
-  const {
-    isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
-  } = useEmojiTooltip(
-    Boolean(shouldSuggestStickers && allowedAttachmentOptions.canSendStickers && !attachments.length),
-    html,
-    recentEmojis,
-    undefined,
-    setHtml,
   );
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
@@ -351,11 +338,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const resetComposer = useCallback(() => {
     setHtml('');
     setAttachments([]);
-    closeStickerTooltip();
+    closeEmojiTooltip();
     closeCalendar();
     setScheduledMessageArgs(undefined);
-    closeMentionTooltip();
-    closeEmojiTooltip();
+    closeMentionMenu();
 
     if (IS_MOBILE_SCREEN) {
       // @perf
@@ -363,7 +349,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     } else {
       closeSymbolMenu();
     }
-  }, [closeStickerTooltip, closeCalendar, closeMentionTooltip, closeEmojiTooltip, closeSymbolMenu]);
+  }, [closeEmojiTooltip, closeCalendar, closeMentionMenu, closeSymbolMenu]);
 
   // Handle chat change
   const prevChatId = usePrevious(chatId);
@@ -704,10 +690,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           message={renderedEditedMessage}
         />
       )}
-      <MentionTooltip
-        isOpen={isMentionTooltipOpen}
+      <MentionMenu
+        isOpen={isMentionMenuOpen}
         filter={mentionFilter}
-        onClose={closeMentionTooltip}
+        onClose={closeMentionMenu}
         onInsertUserName={insertMention}
         filteredChatMembers={mentionFilteredMembers}
         usersById={usersById}
@@ -754,7 +740,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             }
             shouldSetFocus={isSymbolMenuOpen}
             shouldSupressFocus={IS_MOBILE_SCREEN && isSymbolMenuOpen}
-            shouldSupressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit
               ? handleEditComplete
@@ -802,15 +787,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
-          <StickerTooltip
-            isOpen={isStickerTooltipOpen}
-            onStickerSelect={handleStickerSelect}
-          />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}
-            emojis={filteredEmojis}
-            onClose={closeEmojiTooltip}
-            onEmojiSelect={insertEmoji}
+            onStickerSelect={handleStickerSelect}
           />
           <AttachMenu
             isOpen={isAttachMenuOpen}
@@ -932,7 +911,6 @@ export default memo(withGlobal<OwnProps>(
       isPaymentModalOpen: global.payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(global.payment.receipt),
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
-      recentEmojis: global.recentEmojis,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

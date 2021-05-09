@@ -1,12 +1,39 @@
-.MentionTooltip {
+.MentionMenu {
+  position: absolute;
+  bottom: calc(100% + .75rem);
+  left: 0;
   width: calc(100% - 4rem);
   max-width: 20rem;
-  flex-direction: column;
+  background: var(--color-background);
+  border-radius: var(--border-radius-messages);
+  padding: 0.5rem 0;
+  max-height: 15rem;
+  overflow-x: hidden;
+  overflow-y: auto;
 
+  box-shadow: 3px 3px 5px var(--color-default-shadow);
   z-index: -1;
+
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transform-origin: bottom;
+  transition: opacity var(--layer-transition), transform var(--layer-transition);
 
   @media (max-width: 600px) {
     width: calc(100% - 3rem);
+  }
+
+  &:not(.shown) {
+    display: none;
+  }
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .Loading {
+    margin: 1rem 0;
   }
 
   .ListItem.chat-item-clickable {
