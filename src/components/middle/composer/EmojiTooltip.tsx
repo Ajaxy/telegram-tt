@@ -1,55 +1,110 @@
 import React, {
-  FC, memo, useEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiSticker } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
-
-import { STICKER_SIZE_PICKER } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { pick } from '../../../util/iteratees';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import cycleRestrict from '../../../util/cycleRestrict';
+import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
+import findInViewport from '../../../util/findInViewport';
+import isFullyVisible from '../../../util/isFullyVisible';
+import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import useShowTransition from '../../../hooks/useShowTransition';
-import usePrevious from '../../../hooks/usePrevious';
 
 import Loading from '../../ui/Loading';
-import StickerButton from '../../common/StickerButton';
+import EmojiButton from './EmojiButton';
 
 import './EmojiTooltip.scss';
 
+const VIEWPORT_MARGIN = 8;
+const EMOJI_BUTTON_WIDTH = 44;
+
+function setItemVisible(index: number, containerRef: Record<string, any>) {
+  const container = containerRef.current!;
+  if (!container) {
+    return;
+  }
+
+  const { visibleIndexes, allElements } = findInViewport(
+    container,
+    '.EmojiButton',
+    VIEWPORT_MARGIN,
+    true,
+    true,
+    true,
+  );
+
+  if (!allElements.length || !allElements[index]) {
+    return;
+  }
+  const first = visibleIndexes[0];
+  if (!visibleIndexes.includes(index)
+    || (index === first && !isFullyVisible(container, allElements[first], true))) {
+    const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
+    const newLeft = position === 'start' ? index * EMOJI_BUTTON_WIDTH : 0;
+
+    fastSmoothScrollHorizontal(container, newLeft);
+  }
+}
+
 export type OwnProps = {
   isOpen: boolean;
-  onStickerSelect: (sticker: ApiSticker) => void;
+  onEmojiSelect: (text: string) => void;
+  onClose: NoneToVoidFunction;
+  emojis: Emoji[];
 };
 
-type StateProps = {
-  stickers?: ApiSticker[];
-};
-
-type DispatchProps = Pick<GlobalActions, 'clearStickersForEmoji'>;
-
-const INTERSECTION_THROTTLE = 200;
-
-const EmojiTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
+const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
-  onStickerSelect,
-  stickers,
-  clearStickersForEmoji,
+  emojis,
+  onClose,
+  onEmojiSelect,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
-  const prevStickers = usePrevious(stickers, true);
-  const displayedStickers = stickers || prevStickers;
 
-  const {
-    observe: observeIntersection,
-  } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE });
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  useEffect(() => (isOpen ? captureEscKeyListener(clearStickersForEmoji) : undefined), [isOpen, clearStickersForEmoji]);
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [emojis]);
+
+  useEffect(() => {
+    setItemVisible(selectedIndex, containerRef);
+  }, [selectedIndex]);
+
+  const getSelectedIndex = useCallback((newIndex: number) => {
+    if (!emojis.length) {
+      return -1;
+    }
+
+    const emojisCount = emojis.length;
+    return cycleRestrict(emojisCount, newIndex);
+  }, [emojis]);
+
+
+  const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
+    e.preventDefault();
+    setSelectedIndex((index) => (getSelectedIndex(index + value)));
+  }, [setSelectedIndex, getSelectedIndex]);
+
+  const handleSelectEmoji = useCallback((e: KeyboardEvent) => {
+    if (emojis.length && selectedIndex > -1) {
+      const emoji = emojis[selectedIndex];
+      if (emoji) {
+        e.preventDefault();
+        onEmojiSelect(emoji.native);
+      }
+    }
+  }, [emojis, onEmojiSelect, selectedIndex]);
+
+  useEffect(() => (isOpen ? captureKeyboardListeners({
+    onEsc: onClose,
+    onLeft: (e: KeyboardEvent) => handleArrowKey(-1, e),
+    onRight: (e: KeyboardEvent) => handleArrowKey(1, e),
+    onEnter: handleSelectEmoji,
+  }) : undefined), [handleArrowKey, handleSelectEmoji, isOpen, onClose]);
 
   const handleMouseEnter = () => {
     document.body.classList.add('no-select');
@@ -60,7 +115,7 @@ const EmojiTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
   };
 
   const className = buildClassName(
-    'EmojiTooltip custom-scroll',
+    'EmojiTooltip composer-tooltip custom-scroll-x',
     transitionClassNames,
   );
 
@@ -71,15 +126,13 @@ const EmojiTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
-      {shouldRender && displayedStickers ? (
-        displayedStickers.map((sticker) => (
-          <StickerButton
-            key={sticker.id}
-            sticker={sticker}
-            size={STICKER_SIZE_PICKER}
-            observeIntersection={observeIntersection}
-            onClick={onStickerSelect}
-            clickArg={sticker}
+      {shouldRender && emojis ? (
+        emojis.map((emoji, index) => (
+          <EmojiButton
+            key={emoji.id}
+            emoji={emoji}
+            focus={selectedIndex === index}
+            onClick={onEmojiSelect}
           />
         ))
       ) : shouldRender ? (
@@ -89,11 +142,4 @@ const EmojiTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { stickers } = global.stickers.forEmoji;
-
-    return { stickers };
-  },
-  (setGlobal, actions): DispatchProps => pick(actions, ['clearStickersForEmoji']),
-)(EmojiTooltip));
+export default memo(EmojiTooltip);

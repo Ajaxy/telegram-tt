@@ -38,7 +38,7 @@ type EmojiCategory = {
 
 type Emoji = {
   id: string;
-  colons: string;
+  names: string[];
   native: string;
   image: string;
   skin?: number;
