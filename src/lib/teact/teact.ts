@@ -447,10 +447,6 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
       value: initial,
       nextValue: initial,
       setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
-        if (!componentInstance.isMounted) {
-          return;
-        }
-
         if (byCursor[cursor].nextValue !== newValue) {
           byCursor[cursor].nextValue = typeof newValue === 'function'
             ? (newValue as (current: T) => T)(byCursor[cursor].value)
@@ -466,8 +462,8 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
             console.log(
               '[Teact.useState]',
               componentInstance.name,
-              // eslint-disable-next-line max-len
-              (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
+              // `componentInstance.Component` may be set to `null` by GC helper
+              componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
                 ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
                 : '',
               `Forced update at cursor #${cursor}, next value: `,
