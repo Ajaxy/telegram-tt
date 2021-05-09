@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack:///./src/lib/croppie.ts"],"names":["Croppie"],"mappings":"0FAAA,oCAGeA,YAAf","file":"7.b3047ce293a0e552bf8b.js","sourcesContent":["import Croppie from 'croppie';\nimport 'croppie/croppie.css';\n\nexport default Croppie;\n"],"sourceRoot":""}
