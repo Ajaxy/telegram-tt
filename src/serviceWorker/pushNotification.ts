@@ -7,7 +7,7 @@ enum Boolean {
   False = '0'
 }
 
-export type NotificationData = {
+type PushData = {
   custom: {
     msg_id?: string;
     channel_id?: string;
@@ -23,10 +23,17 @@ export type NotificationData = {
   description: string;
 };
 
+type NotificationData = {
+  messageId?: number;
+  chatId?: number;
+  title: string;
+  body: string;
+};
+
 const clickBuffer: Record<string, NotificationData> = {};
 const shownNotifications = new Set();
 
-function getPushData(e: PushEvent | Notification): NotificationData | undefined {
+function getPushData(e: PushEvent | Notification): PushData | undefined {
   try {
     return e.data.json();
   } catch (error) {
@@ -36,6 +43,46 @@ function getPushData(e: PushEvent | Notification): NotificationData | undefined 
     }
     return undefined;
   }
+}
+
+function getChatId(data: PushData) {
+  if (data.custom.from_id) {
+    return parseInt(data.custom.from_id, 10);
+  }
+  // Chats and channels have negative IDs
+  if (data.custom.chat_id) {
+    return parseInt(data.custom.chat_id, 10) * -1;
+  }
+  if (data.custom.channel_id) {
+    return parseInt(data.custom.channel_id, 10) * -1;
+  }
+  return undefined;
+}
+
+function getMessageId(data: PushData) {
+  if (!data.custom.msg_id) return undefined;
+  return parseInt(data.custom.msg_id, 10);
+}
+
+function getNotificationData(data: PushData):NotificationData {
+  return {
+    chatId: getChatId(data),
+    messageId: getMessageId(data),
+    title: data.title || process.env.APP_INFO!,
+    body: data.description,
+  };
+}
+
+function showNotification({
+  chatId, messageId, body, title,
+}: NotificationData) {
+  return self.registration.showNotification(title, {
+    body,
+    data: { chatId, messageId },
+    icon: 'icon-192x192.png',
+    badge: 'icon-192x192.png',
+    vibrate: [200, 100, 200],
+  });
 }
 
 export function handlePush(e: PushEvent) {
@@ -52,49 +99,19 @@ export function handlePush(e: PushEvent) {
   // Do not show muted notifications
   if (!data || data.mute === Boolean.True) return;
 
+  const notification = getNotificationData(data);
+
   // Dont show already triggered notification
-  const messageId = getMessageId(data);
-  if (shownNotifications.has(messageId)) {
-    shownNotifications.delete(messageId);
+  if (shownNotifications.has(notification.messageId)) {
+    shownNotifications.delete(notification.messageId);
     return;
   }
 
-  const title = data.title || process.env.APP_INFO!;
-  const body = data.description;
-
-  e.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      data,
-      icon: 'icon-192x192.png',
-      badge: 'icon-192x192.png',
-      vibrate: [200, 100, 200],
-    }),
-  );
+  e.waitUntil(showNotification(notification));
 }
 
-function getChatId(data: NotificationData) {
-  if (data.custom.from_id) {
-    return parseInt(data.custom.from_id, 10);
-  }
-  // Chats and channels have negative IDs
-  if (data.custom.chat_id) {
-    return parseInt(data.custom.chat_id, 10) * -1;
-  }
-  if (data.custom.channel_id) {
-    return parseInt(data.custom.channel_id, 10) * -1;
-  }
-  return undefined;
-}
-
-function getMessageId(data: NotificationData) {
-  if (!data.custom.msg_id) return undefined;
-  return parseInt(data.custom.msg_id, 10);
-}
-
-function focusChatMessage(client: WindowClient, data: NotificationData) {
-  const chatId = getChatId(data);
-  const messageId = getMessageId(data);
+function focusChatMessage(client: WindowClient, data: {chatId?: number; messageId?: number}) {
+  const { chatId, messageId } = data;
 
   if (chatId) {
     client.postMessage({
@@ -147,7 +164,8 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
   }
   if (e.data.type === 'newMessageNotification') {
     // store messageId for already shown notification
-    const { messageId } = e.data.payload;
-    shownNotifications.add(messageId);
+    const notification: NotificationData = e.data.payload;
+    e.waitUntil(showNotification(notification));
+    shownNotifications.add(notification.messageId);
   }
 }

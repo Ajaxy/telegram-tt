@@ -242,33 +242,40 @@ export async function showNewMessageNotification({
     body,
   } = getNotificationContent(chat, message as ApiMessage);
 
-  const notification = new Notification(title, {
-    body,
-    icon: 'icon-192x192.png',
-    badge: 'icon-192x192.png',
-    tag: message.id.toString(),
-    vibrate: [200, 100, 200],
-  });
-
-  if (navigator.serviceWorker.controller) {
-    // notify service worker about new message notification
-    navigator.serviceWorker.controller.postMessage({
-      type: 'newMessageNotification',
-      payload: { messageId: message.id },
-    });
-  }
-  const dispatch = getDispatch();
-
-  notification.onclick = () => {
-    notification.close();
-    dispatch.focusMessage({
-      chatId: chat.id,
-      messageId: message.id,
-    });
-    if (window.focus) {
-      window.focus();
+  if (checkIfPushSupported()) {
+    if (navigator.serviceWorker.controller) {
+      // notify service worker about new message notification
+      navigator.serviceWorker.controller.postMessage({
+        type: 'newMessageNotification',
+        payload: {
+          title,
+          body,
+          chatId: chat.id,
+          messageId: message.id,
+        },
+      });
     }
-  };
+  } else {
+    const dispatch = getDispatch();
+    const notification = new Notification(title, {
+      body,
+      icon: 'icon-192x192.png',
+      badge: 'icon-192x192.png',
+      tag: message.id.toString(),
+      vibrate: [200, 100, 200],
+    });
+
+    notification.onclick = () => {
+      notification.close();
+      dispatch.focusMessage({
+        chatId: chat.id,
+        messageId: message.id,
+      });
+      if (window.focus) {
+        window.focus();
+      }
+    };
+  }
 }
 
 // Notify service worker that client is fully loaded
