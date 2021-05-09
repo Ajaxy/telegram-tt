@@ -4,7 +4,7 @@ import { IS_IOS } from './environment';
 
 const DURATION = 450;
 
-export default function fastSmoothScroll(container: HTMLElement, left: number) {
+export default function fastSmoothScrollHorizontal(container: HTMLElement, left: number) {
   // Native way seems to be smoother in Chrome
   if (!IS_IOS) {
     container.scrollTo({ left, behavior: 'smooth' });

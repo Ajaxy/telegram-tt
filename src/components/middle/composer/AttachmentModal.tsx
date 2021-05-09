@@ -8,14 +8,14 @@ import { EDITABLE_INPUT_MODAL_ID } from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
-import useMentionMenu from './hooks/useMentionMenu';
+import useMentionTooltip from './hooks/useMentionTooltip';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import File from '../../common/File';
 import MessageInput from './MessageInput';
-import MentionMenu from './MentionMenu';
+import MentionTooltip from './MentionTooltip';
 
 import './AttachmentModal.scss';
 
@@ -47,10 +47,10 @@ const AttachmentModal: FC<OwnProps> = ({
   const isOpen = Boolean(attachments.length);
 
   const {
-    isMentionMenuOpen, mentionFilter,
-    closeMentionMenu, insertMention,
+    isMentionTooltipOpen, mentionFilter,
+    closeMentionTooltip, insertMention,
     mentionFilteredMembers,
-  } = useMentionMenu(
+  } = useMentionTooltip(
     canSuggestMembers && isOpen,
     caption,
     onCaptionUpdate,
@@ -136,9 +136,9 @@ const AttachmentModal: FC<OwnProps> = ({
       )}
 
       <div className="attachment-caption-wrapper">
-        <MentionMenu
-          isOpen={isMentionMenuOpen}
-          onClose={closeMentionMenu}
+        <MentionTooltip
+          isOpen={isMentionTooltipOpen}
+          onClose={closeMentionTooltip}
           filter={mentionFilter}
           onInsertUserName={insertMention}
           filteredChatMembers={mentionFilteredMembers}
