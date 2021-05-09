@@ -1,36 +1,132 @@
-import { useEffect } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../lib/teact/teactn';
+import {
+  useCallback, useEffect, useMemo, useState,
+} from '../../../../lib/teact/teact';
 
-import { ApiSticker } from '../../../../api/types';
+import { EDITABLE_INPUT_ID } from '../../../../config';
+import { IS_MOBILE_SCREEN } from '../../../../util/environment';
+import {
+  EmojiData, EmojiModule, EmojiRawData, uncompressEmoji,
+} from '../../../../util/emoji';
+import useFlag from '../../../../hooks/useFlag';
+import focusEditableElement from '../../../../util/focusEditableElement';
 
-import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
+let emojiDataPromise: Promise<EmojiModule>;
+let emojiRawData: EmojiRawData;
+let emojiData: EmojiData;
 
-import parseEmojiOnlyString from '../../../common/helpers/parseEmojiOnlyString';
+const RE_NOT_EMOJI_SEARCH = /[^-:_a-z\d]+/i;
+const EMOJIS_LIMIT = 50;
 
 export default function useEmojiTooltip(
   isAllowed: boolean,
   html: string,
-  stickers?: ApiSticker[],
+  recentEmojiIds: string[],
+  inputId = EDITABLE_INPUT_ID,
+  onUpdateHtml: (html: string) => void,
 ) {
-  const { loadStickersForEmoji, clearStickersForEmoji } = getDispatch();
-  const isSingleEmoji = (
-    (IS_EMOJI_SUPPORTED && parseEmojiOnlyString(html) === 1)
-    || (!IS_EMOJI_SUPPORTED && Boolean(html.match(/^<img.[^>]*?>$/g)))
+  const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
+  const [emojis, setEmojis] = useState<Emoji[]>([]);
+  const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
+
+  const recentEmojis = useMemo(
+    () => {
+      if (!emojis && !recentEmojiIds.length) {
+        return [];
+      }
+
+      return emojis.filter((emoji) => recentEmojiIds.includes(emoji.id)) as Emoji[];
+    },
+    [emojis, recentEmojiIds],
   );
-  const hasStickers = Boolean(stickers) && isSingleEmoji;
+
+  // Initialize data on first render.
+  useEffect(() => {
+    const exec = () => {
+      setEmojis(Object.values(emojiData.emojis));
+    };
+
+    if (emojiData) {
+      exec();
+    } else {
+      ensureEmojiData()
+        .then(exec);
+    }
+  }, []);
 
   useEffect(() => {
-    if (isAllowed && isSingleEmoji) {
-      loadStickersForEmoji({ emoji: html });
-    } else if (hasStickers || !isSingleEmoji) {
-      clearStickersForEmoji();
+    if (!html || !emojis) {
+      unmarkIsOpen();
+      return;
     }
-    // We omit `hasStickers` here to prevent re-fetching after manually closing tooltip (via <Esc>).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [html, isSingleEmoji, clearStickersForEmoji, loadStickersForEmoji, isAllowed]);
+
+    const code = getEmojiCode(html);
+    if (!code) {
+      setFilteredEmojis([]);
+      unmarkIsOpen();
+      return;
+    }
+
+    const filter = code.substr(1);
+    const matched = filter === '' ? recentEmojis : emojis.filter((emoji) => {
+      return 'names' in emoji && (!filter || emoji.names.find((name) => name.includes(filter)));
+    }) as Emoji[];
+
+    if (matched.length) {
+      markIsOpen();
+      setFilteredEmojis(matched.slice(0, EMOJIS_LIMIT));
+    } else {
+      unmarkIsOpen();
+    }
+  }, [emojis, html, markIsOpen, recentEmojis, unmarkIsOpen]);
+
+  const insertEmoji = useCallback((textEmoji: string) => {
+    const atIndex = html.lastIndexOf(':');
+    if (atIndex !== -1) {
+      onUpdateHtml(`${html.substr(0, atIndex)}${textEmoji}`);
+      const messageInput = document.getElementById(inputId)!;
+      if (!IS_MOBILE_SCREEN) {
+        requestAnimationFrame(() => {
+          focusEditableElement(messageInput, true);
+        });
+      }
+    }
+
+    unmarkIsOpen();
+  }, [html, inputId, onUpdateHtml, unmarkIsOpen]);
 
   return {
-    isEmojiTooltipOpen: hasStickers,
-    closeEmojiTooltip: clearStickersForEmoji,
+    isEmojiTooltipOpen: isOpen,
+    closeEmojiTooltip: unmarkIsOpen,
+    filteredEmojis,
+    insertEmoji,
   };
+}
+
+function getEmojiCode(html: string) {
+  const tempEl = document.createElement('div');
+  tempEl.innerHTML = html;
+  const text = tempEl.innerText;
+
+  const lastSymbol = text[text.length - 1];
+  const lastWord = text.split(RE_NOT_EMOJI_SEARCH).pop();
+
+  if (
+    !text.length || RE_NOT_EMOJI_SEARCH.test(lastSymbol)
+    || !lastWord || !lastWord.startsWith(':')
+  ) {
+    return undefined;
+  }
+
+  return lastWord.toLowerCase();
+}
+
+async function ensureEmojiData() {
+  if (!emojiDataPromise) {
+    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiModule>;
+    emojiRawData = (await emojiDataPromise).default;
+
+    emojiData = uncompressEmoji(emojiRawData);
+  }
+
+  return emojiDataPromise;
 }
