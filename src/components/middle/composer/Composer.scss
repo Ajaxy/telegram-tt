@@ -368,37 +368,3 @@
     left: 1rem;
   }
 }
-
-.composer-tooltip {
-  position: absolute;
-  bottom: calc(100% + .5rem);
-  left: 0;
-  width: 100%;
-  background: var(--color-background);
-  border-radius: var(--border-radius-messages);
-  padding: 0.5rem 0;
-  max-height: 15rem;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overflow-y: overlay;
-
-  box-shadow: 0 1px 2px var(--color-default-shadow);
-
-  opacity: 0;
-  transform: translateY(1.5rem);
-  transform-origin: bottom;
-  transition: opacity var(--layer-transition), transform var(--layer-transition);
-
-  &:not(.shown) {
-    display: none;
-  }
-
-  &.open {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .Loading {
-    margin: 1rem 0;
-  }
-}

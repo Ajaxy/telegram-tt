@@ -55,13 +55,13 @@ export function uncompressEmoji(data: EmojiRawData): EmojiData {
 
     for (let j = 0; j < data[i + 1].length; j++) {
       const emojiRaw = data[i + 1][j];
-      if (!EXCLUDE_EMOJIS.includes(emojiRaw[1][0])) {
-        category.emojis.push(emojiRaw[1][0]);
-        emojiData.emojis[emojiRaw[1][0]] = {
-          id: emojiRaw[1][0],
-          names: emojiRaw[1] as string[],
-          native: unifiedToNative(emojiRaw[0] as string),
-          image: (emojiRaw[0] as string).toLowerCase(),
+      if (!EXCLUDE_EMOJIS.includes(emojiRaw[1])) {
+        category.emojis.push(emojiRaw[1]);
+        emojiData.emojis[emojiRaw[1]] = {
+          id: emojiRaw[1],
+          colons: `:${emojiRaw[1]}:`,
+          native: unifiedToNative(emojiRaw[0]),
+          image: emojiRaw[0].toLowerCase(),
         };
       }
     }

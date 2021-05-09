@@ -16,7 +16,7 @@ import cycleRestrict from '../../../util/cycleRestrict';
 import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 
-import './MentionTooltip.scss';
+import './MentionMenu.scss';
 
 const VIEWPORT_MARGIN = 8;
 const SCROLL_MARGIN = 10;
@@ -53,7 +53,7 @@ export type OwnProps = {
   usersById?: Record<number, ApiUser>;
 };
 
-const MentionTooltip: FC<OwnProps> = ({
+const MentionMenu: FC<OwnProps> = ({
   isOpen,
   filter,
   onClose,
@@ -136,7 +136,7 @@ const MentionTooltip: FC<OwnProps> = ({
   }
 
   const className = buildClassName(
-    'MentionTooltip composer-tooltip custom-scroll',
+    'MentionMenu custom-scroll',
     transitionClassNames,
   );
 
@@ -160,4 +160,4 @@ const MentionTooltip: FC<OwnProps> = ({
   );
 };
 
-export default memo(MentionTooltip);
+export default memo(MentionMenu);

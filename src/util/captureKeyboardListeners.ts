@@ -1,5 +1,4 @@
-type HandlerName = 'onEnter' | 'onBackspace' | 'onDelete' | 'onEsc' | 'onUp' | 'onDown' | 'onLeft' | 'onRight'
-| 'onTab';
+type HandlerName = 'onEnter' | 'onBackspace' | 'onDelete' | 'onEsc' | 'onUp' | 'onDown' | 'onTab';
 type Handler = (e: KeyboardEvent) => void;
 type CaptureOptions = Partial<Record<HandlerName, Handler>>;
 
@@ -11,8 +10,6 @@ const keyToHandlerName: Record<string, HandlerName> = {
   Escape: 'onEsc',
   ArrowUp: 'onUp',
   ArrowDown: 'onDown',
-  ArrowLeft: 'onLeft',
-  ArrowRight: 'onRight',
   Tab: 'onTab',
 };
 
@@ -23,8 +20,6 @@ const handlers: Record<HandlerName, Handler[]> = {
   onEsc: [],
   onUp: [],
   onDown: [],
-  onLeft: [],
-  onRight: [],
   onTab: [],
 };
 
