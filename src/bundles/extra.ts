@@ -27,12 +27,13 @@ export { default as AttachmentModal } from '../components/middle/composer/Attach
 export { default as PollModal } from '../components/middle/composer/PollModal';
 export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu';
 export { default as AttachMenu } from '../components/middle/composer/AttachMenu';
-export { default as MentionMenu } from '../components/middle/composer/MentionMenu';
-export { default as EmojiTooltip } from '../components/middle/composer/EmojiTooltip';
+export { default as MentionTooltip } from '../components/middle/composer/MentionTooltip';
+export { default as StickerTooltip } from '../components/middle/composer/StickerTooltip';
 export { default as BotKeyboardMenu } from '../components/middle/composer/BotKeyboardMenu';
 export { default as CustomSendMenu } from '../components/middle/composer/CustomSendMenu';
 export { default as DropArea } from '../components/middle/composer/DropArea';
 export { default as TextFormatter } from '../components/middle/composer/TextFormatter';
+export { default as EmojiTooltip } from '../components/middle/composer/EmojiTooltip';
 
 export { default as RightSearch } from '../components/right/RightSearch';
 export { default as StickerSearch } from '../components/right/StickerSearch';
