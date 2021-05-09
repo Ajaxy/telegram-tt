@@ -50,8 +50,7 @@ export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; c
 
 export const DPR = window.devicePixelRatio || 1;
 
-// `mask-image` CSS property for custom background slows down the scroll performance significantly
-export const MASK_IMAGE_ENABLED = IS_IOS;
+export const MASK_IMAGE_DISABLED = true;
 
 let isWebpSupportedCache: boolean | undefined;
 
