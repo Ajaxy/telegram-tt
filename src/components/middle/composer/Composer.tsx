@@ -124,7 +124,7 @@ type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
   'clearDraft' | 'showError' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
   'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
-  'clearReceipt'
+  'clearReceipt' | 'addRecentEmoji'
 )>;
 
 enum MainButtonState {
@@ -189,6 +189,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   closePaymentModal,
   openChat,
   clearReceipt,
+  addRecentEmoji,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const appendixRef = useRef<HTMLDivElement>(null);
@@ -835,6 +836,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             onGifSelect={handleGifSelect}
             onRemoveSymbol={removeSymbol}
             onSearchOpen={handleSearchOpen}
+            addRecentEmoji={addRecentEmoji}
           />
         </div>
       </div>
@@ -948,5 +950,6 @@ export default memo(withGlobal<OwnProps>(
     'clearReceipt',
     'loadScheduledHistory',
     'openChat',
+    'addRecentEmoji',
   ]),
 )(Composer));

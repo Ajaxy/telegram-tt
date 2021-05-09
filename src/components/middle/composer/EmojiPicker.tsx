@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalState, GlobalActions } from '../../../global/types';
+import { GlobalState } from '../../../global/types';
 
 import { MENU_TRANSITION_DURATION } from '../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -31,11 +31,10 @@ import './EmojiPicker.scss';
 
 type OwnProps = {
   className?: string;
-  onEmojiSelect: (emoji: string) => void;
+  onEmojiSelect: (emoji: string, name: string) => void;
 };
 
 type StateProps = Pick<GlobalState, 'recentEmojis'>;
-type DispatchProps = Pick<GlobalActions, 'addRecentEmoji'>;
 type EmojiCategoryData = { id: string; name: string; emojis: string[] };
 
 const ICONS_BY_CATEGORY: Record<string, string> = {
@@ -63,8 +62,8 @@ let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
-const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
-  className, onEmojiSelect, recentEmojis, addRecentEmoji,
+const EmojiPicker: FC<OwnProps & StateProps> = ({
+  className, onEmojiSelect, recentEmojis,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -161,9 +160,8 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const handleEmojiSelect = useCallback((emoji: string, name: string) => {
-    onEmojiSelect(emoji);
-    addRecentEmoji({ emoji: name });
-  }, [addRecentEmoji, onEmojiSelect]);
+    onEmojiSelect(emoji, name);
+  }, [onEmojiSelect]);
 
   const canRenderContents = useAsyncRendering([], MENU_TRANSITION_DURATION);
 
@@ -228,5 +226,4 @@ async function ensureEmojiData() {
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => pick(global, ['recentEmojis']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['addRecentEmoji']),
 )(EmojiPicker));
