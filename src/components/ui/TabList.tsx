@@ -20,12 +20,15 @@ export type TabWithProperties = {
 type OwnProps = {
   tabs: readonly TabWithProperties[];
   activeTab: number;
+  big?: boolean;
   onSwitchTab: (index: number) => void;
 };
 
 const TAB_SCROLL_THRESHOLD_PX = 16;
 
-const TabList: FC<OwnProps> = ({ tabs, activeTab, onSwitchTab }) => {
+const TabList: FC<OwnProps> = ({
+  tabs, activeTab, big, onSwitchTab,
+}) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const previousActiveTab = usePrevious(activeTab);
@@ -55,7 +58,7 @@ const TabList: FC<OwnProps> = ({ tabs, activeTab, onSwitchTab }) => {
   const lang = useLang();
 
   return (
-    <div className="TabList no-selection no-scrollbar" ref={containerRef}>
+    <div className={`TabList no-selection no-scrollbar ${big ? 'big' : ''}`} ref={containerRef}>
       {tabs.map((tab, i) => (
         <Tab
           key={tab.title}
