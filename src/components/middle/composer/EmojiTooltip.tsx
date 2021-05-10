@@ -10,6 +10,7 @@ import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import useShowTransition from '../../../hooks/useShowTransition';
+import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
 
 import Loading from '../../ui/Loading';
 import EmojiButton from './EmojiButton';
@@ -51,18 +52,23 @@ export type OwnProps = {
   isOpen: boolean;
   onEmojiSelect: (text: string) => void;
   onClose: NoneToVoidFunction;
+  addRecentEmoji: AnyToVoidFunction;
   emojis: Emoji[];
 };
+
+const CLOSE_DURATION = 350;
 
 const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
   emojis,
   onClose,
   onEmojiSelect,
+  addRecentEmoji,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
 
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
@@ -95,9 +101,10 @@ const EmojiTooltip: FC<OwnProps> = ({
       if (emoji) {
         e.preventDefault();
         onEmojiSelect(emoji.native);
+        addRecentEmoji({ emoji: emoji.id });
       }
     }
-  }, [emojis, onEmojiSelect, selectedIndex]);
+  }, [addRecentEmoji, emojis, onEmojiSelect, selectedIndex]);
 
   useEffect(() => (isOpen ? captureKeyboardListeners({
     onEsc: onClose,
@@ -126,8 +133,8 @@ const EmojiTooltip: FC<OwnProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
-      {shouldRender && emojis ? (
-        emojis.map((emoji, index) => (
+      {shouldRender && listEmojis ? (
+        listEmojis.map((emoji, index) => (
           <EmojiButton
             key={emoji.id}
             emoji={emoji}
