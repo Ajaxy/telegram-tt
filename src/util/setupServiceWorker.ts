@@ -3,6 +3,7 @@ import { scriptUrl } from 'service-worker-loader!../serviceWorker';
 import { DEBUG } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
+import { notifyClientReady } from './notifications';
 
 type WorkerAction = {
   type: string;
@@ -25,6 +26,13 @@ function handleWorkerMessage(e: MessageEvent) {
   }
 }
 
+function subscribeToWorker() {
+  navigator.serviceWorker.removeEventListener('message', handleWorkerMessage);
+  navigator.serviceWorker.addEventListener('message', handleWorkerMessage);
+  // Notify web worker that client is ready to receive messages
+  notifyClientReady();
+}
+
 if (IS_SERVICE_WORKER_SUPPORTED) {
   window.addEventListener('load', async () => {
     try {
@@ -42,8 +50,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
           // eslint-disable-next-line no-console
           console.log('[SW] ServiceWorker ready');
         }
-
-        navigator.serviceWorker.addEventListener('message', handleWorkerMessage);
+        subscribeToWorker();
       } else {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -57,5 +64,9 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         console.error('[SW] ServiceWorker registration failed: ', err);
       }
     }
+  });
+  window.addEventListener('focus', async () => {
+    await navigator.serviceWorker.ready;
+    subscribeToWorker();
   });
 }

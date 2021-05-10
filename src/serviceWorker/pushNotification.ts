@@ -64,7 +64,7 @@ function getMessageId(data: PushData) {
   return parseInt(data.custom.msg_id, 10);
 }
 
-function getNotificationData(data: PushData):NotificationData {
+function getNotificationData(data: PushData): NotificationData {
   return {
     chatId: getChatId(data),
     messageId: getMessageId(data),
@@ -110,21 +110,16 @@ export function handlePush(e: PushEvent) {
   e.waitUntil(showNotification(notification));
 }
 
-function focusChatMessage(client: WindowClient, data: {chatId?: number; messageId?: number}) {
+function focusChatMessage(client: WindowClient, data: { chatId?: number; messageId?: number }) {
   const { chatId, messageId } = data;
-
-  if (chatId) {
-    client.postMessage({
-      type: 'focusMessage',
-      payload: {
-        chatId,
-        messageId,
-      },
-    });
-  }
-  if (client.focus) {
-    client.focus();
-  }
+  if (!chatId) return;
+  client.postMessage({
+    type: 'focusMessage',
+    payload: {
+      chatId,
+      messageId,
+    },
+  });
 }
 
 export function handleNotificationClick(e: NotificationEvent) {
@@ -134,7 +129,10 @@ export function handleNotificationClick(e: NotificationEvent) {
   const notifyClients = async () => {
     const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
     const clientsInScope = clients.filter((client) => client.url === self.registration.scope);
-    clientsInScope.forEach((client) => focusChatMessage(client, data));
+    await Promise.all(clientsInScope.map(async (client) => {
+      await client.focus();
+      clickBuffer[client.id] = data;
+    }));
     if (!self.clients.openWindow || clientsInScope.length > 0) return undefined;
 
     // If there is no opened client we need to open one and wait until it is fully loaded
