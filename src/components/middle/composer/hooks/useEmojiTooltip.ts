@@ -15,7 +15,7 @@ let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
 const RE_NOT_EMOJI_SEARCH = /[^-:_a-z\d]+/i;
-const EMOJIS_LIMIT = 50;
+const EMOJIS_LIMIT = 36;
 
 export default function useEmojiTooltip(
   isAllowed: boolean,
@@ -25,24 +25,26 @@ export default function useEmojiTooltip(
   onUpdateHtml: (html: string) => void,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
-  const [emojis, setEmojis] = useState<Emoji[]>([]);
+  const [emojiIds, setEmojiIds] = useState<string[]>([]);
   const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
 
   const recentEmojis = useMemo(
     () => {
-      if (!emojis && !recentEmojiIds.length) {
+      if (!emojiIds.length || !recentEmojiIds.length) {
         return [];
       }
 
-      return emojis.filter((emoji) => recentEmojiIds.includes(emoji.id)) as Emoji[];
+      return recentEmojiIds
+        .map((emojiId) => emojiData.emojis[emojiId])
+        .filter<Emoji>(Boolean as any);
     },
-    [emojis, recentEmojiIds],
+    [emojiIds, recentEmojiIds],
   );
 
   // Initialize data on first render.
   useEffect(() => {
     const exec = () => {
-      setEmojis(Object.values(emojiData.emojis));
+      setEmojiIds(Object.keys(emojiData.emojis));
     };
 
     if (emojiData) {
@@ -54,7 +56,7 @@ export default function useEmojiTooltip(
   }, []);
 
   useEffect(() => {
-    if (!html || !emojis) {
+    if (!html || !emojiIds.length) {
       unmarkIsOpen();
       return;
     }
@@ -67,17 +69,20 @@ export default function useEmojiTooltip(
     }
 
     const filter = code.substr(1);
-    const matched = filter === '' ? recentEmojis : emojis.filter((emoji) => {
-      return 'names' in emoji && (!filter || emoji.names.find((name) => name.includes(filter)));
-    }) as Emoji[];
+    const matched = filter === ''
+      ? recentEmojis
+      : emojiIds
+        .filter((emojiId) => emojiData.emojis[emojiId].names.find((name) => name.includes(filter)))
+        .slice(0, EMOJIS_LIMIT)
+        .map((emojiId) => emojiData.emojis[emojiId]);
 
     if (matched.length) {
       markIsOpen();
-      setFilteredEmojis(matched.slice(0, EMOJIS_LIMIT));
+      setFilteredEmojis(matched);
     } else {
       unmarkIsOpen();
     }
-  }, [emojis, html, markIsOpen, recentEmojis, unmarkIsOpen]);
+  }, [emojiIds, html, markIsOpen, recentEmojis, unmarkIsOpen]);
 
   const insertEmoji = useCallback((textEmoji: string) => {
     const atIndex = html.lastIndexOf(':');

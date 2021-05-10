@@ -811,6 +811,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             emojis={filteredEmojis}
             onClose={closeEmojiTooltip}
             onEmojiSelect={insertEmoji}
+            addRecentEmoji={addRecentEmoji}
           />
           <AttachMenu
             isOpen={isAttachMenuOpen}
