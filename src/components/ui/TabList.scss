@@ -5,7 +5,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  font-size: 1rem;
+  font-size: .875rem;
   flex-wrap: nowrap;
   box-shadow: 0 2px 2px var(--color-light-shadow);
   background-color: var(--color-background);
@@ -14,6 +14,10 @@
 
   scrollbar-width: none;
   scrollbar-color: rgba(0, 0, 0, 0);
+
+  &.big {
+    font-size: 1rem;
+  }
 
   &::-webkit-scrollbar {
     height: 0;

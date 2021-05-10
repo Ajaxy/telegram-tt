@@ -333,7 +333,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           >
             {renderSharedMedia}
           </Transition>
-          <TabList activeTab={activeTab} tabs={tabs} onSwitchTab={setActiveTab} />
+          <TabList big activeTab={activeTab} tabs={tabs} onSwitchTab={setActiveTab} />
         </div>
       )}
     </InfiniteScroll>
