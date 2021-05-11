@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiUpdate } from '../../../api/types';
+import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
@@ -27,7 +27,7 @@ const CURRENT_CHAT_UNREAD_DELAY = 1000;
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
-      if (!selectIsChatListed(global, update.id)) {
+      if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)) {
         // Chat can appear in dialogs list.
         actions.loadTopChats();
       }
@@ -95,7 +95,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'newMessage': {
       const { message } = update;
-      const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
+      const { chatId: currentChatId, threadId, type: messageListType } = selectCurrentMessageList(global) || {};
 
       if (message.senderId === global.currentUserId && !message.isFromScheduled) {
         return;
@@ -106,7 +106,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         return;
       }
 
-      const isActiveChat = update.chatId === currentChatId;
+      const isActiveChat = (
+        messageListType === 'thread'
+        && threadId === MAIN_THREAD_ID
+        && update.chatId === currentChatId
+      );
 
       if (isActiveChat) {
         setTimeout(() => {

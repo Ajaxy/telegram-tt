@@ -732,6 +732,7 @@ export async function requestThreadInfoUpdate({
       '@type': 'updateChat',
       id: newChat.id,
       chat: newChat,
+      noTopChatsRequest: true,
     });
   });
 }

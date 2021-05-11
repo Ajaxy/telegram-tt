@@ -330,7 +330,11 @@ export default memo(withGlobal(
       canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_MOBILE_SCREEN),
       isPinnedMessageList,
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
-      hasPinnedOrAudioMessage: Boolean(pinnedIds && pinnedIds.length) || Boolean(audioChatId && audioMessageId),
+      hasPinnedOrAudioMessage: (
+        threadId !== MAIN_THREAD_ID
+        || Boolean(pinnedIds && pinnedIds.length)
+        || Boolean(audioChatId && audioMessageId)
+      ),
       customBackground,
       patternColor,
       isCustomBackgroundColor,

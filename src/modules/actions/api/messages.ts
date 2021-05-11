@@ -50,10 +50,12 @@ import {
   selectScheduledMessage,
   selectNoWebPage,
 } from '../../selectors';
-import { rafPromise } from '../../../util/schedulers';
+import { rafPromise, throttle } from '../../../util/schedulers';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
+
+const runThrottledForMarkRead = throttle((cb) => cb(), 1000, true);
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
@@ -409,7 +411,9 @@ addReducer('markMessageListRead', (global, actions, payload) => {
 
   const { maxId } = payload!;
 
-  void callApi('markMessageListRead', { chat, threadId, maxId });
+  runThrottledForMarkRead(() => {
+    void callApi('markMessageListRead', { chat, threadId, maxId });
+  });
 });
 
 addReducer('markMessagesRead', (global, actions, payload) => {
