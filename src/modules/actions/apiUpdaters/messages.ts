@@ -210,7 +210,9 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateThreadInfo': {
-      const { chatId, threadId, threadInfo } = update;
+      const {
+        chatId, threadId, threadInfo, firstMessageId,
+      } = update;
 
       const currentThreadInfo = selectThreadInfo(global, chatId, threadId);
       const newTheadInfo = {
@@ -223,6 +225,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       global = updateThreadInfo(global, chatId, threadId, newTheadInfo as ApiThreadInfo);
+
+      if (firstMessageId) {
+        global = replaceThreadParam(global, chatId, threadId, 'firstMessageId', firstMessageId);
+      }
+
       setGlobal(global);
 
       break;

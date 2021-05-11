@@ -103,26 +103,11 @@ export async function fetchMessages({
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
   const threadInfos = messages.map(({ threadInfo }) => threadInfo).filter<ApiThreadInfo>(Boolean as any);
 
-  // Not sure if there is an easier way to do this
-  let firstMessageId: number | undefined;
-  if (result.messages.length) {
-    if (result instanceof GramJs.messages.Messages) {
-      firstMessageId = result.messages[result.messages.length - 1].id;
-    } else if (pagination.offsetId && result.offsetIdOffset) {
-      const offsetIdIndex = result.messages.findIndex((m) => m.id === pagination.offsetId);
-      const lastIndex = result.messages.length - offsetIdIndex;
-      if (lastIndex + result.offsetIdOffset >= result.count) {
-        firstMessageId = result.messages[result.messages.length - 1].id;
-      }
-    }
-  }
-
   return {
     messages,
     users,
     chats,
     threadInfos,
-    firstMessageId,
   };
 }
 
@@ -702,6 +687,8 @@ export async function requestThreadInfoUpdate({
     invokeRequest(new GramJs.messages.GetReplies({
       peer: buildInputPeer(chat.id, chat.accessHash),
       msgId: threadId,
+      offsetId: 1,
+      addOffset: -1,
       limit: 1,
     })),
   ]);
@@ -724,6 +711,9 @@ export async function requestThreadInfoUpdate({
       lastReadInboxMessageId: topMessageResult.readInboxMaxId,
       messagesCount: (repliesResult instanceof GramJs.messages.ChannelMessages) ? repliesResult.count : undefined,
     },
+    firstMessageId: repliesResult && 'messages' in repliesResult && repliesResult.messages.length
+      ? repliesResult.messages[0].id
+      : undefined,
   });
 
   const chats = topMessageResult.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
