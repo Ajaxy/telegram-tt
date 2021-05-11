@@ -1,4 +1,7 @@
-type Scheduler = typeof requestAnimationFrame | typeof onTickEnd | typeof runNow;
+type Scheduler =
+  typeof requestAnimationFrame
+  | typeof onTickEnd
+  | typeof runNow;
 
 export function debounce<F extends AnyToVoidFunction>(
   fn: F,
@@ -125,28 +128,34 @@ export const pause = (ms: number) => new Promise((resolve) => {
 
 export function rafPromise() {
   return new Promise((resolve) => {
-    requestAnimationFrame(resolve);
+    fastRaf(resolve);
   });
 }
 
 let fastRafCallbacks: NoneToVoidFunction[] | undefined;
+let fastRafPrimaryCallbacks: NoneToVoidFunction[] | undefined;
 
+// May result in an immediate execution if called from another `requestAnimationFrame` callback
 export function fastRaf(callback: NoneToVoidFunction, isPrimary = false) {
   if (!fastRafCallbacks) {
-    fastRafCallbacks = [callback];
+    fastRafCallbacks = isPrimary ? [] : [callback];
+    fastRafPrimaryCallbacks = isPrimary ? [callback] : [];
 
     requestAnimationFrame(() => {
       const currentCallbacks = fastRafCallbacks!;
+      const currentPrimaryCallbacks = fastRafPrimaryCallbacks!;
       fastRafCallbacks = undefined;
+      fastRafPrimaryCallbacks = undefined;
+      currentPrimaryCallbacks.forEach((cb) => cb());
       currentCallbacks.forEach((cb) => cb());
     });
   } else if (isPrimary) {
-    fastRafCallbacks.unshift(callback);
+    fastRafPrimaryCallbacks!.push(callback);
   } else {
     fastRafCallbacks.push(callback);
   }
 }
 
 export function fastPrimaryRaf(callback: NoneToVoidFunction) {
-  return fastRaf(callback, true);
+  fastRaf(callback, true);
 }
