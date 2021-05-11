@@ -494,9 +494,7 @@ export function selectRealLastReadId(global: GlobalState, chatId: number, thread
     }
 
     // Some previously read messages may be deleted
-    return threadInfo.lastMessageId
-      ? Math.min(threadInfo.lastReadInboxMessageId, threadInfo.lastMessageId)
-      : threadInfo.lastReadInboxMessageId;
+    return Math.min(threadInfo.lastReadInboxMessageId, threadInfo.lastMessageId || Infinity);
   }
 }
 

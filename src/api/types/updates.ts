@@ -61,6 +61,7 @@ export type ApiUpdateChat = {
   id: number;
   chat: Partial<ApiChat>;
   newProfilePhoto?: ApiPhoto;
+  noTopChatsRequest?: boolean;
 };
 
 export type ApiUpdateChatJoin = {

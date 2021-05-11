@@ -149,8 +149,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
   const listItemElementsRef = useRef<HTMLDivElement[]>();
-  // Updated when opening chat (to preserve divider even after messages are read)
-  const memoUnreadDividerBeforeIdRef = useRef<number | undefined>(firstUnreadId);
+  const memoUnreadDividerBeforeIdRef = useRef<number | undefined>();
   // Updated every time (to be used from intersection callback closure)
   const memoFirstUnreadIdRef = useRef<number>();
   const memoFocusingIdRef = useRef<number>();
@@ -172,6 +171,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useOnChange(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
+
+    // Updated only once (to preserve divider even after messages are read)
+    if (!memoUnreadDividerBeforeIdRef.current) {
+      memoUnreadDividerBeforeIdRef.current = firstUnreadId;
+    }
   }, [firstUnreadId]);
 
   const {
