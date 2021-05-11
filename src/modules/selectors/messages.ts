@@ -519,10 +519,13 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number, threadI
   }
 
   const lastReadId = selectRealLastReadId(global, chatId, threadId);
+  if (!lastReadId) {
+    return undefined;
+  }
 
   if (outlyingIds) {
     const found = outlyingIds.find((id) => {
-      return !lastReadId || (id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled));
+      return id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled);
     });
     if (found) {
       return found;
@@ -531,7 +534,7 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number, threadI
 
   if (listedIds) {
     const found = listedIds.find((id) => {
-      return !lastReadId || (id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled));
+      return id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled);
     });
     if (found) {
       return found;
