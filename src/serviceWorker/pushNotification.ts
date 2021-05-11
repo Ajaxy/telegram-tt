@@ -147,10 +147,6 @@ export function handleNotificationClick(e: NotificationEvent) {
 }
 
 export function handleClientMessage(e: ExtendableMessageEvent) {
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('[SW] New message from client', e);
-  }
   if (!e.data) return;
   const source = e.source as WindowClient;
   if (e.data.type === 'clientReady') {
