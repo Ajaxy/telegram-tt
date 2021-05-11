@@ -86,7 +86,7 @@ const WebPage: FC<OwnProps> = ({
           onCancelUpload={onCancelMediaTransfer}
         />
       )}
-      <div className="WebPage-text">
+      <div>
         <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
         {!inPreview && title && (
           <p className="site-title">{renderText(title)}</p>
