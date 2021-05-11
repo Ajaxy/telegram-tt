@@ -80,7 +80,7 @@ interface ComponentInstance {
       }[];
     };
   };
-  scheduleNextState?: () => void;
+  prepareForFrame?: () => void;
   forceUpdate?: () => void;
   onUpdate?: () => void;
 }
@@ -372,8 +372,9 @@ function unmountComponent(componentInstance: ComponentInstance) {
 }
 
 // We force cleaning as many objects as possible. Not sure this is needed at all.
-/* eslint-disable no-null/no-null */
 function helpGc(componentInstance: ComponentInstance) {
+  /* eslint-disable no-null/no-null */
+
   componentInstance.hooks.effects.byCursor.forEach((hook) => {
     hook.cleanup = null as any;
     hook.effect = null as any;
@@ -396,11 +397,11 @@ function helpGc(componentInstance: ComponentInstance) {
   componentInstance.props = null as any;
   componentInstance.forceUpdate = null as any;
   componentInstance.onUpdate = null as any;
+
+  /* eslint-enable no-null/no-null */
 }
 
-/* eslint-enable no-null/no-null */
-
-function applyNextState(componentInstance: ComponentInstance) {
+function prepareComponentForFrame(componentInstance: ComponentInstance) {
   if (!componentInstance.isMounted) {
     return;
   }
@@ -408,6 +409,9 @@ function applyNextState(componentInstance: ComponentInstance) {
   componentInstance.hooks.state.byCursor.forEach((hook) => {
     hook.value = hook.nextValue;
   });
+
+  componentInstance.prepareForFrame = throttleWithPrimaryRaf(() => prepareComponentForFrame(componentInstance));
+  componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
@@ -416,6 +420,7 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
   }
 
   const currentElement = componentInstance.$element;
+
   renderComponent(componentInstance);
 
   if (componentInstance.$element !== currentElement) {
@@ -452,10 +457,17 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
             ? (newValue as (current: T) => T)(byCursor[cursor].value)
             : newValue;
 
-          if (!componentInstance.scheduleNextState || !componentInstance.forceUpdate) {
-            componentInstance.scheduleNextState = throttleWithPrimaryRaf(() => applyNextState(componentInstance));
-            componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
+          if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
+            componentInstance.prepareForFrame = throttleWithPrimaryRaf(
+              () => prepareComponentForFrame(componentInstance),
+            );
+            componentInstance.forceUpdate = throttleWithRaf(
+              () => forceUpdateComponent(componentInstance),
+            );
           }
+
+          componentInstance.prepareForFrame();
+          componentInstance.forceUpdate();
 
           if (DEBUG_MORE) {
             // eslint-disable-next-line no-console
@@ -470,9 +482,6 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
               byCursor[cursor].nextValue,
             );
           }
-
-          componentInstance.scheduleNextState();
-          componentInstance.forceUpdate();
         }
       })(renderingInstance),
     };
