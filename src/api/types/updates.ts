@@ -174,6 +174,7 @@ export type ApiUpdateThreadInfo = {
   chatId: number;
   threadId: number;
   threadInfo: Partial<ApiThreadInfo>;
+  firstMessageId?: number;
 };
 
 export type ApiUpdateScheduledMessageSendSucceeded = {

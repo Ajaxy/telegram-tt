@@ -576,7 +576,7 @@ async function loadViewportMessages(
   }
 
   const {
-    messages, users, chats, threadInfos, firstMessageId,
+    messages, users, chats, threadInfos,
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
@@ -591,10 +591,6 @@ async function loadViewportMessages(
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = updateThreadInfos(global, chatId, threadInfos);
-
-  if (firstMessageId) {
-    global = replaceThreadParam(global, chatId, threadId, 'firstMessageId', firstMessageId);
-  }
 
   let listedIds = selectListedIds(global, chatId, threadId);
   const outlyingIds = selectOutlyingIds(global, chatId, threadId);
