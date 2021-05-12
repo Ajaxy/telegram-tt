@@ -63,17 +63,17 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [loadFullUser, userId, lastSyncTime]);
 
-  const handleClick = useCallback((text: string, entity: string) => {
-    copyTextToClipboard(text);
-    showNotification({ message: `${entity} was copied` });
-  }, [showNotification]);
-
   const handleNotificationChange = useCallback(() => {
     updateChatMutedState({ chatId, isMuted: !currentIsMuted });
   }, [chatId, currentIsMuted, updateChatMutedState]);
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
     return undefined;
+  }
+
+  function copy(text: string, entity: string) {
+    copyTextToClipboard(text);
+    showNotification({ message: `${entity} was copied` });
   }
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
@@ -85,7 +85,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="ChatExtra">
       {formattedNumber && !!formattedNumber.length && (
-        <ListItem icon="phone" multiline narrow ripple onClick={() => handleClick(formattedNumber, lang('Phone'))}>
+        <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
           <span className="title">{formattedNumber}</span>
           <span className="subtitle">{lang('Phone')}</span>
         </ListItem>
@@ -96,7 +96,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           multiline
           narrow
           ripple
-          onClick={() => handleClick(`@${printedUsername}`, lang('Username'))}
+          onClick={() => copy(`@${printedUsername}`, lang('Username'))}
         >
           <span className="title">{renderText(printedUsername)}</span>
           <span className="subtitle">{lang('Username')}</span>
@@ -114,18 +114,18 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
       )}
       {canInviteUsers && !printedUsername && !!link.length && (
-        <ListItem icon="mention" multiline narrow ripple onClick={() => handleClick(link, lang('SetUrlPlaceholder'))}>
+        <ListItem icon="mention" multiline narrow ripple onClick={() => copy(link, lang('SetUrlPlaceholder'))}>
           <div className="title">
             <SafeLink url={url} className="title" text={link} />
           </div>
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
-      <ListItem icon="unmute" onClick={handleNotificationChange}>
+      <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
         <span>{lang('Notifications')}</span>
         <Switcher
           id="group-notifications"
-          label={`${userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}`}
+          label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
           checked={!currentIsMuted}
           inactive
         />
