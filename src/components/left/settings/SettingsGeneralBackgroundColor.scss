@@ -10,6 +10,7 @@
   .color-picker {
     margin-top: 1rem;
     height: 12rem;
+    touch-action: none;
   }
 
   .hue-picker {
