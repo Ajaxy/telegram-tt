@@ -340,6 +340,18 @@
 .message-content.custom-shape {
   line-height: 1.2;
   font-size: 10rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &.has-comments {
+    min-height: 5.25rem;
+    margin-top: 0 !important;
+
+    &.has-replies {
+      min-height: 6.5rem;
+    }
+  }
 
   &.is-reply {
     max-width: 100%;
