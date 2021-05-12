@@ -19,7 +19,7 @@
   "--color-links-hover": ["#2d8dec", "#6b5fcc"],
   "--color-gray": ["#C4C9CC", "#717579"],
   "--color-pinned": ["#C4C9CC", "#707579"],
-  "--color-default-shadow": ["#72727240", "#21212140"],
+  "--color-default-shadow": ["#72727240", "#1010109c"],
   "--color-light-shadow": ["#7272722B", "#00000040"],
   "--color-green": ["#4DCD5E", "#8378DB"],
   "--color-text-meta-colored": ["#4DCD5E", "#8378DB"],
