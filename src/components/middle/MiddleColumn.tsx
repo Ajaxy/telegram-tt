@@ -103,10 +103,22 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const [isFabShown, setIsFabShown] = useState(false);
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
+  const hasTools = hasPinnedOrAudioMessage && (
+    windowWidth < MOBILE_SCREEN_MAX_WIDTH
+    || (
+      isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+      && windowWidth < SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+    ) || (
+      windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
+      && windowWidth < SAFE_SCREEN_WIDTH_FOR_CHAT_INFO
+    )
+  );
+
   const renderingChatId = usePrevDuringAnimation(chatId, CLOSE_ANIMATION_DURATION);
   const renderingThreadId = usePrevDuringAnimation(threadId, CLOSE_ANIMATION_DURATION);
   const renderingMessageListType = usePrevDuringAnimation(messageListType, CLOSE_ANIMATION_DURATION);
   const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION);
+  const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
 
   useEffect(() => {
     return chatId
@@ -157,19 +169,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   const customBackgroundValue = useCustomBackground(customBackground);
 
-  const hasTools = hasPinnedOrAudioMessage && (
-    windowWidth < MOBILE_SCREEN_MAX_WIDTH
-    || (
-      isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
-      && windowWidth < SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
-    ) || (
-      windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
-      && windowWidth < SAFE_SCREEN_WIDTH_FOR_CHAT_INFO
-    )
-  );
-
   const className = buildClassName(
-    hasTools && 'has-header-tools',
+    renderingHasTools && 'has-header-tools',
     customBackground && !isCustomBackgroundColor && 'custom-bg-image',
     customBackground && isCustomBackgroundColor && 'custom-bg-color',
     customBackground && isBackgroundBlurred && 'blurred',
@@ -235,7 +236,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     threadId={renderingThreadId}
                     type={renderingMessageListType}
                     canPost={renderingCanPost}
-                    hasTools={hasTools}
+                    hasTools={renderingHasTools}
                     onFabToggle={setIsFabShown}
                   />
                   <div className={buildClassName('middle-column-footer', !renderingCanPost && 'no-composer')}>
