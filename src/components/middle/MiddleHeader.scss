@@ -21,11 +21,11 @@
       content: "";
       display: block;
       position: absolute;
-      top: -2px;
+      top: -.1875rem;
       left: 0;
       right: 0;
-      height: 2px;
-      box-shadow: 0 2px 2px var(--color-light-shadow);
+      height: .125rem;
+      box-shadow: 0 .125rem .125rem var(--color-light-shadow);
     }
 
     .HeaderPinnedMessage {
@@ -317,7 +317,7 @@
     display: flex;
     flex-shrink: 1;
     padding: 0.25rem;
-    margin-top: -0.25rem;
+    margin-top: -0.1875rem;
     margin-bottom: -0.25rem;
     padding-left: 0.375rem;
     border-radius: var(--border-radius-messages-small);
