@@ -23,7 +23,7 @@ import {
   replaceThreadParam,
 } from '../../reducers';
 import {
-  selectUser, selectChat, selectCurrentMessageList, selectDraft,
+  selectUser, selectChat, selectCurrentMessageList, selectDraft, selectChatMessage,
 } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
 
@@ -254,6 +254,11 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
   }
 
   setGlobal(global);
+
+  const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
+  if (audioChatId && audioMessageId && !selectChatMessage(global, audioChatId, audioMessageId)) {
+    getDispatch().closeAudioPlayer();
+  }
 }
 
 async function loadAndUpdateUsers() {
