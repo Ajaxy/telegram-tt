@@ -36,7 +36,7 @@ export default (theme: ISettings['theme'], withAnimation: boolean) => {
 
   document.documentElement.classList.remove(`theme-${isDarkTheme ? 'light' : 'dark'}`);
   if (isInitialized) {
-    document.documentElement.classList.add('disable-animations');
+    document.documentElement.classList.add('no-animations');
   }
   document.documentElement.classList.add(`theme-${theme}`);
   if (themeColorTag) {
@@ -44,7 +44,7 @@ export default (theme: ISettings['theme'], withAnimation: boolean) => {
   }
 
   setTimeout(() => {
-    document.documentElement.classList.remove('disable-animations');
+    document.documentElement.classList.remove('no-animations');
   }, ENABLE_ANIMATION_DELAY_MS);
 
   isInitialized = true;

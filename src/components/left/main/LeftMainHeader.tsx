@@ -203,6 +203,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
               id="darkmode"
               label="Toggle Dark Mode"
               checked={theme === 'dark'}
+              noAnimation
             />
           </MenuItem>
           <MenuItem
