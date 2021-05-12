@@ -4,6 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../config';
+import { IS_SAFARI } from '../../util/environment';
 import resetScroll from '../../util/resetScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../hooks/useIntersectionObserver';
 import useOnChange from '../../hooks/useOnChange';
@@ -72,7 +73,7 @@ const MessageScroll: FC<OwnProps> = ({
     const { offsetHeight, scrollHeight, scrollTop } = containerRef.current!;
     const scrollBottom = scrollHeight - scrollTop - offsetHeight;
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
-    const isAtBottom = scrollBottom === 0;
+    const isAtBottom = scrollBottom === 0 || (IS_SAFARI && scrollBottom === 1);
 
     onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
   }, [messageIds, isViewportNewest, containerRef, onFabToggle, firstUnreadId]);
