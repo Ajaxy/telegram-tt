@@ -13,6 +13,7 @@ type OwnProps = {
   checked?: boolean;
   disabled?: boolean;
   inactive?: boolean;
+  noAnimation?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onCheck?: (isChecked: boolean) => void;
 };
@@ -25,6 +26,7 @@ const Switcher: FC<OwnProps> = ({
   checked = false,
   disabled,
   inactive,
+  noAnimation,
   onChange,
   onCheck,
 }) => {
@@ -42,6 +44,7 @@ const Switcher: FC<OwnProps> = ({
     'Switcher',
     disabled && 'disabled',
     inactive && 'inactive',
+    noAnimation && 'no-animation',
   );
 
   return (

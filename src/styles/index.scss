@@ -83,7 +83,9 @@ body.cursor-grabbing, body.cursor-grabbing * {
   box-sizing: border-box;
 }
 
-.disable-animations #root * {
+.no-animations #root *,
+.no-animations #root *::before,
+.no-animations #root *::after {
   transition: none !important;
 }
 
