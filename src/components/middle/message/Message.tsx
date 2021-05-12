@@ -86,7 +86,7 @@ import Invoice from './Invoice';
 import Album from './Album';
 import RoundVideo from './RoundVideo';
 import InlineButtons from './InlineButtons';
-import CommentsButton from './CommentButton';
+import CommentButton from './CommentButton';
 
 import './Message.scss';
 
@@ -158,6 +158,7 @@ const APPENDIX_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/s
 // eslint-disable-next-line max-len
 const APPENDIX_NOT_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>';
 const APPEARANCE_DELAY = 10;
+const NO_MEDIA_CORNERS_THRESHOLD = 18;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -297,6 +298,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const signature = (
     (isChannel && message.adminTitle) || (forwardInfo && !asForwarded && forwardInfo.adminTitle) || undefined
   );
+  const withCommentButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
+    && messageListType === 'thread' && !noComments;
 
   useEnsureMessage(chatId, hasReply ? message.replyToMessageId : undefined, replyMessage, message.id);
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight);
@@ -438,6 +441,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   let style = '';
   let calculatedWidth;
+  let noMediaCorners = false;
   const albumLayout = useMemo(() => {
     return isAlbum ? calculateAlbumLayout(isOwn, Boolean(asForwarded), album!, windowWidth) : undefined;
   }, [isAlbum, windowWidth, isOwn, asForwarded, album]);
@@ -456,10 +460,16 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (width) {
-      calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
+      calculatedWidth = Math.max(getMinMediaWidth(Boolean(text), withCommentButton), width);
+      if (calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
+        noMediaCorners = true;
+      }
     }
   } else if (albumLayout) {
-    calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), albumLayout.containerStyle.width);
+    calculatedWidth = Math.max(getMinMediaWidth(Boolean(text), withCommentButton), albumLayout.containerStyle.width);
+    if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
+      noMediaCorners = true;
+    }
   }
 
   if (calculatedWidth) {
@@ -489,6 +499,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       'content-inner',
       asForwarded && !customShape && 'forwarded-message',
       hasReply && 'reply-message',
+      noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup && !textParts && !asForwarded && !hasThread;
 
@@ -678,8 +689,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId)
     || isPinnedList
   );
-  const showCommentsButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
-    && messageListType === 'thread' && !noComments;
 
   return (
     <div
@@ -764,7 +773,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
               <i className="icon-arrow-right" />
             </Button>
           ) : undefined}
-          {showCommentsButton && <CommentsButton message={message} disabled={noComments} />}
+          {withCommentButton && <CommentButton message={message} disabled={noComments} />}
         </div>
         {message.inlineButtons && (
           <InlineButtons message={message} onClick={clickInlineButton} />
