@@ -34,7 +34,6 @@ const StickerButton: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const { isAnimated } = sticker;
   const localMediaHash = `sticker${sticker.id}`;
   const stickerSelector = `sticker-button-${sticker.id}`;
 
@@ -44,7 +43,7 @@ const StickerButton: FC<OwnProps> = ({
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !isIntersecting, ApiMediaFormat.BlobUrl);
 
   const shouldPlay = isIntersecting && !noAnimate;
-  const lottieData = useMedia(localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
+  const lottieData = useMedia(sticker.isAnimated && localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
   const [isAnimationLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
   const canAnimatedPlay = isAnimationLoaded && shouldPlay;
 
@@ -76,7 +75,7 @@ const StickerButton: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'StickerButton',
-    isAnimated && 'animated',
+    sticker.isAnimated && 'animated',
     stickerSelector,
     className,
   );
