@@ -122,6 +122,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       }
 
       if (options.onDrag) {
+        e.preventDefault();
         options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
       }
 
