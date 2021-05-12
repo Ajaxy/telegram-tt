@@ -157,12 +157,12 @@ async function download(
     return { mimeType, data, fullSize };
   } else if (entityType === 'stickerSet') {
     const data = await client.downloadStickerSetThumb(entity);
-    const mimeType = mediaFormat === ApiMediaFormat.Lottie ? 'application/json' : 'image/jpeg';
+    const mimeType = mediaFormat === ApiMediaFormat.Lottie ? 'application/json' : getMimeType(data);
 
     return { mimeType, data };
   } else {
     const data = await client.downloadProfilePhoto(entity, mediaMatch[1] === 'profile');
-    const mimeType = 'image/jpeg';
+    const mimeType = getMimeType(data);
 
     return { mimeType, data };
   }
@@ -217,4 +217,37 @@ function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
   }
 
   return mediaData;
+}
+
+
+function getMimeType(data: Uint8Array, fallbackMimeType = 'image/jpeg') {
+  if (data.length < 4) {
+    return fallbackMimeType;
+  }
+
+  let type = fallbackMimeType;
+  const signature = data.subarray(0, 4).reduce((result, byte) => result + byte.toString(16), '');
+
+  // https://en.wikipedia.org/wiki/List_of_file_signatures
+  switch (signature) {
+    case '89504e47':
+      type = 'image/png';
+      break;
+    case '47494638':
+      type = 'image/gif';
+      break;
+    case 'ffd8ffe0':
+    case 'ffd8ffe1':
+    case 'ffd8ffe2':
+    case 'ffd8ffe3':
+    case 'ffd8ffe8':
+      type = 'image/jpeg';
+      break;
+    case '52494646':
+      // In our case only webp is expected
+      type = 'image/webp';
+      break;
+  }
+
+  return type;
 }
