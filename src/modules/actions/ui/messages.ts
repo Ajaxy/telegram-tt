@@ -297,6 +297,7 @@ addReducer('setForwardChatId', (global, actions, payload) => {
 
   actions.openChat({ id });
   actions.closeMediaViewer();
+  actions.exitMessageSelectMode();
 });
 
 addReducer('openForwardMenuForSelectedMessages', (global, actions) => {
