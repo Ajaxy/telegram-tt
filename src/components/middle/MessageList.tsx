@@ -52,6 +52,7 @@ import resetScroll from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 import useLang, { LangFn } from '../../hooks/useLang';
+import useWindowSize from '../../hooks/useWindowSize';
 
 import Loading from '../ui/Loading';
 import MessageScroll from './MessageScroll';
@@ -328,9 +329,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     };
   }, []);
 
-  useLayoutEffect(() => {
+  // Memorize height for scroll animation
+  const { height: windowHeight } = useWindowSize();
+  useEffect(() => {
     containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
-  }, []);
+  }, [windowHeight]);
 
   // Workaround for an iOS bug when animated stickers sometimes disappear
   useLayoutEffect(() => {
