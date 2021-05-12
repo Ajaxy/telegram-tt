@@ -187,6 +187,8 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       className="LeftSearch custom-scroll"
       items={foundMessages}
       onLoadMore={handleLoadMore}
+      // To prevent scroll jumps caused by delayed local results rendering
+      noScrollRestoreOnTop
       noFastList
     >
       {dateSearchQuery && (

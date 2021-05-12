@@ -314,6 +314,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       cacheBuster={cacheBuster}
       sensitiveArea={PROFILE_SENSITIVE_AREA}
       preloadBackwards={canRenderContents ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
+      // To prevent scroll jumps caused by reordering member list
+      noScrollRestoreOnTop
       noFastList
       onLoadMore={getMore}
       onScroll={handleScroll}

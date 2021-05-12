@@ -18,6 +18,7 @@ type OwnProps = {
   preloadBackwards?: number;
   sensitiveArea?: number;
   noScrollRestore?: boolean;
+  noScrollRestoreOnTop?: boolean;
   noFastList?: boolean;
   cacheBuster?: any;
   children: any;
@@ -38,6 +39,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
   // Used to turn off restoring scroll position (e.g. for frequently re-ordered chat or user lists)
   noScrollRestore = false,
+  noScrollRestoreOnTop = false,
   noFastList,
   // Used to re-query `listItemElements` if rendering is delayed by transition
   cacheBuster,
@@ -110,10 +112,14 @@ const InfiniteScroll: FC<OwnProps> = ({
       return;
     }
 
+    if (noScrollRestoreOnTop && container.scrollTop === 0) {
+      return;
+    }
+
     resetScroll(container, newScrollTop);
 
     state.isScrollTopJustUpdated = true;
-  }, [noScrollRestore, itemSelector, items, cacheBuster]);
+  }, [items, itemSelector, noScrollRestore, noScrollRestoreOnTop, cacheBuster]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {
