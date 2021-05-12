@@ -226,6 +226,7 @@ const Transition: FC<OwnProps & StateProps> = ({
       if (activeElement) {
         activeElement.style.height = 'auto';
         container.style.height = `${activeElement.clientHeight}px`;
+        container.style.flexBasis = `${activeElement.clientHeight}px`;
       }
     }
   }, [shouldRestoreHeight, children]);
