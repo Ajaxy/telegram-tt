@@ -39,7 +39,7 @@
     }
   }
 
-  &:not(.disabled) {
+  &:not(.disabled):not(.is-static) {
     .ListItem-button {
       cursor: pointer;
 
@@ -50,7 +50,7 @@
   }
 
   @media (min-width: 600px) {
-    &:not(.has-ripple),
+    &:not(.has-ripple):not(.is-static),
     body.animation-level-0 & {
       .ListItem-button:active {
         --background-color: var(--color-item-active) !important;

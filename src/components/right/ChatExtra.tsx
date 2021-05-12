@@ -76,13 +76,11 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
     return undefined;
   }
 
-  const bio = fullInfo && fullInfo.bio;
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
-  const description = getChatDescription(chat);
   const link = getChatLink(chat);
   const url = link.indexOf('http') === 0 ? link : `http://${link}`;
   const printedUsername = username || chatUsername;
-  const printedDescription = bio || description;
+  const description = (fullInfo && fullInfo.bio) || getChatDescription(chat);
 
   return (
     <div className="ChatExtra">
@@ -104,15 +102,14 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           <span className="subtitle">{lang('Username')}</span>
         </ListItem>
       )}
-      {printedDescription && !!printedDescription.length && (
+      {description && !!description.length && (
         <ListItem
           icon="info"
           multiline
           narrow
-          ripple
-          onClick={() => handleClick(printedDescription, lang(userId ? 'UserBio' : 'Info'))}
+          isStatic
         >
-          <span className="title">{renderText(printedDescription, ['br', 'links', 'emoji'])}</span>
+          <span className="title">{renderText(description, ['br', 'links', 'emoji'])}</span>
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}

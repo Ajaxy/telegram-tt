@@ -34,6 +34,7 @@ type OwnProps = {
   focus?: boolean;
   destructive?: boolean;
   multiline?: boolean;
+  isStatic?: boolean;
   contextActions?: MenuItemContextAction[];
   onClick?: OnClickHandler;
 };
@@ -52,6 +53,7 @@ const ListItem: FC<OwnProps> = (props) => {
     focus,
     destructive,
     multiline,
+    isStatic,
     contextActions,
     onClick,
   } = props;
@@ -111,8 +113,9 @@ const ListItem: FC<OwnProps> = (props) => {
   }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
 
   const fullClassName = buildClassName(
-    'ListItem no-selection',
+    'ListItem',
     className,
+    !isStatic && 'no-selection',
     ripple && 'has-ripple',
     narrow && 'narrow',
     disabled && 'disabled',
@@ -121,6 +124,7 @@ const ListItem: FC<OwnProps> = (props) => {
     focus && 'focus',
     destructive && 'destructive',
     multiline && 'multiline',
+    isStatic && 'is-static',
   );
 
   return (
