@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
@@ -8,7 +8,7 @@ import { GlobalActions, MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_LIST_SLICE, SCHEDULED_WHEN_ONLINE } from '../../config';
-import { IS_ANDROID, IS_IOS, IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_ANDROID, IS_MOBILE_SCREEN } from '../../util/environment';
 import {
   selectChatMessages,
   selectIsViewportNewest,
@@ -38,7 +38,7 @@ import {
   pick,
 } from '../../util/iteratees';
 import {
-  fastRaf, debounce, throttleWithTickEnd, onTickEnd,
+  fastRaf, debounce, onTickEnd,
 } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -107,7 +107,6 @@ const FOCUSING_FADE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
-const runThrottledOnTickEnd = throttleWithTickEnd((cb) => cb());
 
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
@@ -334,22 +333,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
   }, [windowHeight]);
-
-  // Workaround for an iOS bug when animated stickers sometimes disappear
-  useLayoutEffect(() => {
-    if (!IS_IOS) {
-      return;
-    }
-
-    runThrottledOnTickEnd(() => {
-      if (!(containerRef.current as HTMLDivElement).querySelector('.AnimatedSticker.is-playing')) {
-        return;
-      }
-
-      const style = (containerRef.current as HTMLDivElement).style as any;
-      style.webkitOverflowScrolling = style.webkitOverflowScrolling === 'auto' ? '' : 'auto';
-    });
-  });
 
   // Initial message loading
   useEffect(() => {

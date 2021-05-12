@@ -2,7 +2,6 @@ import React, {
   FC, useEffect, useRef, memo, useCallback, useState,
 } from '../../lib/teact/teact';
 
-import { IS_IOS } from '../../util/environment';
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
@@ -190,12 +189,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   // then we can play again.
   useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf);
 
-  const fullClassName = buildClassName(
-    'AnimatedSticker',
-    className,
-    // Workaround for an iOS bug when animated stickers sometimes disappear
-    IS_IOS && play && 'is-playing',
-  );
+  const fullClassName = buildClassName('AnimatedSticker', className);
 
   const style = size ? `width: ${size}px; height: ${size}px;` : undefined;
 
