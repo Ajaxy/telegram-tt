@@ -223,6 +223,11 @@
     width: calc(1.25 * var(--message-text-size, 1rem));
     background-size: calc(1.25 * var(--message-text-size, 1rem));
   }
+
+  .no-media-corners {
+    --border-top-left-radius: 0;
+    --border-top-right-radius: 0;
+  }
 }
 
 .message-content.media {
