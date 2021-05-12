@@ -234,9 +234,9 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     chatId={renderingChatId}
                     threadId={renderingThreadId}
                     type={renderingMessageListType}
+                    canPost={renderingCanPost}
                     hasTools={hasTools}
                     onFabToggle={setIsFabShown}
-                    bottomOffset={renderingCanPost ? 'none' : (isPinnedMessageList ? 'big' : 'small')}
                   />
                   <div className={buildClassName('middle-column-footer', !renderingCanPost && 'no-composer')}>
                     {renderingCanPost && (

@@ -30,7 +30,6 @@ import {
   isChatChannel,
   isChatPrivate,
   isOwnMessage,
-  getCanPostInChat,
 } from '../../modules/helpers';
 import {
   compact,
@@ -65,15 +64,14 @@ type OwnProps = {
   chatId: number;
   threadId: number;
   type: MessageListType;
+  canPost: boolean;
   onFabToggle: (show: boolean) => void;
   hasTools?: boolean;
-  bottomOffset: 'none' | 'small' | 'big';
 };
 
 type StateProps = {
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
-  canPost?: boolean;
   isChatWithSelf?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
@@ -119,7 +117,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isChatLoaded,
   isChannelChat,
   canPost,
-  bottomOffset,
   isChatWithSelf,
   messageIds,
   messagesById,
@@ -505,8 +502,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     'MessageList custom-scroll',
     !withUsers && 'no-avatars',
     isChannelChat && 'no-avatars',
-    (!canPost || bottomOffset !== 'none') && 'bottom-padding',
-    (bottomOffset !== 'none') && `bottom-padding-${bottomOffset}`,
+    !canPost && 'no-composer',
+    type === 'pinned' && 'type-pinned',
     isSelectModeActive && 'select-mode-active',
     hasFocusing && 'has-focusing',
     isScrolled && 'scrolled',
@@ -758,7 +755,6 @@ export default memo(withGlobal<OwnProps>(
       isRestricted,
       restrictionReason,
       isChannelChat: isChatChannel(chat),
-      canPost: getCanPostInChat(chat, threadId),
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       messageIds,
       messagesById,
