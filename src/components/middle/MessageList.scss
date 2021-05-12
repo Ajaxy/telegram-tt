@@ -44,17 +44,19 @@
     }
   }
 
-  &.bottom-padding {
+  &.no-composer {
+    margin-bottom: 0;
+
     .messages-container {
       padding-bottom: 1rem;
     }
 
-    &-big {
+    &.type-pinned {
       .messages-container {
-        padding-bottom: 4.75rem;
+        padding-bottom: 5rem;
 
         @media (max-width: 600px) {
-          padding-bottom: 3.5rem;
+          padding-bottom: 3.75rem;
         }
       }
     }
