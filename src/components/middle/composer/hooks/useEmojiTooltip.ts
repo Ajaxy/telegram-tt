@@ -14,7 +14,7 @@ let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
-const RE_NOT_EMOJI_SEARCH = /[^-:_a-z\d]+/i;
+const RE_NOT_EMOJI_SEARCH = /[^-_:\p{L}\p{N}]+/iu;
 const EMOJIS_LIMIT = 36;
 
 export default function useEmojiTooltip(
@@ -109,7 +109,7 @@ export default function useEmojiTooltip(
 
 function getEmojiCode(html: string) {
   const tempEl = document.createElement('div');
-  tempEl.innerHTML = html;
+  tempEl.innerHTML = html.replace('<br>', '\n');
   const text = tempEl.innerText;
 
   const lastSymbol = text[text.length - 1];
