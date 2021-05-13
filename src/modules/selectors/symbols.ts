@@ -39,7 +39,5 @@ export function selectAnimatedEmoji(global: GlobalState, emoji: string) {
     return undefined;
   }
 
-  emoji = emoji.replace('\ufe0f', '');
-
   return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji);
 }
