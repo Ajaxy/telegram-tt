@@ -30,6 +30,7 @@
 
     .HeaderPinnedMessage {
       max-width: unset;
+      margin-top: -0.1875rem;
     }
   }
 
@@ -316,9 +317,9 @@
   .HeaderPinnedMessage {
     display: flex;
     flex-shrink: 1;
-    padding: 0.25rem;
-    margin-top: -0.1875rem;
+    margin-top: -0.25rem;
     margin-bottom: -0.25rem;
+    padding: 0.25rem;
     padding-left: 0.375rem;
     border-radius: var(--border-radius-messages-small);
     position: relative;
