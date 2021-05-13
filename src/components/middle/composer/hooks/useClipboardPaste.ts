@@ -8,7 +8,7 @@ const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_MESSAGE_LENGTH = 4096;
 
 export default (
-  insertTextAndUpdateCursor: (text: string) => void,
+  insertTextAndUpdateCursor: (text: string, inputId?: string) => void,
   setAttachments: StateHookSetter<ApiAttachment[]>,
   editedMessage: ApiMessage | undefined,
 ) => {
@@ -43,7 +43,7 @@ export default (
       }
 
       if (pastedText) {
-        insertTextAndUpdateCursor(pastedText);
+        insertTextAndUpdateCursor(pastedText, input ? input.id : undefined);
       }
     }
 

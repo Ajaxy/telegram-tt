@@ -301,9 +301,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     setHtml,
   );
 
-  const insertTextAndUpdateCursor = useCallback((text: string) => {
+  const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
     const selection = window.getSelection()!;
-    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const messageInput = document.getElementById(inputId)!;
     const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
       .join('')
       .replace(/\u200b+/g, '\u200b');
@@ -679,7 +679,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         groupChatMembers={groupChatMembers}
         currentUserId={currentUserId}
         usersById={usersById}
+        recentEmojis={recentEmojis}
         onCaptionUpdate={setHtml}
+        addRecentEmoji={addRecentEmoji}
         onSend={shouldSchedule ? openCalendar : handleSend}
         onClear={handleClearAttachment}
       />

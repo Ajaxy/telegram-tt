@@ -56,7 +56,7 @@ export default function useEmojiTooltip(
   }, []);
 
   useEffect(() => {
-    if (!html || !emojiIds.length) {
+    if (!isAllowed || !html || !emojiIds.length) {
       unmarkIsOpen();
       return;
     }
@@ -82,7 +82,7 @@ export default function useEmojiTooltip(
     } else {
       unmarkIsOpen();
     }
-  }, [emojiIds, html, markIsOpen, recentEmojis, unmarkIsOpen]);
+  }, [emojiIds, html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen]);
 
   const insertEmoji = useCallback((textEmoji: string) => {
     const atIndex = html.lastIndexOf(':');
