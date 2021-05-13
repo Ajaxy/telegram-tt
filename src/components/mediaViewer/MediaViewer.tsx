@@ -399,7 +399,11 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     if (avatarOwner) {
       return (
         <div key={chatId} className="media-viewer-content">
-          {renderPhoto(fullMediaData || blobUrlPreview, calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false))}
+          {renderPhoto(
+            fullMediaData || blobUrlPreview,
+            calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false),
+            !IS_MOBILE_SCREEN && !isZoomed,
+          )}
         </div>
       );
     } else if (message) {
@@ -411,6 +415,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           {isPhoto && renderPhoto(
             localBlobUrl || fullMediaData || blobUrlPreview || blobUrlPictogram,
             message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
+            !IS_MOBILE_SCREEN && !isZoomed,
           )}
           {isVideo && (
             <VideoPlayer
@@ -529,7 +534,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   );
 };
 
-function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
+function renderPhoto(blobUrl?: string, imageSize?: IDimensions, canDrag?: boolean) {
   return blobUrl
     ? (
       <img
@@ -537,7 +542,7 @@ function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
         alt=""
         // @ts-ignore teact feature
         style={imageSize ? `width: ${imageSize.width}px` : ''}
-        draggable={false}
+        draggable={Boolean(canDrag)}
       />
     )
     : (
