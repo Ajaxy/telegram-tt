@@ -284,7 +284,6 @@
     }
 
     &.is-in-selection-mode {
-
       .Audio:not(.audio-is-selected),
       .File:not(.file-is-selected) {
         .message-select-control:not(.group-select) {
@@ -312,7 +311,7 @@
 
               &::after {
                 background: var(--background-color);
-                border-color: rgba(var(--color-text-green-rgb), 0.5);
+                border-color: var(--color-message-meta-own);
               }
             }
           }
@@ -343,6 +342,17 @@
 
     .message-content {
       transition: background-color var(--select-transition);
+    }
+
+    &.own {
+      .message-content-wrapper {
+        display: flex;
+        justify-content: flex-end;
+
+        .message-content {
+          width: 100%;
+        }
+      }
     }
   }
 
