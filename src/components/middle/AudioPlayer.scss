@@ -73,7 +73,7 @@
     border-radius: var(--border-radius-messages-small);
 
     &:hover {
-      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+      background-color: var(--color-interactive-element-hover);
     }
 
     @media (min-width: 1440px) and (max-width: 1500px) {

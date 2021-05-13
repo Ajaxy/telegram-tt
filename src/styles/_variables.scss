@@ -76,6 +76,7 @@ $color-user-8: #faa774;
   --color-interactive-active: var(--color-primary);
   --color-interactive-inactive: rgba(var(--color-text-secondary-rgb), 0.25);
   --color-interactive-buffered: rgba(var(--color-text-secondary-rgb), 0.25); // Overlays underlying inactive element
+  --color-interactive-element-hover: rgba(var(--color-text-secondary-rgb), 0.08);
 
   --color-primary: #{$color-primary};
   --color-primary-rgb: #{toRGB($color-primary)};

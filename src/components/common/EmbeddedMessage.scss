@@ -107,7 +107,7 @@
     grid-template-rows: 1fr;
     width: 100%;
     --accent-color: var(--color-primary);
-    --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
+    --hover-color: var(--color-interactive-element-hover);
 
     &::before {
       bottom: .3125rem;

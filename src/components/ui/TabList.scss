@@ -17,6 +17,7 @@
 
   &.big {
     font-size: 1rem;
+    --border-radius-messages-small: 0;
   }
 
   &::-webkit-scrollbar {

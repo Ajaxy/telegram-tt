@@ -326,7 +326,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+      background-color: var(--color-interactive-element-hover);
     }
 
     .pinned-message-border {
