@@ -42,6 +42,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, ('loadMessage' | 'openPollResults')>;
 
+const SOLUTION_CONTAINER_ID = '#middle-column-portals';
 const SOLUTION_DURATION = 5000;
 const NBSP = '\u00A0';
 
@@ -248,6 +249,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
           message={renderTextWithEntities(poll.results.solution, poll.results.solutionEntities)}
           duration={SOLUTION_DURATION}
           onDismiss={handleSolutionHide}
+          containerId={SOLUTION_CONTAINER_ID}
         />
       )
     );

@@ -18,6 +18,7 @@ import Portal from './Portal';
 import './Notification.scss';
 
 type OwnProps = {
+  containerId?: string;
   message: TextPart[];
   duration?: number;
   onDismiss: () => void;
@@ -26,7 +27,9 @@ type OwnProps = {
 const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
 
-const Notification: FC<OwnProps> = ({ message, duration = DEFAULT_DURATION, onDismiss }) => {
+const Notification: FC<OwnProps> = ({
+  message, duration = DEFAULT_DURATION, containerId, onDismiss,
+}) => {
   const [isOpen, setIsOpen] = useState(true);
   // eslint-disable-next-line no-null/no-null
   const timerRef = useRef<number | undefined>(null);
@@ -63,7 +66,7 @@ const Notification: FC<OwnProps> = ({ message, duration = DEFAULT_DURATION, onDi
   }, [duration, closeAndDismiss]);
 
   return (
-    <Portal className="Notification-container" containerId="#middle-column-portals">
+    <Portal className="Notification-container" containerId={containerId}>
       <div
         className={buildClassName('Notification', transitionClassNames)}
         onClick={closeAndDismiss}
