@@ -14,6 +14,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import useThrottledMemo from '../../../hooks/useThrottledMemo';
 import useLang from '../../../hooks/useLang';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Transition from '../../ui/Transition';
 import TabList from '../../ui/TabList';
@@ -121,6 +122,14 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       }),
     });
   }, [activeTab, folderTabs]);
+
+  const isNotInAllTabRef = useRef();
+  isNotInAllTabRef.current = activeTab !== 0;
+  useEffect(() => captureEscKeyListener(() => {
+    if (isNotInAllTabRef.current) {
+      setActiveTab(0);
+    }
+  }), []);
 
   const {
     shouldRender: shouldRenderPlaceholder, transitionClassNames,
