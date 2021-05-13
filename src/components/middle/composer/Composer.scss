@@ -256,7 +256,7 @@
     padding-top: calc(1rem - var(--border-width));
     padding-bottom: calc(1rem - var(--border-width));
     overflow: hidden;
-    line-height: 1.5rem;
+    line-height: 1.375rem;
 
     &.overflown {
       overflow-y: auto;
@@ -276,7 +276,7 @@
 
   .placeholder-text {
     position: absolute;
-    bottom: 1rem;
+    bottom: .9375rem;
     color: var(--color-placeholders);
     pointer-events: none;
 
@@ -318,6 +318,8 @@
     min-height: 3.5rem;
     max-height: 26rem;
     line-height: 1.3125;
+    padding-top: calc(1.15625rem - var(--border-width));
+    padding-bottom: calc(1.15625rem - var(--border-width));
 
     @media (max-width: 600px) {
       height: 2.875rem;
@@ -359,13 +361,14 @@
 
 #caption-input-text {
   .form-control {
+    height: 3.25rem;
     min-height: 3.25rem;
     max-height: 15rem;
   }
 
   .placeholder-text {
-    bottom: 1rem;
-    left: 1rem;
+    bottom: .8125rem;
+    left: .90625rem;
   }
 }
 

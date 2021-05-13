@@ -9,6 +9,7 @@ import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
+import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
@@ -16,6 +17,7 @@ import Modal from '../../ui/Modal';
 import File from '../../common/File';
 import MessageInput from './MessageInput';
 import MentionTooltip from './MentionTooltip';
+import EmojiTooltip from './EmojiTooltip.async';
 
 import './AttachmentModal.scss';
 
@@ -23,9 +25,12 @@ export type OwnProps = {
   attachments: ApiAttachment[];
   caption: string;
   canSuggestMembers?: boolean;
+  canSuggestEmoji?: boolean;
   currentUserId?: number;
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
+  recentEmojis: string[];
+  addRecentEmoji: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onClear: () => void;
@@ -38,7 +43,9 @@ const AttachmentModal: FC<OwnProps> = ({
   groupChatMembers,
   currentUserId,
   usersById,
+  recentEmojis,
   onCaptionUpdate,
+  addRecentEmoji,
   onSend,
   onClear,
 }) => {
@@ -58,6 +65,15 @@ const AttachmentModal: FC<OwnProps> = ({
     groupChatMembers,
     currentUserId,
     usersById,
+  );
+  const {
+    isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
+  } = useEmojiTooltip(
+    isOpen,
+    caption,
+    recentEmojis,
+    EDITABLE_INPUT_MODAL_ID,
+    onCaptionUpdate,
   );
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
@@ -143,6 +159,13 @@ const AttachmentModal: FC<OwnProps> = ({
           onInsertUserName={insertMention}
           filteredChatMembers={mentionFilteredMembers}
           usersById={usersById}
+        />
+        <EmojiTooltip
+          isOpen={isEmojiTooltipOpen}
+          emojis={filteredEmojis}
+          onClose={closeEmojiTooltip}
+          onEmojiSelect={insertEmoji}
+          addRecentEmoji={addRecentEmoji}
         />
         <MessageInput
           id="caption-input-text"
