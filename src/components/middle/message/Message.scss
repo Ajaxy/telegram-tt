@@ -392,6 +392,10 @@
       top: -3px;
       font-size: 1.625rem;
     }
+
+    .theme-dark & {
+      border-color: #ffffff80;
+    }
   }
 
   .Avatar {
