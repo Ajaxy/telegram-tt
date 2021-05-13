@@ -2,7 +2,7 @@ import { callApi } from '../api/gramjs';
 import { ApiChat, ApiMessage } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG } from '../config';
-import { getDispatch, getGlobal } from '../lib/teact/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
 import {
   getChatTitle,
   getMessageAction,
@@ -12,6 +12,7 @@ import {
   isActionMessage,
   isChatChannel,
 } from '../modules/helpers';
+import { replaceSettings } from '../modules/reducers';
 import { selectChatMessage, selectUser } from '../modules/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 
@@ -122,9 +123,22 @@ export async function unsubscribe() {
   await unsubscribeFromPush(subscription);
 }
 
+// Load notification settings from the api
+async function loadNotificationsSettings() {
+  const result = await callApi('loadNotificationsSettings');
+  if (!result) return;
+  setGlobal(replaceSettings(getGlobal(), result));
+}
+
 export async function subscribe() {
-  await requestPermission();
-  if (!checkIfPushSupported()) return;
+  loadNotificationsSettings();
+
+  if (!checkIfPushSupported()) {
+    // Ask for notification permissions only if service worker notifications are not supported
+    // As pushManager.subscribe automatically triggers permission popup
+    await requestPermission();
+    return;
+  }
   const serviceWorkerRegistration = await navigator.serviceWorker.ready;
   let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
   if (!checkIfShouldResubscribe(subscription)) return;
@@ -157,17 +171,22 @@ export async function subscribe() {
       // and / or gcm_user_visible_only
       // eslint-disable-next-line no-console
       console.log('[PUSH] Unable to subscribe to push.', error);
+
+      // Request permissions and fall back to local notifications
+      // if pushManager.subscribe was aborted due to invalid VAPID key.
+      if (error.code === DOMException.ABORT_ERR) {
+        await requestPermission();
+      }
     }
   }
 }
 
-async function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
-  if (chat.isMuted) return false;
+function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
+  if (chat.isMuted || chat.isNotJoined) return false;
 
   // Dont show notification for active chat if client has focus
   if (isActive && document.hasFocus()) return false;
 
-  await getDispatch().loadNotificationsSettings();
   const global = getGlobal();
   switch (chat.type) {
     case 'chatTypePrivate':
@@ -226,7 +245,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
   };
 }
 
-export async function showNewMessageNotification({
+export function showNewMessageNotification({
   chat,
   message,
   isActiveChat,
@@ -234,8 +253,7 @@ export async function showNewMessageNotification({
   if (!checkIfNotificationsSupported()) return;
   if (!message.id) return;
 
-  const shouldNotify = await checkIfShouldNotify(chat, isActiveChat);
-  if (!shouldNotify) return;
+  if (!checkIfShouldNotify(chat, isActiveChat)) return;
 
   const {
     title,
