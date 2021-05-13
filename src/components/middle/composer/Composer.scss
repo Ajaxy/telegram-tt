@@ -321,10 +321,6 @@
     padding-top: calc(1.15625rem - var(--border-width));
     padding-bottom: calc(1.15625rem - var(--border-width));
 
-    &:not(.clone) {
-      overflow: initial;
-    }
-
     @media (max-width: 600px) {
       height: 2.875rem;
       min-height: 2.875rem;
