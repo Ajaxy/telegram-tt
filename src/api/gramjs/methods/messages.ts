@@ -404,11 +404,13 @@ export async function editMessage({
   message,
   text,
   entities,
+  noWebPage,
 }: {
   chat: ApiChat;
   message: ApiMessage;
   text: string;
   entities?: ApiMessageEntity[];
+  noWebPage?: boolean;
 }) {
   const isScheduled = message.date * 1000 > Date.now();
   const messageUpdate: Partial<ApiMessage> = {
@@ -441,6 +443,7 @@ export async function editMessage({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: message.id,
     ...(isScheduled && { scheduleDate: message.date }),
+    ...(noWebPage && { noWebpage: noWebPage }),
   }), true);
 }
 

@@ -258,7 +258,7 @@ addReducer('editMessage', (global, actions, payload) => {
   }
 
   void callApi('editMessage', {
-    chat, message, text, entities,
+    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId),
   });
 
   actions.setEditingId({ messageId: undefined });
