@@ -161,7 +161,7 @@
   .svg-appendix {
     position: absolute;
     bottom: -.1875rem;
-    right: -.562rem; // This value is correct. Safari fix
+    right: -.551rem; // This value is correct. Safari fix
     width: .5625rem;
     height: 1.25rem;
     transition: opacity 200ms;
@@ -320,6 +320,10 @@
     line-height: 1.3125;
     padding-top: calc(1.15625rem - var(--border-width));
     padding-bottom: calc(1.15625rem - var(--border-width));
+
+    &:not(.clone) {
+      overflow: initial;
+    }
 
     @media (max-width: 600px) {
       height: 2.875rem;
