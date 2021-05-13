@@ -29,7 +29,7 @@
   }
 
   &:not(.active):hover {
-    background: rgba(var(--color-text-secondary-rgb), 0.08);
+    background: var(--color-interactive-element-hover);
   }
 
   > span {
