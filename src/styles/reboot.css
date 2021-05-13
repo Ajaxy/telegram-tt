@@ -149,8 +149,8 @@ pre,
 code,
 kbd,
 samp {
-  font-family: monospace, monospace;
-  font-size: 1em;
+  font: .9375rem/1.25 'Courier', 'Courier New', 'Nimbus Mono L', 'Courier 10 Pitch', 'FreeMono', sans-serif-monospace, monospace;
+  font-size-adjust: .43;
 }
 
 pre {
