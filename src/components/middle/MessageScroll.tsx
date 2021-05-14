@@ -100,7 +100,7 @@ const MessageScroll: FC<OwnProps> = ({
     if (target.className === 'backwards-trigger') {
       resetScroll(containerRef.current!);
       loadMoreBackwards();
-    } else if (target.className === 'forwards-trigger' && (target as HTMLDivElement).dataset.isActive) {
+    } else if (target.className === 'forwards-trigger') {
       resetScroll(containerRef.current!);
       loadMoreForwards();
     }
@@ -116,10 +116,8 @@ const MessageScroll: FC<OwnProps> = ({
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: FAB_THRESHOLD,
-  }, ([{ target }]) => {
-    if ((target as HTMLDivElement).dataset.isActive) {
-      updateFabVisibility();
-    }
+  }, () => {
+    updateFabVisibility();
   });
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
@@ -175,13 +173,11 @@ const MessageScroll: FC<OwnProps> = ({
         ref={forwardsTriggerRef}
         key="forwards-trigger"
         className="forwards-trigger"
-        data-is-active={!isViewportNewest}
       />
       <div
         ref={fabTriggerRef}
         key="fab-trigger"
         className="fab-trigger"
-        data-is-active={isViewportNewest}
       />
     </div>
   );

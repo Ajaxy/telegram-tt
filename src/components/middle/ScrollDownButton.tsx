@@ -7,7 +7,6 @@ import { GlobalActions, MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList } from '../../modules/selectors';
-import { getCanPostInChat } from '../../modules/helpers';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import { pick } from '../../util/iteratees';
@@ -19,11 +18,11 @@ import './ScrollDownButton.scss';
 
 type OwnProps = {
   isShown: boolean;
+  canPost?: boolean;
 };
 
 type StateProps = {
   messageListType?: MessageListType;
-  canPost?: boolean;
   unreadCount?: number;
 };
 
@@ -33,8 +32,8 @@ const FOCUS_MARGIN = 20;
 
 const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   isShown,
-  messageListType,
   canPost,
+  messageListType,
   unreadCount,
   focusLastMessage,
 }) => {
@@ -50,8 +49,8 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
       focusLastMessage();
     } else {
       const messagesContainer = elementRef.current!.parentElement!.querySelector<HTMLDivElement>('.MessageList')!;
-      const messsageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
-      const lastMessageElement = messsageElements[messsageElements.length - 1];
+      const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
+      const lastMessageElement = messageElements[messageElements.length - 1];
       if (!lastMessageElement) {
         return;
       }
@@ -94,11 +93,9 @@ export default memo(withGlobal<OwnProps>(
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
     const chat = selectChat(global, chatId);
-    const canPost = chat && getCanPostInChat(chat, threadId);
 
     return {
       messageListType,
-      canPost,
       unreadCount: chat && threadId === MAIN_THREAD_ID && messageListType === 'thread' ? chat.unreadCount : undefined,
     };
   },

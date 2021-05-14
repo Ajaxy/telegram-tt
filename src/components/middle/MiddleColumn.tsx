@@ -100,7 +100,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const { width: windowWidth } = useWindowSize();
 
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
-  const [isFabShown, setIsFabShown] = useState(false);
+  const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
   const hasTools = hasPinnedOrAudioMessage && (
@@ -119,6 +119,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const renderingMessageListType = usePrevDuringAnimation(messageListType, CLOSE_ANIMATION_DURATION);
   const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION);
   const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
+  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, CLOSE_ANIMATION_DURATION);
 
   useEffect(() => {
     return chatId
@@ -130,6 +131,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     setDropAreaState(DropAreaState.None);
+    setIsFabShown(undefined);
   }, [chatId]);
 
   useEffect(() => {
@@ -282,7 +284,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               )}
             </Transition>
 
-            <ScrollDownButton isShown={isFabShown} />
+            <ScrollDownButton
+              isShown={renderingIsFabShown}
+              canPost={renderingCanPost}
+            />
           </div>
           {IS_MOBILE_SCREEN && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
         </>
