@@ -18,7 +18,7 @@ let windowSize = updateSizes();
 const handleResize = throttle(() => {
   windowSize = updateSizes();
 
-  if ((isMobileScreen() !== IS_MOBILE_SCREEN) || (IS_MOBILE_SCREEN && IS_LANDSCAPE !== !isLandscape())) {
+  if ((isMobileScreen() !== IS_MOBILE_SCREEN) || (IS_MOBILE_SCREEN && IS_LANDSCAPE !== isLandscape())) {
     window.location.reload();
   }
 }, 250, true);
