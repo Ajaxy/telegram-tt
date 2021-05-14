@@ -201,7 +201,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       const currentPinnedIds = selectPinnedIds(global, chatId) || [];
       const newPinnedIds = isPinned
-        ? [...currentPinnedIds, ...messageIds]
+        ? [...currentPinnedIds, ...messageIds].sort((a, b) => b - a)
         : currentPinnedIds.filter((id) => !messageIds.includes(id));
 
       setGlobal(replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', newPinnedIds));
