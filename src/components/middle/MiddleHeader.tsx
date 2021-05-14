@@ -134,14 +134,15 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [chatId, loadPinnedMessages, lastSyncTime, threadId]);
 
-  useEffect(() => {
-    setPinnedMessageIndex(0);
-  }, [chatId]);
-
-  // Modify index after unpinning
+  // Modify pinned index after unpinning
   useEffect(() => {
     setPinnedMessageIndex(pinnedMessagesCount ? cycleRestrict(pinnedMessagesCount, pinnedMessageIndex) : -1);
   }, [pinnedMessagesCount, pinnedMessageIndex]);
+
+  // Reset pinned index when switching chats
+  useEffect(() => {
+    setPinnedMessageIndex(0);
+  }, [chatId]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
