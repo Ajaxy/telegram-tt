@@ -126,6 +126,7 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
       && peerEntity.restrictionReason.some((reason) => reason.platform === 'all');
 
     return {
+      // `left` is weirdly set to `true` on all channels never joined before
       isNotJoined: peerEntity.left,
       isRestricted,
       restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
