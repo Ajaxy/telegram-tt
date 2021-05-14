@@ -306,12 +306,20 @@ export default memo(withGlobal(
     const isCustomBackgroundColor = Boolean((customBackground || '').match(/^#[a-f\d]{6,8}$/i));
     const currentMessageList = selectCurrentMessageList(global);
     const { chats: { listIds } } = global;
+
+    const state: StateProps = {
+      customBackground,
+      patternColor,
+      isCustomBackgroundColor,
+      isRightColumnShown: selectIsRightColumnShown(global),
+      isBackgroundBlurred,
+      isMobileSearchActive: Boolean(IS_MOBILE_SCREEN && selectCurrentTextSearch(global)),
+      isSelectModeActive: selectIsInSelectMode(global),
+      animationLevel: global.settings.byKey.animationLevel,
+    };
+
     if (!currentMessageList || !listIds.active) {
-      return {
-        customBackground,
-        isBackgroundBlurred,
-        isCustomBackgroundColor,
-      };
+      return state;
     }
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
@@ -324,6 +332,7 @@ export default memo(withGlobal(
     const isPinnedMessageList = messageListType === 'pinned';
 
     return {
+      ...state,
       chatId,
       threadId,
       messageListType,
@@ -336,14 +345,6 @@ export default memo(withGlobal(
         || Boolean(pinnedIds && pinnedIds.length)
         || Boolean(audioChatId && audioMessageId)
       ),
-      customBackground,
-      patternColor,
-      isCustomBackgroundColor,
-      isRightColumnShown: selectIsRightColumnShown(global),
-      isBackgroundBlurred,
-      isMobileSearchActive: Boolean(IS_MOBILE_SCREEN && selectCurrentTextSearch(global)),
-      isSelectModeActive: selectIsInSelectMode(global),
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
