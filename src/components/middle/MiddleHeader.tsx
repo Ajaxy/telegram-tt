@@ -429,7 +429,7 @@ export default memo(withGlobal<OwnProps>(
       }
     }
 
-    let state: StateProps = {
+    const state: StateProps = {
       typingStatus,
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),
@@ -445,36 +445,38 @@ export default memo(withGlobal<OwnProps>(
     };
 
     const messagesById = selectChatMessages(global, chatId);
-    if (messageListType === 'thread' && messagesById) {
-      if (threadId === MAIN_THREAD_ID) {
-        const pinnedMessageIds = selectPinnedIds(global, chatId);
+    if (messageListType !== 'thread' || !messagesById) {
+      return state;
+    }
 
-        if (pinnedMessageIds && pinnedMessageIds.length) {
-          const firstPinnedMessage = messagesById[pinnedMessageIds[0]];
-          const {
-            canUnpin,
-          } = (firstPinnedMessage && selectAllowedMessageActions(global, firstPinnedMessage, threadId)) || {};
-          state = {
-            ...state,
-            pinnedMessageIds,
-            messagesById,
-            canUnpin,
-          };
-        }
-      } else {
-        const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
-        const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
-        const sender = message ? selectForwardedSender(global, message) : undefined;
-        const topMessageTitle = sender ? getSenderTitle(sender) : undefined;
+    Object.assign(state, { messagesById });
 
-        state = {
-          ...state,
-          pinnedMessageIds: pinnedMessageId,
-          messagesById,
-          canUnpin: false,
-          topMessageTitle,
-        };
-      }
+    if (threadId !== MAIN_THREAD_ID) {
+      const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
+      const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
+      const sender = message ? selectForwardedSender(global, message) : undefined;
+      const topMessageTitle = sender ? getSenderTitle(sender) : undefined;
+
+      return {
+        ...state,
+        pinnedMessageIds: pinnedMessageId,
+        canUnpin: false,
+        topMessageTitle,
+      };
+    }
+
+    const pinnedMessageIds = selectPinnedIds(global, chatId);
+    if (pinnedMessageIds && pinnedMessageIds.length) {
+      const firstPinnedMessage = messagesById[pinnedMessageIds[0]];
+      const {
+        canUnpin,
+      } = (firstPinnedMessage && selectAllowedMessageActions(global, firstPinnedMessage, threadId)) || {};
+
+      return {
+        ...state,
+        pinnedMessageIds,
+        canUnpin,
+      };
     }
 
     return state;
