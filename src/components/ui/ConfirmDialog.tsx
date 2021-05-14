@@ -10,6 +10,7 @@ type OwnProps = {
   isOpen: boolean;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
+  title?: string;
   header?: FC;
   textParts?: TextPart[];
   text?: string;
@@ -23,6 +24,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   isOpen,
   onClose,
   onCloseAnimationEnd,
+  title,
   header,
   text,
   textParts,
@@ -36,6 +38,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   return (
     <Modal
       className="confirm"
+      title={title}
       header={header}
       isOpen={isOpen}
       onClose={onClose}

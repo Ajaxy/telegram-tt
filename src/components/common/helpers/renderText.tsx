@@ -205,6 +205,10 @@ function addLinks(textParts: TextPart[]): TextPart[] {
           </MentionLink>,
         );
       } else {
+        if (nextLink.endsWith('?')) {
+          nextLink = nextLink.slice(0, nextLink.length - 1);
+        }
+
         content.push(
           <SafeLink text={nextLink} url={nextLink} />,
         );

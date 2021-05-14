@@ -14,20 +14,31 @@ type OwnProps = {
   children?: any;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openTelegramLink'>;
+type DispatchProps = Pick<GlobalActions, 'toggleSafeLinkModal' | 'openTelegramLink'>;
 
 const SafeLink: FC<OwnProps & DispatchProps> = ({
   url,
   text,
   className,
   children,
+  toggleSafeLinkModal,
   openTelegramLink,
 }) => {
+  const content = children || text;
+  const isNotSafe = url !== content;
+
   const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (
       e.ctrlKey || e.altKey || e.shiftKey || e.metaKey
       || !url || (!url.match(RE_TME_LINK) && !url.match(RE_TME_INVITE_LINK))
     ) {
+      if (isNotSafe) {
+        toggleSafeLinkModal({ url });
+
+        e.preventDefault();
+        return false;
+      }
+
       return true;
     }
 
@@ -35,7 +46,7 @@ const SafeLink: FC<OwnProps & DispatchProps> = ({
     openTelegramLink({ url });
 
     return false;
-  }, [openTelegramLink, url]);
+  }, [isNotSafe, openTelegramLink, toggleSafeLinkModal, url]);
 
   if (!url) {
     return undefined;
@@ -48,32 +59,32 @@ const SafeLink: FC<OwnProps & DispatchProps> = ({
 
   return (
     <a
-      href={getHref(url)}
-      title={getDecodedUrl(url)}
+      href={ensureProtocol(url)}
+      title={getDomain(url)}
       target="_blank"
       rel="noopener noreferrer"
       className={classNames}
       onClick={handleClick}
     >
-      {children || text}
+      {content}
     </a>
   );
 };
 
-function getHref(url?: string) {
+function ensureProtocol(url?: string) {
   if (!url) {
     return undefined;
   }
 
-  return url.includes('://') ? url : `http://${url}`;
+  return url.includes('://') ? url : `https://${url}`;
 }
 
-function getDecodedUrl(url?: string) {
+function getDomain(url?: string) {
   if (!url) {
     return undefined;
   }
 
-  const href = getHref(url);
+  const href = ensureProtocol(url);
   if (!href) {
     return undefined;
   }
@@ -101,5 +112,7 @@ function getDecodedUrl(url?: string) {
 
 export default memo(withGlobal<OwnProps>(
   undefined,
-  (setGlobal, actions): DispatchProps => pick(actions, ['openTelegramLink']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'toggleSafeLinkModal', 'openTelegramLink',
+  ]),
 )(SafeLink));
