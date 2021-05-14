@@ -10,6 +10,8 @@ export default function usePrevDuringAnimation(current: any, duration?: number) 
   const forceUpdate = useForceUpdate();
   // eslint-disable-next-line no-null/no-null
   const isCurrentPresent = current !== undefined && current !== null;
+  // eslint-disable-next-line no-null/no-null
+  const isPrevPresent = prev !== undefined && prev !== null;
 
   if (isCurrentPresent && timeoutRef.current) {
     clearTimeout(timeoutRef.current);
@@ -18,7 +20,7 @@ export default function usePrevDuringAnimation(current: any, duration?: number) 
 
   useOnChange(() => {
     // When `current` becomes empty
-    if (duration && !isCurrentPresent && prev && !timeoutRef.current) {
+    if (duration && !isCurrentPresent && isPrevPresent && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
         timeoutRef.current = undefined;
         forceUpdate();
