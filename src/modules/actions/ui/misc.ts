@@ -190,3 +190,12 @@ addReducer('dismissError', (global) => {
     errors: newErrors,
   };
 });
+
+addReducer('toggleSafeLinkModal', (global, actions, payload) => {
+  const { url: safeLinkModalUrl } = payload;
+
+  return {
+    ...global,
+    safeLinkModalUrl,
+  };
+});

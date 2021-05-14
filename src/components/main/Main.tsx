@@ -29,6 +29,7 @@ import AudioPlayer from '../middle/AudioPlayer';
 import Notifications from './Notifications.async';
 import Errors from './Errors.async';
 import ForwardPicker from './ForwardPicker.async';
+import SafeLinkModal from './SafeLinkModal.async';
 
 import './Main.scss';
 
@@ -42,6 +43,7 @@ type StateProps = {
   hasNotifications: boolean;
   hasErrors: boolean;
   audioMessage?: ApiMessage;
+  safeLinkModalUrl?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
@@ -65,6 +67,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   hasNotifications,
   hasErrors,
   audioMessage,
+  safeLinkModalUrl,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -167,6 +170,7 @@ const Main: FC<StateProps & DispatchProps> = ({
       <Notifications isOpen={hasNotifications} />
       <Errors isOpen={hasErrors} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
+      <SafeLinkModal url={safeLinkModalUrl} />
     </div>
   );
 };
@@ -201,6 +205,7 @@ export default memo(withGlobal(
       hasNotifications: Boolean(global.notifications.length),
       hasErrors: Boolean(global.errors.length),
       audioMessage,
+      safeLinkModalUrl: global.safeLinkModalUrl,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis']),

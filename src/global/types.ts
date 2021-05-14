@@ -379,6 +379,8 @@ export type GlobalState = {
     deviceToken: string;
     subscribedAt: number;
   };
+
+  safeLinkModalUrl?: string;
 };
 
 export type ActionTypes = (
@@ -387,6 +389,7 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
+  'toggleSafeLinkModal' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' | 'clearCache' |
