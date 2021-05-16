@@ -10,6 +10,8 @@
     margin: 0;
     word-break: break-word;
     line-height: 1.3125;
+    unicode-bidi: plaintext;
+    text-align: justify;
   }
 
   .theme-dark .Message.own & {
