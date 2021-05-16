@@ -180,7 +180,7 @@
 
       #editable-message-text {
         text-align: justify;
-        direction: auto;
+        unicode-bidi: plaintext;
         height: 3.5rem !important;
 
         @media (max-width: 600px) {
