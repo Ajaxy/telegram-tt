@@ -18,7 +18,6 @@ import {
   buildApiChatFromDialog,
   getPeerKey,
   buildChatMembers,
-  buildChatInviteLink,
   buildApiChatFromPreview,
   getApiChatIdFromMtpPeer,
   buildApiChatFolder,
@@ -323,8 +322,10 @@ async function getFullChatInfo(chatId: number): Promise<{
       about,
       members,
       adminMembers,
-      inviteLink: buildChatInviteLink(exportedInvite),
       canViewMembers: true,
+      ...(exportedInvite && {
+        inviteLink: exportedInvite.link,
+      }),
     },
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
   };
@@ -720,11 +721,11 @@ export function updateChatMemberBannedRights({
   chat, user, bannedRights,
 }: { chat: ApiChat; user: ApiUser; bannedRights: ApiChatBannedRights }) {
   const channel = buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel;
-  const userId = buildInputEntity(user.id, user.accessHash) as GramJs.InputUser;
+  const participant = buildInputPeer(user.id, user.accessHash) as GramJs.InputUser;
 
   return invokeRequest(new GramJs.channels.EditBanned({
     channel,
-    userId,
+    participant,
     bannedRights: buildChatBannedRights(bannedRights),
   }), true);
 }
@@ -789,7 +790,10 @@ export function toggleSignatures({
   }), true);
 }
 
-type ChannelMembersFilter = 'kicked' | 'admin' | 'recent';
+type ChannelMembersFilter =
+  'kicked'
+  | 'admin'
+  | 'recent';
 
 export async function fetchMembers(
   chatId: number,

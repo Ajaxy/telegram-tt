@@ -1,19 +1,15 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiChat,
-  ApiChatMember,
   ApiChatAdminRights,
   ApiChatBannedRights,
-  ApiRestrictionReason,
   ApiChatFolder,
+  ApiChatMember,
+  ApiRestrictionReason,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
-  isPeerChat,
-  isPeerUser,
-  isInputPeerUser,
-  isInputPeerChat,
-  isInputPeerChannel,
+  isInputPeerChannel, isInputPeerChat, isInputPeerUser, isPeerChat, isPeerUser,
 } from './peers';
 import { omitVirtualClassFields } from './helpers';
 
@@ -29,7 +25,7 @@ function buildApiChatFieldsFromPeerEntity(
 ): PeerEntityApiChatFields {
   const isMin = Boolean('min' in peerEntity && peerEntity.min);
   const accessHash = ('accessHash' in peerEntity) && String(peerEntity.accessHash);
-  const avatarHash = ('photo' in peerEntity) && buildAvatarHash(peerEntity.photo);
+  const avatarHash = ('photo' in peerEntity) && peerEntity.photo && buildAvatarHash(peerEntity.photo);
   const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
 
@@ -257,12 +253,9 @@ function getUserName(user: GramJs.User) {
     : (user.lastName || undefined);
 }
 
-export function buildAvatarHash(photo: any) {
-  if (photo instanceof GramJs.UserProfilePhoto) {
+export function buildAvatarHash(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
+  if ('photoId' in photo) {
     return photo.photoId.toString();
-  } else if (photo instanceof GramJs.ChatPhoto) {
-    const { dcId, photoSmall: { volumeId, localId } } = photo;
-    return `${dcId}-${volumeId}-${localId}`;
   }
 
   return undefined;
@@ -270,9 +263,13 @@ export function buildAvatarHash(photo: any) {
 
 export function buildChatMember(
   member: GramJs.TypeChatParticipant | GramJs.TypeChannelParticipant,
-): ApiChatMember {
+): ApiChatMember | undefined {
+  const userId = (member instanceof GramJs.ChannelParticipantBanned || member instanceof GramJs.ChannelParticipantLeft)
+    ? getApiChatIdFromMtpPeer(member.peer)
+    : member.userId;
+
   return {
-    userId: member.userId,
+    userId,
     inviterId: 'inviterId' in member ? member.inviterId : undefined,
     joinedDate: 'date' in member ? member.date : undefined,
     kickedByUserId: 'kickedBy' in member ? member.kickedBy : undefined,
@@ -291,25 +288,21 @@ export function buildChatMember(
 
 export function buildChatMembers(
   participants: GramJs.TypeChatParticipants | GramJs.channels.ChannelParticipants,
-): ApiChatMember[] | undefined {
+) {
   // Duplicate code because of TS union-type shenanigans
   if (participants instanceof GramJs.ChatParticipants) {
-    return participants.participants.map(buildChatMember);
+    return participants.participants.map(buildChatMember).filter<ApiChatMember>(Boolean as any);
   }
   if (participants instanceof GramJs.channels.ChannelParticipants) {
-    return participants.participants.map(buildChatMember);
+    return participants.participants.map(buildChatMember).filter<ApiChatMember>(Boolean as any);
   }
 
   return undefined;
 }
 
-export function buildChatInviteLink(exportedInvite: GramJs.TypeExportedChatInvite) {
-  return exportedInvite instanceof GramJs.ChatInviteExported
-    ? exportedInvite.link
-    : undefined;
-}
-
-export function buildChatTypingStatus(update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping) {
+export function buildChatTypingStatus(
+  update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping | GramJs.UpdateChannelUserTyping,
+) {
   let action: string = '';
   if (update.action instanceof GramJs.SendMessageCancelAction) {
     return undefined;
@@ -341,8 +334,7 @@ export function buildChatTypingStatus(update: GramJs.UpdateUserTyping | GramJs.U
 
   return {
     action,
-    ...(update instanceof GramJs.UpdateChatUserTyping && { userId: update.userId }),
-    ...(update instanceof GramJs.UpdateChannelUserTyping && { userId: update.userId }),
+    ...(!(update instanceof GramJs.UpdateUserTyping) && { userId: getApiChatIdFromMtpPeer(update.fromId) }),
     timestamp: Date.now(),
   };
 }
