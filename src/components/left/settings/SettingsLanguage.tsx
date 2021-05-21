@@ -64,11 +64,16 @@ const SettingsLanguage: FC<StateProps & DispatchProps> = ({
 };
 
 function buildOptions(languages: ApiLanguage[]) {
+  const currentLangCode = (window.navigator.language || 'en').toLowerCase();
+  const shortLangCode = currentLangCode.substr(0, 2);
+
   return languages.map(({ langCode, nativeName, name }) => ({
     value: langCode,
     label: nativeName,
     subLabel: name,
-  }));
+  })).sort((a) => {
+    return currentLangCode && (a.value === currentLangCode || a.value === shortLangCode) ? -1 : 0;
+  });
 }
 
 export default memo(withGlobal(
