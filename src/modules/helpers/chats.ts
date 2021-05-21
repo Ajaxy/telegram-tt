@@ -428,7 +428,7 @@ export function getMessageSenderName(chatId: number, sender?: ApiUser) {
   }
 
   if (sender.isSelf) {
-    return 'You';
+    return getTranslation('FromYou');
   }
 
   return getUserFirstOrLastName(sender);

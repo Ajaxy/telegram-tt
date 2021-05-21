@@ -49,7 +49,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const pictogramId = message && `sticker-reply-thumb${message.id}`;
   const mediaThumbnail = useWebpThumbnail(message);
 
-  useLang();
+  const lang = useLang();
 
   const senderTitle = sender && getSenderTitle(sender);
 
@@ -68,7 +68,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
           ) : isActionMessage(message) ? (
             <ActionMessage message={message} isEmbedded />
           ) : (
-            renderText(getMessageSummaryText(message, Boolean(mediaThumbnail)))
+            renderText(getMessageSummaryText(lang, message, Boolean(mediaThumbnail)))
           )}
         </p>
       </div>

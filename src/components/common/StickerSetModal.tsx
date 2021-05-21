@@ -10,6 +10,7 @@ import { STICKER_SIZE_MODAL } from '../../config';
 import { pick } from '../../util/iteratees';
 import { selectStickerSet } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -43,6 +44,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  const lang = useLang();
 
   const {
     observe: observeIntersection,
@@ -98,7 +100,11 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
               color={stickerSet.installedDate ? 'danger' : 'primary'}
               onClick={handleButtonClick}
             >
-              {`${stickerSet.installedDate ? 'Remove' : 'Add'} ${stickerSet.count} stickers`}
+              {lang(
+                stickerSet.installedDate ? 'StickerPack.RemoveStickerCount' : 'StickerPack.AddStickerCount',
+                stickerSet.count,
+                'i',
+              )}
             </Button>
           </div>
         </>

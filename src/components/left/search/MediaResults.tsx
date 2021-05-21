@@ -7,17 +7,18 @@ import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { createMapStateToProps, StateProps } from './helpers/createMapStateToProps';
 import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
+import useLang from '../../../hooks/useLang';
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Media from '../../common/Media';
 import ChatMessage from './ChatMessage';
 import NothingFound from '../../common/NothingFound';
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import Loading from '../../ui/Loading';
 
 export type OwnProps = {
@@ -39,6 +40,7 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessagesGlobal,
   openMediaViewer,
 }) => {
+  const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -115,7 +117,12 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
         noFastList
       >
         {!canRenderContents && <Loading />}
-        {canRenderContents && (!foundIds || foundIds.length === 0) && <NothingFound />}
+        {canRenderContents && (!foundIds || foundIds.length === 0) && (
+          <NothingFound
+            text={lang('ChatList.Search.NoResults')}
+            description={lang('ChatList.Search.NoResultsDescription')}
+          />
+        )}
         {isMediaGrid && renderGallery()}
         {isMessageList && renderSearchResult()}
       </InfiniteScroll>

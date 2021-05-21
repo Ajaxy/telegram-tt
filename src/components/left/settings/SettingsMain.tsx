@@ -40,7 +40,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="edit"
           onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
         >
-          {lang('EditProfile')}
+          {lang('lng_settings_information')}
         </ListItem>
         <ListItem
           icon="folder"

@@ -16,6 +16,7 @@ import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
 import { getMessageDocument } from '../../../modules/helpers';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
+import useLang from '../../../hooks/useLang';
 
 import Document from '../../common/Document';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -43,6 +44,7 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessagesGlobal,
   focusMessage,
 }) => {
+  const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -109,7 +111,12 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
         noFastList
       >
         {!canRenderContents && <Loading />}
-        {canRenderContents && (!foundIds || foundIds.length === 0) && <NothingFound />}
+        {canRenderContents && (!foundIds || foundIds.length === 0) && (
+          <NothingFound
+            text={lang('ChatList.Search.NoResults')}
+            description={lang('ChatList.Search.NoResultsDescription')}
+          />
+        )}
         {canRenderContents && foundIds && foundIds.length > 0 && renderList()}
       </InfiniteScroll>
     </div>

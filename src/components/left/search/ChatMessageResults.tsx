@@ -11,6 +11,7 @@ import { pick } from '../../../util/iteratees';
 import { getMessageSummaryText } from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
+import useLang from '../../../hooks/useLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import ChatMessage from './ChatMessage';
@@ -49,6 +50,7 @@ const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessagesGlobal,
   onSearchDateSelect,
 }) => {
+  const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -79,7 +81,7 @@ const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [foundIds, globalMessagesByChatId]);
 
   function renderFoundMessage(message: ApiMessage) {
-    const text = getMessageSummaryText(message);
+    const text = getMessageSummaryText(lang, message);
     const chat = chatsById[message.chatId];
 
     if (!text || !chat) {
@@ -113,7 +115,12 @@ const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
             />
           </div>
         )}
-        {nothingFound && <NothingFound />}
+        {nothingFound && (
+          <NothingFound
+            text={lang('ChatList.Search.NoResults')}
+            description={lang('ChatList.Search.NoResultsDescription')}
+          />
+        )}
         {!!foundMessages.length && foundMessages.map(renderFoundMessage)}
       </InfiniteScroll>
     </div>

@@ -65,7 +65,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight);
 
-  useLang();
+  const lang = useLang();
 
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
@@ -79,6 +79,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
   const content = renderActionMessageText(
+    lang,
     message,
     sender,
     targetUser,

@@ -70,7 +70,7 @@ export function getUserStatus(user: ApiUser, lang: LangFn) {
   }
 
   if (user.type && user.type === 'userTypeBot') {
-    return 'bot';
+    return lang('Bot');
   }
 
   if (!user.status) {

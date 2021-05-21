@@ -12,6 +12,7 @@ import { pick } from '../../util/iteratees';
 import { selectShouldLoopStickers, selectStickerSet } from '../../modules/selectors';
 import useFlag from '../../hooks/useFlag';
 import useOnChange from '../../hooks/useOnChange';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import StickerButton from '../common/StickerButton';
@@ -37,6 +38,7 @@ const STICKERS_TO_DISPLAY = 5;
 const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
   stickerSetId, observeIntersection, set, shouldPlay, loadStickers, toggleStickerSet, isSomeModalOpen, onModalToggle,
 }) => {
+  const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);
   const areStickersLoaded = Boolean(set && set.stickers);
 
@@ -79,7 +81,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="sticker-set-header">
         <div className="title-wrapper">
           <h3 className="title">{set.title}</h3>
-          <p className="count">{set.count} stickers</p>
+          <p className="count">{lang('Stickers', set.count, 'i')}</p>
         </div>
         <Button
           className={isAdded ? 'is-added' : undefined}
@@ -89,7 +91,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
           fluid
           onClick={handleAddClick}
         >
-          {isAdded ? 'Added' : 'Add'}
+          {lang(isAdded ? 'Stickers.Installed' : 'Stickers.Install')}
         </Button>
       </div>
       <div className="sticker-set-main">

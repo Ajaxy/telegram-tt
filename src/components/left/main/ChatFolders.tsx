@@ -43,6 +43,8 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 
+  const lang = useLang();
+
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
@@ -84,13 +86,13 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     }
 
     return [
-      { title: 'All' },
+      { title: lang('FilterAllChats') },
       ...displayedFolders.map((folder) => ({
         title: folder.title,
         ...(folderCountersById && folderCountersById[folder.id]),
       })),
     ];
-  }, [displayedFolders, folderCountersById]);
+  }, [displayedFolders, folderCountersById, lang]);
 
   const handleSwitchTab = useCallback((index: number) => {
     setActiveTab(index);
@@ -134,8 +136,6 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   const {
     shouldRender: shouldRenderPlaceholder, transitionClassNames,
   } = useShowTransition(!orderedFolderIds, undefined, true);
-
-  const lang = useLang();
 
   function renderCurrentTab() {
     const activeFolder = Object.values(chatFoldersById)

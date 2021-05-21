@@ -37,6 +37,7 @@ import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useProfileState from './hooks/useProfileState';
 import useTransitionFixes from './hooks/useTransitionFixes';
 import useAsyncRendering from './hooks/useAsyncRendering';
+import useLang from '../../hooks/useLang';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -119,6 +120,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
+
+  const lang = useLang();
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -228,16 +231,16 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
           break;
         case 'documents':
-          text = 'No documents found.';
+          text = lang('lng_media_file_empty_search');
           break;
         case 'links':
-          text = 'No links found.';
+          text = lang('lng_media_link_empty_search');
           break;
         case 'audio':
-          text = 'No audio found.';
+          text = lang('lng_media_song_empty_search');
           break;
         default:
-          text = 'No media found.';
+          text = lang('SharedMedia.EmptyTitle');
       }
 
       return (

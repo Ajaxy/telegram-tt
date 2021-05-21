@@ -91,19 +91,19 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
     >
       <p>{lang('AreYouSureDeleteSingleMessage')}</p>
       {willDeleteForCurrentUserOnly && (
-        <p>This will delete it just for you, not for other participants in the chat.</p>
+        <p>{lang('lng_delete_for_me_chat_hint')}</p>
       )}
       {willDeleteForAll && (
-        <p>This will delete it for everyone in this chat.</p>
+        <p>{lang('lng_delete_for_everyone_hint')}</p>
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactName ? 'me and ' : 'Everyone'}
-          {contactName && renderText(contactName)}
+          {contactName && lang('Conversation.DeleteMessagesFor', renderText(contactName))}
+          {!contactName && lang('Conversation.DeleteMessagesForEveryone')}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
-        Delete{canDeleteForAll ? ' just for me' : ''}
+        {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
       </Button>
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
     </Modal>

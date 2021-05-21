@@ -22,7 +22,7 @@ import renderText from '../../common/helpers/renderText';
 import { pick } from '../../../util/iteratees';
 import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';
-import useLang from '../../../hooks/useLang';
+import useLang, { LangFn } from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -62,7 +62,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
     focusMessage({ chatId, messageId: message.id });
   }, [chatId, focusMessage, message.id]);
 
-  useLang();
+  const lang = useLang();
 
   if (!chat) {
     return undefined;
@@ -96,7 +96,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
         <div className="subtitle">
           <div className="message">
-            {renderMessageSummary(message, mediaBlobUrl || mediaThumbnail, searchQuery)}
+            {renderMessageSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery)}
           </div>
         </div>
       </div>
@@ -104,16 +104,16 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function renderMessageSummary(message: ApiMessage, blobUrl?: string, searchQuery?: string) {
+function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string) {
   if (!blobUrl) {
-    return renderText(getMessageSummaryText(message));
+    return renderText(getMessageSummaryText(lang, message));
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderText(getMessageSummaryText(message, true), ['emoji', 'highlight'], { highlight: searchQuery })}
+      {renderText(getMessageSummaryText(lang, message, true), ['emoji', 'highlight'], { highlight: searchQuery })}
     </span>
   );
 }

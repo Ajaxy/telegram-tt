@@ -1,6 +1,7 @@
 import {
   ApiChat, ApiMessage, ApiMessageEntityTypes, ApiUser,
 } from '../../api/types';
+import { LangFn } from '../../hooks/useLang';
 
 import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID, RE_LINK_TEMPLATE } from '../../config';
 import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
@@ -26,62 +27,34 @@ export function getMessageOriginalId(message: ApiMessage) {
   return message.previousLocalId || message.id;
 }
 
-export function getMessageSummaryText(message: ApiMessage, noEmoji = false) {
+export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji = false) {
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
   } = message.content;
 
   if (message.groupedId) {
-    if (text) {
-      return `${noEmoji ? '' : '🖼 '}${text.text}`;
-    }
-
-    return 'Album';
+    return `${noEmoji ? '' : '🖼 '}${text ? text.text : lang('lng_in_dlg_album')}`;
   }
 
   if (photo) {
-    if (text) {
-      return `${noEmoji ? '' : '🖼 '}${text.text}`;
-    }
-
-    return 'Photo';
+    return `${noEmoji ? '' : '🖼 '}${text ? text.text : lang('AttachPhoto')}`;
   }
 
   if (video) {
-    if (video.isGif) {
-      if (text) {
-        return `${noEmoji ? '' : 'GIF '}${text.text}`;
-      }
-
-      return 'GIF';
-    } else {
-      if (text) {
-        return `${noEmoji ? '' : '📹 '}${text.text}`;
-      }
-
-      return 'Video';
-    }
+    return `${noEmoji ? '' : '📹 '}${text ? text.text : lang(video.isGif ? 'AttachGif' : 'AttachVideo')}`;
   }
 
   if (sticker) {
-    return `${sticker.emoji} Sticker`;
+    return `${sticker.emoji} ${lang('AttachSticker')} `;
   }
 
   if (audio) {
     const caption = [audio.title, audio.performer].filter(Boolean).join(' — ') || (text && text.text);
-    if (caption) {
-      return `🎧 ${caption}`;
-    }
-
-    return 'Audio';
+    return `${noEmoji ? '' : '🎧 '}${caption || lang('AttachMusic')}`;
   }
 
   if (voice) {
-    if (text) {
-      return `${noEmoji ? '' : '🎤 '}${text.text}`;
-    }
-
-    return 'Voice Message';
+    return `${noEmoji ? '' : '🎤 '}${text ? text.text : lang('AttachAudio')}`;
   }
 
   if (document) {
@@ -89,11 +62,11 @@ export function getMessageSummaryText(message: ApiMessage, noEmoji = false) {
   }
 
   if (contact) {
-    return 'Contact';
+    return lang('AttachContact');
   }
 
   if (poll) {
-    return `📊 ${poll.summary.question}`;
+    return `${noEmoji ? '' : '📊 '}${poll.summary.question}`;
   }
 
   if (invoice) {
@@ -106,60 +79,6 @@ export function getMessageSummaryText(message: ApiMessage, noEmoji = false) {
 
   return CONTENT_NOT_SUPPORTED;
 }
-
-export function getNotificationText(message: ApiMessage) {
-  const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
-  } = message.content;
-
-  if (message.groupedId) {
-    return `🖼 ${text ? text.text : 'Album'}`;
-  }
-
-  if (photo) {
-    return `🖼 ${text ? text.text : 'Photo'}`;
-  }
-
-  if (video) {
-    return `📹 ${text ? text.text : video.isGif ? 'GIF' : 'Video'}`;
-  }
-
-  if (sticker) {
-    return `${sticker.emoji} Sticker `;
-  }
-
-  if (audio) {
-    const caption = [audio.title, audio.performer].filter(Boolean).join(' — ') || (text && text.text);
-    return `🎧 ${caption || 'Audio'}`;
-  }
-
-  if (voice) {
-    return `🎤 ${text ? text.text : 'Voice Message'}`;
-  }
-
-  if (document) {
-    return `📎 ${text ? text.text : document.fileName}`;
-  }
-
-  if (contact) {
-    return 'Contact';
-  }
-
-  if (poll) {
-    return `📊 ${poll.summary.question}`;
-  }
-
-  if (invoice) {
-    return 'Invoice';
-  }
-
-  if (text) {
-    return text.text;
-  }
-
-  return CONTENT_NOT_SUPPORTED;
-}
-
 
 export function getMessageText(message: ApiMessage) {
   const {

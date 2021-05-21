@@ -111,7 +111,7 @@ const ManageGroupRecentActions: FC<OwnProps & StateProps> = ({ chat }) => {
         </div>
 
         <div className="section not-implemented">
-          <h3 className="section-heading">Admins</h3>
+          <h3 className="section-heading">{lang('Channel.Management.Title')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox

@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import useLang from '../../../hooks/useLang';
+import useLang, { LangFn } from '../../../hooks/useLang';
 
 import { GlobalActions, MessageListType } from '../../../global/types';
 import {
@@ -205,6 +205,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       return (
         <p className="last-message">
           {renderText(renderActionMessageText(
+            lang,
             lastMessage,
             actionOrigin,
             actionTargetUser,
@@ -223,7 +224,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         {senderName && (
           <span className="sender-name">{renderText(senderName)}</span>
         )}
-        {renderMessageSummary(lastMessage!, mediaBlobUrl || mediaThumbnail)}
+        {renderMessageSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail)}
       </p>
     );
   }
@@ -273,16 +274,16 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function renderMessageSummary(message: ApiMessage, blobUrl?: string) {
+function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string) {
   if (!blobUrl) {
-    return renderText(getMessageSummaryText(message));
+    return renderText(getMessageSummaryText(lang, message));
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderText(getMessageSummaryText(message, true))}
+      {renderText(getMessageSummaryText(lang, message, true))}
     </span>
   );
 }

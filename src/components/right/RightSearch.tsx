@@ -17,6 +17,7 @@ import {
   isChatChannel,
 } from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
+import useLang from '../../hooks/useLang';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
@@ -60,6 +61,8 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   searchTextMessagesLocal,
   focusMessage,
 }) => {
+  const lang = useLang();
+
   const foundResults = useMemo(() => {
     if (!query || !foundIds || !foundIds.length || !messagesById) {
       return MEMO_EMPTY_ARRAY;
@@ -98,7 +101,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     message, senderUser, senderChat, onClick,
   }: Result) => {
     const title = senderChat ? getChatTitle(senderChat) : getUserFullName(senderUser);
-    const text = getMessageSummaryText(message);
+    const text = getMessageSummaryText(lang, message);
 
     return (
       <ListItem className="chat-item-clickable search-result-message m-0" onClick={onClick}>

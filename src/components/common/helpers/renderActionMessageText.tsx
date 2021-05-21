@@ -1,6 +1,7 @@
 import React from '../../../lib/teact/teact';
 
 import { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
   getMessageContent,
@@ -25,6 +26,7 @@ interface ActionMessageTextOptions {
 const NBSP = '\u00A0';
 
 export function renderActionMessageText(
+  lang: LangFn,
   message: ApiMessage,
   actionOrigin?: ApiUser | ApiChat,
   targetUser?: ApiUser,
@@ -66,7 +68,7 @@ export function renderActionMessageText(
     unprocessed,
     '%message%',
     targetMessage
-      ? renderMessageContent(targetMessage, textOptions)
+      ? renderMessageContent(lang, targetMessage, textOptions)
       : 'a message',
   );
   unprocessed = processed.pop() as string;
@@ -104,8 +106,8 @@ function renderProductContent(message: ApiMessage) {
     : 'a product';
 }
 
-function renderMessageContent(message: ApiMessage, options: ActionMessageTextOptions = {}) {
-  const text = getMessageSummaryText(message);
+function renderMessageContent(lang: LangFn, message: ApiMessage, options: ActionMessageTextOptions = {}) {
+  const text = getMessageSummaryText(lang, message);
   const {
     photo, video, document, sticker,
   } = getMessageContent(message);
