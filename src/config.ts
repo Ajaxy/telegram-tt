@@ -28,7 +28,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v2';
 export const ASSET_CACHE_NAME = 'tt-assets';
 
 export const API_UPDATE_THROTTLE = 300;
