@@ -22,7 +22,7 @@ export async function fetchStickerSets({ hash }: { hash: number }) {
   }
 
   allStickers.sets.forEach((stickerSet) => {
-    if (stickerSet.thumb) {
+    if (stickerSet.thumbs && stickerSet.thumbs.length) {
       localDb.stickerSets[String(stickerSet.id)] = stickerSet;
     }
   });

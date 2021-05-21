@@ -407,11 +407,9 @@ class TelegramClient {
         let loc;
         if (photo instanceof constructors.UserProfilePhoto || photo instanceof constructors.ChatPhoto) {
             dcId = photo.dcId;
-            const size = isBig ? photo.photoBig : photo.photoSmall;
             loc = new constructors.InputPeerPhotoFileLocation({
                 peer: utils.getInputPeer(entity),
-                localId: size.localId,
-                volumeId: size.volumeId,
+                photoId: photo.photoId,
                 big: isBig,
             });
         } else {
@@ -445,20 +443,18 @@ class TelegramClient {
     }
 
     async downloadStickerSetThumb(stickerSet) {
-        if (!stickerSet.thumb || !stickerSet.thumb.location) {
+        if (!stickerSet.thumbs || !stickerSet.thumbs.length) {
             return undefined;
         }
 
-        const { location } = stickerSet.thumb;
-
+        const { thumbVersion } = stickerSet;
         return this.downloadFile(
             new constructors.InputStickerSetThumb({
                 stickerset: new constructors.InputStickerSetID({
                     id: stickerSet.id,
                     accessHash: stickerSet.accessHash,
                 }),
-                localId: location.localId,
-                volumeId: location.volumeId,
+                thumbVersion,
             }),
             { dcId: stickerSet.thumbDcId },
         );
