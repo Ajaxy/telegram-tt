@@ -231,7 +231,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(ref);
+  } = useContextMenuHandlers(ref, false, true);
 
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
