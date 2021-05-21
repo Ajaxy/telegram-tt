@@ -48,15 +48,15 @@
     margin-bottom: 0;
 
     .last-in-list {
-      padding-bottom: 1rem;
+      margin-bottom: 1rem;
     }
 
     &.type-pinned {
       .last-in-list {
-        padding-bottom: 5rem;
+        margin-bottom: 5rem;
 
         @media (max-width: 600px) {
-          padding-bottom: 3.75rem;
+          margin-bottom: 3.75rem;
         }
       }
     }
