@@ -14,6 +14,7 @@ import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
+import useLang from '../../../hooks/useLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import WebLink from '../../common/WebLink';
@@ -41,6 +42,7 @@ const LinkResults: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessagesGlobal,
   focusMessage,
 }) => {
+  const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -103,7 +105,12 @@ const LinkResults: FC<OwnProps & StateProps & DispatchProps> = ({
         noFastList
       >
         {!canRenderContents && <Loading />}
-        {canRenderContents && (!foundIds || foundIds.length === 0) && <NothingFound />}
+        {canRenderContents && (!foundIds || foundIds.length === 0) && (
+          <NothingFound
+            text={lang('ChatList.Search.NoResults')}
+            description={lang('ChatList.Search.NoResultsDescription')}
+          />
+        )}
         {canRenderContents && foundIds && foundIds.length > 0 && renderList()}
       </InfiniteScroll>
     </div>

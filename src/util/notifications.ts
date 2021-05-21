@@ -7,11 +7,12 @@ import {
   getChatTitle,
   getMessageAction,
   getMessageSenderName,
-  getNotificationText,
+  getMessageSummaryText,
   getPrivateChatUserId,
   isActionMessage,
   isChatChannel,
 } from '../modules/helpers';
+import { getTranslation } from './langProvider';
 import { replaceSettings } from '../modules/reducers';
 import { selectChatMessage, selectUser } from '../modules/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
@@ -225,6 +226,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
       ? chat
       : messageSender;
     body = renderActionMessageText(
+      getTranslation,
       message,
       actionOrigin,
       actionTargetUser,
@@ -234,7 +236,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
     ) as string;
   } else {
     const senderName = getMessageSenderName(chat.id, messageSender);
-    const summary = getNotificationText(message);
+    const summary = getMessageSummaryText(getTranslation, message);
 
     body = senderName ? `${senderName}: ${summary}` : summary;
   }

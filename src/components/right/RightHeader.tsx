@@ -235,7 +235,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return (
           <SearchInput
             value={stickerSearchQuery}
-            placeholder="Search Stickers"
+            placeholder={lang('SearchStickersHint')}
             onChange={handleStickerSearchQueryChange}
           />
         );

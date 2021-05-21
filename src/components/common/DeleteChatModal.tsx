@@ -16,6 +16,7 @@ import {
 } from '../../modules/helpers';
 import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
+import renderText from './helpers/renderText';
 
 import Avatar from './Avatar';
 import Modal from '../ui/Modal';
@@ -96,55 +97,52 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
           chat={chat}
           isSavedMessages={isChatWithSelf}
         />
-        <h3 className="modal-title">{renderTitle()}</h3>
+        <h3 className="modal-title">{lang(renderTitle())}</h3>
       </div>
     );
   }
 
   function renderTitle() {
     if (isChannel && !chat.isCreator) {
-      return 'Leave Channel?';
+      return 'LeaveChannel';
     }
 
     if (isChannel && chat.isCreator) {
-      return 'Delete and Leave Channel?';
+      return 'ChannelDelete';
     }
 
     if (isBasicGroup || isSuperGroup) {
-      return 'Leave Group?';
+      return 'Group.LeaveGroup';
     }
 
-    return 'Delete Chat?';
+    return 'DeleteChatUser';
   }
 
   function renderMessage() {
-    if (isChannel && !chat.isCreator) {
-      return <p>Are you sure you want to leave channel <strong>{chatTitle}</strong>?</p>;
-    }
     if (isChannel && chat.isCreator) {
-      return <p>Are you sure you want to delete and leave channel <strong>{chatTitle}</strong>?</p>;
+      return <p>{renderText(lang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown'])}</p>;
     }
 
-    if (isBasicGroup || isSuperGroup) {
-      return <p>Are you sure you want to leave group <strong>{chatTitle}</strong>?</p>;
+    if ((isChannel && !chat.isCreator) || isBasicGroup || isSuperGroup) {
+      return <p>{renderText(lang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown'])}</p>;
     }
 
-    return <p>Are you sure you want to delete chat with <strong>{contactName}</strong>?</p>;
+    return <p>{renderText(lang('ChatList.DeleteChatConfirmation', contactName), ['simple_markdown'])}</p>;
   }
 
   function renderActionText() {
     if (isChannel && !chat.isCreator) {
-      return 'Leave Channel';
+      return 'LeaveChannel';
     }
     if (isChannel && chat.isCreator) {
-      return 'Delete and Leave Channel';
+      return 'Chat.Input.Delete';
     }
 
     if (isBasicGroup || isSuperGroup) {
-      return 'Leave Group';
+      return 'Group.LeaveGroup';
     }
 
-    return `Delete${canDeleteForAll ? ' just for me' : ''}`;
+    return canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete';
   }
 
   return (
@@ -157,11 +155,11 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
       {renderMessage()}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactName ? `me and ${contactName}` : 'Everyone'}
+          {contactName ? lang('ChatList.DeleteForEveryone', contactName) : lang('DeleteForAll')}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
-        {renderActionText()}
+        {lang(renderActionText())}
       </Button>
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
     </Modal>

@@ -80,7 +80,7 @@ const NewChatButton: FC<OwnProps> = ({
         color="primary"
         className={isMenuOpen ? 'active' : ''}
         onClick={toggleIsMenuOpen}
-        ariaLabel={isMenuOpen ? 'Close' : 'Create new chat'}
+        ariaLabel={lang(isMenuOpen ? 'Close' : 'NewMessageTitle')}
         tabIndex={-1}
       >
         <i className="icon-new-chat-filled" />
@@ -95,7 +95,7 @@ const NewChatButton: FC<OwnProps> = ({
       >
         <MenuItem icon="channel" onClick={onNewChannel}>{lang('NewChannel')}</MenuItem>
         <MenuItem icon="group" onClick={onNewGroup}>{lang('NewGroup')}</MenuItem>
-        <MenuItem icon="user" onClick={onNewPrivateChat}>New Private Chat</MenuItem>
+        <MenuItem icon="user" onClick={onNewPrivateChat}>{lang('NewMessageTitle')}</MenuItem>
       </Menu>
     </div>
   );

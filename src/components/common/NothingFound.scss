@@ -4,7 +4,19 @@
   justify-content: center;
   color: var(--color-text-meta);
 
+  &.with-description {
+    flex-direction: column;
+  }
+
   .AnimatedSticker {
     margin: 0 auto;
+  }
+
+  .description {
+    color: var(--color-text-secondary);
+    font-size: .875rem;
+    text-align: center;
+    margin: 1rem 0 0;
+    unicode-bidi: plaintext;
   }
 }

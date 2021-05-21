@@ -21,7 +21,7 @@ export function getMessageCopyOptions(
 
   if (canImageBeCopied) {
     options.push({
-      label: 'Copy Media',
+      label: 'lng_context_copy_image',
       handler: () => {
         mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl).then(copyImageToClipboard);
 
@@ -57,7 +57,7 @@ export function getMessageCopyOptions(
 
   if (onCopyLink) {
     options.push({
-      label: 'CopyMessageLink',
+      label: 'lng_context_copy_message_link',
       handler: () => {
         onCopyLink();
 
@@ -73,11 +73,11 @@ export function getMessageCopyOptions(
 
 function getCopyLabel(hasSelection: boolean, canImageBeCopied: boolean): string {
   if (hasSelection) {
-    return 'Copy Selected Text';
+    return 'lng_context_copy_selected';
   }
 
   if (canImageBeCopied) {
-    return 'Copy Text';
+    return 'lng_context_copy_text';
   }
 
   return 'Copy';

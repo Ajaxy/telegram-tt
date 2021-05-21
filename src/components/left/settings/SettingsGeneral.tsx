@@ -31,11 +31,6 @@ type StateProps = ISettings['byKey'] & {
 
 type DispatchProps = Pick<GlobalActions, 'setSettingOption' | 'loadStickerSets' | 'loadAddedStickers'>;
 
-const KEYBOARD_SEND_OPTIONS = !IS_TOUCH_ENV ? [
-  { value: 'enter', label: 'Send by Enter', subLabel: 'New line by Shift + Enter' },
-  { value: 'ctrl-enter', label: `Send by ${IS_MAC_OS ? 'Cmd' : 'Ctrl'} + Enter`, subLabel: 'New line by Enter' },
-] : undefined;
-
 const ANIMATION_LEVEL_OPTIONS = [
   'Solid and Steady',
   'Nice and Fast',
@@ -67,6 +62,17 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isModalOpen, openModal, closeModal] = useFlag();
   const [sticker, setSticker] = useState<ApiSticker>();
 
+  const lang = useLang();
+
+  const KEYBOARD_SEND_OPTIONS = !IS_TOUCH_ENV ? [
+    { value: 'enter', label: lang('lng_settings_send_enter'), subLabel: 'New line by Shift + Enter' },
+    {
+      value: 'ctrl-enter',
+      label: lang(IS_MAC_OS ? 'lng_settings_send_cmdenter' : 'lng_settings_send_ctrlenter'),
+      subLabel: 'New line by Enter',
+    },
+  ] : undefined;
+
   useEffect(() => {
     loadStickerSets();
   }, [loadStickerSets]);
@@ -95,9 +101,6 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
     setSticker(value);
     openModal();
   }, [openModal]);
-
-  const lang = useLang();
-
 
   const stickerSets = stickerSetIds && stickerSetIds.map((id: string) => {
     return stickerSetsById && stickerSetsById[id] && stickerSetsById[id].installedDate ? stickerSetsById[id] : false;

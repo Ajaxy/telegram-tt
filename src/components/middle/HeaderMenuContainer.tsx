@@ -165,7 +165,9 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               icon="delete"
               onClick={handleDelete}
             >
-              {lang(isPrivate ? 'Delete' : (canDeleteChat ? 'Delete and Leave' : 'Leave'))}
+              {lang(isPrivate
+                ? 'Delete'
+                : (canDeleteChat ? 'GroupInfo.DeleteAndExit' : (isChannel ? 'LeaveChannel' : 'Group.LeaveGroup')))}
             </MenuItem>
           )}
         </Menu>

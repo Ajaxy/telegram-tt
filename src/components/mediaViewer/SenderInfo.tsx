@@ -41,7 +41,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     focusMessage({ chatId, messageId });
   }, [chatId, focusMessage, messageId, closeMediaViewer]);
 
-  useLang();
+  const lang = useLang();
 
   if (!sender || (!message && !isAvatar)) {
     return undefined;
@@ -62,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date">
-          {isAvatar ? 'Profile photo' : formatMediaDateTime(message!.date * 1000)}
+          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(message!.date * 1000)}
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import buildClassName from '../../util/buildClassName';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 import { formatPastTimeShort } from '../../util/dateFormat';
+import useLang from '../../hooks/useLang';
 
 import Media from './Media';
 import Link from '../ui/Link';
@@ -23,13 +24,15 @@ type OwnProps = {
 };
 
 const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
+  const lang = useLang();
+
   let linkData: ApiWebPage | undefined = getMessageWebPage(message);
 
   if (!linkData) {
     const link = getFirstLinkInMessage(message);
     if (link) {
       const { url, domain } = link;
-      const messageText = getMessageSummaryText(message);
+      const messageText = getMessageSummaryText(lang, message);
 
       linkData = {
         siteName: domain.replace(/^www./, ''),

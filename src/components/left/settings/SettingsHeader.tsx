@@ -83,7 +83,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
   function renderHeaderContent() {
     switch (currentScreen) {
       case SettingsScreens.EditProfile:
-        return <h3>{lang('EditProfile')}</h3>;
+        return <h3>{lang('lng_settings_information')}</h3>;
       case SettingsScreens.General:
         return <h3>{lang('General')}</h3>;
       case SettingsScreens.Notifications:

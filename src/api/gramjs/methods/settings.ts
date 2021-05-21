@@ -18,6 +18,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 
 const MAX_INT_32 = 2 ** 31 - 1;
+const BETA_LANG_CODES = ['ar', 'fa'];
 
 export function updateProfile({
   firstName,
@@ -250,7 +251,10 @@ export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
 
 export async function fetchLangPack({ sourceLangPacks, langCode }: { sourceLangPacks: string[]; langCode: string }) {
   const results = await Promise.all(sourceLangPacks.map((langPack) => {
-    return invokeRequest(new GramJs.langpack.GetLangPack({ langPack, langCode }));
+    return invokeRequest(new GramJs.langpack.GetLangPack({
+      langPack,
+      langCode: BETA_LANG_CODES.includes(langCode) ? `${langCode}-raw` : langCode,
+    }));
   }));
 
   const collections = results

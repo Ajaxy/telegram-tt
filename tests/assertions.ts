@@ -137,7 +137,7 @@ export function expectCommentButton(
     expect(button.querySelector('.label')).toHaveTextContent(`${commentsCount} Comments`);
     expect(button.querySelectorAll('.Avatar')).toHaveLength(Math.min(authorsCount, 3));
   } else {
-    expect(button.querySelector('.label')).toHaveTextContent('Leave a Comment');
+    expect(button.querySelector('.label')).toHaveTextContent('Leave a comment');
     expect(button.querySelectorAll('.Avatar')).toHaveLength(0);
   }
 

@@ -31,10 +31,11 @@ type OwnProps = {
 const HeaderPinnedMessage: FC<OwnProps> = ({
   message, count, index, customTitle, className, onUnpinMessage, onClick, onAllPinnedClick,
 }) => {
+  const lang = useLang();
   const mediaThumbnail = useWebpThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 
-  const text = getMessageSummaryText(message, Boolean(mediaThumbnail));
+  const text = getMessageSummaryText(lang, message, Boolean(mediaThumbnail));
   const [isUnpinDialogOpen, openUnpinDialog, closeUnpinDialog] = useFlag();
 
   const handleUnpinMessage = useCallback(() => {
@@ -44,8 +45,6 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
       onUnpinMessage(message.id);
     }
   }, [closeUnpinDialog, onUnpinMessage, message.id]);
-
-  const lang = useLang();
 
   return (
     <div className={buildClassName('HeaderPinnedMessage-wrapper', className)}>

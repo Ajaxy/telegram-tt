@@ -756,7 +756,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
               color="translucent-white"
               round
               size="tiny"
-              ariaLabel="Forward message"
+              ariaLabel={lang('lng_context_forward_msg')}
               onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
             >
               <i className="icon-share-filled" />

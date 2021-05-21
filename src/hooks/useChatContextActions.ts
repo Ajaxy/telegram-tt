@@ -1,7 +1,10 @@
 import { useMemo } from '../lib/teact/teact';
 import { getDispatch } from '../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../api/types';
-import { isChatArchived, getCanDeleteChat, isChatPrivate } from '../modules/helpers';
+import {
+  isChatArchived, getCanDeleteChat, isChatPrivate, isChatChannel,
+} from '../modules/helpers';
+import useLang from './useLang';
 
 export default ({
   chat,
@@ -16,6 +19,8 @@ export default ({
   folderId?: number;
   isPinned?: boolean;
 }) => {
+  const lang = useLang();
+
   const {
     toggleChatPinned,
     updateChatMutedState,
@@ -31,23 +36,39 @@ export default ({
     const isChatWithSelf = privateChatUser && privateChatUser.isSelf;
 
     const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
-      ? { title: 'Mark as Read', icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
-      : { title: 'Mark as Unread', icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
+      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
+      : { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
 
     const actionPin = isPinned
-      ? { title: 'Unpin', icon: 'unpin', handler: () => toggleChatPinned({ id: chat.id, folderId }) }
-      : { title: 'Pin', icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
+      ? {
+        title: lang('UnpinFromTop'),
+        icon: 'unpin',
+        handler: () => toggleChatPinned({ id: chat.id, folderId }),
+      }
+      : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
 
     const actionMute = chat.isMuted
-      ? { title: 'Unmute', icon: 'unmute', handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }) }
-      : { title: 'Mute', icon: 'mute', handler: () => updateChatMutedState({ chatId: chat.id, isMuted: true }) };
+      ? {
+        title: lang('ChatList.Unmute'),
+        icon: 'unmute',
+        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }),
+      }
+      : {
+        title: lang('ChatList.Mute'),
+        icon: 'mute',
+        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: true }),
+      };
 
     const actionArchive = isChatArchived(chat)
-      ? { title: 'Unarchive', icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
-      : { title: 'Archive', icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
+      ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
+      : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
 
     const actionDelete = {
-      title: isChatPrivate(chat.id) ? 'Delete' : (getCanDeleteChat(chat) ? 'Delete and Leave' : 'Leave'),
+      title: isChatPrivate(chat.id)
+        ? lang('Delete')
+        : lang(getCanDeleteChat(chat)
+          ? 'DeleteChat'
+          : (isChatChannel(chat) ? 'LeaveChannel' : 'Group.LeaveGroup')),
       icon: 'delete',
       destructive: true,
       handler: handleDelete,
@@ -63,7 +84,7 @@ export default ({
       actionDelete,
     ];
   }, [
-    chat, privateChatUser, handleDelete, folderId, isPinned,
-    toggleChatPinned, updateChatMutedState, toggleChatArchived, toggleChatUnread,
+    chat, privateChatUser, lang, isPinned, handleDelete, toggleChatUnread, toggleChatPinned, folderId,
+    updateChatMutedState, toggleChatArchived,
   ]);
 };

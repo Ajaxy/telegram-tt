@@ -124,7 +124,7 @@ export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
 export const DEFAULT_LANG_PACK = 'android';
-export const LANG_PACKS = ['android', 'ios'];
+export const LANG_PACKS = ['android', 'ios', 'tdesktop'];
 export const TIPS_USERNAME = 'TelegramTips';
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

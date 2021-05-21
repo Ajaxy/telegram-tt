@@ -199,7 +199,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
           />
 
           <p className="settings-item-description">
-            {renderText(lang('BioAbout'), ['br', 'simple_markdown'])}
+            {renderText(lang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
           </p>
         </div>
 
@@ -219,7 +219,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
           </p>
           {username && (
             <p className="settings-item-description">
-              This link opens a chat with you:<br />
+              {lang('lng_username_link')}<br />
               <span className="username-link">https://t.me/{username}</span>
             </p>
           )}

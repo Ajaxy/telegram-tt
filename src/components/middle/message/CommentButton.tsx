@@ -8,9 +8,10 @@ import { GlobalActions } from '../../../global/types';
 
 import { pick } from '../../../util/iteratees';
 import { isChatPrivate } from '../../../modules/helpers';
-import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
 import { selectThreadInfo } from '../../../modules/selectors';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 
@@ -32,6 +33,7 @@ type DispatchProps = Pick<GlobalActions, 'openChat'>;
 const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
   disabled, threadInfo, usersById, chatsById, openChat,
 }) => {
+  const lang = useLang();
   const {
     threadId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds,
   } = threadInfo;
@@ -76,23 +78,13 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
       <i className="icon-comments-sticker" />
       {(!recentRepliers || recentRepliers.length === 0) && <i className="icon-comments" />}
       {renderRecentRepliers()}
-      <div className="label">{renderLabel(messagesCount)}</div>
+      <div className="label">
+        {messagesCount ? lang('Comments', messagesCount, 'i') : lang('LeaveAComment')}
+      </div>
       <i className="icon-next" />
     </div>
   );
 };
-
-function renderLabel(messagesCount: number) {
-  if (messagesCount === 0) {
-    return 'Leave a Comment';
-  }
-
-  if (messagesCount === 1) {
-    return '1 Comment';
-  }
-
-  return `${formatInteger(messagesCount)} Comments`;
-}
 
 export default memo(withGlobal<OwnProps>(
   (global, { message }) => {

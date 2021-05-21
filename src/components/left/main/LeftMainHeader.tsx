@@ -76,6 +76,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   setGlobalSearchDate,
   setSettingOption,
 }) => {
+  const lang = useLang();
   const hasMenu = content === LeftColumnContent.ChatList;
   const clearedDateSearchParam = { date: undefined };
   const clearedChatSearchParam = { id: undefined };
@@ -107,12 +108,12 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         color="translucent"
         className={isOpen ? 'active' : ''}
         onClick={hasMenu ? onTrigger : () => onReset()}
-        ariaLabel={hasMenu ? 'Open menu' : 'Return to chat list'}
+        ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
     );
-  }, [hasMenu, onReset]);
+  }, [hasMenu, lang, onReset]);
 
   const handleSearchFocus = useCallback(() => {
     if (!searchQuery) {
@@ -147,8 +148,6 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setSettingOption({ animationLevel: newLevel });
   }, [animationLevel, setSettingOption]);
-
-  const lang = useLang();
 
   const isSearchFocused = (
     Boolean(globalSearchChatId)
@@ -198,10 +197,10 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             icon="darkmode"
             onClick={handleDarkModeToggle}
           >
-            <span className="menu-item-name">Dark Mode</span>
+            <span className="menu-item-name">{lang('lng_menu_night_mode')}</span>
             <Switcher
               id="darkmode"
-              label="Toggle Dark Mode"
+              label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
               checked={theme === 'dark'}
               noAnimation
             />
@@ -221,7 +220,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             icon="help"
             onClick={openTipsChat}
           >
-            Telegram Features
+            {lang('TelegramFeatures')}
           </MenuItem>
           <MenuItem
             icon="bug"

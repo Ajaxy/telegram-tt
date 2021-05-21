@@ -159,7 +159,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   const lang = useLang();
 
   function renderFoundMessage(message: ApiMessage) {
-    const text = getMessageSummaryText(message);
+    const text = getMessageSummaryText(lang, message);
     const chat = chatsById[message.chatId];
 
     if (!text || !chat) {
@@ -199,7 +199,12 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
           />
         </div>
       )}
-      {nothingFound && <NothingFound />}
+      {nothingFound && (
+        <NothingFound
+          text={lang('ChatList.Search.NoResults')}
+          description={lang('ChatList.Search.NoResultsDescription')}
+        />
+      )}
       {!!localResults.length && (
         <div className="chat-selection no-selection no-scrollbar">
           {localResults.map((id) => (
@@ -215,9 +220,11 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
-              <Link onClick={handleClickShowMoreLocal}>{shouldShowMoreLocal ? 'Show less' : 'Show more'}</Link>
+              <Link onClick={handleClickShowMoreLocal}>
+                {lang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+              </Link>
             )}
-            Contacts and Chats
+            {lang('DialogList.SearchSectionDialogs')}
           </h3>
           {localResults.map((id, index) => {
             if (!shouldShowMoreLocal && index >= LESS_LIST_ITEMS_AMOUNT) {
@@ -237,9 +244,11 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
-              <Link onClick={handleClickShowMoreGlobal}>{shouldShowMoreGlobal ? 'Show less' : 'Show more'}</Link>
+              <Link onClick={handleClickShowMoreGlobal}>
+                {lang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+              </Link>
             )}
-            Global Search
+            {lang('DialogList.SearchSectionGlobal')}
           </h3>
           {globalResults.map((id, index) => {
             if (!shouldShowMoreGlobal && index >= LESS_LIST_ITEMS_AMOUNT) {
