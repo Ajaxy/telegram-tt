@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 
 import TelegramClient from './TelegramClient';
@@ -61,6 +62,7 @@ export async function uploadFile(
         for (let j = i; j < end; j++) {
             const bytes = buffer.slice(j * partSize, (j + 1) * partSize);
 
+            // eslint-disable-next-line no-loop-func
             sendingParts.push((async () => {
                 await sender.send(
                     isLarge
@@ -94,6 +96,7 @@ export async function uploadFile(
             ]);
         } catch (err) {
             if (err.message === 'TIMEOUT') {
+                // eslint-disable-next-line no-console
                 console.warn('Upload timeout. Retrying...');
                 i -= workers;
                 continue;
@@ -115,10 +118,6 @@ export async function uploadFile(
             name,
             md5Checksum: '', // This is not a "flag", so not sure if we can make it optional.
         });
-}
-
-function generateRandomBigInt() {
-    return readBigIntFromBuffer(generateRandomBytes(8), false);
 }
 
 function fileToBuffer(file: File) {

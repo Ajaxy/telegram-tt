@@ -49,7 +49,7 @@ class MessagePacker {
         }
         if (!this._queue[this._queue.length - 1]) {
             this._queue = [];
-            return;
+            return undefined;
         }
         let data;
         let buffer = new BinaryWriter(Buffer.alloc(0));
@@ -69,7 +69,8 @@ class MessagePacker {
                     buffer, state.data, state.request.classType === 'request',
                     afterId,
                 );
-                this._log.debug(`Assigned msgId = ${state.msgId} to ${state.request.className || state.request.constructor.name}`);
+                this._log.debug(`Assigned msgId = ${state.msgId} to ${state.request.className
+                || state.request.constructor.name}`);
                 batch.push(state);
                 continue;
             }
@@ -77,12 +78,13 @@ class MessagePacker {
                 this._queue.unshift(state);
                 break;
             }
-            this._log.warn(`Message payload for ${state.request.className || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`);
+            this._log.warn(`Message payload for ${state.request.className
+            || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`);
             state.reject('Request Payload is too big');
             size = 0;
         }
         if (!batch.length) {
-            return null;
+            return undefined;
         }
         if (batch.length > 1) {
             const b = Buffer.alloc(8);

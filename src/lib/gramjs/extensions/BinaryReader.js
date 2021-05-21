@@ -10,7 +10,7 @@ class BinaryReader {
      */
     constructor(data) {
         this.stream = data;
-        this._last = null;
+        this._last = undefined;
         this.offset = 0;
     }
 
@@ -234,7 +234,7 @@ class BinaryReader {
      * Closes the reader.
      */
     close() {
-        this.stream = null;
+        this.stream = undefined;
     }
 
     // region Position related

@@ -35,7 +35,7 @@ class CTR {
 
         this._counter = counter;
 
-        this._remainingCounter = null;
+        this._remainingCounter = undefined;
         this._remainingCounterIndex = 16;
 
         this._aes = new AES(getWords(key));
@@ -95,12 +95,16 @@ class Hash {
         this.data = new Uint8Array(data);
     }
 
+
     async digest() {
         if (this.algorithm === 'sha1') {
+            // eslint-disable-next-line no-restricted-globals
             return Buffer.from(await self.crypto.subtle.digest('SHA-1', this.data));
         } else if (this.algorithm === 'sha256') {
+            // eslint-disable-next-line no-restricted-globals
             return Buffer.from(await self.crypto.subtle.digest('SHA-256', this.data));
         }
+        return undefined;
     }
 }
 

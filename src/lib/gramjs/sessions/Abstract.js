@@ -1,8 +1,4 @@
 class Session {
-    constructor() {
-
-    }
-
     /**
      * Creates a clone of this session file
      * @param toInstance {Session|null}
@@ -59,6 +55,7 @@ class Session {
      * @param serverAddress {string}
      * @param port {number}
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setDC(dcId, serverAddress, port) {
         throw new Error('Not implemented');
     }

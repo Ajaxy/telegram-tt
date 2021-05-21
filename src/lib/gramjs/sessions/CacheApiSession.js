@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 const StorageSession = require('./StorageSession');
 
 const CACHE_NAME = 'GramJs';
@@ -13,7 +14,7 @@ class CacheApiSession extends StorageSession {
         const request = new Request(this._storageKey);
         const cache = await self.caches.open(CACHE_NAME);
         const cached = await cache.match(request);
-        return cached ? cached.text() : null;
+        return cached ? cached.text() : undefined;
     }
 
     async _saveToCache(data) {

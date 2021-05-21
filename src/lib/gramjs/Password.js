@@ -1,5 +1,4 @@
 const BigInt = require('big-integer');
-const Factorizator = require('./crypto/Factorizator');
 const { constructors } = require('./tl');
 const {
     readBigIntFromBuffer,
@@ -148,7 +147,7 @@ function xor(a, b) {
     const length = Math.min(a.length, b.length);
 
     for (let i = 0; i < length; i++) {
-        a[i] = a[i] ^ b[i];
+        a[i] ^= b[i];
     }
 
     return a;

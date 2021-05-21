@@ -3,7 +3,6 @@
  *  in plain text, when no authorization key has been created yet.
  */
 const BigInt = require('big-integer');
-const Helpers = require('../Helpers');
 const MTProtoState = require('./MTProtoState');
 const BinaryReader = require('../extensions/BinaryReader');
 const { InvalidBufferError } = require('../errors/Common');

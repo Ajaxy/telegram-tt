@@ -34,10 +34,14 @@ class MTProtoRequest {
         throw Error(`Not overload ${this.constructor.name}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onResponse(buffer) {
+        throw Error(`Not overload ${this.constructor.name}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onException(exception) {
+        throw Error(`Not overload ${this.constructor.name}`);
     }
 }
 

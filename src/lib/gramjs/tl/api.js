@@ -4,7 +4,6 @@ const {
     serializeDate,
 } = require('./generationHelpers');
 const {
-    readBufferFromBigInt,
     toSignedLittleBuffer,
 } = require('../Helpers');
 
@@ -32,6 +31,7 @@ const AUTO_CASTS = new Set([
 ])
 
  */
+// eslint-disable-next-line no-restricted-globals
 const CACHING_SUPPORTED = typeof self !== 'undefined' && self.localStorage !== undefined;
 
 const CACHE_KEY = 'GramJs:apiCache';
@@ -93,27 +93,33 @@ function extractParams(fileContent) {
     const constructors = [];
     const functions = [];
     for (const d of f) {
-        d.isFunction ? functions.push(d) : constructors.push(d);
+        if (d.isFunction) {
+            functions.push(d);
+        } else {
+            constructors.push(d);
+        }
     }
     return [constructors, functions];
 }
 
 function argToBytes(x, type) {
     switch (type) {
-        case 'int':
+        case 'int': {
             const i = Buffer.alloc(4);
             i.writeInt32LE(x, 0);
             return i;
+        }
         case 'long':
             return toSignedLittleBuffer(x, 8);
         case 'int128':
             return toSignedLittleBuffer(x, 16);
         case 'int256':
             return toSignedLittleBuffer(x, 32);
-        case 'double':
+        case 'double': {
             const d = Buffer.alloc(8);
             d.writeDoubleLE(x, 0);
             return d;
+        }
         case 'string':
             return serializeBytes(x);
         case 'Bool':
@@ -201,7 +207,7 @@ function getArgFromReader(reader, arg) {
                 if (!arg.skipConstructorId) {
                     return reader.tgReadObject();
                 } else {
-                    return api.constructors[arg.type].fromReader(reader);
+                    throw new Error(`Unknown type ${arg}`);
                 }
         }
     }
@@ -254,13 +260,13 @@ function createClasses(classesType, params) {
                         const arg = argsConfig[argName];
                         if (arg.isFlag) {
                             if (arg.type === 'true') {
-                                args[argName] = Boolean(args.flags & 1 << arg.flagIndex);
+                                args[argName] = Boolean(args.flags & (1 << arg.flagIndex));
                                 continue;
                             }
-                            if (args.flags & 1 << arg.flagIndex) {
+                            if (args.flags & (1 << arg.flagIndex)) {
                                 args[argName] = getArgFromReader(reader, arg);
                             } else {
-                                args[argName] = null;
+                                args[argName] = undefined;
                             }
                         } else {
                             if (arg.flagIndicator) {
@@ -282,7 +288,8 @@ function createClasses(classesType, params) {
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
-                            if ((this[arg] === false && argsConfig[arg].type === 'true') || this[arg] === null || this[arg] === undefined) {
+                            if ((this[arg] === false && argsConfig[arg].type === 'true')
+                                || this[arg] === undefined) {
                                 continue;
                             }
                         }
@@ -301,7 +308,8 @@ function createClasses(classesType, params) {
                                 let flagCalculate = 0;
                                 for (const f in argsConfig) {
                                     if (argsConfig[f].isFlag) {
-                                        if ((this[f] === false && argsConfig[f].type === 'true') || this[f] === undefined || this[f] === null) {
+                                        if ((this[f] === false && argsConfig[f].type === 'true')
+                                            || this[f] === undefined) {
                                             flagCalculate |= 0;
                                         } else {
                                             flagCalculate |= 1 << argsConfig[f].flagIndex;

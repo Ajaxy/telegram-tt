@@ -48,7 +48,9 @@ class StorageSession extends MemorySession {
                     }
                 });
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.warn('Failed to retrieve or parse session from storage');
+            // eslint-disable-next-line no-console
             console.warn(err);
         }
     }
@@ -101,12 +103,15 @@ class StorageSession extends MemorySession {
                 const authKey = this._authKeys[dcId];
                 sessionData.keys[dcId] = authKey._key;
                 sessionData.hashes[dcId] = authKey._hash;
+                return undefined;
             });
 
         try {
             await this._saveToCache(JSON.stringify(sessionData));
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.warn('Failed to update session in storage');
+            // eslint-disable-next-line no-console
             console.warn(err);
         }
     }
@@ -115,23 +120,27 @@ class StorageSession extends MemorySession {
         try {
             return await this._delete();
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.warn('Failed to delete session from storage');
+            // eslint-disable-next-line no-console
             console.warn(err);
         }
+        return undefined;
     }
 
     // @abstract
-    async _delete() {
+    _delete() {
         throw new Error('Not Implemented');
     }
 
     // @abstract
-    async _fetchFromCache() {
+    _fetchFromCache() {
         throw new Error('Not Implemented');
     }
 
     // @abstract
-    async _saveToCache(data) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _saveToCache(data) {
         throw new Error('Not Implemented');
     }
 }

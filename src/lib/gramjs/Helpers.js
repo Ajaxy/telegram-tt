@@ -310,7 +310,7 @@ function makeCRCTable() {
     return crcTable;
 }
 
-let crcTable = null;
+let crcTable;
 
 function crc32(buf) {
     if (!crcTable) {

@@ -20,6 +20,10 @@
         ],
         "no-bitwise": "off",
         "no-underscore-dangle": "off",
-        "no-null/no-null": "off"
+        "no-continue": "off",
+        "no-restricted-syntax": "off",
+        "class-methods-use-this": "off",
+        "max-classes-per-file": "off",
+        "camelcase": "error"
     }
 }

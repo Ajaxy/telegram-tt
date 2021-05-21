@@ -34,12 +34,12 @@ class GZIPPacked {
         return Buffer.from(inflate(input));
     }
 
-    static async read(reader) {
+    static read(reader) {
         const constructor = reader.readInt(false);
         if (constructor !== GZIPPacked.CONSTRUCTOR_ID) {
             throw new Error('not equal');
         }
-        return await GZIPPacked.gzip(reader.tgReadBytes());
+        return GZIPPacked.gzip(reader.tgReadBytes());
     }
 
     static async fromReader(reader) {

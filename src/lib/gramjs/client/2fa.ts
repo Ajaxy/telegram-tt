@@ -1,4 +1,5 @@
 import TelegramClient from './TelegramClient';
+// eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 import { generateRandomBytes } from '../Helpers';
 import { computeCheck, computeDigest } from '../Password';
@@ -100,7 +101,8 @@ export async function updateTwoFaSettings(
         }));
     } catch (e) {
         if (e instanceof errors.EmailUnconfirmedError) {
-            while (1) {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
                 try {
                     const code = await emailCodeCallback!(e.codeLength);
 

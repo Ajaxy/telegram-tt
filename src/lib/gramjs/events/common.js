@@ -1,8 +1,8 @@
 class EventBuilder {
     constructor(args = {
-        chats: null,
-        blacklistChats: null,
-        func: null,
+        chats: undefined,
+        blacklistChats: undefined,
+        func: undefined,
     }) {
         this.chats = args.chats;
         this.blacklistChats = Boolean(args.blacklistChats);
@@ -10,17 +10,13 @@ class EventBuilder {
         this.func = args.func;
     }
 
-    build(update, others = null) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    build(update) {
 
     }
-}
-
-class EventCommon {
-
 }
 
 
 module.exports = {
     EventBuilder,
-    EventCommon,
 };

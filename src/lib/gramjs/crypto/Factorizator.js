@@ -70,6 +70,7 @@ class Factorizator {
 
 
         if (g.eq(pq)) {
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 ys = (modExp(ys, BigInt(2), pq)).add(c)
                     .remainder(pq);
