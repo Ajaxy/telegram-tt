@@ -21,7 +21,7 @@ class StringSession extends MemorySession {
      * `decode` definition must be ``function decode(value: string) -> Buffer:``.
      * @param session {string|null}
      */
-    constructor(session = null) {
+    constructor(session = undefined) {
         super();
         if (session) {
             if (session[0] !== CURRENT_VERSION) {
@@ -96,7 +96,7 @@ class StringSession extends MemorySession {
     setAuthKey(authKey, dcId) {
         if (dcId && dcId !== this.dcId) {
             // Not supported.
-            return undefined;
+            return;
         }
 
         this.authKey = authKey;

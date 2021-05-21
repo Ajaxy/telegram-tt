@@ -13,7 +13,7 @@ const AsyncQueue = require('../../extensions/AsyncQueue');
  * the client is disconnected (includes remote disconnections).
  */
 class Connection {
-    PacketCodecClass = null;
+    PacketCodecClass = undefined;
 
     constructor(ip, port, dcId, loggers) {
         this._ip = ip;
@@ -21,10 +21,10 @@ class Connection {
         this._dcId = dcId;
         this._log = loggers;
         this._connected = false;
-        this._sendTask = null;
-        this._recvTask = null;
-        this._codec = null;
-        this._obfuscation = null; // TcpObfuscated and MTProxy
+        this._sendTask = undefined;
+        this._recvTask = undefined;
+        this._codec = undefined;
+        this._obfuscation = undefined; // TcpObfuscated and MTProxy
         this._sendArray = new AsyncQueue();
         this._recvArray = new AsyncQueue();
         // this.socket = new PromiseSocket(new Socket())
@@ -53,7 +53,7 @@ class Connection {
 
     async disconnect() {
         this._connected = false;
-        await this._recvArray.push(null);
+        await this._recvArray.push(undefined);
         await this.socket.close();
     }
 
@@ -81,7 +81,7 @@ class Connection {
             while (this._connected) {
                 const data = await this._sendArray.pop();
                 if (!data) {
-                    this._sendTask = null;
+                    this._sendTask = undefined;
                     return;
                 }
                 await this._send(data);
@@ -116,13 +116,13 @@ class Connection {
         }
     }
 
-    async _send(data) {
+    _send(data) {
         const encodedPacket = this._codec.encodePacket(data);
         this.socket.write(encodedPacket);
     }
 
-    async _recv() {
-        return await this._codec.readPacket(this.socket);
+    _recv() {
+        return this._codec.readPacket(this.socket);
     }
 
     toString() {
@@ -131,9 +131,9 @@ class Connection {
 }
 
 class ObfuscatedConnection extends Connection {
-    ObfuscatedIO = null;
+    ObfuscatedIO = undefined;
 
-    async _initConn() {
+    _initConn() {
         this._obfuscation = new this.ObfuscatedIO(this);
         this.socket.write(this._obfuscation.header);
     }
@@ -143,8 +143,8 @@ class ObfuscatedConnection extends Connection {
     }
 
 
-    async _recv() {
-        return await this._codec.readPacket(this._obfuscation);
+    _recv() {
+        return this._codec.readPacket(this._obfuscation);
     }
 }
 
@@ -153,13 +153,15 @@ class PacketCodec {
         this._conn = connection;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     encodePacket(data) {
         throw new Error('Not Implemented');
 
         // Override
     }
 
-    async readPacket(reader) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    readPacket(reader) {
         // override
         throw new Error('Not Implemented');
     }

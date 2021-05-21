@@ -1,10 +1,10 @@
-const { IGE: aes_ige } = require('@cryptography/aes');
+const { IGE: AESIGE } = require('@cryptography/aes');
 const Helpers = require('../Helpers');
 
 
 class IGENEW {
     constructor(key, iv) {
-        this.ige = new aes_ige(key, iv);
+        this.ige = new AESIGE(key, iv);
     }
 
     /**

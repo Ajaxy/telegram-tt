@@ -1,8 +1,8 @@
+/* eslint-disable max-len */
 const BigInt = require('big-integer');
 const {
     readBigIntFromBuffer,
     readBufferFromBigInt,
-    getByteArray,
     sha1,
     generateRandomBytes,
     modExp,

@@ -44,7 +44,7 @@ function makeCRCTable() {
     return crcTable;
 }
 
-let crcTable = null;
+let crcTable;
 
 function crc32(buf) {
     if (!crcTable) {
@@ -62,6 +62,21 @@ function crc32(buf) {
     return (crc ^ (-1)) >>> 0;
 }
 
+const findAll = (regex, str, matches = []) => {
+    if (!regex.flags.includes('g')) {
+        regex = new RegExp(regex.source, 'g');
+    }
+
+    const res = regex.exec(str);
+
+    if (res) {
+        matches.push(res.slice(1));
+        findAll(regex, str, matches);
+    }
+
+    return matches;
+};
+
 const fromLine = (line, isFunction) => {
     const match = line.match(/([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/);
     if (!match) {
@@ -77,7 +92,7 @@ const fromLine = (line, isFunction) => {
         subclassOfId: crc32(match[3]),
         result: match[3],
         isFunction,
-        namespace: null,
+        namespace: undefined,
     };
     if (!currentConfig.constructorId) {
         const hexId = '';
@@ -134,15 +149,9 @@ function buildArgConfig(name, argType) {
         skipConstructorId: false,
         flagIndex: -1,
         flagIndicator: true,
-        type: null,
-        useVectorId: null,
+        type: undefined,
+        useVectorId: undefined,
     };
-
-    // Special case: some types can be inferred, which makes it
-    // less annoying to type. Currently the only type that can
-    // be inferred is if the name is 'random_id', to which a
-    // random ID will be assigned if left as None (the default)
-    const canBeInferred = name === 'random_id';
 
     // The type can be an indicator that other arguments will be flags
     if (argType !== '#') {
@@ -206,8 +215,8 @@ function buildArgConfig(name, argType) {
 }
 
 
-const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES) {
-    const methodInfo = (methods || []).reduce((o, m) => ({
+function* parseTl(content, layer, methods = [], ignoreIds = CORE_TYPES) {
+    (methods || []).reduce((o, m) => ({
         ...o,
         [m.name]: m,
     }), {});
@@ -281,22 +290,7 @@ const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES)
     for (const obj of objAll) {
         yield obj;
     }
-};
-
-const findAll = (regex, str, matches = []) => {
-    if (!regex.flags.includes('g')) {
-        regex = new RegExp(regex.source, 'g');
-    }
-
-    const res = regex.exec(str);
-
-    if (res) {
-        matches.push(res.slice(1));
-        findAll(regex, str, matches);
-    }
-
-    return matches;
-};
+}
 
 function serializeBytes(data) {
     if (!(data instanceof Buffer)) {

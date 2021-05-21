@@ -26,16 +26,16 @@ class MessageContainer {
         this.classType = 'constructor';
     }
 
-    static async fromReader(reader) {
+    static fromReader(reader) {
         const messages = [];
         const length = reader.readInt();
         for (let x = 0; x < length; x++) {
             const msgId = reader.readLong();
             const seqNo = reader.readInt();
-            const length = reader.readInt();
+            const containerLength = reader.readInt();
             const before = reader.tellPosition();
             const obj = reader.tgReadObject();
-            reader.setPosition(before + length);
+            reader.setPosition(before + containerLength);
             const tlMessage = new TLMessage(msgId, seqNo, obj);
             messages.push(tlMessage);
         }

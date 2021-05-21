@@ -9,7 +9,9 @@ const {
 class UserMigrateError extends InvalidDCError {
     constructor(args) {
         const newDc = Number(args.capture || 0);
+        // eslint-disable-next-line max-len
         super(`The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
         this.newDc = newDc;
     }
@@ -19,7 +21,9 @@ class UserMigrateError extends InvalidDCError {
 class PhoneMigrateError extends InvalidDCError {
     constructor(args) {
         const newDc = Number(args.capture || 0);
+        // eslint-disable-next-line max-len
         super(`The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
         this.newDc = newDc;
     }
@@ -28,7 +32,9 @@ class PhoneMigrateError extends InvalidDCError {
 class SlowModeWaitError extends FloodError {
     constructor(args) {
         const seconds = Number(args.capture || 0);
+        // eslint-disable-next-line max-len
         super(`A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`;
         this.seconds = seconds;
     }
@@ -47,6 +53,7 @@ class FloodTestPhoneWaitError extends FloodError {
     constructor(args) {
         const seconds = Number(args.capture || 0);
         super(`A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`;
         this.seconds = seconds;
     }
@@ -56,6 +63,7 @@ class FileMigrateError extends InvalidDCError {
     constructor(args) {
         const newDc = Number(args.capture || 0);
         super(`The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`;
         this.newDc = newDc;
     }
@@ -74,6 +82,7 @@ class EmailUnconfirmedError extends BadRequestError {
     constructor(args) {
         const codeLength = Number(args.capture || 0);
         super(`Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`);
+        // eslint-disable-next-line max-len
         this.message = `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`;
         this.codeLength = codeLength;
     }

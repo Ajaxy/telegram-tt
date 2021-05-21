@@ -1,15 +1,13 @@
-const utils = require('../Utils');
-const types = require('../tl').constructors;
 const Session = require('./Abstract');
 
 class MemorySession extends Session {
     constructor() {
         super();
 
-        this._serverAddress = null;
+        this._serverAddress = undefined;
         this._dcId = 0;
-        this._port = null;
-        this._takeoutId = null;
+        this._port = undefined;
+        this._takeoutId = undefined;
 
         this._entities = new Set();
         this._updateStates = {};

@@ -11,7 +11,7 @@ function RPCMessageToError(rpcError, request) {
     for (const [msgRegex, Cls] of rpcErrorRe) {
         const m = rpcError.errorMessage.match(msgRegex);
         if (m) {
-            const capture = m.length === 2 ? parseInt(m[1]) : null;
+            const capture = m.length === 2 ? parseInt(m[1], 10) : undefined;
             return new Cls({
                 request,
                 capture,
@@ -22,9 +22,13 @@ function RPCMessageToError(rpcError, request) {
     return new RPCError(rpcError.errorMessage, request);
 }
 
+const Common = require('./Common');
+const RPCBaseErrors = require('./RPCBaseErrors');
+const RPCErrorList = require('./RPCErrorList');
+
 module.exports = {
     RPCMessageToError,
-    ...require('./Common'),
-    ...require('./RPCBaseErrors'),
-    ...require('./RPCErrorList'),
+    ...Common,
+    ...RPCBaseErrors,
+    ...RPCErrorList,
 };

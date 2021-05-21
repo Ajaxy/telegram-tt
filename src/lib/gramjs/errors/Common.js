@@ -22,6 +22,7 @@ class TypeNotFoundError extends Error {
         read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
          it should not be read. Remaining bytes: ${remaining.length}`);
         if (typeof alert !== 'undefined') {
+            // eslint-disable-next-line no-alert
             alert(`Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`);
         }
         this.invalidConstructorId = invalidConstructorId;
@@ -47,7 +48,7 @@ class InvalidChecksumError extends Error {
  */
 class InvalidBufferError extends Error {
     constructor(payload) {
-        let code = null;
+        let code;
         if (payload.length === 4) {
             code = -payload.readInt32LE(0);
             super(`Invalid response buffer (HTTP code ${code})`);
@@ -100,7 +101,7 @@ class BadMessageError extends Error {
             'Incorrect two lower order msg_id bits (the server expects client message msg_id '
             + 'to be divisible by 4).',
 
-        19: 'Container msg_id is the same as msg_id of a previously received message ' + '(this must never happen).',
+        19: 'Container msg_id is the same as msg_id of a previously received message (this must never happen).',
 
         20:
             'Message too old, and it cannot be verified whether the server has received a '

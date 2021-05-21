@@ -58,16 +58,16 @@ async function doAuthentication(sender, log) {
     });
 
     // sha_digest + data + random_bytes
-    let cipherText = null;
-    let targetFingerprint = null;
+    let cipherText;
+    let targetFingerprint;
     for (const fingerprint of resPQ.serverPublicKeyFingerprints) {
         cipherText = await RSA.encrypt(fingerprint.toString(), pqInnerData.getBytes());
-        if (cipherText !== null && cipherText !== undefined) {
+        if (cipherText !== undefined) {
             targetFingerprint = fingerprint;
             break;
         }
     }
-    if (cipherText === null || cipherText === undefined) {
+    if (cipherText === undefined) {
         throw new SecurityError('Step 2 could not find a valid key for fingerprints');
     }
 
@@ -81,7 +81,8 @@ async function doAuthentication(sender, log) {
             encryptedData: cipherText,
         }),
     );
-    if (!(serverDhParams instanceof constructors.ServerDHParamsOk || serverDhParams instanceof constructors.ServerDHParamsFail)) {
+    if (!(serverDhParams instanceof constructors.ServerDHParamsOk
+        || serverDhParams instanceof constructors.ServerDHParamsFail)) {
         throw new Error(`Step 2.1 answer was ${serverDhParams}`);
     }
     if (serverDhParams.nonce.neq(resPQ.nonce)) {

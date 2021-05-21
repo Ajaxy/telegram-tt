@@ -22,7 +22,10 @@ class AuthKey {
 
     async setKey(value) {
         if (!value) {
-            this._key = this.auxHash = this.keyId = this._hash = null;
+            this._key = undefined;
+            this.auxHash = undefined;
+            this.keyId = undefined;
+            this._hash = undefined;
             return;
         }
         if (value instanceof AuthKey) {

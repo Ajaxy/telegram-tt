@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import { getAppropriatedPartSize } from '../Utils';
@@ -34,13 +35,45 @@ const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const REQUEST_TIMEOUT = 15000;
 
+
+class Foreman {
+    private deferred: Deferred | undefined;
+
+    private activeWorkers = 0;
+
+    constructor(private maxWorkers: number) {
+    }
+
+    requestWorker() {
+        this.activeWorkers++;
+
+        if (this.activeWorkers > this.maxWorkers) {
+            this.deferred = createDeferred();
+            return this.deferred.promise;
+        }
+
+        return Promise.resolve();
+    }
+
+    releaseWorker() {
+        this.activeWorkers--;
+
+        if (this.deferred && (this.activeWorkers <= this.maxWorkers)) {
+            this.deferred.resolve();
+        }
+    }
+}
+
 export async function downloadFile(
     client: TelegramClient,
     inputLocation: Api.InputFileLocation,
     fileParams: DownloadFileParams,
 ) {
     let {
-        partSizeKb, fileSize, workers = 1, end,
+        partSizeKb, end,
+    } = fileParams;
+    const {
+        fileSize, workers = 1,
     } = fileParams;
     const { dcId, progressCallback, start = 0 } = fileParams;
 
@@ -88,12 +121,13 @@ export async function downloadFile(
         progressCallback(progress);
     }
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let limit = partSize;
         let isPrecise = false;
 
         if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
-            limit = ONE_MB - offset % ONE_MB;
+            limit = ONE_MB - (offset % ONE_MB);
             isPrecise = true;
         }
 
@@ -104,6 +138,7 @@ export async function downloadFile(
             break;
         }
 
+        // eslint-disable-next-line no-loop-func
         promises.push((async () => {
             try {
                 const result = await Promise.race([
@@ -151,33 +186,6 @@ export async function downloadFile(
     return Buffer.concat(buffers, totalLength);
 }
 
-class Foreman {
-    private deferred: Deferred | undefined;
-
-    private activeWorkers = 0;
-
-    constructor(private maxWorkers: number) {
-    }
-
-    requestWorker() {
-        this.activeWorkers++;
-
-        if (this.activeWorkers > this.maxWorkers) {
-            this.deferred = createDeferred();
-            return this.deferred.promise;
-        }
-
-        return Promise.resolve();
-    }
-
-    releaseWorker() {
-        this.activeWorkers--;
-
-        if (this.deferred && (this.activeWorkers <= this.maxWorkers)) {
-            this.deferred.resolve();
-        }
-    }
-}
 
 function createDeferred(): Deferred {
     let resolve: Deferred['resolve'];

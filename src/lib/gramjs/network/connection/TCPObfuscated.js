@@ -4,7 +4,7 @@ const { AbridgedPacketCodec } = require('./TCPAbridged');
 const CTR = require('../../crypto/CTR');
 
 class ObfuscatedIO {
-    header = null;
+    header = undefined;
 
     constructor(connection) {
         this.connection = connection.socket;

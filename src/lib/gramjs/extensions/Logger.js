@@ -1,4 +1,4 @@
-let _level = null;
+let _level;
 
 class Logger {
     static levels = ['error', 'warn', 'info', 'debug'];
@@ -92,12 +92,12 @@ class Logger {
         }
         if (this.canSend(level)) {
             if (!this.isBrowser) {
+                // eslint-disable-next-line no-console
                 console.log(color + this.format(message, level) + this.colors.end);
             } else {
+                // eslint-disable-next-line no-console
                 console.log(this.colors.start + this.format(message, level), color);
             }
-        } else {
-
         }
     }
 }

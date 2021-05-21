@@ -36,7 +36,7 @@ class AbridgedPacketCodec extends PacketCodec {
                 .readInt32LE(0);
         }
 
-        return await reader.read(length << 2);
+        return reader.read(length << 2);
     }
 }
 

@@ -4,7 +4,6 @@ const { sleep } = require('../Helpers');
 const errors = require('../errors');
 const MemorySession = require('../sessions/Memory');
 const Helpers = require('../Helpers');
-const { BinaryWriter } = require('../extensions');
 const utils = require('../Utils');
 const Session = require('../sessions/Abstract');
 const { LAYER } = require('../tl/AllTLObjects');
@@ -13,7 +12,6 @@ const {
     requests,
 } = require('../tl');
 const MTProtoSender = require('../network/MTProtoSender');
-const { UpdateConnectionState } = require('../network');
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated');
 const {
     authFlow,
@@ -35,7 +33,7 @@ class TelegramClient {
     static DEFAULT_OPTIONS = {
         connection: ConnectionTCPObfuscated,
         useIPV6: false,
-        proxy: null,
+        proxy: undefined,
         timeout: 10,
         requestRetries: 5,
         connectionRetries: Infinity,
@@ -43,9 +41,9 @@ class TelegramClient {
         autoReconnect: true,
         sequentialUpdates: false,
         floodSleepLimit: 60,
-        deviceModel: null,
-        systemVersion: null,
-        appVersion: null,
+        deviceModel: undefined,
+        systemVersion: undefined,
+        appVersion: undefined,
         langCode: 'en',
         systemLangCode: 'en',
         baseLogger: 'gramjs',
@@ -91,7 +89,7 @@ class TelegramClient {
         this._phoneCodeHash = {};
         this.session = session;
         // this._entityCache = EntityCache();
-        this.apiId = parseInt(apiId);
+        this.apiId = parseInt(apiId, 10);
         this.apiHash = apiHash;
 
         this._requestRetries = args.requestRetries;
@@ -123,14 +121,14 @@ class TelegramClient {
                     langPack: '', // this should be left empty.
                     systemLangCode: args.systemLangCode,
                     query: x,
-                    proxy: null, // no proxies yet.
+                    proxy: undefined, // no proxies yet.
                 }),
             });
         };
 
         this._args = args;
         // These will be set later
-        this._config = null;
+        this._config = undefined;
         this.phoneCodeHashes = [];
         this._borrowedSenderPromises = {};
         this._additionalDcsDisabled = args.additionalDcsDisabled;
@@ -178,7 +176,8 @@ class TelegramClient {
         await this.session.load();
 
         if (!this.session.serverAddress || (this.session.serverAddress.includes(':') !== this._useIPV6)) {
-            this.session.setDC(DEFAULT_DC_ID, this._useIPV6 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, this._args.useWSS ? 443 : 80);
+            this.session.setDC(DEFAULT_DC_ID, this._useIPV6
+                ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, this._args.useWSS ? 443 : 80);
         }
     }
 
@@ -208,7 +207,7 @@ class TelegramClient {
                 try {
                     await this.invoke(new requests.updates.GetState());
                 } catch (e) {
-
+                    // we don't care about errors here
                 }
             }
         }
@@ -230,6 +229,7 @@ class TelegramClient {
                         if (sender) {
                             return sender.disconnect();
                         }
+                        return undefined;
                     });
                 }),
         );
@@ -253,13 +253,13 @@ class TelegramClient {
         this.session.setDC(newDc, DC.ipAddress, DC.port);
         // authKey's are associated with a server, which has now changed
         // so it's not valid anymore. Set to None to force recreating it.
-        await this._sender.authKey.setKey(null);
-        this.session.setAuthKey(null);
+        await this._sender.authKey.setKey(undefined);
+        this.session.setAuthKey(undefined);
         await this.disconnect();
         return this.connect();
     }
 
-    async _authKeyCallback(authKey, dcId) {
+    _authKeyCallback(authKey, dcId) {
         this.session.setAuthKey(authKey, dcId);
     }
 
@@ -270,7 +270,7 @@ class TelegramClient {
         delete this._borrowedSenderPromises[dcId];
     }
 
-    async _borrowExportedSender(dcId) {
+    _borrowExportedSender(dcId) {
         if (this._additionalDcsDisabled) {
             return undefined;
         }
@@ -326,7 +326,7 @@ class TelegramClient {
                 await sender.disconnect();
             }
         }
-        return null;
+        return undefined;
     }
 
     // end region
@@ -345,18 +345,15 @@ class TelegramClient {
      * @param [args[workers] {number}]
      * @returns {Promise<Buffer>}
      */
-    async downloadFile(inputLocation, args = {}) {
+    downloadFile(inputLocation, args = {}) {
         return downloadFile(this, inputLocation, args);
     }
 
-    async downloadMedia(messageOrMedia, args) {
-        let date;
+    downloadMedia(messageOrMedia, args) {
         let media;
         if (messageOrMedia instanceof constructors.Message) {
-            date = messageOrMedia.date;
             media = messageOrMedia.media;
         } else {
-            date = new Date().getTime();
             media = messageOrMedia;
         }
         if (typeof media === 'string') {
@@ -377,9 +374,10 @@ class TelegramClient {
         } else if (media instanceof constructors.WebDocument || media instanceof constructors.WebDocumentNoProxy) {
             return this._downloadWebDocument(media, args);
         }
+        return undefined;
     }
 
-    async downloadProfilePhoto(entity, isBig = false) {
+    downloadProfilePhoto(entity, isBig = false) {
         // ('User', 'Chat', 'UserFull', 'ChatFull')
         const ENTITIES = [0x2da17977, 0xc5af5d94, 0x1f4661b9, 0xd49a2697];
         // ('InputPeer', 'InputUser', 'InputChannel')
@@ -393,7 +391,7 @@ class TelegramClient {
             if (!entity.photo) {
                 // Special case: may be a ChatFull with photo:Photo
                 if (!entity.chatPhoto) {
-                    return null;
+                    return undefined;
                 }
 
                 return this._downloadPhoto(
@@ -417,32 +415,14 @@ class TelegramClient {
             // as input location, because then this method would be able
             // to "download the profile photo of a message", i.e. its
             // media which should be done with `download_media` instead.
-            return null;
+            return undefined;
         }
-        try {
-            return this.downloadFile(loc, {
-                dcId,
-            });
-        } catch (e) {
-            // TODO this should never raise
-            throw e;
-            /* if (e.message === 'LOCATION_INVALID') {
-                const ie = await this.getInputEntity(entity)
-                if (ie instanceof constructors.InputPeerChannel) {
-                    const full = await this.invoke(new requests.channels.GetFullChannel({
-                        channel: ie,
-                    }))
-                    return this._downloadPhoto(full.fullChat.chatPhoto, { sizeType })
-                } else {
-                    return null
-                }
-            } else {
-                throw e
-            } */
-        }
+        return this.downloadFile(loc, {
+            dcId,
+        });
     }
 
-    async downloadStickerSetThumb(stickerSet) {
+    downloadStickerSetThumb(stickerSet) {
         if (!stickerSet.thumbs || !stickerSet.thumbs.length) {
             return undefined;
         }
@@ -462,7 +442,7 @@ class TelegramClient {
 
     _pickFileSize(sizes, sizeType) {
         if (!sizeType || !sizes || !sizes.length) {
-            return null;
+            return undefined;
         }
         const indexOfSize = sizeTypes.indexOf(sizeType);
         let size;
@@ -472,7 +452,7 @@ class TelegramClient {
                 return size;
             }
         }
-        return null;
+        return undefined;
     }
 
 
@@ -487,16 +467,16 @@ class TelegramClient {
         return data;
     }
 
-    async _downloadPhoto(photo, args) {
+    _downloadPhoto(photo, args) {
         if (photo instanceof constructors.MessageMediaPhoto) {
             photo = photo.photo;
         }
         if (!(photo instanceof constructors.Photo)) {
-            return;
+            return undefined;
         }
         const size = this._pickFileSize(photo.sizes, args.sizeType);
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
-            return;
+            return undefined;
         }
 
         if (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize) {
@@ -517,22 +497,23 @@ class TelegramClient {
         );
     }
 
-    async _downloadDocument(doc, args) {
+    _downloadDocument(doc, args) {
         if (doc instanceof constructors.MessageMediaDocument) {
             doc = doc.document;
         }
         if (!(doc instanceof constructors.Document)) {
-            return;
+            return undefined;
         }
 
-        let size = null;
+        let size;
         if (args.sizeType) {
-            size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null;
+            size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : undefined;
             if (!size && doc.mimeType.startsWith('video/')) {
-                return;
+                return undefined;
             }
 
-            if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
+            if (size && (size instanceof constructors.PhotoCachedSize
+                || size instanceof constructors.PhotoStrippedSize)) {
                 return this._downloadCachedPhotoSize(size);
             }
         }
@@ -555,10 +536,12 @@ class TelegramClient {
         );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _downloadContact(media, args) {
         throw new Error('not implemented');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _downloadWebDocument(media, args) {
         throw new Error('not implemented');
     }
@@ -601,7 +584,8 @@ class TelegramClient {
                 } else if (e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError
                     || e instanceof errors.UserMigrateError) {
                     this._log.info(`Phone migrated to ${e.newDc}`);
-                    const shouldRaise = e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError;
+                    const shouldRaise = e instanceof errors.PhoneMigrateError
+                        || e instanceof errors.NetworkMigrateError;
                     if (shouldRaise && await checkAuthorization(this)) {
                         throw e;
                     }
@@ -619,7 +603,10 @@ class TelegramClient {
             return (await this.invoke(new requests.users
                 .GetUsers({ id: [new constructors.InputUserSelf()] })))[0];
         } catch (e) {
+            this._log.warn('error while getting me');
+            this._log.warn(e);
         }
+        return undefined;
     }
 
     async start(authParams) {
@@ -666,9 +653,9 @@ class TelegramClient {
                 this._processUpdate(u, update.updates, entities);
             }
         } else if (update instanceof constructors.UpdateShort) {
-            this._processUpdate(update.update, null);
+            this._processUpdate(update.update, undefined);
         } else {
-            this._processUpdate(update, null);
+            this._processUpdate(update, undefined);
         }
         // TODO add caching
         // this._stateCache.update(update)
@@ -915,10 +902,10 @@ class TelegramClient {
     }
     */
     async _dispatchUpdate(args = {
-        update: null,
-        others: null,
-        channelId: null,
-        ptsDate: null,
+        update: undefined,
+        others: undefined,
+        channelId: undefined,
+        ptsDate: undefined,
     }) {
         for (const [builder, callback] of this._eventBuilders) {
             const event = builder.build(args.update);
@@ -938,7 +925,7 @@ class TelegramClient {
     }
 }
 
-async function timeout(promise, ms) {
+function timeout(promise, ms) {
     return Promise.race([
         promise,
         Helpers.sleep(ms)
@@ -959,6 +946,7 @@ async function attempts(cb, times, pause) {
             await Helpers.sleep(pause);
         }
     }
+    return undefined;
 }
 
 module.exports = TelegramClient;

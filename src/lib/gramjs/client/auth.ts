@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import utils from '../Utils';
@@ -55,7 +56,8 @@ async function signInUser(
     let phoneCodeHash;
     let isCodeViaApp = false;
 
-    while (1) {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
         try {
             if (typeof authParams.phoneNumber === 'function') {
                 try {
@@ -92,6 +94,7 @@ async function signInUser(
     let isRegistrationRequired = false;
     let termsOfService;
 
+    // eslint-disable-next-line no-constant-condition
     while (1) {
         try {
             try {
@@ -132,6 +135,7 @@ async function signInUser(
     }
 
     if (isRegistrationRequired) {
+        // eslint-disable-next-line no-constant-condition
         while (1) {
             try {
                 const [firstName, lastName] = await authParams.firstAndLastNames();
@@ -168,6 +172,7 @@ async function signInUserWithQrCode(
     let isScanningComplete = false;
 
     const inputPromise = (async () => {
+        // eslint-disable-next-line no-constant-condition
         while (1) {
             if (isScanningComplete) {
                 break;
@@ -228,7 +233,8 @@ async function signInUserWithQrCode(
                 token: result2.token,
             }));
 
-            if (migratedResult instanceof Api.auth.LoginTokenSuccess && migratedResult.authorization instanceof Api.auth.Authorization) {
+            if (migratedResult instanceof Api.auth.LoginTokenSuccess
+                && migratedResult.authorization instanceof Api.auth.Authorization) {
                 return migratedResult.authorization.user;
             }
         }
@@ -241,6 +247,7 @@ async function signInUserWithQrCode(
     }
 
     // This is a workaround for TypeScript (never actually reached)
+    // eslint-disable-next-line no-throw-literal
     throw undefined;
 }
 
@@ -288,6 +295,7 @@ async function sendCode(
 async function signInWithPassword(
     client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
 ): Promise<Api.TypeUser> {
+    // eslint-disable-next-line no-constant-condition
     while (1) {
         try {
             const passwordSrpResult = await client.invoke(new Api.account.GetPassword());
@@ -307,6 +315,7 @@ async function signInWithPassword(
         }
     }
 
+    // eslint-disable-next-line no-unreachable
     return undefined!; // Never reached (TypeScript fix)
 }
 

@@ -1,15 +1,15 @@
 const StorageSession = require('./StorageSession');
 
 class LocalStorageSession extends StorageSession {
-    async _delete() {
+    _delete() {
         return localStorage.removeItem(this._storageKey);
     }
 
-    async _fetchFromCache(key) {
+    _fetchFromCache() {
         return localStorage.getItem(this._storageKey);
     }
 
-    async _saveToCache(key, data) {
+    _saveToCache(data) {
         return localStorage.setItem(this._storageKey, data);
     }
 }

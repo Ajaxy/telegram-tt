@@ -2,7 +2,7 @@
  * Base class for all Remote Procedure Call errors.
  */
 class RPCError extends Error {
-    constructor(message, request, code = null) {
+    constructor(message, request, code = undefined) {
         super(
             'RPCError {0}: {1}{2}'
                 .replace('{0}', code)

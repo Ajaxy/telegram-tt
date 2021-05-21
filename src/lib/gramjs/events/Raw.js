@@ -2,8 +2,8 @@ const { EventBuilder } = require('./common');
 
 class Raw extends EventBuilder {
     constructor(args = {
-        types: null,
-        func: null,
+        types: undefined,
+        func: undefined,
     }) {
         super();
         if (!args.types) {
@@ -13,7 +13,7 @@ class Raw extends EventBuilder {
         }
     }
 
-    build(update, others = null) {
+    build(update) {
         return update;
     }
 }
