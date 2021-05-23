@@ -3,6 +3,7 @@ node_modules
 .env
 src/lib/gramjs/build/
 build-contest/
+tests/
 .idea
 *.iml
 dev/perf/screenshot*
