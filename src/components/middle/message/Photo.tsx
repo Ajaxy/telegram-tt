@@ -16,8 +16,8 @@ import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObse
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import usePrevious from '../../../hooks/usePrevious';
-import useBlurredMediaThumb from './hooks/useBlurredMediaThumb';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
@@ -69,7 +69,7 @@ const Photo: FC<OwnProps> = ({
     mediaData, downloadProgress,
   } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !shouldDownload);
   const fullMediaData = localBlobUrl || mediaData;
-  const thumbDataUri = useBlurredMediaThumb(message, fullMediaData);
+  const thumbRef = useBlurredMediaThumbRef(message, fullMediaData);
 
   const {
     isUploading, isTransferring, transferProgress,
@@ -122,11 +122,6 @@ const Photo: FC<OwnProps> = ({
     width === height && 'square-image',
   );
 
-  const thumbClassName = buildClassName(
-    'thumbnail',
-    !thumbDataUri && 'empty',
-  );
-
   const style = dimensions
     ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;`
     : '';
@@ -141,12 +136,11 @@ const Photo: FC<OwnProps> = ({
       onClick={isUploading ? undefined : handleClick}
     >
       {shouldRenderThumb && (
-        <img
-          src={thumbDataUri}
-          className={thumbClassName}
-          width={width}
-          height={height}
-          alt=""
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+          // @ts-ignore teact feature
+          style={`width: ${width}px; height: ${height}px`}
         />
       )}
       {shouldRenderFullMedia && (
