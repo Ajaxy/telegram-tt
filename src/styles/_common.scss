@@ -19,12 +19,6 @@
   .thumbnail ~ .full-media, .media-loading {
     position: absolute;
   }
-
-  .thumbnail {
-    &.empty {
-      visibility: hidden;
-    }
-  }
 }
 
 .animated-close-icon {
