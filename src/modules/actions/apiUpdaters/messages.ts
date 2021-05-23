@@ -32,7 +32,7 @@ import {
   selectScheduledMessages,
   isMessageInCurrentMessageList,
   selectScheduledIds,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectRealLastReadId, selectViewportIds,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
 
@@ -427,7 +427,14 @@ function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
   global = updateListedIds(global, chatId, MAIN_THREAD_ID, [id]);
 
   if (selectIsViewportNewest(global, chatId, MAIN_THREAD_ID)) {
-    global = addViewportId(global, chatId, MAIN_THREAD_ID, id);
+    // Always keep at least one read message in the viewport list
+    const lastReadId = selectRealLastReadId(global, chatId, MAIN_THREAD_ID);
+    const newGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id);
+    const newViewportIds = selectViewportIds(newGlobal, chatId, MAIN_THREAD_ID);
+
+    if (!lastReadId || newViewportIds!.includes(lastReadId)) {
+      global = newGlobal;
+    }
   }
 
   const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
