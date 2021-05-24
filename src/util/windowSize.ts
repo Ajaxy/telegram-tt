@@ -4,7 +4,7 @@ import {
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
-import { IS_MOBILE_SCREEN } from './environment';
+import { IS_IOS, IS_MOBILE_SCREEN } from './environment';
 
 type IDimensions = {
   width: number;
@@ -44,6 +44,10 @@ function isMobileScreen() {
 }
 
 function isLandscape() {
+  if (IS_IOS) {
+    return window.matchMedia('(orientation: landscape)').matches;
+  }
+
   // eslint-disable-next-line max-len
   // Source: https://web.archive.org/web/20160509220835/http://blog.abouthalf.com/development/orientation-media-query-challenges-in-android-browsers/
   // Feature is marked as deprecated now, but it is still supported
