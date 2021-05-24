@@ -101,11 +101,11 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   ]);
 
   const handleNextStep = useCallback(() => {
-    if (selectedMemberIds.length) {
+    if (selectedMemberIds.length || isChannel) {
       setGlobalSearchQuery({ query: '' });
       onNextStep();
     }
-  }, [selectedMemberIds, setGlobalSearchQuery, onNextStep]);
+  }, [selectedMemberIds.length, isChannel, setGlobalSearchQuery, onNextStep]);
 
   const lang = useLang();
 
@@ -136,7 +136,7 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
         />
 
         <FloatingActionButton
-          isShown={Boolean(selectedMemberIds.length)}
+          isShown={Boolean(selectedMemberIds.length || isChannel)}
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
         >
