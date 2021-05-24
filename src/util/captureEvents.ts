@@ -29,12 +29,15 @@ export interface RealTouchEvent extends TouchEvent {
   pageY?: number;
 }
 
+type TSwipeAxis = 'x' | 'y' | undefined;
+
 const MOVED_THRESHOLD = 15;
 const SWIPE_THRESHOLD = 50;
 
 export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | undefined;
   let hasMoved = false;
+  let currentSwipeAxis: TSwipeAxis;
 
   function onCapture(e: MouseEvent | RealTouchEvent) {
     if (options.excludedClosestSelector && (
@@ -100,6 +103,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     hasMoved = false;
+    currentSwipeAxis = undefined;
   }
 
   function onMove(e: MouseEvent | RealTouchEvent) {
@@ -127,9 +131,32 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       }
 
       if (options.onSwipe) {
-        processSwipe(e, dragOffsetX, dragOffsetY, options.onSwipe);
+        onSwipe(e, dragOffsetX, dragOffsetY);
       }
     }
+  }
+
+  function onSwipe(e: Event, dragOffsetX: number, dragOffsetY: number) {
+    if (!currentSwipeAxis) {
+      const xAbs = Math.abs(dragOffsetX);
+      const yAbs = Math.abs(dragOffsetY);
+
+      if (dragOffsetX && dragOffsetY) {
+        const ratio = Math.max(xAbs, yAbs) / Math.min(xAbs, yAbs);
+        // Diagonal swipe
+        if (ratio < 2) {
+          return;
+        }
+      }
+
+      if (xAbs >= SWIPE_THRESHOLD) {
+        currentSwipeAxis = 'x';
+      } else if (yAbs >= SWIPE_THRESHOLD) {
+        currentSwipeAxis = 'y';
+      }
+    }
+
+    processSwipe(e, currentSwipeAxis, dragOffsetX, dragOffsetY, options.onSwipe!);
   }
 
   element.addEventListener('mousedown', onCapture);
@@ -142,26 +169,19 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 }
 
 function processSwipe(
-  e: Event, dragOffsetX: number, dragOffsetY: number, onSwipe: (e: Event, direction: SwipeDirection) => void,
+  e: Event,
+  currentSwipeAxis:TSwipeAxis,
+  dragOffsetX: number,
+  dragOffsetY: number,
+  onSwipe: (e: Event, direction: SwipeDirection) => void,
 ) {
-  const xAbs = Math.abs(dragOffsetX);
-  const yAbs = Math.abs(dragOffsetY);
-
-  if (dragOffsetX && dragOffsetY) {
-    const ratio = Math.max(xAbs, yAbs) / Math.min(xAbs, yAbs);
-    // Diagonal swipe
-    if (ratio < 2) {
-      return;
-    }
-  }
-
-  if (xAbs >= SWIPE_THRESHOLD) {
+  if (currentSwipeAxis === 'x') {
     if (dragOffsetX < 0) {
       onSwipe(e, SwipeDirection.Left);
     } else {
       onSwipe(e, SwipeDirection.Right);
     }
-  } else if (yAbs >= SWIPE_THRESHOLD) {
+  } else if (currentSwipeAxis === 'y') {
     if (dragOffsetY < 0) {
       onSwipe(e, SwipeDirection.Up);
     } else {
