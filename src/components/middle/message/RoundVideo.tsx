@@ -161,9 +161,9 @@ const RoundVideo: FC<OwnProps> = ({
         playerEl.pause();
       }
     } else {
+      capturePlaying();
       playerEl.currentTime = 0;
       setIsActivated(true);
-      capturePlaying();
     }
   }, [capturePlaying, isActivated, mediaData]);
 
