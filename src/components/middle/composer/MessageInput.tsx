@@ -97,6 +97,10 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
   const [selectedRange, setSelectedRange] = useState<Range>();
 
+  useEffect(() => {
+    updateInputHeight(false);
+  }, []);
+
   useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
