@@ -94,7 +94,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
         <p>{lang('lng_delete_for_me_chat_hint')}</p>
       )}
       {willDeleteForAll && (
-        <p>{lang('lng_delete_for_everyone_hint')}</p>
+        <p>{lang('lng_delete_for_everyone_hint', 1, 'i')}</p>
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>

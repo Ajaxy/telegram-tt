@@ -78,7 +78,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       hasCloseButton
-      title={stickerSet ? stickerSet.title : 'Sticker Set'}
+      title={stickerSet ? stickerSet.title : lang('AccDescrStickerSet')}
     >
       {stickerSet && stickerSet.stickers ? (
         <>

@@ -46,6 +46,8 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   const [correctOption, setCorrectOption] = useState<string>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
+  const lang = useLang();
+
   const focusInput = useCallback((ref: RefObject<HTMLInputElement>) => {
     if (isOpen && ref.current) {
       ref.current.focus();
@@ -206,21 +208,19 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
   const getQuestionError = useCallback(() => {
     if (hasErrors && !question.trim().length) {
-      return 'Please enter the question';
+      return lang('lng_polls_choose_question');
     }
 
     return undefined;
-  }, [hasErrors, question]);
+  }, [hasErrors, lang, question]);
 
   const getOptionsError = useCallback((index: number) => {
     const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
     if (hasErrors && optionsTrimmed.length < 2 && !options[index].trim().length) {
-      return 'Please enter at least two options';
+      return lang('lng_polls_choose_answers');
     }
     return undefined;
-  }, [hasErrors, options]);
-
-  const lang = useLang();
+  }, [hasErrors, lang, options]);
 
   function renderHeader() {
     return (
@@ -246,8 +246,8 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       <div className="option-wrapper">
         <InputText
           label={index !== options.length - 1 || options.length === MAX_OPTIONS_COUNT
-            ? `Option ${index + 1}`
-            : 'Add an Option'}
+            ? lang('OptionHint')
+            : lang('CreatePoll.AddOption')}
           error={getOptionsError(index)}
           value={option}
           onChange={(e) => updateOption(index, e.currentTarget.value)}
@@ -259,7 +259,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
             round
             color="translucent"
             size="smaller"
-            ariaLabel="Remove option"
+            ariaLabel={lang('Delete')}
             onClick={() => removeOption(index)}
           >
             <i className="icon-close" />
@@ -278,9 +278,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
 
     return isQuizMode && (!correctOption || !optionsTrimmed[Number(correctOption)]) && (
-      <p className="error">
-        Please choose the correct answer
-      </p>
+      <p className="error">{lang('lng_polls_choose_correct')}</p>
     );
   }
 
@@ -341,9 +339,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
               contentEditable
               onChange={(e) => setSolution(e.currentTarget.innerHTML)}
             />
-            <div className="note">
-              Users will see this comment after choosing a wrong answer, good for educational purposes.
-            </div>
+            <div className="note">{lang('CreatePoll.ExplanationInfo')}</div>
           </>
         )}
       </div>

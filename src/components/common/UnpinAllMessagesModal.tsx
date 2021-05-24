@@ -1,7 +1,5 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
 
-import { selectPinnedIds } from '../../modules/selectors';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -10,42 +8,26 @@ import Button from '../ui/Button';
 export type OwnProps = {
   isOpen: boolean;
   chatId?: number;
+  pinnedMessagesCount?: number;
   onClose: () => void;
   onUnpin: () => void;
 };
 
-type StateProps = {
-  pinnedMessagesCount: number;
-};
-
-const UnpinAllMessagesModal: FC<OwnProps & StateProps> = ({
+const UnpinAllMessagesModal: FC<OwnProps> = ({
   isOpen,
-  pinnedMessagesCount,
+  pinnedMessagesCount = 0,
   onClose,
   onUnpin,
 }) => {
   const lang = useLang();
-
-  function renderModalHeader() {
-    return (
-      <div className="modal-header">
-        <h3 className="modal-title">{lang('UnpinAllMessages')}</h3>
-      </div>
-    );
-  }
-
-  function renderMessage() {
-    return <p>Do you want to unpin all {pinnedMessagesCount} messages in this chat?</p>;
-  }
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       className="unpin-all"
-      header={renderModalHeader()}
+      title={lang('Chat.PanelUnpinAllMessages')}
     >
-      {renderMessage()}
+      <p>{lang('Chat.UnpinAllMessagesConfirmation', pinnedMessagesCount, 'i')}</p>
       <Button className="confirm-dialog-button" isText onClick={onUnpin}>
         {lang('DialogUnpin')}
       </Button>
@@ -54,12 +36,4 @@ const UnpinAllMessagesModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
-    const pinnedIds = chatId ? selectPinnedIds(global, chatId) : [];
-
-    return {
-      pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
-    };
-  },
-)(UnpinAllMessagesModal));
+export default memo(UnpinAllMessagesModal);

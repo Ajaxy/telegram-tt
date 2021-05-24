@@ -167,12 +167,12 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
         onClose={handleErrorModalClose}
       >
         <h4>{error.description || 'Error'}</h4>
-        {error.description || 'Error'}
+        <p>{error.description || 'Error'}</p>
         <Button
           isText
           onClick={clearPaymentError}
         >
-          OK
+          {lang('OK')}
         </Button>
       </Modal>
     );
@@ -287,11 +287,11 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   const buttonText = useMemo(() => {
     switch (step) {
       case PaymentStep.Checkout:
-        return `Pay ${currencySign}${(totalPrice / 100).toFixed(2)}`;
+        return lang('Checkout.PayPrice', `${currencySign}${(totalPrice / 100).toFixed(2)}`);
       default:
-        return 'Next Step';
+        return lang('Next');
     }
-  }, [step, totalPrice, currencySign]);
+  }, [step, lang, currencySign, totalPrice]);
 
   if (isProviderError) {
     return (
@@ -300,13 +300,15 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
         isOpen={isOpen}
         onClose={onClose}
       >
-        Sorry, Telegram T doesn&apos;t support payments with this provider yet.
-         Please use one of our mobile apps to do this.
+        <p>
+          Sorry, Telegram T doesn&apos;t support payments with this provider yet. <br />
+          Please use one of our mobile apps to do this.
+        </p>
         <Button
           isText
           onClick={onClose}
         >
-          OK
+          {lang('OK')}
         </Button>
       </Modal>
     );
@@ -329,7 +331,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
         >
           <i className="icon-close" />
         </Button>
-        <h3>{ modalHeader }</h3>
+        <h3>{modalHeader}</h3>
       </div>
       {step !== undefined ? (
         <Transition name="slide" activeKey={step}>
