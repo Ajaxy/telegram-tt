@@ -154,15 +154,19 @@ const NewChatStep2: FC<OwnProps & StateProps & DispatchProps> = ({
           <p className="error">{renderedError}</p>
         )}
 
-        <h3 className="chat-members-heading">{lang('GroupInfo.ParticipantCount', memberIds.length, 'i')}</h3>
+        {memberIds.length > 0 && (
+          <>
+            <h3 className="chat-members-heading">{lang('GroupInfo.ParticipantCount', memberIds.length, 'i')}</h3>
 
-        <div className="chat-members-list custom-scroll">
-          {memberIds.map((id) => (
-            <ListItem inactive className="chat-item-clickable">
-              <PrivateChatInfo userId={id} />
-            </ListItem>
-          ))}
-        </div>
+            <div className="chat-members-list custom-scroll">
+              {memberIds.map((id) => (
+                <ListItem inactive className="chat-item-clickable">
+                  <PrivateChatInfo userId={id} />
+                </ListItem>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <FloatingActionButton
