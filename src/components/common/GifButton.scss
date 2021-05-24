@@ -20,16 +20,12 @@
     grid-column-end: span 2;
   }
 
-  .thumbnail {
+  .preview {
     background-size: cover !important;
     background: transparent no-repeat center;
   }
 
-  .thumbnail ~ video {
-    position: absolute;
-  }
-
-  .thumbnail, video {
+  .preview, video {
     width: 100%;
     height: 100%;
     object-fit: cover;
