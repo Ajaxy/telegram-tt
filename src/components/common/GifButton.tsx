@@ -8,9 +8,9 @@ import buildClassName from '../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useBlur from '../../hooks/useBlur';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
 
 import Spinner from '../ui/Spinner';
 
@@ -31,15 +31,15 @@ const GifButton: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const hasThumbnail = gif.thumbnail && !!gif.thumbnail.dataUri;
   const localMediaHash = `gif${gif.id}`;
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const loadAndPlay = isIntersecting && !isDisabled;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !loadAndPlay, ApiMediaFormat.BlobUrl);
-  const thumbRef = useCanvasBlur(gif.thumbnail && gif.thumbnail.dataUri, Boolean(previewBlobUrl));
+  const thumbDataUri = useBlur(gif.thumbnail && gif.thumbnail.dataUri, Boolean(previewBlobUrl));
+  const previewData = previewBlobUrl || thumbDataUri;
   const videoData = useMedia(localMediaHash, !loadAndPlay, ApiMediaFormat.BlobUrl);
   const shouldRenderVideo = Boolean(loadAndPlay && videoData);
-  const { transitionClassNames } = useTransitionForMedia(hasThumbnail || previewBlobUrl || videoData, 'slow');
+  const { transitionClassNames } = useTransitionForMedia(previewData || videoData, 'slow');
   const { isBuffered, bufferingHandlers } = useBuffering(true);
   const shouldRenderSpinner = loadAndPlay && !isBuffered;
 
@@ -66,20 +66,14 @@ const GifButton: FC<OwnProps> = ({
       className={className}
       onClick={handleClick}
     >
-      {hasThumbnail && (
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
+      {previewData && !shouldRenderVideo && (
+        <div
+          className="preview"
+          // @ts-ignore
+          style={`background-image: url(${previewData});`}
         />
       )}
-      {!hasThumbnail && previewBlobUrl && (
-        <img
-          src={previewBlobUrl}
-          alt=""
-          className="thumbnail"
-        />
-      )}
-      {(shouldRenderVideo || previewBlobUrl) && (
+      {shouldRenderVideo && (
         <video
           ref={videoRef}
           autoPlay
@@ -87,6 +81,7 @@ const GifButton: FC<OwnProps> = ({
           muted
           playsInline
           preload="none"
+          poster={previewData}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
         >
@@ -94,7 +89,7 @@ const GifButton: FC<OwnProps> = ({
         </video>
       )}
       {shouldRenderSpinner && (
-        <Spinner color={previewBlobUrl || hasThumbnail ? 'white' : 'black'} />
+        <Spinner color={previewData ? 'white' : 'black'} />
       )}
     </div>
   );

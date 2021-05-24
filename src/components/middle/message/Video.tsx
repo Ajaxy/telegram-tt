@@ -24,9 +24,9 @@ import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
 import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
+import useBlurredMediaThumb from './hooks/useBlurredMediaThumb';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import usePauseOnInactive from './hooks/usePauseOnInactive';
-import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -76,7 +76,7 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'pictogram'),
     lastSyncTime,
   );
-  const thumbRef = useBlurredMediaThumbRef(message);
+  const thumbDataUri = useBlurredMediaThumb(message, previewBlobUrl);
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
     !shouldDownload,
@@ -84,6 +84,7 @@ const Video: FC<OwnProps> = ({
     lastSyncTime,
   );
 
+  const previewMediaData = previewBlobUrl || thumbDataUri;
   const fullMediaData = localBlobUrl || mediaData;
   const isInline = Boolean(canPlayInline && isIntersecting && fullMediaData);
 
@@ -131,10 +132,9 @@ const Video: FC<OwnProps> = ({
   }, [isUploading, canPlayInline, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
+  const thumbClassName = buildClassName('thumbnail', !previewMediaData && 'empty');
   const videoClassName = buildClassName('full-media', transitionClassNames);
-  const videoStyle = previewBlobUrl
-    ? `background-image: url(${previewBlobUrl}); background-size: cover`
-    : 'background: transparent';
+  const videoStyle = previewMediaData ? `background-image: url(${previewMediaData}); background-size: cover` : '';
 
   const style = dimensions
     ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;`
@@ -154,25 +154,15 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {((!isInline || shouldRenderThumb) && !previewBlobUrl)
-        && (
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-            // @ts-ignore teact feature
-            style={`width: ${width}px; height: ${height}px;`}
-          />
-        )}
-      {previewBlobUrl && fullMediaData && (
+      {(shouldRenderThumb || !isInline) && (
         <img
-          src={previewBlobUrl}
-          className="thumbnail"
-          // @ts-ignore teact feature
-          style={`width: ${width}px; height: ${height}px;`}
+          src={previewMediaData}
+          className={thumbClassName}
+          width={width}
+          height={height}
           alt=""
         />
       )}
-
       {shouldRenderInlineVideo && (
         <video
           ref={videoRef}
