@@ -300,6 +300,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   );
   const withCommentButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
     && messageListType === 'thread' && !noComments;
+  const withAppendix = contentClassName.includes('has-appendix');
 
   useEnsureMessage(chatId, hasReply ? message.replyToMessageId : undefined, replyMessage, message.id);
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight);
@@ -309,7 +310,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     appendixRef.current.innerHTML = isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN;
-  }, [isOwn]);
+  }, [isOwn, withAppendix]);
 
   const handleGroupDocumentMessagesSelect = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
@@ -737,7 +738,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           // @ts-ignore
           style={style}
         >
-          {contentClassName.includes('has-appendix') && (<div className="svg-appendix" ref={appendixRef} />)}
+          {withAppendix && (<div className="svg-appendix" ref={appendixRef} />)}
           {asForwarded && !customShape && (!isInDocumentGroup || isFirstInDocumentGroup) && (
             <div className="message-title">{lang('ForwardedMessage')}</div>
           )}
