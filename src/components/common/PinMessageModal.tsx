@@ -65,24 +65,16 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
-  function renderModalHeader() {
-    return (
-      <div className="modal-header">
-        <h3 className="modal-title">{lang('PinMessageAlertTitle')}</h3>
-      </div>
-    );
-  }
-
   function renderMessage() {
     if (isChannel) {
-      return <p>{lang('PinMessageAlertChannel')}</p>;
+      return lang('PinMessageAlertChannel');
     }
 
     if (isGroup || isSuperGroup) {
-      return <p>{lang('PinMessageAlert')}</p>;
+      return lang('PinMessageAlert');
     }
 
-    return <p>{lang('PinMessageAlertChat')}</p>;
+    return lang('PinMessageAlertChat');
   }
 
   return (
@@ -90,15 +82,17 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       className="pin"
-      header={renderModalHeader()}
+      title={lang('PinMessageAlertTitle')}
     >
-      {renderMessage()}
+      <p>{renderMessage()}</p>
       <Button className="confirm-dialog-button" isText onClick={handlePinMessage}>
         {lang('DialogPin')}
       </Button>
       {canPinForAll && (
         <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
-          {contactName ? `Pin for me and ${contactName}` : 'Pin and notify all memebers'}
+          {contactName
+            ? lang('Conversation.PinMessagesFor', contactName)
+            : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
         </Button>
       )}
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>

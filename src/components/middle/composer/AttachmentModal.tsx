@@ -149,11 +149,11 @@ const AttachmentModal: FC<OwnProps> = ({
 
   let title = '';
   if (areAllPhotos) {
-    title = renderingAttachments.length === 1 ? 'Send Photo' : `Send ${renderingAttachments.length} Photos`;
+    title = lang('PreviewSender.SendPhoto', renderingAttachments.length, 'i');
   } else if (areAllVideos) {
-    title = renderingAttachments.length === 1 ? 'Send Video' : `Send ${renderingAttachments.length} Videos`;
+    title = lang('PreviewSender.SendVideo', renderingAttachments.length, 'i');
   } else {
-    title = renderingAttachments.length === 1 ? 'Send File' : `Send ${renderingAttachments.length} Files`;
+    title = lang('PreviewSender.SendFile', renderingAttachments.length, 'i');
   }
 
   function renderHeader() {

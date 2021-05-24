@@ -58,6 +58,7 @@ type StateProps = {
   canPost?: boolean;
   messageSendingRestrictionReason?: string;
   hasPinnedOrAudioMessage?: boolean;
+  pinnedMessagesCount?: number;
   customBackground?: string;
   patternColor?: string;
   isCustomBackgroundColor?: boolean;
@@ -85,6 +86,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   canPost,
   messageSendingRestrictionReason,
   hasPinnedOrAudioMessage,
+  pinnedMessagesCount,
   customBackground,
   patternColor,
   isCustomBackgroundColor,
@@ -261,7 +263,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                           onClick={handleOpenUnpinModal}
                         >
                           <i className="icon-unpin" />
-                          <span>{lang('Chat.PanelHidePinnedMessages')}</span>
+                          <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
                         </Button>
                       </div>
                     )}
@@ -296,6 +298,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         <UnpinAllMessagesModal
           isOpen={isUnpinModalOpen}
           chatId={chatId}
+          pinnedMessagesCount={pinnedMessagesCount}
           onClose={closeUnpinModal}
           onUnpin={handleUnpinAllMessages}
         />
@@ -350,6 +353,7 @@ export default memo(withGlobal(
         || Boolean(pinnedIds && pinnedIds.length)
         || Boolean(audioChatId && audioMessageId)
       ),
+      pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
