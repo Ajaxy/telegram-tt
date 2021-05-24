@@ -17,7 +17,7 @@
   }
 
   &.hovered .target-content {
-    color: #63A2E3;
+    color: var(--color-primary);
     background-image: var(--drag-target-border-hovered);
   }
 

@@ -384,6 +384,13 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     setAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
   }, []);
 
+  const handleAppendFiles = useCallback(async (files: File[], isQuick: boolean) => {
+    setAttachments([
+      ...attachments,
+      ...await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))),
+    ]);
+  }, [attachments]);
+
   const handleClearAttachment = useCallback(() => {
     setAttachments([]);
   }, []);
@@ -683,6 +690,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         onCaptionUpdate={setHtml}
         addRecentEmoji={addRecentEmoji}
         onSend={shouldSchedule ? openCalendar : handleSend}
+        onFileAppend={handleAppendFiles}
         onClear={handleClearAttachment}
       />
       <PollModal

@@ -28,7 +28,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v2';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v3';
 export const ASSET_CACHE_NAME = 'tt-assets';
 
 export const API_UPDATE_THROTTLE = 300;
@@ -124,7 +124,7 @@ export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
 export const DEFAULT_LANG_PACK = 'android';
-export const LANG_PACKS = ['android', 'ios', 'tdesktop'];
+export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'];
 export const TIPS_USERNAME = 'TelegramTips';
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
