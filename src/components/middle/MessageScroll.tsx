@@ -13,15 +13,11 @@ type OwnProps = {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   className: string;
   messageIds: number[];
-  containerHeight?: number;
-  listItemElementsRef: MutableRefObject<HTMLDivElement[] | undefined>;
-  anchorIdRef: MutableRefObject<string | undefined>;
-  anchorTopRef: MutableRefObject<number | undefined>;
+  focusingId?: number;
   loadMoreForwards?: NoneToVoidFunction;
   loadMoreBackwards?: NoneToVoidFunction;
   isViewportNewest?: boolean;
   firstUnreadId?: number;
-  focusingId?: number;
   onFabToggle: AnyToVoidFunction;
   children: any;
 };
@@ -36,11 +32,7 @@ const MessageScroll: FC<OwnProps> = ({
   containerRef,
   className,
   messageIds,
-  containerHeight,
-  listItemElementsRef,
   focusingId,
-  anchorIdRef,
-  anchorTopRef,
   loadMoreForwards,
   loadMoreBackwards,
   isViewportNewest,
@@ -132,26 +124,6 @@ const MessageScroll: FC<OwnProps> = ({
       unfreezeForLoadMore();
     }
   }, [focusingId]);
-
-  // Remember scroll position before updating height
-  useOnChange(() => {
-    if (!listItemElementsRef.current) {
-      return;
-    }
-
-    const preservedItemElements = listItemElementsRef.current
-      .filter((element) => messageIds.includes(Number(element.dataset.messageId)));
-
-    // We avoid the very first item as it may be a partly-loaded album
-    // and also because it may be removed when messages limit is reached
-    const anchor = preservedItemElements[1] || preservedItemElements[0];
-    if (!anchor) {
-      return;
-    }
-
-    anchorIdRef.current = anchor.id;
-    anchorTopRef.current = anchor.getBoundingClientRect().top;
-  }, [messageIds, containerHeight]);
 
   // Workaround for FAB flickering with tall incoming message
   useOnChange(() => {
