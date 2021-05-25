@@ -350,6 +350,27 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [isChatLoaded, messageIds, loadMoreAround, focusingId, isRestricted]);
 
+  // Remember scroll position before repositioning it
+  useOnChange(() => {
+    if (!messageIds || !listItemElementsRef.current) {
+      return;
+    }
+
+    const preservedItemElements = listItemElementsRef.current
+      .filter((element) => messageIds.includes(Number(element.dataset.messageId)));
+
+    // We avoid the very first item as it may be a partly-loaded album
+    // and also because it may be removed when messages limit is reached
+    const anchor = preservedItemElements[1] || preservedItemElements[0];
+    if (!anchor) {
+      return;
+    }
+
+    anchorIdRef.current = anchor.id;
+    anchorTopRef.current = anchor.getBoundingClientRect().top;
+    // This should match deps for `useLayoutEffectWithPrevDeps` below
+  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
+
   // Handles updated message list, takes care of scroll repositioning
   useLayoutEffectWithPrevDeps(([
     prevMessageIds, prevIsViewportNewest, prevContainerHeight,
@@ -471,6 +492,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
+    // This should match deps for `useOnChange` above
   }, [messageIds, isViewportNewest, containerHeight, hasTools]);
 
   useEffect(() => {
@@ -512,11 +534,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           containerRef={containerRef}
           className="messages-container"
           messageIds={messageIds || [lastMessage!.id]}
-          containerHeight={containerHeight}
-          listItemElementsRef={listItemElementsRef}
           focusingId={focusingId}
-          anchorIdRef={anchorIdRef}
-          anchorTopRef={anchorTopRef}
           loadMoreForwards={loadMoreForwards}
           loadMoreBackwards={loadMoreBackwards}
           isViewportNewest={isViewportNewest}
