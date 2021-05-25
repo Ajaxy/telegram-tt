@@ -64,7 +64,9 @@ export function buildApiThumbnailFromPath(
 
 export function buildApiPhoto(photo: GramJs.Photo): ApiPhoto {
   const sizes = photo.sizes
-    .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
+    .filter((s: any): s is GramJs.PhotoSize => {
+      return s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoSizeProgressive;
+    })
     .map(buildApiPhotoSize);
 
   return {
