@@ -651,10 +651,6 @@ function renderMessages(
 
         currentDocumentGroupId = documentGroupId;
 
-        const shouldRenderUnreadDivider = (
-          (message.id === memoFirstUnreadIdRef.current && memoFirstUnreadIdRef.current !== threadFirstMessageId)
-          || (message.id === threadTopMessageId && memoFirstUnreadIdRef.current === threadFirstMessageId)
-        );
         const originalId = getMessageOriginalId(message);
         // Scheduled messages can have local IDs in the middle of the list,
         // and keys should be ordered, so we prefix it with a date.
@@ -662,7 +658,7 @@ function renderMessages(
         const key = type !== 'scheduled' ? originalId : `${message.date}_${originalId}`;
 
         return compact([
-          shouldRenderUnreadDivider && unreadDivider,
+          message.id === memoFirstUnreadIdRef.current ? unreadDivider : undefined,
           <Message
             key={key}
             message={message}
