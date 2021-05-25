@@ -20,11 +20,6 @@ addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
 
   void initApi(actions.apiUpdate, sessionId);
-
-  return {
-    ...global,
-    authIsSessionRemembered: Boolean(sessionId),
-  };
 });
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {

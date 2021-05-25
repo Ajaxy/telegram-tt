@@ -103,7 +103,6 @@ function updateCache() {
         'authState',
         'authPhoneNumber',
         'authRememberMe',
-        'authIsSessionRemembered',
         'authNearestCountry',
         'currentUserId',
         'contactList',
