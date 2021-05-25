@@ -16,7 +16,6 @@ import {
   RE_TME_LINK,
   TIPS_USERNAME,
 } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
 import { callApi } from '../../../api/gramjs';
 import {
   addChats,
@@ -46,7 +45,7 @@ import {
   isChatSummaryOnly, isChatArchived, prepareChatList, isChatBasicGroup,
 } from '../../helpers';
 
-const TOP_CHATS_PRELOAD_PAUSE = 200;
+const TOP_CHATS_PRELOAD_PAUSE = 100;
 // We expect this ID does not exist
 const TMP_CHAT_ID = -1;
 
@@ -81,10 +80,6 @@ addReducer('preloadTopChatMessages', (global, actions) => {
       preloadedChatIds.push(chatToPreload.id);
 
       actions.loadViewportMessages({ chatId: chatToPreload.id, threadId: MAIN_THREAD_ID });
-
-      if (IS_TOUCH_ENV) {
-        actions.loadPinnedMessages({ chatId: chatToPreload.id });
-      }
     }
   })();
 });
