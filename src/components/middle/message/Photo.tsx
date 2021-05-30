@@ -35,6 +35,7 @@ export type OwnProps = {
   size?: 'inline' | 'pictogram';
   shouldAffectAppendix?: boolean;
   dimensions?: IMediaDimensions & { isSmall?: boolean };
+  nonInteractive?: boolean;
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
@@ -51,6 +52,7 @@ const Photo: FC<OwnProps> = ({
   uploadProgress,
   size = 'inline',
   dimensions,
+  nonInteractive,
   shouldAffectAppendix,
   onClick,
   onCancelUpload,
@@ -117,7 +119,7 @@ const Photo: FC<OwnProps> = ({
 
   const className = buildClassName(
     'media-inner',
-    !isUploading && 'interactive',
+    !isUploading && !nonInteractive && 'interactive',
     isSmall && 'small-image',
     width === height && 'square-image',
   );

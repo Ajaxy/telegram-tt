@@ -24,6 +24,7 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
               onClick={() => onClick({ button })}
             >
               {button.text}
+              {button.type === 'url' && <i className="icon-arrow-right" />}
             </Button>
           ))}
         </div>

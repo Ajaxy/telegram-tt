@@ -42,12 +42,8 @@ const WebPage: FC<OwnProps> = ({
   }
 
   const handleMediaClick = useCallback(() => {
-    if (webPage && (isSquarePhoto || webPage.hasDocument)) {
-      window.open(webPage.url);
-    } else if (onMediaClick) {
-      onMediaClick();
-    }
-  }, [webPage, isSquarePhoto, onMediaClick]);
+    onMediaClick!();
+  }, [onMediaClick]);
 
   if (!webPage) {
     return undefined;
@@ -62,6 +58,7 @@ const WebPage: FC<OwnProps> = ({
     photo,
   } = webPage;
 
+  const isMediaInteractive = photo && onMediaClick && !isSquarePhoto && !webPage.hasDocument;
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
 
   const className = buildClassName(
@@ -82,7 +79,8 @@ const WebPage: FC<OwnProps> = ({
           observeIntersection={observeIntersection}
           shouldAutoLoad={shouldAutoLoad}
           size={isSquarePhoto ? 'pictogram' : 'inline'}
-          onClick={handleMediaClick}
+          nonInteractive={!isMediaInteractive}
+          onClick={isMediaInteractive ? handleMediaClick : undefined}
           onCancelUpload={onCancelMediaTransfer}
         />
       )}

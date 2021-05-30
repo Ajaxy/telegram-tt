@@ -17,7 +17,7 @@ addReducer('clickInlineButton', (global, actions, payload) => {
       if (button.value.match(RE_TME_INVITE_LINK) || button.value.match(RE_TME_LINK)) {
         actions.openTelegramLink({ url: button.value });
       } else {
-        window.open(button.value);
+        actions.toggleSafeLinkModal({ url: button.value });
       }
       break;
     case 'callback': {
