@@ -46,6 +46,15 @@
     &:last-of-type {
       margin-right: 0;
     }
+
+    i {
+      font-size: 0.75rem;
+      position: absolute;
+      right: 0.125rem;
+      top: 0.125rem;
+      display: block;
+      transform: rotate(-45deg);
+    }
   }
 
   .row:first-of-type .Button {
