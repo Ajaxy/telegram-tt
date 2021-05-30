@@ -277,13 +277,18 @@ export function showNewMessageNotification({
     }
   } else {
     const dispatch = getDispatch();
-    const notification = new Notification(title, {
+    const options: NotificationOptions = {
       body,
       icon: 'icon-192x192.png',
       badge: 'icon-192x192.png',
       tag: message.id.toString(),
-      vibrate: [200, 100, 200],
-    });
+    };
+
+    if ('vibrate' in navigator) {
+      options.vibrate = [200, 100, 200];
+    }
+
+    const notification = new Notification(title, options);
 
     notification.onclick = () => {
       notification.close();
