@@ -92,9 +92,17 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     let timeout: number | undefined;
 
+    const safePreload = async () => {
+      try {
+        await preloadTasks[page]();
+      } catch (err) {
+        // Do nothing
+      }
+    };
+
     Promise.race([
       pause(MAX_PRELOAD_DELAY),
-      preloadTasks[page](),
+      safePreload(),
     ]).then(() => {
       markReady();
       setIsUiReady({ uiReadyState: 1 });
