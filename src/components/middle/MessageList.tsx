@@ -609,6 +609,10 @@ function renderMessages(
     ) => {
       if (senderGroup.length === 1 && !isAlbum(senderGroup[0]) && isActionMessage(senderGroup[0])) {
         const message = senderGroup[0];
+        const isLastInList = (
+          senderGroupIndex === senderGroupsArray.length - 1
+          && dateGroupIndex === dateGroupsArray.length - 1
+        );
 
         return compact([
           message.id === memoFirstUnreadIdRef.current && unreadDivider,
@@ -617,6 +621,7 @@ function renderMessages(
             message={message}
             observeIntersection={observeIntersectionForReading}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
+            isLastInList={isLastInList}
           />,
         ]);
       }

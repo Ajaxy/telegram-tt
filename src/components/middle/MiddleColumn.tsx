@@ -203,7 +203,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const footerClassName = buildClassName(
     'middle-column-footer',
     !renderingCanPost && 'no-composer',
-    renderingCanPost && isNotchShown && 'with-notch',
+    renderingCanPost && isNotchShown && !isSelectModeActive && 'with-notch',
   );
 
   return (

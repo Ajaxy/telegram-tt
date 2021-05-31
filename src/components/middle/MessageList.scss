@@ -50,21 +50,21 @@
     .last-in-list {
       margin-bottom: 1rem;
     }
-
-    &.type-pinned {
-      .last-in-list {
-        margin-bottom: 5rem;
-
-        @media (max-width: 600px) {
-          margin-bottom: 3.75rem;
-        }
-      }
-    }
   }
 
-  &.select-mode-active {
-    .messages-container {
-      padding-bottom: 4.75rem;
+  &.select-mode-active, &.type-pinned {
+    margin-bottom: 0;
+
+    .last-in-list {
+      margin-bottom: 5.675rem;
+
+      &.ActionMessage {
+        padding-bottom: 0.075rem;
+      }
+
+      @media (max-width: 600px) {
+        margin-bottom: 4.3125rem;
+      }
     }
   }
 
