@@ -103,6 +103,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
   const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
+  const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
   const hasTools = hasPinnedOrAudioMessage && (
@@ -134,6 +135,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   useEffect(() => {
     setDropAreaState(DropAreaState.None);
     setIsFabShown(undefined);
+    setIsNotchShown(undefined);
   }, [chatId]);
 
   useEffect(() => {
@@ -198,6 +200,12 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
+  const footerClassName = buildClassName(
+    'middle-column-footer',
+    !renderingCanPost && 'no-composer',
+    renderingCanPost && isNotchShown && 'with-notch',
+  );
+
   return (
     <div
       id="MiddleColumn"
@@ -242,8 +250,9 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     canPost={renderingCanPost}
                     hasTools={renderingHasTools}
                     onFabToggle={setIsFabShown}
+                    onNotchToggle={setIsNotchShown}
                   />
-                  <div className={buildClassName('middle-column-footer', !renderingCanPost && 'no-composer')}>
+                  <div className={footerClassName}>
                     {renderingCanPost && (
                       <Composer
                         chatId={renderingChatId}

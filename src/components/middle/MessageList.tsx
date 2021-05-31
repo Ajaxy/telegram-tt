@@ -66,7 +66,8 @@ type OwnProps = {
   threadId: number;
   type: MessageListType;
   canPost: boolean;
-  onFabToggle: (show: boolean) => void;
+  onFabToggle: (shouldShow: boolean) => void;
+  onNotchToggle: (shouldShow: boolean) => void;
   hasTools?: boolean;
 };
 
@@ -114,6 +115,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   type,
   hasTools,
   onFabToggle,
+  onNotchToggle,
   isChatLoaded,
   isChannelChat,
   canPost,
@@ -540,6 +542,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           isViewportNewest={isViewportNewest}
           firstUnreadId={firstUnreadId}
           onFabToggle={onFabToggle}
+          onNotchToggle={onNotchToggle}
         >
           {renderMessages(
             lang,

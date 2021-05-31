@@ -255,6 +255,27 @@
         transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
       }
     }
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -0.5rem;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 2%, rgba(255, 255, 255, 0.4) 98%, rgba(255, 255, 255, 0) 100%);
+      opacity: 0;
+      transition: opacity 200ms ease;
+
+      @media (max-width: 600px) {
+        left: -2%;
+        right: -2%;
+      }
+    }
+
+    &.with-notch::before {
+      opacity: 1;
+    }
   }
 }
 

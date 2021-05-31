@@ -19,6 +19,7 @@ type OwnProps = {
   isViewportNewest?: boolean;
   firstUnreadId?: number;
   onFabToggle: AnyToVoidFunction;
+  onNotchToggle: AnyToVoidFunction;
   children: any;
 };
 
@@ -38,6 +39,7 @@ const MessageScroll: FC<OwnProps> = ({
   isViewportNewest,
   firstUnreadId,
   onFabToggle,
+  onNotchToggle,
   children,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -54,11 +56,13 @@ const MessageScroll: FC<OwnProps> = ({
 
     if (!messageIds || !messageIds.length) {
       onFabToggle(false);
+      onNotchToggle(false);
       return;
     }
 
     if (!isViewportNewest) {
       onFabToggle(true);
+      onNotchToggle(true);
       return;
     }
 
@@ -68,7 +72,8 @@ const MessageScroll: FC<OwnProps> = ({
     const isAtBottom = scrollBottom === 0 || (IS_SAFARI && scrollBottom === 1);
 
     onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
-  }, [messageIds, isViewportNewest, containerRef, onFabToggle, firstUnreadId]);
+    onNotchToggle(!isAtBottom);
+  }, [messageIds, isViewportNewest, containerRef, onFabToggle, firstUnreadId, onNotchToggle]);
 
   const {
     observe: observeIntersection,
@@ -113,6 +118,16 @@ const MessageScroll: FC<OwnProps> = ({
   });
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
+
+  const {
+    observe: observeIntersectionForNotch,
+  } = useIntersectionObserver({
+    rootRef: containerRef,
+  }, () => {
+    updateFabVisibility();
+  });
+
+  useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
   // Do not load more and show FAB when focusing
   useOnChange(() => {
