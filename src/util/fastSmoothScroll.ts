@@ -44,7 +44,6 @@ export default function fastSmoothScroll(
 
   isAnimating = true;
   fastRaf(() => {
-    dispatchHeavyAnimationEvent(MAX_JS_DURATION);
     scrollWithJs(container, element, position, margin, forceDuration, forceCurrentContainerHeight);
   });
 }
@@ -99,6 +98,7 @@ function scrollWithJs(
   );
   const startAt = Date.now();
 
+  dispatchHeavyAnimationEvent(duration);
   animateSingle(() => {
     const t = Math.min((Date.now() - startAt) / duration, 1);
 
