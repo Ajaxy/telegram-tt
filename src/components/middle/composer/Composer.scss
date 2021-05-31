@@ -257,6 +257,7 @@
     padding-bottom: calc(1rem - var(--border-width));
     overflow: hidden;
     line-height: 1.375rem;
+    font-family: Roboto, -apple-system, "Apple Color Emoji", "Helvetica Neue", sans-serif;
 
     &.overflown {
       overflow-y: auto;
