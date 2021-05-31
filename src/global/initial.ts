@@ -116,6 +116,7 @@ export const INITIAL_STATE: GlobalState = {
       language: 'en',
     },
     privacy: {},
+    notifyExceptions: {},
   },
 
   twoFaSettings: {},

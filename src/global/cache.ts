@@ -209,5 +209,6 @@ function reduceSettings(global: GlobalState): GlobalState['settings'] {
   return {
     byKey,
     privacy: {},
+    notifyExceptions: {},
   };
 }

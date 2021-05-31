@@ -1,5 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { ISettings } from '../../types';
+import { ISettings, NotifyException } from '../../types';
 
 export function replaceSettings(global: GlobalState, newSettings?: Partial<ISettings>): GlobalState {
   return {
@@ -14,24 +14,39 @@ export function replaceSettings(global: GlobalState, newSettings?: Partial<ISett
   };
 }
 
+export function addNotifyException(
+  global: GlobalState, id: number, notifyException: NotifyException,
+): GlobalState {
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      notifyExceptions: {
+        ...global.settings.notifyExceptions,
+        [id]: notifyException,
+      },
+    },
+  };
+}
+
 export function updateNotifySettings(
-  global: GlobalState, peerType: 'contact' | 'group' | 'broadcast', isSilent?: boolean, isShowPreviews?: boolean,
+  global: GlobalState, peerType: 'contact' | 'group' | 'broadcast', isSilent?: boolean, shouldShowPreviews?: boolean,
 ) {
   switch (peerType) {
     case 'contact':
       return replaceSettings(global, {
         ...(typeof isSilent !== 'undefined' && { hasPrivateChatsNotifications: !isSilent }),
-        ...(typeof isShowPreviews !== 'undefined' && { hasPrivateChatsMessagePreview: isShowPreviews }),
+        ...(typeof shouldShowPreviews !== 'undefined' && { hasPrivateChatsMessagePreview: shouldShowPreviews }),
       });
     case 'group':
       return replaceSettings(global, {
         ...(typeof isSilent !== 'undefined' && { hasGroupNotifications: !isSilent }),
-        ...(typeof isShowPreviews !== 'undefined' && { hasGroupMessagePreview: isShowPreviews }),
+        ...(typeof shouldShowPreviews !== 'undefined' && { hasGroupMessagePreview: shouldShowPreviews }),
       });
     case 'broadcast':
       return replaceSettings(global, {
         ...(typeof isSilent !== 'undefined' && { hasBroadcastNotifications: !isSilent }),
-        ...(typeof isShowPreviews !== 'undefined' && { hasBroadcastMessagePreview: isShowPreviews }),
+        ...(typeof shouldShowPreviews !== 'undefined' && { hasBroadcastMessagePreview: shouldShowPreviews }),
       });
 
     default:

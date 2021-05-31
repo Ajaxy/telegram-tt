@@ -125,14 +125,18 @@ export async function unsubscribe() {
 }
 
 // Load notification settings from the api
-async function loadNotificationsSettings() {
-  const result = await callApi('loadNotificationsSettings');
+async function loadNotificationSettings() {
+  const [result] = await Promise.all([
+    callApi('fetchNotificationSettings'),
+    callApi('fetchNotificationExceptions'),
+  ]);
+
   if (!result) return;
   setGlobal(replaceSettings(getGlobal(), result));
 }
 
 export async function subscribe() {
-  loadNotificationsSettings();
+  loadNotificationSettings();
 
   if (!checkIfPushSupported()) {
     // Ask for notification permissions only if service worker notifications are not supported

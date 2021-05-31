@@ -12,13 +12,14 @@ import './Badge.scss';
 type OwnProps = {
   chat: ApiChat;
   isPinned?: boolean;
+  isMuted?: boolean;
 };
 
-const Badge: FC<OwnProps> = ({ chat, isPinned }) => {
+const Badge: FC<OwnProps> = ({ chat, isPinned, isMuted }) => {
   const isShown = Boolean(chat.unreadCount || chat.hasUnreadMark || isPinned);
   const className = buildClassName(
     'Badge',
-    chat.isMuted && 'muted',
+    isMuted && 'muted',
     isPinned && 'pinned',
     Boolean(chat.unreadCount || chat.hasUnreadMark) && 'unread',
   );

@@ -304,9 +304,13 @@ addReducer('terminateAllAuthorizations', () => {
   })();
 });
 
-addReducer('loadNotificationsSettings', () => {
+addReducer('loadNotificationExceptions', () => {
+  callApi('fetchNotificationExceptions');
+});
+
+addReducer('loadNotificationSettings', () => {
   (async () => {
-    const result = await callApi('loadNotificationsSettings');
+    const result = await callApi('fetchNotificationSettings');
     if (!result) {
       return;
     }
@@ -316,16 +320,16 @@ addReducer('loadNotificationsSettings', () => {
 });
 
 addReducer('updateNotificationSettings', (global, actions, payload) => {
-  const { peerType, isSilent, isShowPreviews } = payload!;
+  const { peerType, isSilent, shouldShowPreviews } = payload!;
 
   (async () => {
-    const result = await callApi('updateNotificationSettings', peerType, { isSilent, isShowPreviews });
+    const result = await callApi('updateNotificationSettings', peerType, { isSilent, shouldShowPreviews });
 
     if (!result) {
       return;
     }
 
-    setGlobal(updateNotifySettings(getGlobal(), peerType, isSilent, isShowPreviews));
+    setGlobal(updateNotifySettings(getGlobal(), peerType, isSilent, shouldShowPreviews));
   })();
 });
 

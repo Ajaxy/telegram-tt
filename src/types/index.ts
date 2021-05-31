@@ -20,7 +20,17 @@ export interface IAlbum {
   mainMessage: ApiMessage;
 }
 
-export interface ISettings extends Record<string, any> {
+export type NotifySettings = {
+  hasPrivateChatsNotifications?: boolean;
+  hasPrivateChatsMessagePreview?: boolean;
+  hasGroupNotifications?: boolean;
+  hasGroupMessagePreview?: boolean;
+  hasBroadcastNotifications?: boolean;
+  hasBroadcastMessagePreview?: boolean;
+  hasContactJoinedNotifications?: boolean;
+};
+
+export interface ISettings extends NotifySettings, Record<string, any> {
   messageTextSize: number;
   customBackground?: string;
   patternColor?: string;
@@ -37,13 +47,6 @@ export interface ISettings extends Record<string, any> {
   shouldSuggestStickers: boolean;
   shouldLoopStickers: boolean;
   hasPassword?: boolean;
-  hasPrivateChatsNotifications?: boolean;
-  hasPrivateChatsMessagePreview?: boolean;
-  hasGroupNotifications?: boolean;
-  hasGroupMessagePreview?: boolean;
-  hasBroadcastNotifications?: boolean;
-  hasBroadcastMessagePreview?: boolean;
-  hasContactJoinedNotifications?: boolean;
   languages?: ApiLanguage[];
   language: 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'es' | 'uk';
 }
@@ -269,3 +272,9 @@ export enum ManagementScreens {
 }
 
 export type ManagementType = 'user' | 'group' | 'channel';
+
+export type NotifyException = {
+  isMuted: boolean;
+  isSilent?: boolean;
+  shouldShowPreviews?: boolean;
+};

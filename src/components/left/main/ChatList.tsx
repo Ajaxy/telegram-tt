@@ -7,13 +7,16 @@ import { GlobalActions } from '../../../global/types';
 import {
   ApiChat, ApiChatFolder, ApiUser, MAIN_THREAD_ID,
 } from '../../../api/types';
+import { NotifyException, NotifySettings } from '../../../types';
 
 import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../../../config';
 import { IS_ANDROID } from '../../../util/environment';
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
-import { selectChatFolder, selectCurrentMessageList } from '../../../modules/selectors';
+import {
+  selectChatFolder, selectCurrentMessageList, selectNotifyExceptions, selectNotifySettings,
+} from '../../../modules/selectors';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useChatAnimationType } from './hooks';
 
@@ -36,6 +39,8 @@ type StateProps = {
   orderedPinnedIds?: number[];
   lastSyncTime?: number;
   isInDiscussionThread?: boolean;
+  notifySettings: NotifySettings;
+  notifyExceptions: Record<number, NotifyException>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages'>;
@@ -57,14 +62,16 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   orderedPinnedIds,
   lastSyncTime,
   isInDiscussionThread,
+  notifySettings,
+  notifyExceptions,
   loadMoreChats,
   preloadTopChatMessages,
 }) => {
   const [currentListIds, currentPinnedIds] = useMemo(() => {
     return folderType === 'folder' && chatFolder
-      ? prepareFolderListIds(chatsById, usersById, chatFolder)
+      ? prepareFolderListIds(chatsById, usersById, chatFolder, notifySettings, notifyExceptions)
       : [listIds, orderedPinnedIds];
-  }, [folderType, chatsById, usersById, chatFolder, listIds, orderedPinnedIds]);
+  }, [folderType, chatFolder, chatsById, usersById, notifySettings, notifyExceptions, listIds, orderedPinnedIds]);
 
   const [orderById, orderedIds] = useMemo(() => {
     if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
@@ -202,6 +209,8 @@ export default memo(withGlobal<OwnProps>(
         chatFolder,
       }),
       isInDiscussionThread: currentThreadId !== MAIN_THREAD_ID,
+      notifySettings: selectNotifySettings(global),
+      notifyExceptions: selectNotifyExceptions(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats', 'preloadTopChatMessages']),

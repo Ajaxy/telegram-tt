@@ -156,7 +156,15 @@ export function terminateAllAuthorizations() {
   return invokeRequest(new GramJs.auth.ResetAuthorizations());
 }
 
-export async function loadNotificationsSettings() {
+export async function fetchNotificationExceptions() {
+  const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({ compareSound: true }), true);
+
+  if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
+    updateLocalDb(result);
+  }
+}
+
+export async function fetchNotificationSettings() {
   const [
     isMutedContactSignUpNotification,
     privateContactNotificationsSettings,
@@ -212,10 +220,10 @@ export function updateContactSignUpNotification(isSilent: boolean) {
 
 export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broadcast', {
   isSilent,
-  isShowPreviews,
+  shouldShowPreviews,
 }: {
   isSilent: boolean;
-  isShowPreviews: boolean;
+  shouldShowPreviews: boolean;
 }) {
   let peer: GramJs.TypeInputNotifyPeer;
   if (peerType === 'contact') {
@@ -227,7 +235,7 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
   }
 
   const settings = {
-    showPreviews: isShowPreviews,
+    showPreviews: shouldShowPreviews,
     silent: isSilent,
     muteUntil: isSilent ? MAX_INT_32 : undefined,
   };
@@ -358,7 +366,10 @@ export async function setPrivacySettings(
   return buildPrivacyRules(result.rules);
 }
 
-function updateLocalDb(result: GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice) {
+function updateLocalDb(
+  result: GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |
+  GramJs.Updates | GramJs.UpdatesCombined,
+) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
       localDb.users[user.id] = user;

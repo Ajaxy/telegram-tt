@@ -22,7 +22,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadNotificationsSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings'
+  'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings'
 )>;
 
 const SettingsNotifications: FC<StateProps & DispatchProps> = ({
@@ -33,13 +33,13 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
   hasBroadcastNotifications,
   hasBroadcastMessagePreview,
   hasContactJoinedNotifications,
-  loadNotificationsSettings,
+  loadNotificationSettings,
   updateContactSignUpNotification,
   updateNotificationSettings,
 }) => {
   useEffect(() => {
-    loadNotificationsSettings();
-  }, [loadNotificationsSettings]);
+    loadNotificationSettings();
+  }, [loadNotificationSettings]);
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
@@ -49,14 +49,14 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
     const currentIsSilent = peerType === 'contact'
       ? !hasPrivateChatsNotifications
       : !(peerType === 'group' ? hasGroupNotifications : hasBroadcastNotifications);
-    const currentIsShowPreviews = peerType === 'contact'
+    const currentShouldShowPreviews = peerType === 'contact'
       ? hasPrivateChatsMessagePreview
       : (peerType === 'group' ? hasGroupMessagePreview : hasBroadcastMessagePreview);
 
     updateNotificationSettings({
       peerType,
-      ...(setting === 'silent' && { isSilent: !e.target.checked, isShowPreviews: currentIsShowPreviews }),
-      ...(setting === 'showPreviews' && { isShowPreviews: e.target.checked, isSilent: currentIsSilent }),
+      ...(setting === 'silent' && { isSilent: !e.target.checked, shouldShowPreviews: currentShouldShowPreviews }),
+      ...(setting === 'showPreviews' && { shouldShowPreviews: e.target.checked, isSilent: currentIsSilent }),
     });
   }, [
     hasBroadcastMessagePreview, hasBroadcastNotifications,
@@ -151,7 +151,7 @@ export default memo(withGlobal((global): StateProps => {
   };
 },
 (setGlobal, actions): DispatchProps => pick(actions, [
-  'loadNotificationsSettings',
+  'loadNotificationSettings',
   'updateContactSignUpNotification',
   'updateNotificationSettings',
 ]))(SettingsNotifications));

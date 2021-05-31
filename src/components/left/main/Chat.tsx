@@ -25,9 +25,11 @@ import {
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageSticker,
+  selectIsChatMuted,
 } from '../../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
+  selectNotifySettings, selectNotifyExceptions,
 } from '../../../modules/selectors';
 import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
 import renderText from '../../common/helpers/renderText';
@@ -62,6 +64,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  isMuted?: boolean;
   privateChatUser?: ApiUser;
   actionTargetUser?: ApiUser;
   actionTargetMessage?: ApiMessage;
@@ -87,6 +90,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   isSelected,
   isPinned,
   chat,
+  isMuted,
   privateChatUser,
   actionTargetUser,
   lastMessageSender,
@@ -255,14 +259,14 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="title">
           <h3>{renderText(getChatTitle(chat, privateChatUser))}</h3>
           {chat.isVerified && <VerifiedIcon />}
-          {chat.isMuted && <i className="icon-muted-chat" />}
+          {isMuted && <i className="icon-muted-chat" />}
           {chat.lastMessage && (
             <LastMessageMeta message={chat.lastMessage} outgoingStatus={lastMessageOutgoingStatus} />
           )}
         </div>
         <div className="subtitle">
           {renderLastMessageOrTyping()}
-          <Badge chat={chat} isPinned={isPinned} />
+          <Badge chat={chat} isPinned={isPinned} isMuted={isMuted} />
         </div>
       </div>
       <DeleteChatModal
@@ -307,6 +311,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
+      isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       lastMessageSender,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),

@@ -544,14 +544,18 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     update instanceof GramJs.UpdateNotifySettings
     && update.peer instanceof GramJs.NotifyPeer
   ) {
-    const { silent, muteUntil } = update.notifySettings;
+    const {
+      silent, muteUntil, showPreviews, sound,
+    } = update.notifySettings;
+
+    const isMuted = silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000);
 
     onUpdate({
-      '@type': 'updateChat',
+      '@type': 'updateNotifyExceptions',
       id: getApiChatIdFromMtpPeer(update.peer.peer),
-      chat: {
-        isMuted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
-      },
+      isMuted,
+      ...(sound === '' && { isSilent: true }),
+      ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
     });
   } else if (
     update instanceof GramJs.UpdateUserTyping
@@ -741,7 +745,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateNotifySettings',
       peerType,
       isSilent: Boolean(silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000)),
-      isShowPreviews: Boolean(showPreviews),
+      shouldShowPreviews: Boolean(showPreviews),
     });
   } else if (update instanceof GramJs.UpdatePeerBlocked) {
     onUpdate({
