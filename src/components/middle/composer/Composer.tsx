@@ -18,7 +18,7 @@ import {
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
-import { IS_EMOJI_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED, IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_MOBILE_SCREEN, IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import {
   selectChat,
   selectIsChatWithBot,
@@ -317,7 +317,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           insertHtmlInSelection(newHtml);
           messageInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
-
         return;
       }
 
