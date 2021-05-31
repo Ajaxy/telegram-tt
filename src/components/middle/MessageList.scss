@@ -5,7 +5,7 @@
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: overlay;
-  margin-bottom: .3125rem;
+  margin-bottom: .5rem;
 
   .mask-image-enabled & {
     mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
