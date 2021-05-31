@@ -31,6 +31,7 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   isEmbedded?: boolean;
   appearanceOrder?: number;
+  isLastInList?: boolean;
 };
 
 type StateProps = {
@@ -50,6 +51,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersection,
   isEmbedded,
   appearanceOrder = 0,
+  isLastInList,
   sender,
   targetUser,
   targetMessage,
@@ -98,16 +100,19 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     return <span className="embedded-action-message">{renderText(content as string)}</span>;
   }
 
+  const className = buildClassName(
+    'ActionMessage message-list-item',
+    isFocused && !noFocusHighlight && 'focused',
+    isContextMenuShown && 'has-menu-open',
+    isLastInList && 'last-in-list',
+    transitionClassNames,
+  );
+
   return (
     <div
       ref={ref}
       id={`message${message.id}`}
-      className={buildClassName(
-        'ActionMessage message-list-item',
-        isFocused && !noFocusHighlight && 'focused',
-        isContextMenuShown && 'has-menu-open',
-        transitionClassNames,
-      )}
+      className={className}
       data-message-id={message.id}
       onMouseDown={handleBeforeContextMenu}
       onContextMenu={handleContextMenu}
