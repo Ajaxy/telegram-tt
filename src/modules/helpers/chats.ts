@@ -6,6 +6,7 @@ import {
   ApiChatFolder,
   MAIN_THREAD_ID,
 } from '../../api/types';
+import { NotifyException, NotifySettings } from '../../types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
@@ -200,6 +201,17 @@ export function isChatArchived(chat: ApiChat) {
   return chat.folderId === ARCHIVED_FOLDER_ID;
 }
 
+export function selectIsChatMuted(
+  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<number, NotifyException>,
+) {
+  return !(notifyExceptions[chat.id] && !notifyExceptions[chat.id].isMuted) && (
+    chat.isMuted
+    || (isChatPrivate(chat.id) && !notifySettings.hasPrivateChatsNotifications)
+    || (isChatChannel(chat) && !notifySettings.hasBroadcastNotifications)
+    || (isChatGroup(chat) && !notifySettings.hasGroupNotifications)
+  );
+}
+
 export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
@@ -208,6 +220,8 @@ export function prepareFolderListIds(
   chatsById: Record<number, ApiChat>,
   usersById: Record<number, ApiUser>,
   folder: ApiChatFolder,
+  notifySettings: NotifySettings,
+  notifyExceptions: Record<number, NotifyException>,
   chatIdsCache?: number[],
 ) {
   const excludedChatIds = folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined;
@@ -216,7 +230,14 @@ export function prepareFolderListIds(
   const listIds = (chatIdsCache || Object.keys(chatsById).map(Number))
     .filter((id) => {
       return filterChatFolder(
-        chatsById[id], folder, usersById, excludedChatIds, includedChatIds, pinnedChatIds,
+        chatsById[id],
+        folder,
+        usersById,
+        notifySettings,
+        notifyExceptions,
+        excludedChatIds,
+        includedChatIds,
+        pinnedChatIds,
       );
     });
 
@@ -227,6 +248,8 @@ function filterChatFolder(
   chat: ApiChat,
   folder: ApiChatFolder,
   usersById: Record<number, ApiUser>,
+  notifySettings: NotifySettings,
+  notifyExceptions: Record<number, NotifyException>,
   excludedChatIds?: Set<number>,
   includedChatIds?: Set<number>,
   pinnedChatIds?: Set<number>,
@@ -247,7 +270,7 @@ function filterChatFolder(
     return false;
   }
 
-  if (chat.isMuted && folder.excludeMuted) {
+  if (folder.excludeMuted && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
     return false;
   }
 
@@ -340,9 +363,11 @@ export function getFolderUnreadDialogs(
   chatsById: Record<number, ApiChat>,
   usersById: Record<number, ApiUser>,
   folder: ApiChatFolder,
+  notifySettings: NotifySettings,
+  notifyExceptions: Record<number, NotifyException>,
   chatIdsCache: number[],
 ) {
-  const [listIds] = prepareFolderListIds(chatsById, usersById, folder, chatIdsCache);
+  const [listIds] = prepareFolderListIds(chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache);
 
   const listedChats = listIds
     .map((id) => chatsById[id])
@@ -366,6 +391,8 @@ export function getFolderDescriptionText(
   chatsById: Record<number, ApiChat>,
   usersById: Record<number, ApiUser>,
   folder: ApiChatFolder,
+  notifySettings: NotifySettings,
+  notifyExceptions: Record<number, NotifyException>,
   chatIdsCache: number[],
   lang: LangFn,
 ) {
@@ -383,7 +410,7 @@ export function getFolderDescriptionText(
     || (excludedChatIds && excludedChatIds.length)
     || (includedChatIds && includedChatIds.length)
   ) {
-    const length = getFolderChatsCount(chatsById, usersById, folder, chatIdsCache);
+    const length = getFolderChatsCount(chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache);
     return lang('Chats', length);
   }
 
@@ -407,9 +434,13 @@ function getFolderChatsCount(
   chatsById: Record<number, ApiChat>,
   usersById: Record<number, ApiUser>,
   folder: ApiChatFolder,
+  notifySettings: NotifySettings,
+  notifyExceptions: Record<number, NotifyException>,
   chatIdsCache: number[],
 ) {
-  const [listIds, pinnedIds] = prepareFolderListIds(chatsById, usersById, folder, chatIdsCache);
+  const [listIds, pinnedIds] = prepareFolderListIds(
+    chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache,
+  );
   const { pinnedChats, otherChats } = prepareChatList(chatsById, listIds, pinnedIds, 'folder');
   return pinnedChats.length + otherChats.length;
 }

@@ -3,9 +3,8 @@ import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
   const {
-    about, commonChatsCount, pinnedMsgId, botInfo, notifySettings: { silent, muteUntil },
+    about, commonChatsCount, pinnedMsgId, botInfo,
   } = mtpUserFull;
-  const isMuted = silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000);
 
   return {
     ...(buildApiUser(mtpUserFull.user) as ApiUser),
@@ -13,7 +12,6 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
       bio: about,
       commonChatsCount,
       pinnedMessageId: pinnedMsgId,
-      isMuted,
       ...(botInfo && { botDescription: botInfo.description }),
     },
   };

@@ -5,9 +5,11 @@ import { withGlobal } from '../../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../../global/types';
 import { ApiChatFolder, ApiChat, ApiUser } from '../../../../api/types';
+import { NotifyException, NotifySettings } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { pick } from '../../../../util/iteratees';
+import { selectNotifyExceptions, selectNotifySettings } from '../../../../modules/selectors';
 import { throttle } from '../../../../util/schedulers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
 import { getFolderDescriptionText } from '../../../../modules/helpers';
@@ -29,6 +31,8 @@ type StateProps = {
   orderedFolderIds?: number[];
   foldersById: Record<number, ApiChatFolder>;
   recommendedChatFolders?: ApiChatFolder[];
+  notifySettings: NotifySettings;
+  notifyExceptions: Record<number, NotifyException>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadRecommendedChatFolders' | 'addChatFolder' | 'showError'>;
@@ -45,6 +49,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   orderedFolderIds,
   foldersById,
   recommendedChatFolders,
+  notifySettings,
+  notifyExceptions,
   loadRecommendedChatFolders,
   addChatFolder,
   showError,
@@ -96,10 +102,12 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       return {
         id: folder.id,
         title: folder.title,
-        subtitle: getFolderDescriptionText(chatsById, usersById, folder, chatIds, lang),
+        subtitle: getFolderDescriptionText(
+          chatsById, usersById, folder, notifySettings, notifyExceptions, chatIds, lang,
+        ),
       };
     });
-  }, [orderedFolderIds, chatsById, foldersById, usersById, lang]);
+  }, [orderedFolderIds, chatsById, foldersById, usersById, notifySettings, notifyExceptions, lang]);
 
   const handleCreateFolderFromRecommended = useCallback((folder: ApiChatFolder) => {
     if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
@@ -222,6 +230,8 @@ export default memo(withGlobal<OwnProps>(
       orderedFolderIds,
       foldersById,
       recommendedChatFolders,
+      notifySettings: selectNotifySettings(global),
+      notifyExceptions: selectNotifyExceptions(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadRecommendedChatFolders', 'addChatFolder', 'showError']),

@@ -25,7 +25,6 @@ export interface ApiUserFullInfo {
   commonChatsCount?: number;
   botDescription?: string;
   pinnedMessageId?: number;
-  isMuted?: boolean;
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

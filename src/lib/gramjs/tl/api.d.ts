@@ -520,22 +520,22 @@ namespace Api {
   };
   export class InputMediaEmpty extends VirtualClass<void> {};
   export class InputMediaUploadedPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     file: Api.TypeInputFile;
     stickers?: Api.TypeInputDocument[];
     ttlSeconds?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     file: Api.TypeInputFile;
     stickers?: Api.TypeInputDocument[];
     ttlSeconds?: int;
   };
   export class InputMediaPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: Api.TypeInputPhoto;
     ttlSeconds?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: Api.TypeInputPhoto;
     ttlSeconds?: int;
   };
@@ -556,7 +556,7 @@ namespace Api {
     vcard: string;
   };
   export class InputMediaUploadedDocument extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     nosoundVideo?: true;
     forceFile?: true;
     file: Api.TypeInputFile;
@@ -566,7 +566,7 @@ namespace Api {
     stickers?: Api.TypeInputDocument[];
     ttlSeconds?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     nosoundVideo?: true;
     forceFile?: true;
     file: Api.TypeInputFile;
@@ -577,12 +577,12 @@ namespace Api {
     ttlSeconds?: int;
   };
   export class InputMediaDocument extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: Api.TypeInputDocument;
     ttlSeconds?: int;
     query?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: Api.TypeInputDocument;
     ttlSeconds?: int;
     query?: string;
@@ -603,20 +603,20 @@ namespace Api {
     venueType: string;
   };
   export class InputMediaPhotoExternal extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     url: string;
     ttlSeconds?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     url: string;
     ttlSeconds?: int;
   };
   export class InputMediaDocumentExternal extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     url: string;
     ttlSeconds?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     url: string;
     ttlSeconds?: int;
   };
@@ -626,7 +626,7 @@ namespace Api {
     id: Api.TypeInputGame;
   };
   export class InputMediaInvoice extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     multipleAllowed?: true;
     canForward?: true;
     title: string;
@@ -638,7 +638,7 @@ namespace Api {
     providerData: Api.TypeDataJSON;
     startParam: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     multipleAllowed?: true;
     canForward?: true;
     title: string;
@@ -651,14 +651,14 @@ namespace Api {
     startParam: string;
   };
   export class InputMediaGeoLive extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     stopped?: true;
     geoPoint: Api.TypeInputGeoPoint;
     heading?: int;
     period?: int;
     proximityNotificationRadius?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     stopped?: true;
     geoPoint: Api.TypeInputGeoPoint;
     heading?: int;
@@ -666,13 +666,13 @@ namespace Api {
     proximityNotificationRadius?: int;
   };
   export class InputMediaPoll extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     poll: Api.TypePoll;
     correctAnswers?: bytes[];
     solution?: string;
     solutionEntities?: Api.TypeMessageEntity[];
   }> {
-    // flags: null;
+    // flags: undefined;
     poll: Api.TypePoll;
     correctAnswers?: bytes[];
     solution?: string;
@@ -685,12 +685,12 @@ namespace Api {
   };
   export class InputChatPhotoEmpty extends VirtualClass<void> {};
   export class InputChatUploadedPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     file?: Api.TypeInputFile;
     video?: Api.TypeInputFile;
     videoStartTs?: double;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     file?: Api.TypeInputFile;
     video?: Api.TypeInputFile;
     videoStartTs?: double;
@@ -702,12 +702,12 @@ namespace Api {
   };
   export class InputGeoPointEmpty extends VirtualClass<void> {};
   export class InputGeoPoint extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     lat: double;
     long: double;
     accuracyRadius?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     lat: double;
     long: double;
     accuracyRadius?: int;
@@ -786,12 +786,12 @@ namespace Api {
     secret: long;
   };
   export class InputPeerPhotoFileLocation extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     big?: true;
     peer: Api.TypeInputPeer;
     photoId: long;
   }> {
-    // flags: null;
+    // flags: undefined;
     big?: true;
     peer: Api.TypeInputPeer;
     photoId: long;
@@ -833,7 +833,7 @@ namespace Api {
     id: int;
   };
   export class User extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     self?: true;
     contact?: true;
     mutualContact?: true;
@@ -862,7 +862,7 @@ namespace Api {
     botInlinePlaceholder?: string;
     langCode?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     self?: true;
     contact?: true;
     mutualContact?: true;
@@ -893,13 +893,13 @@ namespace Api {
   };
   export class UserProfilePhotoEmpty extends VirtualClass<void> {};
   export class UserProfilePhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     hasVideo?: true;
     photoId: long;
     strippedThumb?: bytes;
     dcId: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     hasVideo?: true;
     photoId: long;
     strippedThumb?: bytes;
@@ -925,7 +925,7 @@ namespace Api {
     id: int;
   };
   export class Chat extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     kicked?: true;
     left?: true;
@@ -942,7 +942,7 @@ namespace Api {
     adminRights?: Api.TypeChatAdminRights;
     defaultBannedRights?: Api.TypeChatBannedRights;
   }> {
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     kicked?: true;
     left?: true;
@@ -967,7 +967,7 @@ namespace Api {
     title: string;
   };
   export class Channel extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     left?: true;
     broadcast?: true;
@@ -997,7 +997,7 @@ namespace Api {
     defaultBannedRights?: Api.TypeChatBannedRights;
     participantsCount?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     left?: true;
     broadcast?: true;
@@ -1028,7 +1028,7 @@ namespace Api {
     participantsCount?: int;
   };
   export class ChannelForbidden extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     broadcast?: true;
     megagroup?: true;
     id: int;
@@ -1036,7 +1036,7 @@ namespace Api {
     title: string;
     untilDate?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     broadcast?: true;
     megagroup?: true;
     id: int;
@@ -1045,7 +1045,7 @@ namespace Api {
     untilDate?: int;
   };
   export class ChatFull extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     canSetUsername?: true;
     hasScheduled?: true;
     id: int;
@@ -1061,7 +1061,7 @@ namespace Api {
     ttlPeriod?: int;
     groupcallDefaultJoinAs?: Api.TypePeer;
   }> {
-    // flags: null;
+    // flags: undefined;
     canSetUsername?: true;
     hasScheduled?: true;
     id: int;
@@ -1078,7 +1078,7 @@ namespace Api {
     groupcallDefaultJoinAs?: Api.TypePeer;
   };
   export class ChannelFull extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     canViewParticipants?: true;
     canSetUsername?: true;
     canSetStickers?: true;
@@ -1118,7 +1118,7 @@ namespace Api {
     pendingSuggestions?: string[];
     groupcallDefaultJoinAs?: Api.TypePeer;
   }> {
-    // flags: null;
+    // flags: undefined;
     canViewParticipants?: true;
     canSetUsername?: true;
     canSetStickers?: true;
@@ -1182,11 +1182,11 @@ namespace Api {
     date: int;
   };
   export class ChatParticipantsForbidden extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     chatId: int;
     selfParticipant?: Api.TypeChatParticipant;
   }> {
-    // flags: null;
+    // flags: undefined;
     chatId: int;
     selfParticipant?: Api.TypeChatParticipant;
   };
@@ -1201,29 +1201,29 @@ namespace Api {
   };
   export class ChatPhotoEmpty extends VirtualClass<void> {};
   export class ChatPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     hasVideo?: true;
     photoId: long;
     strippedThumb?: bytes;
     dcId: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     hasVideo?: true;
     photoId: long;
     strippedThumb?: bytes;
     dcId: int;
   };
   export class MessageEmpty extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: int;
     peerId?: Api.TypePeer;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: int;
     peerId?: Api.TypePeer;
   };
   export class Message extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -1253,7 +1253,7 @@ namespace Api {
     restrictionReason?: Api.TypeRestrictionReason[];
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -1284,7 +1284,7 @@ namespace Api {
     ttlPeriod?: int;
   };
   export class MessageService extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -1299,7 +1299,7 @@ namespace Api {
     action: Api.TypeMessageAction;
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -1316,11 +1316,11 @@ namespace Api {
   };
   export class MessageMediaEmpty extends VirtualClass<void> {};
   export class MessageMediaPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     photo?: Api.TypePhoto;
     ttlSeconds?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     photo?: Api.TypePhoto;
     ttlSeconds?: int;
   };
@@ -1344,11 +1344,11 @@ namespace Api {
   };
   export class MessageMediaUnsupported extends VirtualClass<void> {};
   export class MessageMediaDocument extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     document?: Api.TypeDocument;
     ttlSeconds?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     document?: Api.TypeDocument;
     ttlSeconds?: int;
   };
@@ -1378,7 +1378,7 @@ namespace Api {
     game: Api.TypeGame;
   };
   export class MessageMediaInvoice extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     shippingAddressRequested?: true;
     test?: true;
     title: string;
@@ -1389,7 +1389,7 @@ namespace Api {
     totalAmount: long;
     startParam: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     shippingAddressRequested?: true;
     test?: true;
     title: string;
@@ -1401,13 +1401,13 @@ namespace Api {
     startParam: string;
   };
   export class MessageMediaGeoLive extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     heading?: int;
     period: int;
     proximityNotificationRadius?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     heading?: int;
     period: int;
@@ -1488,7 +1488,7 @@ namespace Api {
     score: int;
   };
   export class MessageActionPaymentSentMe extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     currency: string;
     totalAmount: long;
     payload: bytes;
@@ -1496,7 +1496,7 @@ namespace Api {
     shippingOptionId?: string;
     charge: Api.TypePaymentCharge;
   }> {
-    // flags: null;
+    // flags: undefined;
     currency: string;
     totalAmount: long;
     payload: bytes;
@@ -1512,13 +1512,13 @@ namespace Api {
     totalAmount: long;
   };
   export class MessageActionPhoneCall extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     video?: true;
     callId: long;
     reason?: Api.TypePhoneCallDiscardReason;
     duration?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     video?: true;
     callId: long;
     reason?: Api.TypePhoneCallDiscardReason;
@@ -1558,11 +1558,11 @@ namespace Api {
     distance: int;
   };
   export class MessageActionGroupCall extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     call: Api.TypeInputGroupCall;
     duration?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     call: Api.TypeInputGroupCall;
     duration?: int;
   };
@@ -1586,7 +1586,7 @@ namespace Api {
     scheduleDate: int;
   };
   export class Dialog extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     unreadMark?: true;
     peer: Api.TypePeer;
@@ -1600,7 +1600,7 @@ namespace Api {
     draft?: Api.TypeDraftMessage;
     folderId?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     unreadMark?: true;
     peer: Api.TypePeer;
@@ -1615,7 +1615,7 @@ namespace Api {
     folderId?: int;
   };
   export class DialogFolder extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     folder: Api.TypeFolder;
     peer: Api.TypePeer;
@@ -1625,7 +1625,7 @@ namespace Api {
     unreadMutedMessagesCount: int;
     unreadUnmutedMessagesCount: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     folder: Api.TypeFolder;
     peer: Api.TypePeer;
@@ -1641,7 +1641,7 @@ namespace Api {
     id: long;
   };
   export class Photo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     hasStickers?: true;
     id: long;
     accessHash: long;
@@ -1651,7 +1651,7 @@ namespace Api {
     videoSizes?: Api.TypeVideoSize[];
     dcId: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     hasStickers?: true;
     id: long;
     accessHash: long;
@@ -1715,13 +1715,13 @@ namespace Api {
   };
   export class GeoPointEmpty extends VirtualClass<void> {};
   export class GeoPoint extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     long: double;
     lat: double;
     accessHash: long;
     accuracyRadius?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     long: double;
     lat: double;
     accessHash: long;
@@ -1736,33 +1736,33 @@ namespace Api {
   export class InputNotifyChats extends VirtualClass<void> {};
   export class InputNotifyBroadcasts extends VirtualClass<void> {};
   export class InputPeerNotifySettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     showPreviews?: Bool;
     silent?: Bool;
     muteUntil?: int;
     sound?: string;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     showPreviews?: Bool;
     silent?: Bool;
     muteUntil?: int;
     sound?: string;
   };
   export class PeerNotifySettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     showPreviews?: Bool;
     silent?: Bool;
     muteUntil?: int;
     sound?: string;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     showPreviews?: Bool;
     silent?: Bool;
     muteUntil?: int;
     sound?: string;
   };
   export class PeerSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     reportSpam?: true;
     addContact?: true;
     blockContact?: true;
@@ -1773,7 +1773,7 @@ namespace Api {
     inviteMembers?: true;
     geoDistance?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     reportSpam?: true;
     addContact?: true;
     blockContact?: true;
@@ -1786,7 +1786,7 @@ namespace Api {
   };
   export class WallPaper extends VirtualClass<{
     id: long;
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     default?: true;
     pattern?: true;
@@ -1797,7 +1797,7 @@ namespace Api {
     settings?: Api.TypeWallPaperSettings;
   }> {
     id: long;
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     default?: true;
     pattern?: true;
@@ -1808,12 +1808,12 @@ namespace Api {
     settings?: Api.TypeWallPaperSettings;
   };
   export class WallPaperNoFile extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     default?: true;
     dark?: true;
     settings?: Api.TypeWallPaperSettings;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     default?: true;
     dark?: true;
     settings?: Api.TypeWallPaperSettings;
@@ -1827,7 +1827,7 @@ namespace Api {
   export class InputReportReasonGeoIrrelevant extends VirtualClass<void> {};
   export class InputReportReasonFake extends VirtualClass<void> {};
   export class UserFull extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     blocked?: true;
     phoneCallsAvailable?: true;
     phoneCallsPrivate?: true;
@@ -1845,7 +1845,7 @@ namespace Api {
     folderId?: int;
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     blocked?: true;
     phoneCallsAvailable?: true;
     phoneCallsPrivate?: true;
@@ -1895,10 +1895,10 @@ namespace Api {
   export class InputMessagesFilterMusic extends VirtualClass<void> {};
   export class InputMessagesFilterChatPhotos extends VirtualClass<void> {};
   export class InputMessagesFilterPhoneCalls extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     missed?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     missed?: true;
   };
   export class InputMessagesFilterRoundVoice extends VirtualClass<void> {};
@@ -2045,7 +2045,7 @@ namespace Api {
     notifySettings: Api.TypePeerNotifySettings;
   };
   export class UpdateServiceNotification extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     popup?: true;
     inboxDate?: int;
     type: string;
@@ -2053,7 +2053,7 @@ namespace Api {
     media: Api.TypeMessageMedia;
     entities: Api.TypeMessageEntity[];
   }> {
-    // flags: null;
+    // flags: undefined;
     popup?: true;
     inboxDate?: int;
     type: string;
@@ -2076,7 +2076,7 @@ namespace Api {
     phone: string;
   };
   export class UpdateReadHistoryInbox extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     peer: Api.TypePeer;
     maxId: int;
@@ -2084,7 +2084,7 @@ namespace Api {
     pts: int;
     ptsCount: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     peer: Api.TypePeer;
     maxId: int;
@@ -2122,11 +2122,11 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateChannelTooLong extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     pts?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     pts?: int;
   };
@@ -2145,14 +2145,14 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateReadChannelInbox extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     channelId: int;
     maxId: int;
     stillUnreadCount: int;
     pts: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     channelId: int;
     maxId: int;
@@ -2196,18 +2196,18 @@ namespace Api {
     stickerset: messages.TypeStickerSet;
   };
   export class UpdateStickerSetsOrder extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     masks?: true;
     order: long[];
   }> {
-    // flags: null;
+    // flags: undefined;
     masks?: true;
     order: long[];
   };
   export class UpdateStickerSets extends VirtualClass<void> {};
   export class UpdateSavedGifs extends VirtualClass<void> {};
   export class UpdateBotInlineQuery extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     query: string;
@@ -2215,7 +2215,7 @@ namespace Api {
     peerType?: Api.TypeInlineQueryPeerType;
     offset: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     query: string;
@@ -2224,14 +2224,14 @@ namespace Api {
     offset: string;
   };
   export class UpdateBotInlineSend extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     userId: int;
     query: string;
     geo?: Api.TypeGeoPoint;
     id: string;
     msgId?: Api.TypeInputBotInlineMessageID;
   }> {
-    // flags: null;
+    // flags: undefined;
     userId: int;
     query: string;
     geo?: Api.TypeGeoPoint;
@@ -2248,7 +2248,7 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateBotCallbackQuery extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     peer: Api.TypePeer;
@@ -2257,7 +2257,7 @@ namespace Api {
     data?: bytes;
     gameShortName?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     peer: Api.TypePeer;
@@ -2276,7 +2276,7 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateInlineBotCallbackQuery extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     msgId: Api.TypeInputBotInlineMessageID;
@@ -2284,7 +2284,7 @@ namespace Api {
     data?: bytes;
     gameShortName?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     msgId: Api.TypeInputBotInlineMessageID;
@@ -2322,22 +2322,22 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateDialogPinned extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     folderId?: int;
     peer: Api.TypeDialogPeer;
   }> {
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     folderId?: int;
     peer: Api.TypeDialogPeer;
   };
   export class UpdatePinnedDialogs extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     order?: Api.TypeDialogPeer[];
   } | void> {
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     order?: Api.TypeDialogPeer[];
   };
@@ -2367,7 +2367,7 @@ namespace Api {
     shippingAddress: Api.TypePostAddress;
   };
   export class UpdateBotPrecheckoutQuery extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     payload: bytes;
@@ -2376,7 +2376,7 @@ namespace Api {
     currency: string;
     totalAmount: long;
   }> {
-    // flags: null;
+    // flags: undefined;
     queryId: long;
     userId: int;
     payload: bytes;
@@ -2417,21 +2417,21 @@ namespace Api {
     availableMinId: int;
   };
   export class UpdateDialogUnreadMark extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     unread?: true;
     peer: Api.TypeDialogPeer;
   }> {
-    // flags: null;
+    // flags: undefined;
     unread?: true;
     peer: Api.TypeDialogPeer;
   };
   export class UpdateMessagePoll extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pollId: long;
     poll?: Api.TypePoll;
     results: Api.TypePollResults;
   }> {
-    // flags: null;
+    // flags: undefined;
     pollId: long;
     poll?: Api.TypePoll;
     results: Api.TypePollResults;
@@ -2501,11 +2501,11 @@ namespace Api {
     options: bytes[];
   };
   export class UpdateDialogFilter extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: int;
     filter?: Api.TypeDialogFilter;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: int;
     filter?: Api.TypeDialogFilter;
   };
@@ -2532,14 +2532,14 @@ namespace Api {
     forwards: int;
   };
   export class UpdateReadChannelDiscussionInbox extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     topMsgId: int;
     readMaxId: int;
     broadcastId?: int;
     broadcastPost?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     topMsgId: int;
     readMaxId: int;
@@ -2563,27 +2563,27 @@ namespace Api {
     blocked: Bool;
   };
   export class UpdateChannelUserTyping extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     topMsgId?: int;
     fromId: Api.TypePeer;
     action: Api.TypeSendMessageAction;
   }> {
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     topMsgId?: int;
     fromId: Api.TypePeer;
     action: Api.TypeSendMessageAction;
   };
   export class UpdatePinnedMessages extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     peer: Api.TypePeer;
     messages: int[];
     pts: int;
     ptsCount: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     peer: Api.TypePeer;
     messages: int[];
@@ -2591,14 +2591,14 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdatePinnedChannelMessages extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     channelId: int;
     messages: int[];
     pts: int;
     ptsCount: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     pinned?: true;
     channelId: int;
     messages: int[];
@@ -2627,16 +2627,16 @@ namespace Api {
     call: Api.TypeGroupCall;
   };
   export class UpdatePeerHistoryTTL extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     peer: Api.TypePeer;
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     peer: Api.TypePeer;
     ttlPeriod?: int;
   };
   export class UpdateChatParticipant extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     chatId: int;
     date: int;
     actorId: int;
@@ -2646,7 +2646,7 @@ namespace Api {
     invite?: Api.TypeExportedChatInvite;
     qts: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     chatId: int;
     date: int;
     actorId: int;
@@ -2657,7 +2657,7 @@ namespace Api {
     qts: int;
   };
   export class UpdateChannelParticipant extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     date: int;
     actorId: int;
@@ -2667,7 +2667,7 @@ namespace Api {
     invite?: Api.TypeExportedChatInvite;
     qts: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     channelId: int;
     date: int;
     actorId: int;
@@ -2690,7 +2690,7 @@ namespace Api {
   };
   export class UpdatesTooLong extends VirtualClass<void> {};
   export class UpdateShortMessage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -2707,7 +2707,7 @@ namespace Api {
     entities?: Api.TypeMessageEntity[];
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -2725,7 +2725,7 @@ namespace Api {
     ttlPeriod?: int;
   };
   export class UpdateShortChatMessage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -2743,7 +2743,7 @@ namespace Api {
     entities?: Api.TypeMessageEntity[];
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     out?: true;
     mentioned?: true;
     mediaUnread?: true;
@@ -2797,7 +2797,7 @@ namespace Api {
     seq: int;
   };
   export class UpdateShortSentMessage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     out?: true;
     id: int;
     pts: int;
@@ -2807,7 +2807,7 @@ namespace Api {
     entities?: Api.TypeMessageEntity[];
     ttlPeriod?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     out?: true;
     id: int;
     pts: int;
@@ -2818,7 +2818,7 @@ namespace Api {
     ttlPeriod?: int;
   };
   export class DcOption extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     ipv6?: true;
     mediaOnly?: true;
     tcpoOnly?: true;
@@ -2829,7 +2829,7 @@ namespace Api {
     port: int;
     secret?: bytes;
   }> {
-    // flags: null;
+    // flags: undefined;
     ipv6?: true;
     mediaOnly?: true;
     tcpoOnly?: true;
@@ -2841,7 +2841,7 @@ namespace Api {
     secret?: bytes;
   };
   export class Config extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     phonecallsEnabled?: true;
     defaultP2pContacts?: true;
     preloadFeaturedStickers?: true;
@@ -2894,7 +2894,7 @@ namespace Api {
     langPackVersion?: int;
     baseLangPackVersion?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     phonecallsEnabled?: true;
     defaultP2pContacts?: true;
     preloadFeaturedStickers?: true;
@@ -2975,7 +2975,7 @@ namespace Api {
     participantId: int;
   };
   export class EncryptedChatRequested extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     id: int;
     accessHash: long;
@@ -2984,7 +2984,7 @@ namespace Api {
     participantId: int;
     gA: bytes;
   }> {
-    // flags: null;
+    // flags: undefined;
     folderId?: int;
     id: int;
     accessHash: long;
@@ -3011,11 +3011,11 @@ namespace Api {
     keyFingerprint: long;
   };
   export class EncryptedChatDiscarded extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     historyDeleted?: true;
     id: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     historyDeleted?: true;
     id: int;
   };
@@ -3108,7 +3108,7 @@ namespace Api {
     id: long;
   };
   export class Document extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: long;
     accessHash: long;
     fileReference: bytes;
@@ -3120,7 +3120,7 @@ namespace Api {
     dcId: int;
     attributes: Api.TypeDocumentAttribute[];
   }> {
-    // flags: null;
+    // flags: undefined;
     id: long;
     accessHash: long;
     fileReference: bytes;
@@ -3257,27 +3257,27 @@ namespace Api {
   };
   export class DocumentAttributeAnimated extends VirtualClass<void> {};
   export class DocumentAttributeSticker extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     mask?: true;
     alt: string;
     stickerset: Api.TypeInputStickerSet;
     maskCoords?: Api.TypeMaskCoords;
   }> {
-    // flags: null;
+    // flags: undefined;
     mask?: true;
     alt: string;
     stickerset: Api.TypeInputStickerSet;
     maskCoords?: Api.TypeMaskCoords;
   };
   export class DocumentAttributeVideo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     roundMessage?: true;
     supportsStreaming?: true;
     duration: int;
     w: int;
     h: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     roundMessage?: true;
     supportsStreaming?: true;
     duration: int;
@@ -3285,14 +3285,14 @@ namespace Api {
     h: int;
   };
   export class DocumentAttributeAudio extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     voice?: true;
     duration: int;
     title?: string;
     performer?: string;
     waveform?: bytes;
   }> {
-    // flags: null;
+    // flags: undefined;
     voice?: true;
     duration: int;
     title?: string;
@@ -3325,7 +3325,7 @@ namespace Api {
     date: int;
   };
   export class WebPage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: long;
     url: string;
     displayUrl: string;
@@ -3345,7 +3345,7 @@ namespace Api {
     cachedPage?: Api.TypePage;
     attributes?: Api.TypeWebPageAttribute[];
   }> {
-    // flags: null;
+    // flags: undefined;
     id: long;
     url: string;
     displayUrl: string;
@@ -3366,14 +3366,14 @@ namespace Api {
     attributes?: Api.TypeWebPageAttribute[];
   };
   export class WebPageNotModified extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     cachedPageViews?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     cachedPageViews?: int;
   };
   export class Authorization extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     current?: true;
     officialApp?: true;
     passwordPending?: true;
@@ -3390,7 +3390,7 @@ namespace Api {
     country: string;
     region: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     current?: true;
     officialApp?: true;
     passwordPending?: true;
@@ -3415,7 +3415,7 @@ namespace Api {
     // flags: int;
   };
   export class ChatInviteExported extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     revoked?: true;
     permanent?: true;
     link: string;
@@ -3426,7 +3426,7 @@ namespace Api {
     usageLimit?: int;
     usage?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     revoked?: true;
     permanent?: true;
     link: string;
@@ -3443,7 +3443,7 @@ namespace Api {
     chat: Api.TypeChat;
   };
   export class ChatInvite extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     channel?: true;
     broadcast?: true;
     public?: true;
@@ -3453,7 +3453,7 @@ namespace Api {
     participantsCount: int;
     participants?: Api.TypeUser[];
   }> {
-    // flags: null;
+    // flags: undefined;
     channel?: true;
     broadcast?: true;
     public?: true;
@@ -3490,7 +3490,7 @@ namespace Api {
     emoticon: string;
   };
   export class StickerSet extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     archived?: true;
     official?: true;
     masks?: true;
@@ -3506,7 +3506,7 @@ namespace Api {
     count: int;
     hash: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     archived?: true;
     official?: true;
     masks?: true;
@@ -3551,12 +3551,12 @@ namespace Api {
     url: string;
   };
   export class KeyboardButtonCallback extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     requiresPassword?: true;
     text: string;
     data: bytes;
   }> {
-    // flags: null;
+    // flags: undefined;
     requiresPassword?: true;
     text: string;
     data: bytes;
@@ -3572,12 +3572,12 @@ namespace Api {
     text: string;
   };
   export class KeyboardButtonSwitchInline extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     samePeer?: true;
     text: string;
     query: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     samePeer?: true;
     text: string;
     query: string;
@@ -3593,27 +3593,27 @@ namespace Api {
     text: string;
   };
   export class KeyboardButtonUrlAuth extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     text: string;
     fwdText?: string;
     url: string;
     buttonId: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     text: string;
     fwdText?: string;
     url: string;
     buttonId: int;
   };
   export class InputKeyboardButtonUrlAuth extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     requestWriteAccess?: true;
     text: string;
     fwdText?: string;
     url: string;
     bot: Api.TypeInputUser;
   }> {
-    // flags: null;
+    // flags: undefined;
     requestWriteAccess?: true;
     text: string;
     fwdText?: string;
@@ -3621,11 +3621,11 @@ namespace Api {
     bot: Api.TypeInputUser;
   };
   export class KeyboardButtonRequestPoll extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     quiz?: Bool;
     text: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     quiz?: Bool;
     text: string;
   };
@@ -3635,29 +3635,29 @@ namespace Api {
     buttons: Api.TypeKeyboardButton[];
   };
   export class ReplyKeyboardHide extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     selective?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     selective?: true;
   };
   export class ReplyKeyboardForceReply extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     singleUse?: true;
     selective?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     singleUse?: true;
     selective?: true;
   };
   export class ReplyKeyboardMarkup extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     resize?: true;
     singleUse?: true;
     selective?: true;
     rows: Api.TypeKeyboardButtonRow[];
   }> {
-    // flags: null;
+    // flags: undefined;
     resize?: true;
     singleUse?: true;
     selective?: true;
@@ -3835,11 +3835,11 @@ namespace Api {
   };
   export class ChannelMessagesFilterEmpty extends VirtualClass<void> {};
   export class ChannelMessagesFilter extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     excludeNewMessages?: true;
     ranges: Api.TypeMessageRange[];
   }> {
-    // flags: null;
+    // flags: undefined;
     excludeNewMessages?: true;
     ranges: Api.TypeMessageRange[];
   };
@@ -3860,18 +3860,18 @@ namespace Api {
     date: int;
   };
   export class ChannelParticipantCreator extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     userId: int;
     adminRights: Api.TypeChatAdminRights;
     rank?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     userId: int;
     adminRights: Api.TypeChatAdminRights;
     rank?: string;
   };
   export class ChannelParticipantAdmin extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     canEdit?: true;
     self?: true;
     userId: int;
@@ -3881,7 +3881,7 @@ namespace Api {
     adminRights: Api.TypeChatAdminRights;
     rank?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     canEdit?: true;
     self?: true;
     userId: int;
@@ -3892,14 +3892,14 @@ namespace Api {
     rank?: string;
   };
   export class ChannelParticipantBanned extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     left?: true;
     peer: Api.TypePeer;
     kickedBy: int;
     date: int;
     bannedRights: Api.TypeChatBannedRights;
   }> {
-    // flags: null;
+    // flags: undefined;
     left?: true;
     peer: Api.TypePeer;
     kickedBy: int;
@@ -3935,47 +3935,47 @@ namespace Api {
     q: string;
   };
   export class ChannelParticipantsMentions extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     q?: string;
     topMsgId?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     q?: string;
     topMsgId?: int;
   };
   export class InputBotInlineMessageMediaAuto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageText extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageMediaGeo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     geoPoint: Api.TypeInputGeoPoint;
     heading?: int;
     period?: int;
     proximityNotificationRadius?: int;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     geoPoint: Api.TypeInputGeoPoint;
     heading?: int;
     period?: int;
@@ -3983,7 +3983,7 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageMediaVenue extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     geoPoint: Api.TypeInputGeoPoint;
     title: string;
     address: string;
@@ -3992,7 +3992,7 @@ namespace Api {
     venueType: string;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     geoPoint: Api.TypeInputGeoPoint;
     title: string;
     address: string;
@@ -4002,14 +4002,14 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageMediaContact extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     phoneNumber: string;
     firstName: string;
     lastName: string;
     vcard: string;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     phoneNumber: string;
     firstName: string;
     lastName: string;
@@ -4017,14 +4017,14 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageGame extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     replyMarkup?: Api.TypeReplyMarkup;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineMessageMediaInvoice extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     multipleAllowed?: true;
     canForward?: true;
     title: string;
@@ -4037,7 +4037,7 @@ namespace Api {
     startParam: string;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     multipleAllowed?: true;
     canForward?: true;
     title: string;
@@ -4051,7 +4051,7 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class InputBotInlineResult extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4061,7 +4061,7 @@ namespace Api {
     content?: Api.TypeInputWebDocument;
     sendMessage: Api.TypeInputBotInlineMessage;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4083,7 +4083,7 @@ namespace Api {
     sendMessage: Api.TypeInputBotInlineMessage;
   };
   export class InputBotInlineResultDocument extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4091,7 +4091,7 @@ namespace Api {
     document: Api.TypeInputDocument;
     sendMessage: Api.TypeInputBotInlineMessage;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4109,38 +4109,38 @@ namespace Api {
     sendMessage: Api.TypeInputBotInlineMessage;
   };
   export class BotInlineMessageMediaAuto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineMessageText extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     message: string;
     entities?: Api.TypeMessageEntity[];
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineMessageMediaGeo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     heading?: int;
     period?: int;
     proximityNotificationRadius?: int;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     heading?: int;
     period?: int;
@@ -4148,7 +4148,7 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineMessageMediaVenue extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     title: string;
     address: string;
@@ -4157,7 +4157,7 @@ namespace Api {
     venueType: string;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     geo: Api.TypeGeoPoint;
     title: string;
     address: string;
@@ -4167,14 +4167,14 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineMessageMediaContact extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     phoneNumber: string;
     firstName: string;
     lastName: string;
     vcard: string;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     phoneNumber: string;
     firstName: string;
     lastName: string;
@@ -4182,7 +4182,7 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineMessageMediaInvoice extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     shippingAddressRequested?: true;
     test?: true;
     title: string;
@@ -4192,7 +4192,7 @@ namespace Api {
     totalAmount: long;
     replyMarkup?: Api.TypeReplyMarkup;
   }> {
-    // flags: null;
+    // flags: undefined;
     shippingAddressRequested?: true;
     test?: true;
     title: string;
@@ -4203,7 +4203,7 @@ namespace Api {
     replyMarkup?: Api.TypeReplyMarkup;
   };
   export class BotInlineResult extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4213,7 +4213,7 @@ namespace Api {
     content?: Api.TypeWebDocument;
     sendMessage: Api.TypeBotInlineMessage;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     title?: string;
@@ -4224,7 +4224,7 @@ namespace Api {
     sendMessage: Api.TypeBotInlineMessage;
   };
   export class BotInlineMediaResult extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     photo?: Api.TypePhoto;
@@ -4233,7 +4233,7 @@ namespace Api {
     description?: string;
     sendMessage: Api.TypeBotInlineMessage;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: string;
     type: string;
     photo?: Api.TypePhoto;
@@ -4250,7 +4250,7 @@ namespace Api {
     html: string;
   };
   export class MessageFwdHeader extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     imported?: true;
     fromId?: Api.TypePeer;
     fromName?: string;
@@ -4261,7 +4261,7 @@ namespace Api {
     savedFromMsgId?: int;
     psaType?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     imported?: true;
     fromId?: Api.TypePeer;
     fromName?: string;
@@ -4313,21 +4313,21 @@ namespace Api {
     peers: Api.TypeTopPeer[];
   };
   export class DraftMessageEmpty extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     date?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     date?: int;
   };
   export class DraftMessage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     replyToMsgId?: int;
     message: string;
     entities?: Api.TypeMessageEntity[];
     date: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     noWebpage?: true;
     replyToMsgId?: int;
     message: string;
@@ -4370,7 +4370,7 @@ namespace Api {
     id: Api.TypeInputDocument;
   };
   export class Game extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     id: long;
     accessHash: long;
     shortName: string;
@@ -4379,7 +4379,7 @@ namespace Api {
     photo: Api.TypePhoto;
     document?: Api.TypeDocument;
   }> {
-    // flags: null;
+    // flags: undefined;
     id: long;
     accessHash: long;
     shortName: string;
@@ -4572,26 +4572,26 @@ namespace Api {
     caption: Api.TypeRichText;
   };
   export class PageBlockPhoto extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     photoId: long;
     caption: Api.TypePageCaption;
     url?: string;
     webpageId?: long;
   }> {
-    // flags: null;
+    // flags: undefined;
     photoId: long;
     caption: Api.TypePageCaption;
     url?: string;
     webpageId?: long;
   };
   export class PageBlockVideo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     autoplay?: true;
     loop?: true;
     videoId: long;
     caption: Api.TypePageCaption;
   }> {
-    // flags: null;
+    // flags: undefined;
     autoplay?: true;
     loop?: true;
     videoId: long;
@@ -4603,7 +4603,7 @@ namespace Api {
     cover: Api.TypePageBlock;
   };
   export class PageBlockEmbed extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     fullWidth?: true;
     allowScrolling?: true;
     url?: string;
@@ -4613,7 +4613,7 @@ namespace Api {
     h?: int;
     caption: Api.TypePageCaption;
   }> {
-    // flags: null;
+    // flags: undefined;
     fullWidth?: true;
     allowScrolling?: true;
     url?: string;
@@ -4672,13 +4672,13 @@ namespace Api {
     text: Api.TypeRichText;
   };
   export class PageBlockTable extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     bordered?: true;
     striped?: true;
     title: Api.TypeRichText;
     rows: Api.TypePageTableRow[];
   }> {
-    // flags: null;
+    // flags: undefined;
     bordered?: true;
     striped?: true;
     title: Api.TypeRichText;
@@ -4690,12 +4690,12 @@ namespace Api {
     items: Api.TypePageListOrderedItem[];
   };
   export class PageBlockDetails extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     open?: true;
     blocks: Api.TypePageBlock[];
     title: Api.TypeRichText;
   }> {
-    // flags: null;
+    // flags: undefined;
     open?: true;
     blocks: Api.TypePageBlock[];
     title: Api.TypeRichText;
@@ -4737,7 +4737,7 @@ namespace Api {
     amount: long;
   };
   export class Invoice extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     test?: true;
     nameRequested?: true;
     phoneRequested?: true;
@@ -4751,7 +4751,7 @@ namespace Api {
     maxTipAmount?: long;
     suggestedTipAmounts?: long[];
   }> {
-    // flags: null;
+    // flags: undefined;
     test?: true;
     nameRequested?: true;
     phoneRequested?: true;
@@ -4788,13 +4788,13 @@ namespace Api {
     postCode: string;
   };
   export class PaymentRequestedInfo extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     name?: string;
     phone?: string;
     email?: string;
     shippingAddress?: Api.TypePostAddress;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     name?: string;
     phone?: string;
     email?: string;
@@ -4872,11 +4872,11 @@ namespace Api {
     tmpPassword: bytes;
   };
   export class InputPaymentCredentials extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     save?: true;
     data: Api.TypeDataJSON;
   }> {
-    // flags: null;
+    // flags: undefined;
     save?: true;
     data: Api.TypeDataJSON;
   };
@@ -4900,12 +4900,12 @@ namespace Api {
     prices: Api.TypeLabeledPrice[];
   };
   export class InputStickerSetItem extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     document: Api.TypeInputDocument;
     emoji: string;
     maskCoords?: Api.TypeMaskCoords;
   }> {
-    // flags: null;
+    // flags: undefined;
     document: Api.TypeInputDocument;
     emoji: string;
     maskCoords?: Api.TypeMaskCoords;
@@ -4923,7 +4923,7 @@ namespace Api {
     id: long;
   };
   export class PhoneCallWaiting extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4933,7 +4933,7 @@ namespace Api {
     protocol: Api.TypePhoneCallProtocol;
     receiveDate?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4944,7 +4944,7 @@ namespace Api {
     receiveDate?: int;
   };
   export class PhoneCallRequested extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4954,7 +4954,7 @@ namespace Api {
     gAHash: bytes;
     protocol: Api.TypePhoneCallProtocol;
   }> {
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4965,7 +4965,7 @@ namespace Api {
     protocol: Api.TypePhoneCallProtocol;
   };
   export class PhoneCallAccepted extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4975,7 +4975,7 @@ namespace Api {
     gB: bytes;
     protocol: Api.TypePhoneCallProtocol;
   }> {
-    // flags: null;
+    // flags: undefined;
     video?: true;
     id: long;
     accessHash: long;
@@ -4986,7 +4986,7 @@ namespace Api {
     protocol: Api.TypePhoneCallProtocol;
   };
   export class PhoneCall extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     p2pAllowed?: true;
     video?: true;
     id: long;
@@ -5000,7 +5000,7 @@ namespace Api {
     connections: Api.TypePhoneConnection[];
     startDate: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     p2pAllowed?: true;
     video?: true;
     id: long;
@@ -5015,7 +5015,7 @@ namespace Api {
     startDate: int;
   };
   export class PhoneCallDiscarded extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     needRating?: true;
     needDebug?: true;
     video?: true;
@@ -5023,7 +5023,7 @@ namespace Api {
     reason?: Api.TypePhoneCallDiscardReason;
     duration?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     needRating?: true;
     needDebug?: true;
     video?: true;
@@ -5045,7 +5045,7 @@ namespace Api {
     peerTag: bytes;
   };
   export class PhoneConnectionWebrtc extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     turn?: true;
     stun?: true;
     id: long;
@@ -5055,7 +5055,7 @@ namespace Api {
     username: string;
     password: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     turn?: true;
     stun?: true;
     id: long;
@@ -5066,14 +5066,14 @@ namespace Api {
     password: string;
   };
   export class PhoneCallProtocol extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     udpP2p?: true;
     udpReflector?: true;
     minLayer: int;
     maxLayer: int;
     libraryVersions: string[];
   }> {
-    // flags: null;
+    // flags: undefined;
     udpP2p?: true;
     udpReflector?: true;
     minLayer: int;
@@ -5100,7 +5100,7 @@ namespace Api {
     value: string;
   };
   export class LangPackStringPluralized extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     key: string;
     zeroValue?: string;
     oneValue?: string;
@@ -5109,7 +5109,7 @@ namespace Api {
     manyValue?: string;
     otherValue: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     key: string;
     zeroValue?: string;
     oneValue?: string;
@@ -5135,7 +5135,7 @@ namespace Api {
     strings: Api.TypeLangPackString[];
   };
   export class LangPackLanguage extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     official?: true;
     rtl?: true;
     beta?: true;
@@ -5148,7 +5148,7 @@ namespace Api {
     translatedCount: int;
     translationsUrl: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     official?: true;
     rtl?: true;
     beta?: true;
@@ -5353,7 +5353,7 @@ namespace Api {
     action: Api.TypeChannelAdminLogEventAction;
   };
   export class ChannelAdminLogEventsFilter extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     join?: true;
     leave?: true;
     invite?: true;
@@ -5371,7 +5371,7 @@ namespace Api {
     groupCall?: true;
     invites?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     join?: true;
     leave?: true;
     invite?: true;
@@ -5430,13 +5430,13 @@ namespace Api {
     set: Api.TypeStickerSetCovered;
   };
   export class InputSingleMedia extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     media: Api.TypeInputMedia;
     randomId: long;
     message: string;
     entities?: Api.TypeMessageEntity[];
   }> {
-    // flags: null;
+    // flags: undefined;
     media: Api.TypeInputMedia;
     randomId: long;
     message: string;
@@ -5588,7 +5588,7 @@ namespace Api {
   export class SecureValueTypePhone extends VirtualClass<void> {};
   export class SecureValueTypeEmail extends VirtualClass<void> {};
   export class SecureValue extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     type: Api.TypeSecureValueType;
     data?: Api.TypeSecureData;
     frontSide?: Api.TypeSecureFile;
@@ -5599,7 +5599,7 @@ namespace Api {
     plainData?: Api.TypeSecurePlainData;
     hash: bytes;
   }> {
-    // flags: null;
+    // flags: undefined;
     type: Api.TypeSecureValueType;
     data?: Api.TypeSecureData;
     frontSide?: Api.TypeSecureFile;
@@ -5611,7 +5611,7 @@ namespace Api {
     hash: bytes;
   };
   export class InputSecureValue extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     type: Api.TypeSecureValueType;
     data?: Api.TypeSecureData;
     frontSide?: Api.TypeInputSecureFile;
@@ -5621,7 +5621,7 @@ namespace Api {
     files?: Api.TypeInputSecureFile[];
     plainData?: Api.TypeSecurePlainData;
   }> {
-    // flags: null;
+    // flags: undefined;
     type: Api.TypeSecureValueType;
     data?: Api.TypeSecureData;
     frontSide?: Api.TypeInputSecureFile;
@@ -5784,13 +5784,13 @@ namespace Api {
     M1: bytes;
   };
   export class SecureRequiredType extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     nativeNames?: true;
     selfieRequired?: true;
     translationRequired?: true;
     type: Api.TypeSecureValueType;
   }> {
-    // flags: null;
+    // flags: undefined;
     nativeNames?: true;
     selfieRequired?: true;
     translationRequired?: true;
@@ -5846,7 +5846,7 @@ namespace Api {
     value: Api.TypeJSONObjectValue[];
   };
   export class PageTableCell extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     header?: true;
     alignCenter?: true;
     alignRight?: true;
@@ -5856,7 +5856,7 @@ namespace Api {
     colspan?: int;
     rowspan?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     header?: true;
     alignCenter?: true;
     alignRight?: true;
@@ -5903,7 +5903,7 @@ namespace Api {
     blocks: Api.TypePageBlock[];
   };
   export class PageRelatedArticle extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     url: string;
     webpageId: long;
     title?: string;
@@ -5912,7 +5912,7 @@ namespace Api {
     author?: string;
     publishedDate?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     url: string;
     webpageId: long;
     title?: string;
@@ -5922,7 +5922,7 @@ namespace Api {
     publishedDate?: int;
   };
   export class Page extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     part?: true;
     rtl?: true;
     v2?: true;
@@ -5932,7 +5932,7 @@ namespace Api {
     documents: Api.TypeDocument[];
     views?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     part?: true;
     rtl?: true;
     v2?: true;
@@ -5951,7 +5951,7 @@ namespace Api {
   };
   export class Poll extends VirtualClass<{
     id: long;
-    // flags: null;
+    // flags: undefined;
     closed?: true;
     publicVoters?: true;
     multipleChoice?: true;
@@ -5962,7 +5962,7 @@ namespace Api {
     closeDate?: int;
   }> {
     id: long;
-    // flags: null;
+    // flags: undefined;
     closed?: true;
     publicVoters?: true;
     multipleChoice?: true;
@@ -5973,20 +5973,20 @@ namespace Api {
     closeDate?: int;
   };
   export class PollAnswerVoters extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     chosen?: true;
     correct?: true;
     option: bytes;
     voters: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     chosen?: true;
     correct?: true;
     option: bytes;
     voters: int;
   };
   export class PollResults extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     min?: true;
     results?: Api.TypePollAnswerVoters[];
     totalVoters?: int;
@@ -5994,7 +5994,7 @@ namespace Api {
     solution?: string;
     solutionEntities?: Api.TypeMessageEntity[];
   } | void> {
-    // flags: null;
+    // flags: undefined;
     min?: true;
     results?: Api.TypePollAnswerVoters[];
     totalVoters?: int;
@@ -6013,7 +6013,7 @@ namespace Api {
     url: string;
   };
   export class ChatAdminRights extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     changeInfo?: true;
     postMessages?: true;
     editMessages?: true;
@@ -6026,7 +6026,7 @@ namespace Api {
     manageCall?: true;
     other?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     changeInfo?: true;
     postMessages?: true;
     editMessages?: true;
@@ -6040,7 +6040,7 @@ namespace Api {
     other?: true;
   };
   export class ChatBannedRights extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     viewMessages?: true;
     sendMessages?: true;
     sendMedia?: true;
@@ -6055,7 +6055,7 @@ namespace Api {
     pinMessages?: true;
     untilDate: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     viewMessages?: true;
     sendMessages?: true;
     sendMedia?: true;
@@ -6084,18 +6084,18 @@ namespace Api {
   };
   export class InputWallPaperNoFile extends VirtualClass<void> {};
   export class CodeSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     allowFlashcall?: true;
     currentNumber?: true;
     allowAppHash?: true;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     allowFlashcall?: true;
     currentNumber?: true;
     allowAppHash?: true;
   };
   export class WallPaperSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     blur?: true;
     motion?: true;
     backgroundColor?: int;
@@ -6103,7 +6103,7 @@ namespace Api {
     intensity?: int;
     rotation?: int;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     blur?: true;
     motion?: true;
     backgroundColor?: int;
@@ -6112,7 +6112,7 @@ namespace Api {
     rotation?: int;
   };
   export class AutoDownloadSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     disabled?: true;
     videoPreloadLarge?: true;
     audioPreloadNext?: true;
@@ -6122,7 +6122,7 @@ namespace Api {
     fileSizeMax: int;
     videoUploadMaxbitrate: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     disabled?: true;
     videoPreloadLarge?: true;
     audioPreloadNext?: true;
@@ -6168,7 +6168,7 @@ namespace Api {
     langCode: string;
   };
   export class Folder extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     autofillNewBroadcasts?: true;
     autofillPublicGroups?: true;
     autofillNewCorrespondents?: true;
@@ -6176,7 +6176,7 @@ namespace Api {
     title: string;
     photo?: Api.TypeChatPhoto;
   }> {
-    // flags: null;
+    // flags: undefined;
     autofillNewBroadcasts?: true;
     autofillPublicGroups?: true;
     autofillNewCorrespondents?: true;
@@ -6199,12 +6199,12 @@ namespace Api {
     folderId: int;
   };
   export class UrlAuthResultRequest extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     requestWriteAccess?: true;
     bot: Api.TypeUser;
     domain: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     requestWriteAccess?: true;
     bot: Api.TypeUser;
     domain: string;
@@ -6259,7 +6259,7 @@ namespace Api {
     slug: string;
   };
   export class Theme extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     default?: true;
     id: long;
@@ -6270,7 +6270,7 @@ namespace Api {
     settings?: Api.TypeThemeSettings;
     installsCount: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     creator?: true;
     default?: true;
     id: long;
@@ -6287,7 +6287,7 @@ namespace Api {
   export class BaseThemeTinted extends VirtualClass<void> {};
   export class BaseThemeArctic extends VirtualClass<void> {};
   export class InputThemeSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     baseTheme: Api.TypeBaseTheme;
     accentColor: int;
     messageTopColor?: int;
@@ -6295,7 +6295,7 @@ namespace Api {
     wallpaper?: Api.TypeInputWallPaper;
     wallpaperSettings?: Api.TypeWallPaperSettings;
   }> {
-    // flags: null;
+    // flags: undefined;
     baseTheme: Api.TypeBaseTheme;
     accentColor: int;
     messageTopColor?: int;
@@ -6304,14 +6304,14 @@ namespace Api {
     wallpaperSettings?: Api.TypeWallPaperSettings;
   };
   export class ThemeSettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     baseTheme: Api.TypeBaseTheme;
     accentColor: int;
     messageTopColor?: int;
     messageBottomColor?: int;
     wallpaper?: Api.TypeWallPaper;
   }> {
-    // flags: null;
+    // flags: undefined;
     baseTheme: Api.TypeBaseTheme;
     accentColor: int;
     messageTopColor?: int;
@@ -6319,11 +6319,11 @@ namespace Api {
     wallpaper?: Api.TypeWallPaper;
   };
   export class WebPageAttributeTheme extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     documents?: Api.TypeDocument[];
     settings?: Api.TypeThemeSettings;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     documents?: Api.TypeDocument[];
     settings?: Api.TypeThemeSettings;
   };
@@ -6360,7 +6360,7 @@ namespace Api {
     name: string;
   };
   export class DialogFilter extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     contacts?: true;
     nonContacts?: true;
     groups?: true;
@@ -6376,7 +6376,7 @@ namespace Api {
     includePeers: Api.TypeInputPeer[];
     excludePeers: Api.TypeInputPeer[];
   }> {
-    // flags: null;
+    // flags: undefined;
     contacts?: true;
     nonContacts?: true;
     groups?: true;
@@ -6431,11 +6431,11 @@ namespace Api {
     error: string;
   };
   export class StatsGraph extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     json: Api.TypeDataJSON;
     zoomToken?: string;
   }> {
-    // flags: null;
+    // flags: undefined;
     json: Api.TypeDataJSON;
     zoomToken?: string;
   };
@@ -6449,14 +6449,14 @@ namespace Api {
     forwards: int;
   };
   export class VideoSize extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     type: string;
     w: int;
     h: int;
     size: int;
     videoStartTs?: double;
   }> {
-    // flags: null;
+    // flags: undefined;
     type: string;
     w: int;
     h: int;
@@ -6491,36 +6491,36 @@ namespace Api {
     invitations: int;
   };
   export class GlobalPrivacySettings extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     archiveAndMuteNewNoncontactPeers?: Bool;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     archiveAndMuteNewNoncontactPeers?: Bool;
   };
   export class MessageViews extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     views?: int;
     forwards?: int;
     replies?: Api.TypeMessageReplies;
   } | void> {
-    // flags: null;
+    // flags: undefined;
     views?: int;
     forwards?: int;
     replies?: Api.TypeMessageReplies;
   };
   export class MessageReplyHeader extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     replyToMsgId: int;
     replyToPeerId?: Api.TypePeer;
     replyToTopId?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     replyToMsgId: int;
     replyToPeerId?: Api.TypePeer;
     replyToTopId?: int;
   };
   export class MessageReplies extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     comments?: true;
     replies: int;
     repliesPts: int;
@@ -6529,7 +6529,7 @@ namespace Api {
     maxId?: int;
     readMaxId?: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     comments?: true;
     replies: int;
     repliesPts: int;
@@ -6555,7 +6555,7 @@ namespace Api {
     duration: int;
   };
   export class GroupCall extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     joinMuted?: true;
     canChangeJoinMuted?: true;
     joinDateAsc?: true;
@@ -6570,7 +6570,7 @@ namespace Api {
     scheduleDate?: int;
     version: int;
   }> {
-    // flags: null;
+    // flags: undefined;
     joinMuted?: true;
     canChangeJoinMuted?: true;
     joinDateAsc?: true;
@@ -6593,7 +6593,7 @@ namespace Api {
     accessHash: long;
   };
   export class GroupCallParticipant extends VirtualClass<{
-    // flags: null;
+    // flags: undefined;
     muted?: true;
     left?: true;
     canSelfUnmute?: true;
@@ -6612,7 +6612,7 @@ namespace Api {
     raiseHandRating?: long;
     params?: Api.TypeDataJSON;
   }> {
-    // flags: null;
+    // flags: undefined;
     muted?: true;
     left?: true;
     canSelfUnmute?: true;
@@ -7018,32 +7018,32 @@ namespace Api {
 
   export namespace auth {
     export class SentCode extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       type: auth.TypeSentCodeType;
       phoneCodeHash: string;
       nextType?: auth.TypeCodeType;
       timeout?: int;
     }> {
-      // flags: null;
+      // flags: undefined;
       type: auth.TypeSentCodeType;
       phoneCodeHash: string;
       nextType?: auth.TypeCodeType;
       timeout?: int;
     };
     export class Authorization extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       tmpSessions?: int;
       user: Api.TypeUser;
     }> {
-      // flags: null;
+      // flags: undefined;
       tmpSessions?: int;
       user: Api.TypeUser;
     };
     export class AuthorizationSignUpRequired extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       termsOfService?: help.TypeTermsOfService;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       termsOfService?: help.TypeTermsOfService;
     };
     export class ExportedAuthorization extends VirtualClass<{
@@ -7217,7 +7217,7 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class MessagesSlice extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       count: int;
       nextRate?: int;
@@ -7226,7 +7226,7 @@ namespace Api {
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       count: int;
       nextRate?: int;
@@ -7236,7 +7236,7 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class ChannelMessages extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       pts: int;
       count: int;
@@ -7245,7 +7245,7 @@ namespace Api {
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       pts: int;
       count: int;
@@ -7358,7 +7358,7 @@ namespace Api {
       gifs: Api.TypeDocument[];
     };
     export class BotResults extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       gallery?: true;
       queryId: long;
       nextOffset?: string;
@@ -7367,7 +7367,7 @@ namespace Api {
       cacheTime: int;
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       gallery?: true;
       queryId: long;
       nextOffset?: string;
@@ -7377,7 +7377,7 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class BotCallbackAnswer extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       alert?: true;
       hasUrl?: true;
       nativeUi?: true;
@@ -7385,7 +7385,7 @@ namespace Api {
       url?: string;
       cacheTime: int;
     }> {
-      // flags: null;
+      // flags: undefined;
       alert?: true;
       hasUrl?: true;
       nativeUi?: true;
@@ -7394,10 +7394,10 @@ namespace Api {
       cacheTime: int;
     };
     export class MessageEditData extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       caption?: true;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       caption?: true;
     };
     export class PeerDialogs extends VirtualClass<{
@@ -7480,12 +7480,12 @@ namespace Api {
       sets: Api.TypeStickerSetCovered[];
     };
     export class SearchCounter extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       filter: Api.TypeMessagesFilter;
       count: int;
     }> {
-      // flags: null;
+      // flags: undefined;
       inexact?: true;
       filter: Api.TypeMessagesFilter;
       count: int;
@@ -7500,13 +7500,13 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class VotesList extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       count: int;
       votes: Api.TypeMessageUserVote[];
       users: Api.TypeUser[];
       nextOffset?: string;
     }> {
-      // flags: null;
+      // flags: undefined;
       count: int;
       votes: Api.TypeMessageUserVote[];
       users: Api.TypeUser[];
@@ -7522,7 +7522,7 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class DiscussionMessage extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       messages: Api.TypeMessage[];
       maxId?: int;
       readInboxMaxId?: int;
@@ -7530,7 +7530,7 @@ namespace Api {
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       messages: Api.TypeMessage[];
       maxId?: int;
       readInboxMaxId?: int;
@@ -7544,12 +7544,12 @@ namespace Api {
       id: long;
     };
     export class HistoryImportParsed extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       pm?: true;
       group?: true;
       title?: string;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       pm?: true;
       group?: true;
       title?: string;
@@ -7670,18 +7670,18 @@ namespace Api {
       pts: int;
     };
     export class ChannelDifferenceEmpty extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       final?: true;
       pts: int;
       timeout?: int;
     }> {
-      // flags: null;
+      // flags: undefined;
       final?: true;
       pts: int;
       timeout?: int;
     };
     export class ChannelDifferenceTooLong extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       final?: true;
       timeout?: int;
       dialog: Api.TypeDialog;
@@ -7689,7 +7689,7 @@ namespace Api {
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       final?: true;
       timeout?: int;
       dialog: Api.TypeDialog;
@@ -7698,7 +7698,7 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class ChannelDifference extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       final?: true;
       pts: int;
       timeout?: int;
@@ -7707,7 +7707,7 @@ namespace Api {
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       final?: true;
       pts: int;
       timeout?: int;
@@ -7794,7 +7794,7 @@ namespace Api {
 
   export namespace help {
     export class AppUpdate extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       canNotSkip?: true;
       id: int;
       version: string;
@@ -7803,7 +7803,7 @@ namespace Api {
       document?: Api.TypeDocument;
       url?: string;
     }> {
-      // flags: null;
+      // flags: undefined;
       canNotSkip?: true;
       id: int;
       version: string;
@@ -7826,14 +7826,14 @@ namespace Api {
       user: Api.TypeUser;
     };
     export class TermsOfService extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       popup?: true;
       id: Api.TypeDataJSON;
       text: string;
       entities: Api.TypeMessageEntity[];
       minAgeConfirm?: int;
     }> {
-      // flags: null;
+      // flags: undefined;
       popup?: true;
       id: Api.TypeDataJSON;
       text: string;
@@ -7863,12 +7863,12 @@ namespace Api {
     };
     export class DeepLinkInfoEmpty extends VirtualClass<void> {};
     export class DeepLinkInfo extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       updateApp?: true;
       message: string;
       entities?: Api.TypeMessageEntity[];
     }> {
-      // flags: null;
+      // flags: undefined;
       updateApp?: true;
       message: string;
       entities?: Api.TypeMessageEntity[];
@@ -7904,7 +7904,7 @@ namespace Api {
       expires: int;
     };
     export class PromoData extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       proxy?: true;
       expires: int;
       peer: Api.TypePeer;
@@ -7913,7 +7913,7 @@ namespace Api {
       psaType?: string;
       psaMessage?: string;
     }> {
-      // flags: null;
+      // flags: undefined;
       proxy?: true;
       expires: int;
       peer: Api.TypePeer;
@@ -7923,25 +7923,25 @@ namespace Api {
       psaMessage?: string;
     };
     export class CountryCode extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       countryCode: string;
       prefixes?: string[];
       patterns?: string[];
     }> {
-      // flags: null;
+      // flags: undefined;
       countryCode: string;
       prefixes?: string[];
       patterns?: string[];
     };
     export class Country extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       hidden?: true;
       iso2: string;
       defaultName: string;
       name?: string;
       countryCodes: help.TypeCountryCode[];
     }> {
-      // flags: null;
+      // flags: undefined;
       hidden?: true;
       iso2: string;
       defaultName: string;
@@ -7983,7 +7983,7 @@ namespace Api {
       authorizations: Api.TypeAuthorization[];
     };
     export class Password extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       hasRecovery?: true;
       hasSecureValues?: true;
       hasPassword?: true;
@@ -7996,7 +7996,7 @@ namespace Api {
       newSecureAlgo: Api.TypeSecurePasswordKdfAlgo;
       secureRandom: bytes;
     }> {
-      // flags: null;
+      // flags: undefined;
       hasRecovery?: true;
       hasSecureValues?: true;
       hasPassword?: true;
@@ -8010,23 +8010,23 @@ namespace Api {
       secureRandom: bytes;
     };
     export class PasswordSettings extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       email?: string;
       secureSettings?: Api.TypeSecureSecretSettings;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       email?: string;
       secureSettings?: Api.TypeSecureSecretSettings;
     };
     export class PasswordInputSettings extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       newAlgo?: Api.TypePasswordKdfAlgo;
       newPasswordHash?: bytes;
       hint?: string;
       email?: string;
       newSecureSettings?: Api.TypeSecureSecretSettings;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       newAlgo?: Api.TypePasswordKdfAlgo;
       newPasswordHash?: bytes;
       hint?: string;
@@ -8048,14 +8048,14 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class AuthorizationForm extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       requiredTypes: Api.TypeSecureRequiredType[];
       values: Api.TypeSecureValue[];
       errors: Api.TypeSecureValueError[];
       users: Api.TypeUser[];
       privacyPolicyUrl?: string;
     }> {
-      // flags: null;
+      // flags: undefined;
       requiredTypes: Api.TypeSecureRequiredType[];
       values: Api.TypeSecureValue[];
       errors: Api.TypeSecureValueError[];
@@ -8100,11 +8100,11 @@ namespace Api {
       themes: Api.TypeTheme[];
     };
     export class ContentSettings extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       sensitiveEnabled?: true;
       sensitiveCanChange?: true;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       sensitiveEnabled?: true;
       sensitiveCanChange?: true;
     };
@@ -8145,7 +8145,7 @@ namespace Api {
 
   export namespace payments {
     export class PaymentForm extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       canSaveCredentials?: true;
       passwordMissing?: true;
       formId: long;
@@ -8159,7 +8159,7 @@ namespace Api {
       savedCredentials?: Api.TypePaymentSavedCredentials;
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       canSaveCredentials?: true;
       passwordMissing?: true;
       formId: long;
@@ -8174,11 +8174,11 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class ValidatedRequestedInfo extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       id?: string;
       shippingOptions?: Api.TypeShippingOption[];
     } | void> {
-      // flags: null;
+      // flags: undefined;
       id?: string;
       shippingOptions?: Api.TypeShippingOption[];
     };
@@ -8193,7 +8193,7 @@ namespace Api {
       url: string;
     };
     export class PaymentReceipt extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       date: int;
       botId: int;
       providerId: int;
@@ -8209,7 +8209,7 @@ namespace Api {
       credentialsTitle: string;
       users: Api.TypeUser[];
     }> {
-      // flags: null;
+      // flags: undefined;
       date: int;
       botId: int;
       providerId: int;
@@ -8226,11 +8226,11 @@ namespace Api {
       users: Api.TypeUser[];
     };
     export class SavedInfo extends VirtualClass<{
-      // flags: null;
+      // flags: undefined;
       hasSavedCredentials?: true;
       savedInfo?: Api.TypePaymentRequestedInfo;
     } | void> {
-      // flags: null;
+      // flags: undefined;
       hasSavedCredentials?: true;
       savedInfo?: Api.TypePaymentRequestedInfo;
     };
@@ -8388,7 +8388,7 @@ namespace Api {
     query: X;
   };
   export class InitConnection extends Request<Partial<{
-    // flags: null;
+    // flags: undefined;
     apiId: int;
     deviceModel: string;
     systemVersion: string;
@@ -8400,7 +8400,7 @@ namespace Api {
     params?: Api.TypeJSONValue;
     query: X;
   }>, X> {
-    // flags: null;
+    // flags: undefined;
     apiId: int;
     deviceModel: string;
     systemVersion: string;
@@ -8623,7 +8623,7 @@ namespace Api {
 
   export namespace account {
     export class RegisterDevice extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       noMuted?: true;
       tokenType: int;
       token: string;
@@ -8631,7 +8631,7 @@ namespace Api {
       secret: bytes;
       otherUids: int[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       noMuted?: true;
       tokenType: int;
       token: string;
@@ -8662,12 +8662,12 @@ namespace Api {
     };
     export class ResetNotifySettings extends Request<void, Bool> {};
     export class UpdateProfile extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       firstName?: string;
       lastName?: string;
       about?: string;
     } | void>, Api.TypeUser> {
-      // flags: null;
+      // flags: undefined;
       firstName?: string;
       lastName?: string;
       about?: string;
@@ -8861,7 +8861,7 @@ namespace Api {
       code: string;
     };
     export class InitTakeoutSession extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       contacts?: true;
       messageUsers?: true;
       messageChats?: true;
@@ -8870,7 +8870,7 @@ namespace Api {
       files?: true;
       fileMaxSize?: int;
     } | void>, account.TypeTakeout> {
-      // flags: null;
+      // flags: undefined;
       contacts?: true;
       messageUsers?: true;
       messageChats?: true;
@@ -8880,10 +8880,10 @@ namespace Api {
       fileMaxSize?: int;
     };
     export class FinishTakeoutSession extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       success?: true;
     } | void>, Bool> {
-      // flags: null;
+      // flags: undefined;
       success?: true;
     };
     export class ConfirmPasswordEmail extends Request<Partial<{
@@ -8900,11 +8900,11 @@ namespace Api {
       silent: Bool;
     };
     export class GetNotifyExceptions extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       compareSound?: true;
       peer?: Api.TypeInputNotifyPeer;
     } | void>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       compareSound?: true;
       peer?: Api.TypeInputNotifyPeer;
     };
@@ -8941,44 +8941,44 @@ namespace Api {
     export class ResetWallPapers extends Request<void, Bool> {};
     export class GetAutoDownloadSettings extends Request<void, account.TypeAutoDownloadSettings> {};
     export class SaveAutoDownloadSettings extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       low?: true;
       high?: true;
       settings: Api.TypeAutoDownloadSettings;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       low?: true;
       high?: true;
       settings: Api.TypeAutoDownloadSettings;
     };
     export class UploadTheme extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       file: Api.TypeInputFile;
       thumb?: Api.TypeInputFile;
       fileName: string;
       mimeType: string;
     }>, Api.TypeDocument> {
-      // flags: null;
+      // flags: undefined;
       file: Api.TypeInputFile;
       thumb?: Api.TypeInputFile;
       fileName: string;
       mimeType: string;
     };
     export class CreateTheme extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       slug: string;
       title: string;
       document?: Api.TypeInputDocument;
       settings?: Api.TypeInputThemeSettings;
     }>, Api.TypeTheme> {
-      // flags: null;
+      // flags: undefined;
       slug: string;
       title: string;
       document?: Api.TypeInputDocument;
       settings?: Api.TypeInputThemeSettings;
     };
     export class UpdateTheme extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       format: string;
       theme: Api.TypeInputTheme;
       slug?: string;
@@ -8986,7 +8986,7 @@ namespace Api {
       document?: Api.TypeInputDocument;
       settings?: Api.TypeInputThemeSettings;
     }>, Api.TypeTheme> {
-      // flags: null;
+      // flags: undefined;
       format: string;
       theme: Api.TypeInputTheme;
       slug?: string;
@@ -9002,12 +9002,12 @@ namespace Api {
       unsave: Bool;
     };
     export class InstallTheme extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       format?: string;
       theme?: Api.TypeInputTheme;
     } | void>, Bool> {
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       format?: string;
       theme?: Api.TypeInputTheme;
@@ -9029,10 +9029,10 @@ namespace Api {
       hash: int;
     };
     export class SetContentSettings extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       sensitiveEnabled?: true;
     } | void>, Bool> {
-      // flags: null;
+      // flags: undefined;
       sensitiveEnabled?: true;
     };
     export class GetContentSettings extends Request<void, account.TypeContentSettings> {};
@@ -9137,7 +9137,7 @@ namespace Api {
       username: string;
     };
     export class GetTopPeers extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       correspondents?: true;
       botsPm?: true;
       botsInline?: true;
@@ -9150,7 +9150,7 @@ namespace Api {
       limit: int;
       hash: int;
     }>, contacts.TypeTopPeers> {
-      // flags: null;
+      // flags: undefined;
       correspondents?: true;
       botsPm?: true;
       botsInline?: true;
@@ -9178,14 +9178,14 @@ namespace Api {
       enabled: Bool;
     };
     export class AddContact extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       addPhonePrivacyException?: true;
       id: Api.TypeInputUser;
       firstName: string;
       lastName: string;
       phone: string;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       addPhonePrivacyException?: true;
       id: Api.TypeInputUser;
       firstName: string;
@@ -9198,24 +9198,24 @@ namespace Api {
       id: Api.TypeInputUser;
     };
     export class GetLocated extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       background?: true;
       geoPoint: Api.TypeInputGeoPoint;
       selfExpires?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       background?: true;
       geoPoint: Api.TypeInputGeoPoint;
       selfExpires?: int;
     };
     export class BlockFromReplies extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       deleteMessage?: true;
       deleteHistory?: true;
       reportSpam?: true;
       msgId: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       deleteMessage?: true;
       deleteHistory?: true;
       reportSpam?: true;
@@ -9230,7 +9230,7 @@ namespace Api {
       id: Api.TypeInputMessage[];
     };
     export class GetDialogs extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       excludePinned?: true;
       folderId?: int;
       offsetDate: int;
@@ -9239,7 +9239,7 @@ namespace Api {
       limit: int;
       hash: int;
     }>, messages.TypeDialogs> {
-      // flags: null;
+      // flags: undefined;
       excludePinned?: true;
       folderId?: int;
       offsetDate: int;
@@ -9268,7 +9268,7 @@ namespace Api {
       hash: int;
     };
     export class Search extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       q: string;
       fromId?: Api.TypeInputPeer;
@@ -9283,7 +9283,7 @@ namespace Api {
       minId: int;
       hash: int;
     }>, messages.TypeMessages> {
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       q: string;
       fromId?: Api.TypeInputPeer;
@@ -9306,24 +9306,24 @@ namespace Api {
       maxId: int;
     };
     export class DeleteHistory extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       justClear?: true;
       revoke?: true;
       peer: Api.TypeInputPeer;
       maxId: int;
     }>, messages.TypeAffectedHistory> {
-      // flags: null;
+      // flags: undefined;
       justClear?: true;
       revoke?: true;
       peer: Api.TypeInputPeer;
       maxId: int;
     };
     export class DeleteMessages extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       revoke?: true;
       id: int[];
     }>, messages.TypeAffectedMessages> {
-      // flags: null;
+      // flags: undefined;
       revoke?: true;
       id: int[];
     };
@@ -9333,18 +9333,18 @@ namespace Api {
       maxId: int;
     };
     export class SetTyping extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       topMsgId?: int;
       action: Api.TypeSendMessageAction;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       topMsgId?: int;
       action: Api.TypeSendMessageAction;
     };
     export class SendMessage extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       silent?: true;
       background?: true;
@@ -9357,7 +9357,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       silent?: true;
       background?: true;
@@ -9371,7 +9371,7 @@ namespace Api {
       scheduleDate?: int;
     };
     export class SendMedia extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -9384,7 +9384,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -9398,7 +9398,7 @@ namespace Api {
       scheduleDate?: int;
     };
     export class ForwardMessages extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       withMyScore?: true;
@@ -9408,7 +9408,7 @@ namespace Api {
       toPeer: Api.TypeInputPeer;
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       withMyScore?: true;
@@ -9473,12 +9473,12 @@ namespace Api {
       fwdLimit: int;
     };
     export class DeleteChatUser extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       revokeHistory?: true;
       chatId: int;
       userId: Api.TypeInputUser;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       revokeHistory?: true;
       chatId: int;
       userId: Api.TypeInputUser;
@@ -9516,11 +9516,11 @@ namespace Api {
       keyFingerprint: long;
     };
     export class DiscardEncryption extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       deleteHistory?: true;
       chatId: int;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       deleteHistory?: true;
       chatId: int;
     };
@@ -9539,27 +9539,27 @@ namespace Api {
       maxDate: int;
     };
     export class SendEncrypted extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       peer: Api.TypeInputEncryptedChat;
       randomId: long;
       data: bytes;
     }>, messages.TypeSentEncryptedMessage> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       peer: Api.TypeInputEncryptedChat;
       randomId: long;
       data: bytes;
     };
     export class SendEncryptedFile extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       peer: Api.TypeInputEncryptedChat;
       randomId: long;
       data: bytes;
       file: Api.TypeInputEncryptedFile;
     }>, messages.TypeSentEncryptedMessage> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       peer: Api.TypeInputEncryptedChat;
       randomId: long;
@@ -9603,22 +9603,22 @@ namespace Api {
       hash: int;
     };
     export class GetWebPagePreview extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       message: string;
       entities?: Api.TypeMessageEntity[];
     }>, Api.TypeMessageMedia> {
-      // flags: null;
+      // flags: undefined;
       message: string;
       entities?: Api.TypeMessageEntity[];
     };
     export class ExportChatInvite extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       legacyRevokePermanent?: true;
       peer: Api.TypeInputPeer;
       expireDate?: int;
       usageLimit?: int;
     }>, Api.TypeExportedChatInvite> {
-      // flags: null;
+      // flags: undefined;
       legacyRevokePermanent?: true;
       peer: Api.TypeInputPeer;
       expireDate?: int;
@@ -9686,7 +9686,7 @@ namespace Api {
       chatId: int;
     };
     export class SearchGlobal extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       folderId?: int;
       q: string;
       filter: Api.TypeMessagesFilter;
@@ -9697,7 +9697,7 @@ namespace Api {
       offsetId: int;
       limit: int;
     }>, messages.TypeMessages> {
-      // flags: null;
+      // flags: undefined;
       folderId?: int;
       q: string;
       filter: Api.TypeMessagesFilter;
@@ -9709,11 +9709,11 @@ namespace Api {
       limit: int;
     };
     export class ReorderStickerSets extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       order: long[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       order: long[];
     };
@@ -9739,14 +9739,14 @@ namespace Api {
       unsave: Bool;
     };
     export class GetInlineBotResults extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       bot: Api.TypeInputUser;
       peer: Api.TypeInputPeer;
       geoPoint?: Api.TypeInputGeoPoint;
       query: string;
       offset: string;
     }>, messages.TypeBotResults> {
-      // flags: null;
+      // flags: undefined;
       bot: Api.TypeInputUser;
       peer: Api.TypeInputPeer;
       geoPoint?: Api.TypeInputGeoPoint;
@@ -9754,7 +9754,7 @@ namespace Api {
       offset: string;
     };
     export class SetInlineBotResults extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       gallery?: true;
       private?: true;
       queryId: long;
@@ -9763,7 +9763,7 @@ namespace Api {
       nextOffset?: string;
       switchPm?: Api.TypeInlineBotSwitchPM;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       gallery?: true;
       private?: true;
       queryId: long;
@@ -9773,7 +9773,7 @@ namespace Api {
       switchPm?: Api.TypeInlineBotSwitchPM;
     };
     export class SendInlineBotResult extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -9785,7 +9785,7 @@ namespace Api {
       id: string;
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -9805,7 +9805,7 @@ namespace Api {
       id: int;
     };
     export class EditMessage extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       peer: Api.TypeInputPeer;
       id: int;
@@ -9815,7 +9815,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       peer: Api.TypeInputPeer;
       id: int;
@@ -9826,7 +9826,7 @@ namespace Api {
       scheduleDate?: int;
     };
     export class EditInlineBotMessage extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       id: Api.TypeInputBotInlineMessageID;
       message?: string;
@@ -9834,7 +9834,7 @@ namespace Api {
       replyMarkup?: Api.TypeReplyMarkup;
       entities?: Api.TypeMessageEntity[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       id: Api.TypeInputBotInlineMessageID;
       message?: string;
@@ -9843,14 +9843,14 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
     };
     export class GetBotCallbackAnswer extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       game?: true;
       peer: Api.TypeInputPeer;
       msgId: int;
       data?: bytes;
       password?: Api.TypeInputCheckPasswordSRP;
     }>, messages.TypeBotCallbackAnswer> {
-      // flags: null;
+      // flags: undefined;
       game?: true;
       peer: Api.TypeInputPeer;
       msgId: int;
@@ -9858,14 +9858,14 @@ namespace Api {
       password?: Api.TypeInputCheckPasswordSRP;
     };
     export class SetBotCallbackAnswer extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       alert?: true;
       queryId: long;
       message?: string;
       url?: string;
       cacheTime: int;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       alert?: true;
       queryId: long;
       message?: string;
@@ -9878,14 +9878,14 @@ namespace Api {
       peers: Api.TypeInputDialogPeer[];
     };
     export class SaveDraft extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       replyToMsgId?: int;
       peer: Api.TypeInputPeer;
       message: string;
       entities?: Api.TypeMessageEntity[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       noWebpage?: true;
       replyToMsgId?: int;
       peer: Api.TypeInputPeer;
@@ -9904,39 +9904,39 @@ namespace Api {
       id: long[];
     };
     export class GetRecentStickers extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       attached?: true;
       hash: int;
     }>, messages.TypeRecentStickers> {
-      // flags: null;
+      // flags: undefined;
       attached?: true;
       hash: int;
     };
     export class SaveRecentSticker extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       attached?: true;
       id: Api.TypeInputDocument;
       unsave: Bool;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       attached?: true;
       id: Api.TypeInputDocument;
       unsave: Bool;
     };
     export class ClearRecentStickers extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       attached?: true;
     } | void>, Bool> {
-      // flags: null;
+      // flags: undefined;
       attached?: true;
     };
     export class GetArchivedStickers extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       offsetId: long;
       limit: int;
     }>, messages.TypeArchivedStickers> {
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       offsetId: long;
       limit: int;
@@ -9952,7 +9952,7 @@ namespace Api {
       media: Api.TypeInputStickeredMedia;
     };
     export class SetGameScore extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       editMessage?: true;
       force?: true;
       peer: Api.TypeInputPeer;
@@ -9960,7 +9960,7 @@ namespace Api {
       userId: Api.TypeInputUser;
       score: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       editMessage?: true;
       force?: true;
       peer: Api.TypeInputPeer;
@@ -9969,14 +9969,14 @@ namespace Api {
       score: int;
     };
     export class SetInlineGameScore extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       editMessage?: true;
       force?: true;
       id: Api.TypeInputBotInlineMessageID;
       userId: Api.TypeInputUser;
       score: int;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       editMessage?: true;
       force?: true;
       id: Api.TypeInputBotInlineMessageID;
@@ -10021,21 +10021,21 @@ namespace Api {
       hash: int;
     };
     export class ToggleDialogPin extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       pinned?: true;
       peer: Api.TypeInputDialogPeer;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       pinned?: true;
       peer: Api.TypeInputDialogPeer;
     };
     export class ReorderPinnedDialogs extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       force?: true;
       folderId: int;
       order: Api.TypeInputDialogPeer[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       force?: true;
       folderId: int;
       order: Api.TypeInputDialogPeer[];
@@ -10046,23 +10046,23 @@ namespace Api {
       folderId: int;
     };
     export class SetBotShippingResults extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       queryId: long;
       error?: string;
       shippingOptions?: Api.TypeShippingOption[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       queryId: long;
       error?: string;
       shippingOptions?: Api.TypeShippingOption[];
     };
     export class SetBotPrecheckoutResults extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       success?: true;
       queryId: long;
       error?: string;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       success?: true;
       queryId: long;
       error?: string;
@@ -10125,7 +10125,7 @@ namespace Api {
       hash: int;
     };
     export class SendMultiMedia extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -10134,7 +10134,7 @@ namespace Api {
       multiMedia: Api.TypeInputSingleMedia[];
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       background?: true;
       clearDraft?: true;
@@ -10151,37 +10151,37 @@ namespace Api {
       file: Api.TypeInputEncryptedFile;
     };
     export class SearchStickerSets extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       excludeFeatured?: true;
       q: string;
       hash: int;
     }>, messages.TypeFoundStickerSets> {
-      // flags: null;
+      // flags: undefined;
       excludeFeatured?: true;
       q: string;
       hash: int;
     };
     export class GetSplitRanges extends Request<void, Api.TypeMessageRange[]> {};
     export class MarkDialogUnread extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       unread?: true;
       peer: Api.TypeInputDialogPeer;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       unread?: true;
       peer: Api.TypeInputDialogPeer;
     };
     export class GetDialogUnreadMarks extends Request<void, Api.TypeDialogPeer[]> {};
     export class ClearAllDrafts extends Request<void, Bool> {};
     export class UpdatePinnedMessage extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       unpin?: true;
       pmOneside?: true;
       peer: Api.TypeInputPeer;
       id: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       silent?: true;
       unpin?: true;
       pmOneside?: true;
@@ -10210,12 +10210,12 @@ namespace Api {
       peer: Api.TypeInputPeer;
     };
     export class GetStatsURL extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       peer: Api.TypeInputPeer;
       params: string;
     }>, Api.TypeStatsURL> {
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       peer: Api.TypeInputPeer;
       params: string;
@@ -10264,27 +10264,27 @@ namespace Api {
       filters: Api.TypeMessagesFilter[];
     };
     export class RequestUrlAuth extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer?: Api.TypeInputPeer;
       msgId?: int;
       buttonId?: int;
       url?: string;
     } | void>, Api.TypeUrlAuthResult> {
-      // flags: null;
+      // flags: undefined;
       peer?: Api.TypeInputPeer;
       msgId?: int;
       buttonId?: int;
       url?: string;
     };
     export class AcceptUrlAuth extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       writeAllowed?: true;
       peer?: Api.TypeInputPeer;
       msgId?: int;
       buttonId?: int;
       url?: string;
     } | void>, Api.TypeUrlAuthResult> {
-      // flags: null;
+      // flags: undefined;
       writeAllowed?: true;
       peer?: Api.TypeInputPeer;
       msgId?: int;
@@ -10325,14 +10325,14 @@ namespace Api {
       id: int[];
     };
     export class GetPollVotes extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       id: int;
       option?: bytes;
       offset?: string;
       limit: int;
     }>, messages.TypeVotesList> {
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       id: int;
       option?: bytes;
@@ -10340,13 +10340,13 @@ namespace Api {
       limit: int;
     };
     export class ToggleStickerSets extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       uninstall?: true;
       archive?: true;
       unarchive?: true;
       stickersets: Api.TypeInputStickerSet[];
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       uninstall?: true;
       archive?: true;
       unarchive?: true;
@@ -10355,11 +10355,11 @@ namespace Api {
     export class GetDialogFilters extends Request<void, Api.TypeDialogFilter[]> {};
     export class GetSuggestedDialogFilters extends Request<void, Api.TypeDialogFilterSuggested[]> {};
     export class UpdateDialogFilter extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       id: int;
       filter?: Api.TypeDialogFilter;
     }>, Bool> {
-      // flags: null;
+      // flags: undefined;
       id: int;
       filter?: Api.TypeDialogFilter;
     };
@@ -10425,10 +10425,10 @@ namespace Api {
       chatId: int;
     };
     export class DeletePhoneCallHistory extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       revoke?: true;
     } | void>, messages.TypeAffectedFoundMessages> {
-      // flags: null;
+      // flags: undefined;
       revoke?: true;
     };
     export class CheckHistoryImport extends Request<Partial<{
@@ -10464,7 +10464,7 @@ namespace Api {
       importId: long;
     };
     export class GetExportedChatInvites extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       revoked?: true;
       peer: Api.TypeInputPeer;
       adminId: Api.TypeInputUser;
@@ -10472,7 +10472,7 @@ namespace Api {
       offsetLink?: string;
       limit: int;
     }>, messages.TypeExportedChatInvites> {
-      // flags: null;
+      // flags: undefined;
       revoked?: true;
       peer: Api.TypeInputPeer;
       adminId: Api.TypeInputUser;
@@ -10488,14 +10488,14 @@ namespace Api {
       link: string;
     };
     export class EditExportedChatInvite extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       revoked?: true;
       peer: Api.TypeInputPeer;
       link: string;
       expireDate?: int;
       usageLimit?: int;
     }>, messages.TypeExportedChatInvite> {
-      // flags: null;
+      // flags: undefined;
       revoked?: true;
       peer: Api.TypeInputPeer;
       link: string;
@@ -10551,27 +10551,27 @@ namespace Api {
   export namespace updates {
     export class GetState extends Request<void, updates.TypeState> {};
     export class GetDifference extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       pts: int;
       ptsTotalLimit?: int;
       date: int;
       qts: int;
     }>, updates.TypeDifference> {
-      // flags: null;
+      // flags: undefined;
       pts: int;
       ptsTotalLimit?: int;
       date: int;
       qts: int;
     };
     export class GetChannelDifference extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       force?: true;
       channel: Api.TypeInputChannel;
       filter: Api.TypeChannelMessagesFilter;
       pts: int;
       limit: int;
     }>, updates.TypeChannelDifference> {
-      // flags: null;
+      // flags: undefined;
       force?: true;
       channel: Api.TypeInputChannel;
       filter: Api.TypeChannelMessagesFilter;
@@ -10587,12 +10587,12 @@ namespace Api {
       id: Api.TypeInputPhoto;
     };
     export class UploadProfilePhoto extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       file?: Api.TypeInputFile;
       video?: Api.TypeInputFile;
       videoStartTs?: double;
     } | void>, photos.TypePhoto> {
-      // flags: null;
+      // flags: undefined;
       file?: Api.TypeInputFile;
       video?: Api.TypeInputFile;
       videoStartTs?: double;
@@ -10626,14 +10626,14 @@ namespace Api {
       bytes: bytes;
     };
     export class GetFile extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       precise?: true;
       cdnSupported?: true;
       location: Api.TypeInputFileLocation;
       offset: int;
       limit: int;
     }>, upload.TypeFile> {
-      // flags: null;
+      // flags: undefined;
       precise?: true;
       cdnSupported?: true;
       location: Api.TypeInputFileLocation;
@@ -10848,7 +10848,7 @@ namespace Api {
       channel: Api.TypeInputChannel;
     };
     export class CreateChannel extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       broadcast?: true;
       megagroup?: true;
       forImport?: true;
@@ -10857,7 +10857,7 @@ namespace Api {
       geoPoint?: Api.TypeInputGeoPoint;
       address?: string;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       broadcast?: true;
       megagroup?: true;
       forImport?: true;
@@ -10928,13 +10928,13 @@ namespace Api {
       channel: Api.TypeInputChannel;
     };
     export class ExportMessageLink extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       grouped?: true;
       thread?: true;
       channel: Api.TypeInputChannel;
       id: int;
     }>, Api.TypeExportedMessageLink> {
-      // flags: null;
+      // flags: undefined;
       grouped?: true;
       thread?: true;
       channel: Api.TypeInputChannel;
@@ -10948,11 +10948,11 @@ namespace Api {
       enabled: Bool;
     };
     export class GetAdminedPublicChannels extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       byLocation?: true;
       checkLimit?: true;
     } | void>, messages.TypeChats> {
-      // flags: null;
+      // flags: undefined;
       byLocation?: true;
       checkLimit?: true;
     };
@@ -10966,7 +10966,7 @@ namespace Api {
       bannedRights: Api.TypeChatBannedRights;
     };
     export class GetAdminLog extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       channel: Api.TypeInputChannel;
       q: string;
       eventsFilter?: Api.TypeChannelAdminLogEventsFilter;
@@ -10975,7 +10975,7 @@ namespace Api {
       minId: long;
       limit: int;
     }>, channels.TypeAdminLogResults> {
-      // flags: null;
+      // flags: undefined;
       channel: Api.TypeInputChannel;
       q: string;
       eventsFilter?: Api.TypeChannelAdminLogEventsFilter;
@@ -11082,12 +11082,12 @@ namespace Api {
 
   export namespace payments {
     export class GetPaymentForm extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       msgId: int;
       themeParams?: Api.TypeDataJSON;
     }>, payments.TypePaymentForm> {
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       msgId: int;
       themeParams?: Api.TypeDataJSON;
@@ -11100,20 +11100,20 @@ namespace Api {
       msgId: int;
     };
     export class ValidateRequestedInfo extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       save?: true;
       peer: Api.TypeInputPeer;
       msgId: int;
       info: Api.TypePaymentRequestedInfo;
     }>, payments.TypeValidatedRequestedInfo> {
-      // flags: null;
+      // flags: undefined;
       save?: true;
       peer: Api.TypeInputPeer;
       msgId: int;
       info: Api.TypePaymentRequestedInfo;
     };
     export class SendPaymentForm extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       formId: long;
       peer: Api.TypeInputPeer;
       msgId: int;
@@ -11122,7 +11122,7 @@ namespace Api {
       credentials: Api.TypeInputPaymentCredentials;
       tipAmount?: long;
     }>, payments.TypePaymentResult> {
-      // flags: null;
+      // flags: undefined;
       formId: long;
       peer: Api.TypeInputPeer;
       msgId: int;
@@ -11133,11 +11133,11 @@ namespace Api {
     };
     export class GetSavedInfo extends Request<void, payments.TypeSavedInfo> {};
     export class ClearSavedInfo extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       credentials?: true;
       info?: true;
     } | void>, Bool> {
-      // flags: null;
+      // flags: undefined;
       credentials?: true;
       info?: true;
     };
@@ -11150,7 +11150,7 @@ namespace Api {
 
   export namespace stickers {
     export class CreateStickerSet extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       animated?: true;
       userId: Api.TypeInputUser;
@@ -11159,7 +11159,7 @@ namespace Api {
       thumb?: Api.TypeInputDocument;
       stickers: Api.TypeInputStickerSetItem[];
     }>, messages.TypeStickerSet> {
-      // flags: null;
+      // flags: undefined;
       masks?: true;
       animated?: true;
       userId: Api.TypeInputUser;
@@ -11199,14 +11199,14 @@ namespace Api {
   export namespace phone {
     export class GetCallConfig extends Request<void, Api.TypeDataJSON> {};
     export class RequestCall extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       video?: true;
       userId: Api.TypeInputUser;
       randomId: int;
       gAHash: bytes;
       protocol: Api.TypePhoneCallProtocol;
     }>, phone.TypePhoneCall> {
-      // flags: null;
+      // flags: undefined;
       video?: true;
       userId: Api.TypeInputUser;
       randomId: int;
@@ -11239,14 +11239,14 @@ namespace Api {
       peer: Api.TypeInputPhoneCall;
     };
     export class DiscardCall extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       video?: true;
       peer: Api.TypeInputPhoneCall;
       duration: int;
       reason: Api.TypePhoneCallDiscardReason;
       connectionId: long;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       video?: true;
       peer: Api.TypeInputPhoneCall;
       duration: int;
@@ -11254,13 +11254,13 @@ namespace Api {
       connectionId: long;
     };
     export class SetCallRating extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       userInitiative?: true;
       peer: Api.TypeInputPhoneCall;
       rating: int;
       comment: string;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       userInitiative?: true;
       peer: Api.TypeInputPhoneCall;
       rating: int;
@@ -11281,27 +11281,27 @@ namespace Api {
       data: bytes;
     };
     export class CreateGroupCall extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       randomId: int;
       title?: string;
       scheduleDate?: int;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       peer: Api.TypeInputPeer;
       randomId: int;
       title?: string;
       scheduleDate?: int;
     };
     export class JoinGroupCall extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       muted?: true;
       call: Api.TypeInputGroupCall;
       joinAs: Api.TypeInputPeer;
       inviteHash?: string;
       params: Api.TypeDataJSON;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       muted?: true;
       call: Api.TypeInputGroupCall;
       joinAs: Api.TypeInputPeer;
@@ -11328,12 +11328,12 @@ namespace Api {
       call: Api.TypeInputGroupCall;
     };
     export class ToggleGroupCallSettings extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       resetInviteHash?: true;
       call: Api.TypeInputGroupCall;
       joinMuted?: Bool;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       resetInviteHash?: true;
       call: Api.TypeInputGroupCall;
       joinMuted?: Bool;
@@ -11364,25 +11364,25 @@ namespace Api {
       source: int;
     };
     export class ToggleGroupCallRecord extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       start?: true;
       call: Api.TypeInputGroupCall;
       title?: string;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       start?: true;
       call: Api.TypeInputGroupCall;
       title?: string;
     };
     export class EditGroupCallParticipant extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       muted?: true;
       call: Api.TypeInputGroupCall;
       participant: Api.TypeInputPeer;
       volume?: int;
       raiseHand?: Bool;
     }>, Api.TypeUpdates> {
-      // flags: null;
+      // flags: undefined;
       muted?: true;
       call: Api.TypeInputGroupCall;
       participant: Api.TypeInputPeer;
@@ -11402,11 +11402,11 @@ namespace Api {
       peer: Api.TypeInputPeer;
     };
     export class ExportGroupCallInvite extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       canSelfUnmute?: true;
       call: Api.TypeInputGroupCall;
     }>, phone.TypeExportedGroupCallInvite> {
-      // flags: null;
+      // flags: undefined;
       canSelfUnmute?: true;
       call: Api.TypeInputGroupCall;
     };
@@ -11486,29 +11486,29 @@ namespace Api {
 
   export namespace stats {
     export class GetBroadcastStats extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
     }>, stats.TypeBroadcastStats> {
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
     };
     export class LoadAsyncGraph extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       token: string;
       x?: long;
     }>, Api.TypeStatsGraph> {
-      // flags: null;
+      // flags: undefined;
       token: string;
       x?: long;
     };
     export class GetMegagroupStats extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
     }>, stats.TypeMegagroupStats> {
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
     };
@@ -11528,12 +11528,12 @@ namespace Api {
       limit: int;
     };
     export class GetMessageStats extends Request<Partial<{
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
       msgId: int;
     }>, stats.TypeMessageStats> {
-      // flags: null;
+      // flags: undefined;
       dark?: true;
       channel: Api.TypeInputChannel;
       msgId: int;

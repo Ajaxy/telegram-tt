@@ -7,3 +7,4 @@ export * from './localSearch';
 export * from './management';
 export * from './symbols';
 export * from './payments';
+export * from './settings';

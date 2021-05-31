@@ -5,11 +5,13 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
+import { NotifyException, NotifySettings } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { getFolderUnreadDialogs } from '../../../modules/helpers';
+import { selectNotifyExceptions, selectNotifySettings } from '../../../modules/selectors';
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import useThrottledMemo from '../../../hooks/useThrottledMemo';
@@ -24,6 +26,8 @@ type StateProps = {
   chatsById: Record<number, ApiChat>;
   usersById: Record<number, ApiUser>;
   chatFoldersById: Record<number, ApiChatFolder>;
+  notifySettings: NotifySettings;
+  notifyExceptions: Record<number, NotifyException>;
   orderedFolderIds?: number[];
   lastSyncTime?: number;
 };
@@ -36,6 +40,8 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   chatsById,
   usersById,
   chatFoldersById,
+  notifySettings,
+  notifyExceptions,
   orderedFolderIds,
   lastSyncTime,
   loadChatFolders,
@@ -68,7 +74,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     const counters = displayedFolders.map((folder) => {
       const {
         unreadDialogsCount, hasActiveDialogs,
-      } = getFolderUnreadDialogs(chatsById, usersById, folder, chatIds) || {};
+      } = getFolderUnreadDialogs(chatsById, usersById, folder, notifySettings, notifyExceptions, chatIds) || {};
 
       return {
         id: folder.id,
@@ -78,7 +84,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     });
 
     return buildCollectionByKey(counters, 'id');
-  }, INFO_THROTTLE, [displayedFolders, chatsById, usersById]);
+  }, INFO_THROTTLE, [displayedFolders, chatsById, usersById, notifySettings, notifyExceptions]);
 
   const folderTabs = useMemo(() => {
     if (!displayedFolders || !displayedFolders.length) {
@@ -185,6 +191,8 @@ export default memo(withGlobal(
       chatFoldersById,
       orderedFolderIds,
       lastSyncTime,
+      notifySettings: selectNotifySettings(global),
+      notifyExceptions: selectNotifyExceptions(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadChatFolders']),

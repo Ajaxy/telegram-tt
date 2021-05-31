@@ -327,7 +327,15 @@ export type ApiUpdateNotifySettings = {
   '@type': 'updateNotifySettings';
   peerType: 'contact' | 'group' | 'broadcast';
   isSilent: boolean;
-  isShowPreviews: boolean;
+  shouldShowPreviews: boolean;
+};
+
+export type ApiUpdateNotifyExceptions = {
+  '@type': 'updateNotifyExceptions';
+  id: number;
+  isMuted: boolean;
+  isSilent?: boolean;
+  shouldShowPreviews?: boolean;
 };
 
 export type updateTwoFaStateWaitCode = {
@@ -369,7 +377,7 @@ export type ApiUpdate = (
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | updateTwoFaStateWaitCode |
-  ApiUpdateNotifySettings | ApiUpdatePeerBlocked | ApiUpdatePrivacy
+  ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

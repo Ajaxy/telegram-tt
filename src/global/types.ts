@@ -34,6 +34,7 @@ import {
   Receipt,
   ApiPrivacyKey,
   ApiPrivacySettings,
+  NotifyException,
 } from '../types';
 
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
@@ -365,6 +366,7 @@ export type GlobalState = {
     byKey: ISettings;
     loadedWallpapers?: ApiWallpaper[];
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
+    notifyExceptions: Record<number, NotifyException>;
   };
 
   twoFaSettings: {
@@ -434,8 +436,9 @@ export type ActionTypes = (
   'updatePassword' | 'updateRecoveryEmail' | 'clearPassword' | 'provideTwoFaEmailCode' | 'checkPassword' |
   'loadBlockedContacts' | 'blockContact' | 'unblockContact' |
   'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations' |
-  'loadNotificationsSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
+  'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
   'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' | 'setPrivacySettings' |
+  'loadNotificationExceptions' |
   // Stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
