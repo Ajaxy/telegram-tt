@@ -49,7 +49,7 @@ const MessageScroll: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
-  const updateFabVisibility = useCallback(() => {
+  const toggleScrollTools = useCallback(() => {
     if (isFabFrozen) {
       return;
     }
@@ -69,7 +69,7 @@ const MessageScroll: FC<OwnProps> = ({
     const { offsetHeight, scrollHeight, scrollTop } = containerRef.current!;
     const scrollBottom = scrollHeight - scrollTop - offsetHeight;
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
-    const isAtBottom = scrollBottom === 0 || (IS_SAFARI && scrollBottom === 1);
+    const isAtBottom = scrollBottom <= 0 || (IS_SAFARI && scrollBottom <= 1);
 
     onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
@@ -113,9 +113,7 @@ const MessageScroll: FC<OwnProps> = ({
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: FAB_THRESHOLD,
-  }, () => {
-    updateFabVisibility();
-  });
+  }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
 
@@ -123,9 +121,7 @@ const MessageScroll: FC<OwnProps> = ({
     observe: observeIntersectionForNotch,
   } = useIntersectionObserver({
     rootRef: containerRef,
-  }, () => {
-    updateFabVisibility();
-  });
+  }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
@@ -150,7 +146,7 @@ const MessageScroll: FC<OwnProps> = ({
   }, [messageIds]);
 
   // Workaround for stuck FAB when many unread messages
-  useEffect(updateFabVisibility, [firstUnreadId]);
+  useEffect(toggleScrollTools, [firstUnreadId]);
 
   return (
     <div className={className} teactFastList>

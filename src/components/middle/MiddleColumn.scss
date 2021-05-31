@@ -265,7 +265,7 @@
       height: 1px;
       background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 2%, rgba(255, 255, 255, 0.4) 98%, rgba(255, 255, 255, 0) 100%);
       opacity: 0;
-      transition: opacity 200ms ease;
+      transition: opacity 150ms ease;
 
       @media (max-width: 600px) {
         left: -2%;
