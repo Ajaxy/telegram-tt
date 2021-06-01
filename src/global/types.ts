@@ -366,7 +366,7 @@ export type GlobalState = {
     byKey: ISettings;
     loadedWallpapers?: ApiWallpaper[];
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
-    notifyExceptions: Record<number, NotifyException>;
+    notifyExceptions?: Record<number, NotifyException>;
   };
 
   twoFaSettings: {

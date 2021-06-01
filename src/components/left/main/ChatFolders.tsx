@@ -27,7 +27,7 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
   chatFoldersById: Record<number, ApiChatFolder>;
   notifySettings: NotifySettings;
-  notifyExceptions: Record<number, NotifyException>;
+  notifyExceptions?: Record<number, NotifyException>;
   orderedFolderIds?: number[];
   lastSyncTime?: number;
 };
@@ -74,7 +74,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     const counters = displayedFolders.map((folder) => {
       const {
         unreadDialogsCount, hasActiveDialogs,
-      } = getFolderUnreadDialogs(chatsById, usersById, folder, notifySettings, notifyExceptions, chatIds) || {};
+      } = getFolderUnreadDialogs(chatsById, usersById, folder, chatIds, notifySettings, notifyExceptions) || {};
 
       return {
         id: folder.id,

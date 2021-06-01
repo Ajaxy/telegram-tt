@@ -32,7 +32,7 @@ type StateProps = {
   foldersById: Record<number, ApiChatFolder>;
   recommendedChatFolders?: ApiChatFolder[];
   notifySettings: NotifySettings;
-  notifyExceptions: Record<number, NotifyException>;
+  notifyExceptions?: Record<number, NotifyException>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadRecommendedChatFolders' | 'addChatFolder' | 'showError'>;
@@ -103,7 +103,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
         id: folder.id,
         title: folder.title,
         subtitle: getFolderDescriptionText(
-          chatsById, usersById, folder, notifySettings, notifyExceptions, chatIds, lang,
+          chatsById, usersById, folder, chatIds, lang, notifySettings, notifyExceptions,
         ),
       };
     });
