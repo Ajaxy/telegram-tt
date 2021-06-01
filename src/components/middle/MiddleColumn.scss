@@ -265,7 +265,7 @@
       height: 1px;
       background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 2%, rgba(255, 255, 255, 0.4) 98%, rgba(255, 255, 255, 0) 100%);
       opacity: 0;
-      transition: opacity 150ms ease;
+      transition: opacity 350ms ease;
 
       @media (max-width: 600px) {
         left: -2%;
@@ -275,6 +275,10 @@
 
     &.with-notch::before {
       opacity: 1;
+    }
+
+    html.theme-dark &::before {
+      background: linear-gradient(90deg, rgba(127, 127, 127, 0) 0%, rgba(127, 127, 127, 0.4) 2%, rgba(127, 127, 127, 0.4) 98%, rgba(127, 127, 127, 0) 100%);
     }
   }
 }
