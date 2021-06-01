@@ -58,6 +58,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const lang = useLang();
+
   useEffect(() => {
     if (isOpen) {
       if (!IS_MOBILE_SCREEN) {
@@ -101,18 +103,16 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
           return true;
         }
 
-        return searchWords(getChatTitle(chatsById[id], undefined, id === currentUserId), filter);
+        return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
       }),
     ], chatsById, undefined, currentUserId ? [currentUserId] : undefined);
-  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter]);
+  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang]);
 
   const [viewportIds, getMore] = useInfiniteScroll(loadMoreChats, chatIds, Boolean(filter));
 
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.currentTarget.value);
   }, []);
-
-  const lang = useLang();
 
   const modalHeader = (
     <div className="modal-header">

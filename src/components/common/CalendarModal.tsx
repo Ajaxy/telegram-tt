@@ -7,6 +7,7 @@ import {
   formatMonthAndYear, formatHumanDate, formatTime,
 } from '../../util/dateFormat';
 import { IS_MOBILE_SCREEN } from '../../util/environment';
+import useLang, { LangFn } from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -42,6 +43,7 @@ const CalendarModal: FC<OwnProps> = ({
   onSubmit,
   onSecondButtonClick,
 }) => {
+  const lang = useLang();
   const now = new Date();
   const defaultSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
   const maxDate = maxAt ? new Date(maxAt) : undefined;
@@ -181,7 +183,7 @@ const CalendarModal: FC<OwnProps> = ({
           </Button>
 
           <h4>
-            {formatMonthAndYear(selectedDate, IS_MOBILE_SCREEN)}
+            {formatMonthAndYear(lang, selectedDate, IS_MOBILE_SCREEN)}
           </h4>
 
           <Button
@@ -240,7 +242,7 @@ const CalendarModal: FC<OwnProps> = ({
 
       <div className="footer">
         <Button onClick={handleSubmit}>
-          {withTimePicker ? formatSubmitLabel(selectedDate) : submitButtonLabel}
+          {withTimePicker ? formatSubmitLabel(lang, selectedDate) : submitButtonLabel}
         </Button>
         {secondButtonLabel && (
           <Button onClick={onSecondButtonClick} isText>
@@ -293,10 +295,14 @@ function formatInputTime(value: string | number) {
   return String(value).padStart(2, '0');
 }
 
-function formatSubmitLabel(date: Date) {
-  const day = formatHumanDate(date, true);
+function formatSubmitLabel(lang: LangFn, date: Date) {
+  const day = formatHumanDate(lang, date, true);
 
-  return `Send ${day === 'Today' ? day : `on ${day}`} at ${formatTime(date)}`;
+  if (day === 'Today') {
+    return lang('Conversation.ScheduleMessage.SendToday', formatTime(date));
+  }
+
+  return lang('Conversation.ScheduleMessage.SendOn', day).replace('%@', formatTime(date));
 }
 
 export default memo(CalendarModal);

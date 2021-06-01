@@ -84,14 +84,14 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading">{formatMonthAndYear(new Date(message.date * 1000))}</p>
+            <p className="section-heading">{formatMonthAndYear(lang, new Date(message.date * 1000))}</p>
           )}
           <Document
             message={message}
             withDate
             datetime={message.date}
             smaller
-            sender={getSenderName(message, chatsById, usersById)}
+            sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
             onDateClick={handleMessageFocus}
           />

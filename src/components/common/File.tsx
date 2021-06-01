@@ -8,6 +8,7 @@ import { formatMediaDateTime, formatPastTimeShort } from '../../util/dateFormat'
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
+import useLang from '../../hooks/useLang';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 import Link from '../ui/Link';
@@ -53,6 +54,7 @@ const File: FC<OwnProps> = ({
   onClick,
   onDateClick,
 }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLDivElement>(null);
   if (ref) {
@@ -136,13 +138,13 @@ const File: FC<OwnProps> = ({
           {!sender && timestamp && (
             <>
               {' '}
-              <Link onClick={onDateClick}>{formatMediaDateTime(timestamp * 1000)}</Link>
+              <Link onClick={onDateClick}>{formatMediaDateTime(lang, timestamp * 1000)}</Link>
             </>
           )}
         </div>
       </div>
       {sender && timestamp && (
-        <Link onClick={onDateClick}>{formatPastTimeShort(timestamp * 1000)}</Link>
+        <Link onClick={onDateClick}>{formatPastTimeShort(lang, timestamp * 1000)}</Link>
       )}
     </div>
   );

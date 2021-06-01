@@ -37,7 +37,6 @@ type StateProps = {
   isBasicGroup: boolean;
   isSuperGroup: boolean;
   canDeleteForAll?: boolean;
-  chatTitle: string;
   contactName?: string;
 };
 
@@ -52,13 +51,15 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isBasicGroup,
   isSuperGroup,
   canDeleteForAll,
-  chatTitle,
   contactName,
   onClose,
   leaveChannel,
   deleteHistory,
   deleteChannel,
 }) => {
+  const lang = useLang();
+  const chatTitle = getChatTitle(lang, chat);
+
   const handleDeleteMessageForAll = useCallback(() => {
     deleteHistory({ chatId: chat.id, maxId: chat.lastMessage!.id, shouldDeleteForAll: true });
     onClose();
@@ -86,8 +87,6 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
     leaveChannel,
     deleteChannel,
   ]);
-
-  const lang = useLang();
 
   function renderHeader() {
     return (
@@ -182,7 +181,6 @@ export default memo(withGlobal<OwnProps>(
       isBasicGroup: isChatBasicGroup(chat),
       isSuperGroup: isChatSuperGroup(chat),
       canDeleteForAll,
-      chatTitle: getChatTitle(chat),
       contactName,
     };
   },

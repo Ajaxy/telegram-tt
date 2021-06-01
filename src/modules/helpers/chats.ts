@@ -11,7 +11,6 @@ import { NotifyException, NotifySettings } from '../../types';
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
-import { getTranslation } from '../../util/langProvider';
 import { LangFn } from '../../hooks/useLang';
 
 export function isChatPrivate(chatId: number) {
@@ -60,11 +59,11 @@ export function getPrivateChatUserId(chat: ApiChat) {
 }
 
 // TODO Get rid of `user`
-export function getChatTitle(chat: ApiChat, user?: ApiUser, isSelf = false) {
+export function getChatTitle(lang: LangFn, chat: ApiChat, user?: ApiUser, isSelf = false) {
   if (isSelf || (user && chat.id === user.id && user.isSelf)) {
-    return getTranslation('SavedMessages');
+    return lang('SavedMessages');
   }
-  return chat.title || getTranslation('HiddenName');
+  return chat.title || lang('HiddenName');
 }
 
 export function getChatDescription(chat: ApiChat) {
@@ -388,11 +387,11 @@ export function getFolderUnreadDialogs(
 }
 
 export function getFolderDescriptionText(
+  lang: LangFn,
   chatsById: Record<number, ApiChat>,
   usersById: Record<number, ApiUser>,
   folder: ApiChatFolder,
   chatIdsCache: number[],
-  lang: LangFn,
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
 ) {
@@ -453,13 +452,13 @@ export function isChat(chatOrUser?: ApiUser | ApiChat): chatOrUser is ApiChat {
   return chatOrUser.id < 0;
 }
 
-export function getMessageSenderName(chatId: number, sender?: ApiUser) {
+export function getMessageSenderName(lang: LangFn, chatId: number, sender?: ApiUser) {
   if (!sender || isChatPrivate(chatId)) {
     return undefined;
   }
 
   if (sender.isSelf) {
-    return getTranslation('FromYou');
+    return lang('FromYou');
   }
 
   return getUserFirstOrLastName(sender);

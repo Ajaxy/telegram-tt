@@ -636,7 +636,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     let senderTitle;
     let senderColor;
     if (senderPeer) {
-      senderTitle = getSenderTitle(senderPeer);
+      senderTitle = getSenderTitle(lang, senderPeer);
 
       if (!asForwarded) {
         senderColor = `color-${getUserColorKey(senderPeer)}`;

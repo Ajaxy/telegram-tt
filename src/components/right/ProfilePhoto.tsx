@@ -13,6 +13,7 @@ import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useBlurSync from '../../hooks/useBlurSync';
 import usePrevious from '../../hooks/usePrevious';
+import useLang from '../../hooks/useLang';
 
 import Spinner from '../ui/Spinner';
 
@@ -37,6 +38,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   lastSyncTime,
   onClick,
 }) => {
+  const lang = useLang();
   const isDeleted = user && isDeletedUser(user);
 
   function getMediaHash(size: 'normal' | 'big' = 'big', forceAvatar?: boolean) {
@@ -80,7 +82,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
   } else if (!imageSrc && chat) {
-    const title = getChatTitle(chat);
+    const title = getChatTitle(lang, chat);
     content = title && getFirstLetters(title, isChatPrivate(chat.id) ? 2 : 1);
   } else {
     content = (

@@ -5,9 +5,10 @@ import {
   isChatPrivate,
   isChatGroup,
 } from '../../../../modules/helpers';
+import { LangFn } from '../../../../hooks/useLang';
 
 export function getSenderName(
-  message: ApiMessage, chatsById: Record<number, ApiChat>, usersById: Record<number, ApiUser>,
+  lang: LangFn, message: ApiMessage, chatsById: Record<number, ApiChat>, usersById: Record<number, ApiUser>,
 ) {
   const { senderId } = message;
   if (!senderId) {
@@ -16,14 +17,14 @@ export function getSenderName(
 
   const sender = isChatPrivate(senderId) ? usersById[senderId] : chatsById[senderId];
 
-  let senderName = getSenderTitle(sender);
+  let senderName = getSenderTitle(lang, sender);
 
   const chat = chatsById[message.chatId];
   if (chat) {
     if (isChatPrivate(senderId) && (sender as ApiUser).isSelf) {
-      senderName = `You → ${getChatTitle(chat)}`;
+      senderName = `${lang('FromYou')} → ${getChatTitle(lang, chat)}`;
     } else if (isChatGroup(chat)) {
-      senderName += ` → ${getChatTitle(chat)}`;
+      senderName += ` → ${getChatTitle(lang, chat)}`;
     }
   }
 

@@ -23,7 +23,6 @@ import DateSuggest from './DateSuggest';
 import Link from '../../ui/Link';
 import NothingFound from '../../common/NothingFound';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
-import { getTranslation } from '../../../util/langProvider';
 
 export type OwnProps = {
   searchQuery?: string;
@@ -63,6 +62,8 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   foundIds, globalMessagesByChatId, chatsById, usersById, fetchingStatus, lastSyncTime,
   onReset, onSearchDateSelect, openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
 }) => {
+  const lang = useLang();
+
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
   const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
 
@@ -114,14 +115,14 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       : [];
 
     return [
-      ...(currentUserId && searchWords(getTranslation('SavedMessages'), searchQuery) ? [currentUserId] : []),
+      ...(currentUserId && searchWords(lang('SavedMessages'), searchQuery) ? [currentUserId] : []),
       ...sortChatIds(unique([
         ...foundContactIds,
         ...(localChatIds || []),
         ...(localUserIds || []),
       ]), chatsById),
     ];
-  }, [searchQuery, localContactIds, currentUserId, localChatIds, localUserIds, chatsById, usersById]);
+  }, [searchQuery, localContactIds, currentUserId, lang, localChatIds, localUserIds, chatsById, usersById]);
 
   const globalResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {
@@ -155,8 +156,6 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleClickShowMoreGlobal = useCallback(() => {
     setShouldShowMoreGlobal(!shouldShowMoreGlobal);
   }, [shouldShowMoreGlobal]);
-
-  const lang = useLang();
 
   function renderFoundMessage(message: ApiMessage) {
     const text = getMessageSummaryText(lang, message);

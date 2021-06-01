@@ -81,12 +81,12 @@ const LinkResults: FC<OwnProps & StateProps & DispatchProps> = ({
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading">{formatMonthAndYear(new Date(message.date * 1000))}</p>
+            <p className="section-heading">{formatMonthAndYear(lang, new Date(message.date * 1000))}</p>
           )}
           <WebLink
             key={message.id}
             message={message}
-            senderTitle={getSenderName(message, chatsById, usersById)}
+            senderTitle={getSenderName(lang, message, chatsById, usersById)}
             onMessageClick={handleMessageFocus}
           />
         </div>

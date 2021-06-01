@@ -103,7 +103,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const handle = withUsername ? chat.username : undefined;
-    const groupStatus = getGroupStatus(chat, lang);
+    const groupStatus = getGroupStatus(lang, chat);
     const onlineStatus = onlineCount ? `, ${lang('OnlineCount', onlineCount, 'i')}` : undefined;
 
     return (
@@ -125,7 +125,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       />
       <div className="info">
         <div className="title">
-          <h3>{renderText(getChatTitle(chat))}</h3>
+          <h3>{renderText(getChatTitle(lang, chat))}</h3>
           {chat.isVerified && <VerifiedIcon />}
         </div>
         {renderStatusOrTyping()}
@@ -134,7 +134,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function getGroupStatus(chat: ApiChat, lang: LangFn) {
+function getGroupStatus(lang: LangFn, chat: ApiChat) {
   const chatTypeString = lang(getChatTypeString(chat));
   const { membersCount } = chat;
 

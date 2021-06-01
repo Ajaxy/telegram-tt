@@ -27,7 +27,7 @@ import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgre
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useLang from '../../hooks/useLang';
+import useLang, { LangFn } from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -177,7 +177,7 @@ const Audio: FC<OwnProps & StateProps> = ({
     onDateClick!(message.id, message.chatId);
   }, [onDateClick, message.id, message.chatId]);
 
-  useLang();
+  const lang = useLang();
 
   function getFirstLine() {
     if (isVoice) {
@@ -245,7 +245,7 @@ const Audio: FC<OwnProps & StateProps> = ({
                   className="date"
                   onClick={handleDateClick}
                 >
-                  {formatPastTimeShort(date * 1000)}
+                  {formatPastTimeShort(lang, date * 1000)}
                 </Link>
               )}
             </div>
@@ -293,7 +293,7 @@ const Audio: FC<OwnProps & StateProps> = ({
       )}
       {renderingFor === 'searchResult' && renderSearchResult()}
       {renderingFor !== 'searchResult' && audio && renderAudio(
-        audio, isPlaying, playProgress, bufferedProgress, seekHandlers, date,
+        lang, audio, isPlaying, playProgress, bufferedProgress, seekHandlers, date,
         onDateClick ? handleDateClick : undefined,
       )}
       {renderingFor !== 'searchResult' && voice && renderVoice(voice, renderedWaveform, isMediaUnread)}
@@ -302,6 +302,7 @@ const Audio: FC<OwnProps & StateProps> = ({
 };
 
 function renderAudio(
+  lang: LangFn,
   audio: ApiAudio,
   isPlaying: boolean,
   playProgress: number,
@@ -327,7 +328,7 @@ function renderAudio(
               {' '}
               &bull;
               {' '}
-              <Link className="date" onClick={handleDateClick}>{formatMediaDateTime(date * 1000)}</Link>
+              <Link className="date" onClick={handleDateClick}>{formatMediaDateTime(lang, date * 1000)}</Link>
             </>
           )}
         </div>

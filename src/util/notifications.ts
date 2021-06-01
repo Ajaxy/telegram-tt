@@ -239,14 +239,14 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
       { asPlain: true },
     ) as string;
   } else {
-    const senderName = getMessageSenderName(chat.id, messageSender);
+    const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
     const summary = getMessageSummaryText(getTranslation, message);
 
     body = senderName ? `${senderName}: ${summary}` : summary;
   }
 
   return {
-    title: getChatTitle(chat, privateChatUser),
+    title: getChatTitle(getTranslation, chat, privateChatUser),
     body,
   };
 }

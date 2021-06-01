@@ -48,7 +48,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   const isFromChat = sender.id < 0;
-  const senderTitle = getSenderTitle(sender);
+  const senderTitle = getSenderTitle(lang, sender);
 
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>
@@ -62,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date">
-          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(message!.date * 1000)}
+          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(lang, message!.date * 1000)}
         </div>
       </div>
     </div>

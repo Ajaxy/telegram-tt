@@ -94,7 +94,7 @@ const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
             className="date"
             onClick={handleMessageClick}
           >
-            {formatPastTimeShort(message.date * 1000)}
+            {formatPastTimeShort(lang, message.date * 1000)}
           </Link>
         </div>
       )}

@@ -707,9 +707,9 @@ function renderMessages(
               lang('MessageScheduledUntilOnline')
             )}
             {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
-              lang('MessageScheduledOn', formatHumanDate(dateGroup.datetime, undefined, true))
+              lang('MessageScheduledOn', formatHumanDate(lang, dateGroup.datetime, undefined, true))
             )}
-            {!isSchedule && formatHumanDate(dateGroup.datetime)}
+            {!isSchedule && formatHumanDate(lang, dateGroup.datetime)}
           </span>
         </div>
         {flatten(senderGroups)}

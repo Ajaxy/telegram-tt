@@ -1,4 +1,4 @@
-import { getTranslation } from './langProvider';
+import { LangFn } from '../hooks/useLang';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS_FULL = [
@@ -39,7 +39,7 @@ export function formatTime(datetime: number | Date) {
   return `${hours}:${minutes}`;
 }
 
-export function formatPastTimeShort(datetime: number | Date) {
+export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = getDayStart(new Date());
@@ -50,45 +50,45 @@ export function formatPastTimeShort(datetime: number | Date) {
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 7);
   if (date >= weekAgo) {
-    return getTranslation(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
+    return lang(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
   }
 
   const withYear = date.getFullYear() !== today.getFullYear();
   const format = (
-    getTranslation(withYear ? 'formatDateScheduleYear' : 'formatDateSchedule')
+    lang(withYear ? 'formatDateScheduleYear' : 'formatDateSchedule')
     || (withYear ? 'd MMM yyyy' : 'd MMM')
   );
 
-  return formatDate(date, format);
+  return formatDate(lang, date, format);
 }
 
-export function formatFullDate(datetime: number | Date) {
+export function formatFullDate(lang: LangFn, datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const format = getTranslation('formatterYearMax') || 'dd.MM.yyyy';
+  const format = lang('formatterYearMax') || 'dd.MM.yyyy';
 
-  return formatDate(date, format);
+  return formatDate(lang, date, format);
 }
 
-export function formatMonthAndYear(date: Date, isShort = false) {
-  const format = getTranslation(isShort ? 'formatterMonthYear2' : 'formatterMonthYear') || 'MMM yyyy';
+export function formatMonthAndYear(lang: LangFn, date: Date, isShort = false) {
+  const format = lang(isShort ? 'formatterMonthYear2' : 'formatterMonthYear') || 'MMM yyyy';
 
-  return formatDate(date, format);
+  return formatDate(lang, date, format);
 }
 
-export function formatHumanDate(datetime: number | Date, isShort = false, noWeekdays = false) {
+export function formatHumanDate(lang: LangFn, datetime: number | Date, isShort = false, noWeekdays = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = getDayStart(new Date());
 
   if (!noWeekdays) {
     if (toIsoString(date) === toIsoString(today)) {
-      return (isShort ? lowerFirst : upperFirst)(getTranslation('Weekday.Today'));
+      return (isShort ? lowerFirst : upperFirst)(lang('Weekday.Today'));
     }
 
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
     if (toIsoString(date) === toIsoString(yesterday)) {
-      return (isShort ? lowerFirst : upperFirst)(getTranslation('Weekday.Yesterday'));
+      return (isShort ? lowerFirst : upperFirst)(lang('Weekday.Yesterday'));
     }
 
     const weekAgo = new Date(today);
@@ -98,8 +98,8 @@ export function formatHumanDate(datetime: number | Date, isShort = false, noWeek
     if (date >= weekAgo && date <= weekAhead) {
       const weekDay = WEEKDAYS_FULL[date.getDay()];
       return isShort
-        ? lowerFirst(getTranslation(`Weekday.Short${weekDay}`))
-        : upperFirst(getTranslation(`Weekday.${weekDay}`));
+        ? lowerFirst(lang(`Weekday.Short${weekDay}`))
+        : upperFirst(lang(`Weekday.${weekDay}`));
     }
   }
 
@@ -107,29 +107,29 @@ export function formatHumanDate(datetime: number | Date, isShort = false, noWeek
   const formatKey = isShort
     ? (withYear ? 'formatDateScheduleYear' : 'formatDateSchedule')
     : (withYear ? 'chatFullDate' : 'chatDate');
-  const format = getTranslation(formatKey) || 'd MMMM yyyy';
+  const format = lang(formatKey) || 'd MMMM yyyy';
 
-  return (isShort ? lowerFirst : upperFirst)(formatDate(date, format));
+  return (isShort ? lowerFirst : upperFirst)(formatDate(lang, date, format));
 }
 
-function formatDate(date: Date, format: string) {
+function formatDate(lang: LangFn, date: Date, format: string) {
   const day = date.getDate();
   const monthIndex = date.getMonth();
 
   return format
-    .replace('LLLL', getTranslation(MONTHS_FULL[monthIndex]))
-    .replace('MMMM', getTranslation(`Month.Gen${MONTHS_FULL[monthIndex]}`))
-    .replace('MMM', getTranslation(`Month.Short${MONTHS_FULL[monthIndex]}`))
+    .replace('LLLL', lang(MONTHS_FULL[monthIndex]))
+    .replace('MMMM', lang(`Month.Gen${MONTHS_FULL[monthIndex]}`))
+    .replace('MMM', lang(`Month.Short${MONTHS_FULL[monthIndex]}`))
     .replace('MM', String(monthIndex + 1).padStart(2, '0'))
     .replace('dd', String(day).padStart(2, '0'))
     .replace('d', String(day))
     .replace('yyyy', String(date.getFullYear()));
 }
 
-export function formatMediaDateTime(datetime: number | Date) {
+export function formatMediaDateTime(lang: LangFn, datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  return `${formatHumanDate(date, true)}, ${formatTime(date)}`;
+  return `${formatHumanDate(lang, date, true)}, ${formatTime(date)}`;
 }
 
 export function formatMediaDuration(duration: number) {
