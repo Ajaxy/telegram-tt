@@ -40,7 +40,7 @@ type StateProps = {
   lastSyncTime?: number;
   isInDiscussionThread?: boolean;
   notifySettings: NotifySettings;
-  notifyExceptions: Record<number, NotifyException>;
+  notifyExceptions?: Record<number, NotifyException>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages'>;
