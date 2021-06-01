@@ -221,7 +221,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       );
     }
 
-    const senderName = getMessageSenderName(chatId, lastMessageSender);
+    const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
 
     return (
       <p className="last-message">
@@ -257,7 +257,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       />
       <div className="info">
         <div className="title">
-          <h3>{renderText(getChatTitle(chat, privateChatUser))}</h3>
+          <h3>{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
           {chat.isVerified && <VerifiedIcon />}
           {isMuted && <i className="icon-muted-chat" />}
           {chat.lastMessage && (

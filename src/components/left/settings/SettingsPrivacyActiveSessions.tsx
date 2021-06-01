@@ -103,7 +103,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
         }]}
       >
         <div className="multiline-menu-item full-size">
-          <span className="date">{formatPastTimeShort(session.dateActive * 1000)}</span>
+          <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           <span className="title">{session.appName}</span>
           <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
           <span className="subtitle">{session.ip} - {getLocation(session)}</span>

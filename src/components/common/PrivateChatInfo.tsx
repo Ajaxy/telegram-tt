@@ -104,7 +104,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
         {withUsername && user.username && <span className="handle">{user.username}</span>}
-        <span className="user-status">{getUserStatus(user, lang)}</span>
+        <span className="user-status">{getUserStatus(lang, user)}</span>
       </div>
     );
   }

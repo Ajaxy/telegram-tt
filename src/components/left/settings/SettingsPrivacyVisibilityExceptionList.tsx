@@ -49,6 +49,8 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
   setPrivacySettings,
   onScreenSelect,
 }) => {
+  const lang = useLang();
+
   const selectedContactIds = useMemo(() => {
     if (!settings) {
       return [];
@@ -98,12 +100,12 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
         ((isChatPrivate(chat.id) && chat.id !== currentUserId) || isChatGroup(chat))
         && (
           !searchQuery
-        || searchWords(getChatTitle(chat), searchQuery)
+        || searchWords(getChatTitle(lang, chat), searchQuery)
         || selectedContactIds.includes(chat.id)
         )
       ))
       .map(({ id }) => id);
-  }, [chats, currentUserId, searchQuery, selectedContactIds]);
+  }, [chats, currentUserId, lang, searchQuery, selectedContactIds]);
 
   const handleSelectedContactIdsChange = useCallback((value: number[]) => {
     setNewSelectedContactIds(value);
@@ -119,8 +121,6 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
 
     onScreenSelect(SettingsScreens.Privacy);
   }, [isAllowList, newSelectedContactIds, onScreenSelect, screen, setPrivacySettings]);
-
-  const lang = useLang();
 
   return (
     <div className="NewChat-inner step-1">

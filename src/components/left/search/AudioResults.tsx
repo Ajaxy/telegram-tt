@@ -88,13 +88,13 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading">{formatMonthAndYear(new Date(message.date * 1000))}</p>
+            <p className="section-heading">{formatMonthAndYear(lang, new Date(message.date * 1000))}</p>
           )}
           <Audio
             key={message.id}
             message={message}
             renderingFor="searchResult"
-            senderTitle={getSenderName(message, chatsById, usersById)}
+            senderTitle={getSenderName(lang, message, chatsById, usersById)}
             date={message.date}
             lastSyncTime={lastSyncTime}
             className="scroll-item"

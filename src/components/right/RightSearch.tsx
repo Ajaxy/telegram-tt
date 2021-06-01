@@ -100,7 +100,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   const renderSearchResult = ({
     message, senderUser, senderChat, onClick,
   }: Result) => {
-    const title = senderChat ? getChatTitle(senderChat) : getUserFullName(senderUser);
+    const title = senderChat ? getChatTitle(lang, senderChat) : getUserFullName(senderUser);
     const text = getMessageSummaryText(lang, message);
 
     return (

@@ -54,7 +54,7 @@ const Avatar: FC<OwnProps> = ({
   const dataUri = useMedia(imageHash, false, ApiMediaFormat.DataUri, lastSyncTime);
   const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
 
-  useLang();
+  const lang = useLang();
 
   let content: string | undefined = '';
 
@@ -68,7 +68,7 @@ const Avatar: FC<OwnProps> = ({
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
   } else if (chat) {
-    const title = getChatTitle(chat);
+    const title = getChatTitle(lang, chat);
     content = title && getFirstLetters(title, isChatPrivate(chat.id) ? 2 : 1);
   } else if (text) {
     content = getFirstLetters(text, 2);

@@ -103,7 +103,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
         id: folder.id,
         title: folder.title,
         subtitle: getFolderDescriptionText(
-          chatsById, usersById, folder, chatIds, lang, notifySettings, notifyExceptions,
+          lang, chatsById, usersById, folder, chatIds, notifySettings, notifyExceptions,
         ),
       };
     });

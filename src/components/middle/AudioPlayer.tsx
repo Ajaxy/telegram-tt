@@ -2,7 +2,9 @@ import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiAudio, ApiMessage } from '../../api/types';
+import {
+  ApiAudio, ApiChat, ApiMessage, ApiUser,
+} from '../../api/types';
 
 import { IS_MOBILE_SCREEN } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
@@ -28,14 +30,17 @@ type OwnProps = {
 };
 
 type StateProps = {
-  senderName?: string;
+  sender?: ApiChat | ApiUser;
 };
 
 type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer'>;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, className, noUi, senderName, focusMessage, closeAudioPlayer,
+  message, className, noUi, sender, focusMessage, closeAudioPlayer,
 }) => {
+  const lang = useLang();
+
+  const senderName = sender ? getSenderTitle(lang, sender) : undefined;
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
   const { playPause, isPlaying } = useAudioPlayer(
     getMessageKey(message), getMediaDuration(message)!, mediaData, undefined, undefined, true,
@@ -51,8 +56,6 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
     closeAudioPlayer();
   }, [closeAudioPlayer, isPlaying, playPause]);
-
-  const lang = useLang();
 
   if (noUi) {
     return undefined;
@@ -117,11 +120,10 @@ function renderVoice(subtitle: string, senderName?: string) {
 }
 
 export default withGlobal<OwnProps>(
-  (global, { message }) => {
+  (global, { message }): StateProps => {
     const sender = selectSender(global, message);
-    const senderName = sender ? getSenderTitle(sender) : undefined;
 
-    return { senderName };
+    return { sender };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer']),
 )(AudioPlayer);

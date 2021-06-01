@@ -64,7 +64,7 @@ export function getUserFullName(user?: ApiUser) {
   return undefined;
 }
 
-export function getUserStatus(user: ApiUser, lang: LangFn) {
+export function getUserStatus(lang: LangFn, user: ApiUser) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications').toLowerCase();
   }
@@ -137,7 +137,7 @@ export function getUserStatus(user: ApiUser, lang: LangFn) {
         return lang('LastSeen.YesterdayAt', formatTime(wasOnlineDate));
       }
 
-      return lang('LastSeen.AtDate', formatFullDate(wasOnlineDate));
+      return lang('LastSeen.AtDate', formatFullDate(lang, wasOnlineDate));
     }
 
     case 'userStatusOnline': {

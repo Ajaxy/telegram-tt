@@ -46,7 +46,7 @@ export function renderActionMessageText(
     text,
     '%action_origin%',
     actionOrigin
-      ? (!options.isEmbedded && renderOriginContent(actionOrigin, options.asPlain)) || NBSP
+      ? (!options.isEmbedded && renderOriginContent(lang, actionOrigin, options.asPlain)) || NBSP
       : 'User',
   );
 
@@ -144,9 +144,9 @@ function renderMessageContent(lang: LangFn, message: ApiMessage, options: Action
   );
 }
 
-function renderOriginContent(origin: ApiUser | ApiChat, asPlain?: boolean) {
+function renderOriginContent(lang: LangFn, origin: ApiUser | ApiChat, asPlain?: boolean) {
   return isChat(origin)
-    ? renderChatContent(origin, asPlain)
+    ? renderChatContent(lang, origin, asPlain)
     : renderUserContent(origin, asPlain);
 }
 
@@ -160,8 +160,8 @@ function renderUserContent(sender: ApiUser, asPlain?: boolean): string | TextPar
   return <UserLink className="action-link" sender={sender}>{sender && renderText(text!)}</UserLink>;
 }
 
-function renderChatContent(chat: ApiChat, asPlain?: boolean): string | TextPart | undefined {
-  const text = trimText(getChatTitle(chat));
+function renderChatContent(lang: LangFn, chat: ApiChat, asPlain?: boolean): string | TextPart | undefined {
+  const text = trimText(getChatTitle(lang, chat));
 
   if (asPlain) {
     return text;

@@ -9,7 +9,7 @@ import {
   ApiMessage,
   ApiChat,
   ApiTypingStatus,
-  MAIN_THREAD_ID,
+  MAIN_THREAD_ID, ApiUser,
 } from '../../api/types';
 
 import {
@@ -72,16 +72,16 @@ type OwnProps = {
 };
 
 type StateProps = {
+  chat?: ApiChat;
   pinnedMessageIds?: number[] | number;
   messagesById?: Record<number, ApiMessage>;
   canUnpin?: boolean;
-  topMessageTitle?: string;
+  topMessageSender?: ApiChat | ApiUser;
   typingStatus?: ApiTypingStatus;
   isSelectModeActive?: boolean;
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
-  chatTitleLength?: number;
   chatsById?: Record<number, ApiChat>;
   originChatId: number;
   messagesCount?: number;
@@ -102,13 +102,13 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   pinnedMessageIds,
   messagesById,
   canUnpin,
-  topMessageTitle,
+  topMessageSender,
   typingStatus,
   isSelectModeActive,
   isLeftColumnShown,
   isRightColumnShown,
   audioMessage,
-  chatTitleLength,
+  chat,
   chatsById,
   originChatId,
   messagesCount,
@@ -123,10 +123,14 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   toggleLeftColumn,
   exitMessageSelectMode,
 }) => {
+  const lang = useLang();
+
   const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[pinnedMessageIndex] : pinnedMessageIds;
   const pinnedMessage = messagesById && pinnedMessageId ? messagesById[pinnedMessageId] : undefined;
   const pinnedMessagesCount = Array.isArray(pinnedMessageIds) ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : 0);
+  const chatTitleLength = chat && getChatTitle(lang, chat).length;
+  const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
 
   useEffect(() => {
     if (threadId === MAIN_THREAD_ID && lastSyncTime) {
@@ -201,13 +205,13 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
     let isActive = false;
 
-    const totalCount = Object.values(chatsById).reduce((total, chat) => {
-      if (isChatArchived(chat)) {
+    const totalCount = Object.values(chatsById).reduce((total, currentChat) => {
+      if (isChatArchived(currentChat)) {
         return total;
       }
 
-      const count = chat.unreadCount || 0;
-      if (count && (!chat.isMuted || chat.unreadMentionsCount)) {
+      const count = currentChat.unreadCount || 0;
+      if (count && (!currentChat.isMuted || currentChat.unreadMentionsCount)) {
         isActive = true;
       }
 
@@ -283,8 +287,6 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       shouldAnimateTools.current = true;
     }
   }, [shouldUseStackedToolsClass, canRevealTools, canToolsCollideWithChatInfo, isRightColumnShown]);
-
-  const lang = useLang();
 
   function renderInfo() {
     return (
@@ -435,7 +437,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       isSelectModeActive: selectIsInSelectMode(global),
       audioMessage,
-      chatTitleLength: chat && getChatTitle(chat).length,
+      chat,
       chatsById,
       originChatId: originChat ? originChat.id : chatId,
       messagesCount,
@@ -454,14 +456,13 @@ export default memo(withGlobal<OwnProps>(
     if (threadId !== MAIN_THREAD_ID) {
       const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
       const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
-      const sender = message ? selectForwardedSender(global, message) : undefined;
-      const topMessageTitle = sender ? getSenderTitle(sender) : undefined;
+      const topMessageSender = message ? selectForwardedSender(global, message) : undefined;
 
       return {
         ...state,
         pinnedMessageIds: pinnedMessageId,
         canUnpin: false,
-        topMessageTitle,
+        topMessageSender,
       };
     }
 

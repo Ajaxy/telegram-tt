@@ -197,8 +197,8 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && message.senderId! < 0 && isOwnMessage(message);
 }
 
-export function getSenderTitle(sender: ApiUser | ApiChat) {
-  return sender.id > 0 ? getUserFullName(sender as ApiUser) : getChatTitle(sender as ApiChat);
+export function getSenderTitle(lang: LangFn, sender: ApiUser | ApiChat) {
+  return sender.id > 0 ? getUserFullName(sender as ApiUser) : getChatTitle(lang, sender as ApiChat);
 }
 
 export function getSendingState(message: ApiMessage) {

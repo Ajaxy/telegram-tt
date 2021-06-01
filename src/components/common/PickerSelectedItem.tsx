@@ -40,7 +40,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   user,
   className,
 }) => {
-  useLang();
+  const lang = useLang();
 
   let iconElement: any;
   let titleText: any;
@@ -65,7 +65,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 
     const name = !chat || (user && !user.isSelf)
       ? getUserFirstOrLastName(user)
-      : getChatTitle(chat, user);
+      : getChatTitle(lang, chat, user);
 
     titleText = name ? renderText(name) : undefined;
   }

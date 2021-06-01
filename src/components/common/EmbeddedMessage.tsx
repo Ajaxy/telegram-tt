@@ -51,7 +51,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const senderTitle = sender && getSenderTitle(sender);
+  const senderTitle = sender && getSenderTitle(lang, sender);
 
   return (
     <div

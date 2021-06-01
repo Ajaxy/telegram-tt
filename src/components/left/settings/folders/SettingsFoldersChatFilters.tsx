@@ -6,6 +6,7 @@ import { withGlobal } from '../../../../lib/teact/teactn';
 import { GlobalActions } from '../../../../global/types';
 import { ApiChat } from '../../../../api/types';
 
+import useLang from '../../../../hooks/useLang';
 import { pick } from '../../../../util/iteratees';
 import searchWords from '../../../../util/searchWords';
 import { prepareChatList, getChatTitle } from '../../../../modules/helpers';
@@ -49,6 +50,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
 
+  const lang = useLang();
   const chats = useMemo(() => {
     const activeChatArrays = listIds
       ? prepareChatList(chatsById, listIds, orderedPinnedIds, 'all')
@@ -78,11 +80,11 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
     return chats
       .filter((chat) => (
         !chatFilter
-        || searchWords(getChatTitle(chat), chatFilter)
+        || searchWords(getChatTitle(lang, chat), chatFilter)
         || selectedChatIds.includes(chat.id)
       ))
       .map(({ id }) => id);
-  }, [chats, chatFilter, selectedChatIds]);
+  }, [chats, chatFilter, lang, selectedChatIds]);
 
   const handleFilterChange = useCallback((newFilter: string) => {
     dispatch({
