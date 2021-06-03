@@ -15,6 +15,7 @@ import {
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
+import { updateAppBadge } from '../../../util/appBadge';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
@@ -111,6 +112,7 @@ addReducer('signOut', () => {
 
 addReducer('reset', () => {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+  updateAppBadge(0);
 
   cacheApi.clear(MEDIA_CACHE_NAME);
   cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);

@@ -11,10 +11,13 @@ import {
   getPrivateChatUserId,
   isActionMessage,
   isChatChannel,
+  selectIsChatMuted,
 } from '../modules/helpers';
 import { getTranslation } from './langProvider';
 import { replaceSettings } from '../modules/reducers';
-import { selectChatMessage, selectUser } from '../modules/selectors';
+import {
+  selectChatMessage, selectNotifyExceptions, selectNotifySettings, selectUser,
+} from '../modules/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
 
 function getDeviceToken(subscription: PushSubscription) {
@@ -187,12 +190,15 @@ export async function subscribe() {
 }
 
 function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
-  if (chat.isMuted || chat.isNotJoined) return false;
+  const global = getGlobal();
+
+  if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined) {
+    return false;
+  }
 
   // Dont show notification for active chat if client has focus
   if (isActive && document.hasFocus()) return false;
 
-  const global = getGlobal();
   switch (chat.type) {
     case 'chatTypePrivate':
     case 'chatTypeSecret':

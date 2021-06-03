@@ -100,3 +100,8 @@ interface HTMLElement {
   webkitEnterFullscreen?: () => Promise<void>;
   webkitRequestFullscreen?: () => Promise<void>;
 }
+
+interface Navigator {
+  // PWA badging extensions https://w3c.github.io/badging/
+  setAppBadge?(count: number): Promise<void>;
+}

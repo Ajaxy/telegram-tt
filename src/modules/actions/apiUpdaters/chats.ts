@@ -5,6 +5,7 @@ import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { showNewMessageNotification } from '../../../util/notifications';
+import { updateAppBadge } from '../../../util/appBadge';
 import {
   updateChat,
   replaceChatListIds,
@@ -17,12 +18,15 @@ import {
   selectIsChatListed,
   selectChatListType,
   selectCurrentMessageList,
+  selectCountNotMutedUnread,
 } from '../../selectors';
+import { throttle } from '../../../util/schedulers';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
 // Enough to animate and mark as read in Message List
 const CURRENT_CHAT_UNREAD_DELAY = 1000;
+const runThrottledForUpdateAppBadge = throttle((cb) => cb(), CURRENT_CHAT_UNREAD_DELAY, true);
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
@@ -32,8 +36,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         actions.loadTopChats();
       }
 
-      setGlobal(updateChat(global, update.id, update.chat, update.newProfilePhoto));
+      const newGlobal = updateChat(global, update.id, update.chat, update.newProfilePhoto);
+      setGlobal(newGlobal);
 
+      const unreadCount = selectCountNotMutedUnread(newGlobal);
+      runThrottledForUpdateAppBadge(() => updateAppBadge(unreadCount));
       break;
     }
 
@@ -125,6 +132,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
 
+      const unreadCount = selectCountNotMutedUnread(getGlobal());
+      updateAppBadge(unreadCount);
       showNewMessageNotification({ chat, message, isActiveChat });
 
       break;

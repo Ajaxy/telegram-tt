@@ -377,7 +377,7 @@ export function getFolderUnreadDialogs(
 
   const hasActiveDialogs = listedChats.some((chat) => (
     chat.unreadMentionsCount
-    || (!chat.isMuted && (chat.unreadCount || chat.hasUnreadMark))
+    || (!selectIsChatMuted(chat, notifySettings, notifyExceptions) && (chat.unreadCount || chat.hasUnreadMark))
   ));
 
   return {

@@ -2,10 +2,11 @@ import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 import { GlobalState } from '../../global/types';
 
 import {
-  getPrivateChatUserId, isChatChannel, isChatPrivate, isHistoryClearMessage, isUserBot, isUserOnline,
+  getPrivateChatUserId, isChatChannel, isChatPrivate, isHistoryClearMessage, isUserBot, isUserOnline, selectIsChatMuted,
 } from '../helpers';
 import { selectUser } from './users';
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE } from '../../config';
+import { selectNotifyExceptions, selectNotifySettings } from './settings';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -157,7 +158,11 @@ export function selectCountNotMutedUnread(global: GlobalState) {
   return activeChatIds.reduce((acc, chatId) => {
     const chat = chats[chatId];
 
-    if (chat && chat.unreadCount && !chat.isMuted) {
+    if (
+      chat
+      && chat.unreadCount
+      && !selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))
+    ) {
       return acc + chat.unreadCount;
     }
 
