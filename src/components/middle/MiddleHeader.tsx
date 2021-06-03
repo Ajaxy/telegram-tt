@@ -11,6 +11,7 @@ import {
   ApiTypingStatus,
   MAIN_THREAD_ID, ApiUser,
 } from '../../api/types';
+import { NotifyException, NotifySettings } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
@@ -27,6 +28,7 @@ import {
   getMessageKey,
   getChatTitle,
   getSenderTitle,
+  selectIsChatMuted,
 } from '../../modules/helpers';
 import {
   selectChat,
@@ -43,6 +45,8 @@ import {
   selectScheduledIds,
   selectIsInSelectMode,
   selectIsChatWithBot,
+  selectNotifySettings,
+  selectNotifyExceptions,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
@@ -88,6 +92,8 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
   lastSyncTime?: number;
+  notifySettings: NotifySettings;
+  notifyExceptions?: Record<number, NotifyException>;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -115,6 +121,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isChatWithSelf,
   isChatWithBot,
   lastSyncTime,
+  notifySettings,
+  notifyExceptions,
   openChatWithInfo,
   pinMessage,
   focusMessage,
@@ -211,7 +219,9 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       const count = currentChat.unreadCount || 0;
-      if (count && (!currentChat.isMuted || currentChat.unreadMentionsCount)) {
+      if (
+        count && (!selectIsChatMuted(currentChat, notifySettings, notifyExceptions) || currentChat.unreadMentionsCount)
+      ) {
         isActive = true;
       }
 
@@ -226,7 +236,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       isActive,
       totalCount,
     };
-  }, [isLeftColumnHideable, chatsById]);
+  }, [isLeftColumnHideable, chatsById, notifySettings, notifyExceptions]);
 
   const canToolsCollideWithChatInfo = (
     windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
@@ -444,6 +454,8 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),
       lastSyncTime,
+      notifySettings: selectNotifySettings(global),
+      notifyExceptions: selectNotifyExceptions(global),
     };
 
     const messagesById = selectChatMessages(global, chatId);
