@@ -23,9 +23,10 @@ addReducer('initApi', (global: GlobalState, actions) => {
 
   if (!sessionInfo) {
     const legacySessionMainDc = localStorage.getItem(LEGACY_SESSION_KEY);
-    const legacySessionMainDcKey = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
+    const legacySessionMainDcKeyJson = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
 
-    if (legacySessionMainDc && legacySessionMainDcKey) {
+    if (legacySessionMainDc && legacySessionMainDcKeyJson) {
+      const legacySessionMainDcKey = JSON.parse(legacySessionMainDcKeyJson);
       sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
     }
   }
