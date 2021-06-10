@@ -86,7 +86,6 @@
       font-size: 0.875rem !important;
       line-height: 1rem;
       height: 1rem;
-      margin-bottom: 0.125rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -100,7 +99,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin: 0;
+      margin: .125rem 0 0;
     }
   }
 }
