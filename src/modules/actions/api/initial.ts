@@ -122,6 +122,7 @@ addReducer('signOut', () => {
 
 addReducer('reset', () => {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+  localStorage.removeItem(LEGACY_SESSION_KEY);
   updateAppBadge(0);
 
   cacheApi.clear(MEDIA_CACHE_NAME);
