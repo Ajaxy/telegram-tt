@@ -40,6 +40,8 @@ function buildApiChatFieldsFromPeerEntity(
       && { username: peerEntity.username }
     ),
     ...(('verified' in peerEntity) && { isVerified: peerEntity.verified }),
+    ...(('callActive' in peerEntity) && { isCallActive: peerEntity.callActive }),
+    ...(('callNotEmpty' in peerEntity) && { isCallNotEmpty: peerEntity.callNotEmpty }),
     ...((peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel) && {
       ...(peerEntity.participantsCount && { membersCount: peerEntity.participantsCount }),
       joinDate: peerEntity.date,

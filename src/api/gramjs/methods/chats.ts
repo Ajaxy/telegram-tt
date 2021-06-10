@@ -355,6 +355,7 @@ async function getFullChannelInfo(
     canViewParticipants,
     linkedChatId,
     hiddenPrehistory,
+    call,
   } = result.fullChat;
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -387,6 +388,7 @@ async function getFullChannelInfo(
       members,
       kickedMembers,
       adminMembers,
+      groupCallId: call ? call.id.toString() : undefined,
       linkedChatId: linkedChatId ? getApiChatIdFromMtpPeer({ chatId: linkedChatId } as GramJs.TypePeer) : undefined,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],

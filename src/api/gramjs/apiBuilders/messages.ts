@@ -599,6 +599,13 @@ function buildAction(
     const currencySign = getCurrencySign(action.currency);
     const amount = (Number(action.totalAmount) / 100).toFixed(2);
     text = `You successfully transferred ${currencySign}${amount} to shop for %product%`;
+  } else if (action instanceof GramJs.MessageActionGroupCall) {
+    if (action.duration) {
+      const mins = Math.max(Math.round(action.duration / 60), 1);
+      text = `Voice chat ended (${mins} min${mins > 1 ? 's' : ''})`;
+    } else {
+      text = 'Voice chat started';
+    }
   } else {
     text = '%ACTION_NOT_IMPLEMENTED%';
   }

@@ -30,6 +30,10 @@ export interface ApiChat {
   isSupport?: boolean;
   photos?: ApiPhoto[];
 
+  // Calls
+  isCallActive?: boolean;
+  isCallNotEmpty?: boolean;
+
   // Current user permissions
   isNotJoined?: boolean;
   isCreator?: boolean;
@@ -56,6 +60,21 @@ export interface ApiTypingStatus {
   timestamp: number;
 }
 
+export interface ApiTypeGroupCall {
+  joinMuted?: true;
+  canChangeJoinMuted?: true;
+  joinDateAsc?: true;
+  scheduleStartSubscribed?: true;
+  id: number;
+  participantsCount: number;
+  params?: any;
+  title?: string;
+  streamDcId?: number;
+  recordStartDate?: number;
+  scheduleDate?: number;
+  version: number;
+}
+
 export interface ApiChatFullInfo {
   about?: string;
   onlineCount?: number;
@@ -65,6 +84,7 @@ export interface ApiChatFullInfo {
   canViewMembers?: boolean;
   isPreHistoryHidden?: boolean;
   inviteLink?: string;
+  groupCallId?: string;
   slowMode?: {
     seconds: number;
     nextSendDate?: number;
