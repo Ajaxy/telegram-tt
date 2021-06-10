@@ -16,6 +16,7 @@ import {
   getMessageSummaryText,
   getMessageMediaThumbDataUri,
   getMessageVideo,
+  getMessageRoundVideo,
 } from '../../../modules/helpers';
 import { selectChat, selectUser } from '../../../modules/selectors';
 import renderText from '../../common/helpers/renderText';
@@ -57,6 +58,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
+  const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   const handleClick = useCallback(() => {
     focusMessage({ chatId, messageId: message.id });
@@ -96,7 +98,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
         <div className="subtitle">
           <div className="message">
-            {renderMessageSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery)}
+            {renderMessageSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
           </div>
         </div>
       </div>
@@ -104,14 +106,16 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string) {
+function renderMessageSummary(
+  lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
+) {
   if (!blobUrl) {
     return renderText(getMessageSummaryText(lang, message));
   }
 
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" />
+      <img src={blobUrl} alt="" className={isRoundVideo ? 'round' : undefined} />
       {getMessageVideo(message) && <i className="icon-play" />}
       {renderText(getMessageSummaryText(lang, message, true), ['emoji', 'highlight'], { highlight: searchQuery })}
     </span>

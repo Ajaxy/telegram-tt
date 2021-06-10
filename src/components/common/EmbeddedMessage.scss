@@ -97,6 +97,10 @@
     border-radius: .25rem;
     margin-left: .25rem;
     flex-shrink: 0;
+
+    &.round {
+      border-radius: 1rem;
+    }
   }
 
   &.inside-input {

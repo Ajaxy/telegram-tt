@@ -26,6 +26,7 @@ import {
   getMessageVideo,
   getMessageSticker,
   selectIsChatMuted,
+  getMessageRoundVideo,
 } from '../../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
@@ -119,6 +120,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     ? getMessageMediaThumbDataUri(lastMessage)
     : undefined;
   const mediaBlobUrl = useMedia(lastMessage ? getMessageMediaHash(lastMessage, 'micro') : undefined);
+  const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
@@ -229,7 +231,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         {senderName && (
           <span className="sender-name">{renderText(senderName)}</span>
         )}
-        {renderMessageSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail)}
+        {renderMessageSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
   }
@@ -284,14 +286,14 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string) {
+function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
   if (!blobUrl) {
     return renderText(getMessageSummaryText(lang, message));
   }
 
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" />
+      <img src={blobUrl} alt="" className={isRoundVideo ? 'round' : undefined} />
       {getMessageVideo(message) && <i className="icon-play" />}
       {renderText(getMessageSummaryText(lang, message, true))}
     </span>

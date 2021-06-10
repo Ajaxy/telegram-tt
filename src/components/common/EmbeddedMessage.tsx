@@ -7,6 +7,7 @@ import {
   isActionMessage,
   getMessageSummaryText,
   getSenderTitle,
+  getMessageRoundVideo,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
@@ -48,6 +49,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
   const pictogramId = message && `sticker-reply-thumb${message.id}`;
   const mediaThumbnail = useWebpThumbnail(message);
+  const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
 
   const lang = useLang();
 
@@ -59,7 +61,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       className={buildClassName('EmbeddedMessage', className)}
       onClick={message ? onClick : undefined}
     >
-      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl)}
+      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo)}
       <div className="message-text">
         <div className="message-title">{renderText(senderTitle || title || NBSP)}</div>
         <p>
@@ -80,11 +82,19 @@ function renderPictogram(
   id: string | undefined,
   thumbDataUri: string,
   blobUrl?: string,
+  isRoundVideo?: boolean,
 ) {
   const { width, height } = getPictogramDimensions();
 
   return (
-    <img id={id} src={blobUrl || thumbDataUri} width={width} height={height} alt="" />
+    <img
+      id={id}
+      src={blobUrl || thumbDataUri}
+      width={width}
+      height={height}
+      alt=""
+      className={isRoundVideo ? 'round' : ''}
+    />
   );
 }
 
