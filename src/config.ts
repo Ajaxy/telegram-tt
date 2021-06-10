@@ -5,8 +5,7 @@ export const APP_INFO = process.env.APP_INFO || 'Telegram T';
 
 export const DEBUG = (
   process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf' && process.env.APP_ENV !== 'test'
-// Temporary
-) || true;
+);
 export const DEBUG_MORE = false;
 
 export const IS_TEST = process.env.APP_ENV === 'test';
