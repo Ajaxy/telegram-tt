@@ -82,7 +82,7 @@ const MenuItem: FC<OwnProps> = (props) => {
         download={download}
         aria-label={ariaLabel}
         title={ariaLabel}
-        target="_blank"
+        target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
         rel="noopener noreferrer"
       >
         {content}
