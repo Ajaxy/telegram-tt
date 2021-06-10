@@ -21,7 +21,7 @@
   .file-preview {
     width: 3.375rem;
     height: 3.375rem;
-    margin-right: .75rem;
+    margin-inline-end: .75rem;
     border-radius: var(--border-radius-messages-small);
     background: var(--color-primary);
     display: flex;
@@ -83,7 +83,7 @@
     font-size: 1.5rem;
     position: absolute;
     top: 0;
-    left: 0;
+    start: 0;
     width: 3.375rem;
     height: 3.375rem;
     display: flex;
@@ -187,6 +187,22 @@
 
     .file-subtitle {
       line-height: 1rem;
+    }
+  }
+
+  &:dir(rtl) {
+    .file-info {
+      text-align: right;
+
+      & + .Link {
+        padding-left: 0;
+        padding-right: 1rem;
+      }
+    }
+
+    .icon-download {
+      left: auto;
+      right: 0;
     }
   }
 }
