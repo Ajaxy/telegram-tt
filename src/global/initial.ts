@@ -1,6 +1,8 @@
 import { GlobalState } from './types';
 
-import { ANIMATION_LEVEL_DEFAULT, DEFAULT_MESSAGE_TEXT_SIZE_PX, DEFAULT_PATTERN_COLOR } from '../config';
+import {
+  ANIMATION_LEVEL_DEFAULT, DARK_THEME_PATTERN_COLOR, DEFAULT_MESSAGE_TEXT_SIZE_PX, DEFAULT_PATTERN_COLOR,
+} from '../config';
 
 export const INITIAL_STATE: GlobalState = {
   isLeftColumnShown: true,
@@ -100,8 +102,6 @@ export const INITIAL_STATE: GlobalState = {
   settings: {
     byKey: {
       messageTextSize: DEFAULT_MESSAGE_TEXT_SIZE_PX,
-      isBackgroundBlurred: true,
-      patternColor: DEFAULT_PATTERN_COLOR,
       animationLevel: ANIMATION_LEVEL_DEFAULT,
       messageSendKeyCombo: 'enter',
       theme: 'light',
@@ -114,6 +114,16 @@ export const INITIAL_STATE: GlobalState = {
       shouldSuggestStickers: true,
       shouldLoopStickers: true,
       language: 'en',
+    },
+    themes: {
+      light: {
+        isBlurred: true,
+        patternColor: DEFAULT_PATTERN_COLOR,
+      },
+      dark: {
+        isBlurred: true,
+        patternColor: DARK_THEME_PATTERN_COLOR,
+      },
     },
     privacy: {},
     notifyExceptions: {},

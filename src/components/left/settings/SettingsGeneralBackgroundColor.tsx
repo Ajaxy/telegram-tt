@@ -5,7 +5,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { SettingsScreens } from '../../../types';
+import { SettingsScreens, ThemeKey } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import {
@@ -24,10 +24,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  customBackground?: string;
+  backgroundColor?: string;
+  theme: ThemeKey;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setSettingOption'>;
+type DispatchProps = Pick<GlobalActions, 'setThemeSettings'>;
 
 interface CanvasRects {
   colorRect: {
@@ -49,9 +50,12 @@ const PREDEFINED_COLORS = [
 ];
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
-  customBackground,
-  setSettingOption,
+  theme,
+  backgroundColor,
+  setThemeSettings,
 }) => {
+  const themeRef = useRef<string>();
+  themeRef.current = theme;
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -60,7 +64,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   const huePickerRef = useRef<HTMLDivElement>(null);
   const isFirstRunRef = useRef(true);
 
-  const [hsb, setHsb] = useState(getInitialHsb(customBackground));
+  const [hsb, setHsb] = useState(getInitialHsb(backgroundColor));
   // Cache for drag handlers
   const hsbRef = useRef(hsb);
   useEffect(() => {
@@ -139,13 +143,16 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
     setHexInput(color);
 
     if (!isFirstRunRef.current) {
-      setSettingOption({
-        customBackground: color,
-        patternColor: getPatternColor(rgb),
+      const patternColor = getPatternColor(rgb);
+      setThemeSettings({
+        theme: themeRef.current,
+        background: undefined,
+        backgroundColor: color,
+        patternColor,
       });
     }
     isFirstRunRef.current = false;
-  }, [hsb, setSettingOption]);
+  }, [hsb, setThemeSettings]);
 
   // Redraw color picker when hue changes
   useEffect(() => {
@@ -226,9 +233,9 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-function getInitialHsb(customBackground?: string) {
-  return customBackground && customBackground.startsWith('#')
-    ? rgb2hsb(hex2rgb(customBackground.replace('#', '')))
+function getInitialHsb(backgroundColor?: string) {
+  return backgroundColor && backgroundColor.startsWith('#')
+    ? rgb2hsb(hex2rgb(backgroundColor.replace('#', '')))
     : DEFAULT_HSB;
 }
 
@@ -329,9 +336,12 @@ function drawHue(canvas: HTMLCanvasElement) {
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const { theme } = global.settings.byKey;
+    const { backgroundColor } = global.settings.themes[theme] || {};
     return {
-      customBackground: global.settings.byKey.customBackground,
+      backgroundColor,
+      theme,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setSettingOption']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setThemeSettings']),
 )(SettingsGeneralBackground));

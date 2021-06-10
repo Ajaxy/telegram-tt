@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { MAIN_THREAD_ID } from '../../api/types';
 import { GlobalActions, MessageListType } from '../../global/types';
+import { ThemeKey } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
@@ -15,6 +16,8 @@ import {
   CONTENT_TYPES_FOR_QUICK_UPLOAD,
   ANIMATION_LEVEL_MAX,
   ANIMATION_END_DELAY,
+  DARK_THEME_BG_COLOR,
+  LIGHT_THEME_BG_COLOR,
 } from '../../config';
 import { IS_MOBILE_SCREEN, IS_TOUCH_ENV, MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
@@ -59,9 +62,10 @@ type StateProps = {
   messageSendingRestrictionReason?: string;
   hasPinnedOrAudioMessage?: boolean;
   pinnedMessagesCount?: number;
+  theme: ThemeKey;
   customBackground?: string;
+  backgroundColor?: string;
   patternColor?: string;
-  isCustomBackgroundColor?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
   isMobileSearchActive?: boolean;
@@ -88,8 +92,9 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   hasPinnedOrAudioMessage,
   pinnedMessagesCount,
   customBackground,
+  theme,
+  backgroundColor,
   patternColor,
-  isCustomBackgroundColor,
   isRightColumnShown,
   isBackgroundBlurred,
   isMobileSearchActive,
@@ -173,12 +178,12 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     openChat({ id: chatId });
   }, [unpinAllMessages, openChat, closeUnpinModal, chatId]);
 
-  const customBackgroundValue = useCustomBackground(customBackground);
+  const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const className = buildClassName(
     renderingHasTools && 'has-header-tools',
-    customBackground && !isCustomBackgroundColor && 'custom-bg-image',
-    customBackground && isCustomBackgroundColor && 'custom-bg-color',
+    customBackground && 'custom-bg-image',
+    backgroundColor && 'custom-bg-color',
     customBackground && isBackgroundBlurred && 'blurred',
     MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
   );
@@ -219,6 +224,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         --composer-translate-x: ${composerTranslateX}px;
         --toolbar-translate-x: ${toolbarTranslateX}px;
         --pattern-color: ${patternColor};
+        --theme-background-color:
+          ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)};
       `}
     >
       <div
@@ -318,16 +325,19 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { isBackgroundBlurred, customBackground, patternColor } = global.settings.byKey;
+    const { theme } = global.settings.byKey;
+    const {
+      isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
+    } = global.settings.themes[theme] || {};
 
-    const isCustomBackgroundColor = Boolean((customBackground || '').match(/^#[a-f\d]{6,8}$/i));
     const currentMessageList = selectCurrentMessageList(global);
     const { chats: { listIds } } = global;
 
     const state: StateProps = {
+      theme,
       customBackground,
+      backgroundColor,
       patternColor,
-      isCustomBackgroundColor,
       isRightColumnShown: selectIsRightColumnShown(global),
       isBackgroundBlurred,
       isMobileSearchActive: Boolean(IS_MOBILE_SCREEN && selectCurrentTextSearch(global)),

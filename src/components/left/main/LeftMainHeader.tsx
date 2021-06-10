@@ -7,9 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
-import {
-  APP_INFO, DEFAULT_PATTERN_COLOR, FEEDBACK_URL, DARK_THEME_BG_COLOR, DARK_THEME_PATTERN_COLOR,
-} from '../../../config';
+import { APP_INFO, FEEDBACK_URL } from '../../../config';
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
@@ -128,13 +126,8 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLDivElement>) => {
     e.stopPropagation();
     const newTheme = theme === 'light' ? 'dark' : 'light';
-    const isNewThemeDark = newTheme === 'dark';
 
-    setSettingOption({
-      theme: newTheme,
-      customBackground: isNewThemeDark ? DARK_THEME_BG_COLOR : undefined,
-      patternColor: isNewThemeDark ? DARK_THEME_PATTERN_COLOR : DEFAULT_PATTERN_COLOR,
-    });
+    setSettingOption({ theme: newTheme });
     switchTheme(newTheme, animationLevel > 0);
   }, [animationLevel, setSettingOption, theme]);
 

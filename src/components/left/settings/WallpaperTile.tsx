@@ -1,8 +1,8 @@
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useState, useRef,
 } from '../../../lib/teact/teact';
 import { ApiWallpaper } from '../../../api/types';
-import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
+import { ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
 import { CUSTOM_BG_CACHE_NAME } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';
@@ -21,6 +21,7 @@ import './WallpaperTile.scss';
 
 type OwnProps = {
   wallpaper: ApiWallpaper;
+  theme: ThemeKey;
   isSelected: boolean;
   onClick: (slug: string) => void;
 };
@@ -29,11 +30,11 @@ const ANIMATION_DURATION = 300;
 
 const WallpaperTile: FC<OwnProps> = ({
   wallpaper,
+  theme,
   isSelected,
   onClick,
 }) => {
   const { slug, document } = wallpaper;
-
   const localMediaHash = `wallpaper${document.id!}`;
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
@@ -56,11 +57,14 @@ const WallpaperTile: FC<OwnProps> = ({
     wasDownloadDisabled,
     'slow',
   );
+  // To prevent triggering of the effect for useCallback
+  const cacheKeyRef = useRef<string>();
+  cacheKeyRef.current = theme;
 
   const handleSelect = useCallback(() => {
     (async () => {
       const blob = await fetchBlob(fullMedia!);
-      await cacheApi.save(CUSTOM_BG_CACHE_NAME, CUSTOM_BG_CACHE_NAME, blob);
+      await cacheApi.save(CUSTOM_BG_CACHE_NAME, cacheKeyRef.current!, blob);
       onClick(slug);
     })();
   }, [fullMedia, onClick, slug]);

@@ -127,6 +127,7 @@ export const DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'];
 export const TIPS_USERNAME = 'TelegramTips';
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
+export const LIGHT_THEME_BG_COLOR = '#A2AF8E';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0a0a0a8c';
 export const DEFAULT_PATTERN_COLOR = 'rgba(90, 110, 70, 0.6)';

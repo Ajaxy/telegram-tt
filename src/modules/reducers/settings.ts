@@ -1,5 +1,7 @@
 import { GlobalState } from '../../global/types';
-import { ISettings, NotifyException } from '../../types';
+import {
+  ISettings, IThemeSettings, ThemeKey, NotifyException,
+} from '../../types';
 
 export function replaceSettings(global: GlobalState, newSettings?: Partial<ISettings>): GlobalState {
   return {
@@ -9,6 +11,24 @@ export function replaceSettings(global: GlobalState, newSettings?: Partial<ISett
       byKey: {
         ...global.settings.byKey,
         ...newSettings,
+      },
+    },
+  };
+}
+
+export function replaceThemeSettings(
+  global: GlobalState, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
+): GlobalState {
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      themes: {
+        ...global.settings.themes,
+        [theme]: {
+          ...(global.settings.themes[theme] || {}),
+          ...newSettings,
+        },
       },
     },
   };

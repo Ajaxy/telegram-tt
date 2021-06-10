@@ -1,8 +1,12 @@
-import { CUSTOM_BG_CACHE_NAME } from '../config';
-import * as cacheApi from '../util/cacheApi';
 import { useEffect, useState } from '../lib/teact/teact';
 
-export default (settingValue?: string) => {
+import { ThemeKey } from '../types';
+
+import { CUSTOM_BG_CACHE_NAME } from '../config';
+import * as cacheApi from '../util/cacheApi';
+import { preloadImage } from '../util/files';
+
+export default (theme: ThemeKey, settingValue?: string) => {
   const [value, setValue] = useState(settingValue);
 
   useEffect(() => {
@@ -13,12 +17,16 @@ export default (settingValue?: string) => {
     if (settingValue.startsWith('#')) {
       setValue(settingValue);
     } else {
-      cacheApi.fetch(CUSTOM_BG_CACHE_NAME, CUSTOM_BG_CACHE_NAME, cacheApi.Type.Blob)
+      cacheApi.fetch(CUSTOM_BG_CACHE_NAME, theme, cacheApi.Type.Blob)
         .then((blob) => {
-          setValue(`url(${URL.createObjectURL(blob)}`);
+          const url = URL.createObjectURL(blob);
+          preloadImage(url)
+            .then(() => {
+              setValue(`url(${url})`);
+            });
         });
     }
-  }, [settingValue]);
+  }, [settingValue, theme]);
 
-  return value;
+  return settingValue ? value : undefined;
 };

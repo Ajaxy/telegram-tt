@@ -34,6 +34,8 @@ import {
   Receipt,
   ApiPrivacyKey,
   ApiPrivacySettings,
+  ThemeKey,
+  IThemeSettings,
   NotifyException,
 } from '../types';
 
@@ -365,6 +367,7 @@ export type GlobalState = {
   settings: {
     byKey: ISettings;
     loadedWallpapers?: ApiWallpaper[];
+    themes: Partial<Record<ThemeKey, IThemeSettings>>;
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyExceptions?: Record<number, NotifyException>;
   };
@@ -438,7 +441,7 @@ export type ActionTypes = (
   'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations' |
   'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
   'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' | 'setPrivacySettings' |
-  'loadNotificationExceptions' |
+  'loadNotificationExceptions' | 'setThemeSettings' |
   // Stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |

@@ -77,6 +77,10 @@ function readCache(initialState: GlobalState) {
       ...initialState.settings.byKey,
       ...cached.settings.byKey,
     };
+    cached.settings.themes = {
+      ...initialState.settings.themes,
+      ...cached.settings.themes,
+    };
   }
 
   return {
@@ -204,10 +208,11 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 }
 
 function reduceSettings(global: GlobalState): GlobalState['settings'] {
-  const { byKey } = global.settings;
+  const { byKey, themes } = global.settings;
 
   return {
     byKey,
+    themes,
     privacy: {},
     notifyExceptions: {},
   };
