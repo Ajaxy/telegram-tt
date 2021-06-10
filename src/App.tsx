@@ -3,7 +3,9 @@ import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from './global/types';
 
-import { GRAMJS_SESSION_ID_KEY, INACTIVE_MARKER, PAGE_TITLE } from './config';
+import {
+  GRAMJS_SESSION_ID_KEY, INACTIVE_MARKER, LEGACY_SESSION_KEY, PAGE_TITLE,
+} from './config';
 import { pick } from './util/iteratees';
 import { updateSizes } from './util/windowSize';
 import { addActiveTabChangeListener } from './util/activeTabMonitor';
@@ -53,7 +55,10 @@ const App: FC<StateProps & DispatchProps> = ({ authState, disconnect }) => {
     }
   }
 
-  return localStorage.getItem(GRAMJS_SESSION_ID_KEY) ? renderMain() : <Auth />;
+  const hasSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
+  const hasLegacySession = localStorage.getItem(LEGACY_SESSION_KEY);
+
+  return (hasSession || hasLegacySession) ? renderMain() : <Auth />;
 };
 
 function renderMain() {

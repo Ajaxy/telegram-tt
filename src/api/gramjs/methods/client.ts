@@ -27,7 +27,7 @@ let onUpdate: OnApiUpdate;
 let client: TelegramClient;
 let isConnected = false;
 
-export async function init(sessionId: string, _onUpdate: OnApiUpdate) {
+export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 
   if (DEBUG) {
@@ -36,8 +36,8 @@ export async function init(sessionId: string, _onUpdate: OnApiUpdate) {
   }
 
   const session = IS_TEST
-    ? new sessions.LocalStorageSession(sessionId)
-    : new sessions.IdbSession(sessionId);
+    ? new sessions.LocalStorageSession(sessionInfo)
+    : new sessions.IdbSession(sessionInfo);
 
   client = new TelegramClient(
     session,

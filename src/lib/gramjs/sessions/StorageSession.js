@@ -3,12 +3,19 @@ const AuthKey = require('../crypto/AuthKey');
 const utils = require('../Utils');
 
 const STORAGE_KEY_BASE = 'GramJs-session-';
+const SESSION_DATA_PREFIX = 'session:';
 
 class StorageSession extends MemorySession {
-    constructor(sessionId) {
+    constructor(sessionInfo) {
         super();
-        this._storageKey = sessionId;
+
         this._authKeys = {};
+
+        if (sessionInfo && sessionInfo.startsWith(SESSION_DATA_PREFIX)) {
+            void this._initFromSessionData(sessionInfo);
+        } else if (sessionInfo) {
+            this._storageKey = sessionInfo;
+        }
     }
 
     get authKey() {
@@ -85,6 +92,19 @@ class StorageSession extends MemorySession {
         this._authKeys[dcId] = authKey;
 
         void this._updateStorage();
+    }
+
+    async _initFromSessionData(sessionData) {
+        const [, mainDcIdStr, mainDcKey] = sessionData.split(':');
+        const mainDcId = Number(mainDcIdStr);
+        const {
+            ipAddress,
+            port,
+        } = utils.getDC(mainDcId);
+        this.setDC(mainDcId, ipAddress, port);
+        const authKey = new AuthKey();
+        await authKey.setKey(Buffer.from(mainDcKey, 'hex'), true);
+        this.setAuthKey(authKey, mainDcId);
     }
 
     async _updateStorage() {
