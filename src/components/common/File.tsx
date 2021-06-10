@@ -113,7 +113,7 @@ const File: FC<OwnProps> = ({
         ) : (
           <div className={`file-icon ${color}`}>
             {extension.length <= 4 && (
-              <span className="file-ext">{extension}</span>
+              <span className="file-ext" dir="auto">{extension}</span>
             )}
           </div>
         )}
@@ -129,8 +129,8 @@ const File: FC<OwnProps> = ({
         {onClick && <i className={buildClassName('icon-download', shouldSpinnerRender && 'hidden')} />}
       </div>
       <div className="file-info">
-        <div className="file-title">{renderText(name)}</div>
-        <div className="file-subtitle">
+        <div className="file-title" dir="auto">{renderText(name)}</div>
+        <div className="file-subtitle" dir="auto">
           <span>
             {isTransferring && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
           </span>

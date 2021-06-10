@@ -85,7 +85,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     >
       {iconElement}
       {!isMinimized && (
-        <div className="item-name">
+        <div className="item-name" dir="auto">
           {titleText}
         </div>
       )}

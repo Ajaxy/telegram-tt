@@ -95,15 +95,24 @@
   .ListItem.search-result {
     .ChatInfo {
       .handle {
+        unicode-bidi: plaintext;
         color: var(--color-primary);
 
         &::before {
           content: '@';
+          html[lang=ar] & {
+            content: ' ،@';
+            margin-inline-end: .25rem;
+          }
         }
 
         &::after {
           content: ', ';
           color: var(--color-text-secondary);
+
+          html[lang=ar] & {
+            content: '';
+          }
         }
       }
     }

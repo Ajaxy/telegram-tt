@@ -10,6 +10,34 @@
     margin: 0;
     word-break: break-word;
     line-height: 1.3125;
+    text-align: initial;
+    display: flow-root;
+    unicode-bidi: plaintext;
+  }
+
+  .text-entity-link {
+    unicode-bidi: plaintext;
+  }
+
+  .text-content,
+  &.document {
+    & > .MessageMeta {
+      position: relative;
+      top: .4375rem;
+      bottom: auto !important;
+      float: right;
+      line-height: 1;
+      margin-left: .4375rem;
+      margin-right: -.5rem;
+    }
+
+    &:dir(rtl) {
+      & > .MessageMeta {
+        float: left;
+        margin-left: -.25rem;
+        margin-right: .4375rem;
+      }
+    }
   }
 
   .theme-dark .Message.own & {
@@ -24,6 +52,10 @@
 
   &:not(.custom-shape) {
     font-size: var(--message-text-size, 1rem);
+
+    & > .content-inner {
+      min-width: 0;
+    }
   }
 
   .matching-text-highlight {
@@ -40,6 +72,7 @@
     font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
+    unicode-bidi: plaintext;
     display: flex;
 
     & > .interactive {
@@ -94,8 +127,8 @@
 
     .admin-title {
       flex: 1;
-      margin-left: 1rem;
-      text-align: right;
+      margin-inline-start: 1rem;
+      text-align: end;
       font-weight: 400;
       font-size: 0.75rem;
       margin-top: -0.1rem;
@@ -118,7 +151,7 @@
   &.has-solid-background {
     padding: .3125rem .5rem .375rem;
 
-    .text-content:last-child::after {
+    .forwarded-message > .text-content:not(.with-meta):last-child::after {
       content: '';
       display: inline-block;
       width: var(--meta-safe-area-size);
@@ -210,7 +243,7 @@
     width: 1.25rem;
     background-size: 1.25rem;
     color: transparent;
-    margin-right: 1px;
+    margin-inline-end: 1px;
     vertical-align: text-bottom;
 
     &::selection {
@@ -531,8 +564,9 @@
 .text-entity-link {
   color: var(--color-links) !important;
   text-decoration: none;
-  word-break: none;
+  word-break: break-word;
   cursor: pointer;
+  unicode-bidi: initial;
 
   &:hover, &:active, &:visited {
     color: var(--color-links-hover) !important;

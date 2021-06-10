@@ -135,7 +135,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
               checkUsername={checkPublicLink}
               onChange={setUsername}
             />
-            <p className="section-info">
+            <p className="section-info" dir="auto">
               {lang(`${langPrefix2}.Username.CreatePublicLinkHelp`)}
             </p>
           </div>

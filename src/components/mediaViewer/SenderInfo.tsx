@@ -58,10 +58,10 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
         <Avatar key={sender.id} size="medium" user={sender as ApiUser} />
       )}
       <div className="meta">
-        <div className="title">
+        <div className="title" dir="auto">
           {senderTitle && renderText(senderTitle)}
         </div>
-        <div className="date">
+        <div className="date" dir="auto">
           {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(lang, message!.date * 1000)}
         </div>
       </div>

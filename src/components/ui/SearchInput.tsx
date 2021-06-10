@@ -93,6 +93,7 @@ const SearchInput: FC<OwnProps> = ({
         ref={inputRef}
         id={inputId}
         type="text"
+        dir="auto"
         placeholder={placeholder || lang('Search')}
         className="form-control"
         value={value}

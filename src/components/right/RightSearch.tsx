@@ -108,10 +108,10 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <Avatar chat={senderChat} user={senderUser} />
         <div className="info">
           <div className="title">
-            <h3>{title && renderText(title)}</h3>
+            <h3 dir="auto">{title && renderText(title)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <div className="subtitle">
+          <div className="subtitle" dir="auto">
             {renderText(text, ['emoji', 'highlight'], { highlight: query })}
           </div>
         </div>
@@ -127,13 +127,15 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       onLoadMore={searchTextMessagesLocal}
       noFastList
     >
-      <p className="helper-text">
+      <p className="helper-text" dir="auto">
         {!query ? (
-          'Search messages'
+          lang('lng_dlg_search_for_messages')
+        ) : (totalCount === 0 || !foundResults.length) ? (
+          lang('lng_search_no_results')
         ) : totalCount === 1 ? (
           '1 message found'
         ) : (
-          `${(foundResults.length && (totalCount || foundResults.length)) || 'No'} messages found`
+          `${(foundResults.length && (totalCount || foundResults.length))} messages found`
         )}
       </p>
       {foundResults.map(renderSearchResult)}

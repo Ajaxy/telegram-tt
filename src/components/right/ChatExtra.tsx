@@ -86,7 +86,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className="ChatExtra">
       {formattedNumber && !!formattedNumber.length && (
         <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
-          <span className="title">{formattedNumber}</span>
+          <span className="title" dir="auto">{formattedNumber}</span>
           <span className="subtitle">{lang('Phone')}</span>
         </ListItem>
       )}
@@ -98,7 +98,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           ripple
           onClick={() => copy(`@${printedUsername}`, lang('Username'))}
         >
-          <span className="title">{renderText(printedUsername)}</span>
+          <span className="title" dir="auto">{renderText(printedUsername)}</span>
           <span className="subtitle">{lang('Username')}</span>
         </ListItem>
       )}
@@ -109,7 +109,9 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           narrow
           isStatic
         >
-          <span className="title">{renderText(description, ['br', 'links', 'emoji'])}</span>
+          <span className="title" dir="auto">
+            {renderText(description, ['br', 'links', 'emoji'])}
+          </span>
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}

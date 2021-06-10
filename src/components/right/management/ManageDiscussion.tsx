@@ -185,7 +185,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderDiscussionGroups() {
     return (
       <div>
-        <p className="section-help">{lang('DiscussionChannelHelp')}</p>
+        <p className="section-help" dir="auto">{lang('DiscussionChannelHelp')}</p>
 
         <div teactFastList>
           <ListItem
@@ -212,7 +212,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
             <NothingFound key="nothing-found" teactOrderKey={0} text="No discussion groups found" />
           )}
         </div>
-        <p className="mt-4 mb-0 section-help">{lang('DiscussionChannelHelp2')}</p>
+        <p className="mt-4 mb-0 section-help" dir="auto">{lang('DiscussionChannelHelp2')}</p>
         <ConfirmDialog
           isOpen={isConfirmLinkGroupDialogOpen}
           onClose={closeConfirmLinkGroupDialog}

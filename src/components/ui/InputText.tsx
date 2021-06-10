@@ -62,6 +62,7 @@ const InputText: FC<OwnProps> = ({
         className="form-control"
         type="text"
         id={id}
+        dir="auto"
         value={value || ''}
         placeholder={placeholder}
         maxLength={maxLength}

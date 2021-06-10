@@ -102,9 +102,9 @@ function renderAudio(audio: ApiAudio) {
 
   return (
     <>
-      <div className="title">{renderText(title || fileName)}</div>
+      <div className="title" dir="auto">{renderText(title || fileName)}</div>
       {performer && (
-        <div className="subtitle">{renderText(performer)}</div>
+        <div className="subtitle" dir="auto">{renderText(performer)}</div>
       )}
     </>
   );
@@ -113,8 +113,8 @@ function renderAudio(audio: ApiAudio) {
 function renderVoice(subtitle: string, senderName?: string) {
   return (
     <>
-      <div className="title">{senderName && renderText(senderName)}</div>
-      <div className="subtitle">{subtitle}</div>
+      <div className="title" dir="auto">{senderName && renderText(senderName)}</div>
+      <div className="subtitle" dir="auto">{subtitle}</div>
     </>
   );
 }

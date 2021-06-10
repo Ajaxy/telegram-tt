@@ -82,7 +82,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
           </ListItem>
         ))
       ) : viewportIds && !viewportIds.length ? (
-        <p className="no-results" key="no-results">
+        <p className="no-results" key="no-results" dir="auto">
           {filter.length ? 'No contacts matched your search.' : 'Contact list is empty.'}
         </p>
       ) : (

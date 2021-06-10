@@ -121,7 +121,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
         ripple
       >
         <i className={`icon-${type.icon}`} />
-        <h3 className="chat-type">{lang(type.title)}</h3>
+        <h3 className="chat-type" dir="auto">{lang(type.title)}</h3>
         <Checkbox
           label=""
           checked={selectedChatTypes.includes(type.key)}
@@ -179,7 +179,9 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
             placeholder={lang('Search')}
           />
         ) : (
-          <p className="max-items-reached">{`Sorry, you can't add more than ${MAX_CHATS} chats.`}</p>
+          <p className="max-items-reached" dir="auto">
+            {`Sorry, you can't add more than ${MAX_CHATS} chats.`}
+          </p>
         )}
       </div>
       <InfiniteScroll

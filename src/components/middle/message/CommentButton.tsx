@@ -78,7 +78,7 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
       <i className="icon-comments-sticker" />
       {(!recentRepliers || recentRepliers.length === 0) && <i className="icon-comments" />}
       {renderRecentRepliers()}
-      <div className="label">
+      <div className="label" dir="auto">
         {messagesCount ? lang('Comments', messagesCount, 'i') : lang('LeaveAComment')}
       </div>
       <i className="icon-next" />

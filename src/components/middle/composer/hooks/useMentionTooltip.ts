@@ -73,6 +73,7 @@ export default function useMentionTooltip(
           data-entity-type="${ApiMessageEntityTypes.MentionName}"
           data-user-id="${user.id}"
           contenteditable="false"
+          dir="auto"
         >${getUserFirstOrLastName(user)}</a>`;
 
     const atIndex = html.lastIndexOf('@');

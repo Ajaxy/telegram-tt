@@ -72,6 +72,7 @@ const WebPage: FC<OwnProps> = ({
     <div
       className={className}
       data-initial={(siteName || displayUrl)[0]}
+      dir="auto"
     >
       {photo && (
         <Photo

@@ -67,13 +67,13 @@ const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
         style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
       >
         <Avatar size="medium" user={user} chat={chat} />
-        <div className="contact-info">
-          <h3>{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
+        <div className="contact-info" dir="auto">
+          <h3 dir="auto">{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
           {user && user.phoneNumber && (
-            <div className="contact-phone">{formatPhoneNumberWithCode(user.phoneNumber)}</div>
+            <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(user.phoneNumber)}</div>
           )}
           {user && !user.phoneNumber && user.username && (
-            <div className="contact-username">@{user.username}</div>
+            <div className="contact-username" dir="auto">@{user.username}</div>
           )}
         </div>
       </ListItem>

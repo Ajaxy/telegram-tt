@@ -1,5 +1,6 @@
 .Poll {
   min-width: 15rem;
+  text-align: initial;
 
   @media (max-width: 600px) {
     min-width: 50vw;

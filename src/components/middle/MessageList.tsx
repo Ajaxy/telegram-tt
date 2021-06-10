@@ -702,7 +702,7 @@ function renderMessages(
         teactFastList
       >
         <div className="sticky-date" key="date-header">
-          <span>
+          <span dir="auto">
             {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
               lang('MessageScheduledUntilOnline')
             )}

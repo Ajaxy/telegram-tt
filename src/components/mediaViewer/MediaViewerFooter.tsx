@@ -46,7 +46,7 @@ const MediaViewerFooter: FC<OwnProps> = ({ text = '', isHideable, onClick }) => 
     <div className={`MediaViewerFooter ${isHideable ? 'hideable' : ''}`} onClick={stopEvent}>
       {text && (
         <div className="media-viewer-footer-content" onClick={onClick}>
-          <p className={`media-text custom-scroll ${isMultiline ? 'multiline' : ''}`}>{text}</p>
+          <p className={`media-text custom-scroll ${isMultiline ? 'multiline' : ''}`} dir="auto">{text}</p>
         </div>
       )}
     </div>

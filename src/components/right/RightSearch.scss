@@ -8,5 +8,7 @@
     margin-bottom: 0.125rem;
     font-weight: 500;
     color: var(--color-text-secondary);
+    unicode-bidi: plaintext;
+    text-align: initial;
   }
 }

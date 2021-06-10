@@ -193,7 +193,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (draft && draft.text.length) {
       return (
-        <p className="last-message">
+        <p className="last-message" dir="auto">
           <span className="draft">{lang('Draft')}</span>
           {renderText(draft.text)}
         </p>
@@ -210,7 +210,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         : lastMessageSender;
 
       return (
-        <p className="last-message">
+        <p className="last-message" dir="auto">
           {renderText(renderActionMessageText(
             lang,
             lastMessage,
@@ -227,7 +227,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
 
     return (
-      <p className="last-message">
+      <p className="last-message" dir="auto">
         {senderName && (
           <span className="sender-name">{renderText(senderName)}</span>
         )}

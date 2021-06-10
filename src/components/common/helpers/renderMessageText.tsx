@@ -229,6 +229,7 @@ function processEntity(
         <a
           onClick={handleBotCommandClick}
           className="text-entity-link"
+          dir="auto"
         >
           {renderMessagePart(renderedContent)}
         </a>
@@ -238,6 +239,7 @@ function processEntity(
         <a
           onClick={handleHashtagClick}
           className="text-entity-link"
+          dir="auto"
         >
           {renderMessagePart(renderedContent)}
         </a>
@@ -247,6 +249,7 @@ function processEntity(
         <a
           onClick={handleHashtagClick}
           className="text-entity-link"
+          dir="auto"
         >
           {renderMessagePart(renderedContent)}
         </a>
@@ -260,6 +263,7 @@ function processEntity(
           target="_blank"
           rel="noopener noreferrer"
           className="text-entity-link"
+          dir="auto"
         >
           {renderMessagePart(renderedContent)}
         </a>
@@ -385,6 +389,7 @@ function processEntityAsHtml(
         data-entity-type="${ApiMessageEntityTypes.MentionName}"
         data-user-id="${entity.userId}"
         contenteditable="false"
+        dir="auto"
       >${renderedContent}</a>`;
     case ApiMessageEntityTypes.Url:
     case ApiMessageEntityTypes.TextUrl:
@@ -392,6 +397,7 @@ function processEntityAsHtml(
         class="text-entity-link"
         href=${getLinkUrl(rawEntityText, entity)}
         data-entity-type="${entity.type}"
+        dir="auto"
       >${renderedContent}</a>`;
     default:
       return renderedContent;
