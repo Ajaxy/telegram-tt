@@ -22,6 +22,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+[class^="icon-char-"], [class*=" icon-char-"] {
+  &::before {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    content: attr(data-char);
+    width: 1.5rem;
+    text-align: center;
+    display: block;
+  }
+}
+
 .icon-bug:before {
   content: "\e97e";
 }
