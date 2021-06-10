@@ -13,7 +13,7 @@ import useMedia from '../../../hooks/useMedia';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
-import useBlur from '../../../hooks/useBlur';
+import useCanvasBlur from '../../../hooks/useCanvasBlur';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -26,8 +26,6 @@ type OwnProps = {
   onClick: (slug: string) => void;
 };
 
-const ANIMATION_DURATION = 300;
-
 const WallpaperTile: FC<OwnProps> = ({
   wallpaper,
   theme,
@@ -38,10 +36,10 @@ const WallpaperTile: FC<OwnProps> = ({
   const localMediaHash = `wallpaper${document.id!}`;
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
-  const thumbDataUri = useBlur(
+  const thumbRef = useCanvasBlur(
     document.thumbnail && document.thumbnail.dataUri,
     Boolean(previewBlobUrl),
-    ANIMATION_DURATION,
+    true,
   );
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
@@ -92,10 +90,9 @@ const WallpaperTile: FC<OwnProps> = ({
     <div className={className} onClick={handleClick}>
       <div className="media-inner">
         {shouldRenderThumb && (
-          <img
-            src={thumbDataUri}
+          <canvas
+            ref={thumbRef}
             className="thumbnail"
-            alt=""
           />
         )}
         {shouldRenderFullMedia && (

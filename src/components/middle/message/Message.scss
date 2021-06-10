@@ -436,6 +436,10 @@
   border-bottom-right-radius: var(--border-bottom-right-radius);
 }
 
+.media-inner video.full-media {
+  background: transparent !important;
+}
+
 .media-inner {
   overflow: hidden;
 

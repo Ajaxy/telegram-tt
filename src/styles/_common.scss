@@ -16,14 +16,8 @@
     background-size: contain;
   }
 
-  .thumbnail ~ .full-media, .media-loading {
+  .thumbnail ~ .thumbnail, .thumbnail ~ .full-media, .media-loading {
     position: absolute;
-  }
-
-  .thumbnail {
-    &.empty {
-      visibility: hidden;
-    }
   }
 }
 
