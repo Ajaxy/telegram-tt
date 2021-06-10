@@ -52,6 +52,11 @@
     }
   }
 
+  .status {
+    position: relative;
+    flex-shrink: 0;
+  }
+
   .info {
     .title, .subtitle {
       padding-right: .125rem;
