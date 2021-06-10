@@ -52,6 +52,9 @@ type DispatchProps = Pick<GlobalActions, (
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
+const LEGACY_VERSION = 'https://web.telegram.org/';
+const WEBK_VERSION = 'https://web.telegram.org/k/';
+
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
   contactsFilter,
@@ -220,6 +223,18 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             href={FEEDBACK_URL}
           >
             Report Bug
+          </MenuItem>
+          <MenuItem
+            icon="char-K"
+            href={WEBK_VERSION}
+          >
+            Switch to WebK
+          </MenuItem>
+          <MenuItem
+            icon="char-W"
+            href={LEGACY_VERSION}
+          >
+            Switch to Webogram
           </MenuItem>
         </DropdownMenu>
         <SearchInput
