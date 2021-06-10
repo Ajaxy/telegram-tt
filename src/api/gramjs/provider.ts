@@ -16,7 +16,7 @@ import * as methods from './methods';
 
 let onUpdate: OnApiUpdate;
 
-export async function initApi(_onUpdate: OnApiUpdate, sessionId = '') {
+export async function initApi(_onUpdate: OnApiUpdate, sessionInfo = '') {
   onUpdate = _onUpdate;
 
   initUpdater(handleUpdate);
@@ -28,7 +28,7 @@ export async function initApi(_onUpdate: OnApiUpdate, sessionId = '') {
   initManagement(handleUpdate);
   initTwoFaSettings(handleUpdate);
 
-  await initClient(sessionId, handleUpdate);
+  await initClient(sessionInfo, handleUpdate);
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {

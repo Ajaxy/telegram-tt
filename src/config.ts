@@ -15,6 +15,7 @@ export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the err
 export const DEBUG_GRAMJS = false;
 
 export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
+export const LEGACY_SESSION_KEY = 'dc';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';

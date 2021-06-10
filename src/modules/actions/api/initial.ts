@@ -11,6 +11,7 @@ import {
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
+  LEGACY_SESSION_KEY,
 } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
@@ -18,9 +19,18 @@ import * as cacheApi from '../../../util/cacheApi';
 import { updateAppBadge } from '../../../util/appBadge';
 
 addReducer('initApi', (global: GlobalState, actions) => {
-  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
+  let sessionInfo = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
 
-  void initApi(actions.apiUpdate, sessionId);
+  if (!sessionInfo) {
+    const legacySessionMainDc = localStorage.getItem(LEGACY_SESSION_KEY);
+    const legacySessionMainDcKey = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
+
+    if (legacySessionMainDc && legacySessionMainDcKey) {
+      sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
+    }
+  }
+
+  void initApi(actions.apiUpdate, sessionInfo);
 });
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
