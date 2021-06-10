@@ -29,7 +29,7 @@ const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
       <div className="settings-content-header">
         <AnimatedEmoji sticker={animatedEmoji} />
 
-        <p className="settings-item-description mb-3">
+        <p className="settings-item-description mb-3" dir="auto">
           {renderText(lang('EnabledPasswordText'), ['br'])}
         </p>
       </div>

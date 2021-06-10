@@ -139,7 +139,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
           )}
         </div>
 
-        <p className="settings-item-description mb-3">
+        <p className="settings-item-description mb-3" dir="auto">
           {lang('CreateNewFilterInfo')}
         </p>
 

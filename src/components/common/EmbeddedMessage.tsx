@@ -63,8 +63,8 @@ const EmbeddedMessage: FC<OwnProps> = ({
     >
       {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo)}
       <div className="message-text">
-        <div className="message-title">{renderText(senderTitle || title || NBSP)}</div>
-        <p>
+        <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
+        <p dir="auto">
           {!message ? (
             customText || NBSP
           ) : isActionMessage(message) ? (

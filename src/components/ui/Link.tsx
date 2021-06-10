@@ -20,6 +20,7 @@ const Link: FC<OwnProps> = ({ children, className, onClick }) => {
     <a
       href="#"
       className={buildClassName('Link', className)}
+      dir="auto"
       onClick={onClick ? handleClick : undefined}
     >
       {children}

@@ -84,7 +84,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderStatusOrTyping() {
     if (withUpdatingStatus && !areMessagesLoaded && !isRestricted) {
       return (
-        <span className="status">{lang('Updating')}</span>
+        <span className="status" dir="auto">{lang('Updating')}</span>
       );
     }
 
@@ -98,7 +98,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (withChatType) {
       return (
-        <div className="status">{lang(getChatTypeString(chat))}</div>
+        <div className="status" dir="auto">{lang(getChatTypeString(chat))}</div>
       );
     }
 
@@ -125,7 +125,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       />
       <div className="info">
         <div className="title">
-          <h3>{renderText(getChatTitle(lang, chat))}</h3>
+          <h3 dir="auto">{renderText(getChatTitle(lang, chat))}</h3>
           {chat.isVerified && <VerifiedIcon />}
         </div>
         {renderStatusOrTyping()}

@@ -44,6 +44,10 @@
   .option-wrapper {
     position: relative;
 
+    .form-control {
+      padding-right: 3rem;
+    }
+
     .option-remove-button {
       position: absolute;
       top: 0.3125rem;

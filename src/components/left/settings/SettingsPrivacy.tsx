@@ -74,7 +74,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('BlockedUsers')}</span>
             {blockedCount > 0 && (
-              <span className="subtitle">
+              <span className="subtitle" dir="auto">
                 {lang('Users', blockedCount)}
               </span>
             )}
@@ -89,7 +89,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('TwoStepVerification')}</span>
-            <span className="subtitle">{lang(hasPassword ? 'PasswordOn' : 'PasswordOff')}</span>
+            <span className="subtitle" dir="auto">
+              {lang(hasPassword ? 'PasswordOn' : 'PasswordOff')}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -100,7 +102,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('SessionsTitle')}</span>
             {sessionsCount > 0 && (
-              <span className="subtitle">
+              <span className="subtitle" dir="auto">
                 {sessionsCount === 1 ? '1 session' : `${sessionsCount} sessions`}
               </span>
             )}
@@ -117,7 +119,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyPhoneTitle')}</span>
-            <span className="subtitle">{getVisibilityValue(visibilityPrivacyPhoneNumber)}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(visibilityPrivacyPhoneNumber)}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -126,7 +130,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('LastSeenTitle')}</span>
-            <span className="subtitle">{getVisibilityValue(visibilityPrivacyLastSeen)}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(visibilityPrivacyLastSeen)}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -135,7 +141,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyProfilePhotoTitle')}</span>
-            <span className="subtitle">{getVisibilityValue(visibilityPrivacyProfilePhoto)}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(visibilityPrivacyProfilePhoto)}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -144,7 +152,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyForwardsTitle')}</span>
-            <span className="subtitle">{getVisibilityValue(visibilityPrivacyForwarding)}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(visibilityPrivacyForwarding)}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -153,7 +163,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('WhoCanAddMe')}</span>
-            <span className="subtitle">{getVisibilityValue(visibilityPrivacyGroupChats)}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(visibilityPrivacyGroupChats)}
+            </span>
           </div>
         </ListItem>
       </div>

@@ -256,7 +256,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="Poll">
+    <div className="Poll" dir="auto">
       {renderSolution()}
       <div className="poll-question">{renderText(summary.question)}</div>
       <div className="poll-type">

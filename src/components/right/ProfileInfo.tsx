@@ -157,13 +157,13 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     if (user) {
       return (
         <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
-          <span className="user-status">{getUserStatus(lang, user)}</span>
+          <span className="user-status" dir="auto">{getUserStatus(lang, user)}</span>
         </div>
       );
     }
 
     return (
-      <span className="status">{
+      <span className="status" dir="auto">{
         isChatChannel(chat!)
           ? lang('Subscribers', chat!.membersCount, 'i')
           : lang('Members', chat!.membersCount, 'i')
@@ -203,11 +203,11 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="info">
         {isSavedMessages ? (
           <div className="title">
-            <h3>{lang('SavedMessages')}</h3>
+            <h3 dir="auto">{lang('SavedMessages')}</h3>
           </div>
         ) : (
           <div className="title">
-            <h3>{fullName && renderText(fullName)}</h3>
+            <h3 dir="auto">{fullName && renderText(fullName)}</h3>
             {isVerifiedIconShown && <VerifiedIcon />}
           </div>
         )}

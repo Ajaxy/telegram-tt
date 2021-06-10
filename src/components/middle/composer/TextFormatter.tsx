@@ -258,7 +258,7 @@ const TextFormatter: FC<OwnProps> = ({
     }
 
     const text = getSelectedText();
-    document.execCommand('insertHTML', false, `<code class="text-entity-code">${text}</code>`);
+    document.execCommand('insertHTML', false, `<code class="text-entity-code" dir="auto">${text}</code>`);
     onClose();
   }, [
     getSelectedElement, getSelectedText, onClose,
@@ -282,7 +282,11 @@ const TextFormatter: FC<OwnProps> = ({
 
     const text = getSelectedText();
     restoreSelection();
-    document.execCommand('insertHTML', false, `<a href=${formattedLinkUrl} class="text-entity-link">${text}</a>`);
+    document.execCommand(
+      'insertHTML',
+      false,
+      `<a href=${formattedLinkUrl} class="text-entity-link" dir="auto">${text}</a>`,
+    );
     onClose();
   }
 
@@ -424,6 +428,7 @@ const TextFormatter: FC<OwnProps> = ({
               placeholder="Enter URL..."
               autoComplete="off"
               inputMode="url"
+              dir="auto"
               onChange={handleLinkUrlChange}
               onScroll={updateInputStyles}
             />

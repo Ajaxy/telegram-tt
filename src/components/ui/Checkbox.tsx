@@ -67,8 +67,8 @@ const Checkbox: FC<OwnProps> = ({
         onChange={handleChange}
       />
       <div className="Checkbox-main">
-        <span className="label">{label}</span>
-        {subLabel && <span className="subLabel">{subLabel}</span>}
+        <span className="label" dir="auto">{label}</span>
+        {subLabel && <span className="subLabel" dir="auto">{subLabel}</span>}
       </div>
       {isLoading && <Spinner />}
     </label>

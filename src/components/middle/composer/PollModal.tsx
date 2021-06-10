@@ -337,6 +337,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
               ref={solutionRef}
               className="form-control"
               contentEditable
+              dir="auto"
               onChange={(e) => setSolution(e.currentTarget.innerHTML)}
             />
             <div className="note">{lang('CreatePoll.ExplanationInfo')}</div>

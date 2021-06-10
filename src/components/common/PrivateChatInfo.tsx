@@ -83,13 +83,13 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderStatusOrTyping() {
     if (status) {
       return (
-        <span className="status">{status}</span>
+        <span className="status" dir="auto">{status}</span>
       );
     }
 
     if (withUpdatingStatus && !areMessagesLoaded) {
       return (
-        <span className="status">{lang('Updating')}</span>
+        <span className="status" dir="auto">{lang('Updating')}</span>
       );
     }
 
@@ -104,7 +104,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
         {withUsername && user.username && <span className="handle">{user.username}</span>}
-        <span className="user-status">{getUserStatus(lang, user)}</span>
+        <span className="user-status" dir="auto">{getUserStatus(lang, user)}</span>
       </div>
     );
   }
@@ -125,7 +125,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         ) : (
           <div className="title">
-            <h3>{fullName && renderText(fullName)}</h3>
+            <h3 dir="auto">{fullName && renderText(fullName)}</h3>
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}

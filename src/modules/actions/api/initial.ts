@@ -120,6 +120,12 @@ addReducer('reset', () => {
   cacheApi.clear(CUSTOM_BG_CACHE_NAME);
   cacheApi.clear(LANG_CACHE_NAME);
 
+  const langChachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
+  const langCacheVersion = (LANG_CACHE_NAME.match(/\d+$/) || [0])[0];
+  for (let i = 0; i < langCacheVersion; i++) {
+    cacheApi.clear(`${langChachePrefix}${i === 0 ? '' : i}`);
+  }
+
   getDispatch().init();
 });
 

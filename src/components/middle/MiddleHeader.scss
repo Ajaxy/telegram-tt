@@ -226,6 +226,7 @@
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    unicode-bidi: plaintext;
 
     @media (max-width: 600px) {
       display: block;
@@ -263,6 +264,10 @@
         margin-left: 0.25rem;
         margin-top: 0.05rem;
       }
+    }
+
+    .user-status, .status {
+      unicode-bidi: plaintext;
     }
   }
 

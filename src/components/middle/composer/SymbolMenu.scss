@@ -122,6 +122,12 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    text-align: initial;
+    unicode-bidi: plaintext;
+  }
+
+  &-container {
+    text-align: initial;
   }
 
   &-button {

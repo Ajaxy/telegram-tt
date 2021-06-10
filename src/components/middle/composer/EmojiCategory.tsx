@@ -47,7 +47,9 @@ const EmojiCategory: FC<OwnProps> = ({
       id={`emoji-category-${index}`}
       className="symbol-set"
     >
-      <p className="symbol-set-name">{lang(category.id === 'recent' ? 'RecentStickers' : `Emoji${index}`)}</p>
+      <p className="symbol-set-name" dir="auto">
+        {lang(category.id === 'recent' ? 'RecentStickers' : `Emoji${index}`)}
+      </p>
       <div
         className={buildClassName('symbol-set-container', transitionClassNames)}
         // @ts-ignore

@@ -116,7 +116,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
         {voters && renderViewMoreButton()}
       </div>
       <div className="answer-head">
-        <span className="answer-title">{text}</span>
+        <span className="answer-title" dir="auto">{text}</span>
         <span className="answer-percent">{getPercentage(answerVote.votersCount, totalVoters)}%</span>
       </div>
     </div>

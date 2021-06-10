@@ -200,8 +200,8 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
         <div className="section">
           <ListItem icon="group" multiline ripple onClick={handleClickSubscribers}>
-            <span className="title">{lang('ChannelSubscribers')}</span>
-            <span className="subtitle">{lang('Subscribers', chat.membersCount!, 'i')}</span>
+            <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
+            <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount!, 'i')}</span>
           </ListItem>
         </div>
         <div className="section">

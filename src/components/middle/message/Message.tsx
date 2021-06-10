@@ -503,9 +503,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup && !textParts && !asForwarded && !hasThread;
+    const shouldInlineMeta = !webPage && !animatedEmoji && textParts;
 
     return (
-      <div className={className} onDoubleClick={handleContentDoubleClick}>
+      <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
         {renderSenderName()}
         {hasReply && (
           <EmbeddedMessage
@@ -605,7 +606,19 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
-        {!animatedEmoji && textParts && <p className="text-content">{textParts}</p>}
+        {!animatedEmoji && textParts && (
+          <p className={`text-content ${shouldInlineMeta ? 'with-meta' : ''}`} dir="auto">
+            {textParts}
+            {shouldInlineMeta && (
+              <MessageMeta
+                message={message}
+                outgoingStatus={outgoingStatus}
+                signature={signature}
+                onClick={handleMessageSelect}
+              />
+            )}
+          </p>
+        )}
         {webPage && (
           <WebPage
             message={message}
@@ -737,13 +750,14 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           className={contentClassName}
           // @ts-ignore
           style={style}
+          dir="auto"
         >
           {withAppendix && (<div className="svg-appendix" ref={appendixRef} />)}
           {asForwarded && !customShape && (!isInDocumentGroup || isFirstInDocumentGroup) && (
             <div className="message-title">{lang('ForwardedMessage')}</div>
           )}
           {renderContent()}
-          {(!isInDocumentGroup || isLastInDocumentGroup) && (
+          {(!isInDocumentGroup || isLastInDocumentGroup) && !(!webPage && !animatedEmoji && textParts) && (
             <MessageMeta
               message={message}
               outgoingStatus={outgoingStatus}

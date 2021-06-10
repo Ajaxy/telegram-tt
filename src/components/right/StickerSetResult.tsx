@@ -80,8 +80,8 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
     <div key={set.id} className="sticker-set">
       <div className="sticker-set-header">
         <div className="title-wrapper">
-          <h3 className="title">{set.title}</h3>
-          <p className="count">{lang('Stickers', set.count, 'i')}</p>
+          <h3 className="title" dir="auto">{set.title}</h3>
+          <p className="count" dir="auto">{lang('Stickers', set.count, 'i')}</p>
         </div>
         <Button
           className={isAdded ? 'is-added' : undefined}

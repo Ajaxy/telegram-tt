@@ -82,6 +82,7 @@
       padding-right: 0.25rem;
       flex-grow: 1;
       color: var(--color-text-secondary);
+      unicode-bidi: plaintext;
 
       .sender-name {
         color: var(--color-text);

@@ -256,6 +256,8 @@
     overflow: hidden;
     line-height: 1.375rem;
     font-family: Roboto, -apple-system, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+    unicode-bidi: plaintext;
+    text-align: initial;
 
     &.overflown {
       overflow-y: auto;
@@ -278,6 +280,8 @@
     bottom: .9375rem;
     color: var(--color-placeholders);
     pointer-events: none;
+    unicode-bidi: plaintext;
+    text-align: initial;
 
     @media (max-width: 600px) {
       bottom: 0.6875rem;
@@ -301,6 +305,8 @@
     opacity: 0;
     pointer-events: none;
     z-index: -10;
+    unicode-bidi: plaintext;
+    text-align: initial;
   }
 }
 

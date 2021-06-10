@@ -356,6 +356,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={inputRef}
         id={editableInputId || EDITABLE_INPUT_ID}
         className={className}
+        dir="auto"
         contentEditable
         onClick={focusInput}
         onChange={handleChange}
@@ -364,8 +365,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         onContextMenu={stopEvent}
         onTouchCancel={handleTouchSelection}
       />
-      <div ref={cloneRef} className={buildClassName(className, 'clone')} />
-      <span className="placeholder-text">{placeholder}</span>
+      <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
+      <span className="placeholder-text" dir="auto">{placeholder}</span>
       <TextFormatter
         isOpen={isTextFormatterOpen}
         anchorPosition={textFormatterAnchorPosition}

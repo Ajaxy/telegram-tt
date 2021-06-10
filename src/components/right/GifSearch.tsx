@@ -80,7 +80,7 @@ const GifSearch: FC<StateProps & DispatchProps> = ({
 
     if (!results.length) {
       return (
-        <p className="helper-text">{lang('NoGIFsFound')}</p>
+        <p className="helper-text" dir="auto">{lang('NoGIFsFound')}</p>
       );
     }
 

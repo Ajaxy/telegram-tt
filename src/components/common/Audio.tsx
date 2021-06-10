@@ -237,7 +237,7 @@ const Audio: FC<OwnProps & StateProps> = ({
       <>
         <div className={contentClassName}>
           <div className="content-row">
-            <p className="title">{renderText(getFirstLine())}</p>
+            <p className="title" dir="auto">{renderText(getFirstLine())}</p>
 
             <div className="message-date">
               {date && (
@@ -253,7 +253,7 @@ const Audio: FC<OwnProps & StateProps> = ({
 
           {showSeekline && renderSeekline(playProgress, bufferedProgress, seekHandlers)}
           {!showSeekline && (
-            <p className="duration">
+            <p className="duration" dir="auto">
               {playProgress > 0 ? `${formatMediaDuration(duration * playProgress)} / ` : undefined}
               {getSecondLine()}
             </p>
@@ -318,10 +318,10 @@ function renderAudio(
 
   return (
     <div className="content">
-      <p className="title">{renderText(title || fileName)}</p>
+      <p className="title" dir="auto">{renderText(title || fileName)}</p>
       {showSeekline && renderSeekline(playProgress, bufferedProgress, seekHandlers)}
       {!showSeekline && (
-        <div className="meta">
+        <div className="meta" dir="auto">
           <span className="performer">{renderText(performer || 'Unknown')}</span>
           {date && (
             <>
@@ -333,7 +333,7 @@ function renderAudio(
           )}
         </div>
       )}
-      <p className="duration">
+      <p className="duration" dir="auto">
         {playProgress > 0 ? `${formatMediaDuration(duration * playProgress)} / ` : undefined}
         {formatMediaDuration(duration)}
       </p>
@@ -345,7 +345,7 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, isMediaUnread?: boo
   return (
     <div className="content">
       {renderedWaveform}
-      <p className="voice-duration">
+      <p className="voice-duration" dir="auto">
         {formatMediaDuration(voice.duration)}
         {isMediaUnread && <span>&bull;</span>}
       </p>

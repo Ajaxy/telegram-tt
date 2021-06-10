@@ -35,7 +35,7 @@ const MentionLink: FC<OwnProps & StateProps & DispatchProps> = ({
   };
 
   return (
-    <a onClick={handleClick} className="text-entity-link">
+    <a onClick={handleClick} className="text-entity-link" dir="auto">
       {children}
     </a>
   );

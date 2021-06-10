@@ -22,6 +22,7 @@ type VirtualDomHead = {
 };
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
+const HTML_ATTRIBUTES = new Set(['dir']);
 const MAPPED_ATTRIBUTES: { [k: string]: string } = {
   autoPlay: 'autoplay',
   autoComplete: 'autocomplete',
@@ -428,7 +429,7 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
     element.style.cssText = value;
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value);
-  } else if (key.startsWith('data-')) {
+  } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
@@ -444,7 +445,7 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     element.style.cssText = '';
   } else if (key.startsWith('on')) {
     removeEventListener(element, key, value);
-  } else if (key.startsWith('data-')) {
+  } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
     element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     delete (element as any)[MAPPED_ATTRIBUTES[key] || key];

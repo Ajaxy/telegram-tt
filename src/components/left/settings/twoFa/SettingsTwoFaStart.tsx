@@ -25,7 +25,7 @@ const SettingsTwoFaStart: FC<OwnProps & StateProps> = ({ animatedEmoji, onStart 
       <div className="settings-content-header">
         <AnimatedEmoji sticker={animatedEmoji} />
 
-        <p className="settings-item-description mb-3">
+        <p className="settings-item-description mb-3" dir="auto">
           {lang('SetAdditionalPasswordInfo')}
         </p>
       </div>

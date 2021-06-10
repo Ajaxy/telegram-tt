@@ -86,7 +86,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="info">
         <div className="info-row">
           <div className="title">
-            <h3>{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
+            <h3 dir="auto">{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
             {chat.isVerified && <VerifiedIcon />}
           </div>
           <div className="message-date">
@@ -97,7 +97,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
 
         </div>
         <div className="subtitle">
-          <div className="message">
+          <div className="message" dir="auto">
             {renderMessageSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
           </div>
         </div>

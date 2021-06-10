@@ -35,7 +35,7 @@ const PollResults: FC<StateProps> = ({
 
   return (
     <div className="PollResults">
-      <h3 className="poll-question">{summary.question}</h3>
+      <h3 className="poll-question" dir="auto">{summary.question}</h3>
       <div className="poll-results-list custom-scroll">
         {lastSyncTime && summary.answers.map((answer) => (
           <PollAnswerResults

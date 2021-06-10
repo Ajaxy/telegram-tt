@@ -86,7 +86,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
         </div>
 
         <div className="section">
-          <p className="text-muted">
+          <p className="text-muted" dir="auto">
             {isChannel
               ? 'You can add administrators to help you manage your channel.'
               : 'You can add administrators to help you manage your group.'}

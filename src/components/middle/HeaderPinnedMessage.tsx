@@ -86,10 +86,10 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
         />
         {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
         <div className="message-text">
-          <div className="title">
+          <div className="title" dir="auto">
             {customTitle || `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
           </div>
-          <p>{renderText(text)}</p>
+          <p dir="auto">{renderText(text)}</p>
         </div>
 
         <RippleEffect />

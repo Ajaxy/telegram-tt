@@ -13,6 +13,7 @@
   color: var(--color-text);
   --ripple-color: rgba(0, 0, 0, .08);
   cursor: pointer;
+  unicode-bidi: plaintext;
 
   &:hover, &:focus {
     background-color: var(--color-chat-hover);
