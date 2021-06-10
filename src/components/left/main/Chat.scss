@@ -110,6 +110,10 @@
         border-radius: .125rem;
         vertical-align: -.25rem;
         margin-right: .25rem;
+
+        &.round {
+          border-radius: .625rem;
+        }
       }
 
       .emoji-small {
