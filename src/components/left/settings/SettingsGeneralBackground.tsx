@@ -1,17 +1,17 @@
 import React, {
-  FC, memo, useEffect, useCallback,
+  FC, memo, useEffect, useCallback, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
+import { SettingsScreens, ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { ApiWallpaper } from '../../../api/types';
 
-import { DEFAULT_PATTERN_COLOR } from '../../../config';
+import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { getAverageColor, getPatternColor } from '../../../util/colors';
+import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
 import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
@@ -26,12 +26,15 @@ type OwnProps = {
 };
 
 type StateProps = {
-  customBackground?: string;
-  isBackgroundBlurred?: boolean;
+  background?: string;
+  isBlurred?: boolean;
   loadedWallpapers?: ApiWallpaper[];
+  theme: ThemeKey;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setSettingOption' | 'loadWallpapers' | 'uploadWallpaper'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadWallpapers' | 'uploadWallpaper' | 'setThemeSettings'
+)>;
 
 const SUPPORTED_TYPES = 'image/jpeg';
 
@@ -39,13 +42,16 @@ const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   onScreenSelect,
-  customBackground,
-  isBackgroundBlurred,
+  background,
+  isBlurred,
   loadedWallpapers,
-  setSettingOption,
+  theme,
   loadWallpapers,
   uploadWallpaper,
+  setThemeSettings,
 }) => {
+  const themeRef = useRef<string>();
+  themeRef.current = theme;
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
@@ -71,23 +77,31 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onScreenSelect]);
 
   const handleResetToDefault = useCallback(() => {
-    setSettingOption({ customBackground: undefined, patternColor: DEFAULT_PATTERN_COLOR });
-  }, [setSettingOption]);
+    setThemeSettings({
+      theme,
+      background: undefined,
+      backgroundColor: undefined,
+      isBlurred: true,
+      patternColor: theme === 'dark' ? DARK_THEME_PATTERN_COLOR : DEFAULT_PATTERN_COLOR,
+    });
+  }, [setThemeSettings, theme]);
 
   const handleWallPaperSelect = useCallback((slug: string) => {
-    setSettingOption({ customBackground: slug });
+    setThemeSettings({ theme: themeRef.current, background: slug });
     const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
     if (currentWallpaper && currentWallpaper.document.thumbnail) {
       getAverageColor(currentWallpaper.document.thumbnail.dataUri)
         .then((color) => {
-          setSettingOption({ patternColor: getPatternColor(color) });
+          const patternColor = getPatternColor(color);
+          const rgbColor = `#${rgb2hex(color)}`;
+          setThemeSettings({ theme: themeRef.current, backgroundColor: rgbColor, patternColor });
         });
     }
-  }, [loadedWallpapers, setSettingOption]);
+  }, [loadedWallpapers, setThemeSettings]);
 
   const handleWallPaperBlurChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSettingOption({ isBackgroundBlurred: e.target.checked });
-  }, [setSettingOption]);
+    setThemeSettings({ theme: themeRef.current, isBlurred: e.target.checked });
+  }, [setThemeSettings]);
 
   const lang = useLang();
 
@@ -119,7 +133,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <Checkbox
           label={lang('BackgroundBlurred')}
-          checked={Boolean(isBackgroundBlurred)}
+          checked={Boolean(isBlurred)}
           onChange={handleWallPaperBlurChange}
         />
       </div>
@@ -129,7 +143,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
           {loadedWallpapers.map((wallpaper) => (
             <WallpaperTile
               wallpaper={wallpaper}
-              isSelected={customBackground === wallpaper.slug}
+              theme={theme}
+              isSelected={background === wallpaper.slug}
               onClick={handleWallPaperSelect}
             />
           ))}
@@ -143,16 +158,18 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { isBackgroundBlurred, customBackground } = global.settings.byKey;
+    const { theme } = global.settings.byKey;
+    const { background, isBlurred } = global.settings.themes[theme] || {};
     const { loadedWallpapers } = global.settings;
 
     return {
-      customBackground,
-      isBackgroundBlurred,
+      background,
+      isBlurred,
       loadedWallpapers,
+      theme,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'setSettingOption', 'loadWallpapers', 'uploadWallpaper',
+    'loadWallpapers', 'uploadWallpaper', 'setThemeSettings',
   ]),
 )(SettingsGeneralBackground));

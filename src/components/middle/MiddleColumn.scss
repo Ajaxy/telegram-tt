@@ -16,11 +16,18 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-color: #A2AF8E;
+    background-color: var(--theme-background-color);
   }
 
   &::after {
-    background-image: url('../../assets/chat-bg.jpg');
+    .theme-light & {
+      background-image: url('../../assets/chat-bg.jpg');
+
+      @media (max-width: 600px) {
+        background-image: url('../../assets/chat-bg-mobile.jpg');
+      }
+    }
+
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -32,10 +39,15 @@
     body.animation-level-0 & {
       transition: none;
     }
+  }
 
-    @media (max-width: 600px) {
-      background-image: url('../../assets/chat-bg-mobile.jpg');
-    }
+  .custom-bg-color > &::before {
+    filter: blur(0);
+    transform: scale(1.1);
+  }
+
+  .custom-bg-color:not(.custom-bg-image) > &::after {
+    opacity: 0;
   }
 
   .custom-bg-image > &::after {
@@ -44,18 +56,8 @@
     transform: scale(1.1);
   }
 
-  .custom-bg-color > &::before {
-    background-color: var(--custom-background) !important;
-    filter: blur(0);
-    transform: scale(1.1);
-  }
-
   .custom-bg-image.blurred > &::after {
     filter: blur(12px);
-  }
-
-  .custom-bg-color > &::after {
-    opacity: 0;
   }
 
   @media screen and (min-width: 1276px) {

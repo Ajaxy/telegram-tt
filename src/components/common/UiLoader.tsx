@@ -30,7 +30,7 @@ type OwnProps = {
 
 type StateProps = Pick<GlobalState, 'uiReadyState'> & {
   hasCustomBackground?: boolean;
-  isCustomBackgroundColor: boolean;
+  hasCustomBackgroundColor: boolean;
   isRightColumnShown?: boolean;
 };
 
@@ -80,7 +80,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   page,
   children,
   hasCustomBackground,
-  isCustomBackgroundColor,
+  hasCustomBackgroundColor,
   isRightColumnShown,
   setIsUiReady,
 }) => {
@@ -134,8 +134,8 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
               <div
                 className={buildClassName(
                   'middle',
-                  hasCustomBackground && !isCustomBackgroundColor && 'custom-bg-image',
-                  hasCustomBackground && isCustomBackgroundColor && 'custom-bg-color',
+                  hasCustomBackground && 'custom-bg-image',
+                  hasCustomBackgroundColor && 'custom-bg-color',
                   isRightColumnShown && 'with-right-column',
                 )}
               />
@@ -152,10 +152,13 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global): StateProps => {
+    const { theme } = global.settings.byKey;
+    const { background, backgroundColor } = global.settings.themes[theme] || {};
+
     return {
       uiReadyState: global.uiReadyState,
-      hasCustomBackground: Boolean(global.settings.byKey.customBackground),
-      isCustomBackgroundColor: Boolean((global.settings.byKey.customBackground || '').match(/^#[a-f\d]{6,8}$/i)),
+      hasCustomBackground: Boolean(background),
+      hasCustomBackgroundColor: Boolean(backgroundColor),
       isRightColumnShown: selectIsRightColumnShown(global),
     };
   },

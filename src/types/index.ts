@@ -20,6 +20,14 @@ export interface IAlbum {
   mainMessage: ApiMessage;
 }
 
+export type ThemeKey = 'light' | 'dark';
+export interface IThemeSettings {
+  background?: string;
+  backgroundColor?: string;
+  patternColor?: string;
+  isBlurred?: boolean;
+}
+
 export type NotifySettings = {
   hasPrivateChatsNotifications?: boolean;
   hasPrivateChatsMessagePreview?: boolean;
@@ -31,13 +39,10 @@ export type NotifySettings = {
 };
 
 export interface ISettings extends NotifySettings, Record<string, any> {
+  theme: ThemeKey;
   messageTextSize: number;
-  customBackground?: string;
-  patternColor?: string;
-  isBackgroundBlurred?: boolean;
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
-  theme: 'light' | 'dark';
   shouldAutoDownloadMediaFromContacts: boolean;
   shouldAutoDownloadMediaInPrivateChats: boolean;
   shouldAutoDownloadMediaInGroups: boolean;
