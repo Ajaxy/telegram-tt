@@ -40,6 +40,21 @@
     }
   }
 
+  &.document:not(.text) {
+    & > .MessageMeta {
+      position: absolute;
+      top: auto;
+      bottom: 0 !important;
+      right: .5rem;
+    }
+    &:dir(rtl) {
+      & > .MessageMeta {
+        right: auto;
+        left: .5rem;
+      }
+    }
+  }
+
   .theme-dark .Message.own & {
     .text-entity-link {
       text-decoration: underline;
