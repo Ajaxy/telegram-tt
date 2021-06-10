@@ -12,7 +12,7 @@ class StorageSession extends MemorySession {
         this._authKeys = {};
 
         if (sessionInfo && sessionInfo.startsWith(SESSION_DATA_PREFIX)) {
-            void this._initFromSessionData(sessionInfo);
+            this._sessionData = sessionInfo;
         } else if (sessionInfo) {
             this._storageKey = sessionInfo;
         }
@@ -27,6 +27,11 @@ class StorageSession extends MemorySession {
     }
 
     async load() {
+        if (this._sessionData) {
+            await this._loadFromSessionData();
+            return;
+        }
+
         if (!this._storageKey) {
             return;
         }
@@ -94,8 +99,8 @@ class StorageSession extends MemorySession {
         void this._updateStorage();
     }
 
-    async _initFromSessionData(sessionData) {
-        const [, mainDcIdStr, mainDcKey] = sessionData.split(':');
+    async _loadFromSessionData() {
+        const [, mainDcIdStr, mainDcKey] = this._sessionData.split(':');
         const mainDcId = Number(mainDcIdStr);
         const {
             ipAddress,
