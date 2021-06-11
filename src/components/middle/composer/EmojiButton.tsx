@@ -23,7 +23,7 @@ const EmojiButton: FC<OwnProps> = ({ emoji, focus, onClick }) => {
     >
       {IS_EMOJI_SUPPORTED
         ? <span className="font-emoji">{emoji.native}</span>
-        : <img src={`/img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
+        : <img src={`./img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
     </div>
   );
 };
