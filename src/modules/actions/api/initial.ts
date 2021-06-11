@@ -22,12 +22,14 @@ addReducer('initApi', (global: GlobalState, actions) => {
   let sessionInfo = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
 
   if (!sessionInfo) {
-    const legacySessionMainDc = localStorage.getItem(LEGACY_SESSION_KEY);
-    const legacySessionMainDcKeyJson = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
-
-    if (legacySessionMainDc && legacySessionMainDcKeyJson) {
-      const legacySessionMainDcKey = JSON.parse(legacySessionMainDcKeyJson);
-      sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
+    const legacySessionMainDcRaw = localStorage.getItem(LEGACY_SESSION_KEY);
+    if (legacySessionMainDcRaw) {
+      const legacySessionMainDc = legacySessionMainDcRaw.replace(/"/g, '');
+      const legacySessionMainDcKeyRaw = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
+      if (legacySessionMainDcKeyRaw) {
+        const legacySessionMainDcKey = legacySessionMainDcKeyRaw.replace(/"/g, '');
+        sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
+      }
     }
   }
 
