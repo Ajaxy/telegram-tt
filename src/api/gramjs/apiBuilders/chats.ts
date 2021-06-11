@@ -109,9 +109,19 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
   }
 
   if (peerEntity instanceof GramJs.User) {
+    const restrictionReason = peerEntity.restricted
+      ? buildApiChatRestrictionReason(peerEntity.restrictionReason)
+      : undefined;
+
+    if (restrictionReason === undefined) {
+      return {
+        isRestricted: false,
+      };
+    }
+
     return {
       isRestricted: peerEntity.restricted,
-      restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
+      restrictionReason,
     };
   } else if (peerEntity instanceof GramJs.Chat) {
     return {
