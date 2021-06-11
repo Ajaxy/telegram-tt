@@ -31,12 +31,12 @@
   }
 
   .toggle-play {
-    margin-right: .5rem;
+    margin-inline-end: .5rem;
 
     &.smaller {
       width: 3rem;
       height: 3rem;
-      margin-right: .75rem;
+      margin-inline-end: .75rem;
 
       i {
         font-size: 1.625rem;
