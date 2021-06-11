@@ -290,6 +290,10 @@
     &.online {
       color: var(--color-primary);
     }
+
+    .font-emoji {
+      line-height: 1rem;
+    }
   }
 
   .Button.smaller {
