@@ -239,6 +239,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
+          parentContainerClassName="LeftSearch"
           className={globalSearchChatId || searchDate ? 'with-picker-item' : ''}
           value={contactsFilter || searchQuery}
           focused={isSearchFocused}

@@ -21,6 +21,7 @@ import './LeftColumn.scss';
 type StateProps = {
   searchQuery?: string;
   searchDate?: number;
+  activeChatFolder: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -45,6 +46,7 @@ const RESET_TRANSITION_DELAY_MS = 250;
 const LeftColumn: FC<StateProps & DispatchProps> = ({
   searchQuery,
   searchDate,
+  activeChatFolder,
   setGlobalSearchQuery,
   setGlobalSearchChatId,
   resetChatCreation,
@@ -188,6 +190,11 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       }
     }
 
+    if (content === LeftColumnContent.ChatList && activeChatFolder === 0) {
+      setContent(LeftColumnContent.GlobalSearch);
+      return;
+    }
+
     setContent(LeftColumnContent.ChatList);
     setContactsFilter('');
     setGlobalSearchQuery({ query: '' });
@@ -197,7 +204,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     setTimeout(() => {
       setLastResetTime(Date.now());
     }, RESET_TRANSITION_DELAY_MS);
-  }, [content, setGlobalSearchQuery, setGlobalSearchChatId, setGlobalSearchDate, resetChatCreation, settingsScreen]);
+  }, [
+    content, activeChatFolder, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId, resetChatCreation,
+    settingsScreen,
+  ]);
 
   const handleSearchQuery = useCallback((query: string) => {
     if (content === LeftColumnContent.Contacts) {
@@ -213,8 +223,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   }, [content, setGlobalSearchQuery, searchQuery]);
 
   useEffect(
-    () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(() => handleReset()) : undefined),
-    [content, handleReset],
+    () => (content !== LeftColumnContent.ChatList || activeChatFolder === 0
+      ? captureEscKeyListener(() => handleReset())
+      : undefined),
+    [activeChatFolder, content, handleReset],
   );
 
   useEffect(() => {
@@ -232,11 +244,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       renderCount={RENDER_COUNT}
       activeKey={contentType}
     >
-      {() => {
+      {(isActive) => {
         switch (contentType) {
           case ContentType.Archived:
             return (
               <ArchivedChats
+                isActive={isActive}
                 onReset={handleReset}
               />
             );
@@ -287,8 +300,16 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { query, date } = global.globalSearch;
-    return { searchQuery: query, searchDate: date };
+    const {
+      globalSearch: {
+        query,
+        date,
+      },
+      chatFolders: {
+        activeChatFolder,
+      },
+    } = global;
+    return { searchQuery: query, searchDate: date, activeChatFolder };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'setGlobalSearchQuery', 'setGlobalSearchChatId', 'resetChatCreation', 'setGlobalSearchDate',

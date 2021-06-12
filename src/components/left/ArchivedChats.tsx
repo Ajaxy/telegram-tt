@@ -8,10 +8,11 @@ import ChatList from './main/ChatList';
 import './ArchivedChats.scss';
 
 export type OwnProps = {
+  isActive: boolean;
   onReset: () => void;
 };
 
-const ArchivedChats: FC<OwnProps> = ({ onReset }) => {
+const ArchivedChats: FC<OwnProps> = ({ isActive, onReset }) => {
   const lang = useLang();
 
   return (
@@ -28,7 +29,7 @@ const ArchivedChats: FC<OwnProps> = ({ onReset }) => {
         </Button>
         <h3>{lang('ArchivedChats')}</h3>
       </div>
-      <ChatList folderType="archived" noChatsText="Archive is empty." />
+      <ChatList folderType="archived" noChatsText="Archive is empty." isActive={isActive} />
     </div>
   );
 };

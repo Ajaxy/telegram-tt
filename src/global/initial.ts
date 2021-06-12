@@ -38,6 +38,7 @@ export const INITIAL_STATE: GlobalState = {
 
   chatFolders: {
     byId: {},
+    activeChatFolder: 0,
   },
 
   fileUploads: {

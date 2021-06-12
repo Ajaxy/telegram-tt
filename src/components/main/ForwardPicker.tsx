@@ -14,6 +14,7 @@ import searchWords from '../../util/searchWords';
 import { pick } from '../../util/iteratees';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 
 import Loading from '../ui/Loading';
 import Modal from '../ui/Modal';
@@ -114,6 +115,14 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     setFilter(e.currentTarget.value);
   }, []);
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
+    if (viewportIds) {
+      setForwardChatId({ id: viewportIds[index] });
+    }
+  }, '.ListItem-button', true);
+
   const modalHeader = (
     <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
@@ -129,6 +138,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={inputRef}
         value={filter}
         onChange={handleFilterChange}
+        onKeyDown={handleKeyDown}
         placeholder={lang('ForwardTo')}
       />
     </div>
@@ -147,6 +157,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
           items={viewportIds}
           onLoadMore={getMore}
           noScrollRestore={Boolean(filter)}
+          ref={containerRef}
+          onKeyDown={handleKeyDown}
         >
           {viewportIds.map((id) => (
             <ListItem

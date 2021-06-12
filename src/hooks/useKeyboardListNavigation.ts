@@ -4,13 +4,21 @@ import { useState, useCallback, useEffect } from '../lib/teact/teact';
 export default (
   elementRef: RefObject<HTMLElement>,
   isOpen: boolean,
-  onSelectWithEnter?: () => void,
+  onSelectWithEnter?: (index: number) => void,
+  itemSelector?: string,
+  noCaptureFocus?: boolean,
 ) => {
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     setFocusedIndex(-1);
-  }, [isOpen]);
+
+    const element = elementRef.current;
+    if (isOpen && element && !noCaptureFocus) {
+      element.tabIndex = -1;
+      element.focus();
+    }
+  }, [elementRef, isOpen, noCaptureFocus]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<any>) => {
     const element = elementRef.current;
@@ -20,7 +28,7 @@ export default (
     }
 
     if (e.keyCode === 13 && onSelectWithEnter) {
-      onSelectWithEnter();
+      onSelectWithEnter(focusedIndex);
       return;
     }
 
@@ -29,7 +37,7 @@ export default (
     }
 
     const focusedElement = document.activeElement;
-    const elementChildren = Array.from(element.children);
+    const elementChildren = Array.from(itemSelector ? element.querySelectorAll(itemSelector) : element.children);
 
     let newIndex = (focusedElement && elementChildren.indexOf(focusedElement)) || focusedIndex;
 
@@ -48,7 +56,7 @@ export default (
       setFocusedIndex(newIndex);
       item.focus();
     }
-  }, [focusedIndex, elementRef, onSelectWithEnter]);
+  }, [elementRef, onSelectWithEnter, itemSelector, focusedIndex]);
 
   return handleKeyDown;
 };
