@@ -153,7 +153,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
           size="smaller"
           round
           color="translucent"
-          onClick={closeLocalTextSearch}
+          onClick={() => closeLocalTextSearch({ noPushState: true })}
         >
           <i className="icon-arrow-left" />
         </Button>

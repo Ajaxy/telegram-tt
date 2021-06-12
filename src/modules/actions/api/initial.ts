@@ -16,6 +16,7 @@ import {
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
+import { HistoryWrapper } from '../../../util/history';
 import { updateAppBadge } from '../../../util/appBadge';
 
 addReducer('initApi', (global: GlobalState, actions) => {
@@ -101,6 +102,11 @@ addReducer('returnToAuthPhoneNumber', (global) => {
 
 addReducer('gotToAuthQrCode', (global) => {
   void callApi('restartAuthWithQr');
+
+  HistoryWrapper.pushState({
+    type: 'login',
+    contentKey: 'authQr',
+  });
 
   return {
     ...global,

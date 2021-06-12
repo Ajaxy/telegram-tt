@@ -7,6 +7,7 @@ import { GlobalActions, GlobalState } from '../../global/types';
 import { getChatAvatarHash } from '../../modules/helpers/chats'; // Direct import for better module splitting
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
+import useOnChange from '../../hooks/useOnChange';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
@@ -28,17 +29,18 @@ type OwnProps = {
   children: any;
 };
 
-type StateProps = Pick<GlobalState, 'uiReadyState'> & {
+type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipUiLoaderTransition'> & {
   hasCustomBackground?: boolean;
   hasCustomBackgroundColor: boolean;
   isRightColumnShown?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
+type DispatchProps = Pick<GlobalActions, 'setIsUiReady' | 'setShouldSkipUiLoaderTransition'>;
 
 const MAX_PRELOAD_DELAY = 700;
 const SECOND_STATE_DELAY = 1000;
 const AVATARS_TO_PRELOAD = 10;
+const TRANSITION_TIME = 400;
 
 function preloadAvatars() {
   const { listIds, byId } = getGlobal().chats;
@@ -82,7 +84,9 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   hasCustomBackground,
   hasCustomBackgroundColor,
   isRightColumnShown,
+  shouldSkipUiLoaderTransition,
   setIsUiReady,
+  setShouldSkipUiLoaderTransition,
 }) => {
   const [isReady, markReady] = useFlag();
   const {
@@ -123,10 +127,18 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useOnChange(() => {
+    if (shouldSkipUiLoaderTransition) {
+      setTimeout(() => {
+        setShouldSkipUiLoaderTransition({ shouldSkipUiLoaderTransition: false });
+      }, TRANSITION_TIME);
+    }
+  }, [shouldSkipUiLoaderTransition]);
+
   return (
     <div id="UiLoader">
       {children}
-      {shouldRenderMask && (
+      {shouldRenderMask && !shouldSkipUiLoaderTransition && (
         <div className={buildClassName('mask', transitionClassNames)}>
           {page === 'main' ? (
             <>
@@ -156,11 +168,12 @@ export default withGlobal<OwnProps>(
     const { background, backgroundColor } = global.settings.themes[theme] || {};
 
     return {
+      shouldSkipUiLoaderTransition: global.shouldSkipUiLoaderTransition,
       uiReadyState: global.uiReadyState,
       hasCustomBackground: Boolean(background),
       hasCustomBackgroundColor: Boolean(backgroundColor),
       isRightColumnShown: selectIsRightColumnShown(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady', 'setShouldSkipUiLoaderTransition']),
 )(UiLoader);

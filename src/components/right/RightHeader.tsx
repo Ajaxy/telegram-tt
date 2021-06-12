@@ -37,6 +37,7 @@ type OwnProps = {
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
+  shouldSkipAnimation?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: () => void;
@@ -103,6 +104,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   searchTextMessagesLocal,
   toggleManagement,
   searchMessagesByDate,
+  shouldSkipAnimation,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
@@ -123,11 +125,11 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeCalendar, searchMessagesByDate]);
 
   const handleStickerSearchQueryChange = useCallback((query: string) => {
-    setStickerSearchQuery({ query });
+    setStickerSearchQuery({ query, noPushState: true });
   }, [setStickerSearchQuery]);
 
   const handleGifSearchQueryChange = useCallback((query: string) => {
-    setGifSearchQuery({ query });
+    setGifSearchQuery({ query, noPushState: true });
   }, [setGifSearchQuery]);
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
@@ -286,7 +288,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const buttonClassName = buildClassName(
     'animated-close-icon',
-    shouldSkipTransition && 'no-transition',
+    (shouldSkipTransition || shouldSkipAnimation) && 'no-transition',
   );
 
   // Add class in the next AF to synchronize with animation with Transition components
@@ -307,7 +309,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <div ref={backButtonRef} className={buttonClassName} />
       </Button>
       <Transition
-        name={shouldSkipTransition ? 'none' : 'slide-fade'}
+        name={(shouldSkipTransition || shouldSkipAnimation) ? 'none' : 'slide-fade'}
         activeKey={renderingContentKey}
       >
         {renderHeaderContent}

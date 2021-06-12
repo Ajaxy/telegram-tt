@@ -62,6 +62,7 @@ export type GlobalState = {
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
   uiReadyState: 0 | 1 | 2;
+  shouldSkipUiLoaderTransition?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
   lastSyncTime?: number;
@@ -394,7 +395,7 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
-  'toggleSafeLinkModal' |
+  'toggleSafeLinkModal' | 'setShouldSkipUiLoaderTransition' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' | 'clearCache' |

@@ -1,5 +1,8 @@
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useRef, useState,
+} from '../../lib/teact/teact';
 
+import { HistoryWrapper } from '../../util/history';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
@@ -7,6 +10,8 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import useShowTransition from '../../hooks/useShowTransition';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useOnChange from '../../hooks/useOnChange';
 
 import Button from './Button';
 import Portal from './Portal';
@@ -41,7 +46,13 @@ const Modal: FC<OwnProps> = (props) => {
     onCloseAnimationEnd,
     onEnter,
   } = props;
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const [isClosedWithHistory, setIsClosedWithHistory] = useState(false);
+  const [noAnimations, setNoAnimations] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
+  const {
+    shouldRender,
+    transitionClassNames,
+  } = useShowTransition(isOpen, onCloseAnimationEnd, noAnimations, undefined, noAnimations);
   // eslint-disable-next-line no-null/no-null
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +60,33 @@ const Modal: FC<OwnProps> = (props) => {
     ? captureKeyboardListeners({ onEsc: onClose, onEnter })
     : undefined), [isOpen, onClose, onEnter]);
   useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
+
+  useHistoryBack((event, noAnimation, previousHistoryState) => {
+    if (previousHistoryState && previousHistoryState.type === 'modal') {
+      setIsClosedWithHistory(true);
+      if (noAnimation) {
+        setNoAnimations(true);
+        setTimeout(() => setNoAnimations(false), ANIMATION_DURATION);
+      }
+      onClose();
+    }
+  });
+
+  useOnChange(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+    if (isOpen) {
+      HistoryWrapper.pushState({
+        type: 'modal',
+      });
+    } else if (!isClosedWithHistory) {
+      HistoryWrapper.back();
+    } else {
+      setIsClosedWithHistory(false);
+    }
+  }, [isOpen]);
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', isOpen);

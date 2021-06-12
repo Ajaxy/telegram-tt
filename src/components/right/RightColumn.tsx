@@ -17,6 +17,7 @@ import {
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import RightHeader from './RightHeader';
 import Profile from './Profile';
@@ -26,6 +27,7 @@ import Management from './management/Management.async';
 import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
+import { HistoryWrapper } from '../../util/history';
 
 import './RightColumn.scss';
 
@@ -88,26 +90,26 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
 
-  const close = useCallback(() => {
+  const close = useCallback((noPushState = false) => {
     switch (contentKey) {
       case RightColumnContent.ChatInfo:
         if (isScrolledDown) {
           setProfileState(ProfileState.Profile);
-          break;
+          if (!noPushState) break;
         }
-        toggleChatInfo();
+        toggleChatInfo({ noPushState }, true);
         break;
       case RightColumnContent.UserInfo:
         if (isScrolledDown) {
           setProfileState(ProfileState.Profile);
-          break;
+          if (!noPushState) break;
         }
         openUserInfo({ id: undefined });
         break;
       case RightColumnContent.Management: {
         switch (managementScreen) {
           case ManagementScreens.Initial:
-            toggleManagement();
+            toggleManagement({ noPushState }, true);
             break;
           case ManagementScreens.ChatPrivacyType:
           case ManagementScreens.Discussion:
@@ -116,17 +118,28 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           case ManagementScreens.ChatAdministrators:
           case ManagementScreens.ChannelSubscribers:
           case ManagementScreens.GroupMembers:
+            if (!noPushState) {
+              HistoryWrapper.back();
+            }
             setManagementScreen(ManagementScreens.Initial);
             break;
           case ManagementScreens.GroupUserPermissionsCreate:
           case ManagementScreens.GroupRemovedUsers:
           case ManagementScreens.GroupUserPermissions:
+            if (!noPushState) {
+              HistoryWrapper.back();
+            }
+
             setManagementScreen(ManagementScreens.GroupPermissions);
             setSelectedChatMemberId(undefined);
             setIsPromotedByCurrentUser(undefined);
             break;
           case ManagementScreens.ChatAdminRights:
           case ManagementScreens.GroupRecentActions:
+            if (!noPushState) {
+              HistoryWrapper.back();
+            }
+
             setManagementScreen(ManagementScreens.ChatAdministrators);
             break;
         }
@@ -135,18 +148,20 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
       }
       case RightColumnContent.Search: {
         blurSearchInput();
-        closeLocalTextSearch();
+        closeLocalTextSearch({ noPushState });
         break;
       }
       case RightColumnContent.StickerSearch:
+        blurSearchInput();
+        setStickerSearchQuery({ query: undefined, noPushState });
+        break;
       case RightColumnContent.GifSearch: {
         blurSearchInput();
-        setStickerSearchQuery({ query: undefined });
-        setGifSearchQuery({ query: undefined });
+        setGifSearchQuery({ query: undefined, noPushState });
         break;
       }
       case RightColumnContent.PollResults:
-        closePollResults();
+        closePollResults({ noPushState });
         break;
     }
   }, [
@@ -154,10 +169,31 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
   ]);
 
+  const handleClose = useCallback(() => {
+    close(false);
+  }, [close]);
+
+  useHistoryBack((event, noAnimation, previousHistoryState) => {
+    if (previousHistoryState && previousHistoryState.type === 'right') {
+      if (noAnimation) {
+        setShouldSkipTransition(true);
+        setTimeout(() => setShouldSkipTransition(false), COLUMN_CLOSE_DELAY_MS);
+      }
+      close(true);
+    }
+  });
+
   const handleSelectChatMember = useCallback((memberId, isPromoted) => {
     setSelectedChatMemberId(memberId);
     setIsPromotedByCurrentUser(isPromoted);
   }, []);
+
+  const handleManagementScreenSelect = useCallback((screen: ManagementScreens) => {
+    if (screen !== managementScreen) {
+      HistoryWrapper.pushState({ type: 'right', contentKey });
+      setManagementScreen(screen);
+    }
+  }, [contentKey, managementScreen]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 
@@ -214,10 +250,11 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
             currentScreen={managementScreen}
             isPromotedByCurrentUser={isPromotedByCurrentUser}
             selectedChatMemberId={selectedChatMemberId}
-            onScreenSelect={setManagementScreen}
+            onScreenSelect={handleManagementScreenSelect}
             onChatMemberSelect={handleSelectChatMember}
           />
         );
+
       case RightColumnContent.StickerSearch:
         return <StickerSearch />;
       case RightColumnContent.GifSearch:
@@ -247,7 +284,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isPollResults={isPollResults}
           profileState={profileState}
           managementScreen={managementScreen}
-          onClose={close}
+          onClose={handleClose}
+          shouldSkipAnimation={shouldSkipTransition}
         />
         <Transition
           name={shouldSkipTransition ? 'none' : 'zoom-fade'}

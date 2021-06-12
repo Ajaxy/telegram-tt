@@ -87,6 +87,14 @@
         overflow: hidden;
       }
     }
+
+    #Main.history-animation-disabled & {
+      transition: none;
+
+      &:after {
+        transition: none;
+      }
+    }
   }
 
   @media (max-width: 600px) {
@@ -104,6 +112,18 @@
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100 + 1px);
   }
+
+  #Main.history-animation-disabled & {
+    transition: none;
+
+    .overlay-backdrop {
+      transition: none;
+    }
+  }
+}
+
+#Main.history-animation-disabled .overlay-backdrop {
+  transition: none;
 }
 
 #MiddleColumn {
@@ -153,6 +173,14 @@
 
     #Main.right-column-open & {
       transform: translate3d(-20vw, 0, 0);
+    }
+  }
+
+  #Main.history-animation-disabled & {
+    transition: none;
+
+    &:after {
+      transition: none;
     }
   }
 }
