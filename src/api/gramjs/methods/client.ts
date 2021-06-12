@@ -7,7 +7,7 @@ import { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 import { ApiMediaFormat, ApiOnProgress, OnApiUpdate } from '../../types';
 
 import {
-  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST,
+  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, APP_VERSION,
 } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
@@ -18,6 +18,9 @@ import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import downloadMediaWithClient from './media';
 import { buildApiUserFromFull } from '../apiBuilders/users';
 import localDb from '../localDb';
+
+const DEFAULT_USER_AGENT = 'Unknown UserAgent';
+const APP_CODE_NAME = 'Z';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -44,6 +47,8 @@ export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
     process.env.TELEGRAM_T_API_ID,
     process.env.TELEGRAM_T_API_HASH,
     {
+      deviceModel: navigator.userAgent || DEFAULT_USER_AGENT,
+      appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
     } as any,

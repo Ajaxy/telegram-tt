@@ -1,4 +1,4 @@
-import { DEBUG } from '../config';
+import { APP_NAME, DEBUG } from '../config';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -68,7 +68,7 @@ function getNotificationData(data: PushData): NotificationData {
   return {
     chatId: getChatId(data),
     messageId: getMessageId(data),
-    title: data.title || process.env.APP_INFO!,
+    title: data.title || APP_NAME,
     body: data.description,
   };
 }

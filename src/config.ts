@@ -1,7 +1,8 @@
 export const PAGE_TITLE = 'Telegram';
 export const INACTIVE_MARKER = ' [Inactive]';
 
-export const APP_INFO = process.env.APP_INFO || 'Telegram T';
+export const APP_NAME = 'Telegram WebZ';
+export const APP_VERSION = process.env.APP_VERSION || 'dev';
 
 export const DEBUG = (
   process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf' && process.env.APP_ENV !== 'test'
