@@ -72,7 +72,7 @@ function readCache(initialState: GlobalState) {
   }
 
   if (cached) {
-    // Pre-fill defaults for new settings which may be missing in older cache
+    // Pre-fill defaults in nested objects which may be missing in older cache
     cached.settings.byKey = {
       ...initialState.settings.byKey,
       ...cached.settings.byKey,
@@ -80,6 +80,10 @@ function readCache(initialState: GlobalState) {
     cached.settings.themes = {
       ...initialState.settings.themes,
       ...cached.settings.themes,
+    };
+    cached.chatFolders = {
+      ...initialState.chatFolders,
+      ...cached.chatFolders,
     };
   }
 
