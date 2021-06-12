@@ -78,10 +78,13 @@ const LinkResults: FC<OwnProps & StateProps & DispatchProps> = ({
       return (
         <div
           className="ListItem"
+          dir={lang.isRtl ? 'rtl' : undefined}
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading">{formatMonthAndYear(lang, new Date(message.date * 1000))}</p>
+            <p className="section-heading" dir={lang.isRtl ? 'rtl' : undefined}>
+              {formatMonthAndYear(lang, new Date(message.date * 1000))}
+            </p>
           )}
           <WebLink
             key={message.id}

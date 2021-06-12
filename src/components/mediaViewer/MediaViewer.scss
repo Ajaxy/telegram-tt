@@ -182,12 +182,24 @@
       left: 0;
       background-image: url("../../assets/media_navigation_previous.svg");
       background-position: 1.25rem calc(50% - 2rem);
+
+      &[dir=rtl] {
+        left: auto;
+        right: 0;
+        transform: scaleX(-1);
+      }
     }
 
     &.next {
       right: 0;
       background-image: url("../../assets/media_navigation_next.svg");
       background-position: calc(100% - 1.25rem) calc(50% - 2rem);
+
+      &[dir=rtl]{
+        left: 0;
+        right: auto;
+        transform: scaleX(-1);
+      }
     }
 
     &.inline {

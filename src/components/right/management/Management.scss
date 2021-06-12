@@ -86,16 +86,28 @@
       font-weight: 500;
       font-size: .9375rem;
       color: var(--color-text-secondary);
+
+      &[dir=auto] {
+        text-align: initial;
+      }
     }
 
     .section-help {
       color: var(--color-text-secondary);
       line-height: 1.375rem;
+
+      &[dir=auto] {
+        text-align: initial;
+      }
     }
 
     .section-info {
       color: var(--color-text-secondary);
       font-size: .875rem;
+    }
+
+    &[dir=rtl] {
+      text-align: right;
     }
   }
 

@@ -11,6 +11,7 @@ import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import { pick } from '../../util/iteratees';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 
@@ -37,6 +38,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   unreadCount,
   focusLastMessage,
 }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +74,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
           color="secondary"
           round
           onClick={handleClick}
-          ariaLabel="Scroll to bottom"
+          ariaLabel={lang('AccDescrPageDown')}
         >
           <i className="icon-arrow-down" />
         </Button>

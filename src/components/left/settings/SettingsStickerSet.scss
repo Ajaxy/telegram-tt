@@ -22,4 +22,11 @@
     flex-direction: column;
     justify-content: center;
   }
+
+  &[dir=rtl] {
+    .StickerButton,
+    .Button {
+      margin: 0 0 0 .5rem;
+    }
+  }
 }

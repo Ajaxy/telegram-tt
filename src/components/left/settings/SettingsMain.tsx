@@ -52,7 +52,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="settings"
           onClick={() => onScreenSelect(SettingsScreens.General)}
         >
-          {lang('GeneralSettings')}
+          {lang('Telegram.GeneralSettingsViewController')}
         </ListItem>
         <ListItem
           icon="unmute"

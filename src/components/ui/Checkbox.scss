@@ -92,6 +92,7 @@
 
     .label {
       display: block;
+      text-align: initial;
     }
 
     .subLabel {
@@ -110,6 +111,30 @@
 
     &::after {
       opacity: 1;
+    }
+  }
+
+  &[dir=rtl] {
+    padding-left: 0;
+    padding-right: 4.5rem;
+
+    &.loading {
+      .Spinner {
+        left: auto;
+        right: 0.375rem;
+      }
+    }
+
+    .label,
+    .subLabel {
+      text-align: right;
+    }
+
+    .Checkbox-main {
+      &::before, &::after {
+        left: auto;
+        right: 1.1875rem;
+      }
     }
   }
 }

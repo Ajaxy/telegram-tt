@@ -60,6 +60,7 @@
     .label {
       display: block;
       word-break: break-word;
+      text-align: initial;
     }
 
     .subLabel {
@@ -94,6 +95,35 @@
       opacity: 0;
       animation: fade-in .2s ease forwards;
       --spinner-size: 1.25rem;
+    }
+  }
+
+  &[dir=rtl] {
+    padding-left: 0;
+    padding-right: 4.5rem;
+
+    .Radio-main {
+      text-align: right;
+
+      &::before {
+        left: auto;
+        right: 1.0625rem;
+      }
+
+      &::after {
+        left: auto;
+        right: 1.375rem;
+      }
+    }
+
+    .label,
+    .subLabel {
+      text-align: right;
+    }
+
+      &.loading .Spinner {
+      left: auto;
+      right: 1.0625rem;
     }
   }
 }

@@ -163,7 +163,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <h3 className="section-heading">{lang('ChannelPermissionsHeader')}</h3>
+          <h3 className="section-heading" dir="auto">{lang('ChannelPermissionsHeader')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox
@@ -247,7 +247,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
 
         <div className="section">
-          <h3 className="section-heading">{lang('PrivacyExceptions')}</h3>
+          <h3 className="section-heading" dir="auto">{lang('PrivacyExceptions')}</h3>
 
           <ListItem
             icon="add-user"

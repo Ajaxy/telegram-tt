@@ -287,6 +287,7 @@ function processEntity(
         <a
           href={`tel:${entityText}`}
           className="text-entity-link"
+          dir="auto"
         >
           {renderMessagePart(renderedContent)}
         </a>

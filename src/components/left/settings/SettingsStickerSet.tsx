@@ -45,6 +45,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
         <Button
           ariaLabel={stickerSet.title}
           color="translucent"
+          isRtl={lang.isRtl}
         >
           {stickerSet.isAnimated ? (
             <StickerSetCoverAnimated

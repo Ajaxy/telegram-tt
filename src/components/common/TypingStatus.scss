@@ -4,7 +4,7 @@
 
   .sender-name {
     &::after {
-      content: '\00a0is\00a0';
+      content: '\00a0';
       color: var(--color-text-secondary);
     }
   }
@@ -17,6 +17,11 @@
     &::after {
       content: '...';
       animation: typing-animation 1s steps(4, start) infinite;
+
+      html[lang=ar] &,
+      html[lang=fa] & {
+        animation-name: typing-animation-rtl;
+      }
     }
   }
 }
@@ -24,5 +29,11 @@
 @keyframes typing-animation {
   from {
     transform: translateX(-1rem);
+  }
+}
+
+@keyframes typing-animation-rtl {
+  from {
+    transform: translateX(1rem);
   }
 }

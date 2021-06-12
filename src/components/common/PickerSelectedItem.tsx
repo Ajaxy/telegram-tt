@@ -82,6 +82,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
       className={fullClassName}
       onClick={() => onClick(clickArg)}
       title={isMinimized ? titleText : undefined}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
       {iconElement}
       {!isMinimized && (

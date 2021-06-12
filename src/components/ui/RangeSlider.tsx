@@ -4,6 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
 
 import './RangeSlider.scss';
 
@@ -24,6 +25,7 @@ const RangeSlider: FC<OwnProps> = ({
   disabled,
   onChange,
 }) => {
+  const lang = useLang();
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     onChange(Number(event.currentTarget.value));
   }, [onChange]);
@@ -56,10 +58,10 @@ const RangeSlider: FC<OwnProps> = ({
   return (
     <div className={className}>
       {label && (
-        <div className="slider-top-row">
-          <span className="label">{label}</span>
+        <div className="slider-top-row" dir={lang.isRtl ? 'rtl' : undefined}>
+          <span className="label" dir="auto">{label}</span>
           {range && (
-            <span className="value">{value}</span>
+            <span className="value" dir="auto">{value}</span>
           )}
         </div>
       )}

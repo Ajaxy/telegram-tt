@@ -111,7 +111,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4">{lang('PrivacyTitle')}</h4>
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyTitle')}</h4>
 
         <ListItem
           narrow

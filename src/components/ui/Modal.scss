@@ -83,7 +83,6 @@
     font-size: 1.25rem;
     font-weight: 500;
     flex: 1 1 auto;
-    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -118,6 +117,13 @@
     strong {
       word-break: break-word;
     }
+  }
+
+  .modal-title,
+  .modal-content,
+  .modal-content > p {
+    unicode-bidi: plaintext;
+    text-align: initial;
   }
 
   .dialog-buttons {

@@ -70,8 +70,10 @@ const AttachMenu: FC<OwnProps> = ({
       )}
       {canAttachMedia && (
         <>
-          <MenuItem icon="photo" onClick={handleQuickSelect}>{lang('AttachmentMenu.PhotoOrVideo')}</MenuItem>
-          <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
+          <MenuItem icon="photo" onClick={handleQuickSelect}>
+            {lang('AttachmentMenu.PhotoOrVideo')}
+          </MenuItem>
+          <MenuItem icon="document" onClick={handleDocumentSelect}>{lang('AttachDocument')}</MenuItem>
         </>
       )}
       {canAttachPolls && (

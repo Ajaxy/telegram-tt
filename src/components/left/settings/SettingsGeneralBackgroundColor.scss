@@ -47,6 +47,12 @@
 
     .input-group {
       margin-bottom: 0;
+
+      &[dir=rtl] {
+        label {
+          transform: scale(0.75) translate(1.25rem, -2.25rem);
+        }
+      }
     }
 
     .input-group:first-child {

@@ -166,7 +166,9 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
                 trigger={SettingsMenuButton}
                 positionX="right"
               >
-                <MenuItem icon="delete" destructive onClick={openDeleteFolderConfirmation}>Delete Folder</MenuItem>
+                <MenuItem icon="delete" destructive onClick={openDeleteFolderConfirmation}>
+                  Delete Folder
+                </MenuItem>
               </DropdownMenu>
             )}
           </div>

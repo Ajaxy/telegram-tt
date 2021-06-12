@@ -12,6 +12,13 @@ import itExtraJson from '../assets/lang/it-extra.json';
 import plExtraJson from '../assets/lang/pl-extra.json';
 import ruExtraJson from '../assets/lang/ru-extra.json';
 import { formatInteger } from './textFormat';
+import { getGlobal } from '../lib/teact/teactn';
+
+interface LangFn {
+  (key: string, value?: any, format?: 'i'): any;
+
+  isRtl?: boolean;
+}
 
 const EXTRA_PACK_PATHS: Record<string, string> = {
   en: enExtraJson as unknown as string,
@@ -59,9 +66,42 @@ export { addCallback, removeCallback };
 
 let currentLangCode: string | undefined;
 
+export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') => {
+  if (value !== undefined) {
+    const cached = cache.get(`${key}_${value}_${format}`);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  if (!langPack) {
+    return key;
+  }
+
+  const langString = langPack[key];
+  if (!langString) {
+    return key;
+  }
+
+  const template = langString[typeof value === 'number' ? getPluralOption(value) : 'value'];
+  if (!template || !template.trim()) {
+    const parts = key.split('.');
+
+    return parts[parts.length - 1];
+  }
+
+  if (value !== undefined) {
+    const formattedValue = format === 'i' ? formatInteger(value) : value;
+    const result = processTemplate(template, formattedValue);
+    cache.set(`${key}_${value}_${format}`, result);
+    return result;
+  }
+
+  return template;
+};
+
 export async function setLanguage(langCode: string, callback?: NoneToVoidFunction) {
   if (langPack && langCode === currentLangCode) {
-    document.documentElement.lang = langCode;
     if (callback) {
       callback();
     }
@@ -95,45 +135,15 @@ export async function setLanguage(langCode: string, callback?: NoneToVoidFunctio
   langPack = newLangPack;
   document.documentElement.lang = langCode;
 
+  const { languages } = getGlobal().settings.byKey;
+  const langInfo = languages ? languages.find((l) => l.langCode === langCode) : undefined;
+  getTranslation.isRtl = Boolean(langInfo && langInfo.rtl);
+
   if (callback) {
     callback();
   }
 
   runCallbacks(langPack);
-}
-
-export function getTranslation(key: string, value?: any, format?: 'i') {
-  if (value !== undefined) {
-    const cached = cache.get(`${key}_${value}_${format}`);
-    if (cached) {
-      return cached;
-    }
-  }
-
-  if (!langPack) {
-    return key;
-  }
-
-  const langString = langPack[key];
-  if (!langString) {
-    return key;
-  }
-
-  const template = langString[typeof value === 'number' ? getPluralOption(value) : 'value'];
-  if (!template || !template.trim()) {
-    const parts = key.split('.');
-
-    return parts[parts.length - 1];
-  }
-
-  if (value !== undefined) {
-    const formattedValue = format === 'i' ? formatInteger(value) : value;
-    const result = processTemplate(template, formattedValue);
-    cache.set(`${key}_${value}_${format}`, result);
-    return result;
-  }
-
-  return template;
 }
 
 async function fetchFromCacheOrRemote(langCode: string): Promise<ApiLangPack | undefined> {

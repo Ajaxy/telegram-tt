@@ -64,7 +64,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   const audio = getMessageAudio(message);
 
   return (
-    <div className={buildClassName('AudioPlayer', className)}>
+    <div className={buildClassName('AudioPlayer', className)} dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
         round
         ripple={!IS_MOBILE_SCREEN}

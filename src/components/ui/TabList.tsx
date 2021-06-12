@@ -58,7 +58,11 @@ const TabList: FC<OwnProps> = ({
   const lang = useLang();
 
   return (
-    <div className={`TabList no-selection no-scrollbar ${big ? 'big' : ''}`} ref={containerRef}>
+    <div
+      className={`TabList no-selection no-scrollbar ${big ? 'big' : ''}`}
+      ref={containerRef}
+      dir={lang.isRtl ? 'rtl' : undefined}
+    >
       {tabs.map((tab, i) => (
         <Tab
           key={tab.title}

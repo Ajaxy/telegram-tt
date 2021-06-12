@@ -205,7 +205,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       )}
       {!!localResults.length && (
-        <div className="chat-selection no-selection no-scrollbar">
+        <div className="chat-selection no-selection no-scrollbar" dir={lang.isRtl ? 'rtl' : undefined}>
           {localResults.map((id) => (
             <PickerSelectedItem
               chatOrUserId={id}
@@ -217,7 +217,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {!!localResults.length && (
         <div className="search-section">
-          <h3 className="section-heading">
+          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link onClick={handleClickShowMoreLocal}>
                 {lang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
@@ -241,7 +241,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {!!globalResults.length && (
         <div className="search-section">
-          <h3 className="section-heading">
+          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link onClick={handleClickShowMoreGlobal}>
                 {lang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
@@ -266,7 +266,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {!!foundMessages.length && (
         <div className="search-section">
-          <h3 className="section-heading">{lang('SearchMessages')}</h3>
+          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>{lang('SearchMessages')}</h3>
           {foundMessages.map(renderFoundMessage)}
         </div>
       )}

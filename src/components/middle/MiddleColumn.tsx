@@ -270,7 +270,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                       />
                     )}
                     {isPinnedMessageList && (
-                      <div className="unpin-button-container">
+                      <div className="unpin-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                         <Button
                           size="tiny"
                           fluid

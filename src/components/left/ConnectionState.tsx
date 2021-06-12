@@ -18,7 +18,7 @@ const ConnectionState: FC<StateProps> = ({ connectionState }) => {
   const isConnecting = connectionState === 'connectionStateConnecting';
 
   return isConnecting && (
-    <div id="ConnectionState">
+    <div id="ConnectionState" dir={lang.isRtl ? 'rtl' : undefined}>
       <Spinner color="black" />
       <div className="state-text">{lang('WaitingForNetwork')}</div>
     </div>

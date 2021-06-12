@@ -5,6 +5,7 @@ import { IS_TOUCH_ENV } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useLang from '../../hooks/useLang';
 
 import RippleEffect from './RippleEffect';
 import Menu from './Menu';
@@ -112,6 +113,8 @@ const ListItem: FC<OwnProps> = (props) => {
     }
   }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
 
+  const lang = useLang();
+
   const fullClassName = buildClassName(
     'ListItem',
     className,
@@ -131,6 +134,7 @@ const ListItem: FC<OwnProps> = (props) => {
     <div
       ref={containerRef}
       className={fullClassName}
+      dir={lang.isRtl ? 'rtl' : undefined}
       // @ts-ignore
       style={style}
     >

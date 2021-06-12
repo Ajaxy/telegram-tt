@@ -59,6 +59,12 @@
       order: 2;
       flex-shrink: 0;
     }
+
+    &:dir(rtl) {
+      .WebPage-text {
+        padding-inline-end: 1rem;
+      }
+    }
   }
 
   &:not(.with-square-photo) {
@@ -94,6 +100,15 @@
   .site-description {
     line-height: 1rem;
     margin-bottom: 0;
+  }
+
+  &:dir(rtl) {
+    padding-inline-start: .625rem;
+
+    &::before {
+      left: auto;
+      right: 0;
+    }
   }
 }
 

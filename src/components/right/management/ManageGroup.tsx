@@ -239,9 +239,17 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
               <span className="subtitle">{lang('DiscussionUnlink')}</span>
             </ListItem>
           )}
-          <ListItem icon="permissions" multiline ripple onClick={handleClickPermissions} disabled={!canBanUsers}>
+          <ListItem
+            icon="permissions"
+            multiline
+            ripple
+            onClick={handleClickPermissions}
+            disabled={!canBanUsers}
+          >
             <span className="title">{lang('ChannelPermissions')}</span>
-            <span className="subtitle">{enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}</span>
+            <span className="subtitle" dir="auto">
+              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}
+            </span>
           </ListItem>
           <ListItem icon="admin" multiline ripple onClick={handleClickAdministrators}>
             <span className="title">{lang('ChannelAdministrators')}</span>

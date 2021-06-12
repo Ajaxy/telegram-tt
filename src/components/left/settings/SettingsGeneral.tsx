@@ -109,7 +109,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-item pt-3">
-        <h4 className="settings-item-header">{lang('SETTINGS')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('SETTINGS')}</h4>
 
         <RangeSlider
           label={lang('TextSize')}
@@ -128,10 +128,12 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           Animation Level
         </h4>
-        <p className="settings-item-description">Choose the desired animations amount.</p>
+        <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
+          Choose the desired animations amount.
+        </p>
 
         <RangeSlider
           options={ANIMATION_LEVEL_OPTIONS}
@@ -142,7 +144,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
       {KEYBOARD_SEND_OPTIONS && (
         <div className="settings-item">
-          <h4 className="settings-item-header">{lang('Keyboard')}</h4>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Keyboard')}</h4>
 
           <RadioGroup
             name="keyboard-send-settings"
@@ -154,7 +156,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('AutoDownloadMedia')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoDownloadMedia')}</h4>
 
         <Checkbox
           label={lang('Contacts')}
@@ -179,7 +181,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('AutoplayMedia')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoplayMedia')}</h4>
 
         <Checkbox
           label={lang('GifsTab2')}
@@ -194,7 +196,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('AccDescrStickers')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AccDescrStickers')}</h4>
 
         <Checkbox
           label={lang('SuggestStickers')}

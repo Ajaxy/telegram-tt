@@ -150,7 +150,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-item">
-        <h4 className="settings-item-header">{headerText}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{headerText}</h4>
 
         <RadioGroup
           name={`visibility-${privacyKey}`}
@@ -160,12 +160,12 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
         />
 
         {descriptionText && (
-          <p className="settings-item-description-larger">{descriptionText}</p>
+          <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
         )}
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4">{lang('PrivacyExceptions')}</h4>
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyExceptions')}</h4>
 
         {exceptionLists.shouldShowAllowed && (
           <ListItem
@@ -174,7 +174,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
             onClick={() => { onScreenSelect(allowedContactsScreen); }}
           >
             <div className="multiline-menu-item full-size">
-              {allowedCount > 0 && <span className="date">+{allowedCount}</span>}
+              {allowedCount > 0 && <span className="date" dir="auto">+{allowedCount}</span>}
               <span className="title">{lang('AlwaysShareWith')}</span>
               <span className="subtitle">{lang('EditAdminAddUsers')}</span>
             </div>
@@ -187,7 +187,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
             onClick={() => { onScreenSelect(deniedContactsScreen); }}
           >
             <div className="multiline-menu-item full-size">
-              {blockCount > 0 && <span className="date">&minus;{blockCount}</span>}
+              {blockCount > 0 && <span className="date" dir="auto">&minus;{blockCount}</span>}
               <span className="title">{lang('NeverShareWith')}</span>
               <span className="subtitle">{lang('EditAdminAddUsers')}</span>
             </div>

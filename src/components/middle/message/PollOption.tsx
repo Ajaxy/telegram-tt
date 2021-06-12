@@ -67,7 +67,7 @@ const PollOption: FC<OwnProps> = ({
   const lineStyle = `width: ${lineWidth}%; transform:scaleX(${isAnimationDoesNotStart ? 0 : 1})`;
 
   return (
-    <div className="PollOption">
+    <div className="PollOption" dir="ltr">
       <div className={`poll-option-share ${answerPercent === '100' ? 'limit-width' : ''}`}>
         {answerPercent}%
         {showIcon && (
@@ -82,7 +82,7 @@ const PollOption: FC<OwnProps> = ({
         )}
       </div>
       <div className="poll-option-right">
-        <div className="poll-option-text">
+        <div className="poll-option-text" dir="auto">
           {renderText(answer.text)}
         </div>
         <div className={buildClassName('poll-option-answer', showIcon && !correctAnswer && 'wrong')}>

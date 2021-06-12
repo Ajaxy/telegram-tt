@@ -31,6 +31,7 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withChatType?: boolean;
+  noRtl?: boolean;
 };
 
 type StateProps = {
@@ -49,6 +50,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   withFullInfo,
   withUpdatingStatus,
   withChatType,
+  noRtl,
   chat,
   onlineCount,
   areMessagesLoaded,
@@ -116,7 +118,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="ChatInfo">
+    <div className="ChatInfo" dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
       <Avatar
         key={chat.id}
         size={avatarSize}

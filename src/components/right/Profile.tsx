@@ -120,9 +120,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
-
   const lang = useLang();
-
   const [activeTab, setActiveTab] = useState(0);
 
   const tabs = useMemo(() => ([
@@ -251,7 +249,11 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return (
-      <div className={`content ${resultType}-list`} teactFastList>
+      <div
+        className={`content ${resultType}-list`}
+        dir={lang.isRtl && resultType === 'media' ? 'rtl' : undefined}
+        teactFastList
+      >
         {resultType === 'media' ? (
           viewportIds!.map((id) => chatMessages[id] && (
             <Media
@@ -328,7 +330,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="shared-media">
           <Transition
             ref={transitionRef}
-            name="slide"
+            name={lang.isRtl ? 'slide-reversed' : 'slide'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight

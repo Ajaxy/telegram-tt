@@ -20,6 +20,7 @@ const UnpinAllMessagesModal: FC<OwnProps> = ({
   onUnpin,
 }) => {
   const lang = useLang();
+
   return (
     <Modal
       isOpen={isOpen}

@@ -97,7 +97,7 @@ const GifSearch: FC<StateProps & DispatchProps> = ({
   const hasResults = Boolean(query !== undefined && results && results.length);
 
   return (
-    <div className="GifSearch">
+    <div className="GifSearch" dir={lang.isRtl ? 'rtl' : undefined}>
       <InfiniteScroll
         ref={containerRef}
         className={buildClassName('gif-container custom-scroll', hasResults && 'grid')}

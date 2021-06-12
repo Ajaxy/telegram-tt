@@ -228,7 +228,10 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <p className="last-message" dir="auto">
         {senderName && (
-          <span className="sender-name">{renderText(senderName)}</span>
+          <>
+            <span className="sender-name">{renderText(senderName)}</span>
+            <span className="colon">:</span>
+          </>
         )}
         {renderMessageSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>

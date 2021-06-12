@@ -53,7 +53,7 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderRecentRepliers() {
     return (
       recentRepliers && recentRepliers.length > 0 && (
-        <div className="recent-repliers">
+        <div className="recent-repliers" dir={lang.isRtl ? 'rtl' : 'ltr'}>
           {recentRepliers.map((user) => (
             <Avatar
               key={user.id}
@@ -73,6 +73,7 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
     <div
       data-cnt={formatIntegerCompact(messagesCount)}
       className={buildClassName('CommentButton', hasUnread && 'has-unread', disabled && 'disabled')}
+      dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={handleClick}
     >
       <i className="icon-comments-sticker" />

@@ -286,6 +286,11 @@
     @media (max-width: 600px) {
       bottom: 0.6875rem;
     }
+
+  }
+
+  &[dir=rtl] .placeholder-text {
+    right: 0;
   }
 
   .text-entity-link {

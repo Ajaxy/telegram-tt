@@ -30,6 +30,7 @@ export type OwnProps = {
   ripple?: boolean;
   faded?: boolean;
   tabIndex?: number;
+  isRtl?: boolean;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -66,6 +67,7 @@ const Button: FC<OwnProps> = ({
   ripple,
   faded,
   tabIndex,
+  isRtl,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
@@ -118,6 +120,7 @@ const Button: FC<OwnProps> = ({
         title={ariaLabel}
         download={download}
         tabIndex={tabIndex}
+        dir={isRtl ? 'rtl' : undefined}
       >
         {children}
         {!disabled && ripple && (
@@ -142,10 +145,11 @@ const Button: FC<OwnProps> = ({
       aria-label={ariaLabel}
       title={ariaLabel}
       tabIndex={tabIndex}
+      dir={isRtl ? 'rtl' : undefined}
     >
       {isLoading ? (
         <div>
-          <span>Please wait..</span>
+          <span dir={isRtl ? 'auto' : undefined}>Please wait..</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       ) : children}

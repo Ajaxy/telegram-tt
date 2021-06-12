@@ -151,6 +151,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
           pill
           fluid
           onClick={handleCreateFolder}
+          isRtl={lang.isRtl}
         >
           <i className="icon-add" />
           {lang('CreateNewFilter')}
@@ -158,7 +159,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item pt-3">
-        <h4 className="settings-item-header mb-3">{lang('Filters')}</h4>
+        <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Filters')}</h4>
 
         {userFolders && userFolders.length ? userFolders.map((folder) => (
           <ListItem
@@ -171,7 +172,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
             <span className="subtitle">{folder.subtitle}</span>
           </ListItem>
         )) : userFolders && !userFolders.length ? (
-          <p className="settings-item-description my-4">
+          <p className="settings-item-description my-4" dir="auto">
             You have no folders yet.
           </p>
         ) : <Loading />}
@@ -179,7 +180,9 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
 
       {(recommendedChatFolders && !!recommendedChatFolders.length) && (
         <div className="settings-item pt-3">
-          <h4 className="settings-item-header mb-3">{lang('FilterRecommended')}</h4>
+          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FilterRecommended')}
+          </h4>
 
           {recommendedChatFolders.map((folder) => (
             <ListItem
@@ -199,6 +202,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
                   size="tiny"
                   pill
                   fluid
+                  isRtl={lang.isRtl}
                 >
                   {lang('Add')}
                 </Button>

@@ -49,8 +49,8 @@ const ManageGroupRecentActions: FC<OwnProps & StateProps> = ({ chat }) => {
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section not-implemented">
-          <h3 className="section-heading">Actions</h3>
+        <div className="section not-implemented" dir={lang.isRtl ? 'rtl' : undefined}>
+          <h3 className="section-heading" dir="auto">Actions</h3>
 
           <div className="ListItem no-selection">
             <Checkbox
@@ -110,8 +110,8 @@ const ManageGroupRecentActions: FC<OwnProps & StateProps> = ({ chat }) => {
           </div>
         </div>
 
-        <div className="section not-implemented">
-          <h3 className="section-heading">{lang('Channel.Management.Title')}</h3>
+        <div className="section not-implemented" dir={lang.isRtl ? 'rtl' : undefined}>
+          <h3 className="section-heading" dir="auto">{lang('Channel.Management.Title')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox

@@ -99,6 +99,20 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+
+    &:dir(rtl) {
+      .status {
+        text-align: initial;
+        unicode-bidi: plaintext;
+      }
+    }
+
+    &[dir=rtl] {
+      .status {
+        text-align: initial;
+        unicode-bidi: plaintext;
+      }
+    }
   }
 
   .title {
@@ -129,5 +143,19 @@
   .status {
     font-size: 0.875rem;
     opacity: .5;
+  }
+
+  &[dir=rtl] {
+    .navigation.prev {
+      left: auto;
+      right: 0;
+      transform: scaleX(-1);
+    }
+
+    .navigation.next {
+      left: 0;
+      right: auto;
+      transform: scaleX(-1);
+    }
   }
 }

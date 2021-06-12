@@ -320,7 +320,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
       isOpen={isOpen}
       onClose={onClose}
     >
-      <div className="header">
+      <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button
           className="close-button"
           color="translucent"

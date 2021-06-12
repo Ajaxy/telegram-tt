@@ -70,19 +70,25 @@ const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
     <div
       className={className}
       data-initial={(siteName || displayUrl)[0]}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
       {photo && (
         <Media message={message} />
       )}
       <div className="content">
-        <Link className="site-title" onClick={handleMessageClick}>{renderText(title || siteName || displayUrl)}</Link>
+        <Link isRtl={lang.isRtl} className="site-title" onClick={handleMessageClick}>
+          {renderText(title || siteName || displayUrl)}
+        </Link>
         {truncatedDescription && (
-          <Link className="site-description" onClick={handleMessageClick}>{renderText(truncatedDescription)}</Link>
+          <Link isRtl={lang.isRtl} className="site-description" onClick={handleMessageClick}>
+            {renderText(truncatedDescription)}
+          </Link>
         )}
         <SafeLink
           url={url}
           className="site-name"
           text=""
+          isRtl={lang.isRtl}
         >
           {url.replace('mailto:', '') || displayUrl}
         </SafeLink>
@@ -93,6 +99,7 @@ const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
           <Link
             className="date"
             onClick={handleMessageClick}
+            isRtl={lang.isRtl}
           >
             {formatPastTimeShort(lang, message.date * 1000)}
           </Link>

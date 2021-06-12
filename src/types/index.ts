@@ -53,7 +53,10 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldLoopStickers: boolean;
   hasPassword?: boolean;
   languages?: ApiLanguage[];
-  language: 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'es' | 'uk';
+  language: (
+    'en' | 'ar' | 'be' | 'ca' | 'nl' | 'fr' | 'de' | 'id' | 'it' | 'ko' | 'ms' | 'fa' | 'pl' | 'pt-br' | 'ru' | 'es'
+    | 'tr' | 'uk' | 'uz'
+  );
 }
 
 export interface ApiPrivacySettings {

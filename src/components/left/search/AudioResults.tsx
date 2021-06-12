@@ -88,7 +88,9 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading">{formatMonthAndYear(lang, new Date(message.date * 1000))}</p>
+            <p className="section-heading" dir={lang.isRtl ? 'rtl' : undefined}>
+              {formatMonthAndYear(lang, new Date(message.date * 1000))}
+            </p>
           )}
           <Audio
             key={message.id}

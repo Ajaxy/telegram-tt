@@ -73,7 +73,7 @@ const ManageGroupRemovedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section">
+        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
           <p className="text-muted">{lang('NoBlockedGroup2')}</p>
 
           {removedMembers.map((member) => (

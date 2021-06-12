@@ -82,7 +82,7 @@ const File: FC<OwnProps> = ({
   );
 
   return (
-    <div ref={elementRef} className={fullClassName}>
+    <div ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
         <div className="message-select-control">
           {isSelected && <i className="icon-select" />}

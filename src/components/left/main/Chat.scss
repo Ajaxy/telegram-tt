@@ -94,10 +94,13 @@
     }
 
     .last-message {
-      .sender-name, .draft {
+      .draft {
         &::after {
           content: ': ';
         }
+      }
+      .colon {
+        margin-inline-end: .25rem;
       }
 
       .media-preview {
@@ -110,7 +113,7 @@
         object-fit: cover;
         border-radius: .125rem;
         vertical-align: -.25rem;
-        margin-right: .25rem;
+        margin-inline-end: .25rem;
 
         &.round {
           border-radius: .625rem;
@@ -127,8 +130,34 @@
         font-size: .75rem;
         color: #fff;
         position: absolute;
-        left: .25rem;
         top: .1875rem;
+        margin-inline-start: -1.25rem;
+      }
+    }
+  }
+
+  &[dir=rtl] {
+    .info {
+      .LastMessageMeta {
+        margin-left: 0;
+        margin-right: auto;
+      }
+
+      .title, .subtitle {
+        padding-left: .15rem;
+        padding-right: 0;
+      }
+
+      .icon-muted-chat {
+        margin-left: 0;
+        margin-right: 0.25rem;
+      }
+
+      .last-message, .typing-status {
+        padding-left: 0.5rem;
+        padding-right: 0;
+        text-align: right;
+        unicode-bidi: plaintext;
       }
     }
   }

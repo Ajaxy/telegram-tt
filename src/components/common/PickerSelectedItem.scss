@@ -117,4 +117,29 @@
     opacity: 0;
     transition: opacity .15s ease;
   }
+
+  &[dir=rtl] {
+    padding-left: 1rem;
+    padding-right: 0;
+
+    &.minimized {
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .SearchInput & {
+      left: auto;
+      right: -.125rem;
+    }
+
+    .item-name {
+      margin-left: 0;
+      margin-right: 0.5rem;
+    }
+
+    .item-remove {
+      left: auto;
+      right: 0;
+    }
+  }
 }

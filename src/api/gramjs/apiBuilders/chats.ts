@@ -319,29 +319,29 @@ export function buildChatTypingStatus(
   if (update.action instanceof GramJs.SendMessageCancelAction) {
     return undefined;
   } else if (update.action instanceof GramJs.SendMessageTypingAction) {
-    action = 'typing';
+    action = 'lng_user_typing';
   } else if (update.action instanceof GramJs.SendMessageRecordVideoAction) {
-    action = 'recording a video';
+    action = 'lng_send_action_record_video';
   } else if (update.action instanceof GramJs.SendMessageUploadVideoAction) {
-    action = 'uploading a video';
+    action = 'lng_send_action_upload_video';
   } else if (update.action instanceof GramJs.SendMessageRecordAudioAction) {
-    action = 'recording a voice message';
+    action = 'lng_send_action_record_audio';
   } else if (update.action instanceof GramJs.SendMessageUploadAudioAction) {
-    action = 'uploading a voice message';
+    action = 'lng_send_action_upload_audio';
   } else if (update.action instanceof GramJs.SendMessageUploadPhotoAction) {
-    action = 'uploading a photo';
+    action = 'lng_send_action_upload_photo';
   } else if (update.action instanceof GramJs.SendMessageUploadDocumentAction) {
-    action = 'uploading a file';
+    action = 'lng_send_action_upload_file';
   } else if (update.action instanceof GramJs.SendMessageGeoLocationAction) {
     action = 'selecting a location to share';
   } else if (update.action instanceof GramJs.SendMessageChooseContactAction) {
     action = 'selecting a contact to share';
   } else if (update.action instanceof GramJs.SendMessageGamePlayAction) {
-    action = 'playing a game';
+    action = 'lng_playing_game';
   } else if (update.action instanceof GramJs.SendMessageRecordRoundAction) {
-    action = 'recording a round video';
+    action = 'lng_send_action_record_round';
   } else if (update.action instanceof GramJs.SendMessageUploadRoundAction) {
-    action = 'uploading a round video';
+    action = 'lng_send_action_upload_round';
   }
 
   return {

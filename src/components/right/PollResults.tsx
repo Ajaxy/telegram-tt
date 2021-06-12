@@ -5,6 +5,7 @@ import { ApiMessage, ApiChat } from '../../api/types';
 import { selectChat, selectChatMessage } from '../../modules/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../modules/helpers';
+import useLang from '../../hooks/useLang';
 
 import PollAnswerResults from './PollAnswerResults';
 import Loading from '../ui/Loading';
@@ -22,6 +23,7 @@ const PollResults: FC<StateProps> = ({
   message,
   lastSyncTime,
 }) => {
+  const lang = useLang();
   if (!message || !chat) {
     return <Loading />;
   }
@@ -34,7 +36,7 @@ const PollResults: FC<StateProps> = ({
   const resultsByOption = buildCollectionByKey(results.results, 'option');
 
   return (
-    <div className="PollResults">
+    <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
       <h3 className="poll-question" dir="auto">{summary.question}</h3>
       <div className="poll-results-list custom-scroll">
         {lastSyncTime && summary.answers.map((answer) => (

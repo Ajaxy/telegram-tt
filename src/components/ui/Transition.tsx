@@ -18,8 +18,8 @@ type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
   name: (
-    'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers'
-    | 'push-slide' | 'reveal'
+    'none' | 'slide' | 'slide-reversed' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'slide-layers'
+    | 'fade' | 'push-slide' | 'reveal'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
@@ -38,6 +38,7 @@ type StateProps = {
 
 const ANIMATION_DURATION = {
   slide: 450,
+  'slide-reversed': 450,
   'mv-slide': 400,
   'slide-fade': 400,
   'zoom-fade': 150,

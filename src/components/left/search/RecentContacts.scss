@@ -64,7 +64,7 @@
         width: 1rem;
         height: 1rem;
         background-size: 1rem;
-        margin-right: 1px;
+        margin-inline-end: 1px;
         vertical-align: -3px;
       }
     }
@@ -76,6 +76,13 @@
 
     .Button {
       margin-left: auto;
+    }
+
+    &[dir=rtl] {
+      .Button {
+        margin-left: 0;
+        margin-right: auto;
+      }
     }
   }
 }

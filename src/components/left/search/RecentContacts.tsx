@@ -74,10 +74,10 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="RecentContacts custom-scroll">
       {topUserIds && (
-        <div className="top-peers-section">
+        <div className="top-peers-section" dir={lang.isRtl ? 'rtl' : undefined}>
           <div ref={topUsersRef} className="top-peers no-selection">
             {topUserIds.map((userId) => (
-              <div className="top-peer-item" onClick={() => handleClick(userId)}>
+              <div className="top-peer-item" onClick={() => handleClick(userId)} dir={lang.isRtl ? 'rtl' : undefined}>
                 <Avatar user={usersById[userId]} />
                 <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
@@ -87,7 +87,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {recentlyFoundChatIds && (
         <div className="search-section pt-1">
-          <h3 className="section-heading mt-0 recent-chats-header">
+          <h3 className="section-heading mt-0 recent-chats-header" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('Recent')}
 
             <Button
@@ -96,6 +96,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
               color="translucent"
               ariaLabel="Clear recent chats"
               onClick={clearRecentlyFoundChats}
+              isRtl={lang.isRtl}
             >
               <i className="icon-close" />
             </Button>

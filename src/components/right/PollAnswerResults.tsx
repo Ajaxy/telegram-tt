@@ -12,6 +12,7 @@ import {
 import { GlobalActions } from '../../global/types';
 import { pick } from '../../util/iteratees';
 import usePrevious from '../../hooks/usePrevious';
+import useLang from '../../hooks/useLang';
 
 import ShowMoreButton from '../ui/ShowMoreButton';
 import Loading from '../ui/Loading';
@@ -54,6 +55,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(voters);
   const { option, text } = answer;
+  const lang = useLang();
 
   useEffect(() => {
     // For update when new votes arrive or when the user takes back his vote
@@ -115,9 +117,11 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
           : <Loading />}
         {voters && renderViewMoreButton()}
       </div>
-      <div className="answer-head">
+      <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
         <span className="answer-title" dir="auto">{text}</span>
-        <span className="answer-percent">{getPercentage(answerVote.votersCount, totalVoters)}%</span>
+        <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
+          {getPercentage(answerVote.votersCount, totalVoters)}%
+        </span>
       </div>
     </div>
   );

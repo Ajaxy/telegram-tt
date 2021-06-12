@@ -86,6 +86,7 @@ const Audio: FC<OwnProps & StateProps> = ({
   const { content: { audio, voice }, isMediaUnread } = message;
   const isVoice = Boolean(voice);
   const isSeeking = useRef<boolean>(false);
+  const lang = useLang();
 
   const [isActivated, setIsActivated] = useState(false);
   const shouldDownload = (isActivated || PRELOAD) && lastSyncTime;
@@ -177,8 +178,6 @@ const Audio: FC<OwnProps & StateProps> = ({
     onDateClick!(message.id, message.chatId);
   }, [onDateClick, message.id, message.chatId]);
 
-  const lang = useLang();
-
   function getFirstLine() {
     if (isVoice) {
       return senderTitle || 'Voice';
@@ -264,7 +263,7 @@ const Audio: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className={fullClassName}>
+    <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
         <div className="message-select-control">
           {isSelected && <i className="icon-select" />}
@@ -277,6 +276,7 @@ const Audio: FC<OwnProps & StateProps> = ({
         className={buttonClassNames.join(' ')}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
         onClick={handleButtonClick}
+        isRtl={lang.isRtl}
       >
         <i className="icon-play" />
         <i className="icon-pause" />

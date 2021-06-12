@@ -642,15 +642,15 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const scheduledMaxDate = new Date();
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
-  let sendButtonAriaLabel = 'Send message';
+  let sendButtonAriaLabel = 'SendMessage';
   switch (mainButtonState) {
     case MainButtonState.Edit:
       sendButtonAriaLabel = 'Save edited message';
       break;
     case MainButtonState.Record:
       sendButtonAriaLabel = areVoiceMessagesNotAllowed
-        ? 'Posting media content is not allowed in this group.'
-        : 'Record a voice message';
+        ? 'Conversation.DefaultRestrictedMedia'
+        : 'AccDescrVoiceMessage';
   }
 
   const className = buildClassName(
@@ -867,7 +867,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         color="secondary"
         className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
         disabled={areVoiceMessagesNotAllowed}
-        ariaLabel={sendButtonAriaLabel}
+        ariaLabel={lang(sendButtonAriaLabel)}
         onClick={mainButtonHandler}
         onContextMenu={
           mainButtonState === MainButtonState.Send && canShowCustomSendMenu ? handleContextMenu : undefined

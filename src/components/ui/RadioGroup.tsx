@@ -1,5 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+
 import Radio from './Radio';
 
 type IRadioOption = {

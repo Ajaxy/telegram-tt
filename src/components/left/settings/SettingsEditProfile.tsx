@@ -198,13 +198,13 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
             error={error === ERROR_BIO_TOO_LONG ? error : undefined}
           />
 
-          <p className="settings-item-description">
+          <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
             {renderText(lang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
           </p>
         </div>
 
         <div className="settings-item">
-          <h4 className="settings-item-header">{lang('Username')}</h4>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Username')}</h4>
 
           <UsernameInput
             currentUsername={username || ''}
@@ -214,11 +214,11 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
             onChange={handleUsernameChange}
           />
 
-          <p className="settings-item-description">
+          <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
             {renderText(lang('UsernameHelp'), ['br', 'simple_markdown'])}
           </p>
           {username && (
-            <p className="settings-item-description">
+            <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('lng_username_link')}<br />
               <span className="username-link">https://t.me/{username}</span>
             </p>

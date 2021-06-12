@@ -464,7 +464,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     >
       {() => (
         <>
-          <div className="media-viewer-head">
+          <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
             {IS_MOBILE_SCREEN && (
               <Button
                 className="media-viewer-close"
@@ -513,6 +513,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               type="button"
               className={`navigation prev ${isVideo && !isGif && 'inline'}`}
               aria-label={lang('AccDescrPrevious')}
+              dir={lang.isRtl ? 'rtl' : undefined}
               onClick={selectPreviousMedia}
             />
           )}
@@ -521,6 +522,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               type="button"
               className={`navigation next ${isVideo && !isGif && 'inline'}`}
               aria-label={lang('Next')}
+              dir={lang.isRtl ? 'rtl' : undefined}
               onClick={selectNextMedia}
             />
           )}

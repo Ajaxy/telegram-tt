@@ -15,13 +15,13 @@
     color: var(--color-text-lighter);
     font-weight: 500;
     line-height: 2rem;
-    margin-left: 1.9rem;
+    margin-inline-start: 1.875rem;
     white-space: nowrap;
   }
 
   @media (max-width: 950px) {
     > .state-text {
-      margin-left: 1.2rem;
+      margin-inline-start: 1.25rem;
     }
   }
 }

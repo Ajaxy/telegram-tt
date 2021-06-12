@@ -6,6 +6,8 @@
   width: 100%;
   align-items: center;
   padding: .5625rem .25rem .5625rem .625rem;
+  padding-inline-start: .625rem;
+  padding-inline-end: .25rem;
   background: var(--background-color);
   border-bottom-right-radius: var(--border-bottom-right-radius);
   border-bottom-left-radius: var(--border-bottom-left-radius);
@@ -139,7 +141,6 @@
   .message-content.poll &,
   .message-content.has-solid-background.text &,
   .message-content.has-solid-background.is-forwarded & {
-    margin-right: 0;
     width: calc(100% + 1rem);
   }
 
@@ -150,25 +151,31 @@
   .icon-comments {
     font-size: 1.5625rem;
     line-height: 2rem;
-    margin-right: .875rem;
+    margin-inline-end: .875rem;
   }
 
   .icon-next {
-    margin-left: auto;
+    margin-inline-start: auto;
     font-size: 1.5rem;
   }
 
   .recent-repliers {
     display: inline-flex;
     align-items: center;
-    margin-right: .5rem;
-    margin-left: -.125rem;
+    margin-inline-end: .5rem;
+    margin-inline-start: -.125rem;
 
     .Avatar {
       transition: border .15s;
       border: 2px solid var(--color-background);
-      margin-right: 0;
+      margin-inline-end: 0;
       z-index: 3;
+      overflow: hidden;
+
+      .emoji {
+        width: 1rem;
+        background-size: 1rem;
+      }
 
       + .Avatar {
         z-index: 2;
@@ -179,7 +186,7 @@
       }
 
       &:not(:first-child) {
-        margin-left: -.75rem;
+        margin-inline-start: -.75rem;
       }
     }
   }
@@ -194,7 +201,7 @@
       height: .5rem;
       border-radius: 50%;
       background: var(--accent-color);
-      margin-left: 	.75rem;
+      margin-inline-start: 	.75rem;
     }
   }
 

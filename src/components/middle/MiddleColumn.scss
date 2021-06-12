@@ -345,8 +345,8 @@
     }
 
     .icon-unpin {
-      margin-right: .75rem;
-      margin-left: -0.438rem;
+      margin-inline-start: -0.4375rem;
+      margin-inline-end: .75rem;
       color: var(--color-text-secondary);
       font-size: 1.5rem;
       transition: color .15s

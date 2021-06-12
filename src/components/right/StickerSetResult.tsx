@@ -36,7 +36,8 @@ type DispatchProps = Pick<GlobalActions, 'loadStickers' | 'toggleStickerSet'>;
 const STICKERS_TO_DISPLAY = 5;
 
 const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
-  stickerSetId, observeIntersection, set, shouldPlay, loadStickers, toggleStickerSet, isSomeModalOpen, onModalToggle,
+  stickerSetId, observeIntersection, set, shouldPlay,
+  loadStickers, toggleStickerSet, isSomeModalOpen, onModalToggle,
 }) => {
   const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);
@@ -77,7 +78,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
   const canRenderStickers = displayedStickers.length > 0;
 
   return (
-    <div key={set.id} className="sticker-set">
+    <div key={set.id} className="sticker-set" dir={lang.isRtl ? 'rtl' : undefined}>
       <div className="sticker-set-header">
         <div className="title-wrapper">
           <h3 className="title" dir="auto">{set.title}</h3>

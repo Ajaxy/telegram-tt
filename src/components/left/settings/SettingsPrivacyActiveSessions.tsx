@@ -55,11 +55,13 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
   function renderCurrentSession(session: ApiSession) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4">{lang('AuthSessions.CurrentSession')}</h4>
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('AuthSessions.CurrentSession')}
+        </h4>
 
         <ListItem narrow inactive>
-          <div className="multiline-menu-item">
-            <span className="title">{session.appName}</span>
+          <div className="multiline-menu-item" dir="auto">
+            <span className="title" dir="auto">{session.appName}</span>
             <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
             <span className="subtitle">{session.ip} - {getLocation(session)}</span>
           </div>
@@ -81,7 +83,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
   function renderOtherSessions(sessions: ApiSession[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4">Other Sessions</h4>
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>Other Sessions</h4>
 
         {sessions.map(renderSession)}
       </div>
@@ -102,7 +104,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
           },
         }]}
       >
-        <div className="multiline-menu-item full-size">
+        <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           <span className="title">{session.appName}</span>
           <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
@@ -141,7 +143,11 @@ function getDeviceEnvironment(session: ApiSession) {
 }
 
 export default memo(withGlobal(
-  (global): StateProps => ({ activeSessions: global.activeSessions }),
+  (global): StateProps => {
+    return {
+      activeSessions: global.activeSessions,
+    };
+  },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAuthorizations', 'terminateAuthorization', 'terminateAllAuthorizations',
   ]),

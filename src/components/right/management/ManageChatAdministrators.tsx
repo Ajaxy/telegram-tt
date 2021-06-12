@@ -85,7 +85,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
           </ListItem>
         </div>
 
-        <div className="section">
+        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
           <p className="text-muted" dir="auto">
             {isChannel
               ? 'You can add administrators to help you manage your channel.'

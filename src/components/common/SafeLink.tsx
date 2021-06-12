@@ -12,6 +12,7 @@ type OwnProps = {
   text: string;
   className?: string;
   children?: any;
+  isRtl?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'toggleSafeLinkModal' | 'openTelegramLink'>;
@@ -21,6 +22,7 @@ const SafeLink: FC<OwnProps & DispatchProps> = ({
   text,
   className,
   children,
+  isRtl,
   toggleSafeLinkModal,
   openTelegramLink,
 }) => {
@@ -65,6 +67,7 @@ const SafeLink: FC<OwnProps & DispatchProps> = ({
       rel="noopener noreferrer"
       className={classNames}
       onClick={handleClick}
+      dir={isRtl ? 'rtl' : 'auto'}
     >
       {content}
     </a>

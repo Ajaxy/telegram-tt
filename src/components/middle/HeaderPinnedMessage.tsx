@@ -79,7 +79,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
         confirmLabel="Unpin"
         confirmHandler={handleUnpinMessage}
       />
-      <div className="HeaderPinnedMessage" onClick={onClick}>
+      <div className="HeaderPinnedMessage" onClick={onClick} dir={lang.isRtl ? 'rtl' : undefined}>
         <PinnedMessageNavigation
           count={count}
           index={index}

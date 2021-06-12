@@ -35,6 +35,12 @@
     .status {
       display: none;
     }
+
+    &[dir=rtl] {
+      .title h3{
+        text-align: right;
+      }
+    }
   }
 
   .ListItem-button {
@@ -49,6 +55,13 @@
     i {
       opacity: 1;
       color: inherit;
+    }
+  }
+
+  &[dir=rtl] {
+    .Avatar {
+      margin-left: 1.5rem;
+      margin-right: -0.25rem;
     }
   }
 }

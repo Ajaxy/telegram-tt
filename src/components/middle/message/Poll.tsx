@@ -18,7 +18,7 @@ import { pick } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderMessageText';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import useLang from '../../../hooks/useLang';
+import useLang, { LangFn } from '../../../hooks/useLang';
 
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';
@@ -256,11 +256,11 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="Poll" dir="auto">
+    <div className="Poll" dir={lang.isRtl ? 'auto' : 'ltr'}>
       {renderSolution()}
       <div className="poll-question">{renderText(summary.question)}</div>
       <div className="poll-type">
-        {getPollTypeString(summary)}
+        {lang(getPollTypeString(summary))}
         {renderRecentVoters()}
         {closePeriod > 0 && canVote && <div ref={countdownRef} className="poll-countdown" />}
         {summary.quiz && poll.results.solution && !canVote && (
@@ -306,7 +306,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
       )}
       {!canViewResult && !isMultiple && (
-        <div className="poll-voters-count">{getReadableVotersCount(summary.quiz, results.totalVoters)}</div>
+        <div className="poll-voters-count">{getReadableVotersCount(lang, summary.quiz, results.totalVoters)}</div>
       )}
       {isMultiple && (
         <Button
@@ -338,22 +338,22 @@ function getPollTypeString(summary: ApiPoll['summary']) {
   }
 
   if (summary.quiz) {
-    return summary.isPublic ? 'Quiz' : 'Anonymous Quiz';
+    return summary.isPublic ? 'QuizPoll' : 'AnonymousQuizPoll';
   }
 
   if (summary.closed) {
-    return 'Final results';
+    return 'FinalResults';
   }
 
-  return summary.isPublic ? 'Poll' : 'Anonymous Poll';
+  return summary.isPublic ? 'PublicPoll' : 'AnonymousPoll';
 }
 
-function getReadableVotersCount(isQuiz: true | undefined, count?: number) {
+function getReadableVotersCount(lang: LangFn, isQuiz: true | undefined, count?: number) {
   if (!count) {
-    return isQuiz ? 'No answers yet' : 'No voters yet';
+    return lang(isQuiz ? 'Chat.Quiz.TotalVotesEmpty' : 'Chat.Poll.TotalVotesResultEmpty');
   }
 
-  return isQuiz ? `${count} answered` : `${count} voted`;
+  return lang(isQuiz ? 'Answer' : 'Vote', count, 'i');
 }
 
 export default memo(withGlobal<OwnProps>(

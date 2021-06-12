@@ -54,6 +54,7 @@ const EmojiCategory: FC<OwnProps> = ({
         className={buildClassName('symbol-set-container', transitionClassNames)}
         // @ts-ignore
         style={`height: ${height}px;`}
+        dir={lang.isRtl ? 'rtl' : undefined}
       >
         {shouldRender && category.emojis.map((name) => {
           const emoji = allEmojis[name];
