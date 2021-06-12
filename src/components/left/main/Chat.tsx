@@ -41,7 +41,6 @@ import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useMedia from '../../../hooks/useMedia';
-import ChatCallStatus from './ChatCallStatus';
 import { ChatAnimationTypes } from './hooks';
 
 import Avatar from '../../common/Avatar';
@@ -259,9 +258,6 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           isSavedMessages={privateChatUser && privateChatUser.isSelf}
           lastSyncTime={lastSyncTime}
         />
-        {chat.isCallActive && (
-          <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
-        )}
       </div>
       <div className="info">
         <div className="title">
