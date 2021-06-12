@@ -9,9 +9,10 @@ import {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
+  ApiUpdateSession,
   ApiUpdateCurrentUser,
 } from '../../../api/types';
-import { DEBUG, LEGACY_SESSION_KEY } from '../../../config';
+import { DEBUG, SESSION_USER_KEY } from '../../../config';
 import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
@@ -39,6 +40,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'updateConnectionState':
       onUpdateConnectionState(update);
+      break;
+
+    case 'updateSession':
+      onUpdateSession(update);
       break;
 
     case 'updateCurrentUser':
@@ -102,11 +107,6 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       });
       break;
     case 'authorizationStateReady': {
-      const { sessionId, sessionJson } = update;
-      if (sessionId && global.authRememberMe) {
-        getDispatch().saveSession({ sessionId, sessionJson });
-      }
-
       if (wasAuthReady) {
         break;
       }
@@ -145,6 +145,16 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
   }
 }
 
+function onUpdateSession(update: ApiUpdateSession) {
+  if (!getGlobal().authRememberMe) {
+    return;
+  }
+
+  const { sessionData } = update;
+
+  getDispatch().saveSession({ sessionData });
+}
+
 function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
   const { currentUser } = update;
 
@@ -153,15 +163,15 @@ function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
     currentUserId: currentUser.id,
   });
 
-  updateLegacySessionUserId(currentUser.id);
+  updateSessionUserId(currentUser.id);
 }
 
-function updateLegacySessionUserId(currentUserId: number) {
-  const legacySessionJson = localStorage.getItem(LEGACY_SESSION_KEY);
-  if (!legacySessionJson) return;
+function updateSessionUserId(currentUserId: number) {
+  const sessionUserAuth = localStorage.getItem(SESSION_USER_KEY);
+  if (!sessionUserAuth) return;
 
-  const legacySession = JSON.parse(legacySessionJson);
-  legacySession.id = currentUserId;
+  const userAuth = JSON.parse(sessionUserAuth);
+  userAuth.id = currentUserId;
 
-  localStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(legacySession));
+  localStorage.setItem(SESSION_USER_KEY, JSON.stringify(userAuth));
 }

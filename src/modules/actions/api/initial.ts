@@ -7,34 +7,30 @@ import { GlobalState } from '../../../global/types';
 import {
   LANG_CACHE_NAME,
   CUSTOM_BG_CACHE_NAME,
-  GRAMJS_SESSION_ID_KEY,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
-  LEGACY_SESSION_KEY,
 } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 import { HistoryWrapper } from '../../../util/history';
 import { updateAppBadge } from '../../../util/appBadge';
+import {
+  storeSession,
+  loadStoredSession,
+  clearStoredSession,
+  importLegacySession,
+  clearLegacySessions,
+} from './sessions';
 
 addReducer('initApi', (global: GlobalState, actions) => {
-  let sessionInfo = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
+  (async () => {
+    await importLegacySession();
+    void clearLegacySessions();
 
-  if (!sessionInfo) {
-    const legacySessionJson = localStorage.getItem(LEGACY_SESSION_KEY);
-    if (legacySessionJson) {
-      const { dcID: legacySessionMainDc } = JSON.parse(legacySessionJson);
-      const legacySessionMainKeyRaw = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
-      if (legacySessionMainKeyRaw) {
-        const legacySessionMainDcKey = legacySessionMainKeyRaw.replace(/"/g, '');
-        sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
-      }
-    }
-  }
-
-  void initApi(actions.apiUpdate, sessionInfo);
+    void initApi(actions.apiUpdate, loadStoredSession());
+  })();
 });
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
@@ -116,10 +112,7 @@ addReducer('gotToAuthQrCode', (global) => {
 });
 
 addReducer('saveSession', (global, actions, payload) => {
-  const { sessionId, sessionJson } = payload!;
-  localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
-
-  exportLegacySession(sessionJson, global.currentUserId!);
+  storeSession(payload.sessionData, global.currentUserId);
 });
 
 addReducer('signOut', () => {
@@ -132,19 +125,20 @@ addReducer('signOut', () => {
 });
 
 addReducer('reset', () => {
-  localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
-  clearLegacySession();
+  clearStoredSession();
 
-  cacheApi.clear(MEDIA_CACHE_NAME);
-  cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
-  cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
-  cacheApi.clear(CUSTOM_BG_CACHE_NAME);
+  void cacheApi.clear(MEDIA_CACHE_NAME);
+  void cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
+  void cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
+  void cacheApi.clear(CUSTOM_BG_CACHE_NAME);
 
   const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
   const langCacheVersion = (LANG_CACHE_NAME.match(/\d+$/) || [0])[0];
   for (let i = 0; i < langCacheVersion; i++) {
-    cacheApi.clear(`${langCachePrefix}${i === 0 ? '' : i}`);
+    void cacheApi.clear(`${langCachePrefix}${i === 0 ? '' : i}`);
   }
+
+  void clearLegacySessions();
 
   updateAppBadge(0);
 
@@ -188,23 +182,3 @@ addReducer('deleteDeviceToken', (global) => {
   delete newGlobal.push;
   setGlobal(newGlobal);
 });
-
-function exportLegacySession(sessionJson: string, currentUserId: number) {
-  const { mainDcId, keys } = JSON.parse(sessionJson);
-  const legacySession = { dcID: mainDcId, id: currentUserId };
-  localStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(legacySession));
-  localStorage.setItem('dc', mainDcId);
-  Object.keys(keys).forEach((dcId) => {
-    localStorage.setItem(`dc${dcId}_auth_key`, `"${keys[dcId]}"`);
-  });
-}
-
-function clearLegacySession() {
-  localStorage.removeItem('dc5_auth_key');
-  localStorage.removeItem('dc4_auth_key');
-  localStorage.removeItem('dc3_auth_key');
-  localStorage.removeItem('dc2_auth_key');
-  localStorage.removeItem('dc1_auth_key');
-  localStorage.removeItem('dc');
-  localStorage.removeItem(LEGACY_SESSION_KEY);
-}

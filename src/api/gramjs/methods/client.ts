@@ -4,7 +4,9 @@ import {
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 
-import { ApiMediaFormat, ApiOnProgress, OnApiUpdate } from '../../types';
+import {
+  ApiMediaFormat, ApiOnProgress, ApiSessionData, OnApiUpdate,
+} from '../../types';
 
 import {
   DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, APP_VERSION,
@@ -30,7 +32,7 @@ let onUpdate: OnApiUpdate;
 let client: TelegramClient;
 let isConnected = false;
 
-export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
+export async function init(_onUpdate: OnApiUpdate, sessionData?: ApiSessionData) {
   onUpdate = _onUpdate;
 
   if (DEBUG) {
@@ -38,12 +40,8 @@ export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
     console.log('>>> START INIT API');
   }
 
-  const session = IS_TEST
-    ? new sessions.LocalStorageSession(sessionInfo)
-    : new sessions.IdbSession(sessionInfo);
-
   client = new TelegramClient(
-    session,
+    new sessions.CallbackSession(sessionData, onSessionUpdate),
     process.env.TELEGRAM_T_API_ID,
     process.env.TELEGRAM_T_API_HASH,
     {
@@ -72,17 +70,14 @@ export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
       onError: onAuthError,
     });
 
-    const newSessionId = await session.save();
-    const sessionJson = JSON.stringify(session.getSessionData(true));
-
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.log('>>> FINISH INIT API');
       // eslint-disable-next-line no-console
-      console.log('[GramJs/client] CONNECTED as ', newSessionId);
+      console.log('[GramJs/client] CONNECTED');
     }
 
-    onAuthReady(newSessionId, sessionJson);
+    onAuthReady();
     onUpdate({ '@type': 'updateApiReady' });
 
     void fetchCurrentUser();
@@ -109,6 +104,13 @@ export function getClient() {
   return client;
 }
 
+function onSessionUpdate(sessionData: ApiSessionData) {
+  onUpdate({
+    '@type': 'updateSession',
+    sessionData,
+  });
+}
+
 function handleGramJsUpdate(update: any) {
   if (update instanceof connection.UpdateConnectionState) {
     isConnected = update.state === connection.UpdateConnectionState.connected;
@@ -125,7 +127,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   if (!isConnected) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.warn(`[GramJs/client] INVOKE ${request.className} ERROR: Client is not connected`);
+      console.warn(`[GramJs/client] INVOKE ERROR ${request.className}: Client is not connected`);
     }
 
     return undefined;

@@ -1,6 +1,6 @@
 import Worker from 'worker-loader!./worker';
 
-import { ApiOnProgress, OnApiUpdate } from '../../types';
+import { ApiOnProgress, ApiSessionData, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
 import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
 
@@ -20,7 +20,7 @@ const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
 
 // TODO Re-use `util/WorkerConnector.ts`
 
-export function initApi(onUpdate: OnApiUpdate, sessionInfo = '') {
+export function initApi(onUpdate: OnApiUpdate, sessionData?: ApiSessionData) {
   if (!worker) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -33,7 +33,7 @@ export function initApi(onUpdate: OnApiUpdate, sessionInfo = '') {
 
   return makeRequest({
     type: 'initApi',
-    args: [sessionInfo],
+    args: [sessionData],
   });
 }
 

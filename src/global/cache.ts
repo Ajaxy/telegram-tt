@@ -11,8 +11,8 @@ import {
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
-  GRAMJS_SESSION_ID_KEY,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN, GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
+  LEGACY_SESSION_KEY,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN, GLOBAL_STATE_CACHE_USER_LIST_LIMIT, SESSION_USER_KEY,
 } from '../config';
 import { IS_MOBILE_SCREEN } from '../util/environment';
 import { pick } from '../util/iteratees';
@@ -44,8 +44,8 @@ export function initCache() {
 
 export function loadCache(initialState: GlobalState) {
   if (!GLOBAL_STATE_CACHE_DISABLED) {
-    const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
-    if (hasActiveSession) {
+    const hasSession = localStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
+    if (hasSession) {
       isAllowed = true;
       addCallback(updateCacheThrottled);
       return readCache(initialState);
