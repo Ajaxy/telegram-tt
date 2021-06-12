@@ -56,4 +56,21 @@
   & > .Switcher {
     margin-left: auto;
   }
+
+  &[dir=rtl] {
+    i {
+      margin-left: 2rem;
+      margin-right: 0;
+    }
+
+    .menu-item-name {
+      margin-left: 2rem;
+      margin-right: 0;
+    }
+
+      > .Switcher {
+      margin-left: 0;
+      margin-right: auto;
+    }
+  }
 }

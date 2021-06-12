@@ -57,6 +57,11 @@
     flex-shrink: 0;
   }
 
+  [dir=rtl] .archived-badge {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
   .Menu .bubble {
     min-width: 17rem;
   }

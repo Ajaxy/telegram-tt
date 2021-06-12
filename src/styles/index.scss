@@ -145,8 +145,9 @@ body.cursor-grabbing, body.cursor-grabbing * {
   display: inline-block;
   width: 1.25rem;
   height: 1.25rem;
-  margin-right: 1px;
+  margin-inline-end: 1px;
   overflow: hidden;
+  flex-shrink: 0;
 
   &::selection {
     background-color: var(--color-selection-highlight-emoji);

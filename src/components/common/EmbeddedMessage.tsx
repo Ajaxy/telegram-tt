@@ -63,7 +63,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
     >
       {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo)}
       <div className="message-text">
-        <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
         <p dir="auto">
           {!message ? (
             customText || NBSP
@@ -73,6 +72,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
             renderText(getMessageSummaryText(lang, message, Boolean(mediaThumbnail)))
           )}
         </p>
+        <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
       </div>
     </div>
   );

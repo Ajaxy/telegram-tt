@@ -83,7 +83,7 @@ const Picker: FC<OwnProps> = ({
 
   return (
     <div className="Picker">
-      <div className="picker-header custom-scroll">
+      <div className="picker-header custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
         {selectedIds.map((id, i) => (
           <PickerSelectedItem
             chatOrUserId={id}

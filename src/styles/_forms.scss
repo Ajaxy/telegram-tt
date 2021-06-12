@@ -62,6 +62,34 @@
     opacity: 0.5;
     pointer-events: none;
   }
+
+  &[dir=rtl] {
+    input {
+      text-align: right;
+    }
+
+    label {
+      left: auto;
+      right: 0.75rem;
+    }
+
+    &.with-arrow {
+      &::after {
+        border-left: none;
+        border-right: 1px var(--color-text-secondary) solid;
+        right: auto;
+        left: 2rem;
+      }
+    }
+
+    &.touched label,
+    &.error label,
+    &.success label,
+    .form-control:focus + label,
+    .form-control.focus + label {
+      transform: scale(.75) translate(1.5rem, -2.25rem);
+    }
+  }
 }
 
 .form-control {
@@ -81,6 +109,10 @@
 
   font-size: 1rem;
   line-height: 1.25rem;
+
+  &[dir] {
+    text-align: initial;
+  }
 
   &:hover {
     border-color: var(--color-primary);
@@ -157,6 +189,18 @@ textarea.form-control {
 
     &:hover, &:focus {
       opacity: 1;
+    }
+  }
+
+  &[dir=rtl] {
+    .form-control {
+      padding-left: 3.375rem;
+      padding-right: calc(.9rem - var(--border-width))
+    }
+
+    .toggle-password {
+      left: 0;
+      right: auto;
     }
   }
 }

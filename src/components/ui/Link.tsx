@@ -7,10 +7,13 @@ import './Link.scss';
 type OwnProps = {
   children: any;
   className?: string;
+  isRtl?: boolean;
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
-const Link: FC<OwnProps> = ({ children, className, onClick }) => {
+const Link: FC<OwnProps> = ({
+  children, className, isRtl, onClick,
+}) => {
   const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     onClick!(e);
@@ -20,7 +23,7 @@ const Link: FC<OwnProps> = ({ children, className, onClick }) => {
     <a
       href="#"
       className={buildClassName('Link', className)}
-      dir="auto"
+      dir={isRtl ? 'rtl' : 'auto'}
       onClick={onClick ? handleClick : undefined}
     >
       {children}

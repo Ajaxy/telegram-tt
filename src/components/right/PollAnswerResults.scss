@@ -23,6 +23,11 @@
 
   .answer-percent {
     margin-left: auto;
+
+    &[dir=auto] {
+      margin-left: 0;
+      margin-right: auto;
+    }
   }
 
   .poll-voters {
@@ -39,13 +44,29 @@
     }
   }
 
-  .chat-item-clickable .ChatInfo .Avatar.size-tiny {
-    margin-right: 1.75rem;
+  .chat-item-clickable {
+    .ChatInfo .Avatar.size-tiny {
+      margin-right: 1.75rem;
+    }
+
+    &[dir=rtl] {
+      .ChatInfo .Avatar.size-tiny {
+        margin-left: 1.75rem;
+        margin-right: 0;
+      }
+    }
   }
 
   .ShowMoreButton {
     margin: .25rem 0 0 -0.5rem;
     width: calc(100% + 1rem);
+
+    &[dir=rtl] {
+      .icon-down {
+        margin-left: 2rem;
+        margin-right: 0;
+      }
+    }
   }
 
   .icon-down {

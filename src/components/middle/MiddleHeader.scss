@@ -286,6 +286,11 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    display: inline-block;
+
+    .ellipsis {
+      display: inline-flex;
+    }
 
     &.online {
       color: var(--color-primary);
@@ -375,7 +380,7 @@
 
     .message-text {
       overflow: hidden;
-      margin-left: 0.4rem;
+      margin-inline-start: 0.375rem;
       margin-top: 0.125rem;
       max-width: 15rem;
 
@@ -391,6 +396,7 @@
         color: var(--color-primary);
         margin-bottom: 0.125rem;
         white-space: pre;
+        text-align: initial;
       }
 
       p {
@@ -414,7 +420,7 @@
       height: 2.25rem;
       object-fit: cover;
       border-radius: 0.25rem;
-      margin-left: 0.4rem;
+      margin-inline-start: 0.375rem;
       margin-top: 0.125rem;
       flex-shrink: 0;
 

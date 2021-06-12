@@ -123,10 +123,14 @@ const MessageContextMenu: FC<OwnProps> = ({
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
-      {canReschedule && <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>}
+      {canReschedule && (
+        <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>
+      )}
       {canReply && <MenuItem icon="reply" onClick={onReply}>{lang('Reply')}</MenuItem>}
       {canEdit && <MenuItem icon="edit" onClick={onEdit}>{lang('Edit')}</MenuItem>}
-      {canFaveSticker && <MenuItem icon="favorite" onClick={onFaveSticker}>{lang('AddToFavorites')}</MenuItem>}
+      {canFaveSticker && (
+        <MenuItem icon="favorite" onClick={onFaveSticker}>{lang('AddToFavorites')}</MenuItem>
+      )}
       {canUnfaveSticker && (
         <MenuItem icon="favorite" onClick={onUnfaveSticker}>{lang('Stickers.RemoveFromFavorites')}</MenuItem>
       )}

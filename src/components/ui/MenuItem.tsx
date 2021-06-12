@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
 
 import './MenuItem.scss';
 
@@ -31,6 +32,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     ariaLabel,
   } = props;
 
+  const lang = useLang();
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
       e.stopPropagation();
@@ -84,6 +86,7 @@ const MenuItem: FC<OwnProps> = (props) => {
         title={ariaLabel}
         target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
         rel="noopener noreferrer"
+        dir={lang.isRtl ? 'rtl' : undefined}
       >
         {content}
       </a>
@@ -99,6 +102,7 @@ const MenuItem: FC<OwnProps> = (props) => {
       onKeyDown={handleKeyDown}
       aria-label={ariaLabel}
       title={ariaLabel}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
       {content}
     </div>

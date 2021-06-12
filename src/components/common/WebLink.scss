@@ -42,6 +42,7 @@
   .site-description,
   .site-title {
     word-break: break-word;
+    text-align: initial;
   }
 
   .site-name {
@@ -79,5 +80,19 @@
   .site-description .emoji {
     width: 1rem !important;
     height: 1rem !important;
+  }
+
+  &[dir=rtl] {
+    padding: .25rem 3.75rem 0 0;
+
+    .Media,
+    &.without-photo::before {
+      left: auto;
+      right: 0;
+    }
+
+    .content {
+      text-align: right;
+    }
   }
 }

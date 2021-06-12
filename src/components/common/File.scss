@@ -190,7 +190,15 @@
     }
   }
 
-  &:dir(rtl) {
+  &:dir(rtl),
+  &[dir=rtl] {
+    .file-progress,
+    .file-icon,
+    .file-preview {
+      margin-left: .75rem;
+      margin-right: 0;
+    }
+
     .file-info {
       text-align: right;
 

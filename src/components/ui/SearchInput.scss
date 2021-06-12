@@ -17,6 +17,13 @@
     input {
       padding-left: .5rem;
     }
+
+    &[dir=rtl] {
+      input {
+        padding-right: .5rem;
+        padding-left: 0;
+      }
+    }
   }
 
   &.has-focus {
@@ -79,6 +86,27 @@
 
     i {
       top: 0.5rem;
+    }
+  }
+
+  &[dir=rtl] {
+    input {
+      direction: rtl;
+    }
+
+    > i {
+      left: auto;
+      right: .75rem;
+    }
+
+    .Loading {
+      left: .5rem;
+      right: auto;
+    }
+
+    .Button {
+      left: .125rem;
+      right: auto;
     }
   }
 }

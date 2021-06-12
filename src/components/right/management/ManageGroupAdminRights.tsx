@@ -173,7 +173,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
             />
           </ListItem>
 
-          <h3 className="section-heading mt-4">{lang('EditAdminWhatCanDo')}</h3>
+          <h3 className="section-heading mt-4" dir="auto">{lang('EditAdminWhatCanDo')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox
@@ -277,7 +277,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
           )}
 
           {isFormFullyDisabled && (
-            <p className="section-info mb-4">
+            <p className="section-info mb-4" dir="auto">
               {lang('Channel.EditAdmin.CannotEdit')}
             </p>
           )}

@@ -38,6 +38,7 @@ const SettingsLanguage: FC<StateProps & DispatchProps> = ({
 
     setLanguage(langCode, () => {
       unmarkIsLoading();
+
       setSettingOption({ language: langCode });
     });
   }, [markIsLoading, unmarkIsLoading, setSettingOption]);

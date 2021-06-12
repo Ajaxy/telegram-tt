@@ -163,7 +163,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       ) : undefined}
       <Transition
         ref={transitionRef}
-        name="slide"
+        name={lang.isRtl ? 'slide-reversed' : 'slide'}
         activeKey={activeTab}
         renderCount={folderTabs ? folderTabs.length : undefined}
       >

@@ -24,7 +24,7 @@ const MessageMeta: FC<OwnProps> = ({
   const lang = useLang();
 
   return (
-    <span className="MessageMeta" onClick={onClick}>
+    <span className="MessageMeta" dir={lang.isRtl ? 'rtl' : 'ltr'} onClick={onClick}>
       {Boolean(message.views) && (
         <>
           <span className="message-views">

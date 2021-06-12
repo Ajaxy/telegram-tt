@@ -93,7 +93,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section">
+        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
           <h3 className="section-heading">{lang(`${langPrefix2}Type`)}</h3>
           <RadioGroup
             selected={privacyType}
@@ -103,11 +103,13 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
           />
         </div>
         {privacyType === 'private' ? (
-          <div className="section">
+          <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
             {privateLink ? (
               <>
                 <SafeLink url={privateLink} className="group-link" text={privateLink} />
-                <p className="section-info">{lang(`${langPrefix1}PrivateLinkHelp`)}</p>
+                <p className="section-info" dir={lang.isRtl ? 'rtl' : undefined}>
+                  {lang(`${langPrefix1}PrivateLinkHelp`)}
+                </p>
 
                 <ListItem icon="delete" ripple destructive onClick={openRevokeConfirmDialog}>
                   {lang('RevokeLink')}

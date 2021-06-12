@@ -21,12 +21,19 @@
     }
 
     .title {
-      margin-right: 10px;
+      margin-inline-end: .625rem;
       max-width: 70%;
+      flex: 1 0 auto;
     }
 
     .handle {
       font-size: 1rem;
+    }
+
+    &[dir=rtl] {
+      .status {
+        width: auto;
+      }
     }
   }
 
@@ -46,7 +53,7 @@
     }
 
     .user-status {
-      display: none;
+      display: none !important;
     }
   }
 }

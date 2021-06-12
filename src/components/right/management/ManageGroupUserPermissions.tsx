@@ -134,7 +134,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
             <PrivateChatInfo userId={selectedChatMember.userId} />
           </ListItem>
 
-          <h3 className="section-heading mt-4">{lang('UserRestrictionsCanDo')}</h3>
+          <h3 className="section-heading mt-4" dir="auto">{lang('UserRestrictionsCanDo')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox

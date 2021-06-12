@@ -129,6 +129,10 @@
     color: var(--color-text-secondary);
     margin-bottom: 2rem;
     position: relative;
+
+    &[dir=rtl] {
+      text-align: right;
+    }
   }
 
   &-description {
@@ -140,6 +144,11 @@
     .settings-content.two-fa & {
       font-size: 1rem;
     }
+
+    &[dir=rtl] {
+      text-align: right;
+      unicode-bidi: plaintext;
+    }
   }
 
   &-description-larger {
@@ -148,6 +157,10 @@
     color: var(--color-text-secondary);
     margin-top: 2rem;
     margin-bottom: 0.75rem;
+
+    &[dir=rtl] {
+      text-align: right;
+    }
   }
 
   .ListItem {
@@ -236,6 +249,20 @@
         font-size: 0.875rem;
         line-height: 1rem;
         color: var(--color-text-secondary);
+      }
+    }
+
+    &[dir=rtl] {
+      .multiline-menu-item {
+        .title, .subtitle {
+          text-align: right;
+        }
+
+        .date {
+          float: left;
+          margin-left: 0;
+          margin-right: 1rem;
+        }
       }
     }
   }

@@ -76,7 +76,9 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('AutodownloadPrivateChats')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('AutodownloadPrivateChats')}
+        </h4>
 
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
@@ -93,7 +95,7 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('FilterGroups')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterGroups')}</h4>
 
         <Checkbox
           label={lang('NotificationsForGroups')}
@@ -110,7 +112,7 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('FilterChannels')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterChannels')}</h4>
 
         <Checkbox
           label={lang('NotificationsForChannels')}
@@ -127,7 +129,7 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header">{lang('PhoneOther')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PhoneOther')}</h4>
 
         <Checkbox
           label={lang('ContactJoined')}

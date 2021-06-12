@@ -65,8 +65,8 @@
         font-size: .75rem;
         color: #fff;
         position: absolute;
-        left: .25rem;
         top: .1875rem;
+        margin-inline-start: -1.25rem;
       }
     }
   }
@@ -74,5 +74,11 @@
   .info-row {
     display: flex;
     justify-content: space-between;
+  }
+
+  &[dir=rtl] {
+    .subtitle {
+      text-align: right;
+    }
   }
 }

@@ -29,6 +29,7 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   noStatusOrTyping?: boolean;
+  noRtl?: boolean;
 };
 
 type StateProps = {
@@ -48,6 +49,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   withFullInfo,
   withUpdatingStatus,
   noStatusOrTyping,
+  noRtl,
   user,
   isSavedMessages,
   areMessagesLoaded,
@@ -110,7 +112,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="ChatInfo">
+    <div className="ChatInfo" dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
       <Avatar
         key={user.id}
         size={avatarSize}

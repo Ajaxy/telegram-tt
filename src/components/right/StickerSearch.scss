@@ -56,6 +56,17 @@
       flex-wrap: nowrap;
       overflow: hidden;
     }
+
+    &[dir=rtl] {
+      .title-wrapper {
+        text-align: right;
+      }
+
+      .Button {
+        margin-left: 0;
+        margin-right: 1rem;
+      }
+    }
   }
 
   .StickerButton {

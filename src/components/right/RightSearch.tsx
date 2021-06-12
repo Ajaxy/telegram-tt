@@ -104,7 +104,10 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     const text = getMessageSummaryText(lang, message);
 
     return (
-      <ListItem className="chat-item-clickable search-result-message m-0" onClick={onClick}>
+      <ListItem
+        className="chat-item-clickable search-result-message m-0"
+        onClick={onClick}
+      >
         <Avatar chat={senderChat} user={senderUser} />
         <div className="info">
           <div className="title">

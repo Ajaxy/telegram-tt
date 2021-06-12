@@ -41,6 +41,7 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
   openMediaViewer,
 }) => {
   const lang = useLang();
+
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -75,7 +76,7 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderGallery() {
     return (
-      <div className="media-list">
+      <div className="media-list" dir={lang.isRtl ? 'rtl' : undefined}>
         {foundMessages.map((message) => (
           <Media
             key={message.id}

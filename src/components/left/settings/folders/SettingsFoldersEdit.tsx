@@ -236,7 +236,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
 
           {state.mode === 'create' && (
-            <p className="settings-item-description mb-3">
+            <p className="settings-item-description mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('FilterIncludeInfo')}
             </p>
           )}
@@ -252,12 +252,12 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <div className="settings-item no-border pt-3">
           {state.error && state.error === ERROR_NO_CHATS && (
-            <p className="settings-item-description color-danger mb-2">
+            <p className="settings-item-description color-danger mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
               {state.error}
             </p>
           )}
 
-          <h4 className="settings-item-header mb-3">{lang('FilterInclude')}</h4>
+          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterInclude')}</h4>
 
           <ListItem
             className="settings-folders-list-item color-primary mb-0"
@@ -271,7 +271,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
 
         <div className="settings-item no-border pt-3">
-          <h4 className="settings-item-header mb-3">{lang('FilterExclude')}</h4>
+          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterExclude')}</h4>
 
           <ListItem
             className="settings-folders-list-item color-primary mb-0"

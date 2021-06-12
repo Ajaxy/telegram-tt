@@ -21,6 +21,7 @@ import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevD
 import useFlag from '../../../hooks/useFlag';
 import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
+import useLang from '../../../hooks/useLang';
 
 import TextFormatter from './TextFormatter';
 
@@ -92,6 +93,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const cloneRef = useRef<HTMLDivElement>(null);
 
+  const lang = useLang();
   const isContextMenuOpenRef = useRef(false);
   const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
@@ -351,13 +353,13 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 
   return (
-    <div id={id} onClick={shouldSupressFocus ? onSupressedFocus : undefined}>
+    <div id={id} onClick={shouldSupressFocus ? onSupressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
       <div
         ref={inputRef}
         id={editableInputId || EDITABLE_INPUT_ID}
         className={className}
-        dir="auto"
         contentEditable
+        dir="auto"
         onClick={focusInput}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

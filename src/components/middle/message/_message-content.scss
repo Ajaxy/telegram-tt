@@ -41,17 +41,16 @@
   }
 
   &.document:not(.text) {
-    & > .MessageMeta {
-      position: absolute;
-      top: auto;
-      bottom: 0 !important;
-      right: .5rem;
+    &::after {
+      content: "";
+      display: block;
+      clear: both;
     }
-    &:dir(rtl) {
-      & > .MessageMeta {
-        right: auto;
-        left: .5rem;
-      }
+
+    & > .MessageMeta {
+      position: relative;
+      top: auto;
+      bottom: -.5rem !important;
     }
   }
 
@@ -142,8 +141,8 @@
 
     .admin-title {
       flex: 1;
-      margin-inline-start: 1rem;
-      text-align: end;
+      margin-left: 1rem;
+      text-align: right;
       font-weight: 400;
       font-size: 0.75rem;
       margin-top: -0.1rem;
@@ -414,6 +413,7 @@
     display: flex;
     align-items: flex-start;
     flex-direction: row-reverse;
+    direction: ltr;
 
     > p {
       margin-bottom: 0;
@@ -558,6 +558,15 @@
       width: 2px;
       background: var(--accent-color);
       border-radius: 2px;
+    }
+
+    &:dir(rtl) {
+      padding-inline-start: 0.625rem;
+
+      &::before {
+        left: auto;
+        right: 0.05rem;
+      }
     }
   }
 

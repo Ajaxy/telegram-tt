@@ -41,6 +41,19 @@
       left: .625rem;
       top: -1px;
     }
+
+    &[dir=rtl],
+    &[dir=auto] {
+      padding-left: 0;
+      padding-right: 1.25rem;
+      margin: 0 -1.25rem 0 1rem !important;
+      text-align: initial;
+
+      &::before {
+        left: auto;
+        right: .625rem;
+      }
+    }
   }
 
   .LeftSearch .search-section .section-heading,
@@ -97,6 +110,7 @@
       .handle {
         unicode-bidi: plaintext;
         color: var(--color-primary);
+        unicode-bidi: plaintext;
 
         &::before {
           content: '@';
@@ -112,6 +126,16 @@
 
           html[lang=ar] & {
             content: '';
+          }
+        }
+      }
+
+      &[dir=rtl] {
+        .status {
+          text-align: right;
+
+          .handle {
+            float: right;
           }
         }
       }
@@ -156,6 +180,15 @@
           color: var(--color-links-hover);
         }
       }
+
+      &[dir=rtl],
+      &[dir=auto] {
+        .Link {
+          float: left;
+          margin-left: 1rem;
+          margin-right: 0;
+        }
+      }
     }
 
     .Loading {
@@ -186,9 +219,23 @@
         margin-right: auto;
       }
     }
+
+    &[dir=rtl] {
+      > .PickerSelectedItem:last-child {
+        margin-left: auto;
+        margin-right: 0;
+      }
+    }
   }
 
   .NothingFound {
     height: 100%;
+  }
+
+  [dir=rtl] {
+    .message-date {
+      padding-left: 0;
+      padding-right: 1rem;
+    }
   }
 }

@@ -8,6 +8,7 @@ import { GlobalSearchContent } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import { parseDateString } from '../../../util/dateFormat';
+import useLang from '../../../hooks/useLang';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -58,6 +59,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   setGlobalSearchDate,
   onReset,
 }) => {
+  const lang = useLang();
   const [activeTab, setActiveTab] = useState(0);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 
@@ -74,7 +76,11 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="LeftSearch">
       <TabList activeTab={activeTab} tabs={chatId ? CHAT_TABS : TABS} onSwitchTab={handleSwitchTab} />
-      <Transition name="slide" renderCount={TRANSITION_RENDER_COUNT} activeKey={currentContent}>
+      <Transition
+        name={lang.isRtl ? 'slide-reversed' : 'slide'}
+        renderCount={TRANSITION_RENDER_COUNT}
+        activeKey={currentContent}
+      >
         {() => {
           switch (currentContent) {
             case GlobalSearchContent.ChatList:

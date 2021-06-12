@@ -2,6 +2,8 @@ import { ChangeEvent } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
+
 import Spinner from './Spinner';
 
 import './Radio.scss';
@@ -31,6 +33,7 @@ const Radio: FC<OwnProps> = ({
   isLoading,
   onChange,
 }) => {
+  const lang = useLang();
   const className = buildClassName(
     'Radio',
     disabled && 'disabled',
@@ -39,7 +42,7 @@ const Radio: FC<OwnProps> = ({
   );
 
   return (
-    <label className={className}>
+    <label className={className} dir={lang.isRtl ? 'rtl' : undefined}>
       <input
         type="radio"
         name={name}
@@ -50,8 +53,8 @@ const Radio: FC<OwnProps> = ({
         disabled={disabled || hidden}
       />
       <div className="Radio-main">
-        <span className="label">{label}</span>
-        {subLabel && <span className="subLabel">{subLabel}</span>}
+        <span className="label" dir="auto">{label}</span>
+        {subLabel && <span className="subLabel" dir="auto">{subLabel}</span>}
       </div>
       {isLoading && <Spinner />}
     </label>

@@ -9,6 +9,7 @@ import { pick } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
 import { selectCurrentStickerSearch } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 
 import Loading from '../ui/Loading';
 import StickerSetResult from './StickerSetResult';
@@ -35,6 +36,8 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const lang = useLang();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -69,7 +72,7 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
 
     if (resultIds) {
       if (!resultIds.length) {
-        return <p className="helper-text">Nothing found.</p>;
+        return <p className="helper-text" dir="auto">Nothing found.</p>;
       }
 
       return resultIds.map((id) => (
@@ -87,7 +90,7 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
   }
 
   return (
-    <div ref={containerRef} className="StickerSearch custom-scroll">
+    <div ref={containerRef} className="StickerSearch custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
       {renderContent()}
     </div>
   );

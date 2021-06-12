@@ -206,7 +206,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, userId)!;
     const { progress } = global.management;
 
-    return { user, chat, progress };
+    return {
+      user, chat, progress,
+    };
   },
   (global, actions): DispatchProps => pick(actions, [
     'updateContact', 'deleteUser', 'closeManagement', 'openChat', 'deleteHistory',

@@ -84,7 +84,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
     <div className="settings-fab-wrapper">
       <div className="settings-content infinite-scroll">
         <div className="settings-item">
-          <p className="settings-item-description-larger mt-0 mb-2">
+          <p className="settings-item-description-larger mt-0 mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('BlockedUsersInfo')}
           </p>
         </div>
@@ -95,7 +95,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
               {blockedIds!.map((contactId, i) => renderContact(contactId, i, 0))}
             </div>
           ) : blockedIds && !blockedIds.length ? (
-            <div className="no-results">
+            <div className="no-results" dir="auto">
               List is empty
             </div>
           ) : (

@@ -339,11 +339,13 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
               withFullInfo={isChatWithBot}
               withMediaViewer
               withUpdatingStatus
+              noRtl
             />
           ) : (
             <GroupChatInfo
               chatId={chatId}
               typingStatus={typingStatus}
+              noRtl
               withMediaViewer
               withFullInfo
               withUpdatingStatus

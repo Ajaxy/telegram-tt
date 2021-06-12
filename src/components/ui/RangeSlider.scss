@@ -33,6 +33,13 @@
       margin-left: 1rem;
       color: var(--color-text-secondary);
     }
+
+    &[dir=rtl] {
+      .value {
+        margin-left: 0;
+        margin-right: 1rem;
+      }
+    }
   }
 
   .slider-main {

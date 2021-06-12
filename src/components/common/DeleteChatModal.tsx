@@ -90,7 +90,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderHeader() {
     return (
-      <div className="modal-header">
+      <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
         <Avatar
           size="tiny"
           chat={chat}

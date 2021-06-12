@@ -232,10 +232,34 @@
       top: 0.1875rem;
       left: 0.1875rem;
     }
+
+    &[dir=rtl] {
+      .media-loading {
+        left: auto !important;
+        right: 0;
+      }
+    }
   }
 
   .ProgressSpinner.size-s svg {
     width: 2.25rem;
     height: 2.25rem;
+  }
+
+  &[dir=rtl] {
+    .toggle-play {
+      margin-left: .5rem;
+      margin-right: 0;
+
+      &.smaller {
+        margin-left: .75rem;
+        margin-right: 0;
+      }
+    }
+
+    .content,
+    .duration {
+      text-align: right;
+    }
   }
 }

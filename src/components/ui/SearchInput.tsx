@@ -87,7 +87,10 @@ const SearchInput: FC<OwnProps> = ({
   }
 
   return (
-    <div className={buildClassName('SearchInput', className, isInputFocused && 'has-focus')}>
+    <div
+      className={buildClassName('SearchInput', className, isInputFocused && 'has-focus')}
+      dir={lang.isRtl ? 'rtl' : undefined}
+    >
       {children}
       <input
         ref={inputRef}

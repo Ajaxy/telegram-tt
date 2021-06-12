@@ -19,9 +19,7 @@ type StateProps = {
   animatedEmoji: ApiSticker;
 };
 
-const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
-  animatedEmoji, onScreenSelect,
-}) => {
+const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({ animatedEmoji, onScreenSelect }) => {
   const lang = useLang();
 
   return (

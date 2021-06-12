@@ -42,6 +42,15 @@
       font-weight: 400;
       margin: 0;
     }
+
+    &[dir=rtl] {
+      .Checkbox {
+        margin-left: 0;
+        margin-right: auto;
+        padding-left: 0;
+        padding-right: 3.25rem;
+      }
+    }
   }
 
   .settings-item-header {

@@ -231,6 +231,16 @@
         font-size: 1.5rem;
         margin-right: 0.5rem;
       }
+
+      &[dir=rtl] {
+        padding-left: 1.25rem;
+        padding-right: 0.75rem;
+
+        i {
+          margin-left: 0.5rem;
+          margin-right: 0;
+        }
+      }
     }
 
     @media (max-width: 600px) {

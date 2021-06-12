@@ -162,7 +162,7 @@ const AttachmentModal: FC<OwnProps> = ({
     }
 
     return (
-      <div className="modal-header-condensed">
+      <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachments" onClick={onClear}>
           <i className="icon-close" />
         </Button>

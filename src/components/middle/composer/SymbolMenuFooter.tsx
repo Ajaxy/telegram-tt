@@ -1,5 +1,7 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
+import useLang from '../../../hooks/useLang';
+
 import Button from '../../ui/Button';
 
 type OwnProps = {
@@ -29,6 +31,8 @@ const SYMBOL_MENU_TAB_ICONS = {
 const SymbolMenuFooter: FC<OwnProps> = ({
   activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen,
 }) => {
+  const lang = useLang();
+
   function renderTabButton(tab: SymbolMenuTabs) {
     return (
       <Button
@@ -53,7 +57,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
   }
 
   return (
-    <div className="SymbolMenu-footer" onClick={stopPropagation}>
+    <div className="SymbolMenu-footer" onClick={stopPropagation} dir={lang.isRtl ? 'rtl' : undefined}>
       {activeTab !== SymbolMenuTabs.Emoji && (
         <Button
           className="symbol-search-button"

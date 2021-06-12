@@ -175,7 +175,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const isVerifiedIconShown = (user && user.isVerified) || (chat && chat.isVerified);
 
   return (
-    <div className="ProfileInfo">
+    <div className="ProfileInfo" dir={lang.isRtl ? 'rtl' : undefined}>
       <div className="photo-wrapper">
         {renderPhotoTabs()}
         <Transition activeKey={currentPhotoIndex} name={slideAnimation} className="profile-slide-container">
@@ -200,7 +200,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
       </div>
 
-      <div className="info">
+      <div className="info" dir={lang.isRtl ? 'rtl' : 'auto'}>
         {isSavedMessages ? (
           <div className="title">
             <h3 dir="auto">{lang('SavedMessages')}</h3>
@@ -223,9 +223,7 @@ export default memo(withGlobal<OwnProps>(
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
-    const {
-      animationLevel,
-    } = global.settings.byKey;
+    const { animationLevel } = global.settings.byKey;
 
     return {
       lastSyncTime, user, chat, isSavedMessages, animationLevel,

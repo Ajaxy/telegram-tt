@@ -115,7 +115,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const modalHeader = (
-    <div className="modal-header">
+    <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
         round
         color="translucent"

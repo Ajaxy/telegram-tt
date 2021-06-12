@@ -6,6 +6,7 @@ import React, {
 import { MIN_PASSWORD_LENGTH } from '../../config';
 import { IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 
@@ -38,6 +39,7 @@ const PasswordForm: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
+  const lang = useLang();
 
   const [password, setPassword] = useState('');
   const [canSubmit, setCanSubmit] = useState(false);
@@ -90,7 +92,10 @@ const PasswordForm: FC<OwnProps> = ({
 
   return (
     <form action="" onSubmit={handleSubmit} autoComplete="off">
-      <div className={buildClassName('input-group password-input', password && 'touched', error && 'error')}>
+      <div
+        className={buildClassName('input-group password-input', password && 'touched', error && 'error')}
+        dir={lang.isRtl ? 'rtl' : undefined}
+      >
         <input
           ref={inputRef}
           className="form-control"
@@ -99,6 +104,7 @@ const PasswordForm: FC<OwnProps> = ({
           value={password || ''}
           autoComplete="current-password"
           onChange={onPasswordChange}
+          dir="auto"
         />
         <label>{error || hint || placeholder}</label>
         <div

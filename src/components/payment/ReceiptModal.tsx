@@ -63,7 +63,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
       onClose={onClose}
     >
       <div>
-        <div className="header">
+        <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
           <Button
             className="close-button"
             color="translucent"

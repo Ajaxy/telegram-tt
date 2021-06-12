@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, RefObject } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
 
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
@@ -44,6 +45,7 @@ const InputText: FC<OwnProps> = ({
   onKeyDown,
   onBlur,
 }) => {
+  const lang = useLang();
   const labelText = error || success || label;
   const fullClassName = buildClassName(
     'input-group',
@@ -56,7 +58,7 @@ const InputText: FC<OwnProps> = ({
   );
 
   return (
-    <div className={fullClassName}>
+    <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <input
         ref={ref}
         className="form-control"

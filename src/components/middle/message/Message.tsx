@@ -659,11 +659,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return (
-      <div className="message-title">
+      <div className="message-title" dir="ltr">
         {senderTitle ? (
           <span
             className={buildClassName(senderPeer && 'interactive', senderColor)}
             onClick={senderPeer ? handleSenderClick : undefined}
+            dir="auto"
           >
             {renderText(senderTitle)}
           </span>
@@ -682,9 +683,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           </>
         )}
         {forwardInfo && forwardInfo.isLinkedChannelPost ? (
-          <span className="admin-title">{lang('DiscussChannel')}</span>
+          <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
         ) : message.adminTitle && !isChannel ? (
-          <span className="admin-title">{message.adminTitle}</span>
+          <span className="admin-title" dir="auto">{message.adminTitle}</span>
         ) : undefined}
       </div>
     );
@@ -789,6 +790,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             </Button>
           ) : undefined}
           {withCommentButton && <CommentButton message={message} disabled={noComments} />}
+          {contentClassName.includes('has-appendix') && <div className="svg-appendix" ref={appendixRef} />}
         </div>
         {message.inlineButtons && (
           <InlineButtons message={message} onClick={clickInlineButton} />
