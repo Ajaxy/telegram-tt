@@ -105,10 +105,11 @@ export function onAuthError(err: Error) {
   });
 }
 
-export function onAuthReady(sessionId: string) {
+export function onAuthReady(sessionId: string, sessionJson: string) {
   onUpdate({
     ...buildAuthStateUpdate('authorizationStateReady'),
     sessionId,
+    sessionJson,
   });
 }
 

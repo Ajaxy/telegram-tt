@@ -22,12 +22,12 @@ addReducer('initApi', (global: GlobalState, actions) => {
   let sessionInfo = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
 
   if (!sessionInfo) {
-    const legacySessionMainDcRaw = localStorage.getItem(LEGACY_SESSION_KEY);
-    if (legacySessionMainDcRaw) {
-      const legacySessionMainDc = legacySessionMainDcRaw.replace(/"/g, '');
-      const legacySessionMainDcKeyRaw = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
-      if (legacySessionMainDcKeyRaw) {
-        const legacySessionMainDcKey = legacySessionMainDcKeyRaw.replace(/"/g, '');
+    const legacySessionJson = localStorage.getItem(LEGACY_SESSION_KEY);
+    if (legacySessionJson) {
+      const { dcID: legacySessionMainDc } = JSON.parse(legacySessionJson);
+      const legacySessionMainKeyRaw = localStorage.getItem(`dc${legacySessionMainDc}_auth_key`);
+      if (legacySessionMainKeyRaw) {
+        const legacySessionMainDcKey = legacySessionMainKeyRaw.replace(/"/g, '');
         sessionInfo = `session:${legacySessionMainDc}:${legacySessionMainDcKey}`;
       }
     }
@@ -110,8 +110,10 @@ addReducer('gotToAuthQrCode', (global) => {
 });
 
 addReducer('saveSession', (global, actions, payload) => {
-  const { sessionId } = payload!;
+  const { sessionId, sessionJson } = payload!;
   localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
+
+  exportLegacySession(sessionJson, global.currentUserId!);
 });
 
 addReducer('signOut', () => {
@@ -125,8 +127,7 @@ addReducer('signOut', () => {
 
 addReducer('reset', () => {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
-  localStorage.removeItem(LEGACY_SESSION_KEY);
-  updateAppBadge(0);
+  clearLegacySession();
 
   cacheApi.clear(MEDIA_CACHE_NAME);
   cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
@@ -139,6 +140,8 @@ addReducer('reset', () => {
   for (let i = 0; i < langCacheVersion; i++) {
     cacheApi.clear(`${langChachePrefix}${i === 0 ? '' : i}`);
   }
+
+  updateAppBadge(0);
 
   getDispatch().init();
 });
@@ -180,3 +183,23 @@ addReducer('deleteDeviceToken', (global) => {
   delete newGlobal.push;
   setGlobal(newGlobal);
 });
+
+function exportLegacySession(sessionJson: string, currentUserId: number) {
+  const { mainDcId, keys } = JSON.parse(sessionJson);
+  const legacySession = { dcID: mainDcId, id: currentUserId };
+  localStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(legacySession));
+  localStorage.setItem('dc', mainDcId);
+  Object.keys(keys).forEach((dcId) => {
+    localStorage.setItem(`dc${dcId}_auth_key`, `"${keys[dcId]}"`);
+  });
+}
+
+function clearLegacySession() {
+  localStorage.removeItem('dc5_auth_key');
+  localStorage.removeItem('dc4_auth_key');
+  localStorage.removeItem('dc3_auth_key');
+  localStorage.removeItem('dc2_auth_key');
+  localStorage.removeItem('dc1_auth_key');
+  localStorage.removeItem('dc');
+  localStorage.removeItem(LEGACY_SESSION_KEY);
+}
