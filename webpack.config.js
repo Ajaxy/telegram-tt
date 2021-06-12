@@ -103,7 +103,7 @@ module.exports = (env = {}, argv = {}) => {
         ignoreOrder: true,
       }),
       new EnvironmentPlugin({
-        APP_INFO: 'Telegram T',
+        APP_VERSION: 'dev',
         APP_ENV: 'production',
         APP_URL: 'https://webz.telegram.org/',
         TELEGRAM_T_API_ID: '',
