@@ -1,7 +1,7 @@
 {
     "name": "Telegram WebZ",
     "short_name": "Telegram WebZ",
-    "start_url": "/",
+    "start_url": "./",
     "gcm_sender_id": "795646555577",
     "icons": [
         {
