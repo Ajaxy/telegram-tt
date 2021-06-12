@@ -123,7 +123,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
       />
       <ConnectionState />
       <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
-        {() => {
+        {(isActive) => {
           switch (content) {
             case LeftColumnContent.ChatList:
               return <ChatFolders />;
@@ -132,6 +132,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
                 <LeftSearch
                   searchQuery={searchQuery}
                   searchDate={searchDate}
+                  isActive={isActive}
                   onReset={onReset}
                 />
               );

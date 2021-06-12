@@ -664,6 +664,17 @@ addReducer('unlinkDiscussionGroup', (global, actions, payload) => {
   })();
 });
 
+
+addReducer('setActiveChatFolder', (global, actions, payload) => {
+  return {
+    ...global,
+    chatFolders: {
+      ...global.chatFolders,
+      activeChatFolder: payload,
+    },
+  };
+});
+
 addReducer('loadMoreMembers', (global) => {
   (async () => {
     const { chatId } = selectCurrentMessageList(global) || {};

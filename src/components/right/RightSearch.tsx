@@ -1,4 +1,6 @@
-import React, { FC, useMemo, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useMemo, memo, useRef,
+} from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
@@ -20,6 +22,7 @@ import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
@@ -122,6 +125,14 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   };
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
+    if (foundResults && foundResults[index]) {
+      foundResults[index].onClick();
+    }
+  }, '.ListItem-button', true);
+
   return (
     <InfiniteScroll
       className="RightSearch custom-scroll"
@@ -129,6 +140,8 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       preloadBackwards={0}
       onLoadMore={searchTextMessagesLocal}
       noFastList
+      onKeyDown={handleKeyDown}
+      ref={containerRef}
     >
       <p className="helper-text" dir="auto">
         {!query ? (

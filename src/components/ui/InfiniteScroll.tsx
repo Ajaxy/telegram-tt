@@ -13,6 +13,7 @@ type OwnProps = {
   className?: string;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   items?: any[];
   itemSelector?: string;
   preloadBackwards?: number;
@@ -33,6 +34,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   className,
   onLoadMore,
   onScroll,
+  onKeyDown,
   items,
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
@@ -205,7 +207,13 @@ const InfiniteScroll: FC<OwnProps> = ({
   }, [loadMoreBackwards, loadMoreForwards, onScroll, sensitiveArea]);
 
   return (
-    <div ref={containerRef} className={className} onScroll={handleScroll} teactFastList={!noFastList}>
+    <div
+      ref={containerRef}
+      className={className}
+      onScroll={handleScroll}
+      teactFastList={!noFastList}
+      onKeyDown={onKeyDown}
+    >
       {children}
     </div>
   );

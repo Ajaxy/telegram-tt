@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -29,12 +29,15 @@ type StateProps = {
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
   orderedFolderIds?: number[];
+  activeChatFolder: number;
+  currentUserId?: number;
   lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadChatFolders'>;
+type DispatchProps = Pick<GlobalActions, 'loadChatFolders' | 'setActiveChatFolder' | 'openChat'>;
 
 const INFO_THROTTLE = 3000;
+const SAVED_MESSAGES_HOTKEY = '0';
 
 const ChatFolders: FC<StateProps & DispatchProps> = ({
   chatsById,
@@ -43,15 +46,17 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   notifySettings,
   notifyExceptions,
   orderedFolderIds,
+  activeChatFolder,
+  currentUserId,
   lastSyncTime,
   loadChatFolders,
+  setActiveChatFolder,
+  openChat,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
-
-  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (lastSyncTime) {
@@ -101,8 +106,8 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   }, [displayedFolders, folderCountersById, lang]);
 
   const handleSwitchTab = useCallback((index: number) => {
-    setActiveTab(index);
-  }, []);
+    setActiveChatFolder(index);
+  }, [setActiveChatFolder]);
 
   // Prevent `activeTab` pointing at non-existing folder after update
   useEffect(() => {
@@ -110,10 +115,10 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       return;
     }
 
-    if (activeTab >= folderTabs.length) {
-      setActiveTab(0);
+    if (activeChatFolder >= folderTabs.length) {
+      setActiveChatFolder(0);
     }
-  }, [activeTab, folderTabs]);
+  }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
   useEffect(() => {
     if (!transitionRef.current || !IS_TOUCH_ENV || !folderTabs || !folderTabs.length) {
@@ -123,48 +128,81 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     return captureEvents(transitionRef.current, {
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
-          setActiveTab(Math.min(activeTab + 1, folderTabs.length - 1));
+          setActiveChatFolder(Math.min(activeChatFolder + 1, folderTabs.length - 1));
         } else if (direction === SwipeDirection.Right) {
-          setActiveTab(Math.max(0, activeTab - 1));
+          setActiveChatFolder(Math.max(0, activeChatFolder - 1));
         }
       }),
     });
-  }, [activeTab, folderTabs]);
+  }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
   const isNotInAllTabRef = useRef();
-  isNotInAllTabRef.current = activeTab !== 0;
-  useEffect(() => captureEscKeyListener(() => {
+  isNotInAllTabRef.current = activeChatFolder !== 0;
+  useEffect(() => (isNotInAllTabRef.current ? captureEscKeyListener(() => {
     if (isNotInAllTabRef.current) {
-      setActiveTab(0);
+      setActiveChatFolder(0);
     }
-  }), []);
+  }) : undefined), [activeChatFolder, setActiveChatFolder]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey && e.code.startsWith('Digit') && folderTabs) {
+        const [, digit] = e.code.match(/Digit(\d)/) || [];
+        if (!digit) return;
+
+        if (digit === SAVED_MESSAGES_HOTKEY) {
+          openChat({ id: currentUserId });
+          return;
+        }
+
+        const folder = Number(digit) - 1;
+        if (folder > folderTabs.length - 1) return;
+
+        setActiveChatFolder(folder);
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  });
 
   const {
     shouldRender: shouldRenderPlaceholder, transitionClassNames,
   } = useShowTransition(!orderedFolderIds, undefined, true);
 
-  function renderCurrentTab() {
+  function renderCurrentTab(isActive: boolean) {
     const activeFolder = Object.values(chatFoldersById)
-      .find(({ title }) => title === folderTabs![activeTab].title);
+      .find(({ title }) => title === folderTabs![activeChatFolder].title);
 
-    if (!activeFolder || activeTab === 0) {
-      return <ChatList folderType="all" />;
+    if (!activeFolder || activeChatFolder === 0) {
+      return <ChatList folderType="all" isActive={isActive} />;
     }
 
-    return <ChatList folderType="folder" folderId={activeFolder.id} noChatsText={lang('FilterNoChatsToDisplay')} />;
+    return (
+      <ChatList
+        folderType="folder"
+        folderId={activeFolder.id}
+        noChatsText={lang('FilterNoChatsToDisplay')}
+        isActive={isActive}
+      />
+    );
   }
 
   return (
     <div className="ChatFolders">
       {folderTabs && folderTabs.length ? (
-        <TabList tabs={folderTabs} activeTab={activeTab} onSwitchTab={handleSwitchTab} />
+        <TabList tabs={folderTabs} activeTab={activeChatFolder} onSwitchTab={handleSwitchTab} />
       ) : shouldRenderPlaceholder ? (
         <div className={buildClassName('tabs-placeholder', transitionClassNames)} />
       ) : undefined}
       <Transition
         ref={transitionRef}
         name={lang.isRtl ? 'slide-reversed' : 'slide'}
-        activeKey={activeTab}
+        activeKey={activeChatFolder}
         renderCount={folderTabs ? folderTabs.length : undefined}
       >
         {renderCurrentTab}
@@ -181,7 +219,9 @@ export default memo(withGlobal(
       chatFolders: {
         byId: chatFoldersById,
         orderedIds: orderedFolderIds,
+        activeChatFolder,
       },
+      currentUserId,
       lastSyncTime,
     } = global;
 
@@ -193,7 +233,13 @@ export default memo(withGlobal(
       lastSyncTime,
       notifySettings: selectNotifySettings(global),
       notifyExceptions: selectNotifyExceptions(global),
+      activeChatFolder,
+      currentUserId,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadChatFolders']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadChatFolders',
+    'setActiveChatFolder',
+    'openChat',
+  ]),
 )(ChatFolders));

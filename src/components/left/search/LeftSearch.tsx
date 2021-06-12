@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useState, useMemo,
+  FC, memo, useCallback, useState, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -8,6 +8,7 @@ import { GlobalSearchContent } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import { parseDateString } from '../../../util/dateFormat';
+import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
 
 import TabList from '../../ui/TabList';
@@ -24,6 +25,7 @@ import './LeftSearch.scss';
 export type OwnProps = {
   searchQuery?: string;
   searchDate?: number;
+  isActive: boolean;
   onReset: () => void;
 };
 
@@ -53,6 +55,7 @@ const TRANSITION_RENDER_COUNT = Object.keys(GlobalSearchContent).length / 2;
 const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   searchQuery,
   searchDate,
+  isActive,
   currentContent = GlobalSearchContent.ChatList,
   chatId,
   setGlobalSearchContent,
@@ -73,8 +76,12 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     setGlobalSearchDate({ date: value.getTime() / 1000 });
   }, [setGlobalSearchDate]);
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleKeyDown = useKeyboardListNavigation(containerRef, isActive, undefined, '.ListItem-button', true);
+
   return (
-    <div className="LeftSearch">
+    <div className="LeftSearch" ref={containerRef} onKeyDown={handleKeyDown}>
       <TabList activeTab={activeTab} tabs={chatId ? CHAT_TABS : TABS} onSwitchTab={handleSwitchTab} />
       <Transition
         name={lang.isRtl ? 'slide-reversed' : 'slide'}

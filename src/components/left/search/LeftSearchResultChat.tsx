@@ -1,4 +1,6 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, {
+  FC, memo,
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
@@ -7,6 +9,7 @@ import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import { isChatPrivate, getPrivateChatUserId } from '../../../modules/helpers';
 import { selectChat, selectUser, selectIsChatPinned } from '../../../modules/selectors';
+import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import GroupChatInfo from '../../common/GroupChatInfo';
@@ -42,6 +45,12 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     handleDelete: openDeleteModal,
   });
 
+  const handleClick = () => {
+    onClick(chatId);
+  };
+
+  const buttonRef = useSelectWithEnter(handleClick);
+
   if (!chat) {
     return undefined;
   }
@@ -49,8 +58,9 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   return (
     <ListItem
       className="chat-item-clickable search-result"
-      onClick={() => onClick(chatId)}
+      onClick={handleClick}
       contextActions={contextActions}
+      buttonRef={buttonRef}
     >
       {isChatPrivate(chatId) ? (
         <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" />

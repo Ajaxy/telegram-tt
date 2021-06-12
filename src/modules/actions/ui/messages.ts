@@ -21,7 +21,7 @@ import {
   selectChatMessages,
   selectAllowedMessageActions,
   selectMessageIdsByGroupId,
-  selectForwardedMessageIdsByGroupId,
+  selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
 
@@ -81,6 +81,48 @@ addReducer('editLastMessage', (global) => {
   }
 
   return replaceThreadParam(global, chatId, threadId, 'editingId', lastOwnEditableMessageId);
+});
+
+addReducer('replyToNextMessage', (global, actions, payload) => {
+  const { targetIndexDelta } = payload;
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
+    return;
+  }
+
+  const chatMessages = selectChatMessages(global, chatId);
+  const viewportIds = selectViewportIds(global, chatId, threadId);
+  if (!chatMessages || !viewportIds) {
+    return;
+  }
+
+  const replyingToId = selectReplyingToId(global, chatId, threadId);
+  const isLatest = selectIsViewportNewest(global, chatId, threadId);
+
+  let messageId: number | undefined;
+
+  if (!isLatest || !replyingToId) {
+    if (threadId === MAIN_THREAD_ID) {
+      const chat = selectChat(global, chatId);
+
+      messageId = chat && chat.lastMessage ? chat.lastMessage.id : undefined;
+    } else {
+      const threadInfo = selectThreadInfo(global, chatId, threadId);
+
+      messageId = threadInfo ? threadInfo.lastMessageId : undefined;
+    }
+  } else {
+    const chatMessageKeys = Object.keys(chatMessages);
+    const indexOfCurrent = chatMessageKeys.indexOf(replyingToId.toString());
+    const newIndex = indexOfCurrent + targetIndexDelta;
+    messageId = newIndex <= chatMessageKeys.length + 1 && newIndex >= 0
+      ? Number(chatMessageKeys[newIndex])
+      : undefined;
+  }
+  actions.setReplyingToId({ messageId });
+  actions.focusMessage({
+    chatId, threadId, messageId,
+  });
 });
 
 addReducer('openMediaViewer', (global, actions, payload) => {

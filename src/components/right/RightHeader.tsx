@@ -197,6 +197,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return (
           <>
             <SearchInput
+              parentContainerClassName="RightSearch"
               value={messageSearchQuery}
               onChange={handleMessageSearchQueryChange}
             />

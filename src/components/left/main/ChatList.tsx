@@ -28,6 +28,7 @@ type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
   noChatsText?: string;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -43,7 +44,7 @@ type StateProps = {
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages'>;
+type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages' | 'openChat'>;
 
 enum FolderTypeToListType {
   'all' = 'active',
@@ -54,6 +55,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   folderType,
   folderId,
   noChatsText = 'Chat list is empty.',
+  isActive,
   chatFolder,
   chatsById,
   usersById,
@@ -66,6 +68,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   notifyExceptions,
   loadMoreChats,
   preloadTopChatMessages,
+  openChat,
 }) => {
   const [currentListIds, currentPinnedIds] = useMemo(() => {
     return folderType === 'folder' && chatFolder
@@ -161,6 +164,49 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isActive && orderedIds) {
+        if (e.ctrlKey && e.code.startsWith('Digit')) {
+          const [, digit] = e.code.match(/Digit(\d)/) || [];
+          if (!digit) return;
+
+          const position = Number(digit) - 1;
+          if (position > orderedIds.length - 1) return;
+
+          openChat({ id: orderedIds[position] });
+        }
+
+        if (e.altKey) {
+          const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
+          if (!targetIndexDelta) return;
+
+          if (!currentChatId) {
+            e.preventDefault();
+            openChat({ id: orderedIds[0] });
+            return;
+          }
+
+          const position = orderedIds.indexOf(currentChatId);
+
+          if (position === -1) {
+            return;
+          }
+          const nextId = orderedIds[position + targetIndexDelta];
+
+          e.preventDefault();
+          openChat({ id: nextId });
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, false);
+    };
+  });
+
   return (
     <InfiniteScroll
       className="chat-list custom-scroll"
@@ -213,5 +259,9 @@ export default memo(withGlobal<OwnProps>(
       notifyExceptions: selectNotifyExceptions(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats', 'preloadTopChatMessages']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadMoreChats',
+    'preloadTopChatMessages',
+    'openChat',
+  ]),
 )(ChatList));

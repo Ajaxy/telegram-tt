@@ -50,7 +50,7 @@ type StateProps = {
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
 };
 
-type DispatchProps = Pick<GlobalActions, 'editLastMessage'>;
+type DispatchProps = Pick<GlobalActions, 'editLastMessage' | 'replyToNextMessage'>;
 
 const MAX_INPUT_HEIGHT = IS_MOBILE_SCREEN ? 256 : 416;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
@@ -87,6 +87,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   noTabCapture,
   messageSendKeyCombo,
   editLastMessage,
+  replyToNextMessage,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
@@ -226,6 +227,16 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       e.target.removeEventListener('keyup', handleKeyUp);
     }
 
+    if (e.metaKey) {
+      const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
+      if (targetIndexDelta) {
+        e.preventDefault();
+
+        replyToNextMessage({ targetIndexDelta });
+        return;
+      }
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       if (
         !(IS_IOS || IS_ANDROID)
@@ -239,7 +250,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         closeTextFormatter();
         onSend();
       }
-    } else if (e.key === 'ArrowUp' && !html.length) {
+    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey) {
       e.preventDefault();
       editLastMessage();
     } else {
@@ -391,5 +402,5 @@ export default memo(withGlobal<OwnProps>(
       noTabCapture: global.isPollModalOpen || global.payment.isPaymentModalOpen,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['editLastMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['editLastMessage', 'replyToNextMessage']),
 )(MessageInput));

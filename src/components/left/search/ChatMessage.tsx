@@ -24,6 +24,7 @@ import { pick } from '../../../util/iteratees';
 import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useLang, { LangFn } from '../../../hooks/useLang';
+import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -66,6 +67,8 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
+  const buttonRef = useSelectWithEnter(handleClick);
+
   if (!chat) {
     return undefined;
   }
@@ -75,6 +78,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
       className="ChatMessage chat-item-clickable"
       ripple={!IS_MOBILE_SCREEN}
       onClick={handleClick}
+      buttonRef={buttonRef}
     >
       <Avatar
         chat={chat}

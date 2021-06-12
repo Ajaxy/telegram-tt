@@ -24,6 +24,7 @@ type MenuItemContextAction = {
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
+  buttonRef?: RefObject<HTMLDivElement>;
   icon?: string;
   className?: string;
   style?: string;
@@ -43,6 +44,7 @@ type OwnProps = {
 const ListItem: FC<OwnProps> = (props) => {
   const {
     ref,
+    buttonRef,
     icon,
     className,
     style,
@@ -141,6 +143,7 @@ const ListItem: FC<OwnProps> = (props) => {
       <div
         className="ListItem-button"
         role="button"
+        ref={buttonRef}
         tabIndex={0}
         onClick={!inactive && IS_TOUCH_ENV ? handleClick : undefined}
         onMouseDown={handleMouseDown}
