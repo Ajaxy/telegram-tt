@@ -68,6 +68,7 @@ export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
     });
 
     const newSessionId = await session.save();
+    const sessionJson = JSON.stringify(session.getSessionData(true));
 
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -76,7 +77,7 @@ export async function init(sessionInfo: string, _onUpdate: OnApiUpdate) {
       console.log('[GramJs/client] CONNECTED as ', newSessionId);
     }
 
-    onAuthReady(newSessionId);
+    onAuthReady(newSessionId, sessionJson);
     onUpdate({ '@type': 'updateApiReady' });
 
     void fetchCurrentUser();

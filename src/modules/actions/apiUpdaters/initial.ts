@@ -11,7 +11,7 @@ import {
   ApiUpdateConnectionState,
   ApiUpdateCurrentUser,
 } from '../../../api/types';
-import { DEBUG } from '../../../config';
+import { DEBUG, LEGACY_SESSION_KEY } from '../../../config';
 import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
@@ -102,6 +102,11 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       });
       break;
     case 'authorizationStateReady': {
+      const { sessionId, sessionJson } = update;
+      if (sessionId && global.authRememberMe) {
+        getDispatch().saveSession({ sessionId, sessionJson });
+      }
+
       if (wasAuthReady) {
         break;
       }
@@ -111,11 +116,6 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         isLoggingOut: false,
         lastSyncTime: Date.now(),
       });
-
-      const { sessionId } = update;
-      if (sessionId && global.authRememberMe) {
-        getDispatch().saveSession({ sessionId });
-      }
 
       break;
     }
@@ -152,4 +152,16 @@ function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
     ...updateUser(getGlobal(), currentUser.id, currentUser),
     currentUserId: currentUser.id,
   });
+
+  updateLegacySessionUserId(currentUser.id);
+}
+
+function updateLegacySessionUserId(currentUserId: number) {
+  const legacySessionJson = localStorage.getItem(LEGACY_SESSION_KEY);
+  if (!legacySessionJson) return;
+
+  const legacySession = JSON.parse(legacySessionJson);
+  legacySession.id = currentUserId;
+
+  localStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(legacySession));
 }

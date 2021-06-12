@@ -12,7 +12,7 @@ class StorageSession extends MemorySession {
         this._authKeys = {};
 
         if (sessionInfo && sessionInfo.startsWith(SESSION_DATA_PREFIX)) {
-            this._sessionData = sessionInfo;
+            this._sessionString = sessionInfo;
         } else if (sessionInfo) {
             this._storageKey = sessionInfo;
         }
@@ -27,8 +27,8 @@ class StorageSession extends MemorySession {
     }
 
     async load() {
-        if (this._sessionData) {
-            await this._loadFromSessionData();
+        if (this._sessionString) {
+            await this._loadFromSessionString();
             return;
         }
 
@@ -99,8 +99,26 @@ class StorageSession extends MemorySession {
         void this._updateStorage();
     }
 
-    async _loadFromSessionData() {
-        const [, mainDcIdStr, mainDcKey] = this._sessionData.split(':');
+    getSessionData(asHex) {
+        const sessionData = {
+            mainDcId: this._dcId,
+            keys: {},
+            hashes: {},
+        };
+
+        Object
+            .keys(this._authKeys)
+            .forEach((dcId) => {
+                const authKey = this._authKeys[dcId];
+                sessionData.keys[dcId] = asHex ? authKey._key.toString('hex') : authKey._key;
+                sessionData.hashes[dcId] = asHex ? authKey._hash.toString('hex') : authKey._hash;
+            });
+
+        return sessionData;
+    }
+
+    async _loadFromSessionString() {
+        const [, mainDcIdStr, mainDcKey] = this._sessionString.split(':');
         const mainDcId = Number(mainDcIdStr);
         const {
             ipAddress,
@@ -117,22 +135,8 @@ class StorageSession extends MemorySession {
             return;
         }
 
-        const sessionData = {
-            mainDcId: this._dcId,
-            keys: {},
-            hashes: {},
-        };
-
-        Object.keys(this._authKeys)
-            .map((dcId) => {
-                const authKey = this._authKeys[dcId];
-                sessionData.keys[dcId] = authKey._key;
-                sessionData.hashes[dcId] = authKey._hash;
-                return undefined;
-            });
-
         try {
-            await this._saveToCache(JSON.stringify(sessionData));
+            await this._saveToCache(JSON.stringify(this.getSessionData()));
         } catch (err) {
             // eslint-disable-next-line no-console
             console.warn('Failed to update session in storage');
