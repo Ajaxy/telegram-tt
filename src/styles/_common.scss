@@ -65,6 +65,7 @@
 
 // Used by ChatList and ContactList components
 .chat-list {
+  background: var(--color-background);
   height: 100%;
   overflow-y: auto;
   padding: .5rem .125rem .5rem .4375rem;

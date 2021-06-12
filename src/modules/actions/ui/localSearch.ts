@@ -8,6 +8,8 @@ import {
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { selectCurrentMessageList } from '../../selectors';
 import { buildChatThreadKey } from '../../helpers';
+import { HistoryWrapper } from '../../../util/history';
+import { RightColumnContent } from '../../../types';
 
 addReducer('openLocalTextSearch', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
@@ -15,13 +17,23 @@ addReducer('openLocalTextSearch', (global) => {
     return undefined;
   }
 
+  HistoryWrapper.pushState({
+    type: 'right',
+    contentKey: RightColumnContent.Search,
+  });
+
   return updateLocalTextSearch(global, chatId, threadId, true);
 });
 
-addReducer('closeLocalTextSearch', (global) => {
+addReducer('closeLocalTextSearch', (global, actions, payload) => {
+  const { noPushState } = payload;
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
   if (!chatId || !threadId) {
     return undefined;
+  }
+
+  if (!noPushState) {
+    HistoryWrapper.back();
   }
 
   global = updateLocalTextSearch(global, chatId, threadId, false);

@@ -5,6 +5,7 @@ import {
 } from '../../../util/environment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
+import { HistoryWrapper } from '../../../util/history';
 
 addReducer('init', (global) => {
   const {
@@ -45,6 +46,11 @@ addReducer('setIsUiReady', (global, actions, payload) => {
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
+  HistoryWrapper.pushState({
+    type: 'login',
+    contentKey: 'authCode',
+  });
+
   return {
     ...global,
     authPhoneNumber: phoneNumber,
@@ -62,5 +68,14 @@ addReducer('clearAuthError', (global) => {
   return {
     ...global,
     authError: undefined,
+  };
+});
+
+addReducer('setShouldSkipUiLoaderTransition', (global, actions, payload) => {
+  const { shouldSkipUiLoaderTransition } = payload;
+
+  return {
+    ...global,
+    shouldSkipUiLoaderTransition,
   };
 });

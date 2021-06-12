@@ -20,6 +20,7 @@ type OwnProps = {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;
+  shouldSkipTransition?: boolean;
   footer?: string;
   noCloseOnBackdrop?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
@@ -48,6 +49,7 @@ const Menu: FC<OwnProps> = ({
   onClose,
   onMouseEnter,
   onMouseLeave,
+  shouldSkipTransition,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let menuRef = useRef<HTMLDivElement>(null);
@@ -56,9 +58,20 @@ const Menu: FC<OwnProps> = ({
   }
   const backdropContainerRef = containerRef || menuRef;
 
-  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const {
+    transitionClassNames,
+  } = useShowTransition(
+    isOpen,
+    onCloseAnimationEnd,
+    shouldSkipTransition,
+    undefined,
+    shouldSkipTransition,
+  );
 
-  useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
+  useEffect(
+    () => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined),
+    [isOpen, onClose],
+  );
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     if (prevIsOpen !== undefined) {
