@@ -7,7 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
-import { APP_INFO, FEEDBACK_URL } from '../../../config';
+import { APP_NAME, APP_VERSION, FEEDBACK_URL } from '../../../config';
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
@@ -160,7 +160,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
-          footer={APP_INFO}
+          footer={`${APP_NAME} ${APP_VERSION}`}
         >
           <MenuItem
             icon="saved-messages"
