@@ -15,8 +15,8 @@ export const IS_PERF = process.env.APP_ENV === 'perf';
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;
 
-export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
-export const LEGACY_SESSION_KEY = 'user_auth';
+export const SESSION_USER_KEY = 'user_auth';
+export const LEGACY_SESSION_KEY = 'GramJs:sessionId';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';

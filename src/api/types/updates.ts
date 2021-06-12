@@ -9,6 +9,7 @@ import {
   ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
+import { ApiSessionData } from './misc';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -35,11 +36,14 @@ export type ApiUpdateConnectionStateType = (
 export type ApiUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState';
   authorizationState: ApiUpdateAuthorizationStateType;
-  sessionId?: string;
-  sessionJson?: string;
   isCodeViaApp?: boolean;
   hint?: string;
   qrCode?: { token: string; expires: number };
+};
+
+export type ApiUpdateSession = {
+  '@type': 'updateSession';
+  sessionData?: ApiSessionData;
 };
 
 export type ApiUpdateAuthorizationError = {
@@ -363,7 +367,7 @@ export type ApiUpdatePrivacy = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateReady |
+  ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |

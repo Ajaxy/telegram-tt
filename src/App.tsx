@@ -4,7 +4,7 @@ import React, { withGlobal } from './lib/teact/teactn';
 import { GlobalActions, GlobalState } from './global/types';
 
 import {
-  GRAMJS_SESSION_ID_KEY, INACTIVE_MARKER, LEGACY_SESSION_KEY, PAGE_TITLE,
+  LEGACY_SESSION_KEY, INACTIVE_MARKER, SESSION_USER_KEY, PAGE_TITLE,
 } from './config';
 import { pick } from './util/iteratees';
 import { updateSizes } from './util/windowSize';
@@ -55,10 +55,9 @@ const App: FC<StateProps & DispatchProps> = ({ authState, disconnect }) => {
     }
   }
 
-  const hasSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
-  const hasLegacySession = localStorage.getItem(LEGACY_SESSION_KEY);
+  const hasSession = localStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
 
-  return (hasSession || hasLegacySession) ? renderMain() : <Auth />;
+  return hasSession ? renderMain() : <Auth />;
 };
 
 function renderMain() {
