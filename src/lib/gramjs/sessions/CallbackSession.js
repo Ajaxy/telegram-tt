@@ -89,6 +89,8 @@ class CallbackSession extends MemorySession {
             .keys(this._authKeys)
             .forEach((dcId) => {
                 const authKey = this._authKeys[dcId];
+                if (!authKey._key) return;
+
                 sessionData.keys[dcId] = authKey._key.toString('hex');
                 sessionData.hashes[dcId] = authKey._hash.toString('hex');
             });

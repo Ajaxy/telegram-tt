@@ -110,6 +110,8 @@ class StorageSession extends MemorySession {
             .keys(this._authKeys)
             .forEach((dcId) => {
                 const authKey = this._authKeys[dcId];
+                if (!authKey._key) return;
+
                 sessionData.keys[dcId] = asHex ? authKey._key.toString('hex') : authKey._key;
                 sessionData.hashes[dcId] = asHex ? authKey._hash.toString('hex') : authKey._hash;
             });
