@@ -315,6 +315,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
       .join('')
       .replace(/\u200b+/g, '\u200b');
+
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
       if (isSelectionInsideInput(selectionRange)) {
@@ -327,17 +328,15 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         }
         return;
       }
+    }
 
-      setHtml(`${htmlRef.current!}${newHtml}`);
+    setHtml(`${htmlRef.current!}${newHtml}`);
 
-      if (!IS_MOBILE_SCREEN) {
-        // If selection is outside of input, set cursor at the end of input
-        requestAnimationFrame(() => {
-          focusEditableElement(messageInput);
-        });
-      }
-    } else {
-      setHtml(`${htmlRef.current!}${newHtml}`);
+    if (!IS_MOBILE_SCREEN) {
+      // If selection is outside of input, set cursor at the end of input
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput);
+      });
     }
   }, []);
 
