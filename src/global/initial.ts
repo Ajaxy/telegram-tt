@@ -63,6 +63,8 @@ export const INITIAL_STATE: GlobalState = {
     forEmoji: {},
   },
 
+  emojiKeywords: {},
+
   gifs: {
     saved: {},
     search: {},

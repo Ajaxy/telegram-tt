@@ -7,8 +7,11 @@ import { IS_MOBILE_SCREEN } from '../../../../util/environment';
 import {
   EmojiData, EmojiModule, EmojiRawData, uncompressEmoji,
 } from '../../../../util/emoji';
-import useFlag from '../../../../hooks/useFlag';
 import focusEditableElement from '../../../../util/focusEditableElement';
+import {
+  buildCollectionByKey, flatten, mapValues, pickTruthy, unique,
+} from '../../../../util/iteratees';
+import useFlag from '../../../../hooks/useFlag';
 
 let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
@@ -23,28 +26,31 @@ export default function useEmojiTooltip(
   recentEmojiIds: string[],
   inputId = EDITABLE_INPUT_ID,
   onUpdateHtml: (html: string) => void,
+  emojiKeywords?: Record<string, string[]>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
-  const [emojiIds, setEmojiIds] = useState<string[]>([]);
+
+  const [byId, setById] = useState<Record<string, Emoji> | undefined>();
+  const [byKeyword, setByKeyword] = useState<Record<string, Emoji[]>>({});
+  const [byName, setByName] = useState<Record<string, Emoji[]>>({});
+
   const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
 
   const recentEmojis = useMemo(
     () => {
-      if (!emojiIds.length || !recentEmojiIds.length) {
+      if (!byId || !recentEmojiIds.length) {
         return [];
       }
 
-      return recentEmojiIds
-        .map((emojiId) => emojiData.emojis[emojiId])
-        .filter<Emoji>(Boolean as any);
+      return Object.values(pickTruthy(byId, recentEmojiIds));
     },
-    [emojiIds, recentEmojiIds],
+    [byId, recentEmojiIds],
   );
 
   // Initialize data on first render.
   useEffect(() => {
     const exec = () => {
-      setEmojiIds(Object.keys(emojiData.emojis));
+      setById(emojiData.emojis);
     };
 
     if (emojiData) {
@@ -56,7 +62,34 @@ export default function useEmojiTooltip(
   }, []);
 
   useEffect(() => {
-    if (!isAllowed || !html || !emojiIds.length) {
+    if (!byId) {
+      return;
+    }
+
+    const emojis = Object.values(byId);
+
+    if (emojiKeywords) {
+      const byNative = buildCollectionByKey(emojis, 'native');
+      setByKeyword(mapValues(emojiKeywords, (natives) => {
+        return Object.values(pickTruthy(byNative, natives));
+      }));
+    }
+
+    setByName(emojis.reduce((result, emoji) => {
+      emoji.names.forEach((name) => {
+        if (!result[name]) {
+          result[name] = [];
+        }
+
+        result[name].push(emoji);
+      });
+
+      return result;
+    }, {} as Record<string, Emoji[]>));
+  }, [byId, emojiKeywords]);
+
+  useEffect(() => {
+    if (!isAllowed || !html || !byId) {
       unmarkIsOpen();
       return;
     }
@@ -69,20 +102,28 @@ export default function useEmojiTooltip(
     }
 
     const filter = code.substr(1);
-    const matched = filter === ''
-      ? recentEmojis
-      : emojiIds
-        .filter((emojiId) => emojiData.emojis[emojiId].names.find((name) => name.includes(filter)))
-        .slice(0, EMOJIS_LIMIT)
-        .map((emojiId) => emojiData.emojis[emojiId]);
+    let matched: Emoji[] = [];
+
+    if (!filter) {
+      matched = recentEmojis;
+    } else {
+      const matchedKeywords = Object.keys(byKeyword).filter((keyword) => keyword.startsWith(filter));
+      matched = matched.concat(flatten(Object.values(pickTruthy(byKeyword, matchedKeywords))));
+
+      // Also search by names, which is useful for non-English languages
+      const matchedNames = Object.keys(byName).filter((name) => name.startsWith(filter));
+      matched = matched.concat(flatten(Object.values(pickTruthy(byName, matchedNames))));
+
+      matched = unique(matched);
+    }
 
     if (matched.length) {
       markIsOpen();
-      setFilteredEmojis(matched);
+      setFilteredEmojis(matched.slice(0, EMOJIS_LIMIT));
     } else {
       unmarkIsOpen();
     }
-  }, [emojiIds, html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen]);
+  }, [byId, byKeyword, byName, html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen]);
 
   const insertEmoji = useCallback((textEmoji: string) => {
     const atIndex = html.lastIndexOf(':');

@@ -1006,6 +1006,7 @@ messages.sendVote#10ea6184 peer:InputPeer msg_id:int options:Vector<bytes> = Upd
 messages.getOnlines#6e2be050 peer:InputPeer = ChatOnlines;
 messages.editChatAbout#def60797 peer:InputPeer about:string = Bool;
 messages.editChatDefaultBannedRights#a5866b41 peer:InputPeer banned_rights:ChatBannedRights = Updates;
+messages.getEmojiKeywordsDifference#1508b6af lang_code:string from_version:int = EmojiKeywordsDifference;
 messages.getScheduledHistory#e2c2685b peer:InputPeer hash:int = messages.Messages;
 messages.sendScheduledMessages#bd38850a peer:InputPeer id:Vector<int> = Updates;
 messages.deleteScheduledMessages#59ae2b16 peer:InputPeer id:Vector<int> = Updates;

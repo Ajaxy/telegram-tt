@@ -38,6 +38,11 @@ export type NotifySettings = {
   hasContactJoinedNotifications?: boolean;
 };
 
+export type LangCode = (
+  'en' | 'ar' | 'be' | 'ca' | 'nl' | 'fr' | 'de' | 'id' | 'it' | 'ko' | 'ms' | 'fa' | 'pl' | 'pt-br' | 'ru' | 'es'
+  | 'tr' | 'uk' | 'uz'
+);
+
 export interface ISettings extends NotifySettings, Record<string, any> {
   theme: ThemeKey;
   messageTextSize: number;
@@ -53,10 +58,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldLoopStickers: boolean;
   hasPassword?: boolean;
   languages?: ApiLanguage[];
-  language: (
-    'en' | 'ar' | 'be' | 'ca' | 'nl' | 'fr' | 'de' | 'id' | 'it' | 'ko' | 'ms' | 'fa' | 'pl' | 'pt-br' | 'ru' | 'es'
-    | 'tr' | 'uk' | 'uz'
-  );
+  language: LangCode;
 }
 
 export interface ApiPrivacySettings {
@@ -285,4 +287,10 @@ export type NotifyException = {
   isMuted: boolean;
   isSilent?: boolean;
   shouldShowPreviews?: boolean;
+};
+
+export type EmojiKeywords = {
+  isLoading?: boolean;
+  version: number;
+  keywords: Record<string, string[]>;
 };

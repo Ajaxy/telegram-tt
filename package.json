@@ -101,7 +101,7 @@
     "async-mutex": "^0.1.4",
     "big-integer": "painor/BigInteger.js",
     "croppie": "^2.6.4",
-    "emoji-data-ios": "github:korenskoy/emoji-data-ios#e644adb",
+    "emoji-data-ios": "github:korenskoy/emoji-data-ios#d3efbb0",
     "events": "^3.0.0",
     "idb-keyval": "^5.0.5",
     "opus-recorder": "^6.2.0",
