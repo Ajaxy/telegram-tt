@@ -271,6 +271,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           focused={isSearchFocused}
           isLoading={isLoading}
           placeholder={searchInputPlaceholder}
+          autoComplete="off"
           canClose={Boolean(globalSearchChatId || searchDate)}
           onChange={onSearchQuery}
           onReset={onReset}
