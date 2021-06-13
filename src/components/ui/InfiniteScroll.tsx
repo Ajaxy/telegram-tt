@@ -11,7 +11,7 @@ import resetScroll from '../../util/resetScroll';
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
-  onLoadMore?: ({ direction }: { direction: LoadMoreDirection }) => void;
+  onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   items?: any[];
@@ -66,8 +66,12 @@ const InfiniteScroll: FC<OwnProps> = ({
     }
 
     return [
-      debounce(() => onLoadMore({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
-      debounce(() => onLoadMore({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+      debounce((noScroll = false) => {
+        onLoadMore({ direction: LoadMoreDirection.Backwards, noScroll });
+      }, 1000, true, false),
+      debounce(() => {
+        onLoadMore({ direction: LoadMoreDirection.Forwards });
+      }, 1000, true, false),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLoadMore, items]);
@@ -79,7 +83,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     }
 
     if (preloadBackwards > 0 && (!items || items.length < preloadBackwards)) {
-      loadMoreBackwards();
+      loadMoreBackwards(true);
       return;
     }
 
