@@ -23,10 +23,10 @@ type OwnProps = {
 };
 
 const FAB_THRESHOLD = 50;
-const FAB_FREEZE_TIMEOUT = 100;
+const TOOLS_FREEZE_TIMEOUT = 100;
 
 // Local flag is used because `freeze/unfreeze` methods are controlled by heavy animation
-let isFabFrozen = false;
+let areToolsFrozen = false;
 
 const MessageScroll: FC<OwnProps> = ({
   containerRef,
@@ -49,7 +49,7 @@ const MessageScroll: FC<OwnProps> = ({
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
   const toggleScrollTools = useCallback(() => {
-    if (isFabFrozen) {
+    if (areToolsFrozen) {
       return;
     }
 
@@ -135,13 +135,13 @@ const MessageScroll: FC<OwnProps> = ({
     }
   }, [focusingId]);
 
-  // Workaround for FAB flickering with tall incoming message
+  // Workaround for FAB and notch flickering with tall incoming message
   useOnChange(() => {
-    isFabFrozen = true;
+    areToolsFrozen = true;
 
     setTimeout(() => {
-      isFabFrozen = false;
-    }, FAB_FREEZE_TIMEOUT);
+      areToolsFrozen = false;
+    }, TOOLS_FREEZE_TIMEOUT);
   }, [messageIds]);
 
   // Workaround for stuck FAB when many unread messages
