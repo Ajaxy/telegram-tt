@@ -2,6 +2,7 @@ import {
   MOBILE_SCREEN_MAX_WIDTH,
   MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT,
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
+  IS_TEST,
 } from '../config';
 
 export function getPlatform() {
@@ -47,7 +48,9 @@ export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
 export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
 export const IS_STREAMING_SUPPORTED = 'MediaSource' in window;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
-export const IS_CANVAS_FILTER_SUPPORTED = 'filter' in (document.createElement('canvas').getContext('2d') || {});
+export const IS_CANVAS_FILTER_SUPPORTED = (
+  !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
+);
 
 export const DPR = window.devicePixelRatio || 1;
 

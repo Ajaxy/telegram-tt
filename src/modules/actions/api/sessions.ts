@@ -98,3 +98,17 @@ export async function clearLegacySessions() {
       .map((k) => idb.del(k)),
   ]);
 }
+
+export function importTestSession() {
+  const sessionJson = process.env.TEST_SESSION!;
+  try {
+    const sessionData = JSON.parse(sessionJson) as ApiSessionData;
+    storeSession(sessionData);
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load test session', err);
+    }
+    // Do nothing.
+  }
+}
