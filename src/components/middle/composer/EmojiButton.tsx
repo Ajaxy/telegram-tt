@@ -11,14 +11,17 @@ type OwnProps = {
 };
 
 const EmojiButton: FC<OwnProps> = ({ emoji, focus, onClick }) => {
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    // Preventing safari from losing focus on Composer MessageInput
+    e.preventDefault();
+
     onClick(emoji.native, emoji.id);
   }, [emoji, onClick]);
 
   return (
     <div
       className={`EmojiButton ${focus ? 'focus' : ''}`}
-      onClick={handleClick}
+      onMouseDown={handleClick}
       title={`:${emoji.names[0]}:`}
     >
       {IS_EMOJI_SUPPORTED

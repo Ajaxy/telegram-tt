@@ -79,7 +79,7 @@ const Menu: FC<OwnProps> = ({
     }
   }, [isOpen]);
 
-  const handleKeyDown = useKeyboardListNavigation(menuRef, isOpen, autoClose ? onClose : undefined);
+  const handleKeyDown = useKeyboardListNavigation(menuRef, isOpen, autoClose ? onClose : undefined, undefined, true);
 
   useVirtualBackdrop(
     isOpen,
