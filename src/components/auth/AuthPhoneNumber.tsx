@@ -28,7 +28,7 @@ type DispatchProps = Pick<GlobalActions, (
   'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'gotToAuthQrCode'
 )>;
 
-const MIN_NUMBER_LENGTH = 10;
+const MIN_NUMBER_LENGTH = 7;
 
 let isPreloadInitiated = false;
 
