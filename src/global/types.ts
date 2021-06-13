@@ -37,6 +37,8 @@ import {
   ThemeKey,
   IThemeSettings,
   NotifyException,
+  LangCode,
+  EmojiKeywords,
 } from '../types';
 
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
@@ -204,6 +206,7 @@ export type GlobalState = {
   };
 
   animatedEmojis?: ApiStickerSet;
+  emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
   gifs: {
     saved: {
@@ -448,7 +451,7 @@ export type ActionTypes = (
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
-  'loadStickersForEmoji' | 'clearStickersForEmoji' |
+  'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' |
   // bots
   'clickInlineButton' | 'sendBotCommand' |
   // misc

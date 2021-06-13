@@ -16,6 +16,7 @@ import Loading from '../../ui/Loading';
 import EmojiButton from './EmojiButton';
 
 import './EmojiTooltip.scss';
+import { LangCode } from '../../../types';
 
 const VIEWPORT_MARGIN = 8;
 const EMOJI_BUTTON_WIDTH = 44;
@@ -50,9 +51,11 @@ function setItemVisible(index: number, containerRef: Record<string, any>) {
 
 export type OwnProps = {
   isOpen: boolean;
+  language: LangCode;
   onEmojiSelect: (text: string) => void;
   onClose: NoneToVoidFunction;
   addRecentEmoji: AnyToVoidFunction;
+  loadEmojiKeywords: AnyToVoidFunction;
   emojis: Emoji[];
 };
 
@@ -60,10 +63,12 @@ const CLOSE_DURATION = 350;
 
 const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
+  language,
   emojis,
   onClose,
   onEmojiSelect,
   addRecentEmoji,
+  loadEmojiKeywords,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,6 +76,10 @@ const EmojiTooltip: FC<OwnProps> = ({
   const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
 
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  useEffect(() => {
+    loadEmojiKeywords({ language });
+  }, [loadEmojiKeywords, language]);
 
   useEffect(() => {
     setSelectedIndex(0);

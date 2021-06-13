@@ -246,6 +246,30 @@ export async function fetchStickersForEmoji({
   };
 }
 
+export async function fetchEmojiKeywords({ language, fromVersion }: {
+  language: string;
+  fromVersion?: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetEmojiKeywordsDifference({
+    langCode: language,
+    fromVersion,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    language: result.langCode,
+    version: result.version,
+    keywords: result.keywords.reduce((acc, emojiKeyword) => {
+      acc[emojiKeyword.keyword] = emojiKeyword.emoticons;
+
+      return acc;
+    }, {} as Record<string, string[]>),
+  };
+}
+
 function processStickerResult(stickers: GramJs.TypeDocument[]) {
   return stickers
     .map((document) => {

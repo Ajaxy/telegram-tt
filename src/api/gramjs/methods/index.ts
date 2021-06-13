@@ -34,7 +34,7 @@ export {
 export {
   fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers,
   faveSticker, fetchStickers, fetchSavedGifs, searchStickers, installStickerSet, uninstallStickerSet,
-  searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji,
+  searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords,
 } from './symbols';
 
 export {

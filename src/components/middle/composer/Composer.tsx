@@ -16,6 +16,7 @@ import {
   ApiUser,
   MAIN_THREAD_ID,
 } from '../../../api/types';
+import { LangCode } from '../../../types';
 
 import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_MOBILE_SCREEN, IS_EMOJI_SUPPORTED } from '../../../util/environment';
@@ -30,6 +31,7 @@ import {
   selectEditingMessage,
   selectIsChatWithSelf,
   selectChatUser,
+  selectEmojiKeywords,
 } from '../../../modules/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -118,13 +120,15 @@ type StateProps = {
   lastSyncTime?: number;
   contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
   shouldSuggestStickers?: boolean;
+  language: LangCode;
+  emojiKeywords?: Record<string, string[]>;
 } & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
   'clearDraft' | 'showError' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
   'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
-  'clearReceipt' | 'addRecentEmoji'
+  'clearReceipt' | 'addRecentEmoji' | 'loadEmojiKeywords'
 )>;
 
 enum MainButtonState {
@@ -174,6 +178,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
+  language,
+  emojiKeywords,
   recentEmojis,
   sendMessage,
   editMessage,
@@ -190,6 +196,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   openChat,
   clearReceipt,
   addRecentEmoji,
+  loadEmojiKeywords,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const appendixRef = useRef<HTMLDivElement>(null);
@@ -299,6 +306,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     recentEmojis,
     undefined,
     setHtml,
+    emojiKeywords,
   );
 
   const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
@@ -687,7 +695,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         usersById={usersById}
         recentEmojis={recentEmojis}
         onCaptionUpdate={setHtml}
+        language={language}
         addRecentEmoji={addRecentEmoji}
+        loadEmojiKeywords={loadEmojiKeywords}
         onSend={shouldSchedule ? openCalendar : handleSend}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachment}
@@ -821,6 +831,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             onClose={closeEmojiTooltip}
             onEmojiSelect={insertEmoji}
             addRecentEmoji={addRecentEmoji}
+            loadEmojiKeywords={loadEmojiKeywords}
+            language={language}
           />
           <AttachMenu
             isOpen={isAttachMenuOpen}
@@ -909,6 +921,8 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
+    const { language } = global.settings.byKey;
+    const emojiKeywords = selectEmojiKeywords(global, language);
 
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
@@ -943,6 +957,8 @@ export default memo(withGlobal<OwnProps>(
       isReceiptModalOpen: Boolean(global.payment.receipt),
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
       recentEmojis: global.recentEmojis,
+      language,
+      emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -961,5 +977,6 @@ export default memo(withGlobal<OwnProps>(
     'loadScheduledHistory',
     'openChat',
     'addRecentEmoji',
+    'loadEmojiKeywords',
   ]),
 )(Composer));

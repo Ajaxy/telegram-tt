@@ -3,8 +3,9 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { ApiAttachment, ApiChatMember, ApiUser } from '../../../api/types';
-import { CONTENT_TYPES_FOR_QUICK_UPLOAD, EDITABLE_INPUT_MODAL_ID } from '../../../config';
+import { LangCode } from '../../../types';
 
+import { CONTENT_TYPES_FOR_QUICK_UPLOAD, EDITABLE_INPUT_MODAL_ID } from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
@@ -31,7 +32,9 @@ export type OwnProps = {
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
   recentEmojis: string[];
+  language: LangCode;
   addRecentEmoji: AnyToVoidFunction;
+  loadEmojiKeywords: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onFileAppend: (files: File[], isQuick: boolean) => void;
@@ -48,8 +51,10 @@ const AttachmentModal: FC<OwnProps> = ({
   currentUserId,
   usersById,
   recentEmojis,
+  language,
   onCaptionUpdate,
   addRecentEmoji,
+  loadEmojiKeywords,
   onSend,
   onFileAppend,
   onClear,
@@ -229,8 +234,10 @@ const AttachmentModal: FC<OwnProps> = ({
             isOpen={isEmojiTooltipOpen}
             emojis={filteredEmojis}
             onClose={closeEmojiTooltip}
+            language={language}
             onEmojiSelect={insertEmoji}
             addRecentEmoji={addRecentEmoji}
+            loadEmojiKeywords={loadEmojiKeywords}
           />
           <MessageInput
             id="caption-input-text"
