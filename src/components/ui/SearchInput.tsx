@@ -23,6 +23,7 @@ type OwnProps = {
   isLoading?: boolean;
   placeholder?: string;
   disabled?: boolean;
+  autoComplete?: string;
   canClose?: boolean;
   onChange: (value: string) => void;
   onReset?: NoneToVoidFunction;
@@ -41,6 +42,7 @@ const SearchInput: FC<OwnProps> = ({
   isLoading,
   placeholder,
   disabled,
+  autoComplete,
   canClose,
   onChange,
   onReset,
@@ -112,6 +114,7 @@ const SearchInput: FC<OwnProps> = ({
         className="form-control"
         value={value}
         disabled={disabled}
+        autoComplete={autoComplete}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
