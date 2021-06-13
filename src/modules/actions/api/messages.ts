@@ -388,13 +388,19 @@ addReducer('deleteScheduledMessages', (global, actions, payload) => {
 });
 
 addReducer('deleteHistory', (global, actions, payload) => {
-  const { chatId, maxId, shouldDeleteForAll } = payload!;
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return;
-  }
+  (async () => {
+    const { chatId, shouldDeleteForAll } = payload!;
+    const chat = selectChat(global, chatId);
+    if (!chat) {
+      return;
+    }
 
-  void callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+    const maxId = chat.lastMessage && chat.lastMessage.id;
+
+    await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+
+    actions.openChat({ id: undefined });
+  })();
 });
 
 addReducer('markMessageListRead', (global, actions, payload) => {

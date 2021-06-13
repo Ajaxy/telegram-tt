@@ -117,18 +117,15 @@ const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [firstName, lastName, updateContact, userId, isNotificationsEnabled]);
 
   const handleDeleteContact = useCallback(() => {
-    if (chat.lastMessage) {
-      deleteHistory({
-        chatId: chat.id,
-        maxId: chat.lastMessage!.id,
-        shouldDeleteForAll: false,
-      });
-    }
+    deleteHistory({
+      chatId: chat.id,
+      shouldDeleteForAll: false,
+    });
     deleteUser({ userId });
     closeDeleteDialog();
     closeManagement();
     openChat({ id: undefined });
-  }, [chat.id, chat.lastMessage, closeDeleteDialog, closeManagement, deleteHistory, deleteUser, openChat, userId]);
+  }, [chat.id, closeDeleteDialog, closeManagement, deleteHistory, deleteUser, openChat, userId]);
 
   if (!user) {
     return undefined;

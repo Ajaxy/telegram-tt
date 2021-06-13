@@ -182,7 +182,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleDeleteGroup = useCallback(() => {
     if (isBasicGroup) {
-      deleteHistory({ chatId: chat.id, maxId: chat.lastMessage!.id, shouldDeleteForAll: false });
+      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (!chat.isCreator) {
       leaveChannel({ chatId: chat.id });
     } else {
@@ -192,7 +192,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
     closeManagement();
     openChat({ id: undefined });
   }, [
-    isBasicGroup, chat.isCreator, chat.id, chat.lastMessage,
+    isBasicGroup, chat.isCreator, chat.id,
     closeDeleteDialog, closeManagement, deleteHistory, leaveChannel, deleteChannel, openChat,
   ]);
 

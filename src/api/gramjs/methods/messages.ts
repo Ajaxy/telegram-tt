@@ -585,7 +585,7 @@ export async function deleteScheduledMessages({
 export async function deleteHistory({
   chat, shouldDeleteForAll, maxId,
 }: {
-  chat: ApiChat; shouldDeleteForAll?: boolean; maxId: number;
+  chat: ApiChat; shouldDeleteForAll?: boolean; maxId?: number;
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
   const result = await invokeRequest(

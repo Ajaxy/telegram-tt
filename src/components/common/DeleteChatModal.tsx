@@ -61,13 +61,14 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   const chatTitle = getChatTitle(lang, chat);
 
   const handleDeleteMessageForAll = useCallback(() => {
-    deleteHistory({ chatId: chat.id, maxId: chat.lastMessage!.id, shouldDeleteForAll: true });
+    deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
+
     onClose();
-  }, [deleteHistory, chat.id, chat.lastMessage, onClose]);
+  }, [deleteHistory, chat.id, onClose]);
 
   const handleDeleteChat = useCallback(() => {
     if (isPrivateChat || isBasicGroup) {
-      deleteHistory({ chatId: chat.id, maxId: chat.lastMessage!.id, shouldDeleteForAll: false });
+      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
       leaveChannel({ chatId: chat.id });
     } else if ((isChannel || isSuperGroup) && chat.isCreator) {
@@ -80,7 +81,6 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
     isChannel,
     isSuperGroup,
     chat.isCreator,
-    chat.lastMessage,
     chat.id,
     onClose,
     deleteHistory,
