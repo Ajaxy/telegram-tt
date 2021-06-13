@@ -70,6 +70,10 @@ export default (
       return;
     }
 
+    if (!noScroll) {
+      lastParamsRef.current = { ...lastParamsRef.current, direction, offsetId };
+    }
+
     const {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(listIds, offsetId, direction, listSlice);
@@ -80,10 +84,6 @@ export default (
     }
 
     if (!areAllLocal && loadMoreBackwards) {
-      if (!noScroll) {
-        lastParamsRef.current = { ...lastParamsRef.current, direction, offsetId };
-      }
-
       loadMoreBackwards({ offsetId });
     }
   }, [listIds, listSlice, loadMoreBackwards, forceUpdate]);
