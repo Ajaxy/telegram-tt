@@ -10,6 +10,7 @@ import {
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
+  IS_TEST,
 } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
@@ -22,12 +23,17 @@ import {
   clearStoredSession,
   importLegacySession,
   clearLegacySessions,
+  importTestSession,
 } from './sessions';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   (async () => {
-    await importLegacySession();
-    void clearLegacySessions();
+    if (!IS_TEST) {
+      await importLegacySession();
+      void clearLegacySessions();
+    } else {
+      importTestSession();
+    }
 
     void initApi(actions.apiUpdate, loadStoredSession());
   })();
