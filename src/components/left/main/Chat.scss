@@ -83,6 +83,9 @@
       flex-grow: 1;
       color: var(--color-text-secondary);
       unicode-bidi: plaintext;
+      &[dir=ltr] {
+        text-align: left;
+      }
 
       .sender-name {
         color: var(--color-text);

@@ -53,8 +53,8 @@ const Radio: FC<OwnProps> = ({
         disabled={disabled || hidden}
       />
       <div className="Radio-main">
-        <span className="label" dir="auto">{label}</span>
-        {subLabel && <span className="subLabel" dir="auto">{subLabel}</span>}
+        <span className="label" dir={lang.isRtl ? 'auto' : undefined}>{label}</span>
+        {subLabel && <span className="subLabel" dir={lang.isRtl ? 'auto' : undefined}>{subLabel}</span>}
       </div>
       {isLoading && <Spinner />}
     </label>

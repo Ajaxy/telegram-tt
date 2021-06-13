@@ -60,7 +60,8 @@
     .label {
       display: block;
       word-break: break-word;
-      text-align: initial;
+      unicode-bidi: plaintext;
+      text-align: left;
     }
 
     .subLabel {
@@ -68,6 +69,7 @@
       font-size: 0.875rem;
       line-height: 1rem;
       color: var(--color-text-secondary);
+      unicode-bidi: plaintext;
     }
   }
 
