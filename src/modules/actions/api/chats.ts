@@ -223,31 +223,39 @@ addReducer('joinChannel', (global, actions, payload) => {
 });
 
 addReducer('leaveChannel', (global, actions, payload) => {
-  const { chatId } = payload!;
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return;
-  }
+  (async () => {
+    const { chatId } = payload!;
+    const chat = selectChat(global, chatId);
+    if (!chat) {
+      return;
+    }
 
-  const { id: channelId, accessHash } = chat;
+    const { id: channelId, accessHash } = chat;
 
-  if (channelId && accessHash) {
-    void callApi('leaveChannel', { channelId, accessHash });
-  }
+    if (channelId && accessHash) {
+      await callApi('leaveChannel', { channelId, accessHash });
+    }
+
+    actions.openChat({ id: undefined });
+  })();
 });
 
 addReducer('deleteChannel', (global, actions, payload) => {
-  const { chatId } = payload!;
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return;
-  }
+  (async () => {
+    const { chatId } = payload!;
+    const chat = selectChat(global, chatId);
+    if (!chat) {
+      return;
+    }
 
-  const { id: channelId, accessHash } = chat;
+    const { id: channelId, accessHash } = chat;
 
-  if (channelId && accessHash) {
-    void callApi('deleteChannel', { channelId, accessHash });
-  }
+    if (channelId && accessHash) {
+      await callApi('deleteChannel', { channelId, accessHash });
+    }
+
+    actions.openChat({ id: undefined });
+  })();
 });
 
 addReducer('createGroupChat', (global, actions, payload) => {
