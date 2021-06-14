@@ -57,8 +57,8 @@ type DispatchProps = Pick<GlobalActions, (
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const MENU_ANIMATION_DURATION = 300;
 
-const LEGACY_VERSION = 'https://web.telegram.org/?legacy=1';
-const WEBK_VERSION = 'https://web.telegram.org/k/';
+const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
+const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
@@ -158,6 +158,10 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     setSettingOption({ animationLevel: newLevel });
   }, [animationLevel, setSettingOption]);
 
+  const handleSwitchToWebK = () => {
+    localStorage.setItem('kz_version', 'K');
+  };
+
   const isSearchFocused = (
     Boolean(globalSearchChatId)
     || content === LeftColumnContent.GlobalSearch
@@ -252,13 +256,14 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           </MenuItem>
           <MenuItem
             icon="char-K"
-            href={WEBK_VERSION}
+            href={WEBK_VERSION_URL}
+            onClick={handleSwitchToWebK}
           >
             Switch to K Version
           </MenuItem>
           <MenuItem
             icon="char-W"
-            href={LEGACY_VERSION}
+            href={LEGACY_VERSION_URL}
           >
             Switch to Old Version
           </MenuItem>
