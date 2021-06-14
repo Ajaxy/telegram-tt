@@ -139,7 +139,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: currentUserId });
   }, [currentUserId, openChat]);
 
-  const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLDivElement>) => {
+  const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
     const newTheme = theme === 'light' ? 'dark' : 'light';
 
@@ -147,7 +147,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     switchTheme(newTheme, animationLevel > 0);
   }, [animationLevel, setSettingOption, theme]);
 
-  const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLDivElement>) => {
+  const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
 
     const newLevel = animationLevel === 0 ? 2 : 0;

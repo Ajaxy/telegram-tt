@@ -5,7 +5,7 @@ import useLang from '../../hooks/useLang';
 
 import './MenuItem.scss';
 
-type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement>) => void;
+type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => void;
 
 type OwnProps = {
   icon?: string;
@@ -87,6 +87,7 @@ const MenuItem: FC<OwnProps> = (props) => {
         target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
         rel="noopener noreferrer"
         dir={lang.isRtl ? 'rtl' : undefined}
+        onClick={onClick}
       >
         {content}
       </a>
