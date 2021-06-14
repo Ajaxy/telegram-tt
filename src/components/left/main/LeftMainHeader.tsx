@@ -54,6 +54,7 @@ const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
+const PERMANENT_VERSION_KEY = 'kz_version';
 
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
@@ -146,7 +147,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [animationLevel, setSettingOption]);
 
   const handleSwitchToWebK = () => {
-    localStorage.setItem('kz_version', 'K');
+    localStorage.setItem(PERMANENT_VERSION_KEY, JSON.stringify('K'));
   };
 
   const isSearchFocused = (
