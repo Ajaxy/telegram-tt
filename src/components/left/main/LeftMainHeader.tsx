@@ -57,7 +57,7 @@ type DispatchProps = Pick<GlobalActions, (
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const MENU_ANIMATION_DURATION = 300;
 
-const LEGACY_VERSION = 'https://web.telegram.org/';
+const LEGACY_VERSION = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -254,13 +254,13 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             icon="char-K"
             href={WEBK_VERSION}
           >
-            Switch to WebK
+            Switch to K Version
           </MenuItem>
           <MenuItem
             icon="char-W"
             href={LEGACY_VERSION}
           >
-            Switch to Webogram
+            Switch to Old Version
           </MenuItem>
         </DropdownMenu>
         <SearchInput
