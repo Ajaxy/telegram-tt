@@ -36,7 +36,7 @@ type StateProps = {
   animationLevel: number;
 };
 
-export const ANIMATION_DURATION = {
+const ANIMATION_DURATION = {
   slide: 450,
   'slide-reversed': 450,
   'mv-slide': 400,

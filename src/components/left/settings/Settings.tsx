@@ -31,7 +31,6 @@ const TRANSITION_DURATION = 200;
 export type OwnProps = {
   currentScreen: SettingsScreens;
   onScreenSelect: (screen: SettingsScreens) => void;
-  shouldSkipTransition?: boolean;
   onReset: () => void;
 };
 
@@ -39,7 +38,6 @@ const Settings: FC<OwnProps> = ({
   currentScreen,
   onScreenSelect,
   onReset,
-  shouldSkipTransition,
 }) => {
   const [foldersState, foldersDispatch] = useFoldersReducer();
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
@@ -215,7 +213,7 @@ const Settings: FC<OwnProps> = ({
   return (
     <Transition
       id="Settings"
-      name={shouldSkipTransition ? 'none' : IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide'}
+      name={IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide'}
       activeKey={currentScreen}
       renderCount={TRANSITION_RENDER_COUNT}
     >

@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo, memo, useState,
+  FC, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -15,7 +15,6 @@ import { isChatArchived } from '../../../modules/helpers';
 import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -29,14 +28,11 @@ import './LeftMainHeader.scss';
 type OwnProps = {
   content: LeftColumnContent;
   contactsFilter: string;
-  shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
   onSelectContacts: () => void;
   onSelectArchived: () => void;
   onReset: () => void;
-  onOpenMenu: NoneToVoidFunction;
-  onCloseMenu: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -55,7 +51,6 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
-const MENU_ANIMATION_DURATION = 300;
 
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
@@ -67,13 +62,10 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onSelectSettings,
   onSelectContacts,
   onSelectArchived,
-  onOpenMenu,
-  onCloseMenu,
   setGlobalSearchChatId,
   onReset,
   searchQuery,
   isLoading,
-  shouldSkipTransition,
   currentUserId,
   globalSearchChatId,
   searchDate,
@@ -119,15 +111,10 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
-        <div className={buildClassName(
-          'animated-menu-icon',
-          !hasMenu && 'state-back',
-          shouldSkipTransition && 'no-animation',
-        )}
-        />
+        <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
     );
-  }, [hasMenu, lang, onReset, shouldSkipTransition]);
+  }, [hasMenu, lang, onReset]);
 
   const handleSearchFocus = useCallback(() => {
     if (!searchQuery) {
@@ -172,25 +159,12 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     ? lang('SearchFriends')
     : lang('Search');
 
-  const [forceOpenDropdown, setForceOpenDropdown] = useState(false);
-
-  useHistoryBack((event, noAnimation, previousHistoryState) => {
-    if (previousHistoryState && previousHistoryState.type === 'left' && previousHistoryState.isMenuOpen
-      && noAnimation) {
-      setForceOpenDropdown(true);
-      setTimeout(() => setForceOpenDropdown(false), MENU_ANIMATION_DURATION);
-    }
-  });
-
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${APP_VERSION}`}
-          forceOpen={forceOpenDropdown}
-          onOpen={onOpenMenu}
-          onClose={onCloseMenu}
         >
           <MenuItem
             icon="saved-messages"

@@ -4,50 +4,22 @@ import { GlobalState } from '../../../global/types';
 
 import { IS_MOBILE_SCREEN } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
-import { selectCurrentMessageList, selectRightColumnContentKey } from '../../selectors';
-import { HistoryWrapper } from '../../../util/history';
+import { selectCurrentMessageList } from '../../selectors';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
-addReducer('toggleChatInfo', (global, actions, payload) => {
-  const { noPushState } = payload;
-
-  if (!noPushState) {
-    if (global.isChatInfoShown) {
-      HistoryWrapper.back();
-    } else {
-      HistoryWrapper.pushState({
-        type: 'right',
-        contentKey: selectRightColumnContentKey(global),
-      });
-    }
-  }
-
+addReducer('toggleChatInfo', (global) => {
   return {
     ...global,
     isChatInfoShown: !global.isChatInfoShown,
   };
 });
 
-addReducer('toggleManagement', (global, actions, payload): GlobalState | undefined => {
+addReducer('toggleManagement', (global): GlobalState | undefined => {
   const { chatId } = selectCurrentMessageList(global) || {};
-  const { noPushState } = payload;
 
   if (!chatId) {
     return undefined;
-  }
-
-  const { isActive: prevIsActive } = global.management.byChatId[chatId] || {};
-
-  if (!noPushState) {
-    if (prevIsActive) {
-      HistoryWrapper.back();
-    } else {
-      HistoryWrapper.pushState({
-        type: 'right',
-        contentKey: selectRightColumnContentKey(global),
-      });
-    }
   }
 
   return {
@@ -57,7 +29,7 @@ addReducer('toggleManagement', (global, actions, payload): GlobalState | undefin
         ...global.management.byChatId,
         [chatId]: {
           ...global.management.byChatId[chatId],
-          isActive: !prevIsActive,
+          isActive: !(global.management.byChatId[chatId] || {}).isActive,
         },
       },
     },

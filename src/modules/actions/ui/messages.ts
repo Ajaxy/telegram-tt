@@ -1,7 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { FocusDirection, RightColumnContent } from '../../../types';
+import { FocusDirection } from '../../../types';
 
 import {
   enterMessageSelectMode,
@@ -24,7 +24,6 @@ import {
   selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
-import { HistoryWrapper } from '../../../util/history';
 
 const FOCUS_DURATION = 2000;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
@@ -175,18 +174,11 @@ addReducer('closeAudioPlayer', (global) => {
 });
 
 addReducer('openPollResults', (global, actions, payload) => {
-  const { chatId, messageId, noPushState } = payload!;
+  const { chatId, messageId } = payload!;
 
   const shouldOpenInstantly = selectIsRightColumnShown(global);
 
-  if (!noPushState) {
-    HistoryWrapper.pushState({
-      type: 'right',
-      contentKey: RightColumnContent.PollResults,
-    });
-  }
-
-  if (shouldOpenInstantly) {
+  if (!shouldOpenInstantly) {
     window.setTimeout(() => {
       const newGlobal = getGlobal();
 
@@ -211,13 +203,7 @@ addReducer('openPollResults', (global, actions, payload) => {
   }
 });
 
-addReducer('closePollResults', (global, actions, payload) => {
-  const { noPushState } = payload;
-
-  if (!noPushState) {
-    HistoryWrapper.back();
-  }
-
+addReducer('closePollResults', (global) => {
   setGlobal({
     ...global,
     pollResults: {},

@@ -12,24 +12,14 @@ import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
 import TrackingMonkey from '../common/TrackingMonkey';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import { HistoryWrapper } from '../../util/history';
 
 type StateProps = Pick<GlobalState, 'authPhoneNumber' | 'authIsCodeViaApp' | 'authIsLoading' | 'authError'>;
-type DispatchProps = Pick<GlobalActions, (
-  'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError' | 'setShouldSkipUiLoaderTransition'
-)>;
+type DispatchProps = Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>;
 
 const CODE_LENGTH = 5;
 
 const AuthCode: FC<StateProps & DispatchProps> = ({
-  authPhoneNumber,
-  authIsCodeViaApp,
-  authIsLoading,
-  authError,
-  setAuthCode,
-  returnToAuthPhoneNumber,
-  clearAuthError,
-  setShouldSkipUiLoaderTransition,
+  authPhoneNumber, authIsCodeViaApp, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,15 +34,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
     }
   }, []);
 
-  const handleBackToPhoneNumber = () => {
-    returnToAuthPhoneNumber();
-    HistoryWrapper.back();
-  };
-
-  useHistoryBack((event, noAnimation) => {
-    setShouldSkipUiLoaderTransition({ shouldSkipUiLoaderTransition: noAnimation });
-    returnToAuthPhoneNumber();
-  });
+  useHistoryBack(returnToAuthPhoneNumber);
 
   const onCodeChange = useCallback((e: FormEvent<HTMLInputElement>) => {
     if (authError) {
@@ -98,7 +80,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
           {authPhoneNumber}
           <div
             className="auth-number-edit"
-            onClick={handleBackToPhoneNumber}
+            onClick={returnToAuthPhoneNumber}
             role="button"
             tabIndex={0}
             title="Sign In with another phone number"
@@ -137,10 +119,5 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authPhoneNumber', 'authIsCodeViaApp', 'authIsLoading', 'authError']),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setAuthCode',
-    'returnToAuthPhoneNumber',
-    'clearAuthError',
-    'setShouldSkipUiLoaderTransition',
-  ]),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthCode', 'returnToAuthPhoneNumber', 'clearAuthError']),
 )(AuthCode));

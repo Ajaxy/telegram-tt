@@ -44,7 +44,7 @@ export default (
   const transitionClassNames = buildClassName(
     className && 'opacity-transition',
     className,
-    ((hasOpenClassName && !noCloseTransition) || (noCloseTransition && isOpen)) && 'open',
+    hasOpenClassName && 'open',
     shouldRender && 'shown',
     isClosing && 'closing',
   );

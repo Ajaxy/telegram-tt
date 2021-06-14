@@ -1,6 +1,4 @@
-import React, {
-  FC, useEffect, memo, useState,
-} from '../../lib/teact/teact';
+import React, { FC, useEffect, memo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -8,7 +6,7 @@ import { ApiMessage } from '../../api/types';
 
 import '../../modules/actions/all';
 import {
-  ANIMATION_END_DELAY, DEBUG, INACTIVE_MARKER, PAGE_TITLE, SLIDE_TRANSITION_DURATION,
+  ANIMATION_END_DELAY, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../config';
 import { pick } from '../../util/iteratees';
 import {
@@ -22,7 +20,6 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import buildClassName from '../../util/buildClassName';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -49,7 +46,7 @@ type StateProps = {
   safeLinkModalUrl?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis' | 'openChat'>;
+type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
 
 const ANIMATION_DURATION = 350;
 const NOTIFICATION_INTERVAL = 1000;
@@ -62,7 +59,6 @@ let DEBUG_isLogged = false;
 const Main: FC<StateProps & DispatchProps> = ({
   lastSyncTime,
   loadAnimatedEmojis,
-  openChat,
   isLeftColumnShown,
   isRightColumnShown,
   isMediaViewerOpen,
@@ -86,21 +82,17 @@ const Main: FC<StateProps & DispatchProps> = ({
     }
   }, [lastSyncTime, loadAnimatedEmojis]);
 
-  const [isHistoryAnimationDisabled, setIsHistoryAnimationDisabled] = useState(false);
-
   const {
     transitionClassNames: middleColumnTransitionClassNames,
-  } = useShowTransition(!isLeftColumnShown, undefined, true, undefined, isHistoryAnimationDisabled);
+  } = useShowTransition(!isLeftColumnShown, undefined, true);
 
   const {
     transitionClassNames: rightColumnTransitionClassNames,
-  } = useShowTransition(isRightColumnShown, undefined, true, undefined, isHistoryAnimationDisabled);
-
+  } = useShowTransition(isRightColumnShown, undefined, true);
 
   const className = buildClassName(
     middleColumnTransitionClassNames.replace(/([\w-]+)/g, 'middle-column-$1'),
     rightColumnTransitionClassNames.replace(/([\w-]+)/g, 'right-column-$1'),
-    isHistoryAnimationDisabled && 'history-animation-disabled',
   );
 
   useEffect(() => {
@@ -168,34 +160,6 @@ const Main: FC<StateProps & DispatchProps> = ({
     e.stopPropagation();
   }
 
-  useHistoryBack((event, noAnimation) => {
-    const { state } = event;
-
-    if (state.type !== 'right') {
-      if (state.type === 'chat') {
-        const { chatId: id, threadId, messageListType: type } = state;
-
-        openChat({
-          id, threadId, type, noPushState: true,
-        }, true);
-      } else {
-        openChat({
-          id: undefined,
-          noPushState: true,
-        }, true);
-      }
-    }
-
-    // Must disable pane closing animation for back/forward gestures on iOS
-    if (noAnimation) {
-      setIsHistoryAnimationDisabled(true);
-
-      setTimeout(() => {
-        setIsHistoryAnimationDisabled(false);
-      }, SLIDE_TRANSITION_DURATION);
-    }
-  });
-
   return (
     <div id="Main" className={className} onDrop={stopEvent} onDragOver={stopEvent}>
       <LeftColumn />
@@ -244,5 +208,5 @@ export default memo(withGlobal(
       safeLinkModalUrl: global.safeLinkModalUrl,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis', 'openChat']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis']),
 )(Main));

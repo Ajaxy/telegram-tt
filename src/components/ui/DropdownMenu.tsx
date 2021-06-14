@@ -10,9 +10,6 @@ type OwnProps = {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   footer?: string;
-  forceOpen?: boolean;
-  onOpen?: NoneToVoidFunction;
-  onClose?: NoneToVoidFunction;
   children: any;
 };
 
@@ -23,9 +20,6 @@ const DropdownMenu: FC<OwnProps> = ({
   positionX = 'left',
   positionY = 'top',
   footer,
-  forceOpen,
-  onOpen,
-  onClose,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -35,9 +29,6 @@ const DropdownMenu: FC<OwnProps> = ({
 
   const toggleIsOpen = () => {
     setIsOpen(!isOpen);
-    if (isOpen) {
-      if (onClose) onClose();
-    } else if (onOpen) onOpen();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
@@ -57,7 +48,6 @@ const DropdownMenu: FC<OwnProps> = ({
 
   const handleClose = () => {
     setIsOpen(false);
-    if (onClose) onClose();
   };
 
   return (
@@ -71,14 +61,13 @@ const DropdownMenu: FC<OwnProps> = ({
       <Menu
         ref={menuRef}
         containerRef={dropdownRef}
-        isOpen={isOpen || !!forceOpen}
+        isOpen={isOpen}
         className={className || ''}
         positionX={positionX}
         positionY={positionY}
         footer={footer}
         autoClose
         onClose={handleClose}
-        shouldSkipTransition={forceOpen}
       >
         {children}
       </Menu>
