@@ -30,6 +30,7 @@ import Notifications from './Notifications.async';
 import Errors from './Errors.async';
 import ForwardPicker from './ForwardPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
+import HistoryCalendar from './HistoryCalendar.async';
 
 import './Main.scss';
 
@@ -44,6 +45,7 @@ type StateProps = {
   hasErrors: boolean;
   audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
+  isHistoryCalendarOpen: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
@@ -58,7 +60,6 @@ let DEBUG_isLogged = false;
 
 const Main: FC<StateProps & DispatchProps> = ({
   lastSyncTime,
-  loadAnimatedEmojis,
   isLeftColumnShown,
   isRightColumnShown,
   isMediaViewerOpen,
@@ -68,6 +69,8 @@ const Main: FC<StateProps & DispatchProps> = ({
   hasErrors,
   audioMessage,
   safeLinkModalUrl,
+  isHistoryCalendarOpen,
+  loadAnimatedEmojis,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -171,6 +174,7 @@ const Main: FC<StateProps & DispatchProps> = ({
       <Errors isOpen={hasErrors} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
+      <HistoryCalendar isOpen={isHistoryCalendarOpen} />
     </div>
   );
 };
@@ -206,6 +210,7 @@ export default memo(withGlobal(
       hasErrors: Boolean(global.errors.length),
       audioMessage,
       safeLinkModalUrl: global.safeLinkModalUrl,
+      isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis']),

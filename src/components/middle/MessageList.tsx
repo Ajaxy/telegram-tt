@@ -22,7 +22,8 @@ import {
   selectScrollOffset,
   selectThreadTopMessageId,
   selectFirstMessageId,
-  selectScheduledMessages, selectCurrentMessageIds,
+  selectScheduledMessages,
+  selectCurrentMessageIds,
 } from '../../modules/selectors';
 import {
   getMessageOriginalId,
@@ -92,7 +93,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadViewportMessages' | 'markMessageListRead' | 'markMessagesRead' | 'setScrollOffset'
+  'loadViewportMessages' | 'markMessageListRead' | 'markMessagesRead' | 'setScrollOffset' | 'openHistoryCalendar'
 )>;
 
 const BOTTOM_THRESHOLD = 100;
@@ -138,6 +139,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   botDescription,
   threadTopMessageId,
   hasLinkedChat,
+  openHistoryCalendar,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -557,9 +559,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
             type,
             threadTopMessageId,
             threadFirstMessageId,
-            hasLinkedChat,
+            Boolean(hasLinkedChat),
             messageGroups ? type === 'scheduled' : false,
             !messageGroups || !shouldAnimateAppearanceRef.current,
+            openHistoryCalendar,
           )}
         </MessageScroll>
       ) : (
@@ -580,11 +583,12 @@ function renderMessages(
   memoFirstUnreadIdRef: { current: number | undefined },
   threadId: number,
   type: MessageListType,
-  threadTopMessageId?: number,
-  threadFirstMessageId?: number,
-  hasLinkedChat?: boolean,
-  isSchedule = false,
-  noAppearanceAnimation = false,
+  threadTopMessageId: number | undefined,
+  threadFirstMessageId: number | undefined,
+  hasLinkedChat: boolean,
+  isSchedule: boolean,
+  noAppearanceAnimation: boolean,
+  openHistoryCalendar: Function,
 ) {
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
@@ -701,7 +705,11 @@ function renderMessages(
         key={dateGroup.datetime}
         teactFastList
       >
-        <div className="sticky-date" key="date-header">
+        <div
+          className={buildClassName('sticky-date', !isSchedule && 'interactive')}
+          key="date-header"
+          onClick={!isSchedule ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
+        >
           <span dir="auto">
             {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
               lang('MessageScheduledUntilOnline')
@@ -785,5 +793,6 @@ export default memo(withGlobal<OwnProps>(
     'markMessageListRead',
     'markMessagesRead',
     'setScrollOffset',
+    'openHistoryCalendar',
   ]),
 )(MessageList));

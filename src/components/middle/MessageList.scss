@@ -186,10 +186,22 @@
 
     body:not(.is-scrolling-messages) &.stuck {
       opacity: 0;
+
+      span {
+        pointer-events: none;
+      }
     }
 
     body.animation-level-0 & {
       transition: none;
+    }
+
+    &.interactive {
+      cursor: pointer;
+    }
+
+    span {
+      pointer-events: auto;
     }
   }
 
