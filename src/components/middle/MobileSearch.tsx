@@ -9,12 +9,10 @@ import { GlobalActions } from '../../global/types';
 import { debounce } from '../../util/schedulers';
 import { selectCurrentTextSearch, selectCurrentChat } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
-import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import { getDayStartAt } from '../../util/dateFormat';
 
 import Button from '../ui/Button';
 import SearchInput from '../ui/SearchInput';
-import CalendarModal from '../common/CalendarModal';
 
 import './MobileSearch.scss';
 
@@ -28,10 +26,11 @@ type StateProps = {
   query?: string;
   totalCount?: number;
   foundIds?: number[];
+  isHistoryCalendarOpen?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'setLocalTextSearchQuery' | 'searchTextMessagesLocal' | 'closeLocalTextSearch' | 'searchMessagesByDate' |
+  'setLocalTextSearchQuery' | 'searchTextMessagesLocal' | 'closeLocalTextSearch' | 'openHistoryCalendar' |
   'focusMessage'
 )>;
 
@@ -43,16 +42,16 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
   query,
   totalCount,
   foundIds,
+  isHistoryCalendarOpen,
   setLocalTextSearchQuery,
   searchTextMessagesLocal,
   focusMessage,
   closeLocalTextSearch,
-  searchMessagesByDate,
+  openHistoryCalendar,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
 
   // Fix for iOS keyboard
   useEffect(() => {
@@ -113,7 +112,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
   useLayoutEffect(() => {
     const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
     searchInput.blur();
-  }, [isCalendarOpen]);
+  }, [isHistoryCalendarOpen]);
 
   const handleMessageSearchQueryChange = useCallback((newQuery: string) => {
     setLocalTextSearchQuery({ query: newQuery });
@@ -122,11 +121,6 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
       runDebouncedForSearch(searchTextMessagesLocal);
     }
   }, [searchTextMessagesLocal, setLocalTextSearchQuery]);
-
-  const handleJumpToDate = useCallback((date: Date) => {
-    searchMessagesByDate({ timestamp: date.valueOf() / 1000 });
-    closeCalendar();
-  }, [closeCalendar, searchMessagesByDate]);
 
   const handleUp = useCallback(() => {
     if (chat && foundIds) {
@@ -143,8 +137,6 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
       setFocusedIndex(newFocusIndex);
     }
   }, [chat, focusedIndex, focusMessage, foundIds]);
-
-  const lang = useLang();
 
   return (
     <div id="MobileSearch" className={isActive ? 'active' : ''}>
@@ -178,7 +170,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
               round
               size="smaller"
               color="translucent"
-              onClick={openCalendar}
+              onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel="Search messages by date"
             >
               <i className="icon-calendar" />
@@ -204,13 +196,6 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
           <i className="icon-down" />
         </Button>
       </div>
-      <CalendarModal
-        isOpen={isCalendarOpen}
-        isPastMode
-        submitButtonLabel={lang('JumpToDate')}
-        onClose={closeCalendar}
-        onSubmit={handleJumpToDate}
-      />
     </div>
   );
 };
@@ -230,6 +215,7 @@ export default memo(withGlobal<OwnProps>(
       query,
       totalCount,
       foundIds,
+      isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -237,6 +223,6 @@ export default memo(withGlobal<OwnProps>(
     'searchTextMessagesLocal',
     'focusMessage',
     'closeLocalTextSearch',
-    'searchMessagesByDate',
+    'openHistoryCalendar',
   ]),
 )(MobileSearchFooter));

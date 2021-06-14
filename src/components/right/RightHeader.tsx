@@ -19,14 +19,13 @@ import {
 } from '../../modules/selectors';
 import { isChatAdmin, isChatChannel, isChatPrivate } from '../../modules/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 
-import CalendarModal from '../common/CalendarModal.async';
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
 import './RightHeader.scss';
+import { getDayStartAt } from '../../util/dateFormat';
 
 type OwnProps = {
   chatId?: number;
@@ -52,7 +51,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'setLocalTextSearchQuery' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
-  'searchTextMessagesLocal' | 'toggleManagement' | 'searchMessagesByDate'
+  'searchTextMessagesLocal' | 'toggleManagement' | 'openHistoryCalendar'
 )>;
 
 const COLUMN_CLOSE_DELAY_MS = 300;
@@ -102,12 +101,10 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   setGifSearchQuery,
   searchTextMessagesLocal,
   toggleManagement,
-  searchMessagesByDate,
+  openHistoryCalendar,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
-
-  const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
 
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setLocalTextSearchQuery({ query });
@@ -116,11 +113,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       runDebouncedForSearch(searchTextMessagesLocal);
     }
   }, [searchTextMessagesLocal, setLocalTextSearchQuery]);
-
-  const handleJumpToDate = useCallback((date: Date) => {
-    searchMessagesByDate({ timestamp: date.valueOf() / 1000 });
-    closeCalendar();
-  }, [closeCalendar, searchMessagesByDate]);
 
   const handleStickerSearchQueryChange = useCallback((query: string) => {
     setStickerSearchQuery({ query });
@@ -205,7 +197,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
               round
               size="smaller"
               color="translucent"
-              onClick={openCalendar}
+              onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel="Search messages by date"
             >
               <i className="icon-calendar" />
@@ -312,15 +304,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       >
         {renderHeaderContent}
       </Transition>
-      {!IS_MOBILE_SCREEN && (
-        <CalendarModal
-          isOpen={isCalendarOpen}
-          isPastMode
-          submitButtonLabel={lang('JumpToDate')}
-          onClose={closeCalendar}
-          onSubmit={handleJumpToDate}
-        />
-      )}
     </div>
   );
 };
@@ -356,6 +339,6 @@ export default memo(withGlobal<OwnProps>(
     'setGifSearchQuery',
     'searchTextMessagesLocal',
     'toggleManagement',
-    'searchMessagesByDate',
+    'openHistoryCalendar',
   ]),
 )(RightHeader));

@@ -389,6 +389,7 @@ export type GlobalState = {
   };
 
   safeLinkModalUrl?: string;
+  historyCalendarSelectedAt?: number;
 };
 
 export type ActionTypes = (
@@ -397,7 +398,7 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
-  'toggleSafeLinkModal' |
+  'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' | 'clearCache' |

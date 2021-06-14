@@ -199,3 +199,19 @@ addReducer('toggleSafeLinkModal', (global, actions, payload) => {
     safeLinkModalUrl,
   };
 });
+
+addReducer('openHistoryCalendar', (global, actions, payload) => {
+  const { selectedAt } = payload;
+
+  return {
+    ...global,
+    historyCalendarSelectedAt: selectedAt,
+  };
+});
+
+addReducer('closeHistoryCalendar', (global) => {
+  return {
+    ...global,
+    historyCalendarSelectedAt: undefined,
+  };
+});
