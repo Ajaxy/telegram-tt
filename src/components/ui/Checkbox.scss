@@ -79,7 +79,7 @@
     &::before {
       border: 2px solid var(--color-borders-input);
       border-radius: .25rem;
-      background-color: var(--color-white);
+      background-color: var(--color-background);
       transition: border-color .1s ease, background-color .1s ease;
     }
 
