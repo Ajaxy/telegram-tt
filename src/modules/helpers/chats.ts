@@ -269,7 +269,7 @@ function filterChatFolder(
     return false;
   }
 
-  if (folder.excludeMuted && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
+  if (folder.excludeMuted && !chat.unreadMentionsCount && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
     return false;
   }
 
