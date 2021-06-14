@@ -32,12 +32,21 @@ export function clearStoredSession() {
 }
 
 export function loadStoredSession(): ApiSessionData | undefined {
-  const legacySessionJson = localStorage.getItem(SESSION_USER_KEY);
-  if (!legacySessionJson) return undefined;
+  const userAuthJson = localStorage.getItem(SESSION_USER_KEY);
+  if (!userAuthJson) return undefined;
 
-  const { dcID: mainDcId } = JSON.parse(legacySessionJson);
+  let mainDcId: number | undefined;
   const keys: Record<number, string> = {};
   const hashes: Record<number, string> = {};
+
+  try {
+    const userAuth = JSON.parse(userAuthJson);
+    mainDcId = Number(userAuth.dcID);
+  } catch (err) {
+    // Do nothing.
+  }
+
+  if (!mainDcId) return undefined;
 
   DC_IDS.forEach((dcId) => {
     try {
