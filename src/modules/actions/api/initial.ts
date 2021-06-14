@@ -118,7 +118,13 @@ addReducer('gotToAuthQrCode', (global) => {
 });
 
 addReducer('saveSession', (global, actions, payload) => {
-  storeSession(payload.sessionData, global.currentUserId);
+  const { sessionData } = payload;
+
+  if (sessionData) {
+    storeSession(payload.sessionData, global.currentUserId);
+  } else {
+    clearStoredSession();
+  }
 });
 
 addReducer('signOut', () => {
