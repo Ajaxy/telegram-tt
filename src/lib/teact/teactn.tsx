@@ -46,15 +46,10 @@ function runCallbacks() {
 
 const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
-// noThrottle = true is used as a workaround for iOS gesture history navigation
-export function setGlobal(newGlobal?: GlobalState, noThrottle = false) {
+export function setGlobal(newGlobal?: GlobalState) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     currentGlobal = newGlobal;
-    if (!noThrottle) {
-      runCallbacksThrottled();
-    } else {
-      runCallbacks();
-    }
+    runCallbacksThrottled();
   }
 }
 
@@ -66,12 +61,12 @@ export function getDispatch() {
   return actions;
 }
 
-function onDispatch(name: string, payload?: ActionPayload, noThrottle?: boolean) {
+function onDispatch(name: string, payload?: ActionPayload) {
   if (reducers[name]) {
     reducers[name].forEach((reducer) => {
       const newGlobal = reducer(currentGlobal, actions, payload);
       if (newGlobal) {
-        setGlobal(newGlobal, noThrottle);
+        setGlobal(newGlobal);
       }
     });
   }
@@ -144,8 +139,8 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
   if (!reducers[name]) {
     reducers[name] = [];
 
-    actions[name] = (payload?: ActionPayload, noThrottle = false) => {
-      onDispatch(name, payload, noThrottle);
+    actions[name] = (payload?: ActionPayload) => {
+      onDispatch(name, payload);
     };
   }
 

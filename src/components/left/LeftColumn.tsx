@@ -6,19 +6,15 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import useHistoryBack from '../../hooks/useHistoryBack';
-import useFlag from '../../hooks/useFlag';
-
 import { IS_MOBILE_SCREEN } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 
-import Transition, { ANIMATION_DURATION } from '../ui/Transition';
+import Transition from '../ui/Transition';
 import LeftMain from './main/LeftMain';
 import Settings from './settings/Settings.async';
 import NewChat from './newChat/NewChat.async';
 import ArchivedChats from './ArchivedChats.async';
-import { HistoryWrapper } from '../../util/history';
 
 import './LeftColumn.scss';
 
@@ -61,32 +57,6 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
   const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
-  const [isMenuOpen, openMenu, closeMenu] = useFlag();
-
-  const setContentWithHistory = useCallback((contentKey: LeftColumnContent) => {
-    if (contentKey !== LeftColumnContent.ChatList
-      && contentKey !== LeftColumnContent.NewChannelStep2
-      && contentKey !== LeftColumnContent.NewGroupStep2) {
-      HistoryWrapper.pushState({
-        type: 'left',
-        contentKey,
-        isMenuOpen,
-      });
-    }
-    setContent(contentKey);
-  }, [isMenuOpen]);
-
-  const setSettingsScreenWithHistory = useCallback((screen: SettingsScreens, noPushState = false) => {
-    setSettingsScreen(screen);
-    if (!noPushState) {
-      HistoryWrapper.pushState({
-        type: 'left',
-        contentKey: LeftColumnContent.Settings,
-        screen,
-        isMenuOpen,
-      });
-    }
-  }, [isMenuOpen]);
 
   // Used to reset child components in background.
   const [lastResetTime, setLastResetTime] = useState<number>(0);
@@ -109,13 +79,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       break;
   }
 
-  const handleReset = useCallback((forceReturnToChatList?: boolean, noPushState = false) => {
+  const handleReset = useCallback((forceReturnToChatList?: boolean) => {
     if (
       content === LeftColumnContent.NewGroupStep2
       && !forceReturnToChatList
     ) {
-      if (!noPushState) HistoryWrapper.back();
-      setContentWithHistory(LeftColumnContent.NewGroupStep1);
+      setContent(LeftColumnContent.NewGroupStep1);
       return;
     }
 
@@ -127,9 +96,6 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     }
 
     if (content === LeftColumnContent.Settings) {
-      if (!noPushState) {
-        HistoryWrapper.back();
-      }
       switch (settingsScreen) {
         case SettingsScreens.EditProfile:
         case SettingsScreens.Folders:
@@ -137,14 +103,14 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.Notifications:
         case SettingsScreens.Privacy:
         case SettingsScreens.Language:
-          setSettingsScreenWithHistory(SettingsScreens.Main, noPushState);
+          setSettingsScreen(SettingsScreens.Main);
           return;
 
         case SettingsScreens.GeneralChatBackground:
-          setSettingsScreenWithHistory(SettingsScreens.General, noPushState);
+          setSettingsScreen(SettingsScreens.General);
           return;
         case SettingsScreens.GeneralChatBackgroundColor:
-          setSettingsScreenWithHistory(SettingsScreens.GeneralChatBackground, noPushState);
+          setSettingsScreen(SettingsScreens.GeneralChatBackground);
           return;
 
         case SettingsScreens.PrivacyPhoneNumber:
@@ -157,83 +123,79 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.TwoFaDisabled:
         case SettingsScreens.TwoFaEnabled:
         case SettingsScreens.TwoFaCongratulations:
-          setSettingsScreenWithHistory(SettingsScreens.Privacy, noPushState);
+          setSettingsScreen(SettingsScreens.Privacy);
           return;
         case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
         case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
-          setSettingsScreenWithHistory(SettingsScreens.PrivacyPhoneNumber, noPushState);
+          setSettingsScreen(SettingsScreens.PrivacyPhoneNumber);
           return;
         case SettingsScreens.PrivacyLastSeenAllowedContacts:
         case SettingsScreens.PrivacyLastSeenDeniedContacts:
-          setSettingsScreenWithHistory(SettingsScreens.PrivacyLastSeen, noPushState);
+          setSettingsScreen(SettingsScreens.PrivacyLastSeen);
           return;
         case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
         case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
-          setSettingsScreenWithHistory(SettingsScreens.PrivacyProfilePhoto, noPushState);
+          setSettingsScreen(SettingsScreens.PrivacyProfilePhoto);
           return;
         case SettingsScreens.PrivacyForwardingAllowedContacts:
         case SettingsScreens.PrivacyForwardingDeniedContacts:
-          setSettingsScreenWithHistory(SettingsScreens.PrivacyForwarding, noPushState);
+          setSettingsScreen(SettingsScreens.PrivacyForwarding);
           return;
         case SettingsScreens.PrivacyGroupChatsAllowedContacts:
         case SettingsScreens.PrivacyGroupChatsDeniedContacts:
-          setSettingsScreenWithHistory(SettingsScreens.PrivacyGroupChats, noPushState);
+          setSettingsScreen(SettingsScreens.PrivacyGroupChats);
           return;
         case SettingsScreens.TwoFaNewPassword:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaDisabled, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaDisabled);
           return;
         case SettingsScreens.TwoFaNewPasswordConfirm:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaNewPassword, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaNewPassword);
           return;
         case SettingsScreens.TwoFaNewPasswordHint:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaNewPasswordConfirm, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaNewPasswordConfirm);
           return;
         case SettingsScreens.TwoFaNewPasswordEmail:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaNewPasswordHint, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaNewPasswordHint);
           return;
         case SettingsScreens.TwoFaNewPasswordEmailCode:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaNewPasswordEmail, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaNewPasswordEmail);
           return;
         case SettingsScreens.TwoFaChangePasswordCurrent:
         case SettingsScreens.TwoFaTurnOff:
         case SettingsScreens.TwoFaRecoveryEmailCurrentPassword:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaEnabled, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaEnabled);
           return;
         case SettingsScreens.TwoFaChangePasswordNew:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaChangePasswordCurrent, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaChangePasswordCurrent);
           return;
         case SettingsScreens.TwoFaChangePasswordConfirm:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaChangePasswordNew, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaChangePasswordNew);
           return;
         case SettingsScreens.TwoFaChangePasswordHint:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaChangePasswordConfirm, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaChangePasswordConfirm);
           return;
         case SettingsScreens.TwoFaRecoveryEmail:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaRecoveryEmailCurrentPassword, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaRecoveryEmailCurrentPassword);
           return;
         case SettingsScreens.TwoFaRecoveryEmailCode:
-          setSettingsScreenWithHistory(SettingsScreens.TwoFaRecoveryEmail, noPushState);
+          setSettingsScreen(SettingsScreens.TwoFaRecoveryEmail);
           return;
 
         case SettingsScreens.FoldersCreateFolder:
         case SettingsScreens.FoldersEditFolder:
-          setSettingsScreenWithHistory(SettingsScreens.Folders, noPushState);
+          setSettingsScreen(SettingsScreens.Folders);
           return;
         default:
           break;
       }
     }
 
-    if (!noPushState) {
-      HistoryWrapper.back();
-    }
-
     if (content === LeftColumnContent.ChatList && activeChatFolder === 0) {
-      setContentWithHistory(LeftColumnContent.GlobalSearch);
+      setContent(LeftColumnContent.GlobalSearch);
       return;
     }
 
-    setContentWithHistory(LeftColumnContent.ChatList);
+    setContent(LeftColumnContent.ChatList);
     setContactsFilter('');
     setGlobalSearchQuery({ query: '' });
     setGlobalSearchDate({ date: undefined });
@@ -243,22 +205,9 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       setLastResetTime(Date.now());
     }, RESET_TRANSITION_DELAY_MS);
   }, [
-    content, activeChatFolder, setContentWithHistory, settingsScreen, setSettingsScreenWithHistory,
-    setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId, resetChatCreation,
+    content, activeChatFolder, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId, resetChatCreation,
+    settingsScreen,
   ]);
-
-  const [shouldSkipTransition, setShouldSkipTransition] = useState(false);
-  useHistoryBack((event, noAnimation, previousHistoryState) => {
-    if (previousHistoryState && previousHistoryState.type === 'left') {
-      if (noAnimation) {
-        setShouldSkipTransition(true);
-        setTimeout(() => {
-          setShouldSkipTransition(false);
-        }, ANIMATION_DURATION[IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide']);
-      }
-      handleReset(false, true);
-    }
-  });
 
   const handleSearchQuery = useCallback((query: string) => {
     if (content === LeftColumnContent.Contacts) {
@@ -266,12 +215,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       return;
     }
 
-    setContentWithHistory(LeftColumnContent.GlobalSearch);
+    setContent(LeftColumnContent.GlobalSearch);
 
     if (query !== searchQuery) {
       setGlobalSearchQuery({ query });
     }
-  }, [content, setContentWithHistory, searchQuery, setGlobalSearchQuery]);
+  }, [content, setGlobalSearchQuery, searchQuery]);
 
   useEffect(
     () => (content !== LeftColumnContent.ChatList || activeChatFolder === 0
@@ -291,7 +240,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   return (
     <Transition
       id="LeftColumn"
-      name={shouldSkipTransition ? 'none' : IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide'}
+      name={IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide'}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
     >
@@ -308,9 +257,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
             return (
               <Settings
                 currentScreen={settingsScreen}
-                onScreenSelect={setSettingsScreenWithHistory}
+                onScreenSelect={setSettingsScreen}
                 onReset={handleReset}
-                shouldSkipTransition={shouldSkipTransition}
               />
             );
           case ContentType.NewChannel:
@@ -319,7 +267,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
                 key={lastResetTime}
                 isChannel
                 content={content}
-                onContentChange={setContentWithHistory}
+                onContentChange={setContent}
                 onReset={handleReset}
               />
             );
@@ -328,7 +276,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
               <NewChat
                 key={lastResetTime}
                 content={content}
-                onContentChange={setContentWithHistory}
+                onContentChange={setContent}
                 onReset={handleReset}
               />
             );
@@ -339,12 +287,9 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
                 searchQuery={searchQuery}
                 searchDate={searchDate}
                 contactsFilter={contactsFilter}
-                onContentChange={setContentWithHistory}
+                onContentChange={setContent}
                 onSearchQuery={handleSearchQuery}
                 onReset={handleReset}
-                shouldSkipTransition={shouldSkipTransition}
-                onOpenMenu={openMenu}
-                onCloseMenu={closeMenu}
               />
             );
         }

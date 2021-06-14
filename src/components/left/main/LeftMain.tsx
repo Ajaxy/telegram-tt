@@ -21,12 +21,9 @@ type OwnProps = {
   searchQuery?: string;
   searchDate?: number;
   contactsFilter: string;
-  shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onReset: () => void;
-  onOpenMenu: NoneToVoidFunction;
-  onCloseMenu: NoneToVoidFunction;
 };
 
 type StateProps = {};
@@ -40,12 +37,9 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   searchQuery,
   searchDate,
   contactsFilter,
-  shouldSkipTransition,
   onSearchQuery,
   onContentChange,
   onReset,
-  onOpenMenu,
-  onCloseMenu,
 }) => {
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
 
@@ -125,17 +119,10 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onSelectSettings={handleSelectSettings}
         onSelectContacts={handleSelectContacts}
         onSelectArchived={handleSelectArchived}
-        onOpenMenu={onOpenMenu}
-        onCloseMenu={onCloseMenu}
         onReset={onReset}
-        shouldSkipTransition={shouldSkipTransition}
       />
       <ConnectionState />
-      <Transition
-        name={shouldSkipTransition ? 'none' : 'zoom-fade'}
-        renderCount={TRANSITION_RENDER_COUNT}
-        activeKey={content}
-      >
+      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
         {(isActive) => {
           switch (content) {
             case LeftColumnContent.ChatList:

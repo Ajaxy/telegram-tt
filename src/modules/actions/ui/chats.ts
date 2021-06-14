@@ -1,10 +1,21 @@
-import { addReducer, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getDispatch, setGlobal } from '../../../lib/teact/teactn';
 import {
   exitMessageSelectMode,
   updateCurrentMessageList,
 } from '../../reducers';
-import { selectCurrentMessageList, selectRightColumnContentKey } from '../../selectors';
-import { HistoryWrapper } from '../../../util/history';
+import { selectCurrentMessageList } from '../../selectors';
+
+window.addEventListener('popstate', (e) => {
+  if (!e.state) {
+    return;
+  }
+
+  const { chatId: id, threadId, messageListType: type } = e.state;
+
+  getDispatch().openChat({
+    id, threadId, type, noPushState: true,
+  });
+});
 
 addReducer('openChat', (global, actions, payload) => {
   const {
@@ -35,16 +46,7 @@ addReducer('openChat', (global, actions, payload) => {
     setGlobal(global);
 
     if (!noPushState) {
-      if (id !== undefined) {
-        HistoryWrapper.pushState({
-          type: 'chat',
-          chatId: id,
-          threadId,
-          messageListType: type,
-        });
-      } else {
-        HistoryWrapper.back();
-      }
+      window.history.pushState({ chatId: id, threadId, messageListType: type }, '');
     }
   }
 
@@ -55,11 +57,6 @@ addReducer('openChatWithInfo', (global, actions, payload) => {
   setGlobal({
     ...global,
     isChatInfoShown: true,
-  });
-
-  HistoryWrapper.pushState({
-    type: 'right',
-    contentKey: selectRightColumnContentKey(global),
   });
 
   actions.openChat(payload);
