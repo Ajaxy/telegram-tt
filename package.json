@@ -7,7 +7,7 @@
     "dev": "cross-env APP_ENV=development webpack-dev-server -d",
     "build": "webpack -p",
     "build:staging": "rm -rf dist/ && APP_ENV=staging npm run build && ./deploy/copy_to_dist.sh",
-    "build:production": "npm i && rm -rf dist/ && APP_VERSION=$(npm run inc_version) APP_ENV=production npm run build && ./deploy/copy_to_dist.sh",
+    "build:production": "npm i && rm -rf dist/ && APP_VERSION=$(npm run inc_version --silent) APP_ENV=production npm run build && ./deploy/copy_to_dist.sh",
     "deploy:production": "npm run build:production && git add -A && git commit -a -m '[Build]' && git push",
     "inc_version": "echo $((`cat .patch-version` + 1)) > .patch-version && echo \"$(node -p -e \"require('./package.json').version.match(/^\\d+\\.\\d+/)[0]\").$(cat .patch-version)\"",
     "perf:serve": "APP_ENV=perf parcel src/index-perf.html",
