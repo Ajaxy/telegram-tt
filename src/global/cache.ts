@@ -114,7 +114,6 @@ function updateCache() {
         'authNearestCountry',
         'currentUserId',
         'contactList',
-        'chatFolders',
         'topPeers',
         'recentEmojis',
         'emojiKeywords',
@@ -128,6 +127,7 @@ function updateCache() {
         recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
       },
       settings: reduceSettings(global),
+      chatFolders: reduceChatFolders(global),
     };
 
     const json = JSON.stringify(reducedGlobal);
@@ -220,5 +220,12 @@ function reduceSettings(global: GlobalState): GlobalState['settings'] {
     themes,
     privacy: {},
     notifyExceptions: {},
+  };
+}
+
+function reduceChatFolders(global: GlobalState): GlobalState['chatFolders'] {
+  return {
+    ...global.chatFolders,
+    activeChatFolder: 0,
   };
 }
