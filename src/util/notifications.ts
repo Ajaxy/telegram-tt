@@ -119,7 +119,6 @@ async function unsubscribeFromPush(subscription: PushSubscription | null) {
   }
 }
 
-
 export async function unsubscribe() {
   if (!checkIfPushSupported()) return;
   const serviceWorkerRegistration = await navigator.serviceWorker.ready;
@@ -127,20 +126,22 @@ export async function unsubscribe() {
   await unsubscribeFromPush(subscription);
 }
 
+// Indicates if notification settings are loaded from the api
+let areSettingsLoaded = false;
+
 // Load notification settings from the api
 async function loadNotificationSettings() {
+  if (areSettingsLoaded) return;
   const [result] = await Promise.all([
     callApi('fetchNotificationSettings'),
     callApi('fetchNotificationExceptions'),
   ]);
-
   if (!result) return;
   setGlobal(replaceSettings(getGlobal(), result));
+  areSettingsLoaded = true;
 }
 
 export async function subscribe() {
-  await loadNotificationSettings();
-
   if (!checkIfPushSupported()) {
     // Ask for notification permissions only if service worker notifications are not supported
     // As pushManager.subscribe automatically triggers permission popup
@@ -190,6 +191,7 @@ export async function subscribe() {
 }
 
 function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
+  if (!areSettingsLoaded) return false;
   const global = getGlobal();
   if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined) {
     return false;
@@ -243,7 +245,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
   };
 }
 
-export function showNewMessageNotification({
+export async function showNewMessageNotification({
   chat,
   message,
   isActiveChat,
@@ -251,6 +253,7 @@ export function showNewMessageNotification({
   if (!checkIfNotificationsSupported()) return;
   if (!message.id) return;
 
+  await loadNotificationSettings();
   if (!checkIfShouldNotify(chat, isActiveChat)) return;
 
   const {
