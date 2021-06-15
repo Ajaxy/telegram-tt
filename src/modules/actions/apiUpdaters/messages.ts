@@ -36,6 +36,7 @@ import {
   selectViewportIds,
   selectFirstUnreadId,
   selectRealLastReadId,
+  selectChat,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
 
@@ -426,6 +427,12 @@ function updateWithLocalMedia(
 
 function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
   const { id, chatId } = message;
+
+  const chat = selectChat(global, chatId);
+  const isUnreadChatNotLoaded = chat && chat.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
+  if (isUnreadChatNotLoaded) {
+    return global;
+  }
 
   global = updateListedIds(global, chatId, MAIN_THREAD_ID, [id]);
 
