@@ -164,6 +164,7 @@ const VideoPlayer: FC<OwnProps> = ({
           // @ts-ignore
           style={videoStyle}
           onEnded={handleEnded}
+          onClick={togglePlayState}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
           onTimeUpdate={handleTimeUpdate}
