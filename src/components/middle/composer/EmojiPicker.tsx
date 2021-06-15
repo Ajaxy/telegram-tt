@@ -99,7 +99,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
   });
 
-  useHorizontalScroll(headerRef, !IS_MOBILE_SCREEN);
+  useHorizontalScroll(headerRef.current, !IS_MOBILE_SCREEN);
 
   // Scroll header when active set updates
   useEffect(() => {
