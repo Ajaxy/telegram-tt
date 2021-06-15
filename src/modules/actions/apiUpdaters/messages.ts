@@ -35,7 +35,6 @@ import {
   selectCurrentMessageList,
   selectViewportIds,
   selectFirstUnreadId,
-  selectRealLastReadId,
   selectChat,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
@@ -437,13 +436,12 @@ function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
   global = updateListedIds(global, chatId, MAIN_THREAD_ID, [id]);
 
   if (selectIsViewportNewest(global, chatId, MAIN_THREAD_ID)) {
-    // Always keep the first unread message in the viewport list
-    const lastReadId = selectRealLastReadId(global, chatId, MAIN_THREAD_ID);
+    // Always keep the first uread message in the viewport list
     const firstUnreadId = selectFirstUnreadId(global, chatId, MAIN_THREAD_ID);
     const newGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id);
     const newViewportIds = selectViewportIds(newGlobal, chatId, MAIN_THREAD_ID);
 
-    if (!lastReadId || (firstUnreadId && newViewportIds!.includes(firstUnreadId))) {
+    if (!firstUnreadId || newViewportIds!.includes(firstUnreadId)) {
       global = newGlobal;
     }
   }
