@@ -56,7 +56,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [loadTopUsers, loadContactList]);
 
-  useHorizontalScroll(topUsersRef, !topUserIds);
+  useHorizontalScroll(topUsersRef.current, !topUserIds);
 
   const handleClick = useCallback(
     (id: number) => {

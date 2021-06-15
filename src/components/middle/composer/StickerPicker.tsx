@@ -147,7 +147,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [addedSetIds, loadAddedStickers]);
 
-  useHorizontalScroll(headerRef);
+  useHorizontalScroll(headerRef.current);
 
   // Scroll container and header when active set changes
   useEffect(() => {
