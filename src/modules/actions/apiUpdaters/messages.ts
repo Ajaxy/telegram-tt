@@ -80,7 +80,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }
 
         // @perf Wait until scroll animation finishes or simply rely on delivery status update (which is itself delayed)
-        if (!message.isOutgoing) {
+        if (!isMessageLocal(message as ApiMessage)) {
           setTimeout(() => {
             setGlobal(updateChatLastMessage(getGlobal(), chatId, newMessage));
           }, ANIMATION_DELAY);
