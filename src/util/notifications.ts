@@ -139,7 +139,7 @@ async function loadNotificationSettings() {
 }
 
 export async function subscribe() {
-  loadNotificationSettings();
+  await loadNotificationSettings();
 
   if (!checkIfPushSupported()) {
     // Ask for notification permissions only if service worker notifications are not supported
@@ -191,25 +191,11 @@ export async function subscribe() {
 
 function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
   const global = getGlobal();
-
   if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined) {
     return false;
   }
-
   // Dont show notification for active chat if client has focus
-  if (isActive && document.hasFocus()) return false;
-
-  switch (chat.type) {
-    case 'chatTypePrivate':
-    case 'chatTypeSecret':
-      return Boolean(global.settings.byKey.hasPrivateChatsNotifications);
-    case 'chatTypeBasicGroup':
-    case 'chatTypeSuperGroup':
-      return Boolean(global.settings.byKey.hasGroupNotifications);
-    case 'chatTypeChannel':
-      return Boolean(global.settings.byKey.hasBroadcastNotifications);
-  }
-  return false;
+  return !(isActive && document.hasFocus());
 }
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage) {
