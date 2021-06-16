@@ -5,6 +5,7 @@ import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet, buildStickerSetCovered } from '../apiBuilders/symbols';
 import { buildInputStickerSet, buildInputDocument } from '../gramjsBuilders';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
+import { RECENT_STICKERS_LIMIT } from '../../../config';
 
 import localDb from '../localDb';
 
@@ -42,7 +43,7 @@ export async function fetchRecentStickers({ hash }: { hash: number }) {
 
   return {
     hash: result.hash,
-    stickers: processStickerResult(result.stickers),
+    stickers: processStickerResult(result.stickers.slice(0, RECENT_STICKERS_LIMIT)),
   };
 }
 

@@ -13,6 +13,7 @@ export interface UserAuthParams {
     qrCode: (qrCode: { token: Buffer; expires: number }) => Promise<void>;
     onError: (err: Error) => void;
     forceSMS?: boolean;
+    initialMethod?: 'phoneNumber' | 'qrCode';
 }
 
 export interface BotAuthParams {
@@ -24,6 +25,7 @@ interface ApiCredentials {
     apiHash: string;
 }
 
+const DEFAULT_INITIAL_METHOD = 'phoneNumber';
 const QR_CODE_TIMEOUT = 30000;
 
 export async function authFlow(
@@ -31,11 +33,20 @@ export async function authFlow(
     apiCredentials: ApiCredentials,
     authParams: UserAuthParams | BotAuthParams,
 ) {
-    const me = 'phoneNumber' in authParams
-        ? await signInUser(client, apiCredentials, authParams)
-        : await signInBot(client, apiCredentials, authParams);
+    let me: Api.TypeUser;
 
-    // TODO @logger
+    if ('botAuthToken' in authParams) {
+        me = await signInBot(client, apiCredentials, authParams);
+    } else {
+        const { initialMethod = DEFAULT_INITIAL_METHOD } = authParams;
+
+        if (initialMethod === 'phoneNumber') {
+            me = await signInUser(client, apiCredentials, authParams);
+        } else {
+            me = await signInUserWithQrCode(client, apiCredentials, authParams);
+        }
+    }
+
     client._log.info('Signed in successfully as', utils.getDisplayName(me));
 }
 

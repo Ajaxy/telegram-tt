@@ -11,7 +11,7 @@ import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthCode from './AuthCode.async';
 import AuthPassword from './AuthPassword.async';
 import AuthRegister from './AuthRegister.async';
-import AuthQrCode from './AuthQrCode.async';
+import AuthQrCode from './AuthQrCode';
 
 import './Auth.scss';
 
@@ -24,9 +24,6 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
     initApi();
   }, [reset, initApi]);
 
-  useEffect(() => {
-  }, []);
-
   switch (authState) {
     case 'authorizationStateWaitCode':
       return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;
@@ -34,11 +31,11 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
       return <UiLoader page="authPassword" key="authPassword"><AuthPassword /></UiLoader>;
     case 'authorizationStateWaitRegistration':
       return <AuthRegister />;
-    case 'authorizationStateWaitQrCode':
-      return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
     case 'authorizationStateWaitPhoneNumber':
-    default:
       return <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>;
+    case 'authorizationStateWaitQrCode':
+    default:
+      return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
   }
 };
 
