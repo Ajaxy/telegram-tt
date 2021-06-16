@@ -68,7 +68,6 @@ export async function init(_onUpdate: OnApiUpdate, sessionData?: ApiSessionData)
       firstAndLastNames: onRequestRegistration,
       qrCode: onRequestQrCode,
       onError: onAuthError,
-      initialMethod: 'qrCode',
     });
 
     if (DEBUG) {

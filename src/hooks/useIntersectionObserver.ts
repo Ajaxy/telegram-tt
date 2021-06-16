@@ -41,23 +41,19 @@ export function useIntersectionObserver({
 }, rootCallback?: RootCallback): Response {
   const controllerRef = useRef<IntersectionController>();
   const rootCallbackRef = useRef<RootCallback>();
-  const freezeFlagsRef = useRef(0);
+  const isFrozenRef = useRef<boolean>();
   const onUnfreezeRef = useRef<NoneToVoidFunction>();
 
   rootCallbackRef.current = rootCallback;
 
   const freeze = useCallback(() => {
-    freezeFlagsRef.current++;
+    isFrozenRef.current = true;
   }, []);
 
   const unfreeze = useCallback(() => {
-    if (!freezeFlagsRef.current) {
-      return;
-    }
+    isFrozenRef.current = false;
 
-    freezeFlagsRef.current--;
-
-    if (!freezeFlagsRef.current && onUnfreezeRef.current) {
+    if (onUnfreezeRef.current) {
       onUnfreezeRef.current();
       onUnfreezeRef.current = undefined;
     }
@@ -108,7 +104,7 @@ export function useIntersectionObserver({
           entriesAccumulator.set(entry.target, entry);
         });
 
-        if (freezeFlagsRef.current) {
+        if (isFrozenRef.current) {
           onUnfreezeRef.current = () => {
             observerCallback();
           };

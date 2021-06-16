@@ -1,5 +1,7 @@
 import { MutableRefObject } from 'react';
-import React, { FC, useCallback, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect, useRef,
+} from '../../lib/teact/teact';
 
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../config';
 import resetScroll from '../../util/resetScroll';
@@ -23,6 +25,9 @@ type OwnProps = {
 const FAB_THRESHOLD = 50;
 const TOOLS_FREEZE_TIMEOUT = 100;
 
+// Local flag is used because `freeze/unfreeze` methods are controlled by heavy animation
+let areToolsFrozen = false;
+
 const MessageScroll: FC<OwnProps> = ({
   containerRef,
   className,
@@ -44,6 +49,10 @@ const MessageScroll: FC<OwnProps> = ({
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
   const toggleScrollTools = useCallback(() => {
+    if (areToolsFrozen) {
+      return;
+    }
+
     if (!messageIds || !messageIds.length) {
       onFabToggle(false);
       onNotchToggle(false);
@@ -109,32 +118,34 @@ const MessageScroll: FC<OwnProps> = ({
 
   const {
     observe: observeIntersectionForNotch,
-    freeze: freezeForNotch,
-    unfreeze: unfreezeForNotch,
   } = useIntersectionObserver({
     rootRef: containerRef,
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
+  // Do not load more and show FAB when focusing
   useOnChange(() => {
     if (focusingId) {
       freezeForLoadMore();
+      freezeForFab();
     } else {
+      unfreezeForFab();
       unfreezeForLoadMore();
     }
   }, [focusingId]);
 
   // Workaround for FAB and notch flickering with tall incoming message
   useOnChange(() => {
-    freezeForFab();
-    freezeForNotch();
+    areToolsFrozen = true;
 
     setTimeout(() => {
-      unfreezeForNotch();
-      unfreezeForFab();
+      areToolsFrozen = false;
     }, TOOLS_FREEZE_TIMEOUT);
   }, [messageIds]);
+
+  // Workaround for stuck FAB when many unread messages
+  useEffect(toggleScrollTools, [firstUnreadId]);
 
   return (
     <div className={className} teactFastList>
