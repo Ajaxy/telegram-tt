@@ -11,6 +11,7 @@ import {
   replaceChatListIds,
   updateChatListIds,
   updateChatListType,
+  replaceThreadParam,
 } from '../../reducers';
 import {
   selectChat,
@@ -359,6 +360,18 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
       break;
+    }
+
+    case 'draftMessage': {
+      const { chatId, formattedText, replyingToId } = update;
+      const chat = global.chats.byId[chatId];
+
+      if (chat) {
+        global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', formattedText);
+        global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'replyingToId', replyingToId);
+
+        setGlobal(global);
+      }
     }
   }
 });

@@ -184,12 +184,12 @@ export function buildMessageTextContent(
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
-  if (draft instanceof GramJs.DraftMessageEmpty || !draft.message) {
+  if (draft instanceof GramJs.DraftMessageEmpty) {
     return undefined;
   }
 
   return {
-    formattedText: buildMessageTextContent(draft.message, draft.entities),
+    formattedText: draft.message ? buildMessageTextContent(draft.message, draft.entities) : undefined,
     replyingToId: draft.replyToMsgId,
   };
 }
