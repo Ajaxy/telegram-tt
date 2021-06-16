@@ -7,10 +7,8 @@ let timeout: number | undefined;
 let isAnimating = false;
 
 export const dispatchHeavyAnimationEvent = (duration: number) => {
-  if (!isAnimating) {
-    isAnimating = true;
-    document.dispatchEvent(new Event(ANIMATION_START_EVENT));
-  }
+  document.dispatchEvent(new Event(ANIMATION_START_EVENT));
+  isAnimating = true;
 
   if (timeout) {
     clearTimeout(timeout);
