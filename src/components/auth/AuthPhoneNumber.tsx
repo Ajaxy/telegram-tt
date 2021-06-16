@@ -25,7 +25,7 @@ type StateProps = Pick<GlobalState, (
   'authPhoneNumber' | 'authIsLoading' | 'authIsLoadingQrCode' | 'authError' | 'authRememberMe' | 'authNearestCountry'
 )>;
 type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'gotToAuthQrCode'
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'goToAuthQrCode'
 )>;
 
 const MIN_NUMBER_LENGTH = 7;
@@ -45,7 +45,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   setAuthRememberMe,
   loadNearestCountry,
   clearAuthError,
-  gotToAuthQrCode,
+  goToAuthQrCode,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -183,7 +183,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
             )
           )}
           {isAuthReady && (
-            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={gotToAuthQrCode}>
+            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={goToAuthQrCode}>
               Log in by QR code
             </Button>
           )}
@@ -209,6 +209,6 @@ export default memo(withGlobal(
     'setAuthRememberMe',
     'clearAuthError',
     'loadNearestCountry',
-    'gotToAuthQrCode',
+    'goToAuthQrCode',
   ]),
 )(AuthPhoneNumber));

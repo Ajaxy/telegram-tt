@@ -101,7 +101,7 @@ addReducer('returnToAuthPhoneNumber', (global) => {
   };
 });
 
-addReducer('gotToAuthQrCode', (global) => {
+addReducer('goToAuthQrCode', (global) => {
   void callApi('restartAuthWithQr');
 
   return {

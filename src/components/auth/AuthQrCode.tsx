@@ -9,7 +9,6 @@ import { pick } from '../../util/iteratees';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
-import buildClassName from '../../util/buildClassName';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = Pick<GlobalState, 'connectionState' | 'authQrCode'>;
@@ -32,6 +31,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
     container.innerHTML = '';
     container.classList.remove('pre-animate');
+
     QrCreator.render({
       text: `${DATA_PREFIX}${authQrCode.token}`,
       radius: 0.5,
@@ -45,11 +45,13 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="auth-qr-form" className="custom-scroll">
-      <div className="auth-form">
-        <div className={buildClassName('qr-container', authQrCode && 'pre-animate')} ref={qrCodeRef}>
-          {!authQrCode && <Loading />}
-        </div>
-        <h3> Log in to Telegram by QR Code</h3>
+      <div className="auth-form qr">
+        {authQrCode ? (
+          <div key="qr-container" className="qr-container pre-animate" ref={qrCodeRef} />
+        ) : (
+          <div key="qr-loading" className="qr-loading"><Loading /></div>
+        )}
+        <h3>Log in to Telegram by QR Code</h3>
         <ol>
           <li><span>Open Telegram on your phone</span></li>
           <li><span>Go to&nbsp;<b>Settings</b>&nbsp;&gt;&nbsp;<b>Devices</b>&nbsp;&gt;&nbsp;<b>Scan QR</b></span></li>
