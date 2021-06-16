@@ -6,7 +6,7 @@ import {
   ApiChatFolder,
 } from './chats';
 import {
-  ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
+  ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 import { ApiSessionData } from './misc';
@@ -259,6 +259,13 @@ export type ApiUpdateResetMessages = {
   id: number;
 };
 
+export type ApiUpdateDraftMessage = {
+  '@type': 'draftMessage';
+  chatId: number;
+  formattedText?: ApiFormattedText;
+  replyingToId?: number;
+};
+
 export type ApiDeleteUser = {
   '@type': 'deleteUser';
   id: number;
@@ -376,7 +383,7 @@ export type ApiUpdate = (
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiDeleteUser | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateDeleteProfilePhotos |
-  ApiUpdateAvatar | ApiUpdateMessageImage |
+  ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet |
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |

@@ -11,6 +11,7 @@ import {
   buildPoll,
   buildPollResults,
   buildApiMessageFromNotification,
+  buildMessageDraft,
 } from './apiBuilders/messages';
 import {
   getApiChatIdFromMtpPeer,
@@ -764,6 +765,14 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     }
 
     // Misc
+  } else if (update instanceof GramJs.UpdateDraftMessage) {
+    const { replyingToId, formattedText } = buildMessageDraft(update.draft) || {};
+    onUpdate({
+      '@type': 'draftMessage',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      formattedText,
+      replyingToId,
+    });
   } else if (update instanceof GramJs.UpdateContactsReset) {
     onUpdate({ '@type': 'updateResetContactList' });
   } else if (update instanceof GramJs.UpdateFavedStickers) {
