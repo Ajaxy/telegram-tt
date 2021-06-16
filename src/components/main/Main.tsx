@@ -48,7 +48,9 @@ type StateProps = {
   isHistoryCalendarOpen: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadAnimatedEmojis'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions'
+)>;
 
 const ANIMATION_DURATION = 350;
 const NOTIFICATION_INTERVAL = 1000;
@@ -71,6 +73,8 @@ const Main: FC<StateProps & DispatchProps> = ({
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   loadAnimatedEmojis,
+  loadNotificationSettings,
+  loadNotificationExceptions,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -82,8 +86,10 @@ const Main: FC<StateProps & DispatchProps> = ({
   useEffect(() => {
     if (lastSyncTime) {
       loadAnimatedEmojis();
+      loadNotificationSettings();
+      loadNotificationExceptions();
     }
-  }, [lastSyncTime, loadAnimatedEmojis]);
+  }, [lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings]);
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
@@ -213,5 +219,7 @@ export default memo(withGlobal(
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadAnimatedEmojis']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions',
+  ]),
 )(Main));
