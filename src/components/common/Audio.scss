@@ -13,7 +13,7 @@
     --color-interactive-buffered: rgba(var(--color-text-green-rgb), 0.4); // Overlays underlying inactive color
 
     .theme-dark & {
-      --color-text-green-rgb: 255,255,255;
+      --color-text-green-rgb: 255, 255, 255;
       --color-text-green: var(--color-white);
     }
 
@@ -68,6 +68,34 @@
       opacity: 0;
       transform: scale(.5);
     }
+  }
+
+  .media-loading {
+    pointer-events: none;
+
+    .interactive {
+      pointer-events: auto;
+    }
+  }
+
+  .download-button {
+    position: absolute;
+    width: 0.3rem !important;
+    height: 0.3rem !important;
+    left: 1.5rem;
+    top: 1.5rem;
+    border: 2px solid var(--background-color);
+    z-index: 1;
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+
+  &.bigger .download-button {
+    left: 2rem;
+    top: 2rem;
+    border: 2px solid var(--color-background);
   }
 
   .content {

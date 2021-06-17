@@ -1,13 +1,9 @@
-import React, {
-  FC, useCallback, useEffect, useMemo, useState,
-} from '../../lib/teact/teact';
+import React, { FC, useMemo } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
 
 import { IS_MOBILE_SCREEN } from '../../util/environment';
-import download from '../../util/download';
 import { getMessageMediaHash } from '../../modules/helpers';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
@@ -16,6 +12,7 @@ import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewerActions.scss';
+import useMediaDownload from '../../hooks/useMediaDownload';
 
 type OwnProps = {
   mediaData?: string;
@@ -40,29 +37,11 @@ const MediaViewerActions: FC<OwnProps> = ({
   onForward,
   onZoomToggle,
 }) => {
-  const [isVideoDownloadAllowed, setIsVideoDownloadAllowed] = useState(false);
-  const videoMediaHash = isVideo && message ? getMessageMediaHash(message, 'download') : undefined;
   const {
-    mediaData: videoBlobUrl, downloadProgress,
-  } = useMediaWithDownloadProgress(videoMediaHash, !isVideoDownloadAllowed);
-
-  // Download with browser when fully loaded
-  useEffect(() => {
-    if (isVideoDownloadAllowed && videoBlobUrl) {
-      download(videoBlobUrl, fileName!);
-      setIsVideoDownloadAllowed(false);
-    }
-  }, [fileName, videoBlobUrl, isVideoDownloadAllowed]);
-
-  // Cancel download on slide change
-  useEffect(() => {
-    setIsVideoDownloadAllowed(false);
-  }, [videoMediaHash]);
-
-  const handleVideoDownloadClick = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    e.stopPropagation();
-    setIsVideoDownloadAllowed((isAllowed) => !isAllowed);
-  }, []);
+    isDownloadStarted,
+    downloadProgress,
+    handleDownloadClick,
+  } = useMediaDownload(message && isVideo ? getMessageMediaHash(message, 'download') : undefined);
 
   const lang = useLang();
 
@@ -98,10 +77,10 @@ const MediaViewerActions: FC<OwnProps> = ({
           )}
           {isVideo ? (
             <MenuItem
-              icon={isVideoDownloadAllowed ? 'close' : 'download'}
-              onClick={handleVideoDownloadClick}
+              icon={isDownloadStarted ? 'close' : 'download'}
+              onClick={handleDownloadClick}
             >
-              {isVideoDownloadAllowed ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download'}
+              {isDownloadStarted ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download'}
             </MenuItem>
           ) : (
             <MenuItem
@@ -113,7 +92,7 @@ const MediaViewerActions: FC<OwnProps> = ({
             </MenuItem>
           )}
         </DropdownMenu>
-        {isVideoDownloadAllowed && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
+        {isDownloadStarted && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
       </div>
     );
   }
@@ -139,10 +118,10 @@ const MediaViewerActions: FC<OwnProps> = ({
           size="smaller"
           color="translucent-white"
           ariaLabel={lang('AccActionDownload')}
-          onClick={handleVideoDownloadClick}
+          onClick={handleDownloadClick}
         >
-          {isVideoDownloadAllowed ? (
-            <ProgressSpinner progress={downloadProgress} size="s" onClick={handleVideoDownloadClick} />
+          {isDownloadStarted ? (
+            <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
           ) : (
             <i className="icon-download" />
           )}
