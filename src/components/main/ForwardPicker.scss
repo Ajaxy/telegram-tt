@@ -58,4 +58,17 @@
     justify-content: center;
     color: var(--color-text-secondary);
   }
+
+  .ListItem.chat-item-clickable {
+    &:not(.force-rounded-corners) {
+      @media (max-width: 600px) {
+        margin: 0;
+
+        .ListItem-button {
+          border-radius: 0;
+        }
+      }
+    }
+
+  }
 }
