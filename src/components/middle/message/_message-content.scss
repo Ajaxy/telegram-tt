@@ -130,6 +130,10 @@
       color: var(--color-user-8);
     }
 
+    .theme-dark .Message.own & > .color-1 {
+      color: var(--accent-color);
+    }
+
     & + .File {
       margin-top: .25rem;
     }
@@ -186,6 +190,7 @@
     .corner {
       fill: var(--background-color);
     }
+
     .Message.own & {
       right: -.551rem; // This value is correct. Safari fix
     }
