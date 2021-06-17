@@ -30,5 +30,8 @@
   "--color-accent-own": ["#4FAE4E", "#FFFFFF"],
   "--color-message-meta-own": ["#4FAE4EFF", "#FFFFFF88"],
   "--color-own-links": ["#52A1EF", "#FFFFFF"],
-  "--color-code-own": ["#3C7940", "#FFFFFF"]
+  "--color-code": ["#4a729a", "#93c4ef"],
+  "--color-code-own": ["#3c7940", "#FFFFFF"],
+  "--color-code-bg": ["#70757914", "#ffffff26"],
+  "--color-code-own-bg": ["#70757914", "#ffffff26"]
 }
