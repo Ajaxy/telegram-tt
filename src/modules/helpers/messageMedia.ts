@@ -196,6 +196,8 @@ export function getMessageMediaHash(
       case 'micro':
       case 'pictogram':
         return undefined;
+      case 'download':
+        return `${base}?download`;
       default:
         return getVideoOrAudioBaseHash(audio, base);
     }

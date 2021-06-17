@@ -13,6 +13,7 @@ import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '.
 import {
   getMediaDuration,
   getMediaTransferState,
+  getMessageAudioCaption,
   getMessageKey,
   getMessageMediaFormat,
   getMessageMediaHash,
@@ -27,6 +28,7 @@ import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgre
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
+import useMediaDownload from '../../hooks/useMediaDownload';
 import useLang, { LangFn } from '../../hooks/useLang';
 
 import Button from '../ui/Button';
@@ -124,8 +126,20 @@ const Audio: FC<OwnProps & StateProps> = ({
   }, [isPlaying]);
 
   const {
+    isDownloadStarted,
+    downloadProgress: directDownloadProgress,
+    handleDownloadClick,
+  } = useMediaDownload(getMessageMediaHash(message, 'download'), getMessageAudioCaption(message));
+
+  const isLoadingForPlaying = isActivated && !isBuffered;
+
+  const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActivated && !isBuffered);
+  } = getMediaTransferState(
+    message,
+    isDownloadStarted ? directDownloadProgress : (uploadProgress || downloadProgress),
+    isLoadingForPlaying || isDownloadStarted,
+  );
 
   const {
     shouldRender: shouldRenderSpinner,
@@ -220,7 +234,7 @@ const Audio: FC<OwnProps & StateProps> = ({
   );
 
   const buttonClassNames = ['toggle-play'];
-  if (shouldRenderSpinner) {
+  if (isLoadingForPlaying) {
     buttonClassNames.push('loading');
   } else if (isPlaying) {
     buttonClassNames.push('pause');
@@ -282,14 +296,26 @@ const Audio: FC<OwnProps & StateProps> = ({
         <i className="icon-pause" />
       </Button>
       {shouldRenderSpinner && (
-        <div className={buildClassName('media-loading', spinnerClassNames)}>
+        <div className={buildClassName('media-loading', spinnerClassNames, isLoadingForPlaying && 'interactive')}>
           <ProgressSpinner
             progress={transferProgress}
             transparent
             size={renderingFor ? 'm' : 's'}
-            onClick={handleButtonClick}
+            onClick={isLoadingForPlaying ? handleButtonClick : undefined}
+            noCross={!isLoadingForPlaying}
           />
         </div>
+      )}
+      {audio && (
+        <Button
+          round
+          size="tiny"
+          className="download-button"
+          ariaLabel={isDownloadStarted ? 'Cancel download' : 'Download'}
+          onClick={handleDownloadClick}
+        >
+          <i className={isDownloadStarted ? 'icon-close' : 'icon-arrow-down'} />
+        </Button>
       )}
       {renderingFor === 'searchResult' && renderSearchResult()}
       {renderingFor !== 'searchResult' && audio && renderAudio(
@@ -309,7 +335,7 @@ function renderAudio(
   bufferedProgress: number,
   seekHandlers: ISeekMethods,
   date?: number,
-  handleDateClick?: () => void,
+  handleDateClick?: NoneToVoidFunction,
 ) {
   const {
     title, performer, duration, fileName,

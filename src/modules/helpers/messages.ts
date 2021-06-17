@@ -49,8 +49,7 @@ export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji
   }
 
   if (audio) {
-    const caption = [audio.title, audio.performer].filter(Boolean).join(' — ') || (text && text.text);
-    return `${noEmoji ? '' : '🎧 '}${caption || lang('AttachMusic')}`;
+    return `${noEmoji ? '' : '🎧 '}${getMessageAudioCaption(message) || lang('AttachMusic')}`;
   }
 
   if (voice) {
@@ -215,4 +214,10 @@ export function isMessageLocal(message: ApiMessage) {
 
 export function isHistoryClearMessage(message: ApiMessage) {
   return message.content.action && message.content.action.type === 'historyClear';
+}
+
+export function getMessageAudioCaption(message: ApiMessage) {
+  const { audio, text } = message.content;
+
+  return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text && text.text);
 }
