@@ -64,6 +64,13 @@
 
   .Menu .bubble {
     min-width: 17rem;
+    max-height: calc(100vh - 8.5rem);
+    overflow-y: auto;
+    overflow-y: overlay;
+
+    @media (max-height: 640px) {
+      max-height: calc(100vh - 11rem);
+    }
   }
 
   // @optimization
