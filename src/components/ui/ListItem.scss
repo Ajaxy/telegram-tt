@@ -113,16 +113,6 @@
       padding: .5625rem .6975rem .5625rem .5625rem;
     }
 
-    &:not(.force-rounded-corners) {
-      @media (max-width: 600px) {
-        margin: 0;
-
-        .ListItem-button {
-          border-radius: 0;
-        }
-      }
-    }
-
     .Avatar {
       flex-shrink: 0;
       margin-right: 0.5rem;
