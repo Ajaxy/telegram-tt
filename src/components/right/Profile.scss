@@ -48,6 +48,8 @@
   .TabList {
     background: var(--color-background);
     top: -1px;
+    z-index: 1;
+
     .Tab {
       padding: 1rem .25rem;
       i {
