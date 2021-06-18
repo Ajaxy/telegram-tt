@@ -24,6 +24,7 @@ import {
   selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 const FOCUS_DURATION = 2000;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
@@ -371,16 +372,36 @@ addReducer('toggleMessageSelection', (global, actions, payload) => {
   } = payload!;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
-    return undefined;
+    return;
   }
 
   const { chatId, threadId, type: messageListType } = currentMessageList;
 
-  return toggleMessageSelection(
+  global = toggleMessageSelection(
     global, chatId, threadId, messageListType, messageId, groupedId, childMessageIds, withShift,
   );
+
+  setGlobal(global);
+
+  if (global.shouldShowContextMenuHint) {
+    actions.disableContextMenuHint();
+    actions.showNotification({
+      // eslint-disable-next-line max-len
+      message: `To **edit** or **reply**, close this menu. Then ${IS_TOUCH_ENV ? 'long tap' : 'right click'} on a message.`,
+    });
+  }
 });
 
+addReducer('disableContextMenuHint', (global) => {
+  if (!global.shouldShowContextMenuHint) {
+    return undefined;
+  }
+
+  return {
+    ...global,
+    shouldShowContextMenuHint: false,
+  };
+});
 
 addReducer('exitMessageSelectMode', exitMessageSelectMode);
 

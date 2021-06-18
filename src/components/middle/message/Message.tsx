@@ -148,7 +148,7 @@ type DispatchProps = Pick<GlobalActions, (
   'openUserInfo' | 'openChat' |
   'cancelSendingMessage' | 'markMessagesRead' |
   'sendPollVote' | 'toggleMessageSelection' | 'setReplyingToId' | 'openForwardMenu' |
-  'clickInlineButton'
+  'clickInlineButton' | 'disableContextMenuHint'
 )>;
 
 const NBSP = '\u00A0';
@@ -215,6 +215,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   setReplyingToId,
   openForwardMenu,
   clickInlineButton,
+  disableContextMenuHint,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -232,6 +233,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref, false, true);
+
+  useEffect(() => {
+    if (isContextMenuOpen) {
+      disableContextMenuHint();
+    }
+  }, [isContextMenuOpen, disableContextMenuHint]);
 
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
@@ -931,5 +938,6 @@ export default memo(withGlobal<OwnProps>(
     'setReplyingToId',
     'openForwardMenu',
     'clickInlineButton',
+    'disableContextMenuHint',
   ]),
 )(Message));
