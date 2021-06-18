@@ -1,11 +1,10 @@
-import React, { FC, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, { FC, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
-import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
 
 import Menu from '../../ui/Menu';
@@ -46,7 +45,6 @@ type OwnProps = {
   onCopyLink?: () => void;
 };
 
-const ANIMATION_DURATION = 200;
 const SCROLLBAR_WIDTH = 10;
 
 const MessageContextMenu: FC<OwnProps> = ({
@@ -81,10 +79,6 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
   onCopyLink,
 }) => {
-  useEffect(() => {
-    dispatchHeavyAnimationEvent(ANIMATION_DURATION);
-  }, [isOpen]);
-
   const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined);
 
   const getTriggerElement = useCallback(() => {
