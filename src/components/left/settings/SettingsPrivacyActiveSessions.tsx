@@ -117,9 +117,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
   return (
     <div className="settings-content custom-scroll">
       {currentSession && renderCurrentSession(currentSession)}
-
       {otherSessions && renderOtherSessions(otherSessions)}
-
       {otherSessions && (
         <ConfirmDialog
           isOpen={isConfirmTerminateAllDialogOpen}
@@ -129,7 +127,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
           confirmHandler={handleTerminateAllSessions}
           confirmIsDestructive
         />
-      )};
+      )}
     </div>
   );
 };
