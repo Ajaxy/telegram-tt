@@ -80,22 +80,22 @@
 
   .download-button {
     position: absolute;
-    width: 0.3rem !important;
-    height: 0.3rem !important;
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    padding: 0;
     left: 1.5rem;
     top: 1.5rem;
-    border: 2px solid var(--background-color);
-    z-index: 1;
+    border: .125rem solid var(--background-color);
 
     i {
-      font-size: 0.8rem;
+      font-size: 0.8125rem;
     }
   }
 
   &.bigger .download-button {
     left: 2rem;
     top: 2rem;
-    border: 2px solid var(--color-background);
+    border: .125rem solid var(--color-background);
   }
 
   .content {
