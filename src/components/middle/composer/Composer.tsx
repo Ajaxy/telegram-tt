@@ -673,6 +673,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       : (isSymbolMenuOpen && 'is-loading'),
   );
 
+  const onSend = mainButtonState === MainButtonState.Edit
+    ? handleEditComplete
+    : (shouldSchedule ? openCalendar : handleSend);
+
   return (
     <div className={className}>
       {allowedAttachmentOptions.canAttachMedia && (
@@ -695,6 +699,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         recentEmojis={recentEmojis}
         onCaptionUpdate={setHtml}
         language={language}
+        emojiKeywords={emojiKeywords}
         addRecentEmoji={addRecentEmoji}
         loadEmojiKeywords={loadEmojiKeywords}
         onSend={shouldSchedule ? openCalendar : handleSend}
@@ -774,9 +779,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             shouldSupressFocus={IS_MOBILE_SCREEN && isSymbolMenuOpen}
             shouldSupressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
             onUpdate={setHtml}
-            onSend={mainButtonState === MainButtonState.Edit
-              ? handleEditComplete
-              : (shouldSchedule ? openCalendar : handleSend)}
+            onSend={onSend}
             onSupressedFocus={closeSymbolMenu}
           />
           {withScheduledButton && (

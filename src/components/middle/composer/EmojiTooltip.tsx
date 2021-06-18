@@ -2,6 +2,8 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
+import { LangCode } from '../../../types';
+
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import cycleRestrict from '../../../util/cycleRestrict';
@@ -16,10 +18,11 @@ import Loading from '../../ui/Loading';
 import EmojiButton from './EmojiButton';
 
 import './EmojiTooltip.scss';
-import { LangCode } from '../../../types';
 
 const VIEWPORT_MARGIN = 8;
 const EMOJI_BUTTON_WIDTH = 44;
+const CLOSE_DURATION = 350;
+const NO_EMOJI_SELECTED_INDEX = -1;
 
 function setItemVisible(index: number, containerRef: Record<string, any>) {
   const container = containerRef.current!;
@@ -59,8 +62,6 @@ export type OwnProps = {
   emojis: Emoji[];
 };
 
-const CLOSE_DURATION = 350;
-
 const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
   language,
@@ -75,7 +76,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
   const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
 
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(NO_EMOJI_SELECTED_INDEX);
 
   useEffect(() => {
     loadEmojiKeywords({ language });
@@ -91,13 +92,12 @@ const EmojiTooltip: FC<OwnProps> = ({
 
   const getSelectedIndex = useCallback((newIndex: number) => {
     if (!emojis.length) {
-      return -1;
+      return NO_EMOJI_SELECTED_INDEX;
     }
 
     const emojisCount = emojis.length;
     return cycleRestrict(emojisCount, newIndex);
   }, [emojis]);
-
 
   const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
     e.preventDefault();
@@ -105,7 +105,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   }, [setSelectedIndex, getSelectedIndex]);
 
   const handleSelectEmoji = useCallback((e: KeyboardEvent) => {
-    if (emojis.length && selectedIndex > -1) {
+    if (emojis.length && selectedIndex > NO_EMOJI_SELECTED_INDEX) {
       const emoji = emojis[selectedIndex];
       if (emoji) {
         e.preventDefault();

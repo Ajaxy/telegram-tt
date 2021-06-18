@@ -33,6 +33,7 @@ export type OwnProps = {
   usersById?: Record<number, ApiUser>;
   recentEmojis: string[];
   language: LangCode;
+  emojiKeywords?: Record<string, string[]>;
   addRecentEmoji: AnyToVoidFunction;
   loadEmojiKeywords: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
@@ -52,6 +53,7 @@ const AttachmentModal: FC<OwnProps> = ({
   usersById,
   recentEmojis,
   language,
+  emojiKeywords,
   onCaptionUpdate,
   addRecentEmoji,
   loadEmojiKeywords,
@@ -89,6 +91,7 @@ const AttachmentModal: FC<OwnProps> = ({
     recentEmojis,
     EDITABLE_INPUT_MODAL_ID,
     onCaptionUpdate,
+    emojiKeywords,
   );
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);

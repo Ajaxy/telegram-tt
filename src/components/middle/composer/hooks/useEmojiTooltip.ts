@@ -17,8 +17,16 @@ let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
-const RE_NOT_EMOJI_SEARCH = /[^-_:\p{L}\p{N}]+/iu;
+let RE_NOT_EMOJI_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
+const FILTER_MIN_LENGTH = 2;
+
+try {
+  RE_NOT_EMOJI_SEARCH = new RegExp('[^-_:\\p{L}\\p{N}]+', 'iu');
+} catch (e) {
+  // Support for older versions of firefox
+  RE_NOT_EMOJI_SEARCH = new RegExp('[^-_:\\d\\wа-яё]+', 'i');
+}
 
 export default function useEmojiTooltip(
   isAllowed: boolean,
@@ -31,7 +39,9 @@ export default function useEmojiTooltip(
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
 
   const [byId, setById] = useState<Record<string, Emoji> | undefined>();
+  const [keywords, setKeywords] = useState<string[]>();
   const [byKeyword, setByKeyword] = useState<Record<string, Emoji[]>>({});
+  const [names, setNames] = useState<string[]>();
   const [byName, setByName] = useState<Record<string, Emoji[]>>({});
 
   const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
@@ -70,12 +80,14 @@ export default function useEmojiTooltip(
 
     if (emojiKeywords) {
       const byNative = buildCollectionByKey(emojis, 'native');
-      setByKeyword(mapValues(emojiKeywords, (natives) => {
+      const emojisByKeyword = mapValues(emojiKeywords, (natives) => {
         return Object.values(pickTruthy(byNative, natives));
-      }));
+      });
+      setByKeyword(emojisByKeyword);
+      setKeywords(Object.keys(emojisByKeyword));
     }
 
-    setByName(emojis.reduce((result, emoji) => {
+    const emojisByName = emojis.reduce((result, emoji) => {
       emoji.names.forEach((name) => {
         if (!result[name]) {
           result[name] = [];
@@ -85,7 +97,9 @@ export default function useEmojiTooltip(
       });
 
       return result;
-    }, {} as Record<string, Emoji[]>));
+    }, {} as Record<string, Emoji[]>);
+    setByName(emojisByName);
+    setNames(Object.keys(emojisByName));
   }, [byId, emojiKeywords]);
 
   useEffect(() => {
@@ -106,12 +120,12 @@ export default function useEmojiTooltip(
 
     if (!filter) {
       matched = recentEmojis;
-    } else {
-      const matchedKeywords = Object.keys(byKeyword).filter((keyword) => keyword.startsWith(filter));
+    } else if (filter.length >= FILTER_MIN_LENGTH) {
+      const matchedKeywords = keywords.filter((keyword) => keyword.startsWith(filter)).sort();
       matched = matched.concat(flatten(Object.values(pickTruthy(byKeyword, matchedKeywords))));
 
       // Also search by names, which is useful for non-English languages
-      const matchedNames = Object.keys(byName).filter((name) => name.startsWith(filter));
+      const matchedNames = names.filter((name) => name.startsWith(filter));
       matched = matched.concat(flatten(Object.values(pickTruthy(byName, matchedNames))));
 
       matched = unique(matched);
@@ -123,7 +137,10 @@ export default function useEmojiTooltip(
     } else {
       unmarkIsOpen();
     }
-  }, [byId, byKeyword, byName, html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen]);
+  }, [
+    byId, byKeyword, keywords, byName, names,
+    html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen,
+  ]);
 
   const insertEmoji = useCallback((textEmoji: string) => {
     const atIndex = html.lastIndexOf(':');
