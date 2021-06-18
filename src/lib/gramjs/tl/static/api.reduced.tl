@@ -922,6 +922,7 @@ account.unregisterDevice#3076c4bf token_type:int token:string other_uids:Vector<
 account.updateNotifySettings#84be5b93 peer:InputNotifyPeer settings:InputPeerNotifySettings = Bool;
 account.getNotifySettings#12b3ad31 peer:InputNotifyPeer = PeerNotifySettings;
 account.updateProfile#78515775 flags:# first_name:flags.0?string last_name:flags.1?string about:flags.2?string = User;
+account.updateStatus#6628562c offline:Bool = Bool;
 account.getWallPapers#aabb1763 hash:int = account.WallPapers;
 account.checkUsername#2714d86c username:string = Bool;
 account.updateUsername#3e0bdd7c username:string = User;

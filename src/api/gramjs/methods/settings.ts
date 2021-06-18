@@ -366,9 +366,15 @@ export async function setPrivacySettings(
   return buildPrivacyRules(result.rules);
 }
 
+export async function updateIsOnline(isOnline: boolean) {
+  await invokeRequest(new GramJs.account.UpdateStatus({ offline: !isOnline }));
+}
+
 function updateLocalDb(
-  result: GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |
-  GramJs.Updates | GramJs.UpdatesCombined,
+  result: (
+    GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |
+    GramJs.Updates | GramJs.UpdatesCombined
+  ),
 ) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
