@@ -142,6 +142,9 @@ function getEntityTypeFromNode(node: ChildNode) {
     if (anchor.dataset.entityType === ApiMessageEntityTypes.MentionName) {
       return ApiMessageEntityTypes.MentionName;
     }
+    if (anchor.dataset.entityType === ApiMessageEntityTypes.Url) {
+      return ApiMessageEntityTypes.Url;
+    }
     if (anchor.href.startsWith('mailto:')) {
       return ApiMessageEntityTypes.Email;
     }
