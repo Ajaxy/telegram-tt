@@ -49,7 +49,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions'
+  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline'
 )>;
 
 const ANIMATION_DURATION = 350;
@@ -75,6 +75,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
+  updateIsOnline,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -85,11 +86,12 @@ const Main: FC<StateProps & DispatchProps> = ({
   // Initial API calls
   useEffect(() => {
     if (lastSyncTime) {
+      updateIsOnline(true);
       loadAnimatedEmojis();
       loadNotificationSettings();
       loadNotificationExceptions();
     }
-  }, [lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings]);
+  }, [lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline]);
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
@@ -129,6 +131,13 @@ const Main: FC<StateProps & DispatchProps> = ({
     }
   }, [animationLevel, isRightColumnShown]);
 
+  useBackgroundMode(() => {
+    updateIsOnline(false);
+  }, () => {
+    updateIsOnline(true);
+  });
+
+  // Browser tab indicators
   useBackgroundMode(() => {
     const initialUnread = selectCountNotMutedUnread(getGlobal());
     let index = 0;
@@ -220,6 +229,6 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions',
+    'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
   ]),
 )(Main));
