@@ -13,7 +13,8 @@
     transition: transform var(--layer-transition);
 
     &.open {
-      transform: translate3d(0, 0 ,0);
+      transform: translate3d(0, 0, 0);
+
       body.is-media-viewer-open & {
         transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
       }
@@ -50,7 +51,7 @@
         margin: 0 0.75rem;
       }
 
-      &.symbol-search-button{
+      &.symbol-search-button {
         position: absolute;
         left: 0.25rem;
       }
