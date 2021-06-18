@@ -10,9 +10,9 @@ import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import useMediaDownload from '../../hooks/useMediaDownload';
 
 import './MediaViewerActions.scss';
-import useMediaDownload from '../../hooks/useMediaDownload';
 
 type OwnProps = {
   mediaData?: string;
