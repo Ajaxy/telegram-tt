@@ -24,7 +24,7 @@ const Notifications: FC<StateProps & DispatchProps> = ({ notifications, dismissN
     <div id="Notifications">
       {notifications.map(({ message }) => (
         <Notification
-          message={renderText(message, ['emoji', 'br', 'links'])}
+          message={renderText(message, ['emoji', 'br', 'links', 'simple_markdown'])}
           onDismiss={dismissNotification}
         />
       ))}

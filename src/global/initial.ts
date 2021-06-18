@@ -133,4 +133,6 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   twoFaSettings: {},
+
+  shouldShowContextMenuHint: true,
 };

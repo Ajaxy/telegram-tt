@@ -390,6 +390,9 @@ export type GlobalState = {
 
   safeLinkModalUrl?: string;
   historyCalendarSelectedAt?: number;
+
+  // TODO To be removed in August 2021
+  shouldShowContextMenuHint?: boolean;
 };
 
 export type ActionTypes = (
@@ -398,7 +401,7 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
-  'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' |
+  'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
