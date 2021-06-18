@@ -3,6 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import renderText from '../common/helpers/renderText';
 
 import './Tab.scss';
 
@@ -67,7 +68,7 @@ const Tab: FC<OwnProps> = ({
       ref={tabRef}
     >
       <span>
-        {title}
+        {renderText(title)}
         {!!badgeCount && (
           <span className={buildClassName('badge', isBadgeActive && 'active')}>{badgeCount}</span>
         )}
