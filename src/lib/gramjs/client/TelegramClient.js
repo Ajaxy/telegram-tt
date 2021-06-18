@@ -24,6 +24,7 @@ const { updateTwoFaSettings } = require('./2fa');
 const DEFAULT_DC_ID = 2;
 const DEFAULT_IPV4_IP = 'venus.web.telegram.org';
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]';
+const BORROWED_SENDER_RELEASE_TIMEOUT = 30 * 1000; // 10 sec
 
 // All types
 const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's'];
@@ -131,6 +132,7 @@ class TelegramClient {
         this._config = undefined;
         this.phoneCodeHashes = [];
         this._borrowedSenderPromises = {};
+        this._borrowedSenderReleaseTimeouts = {};
         this._additionalDcsDisabled = args.additionalDcsDisabled;
     }
 
@@ -267,7 +269,7 @@ class TelegramClient {
     // export region
 
     _cleanupBorrowedSender(dcId) {
-        delete this._borrowedSenderPromises[dcId];
+        this._borrowedSenderPromises[dcId] = undefined;
     }
 
     _borrowExportedSender(dcId) {
@@ -275,18 +277,30 @@ class TelegramClient {
             return undefined;
         }
 
-        let senderPromise = this._borrowedSenderPromises[dcId];
-        if (!senderPromise) {
-            senderPromise = this._createExportedSender(dcId);
-            this._borrowedSenderPromises[dcId] = senderPromise;
-
-            senderPromise.then((sender) => {
-                if (!sender) {
-                    delete this._borrowedSenderPromises[dcId];
-                }
-            });
+        if (!this._borrowedSenderPromises[dcId]) {
+            this._borrowedSenderPromises[dcId] = this._createExportedSender(dcId);
         }
-        return senderPromise;
+
+        return this._borrowedSenderPromises[dcId].then((sender) => {
+            if (!sender) {
+                this._borrowedSenderPromises[dcId] = undefined;
+                return this._borrowExportedSender(dcId);
+            }
+
+            if (this._borrowedSenderReleaseTimeouts[dcId]) {
+                clearTimeout(this._borrowedSenderReleaseTimeouts[dcId]);
+                this._borrowedSenderReleaseTimeouts[dcId] = undefined;
+            }
+
+            this._borrowedSenderReleaseTimeouts[dcId] = setTimeout(() => {
+                this._borrowedSenderReleaseTimeouts[dcId] = undefined;
+                this._borrowedSenderPromises[dcId] = undefined;
+
+                sender.disconnect();
+            }, BORROWED_SENDER_RELEASE_TIMEOUT);
+
+            return sender;
+        });
     }
 
     async _createExportedSender(dcId) {
