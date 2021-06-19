@@ -75,29 +75,27 @@ export async function fetchChats({
     return undefined;
   }
 
-  updateLocalDb(result);
+
   if (resultPinned) {
     updateLocalDb(resultPinned);
   }
+  updateLocalDb(result);
 
   const lastMessagesByChatId = buildCollectionByKey(
-    [...result.messages, ...(resultPinned ? resultPinned.messages : [])]
+    (resultPinned ? resultPinned.messages : []).concat(result.messages)
       .map(buildApiMessage)
       .filter<ApiMessage>(Boolean as any),
     'chatId',
   );
   const peersByKey: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {
-    ...preparePeers(result),
     ...(resultPinned && preparePeers(resultPinned)),
+    ...preparePeers(result),
   };
   const chats: ApiChat[] = [];
   const draftsById: Record<number, ApiFormattedText> = {};
   const replyingToById: Record<number, number> = {};
 
-  const dialogs = [
-    ...(resultPinned ? resultPinned.dialogs : []),
-    ...result.dialogs,
-  ];
+  const dialogs = (resultPinned ? resultPinned.dialogs : []).concat(result.dialogs);
 
   const orderedPinnedIds: number[] = [];
 
@@ -131,7 +129,7 @@ export async function fetchChats({
     }
   });
 
-  const users = [...result.users, ...(resultPinned ? resultPinned.users : [])]
+  const users = (resultPinned ? resultPinned.users : []).concat(result.users)
     .map(buildApiUser)
     .filter<ApiUser>(Boolean as any);
   const chatIds = chats.map((chat) => chat.id);
