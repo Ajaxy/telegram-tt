@@ -227,7 +227,7 @@ class TelegramClient {
         await Promise.all(
             Object.values(this._borrowedSenderPromises)
                 .map((promise) => {
-                    return promise.then((sender) => {
+                    return promise && promise.then((sender) => {
                         if (sender) {
                             return sender.disconnect();
                         }
