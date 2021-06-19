@@ -19,7 +19,7 @@
     unicode-bidi: plaintext;
   }
 
-  .text-content,
+  &:not(.custom-shape) .text-content,
   &.document {
     & > .MessageMeta {
       position: relative;
