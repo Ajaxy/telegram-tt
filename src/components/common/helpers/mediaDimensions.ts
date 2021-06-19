@@ -10,7 +10,7 @@ export const ROUND_VIDEO_DIMENSIONS = 200;
 export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
 
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
-const LIKE_STICKER_ID = '1258816259753933';
+export const LIKE_STICKER_ID = '1258816259753933';
 const MOBILE_SCREEN_MAX_MESSAGE_SCREEN_WIDTH = 0.69;
 
 let cachedMaxWidth: number | undefined;

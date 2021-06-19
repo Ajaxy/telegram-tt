@@ -2,7 +2,12 @@
   margin-bottom: 0.75rem;
 
   img {
+    position: absolute;
     width: 100%;
     height: 100%;
+
+    &.like-sticker-thumb {
+      transform: scale(0.8);
+    }
   }
 }
