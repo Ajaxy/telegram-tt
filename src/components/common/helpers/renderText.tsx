@@ -80,6 +80,10 @@ function escapeHtml(textParts: TextPart[]): TextPart[] {
 }
 
 function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx' | 'html'): TextPart[] {
+  if (IS_EMOJI_SUPPORTED) {
+    return textParts;
+  }
+
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string') {
       return [...result, part];
@@ -97,24 +101,18 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
       );
       if (type === 'jsx') {
         emojiResult.push(
-          IS_EMOJI_SUPPORTED
-            ? <span className="font-emoji">{emoji}</span>
-            : (
-              <img
-                className={className}
-                src={`./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`}
-                alt={emoji}
-              />
-            ),
+          <img
+            className={className}
+            src={`./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`}
+            alt={emoji}
+          />,
         );
       }
       if (type === 'html') {
         emojiResult.push(
-          IS_EMOJI_SUPPORTED
-            ? emoji
-            // For preventing extra spaces in html
-            // eslint-disable-next-line max-len
-            : `<img draggable="false" class="${className}" src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png" alt="${emoji}" />`,
+          // For preventing extra spaces in html
+          // eslint-disable-next-line max-len
+          `<img draggable="false" class="${className}" src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png" alt="${emoji}" />`,
         );
       }
 

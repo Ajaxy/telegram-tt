@@ -59,9 +59,8 @@ function parseMarkdown(html: string) {
   if (!IS_EMOJI_SUPPORTED) {
     // Emojis
     parsedHtml = parsedHtml.replace(/<img[^>]+alt="([^"]+)"[^>]*>/gm, '$1');
-  } else {
-    parsedHtml = parsedHtml.replace(/<span\s+class="font-emoji">([^<]*)<\/span>/g, '$1');
   }
+
   // Strip redundant <span> tags
   parsedHtml = parsedHtml.replace(/<\/?span([^>]*)?>/g, '');
 
