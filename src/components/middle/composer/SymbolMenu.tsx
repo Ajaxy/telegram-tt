@@ -49,7 +49,7 @@ const SymbolMenu: FC<OwnProps> = ({
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
+  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_MOBILE_SCREEN);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
 
   if (!isActivated && isOpen) {

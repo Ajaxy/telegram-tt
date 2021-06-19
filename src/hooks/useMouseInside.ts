@@ -6,7 +6,7 @@ const MENU_CLOSE_TIMEOUT = 250;
 let closeTimeout: number | undefined;
 
 export default function useMouseInside(
-  isOpen: boolean, onClose: NoneToVoidFunction, menuCloseTimeout = MENU_CLOSE_TIMEOUT,
+  isOpen: boolean, onClose: NoneToVoidFunction, menuCloseTimeout = MENU_CLOSE_TIMEOUT, isDisabled = false,
 ) {
   const isMouseInside = useRef(false);
 
@@ -16,14 +16,14 @@ export default function useMouseInside(
       closeTimeout = undefined;
     }
 
-    if (isOpen && !IS_TOUCH_ENV) {
+    if (isOpen && !IS_TOUCH_ENV && !isDisabled) {
       closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
         }
       }, menuCloseTimeout * 2);
     }
-  }, [isOpen, menuCloseTimeout, onClose]);
+  }, [isDisabled, isOpen, menuCloseTimeout, onClose]);
 
   const handleMouseEnter = useCallback(() => {
     isMouseInside.current = true;
