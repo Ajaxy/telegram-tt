@@ -102,7 +102,7 @@ export default function useMentionTooltip(
 function getUsernameFilter(html: string) {
   const tempEl = document.createElement('div');
   tempEl.innerHTML = html;
-  const text = tempEl.innerText;
+  const text = tempEl.innerText.replace(/\n$/i, '');
 
   const lastSymbol = text[text.length - 1];
   const lastWord = text.split(RE_NOT_USERNAME_SEARCH).pop();

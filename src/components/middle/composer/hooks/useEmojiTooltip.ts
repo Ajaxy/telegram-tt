@@ -168,7 +168,7 @@ export default function useEmojiTooltip(
 function getEmojiCode(html: string) {
   const tempEl = document.createElement('div');
   tempEl.innerHTML = html.replace('<br>', '\n');
-  const text = tempEl.innerText;
+  const text = tempEl.innerText.replace(/\n$/i, '');
 
   const lastSymbol = text[text.length - 1];
   const lastWord = text.split(RE_NOT_EMOJI_SEARCH).pop();
