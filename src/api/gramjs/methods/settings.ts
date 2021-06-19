@@ -164,7 +164,9 @@ export async function fetchNotificationExceptions() {
   }
 }
 
-export async function fetchNotificationSettings() {
+export async function fetchNotificationSettings({
+  serverTimeOffset,
+}: { serverTimeOffset: number }) {
   const [
     isMutedContactSignUpNotification,
     privateContactNotificationsSettings,
@@ -200,15 +202,18 @@ export async function fetchNotificationSettings() {
   return {
     hasContactJoinedNotifications: !isMutedContactSignUpNotification,
     hasPrivateChatsNotifications: !(
-      privateSilent || (typeof privateMuteUntil === 'number' && Date.now() < privateMuteUntil * 1000)
+      privateSilent
+      || (typeof privateMuteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < privateMuteUntil * 1000)
     ),
     hasPrivateChatsMessagePreview: privateShowPreviews,
     hasGroupNotifications: !(
-      groupSilent || (typeof groupMuteUntil === 'number' && Date.now() < groupMuteUntil * 1000)
+      groupSilent || (typeof groupMuteUntil === 'number'
+        && Date.now() + serverTimeOffset * 1000 < groupMuteUntil * 1000)
     ),
     hasGroupMessagePreview: groupShowPreviews,
     hasBroadcastNotifications: !(
-      broadcastSilent || (typeof broadcastMuteUntil === 'number' && Date.now() < broadcastMuteUntil * 1000)
+      broadcastSilent || (typeof broadcastMuteUntil === 'number'
+        && Date.now() + serverTimeOffset * 1000 < broadcastMuteUntil * 1000)
     ),
     hasBroadcastMessagePreview: broadcastShowPreviews,
   };

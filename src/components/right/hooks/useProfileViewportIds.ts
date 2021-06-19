@@ -20,6 +20,7 @@ export default function useProfileViewportIds(
   foundIds?: number[],
   chatId?: number,
   lastSyncTime?: number,
+  serverTimeOffset = 0,
 ) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
 
@@ -28,8 +29,8 @@ export default function useProfileViewportIds(
       return undefined;
     }
 
-    return sortUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
-  }, [groupChatMembers, usersById]);
+    return sortUserIds(groupChatMembers.map(({ userId }) => userId), usersById, undefined, serverTimeOffset);
+  }, [groupChatMembers, serverTimeOffset, usersById]);
 
   const [memberViewportIds, getMoreMembers, noProfileInfoForMembers] = useInfiniteScrollForMembers(
     resultType, loadMoreMembers, lastSyncTime, memberIds,

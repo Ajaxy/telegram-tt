@@ -49,9 +49,12 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 const sentMessageIds = new Set();
+let serverTimeOffset = 0;
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
-  if (update instanceof connection.UpdateConnectionState) {
+  if (update instanceof connection.UpdateServerTimeOffset) {
+    serverTimeOffset = update.timeOffset;
+  } else if (update instanceof connection.UpdateConnectionState) {
     let connectionState: ApiUpdateConnectionStateType;
 
     switch (update.state) {
@@ -88,7 +91,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     } else if (update instanceof GramJs.UpdateShortMessage) {
       message = buildApiMessageFromShort(update);
     } else if (update instanceof GramJs.UpdateServiceNotification) {
-      const currentDate = Date.now();
+      const currentDate = Date.now() / 1000 + serverTimeOffset;
       message = buildApiMessageFromNotification(update, currentDate);
 
       if (isMessageWithMedia(update)) {
@@ -347,7 +350,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     sentMessageIds.add(update.id);
 
     // Edge case for "Send When Online"
-    const isAlreadySent = 'date' in update && update.date * 1000 < Date.now();
+    const isAlreadySent = 'date' in update && update.date * 1000 < Date.now() + serverTimeOffset * 1000;
 
     onUpdate({
       '@type': localMessage.isScheduled && !isAlreadySent
@@ -549,7 +552,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       silent, muteUntil, showPreviews, sound,
     } = update.notifySettings;
 
-    const isMuted = silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000);
+    const isMuted = silent
+      || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000);
 
     onUpdate({
       '@type': 'updateNotifyExceptions',
@@ -569,7 +573,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateChatTypingStatus',
       id,
-      typingStatus: buildChatTypingStatus(update),
+      typingStatus: buildChatTypingStatus(update, serverTimeOffset),
     });
   } else if (update instanceof GramJs.UpdateChannelUserTyping) {
     const id = getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel);
@@ -577,7 +581,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateChatTypingStatus',
       id,
-      typingStatus: buildChatTypingStatus(update),
+      typingStatus: buildChatTypingStatus(update, serverTimeOffset),
     });
   } else if (update instanceof GramJs.UpdateChannel) {
     const { _entities } = update;
@@ -745,7 +749,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateNotifySettings',
       peerType,
-      isSilent: Boolean(silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000)),
+      isSilent: Boolean(silent
+        || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000)),
       shouldShowPreviews: Boolean(showPreviews),
     });
   } else if (update instanceof GramJs.UpdatePeerBlocked) {

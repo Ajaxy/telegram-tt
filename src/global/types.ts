@@ -67,6 +67,7 @@ export type GlobalState = {
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
   lastSyncTime?: number;
+  serverTimeOffset: number;
 
   // TODO Move to `auth`.
   isLoggingOut?: boolean;

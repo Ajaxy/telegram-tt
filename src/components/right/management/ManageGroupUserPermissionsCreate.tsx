@@ -23,6 +23,7 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
   members?: ApiChatMember[];
   isChannel?: boolean;
+  serverTimeOffset: number;
 };
 
 const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
@@ -31,14 +32,18 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   isChannel,
   onScreenSelect,
   onChatMemberSelect,
+  serverTimeOffset,
 }) => {
   const memberIds = useMemo(() => {
     if (!members || !usersById) {
       return undefined;
     }
 
-    return sortUserIds(members.filter((member) => !member.isOwner).map(({ userId }) => userId), usersById);
-  }, [members, usersById]);
+    return sortUserIds(
+      members.filter((member) => !member.isOwner).map(({ userId }) => userId),
+      usersById, undefined, serverTimeOffset,
+    );
+  }, [members, serverTimeOffset, usersById]);
 
   const handleExceptionMemberClick = useCallback((memberId: number) => {
     onChatMemberSelect(memberId);
@@ -85,6 +90,7 @@ export default memo(withGlobal<OwnProps>(
       members,
       usersById,
       isChannel,
+      serverTimeOffset: global.serverTimeOffset,
     };
   },
 )(ManageGroupUserPermissionsCreate));

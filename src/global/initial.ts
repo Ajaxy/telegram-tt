@@ -8,6 +8,7 @@ export const INITIAL_STATE: GlobalState = {
   isLeftColumnShown: true,
   isChatInfoShown: false,
   uiReadyState: 0,
+  serverTimeOffset: 0,
 
   authRememberMe: true,
 

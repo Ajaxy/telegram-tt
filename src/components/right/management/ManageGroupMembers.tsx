@@ -21,6 +21,7 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
   members?: ApiChatMember[];
   isChannel?: boolean;
+  serverTimeOffset: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
@@ -30,14 +31,15 @@ const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
   usersById,
   isChannel,
   openUserInfo,
+  serverTimeOffset,
 }) => {
   const memberIds = useMemo(() => {
     if (!members || !usersById) {
       return undefined;
     }
 
-    return sortUserIds(members.map(({ userId }) => userId), usersById);
-  }, [members, usersById]);
+    return sortUserIds(members.map(({ userId }) => userId), usersById, undefined, serverTimeOffset);
+  }, [members, serverTimeOffset, usersById]);
 
   const handleMemberClick = useCallback((id: number) => {
     openUserInfo({ id });
@@ -82,6 +84,7 @@ export default memo(withGlobal<OwnProps>(
       members,
       usersById,
       isChannel,
+      serverTimeOffset: global.serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

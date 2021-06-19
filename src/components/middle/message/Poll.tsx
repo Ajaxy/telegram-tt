@@ -38,6 +38,7 @@ type OwnProps = {
 type StateProps = {
   recentVoterIds?: number[];
   usersById: Record<number, ApiUser>;
+  serverTimeOffset: number;
 };
 
 type DispatchProps = Pick<GlobalActions, ('loadMessage' | 'openPollResults')>;
@@ -54,6 +55,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   loadMessage,
   onSendVote,
   openPollResults,
+  serverTimeOffset,
 }) => {
   const { id: messageId, chatId } = message;
   const { summary, results } = poll;
@@ -63,7 +65,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   const [wasSubmitted, setWasSubmitted] = useState<boolean>(false);
   const [closePeriod, setClosePeriod] = useState<number>(
     !summary.closed && summary.closeDate && summary.closeDate > 0
-      ? Math.min(summary.closeDate - Math.floor(Date.now() / 1000), summary.closePeriod!)
+      ? Math.min(summary.closeDate - Math.floor(Date.now() / 1000) + serverTimeOffset, summary.closePeriod!)
       : 0,
   );
   // eslint-disable-next-line no-null/no-null
@@ -359,7 +361,7 @@ function getReadableVotersCount(lang: LangFn, isQuiz: true | undefined, count?: 
 export default memo(withGlobal<OwnProps>(
   (global, { poll }) => {
     const { recentVoterIds } = poll.results;
-    const { byId: usersById } = global.users;
+    const { serverTimeOffset, users: { byId: usersById } } = global;
     if (!recentVoterIds || recentVoterIds.length === 0) {
       return {};
     }
@@ -367,6 +369,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       recentVoterIds,
       usersById,
+      serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadMessage', 'openPollResults']),

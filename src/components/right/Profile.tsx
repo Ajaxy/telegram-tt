@@ -75,6 +75,7 @@ type StateProps = {
   isRightColumnShown: boolean;
   isRestricted?: boolean;
   lastSyncTime?: number;
+  serverTimeOffset: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -115,6 +116,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   openUserInfo,
   focusMessage,
   loadProfilePhotos,
+  serverTimeOffset,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -133,7 +135,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     isRightColumnShown, loadMoreMembers, searchMediaMessagesLocal, tabType, mediaSearchType, members,
-    usersById, chatMessages, foundIds, chatId, lastSyncTime,
+    usersById, chatMessages, foundIds, chatId, lastSyncTime, serverTimeOffset,
   );
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
@@ -406,6 +408,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       isRestricted: chat && chat.isRestricted,
       lastSyncTime: global.lastSyncTime,
+      serverTimeOffset: global.serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

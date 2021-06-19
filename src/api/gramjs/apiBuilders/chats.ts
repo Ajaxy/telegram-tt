@@ -57,12 +57,13 @@ function buildApiChatFieldsFromPeerEntity(
 export function buildApiChatFromDialog(
   dialog: GramJs.Dialog,
   peerEntity: GramJs.TypeUser | GramJs.TypeChat,
+  serverTimeOffset: number,
 ): ApiChat {
   const {
     peer, folderId, unreadMark, unreadCount, unreadMentionsCount, notifySettings: { silent, muteUntil },
     readOutboxMaxId, readInboxMaxId,
   } = dialog;
-  const isMuted = silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000);
+  const isMuted = silent || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000);
 
   return {
     id: getApiChatIdFromMtpPeer(peer),
@@ -314,6 +315,7 @@ export function buildChatMembers(
 
 export function buildChatTypingStatus(
   update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping | GramJs.UpdateChannelUserTyping,
+  serverTimeOffset: number,
 ) {
   let action: string = '';
   if (update.action instanceof GramJs.SendMessageCancelAction) {
@@ -347,7 +349,7 @@ export function buildChatTypingStatus(
   return {
     action,
     ...(!(update instanceof GramJs.UpdateUserTyping) && { userId: getApiChatIdFromMtpPeer(update.fromId) }),
-    timestamp: Date.now(),
+    timestamp: Date.now() + serverTimeOffset * 1000,
   };
 }
 

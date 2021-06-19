@@ -308,9 +308,12 @@ addReducer('loadNotificationExceptions', () => {
   callApi('fetchNotificationExceptions');
 });
 
-addReducer('loadNotificationSettings', () => {
+addReducer('loadNotificationSettings', (global) => {
+  const { serverTimeOffset } = global;
   (async () => {
-    const result = await callApi('fetchNotificationSettings');
+    const result = await callApi('fetchNotificationSettings', {
+      serverTimeOffset,
+    });
     if (!result) {
       return;
     }

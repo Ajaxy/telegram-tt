@@ -373,6 +373,11 @@ export type ApiUpdatePrivacy = {
   };
 };
 
+export type ApiUpdateServerTimeOffset = {
+  '@type': 'updateServerTimeOffset';
+  serverTimeOffset: number;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -389,7 +394,8 @@ export type ApiUpdate = (
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | updateTwoFaStateWaitCode |
-  ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy
+  ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
+  ApiUpdateServerTimeOffset
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;
