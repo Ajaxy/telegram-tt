@@ -764,7 +764,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           style={style}
           dir="auto"
         >
-          {withAppendix && (<div className="svg-appendix" ref={appendixRef} />)}
           {asForwarded && !customShape && (!isInDocumentGroup || isFirstInDocumentGroup) && (
             <div className="message-title">{lang('ForwardedMessage')}</div>
           )}
@@ -801,7 +800,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             </Button>
           ) : undefined}
           {withCommentButton && <CommentButton message={message} disabled={noComments} />}
-          {contentClassName.includes('has-appendix') && <div className="svg-appendix" ref={appendixRef} />}
+          {withAppendix && <div className="svg-appendix" ref={appendixRef} />}
         </div>
         {message.inlineButtons && (
           <InlineButtons message={message} onClick={clickInlineButton} />
