@@ -15,7 +15,7 @@ const {
 } = require('../tl').constructors;
 const MessagePacker = require('../extensions/MessagePacker');
 const BinaryReader = require('../extensions/BinaryReader');
-const { UpdateConnectionState } = require('./index');
+const { UpdateConnectionState, UpdateServerTimeOffset } = require('./index');
 const { BadMessageError } = require('../errors/Common');
 const {
     BadServerSalt,
@@ -258,6 +258,10 @@ class MTProtoSender {
             await this.authKey.setKey(res.authKey);
 
             this._state.time_offset = res.timeOffset;
+
+            if (this._updateCallback) {
+                this._updateCallback(new UpdateServerTimeOffset(this._state.time_offset));
+            }
 
             /**
              * This is *EXTREMELY* important since we don't control
@@ -630,6 +634,11 @@ class MTProtoSender {
             // Sent msg_id too low or too high (respectively).
             // Use the current msg_id to determine the right time offset.
             const to = this._state.updateTimeOffset(message.msgId);
+
+            if (this._updateCallback) {
+                this._updateCallback(new UpdateServerTimeOffset(to));
+            }
+
             this._log.info(`System clock is wrong, set time offset to ${to}s`);
         } else if (badMsg.errorCode === 32) {
             // msg_seqno too low, so just pump it up by some "large" amount

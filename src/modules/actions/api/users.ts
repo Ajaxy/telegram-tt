@@ -15,7 +15,7 @@ import {
 } from '../../reducers';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
-const TOP_PEERS_REQUEST_COOLDOWN = 60000; // 1 min
+const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 
 addReducer('loadFullUser', (global, actions, payload) => {
   const { userId } = payload!;
@@ -49,9 +49,14 @@ addReducer('loadUser', (global, actions, payload) => {
 });
 
 addReducer('loadTopUsers', (global) => {
-  const { hash, lastRequestedAt } = global.topPeers;
+  const {
+    serverTimeOffset,
+    topPeers: {
+      hash, lastRequestedAt,
+    },
+  } = global;
 
-  if (!lastRequestedAt || Date.now() - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
+  if (!lastRequestedAt || Date.now() / 1000 + serverTimeOffset - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
     void loadTopUsers(hash);
   }
 });
@@ -95,7 +100,7 @@ async function loadTopUsers(usersHash?: number) {
       ...global.topPeers,
       hash,
       userIds: ids,
-      lastRequestedAt: Date.now(),
+      lastRequestedAt: Date.now() / 1000 + global.serverTimeOffset,
     },
   };
   setGlobal(global);

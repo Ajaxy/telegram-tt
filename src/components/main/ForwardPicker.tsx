@@ -37,6 +37,7 @@ type StateProps = {
   archivedListIds?: number[];
   orderedPinnedIds?: number[];
   currentUserId?: number;
+  serverTimeOffset: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setForwardChatId' | 'exitForwardMode' | 'loadMoreChats'>;
@@ -50,6 +51,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   activeListIds,
   archivedListIds,
   currentUserId,
+  serverTimeOffset,
   isOpen,
   setForwardChatId,
   exitForwardMode,
@@ -106,8 +108,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
         return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
       }),
-    ], chatsById, undefined, currentUserId ? [currentUserId] : undefined);
-  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang]);
+    ], chatsById, undefined, currentUserId ? [currentUserId] : undefined, serverTimeOffset);
+  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, serverTimeOffset]);
 
   const [viewportIds, getMore] = useInfiniteScroll(loadMoreChats, chatIds, Boolean(filter));
 
@@ -186,6 +188,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
+      serverTimeOffset,
       chats: {
         byId: chatsById,
         listIds,
@@ -198,6 +201,7 @@ export default memo(withGlobal<OwnProps>(
       activeListIds: listIds.active,
       archivedListIds: listIds.archived,
       currentUserId,
+      serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatId', 'exitForwardMode', 'loadMoreChats']),

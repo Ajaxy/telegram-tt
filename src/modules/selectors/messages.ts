@@ -335,6 +335,7 @@ export function selectForwardedSender(global: GlobalState, message: ApiMessage):
 }
 
 export function selectAllowedMessageActions(global: GlobalState, message: ApiMessage, threadId: number) {
+  const { serverTimeOffset } = global;
   const chat = selectChat(global, message.chatId);
   if (!chat || chat.isRestricted) {
     return {};
@@ -351,7 +352,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const isAction = isActionMessage(message);
   const { content } = message;
   const isMessageEditable = (
-    (isChatWithSelf || Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS)
+    (isChatWithSelf || Date.now() + serverTimeOffset * 1000 - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS)
     && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
       || (content.video && content.video.isRound)

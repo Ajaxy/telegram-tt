@@ -243,6 +243,7 @@ addReducer('sendMessage', (global, actions, payload) => {
 });
 
 addReducer('editMessage', (global, actions, payload) => {
+  const { serverTimeOffset } = global;
   const { text, entities } = payload!;
 
   const currentMessageList = selectCurrentMessageList(global);
@@ -258,7 +259,7 @@ addReducer('editMessage', (global, actions, payload) => {
   }
 
   void callApi('editMessage', {
-    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId),
+    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId), serverTimeOffset,
   });
 
   actions.setEditingId({ messageId: undefined });
@@ -404,6 +405,7 @@ addReducer('deleteHistory', (global, actions, payload) => {
 });
 
 addReducer('markMessageListRead', (global, actions, payload) => {
+  const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return;
@@ -418,7 +420,9 @@ addReducer('markMessageListRead', (global, actions, payload) => {
   const { maxId } = payload!;
 
   runThrottledForMarkRead(() => {
-    void callApi('markMessageListRead', { chat, threadId, maxId });
+    void callApi('markMessageListRead', {
+      serverTimeOffset, chat, threadId, maxId,
+    });
   });
 });
 
@@ -703,6 +707,7 @@ async function sendMessage(params: {
   sticker: ApiSticker;
   gif: ApiVideo;
   poll: ApiNewPoll;
+  serverTimeOffset?: number;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
@@ -730,6 +735,7 @@ async function sendMessage(params: {
   }
 
   const global = getGlobal();
+  params.serverTimeOffset = global.serverTimeOffset;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return;
@@ -756,6 +762,7 @@ function forwardMessages(
     fromChat,
     toChat,
     messages,
+    serverTimeOffset: getGlobal().serverTimeOffset,
   });
 
   setGlobal({

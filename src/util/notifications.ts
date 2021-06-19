@@ -133,10 +133,13 @@ let areSettingsLoaded = false;
 async function loadNotificationSettings() {
   if (areSettingsLoaded) return;
   const [result] = await Promise.all([
-    callApi('fetchNotificationSettings'),
+    callApi('fetchNotificationSettings', {
+      serverTimeOffset: getGlobal().serverTimeOffset,
+    }),
     callApi('fetchNotificationExceptions'),
   ]);
   if (!result) return;
+
   setGlobal(replaceSettings(getGlobal(), result));
   areSettingsLoaded = true;
 }

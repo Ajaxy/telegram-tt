@@ -177,23 +177,28 @@ addReducer('loadTopChats', () => {
 });
 
 addReducer('requestChatUpdate', (global, actions, payload) => {
+  const { serverTimeOffset } = global;
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  void callApi('requestChatUpdate', chat);
+  void callApi('requestChatUpdate', {
+    chat,
+    serverTimeOffset,
+  });
 });
 
 addReducer('updateChatMutedState', (global, actions, payload) => {
+  const { serverTimeOffset } = global;
   const { chatId, isMuted } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  void callApi('updateChatMutedState', { chat, isMuted });
+  void callApi('updateChatMutedState', { chat, isMuted, serverTimeOffset });
 });
 
 addReducer('createChannel', (global, actions, payload) => {
@@ -358,10 +363,11 @@ addReducer('deleteChatFolder', (global, actions, payload) => {
 
 addReducer('toggleChatUnread', (global, actions, payload) => {
   const { id } = payload!;
+  const { serverTimeOffset } = global;
   const chat = selectChat(global, id);
   if (chat) {
     if (chat.unreadCount) {
-      void callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
+      void callApi('markMessageListRead', { serverTimeOffset, chat, threadId: MAIN_THREAD_ID });
     } else {
       void callApi('toggleDialogUnread', {
         chat,
@@ -723,6 +729,7 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
     offsetDate,
     archived: listType === 'archived',
     withPinned: getGlobal().chats.orderedPinnedIds[listType] === undefined,
+    serverTimeOffset: getGlobal().serverTimeOffset,
   });
 
   if (!result) {

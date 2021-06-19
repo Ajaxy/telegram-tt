@@ -64,7 +64,7 @@ export function getUserFullName(user?: ApiUser) {
   return undefined;
 }
 
-export function getUserStatus(lang: LangFn, user: ApiUser) {
+export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: number) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications').toLowerCase();
   }
@@ -95,7 +95,7 @@ export function getUserStatus(lang: LangFn, user: ApiUser) {
 
       if (!wasOnline) return lang('LastSeen.Offline');
 
-      const now = new Date();
+      const now = new Date(new Date().getTime() + serverTimeOffset * 1000);
       const wasOnlineDate = new Date(wasOnline * 1000);
 
       if (wasOnlineDate >= now) {
@@ -118,7 +118,8 @@ export function getUserStatus(lang: LangFn, user: ApiUser) {
       // today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (wasOnlineDate > today) {
+      const serverToday = new Date(today.getTime() + serverTimeOffset * 1000);
+      if (wasOnlineDate > serverToday) {
         // up to 6 hours ago
         if (diff.getTime() / 1000 < 6 * 60 * 60) {
           const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
@@ -132,8 +133,9 @@ export function getUserStatus(lang: LangFn, user: ApiUser) {
       // yesterday
       const yesterday = new Date();
       yesterday.setDate(now.getDate() - 1);
-      today.setHours(0, 0, 0, 0);
-      if (wasOnlineDate > yesterday) {
+      yesterday.setHours(0, 0, 0, 0);
+      const serverYesterday = new Date(yesterday.getTime() + serverTimeOffset * 1000);
+      if (wasOnlineDate > serverYesterday) {
         return lang('LastSeen.YesterdayAt', formatTime(wasOnlineDate));
       }
 
@@ -184,9 +186,10 @@ export function sortUserIds(
   userIds: number[],
   usersById: Record<number, ApiUser>,
   priorityIds?: number[],
+  serverTimeOffset = 0,
 ) {
   return orderBy(userIds, (id) => {
-    const now = Date.now() / 1000;
+    const now = Date.now() / 1000 + serverTimeOffset;
 
     if (priorityIds && priorityIds.includes(id)) {
       // Assuming that online status expiration date can't be as far as two days from now,

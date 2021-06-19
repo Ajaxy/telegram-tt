@@ -45,6 +45,7 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
   fetchingStatus?: { chats?: boolean; messages?: boolean };
   lastSyncTime?: number;
+  serverTimeOffset?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -61,6 +62,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   localContactIds, localChatIds, localUserIds, globalChatIds, globalUserIds,
   foundIds, globalMessagesByChatId, chatsById, usersById, fetchingStatus, lastSyncTime,
   onReset, onSearchDateSelect, openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
+  serverTimeOffset,
 }) => {
   const lang = useLang();
 
@@ -120,17 +122,21 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
         ...foundContactIds,
         ...(localChatIds || []),
         ...(localUserIds || []),
-      ]), chatsById),
+      ]), chatsById, undefined, undefined, serverTimeOffset),
     ];
-  }, [searchQuery, localContactIds, currentUserId, lang, localChatIds, localUserIds, chatsById, usersById]);
+  }, [
+    searchQuery, localContactIds, currentUserId, lang, localChatIds, localUserIds, chatsById,
+    serverTimeOffset, usersById,
+  ]);
 
   const globalResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    return sortChatIds(unique([...globalChatIds, ...globalUserIds]), chatsById, true);
-  }, [chatsById, globalChatIds, globalUserIds, searchQuery]);
+    return sortChatIds(unique([...globalChatIds, ...globalUserIds]),
+      chatsById, true, undefined, serverTimeOffset);
+  }, [chatsById, globalChatIds, globalUserIds, searchQuery, serverTimeOffset]);
 
   const foundMessages = useMemo(() => {
     if ((!searchQuery && !searchDate) || !foundIds || foundIds.length === 0) {
@@ -288,7 +294,9 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const { currentUserId, messages, lastSyncTime } = global;
+    const {
+      currentUserId, messages, lastSyncTime, serverTimeOffset,
+    } = global;
     const {
       fetchingStatus, globalResults, localResults, resultsByType,
     } = global.globalSearch;
@@ -310,6 +318,7 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       fetchingStatus,
       lastSyncTime,
+      serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

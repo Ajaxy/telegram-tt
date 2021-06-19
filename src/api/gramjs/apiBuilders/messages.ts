@@ -96,7 +96,7 @@ export function buildApiMessageFromNotification(
   return {
     id: localId,
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
-    date: notification.inboxDate || (currentDate / 1000),
+    date: notification.inboxDate || currentDate,
     content,
     isOutgoing: false,
   };
@@ -715,6 +715,7 @@ export function buildLocalMessage(
   poll?: ApiNewPoll,
   groupedId?: string,
   scheduledAt?: number,
+  serverTimeOffset = 0,
 ): ApiMessage {
   const localId = localMessageCounter++;
   const media = attachment && buildUploadingMedia(attachment);
@@ -735,7 +736,7 @@ export function buildLocalMessage(
       ...(gif && { video: gif }),
       ...(poll && buildNewPoll(poll, localId)),
     },
-    date: scheduledAt || Math.round(Date.now() / 1000),
+    date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !isChannel,
     senderId: currentUserId,
     ...(replyingTo && { replyToMessageId: replyingTo }),
@@ -750,6 +751,7 @@ export function buildLocalMessage(
 export function buildForwardedMessage(
   toChat: ApiChat,
   message: ApiMessage,
+  serverTimeOffset: number,
 ): ApiMessage {
   const localId = localMessageCounter++;
   const {
@@ -770,7 +772,7 @@ export function buildForwardedMessage(
     id: localId,
     chatId: toChat.id,
     content,
-    date: Math.round(Date.now() / 1000),
+    date: Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
     senderId: currentUserId,
     sendingState: 'messageSendingStatePending',

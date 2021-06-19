@@ -36,6 +36,7 @@ type StateProps = {
   user?: ApiUser;
   isSavedMessages?: boolean;
   areMessagesLoaded: boolean;
+  serverTimeOffset: number;
 } & Pick<GlobalState, 'lastSyncTime'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
@@ -56,6 +57,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   loadFullUser,
   openMediaViewer,
+  serverTimeOffset,
 }) => {
   const { id: userId } = user || {};
   const fullName = getUserFullName(user);
@@ -106,7 +108,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
         {withUsername && user.username && <span className="handle">{user.username}</span>}
-        <span className="user-status" dir="auto">{getUserStatus(lang, user)}</span>
+        <span className="user-status" dir="auto">{getUserStatus(lang, user, serverTimeOffset)}</span>
       </div>
     );
   }
@@ -139,13 +141,13 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
-    const { lastSyncTime } = global;
+    const { lastSyncTime, serverTimeOffset } = global;
     const user = selectUser(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
 
     return {
-      lastSyncTime, user, isSavedMessages, areMessagesLoaded,
+      lastSyncTime, user, isSavedMessages, areMessagesLoaded, serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),

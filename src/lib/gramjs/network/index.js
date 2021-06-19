@@ -14,6 +14,12 @@ class UpdateConnectionState {
     }
 }
 
+class UpdateServerTimeOffset {
+    constructor(timeOffset) {
+        this.timeOffset = timeOffset;
+    }
+}
+
 const {
     Connection,
     ConnectionTCPFull,
@@ -30,4 +36,5 @@ module.exports = {
     doAuthentication,
     MTProtoSender,
     UpdateConnectionState,
+    UpdateServerTimeOffset,
 };

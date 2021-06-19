@@ -122,6 +122,7 @@ type StateProps = {
   shouldSuggestStickers?: boolean;
   language: LangCode;
   emojiKeywords?: Record<string, string[]>;
+  serverTimeOffset: number;
 } & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, (
@@ -180,6 +181,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldSuggestStickers,
   language,
   emojiKeywords,
+  serverTimeOffset,
   recentEmojis,
   sendMessage,
   editMessage,
@@ -442,7 +444,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (currentAttachments.length || text) {
       if (slowMode && !isAdmin) {
-        const nowSeconds = Math.floor(Date.now() / 1000);
+        const nowSeconds = Math.floor(Date.now() / 1000) + serverTimeOffset;
         const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
           && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
         const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
@@ -480,15 +482,15 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       forwardMessages();
     }
 
-    lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000);
+    lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000) + serverTimeOffset;
 
     clearDraft({ chatId, localOnly: true });
 
     // Wait until message animation starts
     requestAnimationFrame(resetComposer);
   }, [
-    activeVoiceRecording, attachments, connectionState, chatId, slowMode, isForwarding, isAdmin,
-    sendMessage, stopRecordingVoice, resetComposer, clearDraft, showError, forwardMessages,
+    connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
+    resetComposer, stopRecordingVoice, showError, slowMode, isAdmin, sendMessage, forwardMessages,
   ]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -536,11 +538,12 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [handleSend, openCalendar, shouldSchedule]);
 
-  const handleMessageSchedule = useCallback((date: Date) => {
+  const handleMessageSchedule = useCallback((date: Date, isWhenOnline = false) => {
     const { isSilent, ...restArgs } = scheduledMessageArgs || {};
 
     // Scheduled time can not be less than 10 seconds in future
-    const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000);
+    const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
+      + (isWhenOnline ? 0 : serverTimeOffset);
 
     if (!scheduledMessageArgs || Object.keys(restArgs).length === 0) {
       handleSend(!!isSilent, scheduledAt);
@@ -552,10 +555,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       requestAnimationFrame(resetComposer);
     }
     closeCalendar();
-  }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage]);
+  }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage, serverTimeOffset]);
 
   const handleMessageScheduleUntilOnline = useCallback(() => {
-    handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000));
+    handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
   }, [handleMessageSchedule]);
 
   const handleCloseCalendar = useCallback(() => {
@@ -961,6 +964,7 @@ export default memo(withGlobal<OwnProps>(
       recentEmojis: global.recentEmojis,
       language,
       emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
+      serverTimeOffset: global.serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

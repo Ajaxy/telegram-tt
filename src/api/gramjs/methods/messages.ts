@@ -168,6 +168,7 @@ export function sendMessage(
     scheduledAt,
     groupedId,
     noWebPage,
+    serverTimeOffset,
   }: {
     chat: ApiChat;
     text?: string;
@@ -181,11 +182,12 @@ export function sendMessage(
     scheduledAt?: number;
     groupedId?: string;
     noWebPage?: boolean;
+    serverTimeOffset?: number;
   },
   onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId, scheduledAt,
+    chat, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId, scheduledAt, serverTimeOffset,
   );
   onUpdate({
     '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
@@ -405,14 +407,16 @@ export async function editMessage({
   text,
   entities,
   noWebPage,
+  serverTimeOffset,
 }: {
   chat: ApiChat;
   message: ApiMessage;
   text: string;
   entities?: ApiMessageEntity[];
   noWebPage?: boolean;
+  serverTimeOffset: number;
 }) {
-  const isScheduled = message.date * 1000 > Date.now();
+  const isScheduled = message.date * 1000 > Date.now() + serverTimeOffset * 1000;
   const messageUpdate: Partial<ApiMessage> = {
     content: {
       ...message.content,
@@ -613,9 +617,9 @@ export async function deleteHistory({
 }
 
 export async function markMessageListRead({
-  chat, threadId, maxId,
+  chat, threadId, maxId, serverTimeOffset,
 }: {
-  chat: ApiChat; threadId: number; maxId?: number;
+  chat: ApiChat; threadId: number; maxId?: number; serverTimeOffset: number;
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
@@ -638,7 +642,7 @@ export async function markMessageListRead({
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    void requestChatUpdate(chat);
+    void requestChatUpdate({ chat, serverTimeOffset });
   } else {
     void requestThreadInfoUpdate({ chat, threadId });
   }
@@ -968,16 +972,18 @@ export async function forwardMessages({
   fromChat,
   toChat,
   messages,
+  serverTimeOffset,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
   messages: ApiMessage[];
+  serverTimeOffset: number;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
 
   messages.forEach((message, index) => {
-    const localMessage = buildForwardedMessage(toChat, message);
+    const localMessage = buildForwardedMessage(toChat, message, serverTimeOffset);
     localDb.localMessages[String(randomIds[index])] = localMessage;
 
     onUpdate({

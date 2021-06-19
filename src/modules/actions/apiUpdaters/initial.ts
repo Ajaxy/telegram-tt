@@ -10,7 +10,7 @@ import {
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
   ApiUpdateSession,
-  ApiUpdateCurrentUser,
+  ApiUpdateCurrentUser, ApiUpdateServerTimeOffset,
 } from '../../../api/types';
 import { DEBUG, SESSION_USER_KEY } from '../../../config';
 import { subscribe } from '../../../util/notifications';
@@ -44,6 +44,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'updateSession':
       onUpdateSession(update);
+      break;
+
+    case 'updateServerTimeOffset':
+      onUpdateServerTimeOffset(update);
       break;
 
     case 'updateCurrentUser':
@@ -153,6 +157,13 @@ function onUpdateSession(update: ApiUpdateSession) {
   const { sessionData } = update;
 
   getDispatch().saveSession({ sessionData });
+}
+
+function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {
+  setGlobal({
+    ...getGlobal(),
+    serverTimeOffset: update.serverTimeOffset,
+  });
 }
 
 function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {

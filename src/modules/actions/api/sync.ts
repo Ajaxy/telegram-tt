@@ -85,6 +85,7 @@ async function loadAndReplaceChats() {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     withPinned: true,
+    serverTimeOffset: getGlobal().serverTimeOffset,
   });
   if (!result) {
     return undefined;
@@ -166,7 +167,9 @@ async function loadAndReplaceArchivedChats() {
     limit: CHAT_LIST_LOAD_SLICE,
     archived: true,
     withPinned: true,
+    serverTimeOffset: getGlobal().serverTimeOffset,
   });
+
   if (!result) {
     return;
   }

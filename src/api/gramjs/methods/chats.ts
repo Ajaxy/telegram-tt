@@ -50,11 +50,13 @@ export async function fetchChats({
   offsetDate,
   archived,
   withPinned,
+  serverTimeOffset,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
   withPinned?: boolean;
+  serverTimeOffset: number;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
@@ -110,7 +112,7 @@ export async function fetchChats({
     }
 
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
-    const chat = buildApiChatFromDialog(dialog, peerEntity);
+    const chat = buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset);
     chat.lastMessage = lastMessagesByChatId[chat.id];
     chats.push(chat);
 
@@ -228,7 +230,12 @@ export async function fetchChat({
   return { chatId: chat.id };
 }
 
-export async function requestChatUpdate(chat: ApiChat) {
+export async function requestChatUpdate({
+  chat,
+  serverTimeOffset,
+}: {
+  chat: ApiChat; serverTimeOffset: number;
+}) {
   const { id, accessHash } = chat;
 
   const result = await invokeRequest(new GramJs.messages.GetPeerDialogs({
@@ -260,7 +267,7 @@ export async function requestChatUpdate(chat: ApiChat) {
     '@type': 'updateChat',
     id,
     chat: {
-      ...buildApiChatFromDialog(dialog, peerEntity),
+      ...buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset),
       lastMessage,
     },
   });
@@ -396,9 +403,9 @@ async function getFullChannelInfo(
 }
 
 export async function updateChatMutedState({
-  chat, isMuted,
+  chat, isMuted, serverTimeOffset,
 }: {
-  chat: ApiChat; isMuted: boolean;
+  chat: ApiChat; isMuted: boolean; serverTimeOffset: number;
 }) {
   await invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyPeer({
@@ -407,7 +414,10 @@ export async function updateChatMutedState({
     settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : undefined }),
   }));
 
-  void requestChatUpdate(chat);
+  void requestChatUpdate({
+    chat,
+    serverTimeOffset,
+  });
 }
 
 export async function createChannel({
