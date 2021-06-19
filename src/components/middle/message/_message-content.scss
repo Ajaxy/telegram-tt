@@ -182,10 +182,11 @@
   }
 
   .svg-appendix {
+    overflow: hidden;
     position: absolute;
-    bottom: -.1875rem;
+    bottom: -.0875rem;
     width: .5625rem;
-    height: 1.25rem;
+    height: 1.125rem;
 
     .corner {
       fill: var(--background-color);
