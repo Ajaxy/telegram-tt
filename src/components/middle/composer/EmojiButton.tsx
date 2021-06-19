@@ -24,9 +24,7 @@ const EmojiButton: FC<OwnProps> = ({ emoji, focus, onClick }) => {
       onMouseDown={handleClick}
       title={`:${emoji.names[0]}:`}
     >
-      {IS_EMOJI_SUPPORTED
-        ? <span className="font-emoji">{emoji.native}</span>
-        : <img src={`./img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
+      {IS_EMOJI_SUPPORTED ? emoji.native : <img src={`./img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
     </div>
   );
 };
