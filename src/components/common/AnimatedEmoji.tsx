@@ -5,7 +5,7 @@ import React, {
 import { ApiMediaFormat, ApiSticker } from '../../api/types';
 
 import { STICKER_SIZE_TWO_FA } from '../../config';
-import { getStickerDimensions } from './helpers/mediaDimensions';
+import { getStickerDimensions, LIKE_STICKER_ID } from './helpers/mediaDimensions';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useTransitionForMedia from '../../hooks/useTransitionForMedia';
@@ -37,14 +37,14 @@ const AnimatedEmoji: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
+  const thumbDataUri = sticker.thumbnail && sticker.thumbnail.dataUri;
   const previewBlobUrl = useMedia(
     `${localMediaHash}?size=m`,
     !isIntersecting && !forceLoadPreview,
     ApiMediaFormat.BlobUrl,
     lastSyncTime,
   );
-  const previewData = previewBlobUrl || (sticker.thumbnail && sticker.thumbnail.dataUri);
-  const { transitionClassNames } = useTransitionForMedia(previewData, 'slow');
+  const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
 
   const mediaData = useMedia(localMediaHash, !isIntersecting, ApiMediaFormat.Lottie, lastSyncTime);
   const isMediaLoaded = Boolean(mediaData);
@@ -71,8 +71,11 @@ const AnimatedEmoji: FC<OwnProps> = ({
       style={style}
       onClick={handleClick}
     >
-      {previewData && !isAnimationLoaded && (
-        <img src={previewData} className={transitionClassNames} alt="" />
+      {!isAnimationLoaded && thumbDataUri && (
+        <img src={thumbDataUri} className={sticker.id === LIKE_STICKER_ID ? 'like-sticker-thumb' : undefined} alt="" />
+      )}
+      {!isAnimationLoaded && previewBlobUrl && (
+        <img src={previewBlobUrl} className={transitionClassNames} alt="" />
       )}
       {isMediaLoaded && (
         <AnimatedSticker
