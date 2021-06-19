@@ -46,10 +46,13 @@ import {
   isOwnMessage,
   isReplyMessage,
   isAnonymousOwnMessage,
+  isMessageLocal,
   isChatPrivate,
   getMessageCustomShape,
   isChatChannel,
-  getMessageSingleEmoji, getSenderTitle, getUserColorKey,
+  getMessageSingleEmoji,
+  getSenderTitle,
+  getUserColorKey,
 } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
@@ -538,6 +541,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             sticker={animatedEmoji}
             observeIntersection={observeIntersectionForMedia}
             lastSyncTime={lastSyncTime}
+            forceLoadPreview={isMessageLocal(message)}
           />
         )}
         {isAlbum && (
