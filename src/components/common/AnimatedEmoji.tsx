@@ -20,13 +20,14 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   isInline?: boolean;
   lastSyncTime?: number;
+  forceLoadPreview?: boolean;
 };
 
 const QUALITY = 1;
 const RESIZE_FACTOR = 0.5;
 
 const AnimatedEmoji: FC<OwnProps> = ({
-  sticker, isInline = false, observeIntersection, lastSyncTime,
+  sticker, isInline = false, observeIntersection, lastSyncTime, forceLoadPreview,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -36,8 +37,14 @@ const AnimatedEmoji: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !isIntersecting, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
+  const previewBlobUrl = useMedia(
+    `${localMediaHash}?size=m`,
+    !isIntersecting && !forceLoadPreview,
+    ApiMediaFormat.BlobUrl,
+    lastSyncTime,
+  );
+  const previewData = previewBlobUrl || (sticker.thumbnail && sticker.thumbnail.dataUri);
+  const { transitionClassNames } = useTransitionForMedia(previewData, 'slow');
 
   const mediaData = useMedia(localMediaHash, !isIntersecting, ApiMediaFormat.Lottie, lastSyncTime);
   const isMediaLoaded = Boolean(mediaData);
@@ -64,8 +71,8 @@ const AnimatedEmoji: FC<OwnProps> = ({
       style={style}
       onClick={handleClick}
     >
-      {previewBlobUrl && !isAnimationLoaded && (
-        <img src={previewBlobUrl} className={transitionClassNames} alt="" />
+      {previewData && !isAnimationLoaded && (
+        <img src={previewData} className={transitionClassNames} alt="" />
       )}
       {isMediaLoaded && (
         <AnimatedSticker
