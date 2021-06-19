@@ -46,8 +46,9 @@
   }
 
   &.last-in-list {
-    // Forcing extra space which is taken by the appendix and causes incorrect container height calculation
-    margin-bottom: 0.4375rem;
+    // Forcing extra space which is taken by the appendix and causes incorrect container height calculation.
+    // This value is accurately crafted as a minimum possible.
+    margin-bottom: 0.375rem;
   }
 
   &.is-in-selection-mode {

@@ -56,14 +56,14 @@
     margin-bottom: 0;
 
     .last-in-list {
-      margin-bottom: 5.6875rem;
-
-      &.ActionMessage {
-        padding-bottom: 0.0625rem;
-      }
+      margin-bottom: 5.625rem;
 
       @media (max-width: 600px) {
-        margin-bottom: 4.3125rem;
+        margin-bottom: 4.25rem;
+      }
+
+      &.ActionMessage {
+        padding-bottom: 0.125rem;
       }
     }
   }
@@ -90,8 +90,8 @@
     &::before {
       content: "";
       position: absolute;
-      top: -0.3125rem;
-      bottom: -0.3125rem;
+      top: -0.1875rem;
+      bottom: -0.1875rem;
       left: -50vw;
       right: -50vw;
       background: black;
