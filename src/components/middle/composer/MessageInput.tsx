@@ -149,7 +149,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     const selectedText = selectionRange.toString().trim();
     if (
       shouldSupressTextFormatter
-      || !isSelectionInsideInput(selectionRange)
+      || !isSelectionInsideInput(selectionRange, editableInputId || EDITABLE_INPUT_ID)
       || !selectedText
       || parseEmojiOnlyString(selectedText)
       || !selectionRange.START_TO_END
