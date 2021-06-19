@@ -320,7 +320,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange)) {
+      if (isSelectionInsideInput(selectionRange, inputId)) {
         if (IS_EMOJI_SUPPORTED) {
           // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
           document.execCommand('insertText', false, text);
@@ -347,7 +347,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange)) {
+      if (isSelectionInsideInput(selectionRange, EDITABLE_INPUT_ID)) {
         document.execCommand('delete', false);
         return;
       }
