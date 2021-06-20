@@ -1,5 +1,8 @@
 import {
-  ApiOnProgress, ApiSessionData, ApiUpdate, OnApiUpdate,
+  OnApiUpdate,
+  ApiInitialArgs,
+  ApiUpdate,
+  ApiOnProgress,
 } from '../types';
 import { Methods, MethodArgs, MethodResponse } from './methods/types';
 
@@ -18,7 +21,7 @@ import * as methods from './methods';
 
 let onUpdate: OnApiUpdate;
 
-export async function initApi(_onUpdate: OnApiUpdate, sessionData?: ApiSessionData) {
+export async function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   onUpdate = _onUpdate;
 
   initUpdater(handleUpdate);
@@ -30,7 +33,7 @@ export async function initApi(_onUpdate: OnApiUpdate, sessionData?: ApiSessionDa
   initManagement(handleUpdate);
   initTwoFaSettings(handleUpdate);
 
-  await initClient(handleUpdate, sessionData);
+  await initClient(handleUpdate, initialArgs);
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {

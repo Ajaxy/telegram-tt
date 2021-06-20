@@ -1,5 +1,10 @@
 import { ApiDocument } from './messages';
 
+export interface ApiInitialArgs {
+  userAgent: string;
+  sessionData?: ApiSessionData;
+}
+
 export interface ApiOnProgress {
   (
     progress: number, // Float between 0 and 1.

@@ -5,7 +5,11 @@ import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 
 import {
-  ApiMediaFormat, ApiOnProgress, ApiSessionData, OnApiUpdate,
+  ApiInitialArgs,
+  ApiMediaFormat,
+  ApiOnProgress,
+  ApiSessionData,
+  OnApiUpdate,
 } from '../../types';
 
 import {
@@ -32,7 +36,7 @@ let onUpdate: OnApiUpdate;
 let client: TelegramClient;
 let isConnected = false;
 
-export async function init(_onUpdate: OnApiUpdate, sessionData?: ApiSessionData) {
+export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   onUpdate = _onUpdate;
 
   if (DEBUG) {
@@ -40,12 +44,14 @@ export async function init(_onUpdate: OnApiUpdate, sessionData?: ApiSessionData)
     console.log('>>> START INIT API');
   }
 
+  const { sessionData, userAgent } = initialArgs;
+
   client = new TelegramClient(
     new sessions.CallbackSession(sessionData, onSessionUpdate),
     process.env.TELEGRAM_T_API_ID,
     process.env.TELEGRAM_T_API_HASH,
     {
-      deviceModel: navigator.userAgent || DEFAULT_USER_AGENT,
+      deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
       appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
@@ -153,7 +159,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     }
 
     if (shouldHandleUpdates) {
-      type ResultWithUpdates = typeof result & { updates?: GramJs.Updates | GramJs.UpdatesCombined };
+      type ResultWithUpdates =
+        typeof result
+        & { updates?: GramJs.Updates | GramJs.UpdatesCombined };
 
       let updatesContainer;
       if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
