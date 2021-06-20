@@ -45,6 +45,7 @@ export type LangCode = (
 
 export interface ISettings extends NotifySettings, Record<string, any> {
   theme: ThemeKey;
+  shouldUseSystemTheme: boolean;
   messageTextSize: number;
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';

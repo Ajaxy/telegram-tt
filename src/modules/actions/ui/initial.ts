@@ -5,11 +5,11 @@ import {
 } from '../../../util/environment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
+import { selectTheme } from '../../selectors';
 
 addReducer('init', (global) => {
-  const {
-    theme, animationLevel, messageTextSize, language,
-  } = global.settings.byKey;
+  const { animationLevel, messageTextSize, language } = global.settings.byKey;
+  const theme = selectTheme(global);
 
   setLanguage(language);
 

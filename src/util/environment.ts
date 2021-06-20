@@ -56,6 +56,10 @@ export const DPR = window.devicePixelRatio || 1;
 
 export const MASK_IMAGE_DISABLED = true;
 
+export const SYSTEM_THEME = (
+  window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+) ? 'dark' : 'light';
+
 let isWebpSupportedCache: boolean | undefined;
 
 export function isWebpSupported() {

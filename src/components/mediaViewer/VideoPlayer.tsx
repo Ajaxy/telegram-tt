@@ -165,7 +165,6 @@ const VideoPlayer: FC<OwnProps> = ({
           style={videoStyle}
           onEnded={handleEnded}
           onClick={togglePlayState}
-          onDoubleClick={handleFullscreenChange}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
           onTimeUpdate={handleTimeUpdate}
