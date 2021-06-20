@@ -105,10 +105,11 @@ export const INITIAL_STATE: GlobalState = {
 
   settings: {
     byKey: {
+      theme: 'light',
+      shouldUseSystemTheme: true,
       messageTextSize: DEFAULT_MESSAGE_TEXT_SIZE_PX,
       animationLevel: ANIMATION_LEVEL_DEFAULT,
       messageSendKeyCombo: 'enter',
-      theme: 'light',
       shouldAutoDownloadMediaFromContacts: true,
       shouldAutoDownloadMediaInPrivateChats: true,
       shouldAutoDownloadMediaInGroups: true,

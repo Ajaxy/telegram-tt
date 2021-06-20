@@ -1,7 +1,7 @@
 import { GlobalState } from '../../global/types';
 import { RightColumnContent } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_MOBILE_SCREEN, SYSTEM_THEME } from '../../util/environment';
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
 import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
@@ -52,4 +52,10 @@ export function selectRightColumnContentKey(global: GlobalState) {
 
 export function selectIsRightColumnShown(global: GlobalState) {
   return selectRightColumnContentKey(global) !== undefined;
+}
+
+export function selectTheme(global: GlobalState) {
+  const { theme, shouldUseSystemTheme } = global.settings.byKey;
+
+  return shouldUseSystemTheme ? SYSTEM_THEME : theme;
 }

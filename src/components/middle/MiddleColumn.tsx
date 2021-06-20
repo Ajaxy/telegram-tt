@@ -29,6 +29,7 @@ import {
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectPinnedIds,
+  selectTheme,
 } from '../../modules/selectors';
 import { getCanPostInChat, getMessageSendingRestrictionReason, isChatPrivate } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -325,7 +326,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { theme } = global.settings.byKey;
+    const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
     } = global.settings.themes[theme] || {};

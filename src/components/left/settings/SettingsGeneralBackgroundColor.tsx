@@ -12,6 +12,7 @@ import {
   getPatternColor, hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
 } from '../../../util/colors';
 import { captureEvents, RealTouchEvent } from '../../../util/captureEvents';
+import { selectTheme } from '../../../modules/selectors';
 import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';
 
@@ -336,7 +337,7 @@ function drawHue(canvas: HTMLCanvasElement) {
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { theme } = global.settings.byKey;
+    const theme = selectTheme(global);
     const { backgroundColor } = global.settings.themes[theme] || {};
     return {
       backgroundColor,

@@ -12,6 +12,7 @@ import { pick } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
+import { selectTheme } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
@@ -158,7 +159,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { theme } = global.settings.byKey;
+    const theme = selectTheme(global);
     const { background, isBlurred } = global.settings.themes[theme] || {};
     const { loadedWallpapers } = global.settings;
 

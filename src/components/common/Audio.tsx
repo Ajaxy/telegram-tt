@@ -24,6 +24,7 @@ import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
+import { selectTheme } from '../../modules/selectors';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
@@ -456,4 +457,6 @@ function renderSeekline(
   );
 }
 
-export default memo(withGlobal<OwnProps>((global) => ({ theme: global.settings.byKey.theme }))(Audio));
+export default memo(withGlobal<OwnProps>((global) => ({
+  theme: selectTheme(global),
+}))(Audio));

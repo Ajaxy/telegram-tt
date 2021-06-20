@@ -21,7 +21,7 @@ import './UiLoader.scss';
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
-import { selectIsRightColumnShown } from '../../modules/selectors';
+import { selectIsRightColumnShown, selectTheme } from '../../modules/selectors';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
@@ -152,7 +152,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global): StateProps => {
-    const { theme } = global.settings.byKey;
+    const theme = selectTheme(global);
     const { background, backgroundColor } = global.settings.themes[theme] || {};
 
     return {

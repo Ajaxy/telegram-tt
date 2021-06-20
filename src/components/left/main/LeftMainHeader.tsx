@@ -13,6 +13,7 @@ import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { isChatArchived } from '../../../modules/helpers';
 import { formatDateToString } from '../../../util/dateFormat';
+import { selectTheme } from '../../../modules/selectors';
 import switchTheme from '../../../util/switchTheme';
 import useLang from '../../../hooks/useLang';
 
@@ -135,6 +136,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     const newTheme = theme === 'light' ? 'dark' : 'light';
 
     setSettingOption({ theme: newTheme });
+    setSettingOption({ shouldUseSystemTheme: false });
     switchTheme(newTheme, animationLevel > 0);
   }, [animationLevel, setSettingOption, theme]);
 
@@ -296,7 +298,7 @@ export default memo(withGlobal<OwnProps>(
     } = global.globalSearch;
     const { currentUserId } = global;
     const { byId: chatsById } = global.chats;
-    const { theme, animationLevel } = global.settings.byKey;
+    const { animationLevel } = global.settings.byKey;
 
     return {
       searchQuery,
@@ -305,7 +307,7 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       globalSearchChatId: chatId,
       searchDate: date,
-      theme,
+      theme: selectTheme(global),
       animationLevel,
     };
   },
