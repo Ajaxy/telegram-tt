@@ -34,7 +34,10 @@ addReducer('initApi', (global: GlobalState, actions) => {
       importTestSession();
     }
 
-    void initApi(actions.apiUpdate, loadStoredSession());
+    void initApi(actions.apiUpdate, {
+      userAgent: navigator.userAgent,
+      sessionData: loadStoredSession(),
+    });
   })();
 });
 

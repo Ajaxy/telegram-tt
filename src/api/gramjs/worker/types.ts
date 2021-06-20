@@ -1,4 +1,4 @@
-import { ApiSessionData, ApiUpdate } from '../../types';
+import { ApiInitialArgs, ApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
 
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;
@@ -27,7 +27,7 @@ export interface WorkerMessageEvent {
 export type OriginRequest = {
   type: 'initApi';
   messageId?: string;
-  args: [ApiSessionData | undefined];
+  args: [ApiInitialArgs];
 } | {
   type: 'callMethod';
   messageId?: string;
