@@ -52,6 +52,7 @@ type DispatchProps = Pick<GlobalActions, (
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
+const PRODUCTION_HOSTNAME = 'web.telegram.org';
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 const PERMANENT_VERSION_KEY = 'kz_version';
@@ -100,6 +101,8 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       return chat.unreadCount ? total + 1 : total;
     }, 0);
   }, [hasMenu, chatsById]);
+
+  const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME;
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -229,19 +232,23 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           >
             Report Bug
           </MenuItem>
-          <MenuItem
-            icon="char-K"
-            href={WEBK_VERSION_URL}
-            onClick={handleSwitchToWebK}
-          >
-            Switch to K Version
-          </MenuItem>
-          <MenuItem
-            icon="char-W"
-            href={LEGACY_VERSION_URL}
-          >
-            Switch to Old Version
-          </MenuItem>
+          {withOtherVersions && (
+            <>
+              <MenuItem
+                icon="char-K"
+                href={WEBK_VERSION_URL}
+                onClick={handleSwitchToWebK}
+              >
+                Switch to K Version
+              </MenuItem>
+              <MenuItem
+                icon="char-W"
+                href={LEGACY_VERSION_URL}
+              >
+                Switch to Old Version
+              </MenuItem>
+            </>
+          )}
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
