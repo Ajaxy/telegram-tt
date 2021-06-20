@@ -141,7 +141,7 @@ async function focusChatMessage(client: WindowClient, data: { chatId?: number; m
 }
 
 export function handleNotificationClick(e: NotificationEvent) {
-  const appUrl = process.env.APP_URL!;
+  const appUrl = self.location.href.replace('serviceWorker.js', '');
   e.notification.close(); // Android needs explicit close.
   const { data } = e.notification;
   const notifyClients = async () => {
