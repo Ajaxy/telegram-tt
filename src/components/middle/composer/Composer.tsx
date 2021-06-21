@@ -121,6 +121,7 @@ type StateProps = {
   contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
   shouldSuggestStickers?: boolean;
   language: LangCode;
+  baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   serverTimeOffset: number;
 } & Pick<GlobalState, 'connectionState'>;
@@ -180,6 +181,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   contentToBeScheduled,
   shouldSuggestStickers,
   language,
+  baseEmojiKeywords,
   emojiKeywords,
   serverTimeOffset,
   recentEmojis,
@@ -308,6 +310,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     recentEmojis,
     undefined,
     setHtml,
+    baseEmojiKeywords,
     emojiKeywords,
   );
 
@@ -927,7 +930,8 @@ export default memo(withGlobal<OwnProps>(
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
     const { language } = global.settings.byKey;
-    const emojiKeywords = selectEmojiKeywords(global, language);
+    const baseEmojiKeywords = selectEmojiKeywords(global, 'en');
+    const emojiKeywords = language !== 'en' ? selectEmojiKeywords(global, language) : undefined;
 
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
@@ -963,6 +967,7 @@ export default memo(withGlobal<OwnProps>(
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
       recentEmojis: global.recentEmojis,
       language,
+      baseEmojiKeywords: baseEmojiKeywords ? baseEmojiKeywords.keywords : undefined,
       emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
       serverTimeOffset: global.serverTimeOffset,
     };
