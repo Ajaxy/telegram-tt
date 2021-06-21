@@ -21,6 +21,7 @@ import {
 } from '../../../api/types';
 import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
 
+import { IS_ANDROID } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import {
   selectChat,
@@ -405,6 +406,15 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [chatId, threadId, openMediaViewer, isScheduled]);
 
+  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+    const target = e.target as HTMLDivElement;
+    if (!target.classList.contains('text-content') && !target.classList.contains('Message')) {
+      return;
+    }
+
+    handleContextMenu(e);
+  }, [handleContextMenu]);
+
   const handleReadMedia = useCallback((): void => {
     markMessagesRead({ messageIds: [messageId] });
   }, [messageId, markMessagesRead]);
@@ -724,7 +734,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       // @ts-ignore teact feature
       style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}
-      onClick={isInSelectMode ? handleMessageSelect : undefined}
+      onClick={isInSelectMode ? handleMessageSelect : IS_ANDROID ? handleClick : undefined}
       onDoubleClick={!isInSelectMode ? handleContainerDoubleClick : undefined}
       onMouseDown={!isInSelectMode ? handleBeforeContextMenu : undefined}
       onContextMenu={!isInSelectMode ? handleContextMenu : undefined}
