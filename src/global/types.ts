@@ -450,7 +450,8 @@ export type ActionTypes = (
   'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations' |
   'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
   'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' | 'setPrivacySettings' |
-  'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
+  'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' | 'loadContentSettings' |
+  'updateContentSettings' |
   // Stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |

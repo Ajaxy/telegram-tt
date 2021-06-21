@@ -375,6 +375,24 @@ export async function updateIsOnline(isOnline: boolean) {
   await invokeRequest(new GramJs.account.UpdateStatus({ offline: !isOnline }));
 }
 
+export async function fetchContentSettings() {
+  const result = await invokeRequest(new GramJs.account.GetContentSettings());
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    isSensitiveEnabled: Boolean(result.sensitiveEnabled),
+    canChangeSensitive: Boolean(result.sensitiveCanChange),
+  };
+}
+
+export function updateContentSettings(isEnabled: boolean) {
+  return invokeRequest(new GramJs.account.SetContentSettings({
+    sensitiveEnabled: isEnabled || undefined,
+  }));
+}
+
 function updateLocalDb(
   result: (
     GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |

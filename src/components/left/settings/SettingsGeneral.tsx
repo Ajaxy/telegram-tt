@@ -24,12 +24,28 @@ type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
 };
 
-type StateProps = ISettings['byKey'] & {
+type StateProps = Pick<ISettings, (
+  'messageTextSize' |
+  'animationLevel' |
+  'messageSendKeyCombo' |
+  'shouldAutoDownloadMediaFromContacts' |
+  'shouldAutoDownloadMediaInPrivateChats' |
+  'shouldAutoDownloadMediaInGroups' |
+  'shouldAutoDownloadMediaInChannels' |
+  'shouldAutoPlayGifs' |
+  'shouldAutoPlayVideos' |
+  'shouldSuggestStickers' |
+  'shouldLoopStickers' |
+  'isSensitiveEnabled' |
+  'canChangeSensitive'
+)> & {
   stickerSetIds?: string[];
   stickerSetsById?: Record<string, ApiStickerSet>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setSettingOption' | 'loadStickerSets' | 'loadAddedStickers'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setSettingOption' | 'loadStickerSets' | 'loadAddedStickers' | 'loadContentSettings' | 'updateContentSettings'
+)>;
 
 const ANIMATION_LEVEL_OPTIONS = [
   'Solid and Steady',
@@ -52,9 +68,13 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldAutoPlayVideos,
   shouldSuggestStickers,
   shouldLoopStickers,
+  isSensitiveEnabled,
+  canChangeSensitive,
   setSettingOption,
   loadStickerSets,
   loadAddedStickers,
+  loadContentSettings,
+  updateContentSettings,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const stickerSettingsRef = useRef<HTMLDivElement>(null);
@@ -75,7 +95,8 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     loadStickerSets();
-  }, [loadStickerSets]);
+    loadContentSettings();
+  }, [loadContentSettings, loadStickerSets]);
 
   useEffect(() => {
     if (stickerSetIds && stickerSetIds.length) {
@@ -104,7 +125,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const stickerSets = stickerSetIds && stickerSetIds.map((id: string) => {
     return stickerSetsById && stickerSetsById[id] && stickerSetsById[id].installedDate ? stickerSetsById[id] : false;
-  }).filter(Boolean);
+  }).filter<ApiStickerSet>(Boolean as any);
 
   return (
     <div className="settings-content custom-scroll">
@@ -154,6 +175,19 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
           />
         </div>
       )}
+
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('lng_settings_sensitive_title')}
+        </h4>
+        <Checkbox
+          label={lang('lng_settings_sensitive_disable_filtering')}
+          subLabel={lang('lng_settings_sensitive_about')}
+          checked={Boolean(isSensitiveEnabled)}
+          disabled={!canChangeSensitive}
+          onCheck={updateContentSettings}
+        />
+      </div>
 
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoDownloadMedia')}</h4>
@@ -234,25 +268,26 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
-      ...pick(global.settings.byKey,
-        [
-          'messageTextSize',
-          'animationLevel',
-          'messageSendKeyCombo',
-          'shouldAutoDownloadMediaFromContacts',
-          'shouldAutoDownloadMediaInPrivateChats',
-          'shouldAutoDownloadMediaInGroups',
-          'shouldAutoDownloadMediaInChannels',
-          'shouldAutoPlayGifs',
-          'shouldAutoPlayVideos',
-          'shouldSuggestStickers',
-          'shouldLoopStickers',
-        ]),
+      ...pick(global.settings.byKey, [
+        'messageTextSize',
+        'animationLevel',
+        'messageSendKeyCombo',
+        'shouldAutoDownloadMediaFromContacts',
+        'shouldAutoDownloadMediaInPrivateChats',
+        'shouldAutoDownloadMediaInGroups',
+        'shouldAutoDownloadMediaInChannels',
+        'shouldAutoPlayGifs',
+        'shouldAutoPlayVideos',
+        'shouldSuggestStickers',
+        'shouldLoopStickers',
+        'isSensitiveEnabled',
+        'canChangeSensitive',
+      ]),
       stickerSetIds: global.stickers.added.setIds,
       stickerSetsById: global.stickers.setsById,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'setSettingOption', 'loadStickerSets', 'loadAddedStickers',
+    'setSettingOption', 'loadStickerSets', 'loadAddedStickers', 'loadContentSettings', 'updateContentSettings',
   ]),
 )(SettingsGeneral));
