@@ -295,7 +295,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       <div className="options-divider" />
 
       <div className="options-list custom-scroll" ref={optionsListRef}>
-        <h3 className="options-header">Options</h3>
+        <h3 className="options-header">{lang('PollOptions')}</h3>
 
         {hasErrors && renderQuizNoOptionError()}
         {isQuizMode ? (
@@ -332,7 +332,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
         />
         {isQuizMode && (
           <>
-            <h3 className="options-header">Solution</h3>
+            <h3 className="options-header">{lang('lng_polls_solution_title')}</h3>
             <div
               ref={solutionRef}
               className="form-control"
