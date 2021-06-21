@@ -79,7 +79,10 @@ const EmojiTooltip: FC<OwnProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(NO_EMOJI_SELECTED_INDEX);
 
   useEffect(() => {
-    loadEmojiKeywords({ language });
+    loadEmojiKeywords({ language: 'en' });
+    if (language !== 'en') {
+      loadEmojiKeywords({ language });
+    }
   }, [loadEmojiKeywords, language]);
 
   useEffect(() => {

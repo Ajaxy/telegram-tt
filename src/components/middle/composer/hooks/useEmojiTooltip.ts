@@ -34,6 +34,7 @@ export default function useEmojiTooltip(
   recentEmojiIds: string[],
   inputId = EDITABLE_INPUT_ID,
   onUpdateHtml: (html: string) => void,
+  baseEmojiKeywords?: Record<string, string[]>,
   emojiKeywords?: Record<string, string[]>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
@@ -78,14 +79,20 @@ export default function useEmojiTooltip(
 
     const emojis = Object.values(byId);
 
-    if (emojiKeywords) {
-      const byNative = buildCollectionByKey(emojis, 'native');
-      const emojisByKeyword = mapValues(emojiKeywords, (natives) => {
+    const byNative = buildCollectionByKey(emojis, 'native');
+    const baseEmojisByKeyword = baseEmojiKeywords
+      ? mapValues(baseEmojiKeywords, (natives) => {
         return Object.values(pickTruthy(byNative, natives));
-      });
-      setByKeyword(emojisByKeyword);
-      setKeywords(Object.keys(emojisByKeyword));
-    }
+      })
+      : {};
+    const emojisByKeyword = emojiKeywords
+      ? mapValues(emojiKeywords, (natives) => {
+        return Object.values(pickTruthy(byNative, natives));
+      })
+      : {};
+
+    setByKeyword({ ...baseEmojisByKeyword, ...emojisByKeyword });
+    setKeywords([...Object.keys(baseEmojisByKeyword), ...Object.keys(emojisByKeyword)]);
 
     const emojisByName = emojis.reduce((result, emoji) => {
       emoji.names.forEach((name) => {
@@ -100,10 +107,10 @@ export default function useEmojiTooltip(
     }, {} as Record<string, Emoji[]>);
     setByName(emojisByName);
     setNames(Object.keys(emojisByName));
-  }, [byId, emojiKeywords]);
+  }, [baseEmojiKeywords, byId, emojiKeywords]);
 
   useEffect(() => {
-    if (!isAllowed || !html || !byId) {
+    if (!isAllowed || !html || !byId || !keywords || !keywords.length) {
       unmarkIsOpen();
       return;
     }
