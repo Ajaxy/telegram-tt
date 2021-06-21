@@ -520,3 +520,23 @@ function buildInputPrivacyRules(global: GlobalState, {
 addReducer('updateIsOnline', (global, actions, payload) => {
   callApi('updateIsOnline', payload);
 });
+
+addReducer('loadContentSettings', () => {
+  (async () => {
+    const result = await callApi('fetchContentSettings');
+    if (!result) return;
+
+    setGlobal(replaceSettings(getGlobal(), result));
+  })();
+});
+
+addReducer('updateContentSettings', (global, actions, payload) => {
+  (async () => {
+    setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: payload }));
+
+    const result = await callApi('updateContentSettings', payload);
+    if (!result) {
+      setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: !payload }));
+    }
+  })();
+});

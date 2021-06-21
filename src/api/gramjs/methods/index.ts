@@ -47,7 +47,7 @@ export {
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
-  updateIsOnline,
+  updateIsOnline, fetchContentSettings, updateContentSettings,
 } from './settings';
 
 export {

@@ -60,6 +60,8 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   hasPassword?: boolean;
   languages?: ApiLanguage[];
   language: LangCode;
+  isSensitiveEnabled?: boolean;
+  canChangeSensitive?: boolean;
 }
 
 export interface ApiPrivacySettings {
