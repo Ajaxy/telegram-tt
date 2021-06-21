@@ -162,7 +162,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const [hasFocusing, setHasFocusing] = useState<boolean>(Boolean(focusingId));
 
   const areMessagesLoaded = Boolean(messageIds);
-  const isFocusing = Boolean(focusingId);
 
   useOnChange(() => {
     // We only need it first time when message list appears
@@ -183,7 +182,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [firstUnreadId]);
 
   const {
-    observe: observeIntersectionForMedia, freeze: freezeForMedia, unfreeze: unfreezeForMedia,
+    observe: observeIntersectionForMedia,
   } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE_FOR_MEDIA,
@@ -235,16 +234,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   useOnChange(() => {
     memoFocusingIdRef.current = focusingId;
   }, [focusingId]);
-
-  useOnChange(() => {
-    if (isFocusing) {
-      freezeForMedia();
-      freezeForReading();
-    } else {
-      unfreezeForReading();
-      unfreezeForMedia();
-    }
-  }, [isFocusing]);
 
   const { observe: observeIntersectionForAnimatedStickers } = useIntersectionObserver({
     rootRef: containerRef,
@@ -545,7 +534,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           containerRef={containerRef}
           className="messages-container"
           messageIds={messageIds || [lastMessage!.id]}
-          isFocusing={isFocusing}
           loadMoreForwards={loadMoreForwards}
           loadMoreBackwards={loadMoreBackwards}
           isViewportNewest={isViewportNewest}

@@ -10,7 +10,6 @@ type OwnProps = {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   className: string;
   messageIds: number[];
-  isFocusing: boolean;
   loadMoreForwards?: NoneToVoidFunction;
   loadMoreBackwards?: NoneToVoidFunction;
   isViewportNewest?: boolean;
@@ -27,7 +26,6 @@ const MessageScroll: FC<OwnProps> = ({
   containerRef,
   className,
   messageIds,
-  isFocusing,
   loadMoreForwards,
   loadMoreBackwards,
   isViewportNewest,
@@ -67,8 +65,6 @@ const MessageScroll: FC<OwnProps> = ({
 
   const {
     observe: observeIntersection,
-    freeze: freezeForLoadMore,
-    unfreeze: unfreezeForLoadMore,
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: MESSAGE_LIST_SENSITIVE_AREA,
@@ -116,14 +112,6 @@ const MessageScroll: FC<OwnProps> = ({
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
-
-  useOnChange(() => {
-    if (isFocusing) {
-      freezeForLoadMore();
-    } else {
-      unfreezeForLoadMore();
-    }
-  }, [isFocusing]);
 
   // Workaround for FAB and notch flickering with tall incoming message
   useOnChange(() => {
