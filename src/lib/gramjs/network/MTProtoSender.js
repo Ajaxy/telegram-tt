@@ -589,6 +589,12 @@ class MTProtoSender {
      */
     _handlePong(message) {
         const pong = message.obj;
+
+        const newTimeOffset = this._state.updateTimeOffset(message.msgId);
+        if (this._updateCallback) {
+            this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
+        }
+
         this._log.debug(`Handling pong for message ${pong.msgId}`);
         const state = this._pending_state[pong.msgId];
         delete this._pending_state[pong.msgId];
@@ -633,10 +639,10 @@ class MTProtoSender {
         if ([16, 17].includes(badMsg.errorCode)) {
             // Sent msg_id too low or too high (respectively).
             // Use the current msg_id to determine the right time offset.
-            const to = this._state.updateTimeOffset(message.msgId);
+            const newTimeOffset = this._state.updateTimeOffset(message.msgId);
 
             if (this._updateCallback) {
-                this._updateCallback(new UpdateServerTimeOffset(to));
+                this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
             }
 
             this._log.info(`System clock is wrong, set time offset to ${to}s`);
