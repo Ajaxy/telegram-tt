@@ -137,6 +137,18 @@ const Main: FC<StateProps & DispatchProps> = ({
     updateIsOnline(true);
   });
 
+  useEffect(() => {
+    function handleUnload() {
+      updateIsOnline(false);
+    }
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, [updateIsOnline]);
+
   // Browser tab indicators
   useBackgroundMode(() => {
     const initialUnread = selectCountNotMutedUnread(getGlobal());
