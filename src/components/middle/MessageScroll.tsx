@@ -10,7 +10,7 @@ type OwnProps = {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   className: string;
   messageIds: number[];
-  focusingId?: number;
+  isFocusing: boolean;
   loadMoreForwards?: NoneToVoidFunction;
   loadMoreBackwards?: NoneToVoidFunction;
   isViewportNewest?: boolean;
@@ -27,7 +27,7 @@ const MessageScroll: FC<OwnProps> = ({
   containerRef,
   className,
   messageIds,
-  focusingId,
+  isFocusing,
   loadMoreForwards,
   loadMoreBackwards,
   isViewportNewest,
@@ -117,7 +117,6 @@ const MessageScroll: FC<OwnProps> = ({
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
-  const isFocusing = Boolean(focusingId);
   useOnChange(() => {
     if (isFocusing) {
       freezeForLoadMore();
