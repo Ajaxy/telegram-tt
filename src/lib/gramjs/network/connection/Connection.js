@@ -52,11 +52,9 @@ class Connection {
     }
 
     async disconnect() {
-        if (this._connected) {
-            this._connected = false;
-            await this._recvArray.push(undefined);
-            await this.socket.close();
-        }
+        this._connected = false;
+        void this._recvArray.push(undefined);
+        await this.socket.close();
     }
 
     async send(data) {
