@@ -23,7 +23,7 @@ import {
   replaceThreadParam,
 } from '../../reducers';
 import {
-  selectUser, selectChat, selectCurrentMessageList, selectDraft, selectChatMessage,
+  selectUser, selectChat, selectCurrentMessageList, selectDraft, selectChatMessage, selectThreadInfo,
 } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
 
@@ -187,7 +187,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
   let users = savedUsers || [];
 
   let global = getGlobal();
-  const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
+  const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId).map(Number);
@@ -200,6 +200,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
     const result = await loadTopMessages(global.chats.byId[currentChatId]);
     global = getGlobal();
     const { chatId: newCurrentChatId } = selectCurrentMessageList(global) || {};
+    const threadInfo = currentThreadId && selectThreadInfo(global, currentChatId, currentThreadId);
 
     if (result && newCurrentChatId === currentChatId) {
       const currentMessageListInfo = global.messages.byChatId[currentChatId];
@@ -226,6 +227,47 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
         },
       };
 
+      if (currentThreadId && threadInfo && threadInfo.originChannelId) {
+        const { originChannelId } = threadInfo;
+        const currentMessageListInfoOrigin = global.messages.byChatId[originChannelId];
+        const resultOrigin = await loadTopMessages(global.chats.byId[originChannelId]);
+        if (resultOrigin) {
+          const byIdOrigin = buildCollectionByKey(resultOrigin.messages, 'id');
+          const listedIdsOrigin = Object.keys(byIdOrigin)
+            .map(Number);
+
+          global = {
+            ...global,
+            messages: {
+              ...global.messages,
+              byChatId: {
+                ...global.messages.byChatId,
+                [threadInfo.originChannelId]: {
+                  byId: byIdOrigin,
+                  threadsById: {
+                    [MAIN_THREAD_ID]: {
+                      ...(currentMessageListInfoOrigin && currentMessageListInfoOrigin.threadsById[MAIN_THREAD_ID]),
+                      listedIds: listedIdsOrigin,
+                      viewportIds: listedIdsOrigin,
+                      outlyingIds: undefined,
+                    },
+                  },
+                },
+                [currentChatId]: {
+                  ...global.messages.byChatId[currentChatId],
+                  threadsById: {
+                    ...global.messages.byChatId[currentChatId].threadsById,
+                    [currentThreadId]: {
+                      ...(currentMessageListInfo && currentMessageListInfo.threadsById[currentThreadId]),
+                      outlyingIds: undefined,
+                    },
+                  },
+                },
+              },
+            },
+          };
+        }
+      }
       global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
       global = updateThreadInfos(global, currentChatId, result.threadInfos);
 
