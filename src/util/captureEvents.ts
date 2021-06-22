@@ -97,7 +97,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         if (options.onRelease) {
           options.onRelease(e);
         }
-      } else if (options.onClick) {
+      } else if (options.onClick && (!('button' in e) || e.button === 0)) {
         options.onClick(e);
       }
     }
