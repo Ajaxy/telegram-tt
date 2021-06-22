@@ -606,35 +606,36 @@ function isListLike(item) {
 }
 */
 function getDC(dcId) {
+    // TODO Move to external config
     switch (dcId) {
         case 1:
             return {
                 id: 1,
-                ipAddress: 'pluto.web.telegram.org',
+                ipAddress: 'zws1.web.telegram.org',
                 port: 443,
             };
         case 2:
             return {
                 id: 2,
-                ipAddress: 'venus.web.telegram.org',
+                ipAddress: 'zws2.web.telegram.org',
                 port: 443,
             };
         case 3:
             return {
                 id: 3,
-                ipAddress: 'aurora.web.telegram.org',
+                ipAddress: 'zws3.web.telegram.org',
                 port: 443,
             };
         case 4:
             return {
                 id: 4,
-                ipAddress: 'vesta.web.telegram.org',
+                ipAddress: 'zws4.web.telegram.org',
                 port: 443,
             };
         case 5:
             return {
                 id: 5,
-                ipAddress: 'flora.web.telegram.org',
+                ipAddress: 'zws5.web.telegram.org',
                 port: 443,
             };
         default:
