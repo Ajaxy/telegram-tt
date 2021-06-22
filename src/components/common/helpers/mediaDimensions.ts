@@ -1,7 +1,7 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
 import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
 import windowSize from '../../../util/windowSize';
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
@@ -17,7 +17,7 @@ let cachedMaxWidth: number | undefined;
 
 function getMaxMessageWidthRem(fromOwnMessage: boolean) {
   const regularMaxWidth = fromOwnMessage ? 30 : 29;
-  if (!IS_MOBILE_SCREEN) {
+  if (!IS_SINGLE_COLUMN_LAYOUT) {
     return regularMaxWidth;
   }
 
@@ -154,7 +154,11 @@ export function getStickerDimensions(sticker: ApiSticker): IDimensions {
   }
 
   const aspectRatio = (height && width) && height / width;
-  const baseWidth = (IS_MOBILE_SCREEN ? STICKER_SIZE_INLINE_MOBILE_FACTOR : STICKER_SIZE_INLINE_DESKTOP_FACTOR) * REM;
+  const baseWidth = REM * (
+    IS_SINGLE_COLUMN_LAYOUT
+      ? STICKER_SIZE_INLINE_MOBILE_FACTOR
+      : STICKER_SIZE_INLINE_DESKTOP_FACTOR
+  );
   const calculatedHeight = aspectRatio ? baseWidth * aspectRatio : baseWidth;
 
   if (aspectRatio && calculatedHeight > baseWidth) {

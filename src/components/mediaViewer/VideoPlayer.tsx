@@ -4,7 +4,7 @@ import React, {
 
 import { IDimensions } from '../../modules/helpers';
 
-import { IS_IOS, IS_MOBILE_SCREEN, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreenStatus from '../../hooks/useFullscreen';
@@ -144,7 +144,7 @@ const VideoPlayer: FC<OwnProps> = ({
   return (
     <div
       className="VideoPlayer"
-      onClick={!isGif && IS_MOBILE_SCREEN ? toggleControls : undefined}
+      onClick={!isGif && IS_SINGLE_COLUMN_LAYOUT ? toggleControls : undefined}
       onMouseOver={!isGif ? handleMouseOver : undefined}
       onMouseOut={!isGif ? handleMouseOut : undefined}
     >
@@ -164,7 +164,7 @@ const VideoPlayer: FC<OwnProps> = ({
           // @ts-ignore
           style={videoStyle}
           onEnded={handleEnded}
-          onClick={togglePlayState}
+          onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
           onDoubleClick={handleFullscreenChange}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}

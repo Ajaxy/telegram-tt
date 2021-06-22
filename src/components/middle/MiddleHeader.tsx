@@ -21,7 +21,7 @@ import {
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
 } from '../../config';
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import {
   isChatPrivate,
   isChatArchived,
@@ -184,14 +184,14 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openChat, chatId]);
 
   const handleBackClick = useCallback(() => {
-    if (IS_MOBILE_SCREEN) {
+    if (IS_SINGLE_COLUMN_LAYOUT) {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID);
       if (messageInput) {
         messageInput.blur();
       }
     }
     if (threadId === MAIN_THREAD_ID && messageListType === 'thread') {
-      if (IS_MOBILE_SCREEN) {
+      if (IS_SINGLE_COLUMN_LAYOUT) {
         openChat({ id: undefined });
       } else {
         toggleLeftColumn();

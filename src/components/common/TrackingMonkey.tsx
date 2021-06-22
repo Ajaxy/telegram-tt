@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { STICKER_SIZE_AUTH, STICKER_SIZE_AUTH_MOBILE, STICKER_SIZE_TWO_FA } from '../../config';
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import getAnimationData from './helpers/animatedAssets';
 
 import AnimatedSticker from './AnimatedSticker';
@@ -20,7 +20,7 @@ type OwnProps = {
 
 const TRACKING_START_FRAME = 15;
 const TRACKING_END_FRAME = 180;
-const STICKER_SIZE = IS_MOBILE_SCREEN ? STICKER_SIZE_AUTH_MOBILE : STICKER_SIZE_AUTH;
+const STICKER_SIZE = IS_SINGLE_COLUMN_LAYOUT ? STICKER_SIZE_AUTH_MOBILE : STICKER_SIZE_AUTH;
 
 const TrackingMonkey: FC<OwnProps> = ({
   code,

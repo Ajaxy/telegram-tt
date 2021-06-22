@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect } from '../../lib/teact/teact';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import formatFileSize from './helpers/formatFileSize';
 import useLang from '../../hooks/useLang';
@@ -58,7 +58,7 @@ const VideoPlayerControls: FC<IProps> = ({
     let timeout: number | undefined;
 
     if (!isForceVisible) {
-      if (IS_MOBILE_SCREEN) {
+      if (IS_SINGLE_COLUMN_LAYOUT) {
         setVisibility(false);
       } else {
         timeout = window.setTimeout(() => {
@@ -96,7 +96,7 @@ const VideoPlayerControls: FC<IProps> = ({
       <Button
         ariaLabel={lang('AccActionPlay')}
         size="tiny"
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         color="translucent-white"
         className="play"
         onClick={onPlayPause}

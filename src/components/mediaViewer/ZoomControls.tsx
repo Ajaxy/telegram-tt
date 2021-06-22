@@ -2,7 +2,7 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import usePrevious from '../../hooks/usePrevious';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -82,7 +82,7 @@ const ZoomControls: FC<OwnProps> = ({ isShown, onChangeZoom }) => {
         color="translucent-white"
         ariaLabel={lang('ZoomOut')}
         className="zoom-out"
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         onClick={handleZoomOut}
       >
         <i className="icon-zoom-out" />
@@ -93,7 +93,7 @@ const ZoomControls: FC<OwnProps> = ({ isShown, onChangeZoom }) => {
         color="translucent-white"
         ariaLabel="Zoom In"
         className="zoom-in"
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         onClick={handleZoomIn}
       >
         <i className="icon-zoom-in" />

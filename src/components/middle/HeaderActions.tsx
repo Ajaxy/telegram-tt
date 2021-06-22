@@ -11,7 +11,7 @@ import { GlobalActions, MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { IAnchorPosition } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { pick } from '../../util/iteratees';
 import { isChatChannel, isChatSuperGroup } from '../../modules/helpers';
 import {
@@ -94,7 +94,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleSearchClick = useCallback(() => {
     openLocalTextSearch();
 
-    if (IS_MOBILE_SCREEN) {
+    if (IS_SINGLE_COLUMN_LAYOUT) {
       // iOS requires synchronous focus on user event.
       const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
       searchInput.focus();
@@ -112,7 +112,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="HeaderActions">
-      {!IS_MOBILE_SCREEN && canSubscribe && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canSubscribe && (
         <Button
           size="tiny"
           ripple
@@ -122,7 +122,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           {lang(isChannel ? 'Subscribe' : 'Join Group')}
         </Button>
       )}
-      {!IS_MOBILE_SCREEN && canStartBot && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canStartBot && (
         <Button
           size="tiny"
           ripple
@@ -132,7 +132,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           {lang('Start')}
         </Button>
       )}
-      {!IS_MOBILE_SCREEN && canSearch && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canSearch && (
         <Button
           round
           ripple={isRightColumnShown}
@@ -144,12 +144,12 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           <i className="icon-search" />
         </Button>
       )}
-      {(IS_MOBILE_SCREEN || !canSubscribe) && (
+      {(IS_SINGLE_COLUMN_LAYOUT || !canSubscribe) && (
         <Button
           ref={menuButtonRef}
           className={isMenuOpen ? 'active' : ''}
           round
-          ripple={!IS_MOBILE_SCREEN}
+          ripple={!IS_SINGLE_COLUMN_LAYOUT}
           size="smaller"
           color="translucent"
           disabled={noMenu}
@@ -207,8 +207,8 @@ export default memo(withGlobal<OwnProps>(
     const canLeave = isMainThread && !canSubscribe;
 
     const noMenu = !(
-      (IS_MOBILE_SCREEN && canSubscribe)
-      || (IS_MOBILE_SCREEN && canSearch)
+      (IS_SINGLE_COLUMN_LAYOUT && canSubscribe)
+      || (IS_SINGLE_COLUMN_LAYOUT && canSearch)
       || canMute
       || canSelect
       || canLeave

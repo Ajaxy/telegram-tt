@@ -5,7 +5,7 @@ import React, {
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
 import { IAllowedAttachmentOptions } from '../../../modules/helpers';
-import { IS_MOBILE_SCREEN, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -49,7 +49,7 @@ const SymbolMenu: FC<OwnProps> = ({
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_MOBILE_SCREEN);
+  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_SINGLE_COLUMN_LAYOUT);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
 
   if (!isActivated && isOpen) {
@@ -61,7 +61,7 @@ const SymbolMenu: FC<OwnProps> = ({
   }, [onLoad]);
 
   useLayoutEffect(() => {
-    if (!IS_MOBILE_SCREEN) {
+    if (!IS_SINGLE_COLUMN_LAYOUT) {
       return undefined;
     }
 
@@ -158,7 +158,7 @@ const SymbolMenu: FC<OwnProps> = ({
           </Transition>
         )}
       </div>
-      {IS_MOBILE_SCREEN && (
+      {IS_SINGLE_COLUMN_LAYOUT && (
         <Button
           round
           faded
@@ -180,7 +180,7 @@ const SymbolMenu: FC<OwnProps> = ({
     </>
   );
 
-  if (IS_MOBILE_SCREEN) {
+  if (IS_SINGLE_COLUMN_LAYOUT) {
     if (!shouldRender) {
       return undefined;
     }

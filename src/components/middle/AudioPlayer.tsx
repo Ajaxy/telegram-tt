@@ -6,7 +6,7 @@ import {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageAudio, getMessageKey, getMessageMediaHash, getSenderTitle,
@@ -67,7 +67,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className={buildClassName('AudioPlayer', className)} dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
         round
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         color="translucent"
         size="smaller"
         className={buildClassName('toggle-play', isPlaying ? 'pause' : 'play')}

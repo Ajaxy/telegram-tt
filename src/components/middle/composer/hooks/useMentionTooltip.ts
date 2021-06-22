@@ -4,7 +4,7 @@ import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/t
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import { getUserFirstOrLastName } from '../../../../modules/helpers';
 import searchUserName from '../helpers/searchUserName';
-import { IS_MOBILE_SCREEN } from '../../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../../util/environment';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import useFlag from '../../../../hooks/useFlag';
 
@@ -80,7 +80,7 @@ export default function useMentionTooltip(
     if (atIndex !== -1) {
       onUpdateHtml(`${html.substr(0, atIndex)}${insertedHtml}&nbsp;`);
       const messageInput = document.getElementById(inputId)!;
-      if (!IS_MOBILE_SCREEN) {
+      if (!IS_SINGLE_COLUMN_LAYOUT) {
         requestAnimationFrame(() => {
           focusEditableElement(messageInput, forceFocus);
         });

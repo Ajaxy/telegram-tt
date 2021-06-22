@@ -14,7 +14,7 @@ import {
   LEGACY_SESSION_KEY,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN, GLOBAL_STATE_CACHE_USER_LIST_LIMIT, SESSION_USER_KEY,
 } from '../config';
-import { IS_MOBILE_SCREEN } from '../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { pick } from '../util/iteratees';
 import { INITIAL_STATE } from './initial';
 import { selectCurrentMessageList } from '../modules/selectors';
@@ -205,7 +205,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 
   return {
     byChatId,
-    messageLists: !currentMessageList || IS_MOBILE_SCREEN ? undefined : [{
+    messageLists: !currentMessageList || IS_SINGLE_COLUMN_LAYOUT ? undefined : [{
       ...currentMessageList,
       threadId: MAIN_THREAD_ID,
       type: 'thread',

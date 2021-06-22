@@ -6,7 +6,7 @@ import buildClassName from '../../util/buildClassName';
 import {
   formatMonthAndYear, formatHumanDate, formatTime,
 } from '../../util/dateFormat';
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import useLang, { LangFn } from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -183,7 +183,7 @@ const CalendarModal: FC<OwnProps> = ({
           </Button>
 
           <h4>
-            {formatMonthAndYear(lang, selectedDate, IS_MOBILE_SCREEN)}
+            {formatMonthAndYear(lang, selectedDate, IS_SINGLE_COLUMN_LAYOUT)}
           </h4>
 
           <Button

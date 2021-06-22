@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ManagementScreens, ProfileState } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
@@ -270,7 +270,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   const isBackButton = (
-    IS_MOBILE_SCREEN
+    IS_SINGLE_COLUMN_LAYOUT
     || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
     || isManagement

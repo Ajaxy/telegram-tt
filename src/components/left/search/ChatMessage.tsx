@@ -8,7 +8,7 @@ import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
 } from '../../../api/types';
 
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   getChatTitle,
   getPrivateChatUserId,
@@ -76,7 +76,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <ListItem
       className="ChatMessage chat-item-clickable"
-      ripple={!IS_MOBILE_SCREEN}
+      ripple={!IS_SINGLE_COLUMN_LAYOUT}
       onClick={handleClick}
       buttonRef={buttonRef}
     >

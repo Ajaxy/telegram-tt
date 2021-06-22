@@ -35,7 +35,7 @@ export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAge
 
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
 // Keep in mind the landscape orientation
-export const IS_MOBILE_SCREEN = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH || (
+export const IS_SINGLE_COLUMN_LAYOUT = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH || (
   window.innerWidth <= MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH && window.innerHeight <= MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT
 );
 export const IS_VOICE_RECORDING_SUPPORTED = (navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (

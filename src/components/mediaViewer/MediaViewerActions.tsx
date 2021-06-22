@@ -2,7 +2,7 @@ import React, { FC, useMemo } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaHash } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
 
@@ -60,7 +60,7 @@ const MediaViewerActions: FC<OwnProps> = ({
     );
   }, []);
 
-  if (IS_MOBILE_SCREEN) {
+  if (IS_SINGLE_COLUMN_LAYOUT) {
     return (
       <div className="MediaViewerActions-mobile">
         <DropdownMenu

@@ -19,7 +19,7 @@ import {
 import { LangCode } from '../../../types';
 
 import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_MOBILE_SCREEN, IS_EMOJI_SUPPORTED } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import {
   selectChat,
   selectIsChatWithBot,
@@ -337,7 +337,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setHtml(`${htmlRef.current!}${newHtml}`);
 
-    if (!IS_MOBILE_SCREEN) {
+    if (!IS_SINGLE_COLUMN_LAYOUT) {
       // If selection is outside of input, set cursor at the end of input
       requestAnimationFrame(() => {
         focusEditableElement(messageInput);
@@ -368,7 +368,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     closeMentionTooltip();
     closeEmojiTooltip();
 
-    if (IS_MOBILE_SCREEN) {
+    if (IS_SINGLE_COLUMN_LAYOUT) {
       // @perf
       setTimeout(() => closeSymbolMenu(), SENDING_ANIMATION_DURATION);
     } else {
@@ -582,7 +582,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleSymbolMenuOpen = useCallback(() => {
     const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
 
-    if (!IS_MOBILE_SCREEN || messageInput !== document.activeElement) {
+    if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
       openSymbolMenu();
       return;
     }
@@ -598,7 +598,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openChat, chatId, threadId]);
 
   useEffect(() => {
-    if (isRightColumnShown && IS_MOBILE_SCREEN) {
+    if (isRightColumnShown && IS_SINGLE_COLUMN_LAYOUT) {
       closeSymbolMenu();
     }
   }, [isRightColumnShown, closeSymbolMenu]);
@@ -751,7 +751,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           disabled={!allowedAttachmentOptions.canAttachEmbedLinks}
         />
         <div className="message-input-wrapper">
-          {IS_MOBILE_SCREEN ? (
+          {IS_SINGLE_COLUMN_LAYOUT ? (
             <Button
               className={symbolMenuButtonClassName}
               round
@@ -782,7 +782,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
               activeVoiceRecording && window.innerWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER ? '' : lang('Message')
             }
             shouldSetFocus={isSymbolMenuOpen}
-            shouldSupressFocus={IS_MOBILE_SCREEN && isSymbolMenuOpen}
+            shouldSupressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
             shouldSupressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
             onUpdate={setHtml}
             onSend={onSend}

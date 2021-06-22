@@ -8,7 +8,7 @@ import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
 import { APP_NAME, APP_VERSION, FEEDBACK_URL } from '../../../config';
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { isChatArchived } from '../../../modules/helpers';
@@ -109,7 +109,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
-        ripple={hasMenu && !IS_MOBILE_SCREEN}
+        ripple={hasMenu && !IS_SINGLE_COLUMN_LAYOUT}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}

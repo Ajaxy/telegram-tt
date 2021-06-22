@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 
@@ -240,7 +240,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   return (
     <Transition
       id="LeftColumn"
-      name={IS_MOBILE_SCREEN ? 'slide-layers' : 'push-slide'}
+      name={IS_SINGLE_COLUMN_LAYOUT ? 'slide-layers' : 'push-slide'}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
     >

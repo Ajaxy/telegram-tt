@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiUser } from '../../../api/types';
 
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
 import { pick } from '../../../util/iteratees';
@@ -77,7 +77,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
             key={id}
             className="chat-item-clickable"
             onClick={() => handleClick(id)}
-            ripple={!IS_MOBILE_SCREEN}
+            ripple={!IS_SINGLE_COLUMN_LAYOUT}
           >
             <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
           </ListItem>
