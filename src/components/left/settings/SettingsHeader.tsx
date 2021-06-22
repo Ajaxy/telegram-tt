@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 
@@ -66,7 +66,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}

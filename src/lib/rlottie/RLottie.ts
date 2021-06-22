@@ -2,7 +2,7 @@ import Worker from 'worker-loader!./rlottie.worker';
 
 import {
   DPR,
-  IS_MOBILE_SCREEN,
+  IS_SINGLE_COLUMN_LAYOUT,
   IS_SAFARI,
 } from '../../util/environment';
 import WorkerConnector from '../../util/WorkerConnector';
@@ -22,7 +22,7 @@ type Chunks = (Frames | undefined)[];
 // TODO Consider removing chunks
 const CHUNK_SIZE = 1;
 const MAX_WORKERS = 4;
-const HIGH_PRIORITY_QUALITY = IS_MOBILE_SCREEN ? 0.75 : 1;
+const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = 0.75;
 const HIGH_PRIORITY_MAX_FPS = 60;
 const LOW_PRIORITY_MAX_FPS = 30;

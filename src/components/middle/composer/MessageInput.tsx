@@ -14,7 +14,7 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import {
-  IS_ANDROID, IS_IOS, IS_MOBILE_SCREEN, IS_TOUCH_ENV,
+  IS_ANDROID, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
@@ -52,7 +52,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'editLastMessage' | 'replyToNextMessage'>;
 
-const MAX_INPUT_HEIGHT = IS_MOBILE_SCREEN ? 256 : 416;
+const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
 // For some reason Safari inserts `<br>` after user removes text from input

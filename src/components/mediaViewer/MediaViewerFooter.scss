@@ -16,7 +16,7 @@
     padding-bottom: 4.5rem;
     background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
 
-    &.hideable {
+    &.is-for-video {
       opacity: 0;
       pointer-events: none;
 
@@ -41,6 +41,12 @@
 
     @media (max-width: 600px) {
       opacity: 1;
+    }
+  }
+
+  &.is-hidden {
+    .media-viewer-footer-content {
+      opacity: 0;
     }
   }
 

@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import {
   getCanPostInChat, getChatTitle, isChatPrivate, sortChatIds,
 } from '../../modules/helpers';
@@ -65,7 +65,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      if (!IS_MOBILE_SCREEN) {
+      if (!IS_SINGLE_COLUMN_LAYOUT) {
         setTimeout(() => {
           requestAnimationFrame(() => {
             if (inputRef.current) {

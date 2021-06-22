@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { MIN_PASSWORD_LENGTH } from '../../config';
-import { IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 
@@ -23,7 +23,7 @@ type OwnProps = {
   onSubmit: (password: string) => void;
 };
 
-const FOCUS_DELAY_TIMEOUT_MS = IS_MOBILE_SCREEN ? 550 : 400;
+const FOCUS_DELAY_TIMEOUT_MS = IS_SINGLE_COLUMN_LAYOUT ? 550 : 400;
 
 const PasswordForm: FC<OwnProps> = ({
   isLoading = false,

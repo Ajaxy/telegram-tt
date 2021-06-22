@@ -7,7 +7,7 @@ import { GlobalState } from '../../../global/types';
 
 import { MENU_TRANSITION_DURATION } from '../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   EmojiModule,
   EmojiRawData,
@@ -99,7 +99,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
   });
 
-  useHorizontalScroll(headerRef.current, !IS_MOBILE_SCREEN);
+  useHorizontalScroll(headerRef.current, !IS_SINGLE_COLUMN_LAYOUT);
 
   // Scroll header when active set updates
   useEffect(() => {

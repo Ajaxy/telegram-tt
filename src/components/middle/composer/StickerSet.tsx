@@ -5,7 +5,7 @@ import { StickerSetOrRecent } from '../../../types';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import StickerButton from '../../common/StickerButton';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -22,7 +22,7 @@ type OwnProps = {
 };
 
 const STICKERS_PER_ROW_ON_DESKTOP = 5;
-const STICKER_MARGIN = IS_MOBILE_SCREEN ? 8 : 16;
+const STICKER_MARGIN = IS_SINGLE_COLUMN_LAYOUT ? 8 : 16;
 const MOBILE_CONTAINER_PADDING = 8;
 
 const StickerSet: FC<OwnProps> = ({
@@ -41,7 +41,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const { transitionClassNames } = useShowTransition(shouldRender, undefined, undefined, 'slow');
 
-  const stickersPerRow = IS_MOBILE_SCREEN
+  const stickersPerRow = IS_SINGLE_COLUMN_LAYOUT
     ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (STICKER_SIZE_PICKER + STICKER_MARGIN))
     : STICKERS_PER_ROW_ON_DESKTOP;
   const height = Math.ceil(stickerSet.count / stickersPerRow) * (STICKER_SIZE_PICKER + STICKER_MARGIN);

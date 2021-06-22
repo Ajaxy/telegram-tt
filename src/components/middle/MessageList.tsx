@@ -8,7 +8,7 @@ import { GlobalActions, MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_LIST_SLICE, SCHEDULED_WHEN_ONLINE } from '../../config';
-import { IS_ANDROID, IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_ANDROID, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import {
   selectChatMessages,
   selectIsViewportNewest,
@@ -102,7 +102,7 @@ const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
 const SCROLL_DEBOUNCE = 200;
 const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
-const INTERSECTION_MARGIN_FOR_MEDIA = IS_MOBILE_SCREEN ? 300 : 500;
+const INTERSECTION_MARGIN_FOR_MEDIA = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
 const FOCUSING_DURATION = 1000;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;

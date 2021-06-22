@@ -5,7 +5,7 @@ import { withGlobal } from '../../../../lib/teact/teactn';
 
 import { ApiSticker } from '../../../../api/types';
 
-import { IS_MOBILE_SCREEN, IS_TOUCH_ENV } from '../../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../../util/environment';
 import { selectAnimatedEmoji } from '../../../../modules/selectors';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
@@ -31,7 +31,7 @@ type StateProps = {
   animatedEmoji: ApiSticker;
 };
 
-const FOCUS_DELAY_TIMEOUT_MS = IS_MOBILE_SCREEN ? 550 : 400;
+const FOCUS_DELAY_TIMEOUT_MS = IS_SINGLE_COLUMN_LAYOUT ? 550 : 400;
 
 const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   animatedEmoji,

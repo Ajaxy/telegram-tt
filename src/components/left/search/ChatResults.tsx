@@ -7,7 +7,7 @@ import { ApiUser, ApiChat, ApiMessage } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import searchWords from '../../../util/searchWords';
 import { unique, pick } from '../../../util/iteratees';
 import { getUserFullName, getMessageSummaryText, sortChatIds } from '../../../modules/helpers';
@@ -88,7 +88,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
         addRecentlyFoundChatId({ id });
       }
 
-      if (!IS_MOBILE_SCREEN) {
+      if (!IS_SINGLE_COLUMN_LAYOUT) {
         onReset();
       }
     },

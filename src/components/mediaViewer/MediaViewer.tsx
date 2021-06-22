@@ -10,7 +10,7 @@ import {
 import { MediaViewerOrigin } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { IS_IOS, IS_MOBILE_SCREEN, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import {
   AVATAR_FULL_DIMENSIONS,
   MEDIA_VIEWER_MEDIA_QUERY,
@@ -126,6 +126,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [panDelta, setPanDelta] = useState({ x: 0, y: 0 });
+  const [isFooterHidden, setIsFooterHidden] = useState<boolean>(false);
 
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
@@ -189,7 +190,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
 
   useEffect(() => {
-    if (!IS_MOBILE_SCREEN) {
+    if (!IS_SINGLE_COLUMN_LAYOUT) {
       return;
     }
 
@@ -373,7 +374,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       // eslint-disable-next-line max-len
       excludedClosestSelector: `.backdrop, .navigation, .media-viewer-head, .media-viewer-footer${!shouldCloseOnVideo ? ', .VideoPlayer' : ''}`,
       onClick: () => {
-        if (!isZoomed) {
+        if (!isZoomed && !IS_TOUCH_ENV) {
           close();
         }
       },
@@ -382,16 +383,22 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           selectPreviousMedia();
         } else if (direction === SwipeDirection.Left) {
           selectNextMedia();
-        } else {
+        } else if (!(e.target && (e.target as HTMLElement).closest('.MediaViewerFooter'))) {
           close();
         }
       } : undefined,
     });
-  }, [close, isGif, isZoomed, selectNextMedia, selectPreviousMedia, canPanZoomWrap]);
+  }, [close, isFooterHidden, isGif, isPhoto, isZoomed, selectNextMedia, selectPreviousMedia]);
 
   const handlePan = useCallback((x: number, y: number) => {
     setPanDelta({ x, y });
   }, []);
+
+  const handleToggleFooterVisibility = useCallback(() => {
+    if (IS_TOUCH_ENV && (isPhoto || isGif)) {
+      setIsFooterHidden(!isFooterHidden);
+    }
+  }, [isFooterHidden, isGif, isPhoto]);
 
   const lang = useLang();
 
@@ -402,7 +409,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           {renderPhoto(
             fullMediaData || blobUrlPreview,
             calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false),
-            !IS_MOBILE_SCREEN && !isZoomed,
+            !IS_SINGLE_COLUMN_LAYOUT && !isZoomed,
           )}
         </div>
       );
@@ -411,11 +418,15 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       const hasFooter = Boolean(textParts);
 
       return (
-        <div key={messageId} className={`media-viewer-content ${hasFooter ? 'has-footer' : ''}`}>
+        <div
+          key={messageId}
+          className={`media-viewer-content ${hasFooter ? 'has-footer' : ''}`}
+          onClick={handleToggleFooterVisibility}
+        >
           {isPhoto && renderPhoto(
             localBlobUrl || fullMediaData || blobUrlPreview || blobUrlPictogram,
             message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
-            !IS_MOBILE_SCREEN && !isZoomed,
+            !IS_SINGLE_COLUMN_LAYOUT && !isZoomed,
           )}
           {isVideo && (
             <VideoPlayer
@@ -435,7 +446,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
             <MediaViewerFooter
               text={textParts}
               onClick={handleFooterClick}
-              isHideable={isVideo}
+              isHidden={isFooterHidden && (!isVideo || isGif)}
+              isForVideo={isVideo && !isGif}
             />
           )}
         </div>
@@ -465,7 +477,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       {() => (
         <>
           <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-            {IS_MOBILE_SCREEN && (
+            {IS_SINGLE_COLUMN_LAYOUT && (
               <Button
                 className="media-viewer-close"
                 round

@@ -4,21 +4,21 @@ import {
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
-import { IS_IOS, IS_MOBILE_SCREEN } from './environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from './environment';
 
 type IDimensions = {
   width: number;
   height: number;
 };
 
-const IS_LANDSCAPE = IS_MOBILE_SCREEN && isLandscape();
+const IS_LANDSCAPE = IS_SINGLE_COLUMN_LAYOUT && isLandscape();
 
 let windowSize = updateSizes();
 
 const handleResize = throttle(() => {
   windowSize = updateSizes();
 
-  if ((isMobileScreen() !== IS_MOBILE_SCREEN) || (IS_MOBILE_SCREEN && IS_LANDSCAPE !== isLandscape())) {
+  if ((isMobileScreen() !== IS_SINGLE_COLUMN_LAYOUT) || (IS_SINGLE_COLUMN_LAYOUT && IS_LANDSCAPE !== isLandscape())) {
     window.location.reload();
   }
 }, 250, true);

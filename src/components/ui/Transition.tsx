@@ -5,7 +5,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
@@ -44,7 +44,7 @@ const ANIMATION_DURATION = {
   'zoom-fade': 150,
   'scroll-slide': 500,
   fade: 150,
-  'slide-layers': IS_MOBILE_SCREEN ? 450 : 300,
+  'slide-layers': IS_SINGLE_COLUMN_LAYOUT ? 450 : 300,
   'push-slide': 300,
   reveal: 350,
 };

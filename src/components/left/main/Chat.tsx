@@ -11,7 +11,7 @@ import {
 } from '../../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   getChatTitle,
   isChatPrivate,
@@ -241,7 +241,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   const className = buildClassName(
     'Chat chat-item-clickable',
     isChatPrivate(chatId) ? 'private' : 'group',
-    isSelected && !IS_MOBILE_SCREEN && 'selected',
+    isSelected && !IS_SINGLE_COLUMN_LAYOUT && 'selected',
   );
 
   return (
@@ -249,7 +249,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       ref={ref}
       className={className}
       style={style}
-      ripple={!IS_MOBILE_SCREEN}
+      ripple={!IS_SINGLE_COLUMN_LAYOUT}
       contextActions={contextActions}
       onClick={handleClick}
     >

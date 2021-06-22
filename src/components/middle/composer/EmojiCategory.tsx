@@ -1,6 +1,6 @@
 import React, { FC, memo, useRef } from '../../../lib/teact/teact';
 
-import { IS_MOBILE_SCREEN } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import windowSize from '../../../util/windowSize';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -35,7 +35,7 @@ const EmojiCategory: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const emojisPerRow = IS_MOBILE_SCREEN
+  const emojisPerRow = IS_SINGLE_COLUMN_LAYOUT
     ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (EMOJI_SIZE + EMOJI_MARGIN))
     : EMOJIS_PER_ROW_ON_DESKTOP;
   const height = Math.ceil(category.emojis.length / emojisPerRow) * (EMOJI_SIZE + EMOJI_MARGIN);

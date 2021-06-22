@@ -8,7 +8,7 @@ import {
 } from '../../api/types';
 import { ISettings } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
 import {
   getMediaDuration,
@@ -65,8 +65,8 @@ interface ISeekMethods {
 }
 
 const AVG_VOICE_DURATION = 30;
-const MIN_SPIKES = IS_MOBILE_SCREEN ? 20 : 25;
-const MAX_SPIKES = IS_MOBILE_SCREEN ? 50 : 75;
+const MIN_SPIKES = IS_SINGLE_COLUMN_LAYOUT ? 20 : 25;
+const MAX_SPIKES = IS_SINGLE_COLUMN_LAYOUT ? 50 : 75;
 // This is needed for browsers requiring user interaction before playing.
 const PRELOAD = true;
 
@@ -286,7 +286,7 @@ const Audio: FC<OwnProps & StateProps> = ({
       )}
       <Button
         round
-        ripple={!IS_MOBILE_SCREEN}
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
         size={renderingFor ? 'smaller' : 'tiny'}
         className={buttonClassNames.join(' ')}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}

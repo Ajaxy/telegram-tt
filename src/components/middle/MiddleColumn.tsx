@@ -19,7 +19,7 @@ import {
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
 } from '../../config';
-import { IS_MOBILE_SCREEN, IS_TOUCH_ENV, MASK_IMAGE_DISABLED } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV, MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
@@ -76,7 +76,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'openChat' | 'unpinAllMessages' | 'loadUser'>;
 
-const CLOSE_ANIMATION_DURATION = IS_MOBILE_SCREEN ? 450 + ANIMATION_END_DELAY : undefined;
+const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
 function canBeQuicklyUploaded(item: DataTransferItem) {
   return item.kind === 'file' && item.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.includes(item.type);
@@ -308,7 +308,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               canPost={renderingCanPost}
             />
           </div>
-          {IS_MOBILE_SCREEN && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
+          {IS_SINGLE_COLUMN_LAYOUT && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
         </>
       )}
       {chatId && (
@@ -341,7 +341,7 @@ export default memo(withGlobal(
       patternColor,
       isRightColumnShown: selectIsRightColumnShown(global),
       isBackgroundBlurred,
-      isMobileSearchActive: Boolean(IS_MOBILE_SCREEN && selectCurrentTextSearch(global)),
+      isMobileSearchActive: Boolean(IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       animationLevel: global.settings.byKey.animationLevel,
     };
@@ -365,7 +365,7 @@ export default memo(withGlobal(
       threadId,
       messageListType,
       isPrivate: isChatPrivate(chatId),
-      canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_MOBILE_SCREEN),
+      canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_SINGLE_COLUMN_LAYOUT),
       isPinnedMessageList,
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedOrAudioMessage: (

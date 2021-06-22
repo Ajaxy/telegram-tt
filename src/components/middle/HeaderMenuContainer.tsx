@@ -7,7 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 import { IAnchorPosition } from '../../types';
 
-import { IS_MOBILE_SCREEN } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import { selectChat } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
@@ -127,7 +127,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
-          {IS_MOBILE_SCREEN && canSubscribe && (
+          {IS_SINGLE_COLUMN_LAYOUT && canSubscribe && (
             <MenuItem
               icon={isChannel ? 'channel' : 'group'}
               onClick={handleSubscribe}
@@ -135,7 +135,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang(isChannel ? 'Subscribe' : 'Join Group')}
             </MenuItem>
           )}
-          {IS_MOBILE_SCREEN && canSearch && (
+          {IS_SINGLE_COLUMN_LAYOUT && canSearch && (
             <MenuItem
               icon="search"
               onClick={handleSearch}
