@@ -129,7 +129,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           fluid
           onClick={handleStartBot}
         >
-          {lang('Start')}
+          {lang('BotStart')}
         </Button>
       )}
       {!IS_MOBILE_SCREEN && canSearch && (
