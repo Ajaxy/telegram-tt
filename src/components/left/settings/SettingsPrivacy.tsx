@@ -8,6 +8,7 @@ import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
+import Checkbox from '../../ui/Checkbox';
 
 type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
@@ -17,6 +18,8 @@ type StateProps = {
   hasPassword?: boolean;
   blockedCount: number;
   sessionsCount: number;
+  isSensitiveEnabled?: boolean;
+  canChangeSensitive?: boolean;
   visibilityPrivacyPhoneNumber?: PrivacyVisibility;
   visibilityPrivacyLastSeen?: PrivacyVisibility;
   visibilityPrivacyProfilePhoto?: PrivacyVisibility;
@@ -24,13 +27,17 @@ type StateProps = {
   visibilityPrivacyGroupChats?: PrivacyVisibility;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadBlockedContacts' | 'loadAuthorizations' | 'loadPrivacySettings'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadBlockedContacts' | 'loadAuthorizations' | 'loadPrivacySettings' | 'loadContentSettings' | 'updateContentSettings'
+)>;
 
 const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
   onScreenSelect,
   hasPassword,
   blockedCount,
   sessionsCount,
+  isSensitiveEnabled,
+  canChangeSensitive,
   visibilityPrivacyPhoneNumber,
   visibilityPrivacyLastSeen,
   visibilityPrivacyProfilePhoto,
@@ -39,12 +46,15 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
   loadPrivacySettings,
   loadBlockedContacts,
   loadAuthorizations,
+  loadContentSettings,
+  updateContentSettings,
 }) => {
   useEffect(() => {
     loadBlockedContacts();
     loadAuthorizations();
     loadPrivacySettings();
-  }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings]);
+    loadContentSettings();
+  }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings, loadContentSettings]);
 
   const lang = useLang();
 
@@ -169,6 +179,19 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         </ListItem>
       </div>
+
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('lng_settings_sensitive_title')}
+        </h4>
+        <Checkbox
+          label={lang('lng_settings_sensitive_disable_filtering')}
+          subLabel={lang('lng_settings_sensitive_about')}
+          checked={Boolean(isSensitiveEnabled)}
+          disabled={!canChangeSensitive}
+          onCheck={updateContentSettings}
+        />
+      </div>
     </div>
   );
 };
@@ -177,7 +200,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
       settings: {
-        byKey: { hasPassword },
+        byKey: { hasPassword, isSensitiveEnabled, canChangeSensitive },
         privacy,
       },
       blocked,
@@ -188,6 +211,8 @@ export default memo(withGlobal<OwnProps>(
       hasPassword,
       blockedCount: blocked.totalCount,
       sessionsCount: activeSessions.length,
+      isSensitiveEnabled,
+      canChangeSensitive,
       visibilityPrivacyPhoneNumber: privacy.phoneNumber && privacy.phoneNumber.visibility,
       visibilityPrivacyLastSeen: privacy.lastSeen && privacy.lastSeen.visibility,
       visibilityPrivacyProfilePhoto: privacy.profilePhoto && privacy.profilePhoto.visibility,
@@ -196,6 +221,6 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadBlockedContacts', 'loadAuthorizations', 'loadPrivacySettings',
+    'loadBlockedContacts', 'loadAuthorizations', 'loadPrivacySettings', 'loadContentSettings', 'updateContentSettings',
   ]),
 )(SettingsPrivacy));

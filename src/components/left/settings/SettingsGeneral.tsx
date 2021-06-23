@@ -35,16 +35,14 @@ type StateProps = Pick<ISettings, (
   'shouldAutoPlayGifs' |
   'shouldAutoPlayVideos' |
   'shouldSuggestStickers' |
-  'shouldLoopStickers' |
-  'isSensitiveEnabled' |
-  'canChangeSensitive'
+  'shouldLoopStickers'
 )> & {
   stickerSetIds?: string[];
   stickerSetsById?: Record<string, ApiStickerSet>;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'setSettingOption' | 'loadStickerSets' | 'loadAddedStickers' | 'loadContentSettings' | 'updateContentSettings'
+  'setSettingOption' | 'loadStickerSets' | 'loadAddedStickers'
 )>;
 
 const ANIMATION_LEVEL_OPTIONS = [
@@ -68,13 +66,9 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldAutoPlayVideos,
   shouldSuggestStickers,
   shouldLoopStickers,
-  isSensitiveEnabled,
-  canChangeSensitive,
   setSettingOption,
   loadStickerSets,
   loadAddedStickers,
-  loadContentSettings,
-  updateContentSettings,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const stickerSettingsRef = useRef<HTMLDivElement>(null);
@@ -95,8 +89,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     loadStickerSets();
-    loadContentSettings();
-  }, [loadContentSettings, loadStickerSets]);
+  }, [loadStickerSets]);
 
   useEffect(() => {
     if (stickerSetIds && stickerSetIds.length) {
@@ -175,19 +168,6 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
           />
         </div>
       )}
-
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('lng_settings_sensitive_title')}
-        </h4>
-        <Checkbox
-          label={lang('lng_settings_sensitive_disable_filtering')}
-          subLabel={lang('lng_settings_sensitive_about')}
-          checked={Boolean(isSensitiveEnabled)}
-          disabled={!canChangeSensitive}
-          onCheck={updateContentSettings}
-        />
-      </div>
 
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoDownloadMedia')}</h4>
@@ -288,6 +268,6 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'setSettingOption', 'loadStickerSets', 'loadAddedStickers', 'loadContentSettings', 'updateContentSettings',
+    'setSettingOption', 'loadStickerSets', 'loadAddedStickers',
   ]),
 )(SettingsGeneral));
