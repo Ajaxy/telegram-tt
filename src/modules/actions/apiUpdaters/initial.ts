@@ -152,8 +152,9 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 function onUpdateSession(update: ApiUpdateSession) {
   const { sessionData } = update;
   const { authRememberMe, authState } = getGlobal();
+  const isEmpty = !sessionData || !sessionData.mainDcId;
 
-  if (!authRememberMe || (sessionData && authState !== 'authorizationStateReady')) {
+  if (!authRememberMe || authState !== 'authorizationStateReady' || isEmpty) {
     return;
   }
 
