@@ -9,7 +9,10 @@ import { ApiChat, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
-import { selectChat, selectUser } from '../../../modules/selectors';
+import {
+  selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
+} from '../../../modules/selectors';
+import { selectIsChatMuted } from '../../../modules/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 
@@ -31,6 +34,7 @@ type StateProps = {
   user?: ApiUser;
   chat: ApiChat;
   progress?: ManagementProgress;
+  isMuted?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -44,6 +48,7 @@ const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
   user,
   chat,
   progress,
+  isMuted,
   updateContact,
   deleteUser,
   deleteHistory,
@@ -57,15 +62,14 @@ const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const currentFirstName = user ? (user.firstName || '') : '';
   const currentLastName = user ? (user.lastName || '') : '';
-  const currentIsMuted = chat ? chat.isMuted : undefined;
 
   const [firstName, setFirstName] = useState(currentFirstName);
   const [lastName, setLastName] = useState(currentLastName);
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(!currentIsMuted);
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(!isMuted);
 
   useEffect(() => {
-    setIsNotificationsEnabled(!currentIsMuted);
-  }, [currentIsMuted]);
+    setIsNotificationsEnabled(!isMuted);
+  }, [isMuted]);
 
   useEffect(() => {
     setIsProfileFieldsTouched(false);
@@ -202,9 +206,10 @@ export default memo(withGlobal<OwnProps>(
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId)!;
     const { progress } = global.management;
+    const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     return {
-      user, chat, progress,
+      user, chat, progress, isMuted,
     };
   },
   (global, actions): DispatchProps => pick(actions, [

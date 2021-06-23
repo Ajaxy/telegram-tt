@@ -242,7 +242,7 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
   const settings = {
     showPreviews: shouldShowPreviews,
     silent: isSilent,
-    muteUntil: isSilent ? MAX_INT_32 : undefined,
+    muteUntil: isSilent ? MAX_INT_32 : 0,
   };
 
   return invokeRequest(new GramJs.account.UpdateNotifySettings({

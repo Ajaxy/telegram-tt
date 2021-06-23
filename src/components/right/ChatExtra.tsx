@@ -6,9 +6,11 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions, GlobalState } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-import { selectChat, selectUser } from '../../modules/selectors';
 import {
-  getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isChatPrivate, isUserRightBanned,
+  selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
+} from '../../modules/selectors';
+import {
+  getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isChatPrivate, isUserRightBanned, selectIsChatMuted,
 } from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
 import { pick } from '../../util/iteratees';
@@ -29,6 +31,7 @@ type StateProps = {
   user?: ApiUser;
   chat?: ApiChat;
   canInviteUsers?: boolean;
+  isMuted?: boolean;
 } & Pick<GlobalState, 'lastSyncTime'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'updateChatMutedState' | 'showNotification'>;
@@ -39,6 +42,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   forceShowSelf,
   canInviteUsers,
+  isMuted,
   loadFullUser,
   showNotification,
   updateChatMutedState,
@@ -52,7 +56,6 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   } = user || {};
   const {
     id: chatId,
-    isMuted: currentIsMuted,
     username: chatUsername,
   } = chat || {};
   const lang = useLang();
@@ -64,8 +67,8 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [loadFullUser, userId, lastSyncTime]);
 
   const handleNotificationChange = useCallback(() => {
-    updateChatMutedState({ chatId, isMuted: !currentIsMuted });
-  }, [chatId, currentIsMuted, updateChatMutedState]);
+    updateChatMutedState({ chatId, isMuted: !isMuted });
+  }, [chatId, isMuted, updateChatMutedState]);
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
     return undefined;
@@ -128,7 +131,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <Switcher
           id="group-notifications"
           label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
-          checked={!currentIsMuted}
+          checked={!isMuted}
           inactive
         />
       </ListItem>
@@ -142,6 +145,7 @@ export default memo(withGlobal<OwnProps>(
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     const canInviteUsers = chat && (
       (!isChatChannel(chat) && !isUserRightBanned(chat, 'inviteUsers'))
@@ -149,7 +153,7 @@ export default memo(withGlobal<OwnProps>(
     );
 
     return {
-      lastSyncTime, chat, user, canInviteUsers,
+      lastSyncTime, chat, user, canInviteUsers, isMuted,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

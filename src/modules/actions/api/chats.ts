@@ -198,6 +198,7 @@ addReducer('updateChatMutedState', (global, actions, payload) => {
     return;
   }
 
+  setGlobal(updateChat(global, chatId, { isMuted }));
   void callApi('updateChatMutedState', { chat, isMuted, serverTimeOffset });
 });
 
