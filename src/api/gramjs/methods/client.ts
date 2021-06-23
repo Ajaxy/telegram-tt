@@ -37,14 +37,15 @@ let client: TelegramClient;
 let isConnected = false;
 
 export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
-  onUpdate = _onUpdate;
-
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START INIT API');
   }
 
+  onUpdate = _onUpdate;
+
   const { sessionData, userAgent } = initialArgs;
+  const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
   client = new TelegramClient(
     new sessions.CallbackSession(sessionData, onSessionUpdate),
@@ -57,6 +58,8 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       additionalDcsDisabled: IS_TEST,
     } as any,
   );
+
+  onSessionUpdate(session.getSessionData());
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
   client.addEventHandler(updater, gramJsUpdateEventBuilder);

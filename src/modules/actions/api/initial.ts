@@ -23,7 +23,7 @@ import {
   importLegacySession,
   clearLegacySessions,
   importTestSession,
-} from './sessions';
+} from '../../../util/sessions';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   (async () => {

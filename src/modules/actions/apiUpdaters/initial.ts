@@ -150,7 +150,8 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 }
 
 function onUpdateSession(update: ApiUpdateSession) {
-  if (!getGlobal().authRememberMe) {
+  const { authRememberMe, authState } = getGlobal();
+  if (!authRememberMe || authState !== 'authorizationStateReady') {
     return;
   }
 
@@ -160,8 +161,14 @@ function onUpdateSession(update: ApiUpdateSession) {
 }
 
 function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {
+  const global = getGlobal();
+
+  if (global.serverTimeOffset === update.serverTimeOffset) {
+    return;
+  }
+
   setGlobal({
-    ...getGlobal(),
+    ...global,
     serverTimeOffset: update.serverTimeOffset,
   });
 }
