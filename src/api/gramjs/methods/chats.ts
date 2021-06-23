@@ -409,8 +409,14 @@ export async function updateChatMutedState({
     peer: new GramJs.InputNotifyPeer({
       peer: buildInputPeer(chat.id, chat.accessHash),
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : undefined }),
+    settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : 0 }),
   }));
+
+  onUpdate({
+    '@type': 'updateNotifyExceptions',
+    id: chat.id,
+    isMuted,
+  });
 
   void requestChatUpdate({
     chat,

@@ -7,8 +7,10 @@ import { ApiChat, ApiUser } from '../../../api/types';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
-import { isChatPrivate, getPrivateChatUserId } from '../../../modules/helpers';
-import { selectChat, selectUser, selectIsChatPinned } from '../../../modules/selectors';
+import { isChatPrivate, getPrivateChatUserId, selectIsChatMuted } from '../../../modules/helpers';
+import {
+  selectChat, selectUser, selectIsChatPinned, selectNotifySettings, selectNotifyExceptions,
+} from '../../../modules/selectors';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -26,6 +28,7 @@ type StateProps = {
   chat?: ApiChat;
   privateChatUser?: ApiUser;
   isPinned?: boolean;
+  isMuted?: boolean;
 };
 
 const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
@@ -33,6 +36,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   chat,
   privateChatUser,
   isPinned,
+  isMuted,
   withUsername,
   onClick,
 }) => {
@@ -42,6 +46,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     chat,
     privateChatUser,
     isPinned,
+    isMuted,
     handleDelete: openDeleteModal,
   });
 
@@ -82,11 +87,15 @@ export default memo(withGlobal<OwnProps>(
     const privateChatUserId = chat && getPrivateChatUserId(chat);
     const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const isPinned = selectIsChatPinned(global, chatId);
+    const isMuted = chat
+      ? selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))
+      : undefined;
 
     return {
       chat,
       privateChatUser,
       isPinned,
+      isMuted,
     };
   },
 )(LeftSearchResultChat));

@@ -1,6 +1,8 @@
 import { useMemo } from '../lib/teact/teact';
 import { getDispatch } from '../lib/teact/teactn';
+
 import { ApiChat, ApiUser } from '../api/types';
+
 import {
   isChatArchived, getCanDeleteChat, isChatPrivate, isChatChannel,
 } from '../modules/helpers';
@@ -12,12 +14,14 @@ export default ({
   handleDelete,
   folderId,
   isPinned,
+  isMuted,
 }: {
   chat: ApiChat | undefined;
   privateChatUser: ApiUser | undefined;
   handleDelete: () => void;
   folderId?: number;
   isPinned?: boolean;
+  isMuted?: boolean;
 }) => {
   const lang = useLang();
 
@@ -47,7 +51,7 @@ export default ({
       }
       : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
 
-    const actionMute = chat.isMuted
+    const actionMute = isMuted
       ? {
         title: lang('ChatList.Unmute'),
         icon: 'unmute',
@@ -85,6 +89,6 @@ export default ({
     ];
   }, [
     chat, privateChatUser, lang, isPinned, handleDelete, toggleChatUnread, toggleChatPinned, folderId,
-    updateChatMutedState, toggleChatArchived,
+    updateChatMutedState, toggleChatArchived, isMuted,
   ]);
 };

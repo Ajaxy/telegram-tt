@@ -177,6 +177,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     handleDelete: openDeleteModal,
     folderId,
     isPinned,
+    isMuted,
   });
 
   const lang = useLang();

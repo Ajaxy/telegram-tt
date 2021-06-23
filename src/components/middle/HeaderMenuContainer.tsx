@@ -9,9 +9,9 @@ import { IAnchorPosition } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
-import { selectChat } from '../../modules/selectors';
+import { selectChat, selectNotifySettings, selectNotifyExceptions } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
-import { isChatPrivate, getCanDeleteChat } from '../../modules/helpers';
+import { isChatPrivate, getCanDeleteChat, selectIsChatMuted } from '../../modules/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 
@@ -192,7 +192,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      isMuted: chat.isMuted,
+      isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       isPrivate: isChatPrivate(chat.id),
       canDeleteChat: getCanDeleteChat(chat),
     };
