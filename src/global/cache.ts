@@ -11,13 +11,14 @@ import {
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
-  LEGACY_SESSION_KEY,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN, GLOBAL_STATE_CACHE_USER_LIST_LIMIT, SESSION_USER_KEY,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { pick } from '../util/iteratees';
 import { INITIAL_STATE } from './initial';
 import { selectCurrentMessageList } from '../modules/selectors';
+import { hasStoredSession } from '../util/sessions';
 
 const UPDATE_THROTTLE = 1000;
 
@@ -44,8 +45,7 @@ export function initCache() {
 
 export function loadCache(initialState: GlobalState) {
   if (!GLOBAL_STATE_CACHE_DISABLED) {
-    const hasSession = localStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
-    if (hasSession) {
+    if (hasStoredSession(true)) {
       isAllowed = true;
       addCallback(updateCacheThrottled);
       return readCache(initialState);

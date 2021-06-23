@@ -1,11 +1,28 @@
 import * as idb from 'idb-keyval';
 
-import { ApiSessionData } from '../../../api/types';
+import { ApiSessionData } from '../api/types';
 
-import { DEBUG, LEGACY_SESSION_KEY, SESSION_USER_KEY } from '../../../config';
-import * as cacheApi from '../../../util/cacheApi';
+import { DEBUG, LEGACY_SESSION_KEY, SESSION_USER_KEY } from '../config';
+import * as cacheApi from './cacheApi';
 
 const DC_IDS = [1, 2, 3, 4, 5];
+
+export function hasStoredSession(withLegacy = false) {
+  if (withLegacy && localStorage.getItem(LEGACY_SESSION_KEY)) {
+    return true;
+  }
+
+  const userAuthJson = localStorage.getItem(SESSION_USER_KEY);
+  if (!userAuthJson) return false;
+
+  try {
+    const userAuth = JSON.parse(userAuthJson);
+    return Boolean(userAuth && userAuth.id && userAuth.dcID);
+  } catch (err) {
+    // Do nothing.
+    return false;
+  }
+}
 
 export function storeSession(sessionData: ApiSessionData, currentUserId?: number) {
   const { mainDcId, keys, hashes } = sessionData;
@@ -32,21 +49,14 @@ export function clearStoredSession() {
 }
 
 export function loadStoredSession(): ApiSessionData | undefined {
-  const userAuthJson = localStorage.getItem(SESSION_USER_KEY);
-  if (!userAuthJson) return undefined;
-
-  let mainDcId: number | undefined;
-  const keys: Record<number, string> = {};
-  const hashes: Record<number, string> = {};
-
-  try {
-    const userAuth = JSON.parse(userAuthJson);
-    mainDcId = Number(userAuth.dcID);
-  } catch (err) {
-    // Do nothing.
+  if (!hasStoredSession()) {
+    return undefined;
   }
 
-  if (!mainDcId) return undefined;
+  const userAuth = JSON.parse(localStorage.getItem(SESSION_USER_KEY)!);
+  const mainDcId = Number(userAuth.dcID);
+  const keys: Record<number, string> = {};
+  const hashes: Record<number, string> = {};
 
   DC_IDS.forEach((dcId) => {
     try {

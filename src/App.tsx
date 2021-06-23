@@ -3,9 +3,7 @@ import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from './global/types';
 
-import {
-  LEGACY_SESSION_KEY, INACTIVE_MARKER, SESSION_USER_KEY, PAGE_TITLE,
-} from './config';
+import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { pick } from './util/iteratees';
 import { updateSizes } from './util/windowSize';
 import { addActiveTabChangeListener } from './util/activeTabMonitor';
@@ -15,6 +13,7 @@ import Auth from './components/auth/Auth';
 import UiLoader from './components/common/UiLoader';
 import Main from './components/main/Main.async';
 import AppInactive from './components/main/AppInactive';
+import { hasStoredSession } from './util/sessions';
 // import Test from './components/test/TestNoRedundancy';
 
 type StateProps = Pick<GlobalState, 'authState'>;
@@ -55,9 +54,7 @@ const App: FC<StateProps & DispatchProps> = ({ authState, disconnect }) => {
     }
   }
 
-  const hasSession = localStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
-
-  return hasSession ? renderMain() : <Auth />;
+  return hasStoredSession(true) ? renderMain() : <Auth />;
 };
 
 function renderMain() {
