@@ -48,7 +48,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
   client = new TelegramClient(
-    new sessions.CallbackSession(sessionData, onSessionUpdate),
+    session,
     process.env.TELEGRAM_T_API_ID,
     process.env.TELEGRAM_T_API_HASH,
     {
@@ -58,8 +58,6 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       additionalDcsDisabled: IS_TEST,
     } as any,
   );
-
-  onSessionUpdate(session.getSessionData());
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
   client.addEventHandler(updater, gramJsUpdateEventBuilder);
@@ -97,6 +95,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     }
 
     onAuthReady();
+    onSessionUpdate(session.getSessionData());
     onUpdate({ '@type': 'updateApiReady' });
 
     void fetchCurrentUser();
