@@ -129,7 +129,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           fluid
           onClick={handleStartBot}
         >
-          {lang('Start')}
+          {lang('BotStart')}
         </Button>
       )}
       {!IS_SINGLE_COLUMN_LAYOUT && canSearch && (
