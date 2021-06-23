@@ -123,11 +123,11 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
-    if (animationLevel === 0) {
+    const element = ref.current;
+
+    if (animationLevel === 0 || !element) {
       return;
     }
-
-    const element = ref.current!;
 
     // TODO Refactor animation: create `useListAnimation` that owns `orderDiff` and `animationType`
     if (animationType === ChatAnimationTypes.Opacity) {
