@@ -244,7 +244,12 @@ class TelegramClient {
      * @returns {Promise<void>}
      */
     async destroy() {
-        await this.disconnect();
+        try {
+            await this.disconnect();
+        } catch (err) {
+            // Do nothing
+        }
+
         this.session.delete();
         this._eventBuilders = [];
     }

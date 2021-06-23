@@ -150,12 +150,12 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 }
 
 function onUpdateSession(update: ApiUpdateSession) {
+  const { sessionData } = update;
   const { authRememberMe, authState } = getGlobal();
-  if (!authRememberMe || authState !== 'authorizationStateReady') {
+
+  if (!authRememberMe || (sessionData && authState !== 'authorizationStateReady')) {
     return;
   }
-
-  const { sessionData } = update;
 
   getDispatch().saveSession({ sessionData });
 }
