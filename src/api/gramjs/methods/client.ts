@@ -70,15 +70,24 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       console.log('[GramJs/client] CONNECTING');
     }
 
-    await client.start({
-      phoneNumber: onRequestPhoneNumber,
-      phoneCode: onRequestCode,
-      password: onRequestPassword,
-      firstAndLastNames: onRequestRegistration,
-      qrCode: onRequestQrCode,
-      onError: onAuthError,
-      initialMethod: 'qrCode',
-    });
+    try {
+      await client.start({
+        phoneNumber: onRequestPhoneNumber,
+        phoneCode: onRequestCode,
+        password: onRequestPassword,
+        firstAndLastNames: onRequestRegistration,
+        qrCode: onRequestQrCode,
+        onError: onAuthError,
+        initialMethod: 'qrCode',
+      });
+    } catch (err) {
+      onUpdate({
+        '@type': 'updateConnectionState',
+        connectionState: 'connectionStateBroken',
+      });
+
+      return;
+    }
 
     if (DEBUG) {
       // eslint-disable-next-line no-console

@@ -126,8 +126,12 @@ addReducer('saveSession', (global, actions, payload) => {
 
 addReducer('signOut', () => {
   (async () => {
-    await unsubscribe();
-    await callApi('destroy');
+    try {
+      await unsubscribe();
+      await callApi('destroy');
+    } catch (err) {
+      // Do nothing
+    }
 
     getDispatch().reset();
   })();
