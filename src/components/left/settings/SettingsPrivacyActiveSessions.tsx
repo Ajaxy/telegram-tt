@@ -83,7 +83,7 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
   function renderOtherSessions(sessions: ApiSession[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>Other Sessions</h4>
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>lang('OtherSessions')</h4>
 
         {sessions.map(renderSession)}
       </div>
