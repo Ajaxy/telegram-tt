@@ -132,7 +132,8 @@ addReducer('openSupportChat', (global, actions) => {
 });
 
 addReducer('openTipsChat', (global, actions) => {
-  actions.openChatByUsername({ username: TIPS_USERNAME });
+  const shortLanguageName = window.navigation.language.toUpperCase();
+  actions.openChatByUsername({ username: TIPS_USERNAME + (shortLanguageName != 'EN' ? shortLanguageName : '') });
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {
