@@ -121,8 +121,8 @@ export async function clearLegacySessions() {
 export function importTestSession() {
   const sessionJson = process.env.TEST_SESSION!;
   try {
-    const sessionData = JSON.parse(sessionJson) as ApiSessionData;
-    storeSession(sessionData);
+    const sessionData = JSON.parse(sessionJson) as ApiSessionData & { userId: number };
+    storeSession(sessionData, sessionData.userId);
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
