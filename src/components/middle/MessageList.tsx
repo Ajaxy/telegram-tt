@@ -263,7 +263,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    const listedMessages = viewportIds.map((id) => messagesById[id]);
+    const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
     return groupMessages(orderBy(listedMessages, ['date', 'id']), memoUnreadDividerBeforeIdRef.current);
   }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId]);
 
