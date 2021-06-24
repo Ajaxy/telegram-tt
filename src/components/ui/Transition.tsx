@@ -25,6 +25,7 @@ type OwnProps = {
   renderCount?: number;
   shouldRestoreHeight?: boolean;
   shouldCleanup?: boolean;
+  cleanupExceptionKey?: number;
   id?: string;
   className?: string;
   onStart?: () => void;
@@ -55,6 +56,7 @@ const Transition: FC<OwnProps> = ({
   renderCount,
   shouldRestoreHeight,
   shouldCleanup,
+  cleanupExceptionKey,
   id,
   className,
   onStart,
@@ -85,7 +87,7 @@ const Transition: FC<OwnProps> = ({
 
   useLayoutEffect(() => {
     function cleanup() {
-      if (!shouldCleanup) {
+      if (!shouldCleanup || cleanupExceptionKey === prevActiveKey) {
         return;
       }
 
@@ -212,6 +214,7 @@ const Transition: FC<OwnProps> = ({
     renderCount,
     shouldRestoreHeight,
     shouldCleanup,
+    cleanupExceptionKey,
     animationLevel,
     forceUpdate,
   ]);

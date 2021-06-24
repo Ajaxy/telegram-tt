@@ -243,6 +243,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       name={IS_SINGLE_COLUMN_LAYOUT ? 'slide-layers' : 'push-slide'}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
+      shouldCleanup
+      cleanupExceptionKey={ContentType.Main}
     >
       {(isActive) => {
         switch (contentType) {
