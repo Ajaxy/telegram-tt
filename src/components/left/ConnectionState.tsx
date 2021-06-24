@@ -1,9 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import React, { memo, FC } from '../../lib/teact/teact';
 
 import { GlobalState } from '../../global/types';
 
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Spinner from '../ui/Spinner';
@@ -12,12 +10,10 @@ import './ConnectionState.scss';
 
 type StateProps = Pick<GlobalState, 'connectionState'>;
 
-const ConnectionState: FC<StateProps> = ({ connectionState }) => {
+const ConnectionState: FC<StateProps> = () => {
   const lang = useLang();
 
-  const isConnecting = connectionState === 'connectionStateConnecting';
-
-  return isConnecting && (
+  return (
     <div id="ConnectionState" dir={lang.isRtl ? 'rtl' : undefined}>
       <Spinner color="black" />
       <div className="state-text">{lang('WaitingForNetwork')}</div>
@@ -25,6 +21,4 @@ const ConnectionState: FC<StateProps> = ({ connectionState }) => {
   );
 };
 
-export default withGlobal(
-  (global): StateProps => pick(global, ['connectionState']),
-)(ConnectionState);
+export default memo(ConnectionState);

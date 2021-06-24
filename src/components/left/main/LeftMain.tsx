@@ -1,10 +1,14 @@
 import React, {
-  FC, memo, useState, useRef, useCallback, useEffect,
+  FC, useState, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
+import { GlobalState } from '../../../global/types';
 import { LeftColumnContent } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
+import { pick } from '../../../util/iteratees';
+import useBrowserOnline from '../../../hooks/useBrowserOnline';
 
 import Transition from '../../ui/Transition';
 import LeftMainHeader from './LeftMainHeader';
@@ -13,6 +17,7 @@ import ChatFolders from './ChatFolders';
 import LeftSearch from '../search/LeftSearch.async';
 import ContactList from './ContactList.async';
 import NewChatButton from '../NewChatButton';
+import ShowTransition from '../../ui/ShowTransition';
 
 import './LeftMain.scss';
 
@@ -26,7 +31,7 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = {};
+type StateProps = Pick<GlobalState, 'connectionState'>;
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 const BUTTON_CLOSE_DELAY_MS = 250;
@@ -40,8 +45,12 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   onSearchQuery,
   onContentChange,
   onReset,
+  connectionState,
 }) => {
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
+
+  const isBrowserOnline = useBrowserOnline();
+  const isConnecting = !isBrowserOnline || connectionState === 'connectionStateConnecting';
 
   const isMouseInside = useRef(false);
 
@@ -121,13 +130,16 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onSelectArchived={handleSelectArchived}
         onReset={onReset}
       />
-      <ConnectionState />
+      <ShowTransition isOpen={isConnecting} isCustom className="connection-state-wrapper opacity-transition slow">
+        {() => <ConnectionState />}
+      </ShowTransition>
       <Transition
         name="zoom-fade"
         renderCount={TRANSITION_RENDER_COUNT}
         activeKey={content}
         shouldCleanup
         cleanupExceptionKey={LeftColumnContent.ChatList}
+        className={isConnecting ? 'pull-down' : undefined}
       >
         {(isActive) => {
           switch (content) {
@@ -159,4 +171,6 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(LeftMain);
+export default withGlobal<OwnProps>(
+  (global): StateProps => pick(global, ['connectionState']),
+)(LeftMain);

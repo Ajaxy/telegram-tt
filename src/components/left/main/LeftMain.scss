@@ -6,9 +6,20 @@
   overflow: hidden;
   z-index: 1;
 
+  .connection-state-wrapper {
+    position: absolute;
+    top: 3.75rem;
+    width: 100%;
+  }
+
   > .Transition {
     flex: 1;
     overflow: hidden;
+    transition: transform 300ms ease;
+
+    &.pull-down {
+      transform: translateY(3.75rem);
+    }
   }
 
   .ChatFolders {
