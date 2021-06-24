@@ -63,7 +63,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   onReset,
 }) => {
   const lang = useLang();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 
   const handleSwitchTab = useCallback((index: number) => {

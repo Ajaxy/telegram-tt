@@ -122,7 +122,13 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onReset={onReset}
       />
       <ConnectionState />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
+      <Transition
+        name="zoom-fade"
+        renderCount={TRANSITION_RENDER_COUNT}
+        activeKey={content}
+        shouldCleanup
+        cleanupExceptionKey={LeftColumnContent.ChatList}
+      >
         {(isActive) => {
           switch (content) {
             case LeftColumnContent.ChatList:
