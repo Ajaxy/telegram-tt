@@ -35,3 +35,4 @@ destroy_session_none#62d350c9 session_id:long = DestroySessionRes;
 new_session_created#9ec20908 first_msg_id:long unique_id:long server_salt:long = NewSession;
 ---functions---
 ping#7abe77ec ping_id:long = Pong;
+ping_delay_disconnect#f3427b8c ping_id:long disconnect_delay:int = Pong;
