@@ -108,6 +108,7 @@ module.exports = (env = {}, argv = {}) => {
         APP_ENV: 'production',
         TELEGRAM_T_API_ID: '',
         TELEGRAM_T_API_HASH: '',
+        TEST_SESSION: '',
       }),
       ...(argv.mode === 'production' ? [
         new BundleAnalyzerPlugin({

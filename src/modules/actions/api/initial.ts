@@ -22,7 +22,6 @@ import {
   clearStoredSession,
   importLegacySession,
   clearLegacySessions,
-  importTestSession,
 } from '../../../util/sessions';
 
 addReducer('initApi', (global: GlobalState, actions) => {
@@ -30,8 +29,6 @@ addReducer('initApi', (global: GlobalState, actions) => {
     if (!IS_TEST) {
       await importLegacySession();
       void clearLegacySessions();
-    } else {
-      importTestSession();
     }
 
     void initApi(actions.apiUpdate, {
