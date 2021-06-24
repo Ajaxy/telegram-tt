@@ -1,7 +1,7 @@
 import { GlobalState } from '../../global/types';
 import { RightColumnContent } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT, SYSTEM_THEME } from '../../util/environment';
+import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
 import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
@@ -57,5 +57,5 @@ export function selectIsRightColumnShown(global: GlobalState) {
 export function selectTheme(global: GlobalState) {
   const { theme, shouldUseSystemTheme } = global.settings.byKey;
 
-  return shouldUseSystemTheme ? SYSTEM_THEME : theme;
+  return shouldUseSystemTheme ? getSystemTheme() : theme;
 }
