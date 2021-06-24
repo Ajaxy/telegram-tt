@@ -1,9 +1,9 @@
 import { useEffect } from '../lib/teact/teact';
 
-export default (
+export default function useBackgroundMode(
   onBlur: AnyToVoidFunction,
   onFocus: AnyToVoidFunction,
-) => {
+) {
   useEffect(() => {
     if (!document.hasFocus()) {
       onBlur();
@@ -17,4 +17,4 @@ export default (
       window.removeEventListener('blur', onBlur);
     };
   }, [onBlur, onFocus]);
-};
+}
