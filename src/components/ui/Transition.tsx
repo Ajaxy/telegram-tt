@@ -87,7 +87,7 @@ const Transition: FC<OwnProps> = ({
 
   useLayoutEffect(() => {
     function cleanup() {
-      if (!shouldCleanup || cleanupExceptionKey === prevActiveKey) {
+      if (!shouldCleanup || (cleanupExceptionKey !== undefined && cleanupExceptionKey === prevActiveKey)) {
         return;
       }
 
