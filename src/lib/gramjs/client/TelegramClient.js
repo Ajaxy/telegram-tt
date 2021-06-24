@@ -24,7 +24,13 @@ const { updateTwoFaSettings } = require('./2fa');
 const DEFAULT_DC_ID = 2;
 const DEFAULT_IPV4_IP = 'venus.web.telegram.org';
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]';
-const BORROWED_SENDER_RELEASE_TIMEOUT = 30 * 1000; // 10 sec
+const BORROWED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
+
+const PING_INTERVAL = 3000; // 3 sec
+const PING_TIMEOUT = 5000; // 5 sec
+const PING_FAIL_ATTEMPTS = 3;
+const PING_FAIL_INTERVAL = 100; // ms
+const PING_DISCONNECT_DELAY = 60000; // 1 min
 
 // All types
 const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's'];
@@ -185,15 +191,18 @@ class TelegramClient {
 
     async _updateLoop() {
         while (this.isConnected()) {
-            await Helpers.sleep(3 * 1000);
+            await Helpers.sleep(PING_INTERVAL);
 
             try {
                 await attempts(() => {
-                    return timeout(this._sender.send(new requests.Ping({
+                    return timeout(this._sender.send(new requests.PingDelayDisconnect({
                         pingId: Helpers.getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
-                    })), 1500);
-                }, 3, 100);
+                        disconnectDelay: PING_DISCONNECT_DELAY,
+                    })), PING_TIMEOUT);
+                }, PING_FAIL_ATTEMPTS, PING_FAIL_INTERVAL);
             } catch (err) {
+                console.error('!!!', err);
+
                 await this.disconnect();
                 this.connect();
 
