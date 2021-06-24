@@ -31,6 +31,7 @@ type DispatchProps = Pick<GlobalActions, ('searchMessagesGlobal' | 'focusMessage
 const runThrottled = throttle((cb) => cb(), 500, true);
 
 const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
+  theme,
   isVoice,
   searchQuery,
   searchChatId,
@@ -94,8 +95,9 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
           )}
           <Audio
             key={message.id}
+            theme={theme}
             message={message}
-            renderingFor="searchResult"
+            target="searchResult"
             senderTitle={getSenderName(lang, message, chatsById, usersById)}
             date={message.date}
             lastSyncTime={lastSyncTime}

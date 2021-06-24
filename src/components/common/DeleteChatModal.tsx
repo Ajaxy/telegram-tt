@@ -28,6 +28,7 @@ export type OwnProps = {
   isOpen: boolean;
   chat: ApiChat;
   onClose: () => void;
+  onCloseAnimationEnd?: () => void;
 };
 
 type StateProps = {
@@ -53,6 +54,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   canDeleteForAll,
   contactName,
   onClose,
+  onCloseAnimationEnd,
   leaveChannel,
   deleteHistory,
   deleteChannel,
@@ -147,9 +149,10 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
       className="DeleteChatModal"
       header={renderHeader()}
+      onClose={onClose}
+      onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {renderMessage()}
       {canDeleteForAll && (

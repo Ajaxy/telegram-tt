@@ -2,8 +2,12 @@ import { GlobalState } from '../../../../global/types';
 import {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
 } from '../../../../api/types';
+import { ISettings } from '../../../../types';
+
+import { selectTheme } from '../../../../modules/selectors';
 
 export type StateProps = {
+  theme: ISettings['theme'];
   isLoading?: boolean;
   chatsById: Record<number, ApiChat>;
   usersById: Record<number, ApiUser>;
@@ -30,6 +34,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     const { foundIds } = (resultsByType && resultsByType[currentType]) || {};
 
     return {
+      theme: selectTheme(global),
       isLoading: foundIds === undefined
         || (fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false),
       chatsById,
