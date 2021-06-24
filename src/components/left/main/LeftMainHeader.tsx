@@ -7,7 +7,9 @@ import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
-import { APP_NAME, APP_VERSION, FEEDBACK_URL } from '../../../config';
+import {
+  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, FEEDBACK_URL,
+} from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
@@ -137,7 +139,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setSettingOption({ theme: newTheme });
     setSettingOption({ shouldUseSystemTheme: false });
-    switchTheme(newTheme, animationLevel > 0);
+    switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
   }, [animationLevel, setSettingOption, theme]);
 
   const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {

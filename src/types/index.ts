@@ -21,6 +21,7 @@ export interface IAlbum {
 }
 
 export type ThemeKey = 'light' | 'dark';
+
 export interface IThemeSettings {
   background?: string;
   backgroundColor?: string;

@@ -5,6 +5,10 @@ import {
   IS_TEST,
 } from '../config';
 
+export * from './environmentWebp';
+
+export * from './environmentSystemTheme';
+
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
   const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
@@ -55,30 +59,3 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
 export const DPR = window.devicePixelRatio || 1;
 
 export const MASK_IMAGE_DISABLED = true;
-
-export const SYSTEM_THEME = (
-  window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-) ? 'dark' : 'light';
-
-let isWebpSupportedCache: boolean | undefined;
-
-export function isWebpSupported() {
-  return Boolean(isWebpSupportedCache);
-}
-
-function testWebp(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const webp = new Image();
-    // eslint-disable-next-line max-len
-    webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
-    const handleLoadOrError = () => {
-      resolve(webp.height === 2);
-    };
-    webp.onload = handleLoadOrError;
-    webp.onerror = handleLoadOrError;
-  });
-}
-
-testWebp().then((hasWebp) => {
-  isWebpSupportedCache = hasWebp;
-});
