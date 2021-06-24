@@ -1,10 +1,8 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch } from '../../lib/teact/teactn';
 import convertPunycode from '../../lib/punycode';
-import { GlobalActions } from '../../global/types';
 
 import { DEBUG, RE_TME_INVITE_LINK, RE_TME_LINK } from '../../config';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 
 type OwnProps = {
@@ -15,17 +13,15 @@ type OwnProps = {
   isRtl?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'toggleSafeLinkModal' | 'openTelegramLink'>;
-
-const SafeLink: FC<OwnProps & DispatchProps> = ({
+const SafeLink: FC<OwnProps> = ({
   url,
   text,
   className,
   children,
   isRtl,
-  toggleSafeLinkModal,
-  openTelegramLink,
 }) => {
+  const { toggleSafeLinkModal, openTelegramLink } = getDispatch();
+
   const content = children || text;
   const isNotSafe = url !== content;
 
@@ -113,9 +109,4 @@ function getDomain(url?: string) {
   return undefined;
 }
 
-export default memo(withGlobal<OwnProps>(
-  undefined,
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'toggleSafeLinkModal', 'openTelegramLink',
-  ]),
-)(SafeLink));
+export default memo(SafeLink);

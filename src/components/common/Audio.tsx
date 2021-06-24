@@ -1,7 +1,6 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
 
 import {
   ApiAudio, ApiMessage, ApiVoice,
@@ -24,7 +23,6 @@ import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
-import { selectTheme } from '../../modules/selectors';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
@@ -39,10 +37,11 @@ import Link from '../ui/Link';
 import './Audio.scss';
 
 type OwnProps = {
+  theme: ISettings['theme'];
   message: ApiMessage;
   senderTitle?: string;
   uploadProgress?: number;
-  renderingFor?: 'searchResult' | 'sharedMedia';
+  target?: 'searchResult' | 'sharedMedia';
   date?: number;
   lastSyncTime?: number;
   className?: string;
@@ -52,10 +51,6 @@ type OwnProps = {
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
   onDateClick?: (messageId: number, chatId: number) => void;
-};
-
-type StateProps = {
-  theme: ISettings['theme'];
 };
 
 interface ISeekMethods {
@@ -70,12 +65,12 @@ const MAX_SPIKES = IS_SINGLE_COLUMN_LAYOUT ? 50 : 75;
 // This is needed for browsers requiring user interaction before playing.
 const PRELOAD = true;
 
-const Audio: FC<OwnProps & StateProps> = ({
+const Audio: FC<OwnProps> = ({
   theme,
   message,
   senderTitle,
   uploadProgress,
-  renderingFor,
+  target,
   date,
   lastSyncTime,
   className,
@@ -229,8 +224,8 @@ const Audio: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'Audio media-inner',
     className,
-    isOwn && !renderingFor && 'own',
-    renderingFor && 'bigger',
+    isOwn && !target && 'own',
+    target && 'bigger',
     isSelected && 'audio-is-selected',
   );
 
@@ -287,7 +282,7 @@ const Audio: FC<OwnProps & StateProps> = ({
       <Button
         round
         ripple={!IS_SINGLE_COLUMN_LAYOUT}
-        size={renderingFor ? 'smaller' : 'tiny'}
+        size={target ? 'smaller' : 'tiny'}
         className={buttonClassNames.join(' ')}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
         onClick={handleButtonClick}
@@ -301,7 +296,7 @@ const Audio: FC<OwnProps & StateProps> = ({
           <ProgressSpinner
             progress={transferProgress}
             transparent
-            size={renderingFor ? 'm' : 's'}
+            size={target ? 'm' : 's'}
             onClick={isLoadingForPlaying ? handleButtonClick : undefined}
             noCross={!isLoadingForPlaying}
           />
@@ -318,12 +313,12 @@ const Audio: FC<OwnProps & StateProps> = ({
           <i className={isDownloadStarted ? 'icon-close' : 'icon-arrow-down'} />
         </Button>
       )}
-      {renderingFor === 'searchResult' && renderSearchResult()}
-      {renderingFor !== 'searchResult' && audio && renderAudio(
+      {target === 'searchResult' && renderSearchResult()}
+      {target !== 'searchResult' && audio && renderAudio(
         lang, audio, isPlaying, playProgress, bufferedProgress, seekHandlers, date,
         onDateClick ? handleDateClick : undefined,
       )}
-      {renderingFor !== 'searchResult' && voice && renderVoice(voice, renderedWaveform, isMediaUnread)}
+      {target !== 'searchResult' && voice && renderVoice(voice, renderedWaveform, isMediaUnread)}
     </div>
   );
 };
@@ -457,6 +452,4 @@ function renderSeekline(
   );
 }
 
-export default memo(withGlobal<OwnProps>((global) => ({
-  theme: selectTheme(global),
-}))(Audio));
+export default memo(Audio);

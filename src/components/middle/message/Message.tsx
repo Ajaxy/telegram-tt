@@ -19,7 +19,9 @@ import {
   ApiSticker,
   MAIN_THREAD_ID,
 } from '../../../api/types';
-import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
+import {
+  FocusDirection, IAlbum, ISettings, MediaViewerOrigin,
+} from '../../../types';
 
 import { IS_ANDROID } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
@@ -40,7 +42,9 @@ import {
   selectForwardedSender,
   selectThreadTopMessageId,
   selectShouldAutoLoadMedia,
-  selectShouldAutoPlayMedia, selectShouldLoopStickers,
+  selectShouldAutoPlayMedia,
+  selectShouldLoopStickers,
+  selectTheme,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -117,6 +121,7 @@ type OwnProps = {
 } & MessagePositionProperties;
 
 type StateProps = {
+  theme: ISettings['theme'];
   forceSenderName?: boolean;
   sender?: ApiUser | ApiChat;
   originSender?: ApiUser | ApiChat;
@@ -179,6 +184,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isFirstInDocumentGroup,
   isLastInDocumentGroup,
   isLastInList,
+  theme,
   forceSenderName,
   sender,
   originSender,
@@ -601,6 +607,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
         {(audio || voice) && (
           <Audio
+            theme={theme}
             message={message}
             uploadProgress={uploadProgress}
             lastSyncTime={lastSyncTime}
@@ -907,6 +914,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
+      theme: selectTheme(global),
       forceSenderName,
       sender,
       originSender,

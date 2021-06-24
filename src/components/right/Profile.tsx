@@ -11,6 +11,7 @@ import {
 } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import {
+  ISettings,
   MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType,
 } from '../../types';
 
@@ -29,6 +30,7 @@ import {
   selectChat,
   selectCurrentMediaSearch,
   selectIsRightColumnShown,
+  selectTheme,
 } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -63,6 +65,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  theme: ISettings['theme'];
   isChannel?: boolean;
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
@@ -96,6 +99,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   profileState,
   onProfileStateChange,
+  theme,
   isChannel,
   resolvedUserId,
   chatMessages,
@@ -287,8 +291,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           viewportIds!.map((id) => chatMessages[id] && (
             <Audio
               key={id}
-              renderingFor="sharedMedia"
+              theme={theme}
               message={chatMessages[id]}
+              target="sharedMedia"
               date={chatMessages[id].date}
               lastSyncTime={lastSyncTime}
               className="scroll-item"
@@ -394,6 +399,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
+      theme: selectTheme(global),
       isChannel,
       resolvedUserId,
       chatMessages,

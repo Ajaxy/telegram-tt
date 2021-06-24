@@ -28,8 +28,8 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, ('toggleMessageSelection')>;
 
-export default function withSelectControl(WrapedComponent: FC) {
-  const Component: FC<OwnProps & StateProps & DispatchProps> = (props) => {
+export default function withSelectControl(WrappedComponent: FC) {
+  const ComponentWithSelectControl: FC<OwnProps & StateProps & DispatchProps> = (props) => {
     const {
       isInSelectMode,
       isSelected,
@@ -77,7 +77,7 @@ export default function withSelectControl(WrapedComponent: FC) {
           </div>
         )}
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <WrapedComponent {...newProps} />
+        <WrappedComponent {...newProps} />
       </div>
     );
   };
@@ -93,5 +93,5 @@ export default function withSelectControl(WrapedComponent: FC) {
     (setGlobal, actions) => pick(actions, [
       'toggleMessageSelection',
     ]),
-  )(Component));
+  )(ComponentWithSelectControl));
 }

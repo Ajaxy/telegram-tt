@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getGlobal } from '../../lib/teact/teactn';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
@@ -32,10 +32,6 @@ type OwnProps = {
   children: ChildrenFn;
 };
 
-type StateProps = {
-  animationLevel: number;
-};
-
 const ANIMATION_DURATION = {
   slide: 450,
   'slide-reversed': 450,
@@ -51,7 +47,7 @@ const ANIMATION_DURATION = {
 
 const CLEANED_UP = Symbol('CLEANED_UP');
 
-const Transition: FC<OwnProps & StateProps> = ({
+const Transition: FC<OwnProps> = ({
   ref,
   activeKey,
   name,
@@ -64,8 +60,10 @@ const Transition: FC<OwnProps & StateProps> = ({
   onStart,
   onStop,
   children,
-  animationLevel,
 }) => {
+  // No need for a container to update on change
+  const { animationLevel } = getGlobal().settings.byKey;
+
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
   if (ref) {
@@ -255,7 +253,4 @@ const Transition: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>((global) => {
-  const { animationLevel } = global.settings.byKey;
-  return { animationLevel };
-})(Transition);
+export default Transition;

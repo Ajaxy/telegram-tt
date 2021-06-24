@@ -109,6 +109,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
 
   const { lastMessage, typingStatus } = chat || {};
   const isAction = lastMessage && isActionMessage(lastMessage);
@@ -171,10 +172,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     focusLastMessage,
   ]);
 
+  function handleDelete() {
+    markRenderDeleteModal();
+    openDeleteModal();
+  }
+
   const contextActions = useChatContextActions({
     chat,
     privateChatUser,
-    handleDelete: openDeleteModal,
+    handleDelete,
     folderId,
     isPinned,
     isMuted,
@@ -277,11 +283,14 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           <Badge chat={chat} isPinned={isPinned} isMuted={isMuted} />
         </div>
       </div>
-      <DeleteChatModal
-        isOpen={isDeleteModalOpen}
-        onClose={closeDeleteModal}
-        chat={chat}
-      />
+      {shouldRenderDeleteModal && (
+        <DeleteChatModal
+          isOpen={isDeleteModalOpen}
+          onClose={closeDeleteModal}
+          onCloseAnimationEnd={unmarkRenderDeleteModal}
+          chat={chat}
+        />
+      )}
     </ListItem>
   );
 };

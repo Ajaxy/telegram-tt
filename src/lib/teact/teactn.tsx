@@ -218,6 +218,14 @@ if (DEBUG) {
 
   document.addEventListener('dblclick', () => {
     // eslint-disable-next-line no-console
-    console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates', 'desc'));
+    console.log(
+      'GLOBAL CONTAINERS',
+      orderBy(
+        Array.from(containers.values())
+          .map(({ DEBUG_componentName, DEBUG_updates }) => ({ DEBUG_componentName, DEBUG_updates })),
+        'DEBUG_updates',
+        'desc',
+      ),
+    );
   });
 }
