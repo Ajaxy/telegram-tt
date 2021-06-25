@@ -28,6 +28,11 @@ html, body {
   }
 }
 
+html[lang=fa],
+html[lang=fa] body {
+  font-family: "Vazir", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+}
+
 body.cursor-grabbing, body.cursor-grabbing * {
   cursor: grabbing !important;
 }
