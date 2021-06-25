@@ -195,13 +195,13 @@ class TelegramClient {
 
             try {
                 await attempts(() => {
-                    return timeout(this._sender.send(new requests.PingDelayDisconnect({
+                    return timeout(this._sender.send(new requests.Ping({
                         pingId: Helpers.getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
-                        disconnectDelay: PING_DISCONNECT_DELAY,
                     })), PING_TIMEOUT);
                 }, PING_FAIL_ATTEMPTS, PING_FAIL_INTERVAL);
             } catch (err) {
-                console.error('!!!', err);
+                // eslint-disable-next-line no-console
+                console.warn(err);
 
                 await this.disconnect();
                 this.connect();
