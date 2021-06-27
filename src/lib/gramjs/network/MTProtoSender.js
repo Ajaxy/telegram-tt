@@ -645,7 +645,7 @@ class MTProtoSender {
                 this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
             }
 
-            this._log.info(`System clock is wrong, set time offset to ${to}s`);
+            this._log.info(`System clock is wrong, set time offset to ${newTimeOffset}s`);
         } else if (badMsg.errorCode === 32) {
             // msg_seqno too low, so just pump it up by some "large" amount
             // TODO A better fix would be to start with a new fresh session ID
