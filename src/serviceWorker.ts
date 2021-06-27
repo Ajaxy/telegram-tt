@@ -45,7 +45,6 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   })());
 });
 
-
 self.addEventListener('push', handlePush);
 self.addEventListener('notificationclick', handleNotificationClick);
 self.addEventListener('message', handleClientMessage);
