@@ -1,5 +1,4 @@
 import { APP_NAME, DEBUG } from '../config';
-import { debounce } from '../util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -35,7 +34,6 @@ let lastSyncAt = new Date().valueOf();
 
 const clickBuffer: Record<string, NotificationData> = {};
 const shownNotifications = new Set();
-let pendingNotifications: Record<number, NotificationData[]> = {};
 
 function getPushData(e: PushEvent | Notification): PushData | undefined {
   try {
@@ -95,57 +93,6 @@ function showNotification({
   });
 }
 
-async function showNotifications(groupLimit: number = 1) {
-  const count = Object.keys(pendingNotifications).reduce<number>((result, groupId) => {
-    result += pendingNotifications[Number(groupId)].length;
-    return result;
-  }, 0);
-  // if we have more than groupLimit notification groups we send only one notification
-  if (Object.keys(pendingNotifications).length > groupLimit) {
-    await showNotification({
-      title: APP_NAME,
-      body: `You have ${count} new Telegram notifications`,
-    });
-  } else {
-    // Else we send a notification per group
-    await Promise.all(Object.keys(pendingNotifications)
-      // eslint-disable-next-line no-async-without-await/no-async-without-await
-      .map(async (groupId) => {
-        const group = pendingNotifications[Number(groupId)];
-        if (group.length > groupLimit) {
-          const lastMessage = group[group.length - 1];
-          return showNotification({
-            title: APP_NAME,
-            body: `You have ${count} notifications from ${lastMessage.title}`,
-            messageId: lastMessage.messageId,
-            chatId: Number(groupId),
-          });
-        }
-        return Promise.all(group.map(showNotification));
-      }));
-  }
-
-  // Clear all pending notifications
-  pendingNotifications = {};
-}
-
-const flushNotifications = debounce(showNotifications, 1000, false);
-
-async function handleNotification(notification: NotificationData, groupLimit?: number) {
-  // Dont show already triggered notification
-  if (shownNotifications.has(notification.messageId)) {
-    shownNotifications.delete(notification.messageId);
-    return;
-  }
-
-  const groupId = notification.chatId || 0;
-  if (!pendingNotifications[groupId]) {
-    pendingNotifications[groupId] = [];
-  }
-  pendingNotifications[groupId].push(notification);
-  await flushNotifications(groupLimit);
-}
-
 export function handlePush(e: PushEvent) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -166,7 +113,14 @@ export function handlePush(e: PushEvent) {
   if (!data || data.mute === Boolean.True) return;
 
   const notification = getNotificationData(data);
-  e.waitUntil(handleNotification(notification));
+
+  // Dont show already triggered notification
+  if (shownNotifications.has(notification.messageId)) {
+    shownNotifications.delete(notification.messageId);
+    return;
+  }
+
+  e.waitUntil(showNotification(notification));
 }
 
 async function focusChatMessage(client: WindowClient, data: { chatId?: number; messageId?: number }) {
@@ -234,7 +188,7 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
   if (e.data.type === 'newMessageNotification') {
     // store messageId for already shown notification
     const notification: NotificationData = e.data.payload;
-    e.waitUntil(handleNotification(notification, 3));
+    e.waitUntil(showNotification(notification));
     shownNotifications.add(notification.messageId);
   }
 }
