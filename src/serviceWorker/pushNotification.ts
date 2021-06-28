@@ -31,6 +31,8 @@ type NotificationData = {
   body: string;
 };
 
+let lastSyncAt = new Date().valueOf();
+
 const clickBuffer: Record<string, NotificationData> = {};
 const shownNotifications = new Set();
 let pendingNotifications: Record<number, NotificationData[]> = {};
@@ -111,9 +113,11 @@ async function showNotifications(groupLimit: number = 1) {
       .map(async (groupId) => {
         const group = pendingNotifications[Number(groupId)];
         if (group.length > groupLimit) {
+          const lastMessage = group[group.length - 1];
           return showNotification({
             title: APP_NAME,
-            body: `You have ${count} notifications from ${group[0].title}`,
+            body: `You have ${count} notifications from ${lastMessage.title}`,
+            messageId: lastMessage.messageId,
             chatId: Number(groupId),
           });
         }
@@ -151,6 +155,11 @@ export function handlePush(e: PushEvent) {
       console.log('[SW] Push received with data', e.data.json());
     }
   }
+
+  // Do not show notifications right after sync (when browser is opened)
+  // To avoid stale notifications
+  if (new Date().valueOf() - lastSyncAt < 3000) return;
+
   const data = getPushData(e);
 
   // Do not show muted notifications
@@ -229,3 +238,7 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     shownNotifications.add(notification.messageId);
   }
 }
+
+self.onsync = () => {
+  lastSyncAt = new Date().valueOf();
+};
