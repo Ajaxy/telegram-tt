@@ -29,6 +29,7 @@ import {
   updateOutlyingIds,
   replaceScheduledMessages,
   updateThreadInfos,
+  updateChat,
 } from '../../reducers';
 import {
   selectChat,
@@ -298,7 +299,10 @@ addReducer('saveDraft', (global, actions, payload) => {
     });
   }
 
-  return replaceThreadParam(global, chatId, threadId, 'draft', draft);
+  global = replaceThreadParam(global, chatId, threadId, 'draft', draft);
+  global = updateChat(global, chatId, { hasDraft: true });
+
+  return global;
 });
 
 addReducer('clearDraft', (global, actions, payload) => {
@@ -313,7 +317,10 @@ addReducer('clearDraft', (global, actions, payload) => {
     void callApi('clearDraft', chat);
   }
 
-  return replaceThreadParam(global, chatId, threadId, 'draft', undefined);
+  global = replaceThreadParam(global, chatId, threadId, 'draft', undefined);
+  global = updateChat(global, chatId, { hasDraft: false });
+
+  return global;
 });
 
 addReducer('toggleMessageWebPage', (global, actions, payload) => {

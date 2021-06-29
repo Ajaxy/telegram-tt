@@ -369,6 +369,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       if (chat) {
         global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', formattedText);
         global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'replyingToId', replyingToId);
+        global = updateChat(global, chatId, { hasDraft: Boolean(formattedText) });
 
         setGlobal(global);
       }
