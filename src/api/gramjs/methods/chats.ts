@@ -904,13 +904,32 @@ export async function openChatByInvite(hash: string) {
     return undefined;
   }
 
-  if (result instanceof GramJs.ChatInvite) {
-    await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
+  let chat: ApiChat | undefined;
 
-    return undefined;
+  if (result instanceof GramJs.ChatInvite) {
+    const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
+    if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
+      return undefined;
+    }
+
+    chat = buildApiChatFromPreview(updates.chats[0]);
   } else {
-    return buildApiChatFromPreview(result.chat);
+    chat = buildApiChatFromPreview(result.chat);
+
+    if (chat) {
+      onUpdate({
+        '@type': 'updateChat',
+        id: chat.id,
+        chat,
+      });
+    }
   }
+
+  if (!chat) {
+    return undefined;
+  }
+
+  return { chatId: chat.id };
 }
 
 function preparePeers(

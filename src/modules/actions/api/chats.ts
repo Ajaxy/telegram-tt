@@ -386,13 +386,12 @@ addReducer('openTelegramLink', (global, actions, payload) => {
     const hash = match[1];
 
     (async () => {
-      const chat = await callApi('openChatByInvite', hash);
-
-      if (!chat) {
+      const result = await callApi('openChatByInvite', hash);
+      if (!result) {
         return;
       }
 
-      actions.openChat({ id: chat.id });
+      actions.openChat({ id: result.chatId });
     })();
   } else {
     match = RE_TME_LINK.exec(url)!;
