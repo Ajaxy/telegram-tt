@@ -156,7 +156,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const memoFirstUnreadIdRef = useRef<number>();
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
-  const shouldAnimateAppearanceRef = useRef(!messageIds);
+  const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
   const [hasFocusing, setHasFocusing] = useState<boolean>(Boolean(focusingId));

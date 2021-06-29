@@ -13,7 +13,7 @@ let isAnimating = false;
 export default function fastSmoothScroll(
   container: HTMLElement,
   element: HTMLElement,
-  position: ScrollLogicalPosition,
+  position: ScrollLogicalPosition | 'centerOrTop',
   margin = 0,
   maxDistance = MAX_DISTANCE,
   forceDirection?: FocusDirection,
@@ -21,7 +21,15 @@ export default function fastSmoothScroll(
   forceCurrentContainerHeight?: boolean,
 ) {
   if (forceDirection === FocusDirection.Static) {
-    element.scrollIntoView({ block: position });
+    let block!: ScrollLogicalPosition;
+
+    if (position === 'centerOrTop') {
+      block = element.offsetHeight < container.offsetHeight ? 'center' : 'start';
+    } else {
+      block = position;
+    }
+
+    element.scrollIntoView({ block });
 
     return;
   }
@@ -55,7 +63,7 @@ export function isAnimatingScroll() {
 function scrollWithJs(
   container: HTMLElement,
   element: HTMLElement,
-  position: ScrollLogicalPosition,
+  position: ScrollLogicalPosition | 'centerOrTop',
   margin = 0,
   forceDuration?: number,
   forceCurrentContainerHeight?: boolean,
@@ -78,6 +86,7 @@ function scrollWithJs(
     // 'nearest' is not supported yet
     case 'nearest':
     case 'center':
+    case 'centerOrTop':
       path = elementHeight < targetContainerHeight
         ? (elementTop + elementHeight / 2) - (scrollTop + targetContainerHeight / 2)
         : (elementTop - margin) - scrollTop;
