@@ -82,13 +82,15 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
 
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
-          subLabel={lang(hasPrivateChatsNotifications ? 'NotificationsEnabled' : 'NotificationsDisabled')}
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasPrivateChatsNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPrivateChatsNotifications}
           onChange={(e) => { handleSettingsChange(e, 'contact', 'silent'); }}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          subLabel={lang(hasPrivateChatsMessagePreview ? 'PreviewEnabled' : 'PreviewDisabled')}
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasPrivateChatsMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPrivateChatsMessagePreview}
           onChange={(e) => { handleSettingsChange(e, 'contact', 'showPreviews'); }}
         />
@@ -99,13 +101,13 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
 
         <Checkbox
           label={lang('NotificationsForGroups')}
-          subLabel={lang(hasGroupNotifications ? 'NotificationsEnabled' : 'NotificationsDisabled')}
+          subLabel={lang(hasGroupNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasGroupNotifications}
           onChange={(e) => { handleSettingsChange(e, 'group', 'silent'); }}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          subLabel={lang(hasGroupMessagePreview ? 'PreviewEnabled' : 'PreviewDisabled')}
+          subLabel={lang(hasGroupMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasGroupMessagePreview}
           onChange={(e) => { handleSettingsChange(e, 'group', 'showPreviews'); }}
         />
@@ -116,13 +118,15 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
 
         <Checkbox
           label={lang('NotificationsForChannels')}
-          subLabel={lang(hasBroadcastNotifications ? 'NotificationsEnabled' : 'NotificationsDisabled')}
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasBroadcastNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasBroadcastNotifications}
           onChange={(e) => { handleSettingsChange(e, 'broadcast', 'silent'); }}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          subLabel={lang(hasBroadcastMessagePreview ? 'PreviewEnabled' : 'PreviewDisabled')}
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasBroadcastMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasBroadcastMessagePreview}
           onChange={(e) => { handleSettingsChange(e, 'broadcast', 'showPreviews'); }}
         />

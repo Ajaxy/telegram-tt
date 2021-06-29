@@ -1,16 +1,9 @@
 import { ApiLangPack } from '../api/types';
 
-import { DEBUG, LANG_CACHE_NAME, LANG_PACKS } from '../config';
+import { LANG_CACHE_NAME, LANG_PACKS } from '../config';
 import * as cacheApi from './cacheApi';
 import { callApi } from '../api/gramjs';
 import { createCallbackManager } from './callbacks';
-import { mapValues } from './iteratees';
-
-import enExtraJson from '../assets/lang/en-extra.json';
-import esExtraJson from '../assets/lang/es-extra.json';
-import itExtraJson from '../assets/lang/it-extra.json';
-import plExtraJson from '../assets/lang/pl-extra.json';
-import ruExtraJson from '../assets/lang/ru-extra.json';
 import { formatInteger } from './textFormat';
 import { getGlobal } from '../lib/teact/teactn';
 
@@ -19,14 +12,6 @@ interface LangFn {
 
   isRtl?: boolean;
 }
-
-const EXTRA_PACK_PATHS: Record<string, string> = {
-  en: enExtraJson as unknown as string,
-  es: esExtraJson as unknown as string,
-  it: itExtraJson as unknown as string,
-  pl: plExtraJson as unknown as string,
-  ru: ruExtraJson as unknown as string,
-};
 
 const PLURAL_OPTIONS = ['value', 'zeroValue', 'oneValue', 'twoValue', 'fewValue', 'manyValue', 'otherValue'] as const;
 const PLURAL_RULES = {
@@ -112,21 +97,6 @@ export async function setLanguage(langCode: string, callback?: NoneToVoidFunctio
   const newLangPack = await fetchFromCacheOrRemote(langCode);
   if (!newLangPack) {
     return;
-  }
-
-  if (EXTRA_PACK_PATHS[langCode]) {
-    try {
-      const response = await fetch(EXTRA_PACK_PATHS[langCode]);
-      const pairs = await response.json();
-      const extraLangPack = mapValues(pairs, (value, key) => ({ key, value }));
-
-      Object.assign(newLangPack, extraLangPack);
-    } catch (err) {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    }
   }
 
   cache.clear();

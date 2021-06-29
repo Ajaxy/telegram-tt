@@ -132,7 +132,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
       case SettingsScreens.TwoFaNewPassword:
       case SettingsScreens.TwoFaChangePasswordNew:
       case SettingsScreens.TwoFaChangePasswordConfirm:
-        return <h3>{lang('EnterPassword')}</h3>;
+        return <h3>{lang('PleaseEnterCurrentPassword')}</h3>;
       case SettingsScreens.TwoFaNewPasswordConfirm:
         return <h3>{lang('PleaseReEnterPassword')}</h3>;
       case SettingsScreens.TwoFaNewPasswordHint:
