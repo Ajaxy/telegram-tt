@@ -21,7 +21,7 @@ import {
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
 } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
   isChatPrivate,
   isChatArchived,
@@ -156,7 +156,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const { width: windowWidth } = useWindowSize();
 
   const isLeftColumnHideable = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
-  const shouldShowCloseButton = windowWidth >= MOBILE_SCREEN_MAX_WIDTH && isLeftColumnShown;
+  const shouldShowCloseButton = IS_TABLET_COLUMN_LAYOUT && isLeftColumnShown;
 
   // eslint-disable-next-line no-null/no-null
   const componentRef = useRef<HTMLDivElement>(null);
@@ -183,7 +183,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: chatId, threadId: MAIN_THREAD_ID, type: 'pinned' });
   }, [openChat, chatId]);
 
-  const handleBackClick = useCallback(() => {
+  const handleBackClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (IS_SINGLE_COLUMN_LAYOUT) {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID);
       if (messageInput) {
@@ -191,7 +191,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       }
     }
     if (threadId === MAIN_THREAD_ID && messageListType === 'thread') {
-      if (IS_SINGLE_COLUMN_LAYOUT) {
+      if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
+        e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
         openChat({ id: undefined });
       } else {
         toggleLeftColumn();
@@ -203,8 +204,12 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     if (messageListType === 'scheduled' && isSelectModeActive) {
       exitMessageSelectMode();
     }
+
     openChat({ id: originChatId, threadId: MAIN_THREAD_ID });
-  }, [openChat, originChatId, threadId, messageListType, toggleLeftColumn, isSelectModeActive, exitMessageSelectMode]);
+  }, [
+    openChat, originChatId, threadId, messageListType, toggleLeftColumn, isSelectModeActive, exitMessageSelectMode,
+    shouldShowCloseButton,
+  ]);
 
   const unreadCount = useMemo(() => {
     if (!isLeftColumnHideable || !chatsById) {

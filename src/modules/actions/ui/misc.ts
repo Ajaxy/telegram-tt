@@ -2,7 +2,7 @@ import { addReducer } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { selectCurrentMessageList } from '../../selectors';
 
@@ -58,7 +58,7 @@ addReducer('closeManagement', (global): GlobalState | undefined => {
 });
 
 addReducer('openChat', (global, actions, payload) => {
-  if (!IS_SINGLE_COLUMN_LAYOUT) {
+  if (!IS_SINGLE_COLUMN_LAYOUT && !IS_TABLET_COLUMN_LAYOUT) {
     return undefined;
   }
 

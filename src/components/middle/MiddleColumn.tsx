@@ -19,7 +19,12 @@ import {
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
 } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV, MASK_IMAGE_DISABLED } from '../../util/environment';
+import {
+  IS_SINGLE_COLUMN_LAYOUT,
+  IS_TABLET_COLUMN_LAYOUT,
+  IS_TOUCH_ENV,
+  MASK_IMAGE_DISABLED,
+} from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
@@ -67,6 +72,7 @@ type StateProps = {
   customBackground?: string;
   backgroundColor?: string;
   patternColor?: string;
+  isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
   isMobileSearchActive?: boolean;
@@ -96,6 +102,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   theme,
   backgroundColor,
   patternColor,
+  isLeftColumnShown,
   isRightColumnShown,
   isBackgroundBlurred,
   isMobileSearchActive,
@@ -179,6 +186,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     openChat({ id: chatId });
   }, [unpinAllMessages, openChat, closeUnpinModal, chatId]);
 
+  const handleTabletFocus = useCallback(() => {
+    openChat({ id: chatId });
+  }, [openChat, chatId]);
+
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const className = buildClassName(
@@ -228,6 +239,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         --theme-background-color:
           ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)};
       `}
+      onClick={(IS_TABLET_COLUMN_LAYOUT && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
       <div
         id="middle-column-bg"
@@ -332,13 +344,14 @@ export default memo(withGlobal(
     } = global.settings.themes[theme] || {};
 
     const currentMessageList = selectCurrentMessageList(global);
-    const { chats: { listIds } } = global;
+    const { isLeftColumnShown, chats: { listIds } } = global;
 
     const state: StateProps = {
       theme,
       customBackground,
       backgroundColor,
       patternColor,
+      isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),
       isBackgroundBlurred,
       isMobileSearchActive: Boolean(IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global)),
