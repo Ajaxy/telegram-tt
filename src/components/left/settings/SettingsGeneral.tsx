@@ -158,7 +158,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
       {KEYBOARD_SEND_OPTIONS && (
         <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Keyboard')}</h4>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('VoiceOver.Keyboard')}</h4>
 
           <RadioGroup
             name="keyboard-send-settings"
@@ -203,7 +203,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
           onCheck={(isChecked) => setSettingOption({ shouldAutoPlayGifs: isChecked })}
         />
         <Checkbox
-          label={lang('VideosTitle')}
+          label={lang('DataAndStorage.Autoplay.Videos')}
           checked={shouldAutoPlayVideos}
           onCheck={(isChecked) => setSettingOption({ shouldAutoPlayVideos: isChecked })}
         />
