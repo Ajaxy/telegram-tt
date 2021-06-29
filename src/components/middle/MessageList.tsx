@@ -471,7 +471,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
       newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
-    } else if (unreadDivider) {
+    } else if (unreadDivider && !scrollOffset) {
       newScrollTop = unreadDivider.offsetTop - (hasTools ? UNREAD_DIVIDER_TOP_WITH_TOOLS : UNREAD_DIVIDER_TOP);
     } else {
       newScrollTop = scrollHeight - scrollOffset;
