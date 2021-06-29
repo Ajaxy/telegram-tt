@@ -13,6 +13,7 @@ interface LangFn {
   isRtl?: boolean;
 }
 
+const FALLBACK_LANG_CODE = 'en';
 const PLURAL_OPTIONS = ['value', 'zeroValue', 'oneValue', 'twoValue', 'fewValue', 'manyValue', 'otherValue'] as const;
 const PLURAL_RULES = {
   /* eslint-disable max-len */
@@ -39,7 +40,8 @@ const PLURAL_RULES = {
 
 const cache = new Map<string, string>();
 
-let langPack: ApiLangPack;
+let langPack: ApiLangPack | undefined;
+let fallbackLangPack: ApiLangPack | undefined;
 
 const {
   addCallback,
@@ -59,12 +61,16 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
     }
   }
 
-  if (!langPack) {
+  if (!langPack && !fallbackLangPack) {
     return key;
   }
 
-  const langString = langPack[key];
+  const langString = (langPack && langPack[key]) || (fallbackLangPack && fallbackLangPack[key]);
   if (!langString) {
+    if (!fallbackLangPack) {
+      void importFallbackLangPack();
+    }
+
     return key;
   }
 
@@ -85,7 +91,7 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
   return template;
 };
 
-export async function setLanguage(langCode: string, callback?: NoneToVoidFunction) {
+export async function setLanguage(langCode: string, callback?: NoneToVoidFunction, withFallback = false) {
   if (langPack && langCode === currentLangCode) {
     if (callback) {
       callback();
@@ -94,9 +100,16 @@ export async function setLanguage(langCode: string, callback?: NoneToVoidFunctio
     return;
   }
 
-  const newLangPack = await fetchFromCacheOrRemote(langCode);
+  let newLangPack = await cacheApi.fetch(LANG_CACHE_NAME, langCode, cacheApi.Type.Json);
   if (!newLangPack) {
-    return;
+    if (withFallback) {
+      await importFallbackLangPack();
+    }
+
+    newLangPack = await fetchRemote(langCode);
+    if (!newLangPack) {
+      return;
+    }
   }
 
   cache.clear();
@@ -113,15 +126,19 @@ export async function setLanguage(langCode: string, callback?: NoneToVoidFunctio
     callback();
   }
 
-  runCallbacks(langPack);
+  runCallbacks();
 }
 
-async function fetchFromCacheOrRemote(langCode: string): Promise<ApiLangPack | undefined> {
-  const cached = await cacheApi.fetch(LANG_CACHE_NAME, langCode, cacheApi.Type.Json);
-  if (cached) {
-    return cached;
+async function importFallbackLangPack() {
+  if (fallbackLangPack) {
+    return;
   }
 
+  fallbackLangPack = (await import('./fallbackLangPack')).default;
+  runCallbacks();
+}
+
+async function fetchRemote(langCode: string): Promise<ApiLangPack | undefined> {
   const remote = await callApi('fetchLangPack', { sourceLangPacks: LANG_PACKS, langCode });
   if (remote) {
     await cacheApi.save(LANG_CACHE_NAME, langCode, remote.langPack);
@@ -132,8 +149,9 @@ async function fetchFromCacheOrRemote(langCode: string): Promise<ApiLangPack | u
 }
 
 function getPluralOption(amount: number) {
-  const optionIndex = currentLangCode && PLURAL_RULES[currentLangCode as keyof typeof PLURAL_RULES]
-    ? PLURAL_RULES[currentLangCode as keyof typeof PLURAL_RULES](amount)
+  const langCode = currentLangCode || FALLBACK_LANG_CODE;
+  const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
+    ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;
 
   return PLURAL_OPTIONS[optionIndex];

@@ -14,7 +14,7 @@ addReducer('init', (global) => {
   const { animationLevel, messageTextSize, language } = global.settings.byKey;
   const theme = selectTheme(global);
 
-  setLanguage(language);
+  setLanguage(language, undefined, true);
 
   document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
   document.body.classList.add('initial');
