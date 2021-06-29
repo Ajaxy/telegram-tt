@@ -109,39 +109,36 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
     };
   }
 
-  if (peerEntity instanceof GramJs.User) {
+  const restrictions = {};
+
+  if ('restricted' in peerEntity) {
     const restrictionReason = peerEntity.restricted
       ? buildApiChatRestrictionReason(peerEntity.restrictionReason)
       : undefined;
 
-    if (restrictionReason === undefined) {
-      return {
-        isRestricted: false,
-      };
+    if (restrictionReason) {
+      Object.assign(restrictions, {
+        isRestricted: true,
+        restrictionReason,
+      });
     }
+  }
 
-    return {
-      isRestricted: peerEntity.restricted,
-      restrictionReason,
-    };
-  } else if (peerEntity instanceof GramJs.Chat) {
-    return {
+  if (peerEntity instanceof GramJs.Chat) {
+    Object.assign(restrictions, {
       isNotJoined: peerEntity.left,
       isRestricted: peerEntity.kicked,
-    };
-  } else if (peerEntity instanceof GramJs.Channel) {
-    const isRestricted = peerEntity.restricted
-      && peerEntity.restrictionReason
-      && peerEntity.restrictionReason.some((reason) => reason.platform === 'all');
+    });
+  }
 
-    return {
+  if (peerEntity instanceof GramJs.Channel) {
+    Object.assign(restrictions, {
       // `left` is weirdly set to `true` on all channels never joined before
       isNotJoined: peerEntity.left,
-      isRestricted,
-      restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
-    };
+    });
   }
-  return {};
+
+  return restrictions;
 }
 
 function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
