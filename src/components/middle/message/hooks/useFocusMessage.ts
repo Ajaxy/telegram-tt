@@ -23,7 +23,7 @@ export default function useFocusMessage(
         messagesContainer,
         elementRef.current,
         // `noFocusHighlight` always called from “scroll-to-bottom” buttons
-        noFocusHighlight ? 'end' : 'center',
+        noFocusHighlight ? 'end' : 'centerOrTop',
         FOCUS_MARGIN,
         focusDirection === undefined ? FOCUS_MAX_OFFSET : RELOCATED_FOCUS_OFFSET,
         focusDirection,
