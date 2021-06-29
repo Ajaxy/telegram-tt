@@ -6,6 +6,8 @@ import { isActionMessage } from '../../../modules/helpers';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
 
+const GROUP_INTERVAL_SECONDS = 600; // 10 minutes
+
 export type MessageDateGroup = {
   originalDate: number;
   datetime: number;
@@ -55,11 +57,11 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
       currentAlbum = undefined;
     }
     if (nextMessage) {
-      const nextMessageDatetime = Number(getDayStart(nextMessage.date * 1000));
-      if (currentDateGroup.datetime !== nextMessageDatetime) {
+      const nextMessageDayStartsAt = Number(getDayStart(nextMessage.date * 1000));
+      if (currentDateGroup.datetime !== nextMessageDayStartsAt) {
         currentDateGroup = {
           originalDate: nextMessage.date,
-          datetime: nextMessageDatetime,
+          datetime: nextMessageDayStartsAt,
           senderGroups: [],
         };
         dateGroups.push(currentDateGroup);
@@ -82,6 +84,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         )
         || message.inlineButtons
         || nextMessage.inlineButtons
+        || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
       ) {
         currentSenderGroup = [];
         currentDateGroup.senderGroups.push(currentSenderGroup);
