@@ -192,8 +192,14 @@ export function getChatSlowModeOptions(chat?: ApiChat) {
   return chat.fullInfo.slowMode;
 }
 
+
 export function getChatOrder(chat: ApiChat) {
-  return Math.max(chat.joinDate || 0, chat.lastMessage ? chat.lastMessage.date : 0);
+  return Math.max(
+    chat.joinDate || 0,
+    chat.lastMessage ? chat.lastMessage.date : 0,
+  ) + (
+    chat.hasDraft ? Date.now() / 1000 : 0
+  );
 }
 
 export function isChatArchived(chat: ApiChat) {
