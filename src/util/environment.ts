@@ -1,4 +1,5 @@
 import {
+  MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
   MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT,
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
@@ -41,6 +42,10 @@ export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
 // Keep in mind the landscape orientation
 export const IS_SINGLE_COLUMN_LAYOUT = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH || (
   window.innerWidth <= MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH && window.innerHeight <= MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT
+);
+// Special layout, 1 column while chat opened, 2 columns while collapsed
+export const IS_TABLET_COLUMN_LAYOUT = !IS_SINGLE_COLUMN_LAYOUT && (
+  window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
 );
 export const IS_VOICE_RECORDING_SUPPORTED = (navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
   window.AudioContext || (window as any).webkitAudioContext
