@@ -19,7 +19,7 @@ import {
 import { LangCode } from '../../../types';
 
 import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_EMOJI_SUPPORTED } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   selectChat,
   selectIsChatWithBot,
@@ -324,13 +324,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
       if (isSelectionInsideInput(selectionRange, inputId)) {
-        if (IS_EMOJI_SUPPORTED) {
-          // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
-          document.execCommand('insertText', false, text);
-        } else {
-          insertHtmlInSelection(newHtml);
-          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        insertHtmlInSelection(newHtml);
+        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
         return;
       }
     }
