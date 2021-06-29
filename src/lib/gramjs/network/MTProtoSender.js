@@ -81,6 +81,12 @@ class MTProtoSender {
         this._isMainSender = args.isMainSender;
         this._onConnectionBreak = args.onConnectionBreak;
 
+
+        /**
+         * whether we disconnected ourself or telegram did it.
+         */
+        this.userDisconnected = false;
+
         /**
          * Whether the user has explicitly connected or disconnected.
          *
@@ -192,6 +198,7 @@ class MTProtoSender {
      * all pending requests, and closes the send and receive loops.
      */
     async disconnect() {
+        this.userDisconnected = true;
         await this._disconnect();
     }
 
@@ -378,8 +385,11 @@ class MTProtoSender {
                 body = await this._connection.recv();
             } catch (e) {
                 // this._log.info('Connection closed while receiving data');
-                this._log.warn('Connection closed while receiving data');
-                this.reconnect();
+                /** when the server disconnects us we want to reconnect */
+                if (!this.userDisconnected) {
+                    this._log.warn('Connection closed while receiving data');
+                    this.reconnect();
+                }
                 return;
             }
             try {
