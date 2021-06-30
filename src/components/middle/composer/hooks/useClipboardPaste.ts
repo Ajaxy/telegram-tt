@@ -19,7 +19,7 @@ export default (
       }
 
       const input = document.activeElement;
-      if (input && input.tagName === 'INPUT' && ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID].includes(input.id)) {
+      if (input && ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID].includes(input.id)) {
         return;
       }
 
