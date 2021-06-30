@@ -1,7 +1,7 @@
 import React from '../../../lib/teact/teact';
 import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
 
-import { RE_LINK_TEMPLATE } from '../../../config';
+import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import { nativeToUnfified } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
@@ -177,8 +177,7 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined): Tex
   }, [] as TextPart[]);
 }
 
-const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'ig');
-const RE_MENTION = /@[\w\d_-]+/ig;
+const RE_LINK = new RegExp(`${RE_LINK_TEMPLATE}|${RE_MENTION_TEMPLATE}`, 'ig');
 
 function addLinks(textParts: TextPart[]): TextPart[] {
   return textParts.reduce((result, part) => {
@@ -186,8 +185,8 @@ function addLinks(textParts: TextPart[]): TextPart[] {
       return [...result, part];
     }
 
-    const links = [...(part.match(RE_LINK) || []), ...(part.match(RE_MENTION) || [])];
-    if (!links.length) {
+    const links = part.match(RE_LINK);
+    if (!links || !links.length) {
       return [...result, part];
     }
 
