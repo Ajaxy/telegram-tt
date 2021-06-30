@@ -159,3 +159,25 @@ export function fastRaf(callback: NoneToVoidFunction, isPrimary = false) {
 export function fastPrimaryRaf(callback: NoneToVoidFunction) {
   fastRaf(callback, true);
 }
+
+let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;
+
+export function onBeforeUnload(callback: NoneToVoidFunction, isLast = false) {
+  if (!beforeUnloadCallbacks) {
+    beforeUnloadCallbacks = [];
+    // eslint-disable-next-line no-restricted-globals
+    self.addEventListener('beforeunload', () => {
+      beforeUnloadCallbacks!.forEach((cb) => cb());
+    });
+  }
+
+  if (isLast) {
+    beforeUnloadCallbacks.push(callback);
+  } else {
+    beforeUnloadCallbacks.unshift(callback);
+  }
+
+  return () => {
+    beforeUnloadCallbacks = beforeUnloadCallbacks!.filter((cb) => cb !== callback);
+  };
+}

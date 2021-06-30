@@ -777,11 +777,11 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
               activeVoiceRecording && window.innerWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER ? '' : lang('Message')
             }
             shouldSetFocus={isSymbolMenuOpen}
-            shouldSupressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
-            shouldSupressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
+            shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
+            shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
             onUpdate={setHtml}
             onSend={onSend}
-            onSupressedFocus={closeSymbolMenu}
+            onSuppressedFocus={closeSymbolMenu}
           />
           {withScheduledButton && (
             <Button
