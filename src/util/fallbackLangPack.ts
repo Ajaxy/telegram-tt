@@ -1701,4 +1701,8 @@ export default {
     key: 'Chat.Quiz.TotalVotesEmpty',
     value: 'No answers yet',
   },
+  lng_update_telegram: {
+    key: 'lng_update_telegram',
+    value: 'Update Telegram',
+  },
 } as ApiLangPack;
