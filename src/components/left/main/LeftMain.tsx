@@ -8,7 +8,11 @@ import { LeftColumnContent } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
+import buildClassName from '../../../util/buildClassName';
 import useBrowserOnline from '../../../hooks/useBrowserOnline';
+import useFlag from '../../../hooks/useFlag';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useLang from '../../../hooks/useLang';
 
 import Transition from '../../ui/Transition';
 import LeftMainHeader from './LeftMainHeader';
@@ -18,6 +22,7 @@ import LeftSearch from '../search/LeftSearch.async';
 import ContactList from './ContactList.async';
 import NewChatButton from '../NewChatButton';
 import ShowTransition from '../../ui/ShowTransition';
+import Button from '../../ui/Button';
 
 import './LeftMain.scss';
 
@@ -35,6 +40,8 @@ type StateProps = Pick<GlobalState, 'connectionState'>;
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 const BUTTON_CLOSE_DELAY_MS = 250;
+const APP_OUTDATED_TIMEOUT = 3 * 24 * 60 * 60 * 1000; // 3 days
+
 let closeTimeout: number | undefined;
 
 const LeftMain: FC<OwnProps & StateProps> = ({
@@ -115,6 +122,10 @@ const LeftMain: FC<OwnProps & StateProps> = ({
     };
   }, [content]);
 
+  const [shouldRenderUpdateButton, updateButtonClassNames, handleUpdateClick] = useAppOutdatedCheck();
+
+  const lang = useLang();
+
   return (
     <div
       id="LeftColumn-main"
@@ -161,6 +172,16 @@ const LeftMain: FC<OwnProps & StateProps> = ({
           }
         }}
       </Transition>
+      {shouldRenderUpdateButton && (
+        <Button
+          fluid
+          pill
+          className={buildClassName('btn-update', updateButtonClassNames)}
+          onClick={handleUpdateClick}
+        >
+          {lang('lng_update_telegram')}
+        </Button>
+      )}
       <NewChatButton
         isShown={isNewChatButtonShown}
         onNewPrivateChat={handleSelectContacts}
@@ -170,6 +191,26 @@ const LeftMain: FC<OwnProps & StateProps> = ({
     </div>
   );
 };
+
+function useAppOutdatedCheck() {
+  const [isAppOutdated, markIsAppOutdated] = useFlag(false);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(markIsAppOutdated, APP_OUTDATED_TIMEOUT);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [markIsAppOutdated]);
+
+  const { shouldRender, transitionClassNames } = useShowTransition(isAppOutdated);
+
+  const handleUpdateClick = () => {
+    window.location.reload();
+  };
+
+  return [shouldRender, transitionClassNames, handleUpdateClick] as const;
+}
 
 export default withGlobal<OwnProps>(
   (global): StateProps => pick(global, ['connectionState']),
