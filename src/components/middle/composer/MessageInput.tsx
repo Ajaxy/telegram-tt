@@ -36,10 +36,10 @@ type OwnProps = {
   html: string;
   placeholder: string;
   shouldSetFocus: boolean;
-  shouldSupressFocus?: boolean;
-  shouldSupressTextFormatter?: boolean;
+  shouldSuppressFocus?: boolean;
+  shouldSuppressTextFormatter?: boolean;
   onUpdate: (html: string) => void;
-  onSupressedFocus?: () => void;
+  onSuppressedFocus?: () => void;
   onSend: () => void;
 };
 
@@ -77,10 +77,10 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   html,
   placeholder,
   shouldSetFocus,
-  shouldSupressFocus,
-  shouldSupressTextFormatter,
+  shouldSuppressFocus,
+  shouldSuppressTextFormatter,
   onUpdate,
-  onSupressedFocus,
+  onSuppressedFocus,
   onSend,
   currentChatId,
   replyingToId,
@@ -148,7 +148,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     const selectionRange = selection.getRangeAt(0);
     const selectedText = selectionRange.toString().trim();
     if (
-      shouldSupressTextFormatter
+      shouldSuppressTextFormatter
       || !isSelectionInsideInput(selectionRange, editableInputId || EDITABLE_INPUT_ID)
       || !selectedText
       || parseEmojiOnlyString(selectedText)
@@ -344,27 +344,27 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     const input = inputRef.current!;
 
-    function supressFocus() {
+    function suppressFocus() {
       input.blur();
     }
 
-    if (shouldSupressFocus) {
-      input.addEventListener('focus', supressFocus);
+    if (shouldSuppressFocus) {
+      input.addEventListener('focus', suppressFocus);
     }
 
     return () => {
-      input.removeEventListener('focus', supressFocus);
+      input.removeEventListener('focus', suppressFocus);
     };
-  }, [shouldSupressFocus]);
+  }, [shouldSuppressFocus]);
 
   const className = buildClassName(
     'form-control custom-scroll',
     html.length > 0 && 'touched',
-    shouldSupressFocus && 'focus-disabled',
+    shouldSuppressFocus && 'focus-disabled',
   );
 
   return (
-    <div id={id} onClick={shouldSupressFocus ? onSupressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
+    <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
       <div
         ref={inputRef}
         id={editableInputId || EDITABLE_INPUT_ID}

@@ -9,6 +9,8 @@ import { debounce } from '../../../../util/schedulers';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../helpers/parseMessageInput';
 import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
+import useBackgroundMode from '../../../../hooks/useBackgroundMode';
+import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 
 // Used to avoid running debounced callbacks when chat changes.
 let currentChatId: number | undefined;
@@ -90,18 +92,12 @@ export default (
     }
   }, [chatId, html, prevChatId, prevHtml, prevThreadId, runDebouncedForSaveDraft, threadId, updateDraft]);
 
-  // Subscribe and handle `window.blur`
-  useEffect(() => {
-    function handleBlur() {
-      if (chatId && threadId) {
-        updateDraft(chatId, threadId);
-      }
+  const handleBlur = useCallback(() => {
+    if (chatId && threadId) {
+      updateDraft(chatId, threadId);
     }
-
-    window.addEventListener('blur', handleBlur);
-
-    return () => {
-      window.removeEventListener('blur', handleBlur);
-    };
   }, [chatId, threadId, updateDraft]);
+
+  useBackgroundMode(handleBlur);
+  useBeforeUnload(handleBlur);
 };

@@ -1,4 +1,6 @@
-import React, { FC, useEffect, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, memo, useCallback,
+} from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -20,6 +22,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import buildClassName from '../../util/buildClassName';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
+import useBeforeUnload from '../../hooks/useBeforeUnload';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -131,26 +134,9 @@ const Main: FC<StateProps & DispatchProps> = ({
     }
   }, [animationLevel, isRightColumnShown]);
 
-  useBackgroundMode(() => {
+  const handleBlur = useCallback(() => {
     updateIsOnline(false);
-  }, () => {
-    updateIsOnline(true);
-  });
 
-  useEffect(() => {
-    function handleUnload() {
-      updateIsOnline(false);
-    }
-
-    window.addEventListener('beforeunload', handleUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleUnload);
-    };
-  }, [updateIsOnline]);
-
-  // Browser tab indicators
-  useBackgroundMode(() => {
     const initialUnread = selectCountNotMutedUnread(getGlobal());
     let index = 0;
 
@@ -174,7 +160,11 @@ const Main: FC<StateProps & DispatchProps> = ({
 
       index++;
     }, NOTIFICATION_INTERVAL);
-  }, () => {
+  }, [updateIsOnline]);
+
+  const handleFocus = useCallback(() => {
+    updateIsOnline(true);
+
     clearInterval(notificationInterval);
     notificationInterval = undefined;
 
@@ -183,7 +173,11 @@ const Main: FC<StateProps & DispatchProps> = ({
     }
 
     updateIcon(false);
-  });
+  }, [updateIsOnline]);
+
+  // Online status and browser tab indicators
+  useBackgroundMode(handleBlur, handleFocus);
+  useBeforeUnload(handleBlur);
 
   function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
