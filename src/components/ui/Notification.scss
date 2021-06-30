@@ -7,10 +7,6 @@
 
   @media (min-width: 1276px) {
     transition: transform var(--layer-transition);
-
-    body.is-right-column-shown & {
-      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
-    }
   }
 
   &:first-of-type {
