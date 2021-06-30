@@ -105,7 +105,7 @@
     "emoji-data-ios": "github:korenskoy/emoji-data-ios#1a4532f",
     "events": "^3.0.0",
     "idb-keyval": "^5.0.5",
-    "opus-recorder": "^6.2.0",
+    "opus-recorder": "github:Ajaxy/opus-recorder",
     "pako": "^1.0.10",
     "qr-creator": "^1.0.0",
     "websocket": "^1.0.30"

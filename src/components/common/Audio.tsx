@@ -389,7 +389,7 @@ function renderWaveform(
   }
 
   const fillColor = theme === 'dark' ? '#494B75' : '#CBCBCB';
-  const fillOwnColor = theme === 'dark' ? '#C69C85' : '#B0DEA6';
+  const fillOwnColor = theme === 'dark' ? '#C0BBED' : '#B0DEA6';
   const progressFillColor = theme === 'dark' ? '#868DF5' : '#54a3e6';
   const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#53ad53';
   const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
