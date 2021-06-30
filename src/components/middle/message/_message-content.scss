@@ -254,7 +254,12 @@
 
     .Audio + .text-content {
       margin-top: .25rem;
-      margin-bottom: -0.4375rem;
+    }
+
+    &:not(.has-replies) {
+      .Audio + .text-content {
+        margin-bottom: -0.4375rem;
+      }
     }
   }
 
