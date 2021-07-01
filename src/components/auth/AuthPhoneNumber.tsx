@@ -8,7 +8,7 @@ import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
@@ -51,7 +51,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [country, setCountry] = useState<Country | undefined>();
-  const [phoneNumber, setPhoneNumber] = useState<string>();
+  const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
   const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
 
@@ -77,14 +77,16 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   }, [country, authNearestCountry, isTouched]);
 
   const parseFullNumber = useCallback((newFullNumber: string) => {
+    if (!newFullNumber.length) {
+      setPhoneNumber('');
+    }
+
     const suggestedCountry = getCountryFromPhoneNumber(newFullNumber);
     const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
       ? suggestedCountry
       : country;
 
-    if (!newFullNumber.length) {
-      setCountry(undefined);
-    } else if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
+    if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
       setCountry(selectedCountry);
     }
 
@@ -102,6 +104,14 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       inputRef.current.setSelectionRange(...lastSelection);
     }
   }, [lastSelection]);
+
+  const isJustPastedRef = useRef(false);
+  const handlePaste = useCallback(() => {
+    isJustPastedRef.current = true;
+    requestAnimationFrame(() => {
+      isJustPastedRef.current = false;
+    });
+  }, []);
 
   const handlePhoneNumberChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (authError) {
@@ -123,8 +133,13 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     );
 
     setIsTouched(true);
-    parseFullNumber(value);
-  }, [authError, clearAuthError, parseFullNumber]);
+
+    const shouldFixSafariAutoComplete = (
+      IS_SAFARI && country && fullNumber !== undefined
+      && value.length - fullNumber.length > 1 && !isJustPastedRef.current
+    );
+    parseFullNumber(shouldFixSafariAutoComplete ? `${country!.code} ${value}` : value);
+  }, [authError, clearAuthError, country, fullNumber, parseFullNumber]);
 
   const handleKeepSessionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setAuthRememberMe(e.target.checked);
@@ -168,6 +183,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
             error={authError}
             inputMode="tel"
             onChange={handlePhoneNumberChange}
+            onPaste={IS_SAFARI ? handlePaste : undefined}
           />
           <Checkbox
             id="sign-in-keep-session"
