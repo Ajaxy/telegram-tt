@@ -28,6 +28,7 @@ export type OwnProps = {
   id?: string;
   message: ApiMessage;
   observeIntersection?: ObserveFn;
+  noAvatars?: boolean;
   shouldAutoLoad?: boolean;
   isInSelectMode?: boolean;
   isSelected?: boolean;
@@ -46,6 +47,7 @@ const Photo: FC<OwnProps> = ({
   id,
   message,
   observeIntersection,
+  noAvatars,
   shouldAutoLoad,
   isInSelectMode,
   isSelected,
@@ -115,7 +117,7 @@ const Photo: FC<OwnProps> = ({
     }
   }, [fullMediaData, isOwn, shouldAffectAppendix, isInSelectMode, isSelected]);
 
-  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message);
+  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, noAvatars);
 
   const className = buildClassName(
     'media-inner',

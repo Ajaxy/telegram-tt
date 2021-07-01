@@ -11,34 +11,56 @@ export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
 
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const LIKE_STICKER_ID = '1258816259753933';
-const MOBILE_SCREEN_MAX_MESSAGE_SCREEN_WIDTH = 0.69;
+const MOBILE_SCREEN_NO_AVATARS_MESSAGE_EXTRA_WIDTH_REM = 4.5;
+const MOBILE_SCREEN_MESSAGE_EXTRA_WIDTH_REM = 7;
+const MESSAGE_MAX_WIDTH_REM = 29;
+const MESSAGE_OWN_MAX_WIDTH_REM = 30;
 
+let cachedMaxWidthOwn: number | undefined;
 let cachedMaxWidth: number | undefined;
+let cachedMaxWidthNoAvatar: number | undefined;
 
-function getMaxMessageWidthRem(fromOwnMessage: boolean) {
-  const regularMaxWidth = fromOwnMessage ? 30 : 29;
+function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean) {
+  const regularMaxWidth = fromOwnMessage ? MESSAGE_OWN_MAX_WIDTH_REM : MESSAGE_MAX_WIDTH_REM;
   if (!IS_SINGLE_COLUMN_LAYOUT) {
     return regularMaxWidth;
   }
 
+  const { width: windowWidth } = windowSize.get();
+
   // @optimization Limitation: changing device screen width not supported
+  if (!cachedMaxWidthOwn) {
+    cachedMaxWidthOwn = Math.min(
+      MESSAGE_OWN_MAX_WIDTH_REM,
+      windowWidth / REM - MOBILE_SCREEN_NO_AVATARS_MESSAGE_EXTRA_WIDTH_REM,
+    );
+  }
   if (!cachedMaxWidth) {
     cachedMaxWidth = Math.min(
-      regularMaxWidth,
-      Math.floor(window.innerWidth * MOBILE_SCREEN_MAX_MESSAGE_SCREEN_WIDTH) / REM,
+      MESSAGE_MAX_WIDTH_REM,
+      windowWidth / REM - MOBILE_SCREEN_MESSAGE_EXTRA_WIDTH_REM,
+    );
+  }
+  if (!cachedMaxWidthNoAvatar) {
+    cachedMaxWidthNoAvatar = Math.min(
+      MESSAGE_MAX_WIDTH_REM,
+      windowWidth / REM - MOBILE_SCREEN_NO_AVATARS_MESSAGE_EXTRA_WIDTH_REM,
     );
   }
 
-  return cachedMaxWidth;
+  return fromOwnMessage
+    ? cachedMaxWidthOwn
+    : (noAvatars ? cachedMaxWidthNoAvatar : cachedMaxWidth);
 }
 
-function getAvailableWidth(
+export function getAvailableWidth(
   fromOwnMessage: boolean,
   isForwarded?: boolean,
   isWebPagePhoto?: boolean,
+  noAvatars?: boolean,
 ) {
   const extraPaddingRem = isForwarded || isWebPagePhoto ? 1.625 : 0;
-  const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage) - extraPaddingRem;
+  const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars) - extraPaddingRem;
 
   return availableWidthRem * REM;
 }
@@ -61,6 +83,7 @@ function calculateDimensionsForMessageMedia({
   isForwarded,
   isWebPagePhoto,
   isGif,
+  noAvatars,
 }: {
   width: number;
   height: number;
@@ -68,9 +91,10 @@ function calculateDimensionsForMessageMedia({
   isForwarded?: boolean;
   isWebPagePhoto?: boolean;
   isGif?: boolean;
+  noAvatars?: boolean;
 }): IDimensions {
   const aspectRatio = height / width;
-  const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto);
+  const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto, noAvatars);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
 
   return calculateDimensions(availableWidth, availableHeight, width, height);
@@ -95,6 +119,7 @@ export function calculateInlineImageDimensions(
   fromOwnMessage: boolean,
   isForwarded?: boolean,
   isWebPagePhoto?: boolean,
+  noAvatars?: boolean,
 ) {
   const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
 
@@ -104,6 +129,7 @@ export function calculateInlineImageDimensions(
     fromOwnMessage,
     isForwarded,
     isWebPagePhoto,
+    noAvatars,
   });
 }
 
@@ -111,6 +137,7 @@ export function calculateVideoDimensions(
   video: ApiVideo,
   fromOwnMessage: boolean,
   isForwarded?: boolean,
+  noAvatars?: boolean,
 ) {
   const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
 
@@ -120,6 +147,7 @@ export function calculateVideoDimensions(
     fromOwnMessage,
     isForwarded,
     isGif: video.isGif,
+    noAvatars,
   });
 }
 

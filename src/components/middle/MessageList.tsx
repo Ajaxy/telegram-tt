@@ -508,11 +508,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const isPrivate = Boolean(chatId && isChatPrivate(chatId));
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf);
+  const noAvatars = Boolean(!withUsers || isChannelChat);
 
   const className = buildClassName(
     'MessageList custom-scroll',
-    !withUsers && 'no-avatars',
-    isChannelChat && 'no-avatars',
+    noAvatars && 'no-avatars',
     !canPost && 'no-composer',
     type === 'pinned' && 'type-pinned',
     isSelectModeActive && 'select-mode-active',
@@ -551,6 +551,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
             observeIntersectionForMedia,
             observeIntersectionForAnimatedStickers,
             withUsers,
+            noAvatars,
             anchorIdRef,
             memoUnreadDividerBeforeIdRef,
             threadId,
@@ -577,6 +578,7 @@ function renderMessages(
   observeIntersectionForMedia: ObserveFn,
   observeIntersectionForAnimatedStickers: ObserveFn,
   withUsers: boolean,
+  noAvatars: boolean,
   currentAnchorIdRef: { current: string | undefined },
   memoFirstUnreadIdRef: { current: number | undefined },
   threadId: number,
@@ -676,6 +678,7 @@ function renderMessages(
             observeIntersectionForMedia={observeIntersectionForMedia}
             observeIntersectionForAnimatedStickers={observeIntersectionForAnimatedStickers}
             album={album}
+            noAvatars={noAvatars}
             withAvatar={position.isLastInGroup && withUsers && !isOwn && !(message.id === threadTopMessageId)}
             withSenderName={position.isFirstInGroup && withUsers && !isOwn}
             threadId={threadId}

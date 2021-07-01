@@ -7,13 +7,9 @@ import { IAlbum } from '../../../../types';
 import { ApiMessage } from '../../../../api/types';
 import { IDimensions } from '../../../../modules/helpers';
 
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../../../config';
-import { REM } from '../../../common/helpers/mediaDimensions';
+import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';
 
-const MAX_WIDTH_MOBILE_VW = 69;
-const MAX_WIDTH_DESK_OWN_REM = 30;
-const MAX_WIDTH_DESK_REM = 29;
 export const AlbumRectPart = {
   None: 0,
   Top: 1,
@@ -49,16 +45,6 @@ export type IAlbumLayout = {
   layout: IMediaLayout[];
   containerStyle: IDimensions;
 };
-
-function getMaxWidth(isOwn: boolean, isForwarded: boolean, windowWidth: number) {
-  if (windowWidth <= MOBILE_SCREEN_MAX_WIDTH) {
-    return (windowWidth / 100) * MAX_WIDTH_MOBILE_VW - (isForwarded ? 1.625 : 0) * REM;
-  }
-
-  const maxWidth = isOwn ? MAX_WIDTH_DESK_OWN_REM : MAX_WIDTH_DESK_REM;
-
-  return (maxWidth - (isForwarded ? 1.625 : 0)) * REM;
-}
 
 function getRatios(messages: ApiMessage[]) {
   return messages.map(
@@ -110,8 +96,8 @@ function calculateContainerSize(layout: IMediaLayout[]) {
 export function calculateAlbumLayout(
   isOwn: boolean,
   isForwarded: boolean,
+  noAvatars: boolean,
   album: IAlbum,
-  windowWidth: number,
 ): IAlbumLayout {
   const spacing = 2;
   const ratios = getRatios(album.messages);
@@ -119,7 +105,7 @@ export function calculateAlbumLayout(
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;
   const forceCalc = ratios.some((ratio) => ratio > 2);
-  const maxWidth = getMaxWidth(isOwn, isForwarded, windowWidth);
+  const maxWidth = getAvailableWidth(isOwn, isForwarded, false, noAvatars) - (isForwarded ? 2.5 : 0) * REM;
   const maxHeight = maxWidth;
 
   let layout;
