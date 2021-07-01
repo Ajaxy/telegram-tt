@@ -15,10 +15,10 @@ export function getPlatform() {
   const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
   const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
   const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-  let os: 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | undefined;
+  let os: 'macOS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | undefined;
 
   if (macosPlatforms.indexOf(platform) !== -1) {
-    os = 'Mac OS';
+    os = 'macOS';
   } else if (iosPlatforms.indexOf(platform) !== -1) {
     os = 'iOS';
   } else if (windowsPlatforms.indexOf(platform) !== -1) {
@@ -33,7 +33,7 @@ export function getPlatform() {
 }
 
 export const PLATFORM_ENV = getPlatform();
-export const IS_MAC_OS = PLATFORM_ENV === 'Mac OS';
+export const IS_MAC_OS = PLATFORM_ENV === 'macOS';
 export const IS_IOS = PLATFORM_ENV === 'iOS';
 export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);

@@ -11,13 +11,13 @@ import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
-type StateProps = Pick<GlobalState, 'connectionState' | 'authQrCode'>;
+type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>;
 type DispatchProps = Pick<GlobalActions, 'returnToAuthPhoneNumber'>;
 
 const DATA_PREFIX = 'tg://login?token=';
 
 const AuthCode: FC<StateProps & DispatchProps> = ({
-  connectionState, authQrCode, returnToAuthPhoneNumber,
+  connectionState, authState, authQrCode, returnToAuthPhoneNumber,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
@@ -43,6 +43,8 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
   useHistoryBack(returnToAuthPhoneNumber);
 
+  const isAuthReady = authState === 'authorizationStateWaitQrCode';
+
   return (
     <div id="auth-qr-form" className="custom-scroll">
       <div className="auth-form qr">
@@ -57,13 +59,15 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
           <li><span>Go to&nbsp;<b>Settings</b>&nbsp;&gt;&nbsp;<b>Devices</b>&nbsp;&gt;&nbsp;<b>Scan QR</b></span></li>
           <li><span>Point your phone at this screen to confirm login</span></li>
         </ol>
-        <Button isText onClick={returnToAuthPhoneNumber}>Log in by phone number</Button>
+        {isAuthReady && (
+          <Button isText onClick={returnToAuthPhoneNumber}>Log in by phone number</Button>
+        )}
       </div>
     </div>
   );
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['connectionState', 'authQrCode']),
+  (global): StateProps => pick(global, ['connectionState', 'authState', 'authQrCode']),
   (setGlobal, actions): DispatchProps => pick(actions, ['returnToAuthPhoneNumber']),
 )(AuthCode));
