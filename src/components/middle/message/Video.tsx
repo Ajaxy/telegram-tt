@@ -153,7 +153,7 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {(!isInline || shouldRenderThumb)
+      {(!isInline || shouldRenderThumb || shouldRenderInlineVideo)
         && (
           <canvas
             ref={thumbRef}

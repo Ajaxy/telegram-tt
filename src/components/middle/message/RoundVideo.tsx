@@ -181,7 +181,7 @@ const RoundVideo: FC<OwnProps> = ({
       className="RoundVideo media-inner"
       onClick={handleClick}
     >
-      {shouldRenderThumb && (
+      {(shouldRenderThumb || mediaData) && (
         <div className="thumbnail-wrapper">
           <canvas
             ref={thumbRef}
