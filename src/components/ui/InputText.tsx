@@ -23,6 +23,7 @@ type OwnProps = {
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onPaste?: (e: React.ClipboardEvent<HTMLInputElement>) => void;
 };
 
 const InputText: FC<OwnProps> = ({
@@ -44,6 +45,7 @@ const InputText: FC<OwnProps> = ({
   onKeyPress,
   onKeyDown,
   onBlur,
+  onPaste,
 }) => {
   const lang = useLang();
   const labelText = error || success || label;
@@ -77,6 +79,7 @@ const InputText: FC<OwnProps> = ({
         onKeyPress={onKeyPress}
         onKeyDown={onKeyDown}
         onBlur={onBlur}
+        onPaste={onPaste}
       />
       {labelText && (
         <label htmlFor={id}>{labelText}</label>
