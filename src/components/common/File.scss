@@ -7,6 +7,9 @@
 
   .content-inner & {
     min-width: 14rem;
+    @media (max-width: 340px) {
+      min-width: 11rem;
+    }
   }
 
   display: flex;

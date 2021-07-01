@@ -71,7 +71,6 @@ import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useFocusMessage from './hooks/useFocusMessage';
-import useWindowSize from '../../../hooks/useWindowSize';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
@@ -112,6 +111,7 @@ type OwnProps = {
   observeIntersectionForMedia: ObserveFn;
   observeIntersectionForAnimatedStickers: ObserveFn;
   album?: IAlbum;
+  noAvatars?: boolean;
   withAvatar?: boolean;
   withSenderName?: boolean;
   threadId: number;
@@ -175,6 +175,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   observeIntersectionForMedia,
   observeIntersectionForAnimatedStickers,
   album,
+  noAvatars,
   withAvatar,
   withSenderName,
   noComments,
@@ -236,8 +237,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
-  const { width: windowWidth } = useWindowSize();
-
   const {
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
@@ -277,6 +276,24 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const customShape = getMessageCustomShape(message);
   const textParts = renderMessageText(message, highlight, isEmojiOnlyMessage(customShape));
   const isContextMenuShown = contextMenuPosition !== undefined;
+  const signature = (
+    (isChannel && message.adminTitle) || (forwardInfo && !asForwarded && forwardInfo.adminTitle) || undefined
+  );
+  const metaSafeAuthorWidth = useMemo(() => {
+    return signature ? calculateAuthorWidth(signature) : undefined;
+  }, [signature]);
+  const canShowActionButton = (
+    !(isContextMenuShown || isInSelectMode || isForwarding)
+    && (!isInDocumentGroup || isLastInDocumentGroup)
+  );
+  const canForward = canShowActionButton && isChannel && !isScheduled;
+  const canFocus = Boolean(canShowActionButton && (
+    (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId)
+    || isPinnedList
+  ));
+  const avatarPeer = forwardInfo && (isChatWithSelf || !sender) ? originSender : sender;
+  const senderPeer = forwardInfo ? originSender : sender;
+
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -310,11 +327,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     forceSenderName,
     hasComments: message.threadInfo && message.threadInfo.messagesCount > 0,
   });
-  const avatarPeer = forwardInfo && (isChatWithSelf || !sender) ? originSender : sender;
-  const senderPeer = forwardInfo ? originSender : sender;
-  const signature = (
-    (isChannel && message.adminTitle) || (forwardInfo && !asForwarded && forwardInfo.adminTitle) || undefined
-  );
   const withCommentButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
     && messageListType === 'thread' && !noComments;
   const withAppendix = contentClassName.includes('has-appendix');
@@ -470,19 +482,19 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   let calculatedWidth;
   let noMediaCorners = false;
   const albumLayout = useMemo(() => {
-    return isAlbum ? calculateAlbumLayout(isOwn, Boolean(asForwarded), album!, windowWidth) : undefined;
-  }, [isAlbum, windowWidth, isOwn, asForwarded, album]);
+    return isAlbum ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!) : undefined;
+  }, [isAlbum, isOwn, asForwarded, noAvatars, album]);
 
   const extraPadding = asForwarded ? 28 : 0;
   if (!isAlbum && (photo || video)) {
     let width: number | undefined;
     if (photo) {
-      width = calculateMediaDimensions(message).width;
+      width = calculateMediaDimensions(message, noAvatars).width;
     } else if (video) {
       if (video.isRound) {
         width = ROUND_VIDEO_DIMENSIONS;
       } else {
-        width = calculateMediaDimensions(message).width;
+        width = calculateMediaDimensions(message, noAvatars).width;
       }
     }
 
@@ -577,6 +589,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Photo
             message={message}
             observeIntersection={observeIntersectionForMedia}
+            noAvatars={noAvatars}
             shouldAutoLoad={shouldAutoLoadMedia}
             uploadProgress={uploadProgress}
             shouldAffectAppendix={hasCustomAppendix}
@@ -597,6 +610,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Video
             message={message}
             observeIntersection={observeIntersectionForMedia}
+            noAvatars={noAvatars}
             shouldAutoLoad={shouldAutoLoadMedia}
             shouldAutoPlay={shouldAutoPlayMedia}
             uploadProgress={uploadProgress}
@@ -651,6 +665,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <WebPage
             message={message}
             observeIntersection={observeIntersectionForMedia}
+            noAvatars={noAvatars}
             shouldAutoLoad={shouldAutoLoadMedia}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
@@ -718,20 +733,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
     );
   }
-
-  const metaSafeAuthorWidth = useMemo(() => {
-    return signature ? calculateAuthorWidth(signature) : undefined;
-  }, [signature]);
-
-  const canShowActionButton = (
-    !(isContextMenuShown || isInSelectMode || isForwarding)
-    && (!isInDocumentGroup || isLastInDocumentGroup)
-  );
-  const canForward = canShowActionButton && isChannel && !isScheduled;
-  const canFocus = canShowActionButton && (
-    (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId)
-    || isPinnedList
-  );
 
   return (
     <div

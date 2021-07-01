@@ -34,6 +34,7 @@ export type OwnProps = {
   id?: string;
   message: ApiMessage;
   observeIntersection: ObserveFn;
+  noAvatars?: boolean;
   shouldAutoLoad?: boolean;
   shouldAutoPlay?: boolean;
   uploadProgress?: number;
@@ -47,6 +48,7 @@ const Video: FC<OwnProps> = ({
   id,
   message,
   observeIntersection,
+  noAvatars,
   shouldAutoLoad,
   shouldAutoPlay,
   uploadProgress,
@@ -107,7 +109,7 @@ const Video: FC<OwnProps> = ({
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded);
+  const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
 
   useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && shouldAutoPlay));
 

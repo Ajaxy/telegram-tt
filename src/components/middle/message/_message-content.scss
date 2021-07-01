@@ -3,7 +3,28 @@
   max-width: var(--max-width);
 
   @media (max-width: 600px) {
-    max-width: 69vw;
+    max-width: calc(100vw - 7rem);
+
+    // Workaround for sass function override - we should use CSS min() here
+    @supports (max-width: #{"min(29rem, 100vw - 7rem)"}) {
+      max-width: #{"min(29rem, 100vw - 7rem)"};
+    }
+
+    .MessageList.no-avatars & {
+      max-width: calc(100vw - 4.5rem);
+
+      @supports (max-width: #{"min(29rem, 100vw - 4.5rem)"}) {
+        max-width: #{"min(29rem, 100vw - 4.5rem)"};
+      }
+    }
+
+    .Message.own & {
+      max-width: calc(100vw - 4.5rem);
+
+      @supports (max-width: #{"min(30rem, 100vw - 4.5rem)"}) {
+        max-width: #{"min(30rem, 100vw - 4.5rem)"};
+      }
+    }
   }
 
   .text-content {
@@ -437,6 +458,12 @@
       @media (max-width: 600px) {
         max-width: calc(90vw - 13rem);
       }
+
+      @media (max-width: 340px) {
+        margin-left: -1rem;
+        z-index: 1;
+        max-width: calc(90vw - 12rem);
+      }
     }
   }
 
@@ -548,6 +575,12 @@
 
       .EmbeddedMessage {
         margin-right: 0.5rem;
+
+        @media (max-width: 340px) {
+          margin-left: 0;
+          z-index: 1;
+          max-width: calc(90vw - 11.5rem);
+        }
       }
     }
   }

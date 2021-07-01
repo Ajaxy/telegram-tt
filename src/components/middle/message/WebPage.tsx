@@ -19,6 +19,7 @@ const MAX_TEXT_LENGTH = 170; // symbols
 type OwnProps = {
   message: ApiMessage;
   observeIntersection?: ObserveFn;
+  noAvatars?: boolean;
   shouldAutoLoad?: boolean;
   inPreview?: boolean;
   onMediaClick?: () => void;
@@ -28,6 +29,7 @@ type OwnProps = {
 const WebPage: FC<OwnProps> = ({
   message,
   observeIntersection,
+  noAvatars,
   shouldAutoLoad,
   inPreview,
   onMediaClick,
@@ -78,6 +80,7 @@ const WebPage: FC<OwnProps> = ({
         <Photo
           message={message}
           observeIntersection={observeIntersection}
+          noAvatars={noAvatars}
           shouldAutoLoad={shouldAutoLoad}
           size={isSquarePhoto ? 'pictogram' : 'inline'}
           nonInteractive={!isMediaInteractive}
