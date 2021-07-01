@@ -14,6 +14,7 @@ import AuthRegister from './AuthRegister.async';
 import AuthQrCode from './AuthQrCode';
 
 import './Auth.scss';
+import { PLATFORM_ENV } from '../../util/environment';
 
 type StateProps = Pick<GlobalState, 'authState'>;
 type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi'>;
@@ -35,7 +36,9 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
       return <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>;
     case 'authorizationStateWaitQrCode':
     default:
-      return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
+      return PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android'
+        ? <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>
+        : <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
   }
 };
 

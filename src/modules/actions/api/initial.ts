@@ -12,6 +12,7 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
   IS_TEST,
 } from '../../../config';
+import { PLATFORM_ENV } from '../../../util/environment';
 import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
@@ -33,6 +34,7 @@ addReducer('initApi', (global: GlobalState, actions) => {
 
     void initApi(actions.apiUpdate, {
       userAgent: navigator.userAgent,
+      platform: PLATFORM_ENV,
       sessionData: loadStoredSession(),
     });
   })();

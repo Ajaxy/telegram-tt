@@ -2,6 +2,7 @@ import { ApiDocument } from './messages';
 
 export interface ApiInitialArgs {
   userAgent: string;
+  platform?: string;
   sessionData?: ApiSessionData;
 }
 

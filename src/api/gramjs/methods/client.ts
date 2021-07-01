@@ -44,7 +44,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   onUpdate = _onUpdate;
 
-  const { sessionData, userAgent } = initialArgs;
+  const { userAgent, platform, sessionData } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
   client = new TelegramClient(
@@ -76,7 +76,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         firstAndLastNames: onRequestRegistration,
         qrCode: onRequestQrCode,
         onError: onAuthError,
-        initialMethod: 'qrCode',
+        initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
       });
     } catch (err) {
       onUpdate({
