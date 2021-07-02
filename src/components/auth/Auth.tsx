@@ -35,6 +35,7 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
     case 'authorizationStateWaitPhoneNumber':
       return <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>;
     case 'authorizationStateWaitQrCode':
+      return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
     default:
       return PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android'
         ? <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>
