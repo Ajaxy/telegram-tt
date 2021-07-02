@@ -67,9 +67,11 @@
     padding: 0 1.25rem;
     position: relative;
     z-index: var(--z-media-viewer-head);
+    min-width: 0;
 
     & > .Transition {
       width: 100%;
+      min-width: 0;
     }
 
     @media (max-width: 600px) {
