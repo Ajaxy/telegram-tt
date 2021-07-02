@@ -9,6 +9,11 @@
     @media (max-width: 600px) {
       padding: 0.5rem 0.25rem;
     }
+
+    .symbol-set-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 
   &-header {
