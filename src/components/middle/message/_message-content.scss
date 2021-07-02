@@ -72,6 +72,10 @@
       position: relative;
       top: auto;
       bottom: -.5rem !important;
+      margin-top: -.25rem;
+      &:not([dir=rtl]) {
+        margin-top: -1.25rem;
+      }
     }
   }
 
@@ -248,7 +252,7 @@
     }
 
     .File + .text-content {
-      margin-top: .313rem;
+      margin-top: .3125rem;
     }
   }
 
@@ -587,6 +591,11 @@
 }
 
 .forwarded-message {
+  .message-content.poll & {
+    // MessageOutgoingStatus's icon needs more space
+    margin-bottom: 0.5rem;
+  }
+
   .message-content:not(.custom-shape) & {
     position: relative;
     margin-top: 0.25rem;
