@@ -75,7 +75,8 @@
         content: '';
         display: inline-block;
         width: var(--meta-safe-area-size);
-        height: 0.5rem;
+        height: 0.75rem;
+        float: right;
       }
     }
   }
