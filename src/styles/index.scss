@@ -20,7 +20,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-size: 16px;
-  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  font-family: "Roboto", -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
   color: var(--color-text);
   overflow: hidden;
   @media (max-width: 600px) {
@@ -30,7 +30,7 @@ html, body {
 
 html[lang=fa],
 html[lang=fa] body {
-  font-family: "Vazir", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  font-family: "Vazir", "Roboto", -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
 }
 
 body.cursor-grabbing, body.cursor-grabbing * {
