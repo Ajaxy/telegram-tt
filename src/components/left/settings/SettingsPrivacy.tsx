@@ -180,18 +180,20 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
       </div>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('lng_settings_sensitive_title')}
-        </h4>
-        <Checkbox
-          label={lang('lng_settings_sensitive_disable_filtering')}
-          subLabel={lang('lng_settings_sensitive_about')}
-          checked={Boolean(isSensitiveEnabled)}
-          disabled={!canChangeSensitive}
-          onCheck={updateContentSettings}
-        />
-      </div>
+      {canChangeSensitive && (
+        <div className="settings-item">
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('lng_settings_sensitive_title')}
+          </h4>
+          <Checkbox
+            label={lang('lng_settings_sensitive_disable_filtering')}
+            subLabel={lang('lng_settings_sensitive_about')}
+            checked={Boolean(isSensitiveEnabled)}
+            disabled={!canChangeSensitive}
+            onCheck={updateContentSettings}
+          />
+        </div>
+      )}
     </div>
   );
 };
