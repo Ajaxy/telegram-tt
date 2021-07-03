@@ -74,6 +74,11 @@ export type ApiUpdateChatJoin = {
   id: number;
 };
 
+export type ApiUpdateShowInvite = {
+  '@type': 'showInvite';
+  data: ApiInviteInfo;
+};
+
 export type ApiUpdateChatLeave = {
   '@type': 'updateChatLeave';
   id: number;
@@ -311,6 +316,13 @@ export type ApiError = {
   textParams?: Record<string, string>;
 };
 
+export type ApiInviteInfo = {
+  title: string;
+  hash: string;
+  isChannel?: boolean;
+  participantsCount?: number;
+};
+
 export type ApiUpdateError = {
   '@type': 'error';
   error: ApiError;
@@ -395,7 +407,7 @@ export type ApiUpdate = (
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | updateTwoFaStateWaitCode |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset
+  ApiUpdateServerTimeOffset | ApiUpdateShowInvite
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -1,3 +1,5 @@
+import { ApiError, ApiInviteInfo } from '../../api/types';
+
 const STRIPE_ERRORS: Record<string, Record<string, string>> = {
   missing_payment_information: {
     field: 'cardNumber',
@@ -91,8 +93,9 @@ const SHIPPING_ERRORS: Record<string, Record<string, string>> = {
 };
 
 
-export function getShippingError(errors: Record<number, { message: string }>) {
-  return Object.values(errors).reduce((acc, cur) => {
+export function getShippingErrors(dialogs: (ApiError | ApiInviteInfo)[]) {
+  return Object.values(dialogs).reduce((acc, cur) => {
+    if (!('message' in cur)) return acc;
     const error = SHIPPING_ERRORS[cur.message];
     if (error) {
       acc = {

@@ -3,11 +3,11 @@ import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
 
-const ErrorsAsync: FC = ({ isOpen }) => {
-  const Errors = useModuleLoader(Bundles.Extra, 'Errors', !isOpen);
+const DialogsAsync: FC = ({ isOpen }) => {
+  const Dialogs = useModuleLoader(Bundles.Extra, 'Dialogs', !isOpen);
 
   // eslint-disable-next-line react/jsx-props-no-spreading
-  return Errors ? <Errors /> : undefined;
+  return Dialogs ? <Dialogs /> : undefined;
 };
 
-export default memo(ErrorsAsync);
+export default memo(DialogsAsync);

@@ -907,12 +907,15 @@ export async function openChatByInvite(hash: string) {
   let chat: ApiChat | undefined;
 
   if (result instanceof GramJs.ChatInvite) {
-    const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
-    if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
-      return undefined;
-    }
-
-    chat = buildApiChatFromPreview(updates.chats[0]);
+    onUpdate({
+      '@type': 'showInvite',
+      data: {
+        title: result.title,
+        hash,
+        participantsCount: result.participantsCount,
+        isChannel: result.channel,
+      },
+    });
   } else {
     chat = buildApiChatFromPreview(result.chat);
 
@@ -977,4 +980,15 @@ function updateLocalDb(result: (
       }
     });
   }
+}
+
+export async function importChatInvite({ hash }: {hash: string}) {
+  const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
+  if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
+    return undefined;
+  }
+
+  const chat = buildApiChatFromPreview(updates.chats[0]);
+
+  return chat;
 }

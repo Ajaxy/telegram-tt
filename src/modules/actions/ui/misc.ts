@@ -5,6 +5,7 @@ import { GlobalState } from '../../../global/types';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { selectCurrentMessageList } from '../../selectors';
+import { ApiError } from '../../../api/types';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
@@ -158,36 +159,38 @@ addReducer('dismissNotification', (global) => {
   };
 });
 
-addReducer('showError', (global, actions, payload) => {
-  const { error } = payload!;
+addReducer('showDialog', (global, actions, payload) => {
+  const { data } = payload!;
 
   // Filter out errors that we don't want to show to the user
-  if (!getReadableErrorText(error)) {
+  if ('message' in data && !getReadableErrorText(data)) {
     return global;
   }
 
-  const newErrors = [...global.errors];
-  const existingErrorIndex = newErrors.findIndex((err) => err.message === error.message);
-  if (existingErrorIndex !== -1) {
-    newErrors.splice(existingErrorIndex, 1);
+  const newDialogs = [...global.dialogs];
+  if ('message' in data) {
+    const existingErrorIndex = newDialogs.findIndex((err) => (err as ApiError).message === data.message);
+    if (existingErrorIndex !== -1) {
+      newDialogs.splice(existingErrorIndex, 1);
+    }
   }
 
-  newErrors.push(error);
+  newDialogs.push(data);
 
   return {
     ...global,
-    errors: newErrors,
+    dialogs: newDialogs,
   };
 });
 
-addReducer('dismissError', (global) => {
-  const newErrors = [...global.errors];
+addReducer('dismissDialog', (global) => {
+  const newDialogs = [...global.dialogs];
 
-  newErrors.pop();
+  newDialogs.pop();
 
   return {
     ...global,
-    errors: newErrors,
+    dialogs: newDialogs,
   };
 });
 

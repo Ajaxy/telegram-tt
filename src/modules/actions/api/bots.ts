@@ -84,7 +84,7 @@ async function answerCallbackButton(chat: ApiChat, messageId: number, data: stri
   const { message, alert: isError } = result;
 
   if (isError) {
-    getDispatch().showError({ error: { message } });
+    getDispatch().showDialog({ data: { message } });
   } else {
     getDispatch().showNotification({ message });
   }
