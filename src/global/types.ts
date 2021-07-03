@@ -18,6 +18,7 @@ import {
   ApiPaymentSavedInfo,
   ApiSession,
   ApiNewPoll,
+  ApiInviteInfo,
 } from '../api/types';
 import {
   FocusDirection,
@@ -364,7 +365,7 @@ export type GlobalState = {
   };
 
   notifications: ApiNotification[];
-  errors: ApiError[];
+  dialogs: (ApiError | ApiInviteInfo)[];
 
   // TODO Move to settings
   activeSessions: ApiSession[];
@@ -399,7 +400,7 @@ export type GlobalState = {
 export type ActionTypes = (
   // system
   'init' | 'reset' | 'disconnect' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' | 'afterSync' |
-  'showNotification' | 'dismissNotification' | 'showError' | 'dismissError' |
+  'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
@@ -438,6 +439,7 @@ export type ActionTypes = (
   'toggleManagement' | 'closeManagement' | 'checkPublicLink' | 'updatePublicLink' | 'updatePrivateLink' |
   // groups
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
+  'acceptInviteConfirmation' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' | 'loadCurrentUser' |
   'updateProfile' | 'checkUsername' | 'updateContact' | 'deleteUser' | 'loadUser' |

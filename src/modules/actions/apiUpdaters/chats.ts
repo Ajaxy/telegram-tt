@@ -373,6 +373,14 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
         setGlobal(global);
       }
+      break;
+    }
+
+    case 'showInvite': {
+      const { data } = update;
+
+      actions.showDialog({ data });
+      break;
     }
   }
 });

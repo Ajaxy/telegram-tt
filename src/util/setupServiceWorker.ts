@@ -52,7 +52,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
           // eslint-disable-next-line no-console
           console.error('[SW] ServiceWorker not available');
         }
-        getDispatch().showError({ error: { message: 'SERVICE_WORKER_DISABLED' } });
+        getDispatch().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED' } });
       }
     } catch (err) {
       if (DEBUG) {

@@ -99,7 +99,7 @@ export const INITIAL_STATE: GlobalState = {
 
   notifications: [],
 
-  errors: [],
+  dialogs: [],
 
   activeSessions: [],
 

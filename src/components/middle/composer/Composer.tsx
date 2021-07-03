@@ -128,7 +128,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
-  'clearDraft' | 'showError' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
+  'clearDraft' | 'showDialog' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
   'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
   'clearReceipt' | 'addRecentEmoji' | 'loadEmojiKeywords'
 )>;
@@ -189,7 +189,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   editMessage,
   saveDraft,
   clearDraft,
-  showError,
+  showDialog,
   setStickerSearchQuery,
   setGifSearchQuery,
   forwardMessages,
@@ -428,8 +428,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (currentAttachments.length && text && text.length > CAPTION_MAX_LENGTH) {
       const extraLength = text.length - CAPTION_MAX_LENGTH;
-      showError({
-        error: {
+      showDialog({
+        data: {
           message: 'CAPTION_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
           textParams: {
             '{EXTRA_CHARS_COUNT}': extraLength,
@@ -454,8 +454,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           const secondsRemaining = nextSendDateNotReached
             ? slowMode.nextSendDate! - nowSeconds
             : slowMode.seconds - secondsSinceLastMessage!;
-          showError({
-            error: {
+          showDialog({
+            data: {
               message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
               isSlowMode: true,
             },
@@ -488,7 +488,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     requestAnimationFrame(resetComposer);
   }, [
     connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
-    resetComposer, stopRecordingVoice, showError, slowMode, isAdmin, sendMessage, forwardMessages,
+    resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages,
   ]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -972,7 +972,7 @@ export default memo(withGlobal<OwnProps>(
     'editMessage',
     'saveDraft',
     'clearDraft',
-    'showError',
+    'showDialog',
     'setStickerSearchQuery',
     'setGifSearchQuery',
     'forwardMessages',

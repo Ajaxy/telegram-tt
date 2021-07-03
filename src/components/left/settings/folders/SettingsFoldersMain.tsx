@@ -35,7 +35,7 @@ type StateProps = {
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadRecommendedChatFolders' | 'addChatFolder' | 'showError'>;
+type DispatchProps = Pick<GlobalActions, 'loadRecommendedChatFolders' | 'addChatFolder' | 'showDialog'>;
 
 const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
 
@@ -53,7 +53,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   notifyExceptions,
   loadRecommendedChatFolders,
   addChatFolder,
-  showError,
+  showDialog,
 }) => {
   const [animationData, setAnimationData] = useState<Record<string, any>>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
@@ -75,8 +75,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleCreateFolder = useCallback(() => {
     if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
-      showError({
-        error: {
+      showDialog({
+        data: {
           message: 'DIALOG_FILTERS_TOO_MUCH',
         },
       });
@@ -85,7 +85,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     onCreateFolder();
-  }, [foldersById, showError, onCreateFolder]);
+  }, [foldersById, showDialog, onCreateFolder]);
 
   const lang = useLang();
 
@@ -111,8 +111,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleCreateFolderFromRecommended = useCallback((folder: ApiChatFolder) => {
     if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
-      showError({
-        error: {
+      showDialog({
+        data: {
           message: 'DIALOG_FILTERS_TOO_MUCH',
         },
       });
@@ -121,7 +121,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     addChatFolder({ folder });
-  }, [foldersById, addChatFolder, showError]);
+  }, [foldersById, addChatFolder, showDialog]);
 
   return (
     <div className="settings-content custom-scroll">
@@ -238,5 +238,5 @@ export default memo(withGlobal<OwnProps>(
       notifyExceptions: selectNotifyExceptions(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadRecommendedChatFolders', 'addChatFolder', 'showError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadRecommendedChatFolders', 'addChatFolder', 'showDialog']),
 )(SettingsFoldersMain));

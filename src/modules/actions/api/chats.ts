@@ -403,6 +403,18 @@ addReducer('openTelegramLink', (global, actions, payload) => {
   }
 });
 
+addReducer('acceptInviteConfirmation', (global, actions, payload) => {
+  const { hash } = payload!;
+  (async () => {
+    const result = await callApi('importChatInvite', { hash });
+    if (!result) {
+      return;
+    }
+
+    actions.openChat({ id: result.id });
+  })();
+});
+
 addReducer('openChatByUsername', (global, actions, payload) => {
   const { username } = payload!;
 

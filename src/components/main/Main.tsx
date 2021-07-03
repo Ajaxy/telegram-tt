@@ -30,7 +30,7 @@ import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
 import Notifications from './Notifications.async';
-import Errors from './Errors.async';
+import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
@@ -45,7 +45,7 @@ type StateProps = {
   isMediaViewerOpen: boolean;
   isForwardModalOpen: boolean;
   hasNotifications: boolean;
-  hasErrors: boolean;
+  hasDialogs: boolean;
   audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
@@ -71,7 +71,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   isForwardModalOpen,
   animationLevel,
   hasNotifications,
-  hasErrors,
+  hasDialogs,
   audioMessage,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
@@ -192,7 +192,7 @@ const Main: FC<StateProps & DispatchProps> = ({
       <MediaViewer isOpen={isMediaViewerOpen} />
       <ForwardPicker isOpen={isForwardModalOpen} />
       <Notifications isOpen={hasNotifications} />
-      <Errors isOpen={hasErrors} />
+      <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
@@ -228,7 +228,7 @@ export default memo(withGlobal(
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       hasNotifications: Boolean(global.notifications.length),
-      hasErrors: Boolean(global.errors.length),
+      hasDialogs: Boolean(global.dialogs.length),
       audioMessage,
       safeLinkModalUrl: global.safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
