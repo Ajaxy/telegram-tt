@@ -300,7 +300,7 @@ addReducer('saveDraft', (global, actions, payload) => {
   }
 
   global = replaceThreadParam(global, chatId, threadId, 'draft', draft);
-  global = updateChat(global, chatId, { hasDraft: true });
+  global = updateChat(global, chatId, { draftDate: Math.round(Date.now() / 1000) });
 
   return global;
 });
@@ -318,7 +318,7 @@ addReducer('clearDraft', (global, actions, payload) => {
   }
 
   global = replaceThreadParam(global, chatId, threadId, 'draft', undefined);
-  global = updateChat(global, chatId, { hasDraft: false });
+  global = updateChat(global, chatId, { draftDate: undefined });
 
   return global;
 });

@@ -76,7 +76,7 @@ export function buildApiChatFromDialog(
     unreadMentionsCount,
     isMuted,
     ...(unreadMark && { hasUnreadMark: true }),
-    ...(draft instanceof GramJs.DraftMessage && { hasDraft: true }),
+    ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
 }

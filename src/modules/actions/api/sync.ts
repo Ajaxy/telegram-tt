@@ -21,7 +21,6 @@ import {
   updateChatListSecondaryInfo,
   updateThreadInfos,
   replaceThreadParam,
-  updateChat,
 } from '../../reducers';
 import {
   selectUser, selectChat, selectCurrentMessageList, selectDraft, selectChatMessage, selectThreadInfo,
@@ -143,10 +142,7 @@ async function loadAndReplaceChats() {
   global = updateChatListSecondaryInfo(global, 'active', result);
 
   Object.keys(result.draftsById).map(Number).forEach((chatId) => {
-    global = replaceThreadParam(
-      global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
-    );
-    global = updateChat(global, chatId, { hasDraft: Boolean(result.draftsById[chatId]) });
+    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId]);
   });
 
   Object.keys(result.replyingToById).map(Number).forEach((chatId) => {

@@ -196,9 +196,8 @@ export function getChatSlowModeOptions(chat?: ApiChat) {
 export function getChatOrder(chat: ApiChat) {
   return Math.max(
     chat.joinDate || 0,
+    chat.draftDate || 0,
     chat.lastMessage ? chat.lastMessage.date : 0,
-  ) + (
-    chat.hasDraft ? Date.now() / 1000 : 0
   );
 }
 

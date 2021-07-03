@@ -363,13 +363,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'draftMessage': {
-      const { chatId, formattedText, replyingToId } = update;
+      const {
+        chatId, formattedText, date, replyingToId,
+      } = update;
       const chat = global.chats.byId[chatId];
 
       if (chat) {
         global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', formattedText);
         global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'replyingToId', replyingToId);
-        global = updateChat(global, chatId, { hasDraft: Boolean(formattedText) });
+        global = updateChat(global, chatId, { draftDate: date });
 
         setGlobal(global);
       }
