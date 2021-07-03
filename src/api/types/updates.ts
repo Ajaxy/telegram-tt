@@ -268,6 +268,7 @@ export type ApiUpdateDraftMessage = {
   '@type': 'draftMessage';
   chatId: number;
   formattedText?: ApiFormattedText;
+  date?: number;
   replyingToId?: number;
 };
 

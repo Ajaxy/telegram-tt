@@ -188,9 +188,14 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
     return undefined;
   }
 
+  const {
+    message, entities, replyToMsgId, date,
+  } = draft;
+
   return {
-    formattedText: draft.message ? buildMessageTextContent(draft.message, draft.entities) : undefined,
-    replyingToId: draft.replyToMsgId,
+    formattedText: message ? buildMessageTextContent(message, entities) : undefined,
+    replyingToId: replyToMsgId,
+    date,
   };
 }
 

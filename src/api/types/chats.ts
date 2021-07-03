@@ -29,7 +29,7 @@ export interface ApiChat {
   joinDate?: number;
   isSupport?: boolean;
   photos?: ApiPhoto[];
-  hasDraft?: boolean;
+  draftDate?: number;
 
   // Calls
   isCallActive?: boolean;

@@ -982,7 +982,7 @@ function updateLocalDb(result: (
   }
 }
 
-export async function importChatInvite({ hash }: {hash: string}) {
+export async function importChatInvite({ hash }: { hash: string }) {
   const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
   if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
     return undefined;
