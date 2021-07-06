@@ -11,7 +11,7 @@ import {
   getCanPostInChat, getChatTitle, isChatPrivate, sortChatIds,
 } from '../../modules/helpers';
 import searchWords from '../../util/searchWords';
-import { pick } from '../../util/iteratees';
+import { pick, unique } from '../../util/iteratees';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
@@ -33,6 +33,7 @@ export type OwnProps = {
 
 type StateProps = {
   chatsById: Record<number, ApiChat>;
+  pinnedIds?: number[];
   activeListIds?: number[];
   archivedListIds?: number[];
   orderedPinnedIds?: number[];
@@ -48,6 +49,7 @@ const MODAL_HIDE_DELAY_MS = 300;
 
 const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
+  pinnedIds,
   activeListIds,
   archivedListIds,
   currentUserId,
@@ -91,6 +93,11 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       ...archivedListIds || [],
     ];
 
+    let priorityIds = pinnedIds || [];
+    if (currentUserId) {
+      priorityIds = unique([currentUserId, ...priorityIds]);
+    }
+
     return sortChatIds([
       ...listIds.filter((id) => {
         const chat = chatsById[id];
@@ -108,8 +115,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
         return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
       }),
-    ], chatsById, undefined, currentUserId ? [currentUserId] : undefined, serverTimeOffset);
-  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, serverTimeOffset]);
+    ], chatsById, undefined, priorityIds, serverTimeOffset);
+  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, pinnedIds, serverTimeOffset]);
 
   const [viewportIds, getMore] = useInfiniteScroll(loadMoreChats, chatIds, Boolean(filter));
 
@@ -192,12 +199,14 @@ export default memo(withGlobal<OwnProps>(
       chats: {
         byId: chatsById,
         listIds,
+        orderedPinnedIds,
       },
       currentUserId,
     } = global;
 
     return {
       chatsById,
+      pinnedIds: orderedPinnedIds.active,
       activeListIds: listIds.active,
       archivedListIds: listIds.archived,
       currentUserId,
