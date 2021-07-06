@@ -667,6 +667,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             observeIntersection={observeIntersectionForMedia}
             noAvatars={noAvatars}
             shouldAutoLoad={shouldAutoLoadMedia}
+            shouldAutoPlay={shouldAutoPlayMedia}
+            lastSyncTime={lastSyncTime}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
           />

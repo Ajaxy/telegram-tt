@@ -145,6 +145,11 @@ async function download(
       if (entity.media instanceof GramJs.MessageMediaDocument && entity.media.document instanceof GramJs.Document) {
         fullSize = entity.media.document.size;
       }
+      if (entity.media instanceof GramJs.MessageMediaWebPage
+        && entity.media.webpage instanceof GramJs.WebPage
+        && entity.media.webpage.document instanceof GramJs.Document) {
+        fullSize = entity.media.webpage.document.size;
+      }
     } else if (entity instanceof GramJs.Photo) {
       mimeType = 'image/jpeg';
     } else if (entityType === 'sticker' && sizeType) {
@@ -185,6 +190,12 @@ function getMessageMediaMimeType(message: GramJs.Message, sizeType?: string) {
     }
 
     return message.media.document!.mimeType;
+  }
+
+  if (message.media instanceof GramJs.MessageMediaWebPage
+    && message.media.webpage instanceof GramJs.WebPage
+    && message.media.webpage.document instanceof GramJs.Document) {
+    return message.media.webpage.document.mimeType;
   }
 
   return undefined;

@@ -39,6 +39,10 @@
       bottom: .05rem;
     }
 
+    &.with-video .media-inner { // TODO add support for video in previews in composer
+      display: none;
+    }
+
     .site-title,
     .site-description {
       flex: 1;

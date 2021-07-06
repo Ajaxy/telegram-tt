@@ -13,7 +13,6 @@ export type IDimensions = {
 
 type Target = 'micro' | 'pictogram' | 'inline' | 'viewerPreview' | 'viewerFull' | 'download';
 
-const MAX_INLINE_VIDEO_SIZE = 10 * 1024 ** 2; // 10 MB
 
 export function getMessageContent(message: ApiMessage) {
   return message.content;
@@ -88,12 +87,24 @@ export function getMessageWebPagePhoto(message: ApiMessage) {
   return webPage ? webPage.photo : undefined;
 }
 
+export function getMessageWebPageDocument(message: ApiMessage) {
+  const webPage = getMessageWebPage(message);
+  return webPage ? webPage.document : undefined;
+}
+
+export function getMessageWebPageVideo(message: ApiMessage): ApiVideo | undefined {
+  const webPage = getMessageWebPage(message);
+  if (!webPage) return undefined;
+  return webPage.video;
+}
+
 export function getMessageMediaThumbnail(message: ApiMessage) {
   const media = getMessagePhoto(message)
     || getMessageVideo(message)
     || getMessageDocument(message)
     || getMessageSticker(message)
-    || getMessageWebPagePhoto(message);
+    || getMessageWebPagePhoto(message)
+    || getMessageWebPageVideo(message);
 
   if (!media) {
     return undefined;
@@ -116,32 +127,34 @@ export function getMessageMediaHash(
     photo, video, sticker, audio, voice, document,
   } = message.content;
   const webPagePhoto = getMessageWebPagePhoto(message);
+  const webPageVideo = getMessageWebPageVideo(message);
 
-  if (!(photo || video || sticker || webPagePhoto || audio || voice || document)) {
+  const messageVideo = video || webPageVideo;
+  const messagePhoto = photo || webPagePhoto;
+
+  if (!(messagePhoto || messageVideo || sticker || audio || voice || document)) {
     return undefined;
   }
 
   const base = getMessageKey(message);
 
-  if (photo || webPagePhoto) {
+  if (messageVideo) {
     switch (target) {
       case 'micro':
       case 'pictogram':
         return `${base}?size=m`;
       case 'inline':
-        if (hasMessageLocalBlobUrl(message)) {
-          return undefined;
-        }
-
-        return `${base}?size=x`;
+        return !hasMessageLocalBlobUrl(message) ? getVideoOrAudioBaseHash(messageVideo, base) : undefined;
       case 'viewerPreview':
-        return `${base}?size=x`;
+        return `${base}?size=m`;
       case 'viewerFull':
-        return `${base}?size=z`;
+        return getVideoOrAudioBaseHash(messageVideo, base);
+      case 'download':
+        return `${base}?download`;
     }
   }
 
-  if (video) {
+  if (messagePhoto) {
     switch (target) {
       case 'micro':
       case 'pictogram':
@@ -151,17 +164,11 @@ export function getMessageMediaHash(
           return undefined;
         }
 
-        if (canMessagePlayVideoInline(video)) {
-          return getVideoOrAudioBaseHash(video, base);
-        }
-
-        return `${base}?size=z`;
+        return `${base}?size=x`;
       case 'viewerPreview':
-        return `${base}?size=m`;
+        return `${base}?size=x`;
       case 'viewerFull':
-        return getVideoOrAudioBaseHash(video, base);
-      case 'download':
-        return `${base}?download`;
+        return `${base}?size=z`;
     }
   }
 
@@ -235,10 +242,12 @@ export function getMessageMediaFormat(
     sticker, video, audio, voice,
   } = message.content;
 
+  const fullVideo = video || getMessageWebPageVideo(message);
+
   if (sticker && target === 'inline' && sticker.isAnimated) {
     return ApiMediaFormat.Lottie;
-  } else if (video && IS_PROGRESSIVE_SUPPORTED && (
-    (target === 'viewerFull') || (target === 'inline' && canMessagePlayVideoInline(video))
+  } else if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
+    target === 'viewerFull' || target === 'inline'
   )) {
     return ApiMediaFormat.Progressive;
   } else if (audio || voice) {
@@ -254,10 +263,16 @@ export function getMessageMediaFormat(
 }
 
 export function getMessageMediaFilename(message: ApiMessage) {
-  const { photo, video, webPage } = message.content;
+  const { photo, video } = message.content;
+  const webPagePhoto = getMessageWebPagePhoto(message);
+  const webPageVideo = getMessageWebPageVideo(message);
 
-  if (photo || (webPage && webPage.photo)) {
+  if (photo || webPagePhoto) {
     return `photo${message.date}.jpeg`;
+  }
+
+  if (webPageVideo) {
+    return webPageVideo.fileName;
   }
 
   if (video) {
@@ -271,10 +286,6 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
   const { photo, video, document } = message.content;
 
   return (photo && photo.blobUrl) || (video && video.blobUrl) || (document && document.previewBlobUrl);
-}
-
-export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE;
 }
 
 export function getChatMediaMessageIds(
@@ -360,7 +371,7 @@ export function getMessageContentIds(
 
 export function getMediaDuration(message: ApiMessage) {
   const { audio, voice, video } = getMessageContent(message);
-  const media = audio || voice || video;
+  const media = audio || voice || video || getMessageWebPageVideo(message);
   if (!media) {
     return undefined;
   }

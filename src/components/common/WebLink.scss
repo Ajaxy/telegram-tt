@@ -9,7 +9,7 @@
     margin-top: 1.5rem;
   }
 
-  &.without-photo::before {
+  &.without-media::before {
     content: attr(data-initial);
     width: 3rem;
     height: 3rem;
@@ -86,7 +86,7 @@
     padding: .25rem 3.75rem 0 0;
 
     .Media,
-    &.without-photo::before {
+    &.without-media::before {
       left: auto;
       right: 0;
     }

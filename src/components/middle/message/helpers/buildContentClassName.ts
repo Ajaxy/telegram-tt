@@ -65,7 +65,7 @@ export function buildContentClassName(
   } else if (webPage) {
     classNames.push('web-page');
 
-    if (webPage.photo) {
+    if (webPage.photo || webPage.video) {
       classNames.push('media');
     }
   }

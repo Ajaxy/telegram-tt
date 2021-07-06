@@ -9,10 +9,11 @@ import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
-  canMessagePlayVideoInline,
   getMediaTransferState,
   getMessageMediaFormat,
   getMessageMediaHash,
+  getMessageVideo,
+  getMessageWebPageVideo,
   isForwardedMessage,
   isOwnMessage,
 } from '../../../modules/helpers';
@@ -62,9 +63,8 @@ const Video: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const video = message.content.video!;
+  const video = (getMessageVideo(message) || getMessageWebPageVideo(message))!;
   const localBlobUrl = video.blobUrl;
-  const canPlayInline = Boolean(localBlobUrl) || canMessagePlayVideoInline(video);
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
@@ -87,13 +87,13 @@ const Video: FC<OwnProps> = ({
   );
 
   const fullMediaData = localBlobUrl || mediaData;
-  const isInline = Boolean(canPlayInline && isIntersecting && fullMediaData);
+  const isInline = Boolean(isIntersecting && fullMediaData);
 
   const { isBuffered, bufferingHandlers } = useBuffering(!shouldAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     message,
     uploadProgress || downloadProgress,
-    shouldDownload && (canPlayInline && !isBuffered),
+    shouldDownload && !isBuffered,
   );
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
@@ -106,6 +106,8 @@ const Video: FC<OwnProps> = ({
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
   }, []);
+
+  const duration = video.duration || (videoRef.current && videoRef.current.duration) || 0;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
@@ -122,15 +124,15 @@ const Video: FC<OwnProps> = ({
       if (onCancelUpload) {
         onCancelUpload(message);
       }
-    } else if (canPlayInline && !fullMediaData) {
+    } else if (!fullMediaData) {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
-    } else if (canPlayInline && fullMediaData && !isPlayAllowed) {
+    } else if (fullMediaData && !isPlayAllowed) {
       setIsPlayAllowed(true);
       videoRef.current!.play();
     } else if (onClick) {
       onClick(message.id);
     }
-  }, [isUploading, canPlayInline, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
+  }, [isUploading, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
   const videoClassName = buildClassName('full-media', transitionClassNames);
@@ -140,9 +142,8 @@ const Video: FC<OwnProps> = ({
     : '';
 
   const shouldRenderInlineVideo = isInline;
-  const shouldRenderHqPreview = !canPlayInline && mediaData;
-  const shouldRenderPlayButton = !canPlayInline || (isDownloadAllowed && !isPlayAllowed && !shouldRenderSpinner);
-  const shouldRenderDownloadButton = canPlayInline && !isDownloadAllowed;
+  const shouldRenderPlayButton = (isDownloadAllowed && !isPlayAllowed && !shouldRenderSpinner);
+  const shouldRenderDownloadButton = !isDownloadAllowed;
 
   return (
     <div
@@ -189,15 +190,6 @@ const Video: FC<OwnProps> = ({
           <source src={fullMediaData} />
         </video>
       )}
-      {shouldRenderHqPreview && (
-        <img
-          src={mediaData}
-          className={`full-media ${transitionClassNames}`}
-          width={width}
-          height={height}
-          alt=""
-        />
-      )}
       {shouldRenderPlayButton && (
         <i className="icon-large-play" />
       )}
@@ -209,13 +201,11 @@ const Video: FC<OwnProps> = ({
       {shouldRenderDownloadButton && (
         <i className="icon-download" />
       )}
-      {isTransferring && !canPlayInline ? (
-        <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
-      ) : isTransferring && canPlayInline ? (
+      {isTransferring ? (
         <span className="message-upload-progress">...</span>
       ) : (
         <div className="message-media-duration">
-          {video.isGif ? 'GIF' : formatMediaDuration(video.duration - playProgress)}
+          {video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
         </div>
       )}
     </div>

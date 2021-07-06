@@ -152,11 +152,14 @@ export interface ApiWebPage {
   id: number;
   url: string;
   displayUrl: string;
+  type?: string;
   siteName?: string;
   title?: string;
   description?: string;
   photo?: ApiPhoto;
-  hasDocument?: true;
+  duration?: number;
+  document?: ApiDocument;
+  video?: ApiVideo;
 }
 
 export interface ApiMessageForwardInfo {
