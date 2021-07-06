@@ -41,7 +41,7 @@ type StateProps = {
   contactName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'leaveChannel' | 'deleteHistory' | 'deleteChannel'>;
+type DispatchProps = Pick<GlobalActions, 'leaveChannel' | 'deleteHistory' | 'deleteChannel' | 'deleteChatUser'>;
 
 const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
@@ -58,6 +58,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   leaveChannel,
   deleteHistory,
   deleteChannel,
+  deleteChatUser,
 }) => {
   const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);
@@ -69,7 +70,10 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [deleteHistory, chat.id, onClose]);
 
   const handleDeleteChat = useCallback(() => {
-    if (isPrivateChat || isBasicGroup) {
+    if (isPrivateChat) {
+      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
+    } else if (isBasicGroup) {
+      deleteChatUser({ chatId: chat.id });
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
       leaveChannel({ chatId: chat.id });
@@ -86,6 +90,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
     chat.id,
     onClose,
     deleteHistory,
+    deleteChatUser,
     leaveChannel,
     deleteChannel,
   ]);
@@ -187,5 +192,6 @@ export default memo(withGlobal<OwnProps>(
       contactName,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['leaveChannel', 'deleteHistory', 'deleteChannel']),
+  (setGlobal, actions): DispatchProps => pick(actions,
+    ['leaveChannel', 'deleteHistory', 'deleteChannel', 'deleteChatUser']),
 )(DeleteChatModal));
