@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import SafeLink from '../../common/SafeLink';
 import Photo from './Photo';
+import Video from './Video';
 
 import './WebPage.scss';
 
@@ -21,7 +22,9 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   noAvatars?: boolean;
   shouldAutoLoad?: boolean;
+  shouldAutoPlay?: boolean;
   inPreview?: boolean;
+  lastSyncTime?: number;
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -31,7 +34,9 @@ const WebPage: FC<OwnProps> = ({
   observeIntersection,
   noAvatars,
   shouldAutoLoad,
+  shouldAutoPlay,
   inPreview,
+  lastSyncTime,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
@@ -58,16 +63,16 @@ const WebPage: FC<OwnProps> = ({
     title,
     description,
     photo,
+    video,
   } = webPage;
-
-  const isMediaInteractive = photo && onMediaClick && !isSquarePhoto && !webPage.hasDocument;
+  const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
 
   const className = buildClassName(
     'WebPage',
-    photo
-      ? (isSquarePhoto && 'with-square-photo')
-      : (!inPreview && 'without-photo'),
+    isSquarePhoto && 'with-square-photo',
+    !photo && !video && !inPreview && 'without-media',
+    video && 'with-video',
   );
 
   return (
@@ -76,7 +81,7 @@ const WebPage: FC<OwnProps> = ({
       data-initial={(siteName || displayUrl)[0]}
       dir="auto"
     >
-      {photo && (
+      {photo && !video && (
         <Photo
           message={message}
           observeIntersection={observeIntersection}
@@ -97,6 +102,18 @@ const WebPage: FC<OwnProps> = ({
           <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
         )}
       </div>
+      {!inPreview && video && (
+        <Video
+          message={message}
+          observeIntersection={observeIntersection!}
+          noAvatars={noAvatars}
+          shouldAutoLoad={shouldAutoLoad}
+          shouldAutoPlay={shouldAutoPlay}
+          lastSyncTime={lastSyncTime}
+          onClick={isMediaInteractive ? handleMediaClick : undefined}
+          onCancelUpload={onCancelMediaTransfer}
+        />
+      )}
     </div>
   );
 };

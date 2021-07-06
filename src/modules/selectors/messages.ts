@@ -29,6 +29,7 @@ import {
   isChatGroup,
   isChatSuperGroup,
   getMessageVideo,
+  getMessageWebPageVideo,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -679,7 +680,7 @@ export function selectShouldAutoLoadMedia(
 }
 
 export function selectShouldAutoPlayMedia(global: GlobalState, message: ApiMessage) {
-  const video = getMessageVideo(message);
+  const video = getMessageVideo(message) || getMessageWebPageVideo(message);
   if (!video) {
     return undefined;
   }

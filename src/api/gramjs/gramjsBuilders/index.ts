@@ -292,7 +292,12 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
     || (
       media instanceof GramJs.MessageMediaWebPage
       && media.webpage instanceof GramJs.WebPage
-      && media.webpage.photo instanceof GramJs.Photo
+      && (
+        media.webpage.photo instanceof GramJs.Photo || (
+          media.webpage.document instanceof GramJs.Document
+          && media.webpage.document.mimeType.startsWith('video')
+        )
+      )
     )
   );
 }

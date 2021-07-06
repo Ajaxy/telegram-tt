@@ -27,7 +27,7 @@ import { DELETED_COMMENTS_CHANNEL_ID, LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIO
 import { pick } from '../../../util/iteratees';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { buildStickerFromDocument } from './symbols';
-import { buildApiPhoto, buildApiThumbnailFromStripped, buildApiPhotoSize } from './common';
+import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { getCurrencySign } from '../../../components/middle/helpers/getCurrencySign';
 import { buildPeer } from '../gramjsBuilders';
@@ -511,26 +511,25 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
 
   const { id, photo, document } = media.webpage;
 
+  let video;
+  if (document instanceof GramJs.Document && document.mimeType.startsWith('video')) {
+    video = buildVideoFromDocument(document);
+  }
+
   return {
     id: Number(id),
     ...pick(media.webpage, [
       'url',
       'displayUrl',
+      'type',
       'siteName',
       'title',
       'description',
+      'duration',
     ]),
-    photo: photo && photo instanceof GramJs.Photo
-      ? {
-        id: String(photo.id),
-        thumbnail: buildApiThumbnailFromStripped(photo.sizes),
-        sizes: photo.sizes
-          .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
-          .map(buildApiPhotoSize),
-      }
-      : undefined,
-    // TODO support video and embed
-    ...(document && { hasDocument: true }),
+    photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
+    document: !video && document ? buildApiDocument(document) : undefined,
+    video,
   };
 }
 

@@ -2,7 +2,13 @@ import { ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
-import { getMessageContent, getPhotoFullDimensions, getVideoDimensions } from '../../../modules/helpers';
+import {
+  getMessageContent,
+  getMessageWebPagePhoto,
+  getMessageWebPageVideo,
+  getPhotoFullDimensions,
+  getVideoDimensions,
+} from '../../../modules/helpers';
 import {
   AVATAR_FULL_DIMENSIONS,
   calculateDimensions,
@@ -28,9 +34,13 @@ export function animateOpening(
   let isVideo = false;
   let mediaSize;
   if (message) {
-    const { photo, video, webPage } = getMessageContent(message);
-    isVideo = Boolean(video);
-    mediaSize = video ? getVideoDimensions(video)! : getPhotoFullDimensions((photo || webPage!.photo)!)!;
+    const { photo, video } = getMessageContent(message);
+    const webPagePhoto = getMessageWebPagePhoto(message);
+    const webPageVideo = getMessageWebPageVideo(message);
+    isVideo = Boolean(video || webPageVideo);
+    mediaSize = isVideo
+      ? getVideoDimensions((video || webPageVideo)!)!
+      : getPhotoFullDimensions((photo || webPagePhoto)!)!;
   } else {
     mediaSize = AVATAR_FULL_DIMENSIONS;
   }

@@ -37,6 +37,7 @@ import {
   getMessagePhoto,
   getMessageVideo,
   getMessageWebPagePhoto,
+  getMessageWebPageVideo,
   getPhotoFullDimensions,
   getVideoDimensions,
   IDimensions,
@@ -107,12 +108,15 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const animationKey = useRef<number>(null);
   const isOpen = Boolean(avatarOwner || messageId);
   const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
+  const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
   const photo = message ? getMessagePhoto(message) : undefined;
   const video = message ? getMessageVideo(message) : undefined;
   const isWebPagePhoto = Boolean(webPagePhoto);
-  const isPhoto = Boolean(photo || webPagePhoto);
-  const isVideo = Boolean(video);
-  const isGif = video ? video.isGif : undefined;
+  const isWebPageVideo = Boolean(webPageVideo);
+  const messageVideo = video || webPageVideo;
+  const isVideo = Boolean(messageVideo);
+  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto));
+  const isGif = (messageVideo) ? messageVideo.isGif : undefined;
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
   const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
@@ -129,10 +133,10 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const [isFooterHidden, setIsFooterHidden] = useState<boolean>(false);
 
   const messageIds = useMemo(() => {
-    return isWebPagePhoto && messageId
+    return (isWebPagePhoto || isWebPageVideo) && messageId
       ? [messageId]
       : getChatMediaMessageIds(chatMessages || {}, collectionIds || [], isFromSharedMedia);
-  }, [isWebPagePhoto, messageId, chatMessages, collectionIds, isFromSharedMedia]);
+  }, [isWebPagePhoto, isWebPageVideo, messageId, chatMessages, collectionIds, isFromSharedMedia]);
 
   const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
@@ -185,9 +189,11 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }
 
   const photoDimensions = isPhoto ? getPhotoFullDimensions((
-    isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
+    isWebPagePhoto ? webPagePhoto : photo
   )!) : undefined;
-  const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
+  const videoDimensions = isVideo ? getVideoDimensions((
+    isWebPageVideo ? webPageVideo : video
+  )!) : undefined;
 
   useEffect(() => {
     if (!IS_SINGLE_COLUMN_LAYOUT) {
@@ -436,7 +442,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               posterData={bestImageData}
               posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter, true)}
               downloadProgress={downloadProgress}
-              fileSize={video!.size}
+              fileSize={messageVideo!.size}
               isMediaViewerOpen={isOpen}
               noPlay={!isActive}
               onClose={close}

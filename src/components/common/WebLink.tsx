@@ -57,13 +57,14 @@ const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
     title,
     description,
     photo,
+    video,
   } = linkData;
 
   const truncatedDescription = !senderTitle && trimText(description, MAX_TEXT_LENGTH);
 
   const className = buildClassName(
     'WebLink scroll-item',
-    !photo && 'without-photo',
+    (!photo && !video) && 'without-media',
   );
 
   return (
