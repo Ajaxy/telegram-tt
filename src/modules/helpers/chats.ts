@@ -496,7 +496,7 @@ export function sortChatIds(
       // Assuming that last message date can't be less than now,
       // this should place prioritized on top of the list.
       // Then we subtract index of `id` in `priorityIds` to preserve selected order
-      priority += Date.now() + serverTimeOffset * 1000 + (priorityIds.length - priorityIds.indexOf(id));
+      priority += Date.now() + serverTimeOffset * 1000 + (priorityIds.length - priorityIds.indexOf(id)) * 3e8;
     }
 
     return priority;
