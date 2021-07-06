@@ -43,7 +43,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'togglePreHistoryHidden' | 'updateChat' | 'closeManagement' |
-  'leaveChannel' | 'deleteChannel' | 'deleteChat' | 'openChat'
+  'deleteHistory' | 'leaveChannel' | 'deleteChannel' | 'openChat'
 )>;
 
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
@@ -63,7 +63,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
   onScreenSelect,
   togglePreHistoryHidden,
   updateChat,
-  deleteChat,
+  deleteHistory,
   leaveChannel,
   deleteChannel,
   closeManagement,
@@ -182,7 +182,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleDeleteGroup = useCallback(() => {
     if (isBasicGroup) {
-      deleteChat({ chatId: chat.id });
+      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (!chat.isCreator) {
       leaveChannel({ chatId: chat.id });
     } else {
@@ -193,7 +193,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: undefined });
   }, [
     isBasicGroup, chat.isCreator, chat.id,
-    closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, deleteChat, openChat,
+    closeDeleteDialog, closeManagement, deleteHistory, leaveChannel, deleteChannel, openChat,
   ]);
 
   if (chat.isRestricted) {
@@ -325,6 +325,6 @@ export default memo(withGlobal<OwnProps>(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'togglePreHistoryHidden', 'updateChat', 'closeManagement',
-    'leaveChannel', 'deleteChannel', 'deleteChat', 'openChat',
+    'deleteHistory', 'leaveChannel', 'deleteChannel', 'openChat',
   ]),
 )(ManageGroup));

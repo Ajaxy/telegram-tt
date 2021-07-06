@@ -971,7 +971,6 @@ messages.getChats#3c6aa187 id:Vector<int> = messages.Chats;
 messages.getFullChat#3b831c66 chat_id:int = messages.ChatFull;
 messages.editChatTitle#dc452855 chat_id:int title:string = Updates;
 messages.editChatPhoto#ca4c79d8 chat_id:int photo:InputChatPhoto = Updates;
-messages.deleteChatUser#c534459a flags:# revoke_history:flags.0?true chat_id:int user_id:InputUser = Updates;
 messages.createChat#9cb126e users:Vector<InputUser> title:string = Updates;
 messages.getDhConfig#26cf8950 version:int random_length:int = messages.DhConfig;
 messages.readMessageContents#36a73f77 id:Vector<int> = messages.AffectedMessages;
@@ -1022,7 +1021,6 @@ messages.getReplies#24b581ba peer:InputPeer msg_id:int offset_id:int offset_date
 messages.getDiscussionMessage#446972fd peer:InputPeer msg_id:int = messages.DiscussionMessage;
 messages.readDiscussion#f731a9f4 peer:InputPeer msg_id:int read_max_id:int = Bool;
 messages.unpinAllMessages#f025bc8b peer:InputPeer = messages.AffectedHistory;
-messages.deleteChat#83247d11 chat_id:int = Bool;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;
 updates.getChannelDifference#3173d78 flags:# force:flags.0?true channel:InputChannel filter:ChannelMessagesFilter pts:int limit:int = updates.ChannelDifference;
