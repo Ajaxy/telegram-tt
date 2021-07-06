@@ -228,35 +228,6 @@ addReducer('joinChannel', (global, actions, payload) => {
   }
 });
 
-addReducer('deleteChatUser', (global, actions, payload) => {
-  (async () => {
-    const { chatId, userId } : {chatId: number; userId?: number} = payload!;
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return;
-    }
-
-    const user = userId !== undefined ? selectUser(global, userId) : undefined;
-    await callApi('deleteChatUser', { chatId: chat.id, user });
-
-    actions.openChat({ id: undefined });
-  })();
-});
-
-addReducer('deleteChat', (global, actions, payload) => {
-  (async () => {
-    const { chatId } : {chatId: number } = payload!;
-    const chat = selectChat(global, chatId);
-
-    if (!chat) {
-      return;
-    }
-    await callApi('deleteChat', { chatId: chat.id });
-
-    actions.openChat({ id: undefined });
-  })();
-});
-
 addReducer('leaveChannel', (global, actions, payload) => {
   (async () => {
     const { chatId } = payload!;
