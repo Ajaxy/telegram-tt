@@ -475,6 +475,28 @@ export function joinChannel({
   }), true);
 }
 
+export function deleteChatUser({
+  chatId, user,
+}: {
+  chatId: number; user?: ApiUser;
+}) {
+  const userId = user ? buildInputEntity(user.id, user.accessHash) as GramJs.InputUser : new GramJs.InputUserSelf();
+  return invokeRequest(new GramJs.messages.DeleteChatUser({
+    chatId: buildInputEntity(chatId) as number,
+    userId,
+  }), true);
+}
+
+export function deleteChat({
+  chatId,
+}: {
+  chatId: number;
+}) {
+  return invokeRequest(new GramJs.messages.DeleteChat({
+    chatId: buildInputEntity(chatId) as number,
+  }), true);
+}
+
 export function leaveChannel({
   channelId, accessHash,
 }: {
