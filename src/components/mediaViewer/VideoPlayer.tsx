@@ -127,6 +127,7 @@ const VideoPlayer: FC<OwnProps> = ({
   useEffect(() => {
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
         togglePlayState(e);
       }
     };
