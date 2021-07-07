@@ -2,7 +2,7 @@ import { fastRaf } from './schedulers';
 import { animate } from './animation';
 import { IS_IOS } from './environment';
 
-const DURATION = 450;
+const DURATION = 300;
 
 export default function fastSmoothScrollHorizontal(container: HTMLElement, left: number) {
   // Native way seems to be smoother in Chrome
