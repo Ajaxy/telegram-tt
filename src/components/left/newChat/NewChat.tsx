@@ -4,7 +4,7 @@ import React, {
 
 import { LeftColumnContent } from '../../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { LAYERS_ANIMATION_NAME } from '../../../util/environment';
 
 import Transition from '../../ui/Transition';
 import NewChatStep1 from './NewChatStep1';
@@ -36,7 +36,7 @@ const NewChat: FC<OwnProps> = ({
   return (
     <Transition
       id="NewChat"
-      name={IS_SINGLE_COLUMN_LAYOUT ? 'slide-layers' : 'push-slide'}
+      name={LAYERS_ANIMATION_NAME}
       renderCount={RENDER_COUNT}
       activeKey={content}
     >

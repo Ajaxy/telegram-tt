@@ -60,6 +60,7 @@ export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; c
 export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
+export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slide-fade' : IS_IOS ? 'slide-layers' : 'push-slide';
 
 export const DPR = window.devicePixelRatio || 1;
 
