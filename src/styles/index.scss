@@ -189,6 +189,14 @@ div[role="button"] {
   color: var(--color-text-secondary) !important;
 }
 
+.for-ios-autocapitalization-fix {
+  position: fixed;
+  font-size: 16px;
+  opacity: 0;
+  bottom: 1rem;
+  z-index: -1;
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);

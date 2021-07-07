@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useEffect, useRef, memo, useState, useCallback,
+  FC, useEffect, useRef, memo, useState, useCallback, useLayoutEffect,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -22,6 +22,7 @@ import useFlag from '../../../hooks/useFlag';
 import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import useLang from '../../../hooks/useLang';
+import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 
 import TextFormatter from './TextFormatter';
 
@@ -103,6 +104,12 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     updateInputHeight(false);
   }, []);
+
+  useLayoutEffect(() => {
+    if (IS_IOS && !html && inputRef.current === document.activeElement) {
+      applyIosAutoCapitalizationFix(inputRef.current!);
+    }
+  }, [html]);
 
   useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {
