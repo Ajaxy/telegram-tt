@@ -95,7 +95,7 @@ const SHIPPING_ERRORS: Record<string, Record<string, string>> = {
 
 export function getShippingErrors(dialogs: (ApiError | ApiInviteInfo)[]) {
   return Object.values(dialogs).reduce((acc, cur) => {
-    if (!('message' in cur)) return acc;
+    if (!('hasErrorKey' in cur) || !cur.hasErrorKey) return acc;
     const error = SHIPPING_ERRORS[cur.message];
     if (error) {
       acc = {

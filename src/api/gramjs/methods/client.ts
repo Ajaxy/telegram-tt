@@ -261,6 +261,7 @@ export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, req
     error: {
       message,
       isSlowMode,
+      hasErrorKey: true,
     },
   });
 }

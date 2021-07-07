@@ -163,7 +163,7 @@ addReducer('showDialog', (global, actions, payload) => {
   const { data } = payload!;
 
   // Filter out errors that we don't want to show to the user
-  if ('message' in data && !getReadableErrorText(data)) {
+  if ('message' in data && data.hasErrorKey && !getReadableErrorText(data)) {
     return global;
   }
 

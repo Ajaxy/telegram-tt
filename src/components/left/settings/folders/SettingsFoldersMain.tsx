@@ -78,6 +78,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       showDialog({
         data: {
           message: 'DIALOG_FILTERS_TOO_MUCH',
+          hasErrorKey: true,
         },
       });
 
@@ -114,6 +115,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       showDialog({
         data: {
           message: 'DIALOG_FILTERS_TOO_MUCH',
+          hasErrorKey: true,
         },
       });
 
