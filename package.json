@@ -23,7 +23,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsc && lint-staged -- --fix"
+      "pre-commit": "tsc && lint-staged -- --fix --ignore-path=src/lib/gramjs/.eslintignore"
     }
   },
   "lint-staged": {
