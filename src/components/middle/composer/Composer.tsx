@@ -40,7 +40,7 @@ import {
   isChatPrivate,
   isChatAdmin,
 } from '../../../modules/helpers';
-import { formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
+import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
@@ -211,6 +211,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [
     scheduledMessageArgs, setScheduledMessageArgs,
   ] = useState<GlobalState['messages']['contentToBeScheduled'] | undefined>();
+  const lang = useLang();
 
   // Cache for frequently updated state
   const htmlRef = useRef<string>(html);
@@ -435,6 +436,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             '{EXTRA_CHARS_COUNT}': extraLength,
             '{PLURAL_S}': extraLength > 1 ? 's' : '',
           },
+          hasErrorKey: true,
         },
       });
       return;
@@ -456,8 +458,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             : slowMode.seconds - secondsSinceLastMessage!;
           showDialog({
             data: {
-              message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
+              message: lang('SlowModeHint', formatMediaDuration(secondsRemaining)),
               isSlowMode: true,
+              hasErrorKey: false,
             },
           });
 
@@ -488,7 +491,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     requestAnimationFrame(resetComposer);
   }, [
     connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
-    resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages,
+    resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang,
   ]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -634,8 +637,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     mainButtonState, resetComposer, shouldSchedule, startRecordingVoice, handleEditComplete,
     activeVoiceRecording, openCalendar, pauseRecordingVoice, handleSend,
   ]);
-
-  const lang = useLang();
 
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
     && !allowedAttachmentOptions.canAttachMedia;

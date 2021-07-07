@@ -59,7 +59,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         actions.signOut();
       }
 
-      actions.showDialog({ data: update.error });
+      actions.showDialog({ data: { ...update.error, hasErrorKey: true } });
 
       break;
   }

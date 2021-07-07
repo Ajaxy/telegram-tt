@@ -313,6 +313,7 @@ export type ApiNotification = {
 
 export type ApiError = {
   message: string;
+  hasErrorKey?: boolean;
   isSlowMode?: boolean;
   textParams?: Record<string, string>;
 };

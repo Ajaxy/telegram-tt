@@ -64,7 +64,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
 
 export default function getReadableErrorText(error: ApiError) {
   const { message, isSlowMode, textParams } = error;
-  // Currently Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
+  // Currently, Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
   if (isSlowMode) {
     const extraPartIndex = message.indexOf(' (caused by');
     return extraPartIndex > 0 ? message.substring(0, extraPartIndex) : message;
