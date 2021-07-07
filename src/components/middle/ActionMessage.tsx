@@ -25,6 +25,7 @@ import useLang from '../../hooks/useLang';
 import ContextMenuContainer from './message/ContextMenuContainer.async';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
+import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 type OwnProps = {
   message: ApiMessage;
@@ -96,6 +97,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   } = useContextMenuHandlers(ref);
   const isContextMenuShown = contextMenuPosition !== undefined;
 
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    preventMessageInputBlur(e);
+    handleBeforeContextMenu(e);
+  };
+
   if (isEmbedded) {
     return <span className="embedded-action-message">{renderText(content as string)}</span>;
   }
@@ -114,7 +120,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       id={`message${message.id}`}
       className={className}
       data-message-id={message.id}
-      onMouseDown={handleBeforeContextMenu}
+      onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
       <span>{content}</span>
