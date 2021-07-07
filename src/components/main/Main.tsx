@@ -112,8 +112,6 @@ const Main: FC<StateProps & DispatchProps> = ({
   useEffect(() => {
     // For animating Symbol Menu on mobile
     document.body.classList.toggle('is-middle-column-open', className.includes('middle-column-open'));
-    // For animating components in portals (i.e. Notification)
-    document.body.classList.toggle('is-right-column-shown', className.includes('right-column-open'));
   }, [className]);
 
   // Add `body` classes when toggling right column
