@@ -91,7 +91,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
     >
       <p>{lang('AreYouSureDeleteSingleMessage')}</p>
       {willDeleteForCurrentUserOnly && (
-        <p>{lang('lng_delete_for_me_chat_hint')}</p>
+        <p>{lang('lng_delete_for_me_chat_hint', 1, 'i')}</p>
       )}
       {willDeleteForAll && (
         <p>{lang('lng_delete_for_everyone_hint', 1, 'i')}</p>
