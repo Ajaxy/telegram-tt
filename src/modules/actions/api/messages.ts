@@ -407,7 +407,10 @@ addReducer('deleteHistory', (global, actions, payload) => {
 
     await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
 
-    actions.openChat({ id: undefined });
+    const activeChat = selectCurrentMessageList(global);
+    if (activeChat && activeChat.chatId === chatId) {
+      actions.openChat({ id: undefined });
+    }
   })();
 });
 

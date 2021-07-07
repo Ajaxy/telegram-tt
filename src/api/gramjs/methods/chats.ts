@@ -476,14 +476,14 @@ export function joinChannel({
 }
 
 export function deleteChatUser({
-  chatId, user,
+  chat, user,
 }: {
-  chatId: number; user?: ApiUser;
+  chat: ApiChat; user: ApiUser;
 }) {
-  const userId = user ? buildInputEntity(user.id, user.accessHash) as GramJs.InputUser : new GramJs.InputUserSelf();
+  if (chat.type !== 'chatTypeBasicGroup') return undefined;
   return invokeRequest(new GramJs.messages.DeleteChatUser({
-    chatId: buildInputEntity(chatId) as number,
-    userId,
+    chatId: buildInputEntity(chat.id, chat.accessHash) as number,
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
   }), true);
 }
 
