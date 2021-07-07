@@ -395,10 +395,37 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
   }
 
   const {
-    id, size, mimeType, date, thumbs,
+    id, size, mimeType, date, thumbs, attributes,
   } = document;
 
   const thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
+
+  let mediaType: ApiDocument['mediaType'] | undefined;
+  let mediaSize: ApiDocument['mediaSize'] | undefined;
+  const photoSize = thumbs && thumbs.find((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
+  if (photoSize) {
+    mediaSize = {
+      width: photoSize.w,
+      height: photoSize.h,
+    };
+  }
+
+  if (mimeType.startsWith('image/')) {
+    mediaType = 'photo';
+
+    const imageAttribute = attributes
+      .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
+
+    if (imageAttribute) {
+      const { w: width, h: height } = imageAttribute;
+      mediaSize = {
+        width,
+        height,
+      };
+    }
+  } else if (mimeType.startsWith('video/')) {
+    mediaType = 'video';
+  }
 
   return {
     id: String(id),
@@ -407,6 +434,8 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
     timestamp: date,
     fileName: getFilenameFromDocument(document),
     thumbnail,
+    mediaType,
+    mediaSize,
   };
 }
 

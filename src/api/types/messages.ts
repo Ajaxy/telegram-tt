@@ -1,13 +1,14 @@
-export interface ApiPhotoSize {
-  type: 's' | 'm' | 'x' | 'y' | 'z';
+export interface ApiDimensions {
   width: number;
   height: number;
 }
 
-export interface ApiThumbnail {
+export interface ApiPhotoSize extends ApiDimensions {
+  type: 's' | 'm' | 'x' | 'y' | 'z';
+}
+
+export interface ApiThumbnail extends ApiDimensions {
   dataUri: string;
-  height: number;
-  width: number;
 }
 
 export interface ApiPhoto {
@@ -81,6 +82,8 @@ export interface ApiDocument {
   mimeType: string;
   thumbnail?: ApiThumbnail;
   previewBlobUrl?: string;
+  mediaType?: 'photo' | 'video';
+  mediaSize?: ApiDimensions;
 }
 
 export interface ApiContact {

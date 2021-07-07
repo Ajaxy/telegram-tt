@@ -70,7 +70,7 @@
     background: transparent;
     overflow: hidden;
 
-    & + .icon-download,
+    & + .action-icon,
     & + .file-progress {
       background: rgba(black, 0.5);
       border-radius: var(--border-radius-messages-small);
@@ -81,7 +81,7 @@
     }
   }
 
-  .icon-download {
+  .action-icon {
     color: #fff;
     font-size: 1.5rem;
     position: absolute;
@@ -104,7 +104,7 @@
         border-width: 0;
       }
 
-      .icon-download {
+      .action-icon {
         opacity: 1;
 
         &.hidden {
@@ -164,7 +164,7 @@
     --background-color: var(--color-background);
     --border-radius-messages-small: .3125rem;
 
-    .icon-download,
+    .action-icon,
     .file-progress,
     .file-icon,
     .file-preview {
@@ -211,7 +211,7 @@
       }
     }
 
-    .icon-download {
+    .action-icon {
       left: auto;
       right: 0;
     }

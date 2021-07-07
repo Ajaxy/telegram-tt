@@ -5,7 +5,12 @@ import React, {
 import { ApiMessage } from '../../api/types';
 
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
-import { getMediaTransferState, getMessageMediaHash, getMessageMediaThumbDataUri } from '../../modules/helpers';
+import {
+  getMediaTransferState,
+  getMessageMediaHash,
+  getMessageMediaThumbDataUri,
+  isMessageDocumentVideo,
+} from '../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useMedia from '../../hooks/useMedia';
@@ -25,6 +30,7 @@ type OwnProps = {
   className?: string;
   sender?: string;
   onCancelUpload?: () => void;
+  onMediaClick?: () => void;
   onDateClick?: (messageId: number, chatId: number) => void;
 };
 
@@ -40,6 +46,7 @@ const Document: FC<OwnProps> = ({
   isSelected,
   isSelectable,
   onCancelUpload,
+  onMediaClick,
   onDateClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -48,6 +55,7 @@ const Document: FC<OwnProps> = ({
   const document = message.content.document!;
   const extension = getDocumentExtension(document) || '';
   const { fileName, size, timestamp } = document;
+  const withMediaViewer = onMediaClick && Boolean(document.mediaType);
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
@@ -65,14 +73,16 @@ const Document: FC<OwnProps> = ({
   const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
 
   const handleClick = useCallback(() => {
-    if (isUploading) {
+    if (withMediaViewer) {
+      onMediaClick!();
+    } else if (isUploading) {
       if (onCancelUpload) {
         onCancelUpload();
       }
     } else {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
     }
-  }, [isUploading, onCancelUpload]);
+  }, [withMediaViewer, isUploading, onCancelUpload, onMediaClick]);
 
   const handleDateClick = useCallback(() => {
     onDateClick!(message.id, message.chatId);
@@ -102,6 +112,7 @@ const Document: FC<OwnProps> = ({
       sender={sender}
       isSelectable={isSelectable}
       isSelected={isSelected}
+      actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'icon-play' : 'icon-eye') : 'icon-download'}
       onClick={handleClick}
       onDateClick={onDateClick ? handleDateClick : undefined}
     />

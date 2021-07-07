@@ -1,16 +1,19 @@
-import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
-import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
-import windowSize from '../../../util/windowSize';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import {
+  ApiPhoto, ApiVideo, ApiSticker, ApiDimensions,
+} from '../../../api/types';
+
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import windowSize from '../../../util/windowSize';
+import { getPhotoInlineDimensions, getVideoDimensions } from '../../../modules/helpers';
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
 export const ROUND_VIDEO_DIMENSIONS = 200;
 export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
-
-const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const LIKE_STICKER_ID = '1258816259753933';
+
+const DEFAULT_MEDIA_DIMENSIONS: ApiDimensions = { width: 100, height: 100 };
 const MOBILE_SCREEN_NO_AVATARS_MESSAGE_EXTRA_WIDTH_REM = 4.5;
 const MOBILE_SCREEN_MESSAGE_EXTRA_WIDTH_REM = 7;
 const MESSAGE_MAX_WIDTH_REM = 29;
@@ -92,7 +95,7 @@ function calculateDimensionsForMessageMedia({
   isWebPagePhoto?: boolean;
   isGif?: boolean;
   noAvatars?: boolean;
-}): IDimensions {
+}): ApiDimensions {
   const aspectRatio = height / width;
   const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto, noAvatars);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
@@ -100,7 +103,7 @@ function calculateDimensionsForMessageMedia({
   return calculateDimensions(availableWidth, availableHeight, width, height);
 }
 
-export function getMediaViewerAvailableDimensions(withFooter: boolean, isVideo: boolean): IDimensions {
+export function getMediaViewerAvailableDimensions(withFooter: boolean, isVideo: boolean): ApiDimensions {
   const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
   const { width: windowWidth, height: windowHeight } = windowSize.get();
   let occupiedHeightRem = isVideo && mql.matches ? 10 : 8.25;
@@ -151,14 +154,14 @@ export function calculateVideoDimensions(
   });
 }
 
-export function getPictogramDimensions(): IDimensions {
+export function getPictogramDimensions(): ApiDimensions {
   return {
     width: 2 * REM,
     height: 2 * REM,
   };
 }
 
-export function getDocumentThumbnailDimensions(smaller?: boolean): IDimensions {
+export function getDocumentThumbnailDimensions(smaller?: boolean): ApiDimensions {
   if (smaller) {
     return {
       width: 3 * REM,
@@ -172,7 +175,7 @@ export function getDocumentThumbnailDimensions(smaller?: boolean): IDimensions {
   };
 }
 
-export function getStickerDimensions(sticker: ApiSticker): IDimensions {
+export function getStickerDimensions(sticker: ApiSticker): ApiDimensions {
   const { width } = sticker;
   let { height } = sticker;
 
@@ -203,8 +206,8 @@ export function getStickerDimensions(sticker: ApiSticker): IDimensions {
 }
 
 export function calculateMediaViewerDimensions(
-  { width, height }: IDimensions, withFooter: boolean, isVideo: boolean = false,
-): IDimensions {
+  { width, height }: ApiDimensions, withFooter: boolean, isVideo: boolean = false,
+): ApiDimensions {
   const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(withFooter, isVideo);
 
   return calculateDimensions(availableWidth, availableHeight, width, height);
@@ -215,7 +218,7 @@ export function calculateDimensions(
   availableHeight: number,
   mediaWidth: number,
   mediaHeight: number,
-): IDimensions {
+): ApiDimensions {
   const aspectRatio = mediaHeight / mediaWidth;
   const calculatedWidth = Math.min(mediaWidth, availableWidth);
   const calculatedHeight = Math.round(calculatedWidth * aspectRatio);

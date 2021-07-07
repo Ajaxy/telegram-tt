@@ -639,6 +639,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             uploadProgress={uploadProgress}
             isSelectable={isInDocumentGroup}
             isSelected={isSelected}
+            onMediaClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
           />
         )}
