@@ -2,7 +2,7 @@ import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { SettingsScreens } from '../../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { LAYERS_ANIMATION_NAME } from '../../../util/environment';
 import useFoldersReducer from '../../../hooks/reducers/useFoldersReducer';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 
@@ -213,7 +213,7 @@ const Settings: FC<OwnProps> = ({
   return (
     <Transition
       id="Settings"
-      name={IS_SINGLE_COLUMN_LAYOUT ? 'slide-layers' : 'push-slide'}
+      name={LAYERS_ANIMATION_NAME}
       activeKey={currentScreen}
       renderCount={TRANSITION_RENDER_COUNT}
     >

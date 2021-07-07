@@ -140,6 +140,8 @@ $color-user-8: #faa774;
   --color-default-shadow: #72727240;
   --color-light-shadow: #7272722B;
 
+  --vh: 1vh;
+
   --border-radius-default: 0.75rem;
   --border-radius-default-small: 0.625rem;
   --border-radius-default-tiny: 0.375rem;
@@ -201,14 +203,16 @@ $color-user-8: #faa774;
   --layer-transition: 300ms cubic-bezier(0.33, 1, 0.68, 1);
   --layer-blackout-opacity: 0.3;
 
-  --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
-
-  --select-transition: 200ms ease-out;
-
   // For some reason these parameters cause worse animation in desktop Chrome
   @media (max-width: 600px) {
     --layer-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  --vh: 1vh;
+  --slide-transition: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  body.is-android {
+    --slide-transition: 200ms ease-in-out;
+  }
+
+  --select-transition: 200ms ease-out;
 }

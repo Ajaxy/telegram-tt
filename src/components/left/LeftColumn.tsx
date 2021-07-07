@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 
@@ -240,7 +240,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   return (
     <Transition
       id="LeftColumn"
-      name={IS_SINGLE_COLUMN_LAYOUT ? 'slide-layers' : 'push-slide'}
+      name={LAYERS_ANIMATION_NAME}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
       shouldCleanup
