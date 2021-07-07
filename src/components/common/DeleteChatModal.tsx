@@ -37,6 +37,7 @@ type StateProps = {
   isPrivateChat: boolean;
   isBasicGroup: boolean;
   isSuperGroup: boolean;
+  currentUserId: number | undefined;
   canDeleteForAll?: boolean;
   contactName?: string;
 };
@@ -51,6 +52,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isChatWithSelf,
   isBasicGroup,
   isSuperGroup,
+  currentUserId,
   canDeleteForAll,
   contactName,
   onClose,
@@ -73,7 +75,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
     if (isPrivateChat) {
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (isBasicGroup) {
-      deleteChatUser({ chatId: chat.id });
+      deleteChatUser({ chatId: chat.id, userId: currentUserId });
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
       leaveChannel({ chatId: chat.id });
@@ -86,6 +88,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
     isBasicGroup,
     isChannel,
     isSuperGroup,
+    currentUserId,
     chat.isCreator,
     chat.id,
     onClose,
@@ -188,6 +191,7 @@ export default memo(withGlobal<OwnProps>(
       isChannel: isChatChannel(chat),
       isBasicGroup: isChatBasicGroup(chat),
       isSuperGroup: isChatSuperGroup(chat),
+      currentUserId: global.currentUserId,
       canDeleteForAll,
       contactName,
     };
