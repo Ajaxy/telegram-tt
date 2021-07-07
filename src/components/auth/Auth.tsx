@@ -5,6 +5,7 @@ import { GlobalActions, GlobalState } from '../../global/types';
 
 import '../../modules/actions/initial';
 import { pick } from '../../util/iteratees';
+import { PLATFORM_ENV } from '../../util/environment';
 
 import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
@@ -14,7 +15,6 @@ import AuthRegister from './AuthRegister.async';
 import AuthQrCode from './AuthQrCode';
 
 import './Auth.scss';
-import { PLATFORM_ENV } from '../../util/environment';
 
 type StateProps = Pick<GlobalState, 'authState'>;
 type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi'>;
