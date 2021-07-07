@@ -195,8 +195,9 @@ class TelegramClient {
 
             try {
                 await attempts(() => {
-                    return timeout(this._sender.send(new requests.Ping({
+                    return timeout(this._sender.send(new requests.PingDelayDisconnect({
                         pingId: Helpers.getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
+                        disconnectDelay: PING_DISCONNECT_DELAY,
                     })), PING_TIMEOUT);
                 }, PING_FAIL_ATTEMPTS, PING_FAIL_INTERVAL);
             } catch (err) {
