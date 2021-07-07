@@ -33,7 +33,6 @@ type StateProps = {
   isSearching?: boolean;
   localUserIds?: number[];
   globalUserIds?: number[];
-  serverTimeOffset?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setGlobalSearchQuery'>;
@@ -54,7 +53,6 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   isSearching,
   localUserIds,
   globalUserIds,
-  serverTimeOffset,
   loadContactList,
   setGlobalSearchQuery,
 }) => {
@@ -72,8 +70,7 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const displayedIds = useMemo(() => {
     const contactIds = localContactIds
-      ? sortChatIds(localContactIds.filter((id) => id !== currentUserId), chatsById,
-        undefined, undefined, serverTimeOffset)
+      ? sortChatIds(localContactIds.filter((id) => id !== currentUserId), chatsById)
       : [];
 
     if (!searchQuery) {
@@ -98,10 +95,9 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
       chatsById,
       false,
       selectedMemberIds,
-      serverTimeOffset,
     );
   }, [
-    localContactIds, chatsById, serverTimeOffset, searchQuery, localUserIds, globalUserIds, selectedMemberIds,
+    localContactIds, chatsById, searchQuery, localUserIds, globalUserIds, selectedMemberIds,
     currentUserId, usersById,
   ]);
 
@@ -157,7 +153,7 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: localContactIds } = global.contactList || {};
     const { byId: usersById } = global.users;
     const { byId: chatsById } = global.chats;
-    const { currentUserId, serverTimeOffset } = global;
+    const { currentUserId } = global;
 
     const {
       query: searchQuery,
@@ -177,7 +173,6 @@ export default memo(withGlobal<OwnProps>(
       isSearching: fetchingStatus && fetchingStatus.chats,
       globalUserIds,
       localUserIds,
-      serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'setGlobalSearchQuery']),

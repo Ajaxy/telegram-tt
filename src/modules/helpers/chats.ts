@@ -13,6 +13,9 @@ import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { LangFn } from '../../hooks/useLang';
 
+const VEIFIED_PRIORITY_BASE = 3e9;
+const PINNED_PRIORITY_BASE = 3e8;
+
 export function isChatPrivate(chatId: number) {
   return chatId > 0;
 }
@@ -474,7 +477,6 @@ export function sortChatIds(
   chatsById: Record<number, ApiChat>,
   shouldPrioritizeVerified = false,
   priorityIds?: number[],
-  serverTimeOffset = 0,
 ) {
   return orderBy(chatIds, (id) => {
     const chat = chatsById[id];
@@ -489,14 +491,11 @@ export function sortChatIds(
     }
 
     if (shouldPrioritizeVerified && chat.isVerified) {
-      priority += 3e9; // ~100 years in seconds
+      priority += VEIFIED_PRIORITY_BASE; // ~100 years in seconds
     }
 
     if (priorityIds && priorityIds.includes(id)) {
-      // Assuming that last message date can't be less than now,
-      // this should place prioritized on top of the list.
-      // Then we subtract index of `id` in `priorityIds` to preserve selected order
-      priority += Date.now() + serverTimeOffset * 1000 + (priorityIds.length - priorityIds.indexOf(id)) * 3e8;
+      priority = Date.now() + PINNED_PRIORITY_BASE + (priorityIds.length - priorityIds.indexOf(id));
     }
 
     return priority;
