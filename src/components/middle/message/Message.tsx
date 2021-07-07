@@ -1,4 +1,3 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC,
   memo,
@@ -67,6 +66,7 @@ import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName, isEmojiOnlyMessage } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
+import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -342,7 +342,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     appendixRef.current.innerHTML = isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN;
   }, [isOwn, withAppendix]);
 
-  const handleGroupDocumentMessagesSelect = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleGroupDocumentMessagesSelect = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
 
     toggleMessageSelection({
@@ -351,7 +351,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [messageId, message.groupedId, toggleMessageSelection]);
 
-  const handleMessageSelect = useCallback((e?: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMessageSelect = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const params = isAlbum && album && album.messages
       ? {
         messageId,
@@ -366,9 +366,14 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     setReplyingToId({ messageId });
   }, [setReplyingToId, messageId]);
 
-  const handleContentDoubleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleContentDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
   }, []);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    preventMessageInputBlur(e);
+    handleBeforeContextMenu(e);
+  };
 
   const handleAvatarClick = useCallback(() => {
     if (!avatarPeer) {
@@ -425,7 +430,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [chatId, threadId, openMediaViewer, isScheduled]);
 
-  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const target = e.target as HTMLDivElement;
     if (!target.classList.contains('text-content') && !target.classList.contains('Message')) {
       return;
@@ -754,7 +759,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       data-message-id={messageId}
       onClick={isInSelectMode ? handleMessageSelect : IS_ANDROID ? handleClick : undefined}
       onDoubleClick={!isInSelectMode ? handleContainerDoubleClick : undefined}
-      onMouseDown={!isInSelectMode ? handleBeforeContextMenu : undefined}
+      onMouseDown={!isInSelectMode ? handleMouseDown : undefined}
       onContextMenu={!isInSelectMode ? handleContextMenu : undefined}
       onMouseEnter={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseEnter : undefined}
       onMouseLeave={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseLeave : undefined}

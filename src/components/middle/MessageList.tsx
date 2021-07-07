@@ -45,6 +45,7 @@ import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages, MessageDateGroup, isAlbum } from './helpers/groupMessages';
+import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { ObserveFn, useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useOnChange from '../../hooks/useOnChange';
 import useStickyDates from './hooks/useStickyDates';
@@ -521,7 +522,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 
   return (
-    <div ref={containerRef} className={className} onScroll={handleScroll}>
+    <div
+      ref={containerRef}
+      className={className}
+      onScroll={handleScroll}
+      onMouseDown={preventMessageInputBlur}
+    >
       {isRestricted ? (
         <div className="empty">
           <span>
@@ -704,11 +710,13 @@ function renderMessages(
       <div
         className="message-date-group"
         key={dateGroup.datetime}
+        onMouseDown={preventMessageInputBlur}
         teactFastList
       >
         <div
           className={buildClassName('sticky-date', !isSchedule && 'interactive')}
           key="date-header"
+          onMouseDown={preventMessageInputBlur}
           onClick={!isSchedule ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
         >
           <span dir="auto">
