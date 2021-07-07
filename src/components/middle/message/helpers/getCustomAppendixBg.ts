@@ -1,8 +1,8 @@
-const SELECTED_APPENDIX_BACKGROUND = 'rgba(255,255,255,1)';
+const SELECTED_APPENDIX_BACKGROUND = Promise.resolve('rgba(255,255,255,1)');
 
-export default async (src: string, isOwn: boolean, inSelectMode?: boolean, isSelected?: boolean) => {
+export default function getCustomAppendixBg(src: string, isOwn: boolean, inSelectMode?: boolean, isSelected?: boolean) {
   return isSelected ? SELECTED_APPENDIX_BACKGROUND : getAppendixColorFromImage(src, isOwn);
-};
+}
 
 async function getAppendixColorFromImage(src: string, isOwn: boolean) {
   const img = new Image();
