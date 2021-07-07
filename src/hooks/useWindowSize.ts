@@ -1,14 +1,13 @@
 import { useEffect, useState } from '../lib/teact/teact';
 
-import { IDimensions } from '../modules/helpers';
-
 import { throttle } from '../util/schedulers';
 import windowSize from '../util/windowSize';
+import { ApiDimensions } from '../api/types';
 
 const THROTTLE = 250;
 
 export default () => {
-  const [size, setSize] = useState<IDimensions>(windowSize.get());
+  const [size, setSize] = useState<ApiDimensions>(windowSize.get());
 
   useEffect(() => {
     const handleResize = throttle(() => {

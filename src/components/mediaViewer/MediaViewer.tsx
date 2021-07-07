@@ -5,7 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import {
-  ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
+  ApiChat, ApiMediaFormat, ApiMessage, ApiUser, ApiDimensions,
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
@@ -30,17 +30,20 @@ import {
 import {
   getChatAvatarHash,
   getChatMediaMessageIds,
-  getMessageMediaFilename,
+  getMessageFileName,
   getMessageMediaFormat,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessagePhoto,
   getMessageVideo,
+  getMessageDocument,
+  isMessageDocumentPhoto,
+  isMessageDocumentVideo,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   getPhotoFullDimensions,
-  getVideoDimensions,
-  IDimensions,
+  getVideoDimensions, getMessageFileSize,
+
 } from '../../modules/helpers';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -104,56 +107,62 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   focusMessage,
   animationLevel,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const animationKey = useRef<number>(null);
   const isOpen = Boolean(avatarOwner || messageId);
-  const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
-  const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
-  const photo = message ? getMessagePhoto(message) : undefined;
-  const video = message ? getMessageVideo(message) : undefined;
-  const isWebPagePhoto = Boolean(webPagePhoto);
-  const isWebPageVideo = Boolean(webPageVideo);
-  const messageVideo = video || webPageVideo;
-  const isVideo = Boolean(messageVideo);
-  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto));
-  const isGif = (messageVideo) ? messageVideo.isGif : undefined;
+
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
-  const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
-  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
-  const isGhostAnimation = animationLevel === 2;
-  const fileName = avatarOwner
-    ? `avatar${avatarOwner.id}-${profilePhotoIndex}.jpg`
-    : message && getMessageMediaFilename(message);
-  const prevSenderId = usePrevious<number | undefined>(senderId);
-  const [canPanZoomWrap, setCanPanZoomWrap] = useState(false);
-  const [isZoomed, setIsZoomed] = useState<boolean>(false);
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [panDelta, setPanDelta] = useState({ x: 0, y: 0 });
-  const [isFooterHidden, setIsFooterHidden] = useState<boolean>(false);
 
+  /* Content */
+  const photo = message ? getMessagePhoto(message) : undefined;
+  const video = message ? getMessageVideo(message) : undefined;
+  const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
+  const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
+  const isDocumentPhoto = message ? isMessageDocumentPhoto(message) : false;
+  const isDocumentVideo = message ? isMessageDocumentVideo(message) : false;
+  const isVideo = Boolean(video || webPageVideo || isDocumentVideo);
+  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto || isDocumentPhoto));
+  const { isGif } = video || webPageVideo || {};
+  const isAvatar = Boolean(avatarOwner);
+
+  /* Navigation */
+  const isSingleSlide = Boolean(webPagePhoto || webPageVideo);
   const messageIds = useMemo(() => {
-    return (isWebPagePhoto || isWebPageVideo) && messageId
+    return isSingleSlide && messageId
       ? [messageId]
       : getChatMediaMessageIds(chatMessages || {}, collectionIds || [], isFromSharedMedia);
-  }, [isWebPagePhoto, isWebPageVideo, messageId, chatMessages, collectionIds, isFromSharedMedia]);
+  }, [isSingleSlide, messageId, chatMessages, collectionIds, isFromSharedMedia]);
 
   const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
+
+  /* Animation */
+  const animationKey = useRef<number>();
+  const prevSenderId = usePrevious<number | undefined>(senderId);
   if (isOpen && (!prevSenderId || prevSenderId !== senderId || !animationKey.current)) {
     animationKey.current = selectedMediaMessageIndex;
   }
+  const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
+  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
+  const isGhostAnimation = animationLevel === 2;
 
-  function getMediaHash(full?: boolean) {
-    if (avatarOwner && profilePhotoIndex !== undefined) {
-      const { photos } = avatarOwner;
+  /* Controls */
+  const [isFooterHidden, setIsFooterHidden] = useState<boolean>(false);
+  const [canPanZoomWrap, setCanPanZoomWrap] = useState(false);
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [panDelta, setPanDelta] = useState({ x: 0, y: 0 });
+
+  /* Media data */
+  function getMediaHash(isFull?: boolean) {
+    if (isAvatar && profilePhotoIndex !== undefined) {
+      const { photos } = avatarOwner!;
       return photos && photos[profilePhotoIndex]
         ? `photo${photos[profilePhotoIndex].id}?size=c`
-        : getChatAvatarHash(avatarOwner, full ? 'big' : 'normal');
+        : getChatAvatarHash(avatarOwner!, isFull ? 'big' : 'normal');
     }
 
-    return message && getMessageMediaHash(message, full ? 'viewerFull' : 'viewerPreview');
+    return message && getMessageMediaHash(message, isFull ? 'viewerFull' : 'viewerPreview');
   }
 
   const blobUrlPictogram = useMedia(
@@ -167,7 +176,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const blobUrlPreview = useMedia(
     previewMediaHash,
     undefined,
-    avatarOwner && previewMediaHash && previewMediaHash.startsWith('profilePhoto')
+    isAvatar && previewMediaHash && previewMediaHash.startsWith('profilePhoto')
       ? ApiMediaFormat.DataUri
       : ApiMediaFormat.BlobUrl,
     undefined,
@@ -188,12 +197,25 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     bestImageData = thumbDataUri;
   }
 
-  const photoDimensions = isPhoto ? getPhotoFullDimensions((
-    isWebPagePhoto ? webPagePhoto : photo
-  )!) : undefined;
-  const videoDimensions = isVideo ? getVideoDimensions((
-    isWebPageVideo ? webPageVideo : video
-  )!) : undefined;
+  const videoSize = message ? getMessageFileSize(message) : undefined;
+  const fileName = message
+    ? getMessageFileName(message)
+    : isAvatar
+      ? `avatar${avatarOwner!.id}-${profilePhotoIndex}.jpg`
+      : undefined;
+
+  let dimensions!: ApiDimensions;
+  if (message) {
+    if (isDocumentPhoto || isDocumentVideo) {
+      dimensions = getMessageDocument(message)!.mediaSize!;
+    } else if (photo || webPagePhoto) {
+      dimensions = getPhotoFullDimensions((photo || webPagePhoto)!)!;
+    } else if (video || webPageVideo) {
+      dimensions = getVideoDimensions((video || webPageVideo)!)!;
+    }
+  } else {
+    dimensions = AVATAR_FULL_DIMENSIONS;
+  }
 
   useEffect(() => {
     if (!IS_SINGLE_COLUMN_LAYOUT) {
@@ -230,7 +252,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
       const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
-      animateOpening(hasFooter, origin!, bestImageData!, message);
+      animateOpening(hasFooter, origin!, bestImageData!, dimensions, isVideo, message);
     }
 
     if (isGhostAnimation && !isOpen && (prevMessage || prevAvatarOwner)) {
@@ -238,8 +260,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       animateClosing(prevOrigin!, prevBestImageData!, prevMessage || undefined);
     }
   }, [
-    isGhostAnimation, isOpen, origin, prevOrigin,
-    message, prevMessage, prevAvatarOwner, bestImageData, prevBestImageData,
+    isGhostAnimation, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner,
+    bestImageData, prevBestImageData, dimensions, isVideo,
   ]);
 
   useEffect(() => {
@@ -409,7 +431,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const lang = useLang();
 
   function renderSlide(isActive: boolean) {
-    if (avatarOwner) {
+    if (isAvatar) {
       return (
         <div key={chatId} className="media-viewer-content">
           {renderPhoto(
@@ -431,7 +453,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
         >
           {isPhoto && renderPhoto(
             localBlobUrl || fullMediaData || blobUrlPreview || blobUrlPictogram,
-            message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
+            message && calculateMediaViewerDimensions(dimensions!, hasFooter),
             !IS_SINGLE_COLUMN_LAYOUT && !isZoomed,
           )}
           {isVideo && (
@@ -440,9 +462,9 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               url={localBlobUrl || fullMediaData}
               isGif={isGif}
               posterData={bestImageData}
-              posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter, true)}
+              posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
               downloadProgress={downloadProgress}
-              fileSize={messageVideo!.size}
+              fileSize={videoSize!}
               isMediaViewerOpen={isOpen}
               noPlay={!isActive}
               onClose={close}
@@ -464,12 +486,17 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }
 
   function renderSenderInfo() {
-    return (
+    return isAvatar ? (
       <SenderInfo
-        key={avatarOwner ? avatarOwner.id : messageId}
-        chatId={avatarOwner ? avatarOwner.id : chatId}
+        key={avatarOwner!.id}
+        chatId={avatarOwner!.id}
+        isAvatar
+      />
+    ) : (
+      <SenderInfo
+        key={messageId}
+        chatId={chatId}
         messageId={messageId}
-        isAvatar={Boolean(avatarOwner)}
       />
     );
   }
@@ -507,7 +534,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               onCloseMediaViewer={close}
               onForward={handleForward}
               onZoomToggle={handleZoomToggle}
-              isAvatar={Boolean(avatarOwner)}
+              isAvatar={isAvatar}
             />
           </div>
           <PanZoom
@@ -554,7 +581,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   );
 };
 
-function renderPhoto(blobUrl?: string, imageSize?: IDimensions, canDrag?: boolean) {
+function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: boolean) {
   return blobUrl
     ? (
       <img

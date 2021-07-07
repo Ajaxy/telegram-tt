@@ -4,8 +4,7 @@
 // https://github.com/overtake/TelegramSwift/blob/master/Telegram-Mac/GroupedLayout.swift#L83
 
 import { IAlbum } from '../../../../types';
-import { ApiMessage } from '../../../../api/types';
-import { IDimensions } from '../../../../modules/helpers';
+import { ApiMessage, ApiDimensions } from '../../../../api/types';
 
 import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';
@@ -43,13 +42,13 @@ type ILayoutParams = {
 };
 export type IAlbumLayout = {
   layout: IMediaLayout[];
-  containerStyle: IDimensions;
+  containerStyle: ApiDimensions;
 };
 
 function getRatios(messages: ApiMessage[]) {
   return messages.map(
     (message) => {
-      const dimensions = calculateMediaDimensions(message) as IDimensions;
+      const dimensions = calculateMediaDimensions(message) as ApiDimensions;
 
       return dimensions.width / dimensions.height;
     },
@@ -77,7 +76,7 @@ function cropRatios(ratios: number[], averageRatio: number) {
 }
 
 function calculateContainerSize(layout: IMediaLayout[]) {
-  const styles: IDimensions = { width: 0, height: 0 };
+  const styles: ApiDimensions = { width: 0, height: 0 };
   layout.forEach(({
     dimensions,
     sides,

@@ -2,8 +2,6 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { IDimensions } from '../../modules/helpers';
-
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
@@ -15,12 +13,13 @@ import VideoPlayerControls from './VideoPlayerControls';
 import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './VideoPlayer.scss';
+import { ApiDimensions } from '../../api/types';
 
 type OwnProps = {
   url?: string;
   isGif?: boolean;
   posterData?: string;
-  posterSize?: IDimensions;
+  posterSize?: ApiDimensions;
   downloadProgress?: number;
   fileSize: number;
   isMediaViewerOpen?: boolean;

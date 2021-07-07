@@ -1,28 +1,25 @@
-import { ApiMessage } from '../../../api/types';
+import { ApiMessage, ApiDimensions } from '../../../api/types';
+
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
 import {
-  getMessageContent,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
-  getPhotoFullDimensions,
-  getVideoDimensions,
-} from '../../../modules/helpers';
-import {
-  AVATAR_FULL_DIMENSIONS,
   calculateDimensions,
   getMediaViewerAvailableDimensions,
   MEDIA_VIEWER_MEDIA_QUERY,
   REM,
 } from '../../common/helpers/mediaDimensions';
-
 import windowSize from '../../../util/windowSize';
 
 const ANIMATION_DURATION = 200;
 
 export function animateOpening(
-  hasFooter: boolean, origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage,
+  hasFooter: boolean,
+  origin: MediaViewerOrigin,
+  bestImageData: string,
+  dimensions: ApiDimensions,
+  isVideo: boolean,
+  message?: ApiMessage,
 ) {
   const { mediaEl: fromImage } = getNodes(origin, message);
   if (!fromImage) {
@@ -30,27 +27,11 @@ export function animateOpening(
   }
 
   const { width: windowWidth } = windowSize.get();
-
-  let isVideo = false;
-  let mediaSize;
-  if (message) {
-    const { photo, video } = getMessageContent(message);
-    const webPagePhoto = getMessageWebPagePhoto(message);
-    const webPageVideo = getMessageWebPageVideo(message);
-    isVideo = Boolean(video || webPageVideo);
-    mediaSize = isVideo
-      ? getVideoDimensions((video || webPageVideo)!)!
-      : getPhotoFullDimensions((photo || webPagePhoto)!)!;
-  } else {
-    mediaSize = AVATAR_FULL_DIMENSIONS;
-  }
-
-  // eslint-disable-next-line max-len
   const {
     width: availableWidth, height: availableHeight,
   } = getMediaViewerAvailableDimensions(hasFooter, isVideo);
   const { width: toWidth, height: toHeight } = calculateDimensions(
-    availableWidth, availableHeight, mediaSize.width, mediaSize.height,
+    availableWidth, availableHeight, dimensions.width, dimensions.height,
   );
   const toLeft = (windowWidth - toWidth) / 2;
   const toTop = getTopOffset(hasFooter) + (availableHeight - toHeight) / 2;

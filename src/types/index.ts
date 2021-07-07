@@ -1,5 +1,5 @@
 import {
-  ApiLanguage, ApiMessage, ApiStickerSet, ApiShippingAddress,
+  ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
 
 export enum LoadMoreDirection {

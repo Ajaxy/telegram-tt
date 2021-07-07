@@ -5,12 +5,12 @@ import { ApiMessage } from '../../api/types';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaHash } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
+import useMediaDownload from '../../hooks/useMediaDownload';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
-import useMediaDownload from '../../hooks/useMediaDownload';
 
 import './MediaViewerActions.scss';
 
@@ -41,7 +41,10 @@ const MediaViewerActions: FC<OwnProps> = ({
     isDownloadStarted,
     downloadProgress,
     handleDownloadClick,
-  } = useMediaDownload(message && isVideo ? getMessageMediaHash(message, 'download') : undefined);
+  } = useMediaDownload(
+    message && isVideo ? getMessageMediaHash(message, 'download') : undefined,
+    fileName,
+  );
 
   const lang = useLang();
 

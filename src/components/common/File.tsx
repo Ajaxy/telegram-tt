@@ -31,6 +31,7 @@ type OwnProps = {
   isSelectable?: boolean;
   isSelected?: boolean;
   transferProgress?: number;
+  actionIcon?: string;
   onClick?: () => void;
   onDateClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
@@ -51,6 +52,7 @@ const File: FC<OwnProps> = ({
   isSelectable,
   isSelected,
   transferProgress,
+  actionIcon,
   onClick,
   onDateClick,
 }) => {
@@ -126,7 +128,15 @@ const File: FC<OwnProps> = ({
             />
           </div>
         )}
-        {onClick && <i className={buildClassName('icon-download', shouldSpinnerRender && 'hidden')} />}
+        {onClick && (
+          <i
+            className={buildClassName(
+              'action-icon',
+              actionIcon || 'icon-download',
+              shouldSpinnerRender && 'hidden',
+            )}
+          />
+        )}
       </div>
       <div className="file-info">
         <div className="file-title" dir="auto">{renderText(name)}</div>
