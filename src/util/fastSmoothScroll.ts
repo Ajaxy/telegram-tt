@@ -1,5 +1,8 @@
+import { getGlobal } from '../lib/teact/teactn';
+
 import { FocusDirection } from '../types';
 
+import { ANIMATION_LEVEL_MIN } from '../config';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { fastRaf } from './schedulers';
 import { animateSingle } from './animation';
@@ -48,6 +51,10 @@ export default function fastSmoothScroll(
     container.scrollTop = offsetTop + maxDistance;
   } else if (forceDirection === FocusDirection.Down) {
     container.scrollTop = Math.max(0, offsetTop - maxDistance);
+  }
+
+  if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
+    forceDuration = 0;
   }
 
   isAnimating = true;
@@ -102,6 +109,12 @@ function scrollWithJs(
   }
 
   const target = container.scrollTop + path;
+
+  if (forceDuration === 0) {
+    container.scrollTop = target;
+    return;
+  }
+
   const duration = forceDuration || (
     MIN_JS_DURATION + (Math.abs(path) / MAX_DISTANCE) * (MAX_JS_DURATION - MIN_JS_DURATION)
   );
