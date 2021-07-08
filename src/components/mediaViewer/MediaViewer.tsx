@@ -11,6 +11,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import windowSize from '../../util/windowSize';
 import {
   AVATAR_FULL_DIMENSIONS,
   MEDIA_VIEWER_MEDIA_QUERY,
@@ -43,7 +44,6 @@ import {
   getMessageWebPageVideo,
   getPhotoFullDimensions,
   getVideoDimensions, getMessageFileSize,
-
 } from '../../modules/helpers';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -331,6 +331,19 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       stopCurrentAudio();
     }
   }, [isGif, isVideo]);
+
+  // Prevent refresh when rotating device to watch a video
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    windowSize.disableRefresh();
+
+    return () => {
+      windowSize.enableRefresh();
+    };
+  }, [isOpen]);
 
   const getMessageId = useCallback((fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
