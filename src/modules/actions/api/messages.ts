@@ -53,6 +53,7 @@ import {
 } from '../../selectors';
 import { rafPromise, throttle } from '../../../util/schedulers';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { IS_IOS } from '../../../util/environment';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
@@ -740,7 +741,7 @@ async function sendMessage(params: {
   } : undefined;
 
   // @optimization
-  if (params.replyingTo) {
+  if (params.replyingTo || IS_IOS) {
     await rafPromise();
   }
 
