@@ -267,9 +267,14 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'deleteHistory': {
       const { chatId } = update;
-      const ids = Object.keys(global.messages.byChatId[chatId].byId).map(Number);
+      const chatMessages = global.messages.byChatId[chatId];
+      if (chatMessages) {
+        const ids = Object.keys(chatMessages.byId).map(Number);
+        deleteMessages(chatId, ids, actions, global);
+      } else {
+        actions.requestChatUpdate({ chatId });
+      }
 
-      deleteMessages(chatId, ids, actions, global);
       break;
     }
 
