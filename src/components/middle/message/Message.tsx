@@ -263,6 +263,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const { chatId, id: messageId, threadInfo } = message;
 
+  const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
   const hasReply = isReplyMessage(message) && !shouldHideReply;
@@ -352,6 +353,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [messageId, message.groupedId, toggleMessageSelection]);
 
   const handleMessageSelect = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (isLocal) {
+      return;
+    }
+
     const params = isAlbum && album && album.messages
       ? {
         messageId,
@@ -360,7 +365,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       }
       : { messageId, withShift: e && e.shiftKey };
     toggleMessageSelection(params);
-  }, [toggleMessageSelection, messageId, isAlbum, album]);
+  }, [isLocal, isAlbum, album, messageId, toggleMessageSelection]);
 
   const handleContainerDoubleClick = useCallback(() => {
     setReplyingToId({ messageId });
@@ -372,7 +377,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     preventMessageInputBlur(e);
-    handleBeforeContextMenu(e);
+
+    if (!isLocal) {
+      handleBeforeContextMenu(e);
+    }
   };
 
   const handleAvatarClick = useCallback(() => {
@@ -581,7 +589,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             sticker={animatedEmoji}
             observeIntersection={observeIntersectionForMedia}
             lastSyncTime={lastSyncTime}
-            forceLoadPreview={isMessageLocal(message)}
+            forceLoadPreview={isLocal}
           />
         )}
         {isAlbum && (
@@ -760,7 +768,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       onClick={isInSelectMode ? handleMessageSelect : IS_ANDROID ? handleClick : undefined}
       onDoubleClick={!isInSelectMode ? handleContainerDoubleClick : undefined}
       onMouseDown={!isInSelectMode ? handleMouseDown : undefined}
-      onContextMenu={!isInSelectMode ? handleContextMenu : undefined}
+      onContextMenu={!isInSelectMode && !isLocal ? handleContextMenu : undefined}
       onMouseEnter={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseEnter : undefined}
       onMouseLeave={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseLeave : undefined}
     >
@@ -771,12 +779,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-has-unread-mention={message.hasUnreadMention}
       />
-      {!isInDocumentGroup && (
+      {!isLocal && !isInDocumentGroup && (
         <div className="message-select-control">
           {isSelected && <i className="icon-select" />}
         </div>
       )}
-      {isLastInDocumentGroup && (
+      {!isLocal && isLastInDocumentGroup && (
         <div
           className={buildClassName('message-select-control group-select', isGroupSelected && 'is-selected')}
           onClick={handleGroupDocumentMessagesSelect}
