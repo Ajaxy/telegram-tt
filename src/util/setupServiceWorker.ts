@@ -2,7 +2,7 @@ import { scriptUrl } from 'service-worker-loader!../serviceWorker';
 
 import { DEBUG } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
-import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
+import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { notifyClientReady } from './notifications';
 
 type WorkerAction = {
@@ -10,9 +10,8 @@ type WorkerAction = {
   payload: Record<string, any>;
 };
 
-
 function handleWorkerMessage(e: MessageEvent) {
-  const action:WorkerAction = e.data;
+  const action: WorkerAction = e.data;
   if (!action.type) return;
   const dispatch = getDispatch();
   switch (action.type) {
@@ -52,7 +51,10 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
           // eslint-disable-next-line no-console
           console.error('[SW] ServiceWorker not available');
         }
-        getDispatch().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
+
+        if (!IS_IOS && !IS_ANDROID) {
+          getDispatch().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
+        }
       }
     } catch (err) {
       if (DEBUG) {
