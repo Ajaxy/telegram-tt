@@ -408,23 +408,23 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
       width: photoSize.w,
       height: photoSize.h,
     };
-  }
 
-  if (mimeType.startsWith('image/')) {
-    mediaType = 'photo';
+    if (mimeType.startsWith('image/')) {
+      mediaType = 'photo';
 
-    const imageAttribute = attributes
-      .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
+      const imageAttribute = attributes
+        .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
 
-    if (imageAttribute) {
-      const { w: width, h: height } = imageAttribute;
-      mediaSize = {
-        width,
-        height,
-      };
+      if (imageAttribute) {
+        const { w: width, h: height } = imageAttribute;
+        mediaSize = {
+          width,
+          height,
+        };
+      }
+    } else if (mimeType.startsWith('video/')) {
+      mediaType = 'video';
     }
-  } else if (mimeType.startsWith('video/')) {
-    mediaType = 'video';
   }
 
   return {
@@ -541,7 +541,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
   const { id, photo, document } = media.webpage;
 
   let video;
-  if (document instanceof GramJs.Document && document.mimeType.startsWith('video')) {
+  if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
     video = buildVideoFromDocument(document);
   }
 
