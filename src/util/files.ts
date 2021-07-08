@@ -85,6 +85,10 @@ export async function createPosterForVideo(url: string): Promise<string | undefi
     pause(2000) as Promise<undefined>,
     new Promise<string>((resolve, reject) => {
       video.onseeked = () => {
+        if (!video.videoWidth || !video.videoHeight) {
+          resolve(undefined);
+        }
+
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
