@@ -19,7 +19,7 @@ import {
 import { LangCode } from '../../../types';
 
 import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import {
   selectChat,
   selectIsChatWithBot,
@@ -50,6 +50,7 @@ import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharact
 import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import { isSelectionInsideInput } from './helpers/selection';
+import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 
 import useFlag from '../../../hooks/useFlag';
 import useVoiceRecording from './hooks/useVoiceRecording';
@@ -442,6 +443,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+
     if (currentAttachments.length || text) {
       if (slowMode && !isAdmin) {
         const nowSeconds = Math.floor(Date.now() / 1000) + serverTimeOffset;
@@ -464,7 +467,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             },
           });
 
-          const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
           messageInput.blur();
 
           return;
@@ -486,6 +488,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000) + serverTimeOffset;
 
     clearDraft({ chatId, localOnly: true });
+
+    if (IS_IOS && messageInput === document.activeElement) {
+      applyIosAutoCapitalizationFix(messageInput);
+    }
 
     // Wait until message animation starts
     requestAnimationFrame(resetComposer);
