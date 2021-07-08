@@ -14,11 +14,23 @@ type IDimensions = {
 const IS_LANDSCAPE = IS_SINGLE_COLUMN_LAYOUT && isLandscape();
 
 let windowSize = updateSizes();
+let isRefreshDisabled = false;
+
+function disableRefresh() {
+  isRefreshDisabled = true;
+}
+
+function enableRefresh() {
+  isRefreshDisabled = false;
+}
 
 const handleResize = throttle(() => {
   windowSize = updateSizes();
 
-  if ((isMobileScreen() !== IS_SINGLE_COLUMN_LAYOUT) || (IS_SINGLE_COLUMN_LAYOUT && IS_LANDSCAPE !== isLandscape())) {
+  if (!isRefreshDisabled && (
+    isMobileScreen() !== IS_SINGLE_COLUMN_LAYOUT
+    || (IS_SINGLE_COLUMN_LAYOUT && IS_LANDSCAPE !== isLandscape())
+  )) {
     window.location.reload();
   }
 }, 250, true);
@@ -57,4 +69,6 @@ function isLandscape() {
 
 export default {
   get: () => windowSize,
+  disableRefresh,
+  enableRefresh,
 };
