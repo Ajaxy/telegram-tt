@@ -6,8 +6,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalState } from '../../../global/types';
 
 import { MENU_TRANSITION_DURATION } from '../../../config';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   EmojiModule,
   EmojiRawData,
@@ -197,7 +197,10 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
       <div ref={headerRef} className="EmojiPicker-header" dir={lang.isRtl ? 'rtl' : ''}>
         {allCategories.map(renderCategoryButton)}
       </div>
-      <div ref={containerRef} className="EmojiPicker-main no-selection no-scrollbar">
+      <div
+        ref={containerRef}
+        className={buildClassName('EmojiPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      >
         {allCategories.map((category, i) => (
           <EmojiCategory
             category={category}

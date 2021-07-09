@@ -8,6 +8,7 @@ import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION, STICKER_SIZE_PICKER_HEADER } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -257,7 +258,10 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       >
         {allSets.map(renderCover)}
       </div>
-      <div ref={containerRef} className="StickerPicker-main no-scrollbar">
+      <div
+        ref={containerRef}
+        className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      >
         {allSets.map((stickerSet, i) => (
           <StickerSet
             key={stickerSet.id}
