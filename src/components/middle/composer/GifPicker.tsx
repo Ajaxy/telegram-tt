@@ -7,6 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { ApiVideo } from '../../../api/types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -56,7 +57,10 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   return (
-    <div ref={containerRef} className={buildClassName('GifPicker no-scrollbar', className)}>
+    <div
+      ref={containerRef}
+      className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+    >
       {!canSendGifs ? (
         <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
       ) : canRenderContents && savedGifs && savedGifs.length ? (
