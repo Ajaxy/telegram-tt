@@ -1,7 +1,6 @@
 import { addReducer, setGlobal } from '../../../lib/teact/teactn';
 import {
-  exitMessageSelectMode,
-  updateCurrentMessageList,
+  exitMessageSelectMode, replaceThreadParam, updateCurrentMessageList,
 } from '../../reducers';
 import { selectCurrentMessageList } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
@@ -19,6 +18,7 @@ addReducer('openChat', (global, actions, payload) => {
       || currentMessageList.threadId !== threadId
       || currentMessageList.type !== type
     )) {
+    global = replaceThreadParam(global, id, threadId, 'replyStack', []);
     global = exitMessageSelectMode(global);
     global = closeLocalTextSearch(global);
 

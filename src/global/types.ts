@@ -58,6 +58,7 @@ export interface Thread {
   noWebPage?: boolean;
   threadInfo?: ApiThreadInfo;
   firstMessageId?: number;
+  replyStack?: number[];
 }
 
 export type GlobalState = {
@@ -424,7 +425,7 @@ export type ActionTypes = (
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'loadMessageLink' | 'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
-  'reportMessages' |
+  'reportMessages' | 'focusNextReply' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result
