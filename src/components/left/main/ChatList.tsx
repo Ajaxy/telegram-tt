@@ -5,7 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import {
-  ApiChat, ApiChatFolder, ApiUser, MAIN_THREAD_ID,
+  ApiChat, ApiChatFolder, ApiUser,
 } from '../../../api/types';
 import { NotifyException, NotifySettings } from '../../../types';
 
@@ -15,7 +15,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
 import {
-  selectChatFolder, selectCurrentMessageList, selectNotifyExceptions, selectNotifySettings,
+  selectChatFolder, selectNotifyExceptions, selectNotifySettings,
 } from '../../../modules/selectors';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useChatAnimationType } from './hooks';
@@ -36,15 +36,13 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
   chatFolder?: ApiChatFolder;
   listIds?: number[];
-  currentChatId?: number;
   orderedPinnedIds?: number[];
   lastSyncTime?: number;
-  isInDiscussionThread?: boolean;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages' | 'openChat'>;
+type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages' | 'openChat' | 'openNextChat'>;
 
 enum FolderTypeToListType {
   'all' = 'active',
@@ -60,15 +58,14 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
   usersById,
   listIds,
-  currentChatId,
   orderedPinnedIds,
   lastSyncTime,
-  isInDiscussionThread,
   notifySettings,
   notifyExceptions,
   loadMoreChats,
   preloadTopChatMessages,
   openChat,
+  openNextChat,
 }) => {
   const [currentListIds, currentPinnedIds] = useMemo(() => {
     return folderType === 'folder' && chatFolder
@@ -140,7 +137,6 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
             chatId={id}
             isPinned
             folderId={folderId}
-            isSelected={id === currentChatId && !isInDiscussionThread}
             animationType={getAnimationType(id)}
             orderDiff={orderDiffById[id]}
             // @ts-ignore
@@ -153,7 +149,6 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
             teactOrderKey={getChatOrder(chat)}
             chatId={chat.id}
             folderId={folderId}
-            isSelected={chat.id === currentChatId && !isInDiscussionThread}
             animationType={getAnimationType(chat.id)}
             orderDiff={orderDiffById[chat.id]}
             // @ts-ignore
@@ -181,21 +176,8 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
           const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
           if (!targetIndexDelta) return;
 
-          if (!currentChatId) {
-            e.preventDefault();
-            openChat({ id: orderedIds[0] });
-            return;
-          }
-
-          const position = orderedIds.indexOf(currentChatId);
-
-          if (position === -1) {
-            return;
-          }
-          const nextId = orderedIds[position + targetIndexDelta];
-
           e.preventDefault();
-          openChat({ id: nextId });
+          openNextChat({ targetIndexDelta, orderedIds });
         }
       }
     };
@@ -238,15 +220,12 @@ export default memo(withGlobal<OwnProps>(
       users: { byId: usersById },
       lastSyncTime,
     } = global;
-    const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
-
     const listType = folderType !== 'folder' ? FolderTypeToListType[folderType] : undefined;
     const chatFolder = folderId ? selectChatFolder(global, folderId) : undefined;
 
     return {
       chatsById,
       usersById,
-      currentChatId,
       lastSyncTime,
       ...(listType ? {
         listIds: listIds[listType],
@@ -254,7 +233,6 @@ export default memo(withGlobal<OwnProps>(
       } : {
         chatFolder,
       }),
-      isInDiscussionThread: currentThreadId !== MAIN_THREAD_ID,
       notifySettings: selectNotifySettings(global),
       notifyExceptions: selectNotifyExceptions(global),
     };
@@ -263,5 +241,6 @@ export default memo(withGlobal<OwnProps>(
     'loadMoreChats',
     'preloadTopChatMessages',
     'openChat',
+    'openNextChat',
   ]),
 )(ChatList));

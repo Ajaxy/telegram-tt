@@ -73,6 +73,7 @@ type OwnProps = {
   chatId: number;
   threadId: number;
   messageListType: MessageListType;
+  isReady?: boolean;
 };
 
 type StateProps = {
@@ -106,6 +107,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   threadId,
   messageListType,
+  isReady,
   pinnedMessageIds,
   messagesById,
   canUnpin,
@@ -143,10 +145,10 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
 
   useEffect(() => {
-    if (threadId === MAIN_THREAD_ID && lastSyncTime) {
+    if (threadId === MAIN_THREAD_ID && lastSyncTime && isReady) {
       loadPinnedMessages({ chatId });
     }
-  }, [chatId, loadPinnedMessages, lastSyncTime, threadId]);
+  }, [chatId, loadPinnedMessages, lastSyncTime, threadId, isReady]);
 
   // Reset pinned index when switching chats and pinning/unpinning
   useEffect(() => {

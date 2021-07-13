@@ -19,6 +19,14 @@
         transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
       }
     }
+
+    body.animation-level-0 & {
+      transition: none;
+    }
+
+    &:not(.middle-column-open) {
+      transform: translate3d(100vw, 0, 0) !important;
+    }
   }
 
   &-main {

@@ -32,6 +32,7 @@ const TRANSITION_DURATION_FACTOR = 50;
 
 type OwnProps = {
   id: string;
+  isAttachmentModalInput?: boolean;
   editableInputId?: string;
   html: string;
   placeholder: string;
@@ -73,6 +74,7 @@ function clearSelection() {
 
 const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   id,
+  isAttachmentModalInput,
   editableInputId,
   html,
   placeholder,
@@ -101,8 +103,9 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   const [selectedRange, setSelectedRange] = useState<Range>();
 
   useEffect(() => {
+    if (!isAttachmentModalInput) return;
     updateInputHeight(false);
-  }, []);
+  }, [isAttachmentModalInput]);
 
   useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {

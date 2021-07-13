@@ -205,9 +205,17 @@
     }
   }
 
-  &.scrolled .sticky-date {
+  &.scrolled:not(.is-animating) .sticky-date {
     position: sticky;
     top: 0.625rem;
+  }
+
+  &.is-animating {
+    overflow: hidden;
+  }
+
+  &.is-animating .message-select-control {
+    display: none !important;
   }
 
   .has-header-tools & .sticky-date {

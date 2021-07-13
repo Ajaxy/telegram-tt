@@ -48,10 +48,6 @@
         }
       }
 
-      .media-preview {
-        position: relative;
-      }
-
       img {
         width: 1.25rem;
         height: 1.25rem;
@@ -62,11 +58,13 @@
       }
 
       .icon-play {
+        position: relative;
+        display: inline-block;
         font-size: .75rem;
         color: #fff;
-        position: absolute;
-        top: .1875rem;
         margin-inline-start: -1.25rem;
+        margin-inline-end: 0.5rem;
+        bottom: 0.0625rem;
       }
     }
   }

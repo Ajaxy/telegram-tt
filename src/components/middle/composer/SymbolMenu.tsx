@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
@@ -38,10 +39,14 @@ export type OwnProps = {
   addRecentEmoji: AnyToVoidFunction;
 };
 
+type StateProps = {
+  isLeftColumnShown: boolean;
+};
+
 let isActivated = false;
 
-const SymbolMenu: FC<OwnProps> = ({
-  isOpen, allowedAttachmentOptions,
+const SymbolMenu: FC<OwnProps & StateProps> = ({
+  isOpen, allowedAttachmentOptions, isLeftColumnShown,
   onLoad, onClose,
   onEmojiSelect, onStickerSelect, onGifSelect,
   onRemoveSymbol, onSearchOpen, addRecentEmoji,
@@ -188,6 +193,7 @@ const SymbolMenu: FC<OwnProps> = ({
     const className = buildClassName(
       'SymbolMenu mobile-menu',
       transitionClassNames,
+      !isLeftColumnShown && 'middle-column-open',
     );
 
     return (
@@ -216,4 +222,10 @@ const SymbolMenu: FC<OwnProps> = ({
   );
 };
 
-export default memo(SymbolMenu);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      isLeftColumnShown: global.isLeftColumnShown,
+    };
+  },
+)(SymbolMenu));

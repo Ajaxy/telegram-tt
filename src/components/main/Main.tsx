@@ -113,11 +113,6 @@ const Main: FC<StateProps & DispatchProps> = ({
     shouldSkipHistoryAnimations && 'history-animation-disabled',
   );
 
-  useEffect(() => {
-    // For animating Symbol Menu on mobile
-    document.body.classList.toggle('is-middle-column-open', className.includes('middle-column-open'));
-  }, [className]);
-
   // Add `body` classes when toggling right column
   useEffect(() => {
     if (animationLevel > 0) {

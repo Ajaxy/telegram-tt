@@ -11,6 +11,7 @@ export default function useStickerTooltip(
   isAllowed: boolean,
   html: string,
   stickers?: ApiSticker[],
+  isDisabled = false,
 ) {
   const { loadStickersForEmoji, clearStickersForEmoji } = getDispatch();
   const isSingleEmoji = (
@@ -20,6 +21,8 @@ export default function useStickerTooltip(
   const hasStickers = Boolean(stickers) && isSingleEmoji;
 
   useEffect(() => {
+    if (isDisabled) return;
+
     if (isAllowed && isSingleEmoji) {
       loadStickersForEmoji({ emoji: html });
     } else if (hasStickers || !isSingleEmoji) {
@@ -27,7 +30,7 @@ export default function useStickerTooltip(
     }
     // We omit `hasStickers` here to prevent re-fetching after manually closing tooltip (via <Esc>).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [html, isSingleEmoji, clearStickersForEmoji, loadStickersForEmoji, isAllowed]);
+  }, [html, isSingleEmoji, clearStickersForEmoji, loadStickersForEmoji, isAllowed, isDisabled]);
 
   return {
     isStickerTooltipOpen: hasStickers,

@@ -59,7 +59,6 @@ type OwnProps = {
   folderId?: number;
   orderDiff: number;
   animationType: ChatAnimationTypes;
-  isSelected: boolean;
   isPinned?: boolean;
 };
 
@@ -75,6 +74,7 @@ type StateProps = {
   draft?: ApiFormattedText;
   messageListType?: MessageListType;
   animationLevel?: number;
+  isSelected?: boolean;
   lastSyncTime?: number;
 };
 
@@ -88,7 +88,6 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   folderId,
   orderDiff,
   animationType,
-  isSelected,
   isPinned,
   chat,
   isMuted,
@@ -101,6 +100,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   draft,
   messageListType,
   animationLevel,
+  isSelected,
   lastSyncTime,
   openChat,
   focusLastMessage,
@@ -324,7 +324,11 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const { targetUserId: actionTargetUserId, targetChatId: actionTargetChatId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
-    const { type: messageListType } = selectCurrentMessageList(global) || {};
+    const {
+      chatId: currentChatId,
+      threadId: currentThreadId,
+      type: messageListType,
+    } = selectCurrentMessageList(global) || {};
 
     return {
       chat,
@@ -338,6 +342,7 @@ export default memo(withGlobal<OwnProps>(
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       messageListType,
       animationLevel: global.settings.byKey.animationLevel,
+      isSelected: chatId === currentChatId && currentThreadId === MAIN_THREAD_ID,
       lastSyncTime: global.lastSyncTime,
     };
   },

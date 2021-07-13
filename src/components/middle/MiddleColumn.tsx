@@ -18,6 +18,7 @@ import {
   ANIMATION_END_DELAY,
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
+  ANIMATION_LEVEL_MIN,
 } from '../../config';
 import {
   IS_SINGLE_COLUMN_LAYOUT,
@@ -85,8 +86,9 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'unpinAllMessages' | 'loadUser' |
-'closeLocalTextSearch' | 'exitMessageSelectMode'>;
+type DispatchProps = Pick<GlobalActions, (
+  'openChat' | 'unpinAllMessages' | 'loadUser' | 'closeLocalTextSearch' | 'exitMessageSelectMode'
+)>;
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
@@ -129,6 +131,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
+  const [isReady, setIsReady] = useState(!IS_SINGLE_COLUMN_LAYOUT || animationLevel === ANIMATION_LEVEL_MIN);
 
   const hasTools = hasPinnedOrAudioMessage && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
@@ -161,6 +164,18 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     setIsFabShown(undefined);
     setIsNotchShown(undefined);
   }, [chatId]);
+
+  useEffect(() => {
+    if (animationLevel === ANIMATION_LEVEL_MIN) {
+      setIsReady(true);
+    }
+  }, [animationLevel]);
+
+  const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
+    if (e.propertyName === 'transform' && e.target === e.currentTarget) {
+      setIsReady(Boolean(chatId));
+    }
+  };
 
   useEffect(() => {
     if (isPrivate) {
@@ -263,6 +278,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     <div
       id="MiddleColumn"
       className={className}
+      onTransitionEnd={handleTransitionEnd}
       // @ts-ignore teact-feature
       style={`
         --composer-hidden-scale: ${composerHiddenScale};
@@ -290,6 +306,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               chatId={renderingChatId}
               threadId={renderingThreadId}
               messageListType={renderingMessageListType}
+              isReady={isReady}
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
@@ -307,6 +324,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     hasTools={renderingHasTools}
                     onFabToggle={setIsFabShown}
                     onNotchToggle={setIsNotchShown}
+                    isReady={isReady}
                   />
                   <div className={footerClassName}>
                     {renderingCanPost && (
@@ -316,6 +334,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         messageListType={renderingMessageListType}
                         dropAreaState={dropAreaState}
                         onDropHide={handleHideDropArea}
+                        isReady={isReady}
                       />
                     )}
                     {isPinnedMessageList && (

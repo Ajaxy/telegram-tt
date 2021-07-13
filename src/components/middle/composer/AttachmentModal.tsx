@@ -244,6 +244,7 @@ const AttachmentModal: FC<OwnProps> = ({
           />
           <MessageInput
             id="caption-input-text"
+            isAttachmentModalInput
             html={caption}
             editableInputId={EDITABLE_INPUT_MODAL_ID}
             placeholder={lang('Caption')}
