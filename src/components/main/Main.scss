@@ -177,3 +177,49 @@
     }
   }
 }
+
+body.is-android.animation-level-1 {
+  #LeftColumn, #MiddleColumn, #RightColumn {
+    transition: transform var(--layer-transition), opacity var(--layer-transition);
+  }
+
+  #Main:not(.middle-column-shown) {
+    #MiddleColumn {
+      display: none;
+    }
+  }
+
+  #Main:not(.middle-column-open) {
+    #MiddleColumn {
+      transform: translate3d(10vw, 0, 0);
+      opacity: 0;
+    }
+  }
+
+  #Main.middle-column-open {
+    #LeftColumn {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+  }
+
+  #Main:not(.right-column-shown) {
+    #RightColumn {
+      display: none;
+    }
+  }
+
+  #Main:not(.right-column-open) {
+    #RightColumn {
+      transform: translate3d(10vw, 0, 0);
+      opacity: 0;
+    }
+  }
+
+  #Main.right-column-open {
+    #MiddleColumn {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+  }
+}
