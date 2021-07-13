@@ -69,6 +69,7 @@ type OwnProps = {
   threadId: number;
   type: MessageListType;
   canPost: boolean;
+  isReady: boolean;
   onFabToggle: (shouldShow: boolean) => void;
   onNotchToggle: (shouldShow: boolean) => void;
   hasTools?: boolean;
@@ -122,6 +123,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isChatLoaded,
   isChannelChat,
   canPost,
+  isReady,
   isChatWithSelf,
   messageIds,
   messagesById,
@@ -331,9 +333,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Memorize height for scroll animation
   const { height: windowHeight } = useWindowSize();
+
   useEffect(() => {
-    containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
-  }, [windowHeight]);
+    if (isReady) {
+      containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
+    }
+  }, [windowHeight, isReady]);
 
   // Initial message loading
   useEffect(() => {
@@ -353,7 +358,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Remember scroll position before repositioning it
   useOnChange(() => {
-    if (!messageIds || !listItemElementsRef.current) {
+    if (!messageIds || !listItemElementsRef.current || !isReady) {
       return;
     }
 
@@ -370,7 +375,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     anchorIdRef.current = anchor.id;
     anchorTopRef.current = anchor.getBoundingClientRect().top;
     // This should match deps for `useLayoutEffectWithPrevDeps` below
-  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
+  }, [messageIds, isViewportNewest, containerHeight, hasTools, isReady]);
 
   // Handles updated message list, takes care of scroll repositioning
   useLayoutEffectWithPrevDeps(([
@@ -519,6 +524,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     isSelectModeActive && 'select-mode-active',
     hasFocusing && 'has-focusing',
     isScrolled && 'scrolled',
+    !isReady && 'is-animating',
   );
 
   return (

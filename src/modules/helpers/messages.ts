@@ -10,6 +10,7 @@ import { getChatTitle } from './chats';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
+const TRUNCATED_SUMMARY_LENGTH = 80;
 
 export function getMessageKey(message: ApiMessage) {
   const { chatId, id } = message;
@@ -32,16 +33,18 @@ export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji
     text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
   } = message.content;
 
+  const truncatedText = text && text.text.substr(0, TRUNCATED_SUMMARY_LENGTH);
+
   if (message.groupedId) {
-    return `${noEmoji ? '' : '🖼 '}${text ? text.text : lang('lng_in_dlg_album')}`;
+    return `${noEmoji ? '' : '🖼 '}${truncatedText || lang('lng_in_dlg_album')}`;
   }
 
   if (photo) {
-    return `${noEmoji ? '' : '🖼 '}${text ? text.text : lang('AttachPhoto')}`;
+    return `${noEmoji ? '' : '🖼 '}${truncatedText || lang('AttachPhoto')}`;
   }
 
   if (video) {
-    return `${noEmoji ? '' : '📹 '}${text ? text.text : lang(video.isGif ? 'AttachGif' : 'AttachVideo')}`;
+    return `${noEmoji ? '' : '📹 '}${truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo')}`;
   }
 
   if (sticker) {
@@ -53,11 +56,11 @@ export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji
   }
 
   if (voice) {
-    return `${noEmoji ? '' : '🎤 '}${text ? text.text : lang('AttachAudio')}`;
+    return `${noEmoji ? '' : '🎤 '}${truncatedText || lang('AttachAudio')}`;
   }
 
   if (document) {
-    return `${noEmoji ? '' : '📎 '}${text ? text.text : document.fileName}`;
+    return `${noEmoji ? '' : '📎 '}${truncatedText || document.fileName}`;
   }
 
   if (contact) {
@@ -73,7 +76,7 @@ export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji
   }
 
   if (text) {
-    return text.text;
+    return truncatedText;
   }
 
   return CONTENT_NOT_SUPPORTED;

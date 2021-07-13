@@ -81,13 +81,6 @@
       }
     }
 
-    // @optimization
-    #Main.middle-column-open & {
-      .custom-scroll {
-        overflow: hidden;
-      }
-    }
-
     #Main.history-animation-disabled & {
       transition: none;
 
@@ -181,20 +174,6 @@
 
     &:after {
       transition: none;
-    }
-  }
-}
-
-.SymbolMenu {
-  @media (max-width: 600px) {
-    transition: transform var(--layer-transition);
-
-    body.animation-level-0 & {
-      transition: none;
-    }
-
-    body:not(.is-middle-column-open) & {
-      transform: translate3d(100vw, 0, 0) !important;
     }
   }
 }

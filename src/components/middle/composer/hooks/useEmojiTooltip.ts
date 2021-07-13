@@ -36,6 +36,7 @@ export default function useEmojiTooltip(
   onUpdateHtml: (html: string) => void,
   baseEmojiKeywords?: Record<string, string[]>,
   emojiKeywords?: Record<string, string[]>,
+  isDisabled = false,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
 
@@ -60,6 +61,7 @@ export default function useEmojiTooltip(
 
   // Initialize data on first render.
   useEffect(() => {
+    if (isDisabled) return;
     const exec = () => {
       setById(emojiData.emojis);
     };
@@ -70,10 +72,10 @@ export default function useEmojiTooltip(
       ensureEmojiData()
         .then(exec);
     }
-  }, []);
+  }, [isDisabled]);
 
   useEffect(() => {
-    if (!byId) {
+    if (!byId || isDisabled) {
       return;
     }
 
@@ -107,7 +109,7 @@ export default function useEmojiTooltip(
     }, {} as Record<string, Emoji[]>);
     setByName(emojisByName);
     setNames(Object.keys(emojisByName));
-  }, [baseEmojiKeywords, byId, emojiKeywords]);
+  }, [isDisabled, baseEmojiKeywords, byId, emojiKeywords]);
 
   useEffect(() => {
     if (!isAllowed || !html || !byId || !keywords || !keywords.length) {

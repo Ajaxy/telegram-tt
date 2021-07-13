@@ -54,3 +54,23 @@ addReducer('resetChatCreation', (global) => {
     chatCreation: undefined,
   };
 });
+
+addReducer('openNextChat', (global, actions, payload) => {
+  const { targetIndexDelta, orderedIds } = payload;
+
+  const { chatId } = selectCurrentMessageList(global) || {};
+
+  if (!chatId) {
+    actions.openChat({ id: orderedIds[0] });
+    return;
+  }
+
+  const position = orderedIds.indexOf(chatId);
+
+  if (position === -1) {
+    return;
+  }
+  const nextId = orderedIds[position + targetIndexDelta];
+
+  actions.openChat({ id: nextId });
+});

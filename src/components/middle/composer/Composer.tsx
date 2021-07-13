@@ -94,6 +94,7 @@ type OwnProps = {
   messageListType: MessageListType;
   dropAreaState: string;
   onDropHide: NoneToVoidFunction;
+  isReady: boolean;
 };
 
 type StateProps = {
@@ -156,6 +157,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldSchedule,
   canScheduleUntilOnline,
   onDropHide,
+  isReady,
   editingMessage,
   chatId,
   threadId,
@@ -225,15 +227,13 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (chatId && lastSyncTime && threadId === MAIN_THREAD_ID) {
+    if (chatId && lastSyncTime && threadId === MAIN_THREAD_ID && isReady) {
       loadScheduledHistory();
     }
-  }, [chatId, loadScheduledHistory, lastSyncTime, threadId]);
+  }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
   useLayoutEffect(() => {
-    if (!appendixRef.current) {
-      return;
-    }
+    if (!appendixRef.current) return;
 
     appendixRef.current.innerHTML = APPENDIX;
   }, []);
@@ -303,6 +303,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     Boolean(shouldSuggestStickers && allowedAttachmentOptions.canSendStickers && !attachments.length),
     html,
     stickersForEmoji,
+    !isReady,
   );
   const {
     isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
@@ -314,6 +315,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     setHtml,
     baseEmojiKeywords,
     emojiKeywords,
+    !isReady,
   );
 
   const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
@@ -608,6 +610,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [isRightColumnShown, closeSymbolMenu]);
 
   useEffect(() => {
+    if (!isReady) return;
+
     if (isSelectModeActive) {
       disableHover();
     } else {
@@ -615,7 +619,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         enableHover();
       }, SELECT_MODE_TRANSITION_MS);
     }
-  }, [isSelectModeActive, enableHover, disableHover]);
+  }, [isSelectModeActive, enableHover, disableHover, isReady]);
 
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
@@ -687,7 +691,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className={className}>
-      {allowedAttachmentOptions.canAttachMedia && (
+      {allowedAttachmentOptions.canAttachMedia && isReady && (
         <Portal containerId="#middle-column-portals">
           <DropArea
             isOpen={dropAreaState !== DropAreaState.None}
@@ -763,7 +767,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             >
               <i className="icon-smile" />
               <i className="icon-keyboard" />
-              <Spinner color="gray" />
+              {!isSymbolMenuLoaded && <Spinner color="gray" />}
             </Button>
           ) : (
             <ResponsiveHoverButton

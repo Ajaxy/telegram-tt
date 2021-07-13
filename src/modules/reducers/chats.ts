@@ -47,9 +47,10 @@ export function replaceChats(global: GlobalState, newById: Record<number, ApiCha
   };
 }
 
-export function updateChat(
+// @optimization Don't spread/unspread global for each element, do it in a batch
+function getUpdatedChat(
   global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
-): GlobalState {
+): ApiChat {
   const { byId } = global.chats;
   const chat = byId[chatId];
   const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
@@ -60,8 +61,18 @@ export function updateChat(
   };
 
   if (!updatedChat.id || !updatedChat.type) {
-    return global;
+    return updatedChat;
   }
+
+  return updatedChat;
+}
+
+export function updateChat(
+  global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+): GlobalState {
+  const { byId } = global.chats;
+
+  const updatedChat = getUpdatedChat(global, chatId, chatUpdate, photo);
 
   return replaceChats(global, {
     ...byId,
@@ -70,8 +81,17 @@ export function updateChat(
 }
 
 export function updateChats(global: GlobalState, updatedById: Record<number, ApiChat>): GlobalState {
-  Object.keys(updatedById).forEach((id) => {
-    global = updateChat(global, Number(id), updatedById[Number(id)]);
+  const updatedChats = Object.keys(updatedById).map(Number).reduce<Record<number, ApiChat>>((acc, id) => {
+    const updatedChat = getUpdatedChat(global, id, updatedById[id]);
+    if (updatedChat) {
+      acc[id] = updatedChat;
+    }
+    return acc;
+  }, {});
+
+  global = replaceChats(global, {
+    ...global.chats.byId,
+    ...updatedChats,
   });
 
   return global;
@@ -80,10 +100,19 @@ export function updateChats(global: GlobalState, updatedById: Record<number, Api
 // @optimization Allows to avoid redundant updates which cause a lot of renders
 export function addChats(global: GlobalState, addedById: Record<number, ApiChat>): GlobalState {
   const { byId } = global.chats;
-  Object.keys(addedById).map(Number).forEach((id) => {
+  const addedChats = Object.keys(addedById).map(Number).reduce<Record<number, ApiChat>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
-      global = updateChat(global, id, addedById[id]);
+      const updatedChat = getUpdatedChat(global, id, addedById[id]);
+      if (updatedChat) {
+        acc[id] = updatedChat;
+      }
     }
+    return acc;
+  }, {});
+
+  global = replaceChats(global, {
+    ...global.chats.byId,
+    ...addedChats,
   });
 
   return global;
