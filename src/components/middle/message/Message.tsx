@@ -416,8 +416,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [botSender, openUserInfo]);
 
   const handleReplyClick = useCallback((): void => {
-    focusMessage({ chatId, threadId, messageId: message.replyToMessageId });
-  }, [focusMessage, chatId, threadId, message.replyToMessageId]);
+    focusMessage({
+      chatId, threadId, messageId: message.replyToMessageId, replyMessageId: messageId,
+    });
+  }, [focusMessage, chatId, threadId, message.replyToMessageId, messageId]);
 
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({

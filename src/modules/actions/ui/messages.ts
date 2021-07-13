@@ -21,7 +21,7 @@ import {
   selectChatMessages,
   selectAllowedMessageActions,
   selectMessageIdsByGroupId,
-  selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId,
+  selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId, selectReplyStack,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -240,9 +240,39 @@ addReducer('focusLastMessage', (global, actions) => {
   });
 });
 
+addReducer('focusNextReply', (global, actions) => {
+  const currentMessageList = selectCurrentMessageList(global);
+  if (!currentMessageList) {
+    return undefined;
+  }
+
+  const { chatId, threadId } = currentMessageList;
+
+  const replyStack = selectReplyStack(global, chatId, threadId);
+
+  if (!replyStack || replyStack.length === 0) {
+    actions.focusLastMessage();
+  } else {
+    const messageId = replyStack.pop();
+
+    global = replaceThreadParam(global, chatId, threadId, 'replyStack', [...replyStack]);
+
+    setGlobal(global);
+
+    actions.focusMessage({
+      chatId,
+      threadId,
+      messageId,
+    });
+  }
+
+  return undefined;
+});
+
 addReducer('focusMessage', (global, actions, payload) => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
+    replyMessageId,
   } = payload!;
 
   let { messageId } = payload!;
@@ -274,6 +304,11 @@ addReducer('focusMessage', (global, actions, payload) => {
 
   global = updateFocusedMessage(global, chatId, messageId, noHighlight);
   global = updateFocusDirection(global, undefined);
+
+  if (replyMessageId) {
+    const replyStack = selectReplyStack(global, chatId, threadId) || [];
+    global = replaceThreadParam(global, chatId, threadId, 'replyStack', [...replyStack, replyMessageId]);
+  }
 
   if (shouldSwitchChat) {
     global = updateFocusDirection(global, FocusDirection.Static);

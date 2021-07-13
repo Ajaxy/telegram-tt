@@ -27,7 +27,7 @@ type StateProps = {
   unreadCount?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusLastMessage'>;
+type DispatchProps = Pick<GlobalActions, 'focusNextReply'>;
 
 const FOCUS_MARGIN = 20;
 
@@ -36,7 +36,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   canPost,
   messageListType,
   unreadCount,
-  focusLastMessage,
+  focusNextReply,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -48,7 +48,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (messageListType === 'thread') {
-      focusLastMessage();
+      focusNextReply();
     } else {
       const messagesContainer = elementRef.current!.parentElement!.querySelector<HTMLDivElement>('.MessageList')!;
       const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
@@ -59,7 +59,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
 
       fastSmoothScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
     }
-  }, [isShown, messageListType, focusLastMessage]);
+  }, [isShown, messageListType, focusNextReply]);
 
   const fabClassName = buildClassName(
     'ScrollDownButton',
@@ -101,5 +101,5 @@ export default memo(withGlobal<OwnProps>(
       unreadCount: chat && threadId === MAIN_THREAD_ID && messageListType === 'thread' ? chat.unreadCount : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['focusLastMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['focusNextReply']),
 )(ScrollDownButton));

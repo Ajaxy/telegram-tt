@@ -150,6 +150,10 @@ export function selectFirstMessageId(global: GlobalState, chatId: number, thread
   return selectThreadParam(global, chatId, threadId, 'firstMessageId');
 }
 
+export function selectReplyStack(global: GlobalState, chatId: number, threadId: number) {
+  return selectThreadParam(global, chatId, threadId, 'replyStack');
+}
+
 export function selectThreadOriginChat(global: GlobalState, chatId: number, threadId: number) {
   if (threadId === MAIN_THREAD_ID) {
     return selectChat(global, chatId);
