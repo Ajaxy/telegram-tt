@@ -94,6 +94,7 @@ type StateProps = {
   lastSyncTime?: number;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -123,6 +124,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   notifySettings,
   notifyExceptions,
+  shouldSkipHistoryAnimations,
   openChatWithInfo,
   pinMessage,
   focusMessage,
@@ -384,7 +386,10 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="MiddleHeader" ref={componentRef}>
-      <Transition name="slide-fade" activeKey={messageListType === 'thread' ? threadId : 1}>
+      <Transition
+        name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
+        activeKey={messageListType === 'thread' ? threadId : 1}
+      >
         {renderInfo}
       </Transition>
 
@@ -421,7 +426,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, messageListType }): StateProps => {
-    const { isLeftColumnShown, lastSyncTime } = global;
+    const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
     const { byId: chatsById } = global.chats;
     const chat = selectChat(global, chatId);
 
@@ -463,6 +468,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
       notifySettings: selectNotifySettings(global),
       notifyExceptions: selectNotifyExceptions(global),
+      shouldSkipHistoryAnimations,
     };
 
     const messagesById = selectChatMessages(global, chatId);

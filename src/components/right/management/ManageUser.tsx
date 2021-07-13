@@ -15,6 +15,7 @@ import {
 import { selectIsChatMuted } from '../../../modules/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
@@ -28,6 +29,8 @@ import './Management.scss';
 
 type OwnProps = {
   userId: number;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -54,11 +57,15 @@ const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
   deleteHistory,
   closeManagement,
   openChat,
+  onClose,
+  isActive,
 }) => {
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   const currentFirstName = user ? (user.firstName || '') : '';
   const currentLastName = user ? (user.lastName || '') : '';

@@ -6,11 +6,17 @@ import { selectChat, selectChatMessage } from '../../modules/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import PollAnswerResults from './PollAnswerResults';
 import Loading from '../ui/Loading';
 
 import './PollResults.scss';
+
+type OwnProps = {
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
+};
 
 type StateProps = {
   chat?: ApiChat;
@@ -18,12 +24,16 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-const PollResults: FC<StateProps> = ({
+const PollResults: FC<OwnProps & StateProps> = ({
+  onClose,
+  isActive,
   chat,
   message,
   lastSyncTime,
 }) => {
   const lang = useLang();
+  useHistoryBack(isActive, onClose);
+
   if (!message || !chat) {
     return <Loading />;
   }

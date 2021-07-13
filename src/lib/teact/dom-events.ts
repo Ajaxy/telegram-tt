@@ -8,26 +8,28 @@ const delegationRegistry: Record<string, Map<HTMLElement, Handler>> = {};
 const delegatedEventsByElement = new Map<HTMLElement, Set<string>>();
 const documentEventCounters: Record<string, number> = {};
 
-export function addEventListener(element: HTMLElement, propName: string, handler: Handler) {
+export function addEventListener(element: HTMLElement, propName: string, handler: Handler, asCapture = false) {
   const eventName = resolveEventName(propName, element);
-  if (canUseEventDelegation(eventName, element)) {
+  if (canUseEventDelegation(eventName, element, asCapture)) {
     addDelegatedListener(eventName, element, handler);
   } else {
-    element.addEventListener(eventName, handler);
+    element.addEventListener(eventName, handler, asCapture);
   }
 }
 
-export function removeEventListener(element: HTMLElement, propName: string, handler: Handler) {
+export function removeEventListener(element: HTMLElement, propName: string, handler: Handler, asCapture = false) {
   const eventName = resolveEventName(propName, element);
-  if (canUseEventDelegation(eventName, element)) {
+  if (canUseEventDelegation(eventName, element, asCapture)) {
     removeDelegatedListener(eventName, element);
   } else {
-    element.removeEventListener(eventName, handler);
+    element.removeEventListener(eventName, handler, asCapture);
   }
 }
 
 function resolveEventName(propName: string, element: HTMLElement) {
-  const eventName = propName.replace(/^on/, '').toLowerCase();
+  const eventName = propName
+    .replace(/^on/, '')
+    .replace(/Capture$/, '').toLowerCase();
 
   if (eventName === 'change' && element.tagName !== 'SELECT') {
     // React behavior repeated here.
@@ -51,9 +53,10 @@ function resolveEventName(propName: string, element: HTMLElement) {
   return eventName;
 }
 
-function canUseEventDelegation(realEventName: string, element: HTMLElement) {
+function canUseEventDelegation(realEventName: string, element: HTMLElement, asCapture: boolean) {
   return (
-    !NON_BUBBLEABLE_EVENTS.has(realEventName)
+    !asCapture
+    && !NON_BUBBLEABLE_EVENTS.has(realEventName)
     && element.tagName !== 'VIDEO'
     && element.tagName !== 'IFRAME'
   );

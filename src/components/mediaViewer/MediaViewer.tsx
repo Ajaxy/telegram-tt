@@ -58,6 +58,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Spinner from '../ui/Spinner';
 import ShowTransition from '../ui/ShowTransition';
@@ -442,6 +443,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }, [isFooterHidden, isGif, isPhoto]);
 
   const lang = useLang();
+
+  useHistoryBack(isOpen, closeMediaViewer, openMediaViewer, {
+    chatId,
+    threadId,
+    messageId,
+    origin,
+    avatarOwnerId: avatarOwner && avatarOwner.id,
+  });
 
   function renderSlide(isActive: boolean) {
     if (isAvatar) {

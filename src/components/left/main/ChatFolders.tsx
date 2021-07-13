@@ -16,6 +16,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import useThrottledMemo from '../../../hooks/useThrottledMemo';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Transition from '../../ui/Transition';
@@ -143,6 +144,8 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       setActiveChatFolder(0);
     }
   }) : undefined), [activeChatFolder, setActiveChatFolder]);
+
+  useHistoryBack(activeChatFolder !== 0, () => setActiveChatFolder(0));
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

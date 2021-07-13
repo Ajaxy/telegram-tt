@@ -5,11 +5,19 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
+import { SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import Checkbox from '../../ui/Checkbox';
+
+type OwnProps = {
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+};
 
 type StateProps = {
   hasPrivateChatsNotifications: boolean;
@@ -25,7 +33,10 @@ type DispatchProps = Pick<GlobalActions, (
   'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings'
 )>;
 
-const SettingsNotifications: FC<StateProps & DispatchProps> = ({
+const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   hasPrivateChatsNotifications,
   hasPrivateChatsMessagePreview,
   hasGroupNotifications,
@@ -72,6 +83,8 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
   }, [updateContactSignUpNotification]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Notifications);
 
   return (
     <div className="settings-content custom-scroll">
@@ -145,7 +158,7 @@ const SettingsNotifications: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     hasPrivateChatsNotifications: Boolean(global.settings.byKey.hasPrivateChatsNotifications),
     hasPrivateChatsMessagePreview: Boolean(global.settings.byKey.hasPrivateChatsMessagePreview),

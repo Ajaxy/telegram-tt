@@ -8,6 +8,7 @@ import { ManagementScreens } from '../../../types';
 
 import { selectChat } from '../../../modules/selectors';
 import { sortUserIds, isChatChannel } from '../../../modules/helpers';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
@@ -17,6 +18,8 @@ type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
   onChatMemberSelect: (memberId: number) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -32,8 +35,12 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   isChannel,
   onScreenSelect,
   onChatMemberSelect,
+  onClose,
+  isActive,
   serverTimeOffset,
 }) => {
+  useHistoryBack(isActive, onClose);
+
   const memberIds = useMemo(() => {
     if (!members || !usersById) {
       return undefined;

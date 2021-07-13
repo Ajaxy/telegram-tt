@@ -26,6 +26,8 @@ export type OwnProps = {
   isPromotedByCurrentUser?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
   onChatMemberSelect: (memberId: number, isPromotedByCurrentUser?: boolean) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -39,17 +41,59 @@ const Management: FC<OwnProps & StateProps> = ({
   isPromotedByCurrentUser,
   onScreenSelect,
   onChatMemberSelect,
+  onClose,
+  isActive,
   managementType,
 }) => {
   switch (currentScreen) {
     case ManagementScreens.Initial: {
       switch (managementType) {
         case 'user':
-          return <ManageUser key={chatId} userId={chatId} />;
+          return (
+            <ManageUser
+              key={chatId}
+              userId={chatId}
+              onClose={onClose}
+              isActive={isActive}
+            />
+          );
         case 'group':
-          return <ManageGroup key={chatId} chatId={chatId} onScreenSelect={onScreenSelect} />;
+          return (
+            <ManageGroup
+              key={chatId}
+              chatId={chatId}
+              onScreenSelect={onScreenSelect}
+              onClose={onClose}
+              isActive={isActive || [
+                ManagementScreens.ChatPrivacyType,
+                ManagementScreens.Discussion,
+                ManagementScreens.GroupPermissions,
+                ManagementScreens.ChatAdministrators,
+                ManagementScreens.GroupRemovedUsers,
+                ManagementScreens.GroupUserPermissionsCreate,
+                ManagementScreens.GroupUserPermissions,
+                ManagementScreens.ChatAdminRights,
+                ManagementScreens.GroupRecentActions,
+              ].includes(currentScreen)}
+            />
+          );
         case 'channel':
-          return <ManageChannel key={chatId} chatId={chatId} onScreenSelect={onScreenSelect} />;
+          return (
+            <ManageChannel
+              key={chatId}
+              chatId={chatId}
+              onScreenSelect={onScreenSelect}
+              onClose={onClose}
+              isActive={isActive || [
+                ManagementScreens.ChannelSubscribers,
+                ManagementScreens.ChatAdministrators,
+                ManagementScreens.Discussion,
+                ManagementScreens.ChatPrivacyType,
+                ManagementScreens.ChatAdminRights,
+                ManagementScreens.GroupRecentActions,
+              ].includes(currentScreen)}
+            />
+          );
       }
 
       break;
@@ -57,7 +101,11 @@ const Management: FC<OwnProps & StateProps> = ({
 
     case ManagementScreens.ChatPrivacyType:
       return (
-        <ManageChatPrivacyType chatId={chatId} />
+        <ManageChatPrivacyType
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+        />
       );
 
     case ManagementScreens.Discussion:
@@ -65,6 +113,8 @@ const Management: FC<OwnProps & StateProps> = ({
         <ManageDiscussion
           chatId={chatId}
           onScreenSelect={onScreenSelect}
+          isActive={isActive}
+          onClose={onClose}
         />
       );
 
@@ -74,12 +124,22 @@ const Management: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           onScreenSelect={onScreenSelect}
           onChatMemberSelect={onChatMemberSelect}
+          isActive={isActive || [
+            ManagementScreens.GroupRemovedUsers,
+            ManagementScreens.GroupUserPermissionsCreate,
+            ManagementScreens.GroupUserPermissions,
+          ].includes(currentScreen)}
+          onClose={onClose}
         />
       );
 
     case ManagementScreens.GroupRemovedUsers:
       return (
-        <ManageGroupRemovedUsers chatId={chatId} />
+        <ManageGroupRemovedUsers
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+        />
       );
 
     case ManagementScreens.GroupUserPermissionsCreate:
@@ -88,6 +148,10 @@ const Management: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           onChatMemberSelect={onChatMemberSelect}
           onScreenSelect={onScreenSelect}
+          isActive={isActive || [
+            ManagementScreens.GroupUserPermissions,
+          ].includes(currentScreen)}
+          onClose={onClose}
         />
       );
 
@@ -98,6 +162,8 @@ const Management: FC<OwnProps & StateProps> = ({
           selectedChatMemberId={selectedChatMemberId}
           isPromotedByCurrentUser={isPromotedByCurrentUser}
           onScreenSelect={onScreenSelect}
+          isActive={isActive}
+          onClose={onClose}
         />
       );
 
@@ -107,6 +173,11 @@ const Management: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           onScreenSelect={onScreenSelect}
           onChatMemberSelect={onChatMemberSelect}
+          isActive={isActive || [
+            ManagementScreens.ChatAdminRights,
+            ManagementScreens.GroupRecentActions,
+          ].includes(currentScreen)}
+          onClose={onClose}
         />
       );
 
@@ -114,6 +185,8 @@ const Management: FC<OwnProps & StateProps> = ({
       return (
         <ManageGroupRecentActions
           chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
         />
       );
 
@@ -124,13 +197,19 @@ const Management: FC<OwnProps & StateProps> = ({
           selectedChatMemberId={selectedChatMemberId}
           isPromotedByCurrentUser={isPromotedByCurrentUser}
           onScreenSelect={onScreenSelect}
+          isActive={isActive}
+          onClose={onClose}
         />
       );
 
     case ManagementScreens.ChannelSubscribers:
     case ManagementScreens.GroupMembers:
       return (
-        <ManageGroupMembers chatId={chatId} />
+        <ManageGroupMembers
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+        />
       );
   }
 

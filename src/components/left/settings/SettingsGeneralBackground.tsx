@@ -14,6 +14,7 @@ import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
 import { selectTheme } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
@@ -23,7 +24,9 @@ import WallpaperTile from './WallpaperTile';
 import './SettingsGeneralBackground.scss';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -42,7 +45,9 @@ const SUPPORTED_TYPES = 'image/jpeg';
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
   onScreenSelect,
+  onReset,
   background,
   isBlurred,
   loadedWallpapers,
@@ -105,6 +110,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [setThemeSettings]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.GeneralChatBackground);
 
   const isUploading = loadedWallpapers && loadedWallpapers[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
 

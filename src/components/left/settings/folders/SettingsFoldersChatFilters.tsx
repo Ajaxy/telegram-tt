@@ -5,6 +5,7 @@ import { withGlobal } from '../../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../../global/types';
 import { ApiChat } from '../../../../api/types';
+import { SettingsScreens } from '../../../../types';
 
 import useLang from '../../../../hooks/useLang';
 import { pick } from '../../../../util/iteratees';
@@ -15,6 +16,7 @@ import {
   FolderEditDispatch,
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import SettingsFoldersChatsPicker from './SettingsFoldersChatsPicker';
 
@@ -24,6 +26,9 @@ type OwnProps = {
   mode: 'included' | 'excluded';
   state: FoldersState;
   dispatch: FolderEditDispatch;
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -37,6 +42,9 @@ type StateProps = {
 type DispatchProps = Pick<GlobalActions, 'loadMoreChats'>;
 
 const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   mode,
   state,
   dispatch,
@@ -131,6 +139,9 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
       });
     }
   }, [mode, selectedChatIds, dispatch]);
+
+  useHistoryBack(isActive, onReset, onScreenSelect,
+    mode === 'included' ? SettingsScreens.FoldersIncludedChats : SettingsScreens.FoldersExcludedChats);
 
   if (!displayedIds) {
     return <Loading />;

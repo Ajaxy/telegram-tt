@@ -6,24 +6,31 @@ import { SettingsScreens } from '../../../../types';
 
 import { selectAnimatedEmoji } from '../../../../modules/selectors';
 import useLang from '../../../../hooks/useLang';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import Button from '../../../ui/Button';
 import AnimatedEmoji from '../../../common/AnimatedEmoji';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
   animatedEmoji: ApiSticker;
 };
 
-const SettingsTwoFaCongratulations: FC<OwnProps & StateProps> = ({ animatedEmoji, onScreenSelect }) => {
+const SettingsTwoFaCongratulations: FC<OwnProps & StateProps> = ({
+  isActive, onReset, animatedEmoji, onScreenSelect,
+}) => {
   const lang = useLang();
 
   const handleClick = () => {
     onScreenSelect(SettingsScreens.Privacy);
   };
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.TwoFaCongratulations);
 
   return (
     <div className="settings-content two-fa custom-scroll">

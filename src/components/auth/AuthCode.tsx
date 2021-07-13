@@ -7,19 +7,27 @@ import { GlobalState, GlobalActions } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { pick } from '../../util/iteratees';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
 import TrackingMonkey from '../common/TrackingMonkey';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = Pick<GlobalState, 'authPhoneNumber' | 'authIsCodeViaApp' | 'authIsLoading' | 'authError'>;
-type DispatchProps = Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'
+)>;
 
 const CODE_LENGTH = 5;
 
 const AuthCode: FC<StateProps & DispatchProps> = ({
-  authPhoneNumber, authIsCodeViaApp, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
+  authPhoneNumber,
+  authIsCodeViaApp,
+  authIsLoading,
+  authError,
+  setAuthCode,
+  returnToAuthPhoneNumber,
+  clearAuthError,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,7 +42,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
     }
   }, []);
 
-  useHistoryBack(returnToAuthPhoneNumber);
+  useHistoryBack(true, returnToAuthPhoneNumber);
 
   const onCodeChange = useCallback((e: FormEvent<HTMLInputElement>) => {
     if (authError) {
@@ -119,5 +127,9 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authPhoneNumber', 'authIsCodeViaApp', 'authIsLoading', 'authError']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthCode', 'returnToAuthPhoneNumber', 'clearAuthError']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setAuthCode',
+    'returnToAuthPhoneNumber',
+    'clearAuthError',
+  ]),
 )(AuthCode));

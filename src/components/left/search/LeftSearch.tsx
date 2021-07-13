@@ -10,6 +10,7 @@ import { pick } from '../../../util/iteratees';
 import { parseDateString } from '../../../util/dateFormat';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -75,6 +76,8 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleSearchDateSelect = useCallback((value: Date) => {
     setGlobalSearchDate({ date: value.getTime() / 1000 });
   }, [setGlobalSearchDate]);
+
+  useHistoryBack(isActive, onReset, undefined, undefined, true);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

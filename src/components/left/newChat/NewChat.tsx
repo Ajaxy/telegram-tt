@@ -13,6 +13,7 @@ import NewChatStep2 from './NewChatStep2';
 import './NewChat.scss';
 
 export type OwnProps = {
+  isActive: boolean;
   isChannel?: boolean;
   content: LeftColumnContent;
   onContentChange: (content: LeftColumnContent) => void;
@@ -22,6 +23,7 @@ export type OwnProps = {
 const RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 
 const NewChat: FC<OwnProps> = ({
+  isActive,
   isChannel = false,
   content,
   onContentChange,
@@ -40,13 +42,14 @@ const NewChat: FC<OwnProps> = ({
       renderCount={RENDER_COUNT}
       activeKey={content}
     >
-      {() => {
+      {(isStepActive) => {
         switch (content) {
           case LeftColumnContent.NewChannelStep1:
           case LeftColumnContent.NewGroupStep1:
             return (
               <NewChatStep1
                 isChannel={isChannel}
+                isActive={isActive}
                 selectedMemberIds={newChatMemberIds}
                 onSelectedMemberIdsChange={setNewChatMemberIds}
                 onNextStep={handleNextStep}
@@ -58,6 +61,7 @@ const NewChat: FC<OwnProps> = ({
             return (
               <NewChatStep2
                 isChannel={isChannel}
+                isActive={isStepActive && isActive}
                 memberIds={newChatMemberIds}
                 onReset={onReset}
               />

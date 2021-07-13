@@ -16,6 +16,7 @@ import { selectChat } from '../../../modules/selectors';
 import { formatInteger } from '../../../util/textFormat';
 import { pick } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import AvatarEditable from '../../ui/AvatarEditable';
 import InputText from '../../ui/InputText';
@@ -30,6 +31,8 @@ import './Management.scss';
 type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -68,6 +71,8 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
   deleteChannel,
   closeManagement,
   openChat,
+  onClose,
+  isActive,
 }) => {
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const currentTitle = chat.title;
@@ -81,6 +86,8 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
   const imageHash = getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {

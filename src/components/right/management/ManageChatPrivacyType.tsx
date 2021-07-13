@@ -12,6 +12,7 @@ import { pick } from '../../../util/iteratees';
 import { isChatChannel } from '../../../modules/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import SafeLink from '../../common/SafeLink';
 import ListItem from '../../ui/ListItem';
@@ -26,6 +27,8 @@ type PrivacyType = 'private' | 'public';
 
 type OwnProps = {
   chatId: number;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -41,6 +44,8 @@ type DispatchProps = Pick<GlobalActions, (
 
 const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
+  onClose,
+  isActive,
   isChannel,
   progress,
   isUsernameAvailable,
@@ -59,6 +64,8 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
     (privacyType === 'public' && username && isUsernameAvailable)
     || (privacyType === 'private' && isPublic)
   );
+
+  useHistoryBack(isActive, onClose);
 
   useEffect(() => {
     if (privacyType && !privateLink) {

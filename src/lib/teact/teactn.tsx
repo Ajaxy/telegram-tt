@@ -46,10 +46,15 @@ function runCallbacks() {
 
 const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
-export function setGlobal(newGlobal?: GlobalState) {
+// `noThrottle = true` is used as a workaround for iOS gesture history navigation
+export function setGlobal(newGlobal?: GlobalState, noThrottle = false) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     currentGlobal = newGlobal;
-    runCallbacksThrottled();
+    if (!noThrottle) {
+      runCallbacksThrottled();
+    } else {
+      runCallbacks();
+    }
   }
 }
 
@@ -61,12 +66,12 @@ export function getDispatch() {
   return actions;
 }
 
-function onDispatch(name: string, payload?: ActionPayload) {
+function onDispatch(name: string, payload?: ActionPayload, noThrottle?: boolean) {
   if (reducers[name]) {
     reducers[name].forEach((reducer) => {
       const newGlobal = reducer(currentGlobal, actions, payload);
       if (newGlobal) {
-        setGlobal(newGlobal);
+        setGlobal(newGlobal, noThrottle);
       }
     });
   }
@@ -139,8 +144,8 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
   if (!reducers[name]) {
     reducers[name] = [];
 
-    actions[name] = (payload?: ActionPayload) => {
-      onDispatch(name, payload);
+    actions[name] = (payload?: ActionPayload, noThrottle = false) => {
+      onDispatch(name, payload, noThrottle);
     };
   }
 

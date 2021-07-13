@@ -5,14 +5,22 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiSession } from '../../../api/types';
+import { SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+
+type OwnProps = {
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+};
 
 type StateProps = {
   activeSessions: ApiSession[];
@@ -22,7 +30,10 @@ type DispatchProps = Pick<GlobalActions, (
   'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations'
 )>;
 
-const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
+const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   activeSessions,
   loadAuthorizations,
   terminateAuthorization,
@@ -51,6 +62,8 @@ const SettingsPrivacyActiveSessions: FC<StateProps & DispatchProps> = ({
   }, [activeSessions]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.PrivacyActiveSessions);
 
   function renderCurrentSession(session: ApiSession) {
     return (
@@ -140,7 +153,7 @@ function getDeviceEnvironment(session: ApiSession) {
   return `${session.deviceModel}${session.deviceModel ? ', ' : ''} ${session.platform} ${session.systemVersion}`;
 }
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       activeSessions: global.activeSessions,

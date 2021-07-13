@@ -12,6 +12,7 @@ import searchWords from '../../../util/searchWords';
 import { pick } from '../../../util/iteratees';
 import { getUserFullName, sortUserIds } from '../../../modules/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -20,6 +21,8 @@ import Loading from '../../ui/Loading';
 
 export type OwnProps = {
   filter: string;
+  isActive: boolean;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -33,6 +36,7 @@ type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'openChat'>;
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive, onReset,
   filter, usersById, contactIds, loadContactList, openChat, serverTimeOffset,
 }) => {
   // Due to the parent Transition, this component never gets unmounted,
@@ -42,6 +46,8 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
       loadContactList();
     });
   });
+
+  useHistoryBack(isActive, onReset);
 
   const handleClick = useCallback(
     (id: number) => {

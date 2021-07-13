@@ -8,6 +8,8 @@ import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
 import { selectTheme } from '../../selectors';
 
+const HISTORY_ANIMATION_DURATION = 450;
+
 subscribeToSystemThemeChange();
 
 addReducer('init', (global) => {
@@ -66,6 +68,21 @@ addReducer('clearAuthError', (global) => {
     ...global,
     authError: undefined,
   };
+});
+
+addReducer('disableHistoryAnimations', () => {
+  setTimeout(() => {
+    setGlobal({
+      ...getGlobal(),
+      shouldSkipHistoryAnimations: false,
+    });
+    document.body.classList.remove('no-animate');
+  }, HISTORY_ANIMATION_DURATION);
+
+  setGlobal({
+    ...getGlobal(),
+    shouldSkipHistoryAnimations: true,
+  }, true);
 });
 
 function subscribeToSystemThemeChange() {

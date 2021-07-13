@@ -10,12 +10,15 @@ import { selectChat } from '../../../modules/selectors';
 import { getUserFullName } from '../../../modules/helpers';
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: number;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -29,8 +32,12 @@ const ManageGroupRemovedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   usersById,
   updateChatMemberBannedRights,
+  onClose,
+  isActive,
 }) => {
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   const removedMembers = useMemo(() => {
     if (!chat || !chat.fullInfo || !chat.fullInfo.kickedMembers) {

@@ -8,6 +8,7 @@ import { ChatCreationProgress } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import InputText from '../../ui/InputText';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -19,6 +20,7 @@ import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 export type OwnProps = {
   isChannel?: boolean;
+  isActive: boolean;
   memberIds: number[];
   onReset: (forceReturnToChatList?: boolean) => void;
 };
@@ -35,6 +37,7 @@ const MAX_USERS_FOR_LEGACY_CHAT = 199; // Accounting for current user
 
 const NewChatStep2: FC<OwnProps & StateProps & DispatchProps> = ({
   isChannel,
+  isActive,
   memberIds,
   onReset,
   creationProgress,
@@ -43,6 +46,8 @@ const NewChatStep2: FC<OwnProps & StateProps & DispatchProps> = ({
   createChannel,
 }) => {
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset);
 
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');

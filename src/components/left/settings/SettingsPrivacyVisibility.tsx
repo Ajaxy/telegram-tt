@@ -9,6 +9,7 @@ import { ApiPrivacySettings, SettingsScreens } from '../../../types';
 
 import useLang from '../../../hooks/useLang';
 import { pick } from '../../../util/iteratees';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
@@ -16,7 +17,9 @@ import { getPrivacyKey } from './helper/privacy';
 
 type OwnProps = {
   screen: SettingsScreens;
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = Partial<ApiPrivacySettings> & {
@@ -28,7 +31,9 @@ type DispatchProps = Pick<GlobalActions, 'setPrivacyVisibility'>;
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
   screen,
+  isActive,
   onScreenSelect,
+  onReset,
   visibility,
   allowUserIds,
   allowChatIds,
@@ -80,6 +85,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
         return undefined;
     }
   }, [lang, screen]);
+
+  useHistoryBack(isActive, onReset, onScreenSelect, screen);
 
   const descriptionText = useMemo(() => {
     switch (screen) {

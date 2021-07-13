@@ -8,7 +8,9 @@ import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
-import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
+import {
+  IS_SAFARI, IS_TOUCH_ENV,
+} from '../../util/environment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';

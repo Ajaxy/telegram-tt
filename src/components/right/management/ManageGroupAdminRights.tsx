@@ -12,6 +12,7 @@ import { selectChat } from '../../../modules/selectors';
 import { getUserFullName, isChatBasicGroup, isChatChannel } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
@@ -26,6 +27,8 @@ type OwnProps = {
   selectedChatMemberId?: number;
   isPromotedByCurrentUser?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -49,6 +52,8 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
   isChannel,
   isFormFullyDisabled,
   updateChatAdmin,
+  onClose,
+  isActive,
 }) => {
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
   const [isTouched, setIsTouched] = useState(false);
@@ -56,6 +61,8 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   const selectedChatMember = useMemo(() => {
     if (!chat.fullInfo || !chat.fullInfo.adminMembers) {
