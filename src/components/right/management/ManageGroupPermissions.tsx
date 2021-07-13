@@ -10,6 +10,7 @@ import { GlobalActions } from '../../../global/types';
 import useLang from '../../../hooks/useLang';
 import { selectChat } from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
@@ -21,6 +22,8 @@ type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
   onChatMemberSelect: (memberId: number, isPromotedByCurrentUser?: boolean) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -61,11 +64,15 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   currentUserId,
   updateChatDefaultBannedRights,
+  onClose,
+  isActive,
 }) => {
   const [permissions, setPermissions] = useState<ApiChatBannedRights>({});
   const [havePermissionChanged, setHavePermissionChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   const handleRemovedUsersClick = useCallback(() => {
     onScreenSelect(ManagementScreens.GroupRemovedUsers);

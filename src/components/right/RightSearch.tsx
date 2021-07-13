@@ -23,6 +23,7 @@ import useLang from '../../hooks/useLang';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
@@ -34,6 +35,8 @@ import './RightSearch.scss';
 export type OwnProps = {
   chatId: number;
   threadId: number;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -56,6 +59,8 @@ interface Result {
 const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   threadId,
+  onClose,
+  isActive,
   chat,
   messagesById,
   query,
@@ -124,6 +129,8 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       </ListItem>
     );
   };
+
+  useHistoryBack(isActive, onClose);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

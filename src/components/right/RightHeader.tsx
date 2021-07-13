@@ -36,6 +36,7 @@ type OwnProps = {
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
+  shouldSkipAnimation?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: () => void;
@@ -102,6 +103,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   searchTextMessagesLocal,
   toggleManagement,
   openHistoryCalendar,
+  shouldSkipAnimation,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
@@ -278,7 +280,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const buttonClassName = buildClassName(
     'animated-close-icon',
-    shouldSkipTransition && 'no-transition',
+    (shouldSkipTransition || shouldSkipAnimation) && 'no-transition',
   );
 
   // Add class in the next AF to synchronize with animation with Transition components
@@ -299,7 +301,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <div ref={backButtonRef} className={buttonClassName} />
       </Button>
       <Transition
-        name={shouldSkipTransition ? 'none' : 'slide-fade'}
+        name={(shouldSkipTransition || shouldSkipAnimation) ? 'none' : 'slide-fade'}
         activeKey={renderingContentKey}
       >
         {renderHeaderContent}

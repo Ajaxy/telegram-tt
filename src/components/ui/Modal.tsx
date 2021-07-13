@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useRef,
+} from '../../lib/teact/teact';
 
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';
@@ -7,6 +9,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import useShowTransition from '../../hooks/useShowTransition';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Button from './Button';
 import Portal from './Portal';
@@ -28,20 +31,29 @@ type OwnProps = {
   onEnter?: () => void;
 };
 
-const Modal: FC<OwnProps> = (props) => {
+type StateProps = {
+  shouldSkipHistoryAnimations?: boolean;
+};
+
+const Modal: FC<OwnProps & StateProps> = ({
+  title,
+  className,
+  isOpen,
+  header,
+  hasCloseButton,
+  noBackdrop,
+  children,
+  onClose,
+  onCloseAnimationEnd,
+  onEnter,
+  shouldSkipHistoryAnimations,
+}) => {
   const {
-    title,
-    className,
-    isOpen,
-    header,
-    hasCloseButton,
-    noBackdrop,
-    children,
-    onClose,
-    onCloseAnimationEnd,
-    onEnter,
-  } = props;
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
+    shouldRender,
+    transitionClassNames,
+  } = useShowTransition(
+    isOpen, onCloseAnimationEnd, shouldSkipHistoryAnimations, undefined, shouldSkipHistoryAnimations,
+  );
   // eslint-disable-next-line no-null/no-null
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +61,8 @@ const Modal: FC<OwnProps> = (props) => {
     ? captureKeyboardListeners({ onEsc: onClose, onEnter })
     : undefined), [isOpen, onClose, onEnter]);
   useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
+
+  useHistoryBack(isOpen, onClose);
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', isOpen);

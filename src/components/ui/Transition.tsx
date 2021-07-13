@@ -13,7 +13,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 
 import './Transition.scss';
 
-type ChildrenFn = (isActive: boolean, isFrom: boolean) => any;
+type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => any;
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
@@ -239,7 +239,9 @@ const Transition: FC<OwnProps> = ({
     const render = renders[key];
 
     return (
-      typeof render === 'function' ? <div key={key}>{render(key === activeKey, key === prevActiveKey)}</div> : undefined
+      typeof render === 'function'
+        ? <div key={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
+        : undefined
     );
   });
 

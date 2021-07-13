@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiMediaFormat } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
-import { ProfileEditProgress } from '../../../types';
+import { ProfileEditProgress, SettingsScreens } from '../../../types';
 
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
@@ -21,6 +21,13 @@ import Spinner from '../../ui/Spinner';
 import InputText from '../../ui/InputText';
 import renderText from '../../common/helpers/renderText';
 import UsernameInput from '../../common/UsernameInput';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+
+type OwnProps = {
+  isActive: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+};
 
 type StateProps = {
   currentAvatarHash?: string;
@@ -43,7 +50,10 @@ const MAX_BIO_LENGTH = 70;
 const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
 const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
-const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
+const SettingsEditProfile: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   currentAvatarHash,
   currentFirstName,
   currentLastName,
@@ -55,6 +65,8 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
   updateProfile,
   checkUsername,
 }) => {
+  const lang = useLang();
+
   const [isUsernameTouched, setIsUsernameTouched] = useState(false);
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -77,6 +89,8 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
 
     return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
   }, [photo, isProfileFieldsTouched, isUsernameError, isUsernameAvailable]);
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.EditProfile);
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -165,8 +179,6 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
     updateProfile,
   ]);
 
-  const lang = useLang();
-
   return (
     <div className="settings-fab-wrapper">
       <div className="settings-content custom-scroll">
@@ -242,7 +254,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentUserId } = global;
     const { progress, isUsernameAvailable } = global.profileEdit || {};

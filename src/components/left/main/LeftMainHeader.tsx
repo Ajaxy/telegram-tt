@@ -31,6 +31,7 @@ import './LeftMainHeader.scss';
 type OwnProps = {
   content: LeftColumnContent;
   contactsFilter: string;
+  shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
   onSelectContacts: () => void;
@@ -71,6 +72,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onReset,
   searchQuery,
   isLoading,
+  shouldSkipTransition,
   currentUserId,
   globalSearchChatId,
   searchDate,
@@ -118,10 +120,15 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
-        <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
+        <div className={buildClassName(
+          'animated-menu-icon',
+          !hasMenu && 'state-back',
+          shouldSkipTransition && 'no-animation',
+        )}
+        />
       </Button>
     );
-  }, [hasMenu, lang, onReset]);
+  }, [hasMenu, lang, onReset, shouldSkipTransition]);
 
   const handleSearchFocus = useCallback(() => {
     if (!searchQuery) {

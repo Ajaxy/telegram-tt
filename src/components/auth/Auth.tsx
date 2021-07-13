@@ -6,6 +6,7 @@ import { GlobalActions, GlobalState } from '../../global/types';
 import '../../modules/actions/initial';
 import { pick } from '../../util/iteratees';
 import { PLATFORM_ENV } from '../../util/environment';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
@@ -17,13 +18,30 @@ import AuthQrCode from './AuthQrCode';
 import './Auth.scss';
 
 type StateProps = Pick<GlobalState, 'authState'>;
-type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi'>;
+type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi' | 'returnToAuthPhoneNumber' | 'goToAuthQrCode'>;
 
-const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => {
+const Auth: FC<StateProps & DispatchProps> = ({
+  authState, reset, initApi, returnToAuthPhoneNumber, goToAuthQrCode,
+}) => {
   useEffect(() => {
     reset();
     initApi();
   }, [reset, initApi]);
+
+  const isMobile = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
+
+  const handleChangeAuthorizationMethod = () => {
+    if (!isMobile) {
+      goToAuthQrCode();
+    } else {
+      returnToAuthPhoneNumber();
+    }
+  };
+
+  useHistoryBack(
+    (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
+    || (isMobile && authState === 'authorizationStateWaitQrCode'), handleChangeAuthorizationMethod,
+  );
 
   switch (authState) {
     case 'authorizationStateWaitCode':
@@ -37,7 +55,7 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
     case 'authorizationStateWaitQrCode':
       return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
     default:
-      return PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android'
+      return isMobile
         ? <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>
         : <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
   }
@@ -45,5 +63,5 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, reset, initApi }) => 
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authState']),
-  (global, actions): DispatchProps => pick(actions, ['reset', 'initApi']),
+  (global, actions): DispatchProps => pick(actions, ['reset', 'initApi', 'returnToAuthPhoneNumber', 'goToAuthQrCode']),
 )(Auth));

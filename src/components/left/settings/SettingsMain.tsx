@@ -8,12 +8,15 @@ import { selectUser } from '../../../modules/selectors';
 import { getUserFullName } from '../../../modules/helpers';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -21,10 +24,14 @@ type StateProps = {
 };
 
 const SettingsMain: FC<OwnProps & StateProps> = ({
+  isActive,
   onScreenSelect,
+  onReset,
   currentUser,
 }) => {
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Main);
 
   return (
     <div className="settings-content custom-scroll">

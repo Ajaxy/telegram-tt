@@ -12,6 +12,7 @@ import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
@@ -21,7 +22,9 @@ import SettingsStickerSet from './SettingsStickerSet';
 import StickerSetModal from '../../common/StickerSetModal.async';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = Pick<ISettings, (
@@ -52,7 +55,9 @@ const ANIMATION_LEVEL_OPTIONS = [
 ];
 
 const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
   onScreenSelect,
+  onReset,
   stickerSetIds,
   stickerSetsById,
   messageTextSize,
@@ -119,6 +124,8 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   const stickerSets = stickerSetIds && stickerSetIds.map((id: string) => {
     return stickerSetsById && stickerSetsById[id] && stickerSetsById[id].installedDate ? stickerSetsById[id] : false;
   }).filter<ApiStickerSet>(Boolean as any);
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
 
   return (
     <div className="settings-content custom-scroll">

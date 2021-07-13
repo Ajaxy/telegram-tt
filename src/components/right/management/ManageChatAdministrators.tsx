@@ -9,6 +9,7 @@ import { getUserFullName, isChatChannel } from '../../../modules/helpers';
 
 import { selectChat } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -17,6 +18,8 @@ type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
   onChatMemberSelect: (memberId: number, isPromotedByCurrentUser?: boolean) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -33,8 +36,12 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   usersById,
   onScreenSelect,
   onChatMemberSelect,
+  onClose,
+  isActive,
 }) => {
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   function handleRecentActionsClick() {
     onScreenSelect(ManagementScreens.GroupRecentActions);

@@ -428,7 +428,7 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
   } else if (key === 'style') {
     element.style.cssText = value;
   } else if (key.startsWith('on')) {
-    addEventListener(element, key, value);
+    addEventListener(element, key, value, key.endsWith('Capture'));
   } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
@@ -444,7 +444,7 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   } else if (key === 'style') {
     element.style.cssText = '';
   } else if (key.startsWith('on')) {
-    removeEventListener(element, key, value);
+    removeEventListener(element, key, value, key.endsWith('Capture'));
   } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
     element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {

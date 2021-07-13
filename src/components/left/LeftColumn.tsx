@@ -22,6 +22,7 @@ type StateProps = {
   searchQuery?: string;
   searchDate?: number;
   activeChatFolder: number;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -47,6 +48,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   searchQuery,
   searchDate,
   activeChatFolder,
+  shouldSkipHistoryAnimations,
   setGlobalSearchQuery,
   setGlobalSearchChatId,
   resetChatCreation,
@@ -80,11 +82,17 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   }
 
   const handleReset = useCallback((forceReturnToChatList?: boolean) => {
-    if (
-      content === LeftColumnContent.NewGroupStep2
+    if (content === LeftColumnContent.NewGroupStep2
       && !forceReturnToChatList
     ) {
       setContent(LeftColumnContent.NewGroupStep1);
+      return;
+    }
+
+    if (content === LeftColumnContent.NewChannelStep2
+      && !forceReturnToChatList
+    ) {
+      setContent(LeftColumnContent.NewChannelStep1);
       return;
     }
 
@@ -205,8 +213,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       setLastResetTime(Date.now());
     }, RESET_TRANSITION_DELAY_MS);
   }, [
-    content, activeChatFolder, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId, resetChatCreation,
-    settingsScreen,
+    content, activeChatFolder, settingsScreen, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId,
+    resetChatCreation,
   ]);
 
   const handleSearchQuery = useCallback((query: string) => {
@@ -220,7 +228,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     if (query !== searchQuery) {
       setGlobalSearchQuery({ query });
     }
-  }, [content, setGlobalSearchQuery, searchQuery]);
+  }, [content, searchQuery, setGlobalSearchQuery]);
 
   useEffect(
     () => (content !== LeftColumnContent.ChatList || activeChatFolder === 0
@@ -237,10 +245,15 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [clearTwoFaError, loadPasswordInfo, settingsScreen]);
 
+  const handleSettingsScreenSelect = (screen: SettingsScreens) => {
+    setContent(LeftColumnContent.Settings);
+    setSettingsScreen(screen);
+  };
+
   return (
     <Transition
       id="LeftColumn"
-      name={LAYERS_ANIMATION_NAME}
+      name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
       shouldCleanup
@@ -253,20 +266,24 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
               <ArchivedChats
                 isActive={isActive}
                 onReset={handleReset}
+                onContentChange={setContent}
               />
             );
           case ContentType.Settings:
             return (
               <Settings
+                isActive={isActive}
                 currentScreen={settingsScreen}
-                onScreenSelect={setSettingsScreen}
+                onScreenSelect={handleSettingsScreenSelect}
                 onReset={handleReset}
+                shouldSkipTransition={shouldSkipHistoryAnimations}
               />
             );
           case ContentType.NewChannel:
             return (
               <NewChat
                 key={lastResetTime}
+                isActive={isActive}
                 isChannel
                 content={content}
                 onContentChange={setContent}
@@ -277,6 +294,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
             return (
               <NewChat
                 key={lastResetTime}
+                isActive={isActive}
                 content={content}
                 onContentChange={setContent}
                 onReset={handleReset}
@@ -292,6 +310,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
                 onContentChange={setContent}
                 onSearchQuery={handleSearchQuery}
                 onReset={handleReset}
+                shouldSkipTransition={shouldSkipHistoryAnimations}
               />
             );
         }
@@ -310,8 +329,11 @@ export default memo(withGlobal(
       chatFolders: {
         activeChatFolder,
       },
+      shouldSkipHistoryAnimations,
     } = global;
-    return { searchQuery: query, searchDate: date, activeChatFolder };
+    return {
+      searchQuery: query, searchDate: date, activeChatFolder, shouldSkipHistoryAnimations,
+    };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'setGlobalSearchQuery', 'setGlobalSearchChatId', 'resetChatCreation', 'setGlobalSearchDate',

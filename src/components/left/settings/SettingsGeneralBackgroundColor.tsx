@@ -15,13 +15,16 @@ import { captureEvents, RealTouchEvent } from '../../../util/captureEvents';
 import { selectTheme } from '../../../modules/selectors';
 import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import InputText from '../../ui/InputText';
 
 import './SettingsGeneralBackgroundColor.scss';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -51,6 +54,9 @@ const PREDEFINED_COLORS = [
 ];
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   theme,
   backgroundColor,
   setThemeSettings,
@@ -194,6 +200,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
     'SettingsGeneralBackgroundColor settings-content custom-scroll',
     isDragging && 'is-dragging',
   );
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.GeneralChatBackgroundColor);
 
   return (
     <div ref={containerRef} className={className}>

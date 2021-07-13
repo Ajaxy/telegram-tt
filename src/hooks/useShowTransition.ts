@@ -15,6 +15,7 @@ export default (
   // СSS class should be added in a separate tick to turn on CSS transition.
   const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noOpenTransition);
 
+
   if (isOpen) {
     setIsClosed(false);
     setHasOpenClassName(true);
@@ -39,12 +40,14 @@ export default (
     }
   }
 
+  // `noCloseTransition`, when set to true, should remove the open class immediately
+  const shouldHaveOpenClassName = hasOpenClassName && !(noCloseTransition && !isOpen);
   const isClosing = Boolean(closeTimeoutRef.current);
   const shouldRender = isOpen || isClosing;
   const transitionClassNames = buildClassName(
     className && 'opacity-transition',
     className,
-    hasOpenClassName && 'open',
+    shouldHaveOpenClassName && 'open',
     shouldRender && 'shown',
     isClosing && 'closing',
   );

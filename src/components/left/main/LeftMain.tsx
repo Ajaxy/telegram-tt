@@ -31,6 +31,7 @@ type OwnProps = {
   searchQuery?: string;
   searchDate?: number;
   contactsFilter: string;
+  shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onReset: () => void;
@@ -49,6 +50,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   searchQuery,
   searchDate,
   contactsFilter,
+  shouldSkipTransition,
   onSearchQuery,
   onContentChange,
   onReset,
@@ -140,12 +142,13 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onSelectContacts={handleSelectContacts}
         onSelectArchived={handleSelectArchived}
         onReset={onReset}
+        shouldSkipTransition={shouldSkipTransition}
       />
       <ShowTransition isOpen={isConnecting} isCustom className="connection-state-wrapper opacity-transition slow">
         {() => <ConnectionState />}
       </ShowTransition>
       <Transition
-        name="zoom-fade"
+        name={shouldSkipTransition ? 'none' : 'zoom-fade'}
         renderCount={TRANSITION_RENDER_COUNT}
         activeKey={content}
         shouldCleanup
@@ -166,7 +169,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
                 />
               );
             case LeftColumnContent.Contacts:
-              return <ContactList filter={contactsFilter} />;
+              return <ContactList filter={contactsFilter} isActive={isActive} onReset={onReset} />;
             default:
               return undefined;
           }

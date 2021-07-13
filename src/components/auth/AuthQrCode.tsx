@@ -9,7 +9,6 @@ import { pick } from '../../util/iteratees';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>;
 type DispatchProps = Pick<GlobalActions, 'returnToAuthPhoneNumber'>;
@@ -17,7 +16,10 @@ type DispatchProps = Pick<GlobalActions, 'returnToAuthPhoneNumber'>;
 const DATA_PREFIX = 'tg://login?token=';
 
 const AuthCode: FC<StateProps & DispatchProps> = ({
-  connectionState, authState, authQrCode, returnToAuthPhoneNumber,
+  connectionState,
+  authState,
+  authQrCode,
+  returnToAuthPhoneNumber,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
@@ -40,8 +42,6 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
       size: 280,
     }, container);
   }, [connectionState, authQrCode]);
-
-  useHistoryBack(returnToAuthPhoneNumber);
 
   const isAuthReady = authState === 'authorizationStateWaitQrCode';
 

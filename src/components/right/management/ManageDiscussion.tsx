@@ -12,6 +12,7 @@ import { selectChat } from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
 import getAnimationData from '../../common/helpers/animatedAssets';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
@@ -26,6 +27,8 @@ import { isChatChannel } from '../../../modules/helpers';
 type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -40,6 +43,8 @@ type DispatchProps = Pick<GlobalActions, 'loadGroupsForDiscussion' | 'linkDiscus
 
 const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
+  onClose,
+  isActive,
   chatId,
   chatsByIds,
   linkedChat,
@@ -58,6 +63,8 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
   const lang = useLang();
   const linkedChatId = linkedChat && linkedChat.id;
+
+  useHistoryBack(isActive, onClose);
 
   useEffect(() => {
     loadGroupsForDiscussion();

@@ -4,11 +4,13 @@ import React, {
 import { withGlobal } from '../../../../lib/teact/teactn';
 
 import { ApiSticker } from '../../../../api/types';
+import { SettingsScreens } from '../../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../../util/environment';
 import { selectAnimatedEmoji } from '../../../../modules/selectors';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
@@ -25,6 +27,10 @@ type OwnProps = {
   shouldConfirm?: boolean;
   clearError?: NoneToVoidFunction;
   onSubmit: (value?: string) => void;
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+  screen: SettingsScreens;
 };
 
 type StateProps = {
@@ -42,6 +48,10 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   shouldConfirm,
   clearError,
   onSubmit,
+  isActive,
+  onScreenSelect,
+  onReset,
+  screen,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,6 +95,8 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   };
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, screen);
 
   return (
     <div className="settings-content two-fa custom-scroll">

@@ -35,6 +35,7 @@ import {
   selectIsRightColumnShown,
   selectPinnedIds,
   selectTheme,
+  selectThreadOriginChat,
 } from '../../modules/selectors';
 import { getCanPostInChat, getMessageSendingRestrictionReason, isChatPrivate } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -45,6 +46,7 @@ import useWindowSize from '../../hooks/useWindowSize';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -64,6 +66,7 @@ type StateProps = {
   messageListType?: MessageListType;
   isPrivate?: boolean;
   isPinnedMessageList?: boolean;
+  isScheduledMessageList?: boolean;
   canPost?: boolean;
   messageSendingRestrictionReason?: string;
   hasPinnedOrAudioMessage?: boolean;
@@ -78,9 +81,12 @@ type StateProps = {
   isMobileSearchActive?: boolean;
   isSelectModeActive?: boolean;
   animationLevel?: number;
+  originChatId?: number;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'unpinAllMessages' | 'loadUser'>;
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'unpinAllMessages' | 'loadUser' |
+'closeLocalTextSearch' | 'exitMessageSelectMode'>;
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
@@ -94,6 +100,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   messageListType,
   isPrivate,
   isPinnedMessageList,
+  isScheduledMessageList,
   canPost,
   messageSendingRestrictionReason,
   hasPinnedOrAudioMessage,
@@ -108,9 +115,13 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   isMobileSearchActive,
   isSelectModeActive,
   animationLevel,
+  originChatId,
+  shouldSkipHistoryAnimations,
   openChat,
   unpinAllMessages,
   loadUser,
+  closeLocalTextSearch,
+  exitMessageSelectMode,
 }) => {
   const { width: windowWidth } = useWindowSize();
 
@@ -223,6 +234,31 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     renderingCanPost && isNotchShown && !isSelectModeActive && 'with-notch',
   );
 
+  const closeChat = () => {
+    if (renderingThreadId !== MAIN_THREAD_ID) {
+      openChat({ id: originChatId, threadId: MAIN_THREAD_ID }, true);
+    } else if (isPinnedMessageList || isScheduledMessageList) {
+      openChat({ id: chatId, type: 'thread' });
+    } else {
+      openChat({ id: undefined }, true);
+    }
+  };
+
+  useHistoryBack(renderingChatId && renderingThreadId, closeChat, openChat, {
+    id: chatId,
+    threadId: MAIN_THREAD_ID,
+  });
+
+  const isDiscussion = renderingChatId && renderingThreadId !== MAIN_THREAD_ID;
+
+  useHistoryBack(isDiscussion || isPinnedMessageList || isScheduledMessageList, closeChat, openChat, {
+    id: chatId,
+    threadId: renderingThreadId,
+  });
+
+  useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
+  useHistoryBack(isSelectModeActive, exitMessageSelectMode);
+
   return (
     <div
       id="MiddleColumn"
@@ -256,7 +292,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               messageListType={renderingMessageListType}
             />
             <Transition
-              name={animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
+              name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
               activeKey={renderingMessageListType === 'thread' && renderingThreadId === MAIN_THREAD_ID ? 1 : 2}
               shouldCleanup
             >
@@ -371,15 +407,19 @@ export default memo(withGlobal(
     const canPost = chat && getCanPostInChat(chat, threadId);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
+    const isScheduledMessageList = messageListType === 'scheduled';
+    const originChat = selectThreadOriginChat(global, chatId, threadId);
 
     return {
       ...state,
       chatId,
       threadId,
       messageListType,
+      originChatId: originChat ? originChat.id : chatId,
       isPrivate: isChatPrivate(chatId),
       canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_SINGLE_COLUMN_LAYOUT),
       isPinnedMessageList,
+      isScheduledMessageList,
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedOrAudioMessage: (
         threadId !== MAIN_THREAD_ID
@@ -387,9 +427,10 @@ export default memo(withGlobal(
         || Boolean(audioChatId && audioMessageId)
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
+      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'openChat', 'unpinAllMessages', 'loadUser',
+    'openChat', 'unpinAllMessages', 'loadUser', 'closeLocalTextSearch', 'exitMessageSelectMode',
   ]),
 )(MiddleColumn));

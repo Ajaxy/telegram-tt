@@ -11,6 +11,7 @@ import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
 import { getUserFullName, sortChatIds } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import Picker from '../../common/Picker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -18,6 +19,7 @@ import Button from '../../ui/Button';
 
 export type OwnProps = {
   isChannel?: boolean;
+  isActive: boolean;
   selectedMemberIds: number[];
   onSelectedMemberIdsChange: (ids: number[]) => void;
   onNextStep: () => void;
@@ -41,6 +43,7 @@ const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   isChannel,
+  isActive,
   selectedMemberIds,
   onSelectedMemberIdsChange,
   onNextStep,
@@ -63,6 +66,10 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
       loadContactList();
     });
   });
+
+  const lang = useLang();
+
+  useHistoryBack(isActive, onReset);
 
   const handleFilterChange = useCallback((query: string) => {
     setGlobalSearchQuery({ query });
@@ -107,8 +114,6 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
       onNextStep();
     }
   }, [selectedMemberIds.length, isChannel, setGlobalSearchQuery, onNextStep]);
-
-  const lang = useLang();
 
   return (
     <div className="NewChat step-1">

@@ -65,6 +65,7 @@ export type GlobalState = {
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
   uiReadyState: 0 | 1 | 2;
+  shouldSkipHistoryAnimations?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
   lastSyncTime?: number;
@@ -403,7 +404,8 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
-  'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
+  'toggleSafeLinkModal' | 'disableHistoryAnimations' | 'openHistoryCalendar' | 'closeHistoryCalendar' |
+  'disableContextMenuHint' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |

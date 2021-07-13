@@ -28,7 +28,7 @@ type OwnProps = {
   children: any;
 };
 
-type StateProps = Pick<GlobalState, 'uiReadyState'> & {
+type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
   hasCustomBackground?: boolean;
   hasCustomBackgroundColor: boolean;
   isRightColumnShown?: boolean;
@@ -82,6 +82,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   hasCustomBackground,
   hasCustomBackgroundColor,
   isRightColumnShown,
+  shouldSkipHistoryAnimations,
   setIsUiReady,
 }) => {
   const [isReady, markReady] = useFlag();
@@ -126,7 +127,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div id="UiLoader">
       {children}
-      {shouldRenderMask && (
+      {shouldRenderMask && !shouldSkipHistoryAnimations && (
         <div className={buildClassName('mask', transitionClassNames)}>
           {page === 'main' ? (
             <>
@@ -156,6 +157,7 @@ export default withGlobal<OwnProps>(
     const { background, backgroundColor } = global.settings.themes[theme] || {};
 
     return {
+      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       uiReadyState: global.uiReadyState,
       hasCustomBackground: Boolean(background),
       hasCustomBackgroundColor: Boolean(backgroundColor),

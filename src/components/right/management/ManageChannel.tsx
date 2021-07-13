@@ -22,12 +22,15 @@ import Spinner from '../../ui/Spinner';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import './Management.scss';
 
 type OwnProps = {
   chatId: number;
   onScreenSelect: (screen: ManagementScreens) => void;
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -56,6 +59,8 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
   leaveChannel,
   deleteChannel,
   openChat,
+  onClose,
+  isActive,
 }) => {
   const currentTitle = chat ? (chat.title || '') : '';
   const currentAbout = chat && chat.fullInfo ? (chat.fullInfo.about || '') : '';
@@ -70,6 +75,8 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
   const imageHash = chat && getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {

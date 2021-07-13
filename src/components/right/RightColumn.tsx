@@ -17,6 +17,7 @@ import {
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import RightHeader from './RightHeader';
 import Profile from './Profile';
@@ -35,6 +36,7 @@ type StateProps = {
   threadId?: number;
   currentProfileUserId?: number;
   isChatSelected: boolean;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -67,6 +69,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   setStickerSearchQuery,
   setGifSearchQuery,
   closePollResults,
+  shouldSkipHistoryAnimations,
 }) => {
   const { width: windowWidth } = useWindowSize();
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
@@ -88,21 +91,21 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
 
-  const close = useCallback(() => {
+  const close = useCallback((shouldScrollUp = true) => {
     switch (contentKey) {
       case RightColumnContent.ChatInfo:
-        if (isScrolledDown) {
+        if (isScrolledDown && shouldScrollUp) {
           setProfileState(ProfileState.Profile);
           break;
         }
-        toggleChatInfo();
+        toggleChatInfo(undefined, true);
         break;
       case RightColumnContent.UserInfo:
-        if (isScrolledDown) {
+        if (isScrolledDown && shouldScrollUp) {
           setProfileState(ProfileState.Profile);
           break;
         }
-        openUserInfo({ id: undefined });
+        openUserInfo({ id: undefined }, true);
         break;
       case RightColumnContent.Management: {
         switch (managementScreen) {
@@ -139,9 +142,11 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         break;
       }
       case RightColumnContent.StickerSearch:
-      case RightColumnContent.GifSearch: {
         blurSearchInput();
         setStickerSearchQuery({ query: undefined });
+        break;
+      case RightColumnContent.GifSearch: {
+        blurSearchInput();
         setGifSearchQuery({ query: undefined });
         break;
       }
@@ -187,8 +192,13 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [contentKey, chatId]);
 
+
+  useHistoryBack(isChatSelected && (contentKey === RightColumnContent.ChatInfo
+    || contentKey === RightColumnContent.UserInfo || contentKey === RightColumnContent.Management),
+  () => close(false), toggleChatInfo);
+
   // eslint-disable-next-line consistent-return
-  function renderContent() {
+  function renderContent(isActive: boolean) {
     if (renderingContentKey === -1) {
       return undefined;
     }
@@ -206,7 +216,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           />
         );
       case RightColumnContent.Search:
-        return <RightSearch chatId={chatId!} threadId={threadId!} />;
+        return <RightSearch chatId={chatId!} threadId={threadId!} onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.Management:
         return (
           <Management
@@ -216,14 +226,17 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
             selectedChatMemberId={selectedChatMemberId}
             onScreenSelect={setManagementScreen}
             onChatMemberSelect={handleSelectChatMember}
+            isActive={isOpen && isActive}
+            onClose={close}
           />
         );
+
       case RightColumnContent.StickerSearch:
-        return <StickerSearch />;
+        return <StickerSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.GifSearch:
-        return <GifSearch />;
+        return <GifSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.PollResults:
-        return <PollResults />;
+        return <PollResults onClose={close} isActive={isOpen && isActive} />;
     }
   }
 
@@ -248,9 +261,10 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           profileState={profileState}
           managementScreen={managementScreen}
           onClose={close}
+          shouldSkipAnimation={shouldSkipTransition || shouldSkipHistoryAnimations}
         />
         <Transition
-          name={shouldSkipTransition ? 'none' : 'zoom-fade'}
+          name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoom-fade'}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
@@ -274,6 +288,7 @@ export default memo(withGlobal(
       threadId,
       currentProfileUserId: global.users.selectedId,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
+      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

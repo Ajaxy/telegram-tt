@@ -8,6 +8,7 @@ import {
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { selectCurrentMessageList } from '../../selectors';
 import { buildChatThreadKey } from '../../helpers';
+import { GlobalState } from '../../../global/types';
 
 addReducer('openLocalTextSearch', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
@@ -18,16 +19,7 @@ addReducer('openLocalTextSearch', (global) => {
   return updateLocalTextSearch(global, chatId, threadId, true);
 });
 
-addReducer('closeLocalTextSearch', (global) => {
-  const { chatId, threadId } = selectCurrentMessageList(global) || {};
-  if (!chatId || !threadId) {
-    return undefined;
-  }
-
-  global = updateLocalTextSearch(global, chatId, threadId, false);
-  global = replaceLocalTextSearchResults(global, chatId, threadId, undefined);
-  return global;
-});
+addReducer('closeLocalTextSearch', closeLocalTextSearch);
 
 addReducer('setLocalTextSearchQuery', (global, actions, payload) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
@@ -57,3 +49,14 @@ addReducer('setLocalMediaSearchType', (global, actions, payload) => {
   const { mediaType } = payload!;
   return updateLocalMediaSearchType(global, chatId, mediaType);
 });
+
+export function closeLocalTextSearch(global: GlobalState): GlobalState {
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
+    return global;
+  }
+
+  global = updateLocalTextSearch(global, chatId, threadId, false);
+  global = replaceLocalTextSearchResults(global, chatId, threadId, undefined);
+  return global;
+}

@@ -49,6 +49,7 @@ type StateProps = {
   audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -75,6 +76,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   audioMessage,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
+  shouldSkipHistoryAnimations,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
@@ -98,15 +100,17 @@ const Main: FC<StateProps & DispatchProps> = ({
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
-  } = useShowTransition(!isLeftColumnShown, undefined, true);
+  } = useShowTransition(!isLeftColumnShown, undefined, true, undefined, shouldSkipHistoryAnimations);
 
   const {
     transitionClassNames: rightColumnTransitionClassNames,
-  } = useShowTransition(isRightColumnShown, undefined, true);
+  } = useShowTransition(isRightColumnShown, undefined, true, undefined, shouldSkipHistoryAnimations);
+
 
   const className = buildClassName(
     middleColumnTransitionClassNames.replace(/([\w-]+)/g, 'middle-column-$1'),
     rightColumnTransitionClassNames.replace(/([\w-]+)/g, 'right-column-$1'),
+    shouldSkipHistoryAnimations && 'history-animation-disabled',
   );
 
   useEffect(() => {
@@ -230,6 +234,7 @@ export default memo(withGlobal(
       audioMessage,
       safeLinkModalUrl: global.safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
+      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

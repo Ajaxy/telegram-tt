@@ -5,7 +5,7 @@ import { withGlobal } from '../../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../../global/types';
 import { ApiChatFolder, ApiChat, ApiUser } from '../../../../api/types';
-import { NotifyException, NotifySettings } from '../../../../types';
+import { NotifyException, NotifySettings, SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { pick } from '../../../../util/iteratees';
@@ -14,6 +14,7 @@ import { throttle } from '../../../../util/schedulers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
 import { getFolderDescriptionText } from '../../../../modules/helpers';
 import useLang from '../../../../hooks/useLang';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import ListItem from '../../../ui/ListItem';
 import Button from '../../../ui/Button';
@@ -23,6 +24,9 @@ import AnimatedSticker from '../../../common/AnimatedSticker';
 type OwnProps = {
   onCreateFolder: () => void;
   onEditFolder: (folder: ApiChatFolder) => void;
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -44,6 +48,9 @@ const MAX_ALLOWED_FOLDERS = 10;
 const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   onCreateFolder,
   onEditFolder,
+  isActive,
+  onScreenSelect,
+  onReset,
   chatsById,
   usersById,
   orderedFolderIds,
@@ -89,6 +96,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [foldersById, showDialog, onCreateFolder]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Folders);
 
   const userFolders = useMemo(() => {
     if (!orderedFolderIds) {

@@ -18,12 +18,18 @@ import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import GifButton from '../common/GifButton';
 import Loading from '../ui/Loading';
 
 import './GifSearch.scss';
+
+type OwnProps = {
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
+};
 
 type StateProps = {
   query?: string;
@@ -37,7 +43,9 @@ type DispatchProps = Pick<GlobalActions, 'searchMoreGifs' | 'sendMessage' | 'set
 const PRELOAD_BACKWARDS = 96; // GIF Search bot results are multiplied by 24
 const INTERSECTION_DEBOUNCE = 300;
 
-const GifSearch: FC<StateProps & DispatchProps> = ({
+const GifSearch: FC<OwnProps & StateProps & DispatchProps> = ({
+  onClose,
+  isActive,
   query,
   results,
   chat,
@@ -66,6 +74,8 @@ const GifSearch: FC<StateProps & DispatchProps> = ({
   }, [canSendGifs, sendMessage, setGifSearchQuery]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onClose);
 
   function renderContent() {
     if (query === undefined) {

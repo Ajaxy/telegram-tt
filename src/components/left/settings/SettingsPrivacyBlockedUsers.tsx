@@ -5,6 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiUser } from '../../../api/types';
+import { SettingsScreens } from '../../../types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
@@ -15,11 +16,18 @@ import {
 import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import Avatar from '../../common/Avatar';
 import Loading from '../../ui/Loading';
+
+type OwnProps = {
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+};
 
 type StateProps = {
   chatsByIds: Record<number, ApiChat>;
@@ -29,7 +37,10 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'unblockContact'>;
 
-const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
+const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   chatsByIds,
   usersByIds,
   blockedIds,
@@ -40,6 +51,8 @@ const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
   }, [unblockContact]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.PrivacyBlockedUsers);
 
   function renderContact(contactId: number, i: number, viewportOffset: number) {
     const isPrivate = isChatPrivate(contactId);
@@ -118,7 +131,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps & DispatchProps> = ({
 };
 
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
       chats: {

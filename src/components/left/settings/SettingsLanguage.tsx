@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ISettings } from '../../../types';
+import { ISettings, SettingsScreens } from '../../../types';
 import { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
@@ -13,12 +13,22 @@ import { pick } from '../../../util/iteratees';
 import RadioGroup from '../../ui/RadioGroup';
 import Loading from '../../ui/Loading';
 import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+
+type OwnProps = {
+  isActive?: boolean;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
+};
 
 type StateProps = Pick<ISettings, 'languages' | 'language'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadLanguages' | 'setSettingOption'>;
 
-const SettingsLanguage: FC<StateProps & DispatchProps> = ({
+const SettingsLanguage: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
+  onScreenSelect,
+  onReset,
   languages,
   language,
   loadLanguages,
@@ -46,6 +56,8 @@ const SettingsLanguage: FC<StateProps & DispatchProps> = ({
   const options = useMemo(() => {
     return languages ? buildOptions(languages) : undefined;
   }, [languages]);
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Language);
 
   return (
     <div className="settings-content settings-item settings-language custom-scroll">
@@ -77,7 +89,7 @@ function buildOptions(languages: ApiLanguage[]) {
   });
 }
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       languages: global.settings.byKey.languages,

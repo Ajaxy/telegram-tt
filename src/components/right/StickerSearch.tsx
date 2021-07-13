@@ -10,11 +10,17 @@ import { throttle } from '../../util/schedulers';
 import { selectCurrentStickerSearch } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Loading from '../ui/Loading';
 import StickerSetResult from './StickerSetResult';
 
 import './StickerSearch.scss';
+
+type OwnProps = {
+  onClose: NoneToVoidFunction;
+  isActive: boolean;
+};
 
 type StateProps = {
   query?: string;
@@ -28,7 +34,9 @@ const INTERSECTION_THROTTLE = 200;
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const StickerSearch: FC<StateProps & DispatchProps> = ({
+const StickerSearch: FC<OwnProps & StateProps & DispatchProps> = ({
+  onClose,
+  isActive,
   query,
   featuredIds,
   resultIds,
@@ -52,6 +60,8 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
       loadFeaturedStickers();
     });
   });
+
+  useHistoryBack(isActive, onClose);
 
   function renderContent() {
     if (query === undefined) {

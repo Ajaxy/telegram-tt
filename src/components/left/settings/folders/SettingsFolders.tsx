@@ -3,7 +3,7 @@ import React, { FC, memo, useCallback } from '../../../../lib/teact/teact';
 import { ApiChatFolder } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
-import { FoldersState, FolderEditDispatch } from '../../../../hooks/reducers/useFoldersReducer';
+import { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
 
 import SettingsFoldersMain from './SettingsFoldersMain';
 import SettingsFoldersEdit from './SettingsFoldersEdit';
@@ -15,16 +15,20 @@ const TRANSITION_DURATION = 200;
 
 export type OwnProps = {
   currentScreen: SettingsScreens;
+  shownScreen: SettingsScreens;
   state: FoldersState;
   dispatch: FolderEditDispatch;
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
 const SettingsFolders: FC<OwnProps> = ({
   currentScreen,
+  shownScreen,
   state,
   dispatch,
+  isActive,
   onScreenSelect,
   onReset,
 }) => {
@@ -82,6 +86,14 @@ const SettingsFolders: FC<OwnProps> = ({
         <SettingsFoldersMain
           onCreateFolder={handleCreateFolder}
           onEditFolder={handleEditFolder}
+          onScreenSelect={onScreenSelect}
+          isActive={isActive || [
+            SettingsScreens.FoldersCreateFolder,
+            SettingsScreens.FoldersEditFolder,
+            SettingsScreens.FoldersIncludedChats,
+            SettingsScreens.FoldersExcludedChats,
+          ].includes(shownScreen)}
+          onReset={onReset}
         />
       );
     case SettingsScreens.FoldersCreateFolder:
@@ -93,6 +105,12 @@ const SettingsFolders: FC<OwnProps> = ({
           onAddIncludedChats={handleAddIncludedChats}
           onAddExcludedChats={handleAddExcludedChats}
           onReset={handleReset}
+          onScreenSelect={onScreenSelect}
+          isActive={isActive || [
+            SettingsScreens.FoldersIncludedChats,
+            SettingsScreens.FoldersExcludedChats,
+          ].includes(shownScreen)}
+          onBack={onReset}
         />
       );
     case SettingsScreens.FoldersIncludedChats:
@@ -101,6 +119,9 @@ const SettingsFolders: FC<OwnProps> = ({
           mode="included"
           state={state}
           dispatch={dispatch}
+          onReset={handleReset}
+          onScreenSelect={onScreenSelect}
+          isActive={isActive}
         />
       );
     case SettingsScreens.FoldersExcludedChats:
@@ -109,6 +130,9 @@ const SettingsFolders: FC<OwnProps> = ({
           mode="excluded"
           state={state}
           dispatch={dispatch}
+          onReset={handleReset}
+          onScreenSelect={onScreenSelect}
+          isActive={isActive}
         />
       );
 

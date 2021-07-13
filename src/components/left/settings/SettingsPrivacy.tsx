@@ -6,12 +6,15 @@ import { PrivacyVisibility, SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
 
 type OwnProps = {
+  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -32,7 +35,9 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
+  isActive,
   onScreenSelect,
+  onReset,
   hasPassword,
   blockedCount,
   sessionsCount,
@@ -57,6 +62,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings, loadContentSettings]);
 
   const lang = useLang();
+
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Privacy);
 
   function getVisibilityValue(visibility?: PrivacyVisibility) {
     switch (visibility) {
