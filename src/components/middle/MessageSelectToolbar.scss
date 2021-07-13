@@ -1,8 +1,8 @@
 .MessageSelectToolbar {
   position: absolute;
   bottom: 0.5rem;
-  left: .5rem;
-  right: .5rem;
+  left: 0.5rem;
+  right: 0.5rem;
   width: auto;
   z-index: 20;
   justify-content: center;
@@ -105,6 +105,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-grow: 1;
 
     @media (max-width: 600px) {
       margin-right: 0.5rem;
@@ -116,24 +117,15 @@
     display: flex;
 
     .MenuItem {
-      border-radius: var(--border-radius-default);
-      padding: 0.75rem 2rem 0.75rem 1rem;
+      padding: 0.6875rem;
+      border-radius: 50%;
 
       i {
-        margin-right: 1rem;
+        margin-right: 0;
       }
 
-      @media (max-width: 600px) {
-        padding: 0.6875rem;
-        border-radius: 50%;
-
-        i {
-          margin-right: 0;
-        }
-
-        .item-text {
-          display: none;
-        }
+      .item-text {
+        display: none;
       }
     }
   }

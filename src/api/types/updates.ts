@@ -392,6 +392,7 @@ export type ApiUpdateServerTimeOffset = {
   serverTimeOffset: number;
 };
 
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |

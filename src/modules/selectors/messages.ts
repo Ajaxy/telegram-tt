@@ -386,6 +386,8 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || chat.isCreator
     || getHasAdminRight(chat, 'deleteMessages');
 
+  const canReport = !isPrivate && !isOwn;
+
   const canDeleteForAll = canDelete && !isServiceNotification && (
     (isPrivate && !isChatWithSelf)
     || (isBasicGroup && (
@@ -429,6 +431,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canPin,
     canUnpin,
     canDelete,
+    canReport,
     canDeleteForAll,
     canForward,
     canFaveSticker,
@@ -439,6 +442,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   };
 }
 
+// This selector always returns a new object which can not be safely used in shallow-equal checks
 export function selectCanDeleteSelectedMessages(global: GlobalState) {
   const { messageIds: selectedMessageIds } = global.selectedMessages || {};
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
@@ -455,6 +459,21 @@ export function selectCanDeleteSelectedMessages(global: GlobalState) {
     canDelete: messageActions.every((actions) => actions.canDelete),
     canDeleteForAll: messageActions.every((actions) => actions.canDeleteForAll),
   };
+}
+
+export function selectCanReportSelectedMessages(global: GlobalState) {
+  const { messageIds: selectedMessageIds } = global.selectedMessages || {};
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  const chatMessages = chatId && selectChatMessages(global, chatId);
+  if (!chatMessages || !selectedMessageIds || !threadId) {
+    return false;
+  }
+
+  const messageActions = selectedMessageIds
+    .map((id) => chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId))
+    .filter(Boolean);
+
+  return messageActions.every((actions) => actions.canReport);
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {

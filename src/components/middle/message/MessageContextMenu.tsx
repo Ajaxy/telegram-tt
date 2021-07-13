@@ -22,6 +22,7 @@ type OwnProps = {
   canPin?: boolean;
   canUnpin?: boolean;
   canDelete?: boolean;
+  canReport?: boolean;
   canEdit?: boolean;
   canForward?: boolean;
   canFaveSticker?: boolean;
@@ -35,6 +36,7 @@ type OwnProps = {
   onUnpin: () => void;
   onForward: () => void;
   onDelete: () => void;
+  onReport: () => void;
   onFaveSticker: () => void;
   onUnfaveSticker: () => void;
   onSelect: () => void;
@@ -58,6 +60,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canPin,
   canUnpin,
   canDelete,
+  canReport,
   canForward,
   canFaveSticker,
   canUnfaveSticker,
@@ -70,6 +73,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onUnpin,
   onForward,
   onDelete,
+  onReport,
   onFaveSticker,
   onUnfaveSticker,
   onSelect,
@@ -135,6 +139,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
       {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
       {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
+      {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
       {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}
     </Menu>
   );

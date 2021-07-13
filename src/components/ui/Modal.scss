@@ -14,6 +14,12 @@
     }
   }
 
+  &.report {
+    .modal-dialog {
+      max-width: 15rem;
+    }
+  }
+
   .modal-container {
     position: fixed;
     top: 0;
