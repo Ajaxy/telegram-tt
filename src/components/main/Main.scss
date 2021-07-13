@@ -179,6 +179,8 @@
 }
 
 body.is-android.animation-level-1 {
+  --layer-transition: 250ms ease-in-out;
+
   #LeftColumn, #MiddleColumn, #RightColumn {
     transition: transform var(--layer-transition), opacity var(--layer-transition);
   }
