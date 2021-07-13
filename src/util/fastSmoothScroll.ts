@@ -7,9 +7,10 @@ import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { fastRaf } from './schedulers';
 import { animateSingle } from './animation';
 
-const MAX_DISTANCE = 1500;
+const MAX_DISTANCE = 1200;
 const MIN_JS_DURATION = 250;
-const MAX_JS_DURATION = 600;
+const MAX_JS_DURATION = 500;
+const SHORT_CURVE_THRESHOLD = 150; // px
 
 let isAnimating = false;
 
@@ -115,8 +116,10 @@ function scrollWithJs(
     return;
   }
 
+  const absPath = Math.abs(path);
+  const transition = absPath < SHORT_CURVE_THRESHOLD ? shortTransition : longTransition;
   const duration = forceDuration || (
-    MIN_JS_DURATION + (Math.abs(path) / MAX_DISTANCE) * (MAX_JS_DURATION - MIN_JS_DURATION)
+    MIN_JS_DURATION + (absPath / MAX_DISTANCE) * (MAX_JS_DURATION - MIN_JS_DURATION)
   );
   const startAt = Date.now();
 
@@ -133,6 +136,10 @@ function scrollWithJs(
   });
 }
 
-function transition(t: number) {
+function longTransition(t: number) {
+  return t === 1 ? 1 : 1 - 2 ** (-10 * t);
+}
+
+function shortTransition(t: number) {
   return 1 - ((1 - t) ** 3.5);
 }

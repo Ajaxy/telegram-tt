@@ -3,7 +3,7 @@ import fastSmoothScroll from '../../../../util/fastSmoothScroll';
 import { FocusDirection } from '../../../../types';
 
 // This is the max scroll offset within existing viewport.
-const FOCUS_MAX_OFFSET = 1500;
+const FOCUS_MAX_OFFSET = 1200;
 // This is used when the viewport was replaced.
 const RELOCATED_FOCUS_OFFSET = 1000;
 const FOCUS_MARGIN = 20;

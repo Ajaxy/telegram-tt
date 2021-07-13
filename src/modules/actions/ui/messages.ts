@@ -26,7 +26,8 @@ import {
 import { findLast } from '../../../util/iteratees';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 
-const FOCUS_DURATION = 2000;
+const FOCUS_DURATION = 1500;
+const FOCUS_NO_HIGHLIGHT_DURATION = 500; // Matches `fastSmoothScroll:MAX_JS_DURATION`
 const POLL_RESULT_OPEN_DELAY_MS = 450;
 
 let blurTimeout: number | undefined;
@@ -269,7 +270,7 @@ addReducer('focusMessage', (global, actions, payload) => {
     newGlobal = updateFocusedMessage(newGlobal);
     newGlobal = updateFocusDirection(newGlobal);
     setGlobal(newGlobal);
-  }, FOCUS_DURATION);
+  }, noHighlight ? FOCUS_NO_HIGHLIGHT_DURATION : FOCUS_DURATION);
 
   global = updateFocusedMessage(global, chatId, messageId, noHighlight);
   global = updateFocusDirection(global, undefined);
