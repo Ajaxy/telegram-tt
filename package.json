@@ -27,7 +27,7 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": "eslint"
+    "*.{ts,tsx}": "eslint"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",

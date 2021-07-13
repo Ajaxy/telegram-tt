@@ -415,6 +415,31 @@ addReducer('deleteHistory', (global, actions, payload) => {
   })();
 });
 
+addReducer('reportMessages', (global, actions, payload) => {
+  (async () => {
+    const {
+      messageIds, reason, description,
+    } = payload!;
+    const currentMessageList = selectCurrentMessageList(global);
+    if (!currentMessageList) {
+      return;
+    }
+
+    const { chatId } = currentMessageList;
+    const chat = selectChat(global, chatId)!;
+
+    const result = await callApi('reportMessages', {
+      peer: chat, messageIds, reason, description,
+    });
+
+    actions.showNotification({
+      message: result
+        ? 'Thank you! Your report will be reviewed by our team.'
+        : 'Error occured while submiting report. Please, try again later.',
+    });
+  })();
+});
+
 addReducer('markMessageListRead', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);

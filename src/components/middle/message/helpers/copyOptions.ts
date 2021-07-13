@@ -43,7 +43,7 @@ export function getMessageCopyOptions(
     ));
 
     options.push({
-      label: getCopyLabel(hasSelection, canImageBeCopied),
+      label: getCopyLabel(hasSelection),
       handler: () => {
         const clipboardText = hasSelection && selection ? selection.toString() : text;
         copyTextToClipboard(clipboardText);
@@ -71,14 +71,9 @@ export function getMessageCopyOptions(
   return options;
 }
 
-function getCopyLabel(hasSelection: boolean, canImageBeCopied: boolean): string {
+function getCopyLabel(hasSelection: boolean): string {
   if (hasSelection) {
     return 'lng_context_copy_selected';
   }
-
-  if (canImageBeCopied) {
-    return 'lng_context_copy_text';
-  }
-
-  return 'Copy';
+  return 'lng_context_copy_text';
 }

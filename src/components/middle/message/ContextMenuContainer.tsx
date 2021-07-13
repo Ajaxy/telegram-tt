@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -13,6 +13,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
+import ReportMessageModal from '../../common/ReportMessageModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
@@ -36,6 +37,7 @@ type StateProps = {
   canPin?: boolean;
   canUnpin?: boolean;
   canDelete?: boolean;
+  canReport?: boolean;
   canEdit?: boolean;
   canForward?: boolean;
   canFaveSticker?: boolean;
@@ -66,6 +68,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canPin,
   canUnpin,
   canDelete,
+  canReport,
   canEdit,
   canForward,
   canFaveSticker,
@@ -87,12 +90,18 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
 
   const handleDelete = useCallback(() => {
     setIsMenuOpen(false);
     setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleReport = useCallback(() => {
+    setIsMenuOpen(false);
+    setIsReportModalOpen(true);
   }, []);
 
   const closeMenu = useCallback(() => {
@@ -102,6 +111,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
+    onClose();
+  }, [onClose]);
+
+  const closeReportModal = useCallback(() => {
+    setIsReportModalOpen(false);
     onClose();
   }, [onClose]);
 
@@ -200,6 +214,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     return enableScrolling;
   }, []);
 
+  const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
+
   if (noOptions) {
     closeMenu();
 
@@ -219,6 +235,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canReschedule={canReschedule}
         canReply={canReply}
         canDelete={canDelete}
+        canReport={canReport}
         canPin={canPin}
         canUnpin={canUnpin}
         canEdit={canEdit}
@@ -234,6 +251,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         onUnpin={handleUnpin}
         onForward={handleForward}
         onDelete={handleDelete}
+        onReport={handleReport}
         onFaveSticker={handleFaveSticker}
         onUnfaveSticker={handleUnfaveSticker}
         onSelect={handleSelectMessage}
@@ -248,6 +266,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         onClose={closeDeleteModal}
         album={album}
         message={message}
+      />
+      <ReportMessageModal
+        isOpen={isReportModalOpen}
+        onClose={closeReportModal}
+        messageIds={reportMessageIds}
       />
       <PinMessageModal
         isOpen={isPinModalOpen}
@@ -277,6 +300,7 @@ export default memo(withGlobal<OwnProps>(
       canPin,
       canUnpin,
       canDelete,
+      canReport,
       canEdit,
       canForward,
       canFaveSticker,
@@ -296,6 +320,7 @@ export default memo(withGlobal<OwnProps>(
       canPin: !isScheduled && canPin,
       canUnpin: !isScheduled && canUnpin,
       canDelete,
+      canReport,
       canEdit: !isPinned && canEdit,
       canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,

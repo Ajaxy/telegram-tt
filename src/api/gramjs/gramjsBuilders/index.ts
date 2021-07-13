@@ -13,6 +13,7 @@ import {
   ApiChatFolder,
   ApiChatBannedRights,
   ApiChatAdminRights,
+  ApiReportReason,
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';
@@ -378,6 +379,29 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'chatInvite':
       return new GramJs.InputPrivacyKeyChatInvite();
+  }
+
+  return undefined;
+}
+
+export function buildInputReportReason(reason: ApiReportReason) {
+  switch (reason) {
+    case 'spam':
+      return new GramJs.InputReportReasonSpam();
+    case 'violence':
+      return new GramJs.InputReportReasonViolence();
+    case 'childAbuse':
+      return new GramJs.InputReportReasonChildAbuse();
+    case 'pornography':
+      return new GramJs.InputReportReasonPornography();
+    case 'copyright':
+      return new GramJs.InputReportReasonCopyright();
+    case 'fake':
+      return new GramJs.InputReportReasonFake();
+    case 'geoIrrelevant':
+      return new GramJs.InputReportReasonGeoIrrelevant();
+    case 'other':
+      return new GramJs.InputReportReasonOther();
   }
 
   return undefined;

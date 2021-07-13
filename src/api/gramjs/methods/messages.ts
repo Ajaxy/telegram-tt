@@ -15,6 +15,7 @@ import {
   MAIN_THREAD_ID,
   MESSAGE_DELETED,
   ApiGlobalMessageSearchType,
+  ApiReportReason,
 } from '../../types';
 
 import { ALL_FOLDER_ID, DEBUG, PINNED_MESSAGES_LIMIT } from '../../../config';
@@ -37,6 +38,7 @@ import {
   isMessageWithMedia,
   isServiceMessageWithMedia,
   calculateResultHash,
+  buildInputReportReason,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -614,6 +616,21 @@ export async function deleteHistory({
     '@type': 'deleteHistory',
     chatId: chat.id,
   });
+}
+
+export async function reportMessages({
+  peer, messageIds, reason, description,
+}: {
+  peer: ApiChat | ApiUser; messageIds: number[]; reason: ApiReportReason; description?: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.Report({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    id: messageIds,
+    reason: buildInputReportReason(reason),
+    message: description,
+  }));
+
+  return result;
 }
 
 export async function markMessageListRead({

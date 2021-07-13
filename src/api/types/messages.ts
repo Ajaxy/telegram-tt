@@ -275,6 +275,9 @@ export type ApiKeyboardButtons = ApiKeyboardButton[][];
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 
+export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
+| 'copyright' | 'geoIrrelevant' | 'fake' | 'other';
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

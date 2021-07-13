@@ -34,7 +34,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'deleteMessages' | 'exitMessageSelectMode' | 'deleteScheduledMessages'>;
 
-const DeleteSelectedMessagesModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const DeleteSelectedMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   isSchedule,
   selectedMessageIds,
@@ -127,4 +127,4 @@ export default memo(withGlobal<OwnProps>(
     'deleteScheduledMessages',
     'exitMessageSelectMode',
   ]),
-)(DeleteSelectedMessagesModal));
+)(DeleteSelectedMessageModal));

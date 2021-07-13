@@ -15,12 +15,27 @@ const IGNORED_KEYS: Record<string, boolean> = {
   Tab: true,
 };
 
+function isTextBox(target: EventTarget | null) {
+  if (!target || !(target instanceof HTMLElement)) return false;
+  const element = target;
+  const tagName = element.tagName.toLowerCase();
+  if (tagName === 'textarea') return true;
+  if (tagName !== 'input') return false;
+  const type = element.getAttribute('type');
+  if (!type) return false;
+  const inputTypes = [
+    'text', 'password', 'number', 'email', 'tel', 'url',
+    'search', 'date', 'datetime', 'datetime-local', 'time', 'month', 'week',
+  ];
+  return inputTypes.indexOf(type.toLowerCase()) > -1;
+}
+
 const preventDefault = (e: Event) => {
   e.preventDefault();
 };
 
 function preventDefaultForScrollKeys(e: KeyboardEvent) {
-  if (IGNORED_KEYS[e.key]) {
+  if (IGNORED_KEYS[e.key] && !isTextBox(e.target)) {
     preventDefault(e);
   }
 }
