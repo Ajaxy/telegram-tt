@@ -3,6 +3,8 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
 
+import { ANIMATION_END_DELAY, FAST_SMOOTH_MAX_DURATION } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import {
   enterMessageSelectMode,
   toggleMessageSelection,
@@ -21,13 +23,15 @@ import {
   selectChatMessages,
   selectAllowedMessageActions,
   selectMessageIdsByGroupId,
-  selectForwardedMessageIdsByGroupId, selectIsViewportNewest, selectReplyingToId, selectReplyStack,
+  selectForwardedMessageIdsByGroupId,
+  selectIsViewportNewest,
+  selectReplyingToId,
+  selectReplyStack,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
-import { IS_TOUCH_ENV } from '../../../util/environment';
 
 const FOCUS_DURATION = 1500;
-const FOCUS_NO_HIGHLIGHT_DURATION = 500; // Matches `fastSmoothScroll:MAX_JS_DURATION`
+const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
 
 let blurTimeout: number | undefined;
