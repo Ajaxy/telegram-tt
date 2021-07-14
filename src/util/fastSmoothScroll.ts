@@ -113,6 +113,8 @@ function scrollWithJs(
 
   if (forceDuration === 0) {
     container.scrollTop = target;
+    isAnimating = false;
+
     return;
   }
 

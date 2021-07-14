@@ -27,7 +27,8 @@ export const copyTextToClipboard = (str: string): void => {
   document.body.removeChild(textCopyEl);
 };
 
-export const copyImageToClipboard = (imageUrl: string) => {
+export const copyImageToClipboard = (imageUrl?: string) => {
+  if (!imageUrl) return;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const imageEl = new Image();

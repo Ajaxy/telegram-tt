@@ -171,11 +171,7 @@ export function getMessageMediaHash(
       case 'pictogram':
         return `${base}?size=m`;
       case 'inline':
-        if (hasMessageLocalBlobUrl(message)) {
-          return undefined;
-        }
-
-        return `${base}?size=x`;
+        return !hasMessageLocalBlobUrl(message) ? `${base}?size=x` : undefined;
       case 'viewerPreview':
         return `${base}?size=x`;
       case 'viewerFull':
