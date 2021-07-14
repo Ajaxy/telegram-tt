@@ -141,7 +141,6 @@ function updateCache() {
       'contactList',
       'topPeers',
       'recentEmojis',
-      'emojiKeywords',
       'push',
       'shouldShowContextMenuHint',
     ]),

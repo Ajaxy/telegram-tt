@@ -112,9 +112,10 @@ export const STICKER_SIZE_FOLDER_SETTINGS = 80;
 export const RECENT_STICKERS_LIMIT = 20;
 export const MEMOJI_STICKER_ID = 'MEMOJI_STICKER';
 
+export const BASE_EMOJI_KEYWORD_LANG = 'en';
+
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
-export const LAYERS_TRANSITION_DURATION = 450;
 
 export const CONTENT_TYPES_FOR_QUICK_UPLOAD = 'image/png,image/gif,image/jpeg,video/mp4,video/avi,video/quicktime';
 

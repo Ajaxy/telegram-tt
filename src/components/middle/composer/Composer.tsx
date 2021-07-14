@@ -18,7 +18,7 @@ import {
 } from '../../../api/types';
 import { LangCode } from '../../../types';
 
-import { EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
+import { BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import {
   selectChat,
@@ -31,7 +31,6 @@ import {
   selectEditingMessage,
   selectIsChatWithSelf,
   selectChatUser,
-  selectEmojiKeywords,
 } from '../../../modules/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -233,11 +232,13 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
   useEffect(() => {
-    loadEmojiKeywords({ language: 'en' });
-    if (language !== 'en') {
-      loadEmojiKeywords({ language });
+    if (lastSyncTime && isReady) {
+      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
+      if (language !== BASE_EMOJI_KEYWORD_LANG) {
+        loadEmojiKeywords({ language });
+      }
     }
-  }, [loadEmojiKeywords, language]);
+  }, [loadEmojiKeywords, language, lastSyncTime, isReady]);
 
   useLayoutEffect(() => {
     if (!appendixRef.current) return;
@@ -939,8 +940,8 @@ export default memo(withGlobal<OwnProps>(
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
     const { language } = global.settings.byKey;
-    const baseEmojiKeywords = selectEmojiKeywords(global, 'en');
-    const emojiKeywords = language !== 'en' ? selectEmojiKeywords(global, language) : undefined;
+    const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
+    const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
 
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
