@@ -84,11 +84,15 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     }
 
     const suggestedCountry = getCountryFromPhoneNumber(newFullNumber);
-    const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
+
+    // Any phone numbers should be allowed, in some cases ignoring formatting
+    const selectedCountry = !country
+    || (suggestedCountry && suggestedCountry.id !== country.id)
+    || (!suggestedCountry && newFullNumber.length)
       ? suggestedCountry
       : country;
 
-    if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
+    if (!country || !selectedCountry || (selectedCountry && selectedCountry.code !== country.code)) {
       setCountry(selectedCountry);
     }
 
