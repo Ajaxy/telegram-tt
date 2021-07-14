@@ -90,11 +90,15 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const prevOrderById = usePrevious(orderById);
 
-  const orderDiffById = orderById && prevOrderById
-    ? mapValues(orderById, (order, id) => {
+  const orderDiffById = useMemo(() => {
+    if (!orderById || !prevOrderById) {
+      return {};
+    }
+
+    return mapValues(orderById, (order, id) => {
       return order - (prevOrderById[id] !== undefined ? prevOrderById[id] : Infinity);
-    })
-    : {};
+    });
+  }, [orderById, prevOrderById]);
 
   const loadMoreOfType = useCallback(() => {
     loadMoreChats({ listType: folderType === 'archived' ? 'archived' : 'active' });

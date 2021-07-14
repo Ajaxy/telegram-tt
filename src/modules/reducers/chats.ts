@@ -100,20 +100,28 @@ export function updateChats(global: GlobalState, updatedById: Record<number, Api
 // @optimization Allows to avoid redundant updates which cause a lot of renders
 export function addChats(global: GlobalState, addedById: Record<number, ApiChat>): GlobalState {
   const { byId } = global.chats;
+  let isAdded = false;
+
   const addedChats = Object.keys(addedById).map(Number).reduce<Record<number, ApiChat>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
       const updatedChat = getUpdatedChat(global, id, addedById[id]);
       if (updatedChat) {
         acc[id] = updatedChat;
+
+        if (!isAdded) {
+          isAdded = true;
+        }
       }
     }
     return acc;
   }, {});
 
-  global = replaceChats(global, {
-    ...global.chats.byId,
-    ...addedChats,
-  });
+  if (isAdded) {
+    global = replaceChats(global, {
+      ...global.chats.byId,
+      ...addedChats,
+    });
+  }
 
   return global;
 }
