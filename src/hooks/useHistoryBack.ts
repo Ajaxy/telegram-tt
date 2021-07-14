@@ -9,20 +9,40 @@ import { getDispatch } from '../lib/teact/teactn';
 const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
 const SAFARI_EDGE_BACK_GESTURE_DURATION = 350;
 
-let isEdge = false;
+type HistoryState = {
+  currentIndex: number;
+  nextStateIndexToReplace: number;
+  isHistoryAltered: boolean;
+  isDisabled: boolean;
+  isEdge: boolean;
+  currentIndexes: number[];
+};
+
+const historyState: HistoryState = {
+  currentIndex: 0,
+  nextStateIndexToReplace: -1,
+  isHistoryAltered: false,
+  isDisabled: false,
+  isEdge: false,
+  currentIndexes: [],
+};
+
+export const disableHistoryBack = () => {
+  historyState.isDisabled = true;
+};
 
 const handleTouchStart = (event: TouchEvent) => {
   const x = event.touches[0].pageX;
 
   if (x <= SAFARI_EDGE_BACK_GESTURE_LIMIT || x >= window.innerWidth - SAFARI_EDGE_BACK_GESTURE_LIMIT) {
-    isEdge = true;
+    historyState.isEdge = true;
   }
 };
 
 const handleTouchEnd = () => {
-  if (isEdge) {
+  if (historyState.isEdge) {
     setTimeout(() => {
-      isEdge = false;
+      historyState.isEdge = false;
     }, SAFARI_EDGE_BACK_GESTURE_DURATION);
   }
 };
@@ -33,12 +53,7 @@ if (IS_IOS) {
   window.addEventListener('popstate', handleTouchEnd);
 }
 
-let currentIndex = 0;
-let nextStateIndexToReplace = -1;
-let isHistoryAltered = false;
-const currentIndexes: number[] = [];
-
-window.history.replaceState({ index: currentIndex }, '');
+window.history.replaceState({ index: historyState.currentIndex }, '');
 
 export default function useHistoryBack(
   isActive: boolean | undefined,
@@ -54,53 +69,55 @@ export default function useHistoryBack(
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (isHistoryAltered) {
+      if (historyState.isHistoryAltered) {
         setTimeout(() => {
-          isHistoryAltered = false;
+          historyState.isHistoryAltered = false;
         }, 0);
         return;
       }
       const { index: i } = event.state;
       const index = i || 0;
 
-      const prev = currentIndexes[currentIndexes.indexOf(indexRef.current) - 1];
+      const prev = historyState.currentIndexes[historyState.currentIndexes.indexOf(indexRef.current) - 1];
+
+      if (historyState.isDisabled) return;
 
       if (!isClosed.current && (index === 0 || index === prev)) {
-        currentIndexes.splice(currentIndexes.indexOf(indexRef.current), 1);
+        historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(indexRef.current), 1);
 
         if (onBack) {
-          if (isEdge) {
+          if (historyState.isEdge) {
             getDispatch().disableHistoryAnimations();
           }
-          onBack(!isEdge);
+          onBack(!historyState.isEdge);
           isClosed.current = true;
         }
       } else if (index === indexRef.current && isClosed.current && onForward) {
         isForward.current = true;
-        if (isEdge) {
+        if (historyState.isEdge) {
           getDispatch().disableHistoryAnimations();
         }
         onForward(event.state.state);
       }
     };
 
-    if (prevIsActive !== isActive) {
+    if (!historyState.isDisabled && prevIsActive !== isActive) {
       if (isActive) {
         isClosed.current = false;
 
         if (isForward.current) {
           isForward.current = false;
-          currentIndexes.push(indexRef.current);
+          historyState.currentIndexes.push(indexRef.current);
         } else {
           setTimeout(() => {
-            const index = ++currentIndex;
+            const index = ++historyState.currentIndex;
 
-            currentIndexes.push(index);
+            historyState.currentIndexes.push(index);
 
             window.history[
-              (currentIndexes.includes(nextStateIndexToReplace - 1)
+              (historyState.currentIndexes.includes(historyState.nextStateIndexToReplace - 1)
                 && window.history.state.index !== 0
-                && nextStateIndexToReplace === index
+                && historyState.nextStateIndexToReplace === index
                 && !shouldReplaceNext)
                 ? 'replaceState'
                 : 'pushState'
@@ -112,20 +129,20 @@ export default function useHistoryBack(
             indexRef.current = index;
 
             if (shouldReplaceNext) {
-              nextStateIndexToReplace = currentIndex + 1;
+              historyState.nextStateIndexToReplace = historyState.currentIndex + 1;
             }
           }, 0);
         }
       } else if (!isClosed.current) {
-        if (indexRef.current === currentIndex || !shouldReplaceNext) {
-          isHistoryAltered = true;
+        if (indexRef.current === historyState.currentIndex || !shouldReplaceNext) {
+          historyState.isHistoryAltered = true;
           window.history.back();
 
           setTimeout(() => {
-            nextStateIndexToReplace = -1;
+            historyState.nextStateIndexToReplace = -1;
           }, 400);
         }
-        currentIndexes.splice(currentIndexes.indexOf(indexRef.current), 1);
+        historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(indexRef.current), 1);
 
         isClosed.current = true;
       }
