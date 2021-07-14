@@ -18,7 +18,6 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import useLang from '../../hooks/useLang';
 
-import SafeLink from '../common/SafeLink';
 import ListItem from '../ui/ListItem';
 import Switcher from '../ui/Switcher';
 
@@ -115,9 +114,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {(canInviteUsers || !username) && !!link.length && (
         <ListItem icon="mention" multiline narrow ripple onClick={() => copy(link, lang('SetUrlPlaceholder'))}>
-          <div className="title">
-            <SafeLink url={link} className="title" text={link} />
-          </div>
+          <div className="title">{link}</div>
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
