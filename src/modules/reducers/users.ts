@@ -91,23 +91,30 @@ export function updateUsers(global: GlobalState, updatedById: Record<number, Api
 // @optimization Allows to avoid redundant updates which cause a lot of renders
 export function addUsers(global: GlobalState, addedById: Record<number, ApiUser>): GlobalState {
   const { byId } = global.users;
+  let isAdded = false;
 
   const addedUsers = Object.keys(addedById).map(Number).reduce<Record<number, ApiUser>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
       const updatedUser = getUpdatedUser(global, id, addedById[id]);
       if (updatedUser) {
         acc[id] = updatedUser;
+
+        if (!isAdded) {
+          isAdded = true;
+        }
       }
     }
     return acc;
   }, {});
 
-  global = updateContactList(global, Object.values(addedUsers));
+  if (isAdded) {
+    global = replaceUsers(global, {
+      ...global.users.byId,
+      ...addedUsers,
+    });
 
-  global = replaceUsers(global, {
-    ...global.users.byId,
-    ...addedUsers,
-  });
+    global = updateContactList(global, Object.values(addedUsers));
+  }
 
   return global;
 }
