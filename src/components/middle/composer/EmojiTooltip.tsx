@@ -2,8 +2,6 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { LangCode } from '../../../types';
-
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import cycleRestrict from '../../../util/cycleRestrict';
@@ -54,22 +52,18 @@ function setItemVisible(index: number, containerRef: Record<string, any>) {
 
 export type OwnProps = {
   isOpen: boolean;
-  language: LangCode;
   onEmojiSelect: (text: string) => void;
   onClose: NoneToVoidFunction;
   addRecentEmoji: AnyToVoidFunction;
-  loadEmojiKeywords: AnyToVoidFunction;
   emojis: Emoji[];
 };
 
 const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
-  language,
   emojis,
   onClose,
   onEmojiSelect,
   addRecentEmoji,
-  loadEmojiKeywords,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,13 +71,6 @@ const EmojiTooltip: FC<OwnProps> = ({
   const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
 
   const [selectedIndex, setSelectedIndex] = useState(NO_EMOJI_SELECTED_INDEX);
-
-  useEffect(() => {
-    loadEmojiKeywords({ language: 'en' });
-    if (language !== 'en') {
-      loadEmojiKeywords({ language });
-    }
-  }, [loadEmojiKeywords, language]);
 
   useEffect(() => {
     setSelectedIndex(0);

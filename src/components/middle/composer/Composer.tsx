@@ -232,6 +232,13 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
+  useEffect(() => {
+    loadEmojiKeywords({ language: 'en' });
+    if (language !== 'en') {
+      loadEmojiKeywords({ language });
+    }
+  }, [loadEmojiKeywords, language]);
+
   useLayoutEffect(() => {
     if (!appendixRef.current) return;
 
@@ -710,10 +717,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         usersById={usersById}
         recentEmojis={recentEmojis}
         onCaptionUpdate={setHtml}
-        language={language}
         emojiKeywords={emojiKeywords}
         addRecentEmoji={addRecentEmoji}
-        loadEmojiKeywords={loadEmojiKeywords}
         onSend={shouldSchedule ? openCalendar : handleSend}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachment}
@@ -845,8 +850,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             onClose={closeEmojiTooltip}
             onEmojiSelect={insertEmoji}
             addRecentEmoji={addRecentEmoji}
-            loadEmojiKeywords={loadEmojiKeywords}
-            language={language}
           />
           <AttachMenu
             isOpen={isAttachMenuOpen}

@@ -22,10 +22,10 @@ const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
 
 try {
-  RE_NOT_EMOJI_SEARCH = new RegExp('[^-_:\\p{L}\\p{N}]+', 'iu');
+  RE_NOT_EMOJI_SEARCH = new RegExp('[^-+_:\\p{L}\\p{N}]+', 'iu');
 } catch (e) {
   // Support for older versions of firefox
-  RE_NOT_EMOJI_SEARCH = new RegExp('[^-_:\\d\\wа-яё]+', 'i');
+  RE_NOT_EMOJI_SEARCH = new RegExp('[^-+_:\\d\\wа-яё]+', 'i');
 }
 
 export default function useEmojiTooltip(
@@ -45,6 +45,7 @@ export default function useEmojiTooltip(
   const [byKeyword, setByKeyword] = useState<Record<string, Emoji[]>>({});
   const [names, setNames] = useState<string[]>();
   const [byName, setByName] = useState<Record<string, Emoji[]>>({});
+  const [shouldForceInsertEmoji, setShouldForceInsertEmoji] = useState(false);
 
   const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
 
@@ -124,8 +125,11 @@ export default function useEmojiTooltip(
       return;
     }
 
-    const filter = code.substr(1);
+    const forceSend = code.length > 2 && code.endsWith(':');
+    const filter = code.substr(1, forceSend ? code.length - 2 : undefined);
     let matched: Emoji[] = [];
+
+    setShouldForceInsertEmoji(forceSend);
 
     if (!filter) {
       matched = recentEmojis;
@@ -141,18 +145,20 @@ export default function useEmojiTooltip(
     }
 
     if (matched.length) {
-      markIsOpen();
+      if (!forceSend) {
+        markIsOpen();
+      }
       setFilteredEmojis(matched.slice(0, EMOJIS_LIMIT));
     } else {
       unmarkIsOpen();
     }
   }, [
-    byId, byKeyword, keywords, byName, names,
-    html, isAllowed, markIsOpen, recentEmojis, unmarkIsOpen,
+    byId, byKeyword, keywords, byName, names, html, isAllowed, markIsOpen,
+    recentEmojis, unmarkIsOpen, setShouldForceInsertEmoji,
   ]);
 
-  const insertEmoji = useCallback((textEmoji: string) => {
-    const atIndex = html.lastIndexOf(':');
+  const insertEmoji = useCallback((textEmoji: string, isForce?: boolean) => {
+    const atIndex = html.lastIndexOf(':', isForce ? -1 : undefined);
     if (atIndex !== -1) {
       onUpdateHtml(`${html.substr(0, atIndex)}${textEmoji}`);
       const messageInput = document.getElementById(inputId)!;
@@ -165,6 +171,12 @@ export default function useEmojiTooltip(
 
     unmarkIsOpen();
   }, [html, inputId, onUpdateHtml, unmarkIsOpen]);
+
+  useEffect(() => {
+    if (isOpen && shouldForceInsertEmoji && filteredEmojis.length) {
+      insertEmoji(filteredEmojis[0].native, true);
+    }
+  }, [filteredEmojis, insertEmoji, isOpen, shouldForceInsertEmoji]);
 
   return {
     isEmojiTooltipOpen: isOpen,
