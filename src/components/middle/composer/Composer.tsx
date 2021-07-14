@@ -718,6 +718,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         usersById={usersById}
         recentEmojis={recentEmojis}
         onCaptionUpdate={setHtml}
+        baseEmojiKeywords={baseEmojiKeywords}
         emojiKeywords={emojiKeywords}
         addRecentEmoji={addRecentEmoji}
         onSend={shouldSchedule ? openCalendar : handleSend}
