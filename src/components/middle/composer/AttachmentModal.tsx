@@ -31,6 +31,7 @@ export type OwnProps = {
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
   recentEmojis: string[];
+  baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   addRecentEmoji: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
@@ -49,6 +50,7 @@ const AttachmentModal: FC<OwnProps> = ({
   currentUserId,
   usersById,
   recentEmojis,
+  baseEmojiKeywords,
   emojiKeywords,
   onCaptionUpdate,
   addRecentEmoji,
@@ -86,6 +88,7 @@ const AttachmentModal: FC<OwnProps> = ({
     recentEmojis,
     EDITABLE_INPUT_MODAL_ID,
     onCaptionUpdate,
+    baseEmojiKeywords,
     emojiKeywords,
   );
 
