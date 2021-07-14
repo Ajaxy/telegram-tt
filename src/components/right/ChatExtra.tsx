@@ -54,10 +54,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
     phoneNumber,
     isSelf,
   } = user || {};
-  const {
-    id: chatId,
-    username: chatUsername,
-  } = chat || {};
+  const { id: chatId } = chat || {};
   const lang = useLang();
 
   useEffect(() => {
@@ -81,8 +78,6 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
   const link = getChatLink(chat);
-  const url = link.indexOf('http') === 0 ? link : `http://${link}`;
-  const printedUsername = username || chatUsername;
   const description = (fullInfo && fullInfo.bio) || getChatDescription(chat);
 
   return (
@@ -93,15 +88,15 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           <span className="subtitle">{lang('Phone')}</span>
         </ListItem>
       )}
-      {printedUsername && (
+      {username && (
         <ListItem
           icon="mention"
           multiline
           narrow
           ripple
-          onClick={() => copy(`@${printedUsername}`, lang('Username'))}
+          onClick={() => copy(`@${username}`, lang('Username'))}
         >
-          <span className="title" dir="auto">{renderText(printedUsername)}</span>
+          <span className="title" dir="auto">{renderText(username)}</span>
           <span className="subtitle">{lang('Username')}</span>
         </ListItem>
       )}
@@ -118,10 +113,10 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}
-      {canInviteUsers && !printedUsername && !!link.length && (
+      {(canInviteUsers || !username) && !!link.length && (
         <ListItem icon="mention" multiline narrow ripple onClick={() => copy(link, lang('SetUrlPlaceholder'))}>
           <div className="title">
-            <SafeLink url={url} className="title" text={link} />
+            <SafeLink url={link} className="title" text={link} />
           </div>
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>

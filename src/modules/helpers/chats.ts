@@ -84,7 +84,7 @@ export function getChatLink(chat: ApiChat) {
     return inviteLink;
   }
 
-  return username ? `t.me/${username}` : '';
+  return username ? `https://t.me/${username}` : '';
 }
 
 export function getChatAvatarHash(
