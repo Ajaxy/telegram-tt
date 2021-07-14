@@ -13,7 +13,7 @@ import {
   rebuildStickersForEmoji,
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
-import { selectEmojiKeywords, selectStickerSet } from '../../selectors';
+import { selectStickerSet } from '../../selectors';
 
 const ADDED_SETS_THROTTLE = 500;
 const ADDED_SETS_THROTTLE_CHUNK = 50;
@@ -112,8 +112,8 @@ addReducer('toggleStickerSet', (global, actions, payload) => {
 
 addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode }) => {
   const { language } = payload;
-  let currentEmojiKeywords = selectEmojiKeywords(global, language);
 
+  let currentEmojiKeywords = global.emojiKeywords[language];
   if (currentEmojiKeywords && currentEmojiKeywords.isLoading) {
     return;
   }
@@ -136,7 +136,7 @@ addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode 
     });
 
     global = getGlobal();
-    currentEmojiKeywords = selectEmojiKeywords(global, language);
+    currentEmojiKeywords = global.emojiKeywords[language];
 
     if (!emojiKeywords) {
       setGlobal({
