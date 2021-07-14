@@ -18,6 +18,7 @@ import { formatDateToString } from '../../../util/dateFormat';
 import { selectTheme } from '../../../modules/selectors';
 import switchTheme from '../../../util/switchTheme';
 import useLang from '../../../hooks/useLang';
+import { disableHistoryBack } from '../../../hooks/useHistoryBack';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -162,6 +163,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleSwitchToWebK = () => {
     localStorage.setItem(PERMANENT_VERSION_KEY, JSON.stringify('K'));
+    disableHistoryBack();
   };
 
   const isSearchFocused = (
@@ -255,6 +257,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
               <MenuItem
                 icon="char-W"
                 href={LEGACY_VERSION_URL}
+                onClick={disableHistoryBack}
               >
                 Switch to Old Version
               </MenuItem>
