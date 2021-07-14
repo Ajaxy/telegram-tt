@@ -2,15 +2,14 @@ import { getGlobal } from '../lib/teact/teactn';
 
 import { FocusDirection } from '../types';
 
-import { ANIMATION_LEVEL_MIN } from '../config';
+import {
+  ANIMATION_LEVEL_MIN,
+  FAST_SMOOTH_MAX_DISTANCE, FAST_SMOOTH_MAX_DURATION, FAST_SMOOTH_MIN_DURATION,
+  FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE,
+} from '../config';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { fastRaf } from './schedulers';
 import { animateSingle } from './animation';
-
-const MAX_DISTANCE = 1200;
-const MIN_JS_DURATION = 250;
-const MAX_JS_DURATION = 500;
-const SHORT_CURVE_THRESHOLD = 150; // px
 
 let isAnimating = false;
 
@@ -19,7 +18,7 @@ export default function fastSmoothScroll(
   element: HTMLElement,
   position: ScrollLogicalPosition | 'centerOrTop',
   margin = 0,
-  maxDistance = MAX_DISTANCE,
+  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
   forceDirection?: FocusDirection,
   forceDuration?: number,
   forceCurrentContainerHeight?: boolean,
@@ -119,9 +118,10 @@ function scrollWithJs(
   }
 
   const absPath = Math.abs(path);
-  const transition = absPath < SHORT_CURVE_THRESHOLD ? shortTransition : longTransition;
+  const transition = absPath < FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
   const duration = forceDuration || (
-    MIN_JS_DURATION + (absPath / MAX_DISTANCE) * (MAX_JS_DURATION - MIN_JS_DURATION)
+    FAST_SMOOTH_MIN_DURATION
+    + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
   );
   const startAt = Date.now();
 
