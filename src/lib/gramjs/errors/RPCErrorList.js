@@ -48,6 +48,12 @@ class FloodWaitError extends FloodError {
         this.seconds = seconds;
     }
 }
+class MsgWaitError extends FloodError {
+    constructor(args) {
+        super(`Message failed to be sent.${RPCError._fmtRequest(args.request)}`);
+        this.message = `Message failed to be sent.${RPCError._fmtRequest(args.request)}`;
+    }
+}
 
 class FloodTestPhoneWaitError extends FloodError {
     constructor(args) {
@@ -92,6 +98,7 @@ const rpcErrorRe = [
     [/FILE_MIGRATE_(\d+)/, FileMigrateError],
     [/FLOOD_TEST_PHONE_WAIT_(\d+)/, FloodTestPhoneWaitError],
     [/FLOOD_WAIT_(\d+)/, FloodWaitError],
+    [/MSG_WAIT_(.*)/, MsgWaitError],
     [/PHONE_MIGRATE_(\d+)/, PhoneMigrateError],
     [/SLOWMODE_WAIT_(\d+)/, SlowModeWaitError],
     [/USER_MIGRATE_(\d+)/, UserMigrateError],
@@ -108,5 +115,6 @@ module.exports = {
     SlowModeWaitError,
     UserMigrateError,
     NetworkMigrateError,
+    MsgWaitError,
     EmailUnconfirmedError,
 };

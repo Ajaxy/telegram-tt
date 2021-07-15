@@ -2,7 +2,7 @@
 import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import { getAppropriatedPartSize } from '../Utils';
-import { sleep } from '../Helpers';
+import { sleep, createDeferred } from '../Helpers';
 
 export interface progressCallback {
     isCanceled?: boolean;
@@ -49,7 +49,7 @@ class Foreman {
 
         if (this.activeWorkers > this.maxWorkers) {
             this.deferred = createDeferred();
-            return this.deferred.promise;
+            return this.deferred!.promise;
         }
 
         return Promise.resolve();
@@ -184,17 +184,4 @@ export async function downloadFile(
     const buffers = results.filter(Boolean);
     const totalLength = end ? (end + 1) - start : undefined;
     return Buffer.concat(buffers, totalLength);
-}
-
-
-function createDeferred(): Deferred {
-    let resolve: Deferred['resolve'];
-    const promise = new Promise((_resolve) => {
-        resolve = _resolve;
-    });
-
-    return {
-        promise,
-        resolve: resolve!,
-    };
 }

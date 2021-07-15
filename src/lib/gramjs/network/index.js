@@ -1,5 +1,4 @@
 const MTProtoPlainSender = require('./MTProtoPlainSender');
-const doAuthentication = require('./Authenticator');
 const MTProtoSender = require('./MTProtoSender');
 
 class UpdateConnectionState {
@@ -33,7 +32,6 @@ module.exports = {
     ConnectionTCPAbridged,
     ConnectionTCPObfuscated,
     MTProtoPlainSender,
-    doAuthentication,
     MTProtoSender,
     UpdateConnectionState,
     UpdateServerTimeOffset,
