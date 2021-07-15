@@ -23,11 +23,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsc && lint-staged -- --fix --ignore-path=src/lib/gramjs/.eslintignore"
+      "pre-commit": "tsc && lint-staged"
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": "eslint"
+    "*.{ts,tsx,js}": "eslint --fix --ignore-path=src/lib/gramjs/.eslintignore"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",
