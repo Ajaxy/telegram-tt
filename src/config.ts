@@ -33,11 +33,6 @@ export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const LANG_CACHE_NAME = 'tt-lang-packs-v5';
 export const ASSET_CACHE_NAME = 'tt-assets';
 
-export const API_UPDATE_THROTTLE = 300;
-export const API_THROTTLE_RESET_UPDATES = new Set([
-  'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
-]);
-
 export const DOWNLOAD_WORKERS = 16;
 export const UPLOAD_WORKERS = 16;
 
@@ -96,6 +91,12 @@ export const FAST_SMOOTH_MAX_DISTANCE = 1500;
 export const FAST_SMOOTH_MIN_DURATION = 250;
 export const FAST_SMOOTH_MAX_DURATION = 600;
 export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 500; // px
+
+// Average duration of message sending animation
+export const API_UPDATE_THROTTLE = Math.round((FAST_SMOOTH_MIN_DURATION + FAST_SMOOTH_MAX_DURATION) / 2);
+export const API_THROTTLE_RESET_UPDATES = new Set([
+  'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
+]);
 
 export const STICKER_SIZE_INLINE_DESKTOP_FACTOR = 13;
 export const STICKER_SIZE_INLINE_MOBILE_FACTOR = 11;

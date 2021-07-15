@@ -37,6 +37,10 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
     path = Math.min(path, remainingPath);
   }
 
+  if (path === 0) {
+    return;
+  }
+
   const target = container.scrollLeft + path;
 
   if (duration === 0) {
