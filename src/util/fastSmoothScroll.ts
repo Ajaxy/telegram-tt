@@ -108,6 +108,12 @@ function scrollWithJs(
     path = Math.min(path, remainingPath);
   }
 
+  if (path === 0) {
+    isAnimating = false;
+
+    return;
+  }
+
   const target = container.scrollTop + path;
 
   if (forceDuration === 0) {
