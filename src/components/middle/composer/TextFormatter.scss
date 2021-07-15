@@ -16,6 +16,10 @@
     pointer-events: none;
     transition: opacity .3s ease;
 
+    .Modal & {
+      max-width: 100%;
+    }
+
     @media (max-width: 600px) {
       max-width: calc(100vw - var(--text-formatter-left) + 3rem);
     }
@@ -45,6 +49,7 @@
   &-link-url-input-wrapper {
     width: 20rem;
     position: relative;
+    max-width: 100%;
 
     @media (max-width: 600px) {
       max-width: 90vw;
