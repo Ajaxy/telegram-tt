@@ -178,7 +178,6 @@ addReducer('loadNearestCountry', (global) => {
   })();
 });
 
-
 addReducer('setDeviceToken', (global, actions, deviceToken) => {
   setGlobal({
     ...global,
