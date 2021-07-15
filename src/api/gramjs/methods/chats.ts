@@ -414,7 +414,7 @@ export async function updateChatMutedState({
 
   onUpdate({
     '@type': 'updateNotifyExceptions',
-    id: chat.id,
+    chatId: chat.id,
     isMuted,
   });
 

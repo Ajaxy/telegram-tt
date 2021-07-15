@@ -14,7 +14,7 @@ import {
   selectIsChatMuted,
 } from '../modules/helpers';
 import { getTranslation } from './langProvider';
-import { replaceSettings } from '../modules/reducers';
+import { addNotifyExceptions, replaceSettings } from '../modules/reducers';
 import {
   selectChatMessage, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../modules/selectors';
@@ -132,15 +132,21 @@ let areSettingsLoaded = false;
 // Load notification settings from the api
 async function loadNotificationSettings() {
   if (areSettingsLoaded) return;
-  const [result] = await Promise.all([
+  const [resultSettings, resultExceptions] = await Promise.all([
     callApi('fetchNotificationSettings', {
       serverTimeOffset: getGlobal().serverTimeOffset,
     }),
-    callApi('fetchNotificationExceptions'),
+    callApi('fetchNotificationExceptions', {
+      serverTimeOffset: getGlobal().serverTimeOffset,
+    }),
   ]);
-  if (!result) return;
+  if (!resultSettings) return;
 
-  setGlobal(replaceSettings(getGlobal(), result));
+  let global = replaceSettings(getGlobal(), resultSettings);
+  if (resultExceptions) {
+    global = addNotifyExceptions(global, resultExceptions);
+  }
+  setGlobal(global);
   areSettingsLoaded = true;
 }
 

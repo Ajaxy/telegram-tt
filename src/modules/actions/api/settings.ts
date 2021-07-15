@@ -11,6 +11,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { selectUser } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
+  addNotifyExceptions,
 } from '../../reducers';
 import { isChatPrivate } from '../../helpers';
 
@@ -304,8 +305,17 @@ addReducer('terminateAllAuthorizations', () => {
   })();
 });
 
-addReducer('loadNotificationExceptions', () => {
-  callApi('fetchNotificationExceptions');
+addReducer('loadNotificationExceptions', (global) => {
+  const { serverTimeOffset } = global;
+
+  (async () => {
+    const result = await callApi('fetchNotificationExceptions', { serverTimeOffset });
+    if (!result) {
+      return;
+    }
+
+    setGlobal(addNotifyExceptions(getGlobal(), result));
+  })();
 });
 
 addReducer('loadNotificationSettings', (global) => {

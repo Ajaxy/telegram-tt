@@ -4,6 +4,7 @@ import { ApiSession, ApiWallpaper } from '../../types';
 import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument } from './messages';
+import { getApiChatIdFromMtpPeer } from './chats';
 import { pick } from '../../../util/iteratees';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
@@ -94,5 +95,20 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     allowChatIds: allowChatIds || [],
     blockUserIds: blockUserIds || [],
     blockChatIds: blockChatIds || [],
+  };
+}
+
+export function buildApiNotifyException(
+  notifySettings: GramJs.TypePeerNotifySettings, peer: GramJs.TypePeer, serverTimeOffset: number,
+) {
+  const {
+    silent, muteUntil, showPreviews, sound,
+  } = notifySettings;
+
+  return {
+    chatId: getApiChatIdFromMtpPeer(peer),
+    isMuted: silent || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000),
+    ...(sound === '' && { isSilent: true }),
+    ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
   };
 }

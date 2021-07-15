@@ -2,12 +2,14 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import {
-  ApiChat, ApiLangString, ApiLanguage, ApiUser, ApiWallpaper,
+  ApiChat, ApiLangString, ApiLanguage, ApiNotifyException, ApiUser, ApiWallpaper,
 } from '../../types';
 import { ApiPrivacyKey, IInputPrivacyRules } from '../../../types';
 
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
-import { buildApiWallpaper, buildApiSession, buildPrivacyRules } from '../apiBuilders/misc';
+import {
+  buildApiWallpaper, buildApiSession, buildPrivacyRules, buildApiNotifyException,
+} from '../apiBuilders/misc';
 
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview, getApiChatIdFromMtpPeer } from '../apiBuilders/chats';
@@ -156,12 +158,26 @@ export function terminateAllAuthorizations() {
   return invokeRequest(new GramJs.auth.ResetAuthorizations());
 }
 
-export async function fetchNotificationExceptions() {
-  const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({ compareSound: true }), true);
+export async function fetchNotificationExceptions({
+  serverTimeOffset,
+}: { serverTimeOffset: number }) {
+  const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({ compareSound: true }));
 
-  if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
-    updateLocalDb(result);
+  if (!(result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined)) {
+    return undefined;
   }
+
+  updateLocalDb(result);
+
+  return result.updates.reduce((acc, update) => {
+    if (!(update instanceof GramJs.UpdateNotifySettings && update.peer instanceof GramJs.NotifyPeer)) {
+      return acc;
+    }
+
+    acc.push(buildApiNotifyException(update.notifySettings, update.peer.peer, serverTimeOffset));
+
+    return acc;
+  }, [] as ApiNotifyException[]);
 }
 
 export async function fetchNotificationSettings({
