@@ -145,7 +145,7 @@ function scrollWithJs(
 }
 
 function longTransition(t: number) {
-  return t === 1 ? 1 : 1 - 2 ** (-10 * t);
+  return 1 - ((1 - t) ** 5);
 }
 
 function shortTransition(t: number) {
