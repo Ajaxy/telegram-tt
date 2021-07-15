@@ -4,6 +4,7 @@ import {
 
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../../util/environment';
+import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import {
   EmojiData, EmojiModule, EmojiRawData, uncompressEmoji,
 } from '../../../../util/emoji';
@@ -47,7 +48,7 @@ export default function useEmojiTooltip(
   const [byName, setByName] = useState<Record<string, Emoji[]>>({});
   const [shouldForceInsertEmoji, setShouldForceInsertEmoji] = useState(false);
 
-  const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>([]);
+  const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
 
   const recentEmojis = useMemo(
     () => {
@@ -118,9 +119,9 @@ export default function useEmojiTooltip(
       return;
     }
 
-    const code = getEmojiCode(html);
+    const code = html.includes(':') && getEmojiCode(html);
     if (!code) {
-      setFilteredEmojis([]);
+      setFilteredEmojis(MEMO_EMPTY_ARRAY);
       unmarkIsOpen();
       return;
     }
