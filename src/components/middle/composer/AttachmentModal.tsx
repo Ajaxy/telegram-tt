@@ -64,7 +64,7 @@ const AttachmentModal: FC<OwnProps> = ({
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
   const isOpen = Boolean(attachments.length);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
-  const isQuick = renderingAttachments && renderingAttachments.every((a) => a.quick);
+  const isQuick = Boolean(renderingAttachments && renderingAttachments.every((a) => a.quick));
   const lang = useLang();
 
   const {
@@ -129,11 +129,11 @@ const AttachmentModal: FC<OwnProps> = ({
     if (files && files.length) {
       const newFiles = isQuick
         ? Array.from(files).filter((file) => {
-          return file.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.includes(file.type);
+          return file.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.has(file.type);
         })
         : Array.from(files);
 
-      onFileAppend(newFiles, false);
+      onFileAppend(newFiles, isQuick);
     }
   }, [isQuick, onFileAppend, unmarkHovered]);
 

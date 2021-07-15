@@ -118,7 +118,9 @@ export const BASE_EMOJI_KEYWORD_LANG = 'en';
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
-export const CONTENT_TYPES_FOR_QUICK_UPLOAD = 'image/png,image/gif,image/jpeg,video/mp4,video/avi,video/quicktime';
+export const CONTENT_TYPES_FOR_QUICK_UPLOAD = new Set([
+  'image/png', 'image/gif', 'image/jpeg', 'video/mp4', 'video/avi', 'video/quicktime',
+]);
 
 // eslint-disable-next-line max-len
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6})\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)';
