@@ -1,6 +1,5 @@
 import { GlobalState } from '../../global/types';
 import { ApiSticker } from '../../api/types';
-import { LangCode, EmojiKeywords } from '../../types';
 
 export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;
@@ -44,10 +43,4 @@ export function selectAnimatedEmoji(global: GlobalState, emoji: string) {
   const cleanedEmoji = emoji.replace('\ufe0f', '');
 
   return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
-}
-
-export function selectEmojiKeywords(global: GlobalState, language: LangCode): EmojiKeywords | undefined {
-  return global.emojiKeywords[language] && global.emojiKeywords[language] !== undefined
-    ? global.emojiKeywords[language] as EmojiKeywords
-    : undefined;
 }
