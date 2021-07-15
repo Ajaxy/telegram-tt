@@ -24,7 +24,7 @@ class MessagePacker {
 
     append(state) {
         // we need to check if there is already a request with the same name that we should send after.
-        if (USE_INVOKE_AFTER_WITH.includes(state.request.className)) {
+        if (state && USE_INVOKE_AFTER_WITH.includes(state.request.className)) {
             // we now need to check if there is any request in queue already.
             // we loop backwards since the latest request is the most recent
             for (let i = this._queue.length - 1; i >= 0; i--) {
