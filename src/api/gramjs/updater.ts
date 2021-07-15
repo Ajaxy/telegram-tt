@@ -33,7 +33,7 @@ import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import { DEBUG } from '../../config';
 import { addMessageToLocalDb, addPhotoToLocalDb, resolveMessageApiChatId } from './helpers';
-import { buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
+import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
 import { buildApiPhoto } from './apiBuilders/common';
 
 type Update = (
@@ -548,19 +548,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     update instanceof GramJs.UpdateNotifySettings
     && update.peer instanceof GramJs.NotifyPeer
   ) {
-    const {
-      silent, muteUntil, showPreviews, sound,
-    } = update.notifySettings;
-
-    const isMuted = silent
-      || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000);
-
     onUpdate({
       '@type': 'updateNotifyExceptions',
-      id: getApiChatIdFromMtpPeer(update.peer.peer),
-      isMuted,
-      ...(sound === '' && { isSilent: true }),
-      ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
+      ...buildApiNotifyException(update.notifySettings, update.peer.peer, serverTimeOffset),
     });
   } else if (
     update instanceof GramJs.UpdateUserTyping

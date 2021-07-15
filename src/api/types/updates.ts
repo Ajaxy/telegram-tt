@@ -9,7 +9,7 @@ import {
   ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
-import { ApiSessionData } from './misc';
+import { ApiNotifyException, ApiSessionData } from './misc';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -358,11 +358,7 @@ export type ApiUpdateNotifySettings = {
 
 export type ApiUpdateNotifyExceptions = {
   '@type': 'updateNotifyExceptions';
-  id: number;
-  isMuted: boolean;
-  isSilent?: boolean;
-  shouldShowPreviews?: boolean;
-};
+} & ApiNotifyException;
 
 export type updateTwoFaStateWaitCode = {
   '@type': 'updateTwoFaStateWaitCode';

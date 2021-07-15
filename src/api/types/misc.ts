@@ -60,3 +60,10 @@ export interface ApiSessionData {
   keys: Record<number, string | number[]>;
   hashes: Record<number, string | number[]>;
 }
+
+export type ApiNotifyException = {
+  chatId: number;
+  isMuted: boolean;
+  isSilent?: boolean;
+  shouldShowPreviews?: boolean;
+};

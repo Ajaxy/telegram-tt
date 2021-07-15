@@ -12,15 +12,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate): GlobalState | unde
 
     case 'updateNotifyExceptions': {
       const {
-        id, isMuted, isSilent, shouldShowPreviews,
+        chatId, isMuted, isSilent, shouldShowPreviews,
       } = update;
-      const chat = global.chats.byId[id];
+      const chat = global.chats.byId[chatId];
 
       if (chat) {
-        global = updateChat(global, id, { isMuted });
+        global = updateChat(global, chatId, { isMuted });
       }
 
-      setGlobal(addNotifyException(global, id, { isMuted, isSilent, shouldShowPreviews }));
+      setGlobal(addNotifyException(global, chatId, { isMuted, isSilent, shouldShowPreviews }));
       break;
     }
   }

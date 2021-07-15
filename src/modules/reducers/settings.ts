@@ -2,6 +2,7 @@ import { GlobalState } from '../../global/types';
 import {
   ISettings, IThemeSettings, ThemeKey, NotifyException,
 } from '../../types';
+import { ApiNotifyException } from '../../api/types';
 
 export function replaceSettings(global: GlobalState, newSettings?: Partial<ISettings>): GlobalState {
   return {
@@ -32,6 +33,17 @@ export function replaceThemeSettings(
       },
     },
   };
+}
+
+export function addNotifyExceptions(
+  global: GlobalState, notifyExceptions: ApiNotifyException[],
+): GlobalState {
+  notifyExceptions.forEach((notifyException) => {
+    const { chatId, ...exceptionData } = notifyException;
+    global = addNotifyException(global, chatId, exceptionData);
+  });
+
+  return global;
 }
 
 export function addNotifyException(
