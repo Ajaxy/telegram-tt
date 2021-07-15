@@ -152,8 +152,8 @@ namespace Api {
   type Type = unknown;
   type Bool = boolean;
   type int = number;
-  type int128 = number;
-  type int256 = number;
+  type int128 = BigInteger;
+  type int256 = BigInteger;
   type long = BigInteger;
   type bytes = Buffer;
 
@@ -167,6 +167,7 @@ namespace Api {
     static serializeDate(date: Date | number): Buffer;
     static fromReader(reader: Reader): VirtualClass<Args>;
 
+    getBytes(): Buffer;
     CONSTRUCTOR_ID: number;
     SUBCLASS_OF_ID: number;
     className: string;

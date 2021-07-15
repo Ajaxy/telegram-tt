@@ -41,7 +41,7 @@ function toSignedLittleBuffer(big, number = 8) {
 
 /**
  * converts a big int to a buffer
- * @param bigInt {BigInteger}
+ * @param bigInt {bigInt.BigInteger}
  * @param bytesNumber
  * @param little
  * @param signed
@@ -274,6 +274,19 @@ function getRandomInt(min, max) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * Helper to export two buffers of same length
+ * @returns {Buffer}
+ */
+
+function bufferXor(a, b) {
+    const res = [];
+    for (let i = 0; i < a.length; i++) {
+        res.push(a[i] ^ b[i]);
+    }
+    return Buffer.from(res);
+}
+
+/**
  * Checks if the obj is an array
  * @param obj
  * @returns {boolean}
@@ -328,6 +341,22 @@ function crc32(buf) {
     return (crc ^ (-1)) >>> 0;
 }
 
+/**
+ * Creates a deferred object
+ * @return {Deferred}
+ */
+function createDeferred() {
+    let resolve;
+    const promise = new Promise((_resolve) => {
+        resolve = _resolve;
+    });
+
+    return {
+        promise,
+        resolve,
+    };
+}
+
 module.exports = {
     readBigIntFromBuffer,
     readBufferFromBigInt,
@@ -347,5 +376,6 @@ module.exports = {
     // isArrayLike,
     toSignedLittleBuffer,
     convertToLittle,
-
+    bufferXor,
+    createDeferred,
 };

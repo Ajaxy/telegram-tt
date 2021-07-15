@@ -2,7 +2,7 @@ const MtProtoPlainSender = require('./MTProtoPlainSender');
 const MTProtoState = require('./MTProtoState');
 const Helpers = require('../Helpers');
 const AuthKey = require('../crypto/AuthKey');
-const doAuthentication = require('./Authenticator');
+const { doAuthentication } = require('./Authenticator');
 const RPCResult = require('../tl/core/RPCResult');
 const MessageContainer = require('../tl/core/MessageContainer');
 const GZIPPacked = require('../tl/core/GZIPPacked');
@@ -231,18 +231,23 @@ class MTProtoSender {
         if (!this._user_connected) {
             throw new Error('Cannot send requests while disconnected');
         }
-        // CONTEST
         const state = new RequestState(request);
         this._send_queue.append(state);
         return state.promise;
-        /*
-        if (!Helpers.isArrayLike(request)) {
-            const state = new RequestState(request)
-            this._send_queue.append(state)
-            return state.promise
-        } else {
-            throw new Error('not supported')
-        } */
+    }
+
+    /**
+     * Same as send but returns the full state. usefull for invoke after logic
+     * @param request
+     * @return {RequestState}
+     */
+    sendWithInvokeSupport(request) {
+        if (!this._user_connected) {
+            throw new Error('Cannot send requests while disconnected');
+        }
+        const state = new RequestState(request, undefined, this._pending_state);
+        this._send_queue.append(state);
+        return state;
     }
 
     /**
@@ -264,10 +269,10 @@ class MTProtoSender {
             this._log.debug('Generated new auth_key successfully');
             await this.authKey.setKey(res.authKey);
 
-            this._state.time_offset = res.timeOffset;
+            this._state.timeOffset = res.timeOffset;
 
             if (this._updateCallback) {
-                this._updateCallback(new UpdateServerTimeOffset(this._state.time_offset));
+                this._updateCallback(new UpdateServerTimeOffset(this._state.timeOffset));
             }
 
             /**
@@ -471,6 +476,7 @@ class MTProtoSender {
     _popStates(msgId) {
         let state = this._pending_state[msgId];
         if (state) {
+            this._pending_state[msgId].deferred.resolve();
             delete this._pending_state[msgId];
             return [state];
         }
@@ -487,6 +493,7 @@ class MTProtoSender {
             const temp = [];
             for (const x of toPop) {
                 temp.push(this._pending_state[x]);
+                this._pending_state[x].deferred.resolve();
                 delete this._pending_state[x];
             }
             return temp;
@@ -513,6 +520,7 @@ class MTProtoSender {
         const result = message.obj;
         const state = this._pending_state[result.reqMsgId];
         if (state) {
+            state.deferred.resolve();
             delete this._pending_state[result.reqMsgId];
         }
         this._log.debug(`Handling RPC result for message ${result.reqMsgId}`);
@@ -607,6 +615,7 @@ class MTProtoSender {
 
         this._log.debug(`Handling pong for message ${pong.msgId}`);
         const state = this._pending_state[pong.msgId];
+        this._pending_state[pong.msgId].deferred.resolve();
         delete this._pending_state[pong.msgId];
 
         // Todo Check result
@@ -743,6 +752,7 @@ class MTProtoSender {
         for (const msgId of ack.msgIds) {
             const state = this._pending_state[msgId];
             if (state && state.request instanceof LogOut) {
+                this._pending_state[msgId].deferred.resolve();
                 delete this._pending_state[msgId];
                 state.resolve(true);
             }
@@ -765,6 +775,7 @@ class MTProtoSender {
         const state = this._pending_state[message.msgId];
 
         if (state) {
+            this._pending_state[message].deferred.resolve();
             delete this._pending_state[message];
             state.resolve(message.obj);
         }
@@ -822,6 +833,9 @@ class MTProtoSender {
         this._reconnecting = false;
         // uncomment this if you want to resend
         // this._send_queue.extend(Object.values(this._pending_state))
+        for (const state of this._pending_state) {
+            state.deferred.resolve();
+        }
         this._pending_state = {};
         if (this._autoReconnectCallback) {
             await this._autoReconnectCallback();

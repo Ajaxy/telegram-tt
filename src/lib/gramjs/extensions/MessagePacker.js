@@ -2,6 +2,11 @@ const MessageContainer = require('../tl/core/MessageContainer');
 const TLMessage = require('../tl/core/TLMessage');
 const BinaryWriter = require('../extensions/BinaryWriter');
 
+const USE_INVOKE_AFTER_WITH = [
+    'messages.SendMessage', 'messages.SendMedia', 'messages.SendMultiMedia',
+    'messages.ForwardMessages', 'messages.SendInlineBotResult',
+];
+
 class MessagePacker {
     constructor(state, logger) {
         this._state = state;
@@ -18,6 +23,19 @@ class MessagePacker {
     }
 
     append(state) {
+        // we need to check if there is already a request with the same name that we should send after.
+        if (USE_INVOKE_AFTER_WITH.includes(state.request.className)) {
+            // we now need to check if there is any request in queue already.
+            // we loop backwards since the latest request is the most recent
+            for (let i = this._queue.length - 1; i >= 0; i--) {
+                if (USE_INVOKE_AFTER_WITH.includes(this._queue[i].request.className)) {
+                    state.after = this._queue[i];
+                    break;
+                }
+            }
+        }
+
+
         this._queue.push(state);
         this.setReady(true);
 

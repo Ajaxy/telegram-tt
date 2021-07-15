@@ -592,11 +592,9 @@ class TelegramClient {
         this._lastRequest = new Date().getTime();
         let attempt = 0;
         for (attempt = 0; attempt < this._requestRetries; attempt++) {
+            const promise = this._sender.sendWithInvokeSupport(request);
             try {
-                const promise = this._sender.send(request);
-                const result = await promise;
-                // this.session.processEntities(result)
-                // this._entityCache.add(result)
+                const result = await promise.promise;
                 return result;
             } catch (e) {
                 if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
@@ -619,6 +617,9 @@ class TelegramClient {
                         throw e;
                     }
                     await this._switchDC(e.newDc);
+                } else if (e instanceof errors.MsgWaitError) {
+                    // we need to resend this after the old one was confirmed.
+                    await promise.isReady();
                 } else {
                     throw e;
                 }

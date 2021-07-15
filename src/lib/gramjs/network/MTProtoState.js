@@ -107,7 +107,12 @@ class MTProtoState {
         if (!afterId) {
             body = await GZIPPacked.gzipIfSmaller(contentRelated, data);
         } else {
-            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, data).getBytes());
+            // Invoke query expects a query with a getBytes func
+            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, {
+                getBytes() {
+                    return data;
+                },
+            }).getBytes());
         }
         const s = Buffer.alloc(4);
         s.writeInt32LE(seqNo, 0);
