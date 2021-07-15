@@ -43,7 +43,7 @@ addReducer('initApi', (global: GlobalState, actions) => {
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
-  void callApi('provideAuthPhoneNumber', phoneNumber);
+  void callApi('provideAuthPhoneNumber', phoneNumber.replace(/[^\d]/g, ''));
 
   return {
     ...global,
