@@ -833,7 +833,7 @@ class MTProtoSender {
         this._reconnecting = false;
         // uncomment this if you want to resend
         // this._send_queue.extend(Object.values(this._pending_state))
-        for (const state of this._pending_state) {
+        for (const state of Object.values(this._pending_state)) {
             state.deferred.resolve();
         }
         this._pending_state = {};
