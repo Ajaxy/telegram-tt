@@ -35,7 +35,7 @@ const AttachMenu: FC<OwnProps> = ({
 
   const handleQuickSelect = useCallback(() => {
     openSystemFilesDialog(
-      CONTENT_TYPES_FOR_QUICK_UPLOAD,
+      Array.from(CONTENT_TYPES_FOR_QUICK_UPLOAD).join(','),
       (e) => handleFileSelect(e, true),
     );
   }, [handleFileSelect]);

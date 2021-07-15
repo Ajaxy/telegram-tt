@@ -93,7 +93,7 @@ type DispatchProps = Pick<GlobalActions, (
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
 function canBeQuicklyUploaded(item: DataTransferItem) {
-  return item.kind === 'file' && item.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.includes(item.type);
+  return item.kind === 'file' && item.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.has(item.type);
 }
 
 const MiddleColumn: FC<StateProps & DispatchProps> = ({
@@ -189,7 +189,11 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     }
 
     const { items } = e.dataTransfer || {};
-    const shouldDrawQuick = items && Array.from(items).every(canBeQuicklyUploaded);
+    const shouldDrawQuick = items && Array.from(items)
+      // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
+      .filter((item) => item.type !== 'text/uri-list')
+      .every(canBeQuicklyUploaded);
 
     setDropAreaState(shouldDrawQuick ? DropAreaState.QuickFile : DropAreaState.Document);
   }, []);
