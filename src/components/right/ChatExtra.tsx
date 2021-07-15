@@ -139,7 +139,7 @@ export default memo(withGlobal<OwnProps>(
     const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
-    const canInviteUsers = chat && (
+    const canInviteUsers = chat && !user && (
       (!isChatChannel(chat) && !isUserRightBanned(chat, 'inviteUsers'))
       || getHasAdminRight(chat, 'inviteUsers')
     );
