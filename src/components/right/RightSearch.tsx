@@ -135,8 +135,9 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
-    if (foundResults && foundResults[index]) {
-      foundResults[index].onClick();
+    const foundResult = foundResults && foundResults[index === -1 ? 0 : index];
+    if (foundResult) {
+      foundResult.onClick();
     }
   }, '.ListItem-button', true);
 

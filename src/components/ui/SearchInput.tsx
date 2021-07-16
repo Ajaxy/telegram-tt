@@ -91,7 +91,7 @@ const SearchInput: FC<OwnProps> = ({
   }
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown' || e.key === 'Enter') {
       const element = document.querySelector(`.${parentContainerClassName} .ListItem-button`) as HTMLElement;
       if (element) {
         element.focus();

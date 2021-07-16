@@ -125,8 +125,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
-    if (viewportIds) {
-      setForwardChatId({ id: viewportIds[index] });
+    if (viewportIds && viewportIds.length > 0) {
+      setForwardChatId({ id: viewportIds[index === -1 ? 0 : index] });
     }
   }, '.ListItem-button', true);
 

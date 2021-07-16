@@ -149,7 +149,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.code.startsWith('Digit') && folderTabs) {
+      if (e.ctrlKey && e.shiftKey && e.code.startsWith('Digit') && folderTabs) {
         const [, digit] = e.code.match(/Digit(\d)/) || [];
         if (!digit) return;
 
