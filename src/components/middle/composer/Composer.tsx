@@ -6,6 +6,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions, GlobalState, MessageListType } from '../../../global/types';
 import {
   ApiAttachment,
+  ApiBotInlineResult,
+  ApiBotInlineMediaResult,
   ApiSticker,
   ApiVideo,
   ApiNewPoll,
@@ -16,7 +18,7 @@ import {
   ApiUser,
   MAIN_THREAD_ID,
 } from '../../../api/types';
-import { LangCode } from '../../../types';
+import { LangCode, InlineBotSettings } from '../../../types';
 
 import { BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
@@ -35,7 +37,6 @@ import {
 import {
   getAllowedAttachmentOptions,
   getChatSlowModeOptions,
-  isChatGroup,
   isChatPrivate,
   isChatAdmin,
 } from '../../../modules/helpers';
@@ -62,6 +63,8 @@ import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
+import useInlineBotTooltip from './hooks/useInlineBotTooltip';
+import windowSize from '../../../util/windowSize';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -69,6 +72,7 @@ import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Spinner from '../../ui/Spinner';
 import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
+import InlineBotTooltip from './InlineBotTooltip.async';
 import MentionTooltip from './MentionTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
 import StickerTooltip from './StickerTooltip.async';
@@ -105,7 +109,6 @@ type StateProps = {
   isRightColumnShown?: boolean;
   isSelectModeActive?: boolean;
   isForwarding?: boolean;
-  canSuggestMembers?: boolean;
   isPollModalOpen?: boolean;
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
@@ -125,13 +128,16 @@ type StateProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   serverTimeOffset: number;
+  topInlineBotIds?: number[];
+  isInlineBotLoading: boolean;
+  inlineBots?: Record<string, false | InlineBotSettings>;
 } & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
   'clearDraft' | 'showDialog' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
   'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
-  'clearReceipt' | 'addRecentEmoji' | 'loadEmojiKeywords'
+  'clearReceipt' | 'addRecentEmoji' | 'loadEmojiKeywords' | 'sendInlineBotResult'
 )>;
 
 enum MainButtonState {
@@ -169,7 +175,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   isRightColumnShown,
   isSelectModeActive,
   isForwarding,
-  canSuggestMembers,
   isPollModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
@@ -177,6 +182,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   withScheduledButton,
   stickersForEmoji,
   groupChatMembers,
+  topInlineBotIds,
   currentUserId,
   usersById,
   lastSyncTime,
@@ -187,6 +193,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   emojiKeywords,
   serverTimeOffset,
   recentEmojis,
+  inlineBots,
+  isInlineBotLoading,
   sendMessage,
   editMessage,
   saveDraft,
@@ -203,7 +211,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   clearReceipt,
   addRecentEmoji,
   loadEmojiKeywords,
+  sendInlineBotResult,
 }) => {
+  const lang = useLang();
+
   // eslint-disable-next-line no-null/no-null
   const appendixRef = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState<string>('');
@@ -213,7 +224,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [
     scheduledMessageArgs, setScheduledMessageArgs,
   ] = useState<GlobalState['messages']['contentToBeScheduled'] | undefined>();
-  const lang = useLang();
+  const { width: windowWidth } = windowSize.get();
 
   // Cache for frequently updated state
   const htmlRef = useRef<string>(html);
@@ -282,15 +293,32 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   const {
     isMentionTooltipOpen, mentionFilter,
     closeMentionTooltip, insertMention,
-    mentionFilteredMembers,
+    mentionFilteredUsers,
   } = useMentionTooltip(
-    canSuggestMembers && !attachments.length,
+    !attachments.length,
     html,
     setHtml,
     undefined,
     groupChatMembers,
+    topInlineBotIds,
     currentUserId,
     usersById,
+  );
+
+  const {
+    isOpen: isInlineBotTooltipOpen,
+    id: inlineBotId,
+    isGallery: isInlineBotTooltipGallery,
+    switchPm: inlineBotSwitchPm,
+    results: inlineBotResults,
+    closeTooltip: closeInlineBotTooltip,
+    help: inlineBotHelp,
+    loadMore: loadMoreForInlineBot,
+  } = useInlineBotTooltip(
+    Boolean(!attachments.length && lastSyncTime),
+    chatId,
+    html,
+    inlineBots,
   );
 
   const {
@@ -344,12 +372,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setHtml(`${htmlRef.current!}${newHtml}`);
 
-    if (!IS_SINGLE_COLUMN_LAYOUT) {
-      // If selection is outside of input, set cursor at the end of input
-      requestAnimationFrame(() => {
-        focusEditableElement(messageInput);
-      });
-    }
+    // If selection is outside of input, set cursor at the end of input
+    requestAnimationFrame(() => {
+      focusEditableElement(messageInput);
+    });
   }, []);
 
   const removeSymbol = useCallback(() => {
@@ -535,6 +561,25 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 
+  const handleInlineBotSelect = useCallback((inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult) => {
+    if (connectionState !== 'connectionStateReady') {
+      return;
+    }
+
+    sendInlineBotResult({
+      id: inlineResult.id,
+      queryId: inlineResult.queryId,
+    });
+
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    if (IS_IOS && messageInput === document.activeElement) {
+      applyIosAutoCapitalizationFix(messageInput);
+    }
+
+    clearDraft({ chatId, localOnly: true });
+    requestAnimationFrame(resetComposer);
+  }, [chatId, clearDraft, connectionState, resetComposer, sendInlineBotResult]);
+
   const handlePollSend = useCallback((poll: ApiNewPoll) => {
     if (shouldSchedule) {
       setScheduledMessageArgs({ poll });
@@ -712,7 +757,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       <AttachmentModal
         attachments={attachments}
         caption={attachments.length ? html : ''}
-        canSuggestMembers={canSuggestMembers}
         groupChatMembers={groupChatMembers}
         currentUserId={currentUserId}
         usersById={usersById}
@@ -751,7 +795,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         filter={mentionFilter}
         onClose={closeMentionTooltip}
         onInsertUserName={insertMention}
-        filteredChatMembers={mentionFilteredMembers}
+        filteredUsers={mentionFilteredUsers}
         usersById={usersById}
       />
       <div id="message-compose">
@@ -792,15 +836,19 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             id="message-input-text"
             html={!attachments.length ? html : ''}
             placeholder={
-              activeVoiceRecording && window.innerWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER ? '' : lang('Message')
+              activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER ? '' : lang('Message')
             }
+            forcedPlaceholder={inlineBotHelp}
             shouldSetFocus={isSymbolMenuOpen}
             shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
-            shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen}
+            shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onUpdate={setHtml}
             onSend={onSend}
             onSuppressedFocus={closeSymbolMenu}
           />
+          {isInlineBotLoading && Boolean(inlineBotId) && (
+            <Spinner color="gray" />
+          )}
           {withScheduledButton && (
             <Button
               round
@@ -867,6 +915,17 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
               onClose={closeBotKeyboard}
             />
           )}
+          <InlineBotTooltip
+            isOpen={isInlineBotTooltipOpen}
+            botId={inlineBotId}
+            allowedAttachmentOptions={allowedAttachmentOptions}
+            isGallery={isInlineBotTooltipGallery}
+            inlineBotResults={inlineBotResults}
+            switchPm={inlineBotSwitchPm}
+            onSelectResult={handleInlineBotSelect}
+            loadMore={loadMoreForInlineBot}
+            onClose={closeInlineBotTooltip}
+          />
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
             allowedAttachmentOptions={allowedAttachmentOptions}
@@ -965,10 +1024,10 @@ export default memo(withGlobal<OwnProps>(
       shouldSchedule: messageListType === 'scheduled',
       botKeyboardMessageId: messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined,
       isForwarding: chatId === global.forwardMessages.toChatId,
-      canSuggestMembers: chat && isChatGroup(chat),
       isPollModalOpen: global.isPollModalOpen,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       groupChatMembers: chat && chat.fullInfo && chat.fullInfo.members,
+      topInlineBotIds: global.topInlineBots && global.topInlineBots.userIds,
       currentUserId: global.currentUserId,
       usersById: global.users.byId,
       lastSyncTime: global.lastSyncTime,
@@ -981,6 +1040,8 @@ export default memo(withGlobal<OwnProps>(
       baseEmojiKeywords: baseEmojiKeywords ? baseEmojiKeywords.keywords : undefined,
       emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
       serverTimeOffset: global.serverTimeOffset,
+      inlineBots: global.inlineBots.byUsername,
+      isInlineBotLoading: global.inlineBots.isLoading,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -1000,5 +1061,6 @@ export default memo(withGlobal<OwnProps>(
     'openChat',
     'addRecentEmoji',
     'loadEmojiKeywords',
+    'sendInlineBotResult',
   ]),
 )(Composer));

@@ -25,7 +25,6 @@ import './AttachmentModal.scss';
 export type OwnProps = {
   attachments: ApiAttachment[];
   caption: string;
-  canSuggestMembers?: boolean;
   canSuggestEmoji?: boolean;
   currentUserId?: number;
   groupChatMembers?: ApiChatMember[];
@@ -45,7 +44,6 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const AttachmentModal: FC<OwnProps> = ({
   attachments,
   caption,
-  canSuggestMembers,
   groupChatMembers,
   currentUserId,
   usersById,
@@ -70,13 +68,14 @@ const AttachmentModal: FC<OwnProps> = ({
   const {
     isMentionTooltipOpen, mentionFilter,
     closeMentionTooltip, insertMention,
-    mentionFilteredMembers,
+    mentionFilteredUsers,
   } = useMentionTooltip(
-    canSuggestMembers && isOpen,
+    isOpen,
     caption,
     onCaptionUpdate,
     EDITABLE_INPUT_MODAL_ID,
     groupChatMembers,
+    undefined,
     currentUserId,
     usersById,
   );
@@ -228,7 +227,7 @@ const AttachmentModal: FC<OwnProps> = ({
             onClose={closeMentionTooltip}
             filter={mentionFilter}
             onInsertUserName={insertMention}
-            filteredChatMembers={mentionFilteredMembers}
+            filteredUsers={mentionFilteredUsers}
             usersById={usersById}
           />
           <EmojiTooltip

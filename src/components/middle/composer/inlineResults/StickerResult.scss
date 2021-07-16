@@ -1,0 +1,22 @@
+.StickerResult {
+  height: 0;
+  padding-bottom: 100%;
+  overflow: hidden;
+  background: transparent no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  transition: background-color .15s ease, opacity .3s ease !important;
+  position: relative;
+
+  .AnimatedSticker, img, canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  img {
+    object-fit: contain;
+  }
+}

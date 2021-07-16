@@ -1,4 +1,5 @@
 import {
+  ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
 
@@ -304,4 +305,15 @@ export type EmojiKeywords = {
   isLoading?: boolean;
   version: number;
   keywords: Record<string, string[]>;
+};
+
+export type InlineBotSettings = {
+  id: number;
+  help?: string;
+  query?: string;
+  offset?: string;
+  canLoadMore?: boolean;
+  results?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
+  isGallery?: boolean;
+  switchPm?: ApiBotInlineSwitchPm;
 };

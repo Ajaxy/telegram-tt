@@ -1,0 +1,54 @@
+.InlineBotTooltip {
+  .switch-pm .title {
+    margin: 0 auto;
+    font-weight: 500;
+  }
+
+  --border-radius-default: 0;
+
+  &.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1px;
+    padding: 0;
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .switch-pm {
+      grid-column: 1 / -1;
+      .ListItem-button {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+
+    .GifButton {
+      grid-column-end: initial;
+    }
+
+    .StickerButton {
+      width: initial;
+      height: 0;
+      margin: 0;
+      padding-bottom: 100%;
+      border-radius: 0;
+
+      .AnimatedSticker, img, canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+
+        @media (min-width: 600px) {
+          top: .25rem;
+          left: .25rem;
+          width: calc(100% - .5rem) !important;
+          height: calc(100% - .5rem) !important;
+        }
+      }
+    }
+  }
+}

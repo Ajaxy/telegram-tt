@@ -3,7 +3,6 @@ import {
 } from '../../../../lib/teact/teact';
 
 import { EDITABLE_INPUT_ID } from '../../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import {
   EmojiData, EmojiModule, EmojiRawData, uncompressEmoji,
@@ -163,11 +162,9 @@ export default function useEmojiTooltip(
     if (atIndex !== -1) {
       onUpdateHtml(`${html.substr(0, atIndex)}${textEmoji}`);
       const messageInput = document.getElementById(inputId)!;
-      if (!IS_SINGLE_COLUMN_LAYOUT) {
-        requestAnimationFrame(() => {
-          focusEditableElement(messageInput, true);
-        });
-      }
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput, true);
+      });
     }
 
     unmarkIsOpen();

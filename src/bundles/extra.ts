@@ -36,6 +36,7 @@ export { default as CustomSendMenu } from '../components/middle/composer/CustomS
 export { default as DropArea } from '../components/middle/composer/DropArea';
 export { default as TextFormatter } from '../components/middle/composer/TextFormatter';
 export { default as EmojiTooltip } from '../components/middle/composer/EmojiTooltip';
+export { default as InlineBotTooltip } from '../components/middle/composer/InlineBotTooltip';
 
 export { default as RightSearch } from '../components/right/RightSearch';
 export { default as StickerSearch } from '../components/right/StickerSearch';

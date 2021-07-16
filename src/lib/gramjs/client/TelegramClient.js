@@ -22,9 +22,11 @@ const { uploadFile } = require('./uploadFile');
 const { updateTwoFaSettings } = require('./2fa');
 
 const DEFAULT_DC_ID = 2;
+const WEBDOCUMENT_DC_ID = 4;
 const DEFAULT_IPV4_IP = 'venus.web.telegram.org';
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]';
 const BORROWED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
+const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
 
 const PING_INTERVAL = 3000; // 3 sec
 const PING_TIMEOUT = 5000; // 5 sec
@@ -571,10 +573,41 @@ class TelegramClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _downloadWebDocument(media, args) {
-        throw new Error('not implemented');
+    async _downloadWebDocument(media) {
+        try {
+            const buff = [];
+            let offset = 0;
+            while (true) {
+                const downloaded = new requests.upload.GetWebFile({
+                    location: new constructors.InputWebFileLocation({
+                        url: media.url,
+                        accessHash: media.accessHash,
+                    }),
+                    offset,
+                    limit: WEBDOCUMENT_REQUEST_PART_SIZE,
+                });
+                const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+                const res = await sender.send(downloaded);
+                offset += 131072;
+                if (res.bytes.length) {
+                    buff.push(res.bytes);
+                    if (res.bytes.length < WEBDOCUMENT_REQUEST_PART_SIZE) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            return Buffer.concat(buff);
+        } catch (e) {
+            // the file is no longer saved in telegram's cache.
+            if (e.message === 'WEBFILE_NOT_AVAILABLE') {
+                return Buffer.alloc(0);
+            } else {
+                throw e;
+            }
+        }
     }
-
     // region Invoking Telegram request
     /**
      * Invokes a MTProtoRequest (sends and receives it) and returns its result

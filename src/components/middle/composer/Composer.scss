@@ -177,6 +177,11 @@
 .message-input-wrapper {
   display: flex;
 
+  > .Spinner {
+    align-self: center;
+    --spinner-size: 1.5rem;
+  }
+
   > .Button {
     flex-shrink: 0;
     background: none !important;
@@ -275,6 +280,7 @@
     }
   }
 
+  .forced-placeholder,
   .placeholder-text {
     position: absolute;
     bottom: .9375rem;
@@ -284,9 +290,17 @@
     text-align: initial;
 
     @media (max-width: 600px) {
-      bottom: 0.6875rem;
+      bottom: .625rem;
     }
+  }
 
+  .forced-placeholder {
+    z-index: var(--z-below);
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
   }
 
   &[dir=rtl] .placeholder-text {

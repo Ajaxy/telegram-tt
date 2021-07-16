@@ -1,0 +1,62 @@
+.BaseResult {
+  &.chat-item-clickable > .ListItem-button {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+
+    .title {
+      display: block;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .thumb {
+    background-color: var(--color-background-secondary);
+    flex: 0 0 3rem;
+    width: 3rem;
+    height: 3rem;
+    line-height: 3rem;
+    border-radius: var(--border-radius-default-tiny);
+    display: inline-flex;
+    align-content: center;
+    justify-content: center;
+    margin-inline-end: .5rem;
+    overflow: hidden;
+    font-size: 1.5rem;
+
+    img:not(.emoji) {
+      width: 100%;
+      object-fit: cover;
+    }
+
+    img.emoji {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin: .75rem 0 0;
+    }
+  }
+
+  .content-inner {
+    min-width: 0;
+  }
+
+  .title {
+    font-weight: 500;
+    text-align: left;
+    unicode-bidi: plaintext;
+  }
+
+  .description {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    unicode-bidi: plaintext;
+  }
+  &[dir=rtl] .title,
+  &[dir=rtl] .description {
+    text-align: right;
+  }
+}

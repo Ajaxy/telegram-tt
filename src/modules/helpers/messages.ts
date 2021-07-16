@@ -48,7 +48,7 @@ export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji
   }
 
   if (sticker) {
-    return `${sticker.emoji} ${lang('AttachSticker')} `;
+    return `${sticker.emoji || ''} ${lang('AttachSticker')}`.trim();
   }
 
   if (audio) {

@@ -11,8 +11,10 @@ export default function insertHtmlInSelection(html: string) {
     if (lastInsertedNode) {
       range.setStartAfter(lastInsertedNode);
       range.setEndAfter(lastInsertedNode);
-      selection.removeAllRanges();
-      selection.addRange(range);
+    } else {
+      range.collapse(false);
     }
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 }

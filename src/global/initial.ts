@@ -73,6 +73,11 @@ export const INITIAL_STATE: GlobalState = {
     search: {},
   },
 
+  inlineBots: {
+    isLoading: false,
+    byUsername: {},
+  },
+
   globalSearch: {},
 
   userSearch: {},
@@ -90,6 +95,8 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   topPeers: {},
+
+  topInlineBots: {},
 
   mediaViewer: {},
 

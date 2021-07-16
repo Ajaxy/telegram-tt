@@ -40,6 +40,7 @@ import {
   NotifyException,
   LangCode,
   EmojiKeywords,
+  InlineBotSettings,
   NewChatMembersProgress,
 } from '../types';
 
@@ -225,6 +226,11 @@ export type GlobalState = {
     };
   };
 
+  inlineBots: {
+    isLoading: boolean;
+    byUsername: Record<string, false | InlineBotSettings>;
+  };
+
   globalSearch: {
     query?: string;
     date?: number;
@@ -304,6 +310,12 @@ export type GlobalState = {
   };
 
   topPeers: {
+    hash?: number;
+    userIds?: number[];
+    lastRequestedAt?: number;
+  };
+
+  topInlineBots: {
     hash?: number;
     userIds?: number[];
     lastRequestedAt?: number;
@@ -474,7 +486,8 @@ export type ActionTypes = (
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' |
   // bots
-  'clickInlineButton' | 'sendBotCommand' |
+  'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
+  'resetInlineBot' |
   // misc
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |

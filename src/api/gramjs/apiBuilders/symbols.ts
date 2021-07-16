@@ -5,6 +5,8 @@ import { MEMOJI_STICKER_ID } from '../../../config';
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 import localDb from '../localDb';
 
+const ANIMATED_STICKER_MIME_TYPE = 'application/x-tgsticker';
+
 export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
@@ -15,7 +17,12 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
       attr instanceof GramJs.DocumentAttributeSticker
     ));
 
-  if (!stickerAttribute) {
+  const fileAttribute = document.mimeType === ANIMATED_STICKER_MIME_TYPE && document.attributes
+    .find((attr: any): attr is GramJs.DocumentAttributeFilename => (
+      attr instanceof GramJs.DocumentAttributeFilename
+    ));
+
+  if (!stickerAttribute && !fileAttribute) {
     return undefined;
   }
 
@@ -24,9 +31,11 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
       attr instanceof GramJs.DocumentAttributeImageSize
     ));
 
-  const stickerSetInfo = stickerAttribute.stickerset as GramJs.InputStickerSetID;
-  const emoji = stickerAttribute.alt;
-  const isAnimated = document.mimeType === 'application/x-tgsticker';
+  const stickerSetInfo = stickerAttribute && stickerAttribute.stickerset instanceof GramJs.InputStickerSetID
+    ? stickerAttribute.stickerset
+    : undefined;
+  const emoji = stickerAttribute ? stickerAttribute.alt : undefined;
+  const isAnimated = document.mimeType === ANIMATED_STICKER_MIME_TYPE;
   const cachedThumb = document.thumbs && document.thumbs.find(
     (s): s is GramJs.PhotoCachedSize => s instanceof GramJs.PhotoCachedSize,
   );
@@ -43,8 +52,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
 
   return {
     id: String(document.id),
-    stickerSetId: stickerSetInfo.id ? String(stickerSetInfo.id) : MEMOJI_STICKER_ID,
-    stickerSetAccessHash: String(stickerSetInfo.accessHash),
+    stickerSetId: stickerSetInfo ? String(stickerSetInfo.id) : MEMOJI_STICKER_ID,
+    stickerSetAccessHash: stickerSetInfo && String(stickerSetInfo.accessHash),
     emoji,
     isAnimated,
     width,

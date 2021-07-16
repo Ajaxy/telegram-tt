@@ -10,6 +10,7 @@ interface LocalDb {
   documents: Record<string, GramJs.Document>;
   stickerSets: Record<string, GramJs.StickerSet>;
   photos: Record<string, GramJs.Photo>;
+  webDocuments: Record<string, GramJs.TypeWebDocument>;
 }
 
 export default {
@@ -20,4 +21,5 @@ export default {
   documents: {},
   stickerSets: {},
   photos: {},
+  webDocuments: {},
 } as LocalDb;
