@@ -3,14 +3,12 @@ import React, {
 } from '../../../lib/teact/teact';
 import usePrevious from '../../../hooks/usePrevious';
 
-import { ApiChatMember, ApiUser } from '../../../api/types';
+import { ApiUser } from '../../../api/types';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
-import findInViewport from '../../../util/findInViewport';
-import isFullyVisible from '../../../util/isFullyVisible';
-import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import cycleRestrict from '../../../util/cycleRestrict';
 
 import ListItem from '../../ui/ListItem';
@@ -18,38 +16,12 @@ import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 import './MentionTooltip.scss';
 
-const VIEWPORT_MARGIN = 8;
-const SCROLL_MARGIN = 10;
-
-function setItemVisible(index: number, containerRef: Record<string, any>) {
-  const container = containerRef.current!;
-  if (!container || index < 0) {
-    return;
-  }
-  const { visibleIndexes, allElements } = findInViewport(
-    container,
-    '.chat-item-clickable',
-    VIEWPORT_MARGIN,
-    true,
-    true,
-  );
-  if (!allElements.length || !allElements[index]) {
-    return;
-  }
-  const first = visibleIndexes[0];
-  if (!visibleIndexes.includes(index)
-    || (index === first && !isFullyVisible(container, allElements[first]))) {
-    const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
-    fastSmoothScroll(container, allElements[index], position, SCROLL_MARGIN);
-  }
-}
-
 export type OwnProps = {
   isOpen: boolean;
   filter: string;
   onClose: () => void;
   onInsertUserName: (user: ApiUser, forceFocus?: boolean) => void;
-  filteredChatMembers?: ApiChatMember[];
+  filteredUsers?: ApiUser[];
   usersById?: Record<number, ApiUser>;
 };
 
@@ -59,19 +31,19 @@ const MentionTooltip: FC<OwnProps> = ({
   onClose,
   onInsertUserName,
   usersById,
-  filteredChatMembers,
+  filteredUsers,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
   const getSelectedIndex = useCallback((newIndex: number) => {
-    if (!filteredChatMembers) {
+    if (!filteredUsers) {
       return -1;
     }
-    const membersCount = filteredChatMembers!.length;
+    const membersCount = filteredUsers!.length;
     return cycleRestrict(membersCount, newIndex);
-  }, [filteredChatMembers]);
+  }, [filteredUsers]);
 
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(-1);
 
@@ -90,14 +62,14 @@ const MentionTooltip: FC<OwnProps> = ({
   }, [usersById, onInsertUserName]);
 
   const handleSelectMention = useCallback((e: KeyboardEvent) => {
-    if (filteredChatMembers && filteredChatMembers.length && selectedMentionIndex > -1) {
-      const member = filteredChatMembers[selectedMentionIndex];
+    if (filteredUsers && filteredUsers.length && selectedMentionIndex > -1) {
+      const member = filteredUsers[selectedMentionIndex];
       if (member) {
         e.preventDefault();
-        handleUserSelect(member.userId, true);
+        handleUserSelect(member.id, true);
       }
     }
-  }, [filteredChatMembers, selectedMentionIndex, handleUserSelect]);
+  }, [filteredUsers, selectedMentionIndex, handleUserSelect]);
 
   useEffect(() => (isOpen ? captureKeyboardListeners({
     onEsc: onClose,
@@ -108,28 +80,28 @@ const MentionTooltip: FC<OwnProps> = ({
   }) : undefined), [isOpen, onClose, handleArrowKey, handleSelectMention]);
 
   useEffect(() => {
-    if (filteredChatMembers && !filteredChatMembers.length) {
+    if (filteredUsers && !filteredUsers.length) {
       onClose();
     }
-  }, [filteredChatMembers, onClose]);
+  }, [filteredUsers, onClose]);
 
   useEffect(() => {
     setSelectedMentionIndex(0);
   }, [filter]);
 
   useEffect(() => {
-    setItemVisible(selectedMentionIndex, containerRef);
+    setTooltipItemVisible('.chat-item-clickable', selectedMentionIndex, containerRef);
   }, [selectedMentionIndex]);
 
   const prevChatMembers = usePrevious(
-    filteredChatMembers && filteredChatMembers.length
-      ? filteredChatMembers
+    filteredUsers && filteredUsers.length
+      ? filteredUsers
       : undefined,
     shouldRender,
   );
-  const renderedChatMembers = filteredChatMembers && !filteredChatMembers.length
+  const renderedChatMembers = filteredUsers && !filteredUsers.length
     ? prevChatMembers
-    : filteredChatMembers;
+    : filteredUsers;
 
   if (!shouldRender || (renderedChatMembers && !renderedChatMembers.length)) {
     return undefined;
@@ -142,15 +114,15 @@ const MentionTooltip: FC<OwnProps> = ({
 
   return (
     <div className={className} ref={containerRef}>
-      {renderedChatMembers && renderedChatMembers.map(({ userId }, index) => (
+      {renderedChatMembers && renderedChatMembers.map(({ id }, index) => (
         <ListItem
-          key={userId}
+          key={id}
           className="chat-item-clickable scroll-item"
-          onClick={() => handleUserSelect(userId)}
+          onClick={() => handleUserSelect(id)}
           focus={selectedMentionIndex === index}
         >
           <PrivateChatInfo
-            userId={userId}
+            userId={id}
             avatarSize="small"
             withUsername
           />

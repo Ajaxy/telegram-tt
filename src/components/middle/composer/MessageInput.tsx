@@ -22,6 +22,7 @@ import useFlag from '../../../hooks/useFlag';
 import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import useLang from '../../../hooks/useLang';
+import renderText from '../../common/helpers/renderText';
 
 import TextFormatter from './TextFormatter';
 
@@ -36,6 +37,7 @@ type OwnProps = {
   editableInputId?: string;
   html: string;
   placeholder: string;
+  forcedPlaceholder?: string;
   shouldSetFocus: boolean;
   shouldSuppressFocus?: boolean;
   shouldSuppressTextFormatter?: boolean;
@@ -78,6 +80,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   editableInputId,
   html,
   placeholder,
+  forcedPlaceholder,
   shouldSetFocus,
   shouldSuppressFocus,
   shouldSuppressTextFormatter,
@@ -322,10 +325,6 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   useEffect(() => {
-    if (IS_TOUCH_ENV) {
-      return;
-    }
-
     focusInput();
   }, [currentChatId, focusInput, replyingToId, shouldSetFocus]);
 
@@ -382,13 +381,14 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         onTouchCancel={handleTouchSelection}
       />
       <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
-      <span className="placeholder-text" dir="auto">{placeholder}</span>
+      {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
       <TextFormatter
         isOpen={isTextFormatterOpen}
         anchorPosition={textFormatterAnchorPosition}
         selectedRange={selectedRange}
         onClose={handleCloseTextFormatter}
       />
+      {forcedPlaceholder && <span className="forced-placeholder">{renderText(forcedPlaceholder!)}</span>}
     </div>
   );
 };

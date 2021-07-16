@@ -69,7 +69,6 @@
     }
 
     & > .MessageMeta {
-      position: relative;
       top: auto;
       bottom: -.5rem !important;
       margin-top: -.25rem;
@@ -164,8 +163,12 @@
     }
 
     .via {
-      padding: 0 0.2rem;
+      padding-right: .25rem;
       font-weight: 400;
+    }
+
+    span + .via {
+      padding-left: .25rem;
     }
 
     .admin-title {
@@ -311,6 +314,30 @@
     --border-top-left-radius: 0;
     --border-top-right-radius: 0;
   }
+
+  &.custom-shape.is-via-bot {
+    font-size: inherit !important;
+
+    .message-title {
+      display: inline-flex;
+      position: relative;
+      top: .125rem;
+      max-width: calc(100% - 3rem);
+      margin-left: calc(100% - 3rem);
+      padding: 0 .5rem;
+      background-color: var(--background-color);
+      border-radius: var(--border-radius-messages);
+
+      .Message.own & {
+        margin-left: -3rem;
+      }
+    }
+
+    .media-inner {
+      margin-top: 0.375rem;
+    }
+  }
+
 }
 
 .message-content.media, .WebPage {

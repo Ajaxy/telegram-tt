@@ -13,7 +13,8 @@ export async function fetch(cacheName: string, key: string, type: Type) {
   }
 
   try {
-    const request = new Request(key);
+    // To avoid the error "Request scheme 'webdocument' is unsupported"
+    const request = new Request(key.replace(/:/g, '_'));
     const cache = await cacheApi.open(cacheName);
     const response = await cache.match(request);
     if (!response) {
@@ -60,7 +61,8 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
 
   try {
     const cacheData = typeof data === 'string' || data instanceof Blob ? data : JSON.stringify(data);
-    const request = new Request(key);
+    // To avoid the error "Request scheme 'webdocument' is unsupported"
+    const request = new Request(key.replace(/:/g, '_'));
     const response = new Response(cacheData);
     const cache = await cacheApi.open(cacheName);
     return await cache.put(request, response);

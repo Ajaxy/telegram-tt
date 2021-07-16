@@ -53,7 +53,8 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline'
+  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
+  'loadTopInlineBots'
 )>;
 
 const ANIMATION_DURATION = 350;
@@ -81,6 +82,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   loadNotificationSettings,
   loadNotificationExceptions,
   updateIsOnline,
+  loadTopInlineBots,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -95,8 +97,12 @@ const Main: FC<StateProps & DispatchProps> = ({
       loadAnimatedEmojis();
       loadNotificationSettings();
       loadNotificationExceptions();
+      loadTopInlineBots();
     }
-  }, [lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline]);
+  }, [
+    lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline,
+    loadTopInlineBots,
+  ]);
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
@@ -234,5 +240,6 @@ export default memo(withGlobal(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
+    'loadTopInlineBots',
   ]),
 )(Main));

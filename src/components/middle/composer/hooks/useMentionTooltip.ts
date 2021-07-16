@@ -1,14 +1,19 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import {
+  useCallback, useEffect, useState, useMemo,
+} from '../../../../lib/teact/teact';
 
 import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/types';
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import { getUserFirstOrLastName } from '../../../../modules/helpers';
 import searchUserName from '../helpers/searchUserName';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../../util/environment';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import useFlag from '../../../../hooks/useFlag';
+import { unique } from '../../../../util/iteratees';
+import { throttle } from '../../../../util/schedulers';
 
+const tempEl = document.createElement('div');
 const RE_NOT_USERNAME_SEARCH = /[^@_\d\wа-яё]+/i;
+const runThrottled = throttle((cb) => cb(), 500, true);
 
 export default function useMentionTooltip(
   canSuggestMembers: boolean | undefined,
@@ -16,27 +21,42 @@ export default function useMentionTooltip(
   onUpdateHtml: (html: string) => void,
   inputId: string = EDITABLE_INPUT_ID,
   groupChatMembers?: ApiChatMember[],
+  topInlineBotIds?: number[],
   currentUserId?: number,
   usersById?: Record<number, ApiUser>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const [currentFilter, setCurrentFilter] = useState('');
-  const [filteredMembers, setFilteredMembers] = useState<ApiChatMember[]>([]);
+  const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();
 
-  const getFilteredMembers = useCallback((filter) => {
-    if (!groupChatMembers || !usersById) {
-      return undefined;
+  const topInlineBots = useMemo(() => {
+    return (topInlineBotIds || []).map((id) => usersById && usersById[id]).filter<ApiUser>(Boolean as any);
+  }, [topInlineBotIds, usersById]);
+
+  const getFilteredUsers = useCallback((filter, withInlineBots: boolean) => {
+    if (!(groupChatMembers || topInlineBotIds) || !usersById) {
+      setUsersToMention(undefined);
+
+      return;
     }
+    runThrottled(() => {
+      const inlineBots = (withInlineBots ? topInlineBots : []).filter((inlineBot) => {
+        return !filter || searchUserName(filter, inlineBot);
+      });
 
-    return groupChatMembers.filter(({ userId }) => {
-      const user = usersById[userId];
-      if (userId === currentUserId || !user) {
-        return false;
-      }
+      const chatMembers = (groupChatMembers || [])
+        .map(({ userId }) => usersById[userId])
+        .filter((user) => {
+          if (!user || user.id === currentUserId) {
+            return false;
+          }
 
-      return !filter || searchUserName(filter, user);
+          return !filter || searchUserName(filter, user);
+        });
+
+      setUsersToMention(unique(inlineBots.concat(chatMembers)));
     });
-  }, [groupChatMembers, currentUserId, usersById]);
+  }, [currentUserId, groupChatMembers, topInlineBotIds, topInlineBots, usersById]);
 
   useEffect(() => {
     if (!canSuggestMembers || !html.length) {
@@ -44,22 +64,24 @@ export default function useMentionTooltip(
       return;
     }
 
-    const usernameFilter = getUsernameFilter(html);
+    const usernameFilter = html.includes('@') && getUsernameFilter(html);
 
     if (usernameFilter) {
       const filter = usernameFilter ? usernameFilter.substr(1) : '';
-      const membersToMention = getFilteredMembers(filter);
-      if (membersToMention && membersToMention.length) {
-        markIsOpen();
-        setCurrentFilter(filter);
-        setFilteredMembers(membersToMention);
-      } else {
-        unmarkIsOpen();
-      }
+      setCurrentFilter(filter);
+      getFilteredUsers(filter, canSuggestInlineBots(html));
     } else {
       unmarkIsOpen();
     }
-  }, [canSuggestMembers, html, getFilteredMembers, markIsOpen, unmarkIsOpen]);
+  }, [canSuggestMembers, html, getFilteredUsers, markIsOpen, unmarkIsOpen]);
+
+  useEffect(() => {
+    if (usersToMention && usersToMention.length) {
+      markIsOpen();
+    } else {
+      unmarkIsOpen();
+    }
+  }, [markIsOpen, unmarkIsOpen, usersToMention]);
 
   const insertMention = useCallback((user: ApiUser, forceFocus = false) => {
     if (!user.username && !getUserFirstOrLastName(user)) {
@@ -80,11 +102,9 @@ export default function useMentionTooltip(
     if (atIndex !== -1) {
       onUpdateHtml(`${html.substr(0, atIndex)}${insertedHtml}&nbsp;`);
       const messageInput = document.getElementById(inputId)!;
-      if (!IS_SINGLE_COLUMN_LAYOUT) {
-        requestAnimationFrame(() => {
-          focusEditableElement(messageInput, forceFocus);
-        });
-      }
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput, forceFocus);
+      });
     }
 
     unmarkIsOpen();
@@ -95,12 +115,11 @@ export default function useMentionTooltip(
     mentionFilter: currentFilter,
     closeMentionTooltip: unmarkIsOpen,
     insertMention,
-    mentionFilteredMembers: filteredMembers,
+    mentionFilteredUsers: usersToMention,
   };
 }
 
 function getUsernameFilter(html: string) {
-  const tempEl = document.createElement('div');
   tempEl.innerHTML = html;
   const text = tempEl.innerText.replace(/\n$/i, '');
 
@@ -115,4 +134,11 @@ function getUsernameFilter(html: string) {
   }
 
   return lastWord;
+}
+
+function canSuggestInlineBots(html: string) {
+  tempEl.innerHTML = html;
+  const text = tempEl.innerText;
+
+  return text.startsWith('@');
 }

@@ -21,8 +21,8 @@ export interface ApiPhoto {
 export interface ApiSticker {
   id: string;
   stickerSetId: string;
-  stickerSetAccessHash: string;
-  emoji: string;
+  stickerSetAccessHash?: string;
+  emoji?: string;
   isAnimated: boolean;
   width?: number;
   height?: number;

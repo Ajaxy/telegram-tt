@@ -43,6 +43,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     status: buildApiUserStatus(mtpUser.status),
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
     ...(avatarHash && { avatarHash }),
+    ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
   };
 }
 

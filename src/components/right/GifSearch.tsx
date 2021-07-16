@@ -119,7 +119,6 @@ const GifSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       >
         {renderContent()}
       </InfiniteScroll>
-
     </div>
   );
 };

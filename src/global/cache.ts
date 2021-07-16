@@ -140,6 +140,7 @@ function updateCache() {
       'currentUserId',
       'contactList',
       'topPeers',
+      'topInlineBots',
       'recentEmojis',
       'push',
       'shouldShowContextMenuHint',

@@ -20,11 +20,12 @@ type OwnProps = {
   gif: ApiVideo;
   observeIntersection: ObserveFn;
   isDisabled?: boolean;
+  className?: string;
   onClick: (gif: ApiVideo) => void;
 };
 
 const GifButton: FC<OwnProps> = ({
-  gif, observeIntersection, isDisabled, onClick,
+  gif, observeIntersection, isDisabled, className, onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -53,17 +54,18 @@ const GifButton: FC<OwnProps> = ({
     [onClick, gif, videoData],
   );
 
-  const className = buildClassName(
+  const fullClassName = buildClassName(
     'GifButton',
     gif.width && gif.height && gif.width < gif.height ? 'vertical' : 'horizontal',
     transitionClassNames,
     localMediaHash,
+    className,
   );
 
   return (
     <div
       ref={ref}
-      className={className}
+      className={fullClassName}
       onClick={handleClick}
     >
       {hasThumbnail && (

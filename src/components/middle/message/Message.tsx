@@ -706,7 +706,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   function renderSenderName() {
-    const shouldRender = !customShape && (
+    const shouldRender = !(customShape && !viaBotId) && (
       (withSenderName && !photo && !video) || asForwarded || viaBotId || forceSenderName
     ) && (!isInDocumentGroup || isFirstInDocumentGroup);
 
@@ -716,7 +716,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
     let senderTitle;
     let senderColor;
-    if (senderPeer) {
+    if (senderPeer && !(customShape && viaBotId)) {
       senderTitle = getSenderTitle(lang, senderPeer);
 
       if (!asForwarded) {
