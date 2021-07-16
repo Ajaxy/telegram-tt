@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 import { InlineBotSettings } from '../../../../types';
 import useFlag from '../../../../hooks/useFlag';
@@ -15,12 +15,20 @@ export default function useInlineBotTooltip(
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
-  const [botSettings, setBotSettings] = useState<undefined | false | InlineBotSettings>();
   const text = getPlainText(html);
   const { queryInlineBot, resetInlineBot } = getDispatch();
   const { username, query, canShowHelp } = parseStartWithUsernameString(text);
   const usernameLowered = username.toLowerCase();
   const prevUsername = usePrevious(username);
+  const inlineBotData = inlineBots && inlineBots[usernameLowered];
+  const {
+    id: botId,
+    switchPm,
+    offset,
+    results,
+    isGallery,
+    help,
+  } = inlineBotData || {};
 
   useEffect(() => {
     if (isAllowed && usernameLowered && chatId) {
@@ -30,26 +38,17 @@ export default function useInlineBotTooltip(
 
   const loadMore = useCallback(() => {
     queryInlineBot({
-      chatId, username: usernameLowered, query, offset: botSettings && botSettings.offset,
+      chatId, username: usernameLowered, query, offset,
     });
-  }, [botSettings, chatId, query, queryInlineBot, usernameLowered]);
-
-  const inlineBotData = inlineBots && inlineBots[usernameLowered];
+  }, [offset, chatId, query, queryInlineBot, usernameLowered]);
 
   useEffect(() => {
-    setBotSettings(inlineBotData);
-  }, [inlineBotData]);
-
-  useEffect(() => {
-    if (
-      isAllowed && botSettings && botSettings.id
-      && (botSettings.switchPm || (botSettings.results && botSettings.results.length))
-    ) {
+    if (isAllowed && botId && (switchPm || (results && results.length))) {
       markIsOpen();
     } else {
       unmarkIsOpen();
     }
-  }, [botSettings, isAllowed, markIsOpen, unmarkIsOpen]);
+  }, [botId, isAllowed, markIsOpen, results, switchPm, unmarkIsOpen]);
 
   if (prevUsername !== username) {
     resetInlineBot({ username: prevUsername });
@@ -60,11 +59,11 @@ export default function useInlineBotTooltip(
     closeTooltip: unmarkIsOpen,
     loadMore,
     username,
-    id: botSettings ? botSettings.id : undefined,
-    isGallery: botSettings ? botSettings.isGallery : undefined,
-    switchPm: botSettings ? botSettings.switchPm : undefined,
-    results: botSettings ? botSettings.results : undefined,
-    help: canShowHelp && botSettings && botSettings.help ? `@${username} ${botSettings.help}` : undefined,
+    id: botId,
+    isGallery,
+    switchPm,
+    results,
+    help: canShowHelp && help ? `@${username} ${help}` : undefined,
   };
 }
 

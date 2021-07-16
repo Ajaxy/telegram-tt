@@ -12,11 +12,11 @@ import {
 } from '../../selectors';
 import { addChats, addUsers } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { throttle } from '../../../util/schedulers';
+import { debounce } from '../../../util/schedulers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 
 const TOP_PEERS_REQUEST_COOLDOWN = 60000; // 1 min
-const runThrottledForSearch = throttle((cb) => cb(), 500, false);
+const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 
 addReducer('clickInlineButton', (global, actions, payload) => {
   const { button } = payload;
@@ -144,7 +144,7 @@ addReducer('queryInlineBot', ((global, actions, payload) => {
       return;
     }
 
-    void runThrottledForSearch(() => {
+    void runDebouncedForSearch(() => {
       searchInlineBot({
         username,
         inlineBotData: inlineBotData as InlineBotSettings,
@@ -220,11 +220,12 @@ async function searchInlineBot({
     return;
   }
 
+  const shouldReplaceSettings = inlineBotData.query !== query;
   global = replaceInlineBotsIsLoading(global, true);
   global = replaceInlineBotSettings(global, username, {
     ...inlineBotData,
     query,
-    ...(inlineBotData && inlineBotData.query !== query && { offset: undefined }),
+    ...(shouldReplaceSettings && { offset: undefined, results: [] }),
   });
   setGlobal(global);
 
@@ -232,7 +233,7 @@ async function searchInlineBot({
     bot,
     chat,
     query,
-    offset,
+    offset: shouldReplaceSettings ? undefined : offset,
   });
 
   const newInlineBotData = global.inlineBots.byUsername[username];
@@ -249,7 +250,7 @@ async function searchInlineBot({
     ...newInlineBotData,
     help: result.help,
     isGallery: result.isGallery,
-    switchPm: result.switchPm,
+    ...(result.switchPm && { switchPm: result.switchPm }),
     canLoadMore: result.results.length > 0 && Boolean(result.nextOffset),
     results: newInlineBotData.offset === '' || newInlineBotData.offset === result.nextOffset
       ? result.results

@@ -325,6 +325,10 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   useEffect(() => {
+    if (IS_TOUCH_ENV) {
+      return;
+    }
+
     focusInput();
   }, [currentChatId, focusInput, replyingToId, shouldSetFocus]);
 
