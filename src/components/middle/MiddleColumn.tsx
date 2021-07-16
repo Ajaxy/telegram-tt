@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { MAIN_THREAD_ID } from '../../api/types';
+import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
 import { GlobalActions, MessageListType } from '../../global/types';
 import { ThemeKey } from '../../types';
 
@@ -69,7 +69,8 @@ type StateProps = {
   isPinnedMessageList?: boolean;
   isScheduledMessageList?: boolean;
   canPost?: boolean;
-  messageSendingRestrictionReason?: string;
+  currentUserBannedRights?: ApiChatBannedRights;
+  defaultBannedRights?: ApiChatBannedRights;
   hasPinnedOrAudioMessage?: boolean;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
@@ -104,7 +105,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   isPinnedMessageList,
   isScheduledMessageList,
   canPost,
-  messageSendingRestrictionReason,
+  currentUserBannedRights,
+  defaultBannedRights,
   hasPinnedOrAudioMessage,
   pinnedMessagesCount,
   customBackground,
@@ -127,6 +129,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 }) => {
   const { width: windowWidth } = useWindowSize();
 
+  const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
   const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
@@ -235,6 +238,11 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     !isSelectModeActive && 'shown',
   );
 
+
+  const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
+    lang, currentUserBannedRights, defaultBannedRights,
+  );
+
   // CSS Variables calculation doesn't work properly with transforms, so we calculate transform values in JS
   const {
     composerHiddenScale, toolbarHiddenScale,
@@ -244,8 +252,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     () => calculateMiddleFooterTransforms(windowWidth, renderingCanPost),
     [renderingCanPost, windowWidth],
   );
-
-  const lang = useLang();
 
   const footerClassName = buildClassName(
     'middle-column-footer',
@@ -443,7 +449,8 @@ export default memo(withGlobal(
       canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_SINGLE_COLUMN_LAYOUT),
       isPinnedMessageList,
       isScheduledMessageList,
-      messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
+      currentUserBannedRights: chat && chat.currentUserBannedRights,
+      defaultBannedRights: chat && chat.defaultBannedRights,
       hasPinnedOrAudioMessage: (
         threadId !== MAIN_THREAD_ID
         || Boolean(pinnedIds && pinnedIds.length)

@@ -135,6 +135,7 @@ export interface ApiChatBannedRights {
   changeInfo?: true;
   inviteUsers?: true;
   pinMessages?: true;
+  untilDate?: number;
 }
 
 export interface ApiRestrictionReason {

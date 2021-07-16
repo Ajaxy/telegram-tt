@@ -176,9 +176,9 @@ export function formatVoiceRecordDuration(durationInMs: number) {
   return `${parts.join(':')},${String(milliseconds).padStart(2, '0')}`;
 }
 
-export function formatDateToString(date: Date) {
+export function formatDateToString(date: Date, locale = 'en-US') {
   return date.toLocaleString(
-    'en-US',
+    locale,
     {
       year: 'numeric',
       month: 'short',
