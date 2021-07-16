@@ -104,7 +104,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setPermissions((p) => ({
       ...p,
-      [name]: getUpdatedPermissionValue(p[name as keyof ApiChatBannedRights]),
+      [name]: getUpdatedPermissionValue(p[name as Exclude<keyof ApiChatBannedRights, 'untilDate'>]),
       ...(name === 'sendStickers' && {
         sendGifs: getUpdatedPermissionValue(p[name]),
       }),

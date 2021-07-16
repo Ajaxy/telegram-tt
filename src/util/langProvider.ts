@@ -11,6 +11,7 @@ interface LangFn {
   (key: string, value?: any, format?: 'i'): any;
 
   isRtl?: boolean;
+  code?: string;
 }
 
 const FALLBACK_LANG_CODE = 'en';
@@ -124,6 +125,7 @@ export async function setLanguage(langCode: string, callback?: NoneToVoidFunctio
   const { languages } = getGlobal().settings.byKey;
   const langInfo = languages ? languages.find((l) => l.langCode === langCode) : undefined;
   getTranslation.isRtl = Boolean(langInfo && langInfo.rtl);
+  getTranslation.code = langCode;
 
   if (callback) {
     callback();

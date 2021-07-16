@@ -6,12 +6,16 @@ import {
   ApiChatFolder,
   MAIN_THREAD_ID,
 } from '../../api/types';
+
 import { NotifyException, NotifySettings } from '../../types';
+import { LangFn } from '../../hooks/useLang';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
-import { LangFn } from '../../hooks/useLang';
+import { formatDateToString, formatTime } from '../../util/dateFormat';
+
+const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 const VEIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
@@ -176,12 +180,24 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
   };
 }
 
-export function getMessageSendingRestrictionReason(chat: ApiChat) {
-  if (chat.currentUserBannedRights && chat.currentUserBannedRights.sendMessages) {
-    return 'You are not allowed to send messages in this chat.';
+export function getMessageSendingRestrictionReason(
+  lang: LangFn, currentUserBannedRights?: ApiChatBannedRights, defaultBannedRights?: ApiChatBannedRights,
+) {
+  if (currentUserBannedRights && currentUserBannedRights.sendMessages) {
+    const { untilDate } = currentUserBannedRights;
+    return untilDate && untilDate < FOREVER_BANNED_DATE
+      ? lang(
+        'Channel.Persmission.Denied.SendMessages.Until',
+        lang(
+          'formatDateAtTime',
+          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(untilDate * 1000)],
+        ),
+      )
+      : lang('Channel.Persmission.Denied.SendMessages.Forever');
   }
-  if (chat.defaultBannedRights && chat.defaultBannedRights.sendMessages) {
-    return 'Sending messages is not allowed in this chat.';
+
+  if (defaultBannedRights && defaultBannedRights.sendMessages) {
+    return lang('Channel.Persmission.Denied.SendMessages.DefaultRestrictedText');
   }
 
   return undefined;

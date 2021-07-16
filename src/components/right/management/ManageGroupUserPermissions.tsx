@@ -82,7 +82,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setPermissions((p) => ({
       ...p,
-      [name]: getUpdatedPermissionValue(p[name as keyof ApiChatBannedRights]),
+      [name]: getUpdatedPermissionValue(p[name as Exclude<keyof ApiChatBannedRights, 'untilDate'>]),
       ...(name === 'sendStickers' && {
         sendGifs: getUpdatedPermissionValue(p[name]),
       }),
@@ -117,7 +117,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [chat, selectedChatMemberId, updateChatMemberBannedRights]);
 
-  const getControlIsDisabled = useCallback((key: keyof ApiChatBannedRights) => {
+  const getControlIsDisabled = useCallback((key: Exclude<keyof ApiChatBannedRights, 'untilDate'>) => {
     if (isFormFullyDisabled) {
       return true;
     }
