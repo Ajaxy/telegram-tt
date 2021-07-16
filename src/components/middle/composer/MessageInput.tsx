@@ -233,7 +233,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       e.target.removeEventListener('keyup', handleKeyUp);
     }
 
-    if (e.metaKey) {
+    if (e.metaKey && !html.length) {
       const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
       if (targetIndexDelta) {
         e.preventDefault();

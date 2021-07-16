@@ -10,7 +10,7 @@ import {
 import { NotifyException, NotifySettings } from '../../../types';
 
 import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../../../config';
-import { IS_ANDROID } from '../../../util/environment';
+import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
@@ -166,7 +166,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isActive && orderedIds) {
-        if (e.ctrlKey && e.code.startsWith('Digit')) {
+        if (IS_PWA && ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
           const [, digit] = e.code.match(/Digit(\d)/) || [];
           if (!digit) return;
 
