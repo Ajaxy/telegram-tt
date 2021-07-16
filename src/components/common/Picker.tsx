@@ -26,6 +26,7 @@ type OwnProps = {
   notFoundText?: string;
   searchInputId?: string;
   isLoading?: boolean;
+  noScrollRestore?: boolean;
   onSelectedIdsChange: (ids: number[]) => void;
   onFilterChange: (value: string) => void;
   onLoadMore?: () => void;
@@ -45,6 +46,7 @@ const Picker: FC<OwnProps> = ({
   notFoundText,
   searchInputId,
   isLoading,
+  noScrollRestore,
   onSelectedIdsChange,
   onFilterChange,
   onLoadMore,
@@ -107,6 +109,7 @@ const Picker: FC<OwnProps> = ({
           className="picker-list custom-scroll"
           items={viewportIds}
           onLoadMore={getMore}
+          noScrollRestore={noScrollRestore}
         >
           {viewportIds.map((id) => (
             <ListItem

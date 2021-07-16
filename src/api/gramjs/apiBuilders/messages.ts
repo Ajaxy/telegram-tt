@@ -573,74 +573,104 @@ function buildAction(
   }
 
   let text = '';
+  const translationValues = [];
   let type: ApiAction['type'] = 'other';
   let photo: ApiPhoto | undefined;
 
-  const targetUserId = 'users' in action
-    // Api returns array of userIds, but no action currently has multiple users in it
-    ? action.users && action.users[0]
-    : ('userId' in action && action.userId) || undefined;
+  const targetUserIds = 'users' in action
+    ? action.users && action.users
+    : ('userId' in action && [action.userId]) || [];
   let targetChatId: number | undefined;
 
   if (action instanceof GramJs.MessageActionChatCreate) {
-    text = `%action_origin% created the group «${action.title}»`;
+    text = 'Notification.CreatedChatWithTitle';
+    translationValues.push('%action_origin%', action.title);
   } else if (action instanceof GramJs.MessageActionChatEditTitle) {
-    text = isChannelPost
-      ? `Channel renamed to «${action.title}»`
-      : `%action_origin% changed group name to «${action.title}»`;
+    if (isChannelPost) {
+      text = 'Channel.MessageTitleUpdated';
+      translationValues.push(action.title);
+    } else {
+      text = 'Notification.ChangedGroupName';
+      translationValues.push('%action_origin%', action.title);
+    }
   } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
-    text = isChannelPost
-      ? 'Channel photo updated'
-      : '%action_origin% updated group photo';
+    if (isChannelPost) {
+      text = 'Channel.MessagePhotoUpdated';
+    } else {
+      text = 'Notification.ChangedGroupPhoto';
+      translationValues.push('%action_origin%');
+    }
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
-    text = isChannelPost
-      ? 'Channel photo was deleted'
-      : 'Chat photo was deleted';
+    if (isChannelPost) {
+      text = 'Channel.MessagePhotoRemoved';
+    } else {
+      text = 'Group.MessagePhotoRemoved';
+    }
   } else if (action instanceof GramJs.MessageActionChatAddUser) {
-    text = !senderId || senderId === targetUserId
-      ? '%target_user% joined the group'
-      : '%action_origin% added %target_user% to the group';
+    if (!senderId || targetUserIds.includes(senderId)) {
+      text = 'Notification.JoinedChat';
+      translationValues.push('%target_user%');
+    } else {
+      text = 'Notification.Invited';
+      translationValues.push('%action_origin%', '%target_user%');
+    }
   } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
-    text = !senderId || senderId === targetUserId
-      ? '%target_user% left the group'
-      : '%action_origin% removed %target_user% from the group';
+    if (!senderId || targetUserIds.includes(senderId)) {
+      text = 'Notification.LeftChat';
+      translationValues.push('%target_user%');
+    } else {
+      text = 'Notification.Kicked';
+      translationValues.push('%action_origin%', '%target_user%');
+    }
   } else if (action instanceof GramJs.MessageActionChatJoinedByLink) {
-    text = '%action_origin% joined the chat from invitation link';
+    text = 'Notification.JoinedGroupByLink';
+    translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionChannelCreate) {
-    text = 'Channel created';
+    text = 'Notification.CreatedChannel';
   } else if (action instanceof GramJs.MessageActionChatMigrateTo) {
+    targetChatId = getApiChatIdFromMtpPeer(action);
     text = 'Migrated to %target_chat%';
-    targetChatId = getApiChatIdFromMtpPeer(action);
+    translationValues.push('%target_chat%');
   } else if (action instanceof GramJs.MessageActionChannelMigrateFrom) {
-    text = 'Migrated from %target_chat%';
     targetChatId = getApiChatIdFromMtpPeer(action);
+    text = 'Migrated from %target_chat%';
+    translationValues.push('%target_chat%');
   } else if (action instanceof GramJs.MessageActionPinMessage) {
-    text = '%action_origin% pinned %message%';
+    text = 'Notification.PinnedTextMessage';
+    translationValues.push('%action_origin%', '%message%');
   } else if (action instanceof GramJs.MessageActionHistoryClear) {
-    text = 'Chat history was cleared';
+    text = 'HistoryCleared';
     type = 'historyClear';
   } else if (action instanceof GramJs.MessageActionPhoneCall) {
-    text = `${isOutgoing ? 'Outgoing' : 'Incoming'} ${action.video ? 'Video' : 'Phone'} Call`;
+    const withDuration = Boolean(action.duration);
+    text = [
+      withDuration ? 'ChatList.Service' : 'Chat',
+      action.video ? 'VideoCall' : 'Call',
+      isOutgoing ? (withDuration ? 'outgoing' : 'Outgoing') : (withDuration ? 'incoming' : 'Incoming'),
+    ].join('.');
 
-    if (action.duration) {
-      const mins = Math.max(Math.round(action.duration / 60), 1);
-      text += ` (${mins} min${mins > 1 ? 's' : ''})`;
+    if (withDuration) {
+      const mins = Math.max(Math.round(action.duration! / 60), 1);
+      translationValues.push(`${mins} min${mins > 1 ? 's' : ''}`);
     }
   } else if (action instanceof GramJs.MessageActionContactSignUp) {
-    text = '%action_origin% joined Telegram';
+    text = 'Notification.Joined';
+    translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionPaymentSent) {
     const currencySign = getCurrencySign(action.currency);
     const amount = (Number(action.totalAmount) / 100).toFixed(2);
-    text = `You successfully transferred ${currencySign}${amount} to shop for %product%`;
+    text = 'Notification.PaymentSent';
+    translationValues.push(currencySign, amount, '%product%');
   } else if (action instanceof GramJs.MessageActionGroupCall) {
     if (action.duration) {
       const mins = Math.max(Math.round(action.duration / 60), 1);
-      text = `Voice chat ended (${mins} min${mins > 1 ? 's' : ''})`;
+      text = 'Notification.VoiceChatEnded';
+      translationValues.push(`${mins} min${mins > 1 ? 's' : ''}`);
     } else {
-      text = 'Voice chat started';
+      text = 'Notification.VoiceChatStartedChannel';
     }
   } else {
-    text = '%ACTION_NOT_IMPLEMENTED%';
+    text = 'ChatList.UnsupportedMessage';
   }
 
   if ('photo' in action && action.photo instanceof GramJs.Photo) {
@@ -651,9 +681,10 @@ function buildAction(
   return {
     text,
     type,
-    targetUserId,
+    targetUserIds,
     targetChatId,
     photo, // TODO Only used internally now, will be used for the UI in future
+    translationValues,
   };
 }
 

@@ -145,10 +145,11 @@ export type ApiNewPoll = {
 
 export interface ApiAction {
   text: string;
-  targetUserId?: number;
+  targetUserIds?: number[];
   targetChatId?: number;
   type: 'historyClear' | 'other';
   photo?: ApiPhoto;
+  translationValues: string[];
 }
 
 export interface ApiWebPage {

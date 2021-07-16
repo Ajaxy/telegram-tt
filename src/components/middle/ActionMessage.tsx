@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useEffect, useRef,
+  FC, memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -36,8 +36,9 @@ type OwnProps = {
 };
 
 type StateProps = {
+  usersById: Record<number, ApiUser>;
   sender?: ApiUser | ApiChat;
-  targetUser?: ApiUser;
+  targetUserIds?: number[];
   targetMessage?: ApiMessage;
   targetChatId?: number;
   isFocused: boolean;
@@ -53,8 +54,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   isEmbedded,
   appearanceOrder = 0,
   isLastInList,
+  usersById,
   sender,
-  targetUser,
+  targetUserIds,
   targetMessage,
   targetChatId,
   isFocused,
@@ -81,11 +83,17 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
+  const targetUsers = useMemo(() => {
+    return targetUserIds
+      ? targetUserIds.map((userId) => usersById && usersById[userId]).filter<ApiUser>(Boolean as any)
+      : undefined;
+  }, [targetUserIds, usersById]);
+
   const content = renderActionMessageText(
     lang,
     message,
     sender,
-    targetUser,
+    targetUsers,
     targetMessage,
     targetChatId,
     isEmbedded ? { isEmbedded: true, asPlain: true } : undefined,
@@ -140,8 +148,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
+    const { byId: usersById } = global.users;
     const userId = message.senderId;
-    const { targetUserId, targetChatId } = message.content.action || {};
+    const { targetUserIds, targetChatId } = message.content.action || {};
     const targetMessageId = message.replyToMessageId;
     const targetMessage = targetMessageId
       ? selectChatMessage(global, message.chatId, targetMessageId)
@@ -156,9 +165,10 @@ export default memo(withGlobal<OwnProps>(
       : userId ? selectUser(global, userId) : undefined;
 
     return {
+      usersById,
       sender,
-      ...(targetUserId && { targetUser: selectUser(global, targetUserId) }),
       targetChatId,
+      targetUserIds,
       targetMessage,
       isFocused,
       ...(isFocused && { focusDirection, noFocusHighlight }),

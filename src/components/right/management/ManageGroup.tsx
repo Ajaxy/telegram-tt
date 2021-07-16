@@ -320,14 +320,15 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId)!;
     const { progress } = global.management;
     const hasLinkedChannel = Boolean(chat.fullInfo && chat.fullInfo.linkedChatId);
+    const isBasicGroup = isChatBasicGroup(chat);
 
     return {
       chat,
       progress,
-      isBasicGroup: isChatBasicGroup(chat),
+      isBasicGroup,
       hasLinkedChannel,
-      canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
-      canBanUsers: getHasAdminRight(chat, 'banUsers'),
+      canChangeInfo: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'changeInfo'),
+      canBanUsers: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'banUsers'),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

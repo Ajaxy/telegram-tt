@@ -5,17 +5,19 @@ import {
 import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { debounce } from '../../../util/schedulers';
+import { debounce, throttle } from '../../../util/schedulers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { isChatPrivate } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectUser } from '../../selectors';
 import {
   addChats, addUsers, updateChat, updateManagementProgress, updateUser, updateUsers,
+  updateUserSearch, updateUserSearchFetchingStatus,
 } from '../../reducers';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
+const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
 addReducer('loadFullUser', (global, actions, payload) => {
   const { userId } = payload!;
@@ -200,3 +202,44 @@ addReducer('loadProfilePhotos', (global, actions, payload) => {
     setGlobal(newGlobal);
   })();
 });
+
+
+addReducer('setUserSearchQuery', (global, actions, payload) => {
+  const { query } = payload!;
+
+  if (!query) return;
+
+  void runThrottledForSearch(() => {
+    searchUsers(query);
+  });
+});
+
+async function searchUsers(query: string) {
+  const result = await callApi('searchChats', { query });
+
+  let global = getGlobal();
+  const currentSearchQuery = global.userSearch.query;
+
+  if (!result || !currentSearchQuery || (query !== currentSearchQuery)) {
+    setGlobal(updateUserSearchFetchingStatus(global, false));
+    return;
+  }
+
+  const { localUsers, globalUsers } = result;
+
+  let localUserIds;
+  let globalUserIds;
+  if (localUsers.length) {
+    global = addUsers(global, buildCollectionByKey(localUsers, 'id'));
+    localUserIds = localUsers.map(({ id }) => id);
+  }
+  if (globalUsers.length) {
+    global = addUsers(global, buildCollectionByKey(globalUsers, 'id'));
+    globalUserIds = globalUsers.map(({ id }) => id);
+  }
+
+  global = updateUserSearchFetchingStatus(global, false);
+  global = updateUserSearch(global, { localUserIds, globalUserIds });
+
+  setGlobal(global);
+}

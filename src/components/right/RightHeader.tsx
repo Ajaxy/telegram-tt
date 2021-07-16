@@ -36,6 +36,7 @@ type OwnProps = {
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
+  isAddingChatMembers?: boolean;
   shouldSkipAnimation?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
@@ -79,6 +80,7 @@ enum HeaderContent {
   StickerSearch,
   GifSearch,
   PollResults,
+  AddingMembers,
 }
 
 const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -89,6 +91,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isStickerSearch,
   isGifSearch,
   isPollResults,
+  isAddingChatMembers,
   profileState,
   managementScreen,
   canManage,
@@ -149,6 +152,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     HeaderContent.StickerSearch
   ) : isGifSearch ? (
     HeaderContent.GifSearch
+  ) : isAddingChatMembers ? (
+    HeaderContent.AddingMembers
   ) : isManagement ? (
     managementScreen === ManagementScreens.Initial ? (
       HeaderContent.ManageInitial
@@ -206,6 +211,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             </Button>
           </>
         );
+      case HeaderContent.AddingMembers:
+        return <h3>{lang('GroupAddMembers')}</h3>;
       case HeaderContent.ManageInitial:
         return <h3>{lang('Edit')}</h3>;
       case HeaderContent.ManageChatPrivacyType:
@@ -275,6 +282,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     IS_SINGLE_COLUMN_LAYOUT
     || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
+    || contentKey === HeaderContent.AddingMembers
     || isManagement
   );
 

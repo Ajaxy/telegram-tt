@@ -29,7 +29,7 @@ export function renderActionMessageText(
   lang: LangFn,
   message: ApiMessage,
   actionOrigin?: ApiUser | ApiChat,
-  targetUser?: ApiUser,
+  targetUsers?: ApiUser[],
   targetMessage?: ApiMessage,
   targetChatId?: number,
   options: ActionMessageTextOptions = {},
@@ -37,13 +37,13 @@ export function renderActionMessageText(
   if (!message.content.action) {
     return [];
   }
-  const { text } = message.content.action;
+  const { text, translationValues } = message.content.action;
   const content: TextPart[] = [];
   const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 16 };
 
   let unprocessed: string;
   let processed = processPlaceholder(
-    text,
+    lang(text, translationValues && translationValues.length ? translationValues : undefined),
     '%action_origin%',
     actionOrigin
       ? (!options.isEmbedded && renderOriginContent(lang, actionOrigin, options.asPlain)) || NBSP
@@ -56,8 +56,8 @@ export function renderActionMessageText(
   processed = processPlaceholder(
     unprocessed,
     '%target_user%',
-    targetUser
-      ? renderUserContent(targetUser, options.asPlain)
+    targetUsers
+      ? targetUsers.map((user) => renderUserContent(user, options.asPlain)).filter<TextPart>(Boolean as any)
       : 'User',
   );
 
@@ -180,7 +180,7 @@ function renderMigratedContent(chatId: number, asPlain?: boolean): string | Text
   return <ChatLink className="action-link" chatId={chatId}>{text}</ChatLink>;
 }
 
-function processPlaceholder(text: string, placeholder: string, replaceValue?: TextPart): TextPart[] {
+function processPlaceholder(text: string, placeholder: string, replaceValue?: TextPart | TextPart[]): TextPart[] {
   const placeholderPosition = text.indexOf(placeholder);
   if (placeholderPosition < 0 || !replaceValue) {
     return [text];
@@ -188,7 +188,16 @@ function processPlaceholder(text: string, placeholder: string, replaceValue?: Te
 
   const content: TextPart[] = [];
   content.push(text.substring(0, placeholderPosition));
-  content.push(replaceValue);
+  if (Array.isArray(replaceValue)) {
+    replaceValue.forEach((value, index) => {
+      content.push(value);
+      if (index + 1 < replaceValue.length) {
+        content.push(', ');
+      }
+    });
+  } else {
+    content.push(replaceValue);
+  }
   content.push(text.substring(placeholderPosition + placeholder.length));
 
   return content;

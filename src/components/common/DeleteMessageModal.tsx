@@ -98,7 +98,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          {contactName && lang('Conversation.DeleteMessagesFor', renderText(contactName))}
+          {contactName && renderText(lang('Conversation.DeleteMessagesFor', contactName))}
           {!contactName && lang('Conversation.DeleteMessagesForEveryone')}
         </Button>
       )}

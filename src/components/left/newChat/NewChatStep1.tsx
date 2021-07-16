@@ -9,7 +9,7 @@ import { ApiChat, ApiUser } from '../../../api/types';
 import { pick, unique } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
-import { getUserFullName, sortChatIds } from '../../../modules/helpers';
+import { getUserFullName, isUserBot, sortChatIds } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -98,7 +98,11 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
         ...foundContactIds,
         ...(localUserIds || []),
         ...(globalUserIds || []),
-      ]),
+      ]).filter((contactId) => {
+        const user = usersById[contactId];
+
+        return !user || !isUserBot(user) || user.canBeInvitedToGroup;
+      }),
       chatsById,
       false,
       selectedMemberIds,

@@ -215,6 +215,7 @@ export enum RightColumnContent {
   StickerSearch,
   GifSearch,
   PollResults,
+  AddingMembers,
 }
 
 export enum MediaViewerOrigin {
@@ -247,6 +248,12 @@ export enum ManagementProgress {
   InProgress,
   Complete,
   Error,
+}
+
+export enum NewChatMembersProgress {
+  Closed,
+  InProgress,
+  Loading,
 }
 
 export type ProfileTabType = 'members' | 'media' | 'documents' | 'links' | 'audio';

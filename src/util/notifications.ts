@@ -1,5 +1,5 @@
 import { callApi } from '../api/gramjs';
-import { ApiChat, ApiMessage } from '../api/types';
+import { ApiChat, ApiMessage, ApiUser } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
@@ -221,10 +221,13 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
     ? selectChatMessage(global, chat.id, replyToMessageId)
     : undefined;
   const {
-    targetUserId: actionTargetUserId,
+    targetUserIds: actionTargetUserIds,
     targetChatId: actionTargetChatId,
   } = messageAction || {};
-  const actionTargetUser = actionTargetUserId ? selectUser(global, actionTargetUserId) : undefined;
+
+  const actionTargetUsers = actionTargetUserIds
+    ? actionTargetUserIds.map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any)
+    : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
   const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
   let body: string;
@@ -236,7 +239,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
       getTranslation,
       message,
       actionOrigin,
-      actionTargetUser,
+      actionTargetUsers,
       actionTargetMessage,
       actionTargetChatId,
       { asPlain: true },

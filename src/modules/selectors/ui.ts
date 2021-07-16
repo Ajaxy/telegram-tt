@@ -1,5 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { RightColumnContent } from '../../types';
+import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
@@ -17,8 +17,10 @@ export function selectRightColumnContentKey(global: GlobalState) {
   const {
     users,
     isChatInfoShown,
+    newChatMembersProgress,
   } = global;
 
+  const isAddingChatMembersShown = newChatMembersProgress !== NewChatMembersProgress.Closed;
   const isPollResults = selectIsPollResultsOpen(global);
   const isSearch = Boolean(!IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global));
   const isManagement = selectCurrentManagement(global);
@@ -43,6 +45,8 @@ export function selectRightColumnContentKey(global: GlobalState) {
     RightColumnContent.StickerSearch
   ) : isGifSearch ? (
     RightColumnContent.GifSearch
+  ) : isAddingChatMembersShown ? (
+    RightColumnContent.AddingMembers
   ) : isUserInfo ? (
     RightColumnContent.UserInfo
   ) : isChatInfo ? (

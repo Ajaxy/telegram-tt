@@ -26,6 +26,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const avatarHash = mtpUser.photo instanceof GramJs.UserProfilePhoto
     ? String(mtpUser.photo.photoId)
     : undefined;
+  const userType = buildApiUserType(mtpUser);
 
   return {
     id,
@@ -33,8 +34,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(mtpUser.self && { isSelf: true }),
     ...(mtpUser.verified && { isVerified: true }),
     ...((mtpUser.contact || mtpUser.mutualContact) && { isContact: true }),
-    type: buildApiUserType(mtpUser),
+    type: userType,
     ...(firstName && { firstName }),
+    ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(lastName && { lastName }),
     username: mtpUser.username || '',
     phoneNumber: mtpUser.phone || '',

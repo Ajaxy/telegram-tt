@@ -4,7 +4,9 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ManagementScreens, ProfileState, RightColumnContent } from '../../types';
+import {
+  ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
+} from '../../types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -27,6 +29,7 @@ import Management from './management/Management.async';
 import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
+import AddChatMembers from './AddChatMembers';
 
 import './RightColumn.scss';
 
@@ -40,8 +43,8 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'toggleManagement' | 'openUserInfo' |
-  'closeLocalTextSearch' | 'closePollResults' |
+  'toggleChatInfo' | 'toggleManagement' | 'openUserInfo' | 'setNewChatMembersDialogState' |
+  'closeLocalTextSearch' | 'closePollResults' | 'addChatMembers' |
   'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
 
@@ -69,6 +72,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   setStickerSearchQuery,
   setGifSearchQuery,
   closePollResults,
+  addChatMembers,
+  setNewChatMembersDialogState,
   shouldSkipHistoryAnimations,
 }) => {
   const { width: windowWidth } = useWindowSize();
@@ -85,6 +90,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
+  const isAddingChatMembers = contentKey === RightColumnContent.AddingMembers;
   const isOverlaying = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
@@ -93,6 +99,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   const close = useCallback((shouldScrollUp = true) => {
     switch (contentKey) {
+      case RightColumnContent.AddingMembers:
+        setNewChatMembersDialogState(NewChatMembersProgress.Closed);
+        break;
       case RightColumnContent.ChatInfo:
         if (isScrolledDown && shouldScrollUp) {
           setProfileState(ProfileState.Profile);
@@ -155,7 +164,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         break;
     }
   }, [
-    contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults,
+    contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
   ]);
 
@@ -163,6 +172,10 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     setSelectedChatMemberId(memberId);
     setIsPromotedByCurrentUser(isPromoted);
   }, []);
+
+  const handleAppendingChatMembers = useCallback((memberIds: number[]) => {
+    addChatMembers({ chatId, memberIds });
+  }, [addChatMembers, chatId]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 
@@ -194,7 +207,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
 
   useHistoryBack(isChatSelected && (contentKey === RightColumnContent.ChatInfo
-    || contentKey === RightColumnContent.UserInfo || contentKey === RightColumnContent.Management),
+    || contentKey === RightColumnContent.UserInfo || contentKey === RightColumnContent.Management
+    || contentKey === RightColumnContent.AddingMembers),
   () => close(false), toggleChatInfo);
 
   // eslint-disable-next-line consistent-return
@@ -204,6 +218,15 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
 
     switch (renderingContentKey) {
+      case RightColumnContent.AddingMembers:
+        return (
+          <AddChatMembers
+            chatId={chatId!}
+            onNextStep={handleAppendingChatMembers}
+            isActive={isOpen && isActive}
+            onClose={close}
+          />
+        );
       case RightColumnContent.ChatInfo:
       case RightColumnContent.UserInfo:
         return (
@@ -258,6 +281,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isPollResults={isPollResults}
+          isAddingChatMembers={isAddingChatMembers}
           profileState={profileState}
           managementScreen={managementScreen}
           onClose={close}
@@ -299,5 +323,7 @@ export default memo(withGlobal(
     'setStickerSearchQuery',
     'setGifSearchQuery',
     'closePollResults',
+    'addChatMembers',
+    'setNewChatMembersDialogState',
   ]),
 )(RightColumn));

@@ -214,6 +214,14 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
           e instanceof GramJs.User && !!e.self && e.id === action.userId
         ))) {
           onUpdate({
+            '@type': 'updateChat',
+            id: message.chatId,
+            chat: {
+              isRestricted: true,
+            },
+          });
+
+          onUpdate({
             '@type': 'updateChatLeave',
             id: message.chatId,
           });

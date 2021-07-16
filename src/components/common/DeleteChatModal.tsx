@@ -165,7 +165,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
       {renderMessage()}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          {contactName ? lang('ChatList.DeleteForEveryone', contactName) : lang('DeleteForAll')}
+          {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>

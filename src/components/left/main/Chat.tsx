@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef,
+  FC, memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -66,7 +66,8 @@ type StateProps = {
   chat?: ApiChat;
   isMuted?: boolean;
   privateChatUser?: ApiUser;
-  actionTargetUser?: ApiUser;
+  usersById?: Record<number, ApiUser>;
+  actionTargetUserIds?: number[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: number;
   lastMessageSender?: ApiUser;
@@ -91,8 +92,9 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   isPinned,
   chat,
   isMuted,
+  usersById,
   privateChatUser,
-  actionTargetUser,
+  actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
   actionTargetMessage,
@@ -121,6 +123,12 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     : undefined;
   const mediaBlobUrl = useMedia(lastMessage ? getMessageMediaHash(lastMessage, 'micro') : undefined);
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
+
+  const actionTargetUsers = useMemo(() => {
+    return actionTargetUserIds
+      ? actionTargetUserIds.map((userId) => usersById && usersById[userId]).filter<ApiUser>(Boolean as any)
+      : undefined;
+  }, [actionTargetUserIds, usersById]);
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
@@ -221,7 +229,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
             lang,
             lastMessage,
             actionOrigin,
-            actionTargetUser,
+            actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,
             { asPlain: true },
@@ -322,8 +330,9 @@ export default memo(withGlobal<OwnProps>(
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
-    const { targetUserId: actionTargetUserId, targetChatId: actionTargetChatId } = lastMessageAction || {};
+    const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
+    const { byId: usersById } = global.users;
     const {
       chatId: currentChatId,
       threadId: currentThreadId,
@@ -336,7 +345,8 @@ export default memo(withGlobal<OwnProps>(
       lastMessageSender,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
-      ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
+      usersById,
+      actionTargetUserIds,
       actionTargetChatId,
       actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
