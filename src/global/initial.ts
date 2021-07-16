@@ -1,4 +1,5 @@
 import { GlobalState } from './types';
+import { NewChatMembersProgress } from '../types';
 
 import {
   ANIMATION_LEVEL_DEFAULT, DARK_THEME_PATTERN_COLOR, DEFAULT_MESSAGE_TEXT_SIZE_PX, DEFAULT_PATTERN_COLOR,
@@ -7,6 +8,7 @@ import {
 export const INITIAL_STATE: GlobalState = {
   isLeftColumnShown: true,
   isChatInfoShown: false,
+  newChatMembersProgress: NewChatMembersProgress.Closed,
   uiReadyState: 0,
   serverTimeOffset: 0,
 
@@ -72,6 +74,8 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   globalSearch: {},
+
+  userSearch: {},
 
   localTextSearch: {
     byChatThreadKey: {},

@@ -148,3 +148,24 @@ export function deleteUser(global: GlobalState, userId: number): GlobalState {
 
   return replaceUsers(global, byId);
 }
+
+export function updateUserSearch(
+  global: GlobalState,
+  searchStatePartial: Partial<GlobalState['userSearch']>,
+) {
+  return {
+    ...global,
+    userSearch: {
+      ...global.userSearch,
+      ...searchStatePartial,
+    },
+  };
+}
+
+export function updateUserSearchFetchingStatus(
+  global: GlobalState, newState: boolean,
+) {
+  return updateUserSearch(global, {
+    fetchingStatus: newState,
+  });
+}

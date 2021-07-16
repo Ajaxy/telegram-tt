@@ -40,6 +40,7 @@ import {
   NotifyException,
   LangCode,
   EmojiKeywords,
+  NewChatMembersProgress,
 } from '../types';
 
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
@@ -65,6 +66,7 @@ export type GlobalState = {
   isChatInfoShown: boolean;
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
+  newChatMembersProgress?: NewChatMembersProgress;
   uiReadyState: 0 | 1 | 2;
   shouldSkipHistoryAnimations?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
@@ -248,6 +250,13 @@ export type GlobalState = {
     }>>;
   };
 
+  userSearch: {
+    query?: string;
+    fetchingStatus?: boolean;
+    localUserIds?: number[];
+    globalUserIds?: number[];
+  };
+
   localTextSearch: {
     byChatThreadKey: Record<string, {
       isActive: boolean;
@@ -405,8 +414,8 @@ export type ActionTypes = (
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
-  'toggleSafeLinkModal' | 'disableHistoryAnimations' | 'openHistoryCalendar' | 'closeHistoryCalendar' |
-  'disableContextMenuHint' |
+  'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
+  'setNewChatMembersDialogState' | 'disableHistoryAnimations' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
@@ -418,6 +427,7 @@ export type ActionTypes = (
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
   'loadProfilePhotos' | 'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' |
+  'addChatMembers' | 'deleteChatMember' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' |
@@ -446,7 +456,7 @@ export type ActionTypes = (
   'acceptInviteConfirmation' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' | 'loadCurrentUser' |
-  'updateProfile' | 'checkUsername' | 'updateContact' | 'deleteUser' | 'loadUser' |
+  'updateProfile' | 'checkUsername' | 'updateContact' | 'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
   // Channel / groups creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings

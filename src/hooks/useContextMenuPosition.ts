@@ -1,6 +1,8 @@
 import { useState, useEffect } from '../lib/teact/teact';
 import { IAnchorPosition } from '../types';
 
+const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
+
 export default (
   anchor: IAnchorPosition | undefined,
   getTriggerElement: () => HTMLElement | null,
@@ -31,16 +33,18 @@ export default (
     const menuRect = menuEl ? { width: menuEl.offsetWidth, height: menuEl.offsetHeight } : emptyRect;
     const rootRect = rootEl ? rootEl.getBoundingClientRect() : emptyRect;
 
+    let horizontalPostition: 'left' | 'right';
     if (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left) {
-      setPositionX('left');
       x += 3;
+      horizontalPostition = 'left';
     } else if (x - menuRect.width > 0) {
-      setPositionX('right');
+      horizontalPostition = 'right';
       x -= 3;
     } else {
-      setPositionX('left');
+      horizontalPostition = 'left';
       x = 16;
     }
+    setPositionX(horizontalPostition);
 
     if (y + menuRect.height < rootRect.height + rootRect.top) {
       setPositionY('top');
@@ -52,7 +56,11 @@ export default (
       }
     }
 
-    setStyle(`left: ${x - triggerRect.left}px; top: ${y - triggerRect.top}px;`);
+    const left = horizontalPostition === 'left'
+      ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
+      : Math.max((x - triggerRect.left), menuRect.width + MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
+
+    setStyle(`left: ${left}px; top: ${y - triggerRect.top}px;`);
   }, [
     anchor, extraPaddingX, extraTopPadding,
     getMenuElement, getRootElement, getTriggerElement,

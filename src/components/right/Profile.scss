@@ -1,13 +1,14 @@
 .Profile {
   height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
+  overflow-x: hidden;
 
   @supports (overflow-y: overlay) {
     overflow-y: overlay !important;
   }
+
 
   > .profile-info > .ChatInfo {
     grid-area: chat_info;
@@ -124,7 +125,14 @@
 
       @media (max-width: 600px) {
         padding: .5rem 0;
+        .ListItem.chat-item-clickable {
+          margin: 0;
+        }
       }
     }
+  }
+
+  .FloatingActionButton {
+    z-index: 1;
   }
 }

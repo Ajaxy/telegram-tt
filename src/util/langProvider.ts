@@ -14,6 +14,7 @@ interface LangFn {
 }
 
 const FALLBACK_LANG_CODE = 'en';
+const SUBSTITUTION_REGEX = /%\d?\$?[sdf@]/g;
 const PLURAL_OPTIONS = ['value', 'zeroValue', 'oneValue', 'twoValue', 'fewValue', 'manyValue', 'otherValue'] as const;
 const PLURAL_RULES = {
   /* eslint-disable max-len */
@@ -55,7 +56,8 @@ let currentLangCode: string | undefined;
 
 export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') => {
   if (value !== undefined) {
-    const cached = cache.get(`${key}_${value}_${format}`);
+    const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
+    const cached = cache.get(`${key}_${cacheValue}_${format}`);
     if (cached) {
       return cached;
     }
@@ -84,7 +86,8 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
   if (value !== undefined) {
     const formattedValue = format === 'i' ? formatInteger(value) : value;
     const result = processTemplate(template, formattedValue);
-    cache.set(`${key}_${value}_${format}`, result);
+    const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
+    cache.set(`${key}_${cacheValue}_${format}`, result);
     return result;
   }
 
@@ -158,5 +161,11 @@ function getPluralOption(amount: number) {
 }
 
 function processTemplate(template: string, value: any) {
-  return template.replace(/%\d?\$?[sdf@]/, String(value));
+  value = Array.isArray(value) ? value : [value];
+  const translationSlices = template.split(SUBSTITUTION_REGEX);
+  const initialValue = translationSlices.shift();
+
+  return translationSlices.reduce((result, str, index) => {
+    return `${result}${String(value[index] || '')}${str}`;
+  }, initialValue || '');
 }

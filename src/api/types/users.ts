@@ -15,6 +15,7 @@ export interface ApiUser {
   accessHash?: string;
   avatarHash?: string;
   photos?: ApiPhoto[];
+  canBeInvitedToGroup?: boolean;
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;

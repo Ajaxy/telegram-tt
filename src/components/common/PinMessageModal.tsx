@@ -14,6 +14,7 @@ import {
 } from '../../modules/helpers';
 import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
+import renderText from './helpers/renderText';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -91,7 +92,7 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       {canPinForAll && (
         <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
           {contactName
-            ? lang('Conversation.PinMessagesFor', contactName)
+            ? renderText(lang('Conversation.PinMessagesFor', contactName))
             : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
         </Button>
       )}

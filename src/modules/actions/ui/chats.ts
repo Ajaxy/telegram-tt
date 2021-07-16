@@ -1,4 +1,5 @@
 import { addReducer, setGlobal } from '../../../lib/teact/teactn';
+
 import {
   exitMessageSelectMode, replaceThreadParam, updateCurrentMessageList,
 } from '../../reducers';
@@ -52,6 +53,13 @@ addReducer('resetChatCreation', (global) => {
   return {
     ...global,
     chatCreation: undefined,
+  };
+});
+
+addReducer('setNewChatMembersDialogState', (global, actions, payload) => {
+  return {
+    ...global,
+    newChatMembersProgress: payload,
   };
 });
 

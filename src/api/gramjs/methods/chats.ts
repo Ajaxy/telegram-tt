@@ -172,7 +172,7 @@ export async function searchChats({ query }: { query: string }) {
   updateLocalDb(result);
 
   const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
-  const allChats = [...result.chats, ...result.users]
+  const allChats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter<ApiChat>(Boolean as any);
   const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
@@ -756,15 +756,15 @@ export function updateChatDefaultBannedRights({
 }
 
 export function updateChatMemberBannedRights({
-  chat, user, bannedRights,
-}: { chat: ApiChat; user: ApiUser; bannedRights: ApiChatBannedRights }) {
+  chat, user, bannedRights, untilDate,
+}: { chat: ApiChat; user: ApiUser; bannedRights: ApiChatBannedRights; untilDate?: number }) {
   const channel = buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel;
   const participant = buildInputPeer(user.id, user.accessHash) as GramJs.InputUser;
 
   return invokeRequest(new GramJs.channels.EditBanned({
     channel,
     participant,
-    bannedRights: buildChatBannedRights(bannedRights),
+    bannedRights: buildChatBannedRights(bannedRights, untilDate),
   }), true);
 }
 
@@ -955,6 +955,51 @@ export async function openChatByInvite(hash: string) {
   }
 
   return { chatId: chat.id };
+}
+
+export function addChatMembers(chat: ApiChat, users: ApiUser[]) {
+  if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
+    return invokeRequest(new GramJs.channels.InviteToChannel({
+      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
+    }), true);
+  }
+
+  return Promise.all(users.map((user) => {
+    return invokeRequest(new GramJs.messages.AddChatUser({
+      chatId: buildInputEntity(chat.id) as number,
+      userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    }), true);
+  }));
+}
+
+export function deleteChatMember(chat: ApiChat, user: ApiUser) {
+  if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
+    return updateChatMemberBannedRights({
+      chat,
+      user,
+      bannedRights: {
+        viewMessages: true,
+        sendMessages: true,
+        sendMedia: true,
+        sendStickers: true,
+        sendGifs: true,
+        sendGames: true,
+        sendInline: true,
+        embedLinks: true,
+        sendPolls: true,
+        changeInfo: true,
+        inviteUsers: true,
+        pinMessages: true,
+      },
+      untilDate: MAX_INT_32,
+    });
+  } else {
+    return invokeRequest(new GramJs.messages.DeleteChatUser({
+      chatId: buildInputEntity(chat.id) as number,
+      userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    }), true);
+  }
 }
 
 function preparePeers(

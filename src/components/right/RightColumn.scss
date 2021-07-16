@@ -17,7 +17,7 @@
 
   // @optimization
   &:not(:hover) {
-    .chat-item-clickable:nth-child(n + 18) {
+    .chat-item-clickable:not(.picker-list-item):nth-child(n + 18) {
       display: none !important;
     }
   }

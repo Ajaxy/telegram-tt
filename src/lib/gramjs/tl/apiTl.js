@@ -987,6 +987,7 @@ messages.getChats#3c6aa187 id:Vector<int> = messages.Chats;
 messages.getFullChat#3b831c66 chat_id:int = messages.ChatFull;
 messages.editChatTitle#dc452855 chat_id:int title:string = Updates;
 messages.editChatPhoto#ca4c79d8 chat_id:int photo:InputChatPhoto = Updates;
+messages.addChatUser#f9a0aa09 chat_id:int user_id:InputUser fwd_limit:int = Updates;
 messages.deleteChatUser#c534459a flags:# revoke_history:flags.0?true chat_id:int user_id:InputUser = Updates;
 messages.createChat#9cb126e users:Vector<InputUser> title:string = Updates;
 messages.getDhConfig#26cf8950 version:int random_length:int = messages.DhConfig;

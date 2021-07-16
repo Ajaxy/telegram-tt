@@ -14,7 +14,7 @@ export {
   fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
-  migrateChat, openChatByInvite, fetchMembers, importChatInvite,
+  migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember,
 } from './chats';
 
 export {

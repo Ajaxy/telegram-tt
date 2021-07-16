@@ -5,7 +5,7 @@ import {
 import {
   ApiChat, ApiUser, ApiChatFolder, MAIN_THREAD_ID,
 } from '../../../api/types';
-import { ChatCreationProgress, ManagementProgress } from '../../../types';
+import { NewChatMembersProgress, ChatCreationProgress, ManagementProgress } from '../../../types';
 import { GlobalActions } from '../../../global/types';
 
 import {
@@ -771,6 +771,38 @@ addReducer('loadMoreMembers', (global) => {
       },
     });
     setGlobal(global);
+  })();
+});
+
+addReducer('addChatMembers', (global, actions, payload) => {
+  const { chatId, memberIds } = payload;
+  const chat = selectChat(global, chatId);
+  const users = (memberIds as number[]).map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any);
+
+  if (!chat || !users.length) {
+    return;
+  }
+
+  actions.setNewChatMembersDialogState(NewChatMembersProgress.Loading);
+  (async () => {
+    await callApi('addChatMembers', chat, users);
+    actions.setNewChatMembersDialogState(NewChatMembersProgress.Closed);
+    loadFullChat(chat);
+  })();
+});
+
+addReducer('deleteChatMember', (global, actions, payload) => {
+  const { chatId, userId } = payload;
+  const chat = selectChat(global, chatId);
+  const user = selectUser(global, userId);
+
+  if (!chat || !user) {
+    return;
+  }
+
+  (async () => {
+    await callApi('deleteChatMember', chat, user);
+    loadFullChat(chat);
   })();
 });
 
