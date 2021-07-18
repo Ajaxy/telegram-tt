@@ -23,6 +23,7 @@ import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import usePauseOnInactive from './hooks/usePauseOnInactive';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import safePlay from '../../../util/safePlay';
+import { fastRaf } from '../../../util/schedulers';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -121,7 +122,7 @@ const RoundVideo: FC<OwnProps> = ({
     setProgress(0);
     safePlay(playerRef.current!);
 
-    requestAnimationFrame(() => {
+    fastRaf(() => {
       playingProgressRef.current!.innerHTML = '';
     });
   };
@@ -162,7 +163,11 @@ const RoundVideo: FC<OwnProps> = ({
       }
     } else {
       capturePlaying();
+      // Pause is a workaround for iOS Safari – otherwise it stops video after several frames
+      playerEl.pause();
       playerEl.currentTime = 0;
+      safePlay(playerEl);
+
       setIsActivated(true);
     }
   }, [capturePlaying, isActivated, mediaData]);
