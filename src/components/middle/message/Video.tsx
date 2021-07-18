@@ -19,7 +19,6 @@ import {
 } from '../../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
-import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
@@ -72,12 +71,6 @@ const Video: FC<OwnProps> = ({
   const shouldDownload = Boolean(isDownloadAllowed && isIntersecting && lastSyncTime);
   const [isPlayAllowed, setIsPlayAllowed] = useState(shouldAutoPlay);
 
-  const previewBlobUrl = useMedia(
-    getMessageMediaHash(message, 'pictogram'),
-    !(isIntersecting && lastSyncTime),
-    getMessageMediaFormat(message, 'pictogram'),
-    lastSyncTime,
-  );
   const thumbRef = useBlurredMediaThumbRef(message);
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
@@ -85,9 +78,7 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'inline'),
     lastSyncTime,
   );
-
   const fullMediaData = localBlobUrl || mediaData;
-  const isInline = Boolean(isIntersecting && fullMediaData);
 
   const { isBuffered, bufferingHandlers } = useBuffering(!shouldAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
@@ -113,11 +104,9 @@ const Video: FC<OwnProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
 
-  useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && shouldAutoPlay));
-
+  useHeavyAnimationCheckForVideo(videoRef, Boolean(fullMediaData && shouldAutoPlay));
   usePauseOnInactive(videoRef, isPlayAllowed);
-
-  useVideoCleanup(videoRef, [isInline]);
+  useVideoCleanup(videoRef, [fullMediaData]);
 
   const handleClick = useCallback(() => {
     if (isUploading) {
@@ -141,7 +130,6 @@ const Video: FC<OwnProps> = ({
     ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;`
     : '';
 
-  const shouldRenderInlineVideo = isInline;
   const shouldRenderPlayButton = (isDownloadAllowed && !isPlayAllowed && !shouldRenderSpinner);
   const shouldRenderDownloadButton = !isDownloadAllowed;
 
@@ -154,26 +142,15 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {(!isInline || shouldRenderThumb || shouldRenderInlineVideo)
-        && (
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-            // @ts-ignore teact feature
-            style={`width: ${width}px; height: ${height}px;`}
-          />
-        )}
-      {previewBlobUrl && (
-        <img
-          src={previewBlobUrl}
+      {(shouldRenderThumb || fullMediaData) && (
+        <canvas
+          ref={thumbRef}
           className="thumbnail"
           // @ts-ignore teact feature
           style={`width: ${width}px; height: ${height}px;`}
-          alt=""
         />
       )}
-
-      {shouldRenderInlineVideo && (
+      {fullMediaData && (
         <video
           ref={videoRef}
           className={videoClassName}
