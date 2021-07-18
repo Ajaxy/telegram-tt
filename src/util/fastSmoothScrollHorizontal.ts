@@ -1,9 +1,8 @@
 import { getGlobal } from '../lib/teact/teactn';
 
-import { fastRaf } from './schedulers';
-import { animate } from './animation';
-import { IS_IOS } from './environment';
 import { ANIMATION_LEVEL_MIN } from '../config';
+import { IS_IOS } from './environment';
+import { animate } from './animation';
 
 const DEFAULT_DURATION = 300;
 
@@ -19,9 +18,7 @@ export default function fastSmoothScrollHorizontal(container: HTMLElement, left:
       ...(duration && { behavior: 'smooth' }),
     });
   } else {
-    fastRaf(() => {
-      scrollWithJs(container, left, duration);
-    });
+    scrollWithJs(container, left, duration);
   }
 }
 
@@ -41,10 +38,10 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
     return;
   }
 
-  const target = container.scrollLeft + path;
+  const target = scrollLeft + path;
 
   if (duration === 0) {
-    container.scrollTop = target;
+    container.scrollLeft = target;
     return;
   }
 
