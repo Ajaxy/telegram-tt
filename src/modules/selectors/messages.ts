@@ -356,8 +356,12 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const isOwn = isOwnMessage(message);
   const isAction = isActionMessage(message);
   const { content } = message;
+  const canEditMessagesIndefinitely = isChatWithSelf
+    || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
+    || (isChannel && getHasAdminRight(chat, 'editMessages'));
   const isMessageEditable = (
-    (isChatWithSelf || Date.now() + serverTimeOffset * 1000 - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS)
+    (canEditMessagesIndefinitely
+    || Date.now() + serverTimeOffset * 1000 - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS)
     && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
       || (content.video && content.video.isRound)
@@ -395,7 +399,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const canDeleteForAll = canDelete && !isServiceNotification && (
     (isPrivate && !isChatWithSelf)
     || (isBasicGroup && (
-      isOwn || getHasAdminRight(chat, 'deleteMessages')
+      isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator
     ))
   );
 
