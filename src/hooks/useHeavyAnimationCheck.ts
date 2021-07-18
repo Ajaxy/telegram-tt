@@ -6,7 +6,7 @@ const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
 let timeout: number | undefined;
 let isAnimating = false;
 
-export const dispatchHeavyAnimationEvent = (duration: number) => {
+export const dispatchHeavyAnimationEvent = (duration?: number) => {
   if (!isAnimating) {
     isAnimating = true;
     document.dispatchEvent(new Event(ANIMATION_START_EVENT));
@@ -17,11 +17,18 @@ export const dispatchHeavyAnimationEvent = (duration: number) => {
     timeout = undefined;
   }
 
-  timeout = window.setTimeout(() => {
+  if (duration) {
+    timeout = window.setTimeout(() => {
+      isAnimating = false;
+      document.dispatchEvent(new Event(ANIMATION_END_EVENT));
+      timeout = undefined;
+    }, duration);
+  }
+
+  return () => {
     isAnimating = false;
     document.dispatchEvent(new Event(ANIMATION_END_EVENT));
-    timeout = undefined;
-  }, duration);
+  };
 };
 
 export default (
