@@ -78,16 +78,16 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'pictogram'),
     lastSyncTime,
   );
-  const thumbRef = useBlurredMediaThumbRef(message);
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
     !shouldDownload,
     getMessageMediaFormat(message, 'inline'),
     lastSyncTime,
   );
-
   const fullMediaData = localBlobUrl || mediaData;
   const isInline = Boolean(isIntersecting && fullMediaData);
+  // Thumbnail is always rendered so we can only disable blur if we have preview
+  const thumbRef = useBlurredMediaThumbRef(message, previewBlobUrl);
 
   const { isBuffered, bufferingHandlers } = useBuffering(!shouldAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
@@ -100,7 +100,7 @@ const Video: FC<OwnProps> = ({
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasDownloadDisabled);
-  const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(fullMediaData, 'slow');
+  const { transitionClassNames } = useTransitionForMedia(fullMediaData, 'slow');
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -114,9 +114,7 @@ const Video: FC<OwnProps> = ({
   const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
 
   useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && shouldAutoPlay));
-
   usePauseOnInactive(videoRef, isPlayAllowed);
-
   useVideoCleanup(videoRef, [isInline]);
 
   const handleClick = useCallback(() => {
@@ -141,10 +139,6 @@ const Video: FC<OwnProps> = ({
     ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;`
     : '';
 
-  const shouldRenderInlineVideo = isInline;
-  const shouldRenderPlayButton = (isDownloadAllowed && !isPlayAllowed && !shouldRenderSpinner);
-  const shouldRenderDownloadButton = !isDownloadAllowed;
-
   return (
     <div
       ref={ref}
@@ -154,15 +148,14 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {(!isInline || shouldRenderThumb || shouldRenderInlineVideo)
-        && (
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-            // @ts-ignore teact feature
-            style={`width: ${width}px; height: ${height}px;`}
-          />
-        )}
+      {!previewBlobUrl && (
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+          // @ts-ignore teact feature
+          style={`width: ${width}px; height: ${height}px;`}
+        />
+      )}
       {previewBlobUrl && (
         <img
           src={previewBlobUrl}
@@ -172,8 +165,7 @@ const Video: FC<OwnProps> = ({
           alt=""
         />
       )}
-
-      {shouldRenderInlineVideo && (
+      {isInline && (
         <video
           ref={videoRef}
           className={videoClassName}
@@ -190,7 +182,7 @@ const Video: FC<OwnProps> = ({
           <source src={fullMediaData} />
         </video>
       )}
-      {shouldRenderPlayButton && (
+      {(isDownloadAllowed && !isPlayAllowed && !shouldRenderSpinner) && (
         <i className="icon-large-play" />
       )}
       {shouldRenderSpinner && (
@@ -198,7 +190,7 @@ const Video: FC<OwnProps> = ({
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton && (
+      {!isDownloadAllowed && (
         <i className="icon-download" />
       )}
       {isTransferring ? (
