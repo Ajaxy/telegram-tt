@@ -142,7 +142,9 @@ const RoundVideo: FC<OwnProps> = ({
   }, [shouldPlay]);
 
   useHeavyAnimationCheckForVideo(playerRef, shouldPlay);
+
   usePauseOnInactive(playerRef, Boolean(mediaData));
+
   useVideoCleanup(playerRef, [mediaData]);
 
   const handleClick = useCallback(() => {
