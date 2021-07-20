@@ -56,6 +56,7 @@ export async function checkAuthorization(client: TelegramClient) {
         await client.invoke(new Api.updates.GetState());
         return true;
     } catch (e) {
+        if (e.message === 'Disconnect') throw e;
         return false;
     }
 }
