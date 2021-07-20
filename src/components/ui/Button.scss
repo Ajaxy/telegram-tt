@@ -1,7 +1,12 @@
 @mixin active-styles() {
   &:not(.disabled):not(:disabled) {
-    &:hover, &:active, &.active, &:focus {
+    &:active, &.active, &:focus {
       @content;
+    }
+    @media (hover:hover) {
+      &:hover {
+        @content;
+      }
     }
   }
 }
