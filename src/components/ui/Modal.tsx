@@ -2,6 +2,8 @@ import React, {
   FC, useEffect, useRef,
 } from '../../lib/teact/teact';
 
+import { TextPart } from '../common/helpers/renderMessageText';
+
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
@@ -19,10 +21,10 @@ import './Modal.scss';
 const ANIMATION_DURATION = 200;
 
 type OwnProps = {
-  title?: string;
+  title?: string | TextPart[];
   className?: string;
   isOpen?: boolean;
-  header?: FC;
+  header?: any;
   hasCloseButton?: boolean;
   noBackdrop?: boolean;
   children: any;

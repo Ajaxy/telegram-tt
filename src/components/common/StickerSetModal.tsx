@@ -11,6 +11,7 @@ import { pick } from '../../util/iteratees';
 import { selectStickerSet } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
+import renderText from './helpers/renderText';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -78,7 +79,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       hasCloseButton
-      title={stickerSet ? stickerSet.title : lang('AccDescrStickerSet')}
+      title={stickerSet ? renderText(stickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
     >
       {stickerSet && stickerSet.stickers ? (
         <>
