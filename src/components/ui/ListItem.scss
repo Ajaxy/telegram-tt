@@ -48,7 +48,14 @@
     .ListItem-button {
       cursor: pointer;
 
-      body:not(.is-ios) &:hover, &:focus {
+      @media (hover:hover) {
+        &:hover, &:focus {
+          --background-color: var(--color-chat-hover);
+        }
+      }
+    }
+    @media (max-width: 600px) {
+      &:not(.has-ripple) .ListItem-button:active {
         --background-color: var(--color-chat-hover);
       }
     }
