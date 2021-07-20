@@ -392,8 +392,10 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     setHtml(deleteLastCharacterOutsideSelection(htmlRef.current!));
   }, []);
 
-  const resetComposer = useCallback(() => {
-    setHtml('');
+  const resetComposer = useCallback((shouldPreserveInput = false) => {
+    if (!shouldPreserveInput) {
+      setHtml('');
+    }
     setAttachments([]);
     closeStickerTooltip();
     closeCalendar();
@@ -530,7 +532,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     // Wait until message animation starts
-    requestAnimationFrame(resetComposer);
+    requestAnimationFrame(() => { resetComposer(); });
   }, [
     connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang,
@@ -547,7 +549,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       openCalendar();
     } else {
       sendMessage({ sticker });
-      requestAnimationFrame(resetComposer);
+      requestAnimationFrame(() => { resetComposer(true); });
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 
@@ -557,7 +559,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       openCalendar();
     } else {
       sendMessage({ gif });
-      requestAnimationFrame(resetComposer);
+      requestAnimationFrame(() => { resetComposer(true); });
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 
@@ -577,7 +579,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     clearDraft({ chatId, localOnly: true });
-    requestAnimationFrame(resetComposer);
+    requestAnimationFrame(() => { resetComposer(); });
   }, [chatId, clearDraft, connectionState, resetComposer, sendInlineBotResult]);
 
   const handlePollSend = useCallback((poll: ApiNewPoll) => {
@@ -614,7 +616,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         ...scheduledMessageArgs,
         scheduledAt,
       });
-      requestAnimationFrame(resetComposer);
+      requestAnimationFrame(() => { resetComposer(); });
     }
     closeCalendar();
   }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage, serverTimeOffset]);
@@ -684,7 +686,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           openCalendar();
         } else {
           handleSend();
-          requestAnimationFrame(resetComposer);
+          requestAnimationFrame(() => { resetComposer(); });
         }
         break;
       case MainButtonState.Record:
