@@ -7,6 +7,7 @@ import { ApiUser } from '../../../api/types';
 import { selectUser } from '../../../modules/selectors';
 import { getUserFullName } from '../../../modules/helpers';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
+import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -30,6 +31,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   currentUser,
 }) => {
   const lang = useLang();
+  const fullName = getUserFullName(currentUser);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Main);
 
@@ -39,7 +41,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {currentUser && (
           <div className="settings-current-user">
             <Avatar user={currentUser} size="jumbo" />
-            <p className="name">{getUserFullName(currentUser)}</p>
+            <p className="name">{fullName && renderText(fullName)}</p>
             <p className="phone">{formatPhoneNumberWithCode(currentUser.phoneNumber)}</p>
           </div>
         )}
