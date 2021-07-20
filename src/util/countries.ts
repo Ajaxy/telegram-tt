@@ -145,7 +145,7 @@ MU🇲🇺230Mauritius
 MW🇲🇼265Malawi
 MY🇲🇾60Malaysia
 NA🇳🇦264Namibia234
-NC🇳🇨687New Caledonia
+NC🇳🇨687New Caledonia6
 NE🇳🇪227Niger2222
 NF🇳🇫672Norfolk Island
 NG🇳🇬234Nigeria
