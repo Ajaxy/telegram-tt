@@ -79,12 +79,15 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
       });
     } catch (err) {
-      onUpdate({
-        '@type': 'updateConnectionState',
-        connectionState: 'connectionStateBroken',
-      });
+      // TODO Investigate which request causes this exception
+      if (err.message !== 'Disconnect') {
+        onUpdate({
+          '@type': 'updateConnectionState',
+          connectionState: 'connectionStateBroken',
+        });
 
-      return;
+        return;
+      }
     }
 
     if (DEBUG) {

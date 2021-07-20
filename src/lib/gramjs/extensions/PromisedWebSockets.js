@@ -88,7 +88,9 @@ class PromisedWebSockets {
             this.client.onerror = (error) => {
                 reject(error);
             };
-            this.client.onclose = () => {
+            this.client.onclose = (event) => {
+                // eslint-disable-next-line no-console
+                console.error(`Socket closed with code: ${event.code}`);
                 this.resolveRead(false);
                 this.closed = true;
             };
