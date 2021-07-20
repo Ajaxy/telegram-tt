@@ -11,9 +11,9 @@ import useFlag from '../../../../hooks/useFlag';
 import { unique } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 
-const tempEl = document.createElement('div');
-const RE_NOT_USERNAME_SEARCH = /[^@_\d\wа-яё]+/i;
 const runThrottled = throttle((cb) => cb(), 500, true);
+const RE_BR = /(<br>|<br\s?\/>)/g;
+const RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[\\w\\d_-]*$', 'gi');
 
 export default function useMentionTooltip(
   canSuggestMembers: boolean | undefined,
@@ -120,25 +120,11 @@ export default function useMentionTooltip(
 }
 
 function getUsernameFilter(html: string) {
-  tempEl.innerHTML = html;
-  const text = tempEl.innerText.replace(/\n$/i, '');
+  const username = html.replace(RE_BR, '\n').replace(/\n$/i, '').match(RE_USERNAME_SEARCH);
 
-  const lastSymbol = text[text.length - 1];
-  const lastWord = text.split(RE_NOT_USERNAME_SEARCH).pop();
-
-  if (
-    !text.length || RE_NOT_USERNAME_SEARCH.test(lastSymbol)
-    || !lastWord || !lastWord.startsWith('@')
-  ) {
-    return undefined;
-  }
-
-  return lastWord;
+  return username ? username[0].trim() : undefined;
 }
 
 function canSuggestInlineBots(html: string) {
-  tempEl.innerHTML = html;
-  const text = tempEl.innerText;
-
-  return text.startsWith('@');
+  return html.startsWith('@');
 }

@@ -17,15 +17,16 @@ let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
-let RE_NOT_EMOJI_SEARCH: RegExp;
+let RE_EMOJI_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
+const RE_BR = /(<br>|<br\s?\/>)/g;
 
 try {
-  RE_NOT_EMOJI_SEARCH = new RegExp('[^-+_:\\p{L}\\p{N}]+', 'iu');
+  RE_EMOJI_SEARCH = new RegExp('(^|\\s):[-+_:\\p{L}\\p{N}]*$', 'gui');
 } catch (e) {
   // Support for older versions of firefox
-  RE_NOT_EMOJI_SEARCH = new RegExp('[^-+_:\\d\\wа-яё]+', 'i');
+  RE_EMOJI_SEARCH = new RegExp('(^|\\s):[-+_:\\d\\wа-яё]*$', 'gi');
 }
 
 export default function useEmojiTooltip(
@@ -158,7 +159,7 @@ export default function useEmojiTooltip(
   ]);
 
   const insertEmoji = useCallback((textEmoji: string, isForce?: boolean) => {
-    const atIndex = html.lastIndexOf(':', isForce ? -1 : undefined);
+    const atIndex = html.lastIndexOf(':', isForce ? html.lastIndexOf(':') - 1 : undefined);
     if (atIndex !== -1) {
       onUpdateHtml(`${html.substr(0, atIndex)}${textEmoji}`);
       const messageInput = document.getElementById(inputId)!;
@@ -185,21 +186,9 @@ export default function useEmojiTooltip(
 }
 
 function getEmojiCode(html: string) {
-  const tempEl = document.createElement('div');
-  tempEl.innerHTML = html.replace('<br>', '\n');
-  const text = tempEl.innerText.replace(/\n$/i, '');
+  const emojis = html.replace(RE_BR, '\n').replace(/\n$/i, '').match(RE_EMOJI_SEARCH);
 
-  const lastSymbol = text[text.length - 1];
-  const lastWord = text.split(RE_NOT_EMOJI_SEARCH).pop();
-
-  if (
-    !text.length || RE_NOT_EMOJI_SEARCH.test(lastSymbol)
-    || !lastWord || !lastWord.startsWith(':')
-  ) {
-    return undefined;
-  }
-
-  return lastWord.toLowerCase();
+  return emojis ? emojis[0].trim() : undefined;
 }
 
 async function ensureEmojiData() {

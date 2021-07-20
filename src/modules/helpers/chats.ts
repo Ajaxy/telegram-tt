@@ -17,7 +17,7 @@ import { formatDateToString, formatTime } from '../../util/dateFormat';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
-const VEIFIED_PRIORITY_BASE = 3e9;
+const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
 
 export function isChatPrivate(chatId: number) {
@@ -507,7 +507,7 @@ export function sortChatIds(
     }
 
     if (shouldPrioritizeVerified && chat.isVerified) {
-      priority += VEIFIED_PRIORITY_BASE; // ~100 years in seconds
+      priority += VERIFIED_PRIORITY_BASE; // ~100 years in seconds
     }
 
     if (priorityIds && priorityIds.includes(id)) {
