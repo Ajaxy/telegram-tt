@@ -400,9 +400,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleSenderClick = useCallback(() => {
     if (!senderPeer) {
-      if (asForwarded) {
-        showNotification({ message: lang('HidAccount') });
-      }
+      showNotification({ message: lang('HidAccount') });
+
       return;
     }
 
@@ -411,7 +410,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     } else {
       openChat({ id: senderPeer.id });
     }
-  }, [senderPeer, asForwarded, showNotification, lang, openUserInfo, openChat]);
+  }, [senderPeer, showNotification, lang, openUserInfo, openChat]);
 
   const handleViaBotClick = useCallback(() => {
     if (!botSender) {
