@@ -538,7 +538,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang,
   ]);
 
-  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
+  const handleStickerSelect = useCallback((sticker: ApiSticker, shouldPreserveInput = false) => {
     sticker = {
       ...sticker,
       isPreloadedGlobally: true,
@@ -549,7 +549,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       openCalendar();
     } else {
       sendMessage({ sticker });
-      requestAnimationFrame(() => { resetComposer(true); });
+      requestAnimationFrame(() => { resetComposer(shouldPreserveInput); });
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 

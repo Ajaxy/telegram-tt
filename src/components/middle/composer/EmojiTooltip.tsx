@@ -105,6 +105,11 @@ const EmojiTooltip: FC<OwnProps> = ({
     }
   }, [addRecentEmoji, emojis, onEmojiSelect, selectedIndex]);
 
+  const handleClick = useCallback((native: string, id: string) => {
+    onEmojiSelect(native);
+    addRecentEmoji({ emoji: id });
+  }, [addRecentEmoji, onEmojiSelect]);
+
   useEffect(() => (isOpen ? captureKeyboardListeners({
     onEsc: onClose,
     onLeft: (e: KeyboardEvent) => handleArrowKey(-1, e),
@@ -138,7 +143,7 @@ const EmojiTooltip: FC<OwnProps> = ({
             key={emoji.id}
             emoji={emoji}
             focus={selectedIndex === index}
-            onClick={onEmojiSelect}
+            onClick={handleClick}
           />
         ))
       ) : shouldRender ? (

@@ -32,7 +32,7 @@ export type OwnProps = {
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
-  onStickerSelect: (sticker: ApiSticker) => void;
+  onStickerSelect: (sticker: ApiSticker, shouldPreserveInput?: boolean) => void;
   onGifSelect: (gif: ApiVideo) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
@@ -114,6 +114,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     onSearchOpen(type);
   }, [onClose, onSearchOpen]);
 
+  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
+    onStickerSelect(sticker, true);
+  }, [onStickerSelect]);
+
   const lang = useLang();
 
   const { canSendStickers, canSendGifs } = allowedAttachmentOptions;
@@ -133,7 +137,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             className="picker-tab"
             loadAndPlay={canSendStickers ? isOpen && (isActive || isFrom) : false}
             canSendStickers={canSendStickers}
-            onStickerSelect={onStickerSelect}
+            onStickerSelect={handleStickerSelect}
           />
         );
       case SymbolMenuTabs.GIFs:
