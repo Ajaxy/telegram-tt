@@ -182,7 +182,9 @@ class MTProtoSender {
                 if (this._updateCallback && attempt === 0) {
                     this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
                 }
-                this._log.error(`WebSocket connection failed attempt: ${attempt + 1}. Cause: ${err.message}`);
+                this._log.error(`WebSocket connection failed attempt: ${attempt + 1}`);
+                // eslint-disable-next-line no-console
+                console.error(err);
                 await Helpers.sleep(this._delay);
             }
         }
