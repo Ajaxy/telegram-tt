@@ -112,7 +112,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}
-      {(canInviteUsers || !username) && !!link.length && (
+      {(canInviteUsers || !username) && link && (
         <ListItem icon="mention" multiline narrow ripple onClick={() => copy(link, lang('SetUrlPlaceholder'))}>
           <div className="title">{link}</div>
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
