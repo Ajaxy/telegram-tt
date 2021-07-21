@@ -313,6 +313,8 @@ class TelegramClient {
                 this._borrowedSenderReleaseTimeouts[dcId] = undefined;
                 this._borrowedSenderPromises[dcId] = undefined;
 
+                // eslint-disable-next-line no-console
+                console.warn(`Disconnecting from file socket #${dcId}...`);
                 sender.disconnect();
             }, BORROWED_SENDER_RELEASE_TIMEOUT);
 
