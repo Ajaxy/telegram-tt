@@ -82,13 +82,13 @@ export function getChatDescription(chat: ApiChat) {
 
 export function getChatLink(chat: ApiChat) {
   const { username } = chat;
-  const { inviteLink } = chat.fullInfo || {};
-
-  if (inviteLink && inviteLink.length) {
-    return inviteLink;
+  if (username) {
+    return `https://t.me/${username}`;
   }
 
-  return username ? `https://t.me/${username}` : '';
+  const { inviteLink } = chat.fullInfo || {};
+
+  return inviteLink;
 }
 
 export function getChatAvatarHash(
