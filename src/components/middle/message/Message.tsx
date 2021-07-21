@@ -157,7 +157,7 @@ type DispatchProps = Pick<GlobalActions, (
   'openUserInfo' | 'openChat' |
   'cancelSendingMessage' | 'markMessagesRead' |
   'sendPollVote' | 'toggleMessageSelection' | 'setReplyingToId' | 'openForwardMenu' |
-  'clickInlineButton' | 'disableContextMenuHint'
+  'clickInlineButton' | 'disableContextMenuHint' | 'showNotification'
 )>;
 
 const NBSP = '\u00A0';
@@ -228,6 +228,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   openForwardMenu,
   clickInlineButton,
   disableContextMenuHint,
+  showNotification,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -235,6 +236,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const appendixRef = useRef<HTMLDivElement>(null);
+  const lang = useLang();
+
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
@@ -397,6 +400,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleSenderClick = useCallback(() => {
     if (!senderPeer) {
+      if (asForwarded) {
+        showNotification({ message: lang('HidAccount') });
+      }
       return;
     }
 
@@ -405,7 +411,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     } else {
       openChat({ id: senderPeer.id });
     }
-  }, [senderPeer, openUserInfo, openChat]);
+  }, [senderPeer, asForwarded, showNotification, lang, openUserInfo, openChat]);
 
   const handleViaBotClick = useCallback(() => {
     if (!botSender) {
@@ -497,8 +503,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       chatId: forwardInfo!.fromChatId, messageId: forwardInfo!.fromMessageId,
     });
   }, [focusMessage, forwardInfo, message, chatId, isInDocumentGroup]);
-
-  const lang = useLang();
 
   let style = '';
   let calculatedWidth;
@@ -730,8 +734,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="message-title" dir="ltr">
         {senderTitle ? (
           <span
-            className={buildClassName(senderPeer && 'interactive', senderColor)}
-            onClick={senderPeer ? handleSenderClick : undefined}
+            className={buildClassName('interactive', senderColor)}
+            onClick={handleSenderClick}
             dir="auto"
           >
             {renderText(senderTitle)}
@@ -986,5 +990,6 @@ export default memo(withGlobal<OwnProps>(
     'openForwardMenu',
     'clickInlineButton',
     'disableContextMenuHint',
+    'showNotification',
   ]),
 )(Message));
