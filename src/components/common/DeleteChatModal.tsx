@@ -7,6 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
   isChatPrivate,
+  isUserBot,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
@@ -34,6 +35,7 @@ export type OwnProps = {
 type StateProps = {
   isChannel: boolean;
   isChatWithSelf?: boolean;
+  isBot?: boolean;
   isPrivateChat: boolean;
   isBasicGroup: boolean;
   isSuperGroup: boolean;
@@ -42,7 +44,9 @@ type StateProps = {
   contactName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'leaveChannel' | 'deleteHistory' | 'deleteChannel' | 'deleteChatUser'>;
+type DispatchProps = Pick<GlobalActions, (
+  'leaveChannel' | 'deleteHistory' | 'deleteChannel' | 'deleteChatUser' | 'blockContact'
+)>;
 
 const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
@@ -50,6 +54,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isChannel,
   isPrivateChat,
   isChatWithSelf,
+  isBot,
   isBasicGroup,
   isSuperGroup,
   currentUserId,
@@ -61,6 +66,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   deleteHistory,
   deleteChannel,
   deleteChatUser,
+  blockContact,
 }) => {
   const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);
@@ -70,6 +76,13 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
     onClose();
   }, [deleteHistory, chat.id, onClose]);
+
+  const handleDeleteAndStop = useCallback(() => {
+    deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
+    blockContact({ contactId: chat.id, accessHash: chat.accessHash });
+
+    onClose();
+  }, [deleteHistory, chat.id, chat.accessHash, blockContact, onClose]);
 
   const handleDeleteChat = useCallback(() => {
     if (isPrivateChat) {
@@ -163,6 +176,11 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {renderMessage()}
+      {isBot && (
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
+          {lang('DeleteAndStop')}
+        </Button>
+      )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
           {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
@@ -180,14 +198,17 @@ export default memo(withGlobal<OwnProps>(
   (global, { chat }): StateProps => {
     const isPrivateChat = isChatPrivate(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
-    const canDeleteForAll = (isPrivateChat && !isChatWithSelf);
-    const contactName = chat && isChatPrivate(chat.id)
+    const user = isPrivateChat && selectUser(global, getPrivateChatUserId(chat)!);
+    const isBot = user && isUserBot(user) && !chat.isSupport;
+    const canDeleteForAll = (isPrivateChat && !isChatWithSelf && !isBot);
+    const contactName = isPrivateChat
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
     return {
       isPrivateChat,
       isChatWithSelf,
+      isBot,
       isChannel: isChatChannel(chat),
       isBasicGroup: isChatBasicGroup(chat),
       isSuperGroup: isChatSuperGroup(chat),
@@ -197,5 +218,5 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions,
-    ['leaveChannel', 'deleteHistory', 'deleteChannel', 'deleteChatUser']),
+    ['leaveChannel', 'deleteHistory', 'deleteChannel', 'deleteChatUser', 'blockContact']),
 )(DeleteChatModal));

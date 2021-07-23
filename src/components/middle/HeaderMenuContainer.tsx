@@ -22,7 +22,9 @@ import DeleteChatModal from '../common/DeleteChatModal';
 
 import './HeaderMenuContainer.scss';
 
-type DispatchProps = Pick<GlobalActions, 'updateChatMutedState' | 'enterMessageSelectMode'>;
+type DispatchProps = Pick<GlobalActions, (
+  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot'
+)>;
 
 export type OwnProps = {
   chatId: number;
@@ -30,6 +32,8 @@ export type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   isChannel?: boolean;
+  canStartBot?: boolean;
+  canRestartBot?: boolean;
   canSubscribe?: boolean;
   canSearch?: boolean;
   canMute?: boolean;
@@ -53,6 +57,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   anchor,
   isChannel,
+  canStartBot,
+  canRestartBot,
   canSubscribe,
   canSearch,
   canMute,
@@ -68,6 +74,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   onCloseAnimationEnd,
   updateChatMutedState,
   enterMessageSelectMode,
+  sendBotCommand,
+  restartBot,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -89,6 +97,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     setIsDeleteModalOpen(false);
     onClose();
   }, [onClose]);
+
+  const handleStartBot = useCallback(() => {
+    sendBotCommand({ command: '/start' });
+  }, [sendBotCommand]);
+
+  const handleRestartBot = useCallback(() => {
+    restartBot({ chatId });
+  }, [chatId, restartBot]);
 
   const handleToggleMuteClick = useCallback(() => {
     updateChatMutedState({ chatId, isMuted: !isMuted });
@@ -127,6 +143,22 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
+          {IS_SINGLE_COLUMN_LAYOUT && canStartBot && (
+            <MenuItem
+              icon="bots"
+              onClick={handleStartBot}
+            >
+              {lang('BotStart')}
+            </MenuItem>
+          )}
+          {IS_SINGLE_COLUMN_LAYOUT && canRestartBot && (
+            <MenuItem
+              icon="bots"
+              onClick={handleRestartBot}
+            >
+              {lang('BotRestart')}
+            </MenuItem>
+          )}
           {IS_SINGLE_COLUMN_LAYOUT && canSubscribe && (
             <MenuItem
               icon={isChannel ? 'channel' : 'group'}
@@ -200,5 +232,7 @@ export default memo(withGlobal<OwnProps>(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'updateChatMutedState',
     'enterMessageSelectMode',
+    'sendBotCommand',
+    'restartBot',
   ]),
 )(HeaderMenuContainer));

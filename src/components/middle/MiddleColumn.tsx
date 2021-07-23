@@ -446,7 +446,7 @@ export default memo(withGlobal(
       messageListType,
       originChatId: originChat ? originChat.id : chatId,
       isPrivate: isChatPrivate(chatId),
-      canPost: !isPinnedMessageList && (!chat || canPost) && (!isBotNotStarted || IS_SINGLE_COLUMN_LAYOUT),
+      canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
       isScheduledMessageList,
       currentUserBannedRights: chat && chat.currentUserBannedRights,

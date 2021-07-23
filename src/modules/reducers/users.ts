@@ -169,3 +169,19 @@ export function updateUserSearchFetchingStatus(
     fetchingStatus: newState,
   });
 }
+
+export function updateUserBlockedState(global: GlobalState, userId: number, isBlocked: boolean) {
+  const { byId } = global.users;
+  const user = byId[userId];
+  if (!user || !user.fullInfo) {
+    return global;
+  }
+
+  return updateUser(global, userId, {
+    ...user,
+    fullInfo: {
+      ...user.fullInfo,
+      isBlocked,
+    },
+  });
+}
