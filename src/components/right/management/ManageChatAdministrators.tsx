@@ -5,8 +5,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ManagementScreens } from '../../../types';
 import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
-import { getUserFullName, isChatChannel } from '../../../modules/helpers';
 
+import { getUserFullName, isChatChannel } from '../../../modules/helpers';
 import { selectChat } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -86,7 +86,11 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <ListItem icon="recent" multiline ripple onClick={handleRecentActionsClick}>
+          <ListItem
+            icon="recent"
+            multiline
+            onClick={handleRecentActionsClick}
+          >
             <span className="title">{lang('EventLog')}</span>
             <span className="subtitle">{lang(isChannel ? 'EventLogInfoDetailChannel' : 'EventLogInfoDetail')}</span>
           </ListItem>
@@ -103,7 +107,6 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             <ListItem
               key={member.userId}
               className="chat-item-clickable"
-              ripple
               onClick={() => handleAdminMemberClick(member)}
             >
               <PrivateChatInfo

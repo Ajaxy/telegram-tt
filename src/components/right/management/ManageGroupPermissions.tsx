@@ -247,7 +247,12 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
 
         <div className="section">
-          <ListItem icon="delete-user" multiline ripple narrow onClick={handleRemovedUsersClick}>
+          <ListItem
+            icon="delete-user"
+            multiline
+            narrow
+            onClick={handleRemovedUsersClick}
+          >
             <span className="title">{lang('ChannelBlockedUsers')}</span>
             <span className="subtitle">{removedUsersCount}</span>
           </ListItem>
@@ -258,7 +263,6 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
 
           <ListItem
             icon="add-user"
-            ripple
             onClick={handleAddExceptionClick}
           >
             {lang('ChannelAddException')}
@@ -268,7 +272,6 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
             <ListItem
               key={member.userId}
               className="chat-item-clickable exceptions-member"
-              ripple
               onClick={() => handleExceptionMemberClick(member)}
             >
               <PrivateChatInfo

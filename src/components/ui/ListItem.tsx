@@ -2,9 +2,11 @@ import { RefObject } from 'react';
 import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
+import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 
 import RippleEffect from './RippleEffect';
@@ -66,6 +68,7 @@ const ListItem: FC<OwnProps> = (props) => {
   if (ref) {
     containerRef = ref;
   }
+  const [isTouched, markIsTouched, unmarkIsTouched] = useFlag();
 
   const {
     isContextMenuOpen, contextMenuPosition,
@@ -97,7 +100,12 @@ const ListItem: FC<OwnProps> = (props) => {
       return;
     }
     onClick(e);
-  }, [disabled, onClick]);
+
+    if (IS_TOUCH_ENV && !ripple) {
+      markIsTouched();
+      fastRaf(unmarkIsTouched);
+    }
+  }, [disabled, markIsTouched, onClick, ripple, unmarkIsTouched]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (inactive || IS_TOUCH_ENV) {
@@ -141,7 +149,7 @@ const ListItem: FC<OwnProps> = (props) => {
       style={style}
     >
       <div
-        className="ListItem-button"
+        className={buildClassName('ListItem-button', isTouched && 'active')}
         role="button"
         ref={buttonRef}
         tabIndex={0}

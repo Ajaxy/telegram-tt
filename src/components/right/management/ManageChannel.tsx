@@ -184,16 +184,25 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
             disabled={!canChangeInfo}
           />
           {chat.isCreator && (
-            <ListItem icon="lock" ripple multiline onClick={handleClickEditType}>
+            <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('ChannelType')}</span>
               <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
             </ListItem>
           )}
-          <ListItem icon="message" multiline ripple onClick={handleClickDiscussion} disabled={!canChangeInfo}>
+          <ListItem
+            icon="message"
+            multiline
+            onClick={handleClickDiscussion}
+            disabled={!canChangeInfo}
+          >
             <span className="title">{lang('Discussion')}</span>
             <span className="subtitle">{hasLinkedChat ? lang('DiscussionUnlink') : lang('Add')}</span>
           </ListItem>
-          <ListItem icon="admin" multiline ripple onClick={handleClickAdministrators}>
+          <ListItem
+            icon="admin"
+            multiline
+            onClick={handleClickAdministrators}
+          >
             <span className="title">{lang('ChannelAdministrators')}</span>
             <span className="subtitle">{adminsCount}</span>
           </ListItem>
@@ -206,7 +215,11 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         </div>
         <div className="section">
-          <ListItem icon="group" multiline ripple onClick={handleClickSubscribers}>
+          <ListItem
+            icon="group"
+            multiline
+            onClick={handleClickSubscribers}
+          >
             <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
             <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount!, 'i')}</span>
           </ListItem>
