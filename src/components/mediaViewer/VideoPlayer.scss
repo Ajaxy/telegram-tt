@@ -57,6 +57,25 @@
     }
   }
 
+  .play-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3.25rem;
+    height: 3.25rem;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    body:not(.animation-level-0) & {
+      transition: opacity .3s ease !important;
+    }
+
+    .icon-play {
+      font-size: 1.75rem;
+      position: relative;
+      left: .125rem;
+    }
+  }
+
   .spinner-container {
     position: absolute;
     top: 0;
