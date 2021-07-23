@@ -8,9 +8,10 @@ import { InlineBotSettings } from '../../../types';
 import { RE_TME_INVITE_LINK, RE_TME_LINK } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
-  selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectReplyingToId, selectUser,
+  selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList,
+  selectReplyingToId, selectUser,
 } from '../../selectors';
-import { addChats, addUsers } from '../../reducers';
+import { addChats, addUsers, removeBlockedContact } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce } from '../../../util/schedulers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
@@ -72,6 +73,26 @@ addReducer('sendBotCommand', (global, actions, payload) => {
   }
 
   void sendBotCommand(chat, currentUserId, command);
+});
+
+addReducer('restartBot', (global, actions, payload) => {
+  const { chatId } = payload;
+  const { currentUserId } = global;
+  const chat = selectCurrentChat(global);
+  const bot = currentUserId && selectChatBot(global, chatId);
+  if (!currentUserId || !chat || !bot) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('unblockContact', bot.id, bot.accessHash);
+    if (!result) {
+      return;
+    }
+
+    setGlobal(removeBlockedContact(getGlobal(), bot.id));
+    void sendBotCommand(chat, currentUserId, '/start');
+  })();
 });
 
 addReducer('loadTopInlineBots', (global) => {

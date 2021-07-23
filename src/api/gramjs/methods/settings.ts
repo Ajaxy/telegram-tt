@@ -13,7 +13,7 @@ import {
 
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview, getApiChatIdFromMtpPeer } from '../apiBuilders/chats';
-import { buildInputPrivacyKey, buildInputPeer, buildPeer } from '../gramjsBuilders';
+import { buildInputPrivacyKey, buildInputPeer } from '../gramjsBuilders';
 import { invokeRequest, uploadFile, getClient } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -129,9 +129,9 @@ export async function fetchBlockedContacts() {
   };
 }
 
-export function blockContact(chatOrUserId: number) {
+export function blockContact(chatOrUserId: number, accessHash?: string) {
   return invokeRequest(new GramJs.contacts.Block({
-    id: buildPeer(chatOrUserId),
+    id: buildInputPeer(chatOrUserId, accessHash),
   }));
 }
 

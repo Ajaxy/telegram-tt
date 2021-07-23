@@ -217,10 +217,10 @@ addReducer('loadBlockedContacts', () => {
 });
 
 addReducer('blockContact', (global, actions, payload) => {
-  const { contactId } = payload!;
+  const { contactId, accessHash } = payload!;
 
   (async () => {
-    const result = await callApi('blockContact', contactId);
+    const result = await callApi('blockContact', contactId, accessHash);
     if (!result) {
       return;
     }

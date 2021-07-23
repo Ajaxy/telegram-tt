@@ -23,6 +23,7 @@ export interface ApiUser {
 }
 
 export interface ApiUserFullInfo {
+  isBlocked?: boolean;
   bio?: string;
   commonChatsCount?: number;
   botDescription?: string;

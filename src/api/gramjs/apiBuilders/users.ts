@@ -3,7 +3,7 @@ import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
   const {
-    about, commonChatsCount, pinnedMsgId, botInfo,
+    about, commonChatsCount, pinnedMsgId, botInfo, blocked,
   } = mtpUserFull;
 
   return {
@@ -12,6 +12,7 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
       bio: about,
       commonChatsCount,
       pinnedMessageId: pinnedMsgId,
+      isBlocked: Boolean(blocked),
       ...(botInfo && { botDescription: botInfo.description }),
     },
   };

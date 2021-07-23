@@ -487,7 +487,7 @@ export type ActionTypes = (
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' |
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
-  'resetInlineBot' |
+  'resetInlineBot' | 'restartBot' |
   // misc
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |

@@ -3,6 +3,7 @@ import {
   ISettings, IThemeSettings, ThemeKey, NotifyException,
 } from '../../types';
 import { ApiNotifyException } from '../../api/types';
+import { updateUserBlockedState } from './users';
 
 export function replaceSettings(global: GlobalState, newSettings?: Partial<ISettings>): GlobalState {
   return {
@@ -87,6 +88,8 @@ export function updateNotifySettings(
 }
 
 export function addBlockedContact(global: GlobalState, contactId: number): GlobalState {
+  global = updateUserBlockedState(global, contactId, true);
+
   return {
     ...global,
     blocked: {
@@ -98,6 +101,8 @@ export function addBlockedContact(global: GlobalState, contactId: number): Globa
 }
 
 export function removeBlockedContact(global: GlobalState, contactId: number): GlobalState {
+  global = updateUserBlockedState(global, contactId, false);
+
   return {
     ...global,
     blocked: {
