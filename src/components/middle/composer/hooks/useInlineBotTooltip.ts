@@ -19,6 +19,7 @@ export default function useInlineBotTooltip(
   const { queryInlineBot, resetInlineBot } = getDispatch();
   const { username, query, canShowHelp } = parseStartWithUsernameString(text);
   const usernameLowered = username.toLowerCase();
+  const prevQuery = usePrevious(query);
   const prevUsername = usePrevious(username);
   const inlineBotData = inlineBots && inlineBots[usernameLowered];
   const {
@@ -29,6 +30,12 @@ export default function useInlineBotTooltip(
     isGallery,
     help,
   } = inlineBotData || {};
+
+  useEffect(() => {
+    if (prevQuery !== query) {
+      unmarkIsOpen();
+    }
+  }, [prevQuery, query, unmarkIsOpen]);
 
   useEffect(() => {
     if (isAllowed && usernameLowered && chatId) {

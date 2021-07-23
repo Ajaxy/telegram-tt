@@ -249,7 +249,7 @@ async function searchInlineBot({
   global = replaceInlineBotSettings(global, username, {
     ...newInlineBotData,
     help: result.help,
-    isGallery: result.isGallery,
+    ...(newResults.length && { isGallery: result.isGallery }),
     ...(result.switchPm && { switchPm: result.switchPm }),
     canLoadMore: result.results.length > 0 && Boolean(result.nextOffset),
     results: newInlineBotData.offset === '' || newInlineBotData.offset === result.nextOffset

@@ -91,7 +91,7 @@ export async function fetchInlineBotResults({
   return {
     isGallery: Boolean(result.gallery),
     help: bot.botPlaceholder,
-    nextOffset: result.nextOffset,
+    nextOffset: getInlineBotResultsNextOffset(bot.username, result.nextOffset),
     switchPm: buildSwitchPm(result.switchPm),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
     results: processInlineBotResult(String(result.queryId), result.results),
@@ -142,6 +142,10 @@ function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineRe
 
     return buildApiBotInlineResult(result, queryId);
   });
+}
+
+function getInlineBotResultsNextOffset(username: string, nextOffset?: string) {
+  return username === 'gif' && nextOffset === '0' ? '' : nextOffset;
 }
 
 function addUserToLocalDb(user: GramJs.User) {

@@ -800,6 +800,17 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         filteredUsers={mentionFilteredUsers}
         usersById={usersById}
       />
+      <InlineBotTooltip
+        isOpen={isInlineBotTooltipOpen}
+        botId={inlineBotId}
+        allowedAttachmentOptions={allowedAttachmentOptions}
+        isGallery={isInlineBotTooltipGallery}
+        inlineBotResults={inlineBotResults}
+        switchPm={inlineBotSwitchPm}
+        onSelectResult={handleInlineBotSelect}
+        loadMore={loadMoreForInlineBot}
+        onClose={closeInlineBotTooltip}
+      />
       <div id="message-compose">
         <div className="svg-appendix" ref={appendixRef} />
         <ComposerEmbeddedMessage />
@@ -917,17 +928,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
               onClose={closeBotKeyboard}
             />
           )}
-          <InlineBotTooltip
-            isOpen={isInlineBotTooltipOpen}
-            botId={inlineBotId}
-            allowedAttachmentOptions={allowedAttachmentOptions}
-            isGallery={isInlineBotTooltipGallery}
-            inlineBotResults={inlineBotResults}
-            switchPm={inlineBotSwitchPm}
-            onSelectResult={handleInlineBotSelect}
-            loadMore={loadMoreForInlineBot}
-            onClose={closeInlineBotTooltip}
-          />
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
             allowedAttachmentOptions={allowedAttachmentOptions}
