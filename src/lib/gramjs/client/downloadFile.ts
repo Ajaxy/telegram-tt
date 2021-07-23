@@ -3,6 +3,7 @@ import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import { getAppropriatedPartSize } from '../Utils';
 import { sleep, createDeferred } from '../Helpers';
+import errors from '../errors';
 
 export interface progressCallback {
     isCanceled?: boolean;
@@ -33,7 +34,7 @@ interface Deferred {
 const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
-const REQUEST_TIMEOUT = 15000;
+const DISCONNECT_SLEEP = 1000;
 
 
 class Foreman {
@@ -90,24 +91,6 @@ export async function downloadFile(
         throw new Error(`The part size must be evenly divisible by ${MIN_CHUNK_SIZE}`);
     }
 
-    let sender: any;
-    if (dcId) {
-        try {
-            sender = await client._borrowExportedSender(dcId);
-        } catch (e) {
-            // This should never raise
-            client._log.error(e);
-            if (e.message === 'DC_ID_INVALID') {
-                // Can't export a sender for the ID we are currently in
-                sender = client._sender;
-            } else {
-                throw e;
-            }
-        }
-    } else {
-        sender = client._sender;
-    }
-
     client._log.info(`Downloading file in chunks of ${partSize} bytes`);
 
     const foreman = new Foreman(workers);
@@ -120,6 +103,10 @@ export async function downloadFile(
     if (progressCallback) {
         progressCallback(progress);
     }
+
+    // used to populate the sender
+    await client.getSender(dcId);
+
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -139,39 +126,55 @@ export async function downloadFile(
         }
 
         // eslint-disable-next-line no-loop-func
-        promises.push((async () => {
-            try {
-                const result = await Promise.race([
-                    await sender.send(new Api.upload.GetFile({
+        promises.push((async (offsetMemo: number) => {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const sender = await client.getSender(dcId);
+                try {
+                    if (!sender._user_connected) {
+                        await sleep(DISCONNECT_SLEEP);
+                        continue;
+                    }
+                    const result = await sender.send(new Api.upload.GetFile({
                         location: inputLocation,
-                        offset,
+                        offset: offsetMemo,
                         limit,
                         precise: isPrecise || undefined,
-                    })),
-                    sleep(REQUEST_TIMEOUT).then(() => Promise.reject(new Error('REQUEST_TIMEOUT'))),
-                ]);
+                    }));
 
-                if (progressCallback) {
-                    if (progressCallback.isCanceled) {
-                        throw new Error('USER_CANCELED');
+                    if (progressCallback) {
+                        if (progressCallback.isCanceled) {
+                            throw new Error('USER_CANCELED');
+                        }
+
+                        progress += (1 / partsCount);
+                        progressCallback(progress);
                     }
 
-                    progress += (1 / partsCount);
-                    progressCallback(progress);
-                }
+                    if (!end && (result.bytes.length < limit)) {
+                        hasEnded = true;
+                    }
 
-                if (!end && (result.bytes.length < limit)) {
+                    return result.bytes;
+                } catch (err) {
+                    if (err.message === 'Disconnect') {
+                        await sleep(DISCONNECT_SLEEP);
+                        continue;
+                    } else if (err instanceof errors.FloodWaitError) {
+                        await sleep(err.seconds * 1000);
+                        continue;
+                    } else if (err.message !== 'USER_CANCELED') {
+                        // eslint-disable-next-line no-console
+                        console.error(err);
+                    }
+
                     hasEnded = true;
+                    throw err;
+                } finally {
+                    foreman.releaseWorker();
                 }
-
-                return result.bytes;
-            } catch (err) {
-                hasEnded = true;
-                throw err;
-            } finally {
-                foreman.releaseWorker();
             }
-        })());
+        })(offset));
 
         offset += limit;
 
@@ -179,7 +182,6 @@ export async function downloadFile(
             break;
         }
     }
-
     const results = await Promise.all(promises);
     const buffers = results.filter(Boolean);
     const totalLength = end ? (end + 1) - start : undefined;
