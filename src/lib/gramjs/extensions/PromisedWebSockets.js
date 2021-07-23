@@ -86,6 +86,8 @@ class PromisedWebSockets {
                 resolve(this);
             };
             this.client.onerror = (error) => {
+                // eslint-disable-next-line no-console
+                console.error('WebSocket error', error);
                 reject(error);
             };
             this.client.onclose = (event) => {

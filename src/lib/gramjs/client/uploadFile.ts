@@ -4,6 +4,7 @@ import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
 import { getAppropriatedPartSize } from '../Utils';
+import errors from '../errors';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -20,7 +21,7 @@ export interface UploadFileParams {
 
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
-const UPLOAD_TIMEOUT = 15 * 1000;
+const DISCONNECT_SLEEP = 1000;
 
 export async function uploadFile(
     client: TelegramClient,
@@ -38,7 +39,7 @@ export async function uploadFile(
     const buffer = Buffer.from(await fileToBuffer(file));
 
     // We always upload from the DC we are in.
-    const sender = await client._borrowExportedSender(client.session.dcId);
+    const sender = await client.getSender(client.session.dcId);
 
     if (!workers || !size) {
         workers = 1;
@@ -63,47 +64,51 @@ export async function uploadFile(
             const bytes = buffer.slice(j * partSize, (j + 1) * partSize);
 
             // eslint-disable-next-line no-loop-func
-            sendingParts.push((async () => {
-                await sender.send(
-                    isLarge
-                        ? new Api.upload.SaveBigFilePart({
-                            fileId,
-                            filePart: j,
-                            fileTotalParts: partCount,
-                            bytes,
-                        })
-                        : new Api.upload.SaveFilePart({
-                            fileId,
-                            filePart: j,
-                            bytes,
-                        }),
-                );
-
-                if (onProgress) {
-                    if (onProgress.isCanceled) {
-                        throw new Error('USER_CANCELED');
+            sendingParts.push((async (jMemo: number, bytesMemo: Buffer) => {
+                while (true) {
+                    if (!sender._user_connected) {
+                        await sleep(DISCONNECT_SLEEP);
+                        continue;
+                    }
+                    try {
+                        await sender.send(
+                            isLarge
+                                ? new Api.upload.SaveBigFilePart({
+                                    fileId,
+                                    filePart: jMemo,
+                                    fileTotalParts: partCount,
+                                    bytes: bytesMemo,
+                                })
+                                : new Api.upload.SaveFilePart({
+                                    fileId,
+                                    filePart: jMemo,
+                                    bytes: bytesMemo,
+                                }),
+                        );
+                    } catch (err) {
+                        if (err.message === 'Disconnect') {
+                            await sleep(DISCONNECT_SLEEP);
+                            continue;
+                        } else if (err instanceof errors.FloodWaitError) {
+                            await sleep(err.seconds * 1000);
+                            continue;
+                        }
+                        throw err;
                     }
 
-                    progress += (1 / partCount);
-                    onProgress(progress);
-                }
-            })());
-        }
-        try {
-            await Promise.race([
-                await Promise.all(sendingParts),
-                sleep(UPLOAD_TIMEOUT * workers).then(() => Promise.reject(new Error('TIMEOUT'))),
-            ]);
-        } catch (err) {
-            if (err.message === 'TIMEOUT') {
-                // eslint-disable-next-line no-console
-                console.warn('Upload timeout. Retrying...');
-                i -= workers;
-                continue;
-            }
+                    if (onProgress) {
+                        if (onProgress.isCanceled) {
+                            throw new Error('USER_CANCELED');
+                        }
 
-            throw err;
+                        progress += (1 / partCount);
+                        onProgress(progress);
+                    }
+                    break;
+                }
+            })(j, bytes));
         }
+        await Promise.all(sendingParts);
     }
 
     return isLarge

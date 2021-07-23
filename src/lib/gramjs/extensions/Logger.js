@@ -51,6 +51,11 @@ class Logger {
      * @param message {string}
      */
     warn(message) {
+        // todo remove later
+        if (_level === 'debug') {
+            // eslint-disable-next-line no-console
+            console.error(new Error().stack);
+        }
         this._log('warn', message, this.colors.warn);
     }
 
@@ -72,6 +77,11 @@ class Logger {
      * @param message {string}
      */
     error(message) {
+        // todo remove later
+        if (_level === 'debug') {
+            // eslint-disable-next-line no-console
+            console.error(new Error().stack);
+        }
         this._log('error', message, this.colors.error);
     }
 
