@@ -1,4 +1,6 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useEffect,
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import {
@@ -10,7 +12,7 @@ import { pick } from '../../../util/iteratees';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
-import { selectThreadInfo } from '../../../modules/selectors';
+import { selectThreadInfo, selectThreadOriginChat } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -26,12 +28,19 @@ type StateProps = {
   threadInfo: ApiThreadInfo;
   usersById?: Record<number, ApiUser>;
   chatsById?: Record<number, ApiChat>;
+  shouldRequestThreadUpdate: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat'>;
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'requestThreadInfoUpdate'>;
 
 const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
-  disabled, threadInfo, usersById, chatsById, openChat,
+  disabled,
+  threadInfo,
+  usersById,
+  chatsById,
+  shouldRequestThreadUpdate,
+  openChat,
+  requestThreadInfoUpdate,
 }) => {
   const lang = useLang();
   const {
@@ -41,6 +50,13 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleClick = useCallback(() => {
     openChat({ id: chatId, threadId });
   }, [openChat, chatId, threadId]);
+
+
+  useEffect(() => {
+    if (shouldRequestThreadUpdate) {
+      requestThreadInfoUpdate({ chatId, threadId });
+    }
+  }, [chatId, requestThreadInfoUpdate, shouldRequestThreadUpdate, threadId]);
 
   if (messagesCount === undefined) {
     return undefined;
@@ -92,6 +108,7 @@ export default memo(withGlobal<OwnProps>(
     const { threadId, chatId } = message.threadInfo!;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId) || message.threadInfo!;
+    const chat = selectThreadOriginChat(global, chatId, threadId);
     const { byId: usersById } = global.users;
     const { byId: chatsById } = global.chats;
 
@@ -99,9 +116,11 @@ export default memo(withGlobal<OwnProps>(
       threadInfo,
       usersById,
       chatsById,
+      shouldRequestThreadUpdate: !!chat && !threadInfo.topMessageId,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChat',
+    'requestThreadInfoUpdate',
   ]),
 )(CommentButton));
