@@ -53,10 +53,11 @@
           --background-color: var(--color-chat-hover);
         }
       }
-    }
-    @media (max-width: 600px) {
-      &:not(.has-ripple) .ListItem-button:active {
-        --background-color: var(--color-chat-hover);
+
+      @media (max-width: 600px) {
+        &.active {
+          --background-color: var(--color-chat-hover);
+        }
       }
     }
   }

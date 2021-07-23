@@ -235,13 +235,17 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
             disabled={!canChangeInfo}
           />
           {chat.isCreator && (
-            <ListItem icon="lock" multiline ripple onClick={handleClickEditType}>
+            <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('GroupType')}</span>
               <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
             </ListItem>
           )}
           {hasLinkedChannel && (
-            <ListItem icon="message" multiline ripple onClick={handleClickDiscussion}>
+            <ListItem
+              icon="message"
+              multiline
+              onClick={handleClickDiscussion}
+            >
               <span className="title">{lang('LinkedChannel')}</span>
               <span className="subtitle">{lang('DiscussionUnlink')}</span>
             </ListItem>
@@ -249,7 +253,6 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
           <ListItem
             icon="permissions"
             multiline
-            ripple
             onClick={handleClickPermissions}
             disabled={!canBanUsers}
           >
@@ -258,13 +261,17 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
               {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}
             </span>
           </ListItem>
-          <ListItem icon="admin" multiline ripple onClick={handleClickAdministrators}>
+          <ListItem
+            icon="admin"
+            multiline
+            onClick={handleClickAdministrators}
+          >
             <span className="title">{lang('ChannelAdministrators')}</span>
             <span className="subtitle">{formatInteger(adminsCount)}</span>
           </ListItem>
         </div>
         <div className="section">
-          <ListItem icon="group" multiline ripple onClick={handleClickMembers}>
+          <ListItem icon="group" multiline onClick={handleClickMembers}>
             <span className="title">{lang('GroupMembers')}</span>
             <span className="subtitle">{formatInteger(chat.membersCount!)}</span>
           </ListItem>
