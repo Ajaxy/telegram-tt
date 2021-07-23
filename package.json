@@ -19,7 +19,7 @@
   },
   "engines": {
     "node": "^12.13",
-    "npm": "^6.12"
+    "npm": "^7"
   },
   "husky": {
     "hooks": {
