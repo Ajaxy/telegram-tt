@@ -2,6 +2,8 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
+import { ApiDimensions } from '../../api/types';
+
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
@@ -11,9 +13,9 @@ import safePlay from '../../util/safePlay';
 
 import VideoPlayerControls from './VideoPlayerControls';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import Button from '../ui/Button';
 
 import './VideoPlayer.scss';
-import { ApiDimensions } from '../../api/types';
 
 type OwnProps = {
   url?: string;
@@ -53,6 +55,10 @@ const VideoPlayer: FC<OwnProps> = ({
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
+  const {
+    shouldRender: shouldRenderPlayButton,
+    transitionClassNames: playButtonClassNames,
+  } = useShowTransition(IS_IOS && !isPlayed && !shouldRenderSpinner, undefined, undefined, 'slow');
 
   useEffect(() => {
     if (noPlay || !isMediaViewerOpen) {
@@ -173,6 +179,11 @@ const VideoPlayer: FC<OwnProps> = ({
           {url && <source src={url} />}
         </video>
       </div>
+      {shouldRenderPlayButton && (
+        <Button round className={`play-button ${playButtonClassNames}`} onClick={togglePlayState}>
+          <i className="icon-play" />
+        </Button>
+      )}
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>
           {!isBuffered && <div className="buffering">Buffering...</div>}
