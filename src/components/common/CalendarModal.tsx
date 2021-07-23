@@ -269,7 +269,7 @@ function buildCalendarGrid(year: number, month: number) {
   date.setMonth(month);
   date.setDate(1);
 
-  const monthStartDay = date.getDay();
+  const monthStartDay = date.getDay() || 7;
   // Fill empty cells
   for (let i = 1; i < monthStartDay; i++) {
     grid.push(0);
