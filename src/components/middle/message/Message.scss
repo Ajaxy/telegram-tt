@@ -56,6 +56,17 @@
       border: 1px var(--select-background-color) solid;
       background-color: var(--select-background-color);
     }
+
+    body.is-android & {
+      .can-select-text {
+        z-index: var(--z-message-select-control);
+      }
+
+      // Prevent media viewer from opening
+      .media-inner {
+        pointer-events: none;
+      }
+    }
   }
 
   &.has-inline-buttons {
@@ -126,7 +137,10 @@
 
   .select-mode-active & {
     cursor: pointer;
-    user-select: none;
+
+    @media (min-width: 600px) {
+      user-select: none;
+    }
 
     &:not(.own) {
       > .Avatar,

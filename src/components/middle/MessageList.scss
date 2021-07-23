@@ -12,10 +12,13 @@
   }
 
   @media (pointer: coarse) {
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
     user-select: none;
     touch-callout: none;
+
+    &.select-mode-active {
+      user-select: auto;
+      touch-callout: default;
+    }
   }
 
   &.no-avatars .Message > .Avatar {

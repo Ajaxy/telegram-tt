@@ -22,7 +22,7 @@ import {
   FocusDirection, IAlbum, ISettings, MediaViewerOrigin,
 } from '../../../types';
 
-import { IS_ANDROID } from '../../../util/environment';
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import {
   selectChat,
@@ -59,6 +59,7 @@ import {
   getUserColorKey,
 } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
+import windowSize from '../../../util/windowSize';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
@@ -168,7 +169,7 @@ const APPENDIX_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/s
 const APPENDIX_NOT_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>';
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
-const ANDROID_KEYBOARD_HIDE_DELAY_MS = 150;
+const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -243,9 +244,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const {
     isContextMenuOpen, contextMenuPosition,
-    handleBeforeContextMenu, handleContextMenu,
+    handleBeforeContextMenu, handleContextMenu: onContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(ref, false, true);
+  } = useContextMenuHandlers(ref, IS_TOUCH_ENV && isInSelectMode, true, IS_ANDROID);
 
   useEffect(() => {
     if (isContextMenuOpen) {
@@ -452,13 +453,23 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (IS_ANDROID) {
-      setTimeout(() => {
-        handleContextMenu(e);
-      }, ANDROID_KEYBOARD_HIDE_DELAY_MS);
+      if (windowSize.getIsKeyboardVisible()) {
+        setTimeout(() => { onContextMenu(e); }, ANDROID_KEYBOARD_HIDE_DELAY_MS);
+      } else {
+        onContextMenu(e);
+      }
     } else {
-      handleContextMenu(e);
+      onContextMenu(e);
     }
-  }, [handleContextMenu]);
+  }, [onContextMenu]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (IS_ANDROID) {
+      handleMessageSelect(e);
+    } else {
+      onContextMenu(e);
+    }
+  }, [onContextMenu, handleMessageSelect]);
 
   const handleReadMedia = useCallback((): void => {
     markMessagesRead({ messageIds: [messageId] });
@@ -801,7 +812,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {withAvatar && renderAvatar()}
       <div
-        className="message-content-wrapper"
+        className={buildClassName('message-content-wrapper', contentClassName.includes('text') && 'can-select-text')}
         onClick={isInSelectMode && isInDocumentGroup ? handleMessageSelect : undefined}
       >
         <div

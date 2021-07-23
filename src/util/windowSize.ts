@@ -13,6 +13,7 @@ type IDimensions = {
 
 const IS_LANDSCAPE = IS_SINGLE_COLUMN_LAYOUT && isLandscape();
 
+const initialHeight = window.innerHeight;
 let windowSize = updateSizes();
 let isRefreshDisabled = false;
 
@@ -69,6 +70,7 @@ function isLandscape() {
 
 export default {
   get: () => windowSize,
+  getIsKeyboardVisible: () => initialHeight > windowSize.height,
   disableRefresh,
   enableRefresh,
 };
