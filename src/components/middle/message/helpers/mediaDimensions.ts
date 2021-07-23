@@ -10,6 +10,7 @@ import {
 } from '../../../../modules/helpers';
 
 const MIN_MEDIA_WIDTH = 100;
+const MIN_MEDIA_WIDTH_WITH_COMMENTS = 238;
 const MIN_MEDIA_WIDTH_WITH_TEXT = 175;
 const MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS = 238;
 const MIN_MEDIA_HEIGHT = 90;
@@ -18,7 +19,7 @@ const SMALL_IMAGE_THRESHOLD = 12;
 export function getMinMediaWidth(hasText?: boolean, hasCommentButton?: boolean) {
   return hasText
     ? (hasCommentButton ? MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS : MIN_MEDIA_WIDTH_WITH_TEXT)
-    : MIN_MEDIA_WIDTH;
+    : (hasCommentButton ? MIN_MEDIA_WIDTH_WITH_COMMENTS : MIN_MEDIA_WIDTH);
 }
 
 export function calculateMediaDimensions(message: ApiMessage, noAvatars?: boolean) {

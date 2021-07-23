@@ -31,7 +31,8 @@ export function buildContentClassName(
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
-  const isMediaWithNoText = (photo || video) && !text;
+  const isMedia = photo || video;
+  const isMediaWithNoText = isMedia && !text;
   const isViaBot = Boolean(message.viaBotId);
 
   if (isEmojiOnlyMessage(customShape)) {
@@ -92,6 +93,10 @@ export function buildContentClassName(
 
   if (!customShape) {
     classNames.push('has-shadow');
+
+    if (isMedia && hasComments) {
+      classNames.push('has-background');
+    }
 
     if (hasReply || asForwarded || !isMediaWithNoText || isViaBot || forceSenderName) {
       classNames.push('has-solid-background');

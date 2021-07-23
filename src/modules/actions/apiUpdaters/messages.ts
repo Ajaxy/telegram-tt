@@ -176,6 +176,19 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const newMessage = selectChatMessage(global, chatId, message.id)!;
       global = updateChatLastMessage(global, chatId, newMessage);
 
+      const thread = selectThreadByMessage(global, chatId, message);
+      // For some reason Telegram requires to manually mark outgoing thread messages read
+      // For some reason Telegram requires to manually mark outgoing thread messages read
+      if (thread && thread.threadInfo) {
+        actions.markMessageListRead({ maxId: message.id });
+
+        global = replaceThreadParam(global, chatId, thread.threadInfo.threadId, 'threadInfo', {
+          ...thread.threadInfo,
+          lastMessageId: message.id,
+          lastReadInboxMessageId: message.id,
+        });
+      }
+
       setGlobal(global);
 
       break;
@@ -432,8 +445,31 @@ function updateWithLocalMedia(
 function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
   const { id, chatId } = message;
 
+  const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
+
   const chat = selectChat(global, chatId);
   const isUnreadChatNotLoaded = chat && chat.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
+
+  if (threadInfo) {
+    if (firstMessageId || !isMessageLocal(message)) {
+      global = updateListedIds(global, chatId, threadInfo.threadId, [id]);
+
+      if (selectIsViewportNewest(global, chatId, threadInfo.threadId)) {
+        global = addViewportId(global, chatId, threadInfo.threadId, id);
+
+        if (!firstMessageId) {
+          global = replaceThreadParam(global, chatId, threadInfo.threadId, 'firstMessageId', message.id);
+        }
+      }
+    }
+
+    global = replaceThreadParam(global, chatId, threadInfo.threadId, 'threadInfo', {
+      ...threadInfo,
+      lastMessageId: message.id,
+      messagesCount: threadInfo.messagesCount + 1,
+    });
+  }
+
   if (isUnreadChatNotLoaded) {
     return global;
   }
@@ -441,38 +477,13 @@ function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
   global = updateListedIds(global, chatId, MAIN_THREAD_ID, [id]);
 
   if (selectIsViewportNewest(global, chatId, MAIN_THREAD_ID)) {
-    // Always keep the first uread message in the viewport list
+    // Always keep the first unread message in the viewport list
     const firstUnreadId = selectFirstUnreadId(global, chatId, MAIN_THREAD_ID);
     const newGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id);
     const newViewportIds = selectViewportIds(newGlobal, chatId, MAIN_THREAD_ID);
 
     if (!firstUnreadId || newViewportIds!.includes(firstUnreadId)) {
       global = newGlobal;
-    }
-  }
-
-  const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
-
-  if (!firstMessageId && isMessageLocal(message)) {
-    return global;
-  }
-
-  if (threadInfo) {
-    global = updateListedIds(global, chatId, threadInfo.threadId, [id]);
-
-    if (selectIsViewportNewest(global, chatId, threadInfo.threadId)) {
-      global = addViewportId(global, chatId, threadInfo.threadId, id);
-
-      if (!firstMessageId) {
-        global = replaceThreadParam(global, chatId, threadInfo.threadId, 'firstMessageId', message.id);
-      }
-
-      if (!threadInfo.lastMessageId) {
-        global = replaceThreadParam(global, chatId, threadInfo.threadId, 'threadInfo', {
-          ...threadInfo,
-          lastMessageId: message.id,
-        });
-      }
     }
   }
 
@@ -553,12 +564,12 @@ function deleteMessages(chatId: number | undefined, ids: number[], actions: Glob
       }
     });
 
-    unique(threadIdsToUpdate).forEach((threadId) => {
-      actions.requestThreadInfoUpdate({ chatId, threadId });
-    });
-
     setTimeout(() => {
       setGlobal(deleteChatMessages(getGlobal(), chatId, ids));
+
+      unique(threadIdsToUpdate).forEach((threadId) => {
+        actions.requestThreadInfoUpdate({ chatId, threadId });
+      });
     }, ANIMATION_DELAY);
 
     return;

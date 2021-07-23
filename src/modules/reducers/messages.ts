@@ -180,14 +180,18 @@ export function deleteChatMessages(
 
   const threadIds = Object.keys(global.messages.byChatId[chatId].threadsById).map(Number);
   threadIds.forEach((threadId) => {
+    const threadInfo = selectThreadInfo(global, chatId, threadId);
+
     let listedIds = selectListedIds(global, chatId, threadId);
     let outlyingIds = selectOutlyingIds(global, chatId, threadId);
     let viewportIds = selectViewportIds(global, chatId, threadId);
     let pinnedIds = selectPinnedIds(global, chatId);
+    let newMessageCount = threadInfo ? threadInfo.messagesCount : undefined;
 
     messageIds.forEach((messageId) => {
       if (listedIds && listedIds.includes(messageId)) {
         listedIds = listedIds.filter((id) => id !== messageId);
+        if (newMessageCount !== undefined) newMessageCount -= 1;
       }
 
       if (outlyingIds && outlyingIds.includes(messageId)) {
@@ -203,10 +207,18 @@ export function deleteChatMessages(
       }
     });
 
+
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
     global = replaceThreadParam(global, chatId, threadId, 'outlyingIds', outlyingIds);
     global = replaceThreadParam(global, chatId, threadId, 'viewportIds', viewportIds);
     global = replaceThreadParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
+
+    if (threadInfo && newMessageCount !== undefined) {
+      global = replaceThreadParam(global, chatId, threadId, 'threadInfo', {
+        ...threadInfo,
+        messagesCount: newMessageCount,
+      });
+    }
   });
 
   if (deletedForwardedPosts.length) {
