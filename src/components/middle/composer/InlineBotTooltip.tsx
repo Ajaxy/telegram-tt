@@ -17,6 +17,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import usePrevious from '../../../hooks/usePrevious';
 
 import MediaResult from './inlineResults/MediaResult';
 import ArticleResult from './inlineResults/ArticleResult';
@@ -122,7 +123,18 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
     sendBotCommand({ chatId: botId, command: `/start ${switchPm!.startParam}` });
   }, [botId, openChat, sendBotCommand, switchPm]);
 
-  if (!shouldRender || !inlineBotResults || (!inlineBotResults.length && !switchPm)) {
+
+  const prevInlineBotResults = usePrevious(
+    inlineBotResults && inlineBotResults.length
+      ? inlineBotResults
+      : undefined,
+    shouldRender,
+  );
+  const renderedInlineBotResults = inlineBotResults && !inlineBotResults.length
+    ? prevInlineBotResults
+    : inlineBotResults;
+
+  if (!shouldRender || !renderedInlineBotResults || (!renderedInlineBotResults.length && !switchPm)) {
     return undefined;
   }
 
@@ -142,7 +154,7 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   }
 
   function renderContent() {
-    return inlineBotResults!.map((inlineBotResult, index) => {
+    return renderedInlineBotResults!.map((inlineBotResult, index) => {
       switch (inlineBotResult.type) {
         case 'gif':
           return (
@@ -205,7 +217,7 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
     <InfiniteScroll
       ref={containerRef}
       className={className}
-      items={inlineBotResults}
+      items={renderedInlineBotResults}
       itemSelector=".chat-item-clickable"
       noFastList
       onLoadMore={handleLoadMore}
