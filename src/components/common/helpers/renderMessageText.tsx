@@ -44,12 +44,27 @@ function organizeEntity(
   }
 
   // Determine any nested entities inside current entity
-  const nestedEntities = entities
+  const nestedEntities: IOrganizedEntity[] = [];
+  const parsedNestedEntities = entities
     .filter((e, i) => i > index && e.offset >= offset && e.offset < offset + length)
     .map((e) => organizeEntity(e, entities.indexOf(e), entities, organizedEntityIndexes))
     .filter<IOrganizedEntity>(Boolean as any);
 
-  nestedEntities.forEach((e) => e.organizedIndexes.forEach((i) => organizedIndexes.add(i)));
+  parsedNestedEntities.forEach((parsedEntity) => {
+    let isChanged = false;
+
+    parsedEntity.organizedIndexes.forEach((organizedIndex) => {
+      if (!isChanged && !organizedIndexes.has(organizedIndex)) {
+        isChanged = true;
+      }
+
+      organizedIndexes.add(organizedIndex);
+    });
+
+    if (isChanged) {
+      nestedEntities.push(parsedEntity);
+    }
+  });
 
   return {
     entity,
@@ -95,7 +110,7 @@ export function renderTextWithEntities(
   const result: TextPart[] = [];
   let deleteLineBreakAfterPre = false;
 
-  const organizedEntites = organizeEntities(entities);
+  const organizedEntities = organizeEntities(entities);
 
   // Recursive function to render regular and nested entities
   function renderEntity(
@@ -192,12 +207,12 @@ export function renderTextWithEntities(
   // Process highest-level entities
   let index = 0;
 
-  organizedEntites.forEach((entity, arrayIndex) => {
+  organizedEntities.forEach((entity, arrayIndex) => {
     const { renderResult, entityEndIndex } = renderEntity(
       index,
       text.length,
       entity,
-      arrayIndex === organizedEntites.length - 1,
+      arrayIndex === organizedEntities.length - 1,
     );
 
     result.push(...renderResult);
