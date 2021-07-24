@@ -23,7 +23,7 @@ const { updateTwoFaSettings } = require('./2fa');
 
 const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
-const DEFAULT_IPV4_IP = 'zws4.web.telegram.org';
+const DEFAULT_IPV4_IP = 'zws2.web.telegram.org';
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]';
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
