@@ -39,11 +39,14 @@ export function renderActionMessageText(
   }
   const { text, translationValues } = message.content.action;
   const content: TextPart[] = [];
-  const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 16 };
+  const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 32 };
+  const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
+    ? 'Message.PinnedGenericMessage'
+    : text;
 
   let unprocessed: string;
   let processed = processPlaceholder(
-    lang(text, translationValues && translationValues.length ? translationValues : undefined),
+    lang(translationKey, translationValues && translationValues.length ? translationValues : undefined),
     '%action_origin%',
     actionOrigin
       ? (!options.isEmbedded && renderOriginContent(lang, actionOrigin, options.asPlain)) || NBSP
@@ -112,20 +115,24 @@ function renderMessageContent(lang: LangFn, message: ApiMessage, options: Action
     photo, video, document, sticker,
   } = getMessageContent(message);
 
-  const showQuotes = text && !photo && !video && !document && !sticker;
-  let messageText = trimText(text as string, options.maxTextLength)!;
+  const { maxTextLength, isEmbedded, asPlain } = options;
 
-  if (photo) {
-    messageText = 'a photo';
-  } else if (video) {
-    messageText = video.isGif ? 'a GIF' : 'a video';
-  } else if (document) {
-    messageText = 'a document';
-  } else if (sticker) {
-    messageText = `«${text}»`;
+  const showQuotes = isEmbedded && text && !photo && !video && !document && !sticker;
+  let messageText = trimText(text as string, maxTextLength)!;
+
+  if (isEmbedded) {
+    if (photo) {
+      messageText = 'a photo';
+    } else if (video) {
+      messageText = video.isGif ? 'a GIF' : 'a video';
+    } else if (document) {
+      messageText = 'a document';
+    } else if (sticker) {
+      messageText = text;
+    }
   }
 
-  if (options.asPlain) {
+  if (asPlain) {
     return showQuotes ? `«${messageText}»` : messageText;
   }
 
