@@ -60,6 +60,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   INVITE_HASH_INVALID: 'The invite hash is invalid',
   CHANNELS_TOO_MUCH: 'You have joined too many channels/supergroups',
   USER_ALREADY_PARTICIPANT: 'You already in the group',
+  SCHEDULE_DATE_INVALID: 'Invalid schedule date provided',
 };
 
 export default function getReadableErrorText(error: ApiError) {

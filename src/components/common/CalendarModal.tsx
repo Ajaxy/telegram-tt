@@ -5,6 +5,7 @@ import React, {
 import buildClassName from '../../util/buildClassName';
 import { formatTime, formatDateToString } from '../../util/dateFormat';
 import useLang, { LangFn } from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -52,6 +53,7 @@ const CalendarModal: FC<OwnProps> = ({
   const now = new Date();
   const defaultSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
   const maxDate = maxAt ? new Date(maxAt) : undefined;
+  const prevIsOpen = usePrevious(isOpen);
 
   const [selectedDate, setSelectedDate] = useState<Date>(defaultSelectedDate);
   const [selectedHours, setSelectedHours] = useState<string>(
@@ -66,10 +68,10 @@ const CalendarModal: FC<OwnProps> = ({
   const currentDate = selectedDate.getDate();
 
   useEffect(() => {
-    if (isOpen) {
+    if (!prevIsOpen && isOpen) {
       setSelectedDate(defaultSelectedDate);
     }
-  }, [isOpen, defaultSelectedDate]);
+  }, [isOpen, defaultSelectedDate, prevIsOpen]);
 
   const shouldDisableNextMonth = (isPastMode && currentYear >= now.getFullYear() && currentMonth >= now.getMonth())
     || (maxDate && currentYear >= maxDate.getFullYear() && currentMonth >= maxDate.getMonth());
