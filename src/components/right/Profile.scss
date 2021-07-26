@@ -42,6 +42,10 @@
       }
     }
   }
+
+  .FloatingActionButton {
+    z-index: 1;
+  }
 }
 
 .shared-media {
@@ -130,9 +134,5 @@
         }
       }
     }
-  }
-
-  .FloatingActionButton {
-    z-index: 1;
   }
 }
