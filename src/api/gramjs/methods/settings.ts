@@ -6,7 +6,7 @@ import {
 } from '../../types';
 import { ApiPrivacyKey, IInputPrivacyRules } from '../../../types';
 
-import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
+import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, LANG_PACKS } from '../../../config';
 import {
   buildApiWallpaper, buildApiSession, buildPrivacyRules, buildApiNotifyException,
 } from '../apiBuilders/misc';
@@ -278,7 +278,10 @@ export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
   return result.map(omitVirtualClassFields);
 }
 
-export async function fetchLangPack({ sourceLangPacks, langCode }: { sourceLangPacks: string[]; langCode: string }) {
+export async function fetchLangPack({ sourceLangPacks, langCode }: {
+  sourceLangPacks: typeof LANG_PACKS;
+  langCode: string;
+}) {
   const results = await Promise.all(sourceLangPacks.map((langPack) => {
     return invokeRequest(new GramJs.langpack.GetLangPack({
       langPack,
@@ -297,6 +300,22 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: { sourceLangP
   }
 
   return { langPack: Object.assign({}, ...collections.reverse()) };
+}
+
+export async function fetchLangStrings({ langPack, langCode, keys }: {
+  langPack: string; langCode: string; keys: string[];
+}) {
+  const result = await invokeRequest(new GramJs.langpack.GetStrings({
+    langPack,
+    langCode: BETA_LANG_CODES.includes(langCode) ? `${langCode}-raw` : langCode,
+    keys,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(omitVirtualClassFields);
 }
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {

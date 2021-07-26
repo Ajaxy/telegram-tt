@@ -3,18 +3,24 @@ import { ChangeEvent } from 'react';
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 
-import { GlobalActions, GlobalState } from '../../global/types';
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
-import {
-  IS_SAFARI, IS_TOUCH_ENV,
-} from '../../util/environment';
+
+import { GlobalActions, GlobalState } from '../../global/types';
+import { LangCode } from '../../types';
+
+import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
 import { formatPhoneNumber, getCountryById, getCountryFromPhoneNumber } from '../../util/phoneNumber';
+import { setLanguage } from '../../util/langProvider';
+import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import useLangString from '../../hooks/useLangString';
+import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -25,9 +31,12 @@ import CountryCodeInput from './CountryCodeInput';
 type StateProps = Pick<GlobalState, (
   'connectionState' | 'authState' |
   'authPhoneNumber' | 'authIsLoading' | 'authIsLoadingQrCode' | 'authError' | 'authRememberMe' | 'authNearestCountry'
-)>;
+)> & {
+  language?: LangCode;
+};
 type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'goToAuthQrCode'
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'goToAuthQrCode' |
+  'setSettingOption'
 )>;
 
 const MIN_NUMBER_LENGTH = 7;
@@ -43,19 +52,25 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   authError,
   authRememberMe,
   authNearestCountry,
+  language,
   setAuthPhoneNumber,
   setAuthRememberMe,
   loadNearestCountry,
   clearAuthError,
   goToAuthQrCode,
+  setSettingOption,
 }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestedLanguage = getSuggestedLanguage();
 
+  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
   const [country, setCountry] = useState<Country | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
   const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
+  const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
 
   const fullNumber = country ? `${country.code} ${phoneNumber || ''}` : phoneNumber;
   const canSubmit = fullNumber && fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGTH;
@@ -98,6 +113,16 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
 
     setPhoneNumber(formatPhoneNumber(newFullNumber, selectedCountry));
   }, [country]);
+
+  const handleLangChange = useCallback(() => {
+    markIsLoading();
+
+    setLanguage(suggestedLanguage!, () => {
+      unmarkIsLoading();
+
+      setSettingOption({ language: suggestedLanguage });
+    });
+  }, [markIsLoading, setSettingOption, suggestedLanguage, unmarkIsLoading]);
 
   useEffect(() => {
     if (phoneNumber === undefined && authPhoneNumber) {
@@ -169,11 +194,8 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     <div id="auth-phone-number-form" className="custom-scroll">
       <div className="auth-form">
         <div id="logo" />
-        <h2>Sign in to Telegram</h2>
-        <p className="note">
-          Please confirm your country and
-          <br />enter your phone number.
-        </p>
+        <h2>Telegram</h2>
+        <p className="note">{lang('StartText')}</p>
         <form action="" onSubmit={handleSubmit}>
           <CountryCodeInput
             id="sign-in-phone-code"
@@ -184,9 +206,9 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           <InputText
             ref={inputRef}
             id="sign-in-phone-number"
-            label="Phone Number"
+            label={lang('Login.PhonePlaceholder')}
             value={fullNumber}
-            error={authError}
+            error={authError && lang(authError)}
             inputMode="tel"
             onChange={handlePhoneNumberChange}
             onPaste={IS_SAFARI ? handlePaste : undefined}
@@ -199,15 +221,18 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           />
           {canSubmit && (
             isAuthReady ? (
-              <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
+              <Button type="submit" ripple isLoading={authIsLoading}>{lang('Login.Next')}</Button>
             ) : (
               <Loading />
             )
           )}
           {isAuthReady && (
             <Button isText ripple isLoading={authIsLoadingQrCode} onClick={goToAuthQrCode}>
-              Log in by QR code
+              {lang('Login.QR.Login')}
             </Button>
+          )}
+          {suggestedLanguage && suggestedLanguage !== language && continueText && (
+            <Button isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
           )}
         </form>
       </div>
@@ -216,21 +241,31 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, [
-    'connectionState',
-    'authState',
-    'authPhoneNumber',
-    'authIsLoading',
-    'authIsLoadingQrCode',
-    'authError',
-    'authRememberMe',
-    'authNearestCountry',
-  ]),
+  (global): StateProps => {
+    const {
+      settings: { byKey: { language } },
+    } = global;
+
+    return {
+      ...pick(global, [
+        'connectionState',
+        'authState',
+        'authPhoneNumber',
+        'authIsLoading',
+        'authIsLoadingQrCode',
+        'authError',
+        'authRememberMe',
+        'authNearestCountry',
+      ]),
+      language,
+    };
+  },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'setAuthPhoneNumber',
     'setAuthRememberMe',
     'clearAuthError',
     'loadNearestCountry',
     'goToAuthQrCode',
+    'setSettingOption',
   ]),
 )(AuthPhoneNumber));

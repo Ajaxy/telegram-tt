@@ -1084,6 +1084,7 @@ payments.validateRequestedInfo#db103170 flags:# save:flags.0?true peer:InputPeer
 payments.sendPaymentForm#30c3bc9d flags:# form_id:long peer:InputPeer msg_id:int requested_info_id:flags.0?string shipping_option_id:flags.1?string credentials:InputPaymentCredentials tip_amount:flags.2?long = payments.PaymentResult;
 payments.getSavedInfo#227d824b = payments.SavedInfo;
 langpack.getLangPack#f2f2330a lang_pack:string lang_code:string = LangPackDifference;
+langpack.getStrings#efea3803 lang_pack:string lang_code:string keys:Vector<string> = Vector<LangPackString>;
 langpack.getLanguages#42c6978f lang_pack:string = Vector<LangPackLanguage>;
 folders.editPeerFolders#6847d0ab folder_peers:Vector<InputFolderPeer> = Updates;
 // LAYER 128

@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -16,6 +17,7 @@ type DispatchProps = Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadPr
 const AuthRegister: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, signUp, clearAuthError, uploadProfilePhoto,
 }) => {
+  const lang = useLang();
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [croppedFile, setCroppedFile] = useState<File | undefined>();
   const [firstName, setFirstName] = useState('');
@@ -53,28 +55,25 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
       <div className="auth-form">
         <form action="" method="post" onSubmit={handleSubmit}>
           <AvatarEditable onChange={setCroppedFile} />
-          <h2>Your Name</h2>
-          <p className="note">
-            Enter your name and add
-            <br />a profile picture.
-          </p>
+          <h2>{lang('YourName')}</h2>
+          <p className="note">{lang('Login.Register.Desc')}</p>
           <InputText
             id="registration-first-name"
-            label="Name"
+            label={lang('Login.Register.FirstName.Placeholder')}
             onChange={handleFirstNameChange}
             value={firstName}
-            error={authError}
+            error={authError && lang(authError)}
             autoComplete="given-name"
           />
           <InputText
             id="registration-last-name"
-            label="Last Name (optional)"
+            label={lang('Login.Register.LastName.Placeholder')}
             onChange={handleLastNameChange}
             value={lastName}
             autoComplete="family-name"
           />
           {isButtonShown && (
-            <Button type="submit" ripple isLoading={authIsLoading}>Start Messaging</Button>
+            <Button type="submit" ripple isLoading={authIsLoading}>{lang('Next')}</Button>
           )}
         </form>
       </div>

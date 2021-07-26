@@ -2,6 +2,7 @@ import {
   addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
+import { initApi, callApi } from '../../../api/gramjs';
 import { GlobalState } from '../../../global/types';
 
 import {
@@ -13,7 +14,6 @@ import {
   IS_TEST,
 } from '../../../config';
 import { PLATFORM_ENV } from '../../../util/environment';
-import { initApi, callApi } from '../../../api/gramjs';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 import { updateAppBadge } from '../../../util/appBadge';

@@ -1,6 +1,8 @@
-import { ApiLangPack } from '../api/types';
+import { ApiLangPack, ApiLangString } from '../api/types';
 
-import { LANG_CACHE_NAME, LANG_PACKS } from '../config';
+import {
+  DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,
+} from '../config';
 import * as cacheApi from './cacheApi';
 import { callApi } from '../api/gramjs';
 import { createCallbackManager } from './callbacks';
@@ -14,7 +16,6 @@ interface LangFn {
   code?: string;
 }
 
-const FALLBACK_LANG_CODE = 'en';
 const SUBSTITUTION_REGEX = /%\d?\$?[sdf@]/g;
 const PLURAL_OPTIONS = ['value', 'zeroValue', 'oneValue', 'twoValue', 'fewValue', 'manyValue', 'otherValue'] as const;
 const PLURAL_RULES = {
@@ -77,23 +78,22 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
     return key;
   }
 
-  const template = langString[typeof value === 'number' ? getPluralOption(value) : 'value'];
-  if (!template || !template.trim()) {
-    const parts = key.split('.');
-
-    return parts[parts.length - 1];
-  }
-
-  if (value !== undefined) {
-    const formattedValue = format === 'i' ? formatInteger(value) : value;
-    const result = processTemplate(template, formattedValue);
-    const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
-    cache.set(`${key}_${cacheValue}_${format}`, result);
-    return result;
-  }
-
-  return template;
+  return processTranslation(langString, key, value, format);
 };
+
+export async function getTranslationForLangString(langCode: string, key: string) {
+  let translateString = await cacheApi.fetch(
+    LANG_CACHE_NAME,
+    `${DEFAULT_LANG_PACK}_${langCode}_${key}`,
+    cacheApi.Type.Json,
+  );
+
+  if (!translateString) {
+    translateString = await fetchRemoteString(DEFAULT_LANG_PACK, langCode, key);
+  }
+
+  return processTranslation(translateString, key);
+}
 
 export async function setLanguage(langCode: string, callback?: NoneToVoidFunction, withFallback = false) {
   if (langPack && langCode === currentLangCode) {
@@ -153,8 +153,26 @@ async function fetchRemote(langCode: string): Promise<ApiLangPack | undefined> {
   return undefined;
 }
 
+async function fetchRemoteString(
+  remoteLangPack: typeof LANG_PACKS[number], langCode: string, key: string,
+): Promise<string | undefined> {
+  const remote = await callApi('fetchLangStrings', {
+    langPack: remoteLangPack,
+    langCode,
+    keys: [key],
+  });
+
+  if (remote && remote.length) {
+    await cacheApi.save(LANG_CACHE_NAME, `${remoteLangPack}_${langCode}_${key}`, remote[0]);
+
+    return remote[0];
+  }
+
+  return undefined;
+}
+
 function getPluralOption(amount: number) {
-  const langCode = currentLangCode || FALLBACK_LANG_CODE;
+  const langCode = currentLangCode || DEFAULT_LANG_CODE;
   const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
     ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;
@@ -170,4 +188,23 @@ function processTemplate(template: string, value: any) {
   return translationSlices.reduce((result, str, index) => {
     return `${result}${String(value[index] || '')}${str}`;
   }, initialValue || '');
+}
+
+function processTranslation(langString: ApiLangString | undefined, key: string, value?: any, format?: 'i') {
+  const template = langString ? langString[typeof value === 'number' ? getPluralOption(value) : 'value'] : undefined;
+  if (!template || !template.trim()) {
+    const parts = key.split('.');
+
+    return parts[parts.length - 1];
+  }
+
+  if (value !== undefined) {
+    const formattedValue = format === 'i' ? formatInteger(value) : value;
+    const result = processTemplate(template, formattedValue);
+    const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
+    cache.set(`${key}_${cacheValue}_${format}`, result);
+    return result;
+  }
+
+  return template;
 }

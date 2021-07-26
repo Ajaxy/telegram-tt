@@ -181,7 +181,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps & DispatchProps> = ({
       return (
         <SettingsTwoFaPassword
           screen={currentScreen}
-          placeholder={lang('EnterPassword')}
+          placeholder={lang('PleaseEnterPassword')}
           submitLabel={lang('Continue')}
           onSubmit={handleNewPassword}
           onScreenSelect={onScreenSelect}
