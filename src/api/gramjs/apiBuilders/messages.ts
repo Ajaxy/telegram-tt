@@ -669,6 +669,9 @@ function buildAction(
     } else {
       text = 'Notification.VoiceChatStartedChannel';
     }
+  } else if (action instanceof GramJs.MessageActionBotAllowed) {
+    text = 'Chat.Service.BotPermissionAllowed';
+    translationValues.push(action.domain);
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
