@@ -202,7 +202,8 @@ export async function subscribe() {
 function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
-  if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined) {
+  if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined
+    || !chat.isListed) {
     return false;
   }
   // Dont show notification for active chat if client has focus
