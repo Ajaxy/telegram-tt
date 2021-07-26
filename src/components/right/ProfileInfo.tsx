@@ -102,15 +102,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Support for swipe gestures and closing on click
   useEffect(() => {
-    const element = document.querySelector<HTMLDivElement>(
-      '.profile-slide-container > .active, .profile-slide-container > .to',
-    );
+    const element = document.querySelector<HTMLDivElement>('.photo-wrapper');
     if (!element) {
       return undefined;
     }
 
     return captureEvents(element, {
-      excludedClosestSelector: '.navigation',
       onSwipe: IS_TOUCH_ENV ? (e, direction) => {
         if (direction === SwipeDirection.Right) {
           selectPreviousMedia();
