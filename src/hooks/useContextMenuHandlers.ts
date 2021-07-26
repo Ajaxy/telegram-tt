@@ -89,9 +89,9 @@ export default (
     const emulateContextMenuEvent = (originalEvent: TouchEvent) => {
       clearLongPressTimer();
 
-      const { clientX, clientY } = originalEvent.touches[0];
+      const { clientX, clientY, target } = originalEvent.touches[0];
 
-      if (contextMenuPosition) {
+      if (contextMenuPosition || (shouldDisableOnLink && (target as HTMLElement).matches('a.text-entity-link[href]'))) {
         return;
       }
 
@@ -130,7 +130,7 @@ export default (
       element.removeEventListener('touchend', clearLongPressTimer, true);
       element.removeEventListener('touchmove', clearLongPressTimer);
     };
-  }, [contextMenuPosition, isMenuDisabled, shouldDisableOnLongTap, elementRef]);
+  }, [contextMenuPosition, isMenuDisabled, shouldDisableOnLongTap, elementRef, shouldDisableOnLink]);
 
   return {
     isContextMenuOpen,
