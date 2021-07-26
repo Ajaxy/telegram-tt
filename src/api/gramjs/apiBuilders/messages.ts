@@ -636,7 +636,7 @@ function buildAction(
     text = 'Migrated from %target_chat%';
     translationValues.push('%target_chat%');
   } else if (action instanceof GramJs.MessageActionPinMessage) {
-    text = 'Notification.PinnedTextMessage';
+    text = 'Chat.Service.Group.UpdatedPinnedMessage1';
     translationValues.push('%action_origin%', '%message%');
   } else if (action instanceof GramJs.MessageActionHistoryClear) {
     text = 'HistoryCleared';
