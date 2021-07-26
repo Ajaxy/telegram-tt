@@ -9,9 +9,9 @@ import {
 import { DEBUG } from '../../../config';
 
 const ApiErrors: { [k: string]: string } = {
-  PHONE_NUMBER_INVALID: 'Invalid Phone Number',
-  PHONE_CODE_INVALID: 'Invalid Code',
-  PASSWORD_HASH_INVALID: 'Invalid Password',
+  PHONE_NUMBER_INVALID: 'PHONE_NUMBER_INVALID',
+  PHONE_CODE_INVALID: 'PHONE_CODE_INVALID',
+  PASSWORD_HASH_INVALID: 'PASSWORD_HASH_INVALID',
   PHONE_PASSWORD_FLOOD: 'You have tried logging in too many times',
 };
 

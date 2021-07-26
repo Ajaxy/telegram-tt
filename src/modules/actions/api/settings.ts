@@ -3,7 +3,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { GlobalState } from '../../../global/types';
 import {
   ApiPrivacyKey, PrivacyVisibility, ProfileEditProgress, IInputPrivacyRules, IInputPrivacyContact,
-  UPLOADING_WALLPAPER_SLUG,
+  UPLOADING_WALLPAPER_SLUG, LangCode,
 } from '../../../types';
 
 import { callApi } from '../../../api/gramjs';

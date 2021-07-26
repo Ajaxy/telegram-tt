@@ -7,7 +7,9 @@ import { GlobalState, GlobalActions } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { pick } from '../../util/iteratees';
+import renderText from '../common/helpers/renderText';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
 
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
@@ -29,6 +31,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   returnToAuthPhoneNumber,
   clearAuthError,
 }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -91,31 +94,21 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
             onClick={returnToAuthPhoneNumber}
             role="button"
             tabIndex={0}
-            title="Sign In with another phone number"
+            title={lang('WrongNumber')}
           >
             <i className="icon-edit" />
           </div>
         </h2>
         <p className="note">
-          {authIsCodeViaApp ? (
-            <>
-              We have sent the code to the Telegram app
-              <br />on your other device.
-            </>
-          ) : (
-            <>
-              We have sent you an SMS
-              <br />with the code.
-            </>
-          )}
+          {renderText(lang(authIsCodeViaApp ? 'SentAppCode' : 'Login.JustSentSms'), ['simple_markdown'])}
         </p>
         <InputText
           ref={inputRef}
           id="sign-in-code"
-          label="Code"
+          label={lang('Code')}
           onInput={onCodeChange}
           value={code}
-          error={authError}
+          error={authError && lang(authError)}
           autoComplete="off"
           inputMode="decimal"
         />

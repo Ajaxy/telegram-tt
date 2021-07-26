@@ -1,17 +1,29 @@
 import QrCreator from 'qr-creator';
 import React, {
-  FC, useEffect, useRef, memo,
+  FC, useEffect, useRef, memo, useCallback,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalState, GlobalActions } from '../../global/types';
+import { LangCode } from '../../types';
 
 import { pick } from '../../util/iteratees';
+import { setLanguage } from '../../util/langProvider';
+import renderText from '../common/helpers/renderText';
+import useLangString from '../../hooks/useLangString';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 
-type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>;
-type DispatchProps = Pick<GlobalActions, 'returnToAuthPhoneNumber'>;
+type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'> & {
+  language?: LangCode;
+};
+type DispatchProps = Pick<GlobalActions, (
+  'returnToAuthPhoneNumber' | 'setSettingOption'
+)>;
 
 const DATA_PREFIX = 'tg://login?token=';
 
@@ -19,10 +31,16 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   connectionState,
   authState,
   authQrCode,
+  language,
   returnToAuthPhoneNumber,
+  setSettingOption,
 }) => {
+  const suggestedLanguage = getSuggestedLanguage();
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
+  const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
 
   useEffect(() => {
     if (!authQrCode || connectionState !== 'connectionStateReady') {
@@ -43,6 +61,16 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
     }, container);
   }, [connectionState, authQrCode]);
 
+  const handleLangChange = useCallback(() => {
+    markIsLoading();
+
+    setLanguage(suggestedLanguage!, () => {
+      unmarkIsLoading();
+
+      setSettingOption({ language: suggestedLanguage });
+    });
+  }, [markIsLoading, setSettingOption, suggestedLanguage, unmarkIsLoading]);
+
   const isAuthReady = authState === 'authorizationStateWaitQrCode';
 
   return (
@@ -53,14 +81,17 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
         ) : (
           <div key="qr-loading" className="qr-loading"><Loading /></div>
         )}
-        <h3>Log in to Telegram by QR Code</h3>
+        <h3>{lang('Login.QR.Title')}</h3>
         <ol>
-          <li><span>Open Telegram on your phone</span></li>
-          <li><span>Go to&nbsp;<b>Settings</b>&nbsp;&gt;&nbsp;<b>Devices</b>&nbsp;&gt;&nbsp;<b>Scan QR</b></span></li>
-          <li><span>Point your phone at this screen to confirm login</span></li>
+          <li><span>{lang('Login.QR.Help1')}</span></li>
+          <li><span>{renderText(lang('Login.QR.Help2'), ['simple_markdown'])}</span></li>
+          <li><span>{lang('Login.QR.Help3')}</span></li>
         </ol>
         {isAuthReady && (
-          <Button isText onClick={returnToAuthPhoneNumber}>Log in by phone number</Button>
+          <Button isText onClick={returnToAuthPhoneNumber}>{lang('Login.QR.Cancel')}</Button>
+        )}
+        {suggestedLanguage && suggestedLanguage !== language && continueText && (
+          <Button isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
         )}
       </div>
     </div>
@@ -68,6 +99,19 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['connectionState', 'authState', 'authQrCode']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['returnToAuthPhoneNumber']),
+  (global): StateProps => {
+    const {
+      connectionState, authState, authQrCode, settings: { byKey: { language } },
+    } = global;
+
+    return {
+      connectionState,
+      authState,
+      authQrCode,
+      language,
+    };
+  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'returnToAuthPhoneNumber', 'setSettingOption',
+  ]),
 )(AuthCode));

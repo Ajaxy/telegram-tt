@@ -2,17 +2,18 @@ import React, {
   FC, useState, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import { countryList } from '../../util/phoneNumber';
 import searchWords from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
+import useLang from '../../hooks/useLang';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import Spinner from '../ui/Spinner';
 
 import './CountryCodeInput.scss';
-import { ANIMATION_END_DELAY } from '../../config';
 
 type OwnProps = {
   id: string;
@@ -30,6 +31,7 @@ const CountryCodeInput: FC<OwnProps> = ({
   isLoading,
   onChange,
 }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -103,7 +105,7 @@ const CountryCodeInput: FC<OwnProps> = ({
           onInput={handleInput}
           onKeyDown={handleInputKeyDown}
         />
-        <label>Country</label>
+        <label>{lang('Login.SelectCountry.Title')}</label>
         {isLoading ? (
           <Spinner color="black" />
         ) : (
@@ -136,7 +138,7 @@ const CountryCodeInput: FC<OwnProps> = ({
           className="no-results"
           disabled
         >
-          <span>No countries matched your filter.</span>
+          <span>{lang('lng_country_none')}</span>
         </MenuItem>
       )}
     </DropdownMenu>

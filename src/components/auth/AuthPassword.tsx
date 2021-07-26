@@ -6,6 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
+import useLang from '../../hooks/useLang';
 
 import MonkeyPassword from '../common/PasswordMonkey';
 import PasswordForm from '../common/PasswordForm';
@@ -16,6 +17,7 @@ type DispatchProps = Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>;
 const AuthPassword: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, authHint, setAuthPassword, clearAuthError,
 }) => {
+  const lang = useLang();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChangePasswordVisibility = useCallback((isVisible) => {
@@ -30,14 +32,11 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
     <div id="auth-password-form" className="custom-scroll">
       <div className="auth-form">
         <MonkeyPassword isPasswordVisible={showPassword} />
-        <h2>Enter Your Password</h2>
-        <p className="note">
-          Your account is protected with
-          <br />an additional password.
-        </p>
+        <h2>{lang('Login.Header.Password')}</h2>
+        <p className="note">{lang('Login.EnterPasswordDescription')}</p>
         <PasswordForm
           clearError={clearAuthError}
-          error={authError}
+          error={authError && lang(authError)}
           hint={authHint}
           isLoading={authIsLoading}
           isPasswordVisible={showPassword}
