@@ -277,7 +277,7 @@ function filterChatFolder(
   includedChatIds?: Set<number>,
   pinnedChatIds?: Set<number>,
 ) {
-  if (chat.isNotJoined) {
+  if (!chat.isListed) {
     return false;
   }
 

@@ -112,6 +112,7 @@ export async function fetchChats({
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
     const chat = buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset);
     chat.lastMessage = lastMessagesByChatId[chat.id];
+    chat.isListed = true;
     chats.push(chat);
 
     if (withPinned && dialog.pinned) {

@@ -37,6 +37,7 @@ export interface ApiChat {
 
   // Current user permissions
   isNotJoined?: boolean;
+  isListed?: boolean;
   isCreator?: boolean;
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
