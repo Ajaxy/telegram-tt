@@ -38,8 +38,8 @@ export async function uploadFile(
     const partCount = Math.floor((size + partSize - 1) / partSize);
     const buffer = Buffer.from(await fileToBuffer(file));
 
-    // We always upload from the DC we are in.
-    const sender = await client.getSender(client.session.dcId);
+    // Make sure a new sender can be created before starting upload
+    await client.getSender(client.session.dcId);
 
     if (!workers || !size) {
         workers = 1;
@@ -66,11 +66,9 @@ export async function uploadFile(
             // eslint-disable-next-line no-loop-func
             sendingParts.push((async (jMemo: number, bytesMemo: Buffer) => {
                 while (true) {
-                    if (!sender._user_connected) {
-                        await sleep(DISCONNECT_SLEEP);
-                        continue;
-                    }
                     try {
+                        // We always upload from the DC we are in
+                        const sender = await client.getSender(client.session.dcId);
                         await sender.send(
                             isLarge
                                 ? new Api.upload.SaveBigFilePart({

@@ -7,7 +7,7 @@ const WebSocketClient = require('websocket').w3cwebsocket;
 const closeError = new Error('WebSocket was closed');
 
 class PromisedWebSockets {
-    constructor() {
+    constructor(disconnectedCallback) {
         /* CONTEST
         this.isBrowser = typeof process === 'undefined' ||
             process.type === 'renderer' ||
@@ -17,6 +17,7 @@ class PromisedWebSockets {
          */
         this.client = undefined;
         this.closed = true;
+        this.disconnectedCallback = disconnectedCallback;
     }
 
     async readExactly(number) {
@@ -96,6 +97,9 @@ class PromisedWebSockets {
                 console.error(`Socket ${ip} closed. Code: ${code}, reason: ${reason}, was clean: ${wasClean}`);
                 this.resolveRead(false);
                 this.closed = true;
+                if (this.disconnectedCallback) {
+                    this.disconnectedCallback();
+                }
             };
             // CONTEST
             // Seems to not be working, at least in a web worker
