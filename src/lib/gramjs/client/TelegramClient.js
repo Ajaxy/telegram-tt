@@ -174,7 +174,7 @@ class TelegramClient {
             });
         }
         // set defaults vars
-        this._sender.userDisconnected = true;
+        this._sender.userDisconnected = false;
         this._sender._user_connected = false;
         this._sender._reconnecting = false;
         this._sender._disconnected = true;
@@ -317,6 +317,9 @@ class TelegramClient {
     // export region
 
     _cleanupExportedSender(dcId) {
+        if (this.session.dcId !== dcId) {
+            this.session.setAuthKey(undefined, dcId);
+        }
         this._exportedSenderPromises[dcId] = undefined;
     }
 
@@ -343,6 +346,7 @@ class TelegramClient {
                     sender._authenticated = true;
                 }
                 sender.dcId = dcId;
+                sender.userDisconnected = false;
 
                 return sender;
             } catch (err) {

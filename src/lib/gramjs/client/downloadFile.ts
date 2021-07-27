@@ -107,7 +107,6 @@ export async function downloadFile(
     // used to populate the sender
     await client.getSender(dcId);
 
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
         let limit = partSize;
@@ -129,12 +128,8 @@ export async function downloadFile(
         promises.push((async (offsetMemo: number) => {
             // eslint-disable-next-line no-constant-condition
             while (true) {
-                const sender = await client.getSender(dcId);
                 try {
-                    if (!sender._user_connected) {
-                        await sleep(DISCONNECT_SLEEP);
-                        continue;
-                    }
+                    const sender = await client.getSender(dcId);
                     const result = await sender.send(new Api.upload.GetFile({
                         location: inputLocation,
                         offset: offsetMemo,

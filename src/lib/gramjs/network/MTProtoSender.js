@@ -826,7 +826,7 @@ class MTProtoSender {
     async _reconnect() {
         this._log.debug('Closing current connection...');
         try {
-            await this.disconnect();
+            await this._disconnect();
         } catch (err) {
             this._log.warn(err);
         }
@@ -834,7 +834,14 @@ class MTProtoSender {
         this._send_queue.append(undefined);
         this._state.reset();
 
-        await this.connect(this._connection, true);
+        // For some reason reusing existing connection caused stuck requests
+        const newConnection = new this._connection.constructor(
+            this._connection._ip,
+            this._connection._port,
+            this._connection._dcId,
+            this._connection._log,
+        );
+        await this.connect(newConnection, true);
 
         this._reconnecting = false;
         // uncomment this if you want to resend

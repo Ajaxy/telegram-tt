@@ -29,7 +29,11 @@ class Connection {
         this._recvArray = new AsyncQueue();
         // this.socket = new PromiseSocket(new Socket())
 
-        this.socket = new PromisedWebSockets();
+        this.socket = new PromisedWebSockets(this.disconnectCallback.bind(this));
+    }
+
+    async disconnectCallback() {
+        await this.disconnect(true);
     }
 
     async _connect() {
@@ -51,10 +55,16 @@ class Connection {
         this._recvTask = this._recvLoop();
     }
 
-    async disconnect() {
+    async disconnect(fromCallback = false) {
+        if (!this._connected) {
+            return;
+        }
+
         this._connected = false;
         void this._recvArray.push(undefined);
-        await this.socket.close();
+        if (!fromCallback) {
+            await this.socket.close();
+        }
     }
 
     async send(data) {
