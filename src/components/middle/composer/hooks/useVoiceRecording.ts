@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
 
-import { IS_IOS } from '../../../../util/environment';
+import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/environment';
 import * as voiceRecording from '../../../../util/voiceRecording';
 import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 
@@ -17,7 +17,7 @@ export default () => {
 
   useEffect(() => {
     // Preloading worker fixes silent first record on iOS
-    if (IS_IOS) {
+    if (IS_IOS && IS_VOICE_RECORDING_SUPPORTED) {
       void voiceRecording.init();
     }
   }, []);
