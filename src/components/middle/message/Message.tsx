@@ -124,6 +124,7 @@ type OwnProps = {
 type StateProps = {
   theme: ISettings['theme'];
   forceSenderName?: boolean;
+  chatUsername?: string;
   sender?: ApiUser | ApiChat;
   originSender?: ApiUser | ApiChat;
   botSender?: ApiUser;
@@ -173,6 +174,7 @@ const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
+  chatUsername,
   observeIntersectionForBottom,
   observeIntersectionForMedia,
   observeIntersectionForAnimatedStickers,
@@ -869,6 +871,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           anchor={contextMenuPosition}
           message={message}
           album={album}
+          chatUsername={chatUsername}
           messageListType={messageListType}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -915,6 +918,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChannel = chat && isChatChannel(chat);
+    const chatUsername = chat && chat.username;
 
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
     const canShowSender = withSenderName || withAvatar || forceSenderName;
@@ -955,6 +959,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       theme: selectTheme(global),
+      chatUsername,
       forceSenderName,
       sender,
       originSender,

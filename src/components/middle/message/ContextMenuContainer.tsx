@@ -18,9 +18,11 @@ import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
 import { getDayStartAt } from '../../../util/dateFormat';
+import { copyTextToClipboard } from '../../../util/clipboard';
 
 export type OwnProps = {
   isOpen: boolean;
+  chatUsername?: string;
   message: ApiMessage;
   album?: IAlbum;
   anchor: IAnchorPosition;
@@ -49,13 +51,13 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'setReplyingToId' | 'setEditingId' | 'pinMessage' | 'openForwardMenu' |
-  'faveSticker' | 'unfaveSticker' | 'toggleMessageSelection' | 'sendScheduledMessages' | 'rescheduleMessage' |
-  'loadMessageLink'
+  'faveSticker' | 'unfaveSticker' | 'toggleMessageSelection' | 'sendScheduledMessages' | 'rescheduleMessage'
 )>;
 
 const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   messageListType,
+  chatUsername,
   message,
   album,
   anchor,
@@ -85,7 +87,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   toggleMessageSelection,
   sendScheduledMessages,
   rescheduleMessage,
-  loadMessageLink,
 }) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -201,12 +202,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [message.chatId, message.id, rescheduleMessage]);
 
   const handleCopyLink = useCallback(() => {
-    loadMessageLink({
-      messageId: message.id,
-      chatId: message.chatId,
-    });
+    copyTextToClipboard(`https://t.me/${chatUsername || `c/${Math.abs(message.chatId)}`}/${message.id}`);
     closeMenu();
-  }, [closeMenu, loadMessageLink, message.chatId, message.id]);
+  }, [chatUsername, closeMenu, message.chatId, message.id]);
 
   useEffect(() => {
     disableScrolling();
@@ -340,6 +338,5 @@ export default memo(withGlobal<OwnProps>(
     'toggleMessageSelection',
     'sendScheduledMessages',
     'rescheduleMessage',
-    'loadMessageLink',
   ]),
 )(ContextMenuContainer));

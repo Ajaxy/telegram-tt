@@ -1079,15 +1079,6 @@ export async function sendScheduledMessages({ chat, ids }: { chat: ApiChat; ids:
   }), true);
 }
 
-export function fetchMessageLink({ chat, message }: { chat: ApiChat; message: ApiMessage }) {
-  return invokeRequest(new GramJs.channels.ExportMessageLink({
-    id: message.id,
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-    ...(message.isInAlbum && { grouped: true }),
-    ...(message.threadInfo && message.threadInfo.topMessageId !== message.id && { thread: true }),
-  }));
-}
-
 function updateLocalDb(result: (
   GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages |
   GramJs.messages.DiscussionMessage

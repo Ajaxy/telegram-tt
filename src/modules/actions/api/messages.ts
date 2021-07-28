@@ -52,7 +52,6 @@ import {
   selectNoWebPage,
 } from '../../selectors';
 import { rafPromise, throttle } from '../../../util/schedulers';
-import { copyTextToClipboard } from '../../../util/clipboard';
 import { IS_IOS } from '../../../util/environment';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
@@ -856,24 +855,6 @@ addReducer('loadPinnedMessages', (global, actions, payload) => {
   }
 
   void loadPinnedMessages(chat);
-});
-
-addReducer('loadMessageLink', (global, actions, payload) => {
-  const { messageId, chatId } = payload;
-  const chat = selectChat(global, chatId);
-  const message = selectChatMessage(global, chatId, messageId);
-
-  if (!chat || !message) {
-    return;
-  }
-
-  (async () => {
-    const result = await callApi('fetchMessageLink', { chat, message });
-
-    if (result) {
-      copyTextToClipboard(result.link);
-    }
-  })();
 });
 
 async function loadPinnedMessages(chat: ApiChat) {
