@@ -286,12 +286,11 @@
   }
 
   &.select-mode-active,
-  &.has-focusing,
+  &.has-focus-highlight,
   body.has-context-menu &,
   .animating > div > & {
     /*
-      We need to remove the width of the scrollbar for the full-width selection and
-      compensate for it with a right padding
+      Remove scrollbar for full-width selection and compensate it with right padding
     */
     &::-webkit-scrollbar {
       width: 0;
@@ -307,7 +306,7 @@
   }
 
   .is-safari &.select-mode-active,
-  .is-safari &.has-focusing,
+  .is-safari &.has-focus-highlight,
   .is-safari.has-context-menu .messages-layout & {
     padding-right: .375rem;
   }
