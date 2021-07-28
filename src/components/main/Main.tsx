@@ -153,11 +153,11 @@ const Main: FC<StateProps & DispatchProps> = ({
       if (index % 2 === 0) {
         const newUnread = selectCountNotMutedUnread(getGlobal()) - initialUnread;
         if (newUnread > 0) {
-          document.title = `${newUnread} notification${newUnread > 1 ? 's' : ''}`;
+          updatePageTitle(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
           updateIcon(true);
         }
       } else {
-        document.title = PAGE_TITLE;
+        updatePageTitle(PAGE_TITLE);
         updateIcon(false);
       }
 
@@ -172,7 +172,7 @@ const Main: FC<StateProps & DispatchProps> = ({
     notificationInterval = undefined;
 
     if (!document.title.includes(INACTIVE_MARKER)) {
-      document.title = PAGE_TITLE;
+      updatePageTitle(PAGE_TITLE);
     }
 
     updateIcon(false);
@@ -214,6 +214,14 @@ function updateIcon(asUnread: boolean) {
         link.href = link.href.replace('favicon-unread', 'favicon');
       }
     });
+}
+
+// For some reason setting `document.title` to the same value
+// causes increment of Chrome Dev Tools > Performance Monitor > DOM Nodes counter
+function updatePageTitle(nextTitle: string) {
+  if (document.title !== nextTitle) {
+    document.title = nextTitle;
+  }
 }
 
 export default memo(withGlobal(
