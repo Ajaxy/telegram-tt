@@ -67,6 +67,8 @@ function parseMarkdown(html: string) {
   // Strip redundant nbsp's
   parsedHtml = parsedHtml.replace(/&nbsp;/g, ' ');
 
+  // Replace <div><br></div> with newline (new line in Safari)
+  parsedHtml = parsedHtml.replace(/<div><br([^>]*)?><\/div>/g, '\n');
   // Replace <br> with newline
   parsedHtml = parsedHtml.replace(/<br([^>]*)?>/g, '\n');
 
