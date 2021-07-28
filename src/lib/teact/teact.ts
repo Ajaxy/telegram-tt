@@ -377,7 +377,7 @@ function unmountComponent(componentInstance: ComponentInstance) {
   helpGc(componentInstance);
 }
 
-// We force cleaning as many objects as possible. Not sure this is needed at all.
+// We need to remove all references to DOM objects. We also clean all other references, just in case.
 function helpGc(componentInstance: ComponentInstance) {
   /* eslint-disable no-null/no-null */
 
@@ -399,6 +399,7 @@ function helpGc(componentInstance: ComponentInstance) {
 
   componentInstance.hooks = null as any;
   componentInstance.$element = null as any;
+  componentInstance.renderedValue = null as any;
   componentInstance.Component = null as any;
   componentInstance.props = null as any;
   componentInstance.forceUpdate = null as any;
