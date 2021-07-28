@@ -25,6 +25,7 @@ const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
 const DEFAULT_IPV4_IP = 'zws2.web.telegram.org';
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]';
+const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
 
@@ -374,8 +375,14 @@ class TelegramClient {
         let sender;
         try {
             sender = await this._exportedSenderPromises[dcId];
+
             if (!sender.isConnected()) {
-                return this._borrowExportedSender(dcId, true, sender);
+                if (sender.isConnecting) {
+                    await Helpers.sleep(EXPORTED_SENDER_RECONNECT_TIMEOUT);
+                    return this._borrowExportedSender(dcId, false, sender);
+                } else {
+                    return this._borrowExportedSender(dcId, true, sender);
+                }
             }
         } catch (err) {
             // eslint-disable-next-line no-console
@@ -390,9 +397,6 @@ class TelegramClient {
         }
 
         this._exportedSenderReleaseTimeouts[dcId] = setTimeout(() => {
-            // eslint-disable-next-line no-console
-            console.warn(`Disconnecting from file socket #${dcId}...`);
-
             this._exportedSenderReleaseTimeouts[dcId] = undefined;
             sender.disconnect();
         }, EXPORTED_SENDER_RELEASE_TIMEOUT);
