@@ -1071,7 +1071,6 @@ channels.joinChannel#24b524c5 channel:InputChannel = Updates;
 channels.leaveChannel#f836aa95 channel:InputChannel = Updates;
 channels.inviteToChannel#199f3a6c channel:InputChannel users:Vector<InputUser> = Updates;
 channels.deleteChannel#c0111fe3 channel:InputChannel = Updates;
-channels.exportMessageLink#e63fadeb flags:# grouped:flags.0?true thread:flags.1?true channel:InputChannel id:int = ExportedMessageLink;
 channels.toggleSignatures#1f69b606 channel:InputChannel enabled:Bool = Updates;
 channels.editBanned#96e6cd81 channel:InputChannel participant:InputPeer banned_rights:ChatBannedRights = Updates;
 channels.readMessageContents#eab5dc38 channel:InputChannel id:Vector<int> = Bool;
