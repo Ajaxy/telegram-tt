@@ -1,4 +1,6 @@
-import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, memo, useEffect,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -14,6 +16,7 @@ import {
 import renderText from '../common/helpers/renderText';
 import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -47,11 +50,12 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   deleteScheduledMessages,
   exitMessageSelectMode,
 }) => {
+  const prevIsOpen = usePrevious(isOpen);
+
   const handleDeleteMessageForAll = useCallback(() => {
-    deleteMessages({ messageIds: selectedMessageIds, shouldDeleteForAll: true });
-    exitMessageSelectMode();
     onClose();
-  }, [deleteMessages, exitMessageSelectMode, selectedMessageIds, onClose]);
+    deleteMessages({ messageIds: selectedMessageIds, shouldDeleteForAll: true });
+  }, [deleteMessages, selectedMessageIds, onClose]);
 
   const handleDeleteMessageForSelf = useCallback(() => {
     if (isSchedule) {
@@ -60,13 +64,17 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       deleteMessages({ messageIds: selectedMessageIds, shouldDeleteForAll: false });
     }
 
-    exitMessageSelectMode();
     onClose();
-  }, [
-    isSchedule, exitMessageSelectMode, onClose, deleteScheduledMessages, selectedMessageIds, deleteMessages,
-  ]);
+  }, [isSchedule, onClose, deleteScheduledMessages, selectedMessageIds, deleteMessages]);
 
   const lang = useLang();
+
+  // Returning `undefined` from FC instead of `<Modal>` doesn't trigger useHistoryBack
+  useEffect(() => {
+    if (!isOpen && prevIsOpen) {
+      exitMessageSelectMode();
+    }
+  }, [exitMessageSelectMode, isOpen, prevIsOpen]);
 
   if (!selectedMessageIds) {
     return undefined;
