@@ -61,6 +61,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   CHANNELS_TOO_MUCH: 'You have joined too many channels/supergroups',
   USER_ALREADY_PARTICIPANT: 'You already in the group',
   SCHEDULE_DATE_INVALID: 'Invalid schedule date provided',
+  WALLPAPER_DIMENSIONS_INVALID: 'The wallpaper dimensions are invalid, please select another file',
 };
 
 export default function getReadableErrorText(error: ApiError) {
