@@ -436,9 +436,15 @@ addReducer('openTelegramLink', (global, actions, payload) => {
     match = RE_TME_LINK.exec(url)!;
 
     const username = match[1];
-    const channelPostId = match[2] ? Number(match[2]) : undefined;
+    const chatOrChannelPostId = match[2] ? Number(match[2]) : undefined;
+    const messageId = match[3] ? Number(match[3]) : undefined;
 
-    void openChatByUsername(actions, username, channelPostId);
+    // Open message in private chat
+    if (username === 'c' && chatOrChannelPostId && messageId) {
+      actions.focusMessage({ chatId: -chatOrChannelPostId, messageId });
+    } else {
+      void openChatByUsername(actions, username, chatOrChannelPostId);
+    }
   }
 });
 
