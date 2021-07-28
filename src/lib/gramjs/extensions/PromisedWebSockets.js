@@ -93,8 +93,11 @@ class PromisedWebSockets {
             };
             this.client.onclose = (event) => {
                 const { code, reason, wasClean } = event;
-                // eslint-disable-next-line no-console
-                console.error(`Socket ${ip} closed. Code: ${code}, reason: ${reason}, was clean: ${wasClean}`);
+                if (code !== 1000) {
+                    // eslint-disable-next-line no-console
+                    console.error(`Socket ${ip} closed. Code: ${code}, reason: ${reason}, was clean: ${wasClean}`);
+                }
+
                 this.resolveRead(false);
                 this.closed = true;
                 if (this.disconnectedCallback) {

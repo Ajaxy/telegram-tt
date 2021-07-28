@@ -104,7 +104,7 @@ export async function downloadFile(
         progressCallback(progress);
     }
 
-    // used to populate the sender
+    // Preload sender
     await client.getSender(dcId);
 
     // eslint-disable-next-line no-constant-condition
@@ -120,7 +120,7 @@ export async function downloadFile(
         await foreman.requestWorker();
 
         if (hasEnded) {
-            await foreman.releaseWorker();
+            foreman.releaseWorker();
             break;
         }
 
@@ -128,8 +128,9 @@ export async function downloadFile(
         promises.push((async (offsetMemo: number) => {
             // eslint-disable-next-line no-constant-condition
             while (true) {
+                let sender;
                 try {
-                    const sender = await client.getSender(dcId);
+                    sender = await client.getSender(dcId);
                     const result = await sender.send(new Api.upload.GetFile({
                         location: inputLocation,
                         offset: offsetMemo,
@@ -150,23 +151,22 @@ export async function downloadFile(
                         hasEnded = true;
                     }
 
+                    foreman.releaseWorker();
+
                     return result.bytes;
                 } catch (err) {
-                    if (err.message === 'Disconnect') {
+                    if (sender && !sender.isConnected()) {
                         await sleep(DISCONNECT_SLEEP);
                         continue;
                     } else if (err instanceof errors.FloodWaitError) {
                         await sleep(err.seconds * 1000);
                         continue;
-                    } else if (err.message !== 'USER_CANCELED') {
-                        // eslint-disable-next-line no-console
-                        console.error(err);
                     }
+
+                    foreman.releaseWorker();
 
                     hasEnded = true;
                     throw err;
-                } finally {
-                    foreman.releaseWorker();
                 }
             }
         })(offset));

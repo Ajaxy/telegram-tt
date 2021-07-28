@@ -66,9 +66,10 @@ export async function uploadFile(
             // eslint-disable-next-line no-loop-func
             sendingParts.push((async (jMemo: number, bytesMemo: Buffer) => {
                 while (true) {
+                    let sender;
                     try {
                         // We always upload from the DC we are in
-                        const sender = await client.getSender(client.session.dcId);
+                        sender = await client.getSender(client.session.dcId);
                         await sender.send(
                             isLarge
                                 ? new Api.upload.SaveBigFilePart({
@@ -84,7 +85,7 @@ export async function uploadFile(
                                 }),
                         );
                     } catch (err) {
-                        if (err.message === 'Disconnect') {
+                        if (sender && !sender.isConnected()) {
                             await sleep(DISCONNECT_SLEEP);
                             continue;
                         } else if (err instanceof errors.FloodWaitError) {
@@ -106,6 +107,7 @@ export async function uploadFile(
                 }
             })(j, bytes));
         }
+
         await Promise.all(sendingParts);
     }
 
