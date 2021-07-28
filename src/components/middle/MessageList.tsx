@@ -86,6 +86,7 @@ type StateProps = {
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
   focusingId?: number;
+  hasFocusHighlight?: boolean;
   isSelectModeActive?: boolean;
   animationLevel?: number;
   lastMessage?: ApiMessage;
@@ -108,7 +109,6 @@ const INTERSECTION_MARGIN_FOR_MEDIA = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
 const FOCUSING_DURATION = 1000;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;
-const FOCUSING_FADE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
@@ -133,6 +133,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isRestricted,
   restrictionReason,
   focusingId,
+  hasFocusHighlight,
   isSelectModeActive,
   animationLevel,
   loadViewportMessages,
@@ -162,7 +163,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
-  const [hasFocusing, setHasFocusing] = useState<boolean>(Boolean(focusingId));
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -242,16 +242,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE_FOR_MEDIA,
   });
-
-  useEffect(() => {
-    if (focusingId) {
-      setHasFocusing(true);
-    } else {
-      setTimeout(() => {
-        setHasFocusing(false);
-      }, FOCUSING_FADE_ANIMATION_DURATION);
-    }
-  }, [focusingId]);
 
   const messageGroups = useMemo(() => {
     if (!messageIds || !messagesById) {
@@ -521,8 +511,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     noAvatars && 'no-avatars',
     !canPost && 'no-composer',
     type === 'pinned' && 'type-pinned',
+    hasFocusHighlight && 'has-focus-highlight',
     isSelectModeActive && 'select-mode-active',
-    hasFocusing && 'has-focusing',
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
   );
@@ -765,6 +755,7 @@ export default memo(withGlobal<OwnProps>(
 
     const { isRestricted, restrictionReason, lastMessage } = chat;
     const focusingId = selectFocusedMessageId(global, chatId);
+    const hasFocusHighlight = focusingId ? !global.focusedMessage!.noHighlight : undefined;
 
     const withLastMessageWhenPreloading = (
       threadId === MAIN_THREAD_ID
@@ -793,6 +784,7 @@ export default memo(withGlobal<OwnProps>(
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
       threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
       focusingId,
+      hasFocusHighlight,
       isSelectModeActive: selectIsInSelectMode(global),
       animationLevel: global.settings.byKey.animationLevel,
       ...(withLastMessageWhenPreloading && { lastMessage }),
