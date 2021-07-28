@@ -1,39 +1,39 @@
-import { MutableRefObject } from 'react';
-import React, { FC, useCallback, useRef } from '../../lib/teact/teact';
+import { RefObject } from 'react';
+import { getDispatch } from '../../../lib/teact/teactn';
+import { useCallback, useMemo, useRef } from '../../../lib/teact/teact';
 
-import { MESSAGE_LIST_SENSITIVE_AREA } from '../../config';
-import resetScroll from '../../util/resetScroll';
-import { useIntersectionObserver, useOnIntersect } from '../../hooks/useIntersectionObserver';
-import useOnChange from '../../hooks/useOnChange';
+import { LoadMoreDirection } from '../../../types';
+import { MessageListType } from '../../../global/types';
 
-type OwnProps = {
-  containerRef: MutableRefObject<HTMLDivElement | null>;
-  className: string;
-  messageIds: number[];
-  loadMoreForwards?: NoneToVoidFunction;
-  loadMoreBackwards?: NoneToVoidFunction;
-  isViewportNewest?: boolean;
-  firstUnreadId?: number;
-  onFabToggle: AnyToVoidFunction;
-  onNotchToggle: AnyToVoidFunction;
-  children: any;
-};
+import { debounce } from '../../../util/schedulers';
+import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../config';
+import resetScroll from '../../../util/resetScroll';
+import useOnChange from '../../../hooks/useOnChange';
 
 const FAB_THRESHOLD = 50;
 const TOOLS_FREEZE_TIMEOUT = 100;
 
-const MessageScroll: FC<OwnProps> = ({
-  containerRef,
-  className,
-  messageIds,
-  loadMoreForwards,
-  loadMoreBackwards,
-  isViewportNewest,
-  firstUnreadId,
-  onFabToggle,
-  onNotchToggle,
-  children,
-}) => {
+export default function useScrollHooks(
+  type: MessageListType,
+  containerRef: RefObject<HTMLDivElement>,
+  messageIds: number[],
+  isViewportNewest: boolean,
+  isUnread: boolean,
+  onFabToggle: AnyToVoidFunction,
+  onNotchToggle: AnyToVoidFunction,
+) {
+  const { loadViewportMessages } = getDispatch();
+
+  const [loadMoreBackwards, loadMoreForwards] = useMemo(
+    () => (type === 'thread' ? [
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+    ] : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadViewportMessages, messageIds],
+  );
+
   // eslint-disable-next-line no-null/no-null
   const backwardsTriggerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -59,9 +59,9 @@ const MessageScroll: FC<OwnProps> = ({
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= 0;
 
-    onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
+    onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
-  }, [messageIds, isViewportNewest, containerRef, onFabToggle, firstUnreadId, onNotchToggle]);
+  }, [messageIds, isViewportNewest, containerRef, onFabToggle, isUnread, onNotchToggle]);
 
   const {
     observe: observeIntersection,
@@ -124,22 +124,5 @@ const MessageScroll: FC<OwnProps> = ({
     }, TOOLS_FREEZE_TIMEOUT);
   }, [messageIds]);
 
-  return (
-    <div className={className} teactFastList>
-      <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />
-      {children}
-      <div
-        ref={forwardsTriggerRef}
-        key="forwards-trigger"
-        className="forwards-trigger"
-      />
-      <div
-        ref={fabTriggerRef}
-        key="fab-trigger"
-        className="fab-trigger"
-      />
-    </div>
-  );
-};
-
-export default MessageScroll;
+  return { backwardsTriggerRef, forwardsTriggerRef, fabTriggerRef };
+}
