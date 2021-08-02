@@ -6,6 +6,10 @@
     transition: none !important;
   }
 
+  .select-mode-active + .middle-column-footer & {
+    display: none;
+  }
+
   &:not(.open) {
     height: 0 !important;
   }
