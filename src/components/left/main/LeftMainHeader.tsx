@@ -166,6 +166,10 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     disableHistoryBack();
   };
 
+  const handleOpenTipsChat = () => {
+    openTipsChat({ langCode: lang.code });
+  };
+
   const isSearchFocused = (
     Boolean(globalSearchChatId)
     || content === LeftColumnContent.GlobalSearch
@@ -235,7 +239,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           </MenuItem>
           <MenuItem
             icon="help"
-            onClick={openTipsChat}
+            onClick={handleOpenTipsChat}
           >
             {lang('TelegramFeatures')}
           </MenuItem>
