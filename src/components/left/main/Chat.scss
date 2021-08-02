@@ -73,6 +73,10 @@
       padding-right: .125rem;
     }
 
+    .subtitle {
+      margin-top: -.125rem;
+    }
+
     h3 {
       width: auto;
       max-width: 80%;
@@ -94,6 +98,7 @@
       flex-grow: 1;
       color: var(--color-text-secondary);
       unicode-bidi: plaintext;
+
       &[dir=ltr] {
         text-align: left;
       }
