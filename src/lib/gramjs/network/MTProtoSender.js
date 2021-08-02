@@ -398,6 +398,7 @@ class MTProtoSender {
                 // this._log.info('Connection closed while receiving data');
                 /** when the server disconnects us we want to reconnect */
                 if (!this.userDisconnected) {
+                    this._log.error(e);
                     this._log.warn('Connection closed while receiving data');
                     this.reconnect();
                 }
@@ -416,23 +417,22 @@ class MTProtoSender {
                     this._log.warn(`Security error while unpacking a received message: ${e}`);
                     continue;
                 } else if (e instanceof InvalidBufferError) {
-                    this._log.info('Broken authorization key; resetting');
-                    if (this._updateCallback && this._isMainSender) {
-                        this._updateCallback(new UpdateConnectionState(UpdateConnectionState.broken));
-                    } else if (this._onConnectionBreak && !this._isMainSender) {
-                        // Deletes the current sender from the object
-                        this._onConnectionBreak(this._dcId);
+                    // 404 means that the server has "forgotten" our auth key and we need to create a new one.
+                    if (e.code === 404) {
+                        this._log.warn(`Broken authorization key for dc ${this._dcId}; resetting`);
+                        if (this._updateCallback && this._isMainSender) {
+                            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.broken));
+                        } else if (this._onConnectionBreak && !this._isMainSender) {
+                            // Deletes the current sender from the object
+                            this._onConnectionBreak(this._dcId);
+                        }
+                    } else {
+                        // this happens sometimes when telegram is having some internal issues.
+                        // reconnecting should be enough usually
+                        // since the data we sent and received is probably wrong now.
+                        this._log.warn(`Invalid buffer ${e.code} for dc ${this._dcId}`);
+                        this.reconnect();
                     }
-
-                    // We don't really need to do this if we're going to sign in again
-                    /* await this.authKey.setKey(null)
-
-                    if (this._authKeyCallback) {
-                        await this._authKeyCallback(null)
-                    } */
-                    // We can disconnect at sign in
-                    /* await this.disconnect()
-                    */
                     return;
                 } else {
                     this._log.error('Unhandled error while receiving data');
@@ -818,8 +818,12 @@ class MTProtoSender {
             this._reconnecting = true;
             // TODO Should we set this?
             // this._user_connected = false
-            this._log.info('Started reconnecting');
-            this._reconnect();
+            // we want to wait a second between each reconnect try to not flood the server with reconnects
+            // in case of internal server issues.
+            Helpers.sleep(1000).then(() => {
+                this._log.info('Started reconnecting');
+                this._reconnect();
+            });
         }
     }
 
