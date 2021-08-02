@@ -15,6 +15,7 @@ import {
   RE_TME_INVITE_LINK,
   RE_TME_LINK,
   TIPS_USERNAME,
+  LOCALIZED_TIPS,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -131,8 +132,14 @@ addReducer('openSupportChat', (global, actions) => {
   })();
 });
 
-addReducer('openTipsChat', (global, actions) => {
-  actions.openChatByUsername({ username: TIPS_USERNAME });
+addReducer('openTipsChat', (global, actions, payload) => {
+  const { langCode } = payload;
+
+  const usernamePostfix = langCode === 'pt-br'
+    ? 'BR'
+    : LOCALIZED_TIPS.includes(langCode) ? (langCode as string).toUpperCase() : '';
+
+  actions.openChatByUsername({ username: `${TIPS_USERNAME}${usernamePostfix}` });
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {

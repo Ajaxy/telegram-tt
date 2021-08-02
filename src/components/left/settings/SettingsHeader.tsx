@@ -167,7 +167,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
                 positionX="right"
               >
                 <MenuItem icon="delete" destructive onClick={openDeleteFolderConfirmation}>
-                  Delete Folder
+                  {lang('Delete')}
                 </MenuItem>
               </DropdownMenu>
             )}
@@ -228,16 +228,16 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
-        text="Are you sure you want to log out?"
-        confirmLabel="Log Out"
+        text={lang('lng_sure_logout')}
+        confirmLabel={lang('AccountSettings.Logout')}
         confirmHandler={handleSignOutMessage}
         confirmIsDestructive
       />
       <ConfirmDialog
         isOpen={isDeleteFolderDialogOpen}
         onClose={closeDeleteFolderConfirmation}
-        text="Are you sure you want to delete this folder?"
-        confirmLabel="Delete"
+        text={lang('FilterDeleteAlert')}
+        confirmLabel={lang('Delete')}
         confirmHandler={handleDeleteFolderMessage}
         confirmIsDestructive
       />

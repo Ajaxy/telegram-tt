@@ -20,7 +20,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 
 const MAX_INT_32 = 2 ** 31 - 1;
-const BETA_LANG_CODES = ['ar', 'fa'];
+const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
 
 export function updateProfile({
   firstName,
