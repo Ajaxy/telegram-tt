@@ -95,6 +95,11 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       console.log('>>> FINISH INIT API');
       // eslint-disable-next-line no-console
       console.log('[GramJs/client] CONNECTED');
+
+      // eslint-disable-next-line no-restricted-globals
+      (self as any).invoke = invokeRequest;
+      // eslint-disable-next-line no-restricted-globals
+      (self as any).GramJs = GramJs;
     }
 
     onAuthReady();
