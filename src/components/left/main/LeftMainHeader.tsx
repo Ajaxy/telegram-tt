@@ -138,7 +138,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [searchQuery, onSearchQuery]);
 
   const handleSelectSaved = useCallback(() => {
-    openChat({ id: currentUserId });
+    openChat({ id: currentUserId, shouldReplaceHistory: true });
   }, [currentUserId, openChat]);
 
   const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLElement>) => {

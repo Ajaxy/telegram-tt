@@ -46,6 +46,12 @@ import {
 
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
 
+export interface MessageList {
+  chatId: number;
+  threadId: number;
+  type: MessageListType;
+}
+
 export interface Thread {
   listedIds?: number[];
   outlyingIds?: number[];
@@ -134,11 +140,7 @@ export type GlobalState = {
       byId: Record<number, ApiMessage>;
       threadsById: Record<number, Thread>;
     }>;
-    messageLists?: {
-      chatId: number;
-      threadId: number;
-      type: MessageListType;
-    }[];
+    messageLists: MessageList[];
     contentToBeScheduled?: {
       gif?: ApiVideo;
       sticker?: ApiSticker;
@@ -439,7 +441,7 @@ export type ActionTypes = (
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
   'loadProfilePhotos' | 'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' |
-  'addChatMembers' | 'deleteChatMember' |
+  'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' |

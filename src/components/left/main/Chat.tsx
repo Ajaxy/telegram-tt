@@ -167,7 +167,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [animationLevel, orderDiff, animationType]);
 
   const handleClick = useCallback(() => {
-    openChat({ id: chatId });
+    openChat({ id: chatId, shouldReplaceHistory: true });
 
     if (isSelected && messageListType === 'thread') {
       focusLastMessage();

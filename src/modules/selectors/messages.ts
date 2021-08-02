@@ -39,7 +39,7 @@ const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
 export function selectCurrentMessageList(global: GlobalState) {
   const { messageLists } = global.messages;
 
-  if (messageLists && messageLists.length) {
+  if (messageLists.length) {
     return messageLists[messageLists.length - 1];
   }
 

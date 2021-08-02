@@ -36,7 +36,6 @@ import {
   selectAllowedMessageActions,
   selectIsRightColumnShown,
   selectThreadTopMessageId,
-  selectThreadOriginChat,
   selectThreadInfo,
   selectChatMessages,
   selectPinnedIds,
@@ -88,7 +87,6 @@ type StateProps = {
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
   chatsById?: Record<number, ApiChat>;
-  originChatId: number;
   messagesCount?: number;
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
@@ -96,11 +94,12 @@ type StateProps = {
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
   shouldSkipHistoryAnimations?: boolean;
+  currentTransitionKey: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'openChatWithInfo' | 'pinMessage' | 'focusMessage' | 'openChat' | 'loadPinnedMessages' | 'toggleLeftColumn' |
-  'exitMessageSelectMode'
+  'openChatWithInfo' | 'pinMessage' | 'focusMessage' | 'openChat' | 'openPreviousChat' | 'loadPinnedMessages' |
+  'toggleLeftColumn' | 'exitMessageSelectMode'
 )>;
 
 const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -119,7 +118,6 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   audioMessage,
   chat,
   chatsById,
-  originChatId,
   messagesCount,
   isChatWithSelf,
   isChatWithBot,
@@ -127,10 +125,12 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   notifySettings,
   notifyExceptions,
   shouldSkipHistoryAnimations,
+  currentTransitionKey,
   openChatWithInfo,
   pinMessage,
   focusMessage,
   openChat,
+  openPreviousChat,
   loadPinnedMessages,
   toggleLeftColumn,
   exitMessageSelectMode,
@@ -194,7 +194,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         messageInput.blur();
       }
     }
-    if (threadId === MAIN_THREAD_ID && messageListType === 'thread') {
+
+    if (threadId === MAIN_THREAD_ID && messageListType === 'thread' && currentTransitionKey === 0) {
       if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
         openChat({ id: undefined });
@@ -209,10 +210,10 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       exitMessageSelectMode();
     }
 
-    openChat({ id: originChatId, threadId: MAIN_THREAD_ID });
+    openPreviousChat();
   }, [
-    openChat, originChatId, threadId, messageListType, toggleLeftColumn, isSelectModeActive, exitMessageSelectMode,
-    shouldShowCloseButton,
+    threadId, messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
+    openChat, toggleLeftColumn, exitMessageSelectMode,
   ]);
 
   const unreadCount = useMemo(() => {
@@ -339,7 +340,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderMainThreadInfo() {
     return (
       <>
-        {isLeftColumnHideable && renderBackButton(shouldShowCloseButton, unreadCount)}
+        {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, unreadCount)}
         <div className="chat-info-wrapper" onClick={handleHeaderClick}>
           {isChatPrivate(chatId) ? (
             <PrivateChatInfo
@@ -390,7 +391,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className="MiddleHeader" ref={componentRef}>
       <Transition
         name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
-        activeKey={messageListType === 'thread' ? threadId : 1}
+        activeKey={currentTransitionKey}
       >
         {renderInfo}
       </Transition>
@@ -439,8 +440,6 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
 
-    const originChat = selectThreadOriginChat(global, chatId, threadId);
-
     let messagesCount: number | undefined;
     if (messageListType === 'pinned') {
       const pinnedIds = selectPinnedIds(global, chatId);
@@ -463,7 +462,6 @@ export default memo(withGlobal<OwnProps>(
       audioMessage,
       chat,
       chatsById,
-      originChatId: originChat ? originChat.id : chatId,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),
@@ -471,6 +469,7 @@ export default memo(withGlobal<OwnProps>(
       notifySettings: selectNotifySettings(global),
       notifyExceptions: selectNotifyExceptions(global),
       shouldSkipHistoryAnimations,
+      currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
     };
 
     const messagesById = selectChatMessages(global, chatId);
@@ -514,6 +513,7 @@ export default memo(withGlobal<OwnProps>(
     'pinMessage',
     'focusMessage',
     'openChat',
+    'openPreviousChat',
     'loadPinnedMessages',
     'toggleLeftColumn',
     'exitMessageSelectMode',

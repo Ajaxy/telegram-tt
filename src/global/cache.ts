@@ -229,7 +229,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 
   return {
     byChatId,
-    messageLists: !currentMessageList || IS_SINGLE_COLUMN_LAYOUT ? undefined : [{
+    messageLists: !currentMessageList || IS_SINGLE_COLUMN_LAYOUT ? [] : [{
       ...currentMessageList,
       threadId: MAIN_THREAD_ID,
       type: 'thread',

@@ -1,4 +1,6 @@
-import { GlobalState, MessageListType, Thread } from '../../global/types';
+import {
+  GlobalState, MessageList, MessageListType, Thread,
+} from '../../global/types';
 import { ApiMessage, ApiThreadInfo, MAIN_THREAD_ID } from '../../api/types';
 import { FocusDirection } from '../../types';
 
@@ -21,6 +23,8 @@ import {
   areSortedArraysEqual, omit, pickTruthy, unique,
 } from '../../util/iteratees';
 
+const TMP_CHAT_ID = -1;
+
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
   threadsById: Record<number, Thread>;
@@ -31,13 +35,30 @@ export function updateCurrentMessageList(
   chatId: number | undefined,
   threadId: number = MAIN_THREAD_ID,
   type: MessageListType = 'thread',
+  shouldReplaceHistory?: boolean,
 ): GlobalState {
+  const { messageLists } = global.messages;
+  let newMessageLists: MessageList[] = messageLists;
+  if (shouldReplaceHistory) {
+    newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
+  } else if (chatId) {
+    const last = messageLists[messageLists.length - 1];
+    if (!last || last.chatId !== chatId || last.threadId !== threadId || last.type !== type) {
+      if (last && last.chatId === TMP_CHAT_ID) {
+        newMessageLists = [...messageLists.slice(0, -1), { chatId, threadId, type }];
+      } else {
+        newMessageLists = [...messageLists, { chatId, threadId, type }];
+      }
+    }
+  } else {
+    newMessageLists = messageLists.slice(0, -1);
+  }
+
   return {
     ...global,
     messages: {
       ...global.messages,
-      // TODO Support stack navigation
-      messageLists: chatId ? [{ chatId, threadId, type }] : undefined,
+      messageLists: newMessageLists,
     },
   };
 }

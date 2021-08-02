@@ -8,7 +8,7 @@ import { closeLocalTextSearch } from './localSearch';
 
 addReducer('openChat', (global, actions, payload) => {
   const {
-    id, threadId = -1, type = 'thread',
+    id, threadId = -1, type = 'thread', shouldReplaceHistory = false,
   } = payload!;
 
   const currentMessageList = selectCurrentMessageList(global);
@@ -37,7 +37,11 @@ addReducer('openChat', (global, actions, payload) => {
     setGlobal(global);
   }
 
-  return updateCurrentMessageList(global, id, threadId, type);
+  return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory);
+});
+
+addReducer('openPreviousChat', (global) => {
+  return updateCurrentMessageList(global, undefined);
 });
 
 addReducer('openChatWithInfo', (global, actions, payload) => {
@@ -80,5 +84,5 @@ addReducer('openNextChat', (global, actions, payload) => {
   }
   const nextId = orderedIds[position + targetIndexDelta];
 
-  actions.openChat({ id: nextId });
+  actions.openChat({ id: nextId, shouldReplaceHistory: true });
 });
