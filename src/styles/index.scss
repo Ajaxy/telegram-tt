@@ -17,6 +17,8 @@ html, body {
   font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
   color: var(--color-text);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
