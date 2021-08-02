@@ -1,6 +1,12 @@
 .Chat {
   --background-color: var(--color-background);
 
+  body.is-ios &,
+  body.is-macos & {
+    --color-text-meta: var(--color-text-meta-apple);
+  }
+
+
   position: absolute;
   top: 0;
   left: 0;
@@ -87,10 +93,19 @@
       margin-left: 0.25rem;
       margin-top: -.0625rem;
       color: #C6C8CA;
+
+      body.is-ios & {
+        margin-top: 0;
+        margin-right: .5rem;
+      }
     }
 
     .LastMessageMeta {
       margin-left: auto;
+      body.is-ios & {
+        font-size: .875rem;
+        margin-right: 0;
+      }
     }
 
     .last-message, .typing-status {
@@ -130,6 +145,12 @@
         vertical-align: -.25rem;
         margin-inline-end: .25rem;
 
+        body.is-ios & {
+          width: 1.125rem;
+          height: 1.125rem;
+          vertical-align: -.1875rem;
+        }
+
         &.round {
           border-radius: .625rem;
         }
@@ -149,6 +170,11 @@
         margin-inline-start: -1.25rem;
         margin-inline-end: 0.5rem;
         bottom: 0.0625rem;
+
+        body.is-ios & {
+          margin-inline-start: -1.125rem;
+          bottom: 0;
+        }
       }
     }
   }

@@ -51,6 +51,11 @@
     text-align: center;
     flex-shrink: 0;
 
+    body.is-ios &,
+    body.is-macos & {
+      line-height: 1.25rem;
+    }
+
     &.active {
       background: var(--color-primary);
     }

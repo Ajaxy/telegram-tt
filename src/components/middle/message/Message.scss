@@ -108,6 +108,13 @@
     --deleting-translate-x: 50%;
     --color-text-green: var(--color-accent-own);
 
+    body.is-ios &,
+    body.is-macos & {
+      --color-background-own: var(--color-background-own-apple);
+      --color-reply-own-hover: var(--color-reply-own-hover-apple);
+      --color-reply-own-active: var(--color-reply-own-active-apple);
+    }
+
     @media (max-width: 600px) {
       padding-right: 0.25rem;
     }

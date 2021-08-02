@@ -264,6 +264,11 @@
     unicode-bidi: plaintext;
     text-align: initial;
 
+    body.is-ios &,
+    body.is-macos & {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+    }
+
     &.overflown {
       overflow-y: auto;
       overflow-x: hidden;
@@ -289,8 +294,16 @@
     unicode-bidi: plaintext;
     text-align: initial;
 
+    body.is-macos & {
+      bottom: 1rem;
+    }
+
     @media (max-width: 600px) {
       bottom: .625rem;
+
+      body.is-ios & {
+        bottom: .6875rem;
+      }
     }
   }
 
