@@ -98,7 +98,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
     }
 
     return [
-      { title: lang('FilterAllChats') },
+      { title: lang.code === 'en' ? 'All' : lang('FilterAllChats') },
       ...displayedFolders.map((folder) => ({
         title: folder.title,
         ...(folderCountersById && folderCountersById[folder.id]),

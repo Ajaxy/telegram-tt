@@ -2,7 +2,7 @@
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
   padding-left: .625rem;
-  font-size: 0.875rem;
+  font-size: calc(var(--message-text-size, 1rem) - .125rem);
   line-height: 1.125rem;
   max-width: 29rem;
   position: relative;
@@ -14,9 +14,9 @@
     top: 0;
     bottom: 0;
     left: 0;
-    width: 2px;
+    width: .125rem;
     background: var(--accent-color);
-    border-radius: 2px;
+    border-radius: .125rem;
   }
 
   &-text {
