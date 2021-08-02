@@ -117,6 +117,11 @@
   &.chat-item-clickable {
     margin: 0 -0.5rem;
 
+    body.is-ios &,
+    body.is-macos & {
+      --color-text-secondary: var(--color-text-secondary-apple);
+    }
+
     .ListItem-button {
       padding: .5625rem .6975rem .5625rem .5625rem;
     }
@@ -207,6 +212,15 @@
     h3, .last-message, .status, .typing-status {
       text-align: initial;
       unicode-bidi: plaintext;
+    }
+
+    .last-message,
+    .status,
+    .typing-status {
+      body.is-ios &,
+      body.is-macos & {
+        font-size: .9375rem;
+      }
     }
 
     &[dir=rtl] {

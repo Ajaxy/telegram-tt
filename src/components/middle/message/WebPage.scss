@@ -107,6 +107,10 @@
   .site-description {
     line-height: 1rem;
     margin-bottom: 0;
+
+    body.is-ios & {
+      line-height: 1.125rem;
+    }
   }
 
   &:dir(rtl) {

@@ -159,6 +159,11 @@
       padding: 0 .5rem;
       border-radius: 0.75rem;
       word-break: break-word;
+
+      body.is-ios &,
+      body.is-macos & {
+        font-size: .875rem;
+      }
     }
 
     &.rich {

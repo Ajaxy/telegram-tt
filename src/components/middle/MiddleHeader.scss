@@ -228,6 +228,12 @@
     text-overflow: ellipsis;
     unicode-bidi: plaintext;
 
+    body.is-ios &,
+    body.is-macos & {
+      font-size: 1.0625rem;
+      font-weight: 600;
+    }
+
     @media (max-width: 600px) {
       display: block;
       overflow: hidden;
@@ -397,6 +403,10 @@
         margin-bottom: 0.125rem;
         white-space: pre;
         text-align: initial;
+
+        body.is-ios & {
+          font-size: .9375rem;
+        }
       }
 
       p {
@@ -407,6 +417,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         margin: 0;
+
+        body.is-ios & {
+          font-size: .9375rem;
+        }
       }
     }
 

@@ -44,10 +44,11 @@
   &.document {
     & > .MessageMeta {
       position: relative;
-      top: .4375rem;
+      top: .375rem;
       bottom: auto !important;
       float: right;
       line-height: 1;
+      margin-top: .125rem;
       margin-left: .4375rem;
       margin-right: -.5rem;
     }
@@ -90,6 +91,9 @@
 
   &:not(.custom-shape) {
     font-size: var(--message-text-size, 1rem);
+    body.is-ios & {
+      font-size: var(--message-text-size, 1.0625rem);
+    }
 
     & > .content-inner {
       min-width: 0;

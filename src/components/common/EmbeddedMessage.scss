@@ -1,7 +1,7 @@
 .EmbeddedMessage {
   display: flex;
   align-items: center;
-  font-size: 0.875rem;
+  font-size: calc(var(--message-text-size, 1rem) - .125rem);
   line-height: 1.125rem;
   margin: 0 -0.25rem .0625rem;
   padding: .1875rem 0.25rem .1875rem .4375rem;
@@ -57,6 +57,10 @@
 
   &:active {
     background-color: var(--active-color);
+  }
+
+  .message-title {
+    font-size: calc(var(--message-text-size, 1rem) - .125rem);
   }
 
   .message-text {

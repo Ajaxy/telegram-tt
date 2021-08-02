@@ -11,6 +11,10 @@
     color: var(--color-text-meta-colored);
     margin-right: 0.1rem;
     font-size: 1.15rem;
+
+    body.is-ios & {
+      margin-bottom: -.125rem;
+    }
   }
 
   .time {

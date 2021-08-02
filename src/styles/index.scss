@@ -7,12 +7,6 @@
 @import 'common';
 @import '../assets/fonts/roboto.css';
 
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
-}
-
 html, body {
   width: 100%;
   height: 100%;
@@ -23,14 +17,25 @@ html, body {
   font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
   color: var(--color-text);
   overflow: hidden;
+
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }
 }
 
+body.is-ios,
+body.is-macos {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+}
+
 html[lang=fa],
 html[lang=fa] body {
   font-family: "Vazir", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+
+  &.is-ios,
+  &.is-macos {
+    font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  }
 }
 
 body.cursor-grabbing, body.cursor-grabbing * {
