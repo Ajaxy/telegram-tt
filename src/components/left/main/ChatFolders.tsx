@@ -154,7 +154,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
         if (!digit) return;
 
         if (digit === SAVED_MESSAGES_HOTKEY) {
-          openChat({ id: currentUserId });
+          openChat({ id: currentUserId, shouldReplaceHistory: true });
           return;
         }
 

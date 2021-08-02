@@ -60,7 +60,7 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleClick = useCallback(
     (id: number) => {
-      openChat({ id });
+      openChat({ id, shouldReplaceHistory: true });
       onReset();
       setTimeout(() => {
         addRecentlyFoundChatId({ id });

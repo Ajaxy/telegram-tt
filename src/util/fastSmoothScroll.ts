@@ -22,21 +22,13 @@ export default function fastSmoothScroll(
   forceDuration?: number,
   forceCurrentContainerHeight?: boolean,
 ) {
+  const scrollFrom = calculateScrollFrom(container, element, maxDistance, forceDirection);
+
   if (forceDirection === FocusDirection.Static) {
-    let block!: ScrollLogicalPosition;
-
-    if (position === 'centerOrTop') {
-      block = element.offsetHeight < container.offsetHeight ? 'center' : 'start';
-    } else {
-      block = position;
-    }
-
-    element.scrollIntoView({ block });
-
+    scrollWithJs(container, element, scrollFrom, position, margin, 0);
     return;
   }
 
-  const scrollFrom = calculateScrollFrom(container, element, maxDistance, forceDirection);
 
   if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
     forceDuration = 0;

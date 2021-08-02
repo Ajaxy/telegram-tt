@@ -80,7 +80,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleChatClick = useCallback(
     (id: number) => {
-      openChat({ id });
+      openChat({ id, shouldReplaceHistory: true });
 
       if (id !== currentUserId) {
         addRecentlyFoundChatId({ id });

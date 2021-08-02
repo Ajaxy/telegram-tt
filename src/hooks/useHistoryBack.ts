@@ -1,8 +1,9 @@
-import { useEffect, useRef } from '../lib/teact/teact';
+import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 
 import { IS_IOS } from '../util/environment';
 import usePrevious from './usePrevious';
 import { getDispatch } from '../lib/teact/teactn';
+import { areSortedArraysEqual } from '../util/iteratees';
 
 // Carefully selected by swiping and observing visual changes
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
@@ -61,48 +62,19 @@ export default function useHistoryBack(
   onForward?: (state: any) => void,
   currentState?: any,
   shouldReplaceNext = false,
+  hashes?: string[],
 ) {
   const indexRef = useRef(-1);
   const isForward = useRef(false);
   const prevIsActive = usePrevious(isActive);
   const isClosed = useRef(true);
+  const indexHashRef = useRef<{ index: number; hash: string }[]>([]);
+  const prevHashes = usePrevious(hashes);
+  const isHashChangedFromEvent = useRef<boolean>(false);
 
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      if (historyState.isHistoryAltered) {
-        setTimeout(() => {
-          historyState.isHistoryAltered = false;
-        }, 0);
-        return;
-      }
-      const { index: i } = event.state;
-      const index = i || 0;
-
-      const prev = historyState.currentIndexes[historyState.currentIndexes.indexOf(indexRef.current) - 1];
-
-      if (historyState.isDisabled) return;
-
-      if (!isClosed.current && (index === 0 || index === prev)) {
-        historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(indexRef.current), 1);
-
-        if (onBack) {
-          if (historyState.isEdge) {
-            getDispatch().disableHistoryAnimations();
-          }
-          onBack(!historyState.isEdge);
-          isClosed.current = true;
-        }
-      } else if (index === indexRef.current && isClosed.current && onForward) {
-        isForward.current = true;
-        if (historyState.isEdge) {
-          getDispatch().disableHistoryAnimations();
-        }
-        onForward(event.state.state);
-      }
-    };
-
-    if (!historyState.isDisabled && prevIsActive !== isActive) {
-      if (isActive) {
+  const handleChange = useCallback((isForceClose = false) => {
+    if (!hashes) {
+      if (isActive && !isForceClose) {
         isClosed.current = false;
 
         if (isForward.current) {
@@ -126,6 +98,7 @@ export default function useHistoryBack(
               state: currentState,
             }, '');
 
+
             indexRef.current = index;
 
             if (shouldReplaceNext) {
@@ -133,8 +106,10 @@ export default function useHistoryBack(
             }
           }, 0);
         }
-      } else if (!isClosed.current) {
-        if (indexRef.current === historyState.currentIndex || !shouldReplaceNext) {
+      }
+
+      if ((isForceClose || !isActive) && !isClosed.current) {
+        if ((indexRef.current === historyState.currentIndex || !shouldReplaceNext)) {
           historyState.isHistoryAltered = true;
           window.history.back();
 
@@ -146,9 +121,127 @@ export default function useHistoryBack(
 
         isClosed.current = true;
       }
+    } else {
+      const prev = prevHashes || [];
+      if (prev.length < hashes.length) {
+        const index = ++historyState.currentIndex;
+        historyState.currentIndexes.push(index);
+
+        window.history.pushState({
+          index,
+          state: currentState,
+        }, '', `#${hashes[hashes.length - 1]}`);
+
+        indexHashRef.current.push({
+          index,
+          hash: hashes[hashes.length - 1],
+        });
+      } else {
+        const delta = prev.length - hashes.length;
+        if (isHashChangedFromEvent.current) {
+          isHashChangedFromEvent.current = false;
+        } else {
+          if (hashes.length !== indexHashRef.current.length) {
+            if (delta > 0) {
+              const last = indexHashRef.current[indexHashRef.current.length - delta - 1];
+              let realDelta = delta;
+              if (last) {
+                const indexLast = historyState.currentIndexes.findIndex(
+                  (l) => l === last.index,
+                );
+                realDelta = historyState.currentIndexes.length - indexLast - 1;
+              }
+              historyState.isHistoryAltered = true;
+              window.history.go(-realDelta);
+              const removed = indexHashRef.current.splice(indexHashRef.current.length - delta - 1, delta);
+              removed.forEach(({ index }) => {
+                historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(index), 1);
+              });
+            }
+          }
+
+          if (hashes.length > 0) {
+            setTimeout(() => {
+              const index = ++historyState.currentIndex;
+              historyState.currentIndexes[historyState.currentIndexes.length - 1] = index;
+
+              window.history.replaceState({
+                index,
+                state: currentState,
+              }, '', `#${hashes[hashes.length - 1]}`);
+
+              indexHashRef.current[indexHashRef.current.length - 1] = {
+                index,
+                hash: hashes[hashes.length - 1],
+              };
+            }, 0);
+          }
+        }
+      }
+    }
+  }, [currentState, hashes, isActive, prevHashes, shouldReplaceNext]);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (historyState.isHistoryAltered) {
+        setTimeout(() => {
+          historyState.isHistoryAltered = false;
+        }, 0);
+        return;
+      }
+      const { index: i } = event.state;
+      const index = i || 0;
+      try {
+        const currIndex = hashes ? indexHashRef.current[indexHashRef.current.length - 1].index : indexRef.current;
+
+        const prev = historyState.currentIndexes[historyState.currentIndexes.indexOf(currIndex) - 1];
+
+        if (historyState.isDisabled) return;
+
+        if ((!isClosed.current && (index === 0 || index === prev)) || (hashes && (index === 0 || index === prev))) {
+          if (hashes) {
+            isHashChangedFromEvent.current = true;
+            indexHashRef.current.pop();
+          }
+
+          historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(currIndex), 1);
+
+          if (onBack) {
+            if (historyState.isEdge) {
+              getDispatch()
+                .disableHistoryAnimations();
+            }
+            onBack(!historyState.isEdge);
+            isClosed.current = true;
+          }
+        } else if (index === currIndex && isClosed.current && onForward && !hashes) {
+          isForward.current = true;
+          if (historyState.isEdge) {
+            getDispatch()
+              .disableHistoryAnimations();
+          }
+          onForward(event.state.state);
+        }
+      } catch (e) {
+        // Forward navigation for hashed is not supported
+      }
+    };
+
+    const hasChanged = hashes
+      ? (!prevHashes || !areSortedArraysEqual(prevHashes, hashes))
+      : prevIsActive !== isActive;
+
+    if (!historyState.isDisabled && hasChanged) {
+      handleChange();
     }
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentState, isActive, onBack, onForward, prevIsActive, shouldReplaceNext]);
+  }, [
+    currentState, handleChange, hashes, isActive, onBack, onForward, prevHashes, prevIsActive, shouldReplaceNext,
+  ]);
+
+  return {
+    forceClose: () => handleChange(true),
+  };
 }

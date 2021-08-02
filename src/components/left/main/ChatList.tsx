@@ -173,7 +173,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
           const position = Number(digit) - 1;
           if (position > orderedIds.length - 1) return;
 
-          openChat({ id: orderedIds[position] });
+          openChat({ id: orderedIds[position], shouldReplaceHistory: true });
         }
 
         if (e.altKey) {

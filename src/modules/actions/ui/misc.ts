@@ -58,16 +58,14 @@ addReducer('closeManagement', (global): GlobalState | undefined => {
   };
 });
 
-addReducer('openChat', (global, actions, payload) => {
+addReducer('openChat', (global) => {
   if (!IS_SINGLE_COLUMN_LAYOUT && !IS_TABLET_COLUMN_LAYOUT) {
     return undefined;
   }
 
-  const { id } = payload!;
-
   return {
     ...global,
-    isLeftColumnShown: id === undefined,
+    isLeftColumnShown: global.messages.messageLists.length === 0,
   };
 });
 

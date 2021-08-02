@@ -51,7 +51,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleClick = useCallback(
     (id: number) => {
-      openChat({ id });
+      openChat({ id, shouldReplaceHistory: true });
     },
     [openChat],
   );

@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
-import { GlobalActions, MessageListType } from '../../global/types';
+import { GlobalActions, MessageListType, MessageList as GlobalMessageList } from '../../global/types';
 import { ThemeKey } from '../../types';
 
 import {
@@ -36,7 +36,6 @@ import {
   selectIsRightColumnShown,
   selectPinnedIds,
   selectTheme,
-  selectThreadOriginChat,
 } from '../../modules/selectors';
 import { getCanPostInChat, getMessageSendingRestrictionReason, isChatPrivate } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -48,6 +47,7 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { createMessageHash } from '../../util/routing';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -83,8 +83,9 @@ type StateProps = {
   isMobileSearchActive?: boolean;
   isSelectModeActive?: boolean;
   animationLevel?: number;
-  originChatId?: number;
   shouldSkipHistoryAnimations?: boolean;
+  currentTransitionKey: number;
+  messageLists?: GlobalMessageList[];
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -103,7 +104,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   messageListType,
   isPrivate,
   isPinnedMessageList,
-  isScheduledMessageList,
+  messageLists,
   canPost,
   currentUserBannedRights,
   defaultBannedRights,
@@ -119,8 +120,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   isMobileSearchActive,
   isSelectModeActive,
   animationLevel,
-  originChatId,
   shouldSkipHistoryAnimations,
+  currentTransitionKey,
   openChat,
   unpinAllMessages,
   loadUser,
@@ -260,26 +261,12 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   );
 
   const closeChat = () => {
-    if (renderingThreadId !== MAIN_THREAD_ID) {
-      openChat({ id: originChatId, threadId: MAIN_THREAD_ID }, true);
-    } else if (isPinnedMessageList || isScheduledMessageList) {
-      openChat({ id: chatId, type: 'thread' });
-    } else {
-      openChat({ id: undefined }, true);
-    }
+    openChat({ id: undefined }, true);
   };
 
-  useHistoryBack(renderingChatId && renderingThreadId, closeChat, openChat, {
-    id: chatId,
-    threadId: MAIN_THREAD_ID,
-  });
-
-  const isDiscussion = renderingChatId && renderingThreadId !== MAIN_THREAD_ID;
-
-  useHistoryBack(isDiscussion || isPinnedMessageList || isScheduledMessageList, closeChat, openChat, {
-    id: chatId,
-    threadId: renderingThreadId,
-  });
+  useHistoryBack(renderingChatId && renderingThreadId,
+    closeChat, undefined, undefined, undefined,
+    messageLists ? messageLists.map(createMessageHash) : []);
 
   useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
@@ -320,7 +307,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
-              activeKey={renderingMessageListType === 'thread' && renderingThreadId === MAIN_THREAD_ID ? 1 : 2}
+              activeKey={currentTransitionKey}
               shouldCleanup
             >
               {() => (
@@ -408,6 +395,7 @@ export default memo(withGlobal(
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
     } = global.settings.themes[theme] || {};
 
+    const { messageLists } = global.messages;
     const currentMessageList = selectCurrentMessageList(global);
     const { isLeftColumnShown, chats: { listIds } } = global;
 
@@ -422,6 +410,7 @@ export default memo(withGlobal(
       isMobileSearchActive: Boolean(IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       animationLevel: global.settings.byKey.animationLevel,
+      currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
     };
 
     if (!currentMessageList || !listIds.active) {
@@ -437,14 +426,12 @@ export default memo(withGlobal(
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isScheduledMessageList = messageListType === 'scheduled';
-    const originChat = selectThreadOriginChat(global, chatId, threadId);
 
     return {
       ...state,
       chatId,
       threadId,
       messageListType,
-      originChatId: originChat ? originChat.id : chatId,
       isPrivate: isChatPrivate(chatId),
       canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
@@ -458,6 +445,7 @@ export default memo(withGlobal(
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      messageLists,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
