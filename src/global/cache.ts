@@ -111,6 +111,10 @@ function readCache(initialState: GlobalState) {
       ...initialState.chatFolders,
       ...cached.chatFolders,
     };
+
+    if (!cached.messages.messageLists) {
+      cached.messages.messageLists = [];
+    }
   }
 
   return {
