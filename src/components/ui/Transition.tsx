@@ -173,18 +173,16 @@ const Transition: FC<OwnProps> = ({
         });
       }
 
-      function handleAnimationEnd(e: AnimationEvent) {
-        if (e.target !== e.currentTarget) {
-          return;
-        }
-
-        toNode.removeEventListener('animationend', handleAnimationEnd as EventListener);
-
-        onAnimationEnd();
-      }
-
       if (animationLevel > 0) {
-        toNode.addEventListener('animationend', handleAnimationEnd as EventListener);
+        toNode.addEventListener('animationend', function handleAnimationEnd(e: AnimationEvent) {
+          if (e.target !== e.currentTarget) {
+            return;
+          }
+
+          toNode.removeEventListener('animationend', handleAnimationEnd as EventListener);
+
+          onAnimationEnd();
+        } as EventListener);
       } else {
         onAnimationEnd();
       }

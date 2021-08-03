@@ -1,7 +1,7 @@
 import { useEffect } from '../lib/teact/teact';
 
-const ANIMATION_START_EVENT = 'tt-event-heavy-animation-start';
-const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
+export const ANIMATION_START_EVENT = 'tt-event-heavy-animation-start';
+export const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
 
 let timeout: number | undefined;
 let isAnimating = false;
