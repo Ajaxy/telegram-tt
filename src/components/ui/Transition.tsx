@@ -8,6 +8,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { waitForAnimationEnd } from '../../util/cssAnimationEndListeners';
 
 import './Transition.scss';
 
@@ -139,8 +140,6 @@ const Transition: FC<OwnProps> = ({
     requestAnimationFrame(() => {
       container.classList.add('animating');
 
-      const toNode = childNodes[activeIndex];
-
       function onAnimationEnd() {
         requestAnimationFrame(() => {
           container.classList.remove('animating', 'backwards');
@@ -174,15 +173,8 @@ const Transition: FC<OwnProps> = ({
       }
 
       if (animationLevel > 0) {
-        toNode.addEventListener('animationend', function handleAnimationEnd(e: AnimationEvent) {
-          if (e.target !== e.currentTarget) {
-            return;
-          }
-
-          toNode.removeEventListener('animationend', handleAnimationEnd as EventListener);
-
-          onAnimationEnd();
-        } as EventListener);
+        const toNode = name === 'mv-slide' ? childNodes[activeIndex].firstChild! : childNodes[activeIndex];
+        waitForAnimationEnd(toNode, onAnimationEnd);
       } else {
         onAnimationEnd();
       }

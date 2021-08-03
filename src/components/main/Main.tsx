@@ -22,6 +22,7 @@ import {
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import buildClassName from '../../util/buildClassName';
 import { fastRaf } from '../../util/schedulers';
+import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
@@ -135,17 +136,8 @@ const Main: FC<StateProps & DispatchProps> = ({
     }
 
     const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
-    const middleColumnEl = document.getElementById('MiddleColumn')!;
 
-    middleColumnEl.addEventListener('transitionend', function handleTransitionEnd(e: TransitionEvent) {
-      if (e.target !== e.currentTarget) {
-        return;
-      }
-
-      middleColumnEl.removeEventListener('transitionend', handleTransitionEnd);
-
-      dispatchHeavyAnimationEnd();
-    });
+    waitForTransitionEnd(document.getElementById('MiddleColumn')!, dispatchHeavyAnimationEnd);
   }, [isLeftColumnShown]);
 
   // Dispatch heavy transition event and add body class when opening right column
@@ -154,20 +146,13 @@ const Main: FC<StateProps & DispatchProps> = ({
       return;
     }
 
-    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
-    const rightColumnEl = document.getElementById('RightColumn')!;
-
     fastRaf(() => {
       document.body.classList.add('animating-right-column');
     });
 
-    rightColumnEl.addEventListener('transitionend', function handleTransitionEnd(e: TransitionEvent) {
-      if (e.target !== e.currentTarget) {
-        return;
-      }
+    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
 
-      rightColumnEl.removeEventListener('transitionend', handleTransitionEnd);
-
+    waitForTransitionEnd(document.getElementById('RightColumn')!, () => {
       dispatchHeavyAnimationEnd();
 
       fastRaf(() => {
