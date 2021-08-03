@@ -18,6 +18,9 @@ addReducer('init', (global) => {
 
   setLanguage(language, undefined, true);
 
+  document.documentElement.style.setProperty(
+    '--composer-text-size', `${Math.max(messageTextSize, IS_IOS ? 16 : 15)}px`,
+  );
   document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
   document.body.classList.add('initial');
   document.body.classList.add(`animation-level-${animationLevel}`);

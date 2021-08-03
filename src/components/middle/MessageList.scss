@@ -153,16 +153,23 @@
       display: inline-block;
       background: var(--pattern-color);
       color: white;
-      font-size: 0.9375rem;
+      font-size: calc(var(--message-text-size, 1rem) - .0625rem);
       font-weight: 500;
-      line-height: 1.5rem;
+      line-height: 1.75;
       padding: 0 .5rem;
-      border-radius: 0.75rem;
+      border-radius: 2rem;
       word-break: break-word;
 
       body.is-ios &,
       body.is-macos & {
-        font-size: .875rem;
+        font-size: calc(var(--message-text-size, 1rem) - .125rem);
+      }
+
+      .emoji-small {
+        vertical-align: text-bottom;
+        width: calc(1.25 * var(--message-text-size, 1rem));
+        height: calc(1.25 * var(--message-text-size, 1rem));
+        background-size: calc(1.25 * var(--message-text-size, 1rem));
       }
     }
 
