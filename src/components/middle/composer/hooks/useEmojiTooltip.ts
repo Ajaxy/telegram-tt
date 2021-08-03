@@ -21,6 +21,8 @@ let RE_EMOJI_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
 const RE_BR = /(<br>|<br\s?\/>)/g;
+const RE_SPACE = /&nbsp;/g;
+const RE_CLEAN_HTML = /(<div>|<\/div>)/gi;
 
 try {
   RE_EMOJI_SEARCH = new RegExp('(^|\\s):[-+_:\\p{L}\\p{N}]*$', 'gui');
@@ -186,7 +188,11 @@ export default function useEmojiTooltip(
 }
 
 function getEmojiCode(html: string) {
-  const emojis = html.replace(RE_BR, '\n').replace(/\n$/i, '').match(RE_EMOJI_SEARCH);
+  const emojis = html
+    .replace(RE_SPACE, ' ')
+    .replace(RE_BR, '\n')
+    .replace(RE_CLEAN_HTML, '')
+    .match(RE_EMOJI_SEARCH);
 
   return emojis ? emojis[0].trim() : undefined;
 }
