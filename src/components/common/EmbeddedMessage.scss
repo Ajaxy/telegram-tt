@@ -93,9 +93,9 @@
     }
 
     .emoji {
-      width: 1.125rem !important;
-      height: 1.125rem !important;
-      vertical-align: -4px !important;
+      width: calc(1.125 * var(--message-text-size, 1rem)) !important;
+      height: calc(1.125 * var(--message-text-size, 1rem)) !important;
+      vertical-align: text-bottom !important;
     }
   }
 

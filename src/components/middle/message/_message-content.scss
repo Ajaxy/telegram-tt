@@ -110,7 +110,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.875rem;
+    font-size: calc(var(--message-text-size, 1rem) - .125rem);
     font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
@@ -219,6 +219,7 @@
     bottom: -.0875rem;
     width: .5625rem;
     height: 1.125rem;
+    font-size: 1rem !important;
 
     .corner {
       fill: var(--background-color);
@@ -311,6 +312,7 @@
 
   &:not(.custom-shape) .text-content .emoji {
     width: calc(1.25 * var(--message-text-size, 1rem));
+    height: calc(1.25 * var(--message-text-size, 1rem));
     background-size: calc(1.25 * var(--message-text-size, 1rem));
   }
 
@@ -689,4 +691,5 @@
   margin: 0;
   padding: 1px 2px;
   border-radius: 4px;
+  font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
 }
