@@ -28,6 +28,7 @@ import { isChatChannel, isChatPrivate } from '../../modules/helpers';
 import { orderBy, pick } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -112,7 +113,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   focusingId,
   hasFocusHighlight,
   isSelectModeActive,
-  animationLevel,
   loadViewportMessages,
   setScrollOffset,
   lastMessage,
@@ -413,11 +413,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     // This should match deps for `useOnChange` above
   }, [messageIds, isViewportNewest, containerHeight, hasTools]);
 
-  useEffect(() => {
-    if (!animationLevel || animationLevel > 0) {
+  useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
+    if (prevIsSelectModeActive !== undefined) {
       dispatchHeavyAnimationEvent(SELECT_MODE_ANIMATION_DURATION + ANIMATION_END_DELAY);
     }
-  }, [animationLevel, isSelectModeActive]);
+  }, [isSelectModeActive]);
 
   const lang = useLang();
 
@@ -534,7 +534,6 @@ export default memo(withGlobal<OwnProps>(
       focusingId,
       hasFocusHighlight,
       isSelectModeActive: selectIsInSelectMode(global),
-      animationLevel: global.settings.byKey.animationLevel,
       ...(withLastMessageWhenPreloading && { lastMessage }),
       botDescription,
       threadTopMessageId,

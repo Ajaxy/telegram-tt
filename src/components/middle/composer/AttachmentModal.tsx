@@ -25,7 +25,7 @@ import './AttachmentModal.scss';
 export type OwnProps = {
   attachments: ApiAttachment[];
   caption: string;
-  canSuggestEmoji?: boolean;
+  isReady?: boolean;
   currentUserId?: number;
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
@@ -44,14 +44,15 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const AttachmentModal: FC<OwnProps> = ({
   attachments,
   caption,
-  groupChatMembers,
+  isReady,
   currentUserId,
+  groupChatMembers,
   usersById,
   recentEmojis,
   baseEmojiKeywords,
   emojiKeywords,
-  onCaptionUpdate,
   addRecentEmoji,
+  onCaptionUpdate,
   onSend,
   onFileAppend,
   onClear,
@@ -89,6 +90,7 @@ const AttachmentModal: FC<OwnProps> = ({
     onCaptionUpdate,
     baseEmojiKeywords,
     emojiKeywords,
+    !isReady,
   );
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);

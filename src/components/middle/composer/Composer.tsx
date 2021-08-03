@@ -96,8 +96,8 @@ type OwnProps = {
   threadId: number;
   messageListType: MessageListType;
   dropAreaState: string;
-  onDropHide: NoneToVoidFunction;
   isReady: boolean;
+  onDropHide: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -160,8 +160,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   dropAreaState,
   shouldSchedule,
   canScheduleUntilOnline,
-  onDropHide,
   isReady,
+  onDropHide,
   editingMessage,
   chatId,
   threadId,
@@ -520,7 +520,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     // Wait until message animation starts
-    requestAnimationFrame(() => { resetComposer(); });
+    requestAnimationFrame(() => {
+      resetComposer();
+    });
   }, [
     connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang,
@@ -537,7 +539,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       openCalendar();
     } else {
       sendMessage({ sticker });
-      requestAnimationFrame(() => { resetComposer(shouldPreserveInput); });
+      requestAnimationFrame(() => {
+        resetComposer(shouldPreserveInput);
+      });
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 
@@ -547,7 +551,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       openCalendar();
     } else {
       sendMessage({ gif });
-      requestAnimationFrame(() => { resetComposer(true); });
+      requestAnimationFrame(() => {
+        resetComposer(true);
+      });
     }
   }, [shouldSchedule, openCalendar, sendMessage, resetComposer]);
 
@@ -567,7 +573,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     clearDraft({ chatId, localOnly: true });
-    requestAnimationFrame(() => { resetComposer(); });
+    requestAnimationFrame(() => {
+      resetComposer();
+    });
   }, [chatId, clearDraft, connectionState, resetComposer, sendInlineBotResult]);
 
   const handlePollSend = useCallback((poll: ApiNewPoll) => {
@@ -604,7 +612,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         ...scheduledMessageArgs,
         scheduledAt,
       });
-      requestAnimationFrame(() => { resetComposer(); });
+      requestAnimationFrame(() => {
+        resetComposer();
+      });
     }
     closeCalendar();
   }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage, serverTimeOffset]);
@@ -674,7 +684,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           openCalendar();
         } else {
           handleSend();
-          requestAnimationFrame(() => { resetComposer(); });
+          requestAnimationFrame(() => {
+            resetComposer();
+          });
         }
         break;
       case MainButtonState.Record:
@@ -723,6 +735,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const symbolMenuButtonClassName = buildClassName(
     'mobile-symbol-menu-button',
+    !isReady && 'not-ready',
     isSymbolMenuLoaded
       ? (isSymbolMenuOpen && 'menu-opened')
       : (isSymbolMenuOpen && 'is-loading'),
@@ -751,6 +764,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         currentUserId={currentUserId}
         usersById={usersById}
         recentEmojis={recentEmojis}
+        isReady={isReady}
         onCaptionUpdate={setHtml}
         baseEmojiKeywords={baseEmojiKeywords}
         emojiKeywords={emojiKeywords}
@@ -819,7 +833,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             >
               <i className="icon-smile" />
               <i className="icon-keyboard" />
-              {!isSymbolMenuLoaded && <Spinner color="gray" />}
+              {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
             </Button>
           ) : (
             <ResponsiveHoverButton
@@ -945,7 +959,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={mainButtonRef}
         round
         color="secondary"
-        className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
+        className={buildClassName(mainButtonState, !isReady && 'not-ready', activeVoiceRecording && 'recording')}
         disabled={areVoiceMessagesNotAllowed}
         ariaLabel={lang(sendButtonAriaLabel)}
         onClick={mainButtonHandler}
