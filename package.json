@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env APP_ENV=development webpack serve --env mode=dev --env isDevServer --env NODE_ENV=development --config ./webpack.config.js",
+    "dev": "cross-env APP_ENV=development webpack serve --env mode=dev --env isDevServer --mode development --config ./webpack.config.js",
     "build": "webpack --mode production",
     "build:staging": "rm -rf dist/ && APP_ENV=staging npm run build && ./deploy/copy_to_dist.sh",
     "build:production": "npm i && rm -rf dist/ && APP_VERSION=$(npm run inc_version --silent) APP_ENV=production npm run build && ./deploy/copy_to_dist.sh",
