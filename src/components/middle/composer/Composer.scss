@@ -93,6 +93,10 @@
       }
     }
 
+    &.not-ready > i {
+      animation-duration: 0ms !important;
+    }
+
     body.animation-level-0 &, body.animation-level-1 & {
       .icon-send, .icon-microphone-alt, .icon-check {
         animation-duration: 0ms !important;
@@ -121,6 +125,10 @@
 
     .icon-keyboard, .Spinner {
       animation: hide-icon .4s forwards ease-out;
+    }
+
+    &.not-ready > i {
+      animation-duration: 0ms !important;
     }
 
     &.is-loading {
@@ -154,7 +162,6 @@
   box-shadow: 0 1px 2px var(--color-default-shadow);
   position: relative;
   z-index: 1;
-
 
   .svg-appendix {
     position: absolute;
