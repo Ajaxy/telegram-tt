@@ -5,10 +5,11 @@ import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
+import { LangCode } from '../../types';
 
 import '../../modules/actions/all';
 import {
-  ANIMATION_END_DELAY, BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
+  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../config';
 import { pick } from '../../util/iteratees';
 import {
@@ -20,9 +21,11 @@ import {
 } from '../../modules/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import buildClassName from '../../util/buildClassName';
+import { fastRaf } from '../../util/schedulers';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
+import useOnChange from '../../hooks/useOnChange';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -36,7 +39,6 @@ import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 
 import './Main.scss';
-import { LangCode } from '../../types';
 
 type StateProps = {
   animationLevel: number;
@@ -59,10 +61,8 @@ type DispatchProps = Pick<GlobalActions, (
   'loadTopInlineBots' | 'loadEmojiKeywords'
 )>;
 
-const ANIMATION_DURATION = 350;
 const NOTIFICATION_INTERVAL = 1000;
 
-let rightColumnAnimationTimeout: number | undefined;
 let notificationInterval: number | undefined;
 
 let DEBUG_isLogged = false;
@@ -128,23 +128,53 @@ const Main: FC<StateProps & DispatchProps> = ({
     shouldSkipHistoryAnimations && 'history-animation-disabled',
   );
 
-  // Add `body` classes when toggling right column
-  useEffect(() => {
-    if (animationLevel > 0) {
-      document.body.classList.add('animating-right-column');
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+  // Dispatch heavy transition event when opening middle column
+  useOnChange(([prevIsLeftColumnShown]) => {
+    if (prevIsLeftColumnShown === undefined || animationLevel === 0) {
+      return;
+    }
 
-      if (rightColumnAnimationTimeout) {
-        clearTimeout(rightColumnAnimationTimeout);
-        rightColumnAnimationTimeout = undefined;
+    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
+    const middleColumnEl = document.getElementById('MiddleColumn')!;
+
+    middleColumnEl.addEventListener('transitionend', function handleTransitionEnd(e: TransitionEvent) {
+      if (e.target !== e.currentTarget) {
+        return;
       }
 
-      rightColumnAnimationTimeout = window.setTimeout(() => {
-        document.body.classList.remove('animating-right-column');
-        rightColumnAnimationTimeout = undefined;
-      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
+      middleColumnEl.removeEventListener('transitionend', handleTransitionEnd);
+
+      dispatchHeavyAnimationEnd();
+    });
+  }, [isLeftColumnShown]);
+
+  // Dispatch heavy transition event and add body class when opening right column
+  useOnChange(([prevIsRightColumnShown]) => {
+    if (prevIsRightColumnShown === undefined || animationLevel === 0) {
+      return;
     }
-  }, [animationLevel, isRightColumnShown]);
+
+    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
+    const rightColumnEl = document.getElementById('RightColumn')!;
+
+    fastRaf(() => {
+      document.body.classList.add('animating-right-column');
+    });
+
+    rightColumnEl.addEventListener('transitionend', function handleTransitionEnd(e: TransitionEvent) {
+      if (e.target !== e.currentTarget) {
+        return;
+      }
+
+      rightColumnEl.removeEventListener('transitionend', handleTransitionEnd);
+
+      dispatchHeavyAnimationEnd();
+
+      fastRaf(() => {
+        document.body.classList.remove('animating-right-column');
+      });
+    });
+  }, [isRightColumnShown]);
 
   const handleBlur = useCallback(() => {
     updateIsOnline(false);
