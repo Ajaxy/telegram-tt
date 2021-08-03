@@ -4,8 +4,6 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../lib/teact/teactn';
 
-import { ANIMATION_END_DELAY } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
@@ -31,19 +29,6 @@ type OwnProps = {
   onStart?: () => void;
   onStop?: () => void;
   children: ChildrenFn;
-};
-
-const ANIMATION_DURATION = {
-  slide: 450,
-  'slide-reversed': 450,
-  'mv-slide': 400,
-  'slide-fade': 400,
-  'zoom-fade': 150,
-  'scroll-slide': 500,
-  fade: 150,
-  'slide-layers': IS_SINGLE_COLUMN_LAYOUT ? 450 : 300,
-  'push-slide': 300,
-  reveal: 350,
 };
 
 const CLEANED_UP = Symbol('CLEANED_UP');
@@ -74,7 +59,6 @@ const Transition: FC<OwnProps> = ({
 
   const rendersRef = useRef<Record<number, ChildrenFn | typeof CLEANED_UP>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
-  const activateTimeoutRef = useRef<number>();
   const forceUpdate = useForceUpdate();
 
   const activeKeyChanged = prevActiveKey !== undefined && activeKey !== prevActiveKey;
@@ -108,11 +92,6 @@ const Transition: FC<OwnProps> = ({
 
     if (!activeKeyChanged || !childNodes.length) {
       return;
-    }
-
-    if (activateTimeoutRef.current) {
-      clearTimeout(activateTimeoutRef.current);
-      activateTimeoutRef.current = undefined;
     }
 
     const isBackwards = (
@@ -160,14 +139,17 @@ const Transition: FC<OwnProps> = ({
       });
     }
 
+    let dispatchHeavyAnimationStop: NoneToVoidFunction;
     if (animationLevel > 0) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+      dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
     }
 
     requestAnimationFrame(() => {
       container.classList.add('animating');
 
-      activateTimeoutRef.current = window.setTimeout(() => {
+      const toNode = childNodes[activeIndex];
+
+      function onAnimationEnd() {
         requestAnimationFrame(() => {
           container.classList.remove('animating', 'backwards');
 
@@ -191,13 +173,33 @@ const Transition: FC<OwnProps> = ({
             }
           }
 
+          if (dispatchHeavyAnimationStop) {
+            dispatchHeavyAnimationStop();
+          }
+
           cleanup();
 
           if (onStop) {
             onStop();
           }
         });
-      }, ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+      }
+
+      function handleAnimationEnd(e: AnimationEvent) {
+        if (e.target !== e.currentTarget) {
+          return;
+        }
+
+        toNode.removeEventListener('animationend', handleAnimationEnd as EventListener);
+
+        onAnimationEnd();
+      }
+
+      if (animationLevel > 0) {
+        toNode.addEventListener('animationend', handleAnimationEnd as EventListener);
+      } else {
+        onAnimationEnd();
+      }
 
       if (onStart) {
         onStart();
