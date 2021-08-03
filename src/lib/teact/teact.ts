@@ -9,7 +9,9 @@ import { removeAllDelegatedListeners } from './dom-events';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
-export type FC_withDebug = FC & {
+export type FC_withDebug =
+  FC
+  & {
   DEBUG_contentComponentName?: string;
 };
 
@@ -477,17 +479,19 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
           componentInstance.forceUpdate();
 
           if (DEBUG_MORE) {
-            // eslint-disable-next-line no-console
-            console.log(
-              '[Teact.useState]',
-              componentInstance.name,
-              // `componentInstance.Component` may be set to `null` by GC helper
-              componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
-                ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
-                : '',
-              `Forced update at cursor #${cursor}, next value: `,
-              byCursor[cursor].nextValue,
-            );
+            if (componentInstance.name !== 'TeactNContainer') {
+              // eslint-disable-next-line no-console
+              console.log(
+                '[Teact.useState]',
+                componentInstance.name,
+                // `componentInstance.Component` may be set to `null` by GC helper
+                componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
+                  ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
+                  : '',
+                `Forced update at cursor #${cursor}, next value: `,
+                byCursor[cursor].nextValue,
+              );
+            }
           }
         }
       })(renderingInstance),
@@ -506,6 +510,7 @@ function useLayoutEffectBase(
   schedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
   effect: () => Function | void,
   dependencies?: any[],
+  debugKey?: string,
 ) {
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const componentInstance = renderingInstance;
@@ -529,6 +534,25 @@ function useLayoutEffectBase(
 
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
+      if (debugKey) {
+        const causedBy = dependencies.reduce((res, newValue, i) => {
+          const prevValue = byCursor[cursor].dependencies![i];
+          if (newValue !== prevValue) {
+            res.push(`${i}: ${prevValue} => ${newValue}`);
+          }
+
+          return res;
+        }, []);
+
+        // eslint-disable-next-line no-console
+        console.log(
+          '[Teact]',
+          debugKey,
+          'Effect caused by dependencies.',
+          causedBy.join(', '),
+        );
+      }
+
       schedulerFn(exec);
     }
   } else {
@@ -544,12 +568,12 @@ function useLayoutEffectBase(
   renderingInstance.hooks.effects.cursor++;
 }
 
-export function useEffect(effect: () => Function | void, dependencies?: any[]) {
-  return useLayoutEffectBase(fastRaf, effect, dependencies);
+export function useEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
+  return useLayoutEffectBase(fastRaf, effect, dependencies, debugKey);
 }
 
-export function useLayoutEffect(effect: () => Function | void, dependencies?: any[]) {
-  return useLayoutEffectBase(onTickEnd, effect, dependencies);
+export function useLayoutEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
+  return useLayoutEffectBase(onTickEnd, effect, dependencies, debugKey);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {
@@ -599,17 +623,17 @@ export function useRef<T>(initial?: T | null) {
   }), []);
 }
 
-export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual, withDebug = false) {
+export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual, debugKey?: string) {
   return function TeactMemoWrapper(props: Props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const propsRef = useRef(props);
     const renderedRef = useRef();
 
     if (!renderedRef.current || (propsRef.current && !areEqual(propsRef.current, props))) {
-      if (DEBUG && withDebug) {
+      if (DEBUG && debugKey) {
         // eslint-disable-next-line no-console
         console.log(
-          `[Teact.memo] ${Component.name}: Update is caused by:`,
+          `[Teact.memo] ${Component.name} (${debugKey}): Update is caused by:`,
           getUnequalProps(propsRef.current!, props).join(', '),
         );
       }

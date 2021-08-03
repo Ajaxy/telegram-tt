@@ -34,5 +34,11 @@ export function getUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral) 
     return ['%LENGTH%'];
   }
 
-  return currentKeys.filter((prop) => currentProps[prop] !== newProps[prop]);
+  return currentKeys.reduce((res, prop) => {
+    if (currentProps[prop] !== newProps[prop]) {
+      res.push(`${prop}: ${currentProps[prop]} => ${newProps[prop]}`);
+    }
+
+    return res;
+  }, [] as string[]);
 }
