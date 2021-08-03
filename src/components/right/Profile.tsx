@@ -459,15 +459,15 @@ export default memo(withGlobal<OwnProps>(
       areMembersHidden,
       canAddMembers,
       canDeleteMembers,
-      ...(hasMembersTab && members && {
-        members,
-        usersById,
-      }),
       currentUserId: global.currentUserId,
       isRightColumnShown: selectIsRightColumnShown(global),
       isRestricted: chat && chat.isRestricted,
       lastSyncTime: global.lastSyncTime,
       serverTimeOffset: global.serverTimeOffset,
+      ...(hasMembersTab && members && {
+        members,
+        usersById,
+      }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

@@ -344,10 +344,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       lastMessageSender,
-      ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
-      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       actionTargetUserIds,
-      ...(actionTargetUserIds && { usersById }),
       actionTargetChatId,
       actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
@@ -355,6 +352,9 @@ export default memo(withGlobal<OwnProps>(
       isSelected,
       canScrollDown: isSelected && messageListType === 'thread',
       lastSyncTime: global.lastSyncTime,
+      ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
+      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
+      ...(actionTargetUserIds && { usersById }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
