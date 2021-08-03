@@ -534,12 +534,12 @@ export default memo(withGlobal<OwnProps>(
       focusingId,
       hasFocusHighlight,
       isSelectModeActive: selectIsInSelectMode(global),
-      ...(withLastMessageWhenPreloading && { lastMessage }),
       botDescription,
       threadTopMessageId,
       hasLinkedChat: chat.fullInfo && ('linkedChatId' in chat.fullInfo)
         ? Boolean(chat.fullInfo.linkedChatId)
         : undefined,
+      ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

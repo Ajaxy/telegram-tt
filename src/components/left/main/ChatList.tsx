@@ -231,14 +231,14 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       usersById,
       lastSyncTime,
+      notifySettings: selectNotifySettings(global),
+      notifyExceptions: selectNotifyExceptions(global),
       ...(listType ? {
         listIds: listIds[listType],
         orderedPinnedIds: orderedPinnedIds[listType],
       } : {
         chatFolder,
       }),
-      notifySettings: selectNotifySettings(global),
-      notifyExceptions: selectNotifyExceptions(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

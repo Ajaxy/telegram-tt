@@ -968,10 +968,7 @@ export default memo(withGlobal<OwnProps>(
       isThreadTop,
       replyMessage,
       replyMessageSender,
-      ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
-      ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
-      ...(isFocused && { focusDirection, noFocusHighlight }),
       isForwarding,
       isChatWithSelf,
       isChannel,
@@ -989,6 +986,9 @@ export default memo(withGlobal<OwnProps>(
       shouldAutoLoadMedia: chat ? selectShouldAutoLoadMedia(global, message, chat, sender) : undefined,
       shouldAutoPlayMedia: selectShouldAutoPlayMedia(global, message),
       shouldLoopStickers: selectShouldLoopStickers(global),
+      ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
+      ...(typeof uploadProgress === 'number' && { uploadProgress }),
+      ...(isFocused && { focusDirection, noFocusHighlight }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

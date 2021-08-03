@@ -137,8 +137,8 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       lastSyncTime: global.lastSyncTime,
+      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
