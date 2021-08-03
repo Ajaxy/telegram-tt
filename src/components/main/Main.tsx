@@ -8,7 +8,7 @@ import { ApiMessage } from '../../api/types';
 
 import '../../modules/actions/all';
 import {
-  ANIMATION_END_DELAY, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
+  ANIMATION_END_DELAY, BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../config';
 import { pick } from '../../util/iteratees';
 import {
@@ -36,6 +36,7 @@ import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 
 import './Main.scss';
+import { LangCode } from '../../types';
 
 type StateProps = {
   animationLevel: number;
@@ -50,11 +51,12 @@ type StateProps = {
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
+  language?: LangCode;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
-  'loadTopInlineBots'
+  'loadTopInlineBots' | 'loadEmojiKeywords'
 )>;
 
 const ANIMATION_DURATION = 350;
@@ -78,11 +80,13 @@ const Main: FC<StateProps & DispatchProps> = ({
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
+  language,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
   updateIsOnline,
   loadTopInlineBots,
+  loadEmojiKeywords,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -98,10 +102,15 @@ const Main: FC<StateProps & DispatchProps> = ({
       loadNotificationSettings();
       loadNotificationExceptions();
       loadTopInlineBots();
+
+      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
+      if (language !== BASE_EMOJI_KEYWORD_LANG) {
+        loadEmojiKeywords({ language });
+      }
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline,
-    loadTopInlineBots,
+    loadTopInlineBots, loadEmojiKeywords, language,
   ]);
 
   const {
@@ -244,10 +253,11 @@ export default memo(withGlobal(
       safeLinkModalUrl: global.safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      language: global.settings.byKey.language,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
-    'loadTopInlineBots',
+    'loadTopInlineBots', 'loadEmojiKeywords',
   ]),
 )(Main));
