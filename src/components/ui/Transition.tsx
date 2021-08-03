@@ -16,7 +16,7 @@ type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
   name: (
-    'none' | 'slide' | 'slide-reversed' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'slide-layers'
+    'none' | 'slide' | 'slide-reversed' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
     | 'fade' | 'push-slide' | 'reveal'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
@@ -131,14 +131,6 @@ const Transition: FC<OwnProps> = ({
       }
     });
 
-    if (name === 'scroll-slide') {
-      const width = container.offsetWidth;
-      container.scrollBy({
-        left: activeIndex > prevActiveIndex ? width : -width,
-        behavior: 'smooth',
-      });
-    }
-
     let dispatchHeavyAnimationStop: NoneToVoidFunction;
     if (animationLevel > 0) {
       dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
@@ -159,10 +151,6 @@ const Transition: FC<OwnProps> = ({
               node.classList.toggle('active', i === activeIndex);
             }
           });
-
-          if (name === 'scroll-slide') {
-            container.scrollLeft = activeKey * container.offsetWidth;
-          }
 
           if (shouldRestoreHeight) {
             const activeElement = container.querySelector<HTMLDivElement>('.active');
@@ -250,7 +238,7 @@ const Transition: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Transition',
     className,
-    animationLevel === 0 && name === 'scroll-slide' ? 'slide' : name,
+    name,
   );
 
   return (
