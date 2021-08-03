@@ -18,7 +18,7 @@ import {
   ApiUser,
   MAIN_THREAD_ID,
 } from '../../../api/types';
-import { LangCode, InlineBotSettings } from '../../../types';
+import { InlineBotSettings } from '../../../types';
 
 import { BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, SCHEDULED_WHEN_ONLINE } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
@@ -124,7 +124,6 @@ type StateProps = {
   lastSyncTime?: number;
   contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
   shouldSuggestStickers?: boolean;
-  language: LangCode;
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   serverTimeOffset: number;
@@ -137,7 +136,7 @@ type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
   'clearDraft' | 'showDialog' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
   'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
-  'clearReceipt' | 'addRecentEmoji' | 'loadEmojiKeywords' | 'sendInlineBotResult'
+  'clearReceipt' | 'addRecentEmoji' | 'sendInlineBotResult'
 )>;
 
 enum MainButtonState {
@@ -188,7 +187,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
-  language,
   baseEmojiKeywords,
   emojiKeywords,
   serverTimeOffset,
@@ -210,7 +208,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   openChat,
   clearReceipt,
   addRecentEmoji,
-  loadEmojiKeywords,
   sendInlineBotResult,
 }) => {
   const lang = useLang();
@@ -241,15 +238,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       loadScheduledHistory();
     }
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
-
-  useEffect(() => {
-    if (lastSyncTime && isReady) {
-      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
-      if (language !== BASE_EMOJI_KEYWORD_LANG) {
-        loadEmojiKeywords({ language });
-      }
-    }
-  }, [loadEmojiKeywords, language, lastSyncTime, isReady]);
 
   useLayoutEffect(() => {
     if (!appendixRef.current) return;
@@ -1038,7 +1026,6 @@ export default memo(withGlobal<OwnProps>(
       isReceiptModalOpen: Boolean(global.payment.receipt),
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
       recentEmojis: global.recentEmojis,
-      language,
       baseEmojiKeywords: baseEmojiKeywords ? baseEmojiKeywords.keywords : undefined,
       emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
       serverTimeOffset: global.serverTimeOffset,
@@ -1062,7 +1049,6 @@ export default memo(withGlobal<OwnProps>(
     'loadScheduledHistory',
     'openChat',
     'addRecentEmoji',
-    'loadEmojiKeywords',
     'sendInlineBotResult',
   ]),
 )(Composer));
