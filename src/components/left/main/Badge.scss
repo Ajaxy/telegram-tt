@@ -72,6 +72,15 @@
       font-size: 1rem;
       vertical-align: super;
     }
+
+    body.is-ios & {
+      width: 1.375rem;
+      padding: 0.25rem;
+
+      i {
+        font-size: .875rem;
+      }
+    }
   }
 }
 
