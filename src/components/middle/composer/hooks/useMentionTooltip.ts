@@ -13,6 +13,8 @@ import { throttle } from '../../../../util/schedulers';
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 const RE_BR = /(<br>|<br\s?\/>)/g;
+const RE_SPACE = /&nbsp;/g;
+const RE_CLEAN_HTML = /(<div>|<\/div>)/gi;
 const RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[\\w\\d_-]*$', 'gi');
 
 export default function useMentionTooltip(
@@ -120,7 +122,12 @@ export default function useMentionTooltip(
 }
 
 function getUsernameFilter(html: string) {
-  const username = html.replace(RE_BR, '\n').replace(/\n$/i, '').match(RE_USERNAME_SEARCH);
+  const username = html
+    .replace(RE_SPACE, ' ')
+    .replace(RE_BR, '\n')
+    .replace(RE_CLEAN_HTML, '')
+    .replace(/\n$/i, '')
+    .match(RE_USERNAME_SEARCH);
 
   return username ? username[0].trim() : undefined;
 }
