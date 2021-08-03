@@ -1,25 +1,26 @@
-import { useRef } from '../lib/teact/teact';
+import { useState } from '../lib/teact/teact';
 
 import useThrottle from './useThrottle';
 import useOnChange from './useOnChange';
-import useForceUpdate from './useForceUpdate';
+import useHeavyAnimationCheck from './useHeavyAnimationCheck';
+import useFlag from './useFlag';
 
 export default <R extends any, D extends any[]>(resolverFn: () => R, ms: number, dependencies: D) => {
-  const valueRef = useRef<R>();
-  const runThrottled = useThrottle(ms);
-  const forceUpdate = useForceUpdate();
+  const runThrottled = useThrottle(ms, true);
+  const [value, setValue] = useState<R>();
+  const [isFrozen, freeze, unfreeze] = useFlag();
+
+  useHeavyAnimationCheck(freeze, unfreeze);
 
   useOnChange(() => {
-    let isSync = true;
+    if (isFrozen) {
+      return;
+    }
+
     runThrottled(() => {
-      valueRef.current = resolverFn();
-
-      if (!isSync) {
-        forceUpdate();
-      }
+      setValue(resolverFn());
     });
-    isSync = false;
-  }, dependencies);
+  }, dependencies.concat([isFrozen]));
 
-  return valueRef.current;
+  return value;
 };
