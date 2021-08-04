@@ -334,6 +334,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     hasThread,
     forceSenderName,
     hasComments: message.threadInfo && message.threadInfo.messagesCount > 0,
+    hasActionButton: canForward || canFocus,
   });
   const withCommentButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
     && messageListType === 'thread' && !noComments;
@@ -580,6 +581,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     );
     const hasCustomAppendix = isLastInGroup && !textParts && !asForwarded && !hasThread;
     const shouldInlineMeta = !webPage && !animatedEmoji && textParts;
+    const textContentClass = buildClassName(
+      'text-content',
+      shouldInlineMeta && 'with-meta',
+      outgoingStatus && 'with-outgoing-icon',
+    );
 
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
@@ -688,7 +694,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
         {!animatedEmoji && textParts && (
-          <p className={`text-content ${shouldInlineMeta ? 'with-meta' : ''}`} dir="auto">
+          <p className={textContentClass} dir="auto">
             {textParts}
             {shouldInlineMeta && (
               <MessageMeta

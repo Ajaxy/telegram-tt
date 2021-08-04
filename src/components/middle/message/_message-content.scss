@@ -3,26 +3,41 @@
   max-width: var(--max-width);
 
   @media (max-width: 600px) {
-    max-width: calc(100vw - 7rem);
+    max-width: calc(100vw - 5.5rem);
 
-    // Workaround for sass function override - we should use CSS min() here
-    @supports (max-width: #{"min(29rem, 100vw - 7rem)"}) {
-      max-width: #{"min(29rem, 100vw - 7rem)"};
+    .Message.own &,
+    .MessageList.no-avatars & {
+      max-width: calc(100vw - 3rem);
     }
 
-    .MessageList.no-avatars & {
-      max-width: calc(100vw - 4.5rem);
-
-      @supports (max-width: #{"min(29rem, 100vw - 4.5rem)"}) {
-        max-width: #{"min(29rem, 100vw - 4.5rem)"};
+    // Workaround for sass function override - we should use CSS min() here
+    @supports (max-width: #{"min(29rem, 100vw - 5.5rem)"}) {
+      max-width: #{"min(29rem, 100vw - 5.5rem)"};
+      .MessageList.no-avatars & {
+        max-width: #{"min(29rem, 100vw - 3rem)"};
+      }
+      .Message.own & {
+        max-width: #{"min(30rem, 100vw - 3rem)"};
       }
     }
 
-    .Message.own & {
-      max-width: calc(100vw - 4.5rem);
+    &.has-action-button {
+      max-width: calc(100vw - 7rem);
 
-      @supports (max-width: #{"min(30rem, 100vw - 4.5rem)"}) {
-        max-width: #{"min(30rem, 100vw - 4.5rem)"};
+      .Message.own &,
+      .MessageList.no-avatars & {
+        max-width: calc(100vw - 4.5rem);
+      }
+
+      // Workaround for sass function override - we should use CSS min() here
+      @supports (max-width: #{"min(29rem, 100vw - 5.5rem)"}) {
+        max-width: #{"min(29rem, 100vw - 7rem)"};
+        .MessageList.no-avatars & {
+          max-width: #{"min(29rem, 100vw - 4.5rem)"};
+        }
+        .Message.own & {
+          max-width: #{"min(30rem, 100vw - 4.5rem)"};
+        }
       }
     }
   }
@@ -40,7 +55,7 @@
     unicode-bidi: plaintext;
   }
 
-  &:not(.custom-shape) .text-content,
+  &:not(.custom-shape) .text-content:not(.with-meta),
   &.document {
     & > .MessageMeta {
       position: relative;
@@ -201,11 +216,23 @@
   &.has-solid-background {
     padding: .3125rem .5rem .375rem;
 
+    .forwarded-message  .text-content.with-meta {
+      &.with-outgoing-icon:last-child {
+        --meta-icon-width: .5rem;
+      }
+
+      .MessageMeta {
+        bottom: -.25rem;
+      }
+    }
+
+    .text-content.with-meta:last-child::after,
     .forwarded-message > .text-content:not(.with-meta):last-child::after {
       content: '';
       display: inline-block;
-      width: var(--meta-safe-area-size);
+      width: calc(var(--meta-safe-area-size) + var(--meta-icon-width, 0px));
       height: 1rem;
+      float: right;
     }
   }
 
