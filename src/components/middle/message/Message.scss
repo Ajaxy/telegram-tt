@@ -14,7 +14,8 @@
   --secondary-color: var(--color-text-secondary);
   --meta-safe-area-base: 2.25rem;
   --meta-safe-author-width: 0px;
-  --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width));
+  --meta-safe-area-extra-width: 0px;
+  --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width));
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
   --select-background-color: white;
@@ -131,14 +132,22 @@
   }
 
   &.has-views {
-    --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + 4rem);
+    --meta-safe-area-extra-width: 4rem;
   }
 
   &.was-edited {
-    --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + 2.5rem);
+    --meta-safe-area-extra-width: 2.5rem;
 
     &.has-views {
-      --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + 7.5rem);
+      --meta-safe-area-extra-width: 7.5rem;
+    }
+
+    html[lang=ru] & {
+      --meta-safe-area-extra-width: 3.5rem;
+
+      &.has-views {
+        --meta-safe-area-extra-width: 8.5rem;
+      }
     }
   }
 

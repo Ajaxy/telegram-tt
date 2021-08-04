@@ -8,6 +8,12 @@
     }
   }
 
+  &.error {
+    .modal-content > div {
+      margin-top: 1rem;
+    }
+  }
+
   &.narrow {
     .modal-dialog {
       max-width: 20rem;
