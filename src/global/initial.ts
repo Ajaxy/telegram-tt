@@ -62,6 +62,9 @@ export const INITIAL_STATE: GlobalState = {
     favorite: {
       stickers: [],
     },
+    greeting: {
+      stickers: [],
+    },
     featured: {
       setIds: [],
     },

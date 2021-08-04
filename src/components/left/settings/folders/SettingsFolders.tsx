@@ -36,6 +36,7 @@ const SettingsFolders: FC<OwnProps> = ({
     if (
       currentScreen === SettingsScreens.FoldersCreateFolder
       || currentScreen === SettingsScreens.FoldersEditFolder
+      || currentScreen === SettingsScreens.FoldersEditFolderFromChatList
     ) {
       setTimeout(() => {
         dispatch({ type: 'reset' });
@@ -72,13 +73,17 @@ const SettingsFolders: FC<OwnProps> = ({
 
   const handleAddIncludedChats = useCallback(() => {
     dispatch({ type: 'editIncludeFilters' });
-    onScreenSelect(SettingsScreens.FoldersIncludedChats);
-  }, [dispatch, onScreenSelect]);
+    onScreenSelect(currentScreen === SettingsScreens.FoldersEditFolderFromChatList
+      ? SettingsScreens.FoldersIncludedChatsFromChatList
+      : SettingsScreens.FoldersIncludedChats);
+  }, [currentScreen, dispatch, onScreenSelect]);
 
   const handleAddExcludedChats = useCallback(() => {
     dispatch({ type: 'editExcludeFilters' });
-    onScreenSelect(SettingsScreens.FoldersExcludedChats);
-  }, [dispatch, onScreenSelect]);
+    onScreenSelect(currentScreen === SettingsScreens.FoldersEditFolderFromChatList
+      ? SettingsScreens.FoldersExcludedChatsFromChatList
+      : SettingsScreens.FoldersExcludedChats);
+  }, [currentScreen, dispatch, onScreenSelect]);
 
   switch (currentScreen) {
     case SettingsScreens.Folders:
@@ -98,6 +103,7 @@ const SettingsFolders: FC<OwnProps> = ({
       );
     case SettingsScreens.FoldersCreateFolder:
     case SettingsScreens.FoldersEditFolder:
+    case SettingsScreens.FoldersEditFolderFromChatList:
       return (
         <SettingsFoldersEdit
           state={state}
@@ -114,6 +120,7 @@ const SettingsFolders: FC<OwnProps> = ({
         />
       );
     case SettingsScreens.FoldersIncludedChats:
+    case SettingsScreens.FoldersIncludedChatsFromChatList:
       return (
         <SettingsFoldersChatFilters
           mode="included"
@@ -125,6 +132,7 @@ const SettingsFolders: FC<OwnProps> = ({
         />
       );
     case SettingsScreens.FoldersExcludedChats:
+    case SettingsScreens.FoldersExcludedChatsFromChatList:
       return (
         <SettingsFoldersChatFilters
           mode="excluded"

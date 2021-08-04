@@ -1,0 +1,56 @@
+.NoMessages {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .icon {
+    font-size: 5rem;
+    margin: 0 auto 1rem;
+  }
+
+  .wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    background: var(--pattern-color);
+    max-width: 20rem;
+    padding: .75rem 1rem;
+    border-radius: 1.5rem;
+    color: #fff;
+
+    &[dir=rtl] {
+      text-align: right;
+    }
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: .25rem;
+    text-align: center;
+    unicode-bidi: plaintext;
+  }
+
+  .description {
+    font-size: .9375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    unicode-bidi: plaintext;
+  }
+
+  .list-checkmarks {
+    font-size: .9375rem;
+    margin: .25rem 0 0;
+    padding: 0;
+    list-style: none;
+    unicode-bidi: plaintext;
+    line-height: 1.8;
+
+    li::before {
+      content: '✓';
+      margin-inline-end: .5rem;
+    }
+  }
+}

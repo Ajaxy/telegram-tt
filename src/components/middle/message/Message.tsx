@@ -609,7 +609,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
         {animatedEmoji && (
           <AnimatedEmoji
-            isInline
+            size="small"
             sticker={animatedEmoji}
             observeIntersection={observeIntersectionForMedia}
             lastSyncTime={lastSyncTime}

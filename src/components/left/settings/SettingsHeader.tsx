@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo, memo, useState,
+  FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -156,6 +156,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
       case SettingsScreens.FoldersCreateFolder:
         return <h3>{lang('FilterNew')}</h3>;
       case SettingsScreens.FoldersEditFolder:
+      case SettingsScreens.FoldersEditFolderFromChatList:
         return (
           <div className="settings-main-header">
             <h3>{lang('FilterEdit')}</h3>
@@ -174,14 +175,17 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
           </div>
         );
       case SettingsScreens.FoldersIncludedChats:
+      case SettingsScreens.FoldersIncludedChatsFromChatList:
       case SettingsScreens.FoldersExcludedChats:
+      case SettingsScreens.FoldersExcludedChatsFromChatList:
         return (
           <div className="settings-main-header">
-            {currentScreen === SettingsScreens.FoldersIncludedChats ? (
-              <h3>{lang('FilterInclude')}</h3>
-            ) : (
-              <h3>{lang('FilterExclude')}</h3>
-            )}
+            {(currentScreen === SettingsScreens.FoldersIncludedChats
+              || currentScreen === SettingsScreens.FoldersIncludedChatsFromChatList) ? (
+                <h3>{lang('FilterInclude')}</h3>
+              ) : (
+                <h3>{lang('FilterExclude')}</h3>
+              )}
 
             <Button
               round

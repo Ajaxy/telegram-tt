@@ -198,6 +198,10 @@ export type GlobalState = {
       hash?: number;
       stickers: ApiSticker[];
     };
+    greeting: {
+      hash?: number;
+      stickers: ApiSticker[];
+    };
     featured: {
       hash?: number;
       setIds?: string[];
@@ -486,7 +490,7 @@ export type ActionTypes = (
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
-  'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' |
+  'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' |

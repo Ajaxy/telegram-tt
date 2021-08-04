@@ -4,7 +4,8 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
-import { LeftColumnContent } from '../../../types';
+import { LeftColumnContent, SettingsScreens } from '../../../types';
+import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
@@ -32,8 +33,10 @@ type OwnProps = {
   searchDate?: number;
   contactsFilter: string;
   shouldSkipTransition?: boolean;
+  foldersDispatch: FolderEditDispatch;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
+  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -51,8 +54,10 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   searchDate,
   contactsFilter,
   shouldSkipTransition,
+  foldersDispatch,
   onSearchQuery,
   onContentChange,
+  onScreenSelect,
   onReset,
   connectionState,
 }) => {
@@ -158,7 +163,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         {(isActive) => {
           switch (content) {
             case LeftColumnContent.ChatList:
-              return <ChatFolders />;
+              return <ChatFolders onScreenSelect={onScreenSelect} foldersDispatch={foldersDispatch} />;
             case LeftColumnContent.GlobalSearch:
               return (
                 <LeftSearch

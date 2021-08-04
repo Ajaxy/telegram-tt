@@ -3,7 +3,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID } from '../../api/types';
+import {
+  ApiAction, ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
+} from '../../api/types';
 import { GlobalActions, MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
@@ -24,13 +26,13 @@ import {
   selectScheduledMessages,
   selectCurrentMessageIds,
 } from '../../modules/selectors';
-import { isChatChannel, isChatPrivate } from '../../modules/helpers';
+import { isChatChannel, isChatGroup, isChatPrivate } from '../../modules/helpers';
 import { orderBy, pick } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
-import { groupMessages } from './helpers/groupMessages';
+import { groupMessages, MessageDateGroup } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useOnChange from '../../hooks/useOnChange';
 import useStickyDates from './hooks/useStickyDates';
@@ -43,6 +45,8 @@ import useWindowSize from '../../hooks/useWindowSize';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
+import ContactGreeting from './ContactGreeting';
+import NoMessages from './NoMessages';
 
 import './MessageList.scss';
 
@@ -60,7 +64,10 @@ type OwnProps = {
 type StateProps = {
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
+  isGroupChat?: boolean;
   isChatWithSelf?: boolean;
+  isCreator?: boolean;
+  isBot?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
@@ -100,9 +107,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onNotchToggle,
   isChatLoaded,
   isChannelChat,
+  isGroupChat,
   canPost,
   isReady,
   isChatWithSelf,
+  isCreator,
+  isBot,
   messageIds,
   messagesById,
   firstUnreadId,
@@ -424,6 +434,16 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const isPrivate = Boolean(chatId && isChatPrivate(chatId));
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf);
   const noAvatars = Boolean(!withUsers || isChannelChat);
+  const shouldRenderGreeting = isChatPrivate(chatId) && !isChatWithSelf && !isBot
+    && ((
+      !messageGroups && !lastMessage && messageIds
+      // Used to avoid flickering when deleting a greeting that has just been sent
+      && (!listItemElementsRef.current || listItemElementsRef.current.length === 0))
+      || checkSingleMessageActionByType('contactSignUp', messageGroups)
+      || (lastMessage && lastMessage.content.action && lastMessage.content.action.type === 'contactSignUp')
+    );
+  const isGroupChatJustCreated = isGroupChat && isCreator
+    && checkSingleMessageActionByType('chatCreate', messageGroups);
 
   const className = buildClassName(
     'MessageList custom-scroll',
@@ -451,8 +471,15 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
       ) : botDescription ? (
         <div className="empty rich"><span>{renderText(lang(botDescription), ['br', 'emoji', 'links'])}</span></div>
-      ) : messageIds && !messageGroups ? (
-        <div className="empty"><span>{lang('NoMessages')}</span></div>
+      ) : shouldRenderGreeting ? (
+        <ContactGreeting userId={chatId} />
+      ) : messageIds && (!messageGroups || isGroupChatJustCreated) ? (
+        <NoMessages
+          chatId={chatId}
+          type={type}
+          isChatWithSelf={isChatWithSelf}
+          isGroupChatJustCreated={isGroupChatJustCreated}
+        />
       ) : ((messageIds && messageGroups) || lastMessage) ? (
         <MessageListContent
           messageIds={messageIds || [lastMessage!.id]}
@@ -480,6 +507,16 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     </div>
   );
 };
+
+function checkSingleMessageActionByType(type: ApiAction['type'], messageGroups?: MessageDateGroup[]) {
+  return messageGroups
+  && messageGroups.length === 1
+  && messageGroups[0].senderGroups.length === 1
+  && messageGroups[0].senderGroups[0].length === 1
+  && 'content' in messageGroups[0].senderGroups[0][0]
+  && messageGroups[0].senderGroups[0][0].content.action
+  && messageGroups[0].senderGroups[0][0].content.action.type === type;
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, type }): StateProps => {
@@ -510,6 +547,7 @@ export default memo(withGlobal<OwnProps>(
       && !messageIds && !chat.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
     );
 
+    const bot = selectChatBot(global, chatId);
     let botDescription: string | undefined;
     if (selectIsChatBotNotStarted(global, chatId)) {
       const chatBot = selectChatBot(global, chatId)!;
@@ -525,7 +563,10 @@ export default memo(withGlobal<OwnProps>(
       isRestricted,
       restrictionReason,
       isChannelChat: isChatChannel(chat),
+      isGroupChat: isChatGroup(chat),
+      isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
+      isBot: Boolean(bot),
       messageIds,
       messagesById,
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),

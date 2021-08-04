@@ -34,7 +34,7 @@ const ArchivedChats: FC<OwnProps> = ({ isActive, onReset, onContentChange }) => 
         </Button>
         <h3>{lang('ArchivedChats')}</h3>
       </div>
-      <ChatList folderType="archived" noChatsText="Archive is empty." isActive={isActive} />
+      <ChatList folderType="archived" isActive={isActive} />
     </div>
   );
 };

@@ -38,7 +38,11 @@ const Tab: FC<OwnProps> = ({
 
     const tab = tabRef.current!;
     const indicator = tab.querySelector('i')!;
-    const currentIndicator = tab.parentElement!.children[previousActiveTab].querySelector('i')!;
+    const prevTab = tab.parentElement!.children[previousActiveTab];
+    if (!prevTab) {
+      return;
+    }
+    const currentIndicator = prevTab.querySelector('i')!;
 
     currentIndicator.classList.remove('animate');
     indicator.classList.remove('animate');

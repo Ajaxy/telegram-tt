@@ -101,7 +101,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content two-fa custom-scroll">
       <div className="settings-content-header">
-        <AnimatedEmoji sticker={animatedEmoji} />
+        <AnimatedEmoji sticker={animatedEmoji} size="large" />
       </div>
 
       <div className="settings-item pt-0 no-border">

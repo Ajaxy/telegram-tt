@@ -52,6 +52,31 @@ addReducer('loadFavoriteStickers', (global) => {
   void loadFavoriteStickers(hash);
 });
 
+addReducer('loadGreetingStickers', (global) => {
+  const { hash } = global.stickers.greeting || {};
+
+  (async () => {
+    const greeting = await callApi('fetchStickersForEmoji', { emoji: '👋⭐️', hash });
+
+    if (!greeting) {
+      return;
+    }
+
+    const newGlobal = getGlobal();
+
+    setGlobal({
+      ...newGlobal,
+      stickers: {
+        ...newGlobal.stickers,
+        greeting: {
+          hash: greeting.hash,
+          stickers: greeting.stickers.filter((sticker) => sticker.emoji === '👋'),
+        },
+      },
+    });
+  })();
+});
+
 addReducer('loadFeaturedStickers', (global) => {
   const { hash } = global.stickers.featured || {};
   void loadFeaturedStickers(hash);

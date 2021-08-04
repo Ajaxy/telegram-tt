@@ -7,7 +7,8 @@ import { GlobalActions } from '../../../global/types';
 import {
   ApiChat, ApiChatFolder, ApiUser,
 } from '../../../api/types';
-import { NotifyException, NotifySettings } from '../../../types';
+import { NotifyException, NotifySettings, SettingsScreens } from '../../../types';
+import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../../../config';
 import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
@@ -23,12 +24,14 @@ import { useChatAnimationType } from './hooks';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
+import EmptyFolder from './EmptyFolder';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
-  noChatsText?: string;
   isActive: boolean;
+  onScreenSelect?: (screen: SettingsScreens) => void;
+  foldersDispatch?: FolderEditDispatch;
 };
 
 type StateProps = {
@@ -52,7 +55,6 @@ enum FolderTypeToListType {
 const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   folderType,
   folderId,
-  noChatsText = 'Chat list is empty.',
   isActive,
   chatFolder,
   chatsById,
@@ -60,8 +62,10 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   listIds,
   orderedPinnedIds,
   lastSyncTime,
+  foldersDispatch,
   notifySettings,
   notifyExceptions,
+  onScreenSelect,
   loadMoreChats,
   preloadTopChatMessages,
   openChat,
@@ -205,7 +209,14 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       {viewportIds && viewportIds.length && chatArrays ? (
         renderChats()
       ) : viewportIds && !viewportIds.length ? (
-        <div className="no-results">{noChatsText}</div>
+        (
+          <EmptyFolder
+            folderId={folderId}
+            folderType={folderType}
+            foldersDispatch={foldersDispatch}
+            onScreenSelect={onScreenSelect}
+          />
+        )
       ) : (
         <Loading key="loading" />
       )}

@@ -585,6 +585,7 @@ function buildAction(
   if (action instanceof GramJs.MessageActionChatCreate) {
     text = 'Notification.CreatedChatWithTitle';
     translationValues.push('%action_origin%', action.title);
+    type = 'chatCreate';
   } else if (action instanceof GramJs.MessageActionChatEditTitle) {
     if (isChannelPost) {
       text = 'Channel.MessageTitleUpdated';
@@ -656,6 +657,7 @@ function buildAction(
   } else if (action instanceof GramJs.MessageActionContactSignUp) {
     text = 'Notification.Joined';
     translationValues.push('%action_origin%');
+    type = 'contactSignUp';
   } else if (action instanceof GramJs.MessageActionPaymentSent) {
     const currencySign = getCurrencySign(action.currency);
     const amount = (Number(action.totalAmount) / 100).toFixed(2);
