@@ -20,6 +20,12 @@
     margin: 0 0.5rem;
   }
 
+  &.large {
+    width: 10rem;
+    height: 10rem;
+    margin: 0;
+  }
+
   .AnimatedSticker, img {
     position: absolute;
     top: 0;

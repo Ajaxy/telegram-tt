@@ -147,7 +147,7 @@ export interface ApiAction {
   text: string;
   targetUserIds?: number[];
   targetChatId?: number;
-  type: 'historyClear' | 'other';
+  type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'other';
   photo?: ApiPhoto;
   translationValues: string[];
 }

@@ -52,7 +52,7 @@ const SUBMIT_TIMEOUT = 500;
 const INITIAL_CHATS_LIMIT = 5;
 
 const ERROR_NO_TITLE = 'Please provide a title for this folder.';
-const ERROR_NO_CHATS = 'Please select at least one chat for this folder.';
+const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
 
 const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
   state,
@@ -265,7 +265,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="settings-item no-border pt-3">
           {state.error && state.error === ERROR_NO_CHATS && (
             <p className="settings-item-description color-danger mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
-              {state.error}
+              {lang(state.error)}
             </p>
           )}
 

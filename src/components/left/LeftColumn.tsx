@@ -9,6 +9,7 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 import { LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
+import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 
 import Transition from '../ui/Transition';
 import LeftMain from './main/LeftMain';
@@ -59,6 +60,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
   const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
+  const [foldersState, foldersDispatch] = useFoldersReducer();
 
   // Used to reset child components in background.
   const [lastResetTime, setLastResetTime] = useState<number>(0);
@@ -193,6 +195,16 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.FoldersEditFolder:
           setSettingsScreen(SettingsScreens.Folders);
           return;
+
+        case SettingsScreens.FoldersIncludedChatsFromChatList:
+        case SettingsScreens.FoldersExcludedChatsFromChatList:
+          setSettingsScreen(SettingsScreens.FoldersEditFolderFromChatList);
+          return;
+
+        case SettingsScreens.FoldersEditFolderFromChatList:
+          setContent(LeftColumnContent.ChatList);
+          setSettingsScreen(SettingsScreens.Main);
+          return;
         default:
           break;
       }
@@ -274,6 +286,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
               <Settings
                 isActive={isActive}
                 currentScreen={settingsScreen}
+                foldersState={foldersState}
+                foldersDispatch={foldersDispatch}
                 onScreenSelect={handleSettingsScreenSelect}
                 onReset={handleReset}
                 shouldSkipTransition={shouldSkipHistoryAnimations}
@@ -307,8 +321,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
                 searchQuery={searchQuery}
                 searchDate={searchDate}
                 contactsFilter={contactsFilter}
+                foldersDispatch={foldersDispatch}
                 onContentChange={setContent}
                 onSearchQuery={handleSearchQuery}
+                onScreenSelect={handleSettingsScreenSelect}
                 onReset={handleReset}
                 shouldSkipTransition={shouldSkipHistoryAnimations}
               />

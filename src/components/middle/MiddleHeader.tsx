@@ -330,7 +330,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <>
           {renderBackButton()}
           <h3>
-            {isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount)}
+            {isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')}
           </h3>
         </>
       ) : undefined

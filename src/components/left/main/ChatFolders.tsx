@@ -5,7 +5,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
-import { NotifyException, NotifySettings } from '../../../types';
+import { NotifyException, NotifySettings, SettingsScreens } from '../../../types';
+import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { buildCollectionByKey, pick } from '../../../util/iteratees';
@@ -22,6 +23,11 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import Transition from '../../ui/Transition';
 import TabList from '../../ui/TabList';
 import ChatList from './ChatList';
+
+type OwnProps = {
+  onScreenSelect: (screen: SettingsScreens) => void;
+  foldersDispatch: FolderEditDispatch;
+};
 
 type StateProps = {
   chatsById: Record<number, ApiChat>;
@@ -40,7 +46,7 @@ type DispatchProps = Pick<GlobalActions, 'loadChatFolders' | 'setActiveChatFolde
 const INFO_THROTTLE = 3000;
 const SAVED_MESSAGES_HOTKEY = '0';
 
-const ChatFolders: FC<StateProps & DispatchProps> = ({
+const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
   usersById,
   chatFoldersById,
@@ -50,6 +56,8 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   activeChatFolder,
   currentUserId,
   lastSyncTime,
+  foldersDispatch,
+  onScreenSelect,
   loadChatFolders,
   setActiveChatFolder,
   openChat,
@@ -182,15 +190,23 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       .find(({ title }) => title === folderTabs![activeChatFolder].title);
 
     if (!activeFolder || activeChatFolder === 0) {
-      return <ChatList folderType="all" isActive={isActive} />;
+      return (
+        <ChatList
+          folderType="all"
+          isActive={isActive}
+          foldersDispatch={foldersDispatch}
+          onScreenSelect={onScreenSelect}
+        />
+      );
     }
 
     return (
       <ChatList
         folderType="folder"
         folderId={activeFolder.id}
-        noChatsText={lang('FilterNoChatsToDisplay')}
         isActive={isActive}
+        onScreenSelect={onScreenSelect}
+        foldersDispatch={foldersDispatch}
       />
     );
   }
@@ -214,7 +230,7 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
       chats: { byId: chatsById },

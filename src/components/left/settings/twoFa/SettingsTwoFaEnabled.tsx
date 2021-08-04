@@ -32,7 +32,7 @@ const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content two-fa custom-scroll">
       <div className="settings-content-header">
-        <AnimatedEmoji sticker={animatedEmoji} />
+        <AnimatedEmoji sticker={animatedEmoji} size="large" />
 
         <p className="settings-item-description mb-3" dir="auto">
           {renderText(lang('EnabledPasswordText'), ['br'])}

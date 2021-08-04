@@ -1,9 +1,9 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { SettingsScreens } from '../../../types';
+import { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
 
 import { LAYERS_ANIMATION_NAME } from '../../../util/environment';
-import useFoldersReducer from '../../../hooks/reducers/useFoldersReducer';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 
 import Transition from '../../ui/Transition';
@@ -51,8 +51,11 @@ const FOLDERS_SCREENS = [
   SettingsScreens.Folders,
   SettingsScreens.FoldersCreateFolder,
   SettingsScreens.FoldersEditFolder,
+  SettingsScreens.FoldersEditFolderFromChatList,
   SettingsScreens.FoldersIncludedChats,
+  SettingsScreens.FoldersIncludedChatsFromChatList,
   SettingsScreens.FoldersExcludedChats,
+  SettingsScreens.FoldersExcludedChatsFromChatList,
 ];
 
 const PRIVACY_SCREENS = [
@@ -88,6 +91,8 @@ const PRIVACY_GROUP_CHATS_SCREENS = [
 export type OwnProps = {
   isActive: boolean;
   currentScreen: SettingsScreens;
+  foldersState: FoldersState;
+  foldersDispatch: FolderEditDispatch;
   onScreenSelect: (screen: SettingsScreens) => void;
   shouldSkipTransition?: boolean;
   onReset: () => void;
@@ -96,17 +101,19 @@ export type OwnProps = {
 const Settings: FC<OwnProps> = ({
   isActive,
   currentScreen,
+  foldersState,
+  foldersDispatch,
   onScreenSelect,
   onReset,
   shouldSkipTransition,
 }) => {
-  const [foldersState, foldersDispatch] = useFoldersReducer();
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
 
   const handleReset = useCallback(() => {
     if (
       currentScreen === SettingsScreens.FoldersCreateFolder
       || currentScreen === SettingsScreens.FoldersEditFolder
+      || currentScreen === SettingsScreens.FoldersEditFolderFromChatList
     ) {
       setTimeout(() => {
         foldersDispatch({ type: 'reset' });
@@ -270,8 +277,11 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Folders:
       case SettingsScreens.FoldersCreateFolder:
       case SettingsScreens.FoldersEditFolder:
+      case SettingsScreens.FoldersEditFolderFromChatList:
       case SettingsScreens.FoldersIncludedChats:
+      case SettingsScreens.FoldersIncludedChatsFromChatList:
       case SettingsScreens.FoldersExcludedChats:
+      case SettingsScreens.FoldersExcludedChatsFromChatList:
         return (
           <SettingsFolders
             currentScreen={currentScreen}

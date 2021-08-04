@@ -4,8 +4,7 @@ import React, {
 
 import { ApiMediaFormat, ApiSticker } from '../../api/types';
 
-import { STICKER_SIZE_TWO_FA } from '../../config';
-import { getStickerDimensions, LIKE_STICKER_ID } from './helpers/mediaDimensions';
+import { LIKE_STICKER_ID } from './helpers/mediaDimensions';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useTransitionForMedia from '../../hooks/useTransitionForMedia';
@@ -18,16 +17,24 @@ import './AnimatedEmoji.scss';
 type OwnProps = {
   sticker: ApiSticker;
   observeIntersection?: ObserveFn;
-  isInline?: boolean;
+  size?: 'large' | 'medium' | 'small';
   lastSyncTime?: number;
   forceLoadPreview?: boolean;
 };
 
 const QUALITY = 1;
-const RESIZE_FACTOR = 0.5;
+const WIDTH = {
+  large: 160,
+  medium: 128,
+  small: 104,
+};
 
 const AnimatedEmoji: FC<OwnProps> = ({
-  sticker, isInline = false, observeIntersection, lastSyncTime, forceLoadPreview,
+  sticker,
+  size = 'medium',
+  observeIntersection,
+  lastSyncTime,
+  forceLoadPreview,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -54,13 +61,7 @@ const AnimatedEmoji: FC<OwnProps> = ({
     setPlayKey(String(Math.random()));
   }, []);
 
-  let width: number;
-  if (isInline) {
-    width = getStickerDimensions(sticker).width * RESIZE_FACTOR;
-  } else {
-    width = STICKER_SIZE_TWO_FA;
-  }
-
+  const width = WIDTH[size];
   const style = `width: ${width}px; height: ${width}px;`;
 
   return (

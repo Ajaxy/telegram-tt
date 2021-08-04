@@ -1,0 +1,44 @@
+.EmptyFolder {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  @media (max-height: 480px) {
+    height: 100%;
+  }
+
+  .sticker {
+    height: 8rem;
+    margin-bottom: 1.875rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: .125rem;
+  }
+
+  .description {
+    font-size: .875rem;
+    color: var(--color-text-secondary);
+
+    body.is-ios &,
+    body.is-macos & {
+      color: var(--color-text-secondary-apple);
+    }
+  }
+
+  .Button.pill {
+    margin-top: .625rem;
+    font-weight: 500;
+    padding-inline-start: .75rem;
+    unicode-bidi: plaintext;
+
+    i {
+      margin-inline-end: .625rem;
+      font-size: 1.5rem;
+    }
+  }
+}
