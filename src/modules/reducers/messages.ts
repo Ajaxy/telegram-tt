@@ -4,7 +4,7 @@ import {
 import { ApiMessage, ApiThreadInfo, MAIN_THREAD_ID } from '../../api/types';
 import { FocusDirection } from '../../types';
 
-import { MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT } from '../../config';
+import { IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT } from '../../config';
 import {
   selectListedIds,
   selectChatMessages,
@@ -39,7 +39,7 @@ export function updateCurrentMessageList(
 ): GlobalState {
   const { messageLists } = global.messages;
   let newMessageLists: MessageList[] = messageLists;
-  if (shouldReplaceHistory) {
+  if (shouldReplaceHistory || IS_TEST) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
   } else if (chatId) {
     const last = messageLists[messageLists.length - 1];
