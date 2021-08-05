@@ -117,7 +117,11 @@ function readCache(initialState: GlobalState) {
     };
 
     if (!cached.messages.messageLists) {
-      cached.messages.messageLists = [];
+      cached.messages.messageLists = initialState.messages.messageLists;
+    }
+
+    if (!cached.stickers.greeting) {
+      cached.stickers.greeting = initialState.stickers.greeting;
     }
   }
 
