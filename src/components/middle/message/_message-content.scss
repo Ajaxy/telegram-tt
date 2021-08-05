@@ -3,21 +3,21 @@
   max-width: var(--max-width);
 
   @media (max-width: 600px) {
-    max-width: calc(100vw - 5.5rem);
+    max-width: calc(100vw - 6.25rem);
 
     .Message.own &,
     .MessageList.no-avatars & {
-      max-width: calc(100vw - 3rem);
+      max-width: calc(100vw - 3.75rem);
     }
 
     // Workaround for sass function override - we should use CSS min() here
-    @supports (max-width: #{"min(29rem, 100vw - 5.5rem)"}) {
-      max-width: #{"min(29rem, 100vw - 5.5rem)"};
+    @supports (max-width: #{"min(29rem, 100vw - 6.25rem)"}) {
+      max-width: #{"min(29rem, 100vw - 6.25rem)"};
       .MessageList.no-avatars & {
-        max-width: #{"min(29rem, 100vw - 3rem)"};
+        max-width: #{"min(29rem, 100vw - 3.75rem)"};
       }
       .Message.own & {
-        max-width: #{"min(30rem, 100vw - 3rem)"};
+        max-width: #{"min(30rem, 100vw - 3.75rem)"};
       }
     }
 
@@ -55,7 +55,7 @@
     unicode-bidi: plaintext;
   }
 
-  &:not(.custom-shape) .text-content:not(.with-meta),
+  &:not(.custom-shape) .text-content,
   &.document {
     & > .MessageMeta {
       position: relative;
@@ -63,9 +63,30 @@
       bottom: auto !important;
       float: right;
       line-height: 1;
-      margin-top: .125rem;
+      height: calc(var(--message-meta-height, 1rem));
       margin-left: .4375rem;
       margin-right: -.5rem;
+
+      .MessageOutgoingStatus .Transition {
+        max-height: calc(var(--message-meta-height, 1rem));
+        overflow: hidden;
+      }
+
+      html[data-message-text-size="12"] & {
+        top: .25rem;
+      }
+
+      html[data-message-text-size="17"] & {
+        top: .4375rem;
+      }
+
+      html[data-message-text-size="18"] &,
+      html[data-message-text-size="19"] & {
+        top: .5rem;
+      }
+      html[data-message-text-size="20"] & {
+        top: .5625rem;
+      }
     }
 
     &:dir(rtl) {
@@ -85,7 +106,7 @@
     }
 
     & > .MessageMeta {
-      top: auto;
+      top: auto !important;
       bottom: -.5rem !important;
       margin-top: -.25rem;
       &:not([dir=rtl]) {
@@ -216,23 +237,11 @@
   &.has-solid-background {
     padding: .3125rem .5rem .375rem;
 
-    .forwarded-message  .text-content.with-meta {
-      &.with-outgoing-icon:last-child {
-        --meta-icon-width: .5rem;
-      }
-
-      .MessageMeta {
-        bottom: -.25rem;
-      }
-    }
-
-    .text-content.with-meta:last-child::after,
     .forwarded-message > .text-content:not(.with-meta):last-child::after {
       content: '';
       display: inline-block;
-      width: calc(var(--meta-safe-area-size) + var(--meta-icon-width, 0px));
+      width: var(--meta-safe-area-size);
       height: 1rem;
-      float: right;
     }
   }
 
