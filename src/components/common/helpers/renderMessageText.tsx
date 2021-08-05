@@ -380,7 +380,7 @@ function processEntityAsHtml(
 
   const renderedContent = nestedEntityContent.length
     ? nestedEntityContent.join('')
-    : renderText(entityContent, ['emoji_html', 'br_html']).join('');
+    : renderText(entityContent, ['escape_html', 'emoji_html', 'br_html']).join('');
 
   if (!rawEntityText) {
     return renderedContent;
