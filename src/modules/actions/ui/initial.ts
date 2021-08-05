@@ -21,7 +21,9 @@ addReducer('init', (global) => {
   document.documentElement.style.setProperty(
     '--composer-text-size', `${Math.max(messageTextSize, IS_IOS ? 16 : 15)}px`,
   );
+  document.documentElement.style.setProperty('--message-meta-height', `${Math.floor(messageTextSize * 1.3125)}px`);
   document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
+  document.documentElement.setAttribute('data-message-text-size', messageTextSize.toString());
   document.body.classList.add('initial');
   document.body.classList.add(`animation-level-${animationLevel}`);
   document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
