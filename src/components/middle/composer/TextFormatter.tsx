@@ -40,6 +40,7 @@ const TEXT_FORMAT_BY_TAG_NAME: Record<string, keyof ISelectedTextFormats> = {
   DEL: 'strikethrough',
   CODE: 'monospace',
 };
+const fragmentEl = document.createElement('div');
 
 const TextFormatter: FC<OwnProps> = ({
   isOpen,
@@ -117,8 +118,9 @@ const TextFormatter: FC<OwnProps> = ({
     if (!selectedRange) {
       return undefined;
     }
+    fragmentEl.innerText = selectedRange.toString();
 
-    return selectedRange.toString();
+    return fragmentEl.innerHTML;
   }, [selectedRange]);
 
   const getSelectedElement = useCallback(() => {
