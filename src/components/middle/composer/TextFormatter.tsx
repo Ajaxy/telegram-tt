@@ -268,7 +268,7 @@ const TextFormatter: FC<OwnProps> = ({
   ]);
 
   function handleLinkUrlConfirm() {
-    const formattedLinkUrl = linkUrl.includes('://') ? linkUrl : `http://${linkUrl}`;
+    const formattedLinkUrl = encodeURI(linkUrl.includes('://') ? linkUrl : `http://${linkUrl}`);
 
     if (isEditingLink) {
       const element = getSelectedElement();
