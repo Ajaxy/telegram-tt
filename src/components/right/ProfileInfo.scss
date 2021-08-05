@@ -103,14 +103,14 @@
 
     &:dir(rtl) {
       .status {
-        text-align: initial;
+        text-align: right;
         unicode-bidi: plaintext;
       }
     }
 
     &[dir=rtl] {
       .status {
-        text-align: initial;
+        text-align: right;
         unicode-bidi: plaintext;
       }
     }
