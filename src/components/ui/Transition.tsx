@@ -140,6 +140,10 @@ const Transition: FC<OwnProps> = ({
     requestAnimationFrame(() => {
       container.classList.add('animating');
 
+      if (onStart) {
+        onStart();
+      }
+
       function onAnimationEnd() {
         requestAnimationFrame(() => {
           container.classList.remove('animating', 'backwards');
@@ -172,15 +176,14 @@ const Transition: FC<OwnProps> = ({
         });
       }
 
-      if (animationLevel > 0) {
-        const toNode = name === 'mv-slide' ? childNodes[activeIndex].firstChild! : childNodes[activeIndex];
+      const toNode = name === 'mv-slide'
+        ? childNodes[activeIndex] && childNodes[activeIndex].firstChild
+        : childNodes[activeIndex];
+
+      if (animationLevel > 0 && toNode) {
         waitForAnimationEnd(toNode, onAnimationEnd);
       } else {
         onAnimationEnd();
-      }
-
-      if (onStart) {
-        onStart();
       }
     });
   }, [
