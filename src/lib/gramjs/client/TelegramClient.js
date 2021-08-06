@@ -317,11 +317,13 @@ class TelegramClient {
     // endregion
     // export region
 
-    _cleanupExportedSender(dcId) {
+    async _cleanupExportedSender(dcId) {
         if (this.session.dcId !== dcId) {
             this.session.setAuthKey(undefined, dcId);
         }
+        const sender = await this._exportedSenderPromises[dcId];
         this._exportedSenderPromises[dcId] = undefined;
+        await sender.disconnect();
     }
 
     async _connectSender(sender, dcId) {
