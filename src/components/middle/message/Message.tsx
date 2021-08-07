@@ -294,11 +294,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && (!isInDocumentGroup || isLastInDocumentGroup)
   );
-  const canForward = canShowActionButton && isChannel && !isScheduled;
-  const canFocus = Boolean(canShowActionButton && (
-    (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId)
-    || isPinnedList
-  ));
+  const canForward = isChannel && !isScheduled;
+  const canFocus = Boolean(isPinnedList
+    || (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId));
   const avatarPeer = forwardInfo && (isChatWithSelf || !sender) ? originSender : sender;
   const senderPeer = forwardInfo ? originSender : sender;
 
@@ -841,7 +839,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
               onClick={handleMessageSelect}
             />
           )}
-          {canForward ? (
+          {canShowActionButton && canForward ? (
             <Button
               className="message-action-button"
               color="translucent-white"
@@ -852,7 +850,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             >
               <i className="icon-share-filled" />
             </Button>
-          ) : canFocus ? (
+          ) : canShowActionButton && canFocus ? (
             <Button
               className="message-action-button"
               color="translucent-white"
