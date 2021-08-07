@@ -327,7 +327,7 @@ class TelegramClient {
     }
 
     async _connectSender(sender, dcId) {
-        const dc = utils.getDC(dcId, true);
+        const dc = utils.getDC(dcId);
 
         while (true) {
             try {
