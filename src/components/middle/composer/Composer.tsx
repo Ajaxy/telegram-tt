@@ -830,6 +830,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <Button
               className={symbolMenuButtonClassName}
               round
+              faded
               color="translucent"
               onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
               ariaLabel="Choose emoji, sticker or GIF"
