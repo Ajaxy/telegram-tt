@@ -7,11 +7,11 @@ import {
 } from '../api/types';
 
 import {
-  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
+  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS, TRANSPARENT_PIXEL,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
-import { fetchBlob } from './files';
+import { dataUriToBlob, fetchBlob } from './files';
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
 import { oggToWav } from './oggToWav';
 import { webpToPng } from './webpToPng';
@@ -167,6 +167,11 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
   if (mediaData instanceof Blob) {
+    // Prevent HTML-in-video attacks
+    if (mediaData.type.includes('text/html')) {
+      return URL.createObjectURL(dataUriToBlob(TRANSPARENT_PIXEL));
+    }
+
     return URL.createObjectURL(mediaData);
   }
 

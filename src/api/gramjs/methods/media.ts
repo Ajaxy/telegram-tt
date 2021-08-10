@@ -11,10 +11,11 @@ import {
   MEDIA_CACHE_MAX_BYTES,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
+  TRANSPARENT_PIXEL,
 } from '../../../config';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
-import { blobToDataUri } from '../../../util/files';
+import { blobToDataUri, dataUriToBlob } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = (
@@ -233,6 +234,11 @@ async function parseMedia(
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
   if (mediaData instanceof Blob) {
+    // Prevent HTML-in-video attacks
+    if (mediaData.type.includes('text/html')) {
+      return URL.createObjectURL(dataUriToBlob(TRANSPARENT_PIXEL));
+    }
+
     return URL.createObjectURL(mediaData);
   }
 
