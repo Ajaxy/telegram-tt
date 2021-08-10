@@ -243,6 +243,8 @@ export interface ApiMessage {
   hasUnreadMention?: boolean;
   inlineButtons?: ApiKeyboardButtons;
   keyboardButtons?: ApiKeyboardButtons;
+  keyboardPlaceholder?: string;
+  isKeyboardSingleUse?: boolean;
   viaBotId?: number;
   threadInfo?: ApiThreadInfo;
   adminTitle?: string;
@@ -272,6 +274,12 @@ export interface ApiKeyboardButton {
 }
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
+export type ApiReplyKeyboard = {
+  keyboardPlaceholder?: string;
+  isKeyboardSingleUse?: boolean;
+} & {
+  [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
+};
 
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice';

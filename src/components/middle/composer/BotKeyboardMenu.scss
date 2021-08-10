@@ -1,4 +1,4 @@
-.KeyboardMenu {
+.BotKeyboardMenu {
   .bubble {
     width: 100% !important;
     max-width: 27rem;
@@ -40,6 +40,7 @@
       &:hover {
         color: #fff;
         border-color: var(--color-primary-shade);
+        background: var(--color-primary-shade);
       }
     }
 

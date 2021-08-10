@@ -33,6 +33,7 @@ import {
   selectEditingMessage,
   selectIsChatWithSelf,
   selectChatUser,
+  selectChatMessage,
 } from '../../../modules/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -77,7 +78,7 @@ import MentionTooltip from './MentionTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
 import StickerTooltip from './StickerTooltip.async';
 import EmojiTooltip from './EmojiTooltip.async';
-import BotKeyboardMenu from './BotKeyboardMenu.async';
+import BotKeyboardMenu from './BotKeyboardMenu';
 import MessageInput from './MessageInput';
 import ComposerEmbeddedMessage from './ComposerEmbeddedMessage';
 import AttachmentModal from './AttachmentModal.async';
@@ -113,6 +114,7 @@ type StateProps = {
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   botKeyboardMessageId?: number;
+  botKeyboardPlaceholder?: string;
   withScheduledButton?: boolean;
   shouldSchedule?: boolean;
   canScheduleUntilOnline?: boolean;
@@ -178,6 +180,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   isPaymentModalOpen,
   isReceiptModalOpen,
   botKeyboardMessageId,
+  botKeyboardPlaceholder,
   withScheduledButton,
   stickersForEmoji,
   groupChatMembers,
@@ -851,7 +854,9 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             id="message-input-text"
             html={!attachments.length ? html : ''}
             placeholder={
-              activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER ? '' : lang('Message')
+              activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER
+                ? ''
+                : botKeyboardPlaceholder || lang('Message')
             }
             forcedPlaceholder={inlineBotHelp}
             shouldSetFocus={isSymbolMenuOpen}
@@ -1006,6 +1011,8 @@ export default memo(withGlobal<OwnProps>(
     const { language } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
+    const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
+    const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
 
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
@@ -1026,7 +1033,8 @@ export default memo(withGlobal<OwnProps>(
         && Boolean(scheduledIds && scheduledIds.length)
       ),
       shouldSchedule: messageListType === 'scheduled',
-      botKeyboardMessageId: messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined,
+      botKeyboardMessageId,
+      botKeyboardPlaceholder: keyboardMessage ? keyboardMessage.keyboardPlaceholder : undefined,
       isForwarding: chatId === global.forwardMessages.toChatId,
       isPollModalOpen: global.isPollModalOpen,
       stickersForEmoji: global.stickers.forEmoji.stickers,

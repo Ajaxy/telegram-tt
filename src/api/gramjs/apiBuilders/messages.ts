@@ -16,7 +16,7 @@ import {
   ApiWebPage,
   ApiMessageEntity,
   ApiFormattedText,
-  ApiKeyboardButtons,
+  ApiReplyKeyboard,
   ApiKeyboardButton,
   ApiChat,
   ApiThreadInfo,
@@ -138,7 +138,9 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
 
   const { replyToMsgId, replyToTopId } = mtpMessage.replyTo || {};
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
-  const { inlineButtons, keyboardButtons } = buildReplyButtons(mtpMessage) || {};
+  const {
+    inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse,
+  } = buildReplyButtons(mtpMessage) || {};
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
   const { replies, mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && mtpMessage.groupedId.toString();
@@ -165,7 +167,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
       isInAlbum,
     }),
     inlineButtons,
-    ...(keyboardButtons && { keyboardButtons }),
+    ...(keyboardButtons && { keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons }),
     ...(mtpMessage.viaBotId && { viaBotId: mtpMessage.viaBotId }),
     ...(replies && replies.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
@@ -693,9 +695,7 @@ function buildAction(
   };
 }
 
-function buildReplyButtons(message: UniversalMessage): {
-  [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons
-} | undefined {
+function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefined {
   const { id: messageId, replyMarkup, media } = message;
 
   if (!replyMarkup) {
@@ -756,7 +756,13 @@ function buildReplyButtons(message: UniversalMessage): {
     });
   });
 
-  return { [replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? 'keyboardButtons' : 'inlineButtons']: markup };
+  return {
+    [replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? 'keyboardButtons' : 'inlineButtons']: markup,
+    ...(replyMarkup instanceof GramJs.ReplyKeyboardMarkup && {
+      keyboardPlaceholder: replyMarkup.placeholder,
+      isKeyboardSingleUse: replyMarkup.singleUse,
+    }),
+  };
 }
 
 function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file') {
