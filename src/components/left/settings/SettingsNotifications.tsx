@@ -12,6 +12,7 @@ import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import Checkbox from '../../ui/Checkbox';
+import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;
@@ -27,10 +28,14 @@ type StateProps = {
   hasBroadcastNotifications: boolean;
   hasBroadcastMessagePreview: boolean;
   hasContactJoinedNotifications: boolean;
+  hasWebNotifications: boolean;
+  hasPushNotifications: boolean;
+  notificationSoundVolume: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings'
+  'loadNotificationSettings' | 'updateContactSignUpNotification' |
+  'updateNotificationSettings' | 'updateWebNotificationSettings'
 )>;
 
 const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -44,9 +49,13 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
   hasBroadcastNotifications,
   hasBroadcastMessagePreview,
   hasContactJoinedNotifications,
+  hasPushNotifications,
+  hasWebNotifications,
+  notificationSoundVolume,
   loadNotificationSettings,
   updateContactSignUpNotification,
   updateNotificationSettings,
+  updateWebNotificationSettings,
 }) => {
   useEffect(() => {
     loadNotificationSettings();
@@ -90,6 +99,44 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className="settings-content custom-scroll">
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          Web notifications
+        </h4>
+        <Checkbox
+          label="Web notifications"
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasWebNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          checked={hasWebNotifications}
+          onChange={(e) => {
+            updateWebNotificationSettings({ hasWebNotifications: e.target.checked });
+          }}
+        />
+        <Checkbox
+          label="Offline notifications"
+          disabled={!hasWebNotifications}
+          // eslint-disable-next-line max-len
+          subLabel={lang(hasPushNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          checked={hasPushNotifications}
+          onChange={(e) => {
+            updateWebNotificationSettings({ hasPushNotifications: e.target.checked });
+          }}
+        />
+        <div className="settings-item-slider">
+          <RangeSlider
+            label="Sound"
+            disabled={!hasWebNotifications}
+            range={{
+              min: 0,
+              max: 10,
+            }}
+            value={notificationSoundVolume}
+            onChange={(volume) => {
+              updateWebNotificationSettings({ notificationSoundVolume: volume });
+            }}
+          />
+        </div>
+      </div>
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('AutodownloadPrivateChats')}
         </h4>
 
@@ -102,6 +149,7 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
         />
         <Checkbox
           label={lang('MessagePreview')}
+          disabled={!hasPrivateChatsNotifications}
           // eslint-disable-next-line max-len
           subLabel={lang(hasPrivateChatsMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPrivateChatsMessagePreview}
@@ -120,6 +168,7 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
         />
         <Checkbox
           label={lang('MessagePreview')}
+          disabled={!hasGroupNotifications}
           subLabel={lang(hasGroupMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasGroupMessagePreview}
           onChange={(e) => { handleSettingsChange(e, 'group', 'showPreviews'); }}
@@ -138,6 +187,7 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
         />
         <Checkbox
           label={lang('MessagePreview')}
+          disabled={!hasBroadcastNotifications}
           // eslint-disable-next-line max-len
           subLabel={lang(hasBroadcastMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasBroadcastMessagePreview}
@@ -167,10 +217,14 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     hasBroadcastNotifications: Boolean(global.settings.byKey.hasBroadcastNotifications),
     hasBroadcastMessagePreview: Boolean(global.settings.byKey.hasBroadcastMessagePreview),
     hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
+    hasWebNotifications: global.settings.byKey.hasWebNotifications,
+    hasPushNotifications: global.settings.byKey.hasPushNotifications,
+    notificationSoundVolume: global.settings.byKey.notificationSoundVolume,
   };
 },
 (setGlobal, actions): DispatchProps => pick(actions, [
   'loadNotificationSettings',
   'updateContactSignUpNotification',
   'updateNotificationSettings',
+  'updateWebNotificationSettings',
 ]))(SettingsNotifications));

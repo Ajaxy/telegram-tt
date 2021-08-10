@@ -483,9 +483,9 @@ export type ActionTypes = (
   'loadBlockedContacts' | 'blockContact' | 'unblockContact' |
   'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations' |
   'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
-  'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' | 'setPrivacySettings' |
-  'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' | 'loadContentSettings' |
-  'updateContentSettings' |
+  'updateWebNotificationSettings' | 'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' |
+  'setPrivacySettings' | 'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
+  'loadContentSettings' | 'updateContentSettings' |
   // Stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |

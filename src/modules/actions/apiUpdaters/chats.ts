@@ -19,7 +19,7 @@ import {
   selectIsChatListed,
   selectChatListType,
   selectCurrentMessageList,
-  selectCountNotMutedUnread,
+  selectCountNotMutedUnread, selectNotifySettings,
 } from '../../selectors';
 import { throttle } from '../../../util/schedulers';
 
@@ -135,7 +135,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       const unreadCount = selectCountNotMutedUnread(getGlobal());
       updateAppBadge(unreadCount);
-      showNewMessageNotification({ chat, message, isActiveChat });
+
+      const { hasWebNotifications } = selectNotifySettings(global);
+      if (hasWebNotifications) {
+        showNewMessageNotification({
+          chat,
+          message,
+          isActiveChat,
+        });
+      }
 
       break;
     }
