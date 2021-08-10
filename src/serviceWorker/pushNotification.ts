@@ -28,6 +28,7 @@ type NotificationData = {
   chatId?: number;
   title: string;
   body: string;
+  icon?: string;
 };
 
 let lastSyncAt = new Date().valueOf();
@@ -75,22 +76,36 @@ function getNotificationData(data: PushData): NotificationData {
   };
 }
 
-function showNotification({
+async function playNotificationSound(id: number) {
+  const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
+  const clientsInScope = clients.filter((client) => client.url === self.registration.scope);
+  const client = clientsInScope[0];
+  if (!client) return;
+  if (clientsInScope.length === 0) return;
+  client.postMessage({
+    type: 'playNotificationSound',
+    payload: { id },
+  });
+}
+
+async function showNotification({
   chatId,
   messageId,
   body,
   title,
+  icon,
 }: NotificationData) {
-  return self.registration.showNotification(title, {
+  await self.registration.showNotification(title, {
     body,
     data: {
       chatId,
       messageId,
     },
-    icon: 'icon-192x192.png',
-    badge: 'icon-192x192.png',
+    icon: icon || 'icon-192x192.png',
+    badge: icon || 'icon-192x192.png',
     vibrate: [200, 100, 200],
   });
+  await playNotificationSound(messageId || chatId || 0);
 }
 
 export function handlePush(e: PushEvent) {

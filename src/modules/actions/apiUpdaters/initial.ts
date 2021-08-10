@@ -16,6 +16,7 @@ import { DEBUG, SESSION_USER_KEY } from '../../../config';
 import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
+import { selectNotifySettings } from '../../selectors';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
@@ -68,7 +69,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 });
 
 function onUpdateApiReady(global: GlobalState) {
-  subscribe();
+  const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
+  if (hasWebNotifications && hasPushNotifications) subscribe();
   setLanguage(global.settings.byKey.language);
 }
 

@@ -225,14 +225,37 @@ export function isChatArchived(chat: ApiChat) {
 }
 
 export function selectIsChatMuted(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions?: Record<number, NotifyException>,
+  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<number, NotifyException> = [],
 ) {
-  return !(notifyExceptions && notifyExceptions[chat.id] && !notifyExceptions[chat.id].isMuted) && (
+  // If this chat is in exceptions they take precedence
+  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].isMuted !== undefined) {
+    return notifyExceptions[chat.id].isMuted;
+  }
+
+  return (
     chat.isMuted
     || (isChatPrivate(chat.id) && !notifySettings.hasPrivateChatsNotifications)
     || (isChatChannel(chat) && !notifySettings.hasBroadcastNotifications)
     || (isChatGroup(chat) && !notifySettings.hasGroupNotifications)
   );
+}
+
+export function selectShouldShowMessagePreview(
+  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<number, NotifyException> = [],
+) {
+  const {
+    hasPrivateChatsMessagePreview = true,
+    hasBroadcastMessagePreview = true,
+    hasGroupMessagePreview = true,
+  } = notifySettings;
+  // If this chat is in exceptions they take precedence
+  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].shouldShowPreviews !== undefined) {
+    return notifyExceptions[chat.id].shouldShowPreviews;
+  }
+
+  return (isChatPrivate(chat.id) && hasPrivateChatsMessagePreview)
+    || (isChatChannel(chat) && hasBroadcastMessagePreview)
+    || (isChatGroup(chat) && hasGroupMessagePreview);
 }
 
 export function getCanDeleteChat(chat: ApiChat) {

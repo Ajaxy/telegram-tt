@@ -38,6 +38,9 @@ export type NotifySettings = {
   hasBroadcastNotifications?: boolean;
   hasBroadcastMessagePreview?: boolean;
   hasContactJoinedNotifications?: boolean;
+  hasWebNotifications: boolean;
+  hasPushNotifications: boolean;
+  notificationSoundVolume: number;
 };
 
 export type LangCode = (

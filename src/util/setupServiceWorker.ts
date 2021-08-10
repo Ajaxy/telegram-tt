@@ -3,7 +3,7 @@ import { scriptUrl } from 'service-worker-loader!../serviceWorker';
 import { DEBUG } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
-import { notifyClientReady } from './notifications';
+import { notifyClientReady, playNotificationSound } from './notifications';
 
 type WorkerAction = {
   type: string;
@@ -16,7 +16,12 @@ function handleWorkerMessage(e: MessageEvent) {
   const dispatch = getDispatch();
   switch (action.type) {
     case 'focusMessage':
-      dispatch.focusMessage(action.payload);
+      if (dispatch.focusMessage) {
+        dispatch.focusMessage(action.payload);
+      }
+      break;
+    case 'playNotificationSound':
+      playNotificationSound(action.payload.id);
       break;
   }
 }

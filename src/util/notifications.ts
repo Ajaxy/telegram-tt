@@ -1,9 +1,12 @@
 import { callApi } from '../api/gramjs';
-import { ApiChat, ApiMessage, ApiUser } from '../api/types';
+import {
+  ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
+} from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
 import {
+  getChatAvatarHash,
   getChatTitle,
   getMessageAction,
   getMessageSenderName,
@@ -11,7 +14,7 @@ import {
   getPrivateChatUserId,
   isActionMessage,
   isChatChannel,
-  selectIsChatMuted,
+  selectIsChatMuted, selectShouldShowMessagePreview,
 } from '../modules/helpers';
 import { getTranslation } from './langProvider';
 import { addNotifyExceptions, replaceSettings } from '../modules/reducers';
@@ -19,6 +22,8 @@ import {
   selectChatMessage, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../modules/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
+import * as mediaLoader from './mediaLoader';
+import { debounce } from './schedulers';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();
@@ -81,6 +86,38 @@ function checkIfNotificationsSupported() {
 }
 
 const expirationTime = 12 * 60 * 60 * 1000; // 12 hours
+// Notification id is removed from soundPlayed cache after 3 seconds
+const soundPlayedDelay = 3 * 1000;
+const soundPlayed = new Set<number>();
+
+async function playSound(id: number) {
+  if (soundPlayed.has(id)) return;
+  const { notificationSoundVolume } = selectNotifySettings(getGlobal());
+  const volume = notificationSoundVolume / 10;
+  if (volume === 0) return;
+
+  const audio = new Audio('/notification.mp3');
+  audio.volume = volume;
+  audio.setAttribute('mozaudiochannel', 'notification');
+  audio.addEventListener('ended', () => {
+    soundPlayed.add(id);
+  }, { once: true });
+
+  setTimeout(() => {
+    soundPlayed.delete(id);
+  }, soundPlayedDelay);
+
+  try {
+    await audio.play();
+  } catch (error) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('[PUSH] Unable to play notification sound');
+    }
+  }
+}
+
+export const playNotificationSound = debounce(playSound, 1000, true, false);
 
 function checkIfShouldResubscribe(subscription: PushSubscription | null) {
   const global = getGlobal();
@@ -202,8 +239,8 @@ export async function subscribe() {
 function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
-  if (selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)) || chat.isNotJoined
-    || !chat.isListed) {
+  const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
+  if (isMuted || chat.isNotJoined || !chat.isListed) {
     return false;
   }
   // Dont show notification for active chat if client has focus
@@ -216,6 +253,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
     senderId,
     replyToMessageId,
   } = message;
+
   const messageSender = senderId ? selectUser(global, senderId) : undefined;
   const messageAction = getMessageAction(message as ApiMessage);
   const actionTargetMessage = messageAction && replyToMessageId
@@ -227,29 +265,35 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
   } = messageAction || {};
 
   const actionTargetUsers = actionTargetUserIds
-    ? actionTargetUserIds.map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any)
+    ? actionTargetUserIds.map((userId) => selectUser(global, userId))
+      .filter<ApiUser>(Boolean as any)
     : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
   const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
-  let body: string;
-  if (isActionMessage(message)) {
-    const actionOrigin = chat && (isChatChannel(chat) || message.senderId === message.chatId)
-      ? chat
-      : messageSender;
-    body = renderActionMessageText(
-      getTranslation,
-      message,
-      actionOrigin,
-      actionTargetUsers,
-      actionTargetMessage,
-      actionTargetChatId,
-      { asPlain: true },
-    ) as string;
-  } else {
-    const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
-    const summary = getMessageSummaryText(getTranslation, message);
 
-    body = senderName ? `${senderName}: ${summary}` : summary;
+  let body: string;
+  if (selectShouldShowMessagePreview(chat, selectNotifySettings(global), selectNotifyExceptions(global))) {
+    if (isActionMessage(message)) {
+      const actionOrigin = chat && (isChatChannel(chat) || message.senderId === message.chatId)
+        ? chat
+        : messageSender;
+      body = renderActionMessageText(
+        getTranslation,
+        message,
+        actionOrigin,
+        actionTargetUsers,
+        actionTargetMessage,
+        actionTargetChatId,
+        { asPlain: true },
+      ) as string;
+    } else {
+      const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
+      const summary = getMessageSummaryText(getTranslation, message);
+
+      body = senderName ? `${senderName}: ${summary}` : summary;
+    }
+  } else {
+    body = 'New message';
   }
 
   return {
@@ -258,11 +302,22 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
   };
 }
 
+async function getAvatar(chat: ApiChat) {
+  const imageHash = getChatAvatarHash(chat);
+  if (!imageHash) return undefined;
+  let mediaData = mediaLoader.getFromMemory<ApiMediaFormat.BlobUrl>(imageHash);
+  if (!mediaData) {
+    await mediaLoader.fetch(imageHash, ApiMediaFormat.BlobUrl);
+    mediaData = mediaLoader.getFromMemory<ApiMediaFormat.BlobUrl>(imageHash);
+  }
+  return mediaData;
+}
+
 export async function showNewMessageNotification({
   chat,
   message,
   isActiveChat,
-}: { chat: ApiChat; message: Partial<ApiMessage>; isActiveChat: boolean}) {
+}: { chat: ApiChat; message: Partial<ApiMessage>; isActiveChat: boolean }) {
   if (!checkIfNotificationsSupported()) return;
   if (!message.id) return;
 
@@ -274,6 +329,8 @@ export async function showNewMessageNotification({
     body,
   } = getNotificationContent(chat, message as ApiMessage);
 
+  const icon = await getAvatar(chat);
+
   if (checkIfPushSupported()) {
     if (navigator.serviceWorker.controller) {
       // notify service worker about new message notification
@@ -282,6 +339,7 @@ export async function showNewMessageNotification({
         payload: {
           title,
           body,
+          icon,
           chatId: chat.id,
           messageId: message.id,
         },
@@ -291,8 +349,8 @@ export async function showNewMessageNotification({
     const dispatch = getDispatch();
     const options: NotificationOptions = {
       body,
-      icon: 'icon-192x192.png',
-      badge: 'icon-192x192.png',
+      icon,
+      badge: icon,
       tag: message.id.toString(),
     };
 
@@ -311,6 +369,11 @@ export async function showNewMessageNotification({
       if (window.focus) {
         window.focus();
       }
+    };
+
+    // Play sound when notification is displayed
+    notification.onshow = () => {
+      playNotificationSound(message.id || chat.id);
     };
   }
 }
