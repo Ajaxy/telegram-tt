@@ -360,7 +360,7 @@
   &.custom-shape.is-via-bot {
     font-size: inherit !important;
 
-    .message-title {
+    .content-inner > .message-title {
       display: inline-flex;
       position: relative;
       top: .125rem;
