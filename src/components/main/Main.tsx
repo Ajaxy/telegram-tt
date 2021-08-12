@@ -27,6 +27,8 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
+import { processDeepLink } from '../../util/deeplink';
+import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -38,6 +40,7 @@ import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
+import StickerSetModal from '../common/StickerSetModal.async';
 
 import './Main.scss';
 
@@ -55,11 +58,12 @@ type StateProps = {
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   language?: LangCode;
+  openedStickerSetShortName?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
-  'loadTopInlineBots' | 'loadEmojiKeywords'
+  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName'
 )>;
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -82,12 +86,14 @@ const Main: FC<StateProps & DispatchProps> = ({
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
   language,
+  openedStickerSetShortName,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
   updateIsOnline,
   loadTopInlineBots,
   loadEmojiKeywords,
+  openStickerSetShortName,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -113,6 +119,12 @@ const Main: FC<StateProps & DispatchProps> = ({
     lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline,
     loadTopInlineBots, loadEmojiKeywords, language,
   ]);
+
+  useEffect(() => {
+    if (lastSyncTime && LOCATION_HASH.startsWith('#?tgaddr=')) {
+      processDeepLink(decodeURIComponent(LOCATION_HASH.substr('#?tgaddr='.length)));
+    }
+  }, [lastSyncTime]);
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
@@ -223,6 +235,11 @@ const Main: FC<StateProps & DispatchProps> = ({
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
+      <StickerSetModal
+        isOpen={!!openedStickerSetShortName}
+        onClose={() => openStickerSetShortName({ stickerSetShortName: undefined })}
+        stickerSetShortName={openedStickerSetShortName}
+      />
     </div>
   );
 };
@@ -269,10 +286,11 @@ export default memo(withGlobal(
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       language: global.settings.byKey.language,
+      openedStickerSetShortName: global.openedStickerSetShortName,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
-    'loadTopInlineBots', 'loadEmojiKeywords',
+    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName',
   ]),
 )(Main));

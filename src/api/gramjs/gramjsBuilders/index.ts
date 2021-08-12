@@ -113,6 +113,12 @@ export function buildInputStickerSet(id: string, accessHash: string) {
   });
 }
 
+export function buildInputStickerSetShortName(shortName: string) {
+  return new GramJs.InputStickerSetShortName({
+    shortName,
+  });
+}
+
 export function buildInputDocument(media: ApiSticker | ApiVideo) {
   const document = localDb.documents[media.id];
 

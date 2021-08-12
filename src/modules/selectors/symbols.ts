@@ -18,6 +18,10 @@ export function selectStickerSet(global: GlobalState, id: string) {
   return global.stickers.setsById[id];
 }
 
+export function selectStickerSetByShortName(global: GlobalState, shortName: string) {
+  return Object.values(global.stickers.setsById).find((l) => l.shortName.toLowerCase() === shortName.toLowerCase());
+}
+
 export function selectStickersForEmoji(global: GlobalState, emoji: string) {
   const stickerSets = Object.values(global.stickers.setsById);
   let stickersForEmoji: ApiSticker[] = [];

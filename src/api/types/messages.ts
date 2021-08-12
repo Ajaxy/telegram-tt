@@ -43,6 +43,7 @@ export interface ApiStickerSet {
   stickers?: ApiSticker[];
   packs?: Record<string, ApiSticker[]>;
   covers?: ApiSticker[];
+  shortName: string;
 }
 
 export interface ApiVideo {
