@@ -15,7 +15,14 @@ const runThrottled = throttle((cb) => cb(), 500, true);
 const RE_BR = /(<br>|<br\s?\/>)/g;
 const RE_SPACE = /&nbsp;/g;
 const RE_CLEAN_HTML = /(<div>|<\/div>)/gi;
-const RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[\\w\\d_-]*$', 'gi');
+let RE_USERNAME_SEARCH: RegExp;
+
+try {
+  RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[-_\\p{L}\\p{M}\\p{N}]*$', 'gui');
+} catch (e) {
+  // Support for older versions of firefox
+  RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[-_\\d\\wа-яё]*$', 'gi');
+}
 
 export default function useMentionTooltip(
   canSuggestMembers: boolean | undefined,

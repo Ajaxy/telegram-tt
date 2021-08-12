@@ -1,4 +1,11 @@
-const RE_NOT_LETTER = /[^\wа-яё]+/;
+let RE_NOT_LETTER: RegExp;
+
+try {
+  RE_NOT_LETTER = new RegExp('[^\\p{L}\\p{M}]+', 'ui');
+} catch (e) {
+  // Support for older versions of firefox
+  RE_NOT_LETTER = new RegExp('[^\\wа-яё]+', 'i');
+}
 
 export default function searchWords(haystack: string, needle: string) {
   if (!haystack || !needle) {
