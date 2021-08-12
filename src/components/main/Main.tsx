@@ -214,6 +214,10 @@ const Main: FC<StateProps & DispatchProps> = ({
     updateIcon(false);
   }, [updateIsOnline]);
 
+  const handleStickerSetModalClose = useCallback(() => {
+    openStickerSetShortName({ stickerSetShortName: undefined });
+  }, [openStickerSetShortName]);
+
   // Online status and browser tab indicators
   useBackgroundMode(handleBlur, handleFocus);
   useBeforeUnload(handleBlur);
@@ -236,8 +240,8 @@ const Main: FC<StateProps & DispatchProps> = ({
       <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
-        isOpen={!!openedStickerSetShortName}
-        onClose={() => openStickerSetShortName({ stickerSetShortName: undefined })}
+        isOpen={Boolean(openedStickerSetShortName)}
+        onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
       />
     </div>

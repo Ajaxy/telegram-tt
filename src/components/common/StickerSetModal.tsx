@@ -61,7 +61,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
           stickerSetId,
           stickerSetAccessHash,
         });
-      } else {
+      } else if (stickerSetShortName) {
         loadStickers({
           stickerSetShortName,
         });
@@ -134,7 +134,9 @@ export default memo(withGlobal(
     return {
       stickerSet: fromSticker
         ? selectStickerSet(global, fromSticker.stickerSetId)
-        : selectStickerSetByShortName(global, stickerSetShortName!),
+        : stickerSetShortName
+          ? selectStickerSetByShortName(global, stickerSetShortName)
+          : undefined,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
