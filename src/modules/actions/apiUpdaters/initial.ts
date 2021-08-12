@@ -17,6 +17,7 @@ import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 import { selectNotifySettings } from '../../selectors';
+import { forceWebsync } from '../../../util/websync';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
@@ -90,6 +91,8 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
 
   switch (authState) {
     case 'authorizationStateLoggingOut':
+      void forceWebsync(false);
+
       setGlobal({
         ...global,
         isLoggingOut: true,
@@ -118,6 +121,8 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       if (wasAuthReady) {
         break;
       }
+
+      void forceWebsync(true);
 
       setGlobal({
         ...global,

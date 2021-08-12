@@ -83,10 +83,10 @@ addReducer('loadFeaturedStickers', (global) => {
 });
 
 addReducer('loadStickers', (global, actions, payload) => {
-  const { stickerSetId } = payload!;
+  const { stickerSetId, stickerSetShortName } = payload!;
   let { stickerSetAccessHash } = payload!;
 
-  if (!stickerSetAccessHash) {
+  if (!stickerSetAccessHash && !stickerSetShortName) {
     const stickerSet = selectStickerSet(global, stickerSetId);
     if (!stickerSet) {
       return;
@@ -95,7 +95,7 @@ addReducer('loadStickers', (global, actions, payload) => {
     stickerSetAccessHash = stickerSet.accessHash;
   }
 
-  void loadStickers(stickerSetId, stickerSetAccessHash);
+  void loadStickers(stickerSetId, stickerSetAccessHash, stickerSetShortName);
 });
 
 addReducer('loadAnimatedEmojis', () => {
@@ -257,8 +257,9 @@ async function loadFeaturedStickers(hash = 0) {
   ));
 }
 
-async function loadStickers(stickerSetId: string, accessHash: string) {
-  const stickerSet = await callApi('fetchStickers', { stickerSetId, accessHash });
+async function loadStickers(stickerSetId: string, accessHash: string, stickerSetShortName?: string) {
+  const stickerSet = await callApi('fetchStickers',
+    { stickerSetShortName, stickerSetId, accessHash });
   if (!stickerSet) {
     return;
   }
@@ -353,6 +354,14 @@ addReducer('clearStickersForEmoji', (global) => {
       ...global.stickers,
       forEmoji: {},
     },
+  };
+});
+
+addReducer('openStickerSetShortName', (global, actions, payload) => {
+  const { stickerSetShortName } = payload!;
+  return {
+    ...global,
+    openedStickerSetShortName: stickerSetShortName,
   };
 });
 

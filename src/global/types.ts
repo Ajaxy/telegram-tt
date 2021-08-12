@@ -421,6 +421,7 @@ export type GlobalState = {
 
   safeLinkModalUrl?: string;
   historyCalendarSelectedAt?: number;
+  openedStickerSetShortName?: string;
 
   // TODO To be removed in August 2021
   shouldShowContextMenuHint?: boolean;
@@ -491,6 +492,7 @@ export type ActionTypes = (
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
+  'openStickerSetShortName' |
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' |

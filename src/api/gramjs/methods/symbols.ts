@@ -3,7 +3,7 @@ import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet, buildStickerSetCovered } from '../apiBuilders/symbols';
-import { buildInputStickerSet, buildInputDocument } from '../gramjsBuilders';
+import { buildInputStickerSet, buildInputDocument, buildInputStickerSetShortName } from '../gramjsBuilders';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
 import { RECENT_STICKERS_LIMIT } from '../../../config';
 
@@ -93,9 +93,12 @@ export async function faveSticker({
   }
 }
 
-export async function fetchStickers({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {
+export async function fetchStickers({ stickerSetShortName, stickerSetId, accessHash }:
+{ stickerSetShortName?: string; stickerSetId?: string; accessHash: string }) {
   const result = await invokeRequest(new GramJs.messages.GetStickerSet({
-    stickerset: buildInputStickerSet(stickerSetId, accessHash),
+    stickerset: stickerSetId
+      ? buildInputStickerSet(stickerSetId, accessHash)
+      : buildInputStickerSetShortName(stickerSetShortName!),
   }));
 
   if (!result) {

@@ -30,9 +30,13 @@ self.addEventListener('activate', (e) => {
 
 // eslint-disable-next-line no-restricted-globals
 self.addEventListener('fetch', (e: FetchEvent) => {
-  e.respondWith((() => {
-    const { url } = e.request;
+  const { url } = e.request;
 
+  if (url.includes('_websync_')) {
+    return false;
+  }
+
+  e.respondWith((() => {
     if (url.includes('/progressive/')) {
       return respondForProgressive(e);
     }
@@ -43,6 +47,8 @@ self.addEventListener('fetch', (e: FetchEvent) => {
 
     return fetch(e.request);
   })());
+
+  return true;
 });
 
 self.addEventListener('push', handlePush);

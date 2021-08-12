@@ -8,7 +8,7 @@ import { GlobalActions } from '../../global/types';
 
 import { STICKER_SIZE_MODAL } from '../../config';
 import { pick } from '../../util/iteratees';
-import { selectStickerSet } from '../../modules/selectors';
+import { selectStickerSet, selectStickerSetByShortName } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
@@ -22,7 +22,8 @@ import './StickerSetModal.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  fromSticker: ApiSticker;
+  fromSticker?: ApiSticker;
+  stickerSetShortName?: string;
   onClose: () => void;
 };
 
@@ -37,6 +38,7 @@ const INTERSECTION_THROTTLE = 200;
 const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   fromSticker,
+  stickerSetShortName,
   stickerSet,
   onClose,
   loadStickers,
@@ -53,10 +55,19 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const { stickerSetId, stickerSetAccessHash } = fromSticker;
-      loadStickers({ stickerSetId, stickerSetAccessHash });
+      if (fromSticker) {
+        const { stickerSetId, stickerSetAccessHash } = fromSticker;
+        loadStickers({
+          stickerSetId,
+          stickerSetAccessHash,
+        });
+      } else {
+        loadStickers({
+          stickerSetShortName,
+        });
+      }
     }
-  }, [isOpen, fromSticker, loadStickers]);
+  }, [isOpen, fromSticker, loadStickers, stickerSetShortName]);
 
   const handleSelect = useCallback((sticker: ApiSticker) => {
     sticker = {
@@ -69,9 +80,11 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onClose, sendMessage]);
 
   const handleButtonClick = useCallback(() => {
-    toggleStickerSet({ stickerSetId: fromSticker.stickerSetId });
-    onClose();
-  }, [fromSticker.stickerSetId, onClose, toggleStickerSet]);
+    if (stickerSet) {
+      toggleStickerSet({ stickerSetId: stickerSet.id });
+      onClose();
+    }
+  }, [onClose, stickerSet, toggleStickerSet]);
 
   return (
     <Modal
@@ -117,8 +130,12 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  (global, { fromSticker }: OwnProps) => {
-    return { stickerSet: selectStickerSet(global, fromSticker.stickerSetId) };
+  (global, { fromSticker, stickerSetShortName }: OwnProps) => {
+    return {
+      stickerSet: fromSticker
+        ? selectStickerSet(global, fromSticker.stickerSetId)
+        : selectStickerSetByShortName(global, stickerSetShortName!),
+    };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadStickers',

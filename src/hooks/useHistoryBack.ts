@@ -9,6 +9,7 @@ import { areSortedArraysEqual } from '../util/iteratees';
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
 const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
 const SAFARI_EDGE_BACK_GESTURE_DURATION = 350;
+export const LOCATION_HASH = window.location.hash;
 
 type HistoryState = {
   currentIndex: number;
@@ -54,7 +55,7 @@ if (IS_IOS) {
   window.addEventListener('popstate', handleTouchEnd);
 }
 
-window.history.replaceState({ index: historyState.currentIndex }, '');
+window.history.replaceState({ index: historyState.currentIndex }, '', window.location.pathname);
 
 export default function useHistoryBack(
   isActive: boolean | undefined,

@@ -24,6 +24,7 @@ import {
   importLegacySession,
   clearLegacySessions,
 } from '../../../util/sessions';
+import { forceWebsync } from '../../../util/websync';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   (async () => {
@@ -128,6 +129,7 @@ addReducer('signOut', () => {
     try {
       await unsubscribe();
       await callApi('destroy');
+      await forceWebsync(false);
     } catch (err) {
       // Do nothing
     }
