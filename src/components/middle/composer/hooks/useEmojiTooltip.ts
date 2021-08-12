@@ -191,6 +191,7 @@ function getEmojiCode(html: string) {
   const emojis = html
     .replace(RE_SPACE, ' ')
     .replace(RE_BR, '\n')
+    .replace(/\n$/i, '')
     .replace(RE_CLEAN_HTML, '')
     .match(RE_EMOJI_SEARCH);
 
