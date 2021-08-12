@@ -73,6 +73,14 @@ const CalendarModal: FC<OwnProps> = ({
     }
   }, [isOpen, defaultSelectedDate, prevIsOpen]);
 
+  useEffect(() => {
+    if (isFutureMode && selectedDate.getTime() < defaultSelectedDate.getTime()) {
+      setSelectedDate(defaultSelectedDate);
+      setSelectedHours(formatInputTime(defaultSelectedDate.getHours()));
+      setSelectedMinutes(formatInputTime(defaultSelectedDate.getMinutes()));
+    }
+  }, [defaultSelectedDate, isFutureMode, selectedDate]);
+
   const shouldDisableNextMonth = (isPastMode && currentYear >= now.getFullYear() && currentMonth >= now.getMonth())
     || (maxDate && currentYear >= maxDate.getFullYear() && currentMonth >= maxDate.getMonth());
   const shouldDisablePrevMonth = isFutureMode && currentYear <= now.getFullYear() && currentMonth <= now.getMonth();
