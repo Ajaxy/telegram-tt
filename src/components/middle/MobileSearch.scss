@@ -29,11 +29,6 @@
   padding-left: 1rem;
   padding-right: 0.5rem;
 
-  @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(3.5rem + env(safe-area-inset-bottom));
-  }
-
   > .counter {
     flex: 1;
     color: var(--color-text-secondary);

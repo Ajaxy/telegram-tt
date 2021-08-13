@@ -249,12 +249,6 @@
       }
     }
 
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      &:not(.no-composer) {
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-    }
-
     &::before {
       content: "";
       position: absolute;
