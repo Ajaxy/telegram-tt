@@ -129,7 +129,6 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
 
   useHistoryBack(isActive, onReset, onScreenSelect, screen);
 
-
   return (
     <div className="NewChat-inner step-1">
       <Picker

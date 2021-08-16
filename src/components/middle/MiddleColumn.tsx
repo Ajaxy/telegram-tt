@@ -239,7 +239,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     !isSelectModeActive && 'shown',
   );
 
-
   const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
     lang, currentUserBannedRights, defaultBannedRights,
   );

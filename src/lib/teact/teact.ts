@@ -9,11 +9,12 @@ import { removeAllDelegatedListeners } from './dom-events';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type FC_withDebug =
   FC
   & {
-  DEBUG_contentComponentName?: string;
-};
+    DEBUG_contentComponentName?: string;
+  };
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -243,6 +244,7 @@ function buildEmptyElement(): VirtualElementEmpty {
   return { type: VirtualElementTypesEnum.Empty };
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const DEBUG_components: AnyLiteral = {};
 
 document.addEventListener('dblclick', () => {
@@ -260,6 +262,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
   let newRenderedValue;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
       const componentName = componentInstance.name;

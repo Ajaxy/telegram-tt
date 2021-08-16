@@ -208,7 +208,7 @@ async function signInUserWithQrCode(
         }
     })();
 
-    const updatePromise = new Promise((resolve) => {
+    const updatePromise = new Promise<void>((resolve) => {
         client.addEventHandler((update: Api.TypeUpdate) => {
             if (update instanceof Api.UpdateLoginToken) {
                 resolve();

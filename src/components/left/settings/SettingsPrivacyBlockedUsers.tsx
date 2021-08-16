@@ -130,7 +130,6 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
   );
 };
 
-
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {

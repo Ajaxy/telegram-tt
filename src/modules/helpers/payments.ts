@@ -47,5 +47,5 @@ export function getStripeError(error: {
   const { message: description, code, param } = error;
   const { field, message } = param ? STRIPE_ERRORS[param] : STRIPE_ERRORS[code];
 
-  return { field, message, description};
+  return { field, message, description };
 }

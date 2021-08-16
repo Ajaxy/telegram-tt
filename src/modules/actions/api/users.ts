@@ -203,7 +203,6 @@ addReducer('loadProfilePhotos', (global, actions, payload) => {
   })();
 });
 
-
 addReducer('setUserSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 

@@ -51,7 +51,7 @@ const ReportMessageModal: FC<OwnProps & DispatchProps> = ({
 
   const lang = useLang();
 
-  const REPORT_OPTIONS: {value: ApiReportReason; label: string}[] = [
+  const REPORT_OPTIONS: { value: ApiReportReason; label: string }[] = [
     { value: 'spam', label: lang('lng_report_reason_spam') },
     { value: 'violence', label: lang('lng_report_reason_violence') },
     { value: 'pornography', label: lang('lng_report_reason_pornography') },

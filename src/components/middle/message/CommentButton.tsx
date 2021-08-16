@@ -51,7 +51,6 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: chatId, threadId });
   }, [openChat, chatId, threadId]);
 
-
   useEffect(() => {
     if (shouldRequestThreadUpdate) {
       requestThreadInfoUpdate({ chatId, threadId });

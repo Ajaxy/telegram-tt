@@ -211,7 +211,6 @@ export function getChatSlowModeOptions(chat?: ApiChat) {
   return chat.fullInfo.slowMode;
 }
 
-
 export function getChatOrder(chat: ApiChat) {
   return Math.max(
     chat.joinDate || 0,

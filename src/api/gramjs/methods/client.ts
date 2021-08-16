@@ -185,7 +185,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       let updatesContainer;
       if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
         updatesContainer = result;
-      } else if ('updates' in result && (
+      } else if ('updates' in (result as ResultWithUpdates) && (
         (result as ResultWithUpdates).updates instanceof GramJs.Updates
         || (result as ResultWithUpdates).updates instanceof GramJs.UpdatesCombined
       )) {

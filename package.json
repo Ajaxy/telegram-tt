@@ -44,7 +44,7 @@
     "@types/croppie": "^2.6.1",
     "@types/css-font-loading-module": "0.0.6",
     "@types/dom-mediacapture-record": "^1.0.10",
-    "@types/jest": "^27.0.0",
+    "@types/jest": "^27.0.1",
     "@types/react": "^17.0.17",
     "@types/react-dom": "^17.0.9",
     "@types/resize-observer-browser": "^0.1.6",

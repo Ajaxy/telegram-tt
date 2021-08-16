@@ -68,7 +68,6 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
   });
 }
 
-
 export function updateUsers(global: GlobalState, updatedById: Record<number, ApiUser>): GlobalState {
   const updatedUsers = Object.keys(updatedById).map(Number).reduce<Record<number, ApiUser>>((acc, id) => {
     const updatedUser = getUpdatedUser(global, id, updatedById[id]);

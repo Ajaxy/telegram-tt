@@ -49,7 +49,7 @@ type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessag
 
 enum FolderTypeToListType {
   'all' = 'active',
-  'archived' = 'archived'
+  'archived' = 'archived',
 }
 
 const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({

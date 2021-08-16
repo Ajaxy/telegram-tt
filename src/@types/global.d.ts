@@ -56,9 +56,15 @@ declare module 'pako/dist/pako_inflate' {
 
 type WindowWithPerf = typeof window & { perf: AnyLiteral };
 
+interface TEncodedImage {
+  result: Uint8ClampedArray;
+  width: number;
+  height: number;
+}
+
 interface IWebpWorker extends Worker {
   wasmReady?: boolean;
-  requests: Map<string, (value?: PromiseLike<TEncodedImage>) => void>;
+  requests: Map<string, (value: PromiseLike<TEncodedImage>) => void>;
 }
 
 interface Window {

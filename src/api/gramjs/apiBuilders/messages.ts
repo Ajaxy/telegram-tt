@@ -463,7 +463,6 @@ function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined
   return buildPoll(media.poll, media.results);
 }
 
-
 function buildInvoiceFromMedia(media: GramJs.TypeMessageMedia): ApiInvoice | undefined {
   if (!(media instanceof GramJs.MessageMediaInvoice)) {
     return undefined;

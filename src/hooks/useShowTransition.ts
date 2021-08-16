@@ -15,7 +15,6 @@ export default (
   // СSS class should be added in a separate tick to turn on CSS transition.
   const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noOpenTransition);
 
-
   if (isOpen) {
     setIsClosed(false);
     setHasOpenClassName(true);

@@ -54,11 +54,11 @@ const InfiniteScroll: FC<OwnProps> = ({
   }
 
   const stateRef = useRef<{
-    listItemElements: NodeListOf<HTMLDivElement>;
-    isScrollTopJustUpdated: boolean;
-    currentAnchor: HTMLDivElement | undefined;
-    currentAnchorTop: number;
-  }>({} as any);
+    listItemElements?: NodeListOf<HTMLDivElement>;
+    isScrollTopJustUpdated?: boolean;
+    currentAnchor?: HTMLDivElement | undefined;
+    currentAnchorTop?: number;
+  }>({});
 
   const [loadMoreBackwards, loadMoreForwards] = useMemo(() => {
     if (!onLoadMore) {
@@ -105,7 +105,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     if (state.currentAnchor && Array.from(state.listItemElements).includes(state.currentAnchor)) {
       const { scrollTop } = container;
       const newAnchorTop = state.currentAnchor.getBoundingClientRect().top;
-      newScrollTop = scrollTop + (newAnchorTop - state.currentAnchorTop);
+      newScrollTop = scrollTop + (newAnchorTop - state.currentAnchorTop!);
     } else {
       const nextAnchor = state.listItemElements[0];
       if (nextAnchor) {
@@ -130,8 +130,9 @@ const InfiniteScroll: FC<OwnProps> = ({
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {
       const {
-        listItemElements, isScrollTopJustUpdated, currentAnchor, currentAnchorTop,
+        isScrollTopJustUpdated, currentAnchor, currentAnchorTop,
       } = stateRef.current;
+      const listItemElements = stateRef.current.listItemElements!;
 
       if (isScrollTopJustUpdated) {
         stateRef.current.isScrollTopJustUpdated = false;

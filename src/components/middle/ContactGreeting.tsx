@@ -91,7 +91,6 @@ const ContactGreeting: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { stickers } = global.stickers.greeting;

@@ -1,4 +1,3 @@
-
 import { GlobalState } from '../../global/types';
 
 export function selectPaymentChatId(global: GlobalState) {

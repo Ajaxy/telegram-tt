@@ -3,7 +3,7 @@ import { DEBUG } from '../config';
 export enum Bundles {
   Auth,
   Main,
-  Extra
+  Extra,
 }
 
 interface ImportedBundles {

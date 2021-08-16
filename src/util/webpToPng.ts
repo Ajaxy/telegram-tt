@@ -2,12 +2,6 @@ import { isWebpSupported } from './environment';
 import { dataUriToBlob, blobToDataUri } from './files';
 import { pause } from './schedulers';
 
-type TEncodedImage = {
-  result: Uint8ClampedArray;
-  width: number;
-  height: number;
-};
-
 const WORKER_INITIALIZATION_TIMEOUT = 2000;
 
 let canvas: HTMLCanvasElement;
@@ -96,7 +90,10 @@ function handleLibWebpMessage(e: MessageEvent) {
 
 function getDecodePromise(url: string, blob: Blob): Promise<TEncodedImage> {
   return new Promise((resolve) => {
-    worker.requests = worker.requests || new Map();
+    if (!worker.requests) {
+      worker.requests = new Map();
+    }
+
     worker.requests.set(url, resolve);
     worker.postMessage({ id: url, blob });
   });

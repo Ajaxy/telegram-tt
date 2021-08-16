@@ -83,7 +83,7 @@ export async function createPosterForVideo(url: string): Promise<string | undefi
 
   return Promise.race([
     pause(2000) as Promise<undefined>,
-    new Promise<string>((resolve, reject) => {
+    new Promise<string | undefined>((resolve, reject) => {
       video.onseeked = () => {
         if (!video.videoWidth || !video.videoHeight) {
           resolve(undefined);
