@@ -3,7 +3,9 @@ import React, { FC, memo } from '../../../lib/teact/teact';
 import { ApiMessage } from '../../../api/types';
 
 import { getMessageInvoice } from '../../../modules/helpers';
+import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
+import useLang from '../../../hooks/useLang';
 
 import './Invoice.scss';
 
@@ -14,12 +16,15 @@ type OwnProps = {
 const Invoice: FC<OwnProps> = ({
   message,
 }) => {
+  const lang = useLang();
   const invoice = getMessageInvoice(message);
 
   const {
     title,
     text,
-    description,
+    amount,
+    currency,
+    isTest,
     photoUrl,
   } = invoice!;
 
@@ -41,9 +46,10 @@ const Invoice: FC<OwnProps> = ({
             alt=""
           />
         )}
-        {description && (
-          <p className="description-text">{renderText(description, ['emoji', 'br'])}</p>
-        )}
+        <p className="description-text">
+          {formatCurrency(amount, currency, lang.code)}
+          {isTest && <span>{lang('PaymentTestInvoice')}</span>}
+        </p>
       </div>
     </div>
   );

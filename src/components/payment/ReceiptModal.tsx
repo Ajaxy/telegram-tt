@@ -4,10 +4,9 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { Price } from '../../types';
-import { ApiShippingAddress } from '../../api/types/payments';
+import { ApiShippingAddress } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
-import { getCurrencySign } from '../middle/helpers/getCurrencySign';
 
 import Checkout from './Checkout';
 import Modal from '../ui/Modal';
@@ -52,10 +51,10 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
   shippingMethod,
 }) => {
   const lang = useLang();
-  const currencySign = getCurrencySign(currency);
   const checkoutInfo = useMemo(() => {
     return getCheckoutInfo(credentialsTitle, info, shippingMethod);
   }, [info, shippingMethod, credentialsTitle]);
+
   return (
     <Modal
       className="PaymentModal PaymentModal-receipt"
@@ -87,7 +86,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
               title,
             }}
             checkoutInfo={checkoutInfo}
-            currency={currencySign}
+            currency={currency}
           />
         </div>
       </div>
@@ -100,7 +99,7 @@ export default memo(withGlobal<OwnProps>(
     const { receipt } = global.payment;
     const {
       currency,
-      prices: mapedPrices,
+      prices,
       info,
       totalAmount,
       credentialsTitle,
@@ -113,7 +112,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       currency,
-      prices: mapedPrices,
+      prices,
       info,
       totalAmount,
       credentialsTitle,

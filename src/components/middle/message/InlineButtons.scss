@@ -48,12 +48,18 @@
     }
 
     i {
-      font-size: 0.75rem;
+      font-size: .875rem;
       position: absolute;
-      right: 0.125rem;
-      top: 0.125rem;
+      right: .1875rem;
+      top: .1875rem;
       display: block;
-      transform: rotate(-45deg);
+
+      &.icon-arrow-right {
+        font-size: .75rem;
+        top: .125rem;
+        right: .125rem;
+        transform: rotate(-45deg);
+      }
     }
   }
 

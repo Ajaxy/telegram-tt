@@ -5,12 +5,10 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../../global/types';
 import { PaymentStep, ShippingOption, Price } from '../../types';
-import { ApiError, ApiInviteInfo } from '../../api/types';
 
 import { pick } from '../../util/iteratees';
-import { getCurrencySign } from '../middle/helpers/getCurrencySign';
+import { formatCurrency } from '../../util/formatCurrency';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
-import { getShippingErrors } from '../../modules/helpers/payments';
 import usePaymentReducer, { FormState } from '../../hooks/reducers/usePaymentReducer';
 import useLang from '../../hooks/useLang';
 
@@ -46,7 +44,6 @@ type StateProps = {
   needCardholderName?: boolean;
   needCountry?: boolean;
   needZip?: boolean;
-  globalDialogs?: (ApiError | ApiInviteInfo)[];
 };
 
 type GlobalStateProps = Pick<GlobalState['payment'], 'step' | 'shippingOptions' |
@@ -79,7 +76,6 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   needCountry,
   needZip,
   error,
-  globalDialogs,
   validateRequestedInfo,
   sendPaymentForm,
   setPaymentStep,
@@ -87,36 +83,26 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   clearPaymentError,
 }) => {
   const [paymentState, paymentDispatch] = usePaymentReducer();
-  const currencySign = getCurrencySign(currency);
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
 
   useEffect(() => {
-    if (step || error || globalDialogs) {
+    if (step || error) {
       setIsLoading(false);
     }
-  }, [step, error, globalDialogs]);
+  }, [step, error]);
 
   useEffect(() => {
     if (error && error.field) {
       paymentDispatch({
         type: 'setFormErrors',
         payload: {
-          [error.field]: error.fieldError,
+          [error.field]: error.message,
         },
       });
       return;
     }
-    if (globalDialogs && globalDialogs.length) {
-      const errors = getShippingErrors(globalDialogs);
-      paymentDispatch({
-        type: 'setFormErrors',
-        payload: {
-          ...errors,
-        },
-      });
-    }
-  }, [error, globalDialogs, paymentDispatch]);
+  }, [error, paymentDispatch]);
 
   useEffect(() => {
     if (savedInfo) {
@@ -178,8 +164,8 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
     );
   }
 
-  function renderModalContent(cuurentStep: PaymentStep) {
-    switch (cuurentStep) {
+  function renderModalContent(currentStep: PaymentStep) {
+    switch (currentStep) {
       case PaymentStep.ShippingInfo:
         return (
           <ShippingInfo
@@ -197,7 +183,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
             state={paymentState}
             dispatch={paymentDispatch}
             shippingOptions={shippingOptions || []}
-            currency={currencySign}
+            currency={currency}
           />
         );
       case PaymentStep.PaymentInfo:
@@ -221,7 +207,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
             totalPrice={totalPrice}
             invoiceContent={invoiceContent}
             checkoutInfo={checkoutInfo}
-            currency={currencySign}
+            currency={currency}
           />
         );
       default:
@@ -287,11 +273,11 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   const buttonText = useMemo(() => {
     switch (step) {
       case PaymentStep.Checkout:
-        return lang('Checkout.PayPrice', `${currencySign}${(totalPrice / 100).toFixed(2)}`);
+        return lang('Checkout.PayPrice', formatCurrency(totalPrice, currency, lang.code));
       default:
         return lang('Next');
     }
-  }, [step, lang, currencySign, totalPrice]);
+  }, [step, lang, currency, totalPrice]);
 
   if (isProviderError) {
     return (
@@ -412,7 +398,6 @@ export default memo(withGlobal<OwnProps>(
       needCountry,
       needZip,
       error,
-      globalDialogs: global.dialogs,
     };
   },
   (setGlobal, actions): DispatchProps => {

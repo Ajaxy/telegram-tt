@@ -63,6 +63,7 @@ export function buildReceipt(receipt: GramJs.payments.PaymentReceipt) {
 
 export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
   const {
+    formId,
     canSaveCredentials,
     passwordMissing,
     providerId,
@@ -94,6 +95,7 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
   return {
     canSaveCredentials,
     passwordMissing,
+    formId: String(formId),
     providerId,
     nativeProvider,
     savedInfo,

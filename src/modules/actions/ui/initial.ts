@@ -17,7 +17,7 @@ addReducer('init', (global) => {
   const { animationLevel, messageTextSize, language } = global.settings.byKey;
   const theme = selectTheme(global);
 
-  setLanguage(language, undefined, true);
+  void setLanguage(language, undefined, true);
 
   document.documentElement.style.setProperty(
     '--composer-text-size', `${Math.max(messageTextSize, IS_IOS ? 16 : 15)}px`,

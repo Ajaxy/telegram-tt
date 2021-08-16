@@ -2,14 +2,16 @@ import React, {
   FC, memo,
 } from '../../lib/teact/teact';
 
-import { Price } from '../../types';
+import { LangCode, Price } from '../../types';
+
+import { formatCurrency } from '../../util/formatCurrency';
+import useLang from '../../hooks/useLang';
 
 import './Checkout.scss';
 
 export type OwnProps = {
   invoiceContent?: {
     title?: string;
-    description?: string;
     text?: string;
     photoUrl?: string;
   };
@@ -35,8 +37,9 @@ const Checkout: FC<OwnProps> = ({
   currency,
   totalPrice,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const { photoUrl, title, text } = (invoiceContent || {});
+  const lang = useLang();
+
+  const { photoUrl, title, text } = invoiceContent || {};
   const {
     paymentMethod,
     paymentProvider,
@@ -45,26 +48,25 @@ const Checkout: FC<OwnProps> = ({
     phone,
     shippingMethod,
   } = (checkoutInfo || {});
+
   return (
     <div className="Checkout">
       <div className="description has-image">
-        { photoUrl && (
-          <img src={photoUrl} alt="" />
-        )}
+        {photoUrl && <img src={photoUrl} alt="" />}
         <div className="text">
-          <h5>{ title }</h5>
-          <p>{ text }</p>
+          <h5>{title}</h5>
+          <p>{text}</p>
         </div>
       </div>
       <div className="price-info">
         { prices && prices.map((item) => (
-          renderPaymentItem(item.label, item.amount, currency, false)
+          renderPaymentItem(lang.code, item.label, item.amount, currency)
         )) }
         { shippingPrices && shippingPrices.map((item) => (
-          renderPaymentItem(item.label, item.amount, currency, false)
+          renderPaymentItem(lang.code, item.label, item.amount, currency)
         )) }
         { totalPrice !== undefined && (
-          renderPaymentItem('Total', totalPrice, currency, true)
+          renderPaymentItem(lang.code, lang('Checkout.TotalAmount'), totalPrice, currency, true)
         ) }
       </div>
       <div className="invoice-info">
@@ -79,14 +81,16 @@ const Checkout: FC<OwnProps> = ({
   );
 };
 
-function renderPaymentItem(title: string, value: number, currency?: string, main = false) {
+function renderPaymentItem(
+  langCode: LangCode | undefined, title: string, value: number, currency?: string, main = false,
+) {
   return (
     <div className={`price-info-item ${main ? 'price-info-item-main' : ''}`}>
       <div className="title">
         { title }
       </div>
       <div className="value">
-        { `${currency || ''} ${(value / 100).toFixed(2)}` }
+        {formatCurrency(value, currency, langCode)}
       </div>
     </div>
   );

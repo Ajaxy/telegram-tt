@@ -131,8 +131,10 @@ export interface ApiInvoice {
   text: string;
   title: string;
   photoUrl?: string;
-  description?: string;
+  amount: number;
+  currency: string;
   receiptMsgId?: number;
+  isTest?: boolean;
 }
 
 export type ApiNewPoll = {
@@ -150,6 +152,8 @@ export interface ApiAction {
   targetChatId?: number;
   type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'other';
   photo?: ApiPhoto;
+  amount?: number;
+  currency?: string;
   translationValues: string[];
 }
 

@@ -10,6 +10,7 @@ import {
   isChat,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
+import { formatCurrency } from '../../../util/formatCurrency';
 import { TextPart } from './renderMessageText';
 import renderText from './renderText';
 
@@ -37,16 +38,30 @@ export function renderActionMessageText(
   if (!message.content.action) {
     return [];
   }
-  const { text, translationValues } = message.content.action;
+  const {
+    text, translationValues, amount, currency,
+  } = message.content.action;
   const content: TextPart[] = [];
   const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 32 };
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
 
-  let unprocessed: string;
-  let processed = processPlaceholder(
-    lang(translationKey, translationValues && translationValues.length ? translationValues : undefined),
+  let unprocessed = lang(translationKey, translationValues && translationValues.length ? translationValues : undefined);
+  let processed: TextPart[];
+
+  if (unprocessed.includes('%payment_amount%')) {
+    processed = processPlaceholder(
+      unprocessed,
+      '%payment_amount%',
+      formatCurrency(amount!, currency, lang.code),
+    );
+    unprocessed = processed.pop() as string;
+    content.push(...processed);
+  }
+
+  processed = processPlaceholder(
+    unprocessed,
     '%action_origin%',
     actionOrigin
       ? (!options.isEmbedded && renderOriginContent(lang, actionOrigin, options.asPlain)) || NBSP

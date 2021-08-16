@@ -64,7 +64,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   const handleLangChange = useCallback(() => {
     markIsLoading();
 
-    setLanguage(suggestedLanguage!, () => {
+    void setLanguage(suggestedLanguage, () => {
       unmarkIsLoading();
 
       setSettingOption({ language: suggestedLanguage });

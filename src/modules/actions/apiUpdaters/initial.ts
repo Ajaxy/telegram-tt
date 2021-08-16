@@ -18,6 +18,7 @@ import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
+import { getShippingError } from '../../../util/getReadableErrorText';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
@@ -61,7 +62,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         actions.signOut();
       }
 
-      if (actions.showDialog) {
+      const paymentShippingError = getShippingError(update.error);
+      if (paymentShippingError) {
+        actions.addPaymentError({ error: paymentShippingError });
+      } else if (actions.showDialog) {
         actions.showDialog({ data: { ...update.error, hasErrorKey: true } });
       }
 
@@ -71,8 +75,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
 function onUpdateApiReady(global: GlobalState) {
   const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
-  if (hasWebNotifications && hasPushNotifications) subscribe();
-  setLanguage(global.settings.byKey.language);
+  if (hasWebNotifications && hasPushNotifications) {
+    void subscribe();
+  }
+  void setLanguage(global.settings.byKey.language);
 }
 
 function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {

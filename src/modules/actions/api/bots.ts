@@ -55,9 +55,9 @@ addReducer('clickInlineButton', (global, actions, payload) => {
       if (value) {
         actions.getReceipt({ receiptMessageId: value, chatId: chat.id, messageId });
       } else {
-        actions.getPaymentForm({ messageId });
+        actions.getPaymentForm({ chat, messageId });
         actions.setInvoiceMessageInfo(selectChatMessage(global, chat.id, messageId));
-        actions.openPaymentModal({ messageId });
+        actions.openPaymentModal({ chatId: chat.id, messageId });
       }
       break;
     }

@@ -1,4 +1,7 @@
+import { getGlobal } from '../lib/teact/teactn';
+
 import { ApiLangPack, ApiLangString } from '../api/types';
+import { LangCode } from '../types';
 
 import {
   DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,
@@ -7,13 +10,12 @@ import * as cacheApi from './cacheApi';
 import { callApi } from '../api/gramjs';
 import { createCallbackManager } from './callbacks';
 import { formatInteger } from './textFormat';
-import { getGlobal } from '../lib/teact/teactn';
 
 interface LangFn {
   (key: string, value?: any, format?: 'i'): any;
 
   isRtl?: boolean;
-  code?: string;
+  code?: LangCode;
 }
 
 const SUBSTITUTION_REGEX = /%\d?\$?[sdf@]/g;
@@ -95,7 +97,7 @@ export async function getTranslationForLangString(langCode: string, key: string)
   return processTranslation(translateString, key);
 }
 
-export async function setLanguage(langCode: string, callback?: NoneToVoidFunction, withFallback = false) {
+export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunction, withFallback = false) {
   if (langPack && langCode === currentLangCode) {
     if (callback) {
       callback();

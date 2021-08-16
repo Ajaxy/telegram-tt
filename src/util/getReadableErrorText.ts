@@ -1,4 +1,4 @@
-import { ApiError } from '../api/types';
+import { ApiError, ApiFieldError } from '../api/types';
 
 const READABLE_ERROR_MESSAGES: Record<string, string> = {
   CHAT_RESTRICTED: 'You can\'t send messages in this chat, you were restricted',
@@ -64,6 +64,45 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   WALLPAPER_DIMENSIONS_INVALID: 'The wallpaper dimensions are invalid, please select another file',
 };
 
+export const SHIPPING_ERRORS: Record<string, ApiFieldError> = {
+  ADDRESS_STREET_LINE1_INVALID: {
+    field: 'streetLine1',
+    message: 'Incorrect street address',
+  },
+  ADDRESS_STREET_LINE2_INVALID: {
+    field: 'streetLine2',
+    message: 'Incorrect street address',
+  },
+  ADDRESS_CITY_INVALID: {
+    field: 'city',
+    message: 'Incorrect city',
+  },
+  ADDRESS_COUNTRY_INVALID: {
+    field: 'countryIso2',
+    message: 'Incorrect country',
+  },
+  ADDRESS_POSTCODE_INVALID: {
+    field: 'postCode',
+    message: 'Incorrect post code',
+  },
+  ADDRESS_STATE_INVALID: {
+    field: 'state',
+    message: 'Incorrect state',
+  },
+  REQ_INFO_NAME_INVALID: {
+    field: 'fullName',
+    message: 'Incorrect name',
+  },
+  REQ_INFO_PHONE_INVALID: {
+    field: 'phone',
+    message: 'Incorrect phone',
+  },
+  REQ_INFO_EMAIL_INVALID: {
+    field: 'email',
+    message: 'Incorrect email',
+  },
+};
+
 export default function getReadableErrorText(error: ApiError) {
   const { message, isSlowMode, textParams } = error;
   // Currently, Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
@@ -78,4 +117,8 @@ export default function getReadableErrorText(error: ApiError) {
     }, errorMessage as string);
   }
   return errorMessage;
+}
+
+export function getShippingError(error: ApiError): ApiFieldError | undefined {
+    return SHIPPING_ERRORS[error.message];
 }

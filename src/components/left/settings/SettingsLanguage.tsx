@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ISettings, SettingsScreens } from '../../../types';
+import { ISettings, LangCode, SettingsScreens } from '../../../types';
 import { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
@@ -46,7 +46,7 @@ const SettingsLanguage: FC<OwnProps & StateProps & DispatchProps> = ({
     setSelectedLanguage(langCode);
     markIsLoading();
 
-    setLanguage(langCode, () => {
+    void setLanguage(langCode as LangCode, () => {
       unmarkIsLoading();
 
       setSettingOption({ language: langCode });
