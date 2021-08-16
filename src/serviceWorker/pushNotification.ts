@@ -208,6 +208,11 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     e.waitUntil(showNotification(notification));
     shownNotifications.add(notification.messageId);
   }
+  if (e.data.type === 'notificationHandled') {
+    const notification: NotificationData = e.data.payload;
+    // mark this notification as shown if it was handled locally
+    shownNotifications.add(notification.messageId);
+  }
 }
 
 self.onsync = () => {
