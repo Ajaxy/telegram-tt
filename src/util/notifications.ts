@@ -3,7 +3,7 @@ import {
   ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
-import { DEBUG } from '../config';
+import { APP_NAME, DEBUG } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
 import {
   getChatAvatarHash,
@@ -313,6 +313,111 @@ async function getAvatar(chat: ApiChat) {
   return mediaData;
 }
 
+type NotificationData = {
+  messageId?: number;
+  chatId?: number;
+  title: string;
+  body: string;
+  icon?: string;
+};
+
+const shownNotifications = new Set();
+let pendingNotifications: Record<number, NotificationData[]> = {};
+
+async function showNotifications(groupLimit: number = 2) {
+  const count = Object.keys(pendingNotifications).reduce<number>((result, groupId) => {
+    result += pendingNotifications[Number(groupId)].length;
+    return result;
+  }, 0);
+  // if we have more than groupLimit notification groups we send only one notification
+  if (Object.keys(pendingNotifications).length > groupLimit) {
+    await showNotification({
+      title: APP_NAME,
+      body: `You have ${count} new Telegram notifications`,
+    });
+  } else {
+    // Else we send a notification per group
+    await Promise.all(Object.keys(pendingNotifications)
+      // eslint-disable-next-line no-async-without-await/no-async-without-await
+      .map(async (groupId) => {
+        const group = pendingNotifications[Number(groupId)];
+        if (group.length > groupLimit) {
+          const lastMessage = group[group.length - 1];
+          return showNotification({
+            title: APP_NAME,
+            body: `You have ${count} notifications from ${lastMessage.title}`,
+            messageId: lastMessage.messageId,
+            chatId: Number(groupId),
+          });
+        }
+        return Promise.all(group.map(showNotification));
+      }));
+  }
+
+  // Clear all pending notifications
+  pendingNotifications = {};
+}
+
+const flushNotifications = debounce(showNotifications, 1000, false);
+
+async function handleNotification(data: NotificationData, groupLimit?: number) {
+  // Dont show already triggered notification
+  if (shownNotifications.has(data.messageId)) {
+    shownNotifications.delete(data.messageId);
+    return;
+  }
+
+  const groupId = data.chatId || 0;
+  if (!pendingNotifications[groupId]) {
+    pendingNotifications[groupId] = [];
+  }
+  pendingNotifications[groupId].push(data);
+  await flushNotifications(groupLimit);
+}
+
+function showNotification(data: NotificationData) {
+  if (checkIfPushSupported()) {
+    if (navigator.serviceWorker.controller) {
+      // notify service worker about new message notification
+      navigator.serviceWorker.controller.postMessage({
+        type: 'newMessageNotification',
+        payload: data,
+      });
+    }
+  } else {
+    const dispatch = getDispatch();
+    const options: NotificationOptions = {
+      body: data.body,
+      icon: data.icon,
+      badge: data.icon,
+      tag: data.messageId ? data.messageId.toString() : undefined,
+    };
+
+    if ('vibrate' in navigator) {
+      options.vibrate = [200, 100, 200];
+    }
+
+    const notification = new Notification(data.title, options);
+
+    notification.onclick = () => {
+      notification.close();
+      dispatch.focusMessage({
+        chatId: data.chatId,
+        messageId: data.messageId,
+      });
+      if (window.focus) {
+        window.focus();
+      }
+    };
+
+    // Play sound when notification is displayed
+    notification.onshow = () => {
+      const id = data.messageId || data.chatId;
+      if (id) playNotificationSound(id);
+    };
+  }
+}
+
 export async function showNewMessageNotification({
   chat,
   message,
@@ -331,51 +436,13 @@ export async function showNewMessageNotification({
 
   const icon = await getAvatar(chat);
 
-  if (checkIfPushSupported()) {
-    if (navigator.serviceWorker.controller) {
-      // notify service worker about new message notification
-      navigator.serviceWorker.controller.postMessage({
-        type: 'newMessageNotification',
-        payload: {
-          title,
-          body,
-          icon,
-          chatId: chat.id,
-          messageId: message.id,
-        },
-      });
-    }
-  } else {
-    const dispatch = getDispatch();
-    const options: NotificationOptions = {
-      body,
-      icon,
-      badge: icon,
-      tag: message.id.toString(),
-    };
-
-    if ('vibrate' in navigator) {
-      options.vibrate = [200, 100, 200];
-    }
-
-    const notification = new Notification(title, options);
-
-    notification.onclick = () => {
-      notification.close();
-      dispatch.focusMessage({
-        chatId: chat.id,
-        messageId: message.id,
-      });
-      if (window.focus) {
-        window.focus();
-      }
-    };
-
-    // Play sound when notification is displayed
-    notification.onshow = () => {
-      playNotificationSound(message.id || chat.id);
-    };
-  }
+  await handleNotification({
+    title,
+    body,
+    icon,
+    messageId: message.id,
+    chatId: chat.id,
+  });
 }
 
 // Notify service worker that client is fully loaded
