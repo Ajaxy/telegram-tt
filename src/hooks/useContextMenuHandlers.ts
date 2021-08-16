@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from '../lib/teact/teact';
 import { IAnchorPosition } from '../types';
 import { IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 
-const LONG_TAP_DURATION_MS = 250;
+const LONG_TAP_DURATION_MS = 150;
 const SELECTION_ANIMATION_DURATION_MS = 200;
 
 let contextMenuCounter = 0;
