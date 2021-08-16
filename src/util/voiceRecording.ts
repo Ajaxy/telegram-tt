@@ -3,8 +3,8 @@ import encoderPath from 'file-loader!opus-recorder/dist/encoderWorker.min';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 
-interface OpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
-  new(options: AnyLiteral): OpusRecorder;
+interface IOpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
+  new(options: AnyLiteral): IOpusRecorder;
 
   start(stream?: MediaStreamAudioSourceNode): void;
 
@@ -19,9 +19,9 @@ const BLOB_PARAMS = { type: 'audio/ogg' };
 const FFT_SIZE = 64;
 const MIN_VOLUME = 0.1;
 
-let opusRecorderPromise: Promise<{ default: OpusRecorder }>;
-let OpusRecorder: OpusRecorder;
-let mediaRecorder: OpusRecorder;
+let opusRecorderPromise: Promise<{ default: IOpusRecorder }>;
+let OpusRecorder: IOpusRecorder;
+let mediaRecorder: IOpusRecorder;
 
 export async function init() {
   if (!opusRecorderPromise) {
@@ -84,7 +84,7 @@ async function startMediaRecorder() {
   await mediaRecorder.start();
 }
 
-function subscribeToAnalyzer(recorder: OpusRecorder, cb: Function) {
+function subscribeToAnalyzer(recorder: IOpusRecorder, cb: Function) {
   const source = recorder.sourceNode;
   const analyser = source.context.createAnalyser();
   analyser.fftSize = FFT_SIZE;

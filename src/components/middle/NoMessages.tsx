@@ -75,5 +75,4 @@ function renderGroup(lang: LangFn) {
   );
 }
 
-
 export default memo(NoMessages);

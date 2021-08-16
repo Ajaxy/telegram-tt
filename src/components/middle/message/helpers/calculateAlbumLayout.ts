@@ -261,7 +261,6 @@ function layoutWithComplexLayouter({
   return result;
 }
 
-
 function layoutTwo(params: ILayoutParams) {
   const {
     ratios,

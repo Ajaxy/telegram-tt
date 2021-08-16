@@ -582,6 +582,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       typingStatus: buildChatTypingStatus(update, serverTimeOffset),
     });
   } else if (update instanceof GramJs.UpdateChannel) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _entities } = update;
     if (!_entities) {
       return;
@@ -690,6 +691,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       user: { phoneNumber: phone },
     });
   } else if (update instanceof GramJs.UpdatePeerSettings) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _entities } = update;
     if (!_entities) {
       return;

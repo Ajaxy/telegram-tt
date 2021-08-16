@@ -42,12 +42,15 @@
     "import/no-webpack-loader-syntax": "off",
     "react/prop-types": "off",
     "react/jsx-one-expression-per-line": "off",
+    "react/button-has-type": "off",
+    "react/require-default-props": "off",
     // Teact feature
     "react/style-prop-object": "off",
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/no-static-element-interactions": "off",
     "jsx-a11y/label-has-associated-control": "off",
     "jsx-a11y/anchor-is-valid": "off",
+    "jsx-a11y/no-noninteractive-element-to-interactive-role": "off",
     "no-async-without-await/no-async-without-await": 1,
     "@typescript-eslint/no-use-before-define": [
       "error",
@@ -57,9 +60,13 @@
     ],
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/member-delimiter-style": "error",
+    "@typescript-eslint/no-throw-literal": "off",
     "teactn/prefer-separate-component-file": "off"
   },
   "settings": {
     "import/resolver": "webpack"
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
   }
 }

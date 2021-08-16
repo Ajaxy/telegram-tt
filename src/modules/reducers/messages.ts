@@ -228,7 +228,6 @@ export function deleteChatMessages(
       }
     });
 
-
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
     global = replaceThreadParam(global, chatId, threadId, 'outlyingIds', outlyingIds);
     global = replaceThreadParam(global, chatId, threadId, 'viewportIds', viewportIds);

@@ -217,8 +217,8 @@ const Audio: FC<OwnProps> = ({
   const seekHandlers = { handleStartSeek, handleSeek, handleStopSeek };
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(
-    () => voice && renderWaveform(voice, playProgress, isOwn, seekHandlers, theme),
-    [voice, playProgress, isOwn, seekHandlers, theme],
+    () => voice && renderWaveform(voice, playProgress, isOwn, { handleStartSeek, handleSeek, handleStopSeek }, theme),
+    [voice, playProgress, isOwn, handleStartSeek, handleSeek, handleStopSeek, theme],
   );
 
   const fullClassName = buildClassName(

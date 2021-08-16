@@ -300,7 +300,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   useLayoutEffectWithPrevDeps(([
     prevMessageIds, prevIsViewportNewest, prevContainerHeight,
   ]: [
-    typeof messageIds, typeof isViewportNewest, typeof containerHeight
+    typeof messageIds, typeof isViewportNewest, typeof containerHeight,
   ]) => {
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));

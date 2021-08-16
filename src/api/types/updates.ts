@@ -365,7 +365,7 @@ export type ApiUpdateNotifyExceptions = {
   '@type': 'updateNotifyExceptions';
 } & ApiNotifyException;
 
-export type updateTwoFaStateWaitCode = {
+export type ApiUpdateTwoFaStateWaitCode = {
   '@type': 'updateTwoFaStateWaitCode';
   length: number;
 };
@@ -393,7 +393,6 @@ export type ApiUpdateServerTimeOffset = {
   serverTimeOffset: number;
 };
 
-
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -409,7 +408,7 @@ export type ApiUpdate = (
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet |
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
-  ApiUpdateTwoFaError | updateTwoFaStateWaitCode |
+  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite
 );

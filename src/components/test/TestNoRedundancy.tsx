@@ -25,21 +25,6 @@ type BOwnProps = Pick<GlobalState, 'authState'> & {
   aValue: number;
 };
 
-const TestA: FC<AStateProps> = ({ aValue }) => {
-  // eslint-disable-next-line no-console
-  console.log('!!! A MOUNT ', { aValue });
-
-  return (
-    <div>
-      <h1>A</h1>
-      <div>
-        aValue = {aValue}
-      </div>
-      <TestBContainer aValue={aValue} />
-    </div>
-  );
-};
-
 const TestB: FC<BStateProps & BOwnProps> = ({ bValue, aValue, derivedAValue }) => {
   // eslint-disable-next-line no-console
   console.log('!!! B MOUNT ', { bValue, aValue, derivedAValue });
@@ -65,7 +50,6 @@ const TestB: FC<BStateProps & BOwnProps> = ({ bValue, aValue, derivedAValue }) =
   );
 };
 
-
 const TestBContainer = withGlobal<BOwnProps>(
   (global, { aValue }): BStateProps => {
     // eslint-disable-next-line no-console
@@ -78,6 +62,21 @@ const TestBContainer = withGlobal<BOwnProps>(
     };
   },
 )(TestB);
+
+const TestA: FC<AStateProps> = ({ aValue }) => {
+  // eslint-disable-next-line no-console
+  console.log('!!! A MOUNT ', { aValue });
+
+  return (
+    <div>
+      <h1>A</h1>
+      <div>
+        aValue = {aValue}
+      </div>
+      <TestBContainer aValue={aValue} />
+    </div>
+  );
+};
 
 export default withGlobal(
   (global): AStateProps => {

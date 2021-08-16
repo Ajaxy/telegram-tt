@@ -29,7 +29,6 @@ export default function fastSmoothScroll(
     return;
   }
 
-
   if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
     forceDuration = 0;
   }

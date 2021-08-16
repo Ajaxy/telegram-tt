@@ -12,7 +12,7 @@ declare const self: WorkerGlobalScope;
 self.importScripts('rlottie-wasm.js');
 
 let rLottieApi: Record<string, Function>;
-const rLottieApiPromise = new Promise((resolve) => {
+const rLottieApiPromise = new Promise<void>((resolve) => {
   Module.onRuntimeInitialized = () => {
     rLottieApi = {
       init: Module.cwrap('lottie_init', '', []),

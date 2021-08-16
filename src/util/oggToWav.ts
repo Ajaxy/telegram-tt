@@ -7,7 +7,9 @@ export async function oggToWav(opusData: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const typedArray = new Uint8Array(arrayBuffer);
 
-    let decoderWorker: Worker | undefined = new Worker(new URL('opus-recorder/dist/decoderWorker.min.js', import.meta.url));
+    let decoderWorker: Worker | undefined = new Worker(
+      new URL('opus-recorder/dist/decoderWorker.min.js', import.meta.url),
+    );
     let wavWorker: Worker | undefined = new Worker(new URL('opus-recorder/dist/waveWorker.min.js', import.meta.url));
 
     decoderWorker.onmessage = (e) => {

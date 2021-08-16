@@ -4,7 +4,7 @@ declare const self: ServiceWorkerGlobalScope;
 
 enum Boolean {
   True = '1',
-  False = '0'
+  False = '0',
 }
 
 type PushData = {

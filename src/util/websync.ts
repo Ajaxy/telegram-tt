@@ -31,7 +31,7 @@ export const forceWebsync = (authed: boolean) => {
 
   if (canRedirect !== authed || ts + WEBSYNC_TIMEOUT <= currentTs) {
     return Promise.all(WEBSYNC_URLS.map((url) => {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         const script = document.createElement('script');
 
         const removeElement = () => !!document.body.removeChild(script);

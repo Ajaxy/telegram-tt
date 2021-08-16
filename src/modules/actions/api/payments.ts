@@ -71,7 +71,6 @@ addReducer('getPaymentForm', (global, actions, payload) => {
   void getPaymentForm(chat, messageId);
 });
 
-
 async function getPaymentForm(chat: ApiChat, messageId: number) {
   const result = await callApi('getPaymentForm', { chat, messageId });
   if (!result) {

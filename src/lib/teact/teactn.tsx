@@ -78,6 +78,7 @@ function onDispatch(name: string, payload?: ActionPayload, noThrottle?: boolean)
 }
 
 function updateContainers() {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   let DEBUG_startAt: number | undefined;
   if (DEBUG) {
     DEBUG_startAt = performance.now();

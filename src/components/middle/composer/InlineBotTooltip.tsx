@@ -110,7 +110,6 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
     }
   }, [loadMore]);
 
-
   useEffect(() => (isOpen ? captureKeyboardListeners({
     onEsc: onClose,
     onUp: (e: KeyboardEvent) => handleArrowKey(-1, e),
@@ -122,7 +121,6 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
     openChat({ id: botId });
     sendBotCommand({ chatId: botId, command: `/start ${switchPm!.startParam}` });
   }, [botId, openChat, sendBotCommand, switchPm]);
-
 
   const prevInlineBotResults = usePrevious(
     inlineBotResults && inlineBotResults.length

@@ -71,6 +71,7 @@ const NOTIFICATION_INTERVAL = 1000;
 
 let notificationInterval: number | undefined;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
 
 const Main: FC<StateProps & DispatchProps> = ({
@@ -134,7 +135,6 @@ const Main: FC<StateProps & DispatchProps> = ({
   const {
     transitionClassNames: rightColumnTransitionClassNames,
   } = useShowTransition(isRightColumnShown, undefined, true, undefined, shouldSkipHistoryAnimations);
-
 
   const className = buildClassName(
     middleColumnTransitionClassNames.replace(/([\w-]+)/g, 'middle-column-$1'),

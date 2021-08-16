@@ -99,7 +99,6 @@ export default function useHistoryBack(
               state: currentState,
             }, '');
 
-
             indexRef.current = index;
 
             if (shouldReplaceNext) {

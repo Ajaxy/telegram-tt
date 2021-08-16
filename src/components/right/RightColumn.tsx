@@ -205,7 +205,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [contentKey, chatId]);
 
-
   useHistoryBack(isChatSelected && (contentKey === RightColumnContent.ChatInfo
     || contentKey === RightColumnContent.UserInfo || contentKey === RightColumnContent.Management
     || contentKey === RightColumnContent.AddingMembers),

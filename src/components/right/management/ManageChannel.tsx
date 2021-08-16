@@ -139,7 +139,6 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
     onScreenSelect(ManagementScreens.ChannelSubscribers);
   }, [onScreenSelect]);
 
-
   const handleDeleteChannel = useCallback(() => {
     if (chat.isCreator) {
       deleteChannel({ chatId: chat.id });

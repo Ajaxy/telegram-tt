@@ -122,12 +122,12 @@ function runNow(fn: NoneToVoidFunction) {
   fn();
 }
 
-export const pause = (ms: number) => new Promise((resolve) => {
+export const pause = (ms: number) => new Promise<void>((resolve) => {
   setTimeout(() => resolve(), ms);
 });
 
 export function rafPromise() {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     fastRaf(resolve);
   });
 }

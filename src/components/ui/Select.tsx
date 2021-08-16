@@ -1,7 +1,6 @@
 import { ChangeEvent, RefObject } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
-
 import buildClassName from '../../util/buildClassName';
 
 type OwnProps = {

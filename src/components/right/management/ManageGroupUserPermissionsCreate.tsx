@@ -85,7 +85,6 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   );
 };
 
-
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);

@@ -30,6 +30,7 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 const INDEX_KEY_PREFIX = '__indexKey#';
 
 const headsByElement: Record<string, VirtualDomHead> = {};
+// eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_virtualTreeSize = 1;
 
 function render($element?: VirtualElement, parentEl?: HTMLElement | null) {
@@ -462,6 +463,7 @@ function updateAttribute(element: HTMLElement, key: string, oldValue: any, newVa
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function DEBUG_addToVirtualTreeSize($current: VirtualRealElement | VirtualDomHead) {
   DEBUG_virtualTreeSize += $current.children.length;
 

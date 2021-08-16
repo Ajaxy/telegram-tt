@@ -241,7 +241,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const appendixRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
 
-
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
   const {

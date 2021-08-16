@@ -75,7 +75,6 @@ export async function fetchChats({
     return undefined;
   }
 
-
   if (resultPinned) {
     updateLocalDb(resultPinned);
   }

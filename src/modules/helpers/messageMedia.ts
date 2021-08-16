@@ -14,7 +14,6 @@ type Target =
   | 'viewerFull'
   | 'download';
 
-
 export function getMessageContent(message: ApiMessage) {
   return message.content;
 }
