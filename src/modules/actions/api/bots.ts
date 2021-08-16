@@ -99,7 +99,7 @@ addReducer('loadTopInlineBots', (global) => {
   const { serverTimeOffset } = global;
   const { hash, lastRequestedAt } = global.topInlineBots;
 
-  if (lastRequestedAt && Date.now() + serverTimeOffset - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+  if (lastRequestedAt && Date.now() + serverTimeOffset * 1000 - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
     return;
   }
 
@@ -119,7 +119,7 @@ addReducer('loadTopInlineBots', (global) => {
         ...newGlobal.topInlineBots,
         hash: newHash,
         userIds: ids,
-        lastRequestedAt: Date.now(),
+        lastRequestedAt: Date.now() + serverTimeOffset * 1000,
       },
     };
     setGlobal(newGlobal);
