@@ -26,7 +26,7 @@ import { throttle } from '../../../util/schedulers';
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
 // Enough to animate and mark as read in Message List
-const CURRENT_CHAT_UNREAD_DELAY = 1000;
+const CURRENT_CHAT_UNREAD_DELAY = 1500;
 const runThrottledForUpdateAppBadge = throttle((cb) => cb(), CURRENT_CHAT_UNREAD_DELAY, true);
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
