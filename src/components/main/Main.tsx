@@ -27,6 +27,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
+import usePreventIosPinchZoom from '../../hooks/usePreventIosPinchZoom';
 import { processDeepLink } from '../../util/deeplink';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 
@@ -221,6 +222,8 @@ const Main: FC<StateProps & DispatchProps> = ({
   // Online status and browser tab indicators
   useBackgroundMode(handleBlur, handleFocus);
   useBeforeUnload(handleBlur);
+
+  usePreventIosPinchZoom(isMediaViewerOpen);
 
   function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
