@@ -163,12 +163,14 @@ async function focusChatMessage(client: WindowClient, data: { chatId?: number; m
 }
 
 export function handleNotificationClick(e: NotificationEvent) {
-  const appUrl = self.location.href.replace('serviceWorker.js', '');
+  const appUrl = new URL(self.registration.scope).origin;
   e.notification.close(); // Android needs explicit close.
   const { data } = e.notification;
   const notifyClients = async () => {
     const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
-    const clientsInScope = clients.filter((client) => client.url === self.registration.scope);
+    const clientsInScope = clients.filter((client) => {
+      return new URL(client.url).origin === appUrl;
+    });
     e.waitUntil(Promise.all(clientsInScope.map((client) => {
       clickBuffer[client.id] = data;
       return focusChatMessage(client, data);
