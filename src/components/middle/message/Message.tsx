@@ -106,20 +106,22 @@ type MessagePositionProperties = {
   isLastInList: boolean;
 };
 
-type OwnProps = {
-  message: ApiMessage;
-  observeIntersectionForBottom: ObserveFn;
-  observeIntersectionForMedia: ObserveFn;
-  observeIntersectionForAnimatedStickers: ObserveFn;
-  album?: IAlbum;
-  noAvatars?: boolean;
-  withAvatar?: boolean;
-  withSenderName?: boolean;
-  threadId: number;
-  messageListType: MessageListType;
-  noComments: boolean;
-  appearanceOrder: number;
-} & MessagePositionProperties;
+type OwnProps =
+  {
+    message: ApiMessage;
+    observeIntersectionForBottom: ObserveFn;
+    observeIntersectionForMedia: ObserveFn;
+    observeIntersectionForAnimatedStickers: ObserveFn;
+    album?: IAlbum;
+    noAvatars?: boolean;
+    withAvatar?: boolean;
+    withSenderName?: boolean;
+    threadId: number;
+    messageListType: MessageListType;
+    noComments: boolean;
+    appearanceOrder: number;
+  }
+  & MessagePositionProperties;
 
 type StateProps = {
   theme: ISettings['theme'];
@@ -137,6 +139,7 @@ type StateProps = {
   isFocused?: boolean;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
+  isResizingContainer?: boolean;
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
   isChannel?: boolean;
@@ -203,6 +206,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isFocused,
   focusDirection,
   noFocusHighlight,
+  isResizingContainer,
   isForwarding,
   isChatWithSelf,
   isChannel,
@@ -338,7 +342,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const withAppendix = contentClassName.includes('has-appendix');
 
   useEnsureMessage(chatId, hasReply ? message.replyToMessageId : undefined, replyMessage, message.id);
-  useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight);
+  useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer);
   useLayoutEffect(() => {
     if (!appendixRef.current) {
       return;
@@ -454,7 +458,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (IS_ANDROID) {
       if (windowSize.getIsKeyboardVisible()) {
-        setTimeout(() => { onContextMenu(e); }, ANDROID_KEYBOARD_HIDE_DELAY_MS);
+        setTimeout(() => {
+          onContextMenu(e);
+        }, ANDROID_KEYBOARD_HIDE_DELAY_MS);
       } else {
         onContextMenu(e);
       }
@@ -941,7 +947,9 @@ export default memo(withGlobal<OwnProps>(
         : selectIsMessageFocused(global, message)
     );
 
-    const { direction: focusDirection, noHighlight: noFocusHighlight } = (isFocused && focusedMessage) || {};
+    const {
+      direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
+    } = (isFocused && focusedMessage) || {};
 
     const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
 
@@ -987,7 +995,7 @@ export default memo(withGlobal<OwnProps>(
       shouldLoopStickers: selectShouldLoopStickers(global),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
-      ...(isFocused && { focusDirection, noFocusHighlight }),
+      ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

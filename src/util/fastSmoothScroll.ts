@@ -20,7 +20,7 @@ export default function fastSmoothScroll(
   maxDistance = FAST_SMOOTH_MAX_DISTANCE,
   forceDirection?: FocusDirection,
   forceDuration?: number,
-  forceCurrentContainerHeight?: boolean,
+  forceNormalContainerHeight?: boolean,
 ) {
   const scrollFrom = calculateScrollFrom(container, element, maxDistance, forceDirection);
 
@@ -33,7 +33,7 @@ export default function fastSmoothScroll(
     forceDuration = 0;
   }
 
-  scrollWithJs(container, element, scrollFrom, position, margin, forceDuration, forceCurrentContainerHeight);
+  scrollWithJs(container, element, scrollFrom, position, margin, forceDuration, forceNormalContainerHeight);
 }
 
 export function isAnimatingScroll() {
@@ -73,11 +73,11 @@ function scrollWithJs(
   position: ScrollLogicalPosition | 'centerOrTop',
   margin = 0,
   forceDuration?: number,
-  forceCurrentContainerHeight?: boolean,
+  forceNormalContainerHeight?: boolean,
 ) {
   const { offsetTop: elementTop, offsetHeight: elementHeight } = element;
   const { scrollTop: currentScrollTop, offsetHeight: containerHeight, scrollHeight } = container;
-  const targetContainerHeight = !forceCurrentContainerHeight && container.dataset.normalHeight
+  const targetContainerHeight = forceNormalContainerHeight && container.dataset.normalHeight
     ? Number(container.dataset.normalHeight)
     : containerHeight;
 

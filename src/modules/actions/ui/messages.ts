@@ -276,7 +276,7 @@ addReducer('focusNextReply', (global, actions) => {
 addReducer('focusMessage', (global, actions, payload) => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
-    replyMessageId,
+    replyMessageId, isResizingContainer,
   } = payload!;
 
   let { messageId } = payload!;
@@ -306,7 +306,7 @@ addReducer('focusMessage', (global, actions, payload) => {
     setGlobal(newGlobal);
   }, noHighlight ? FOCUS_NO_HIGHLIGHT_DURATION : FOCUS_DURATION);
 
-  global = updateFocusedMessage(global, chatId, messageId, noHighlight);
+  global = updateFocusedMessage(global, chatId, messageId, noHighlight, isResizingContainer);
   global = updateFocusDirection(global, undefined);
 
   if (replyMessageId) {

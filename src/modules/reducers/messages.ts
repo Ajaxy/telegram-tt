@@ -431,7 +431,7 @@ function updateScheduledMessages(
 }
 
 export function updateFocusedMessage(
-  global: GlobalState, chatId?: number, messageId?: number, noHighlight = false,
+  global: GlobalState, chatId?: number, messageId?: number, noHighlight = false, isResizingContainer = false,
 ): GlobalState {
   return {
     ...global,
@@ -440,6 +440,7 @@ export function updateFocusedMessage(
       chatId,
       messageId,
       noHighlight,
+      isResizingContainer,
     },
   };
 }
