@@ -9,6 +9,7 @@ import useBackgroundMode from '../../../hooks/useBackgroundMode';
 
 const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
 const INTERSECTION_MARGIN_FOR_MEDIA = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
+const INTERSECTION_THROTTLE_FOR_READING = 150;
 
 export default function useMessageObservers(
   type: MessageListType,
@@ -29,6 +30,7 @@ export default function useMessageObservers(
     observe: observeIntersectionForReading, freeze: freezeForReading, unfreeze: unfreezeForReading,
   } = useIntersectionObserver({
     rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE_FOR_READING,
   }, (entries) => {
     if (type !== 'thread') {
       return;
