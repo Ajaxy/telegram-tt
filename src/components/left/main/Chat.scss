@@ -6,7 +6,6 @@
     --color-text-meta: var(--color-text-meta-apple);
   }
 
-
   position: absolute;
   top: 0;
   left: 0;
@@ -70,6 +69,12 @@
     }
   }
 
+  @media (max-width: 600px) {
+    .ListItem-button {
+      border-radius: 0 !important;
+    }
+  }
+
   .status {
     flex-shrink: 0;
   }
@@ -102,6 +107,7 @@
 
     .LastMessageMeta {
       margin-left: auto;
+
       body.is-ios & {
         font-size: .875rem;
         margin-right: 0;
@@ -133,6 +139,7 @@
           content: ': ';
         }
       }
+
       .colon {
         margin-inline-end: .25rem;
       }

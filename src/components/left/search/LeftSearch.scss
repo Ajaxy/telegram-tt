@@ -17,8 +17,8 @@
   .documents-list {
     padding: 0 1.25rem 1.25rem;
 
-    .ListItem + .ListItem {
-      margin-top: 1.25rem;
+    .ListItem {
+      padding: 0.625rem 0;
     }
   }
 

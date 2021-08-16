@@ -1,6 +1,26 @@
 .ListItem {
   position: relative;
 
+  @media (max-width: 600px) {
+    &:not(:last-of-type)::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 4.5rem;
+      right: 0;
+      height: 0.03125rem;
+      background: var(--color-dividers);
+    }
+
+    &.small-icon::after {
+      left: 3.875rem;
+    }
+
+    &.no-icon::after {
+      left: 0;
+    }
+  }
+
   .ListItem-button {
     width: 100%;
     background-color: var(--background-color);
@@ -48,7 +68,7 @@
     .ListItem-button {
       cursor: pointer;
 
-      @media (hover:hover) {
+      @media (hover: hover) {
         &:hover, &:focus {
           --background-color: var(--color-chat-hover);
         }

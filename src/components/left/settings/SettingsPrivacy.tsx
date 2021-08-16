@@ -132,6 +132,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <ListItem
           narrow
+          className="no-icon"
           onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneNumber)}
         >
           <div className="multiline-menu-item">
@@ -143,6 +144,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
         <ListItem
           narrow
+          className="no-icon"
           onClick={() => onScreenSelect(SettingsScreens.PrivacyLastSeen)}
         >
           <div className="multiline-menu-item">
@@ -154,6 +156,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
         <ListItem
           narrow
+          className="no-icon"
           onClick={() => onScreenSelect(SettingsScreens.PrivacyProfilePhoto)}
         >
           <div className="multiline-menu-item">
@@ -165,6 +168,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
         <ListItem
           narrow
+          className="no-icon"
           onClick={() => onScreenSelect(SettingsScreens.PrivacyForwarding)}
         >
           <div className="multiline-menu-item">
@@ -176,6 +180,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
         </ListItem>
         <ListItem
           narrow
+          className="no-icon"
           onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
         >
           <div className="multiline-menu-item">
