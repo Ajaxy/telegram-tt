@@ -1,5 +1,3 @@
-import { scriptUrl } from 'service-worker-loader!../serviceWorker';
-
 import { DEBUG } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
@@ -36,7 +34,7 @@ function subscribeToWorker() {
 if (IS_SERVICE_WORKER_SUPPORTED) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register(scriptUrl);
+      await navigator.serviceWorker.register(new URL('../serviceWorker.ts', import.meta.url));
 
       if (DEBUG) {
         // eslint-disable-next-line no-console

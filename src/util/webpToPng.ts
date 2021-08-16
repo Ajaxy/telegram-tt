@@ -1,4 +1,3 @@
-import WebpWorker from 'worker-loader!../lib/webp/webp_wasm.worker';
 import { isWebpSupported } from './environment';
 import { dataUriToBlob, blobToDataUri } from './files';
 import { pause } from './schedulers';
@@ -50,7 +49,7 @@ export async function webpToPngBase64(key: string, url: string): Promise<string>
 
 function initWebpWorker() {
   if (!worker) {
-    worker = new WebpWorker() as IWebpWorker;
+    worker = new Worker(new URL('../lib/webp/webp_wasm.worker.js', import.meta.url)) as IWebpWorker;
     worker.wasmReady = false;
     worker.onmessage = handleLibWebpMessage;
   }

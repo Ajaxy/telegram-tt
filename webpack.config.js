@@ -1,12 +1,12 @@
 const path = require('path');
 const dotenv = require('dotenv');
 
-const { EnvironmentPlugin } = require('webpack');
+const { EnvironmentPlugin, ProvidePlugin } = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 dotenv.config();
 
@@ -14,6 +14,7 @@ module.exports = (env = {}, argv = {}) => {
   return {
     mode: argv.mode,
     entry: './src/index.tsx',
+    target: 'web',
     devServer: {
       contentBase: [
         path.resolve(__dirname, 'public'),
@@ -30,6 +31,7 @@ module.exports = (env = {}, argv = {}) => {
     output: {
       filename: '[name].[contenthash].js',
       chunkFilename: '[id].[chunkhash].js',
+      assetModuleFilename: '[name].[contenthash].[ext]',
       path: path.resolve(__dirname, argv['output-path'] || 'dist'),
     },
     module: {
@@ -63,10 +65,7 @@ module.exports = (env = {}, argv = {}) => {
         },
         {
           test: /\.(woff(2)?|ttf|eot|svg|png|jpg|tgs)(\?v=\d+\.\d+\.\d+)?$/,
-          loader: 'file-loader',
-          options: {
-            name: '[name].[contenthash].[ext]',
-          },
+          type: 'asset/resource',
         },
         {
           test: /-extra\.json$/,
@@ -92,6 +91,12 @@ module.exports = (env = {}, argv = {}) => {
     },
     resolve: {
       extensions: ['.js', '.ts', '.tsx'],
+      fallback: {
+        path: require.resolve("path-browserify"),
+        os: require.resolve("os-browserify/browser"),
+        buffer: require.resolve("buffer/"),
+        fs: false,
+      }
     },
     plugins: [
       new HtmlPlugin({
@@ -110,6 +115,9 @@ module.exports = (env = {}, argv = {}) => {
         TELEGRAM_T_API_HASH: '',
         TEST_SESSION: '',
       }),
+      new ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+      }),
       ...(argv.mode === 'production' ? [
         new BundleAnalyzerPlugin({
           analyzerMode: 'static',
@@ -117,9 +125,6 @@ module.exports = (env = {}, argv = {}) => {
         }),
       ] : []),
     ],
-    node: {
-      fs: 'empty',
-    },
 
     ...(!env.noSourceMap && {
       devtool: 'source-map',
@@ -130,7 +135,7 @@ module.exports = (env = {}, argv = {}) => {
         minimize: !env.noMinify,
         minimizer: [
           new TerserJSPlugin({ sourceMap: true }),
-          new OptimizeCSSAssetsPlugin({}),
+          new CssMinimizerPlugin(),
         ],
       },
     }),
