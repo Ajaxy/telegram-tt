@@ -6,6 +6,7 @@ import { GlobalActions, GlobalState } from '../../global/types';
 import '../../modules/actions/initial';
 import { pick } from '../../util/iteratees';
 import { PLATFORM_ENV } from '../../util/environment';
+import windowSize from '../../util/windowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
 import UiLoader from '../common/UiLoader';
@@ -42,6 +43,15 @@ const Auth: FC<StateProps & DispatchProps> = ({
     (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
     || (isMobile && authState === 'authorizationStateWaitQrCode'), handleChangeAuthorizationMethod,
   );
+
+  // Prevent refresh when rotating device
+  useEffect(() => {
+    windowSize.disableRefresh();
+
+    return () => {
+      windowSize.enableRefresh();
+    };
+  }, []);
 
   switch (authState) {
     case 'authorizationStateWaitCode':
