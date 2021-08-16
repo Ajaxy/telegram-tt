@@ -15,7 +15,8 @@
     "lint:fix": "npm run lint -- --fix",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint:fix": "eslint ./src/lib/gramjs --ignore-path=src/lib/gramjs/.eslintignore --fix",
-    "test": "cross-env APP_ENV=test jest --verbose --forceExit"
+    "test": "cross-env APP_ENV=test jest --verbose --forceExit",
+    "prepare": "husky install"
   },
   "engines": {
     "node": "^12.13",
