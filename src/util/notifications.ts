@@ -321,7 +321,7 @@ type NotificationData = {
   icon?: string;
 };
 
-const shownNotifications = new Set();
+const handledNotifications = new Set();
 let pendingNotifications: Record<number, NotificationData[]> = {};
 
 async function showNotifications(groupLimit: number = 2) {
@@ -362,8 +362,8 @@ const flushNotifications = debounce(showNotifications, 1000, false);
 
 async function handleNotification(data: NotificationData, groupLimit?: number) {
   // Dont show already triggered notification
-  if (shownNotifications.has(data.messageId)) {
-    shownNotifications.delete(data.messageId);
+  if (handledNotifications.has(data.messageId)) {
+    handledNotifications.delete(data.messageId);
     return;
   }
 
@@ -373,6 +373,18 @@ async function handleNotification(data: NotificationData, groupLimit?: number) {
   }
   pendingNotifications[groupId].push(data);
   await flushNotifications(groupLimit);
+
+  if (checkIfPushSupported()) {
+    if (navigator.serviceWorker.controller) {
+      // notify service worker that notification was handled locally
+      navigator.serviceWorker.controller.postMessage({
+        type: 'notificationHandled',
+        payload: data,
+      });
+    }
+  }
+
+  handledNotifications.add(data.messageId);
 }
 
 function showNotification(data: NotificationData) {
