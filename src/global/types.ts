@@ -170,6 +170,7 @@ export type GlobalState = {
     messageId?: number;
     direction?: FocusDirection;
     noHighlight?: boolean;
+    isResizingContainer?: boolean;
   };
 
   selectedMessages?: {

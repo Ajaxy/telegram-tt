@@ -71,6 +71,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
               threadId: currentMessageList.threadId,
               messageId: message.id,
               noHighlight: true,
+              isResizingContainer: true,
             });
           }
         }
