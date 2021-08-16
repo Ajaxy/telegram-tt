@@ -51,6 +51,7 @@ const Transition: FC<OwnProps> = ({
 }) => {
   // No need for a container to update on change
   const { animationLevel } = getGlobal().settings.byKey;
+  const currentIndexRef = useRef<number>();
 
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,8 @@ const Transition: FC<OwnProps> = ({
       }
 
       function onAnimationEnd() {
+        if (activeIndex !== currentIndexRef.current) return;
+
         requestAnimationFrame(() => {
           container.classList.remove('animating', 'backwards');
 
@@ -179,6 +182,8 @@ const Transition: FC<OwnProps> = ({
       const toNode = name === 'mv-slide'
         ? childNodes[activeIndex] && childNodes[activeIndex].firstChild
         : childNodes[activeIndex];
+
+      currentIndexRef.current = activeKey;
 
       if (animationLevel > 0 && toNode) {
         waitForAnimationEnd(toNode, onAnimationEnd);
