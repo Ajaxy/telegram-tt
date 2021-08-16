@@ -147,6 +147,7 @@ export function selectChatByUsername(global: GlobalState, username: string) {
   );
 }
 
+// Slow, not to be used in `withGlobal`
 export function selectCountNotMutedUnread(global: GlobalState) {
   const activeChatIds = global.chats.listIds.active;
   if (!activeChatIds) {
@@ -154,6 +155,8 @@ export function selectCountNotMutedUnread(global: GlobalState) {
   }
 
   const chats = global.chats.byId;
+  const notifySettings = selectNotifySettings(global);
+  const notifyExceptions = selectNotifyExceptions(global);
 
   return activeChatIds.reduce((acc, chatId) => {
     const chat = chats[chatId];
@@ -161,7 +164,10 @@ export function selectCountNotMutedUnread(global: GlobalState) {
     if (
       chat
       && chat.unreadCount
-      && !selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))
+      && chat.isListed
+      && !chat.isNotJoined
+      && !chat.isRestricted
+      && (chat.unreadMentionsCount || !selectIsChatMuted(chat, notifySettings, notifyExceptions))
     ) {
       return acc + chat.unreadCount;
     }

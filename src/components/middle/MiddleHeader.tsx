@@ -1,17 +1,17 @@
 import React, {
   FC, useCallback, useMemo, memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 import cycleRestrict from '../../util/cycleRestrict';
 
 import { GlobalActions, MessageListType } from '../../global/types';
 import {
   ApiMessage,
   ApiChat,
+  ApiUser,
   ApiTypingStatus,
-  MAIN_THREAD_ID, ApiUser,
+  MAIN_THREAD_ID,
 } from '../../api/types';
-import { NotifyException, NotifySettings } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
@@ -24,11 +24,9 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
   isChatPrivate,
-  isChatArchived,
   getMessageKey,
   getChatTitle,
   getSenderTitle,
-  selectIsChatMuted,
 } from '../../modules/helpers';
 import {
   selectChat,
@@ -44,8 +42,7 @@ import {
   selectScheduledIds,
   selectIsInSelectMode,
   selectIsChatWithBot,
-  selectNotifySettings,
-  selectNotifyExceptions,
+  selectCountNotMutedUnread,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
@@ -91,8 +88,6 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
   lastSyncTime?: number;
-  notifySettings: NotifySettings;
-  notifyExceptions?: Record<number, NotifyException>;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
 };
@@ -122,8 +117,6 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isChatWithSelf,
   isChatWithBot,
   lastSyncTime,
-  notifySettings,
-  notifyExceptions,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   openChatWithInfo,
@@ -221,32 +214,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    let isActive = false;
-
-    const totalCount = Object.values(chatsById).reduce((total, currentChat) => {
-      if (isChatArchived(currentChat)) {
-        return total;
-      }
-
-      const count = currentChat.unreadCount || 0;
-      if (
-        count && (!selectIsChatMuted(currentChat, notifySettings, notifyExceptions) || currentChat.unreadMentionsCount)
-      ) {
-        isActive = true;
-      }
-
-      return total + count;
-    }, 0);
-
-    if (!totalCount) {
-      return undefined;
-    }
-
-    return {
-      isActive,
-      totalCount,
-    };
-  }, [isLeftColumnHideable, chatsById, notifySettings, notifyExceptions]);
+    return selectCountNotMutedUnread(getGlobal()) || undefined;
+  }, [isLeftColumnHideable, chatsById]);
 
   const canToolsCollideWithChatInfo = (
     windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
@@ -340,7 +309,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderMainThreadInfo() {
     return (
       <>
-        {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, unreadCount)}
+        {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, true)}
         <div className="chat-info-wrapper" onClick={handleHeaderClick}>
           {isChatPrivate(chatId) ? (
             <PrivateChatInfo
@@ -366,7 +335,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
-  function renderBackButton(asClose = false, unreadCountInfo?: typeof unreadCount) {
+  function renderBackButton(asClose = false, withUnreadCount = false) {
     return (
       <div className="back-button">
         <Button
@@ -378,9 +347,9 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <div className={buildClassName('animated-close-icon', !asClose && 'state-back')} />
         </Button>
-        {unreadCountInfo && (
-          <div className={`unread-count ${unreadCountInfo.isActive ? 'active' : ''}`}>
-            {formatIntegerCompact(unreadCountInfo.totalCount)}
+        {withUnreadCount && unreadCount && (
+          <div className="unread-count active">
+            {formatIntegerCompact(unreadCount)}
           </div>
         )}
       </div>
@@ -466,8 +435,6 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),
       lastSyncTime,
-      notifySettings: selectNotifySettings(global),
-      notifyExceptions: selectNotifyExceptions(global),
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
     };
