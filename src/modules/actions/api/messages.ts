@@ -50,13 +50,14 @@ import {
   selectEditingMessage,
   selectScheduledMessage,
   selectNoWebPage,
+  selectFirstUnreadId,
 } from '../../selectors';
-import { rafPromise, throttle } from '../../../util/schedulers';
+import { debounce, rafPromise } from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/environment';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
-const runThrottledForMarkRead = throttle((cb) => cb(), 1000, true);
+const runDebouncedForMarkRead = debounce((cb) => cb(), 1000, false);
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
@@ -443,21 +444,42 @@ addReducer('markMessageListRead', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
-    return;
+    return undefined;
   }
 
   const { chatId, threadId } = currentMessageList;
   const chat = selectThreadOriginChat(global, chatId, threadId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
   const { maxId } = payload!;
 
-  runThrottledForMarkRead(() => {
+  runDebouncedForMarkRead(() => {
     void callApi('markMessageListRead', {
       serverTimeOffset, chat, threadId, maxId,
     });
+  });
+
+  // TODO Support local marking read for threads
+  if (threadId !== MAIN_THREAD_ID) {
+    return undefined;
+  }
+
+  const viewportIds = selectViewportIds(global, chatId, threadId);
+  const minId = selectFirstUnreadId(global, chatId, threadId);
+  if (!viewportIds || !minId || !chat.unreadCount) {
+    return undefined;
+  }
+
+  const readCount = countSortedIds(viewportIds!, minId, maxId);
+  if (!readCount) {
+    return undefined;
+  }
+
+  return updateChat(global, chatId, {
+    lastReadInboxMessageId: maxId,
+    unreadCount: Math.max(0, chat.unreadCount - readCount),
   });
 });
 
@@ -891,4 +913,20 @@ async function loadScheduledHistory(chat: ApiChat, historyHash?: number) {
   global = replaceScheduledMessages(global, chat.id, byId, hash);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   setGlobal(global);
+}
+
+function countSortedIds(ids: number[], from: number, to: number) {
+  let count = 0;
+
+  for (let i = 0, l = ids.length; i < l; i++) {
+    if (ids[i] >= from && ids[i] <= to) {
+      count++;
+    }
+
+    if (ids[i] >= to) {
+      break;
+    }
+  }
+
+  return count;
 }

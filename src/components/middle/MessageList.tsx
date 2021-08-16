@@ -140,6 +140,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
   const listItemElementsRef = useRef<HTMLDivElement[]>();
+  // Not updated (as we want the unread divider to keep its position)
   const memoUnreadDividerBeforeIdRef = useRef<number | undefined>(firstUnreadId);
   // Updated every time (to be used from intersection callback closure)
   const memoFirstUnreadIdRef = useRef<number>();
@@ -485,7 +486,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           noAvatars={noAvatars}
           containerRef={containerRef}
           anchorIdRef={anchorIdRef}
-          memoFirstUnreadIdRef={memoUnreadDividerBeforeIdRef}
+          memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
+          memoFirstUnreadIdRef={memoFirstUnreadIdRef}
           threadId={threadId}
           type={type}
           threadTopMessageId={threadTopMessageId}
