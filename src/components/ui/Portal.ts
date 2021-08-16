@@ -8,7 +8,10 @@ type OwnProps = {
 };
 
 const Portal: FC<OwnProps> = ({ containerId, className, children }) => {
-  const elementRef = useRef(document.createElement('div'));
+  const elementRef = useRef<HTMLDivElement>();
+  if (!elementRef.current) {
+    elementRef.current = document.createElement('div');
+  }
 
   useLayoutEffect(() => {
     const container = document.querySelector<HTMLDivElement>(containerId || '#portals');
@@ -16,7 +19,7 @@ const Portal: FC<OwnProps> = ({ containerId, className, children }) => {
       return undefined;
     }
 
-    const element = elementRef.current;
+    const element = elementRef.current!;
     if (className) {
       element.classList.add(className);
     }
