@@ -24,32 +24,6 @@
   }
 
   /*
-   * scroll-slide
-   */
-
-  &.scroll-slide {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-wrap: nowrap;
-
-    > * {
-      position: static;
-      flex-shrink: 0;
-
-      &:not(.active):not(.from):not(.to) {
-        display: block !important;
-        transform: scale(0);
-
-        &.through {
-          display: none !important;
-        }
-      }
-    }
-  }
-
-  /*
    * slide
    */
 
