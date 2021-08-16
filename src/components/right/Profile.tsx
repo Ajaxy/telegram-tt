@@ -333,7 +333,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
             <ListItem
               key={id}
               teactOrderKey={i}
-              className="chat-item-clickable scroll-item"
+              className="chat-item-clickable scroll-item small-icon"
               onClick={() => handleMemberClick(id)}
               contextActions={getMemberContextAction(id)}
             >

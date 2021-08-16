@@ -15,13 +15,14 @@
   cursor: pointer;
   unicode-bidi: plaintext;
 
-  @media (hover:hover) {
+  @media (hover: hover) {
     &:hover, &:focus {
       background-color: var(--color-chat-hover);
       text-decoration: none;
       color: inherit;
     }
   }
+
   @media (max-width: 600px) {
     &:focus, &:hover, &:active {
       text-decoration: none;
@@ -80,7 +81,7 @@
       margin-right: 0;
     }
 
-      > .Switcher {
+    > .Switcher {
       margin-left: 0;
       margin-right: auto;
     }

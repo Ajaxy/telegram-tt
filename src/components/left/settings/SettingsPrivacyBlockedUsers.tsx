@@ -60,7 +60,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
     const chat = !isPrivate ? chatsByIds[contactId] : undefined;
 
     const className = buildClassName(
-      'Chat chat-item-clickable blocked-list-item',
+      'Chat chat-item-clickable blocked-list-item small-icon',
       isPrivate ? 'private' : 'group',
     );
 

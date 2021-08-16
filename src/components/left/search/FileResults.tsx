@@ -80,7 +80,7 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
       return (
         <div
-          className="ListItem"
+          className="ListItem small-icon"
           key={message.id}
         >
           {shouldDrawDateDivider && (

@@ -72,7 +72,7 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps & DispatchProps> =
           {lang('AuthSessions.CurrentSession')}
         </h4>
 
-        <ListItem narrow inactive>
+        <ListItem narrow inactive className="no-icon">
           <div className="multiline-menu-item" dir="auto">
             <span className="title" dir="auto">{session.appName}</span>
             <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
@@ -81,7 +81,7 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps & DispatchProps> =
         </ListItem>
 
         <ListItem
-          className="destructive mb-0"
+          className="destructive mb-0 no-icon"
           icon="stop"
           ripple
           narrow
@@ -118,6 +118,7 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps & DispatchProps> =
             handleTerminateSessionClick(session.hash);
           },
         }]}
+        className="no-icon"
       >
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>

@@ -174,7 +174,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
 
         {userFolders && userFolders.length ? userFolders.map((folder) => (
           <ListItem
-            className="mb-2"
+            className="mb-2 no-icon"
             narrow
             multiline
             onClick={() => onEditFolder(foldersById[folder.id])}
