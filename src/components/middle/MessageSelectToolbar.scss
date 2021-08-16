@@ -51,7 +51,7 @@
     opacity: 0;
     pointer-events: none;
 
-    &-inner {
+    .shown-inner {
       transform: scaleX(var(--toolbar-hidden-scale, 1));
     }
 

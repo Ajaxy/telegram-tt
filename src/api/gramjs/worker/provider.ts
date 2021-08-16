@@ -1,5 +1,3 @@
-import Worker from 'worker-loader!./worker';
-
 import { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
 import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
@@ -27,7 +25,7 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
       console.log('>>> START LOAD WORKER');
     }
 
-    worker = new Worker();
+    worker = new Worker(new URL('./worker.ts', import.meta.url));
     subscribeToWorker(onUpdate);
   }
 

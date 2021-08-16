@@ -1,5 +1,3 @@
-import Worker from 'worker-loader!./rlottie.worker';
-
 import {
   DPR,
   IS_SINGLE_COLUMN_LAYOUT,
@@ -29,7 +27,7 @@ const LOW_PRIORITY_MAX_FPS = 30;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
 
-const workers = new Array(MAX_WORKERS).fill(undefined).map(() => new WorkerConnector(new Worker()));
+const workers = new Array(MAX_WORKERS).fill(undefined).map(() => new WorkerConnector(new Worker(new URL('./rlottie.worker.ts', import.meta.url))));
 let lastWorkerIndex = -1;
 
 class RLottie {

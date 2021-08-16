@@ -1,6 +1,3 @@
-import DecoderWorker from 'worker-loader!opus-recorder/dist/decoderWorker.min';
-import WavWorker from 'worker-loader!opus-recorder/dist/waveWorker.min';
-
 const SAMPLE_RATE = 48000;
 const BIT_DEPTH = 16;
 
@@ -10,8 +7,8 @@ export async function oggToWav(opusData: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const typedArray = new Uint8Array(arrayBuffer);
 
-    let decoderWorker: DecoderWorker | undefined = new DecoderWorker();
-    let wavWorker: WavWorker | undefined = new WavWorker();
+    let decoderWorker: Worker | undefined = new Worker(new URL('opus-recorder/dist/decoderWorker.min.js', import.meta.url));
+    let wavWorker: Worker | undefined = new Worker(new URL('opus-recorder/dist/waveWorker.min.js', import.meta.url));
 
     decoderWorker.onmessage = (e) => {
       // eslint-disable-next-line no-null/no-null
