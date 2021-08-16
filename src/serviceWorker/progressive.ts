@@ -24,7 +24,7 @@ type RequestStates = {
 const MB = 1024 * 1024;
 const DEFAULT_PART_SIZE = 0.5 * MB;
 const MAX_END_TO_CACHE = 2 * MB - 1; // We only cache the first 2 MB of each file
-const PART_TIMEOUT = 30000;
+const PART_TIMEOUT = 60000;
 
 const requestStates = new Map<string, RequestStates>();
 
