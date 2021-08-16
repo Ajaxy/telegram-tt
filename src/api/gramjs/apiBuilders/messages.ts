@@ -29,7 +29,6 @@ import { getApiChatIdFromMtpPeer } from './chats';
 import { buildStickerFromDocument } from './symbols';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { interpolateArray } from '../../../util/waveform';
-import { getCurrencySign } from '../../../components/middle/helpers/getCurrencySign';
 import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId } from '../helpers';
 
@@ -113,6 +112,7 @@ type UniversalMessage = (
 
 export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalMessage): ApiMessage {
   const fromId = mtpMessage.fromId ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
+  const peerId = mtpMessage.peerId ? getApiChatIdFromMtpPeer(mtpMessage.peerId) : undefined;
   const isChatWithSelf = !fromId && chatId === currentUserId;
   const isOutgoing = (mtpMessage.out && !mtpMessage.post) || (isChatWithSelf && !mtpMessage.fwdFrom);
 
@@ -131,7 +131,8 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     };
   }
 
-  const action = mtpMessage.action && buildAction(mtpMessage.action, fromId, Boolean(mtpMessage.post), isOutgoing);
+  const action = mtpMessage.action
+    && buildAction(mtpMessage.action, fromId, peerId, Boolean(mtpMessage.post), isOutgoing);
   if (action) {
     content.action = action;
   }
@@ -500,13 +501,15 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
   const {
     description: text, title, photo, test, totalAmount, currency, receiptMsgId,
   } = media;
-  const currencySign = getCurrencySign(currency);
+
   return {
     text,
     title,
     photoUrl: photo && photo.url,
     receiptMsgId,
-    description: `${currencySign}${(Number(totalAmount) / 100).toFixed(2)} ${test ? 'TEST INVOICE' : ''}`,
+    amount: Number(totalAmount),
+    currency,
+    isTest: test,
   };
 }
 
@@ -567,6 +570,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
 function buildAction(
   action: GramJs.TypeMessageAction,
   senderId: number | undefined,
+  targetPeerId: number | undefined,
   isChannelPost: boolean,
   isOutgoing: boolean,
 ): ApiAction | undefined {
@@ -574,7 +578,9 @@ function buildAction(
     return undefined;
   }
 
-  let text = '';
+  let amount: number | undefined;
+  let currency: string | undefined;
+  let text: string;
   const translationValues = [];
   let type: ApiAction['type'] = 'other';
   let photo: ApiPhoto | undefined;
@@ -661,10 +667,13 @@ function buildAction(
     translationValues.push('%action_origin%');
     type = 'contactSignUp';
   } else if (action instanceof GramJs.MessageActionPaymentSent) {
-    const currencySign = getCurrencySign(action.currency);
-    const amount = (Number(action.totalAmount) / 100).toFixed(2);
-    text = 'Notification.PaymentSent';
-    translationValues.push(currencySign, amount, '%product%');
+    amount = Number(action.totalAmount);
+    currency = action.currency;
+    text = 'PaymentSuccessfullyPaid';
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+    }
+    translationValues.push('%payment_amount%', '%target_user%', '%product%');
   } else if (action instanceof GramJs.MessageActionGroupCall) {
     if (action.duration) {
       const mins = Math.max(Math.round(action.duration / 60), 1);
@@ -691,6 +700,8 @@ function buildAction(
     targetUserIds,
     targetChatId,
     photo, // TODO Only used internally now, will be used for the UI in future
+    amount,
+    currency,
     translationValues,
   };
 }
@@ -739,7 +750,7 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
         type = 'requestPoll';
       } else if (button instanceof GramJs.KeyboardButtonBuy) {
         if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
-          text = 'Receipt';
+          text = 'PaymentReceipt';
           value = media.receiptMsgId;
         }
         type = 'buy';

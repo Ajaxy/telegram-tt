@@ -20,7 +20,7 @@ export function setRequestInfoId(global: GlobalState, id: string): GlobalState {
     ...global,
     payment: {
       ...global.payment,
-      formId: id,
+      requestId: id,
     },
   };
 }
@@ -42,7 +42,9 @@ export function setInvoiceMessageInfo(global: GlobalState, message: ApiMessage):
   const {
     title,
     text,
-    description,
+    amount,
+    currency,
+    isTest,
     photoUrl,
   } = message.content.invoice;
   return {
@@ -52,8 +54,10 @@ export function setInvoiceMessageInfo(global: GlobalState, message: ApiMessage):
       invoiceContent: {
         title,
         text,
-        description,
         photoUrl,
+        amount,
+        currency,
+        isTest,
       },
     },
   };

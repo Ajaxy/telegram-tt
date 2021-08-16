@@ -2,9 +2,11 @@ import React, {
   FC, useCallback, memo, useMemo, useEffect,
 } from '../../lib/teact/teact';
 
-import { ShippingOption } from '../../types/index';
+import { ShippingOption } from '../../types';
 
+import { formatCurrency } from '../../util/formatCurrency';
 import { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+import useLang from '../../hooks/useLang';
 
 import RadioGroup from '../ui/RadioGroup';
 
@@ -13,7 +15,7 @@ import './Shipping.scss';
 export type OwnProps = {
   state: FormState;
   shippingOptions: ShippingOption[];
-  currency: string;
+  currency?: string;
   dispatch: FormEditDispatch;
 };
 
@@ -23,6 +25,8 @@ const Shipping: FC<OwnProps> = ({
   currency,
   dispatch,
 }) => {
+  const lang = useLang();
+
   useEffect(() => {
     if (!shippingOptions || state.shipping) {
       return;
@@ -36,9 +40,9 @@ const Shipping: FC<OwnProps> = ({
 
   const options = useMemo(() => (shippingOptions.map(({ id: value, title: label, amount }) => ({
     label,
-    subLabel: `${currency} ${String(amount / 100)}`,
+    subLabel: formatCurrency(amount, currency, lang.code),
     value,
-  }))), [shippingOptions, currency]);
+  }))), [shippingOptions, currency, lang.code]);
 
   return (
     <div className="Shipping">

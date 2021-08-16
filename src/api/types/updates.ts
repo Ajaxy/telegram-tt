@@ -318,6 +318,11 @@ export type ApiError = {
   textParams?: Record<string, string>;
 };
 
+export type ApiFieldError = {
+  field: string;
+  message: string;
+};
+
 export type ApiInviteInfo = {
   title: string;
   hash: string;

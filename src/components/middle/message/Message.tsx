@@ -716,11 +716,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             onCancelMediaTransfer={handleCancelUpload}
           />
         )}
-        {invoice && (
-          <Invoice
-            message={message}
-          />
-        )}
+        {invoice && <Invoice message={message} />}
       </div>
     );
   }

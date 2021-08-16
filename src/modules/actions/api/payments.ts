@@ -1,16 +1,20 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { PaymentStep } from '../../../types/index';
-import { callApi } from '../../../api/gramjs';
+import { PaymentStep } from '../../../types';
+import { ApiChat } from '../../../api/types';
+
 import {
   selectPaymentMessageId,
   selectPaymentRequestId,
   selectProviderPublishableKey,
   selectStripeCredentials,
   selectChatMessage,
+  selectPaymentChatId,
+  selectChat,
+  selectPaymentFormId,
 } from '../../selectors';
-
-import { getStripeError } from '../../helpers/payments';
+import { callApi } from '../../../api/gramjs';
+import { getStripeError } from '../../helpers';
 import { buildQueryString } from '../../../util/requestQuery';
 
 import {
@@ -27,22 +31,28 @@ import {
 
 addReducer('validateRequestedInfo', (global, actions, payload) => {
   const { requestInfo, saveInfo } = payload;
+  const chatId = selectPaymentChatId(global);
+  const chat = chatId && selectChat(global, chatId);
   const messageId = selectPaymentMessageId(global);
-  if (!messageId) {
+  if (!chat || !messageId) {
     return;
   }
-  validateRequestedInfo(messageId, requestInfo, saveInfo);
+  void validateRequestedInfo(chat, messageId, requestInfo, saveInfo);
 });
 
-async function validateRequestedInfo(messageId: number, requestInfo: any, shouldSave?: true) {
-  const result = await callApi('validateRequestedInfo', { messageId, requestInfo, shouldSave });
+async function validateRequestedInfo(chat: ApiChat, messageId: number, requestInfo: any, shouldSave?: true) {
+  const result = await callApi('validateRequestedInfo', {
+    chat, messageId, requestInfo, shouldSave,
+  });
   if (!result) {
     return;
   }
+
   const { id, shippingOptions } = result;
   if (!id) {
     return;
   }
+
   let global = setRequestInfoId(getGlobal(), id);
   if (shippingOptions) {
     global = updateShippingOptions(global, shippingOptions);
@@ -54,16 +64,16 @@ async function validateRequestedInfo(messageId: number, requestInfo: any, should
 }
 
 addReducer('getPaymentForm', (global, actions, payload) => {
-  const { messageId } = payload;
-  if (!messageId) {
+  const { chat, messageId } = payload;
+  if (!chat || !messageId) {
     return;
   }
-  getPaymentForm(messageId);
+  void getPaymentForm(chat, messageId);
 });
 
 
-async function getPaymentForm(messageId: number) {
-  const result = await callApi('getPaymentForm', { messageId });
+async function getPaymentForm(chat: ApiChat, messageId: number) {
+  const result = await callApi('getPaymentForm', { chat, messageId });
   if (!result) {
     return;
   }
@@ -82,19 +92,22 @@ async function getPaymentForm(messageId: number) {
 
 addReducer('getReceipt', (global, actions, payload) => {
   const { receiptMessageId, chatId, messageId } = payload;
-  if (!messageId || !receiptMessageId || !chatId) {
+  const chat = chatId && selectChat(global, chatId);
+  if (!messageId || !receiptMessageId || !chat) {
     return;
   }
-  getReceipt(messageId, receiptMessageId, chatId);
+
+  void getReceipt(chat, messageId, receiptMessageId);
 });
 
-async function getReceipt(messageId: number, receiptMessageId: number, chatId: number) {
-  const result = await callApi('getReceipt', receiptMessageId);
+async function getReceipt(chat: ApiChat, messageId: number, receiptMessageId: number) {
+  const result = await callApi('getReceipt', chat, receiptMessageId);
   if (!result) {
     return;
   }
+
   let global = getGlobal();
-  const message = selectChatMessage(global, chatId, messageId);
+  const message = selectChatMessage(global, chat.id, messageId);
   global = setReceipt(global, result, message);
   setGlobal(global);
 }
@@ -126,34 +139,40 @@ addReducer('sendCredentialsInfo', (global, actions, payload) => {
   }
   const { credentials } = payload;
   const { data } = credentials;
-  sendStipeCredentials(data, publishableKey);
+  void sendStripeCredentials(data, publishableKey);
 });
 
 addReducer('sendPaymentForm', (global, actions, payload) => {
   const { shippingOptionId, saveCredentials } = payload;
+  const chatId = selectPaymentChatId(global);
+  const chat = chatId && selectChat(global, chatId);
   const messageId = selectPaymentMessageId(global);
+  const formId = selectPaymentFormId(global);
   const requestInfoId = selectPaymentRequestId(global);
   const publishableKey = selectProviderPublishableKey(global);
   const stripeCredentials = selectStripeCredentials(global);
-  if (!messageId || !publishableKey) {
+  if (!chat || !messageId || !publishableKey || !formId) {
     return;
   }
-  sendPaymentForm(messageId, {
+
+  void sendPaymentForm(chat, messageId, formId, {
     save: saveCredentials,
     data: stripeCredentials,
   }, requestInfoId, shippingOptionId);
 });
 
-async function sendStipeCredentials(data: {
-  cardNumber: string;
-  cardholder?: string;
-  expiryMonth: string;
-  expiryYear: string;
-  cvv: string;
-  country: string;
-  zip: string;
-},
-publishableKey: string) {
+async function sendStripeCredentials(
+  data: {
+    cardNumber: string;
+    cardholder?: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cvv: string;
+    country: string;
+    zip: string;
+  },
+  publishableKey: string,
+) {
   const query = buildQueryString({
     'card[number]': data.cardNumber,
     'card[exp_month]': data.expiryMonth,
@@ -195,13 +214,15 @@ publishableKey: string) {
 }
 
 async function sendPaymentForm(
+  chat: ApiChat,
   messageId: number,
+  formId: string,
   credentials: any,
   requestedInfoId?: string,
   shippingOptionId?: string,
 ) {
   const result = await callApi('sendPaymentForm', {
-    messageId, credentials, requestedInfoId, shippingOptionId,
+    chat, messageId, formId, credentials, requestedInfoId, shippingOptionId,
   });
   if (result) {
     const global = clearPayment(getGlobal());

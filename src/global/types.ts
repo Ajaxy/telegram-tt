@@ -19,6 +19,7 @@ import {
   ApiSession,
   ApiNewPoll,
   ApiInviteInfo,
+  ApiFieldError,
 } from '../api/types';
 import {
   FocusDirection,
@@ -344,18 +345,22 @@ export type GlobalState = {
   };
 
   payment: {
+    chatId?: number;
     messageId?: number;
     step?: PaymentStep;
     shippingOptions?: ShippingOption[];
     formId?: string;
+    requestId?: string;
     savedInfo?: ApiPaymentSavedInfo;
     canSaveCredentials?: boolean;
     invoice?: Invoice;
     invoiceContent?: {
       title?: string;
       text?: string;
-      description?: string;
       photoUrl?: string;
+      amount?: number;
+      currency?: string;
+      isTest?: boolean;
     };
     nativeProvider?: string;
     providerId?: number;
@@ -377,7 +382,7 @@ export type GlobalState = {
     receipt?: Receipt;
     error?: {
       field?: string;
-      fieldError?: string;
+      message?: string;
       description: string;
     };
     isPaymentModalOpen?: boolean;
@@ -501,7 +506,7 @@ export type ActionTypes = (
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |
   'deleteDeviceToken' |
   // payment
-  'openPaymentModal' | 'closePaymentModal' |
+  'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |
   'sendCredentialsInfo' | 'setInvoiceMessageInfo' | 'clearPaymentError' | 'clearReceipt'
 );

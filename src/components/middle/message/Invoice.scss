@@ -26,6 +26,10 @@
         border-radius: var(--border-radius-messages-small);
         color: var(--color-text);
         font-weight: 500;
+
+        span {
+          margin-left: .5rem;
+        }
       }
     }
 

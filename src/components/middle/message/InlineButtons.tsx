@@ -4,6 +4,7 @@ import { ApiKeyboardButton, ApiMessage } from '../../../api/types';
 
 import { RE_TME_LINK } from '../../../config';
 import renderText from '../../common/helpers/renderText';
+import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 
@@ -15,6 +16,8 @@ type OwnProps = {
 };
 
 const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
+  const lang = useLang();
+
   return (
     <div className="InlineButtons">
       {message.inlineButtons!.map((row) => (
@@ -26,7 +29,8 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
               disabled={button.type === 'NOT_SUPPORTED'}
               onClick={() => onClick({ button })}
             >
-              {renderText(button.text)}
+              {renderText(lang(button.text))}
+              {button.type === 'buy' && <i className="icon-card" />}
               {button.type === 'url' && !button.value!.match(RE_TME_LINK) && <i className="icon-arrow-right" />}
             </Button>
           ))}
