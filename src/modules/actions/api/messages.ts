@@ -57,7 +57,7 @@ import { IS_IOS } from '../../../util/environment';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
-const runDebouncedForMarkRead = debounce((cb) => cb(), 1000, false);
+const runDebouncedForMarkRead = debounce((cb) => cb(), 500, false);
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {

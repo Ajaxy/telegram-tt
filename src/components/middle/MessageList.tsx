@@ -140,10 +140,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
   const listItemElementsRef = useRef<HTMLDivElement[]>();
-  // Not updated (as we want the unread divider to keep its position)
-  const memoUnreadDividerBeforeIdRef = useRef<number | undefined>(firstUnreadId);
-  // Updated every time (to be used from intersection callback closure)
   const memoFirstUnreadIdRef = useRef<number>();
+  const memoUnreadDividerBeforeIdRef = useRef<number | undefined>();
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
@@ -161,9 +159,17 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [areMessagesLoaded]);
 
+  // Updated every time (to be used from intersection callback closure)
   useOnChange(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
+
+  // Updated only once when messages are loaded (as we want the unread divider to keep its position)
+  useOnChange(() => {
+    if (areMessagesLoaded) {
+      memoUnreadDividerBeforeIdRef.current = memoFirstUnreadIdRef.current;
+    }
+  }, [areMessagesLoaded]);
 
   useOnChange(() => {
     memoFocusingIdRef.current = focusingId;
