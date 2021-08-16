@@ -146,9 +146,9 @@ const Transition: FC<OwnProps> = ({
       }
 
       function onAnimationEnd() {
-        if (activeIndex !== currentIndexRef.current) return;
-
         requestAnimationFrame(() => {
+          if (activeIndex !== currentIndexRef.current) return;
+
           container.classList.remove('animating', 'backwards');
 
           childNodes.forEach((node, i) => {
