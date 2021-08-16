@@ -19,7 +19,8 @@ import {
   selectIsChatListed,
   selectChatListType,
   selectCurrentMessageList,
-  selectCountNotMutedUnread, selectNotifySettings,
+  selectCountNotMutedUnread,
+  selectNotifySettings,
 } from '../../selectors';
 import { throttle } from '../../../util/schedulers';
 
@@ -40,8 +41,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const newGlobal = updateChat(global, update.id, update.chat, update.newProfilePhoto);
       setGlobal(newGlobal);
 
-      const unreadCount = selectCountNotMutedUnread(newGlobal);
-      runThrottledForUpdateAppBadge(() => updateAppBadge(unreadCount));
+      runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnread(getGlobal())));
       break;
     }
 
@@ -133,8 +133,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
 
-      const unreadCount = selectCountNotMutedUnread(getGlobal());
-      updateAppBadge(unreadCount);
+      updateAppBadge(selectCountNotMutedUnread(getGlobal()));
 
       const { hasWebNotifications } = selectNotifySettings(global);
       if (hasWebNotifications) {
