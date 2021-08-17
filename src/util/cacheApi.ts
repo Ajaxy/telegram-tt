@@ -7,7 +7,9 @@ export enum Type {
   Json,
 }
 
-export async function fetch(cacheName: string, key: string, type: Type) {
+export async function fetch(
+  cacheName: string, key: string, type: Type, isHtmlAllowed = false,
+) {
   if (!cacheApi) {
     return undefined;
   }
@@ -36,8 +38,13 @@ export async function fetch(cacheName: string, key: string, type: Type) {
         if (!blob.type) {
           const contentType = response.headers.get('Content-Type');
           if (contentType) {
-            return new Blob([blob], { type: contentType });
+            return new Blob([blob], { type: isHtmlAllowed ? contentType : contentType.replace(/html/gi, '') });
           }
+        }
+
+        // Prevent HTML-in-video attacks (for files that were cached before fix)
+        if (!isHtmlAllowed && blob.type.includes('html')) {
+          return new Blob([blob], { type: blob.type.replace(/html/gi, '') });
         }
 
         return blob;

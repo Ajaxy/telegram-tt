@@ -2,7 +2,7 @@ import React, {
   FC, useCallback, useEffect, useState, memo, useRef,
 } from '../../lib/teact/teact';
 
-import { ApiMessage } from '../../api/types';
+import { ApiMediaFormat, ApiMessage } from '../../api/types';
 
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
@@ -62,7 +62,9 @@ const Document: FC<OwnProps> = ({
   const [isDownloadAllowed, setIsDownloadAllowed] = useState(false);
   const {
     mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'download'), !isDownloadAllowed);
+  } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
+    getMessageMediaHash(message, 'download'), !isDownloadAllowed, undefined, undefined, undefined, true,
+  );
   const {
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(message, uploadProgress || downloadProgress, isDownloadAllowed);

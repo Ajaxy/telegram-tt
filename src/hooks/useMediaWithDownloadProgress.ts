@@ -19,6 +19,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaFormat: T = ApiMediaFormat.BlobUrl,
   cacheBuster?: number,
   delay?: number | false,
+  isHtmlAllowed = false,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
   const isStreaming = mediaFormat === ApiMediaFormat.Stream || (
@@ -47,7 +48,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
 
         startedAtRef.current = Date.now();
 
-        mediaLoader.fetch(mediaHash, mediaFormat, handleProgress).then(() => {
+        mediaLoader.fetch(mediaHash, mediaFormat, isHtmlAllowed, handleProgress).then(() => {
           const spentTime = Date.now() - startedAtRef.current!;
           startedAtRef.current = undefined;
 
@@ -63,7 +64,10 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
         }, STREAMING_TIMEOUT);
       }
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isStreaming, delay, handleProgress]);
+  }, [
+    noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isStreaming, delay, handleProgress,
+    isHtmlAllowed,
+  ]);
 
   useEffect(() => {
     if (noLoad && startedAtRef.current) {
