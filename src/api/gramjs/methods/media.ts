@@ -11,11 +11,10 @@ import {
   MEDIA_CACHE_MAX_BYTES,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
-  TRANSPARENT_PIXEL,
 } from '../../../config';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
-import { blobToDataUri, dataUriToBlob } from '../../../util/files';
+import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = (
@@ -25,9 +24,9 @@ const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo
 
 export default async function downloadMedia(
   {
-    url, mediaFormat, start, end,
+    url, mediaFormat, start, end, isHtmlAllowed,
   }: {
-    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number;
+    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean;
   },
   client: TelegramClient,
   isConnected: boolean,
@@ -35,7 +34,7 @@ export default async function downloadMedia(
 ) {
   const {
     data, mimeType, fullSize,
-  } = await download(url, client, isConnected, onProgress, start, end, mediaFormat) || {};
+  } = await download(url, client, isConnected, onProgress, start, end, mediaFormat, isHtmlAllowed) || {};
   if (!data) {
     return undefined;
   }
@@ -73,6 +72,7 @@ async function download(
   start?: number,
   end?: number,
   mediaFormat?: ApiMediaFormat,
+  isHtmlAllowed?: boolean,
 ) {
   const mediaMatch = url.startsWith('webDocument')
     ? url.match(/(webDocument):(.+)/)
@@ -169,6 +169,11 @@ async function download(
       fullSize = (entity as GramJs.Document).size;
     }
 
+    // Prevent HTML-in-video attacks
+    if (!isHtmlAllowed && mimeType) {
+      mimeType = mimeType.replace(/html/gi, '');
+    }
+
     return { mimeType, data, fullSize };
   } else if (entityType === 'stickerSet') {
     const data = await client.downloadStickerSetThumb(entity);
@@ -234,11 +239,6 @@ async function parseMedia(
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
   if (mediaData instanceof Blob) {
-    // Prevent HTML-in-video attacks
-    if (mediaData.type.includes('text/html')) {
-      return URL.createObjectURL(dataUriToBlob(TRANSPARENT_PIXEL));
-    }
-
     return URL.createObjectURL(mediaData);
   }
 

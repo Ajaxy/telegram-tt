@@ -225,7 +225,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 }
 
 export function downloadMedia(
-  args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number },
+  args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean },
   onProgress?: ApiOnProgress,
 ) {
   return downloadMediaWithClient(args, client, isConnected, onProgress);

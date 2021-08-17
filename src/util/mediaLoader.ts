@@ -7,11 +7,11 @@ import {
 } from '../api/types';
 
 import {
-  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS, TRANSPARENT_PIXEL,
+  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
-import { dataUriToBlob, fetchBlob } from './files';
+import { fetchBlob } from './files';
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
 import { oggToWav } from './oggToWav';
 import { webpToPng } from './webpToPng';
@@ -30,18 +30,18 @@ const memoryCache = new Map<string, ApiPreparedMedia>();
 const fetchPromises = new Map<string, Promise<ApiPreparedMedia | undefined>>();
 
 export function fetch<T extends ApiMediaFormat>(
-  url: string, mediaFormat: T, onProgress?: ApiOnProgress,
+  url: string, mediaFormat: T, isHtmlAllowed = false, onProgress?: ApiOnProgress,
 ): Promise<ApiMediaFormatToPrepared<T>> {
   if (mediaFormat === ApiMediaFormat.Progressive) {
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? getProgressive(url)
-        : fetch(url, ApiMediaFormat.BlobUrl, onProgress)
+        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress)
     ) as Promise<ApiMediaFormatToPrepared<T>>;
   }
 
   if (!fetchPromises.has(url)) {
-    const promise = fetchFromCacheOrRemote(url, mediaFormat, onProgress)
+    const promise = fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed, onProgress)
       .catch((err) => {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -76,10 +76,12 @@ function getProgressive(url: string) {
   return Promise.resolve(progressiveUrl);
 }
 
-async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, onProgress?: ApiOnProgress) {
+async function fetchFromCacheOrRemote(
+  url: string, mediaFormat: ApiMediaFormat, isHtmlAllowed: boolean, onProgress?: ApiOnProgress,
+) {
   if (!MEDIA_CACHE_DISABLED) {
     const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
-    const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!);
+    const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!, isHtmlAllowed);
     if (cached) {
       let media = cached;
 
@@ -136,7 +138,7 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
     return streamUrl;
   }
 
-  const remote = await callApi('downloadMedia', { url, mediaFormat }, onProgress);
+  const remote = await callApi('downloadMedia', { url, mediaFormat, isHtmlAllowed }, onProgress);
   if (!remote) {
     throw new Error('Failed to fetch media');
   }
@@ -167,11 +169,6 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
   if (mediaData instanceof Blob) {
-    // Prevent HTML-in-video attacks
-    if (mediaData.type.includes('text/html')) {
-      return URL.createObjectURL(dataUriToBlob(TRANSPARENT_PIXEL));
-    }
-
     return URL.createObjectURL(mediaData);
   }
 
