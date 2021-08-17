@@ -6,6 +6,7 @@ import buildClassName from '../../util/buildClassName';
 import { formatTime, formatDateToString } from '../../util/dateFormat';
 import useLang, { LangFn } from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
+import useFlag from '../../hooks/useFlag';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -54,6 +55,7 @@ const CalendarModal: FC<OwnProps> = ({
   const defaultSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
   const maxDate = maxAt ? new Date(maxAt) : undefined;
   const prevIsOpen = usePrevious(isOpen);
+  const [isTimeInputFocused, markTimeInputAsFocused, unmarkTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(defaultSelectedDate);
   const [selectedHours, setSelectedHours] = useState<string>(
@@ -74,12 +76,12 @@ const CalendarModal: FC<OwnProps> = ({
   }, [isOpen, defaultSelectedDate, prevIsOpen]);
 
   useEffect(() => {
-    if (isFutureMode && selectedDate.getTime() < defaultSelectedDate.getTime()) {
+    if (isFutureMode && !isTimeInputFocused && selectedDate.getTime() < defaultSelectedDate.getTime()) {
       setSelectedDate(defaultSelectedDate);
       setSelectedHours(formatInputTime(defaultSelectedDate.getHours()));
       setSelectedMinutes(formatInputTime(defaultSelectedDate.getMinutes()));
     }
-  }, [defaultSelectedDate, isFutureMode, selectedDate]);
+  }, [defaultSelectedDate, isTimeInputFocused, isFutureMode, selectedDate]);
 
   const shouldDisableNextMonth = (isPastMode && currentYear >= now.getFullYear() && currentMonth >= now.getMonth())
     || (maxDate && currentYear >= maxDate.getFullYear() && currentMonth >= maxDate.getMonth());
@@ -167,6 +169,8 @@ const CalendarModal: FC<OwnProps> = ({
           inputMode="decimal"
           value={selectedHours}
           onChange={handleChangeHours}
+          onFocus={markTimeInputAsFocused}
+          onBlur={unmarkTimeInputAsFocused}
         />
         :
         <input
@@ -175,6 +179,8 @@ const CalendarModal: FC<OwnProps> = ({
           inputMode="decimal"
           value={selectedMinutes}
           onChange={handleChangeMinutes}
+          onFocus={markTimeInputAsFocused}
+          onBlur={unmarkTimeInputAsFocused}
         />
       </div>
     );
