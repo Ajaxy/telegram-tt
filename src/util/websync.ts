@@ -1,4 +1,4 @@
-import { APP_VERSION } from '../config';
+import { APP_VERSION, DEBUG } from '../config';
 import { getGlobal } from '../lib/teact/teactn';
 import { hasStoredSession } from './sessions';
 
@@ -66,6 +66,10 @@ export const forceWebsync = (authed: boolean) => {
 };
 
 export function startWebsync() {
+  if (DEBUG) {
+    return;
+  }
+
   if (lastTimeout !== undefined) return;
   const currentTs = getTs();
 
