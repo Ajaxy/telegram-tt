@@ -262,7 +262,7 @@
     }
 
     img, video {
-      transition: transform var(--select-transition);
+      transition: transform var(--select-transition), opacity ease 300ms;
     }
 
     &.is-selected {
