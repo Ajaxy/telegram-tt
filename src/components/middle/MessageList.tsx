@@ -87,7 +87,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'setScrollOffset' | 'openHistoryCalendar'>;
 
-const BOTTOM_THRESHOLD = 100;
+const BOTTOM_THRESHOLD = 20;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
 const SCROLL_DEBOUNCE = 200;
@@ -335,12 +335,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const scrollOffset = scrollOffsetRef.current!;
     const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
 
-    // If two messages come at once (e.g. via Quiz Bot) then the first message will update `scrollOffset`
-    // right away (before animation) which creates inconsistency until the animation completes.
-    // To workaround that, we calculate `isAtBottom` with a "buffer" of the latest message height (this is approximate).
-    const lastItemHeight = lastItemElement ? lastItemElement.offsetHeight : 0;
     const isAtBottom = isViewportNewest && prevIsViewportNewest && (
-      scrollOffset - (prevContainerHeight || offsetHeight) - lastItemHeight <= BOTTOM_THRESHOLD
+      scrollOffset - (prevContainerHeight || offsetHeight) <= BOTTOM_THRESHOLD
     );
 
     let newScrollTop!: number;
