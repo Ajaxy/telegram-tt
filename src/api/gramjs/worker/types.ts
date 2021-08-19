@@ -33,6 +33,9 @@ export type OriginRequest = {
   messageId?: string;
   name: keyof Methods;
   args: MethodArgs<keyof Methods>;
+} | {
+  type: 'ping';
+  messageId?: string;
 };
 
 export type OriginMessageData = OriginRequest | {
