@@ -23,8 +23,8 @@ self.addEventListener('activate', (e) => {
     console.log('ServiceWorker activated');
   }
 
-  // Become available to all pages
   e.waitUntil(clearAssetCache());
+  // Become available to all pages
   e.waitUntil(self.clients.claim());
 });
 
@@ -32,23 +32,17 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e: FetchEvent) => {
   const { url } = e.request;
 
-  if (url.includes('_websync_')) {
-    return false;
+  if (url.includes('/progressive/')) {
+    e.respondWith(respondForProgressive(e));
+    return true;
   }
 
-  e.respondWith((() => {
-    if (url.includes('/progressive/')) {
-      return respondForProgressive(e);
-    }
+  if (url.startsWith('http') && url.match(ASSET_CACHE_PATTERN)) {
+    e.respondWith(respondWithCache(e));
+    return true;
+  }
 
-    if (url.startsWith('http') && url.match(ASSET_CACHE_PATTERN)) {
-      return respondWithCache(e);
-    }
-
-    return fetch(e.request);
-  })());
-
-  return true;
+  return false;
 });
 
 self.addEventListener('push', handlePush);
