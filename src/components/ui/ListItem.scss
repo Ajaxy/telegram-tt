@@ -1,7 +1,7 @@
 .ListItem {
   position: relative;
 
-  @media (max-width: 600px) {
+  body.is-ios, body.is-android {
     &:not(:last-of-type)::after {
       content: "";
       position: absolute;
