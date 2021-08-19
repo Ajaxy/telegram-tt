@@ -83,6 +83,14 @@ onmessage = async (message: OriginMessageEvent) => {
 
       break;
     }
+    case 'ping': {
+      sendToOrigin({
+        type: 'methodResponse',
+        messageId: data.messageId!,
+      });
+
+      break;
+    }
   }
 };
 
