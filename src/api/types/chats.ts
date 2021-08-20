@@ -1,4 +1,5 @@
 import { ApiMessage, ApiPhoto } from './messages';
+import { ApiBotCommand } from './bots';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
@@ -96,6 +97,7 @@ export interface ApiChatFullInfo {
     maxMessageId?: number;
   };
   linkedChatId?: number;
+  botCommands?: ApiBotCommand[];
 }
 
 export interface ApiChatMember {

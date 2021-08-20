@@ -100,7 +100,6 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
           [error.field]: error.message,
         },
       });
-      return;
     }
   }, [error, paymentDispatch]);
 

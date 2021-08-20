@@ -62,7 +62,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const canUpdate = Boolean(
     (privacyType === 'public' && username && isUsernameAvailable)
-    || (privacyType === 'private' && isPublic)
+    || (privacyType === 'private' && isPublic),
   );
 
   useHistoryBack(isActive, onClose);

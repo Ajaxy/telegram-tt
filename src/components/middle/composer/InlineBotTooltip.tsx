@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -11,13 +11,12 @@ import { LoadMoreDirection } from '../../../types';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import buildClassName from '../../../util/buildClassName';
-import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
-import cycleRestrict from '../../../util/cycleRestrict';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import usePrevious from '../../../hooks/usePrevious';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import MediaResult from './inlineResults/MediaResult';
 import ArticleResult from './inlineResults/ArticleResult';
@@ -43,7 +42,7 @@ export type OwnProps = {
   onClose: NoneToVoidFunction;
 };
 
-type DispatchProps = Pick<GlobalActions, ('sendBotCommand' | 'openChat' | 'sendInlineBotResult')>;
+type DispatchProps = Pick<GlobalActions, ('startBot' | 'openChat' | 'sendInlineBotResult')>;
 
 const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   isOpen,
@@ -54,13 +53,12 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   loadMore,
   onClose,
   openChat,
-  sendBotCommand,
+  startBot,
   onSelectResult,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
   const {
     observe: observeIntersection,
   } = useIntersectionObserver({
@@ -69,58 +67,29 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
     isDisabled: !isOpen,
   });
 
-  useEffect(() => {
-    setSelectedIndex(isGallery ? -1 : 0);
-  }, [inlineBotResults, isGallery]);
-
-  useEffect(() => {
-    setTooltipItemVisible('.chat-item-clickable', selectedIndex, containerRef);
-  }, [selectedIndex]);
-
-  const getSelectedIndex = useCallback((newIndex: number) => {
-    if (!inlineBotResults || !inlineBotResults.length) {
-      return -1;
-    }
-
-    return cycleRestrict(inlineBotResults.length, newIndex);
-  }, [inlineBotResults]);
-
-  const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
-    if (isGallery) {
-      return;
-    }
-
-    e.preventDefault();
-    setSelectedIndex((index) => (getSelectedIndex(index + value)));
-  }, [isGallery, getSelectedIndex]);
-
-  const handleSelectInlineBotResult = useCallback((e: KeyboardEvent) => {
-    if (inlineBotResults && inlineBotResults.length && selectedIndex > -1) {
-      const inlineResult = inlineBotResults[selectedIndex];
-      if (inlineResult) {
-        e.preventDefault();
-        onSelectResult(inlineResult);
-      }
-    }
-  }, [inlineBotResults, onSelectResult, selectedIndex]);
-
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (direction === LoadMoreDirection.Backwards) {
       runThrottled(loadMore);
     }
   }, [loadMore]);
 
-  useEffect(() => (isOpen ? captureKeyboardListeners({
-    onEsc: onClose,
-    onUp: (e: KeyboardEvent) => handleArrowKey(-1, e),
-    onDown: (e: KeyboardEvent) => handleArrowKey(1, e),
-    onEnter: handleSelectInlineBotResult,
-  }) : undefined), [handleArrowKey, handleSelectInlineBotResult, isGallery, isOpen, onClose]);
+  const selectedIndex = useKeyboardNavigation({
+    isActive: isOpen,
+    shouldRemoveSelectionOnReset: isGallery,
+    noArrowNavigation: isGallery,
+    items: inlineBotResults,
+    onSelect: onSelectResult,
+    onClose,
+  });
+
+  useEffect(() => {
+    setTooltipItemVisible('.chat-item-clickable', selectedIndex, containerRef);
+  }, [selectedIndex]);
 
   const handleSendPm = useCallback(() => {
     openChat({ id: botId });
-    sendBotCommand({ chatId: botId, command: `/start ${switchPm!.startParam}` });
-  }, [botId, openChat, sendBotCommand, switchPm]);
+    startBot({ botId, param: switchPm!.startParam });
+  }, [botId, openChat, startBot, switchPm]);
 
   const prevInlineBotResults = usePrevious(
     inlineBotResults && inlineBotResults.length
@@ -230,6 +199,6 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   undefined,
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'sendBotCommand', 'openChat', 'sendInlineBotResult',
+    'startBot', 'openChat', 'sendInlineBotResult',
   ]),
 )(InlineBotTooltip));

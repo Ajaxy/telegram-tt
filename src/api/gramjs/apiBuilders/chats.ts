@@ -3,6 +3,7 @@ import {
   ApiChat,
   ApiChatAdminRights,
   ApiChatBannedRights,
+  ApiBotCommand,
   ApiChatFolder,
   ApiChatMember,
   ApiRestrictionReason,
@@ -375,4 +376,15 @@ export function buildApiChatFolderFromSuggested({
     ...buildApiChatFolder(filter),
     description,
   };
+}
+
+export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
+  return botInfos.reduce((botCommands, botInfo) => {
+    botCommands = botCommands.concat(botInfo.commands.map((mtpCommand) => ({
+      botId: botInfo.userId,
+      ...omitVirtualClassFields(mtpCommand),
+    })));
+
+    return botCommands;
+  }, [] as ApiBotCommand[]);
 }

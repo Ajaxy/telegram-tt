@@ -546,10 +546,9 @@ export default memo(withGlobal<OwnProps>(
       && !messageIds && !chat.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
     );
 
-    const bot = selectChatBot(global, chatId);
+    const chatBot = selectChatBot(global, chatId)!;
     let botDescription: string | undefined;
     if (selectIsChatBotNotStarted(global, chatId)) {
-      const chatBot = selectChatBot(global, chatId)!;
       if (chatBot.fullInfo) {
         botDescription = chatBot.fullInfo.botDescription || 'NoMessages';
       } else {
@@ -565,7 +564,7 @@ export default memo(withGlobal<OwnProps>(
       isGroupChat: isChatGroup(chat),
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
-      isBot: Boolean(bot),
+      isBot: Boolean(chatBot),
       messageIds,
       messagesById,
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),

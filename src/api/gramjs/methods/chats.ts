@@ -22,6 +22,7 @@ import {
   getApiChatIdFromMtpPeer,
   buildApiChatFolder,
   buildApiChatFolderFromSuggested,
+  buildApiChatBotCommands,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
@@ -317,10 +318,12 @@ async function getFullChatInfo(chatId: number): Promise<{
     about,
     participants,
     exportedInvite,
+    botInfo,
   } = result.fullChat;
 
   const members = buildChatMembers(participants);
   const adminMembers = members ? members.filter(({ isAdmin, isOwner }) => isAdmin || isOwner) : undefined;
+  const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
 
   return {
     fullInfo: {
@@ -328,6 +331,7 @@ async function getFullChatInfo(chatId: number): Promise<{
       members,
       adminMembers,
       canViewMembers: true,
+      botCommands,
       ...(exportedInvite && {
         inviteLink: exportedInvite.link,
       }),
@@ -361,6 +365,7 @@ async function getFullChannelInfo(
     linkedChatId,
     hiddenPrehistory,
     call,
+    botInfo,
   } = result.fullChat;
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -374,6 +379,7 @@ async function getFullChannelInfo(
   const { members: adminMembers, users: adminUsers } = (
     canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'admin')
   ) || {};
+  const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
 
   return {
     fullInfo: {
@@ -395,6 +401,7 @@ async function getFullChannelInfo(
       adminMembers,
       groupCallId: call ? call.id.toString() : undefined,
       linkedChatId: linkedChatId ? getApiChatIdFromMtpPeer({ chatId: linkedChatId } as GramJs.TypePeer) : undefined,
+      botCommands,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
   };

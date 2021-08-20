@@ -1,16 +1,15 @@
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import cycleRestrict from '../../../util/cycleRestrict';
-import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Loading from '../../ui/Loading';
 import EmojiButton from './EmojiButton';
@@ -20,7 +19,6 @@ import './EmojiTooltip.scss';
 const VIEWPORT_MARGIN = 8;
 const EMOJI_BUTTON_WIDTH = 44;
 const CLOSE_DURATION = 350;
-const NO_EMOJI_SELECTED_INDEX = -1;
 
 function setItemVisible(index: number, containerRef: Record<string, any>) {
   const container = containerRef.current!;
@@ -70,52 +68,27 @@ const EmojiTooltip: FC<OwnProps> = ({
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
   const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
 
-  const [selectedIndex, setSelectedIndex] = useState(NO_EMOJI_SELECTED_INDEX);
-
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [emojis]);
-
-  useEffect(() => {
-    setItemVisible(selectedIndex, containerRef);
-  }, [selectedIndex]);
-
-  const getSelectedIndex = useCallback((newIndex: number) => {
-    if (!emojis.length) {
-      return NO_EMOJI_SELECTED_INDEX;
-    }
-
-    const emojisCount = emojis.length;
-    return cycleRestrict(emojisCount, newIndex);
-  }, [emojis]);
-
-  const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
-    e.preventDefault();
-    setSelectedIndex((index) => (getSelectedIndex(index + value)));
-  }, [setSelectedIndex, getSelectedIndex]);
-
-  const handleSelectEmoji = useCallback((e: KeyboardEvent) => {
-    if (emojis.length && selectedIndex > NO_EMOJI_SELECTED_INDEX) {
-      const emoji = emojis[selectedIndex];
-      if (emoji) {
-        e.preventDefault();
-        onEmojiSelect(emoji.native);
-        addRecentEmoji({ emoji: emoji.id });
-      }
-    }
-  }, [addRecentEmoji, emojis, onEmojiSelect, selectedIndex]);
+  const handleSelectEmoji = useCallback((emoji: Emoji) => {
+    onEmojiSelect(emoji.native);
+    addRecentEmoji({ emoji: emoji.id });
+  }, [addRecentEmoji, onEmojiSelect]);
 
   const handleClick = useCallback((native: string, id: string) => {
     onEmojiSelect(native);
     addRecentEmoji({ emoji: id });
   }, [addRecentEmoji, onEmojiSelect]);
 
-  useEffect(() => (isOpen ? captureKeyboardListeners({
-    onEsc: onClose,
-    onLeft: (e: KeyboardEvent) => handleArrowKey(-1, e),
-    onRight: (e: KeyboardEvent) => handleArrowKey(1, e),
-    onEnter: handleSelectEmoji,
-  }) : undefined), [handleArrowKey, handleSelectEmoji, isOpen, onClose]);
+  const selectedIndex = useKeyboardNavigation({
+    isActive: isOpen,
+    isHorizontal: true,
+    items: emojis,
+    onSelect: handleSelectEmoji,
+    onClose,
+  });
+
+  useEffect(() => {
+    setItemVisible(selectedIndex, containerRef);
+  }, [selectedIndex]);
 
   const handleMouseEnter = () => {
     document.body.classList.add('no-select');

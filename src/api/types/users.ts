@@ -1,4 +1,5 @@
 import { ApiPhoto } from './messages';
+import { ApiBotCommand } from './bots';
 
 export interface ApiUser {
   id: number;
@@ -28,6 +29,7 @@ export interface ApiUserFullInfo {
   commonChatsCount?: number;
   botDescription?: string;
   pinnedMessageId?: number;
+  botCommands?: ApiBotCommand[];
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

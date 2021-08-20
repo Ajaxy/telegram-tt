@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiBotInlineMediaResult, ApiBotInlineResult, ApiInlineResultType, ApiWebDocument,
+  ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm, ApiInlineResultType, ApiWebDocument,
 } from '../../types';
 
 import { pick } from '../../../util/iteratees';
@@ -44,6 +44,10 @@ export function buildApiBotInlineMediaResult(
       thumbnail: buildApiThumbnailFromStripped(document.thumbs),
     }),
   };
+}
+
+export function buildBotSwitchPm(switchPm?: GramJs.InlineBotSwitchPM) {
+  return switchPm ? pick(switchPm, ['text', 'startParam']) as ApiBotInlineSwitchPm : undefined;
 }
 
 function buildApiWebDocument(document?: GramJs.TypeWebDocument): ApiWebDocument | undefined {
