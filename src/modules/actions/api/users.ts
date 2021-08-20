@@ -14,6 +14,7 @@ import {
   addChats, addUsers, updateChat, updateManagementProgress, updateUser, updateUsers,
   updateUserSearch, updateUserSearchFetchingStatus,
 } from '../../reducers';
+import { getServerTime } from '../../../util/serverTime';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
@@ -52,13 +53,12 @@ addReducer('loadUser', (global, actions, payload) => {
 
 addReducer('loadTopUsers', (global) => {
   const {
-    serverTimeOffset,
     topPeers: {
       hash, lastRequestedAt,
     },
   } = global;
 
-  if (!lastRequestedAt || Date.now() / 1000 + serverTimeOffset - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
+  if (!lastRequestedAt || getServerTime(global.serverTimeOffset) - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
     void loadTopUsers(hash);
   }
 });
@@ -102,7 +102,7 @@ async function loadTopUsers(usersHash?: number) {
       ...global.topPeers,
       hash,
       userIds: ids,
-      lastRequestedAt: Date.now() / 1000 + global.serverTimeOffset,
+      lastRequestedAt: getServerTime(global.serverTimeOffset),
     },
   };
   setGlobal(global);

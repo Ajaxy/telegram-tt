@@ -6,6 +6,7 @@ import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../t
 import { buildApiDocument } from './messages';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { pick } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
   if (wallpaper instanceof GramJs.WallPaperNoFile) {
@@ -107,7 +108,7 @@ export function buildApiNotifyException(
 
   return {
     chatId: getApiChatIdFromMtpPeer(peer),
-    isMuted: silent || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000),
+    isMuted: silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil),
     ...(sound === '' && { isSilent: true }),
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
   };

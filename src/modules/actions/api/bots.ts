@@ -15,8 +15,9 @@ import { addChats, addUsers, removeBlockedContact } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce } from '../../../util/schedulers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
+import { getServerTime } from '../../../util/serverTime';
 
-const TOP_PEERS_REQUEST_COOLDOWN = 60000; // 1 min
+const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 
 addReducer('clickInlineButton', (global, actions, payload) => {
@@ -96,10 +97,9 @@ addReducer('restartBot', (global, actions, payload) => {
 });
 
 addReducer('loadTopInlineBots', (global) => {
-  const { serverTimeOffset } = global;
   const { hash, lastRequestedAt } = global.topInlineBots;
 
-  if (lastRequestedAt && Date.now() + serverTimeOffset * 1000 - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+  if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
     return;
   }
 
@@ -119,7 +119,7 @@ addReducer('loadTopInlineBots', (global) => {
         ...newGlobal.topInlineBots,
         hash: newHash,
         userIds: ids,
-        lastRequestedAt: Date.now() + serverTimeOffset * 1000,
+        lastRequestedAt: getServerTime(global.serverTimeOffset),
       },
     };
     setGlobal(newGlobal);

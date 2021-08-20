@@ -66,6 +66,7 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
 import useInlineBotTooltip from './hooks/useInlineBotTooltip';
 import windowSize from '../../../util/windowSize';
+import { getServerTime } from '../../../util/serverTime';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -476,7 +477,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (currentAttachments.length || text) {
       if (slowMode && !isAdmin) {
-        const nowSeconds = Math.floor(Date.now() / 1000) + serverTimeOffset;
+        const nowSeconds = getServerTime(serverTimeOffset);
         const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
           && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
         const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
@@ -514,7 +515,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       forwardMessages();
     }
 
-    lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000) + serverTimeOffset;
+    lastMessageSendTimeSeconds.current = getServerTime(serverTimeOffset);
 
     clearDraft({ chatId, localOnly: true });
 
@@ -527,7 +528,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
       resetComposer();
     });
   }, [
-    connectionState, attachments, activeVoiceRecording, isForwarding, serverTimeOffset, clearDraft, chatId,
+    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId, serverTimeOffset,
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang,
   ]);
 

@@ -33,8 +33,9 @@ import {
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
+import { getServerTime } from '../../util/serverTime';
 
-const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
+const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 
 export function selectCurrentMessageList(global: GlobalState) {
   const { messageLists } = global.messages;
@@ -340,7 +341,6 @@ export function selectForwardedSender(global: GlobalState, message: ApiMessage):
 }
 
 export function selectAllowedMessageActions(global: GlobalState, message: ApiMessage, threadId: number) {
-  const { serverTimeOffset } = global;
   const chat = selectChat(global, message.chatId);
   if (!chat || chat.isRestricted) {
     return {};
@@ -361,7 +361,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || (isChannel && getHasAdminRight(chat, 'editMessages'));
   const isMessageEditable = (
     (canEditMessagesIndefinitely
-    || Date.now() + serverTimeOffset * 1000 - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS)
+    || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME)
     && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
       || (content.video && content.video.isRound)
