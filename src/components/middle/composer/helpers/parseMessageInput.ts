@@ -16,12 +16,11 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
 };
 
 const MAX_TAG_DEEPNESS = 3;
-const MAX_MESSAGE_LENGTH = 4096;
 
 export default function parseMessageInput(html: string): ApiFormattedText {
   const fragment = document.createElement('div');
   fragment.innerHTML = parseMarkdown(html);
-  const text = fragment.innerText.trim().replace(/\u200b+/g, '').slice(0, MAX_MESSAGE_LENGTH);
+  const text = fragment.innerText.trim().replace(/\u200b+/g, '');
   let textIndex = 0;
   let recursionDeepness = 0;
   const entities: ApiMessageEntity[] = [];

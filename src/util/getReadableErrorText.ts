@@ -40,11 +40,12 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   // TODO Bring back after fixing the weird bug
   // CHANNEL_INVALID: 'An error occurred. Please try again later',
   LINK_NOT_MODIFIED: 'This discussion is already linked to the channel',
+  MESSAGE_TOO_LONG: 'Message is too long',
 
   // Non-API errors
   SERVICE_WORKER_DISABLED: 'Service Worker is disabled. Please reload the page without holding <Shift> key.',
   // eslint-disable-next-line max-len
-  CAPTION_TOO_LONG_PLEASE_REMOVE_CHARACTERS: 'The provided caption is too long. Please remove {EXTRA_CHARS_COUNT} character{PLURAL_S}.',
+  MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS: 'The provided message is too long. Please remove {EXTRA_CHARS_COUNT} character{PLURAL_S}.',
   // eslint-disable-next-line max-len
   FRESH_RESET_AUTHORISATION_FORBIDDEN: 'You can’t logout other sessions if less than 24 hours have passed since you logged on the current session',
 
