@@ -22,6 +22,7 @@ export default function useScrollHooks(
   isUnread: boolean,
   onFabToggle: AnyToVoidFunction,
   onNotchToggle: AnyToVoidFunction,
+  isActive: boolean,
 ) {
   const { loadViewportMessages } = getDispatch();
 
@@ -42,6 +43,8 @@ export default function useScrollHooks(
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
   const toggleScrollTools = useCallback(() => {
+    if (!isActive) return;
+
     if (!messageIds || !messageIds.length) {
       onFabToggle(false);
       onNotchToggle(false);
@@ -61,7 +64,7 @@ export default function useScrollHooks(
 
     onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
-  }, [messageIds, isViewportNewest, containerRef, onFabToggle, isUnread, onNotchToggle]);
+  }, [isActive, messageIds, isViewportNewest, containerRef, onFabToggle, isUnread, onNotchToggle]);
 
   const {
     observe: observeIntersection,

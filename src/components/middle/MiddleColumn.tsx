@@ -309,7 +309,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               activeKey={currentTransitionKey}
               shouldCleanup
             >
-              {() => (
+              {(isActive) => (
                 <>
                   <MessageList
                     key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
@@ -321,6 +321,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     onFabToggle={setIsFabShown}
                     onNotchToggle={setIsNotchShown}
                     isReady={isReady}
+                    isActive={isActive}
                   />
                   <div className={footerClassName}>
                     {renderingCanPost && (

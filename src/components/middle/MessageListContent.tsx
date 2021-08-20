@@ -30,6 +30,7 @@ interface OwnProps {
   memoFirstUnreadIdRef: { current: number | undefined };
   threadId: number;
   type: MessageListType;
+  isActive: boolean;
   threadTopMessageId: number | undefined;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
@@ -54,6 +55,7 @@ const MessageListContent: FC<OwnProps> = ({
   memoFirstUnreadIdRef,
   threadId,
   type,
+  isActive,
   threadTopMessageId,
   hasLinkedChat,
   isSchedule,
@@ -80,6 +82,7 @@ const MessageListContent: FC<OwnProps> = ({
     isUnread,
     onFabToggle,
     onNotchToggle,
+    isActive,
   );
 
   const lang = useLang();
