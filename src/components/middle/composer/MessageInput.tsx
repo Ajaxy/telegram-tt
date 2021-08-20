@@ -256,7 +256,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         closeTextFormatter();
         onSend();
       }
-    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey) {
+    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.altKey) {
       e.preventDefault();
       editLastMessage();
     } else {
