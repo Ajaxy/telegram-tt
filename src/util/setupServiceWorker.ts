@@ -10,6 +10,10 @@ type WorkerAction = {
 
 function handleWorkerMessage(e: MessageEvent) {
   const action: WorkerAction = e.data;
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[SW] Message from worker', action);
+  }
   if (!action.type) return;
   const dispatch = getDispatch();
   switch (action.type) {
