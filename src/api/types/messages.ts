@@ -173,6 +173,7 @@ export interface ApiWebPage {
 
 export interface ApiMessageForwardInfo {
   isChannelPost: boolean;
+  channelPostId?: number;
   isLinkedChannelPost?: boolean;
   fromChatId?: number;
   senderUserId?: number;

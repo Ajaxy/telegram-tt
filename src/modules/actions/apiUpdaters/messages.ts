@@ -15,6 +15,7 @@ import {
   replaceThreadParam,
   updateScheduledMessage,
   deleteChatScheduledMessages,
+  updateThreadUnreadFromForwardedMessage,
 } from '../../reducers';
 import { GlobalActions, GlobalState } from '../../../global/types';
 import {
@@ -46,7 +47,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'newMessage': {
       const { chatId, id, message } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
-      global = updateListedAndViewportIds(global, message as ApiMessage);
+      global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
       if (message.threadInfo) {
         global = updateThreadInfo(
@@ -157,7 +158,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateMessageSendSucceeded': {
       const { chatId, localId, message } = update;
 
-      global = updateListedAndViewportIds(global, message as ApiMessage);
+      global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
       const currentMessage = selectChatMessage(global, chatId, localId);
 
@@ -443,13 +444,39 @@ function updateWithLocalMedia(
     : updateChatMessage(global, chatId, id, message);
 }
 
-function updateListedAndViewportIds(global: GlobalState, message: ApiMessage) {
+function updateThreadUnread(global: GlobalState, actions: GlobalActions, message: ApiMessage, isDeleting?: boolean) {
+  const { chatId } = message;
+
+  const { threadInfo } = selectThreadByMessage(global, chatId, message) || {};
+
+  if (!threadInfo && message.replyToMessageId) {
+    const originMessage = selectChatMessage(global, chatId, message.replyToMessageId);
+    if (originMessage) {
+      global = updateThreadUnreadFromForwardedMessage(global, originMessage, chatId, message.id, isDeleting);
+    } else {
+      actions.loadMessage({
+        chatId,
+        messageId: message.replyToMessageId,
+        threadUpdate: {
+          isDeleting,
+          lastMessageId: message.id,
+        },
+      });
+    }
+  }
+
+  return global;
+}
+
+function updateListedAndViewportIds(global: GlobalState, actions: GlobalActions, message: ApiMessage) {
   const { id, chatId } = message;
 
   const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
 
   const chat = selectChat(global, chatId);
   const isUnreadChatNotLoaded = chat && chat.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
+
+  global = updateThreadUnread(global, actions, message);
 
   if (threadInfo) {
     if (firstMessageId || !isMessageLocal(message)) {
@@ -559,11 +586,15 @@ function deleteMessages(chatId: number | undefined, ids: number[], actions: Glob
         return;
       }
 
+      global = updateThreadUnread(global, actions, message, true);
+
       const { threadInfo } = selectThreadByMessage(global, chatId, message) || {};
       if (threadInfo) {
         threadIdsToUpdate.push(threadInfo.threadId);
       }
     });
+
+    setGlobal(global);
 
     setTimeout(() => {
       setGlobal(deleteChatMessages(getGlobal(), chatId, ids));
