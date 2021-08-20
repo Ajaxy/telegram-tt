@@ -15,7 +15,7 @@ type OwnProps = {
   message: ApiMessage;
   outgoingStatus?: ApiMessageOutgoingStatus;
   signature?: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
 const MessageMeta: FC<OwnProps> = ({

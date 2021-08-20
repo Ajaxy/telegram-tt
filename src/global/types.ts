@@ -19,7 +19,6 @@ import {
   ApiSession,
   ApiNewPoll,
   ApiInviteInfo,
-  ApiFieldError,
 } from '../api/types';
 import {
   FocusDirection,
