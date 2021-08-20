@@ -162,6 +162,7 @@ const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
 const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 const SELECT_MODE_TRANSITION_MS = 200;
+const MESSAGE_MAX_LENGTH = 4096;
 const CAPTION_MAX_LENGTH = 1024;
 const SENDING_ANIMATION_DURATION = 350;
 // eslint-disable-next-line max-len
@@ -474,15 +475,17 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const { text, entities } = parseMessageInput(htmlRef.current!);
+
     if (!currentAttachments.length && !text && !isForwarding) {
       return;
     }
 
-    if (currentAttachments.length && text && text.length > CAPTION_MAX_LENGTH) {
-      const extraLength = text.length - CAPTION_MAX_LENGTH;
+    const maxLength = currentAttachments.length ? CAPTION_MAX_LENGTH : MESSAGE_MAX_LENGTH;
+    if (text?.length > maxLength) {
+      const extraLength = text.length - maxLength;
       showDialog({
         data: {
-          message: 'CAPTION_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
+          message: 'MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
           textParams: {
             '{EXTRA_CHARS_COUNT}': extraLength,
             '{PLURAL_S}': extraLength > 1 ? 's' : '',
@@ -490,6 +493,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           hasErrorKey: true,
         },
       });
+
       return;
     }
 
