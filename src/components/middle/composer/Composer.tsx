@@ -726,9 +726,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           openCalendar();
         } else {
           void handleSend();
-          requestAnimationFrame(() => {
-            resetComposer();
-          });
         }
         break;
       case MainButtonState.Record:
@@ -741,7 +738,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         break;
     }
   }, [
-    mainButtonState, resetComposer, shouldSchedule, startRecordingVoice, handleEditComplete,
+    mainButtonState, shouldSchedule, startRecordingVoice, handleEditComplete,
     activeVoiceRecording, openCalendar, pauseRecordingVoice, handleSend,
   ]);
 
