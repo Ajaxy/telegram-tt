@@ -7,7 +7,7 @@ import {
 import {
   getChatAvatarHash, isDeletedUser, getUserColorKey, getChatTitle, isChatPrivate, getUserFullName,
 } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
+import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
@@ -59,11 +59,16 @@ const ProfilePhoto: FC<OwnProps> = ({
   }
 
   const imageHash = getMediaHash();
-  const fullMediaData = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const fullMediaData = useMedia(
+    imageHash,
+    false,
+    imageHash?.startsWith('avatar') ? ApiMediaFormat.DataUri : ApiMediaFormat.BlobUrl,
+    lastSyncTime,
+  );
   const avatarThumbnailData = useMedia(
     !fullMediaData && isFirstPhoto ? getMediaHash('normal', true) : undefined,
     false,
-    ApiMediaFormat.BlobUrl,
+    ApiMediaFormat.DataUri,
     lastSyncTime,
   );
   const thumbDataUri = useBlurSync(!fullMediaData && photo && photo.thumbnail && photo.thumbnail.dataUri);

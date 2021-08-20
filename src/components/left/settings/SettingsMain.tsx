@@ -1,18 +1,18 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
+import { GlobalActions } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 import { ApiUser } from '../../../api/types';
 
 import { selectUser } from '../../../modules/selectors';
-import { getUserFullName } from '../../../modules/helpers';
-import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
-import renderText from '../../common/helpers/renderText';
+import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
-import Avatar from '../../common/Avatar';
+import ProfileInfo from '../../common/ProfileInfo';
+import ChatExtra from '../../common/ChatExtra';
 
 type OwnProps = {
   isActive?: boolean;
@@ -22,16 +22,27 @@ type OwnProps = {
 
 type StateProps = {
   currentUser?: ApiUser;
+  lastSyncTime?: number;
 };
 
-const SettingsMain: FC<OwnProps & StateProps> = ({
+type DispatchProps = Pick<GlobalActions, 'loadProfilePhotos'>;
+
+const SettingsMain: FC<OwnProps & StateProps & DispatchProps> = ({
   isActive,
   onScreenSelect,
   onReset,
+  loadProfilePhotos,
   currentUser,
+  lastSyncTime,
 }) => {
   const lang = useLang();
-  const fullName = getUserFullName(currentUser);
+  const profileId = currentUser ? currentUser.id : undefined;
+
+  useEffect(() => {
+    if (profileId && lastSyncTime) {
+      loadProfilePhotos({ profileId });
+    }
+  }, [lastSyncTime, profileId, loadProfilePhotos]);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Main);
 
@@ -39,24 +50,17 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
     <div className="settings-content custom-scroll">
       <div className="settings-main-menu">
         {currentUser && (
-          <div className="settings-current-user">
-            <Avatar user={currentUser} size="jumbo" />
-            <p className="name">{fullName && renderText(fullName)}</p>
-            <p className="phone">{formatPhoneNumberWithCode(currentUser.phoneNumber)}</p>
-          </div>
+          <ProfileInfo
+            userId={currentUser.id}
+            forceShowSelf
+          />
         )}
-        <ListItem
-          icon="edit"
-          onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
-        >
-          {lang('lng_settings_information')}
-        </ListItem>
-        <ListItem
-          icon="folder"
-          onClick={() => onScreenSelect(SettingsScreens.Folders)}
-        >
-          {lang('Filters')}
-        </ListItem>
+        {currentUser && (
+          <ChatExtra
+            chatOrUserId={currentUser.id}
+            forceShowSelf
+          />
+        )}
         <ListItem
           icon="settings"
           onClick={() => onScreenSelect(SettingsScreens.General)}
@@ -76,6 +80,12 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           {lang('PrivacySettings')}
         </ListItem>
         <ListItem
+          icon="folder"
+          onClick={() => onScreenSelect(SettingsScreens.Folders)}
+        >
+          {lang('Filters')}
+        </ListItem>
+        <ListItem
           icon="language"
           onClick={() => onScreenSelect(SettingsScreens.Language)}
         >
@@ -88,10 +98,12 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { currentUserId } = global;
+    const { currentUserId, lastSyncTime } = global;
 
     return {
       currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
+      lastSyncTime,
     };
   },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadProfilePhotos']),
 )(SettingsMain));

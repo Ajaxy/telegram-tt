@@ -12,7 +12,7 @@ import {
 import {
   getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isChatPrivate, isUserRightBanned, selectIsChatMuted,
 } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
+import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
@@ -118,15 +118,17 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
-      <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
-        <span>{lang('Notifications')}</span>
-        <Switcher
-          id="group-notifications"
-          label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
-          checked={!isMuted}
-          inactive
-        />
-      </ListItem>
+      {!forceShowSelf && (
+        <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
+          <span>{lang('Notifications')}</span>
+          <Switcher
+            id="group-notifications"
+            label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
+            checked={!isMuted}
+            inactive
+          />
+        </ListItem>
+      )}
     </div>
   );
 };
