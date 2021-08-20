@@ -9,7 +9,7 @@ import useFlag from '../../../../hooks/useFlag';
 import { preventMessageInputBlur } from '../../helpers/preventMessageInputBlur';
 
 const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
-const SWIPE_ANIMATION_DURATION = 200;
+const SWIPE_ANIMATION_DURATION = 150;
 
 export default function useOuterHandlers(
   selectMessage: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
