@@ -22,6 +22,8 @@ interface Response {
   unfreeze: NoneToVoidFunction;
 }
 
+const AUTO_UNFREEZE_TIMEOUT = 2000;
+
 export function useIntersectionObserver({
   rootRef,
   throttleMs,
@@ -42,13 +44,10 @@ export function useIntersectionObserver({
   const controllerRef = useRef<IntersectionController>();
   const rootCallbackRef = useRef<RootCallback>();
   const freezeFlagsRef = useRef(0);
+  const autoUnfreezeTimeoutRef = useRef<number>();
   const onUnfreezeRef = useRef<NoneToVoidFunction>();
 
   rootCallbackRef.current = rootCallback;
-
-  const freeze = useCallback(() => {
-    freezeFlagsRef.current++;
-  }, []);
 
   const unfreeze = useCallback(() => {
     if (!freezeFlagsRef.current) {
@@ -62,6 +61,27 @@ export function useIntersectionObserver({
       onUnfreezeRef.current = undefined;
     }
   }, []);
+
+  const freeze = useCallback(() => {
+    freezeFlagsRef.current++;
+
+    if (autoUnfreezeTimeoutRef.current) {
+      clearTimeout(autoUnfreezeTimeoutRef.current);
+      autoUnfreezeTimeoutRef.current = undefined;
+    }
+
+    // Make sure to unfreeze even if unfreeze callback was not called (which was some hardly-reproducible bug)
+    autoUnfreezeTimeoutRef.current = window.setTimeout(() => {
+      autoUnfreezeTimeoutRef.current = undefined;
+
+      if (!freezeFlagsRef.current) {
+        return;
+      }
+
+      freezeFlagsRef.current = 1;
+      unfreeze();
+    }, AUTO_UNFREEZE_TIMEOUT);
+  }, [unfreeze]);
 
   useHeavyAnimationCheck(freeze, unfreeze);
 
