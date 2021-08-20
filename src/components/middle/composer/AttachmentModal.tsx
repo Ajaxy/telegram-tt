@@ -244,7 +244,7 @@ const AttachmentModal: FC<OwnProps> = ({
             placeholder={lang('Caption')}
             onUpdate={onCaptionUpdate}
             onSend={onSend}
-            shouldSetFocus={isOpen}
+            shouldSetFocus={Boolean(attachments.length)}
           />
         </div>
       </div>

@@ -919,7 +919,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
                 : botKeyboardPlaceholder || lang('Message')
             }
             forcedPlaceholder={inlineBotHelp}
-            shouldSetFocus={isSymbolMenuOpen}
+            shouldSetFocus={!attachments.length}
             shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
             shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onUpdate={setHtml}
