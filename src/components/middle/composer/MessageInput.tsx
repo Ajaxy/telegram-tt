@@ -329,7 +329,9 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
-    focusInput();
+    if (shouldSetFocus) {
+      focusInput();
+    }
   }, [currentChatId, focusInput, replyingToId, shouldSetFocus]);
 
   useEffect(() => {
