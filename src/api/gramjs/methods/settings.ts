@@ -18,6 +18,7 @@ import { invokeRequest, uploadFile, getClient } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
+import { getServerTime } from '../../../util/serverTime';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
@@ -219,17 +220,17 @@ export async function fetchNotificationSettings({
     hasContactJoinedNotifications: !isMutedContactSignUpNotification,
     hasPrivateChatsNotifications: !(
       privateSilent
-      || (typeof privateMuteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < privateMuteUntil * 1000)
+      || (typeof privateMuteUntil === 'number' && getServerTime(serverTimeOffset) < privateMuteUntil)
     ),
     hasPrivateChatsMessagePreview: privateShowPreviews,
     hasGroupNotifications: !(
       groupSilent || (typeof groupMuteUntil === 'number'
-        && Date.now() + serverTimeOffset * 1000 < groupMuteUntil * 1000)
+        && getServerTime(serverTimeOffset) < groupMuteUntil)
     ),
     hasGroupMessagePreview: groupShowPreviews,
     hasBroadcastNotifications: !(
       broadcastSilent || (typeof broadcastMuteUntil === 'number'
-        && Date.now() + serverTimeOffset * 1000 < broadcastMuteUntil * 1000)
+        && getServerTime(serverTimeOffset) < broadcastMuteUntil)
     ),
     hasBroadcastMessagePreview: broadcastShowPreviews,
   };
