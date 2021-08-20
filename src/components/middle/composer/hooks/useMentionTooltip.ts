@@ -35,7 +35,6 @@ export default function useMentionTooltip(
   usersById?: Record<number, ApiUser>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
-  const [currentFilter, setCurrentFilter] = useState('');
   const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();
 
   const topInlineBots = useMemo(() => {
@@ -77,7 +76,6 @@ export default function useMentionTooltip(
 
     if (usernameFilter) {
       const filter = usernameFilter ? usernameFilter.substr(1) : '';
-      setCurrentFilter(filter);
       getFilteredUsers(filter, canSuggestInlineBots(html));
     } else {
       unmarkIsOpen();
@@ -121,7 +119,6 @@ export default function useMentionTooltip(
 
   return {
     isMentionTooltipOpen: isOpen,
-    mentionFilter: currentFilter,
     closeMentionTooltip: unmarkIsOpen,
     insertMention,
     mentionFilteredUsers: usersToMention,

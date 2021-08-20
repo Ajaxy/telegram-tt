@@ -38,3 +38,9 @@ export interface ApiBotInlineSwitchPm {
   text: string;
   startParam: string;
 }
+
+export interface ApiBotCommand {
+  botId: number;
+  command: string;
+  description: string;
+}

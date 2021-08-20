@@ -55,7 +55,7 @@ export {
 } from './twoFaSettings';
 
 export {
-  answerCallbackButton, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults, sendInlineBotResult,
+  answerCallbackButton, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults, sendInlineBotResult, startBot,
 } from './bots';
 
 export {

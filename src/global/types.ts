@@ -500,7 +500,7 @@ export type ActionTypes = (
   'openStickerSetShortName' |
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
-  'resetInlineBot' | 'restartBot' |
+  'resetInlineBot' | 'restartBot' | 'startBot' |
   // misc
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |

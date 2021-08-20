@@ -50,7 +50,6 @@ export async function authFlow(
     client._log.info('Signed in successfully as', utils.getDisplayName(me));
 }
 
-
 export async function checkAuthorization(client: TelegramClient) {
     try {
         await client.invoke(new Api.updates.GetState());

@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'icomoon';
-  src: url('../assets/fonts/icomoon.woff2?7tsg0v') format('woff2'),
-    url('../assets/fonts/icomoon.woff?7tsg0v') format('woff');
+  src: url('../assets/fonts/icomoon.woff2?n9djnk') format('woff2'),
+    url('../assets/fonts/icomoon.woff?n9djnk') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -32,6 +32,12 @@
   }
 }
 
+.icon-bot-commands-filled:before {
+  content: "\e97f";
+}
+.icon-reply-filled:before {
+  content: "\e980";
+}
 .icon-bug:before {
   content: "\e97e";
 }

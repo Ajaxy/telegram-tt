@@ -90,6 +90,13 @@
     }
   }
 
+  .Button.bot-commands ~ & {
+    .is-pointer-env & > .backdrop {
+      left: 3rem;
+      width: 3.25rem;
+    }
+  }
+
   .bubble {
     padding: 0;
     width: var(--symbol-menu-width);

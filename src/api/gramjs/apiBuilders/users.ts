@@ -1,5 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
+import {
+  ApiBotCommand, ApiUser, ApiUserStatus, ApiUserType,
+} from '../../types';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
   const {
@@ -14,6 +16,7 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
       pinnedMessageId: pinnedMsgId,
       isBlocked: Boolean(blocked),
       ...(botInfo && { botDescription: botInfo.description }),
+      ...(botInfo && botInfo.commands.length && { botCommands: buildApiBotCommands(mtpUserFull.user.id, botInfo) }),
     },
   };
 }
@@ -73,4 +76,12 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   } else {
     return { type: 'userStatusLastMonth' };
   }
+}
+
+function buildApiBotCommands(botId: number, botInfo: GramJs.BotInfo) {
+  return botInfo.commands.map(({ command, description }) => ({
+    botId,
+    command,
+    description,
+  })) as ApiBotCommand[];
 }

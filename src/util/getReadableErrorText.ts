@@ -120,5 +120,5 @@ export default function getReadableErrorText(error: ApiError) {
 }
 
 export function getShippingError(error: ApiError): ApiFieldError | undefined {
-    return SHIPPING_ERRORS[error.message];
+  return SHIPPING_ERRORS[error.message];
 }

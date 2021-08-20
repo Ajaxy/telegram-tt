@@ -1,15 +1,14 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiBotInlineSwitchPm, ApiChat, ApiUser } from '../../types';
+import { ApiChat, ApiUser } from '../../types';
 
 import localDb from '../localDb';
 import { invokeRequest } from './client';
 import { buildInputPeer, calculateResultHash, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildApiBotInlineMediaResult, buildApiBotInlineResult } from '../apiBuilders/bots';
+import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { pick } from '../../../util/iteratees';
 
 export function init() {
 }
@@ -92,7 +91,7 @@ export async function fetchInlineBotResults({
     isGallery: Boolean(result.gallery),
     help: bot.botPlaceholder,
     nextOffset: getInlineBotResultsNextOffset(bot.username, result.nextOffset),
-    switchPm: buildSwitchPm(result.switchPm),
+    switchPm: buildBotSwitchPm(result.switchPm),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
     results: processInlineBotResult(String(result.queryId), result.results),
   };
@@ -118,8 +117,20 @@ export async function sendInlineBotResult({
   }), true);
 }
 
-function buildSwitchPm(switchPm?: GramJs.InlineBotSwitchPM) {
-  return switchPm ? pick(switchPm, ['text', 'startParam']) as ApiBotInlineSwitchPm : undefined;
+export async function startBot({
+  bot, startParam,
+}: {
+  bot: ApiUser;
+  startParam?: string;
+}) {
+  const randomId = generateRandomBigInt();
+
+  await invokeRequest(new GramJs.messages.StartBot({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    peer: buildInputPeer(bot.id, bot.accessHash),
+    randomId,
+    startParam,
+  }), true);
 }
 
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {

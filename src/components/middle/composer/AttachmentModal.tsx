@@ -67,9 +67,7 @@ const AttachmentModal: FC<OwnProps> = ({
   const lang = useLang();
 
   const {
-    isMentionTooltipOpen, mentionFilter,
-    closeMentionTooltip, insertMention,
-    mentionFilteredUsers,
+    isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
   } = useMentionTooltip(
     isOpen,
     caption,
@@ -227,7 +225,6 @@ const AttachmentModal: FC<OwnProps> = ({
           <MentionTooltip
             isOpen={isMentionTooltipOpen}
             onClose={closeMentionTooltip}
-            filter={mentionFilter}
             onInsertUserName={insertMention}
             filteredUsers={mentionFilteredUsers}
             usersById={usersById}

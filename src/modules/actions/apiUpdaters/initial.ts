@@ -57,7 +57,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       onUpdateCurrentUser(update);
       break;
 
-    case 'error':
+    case 'error': {
       if (update.error.message === 'SESSION_REVOKED') {
         actions.signOut();
       }
@@ -70,6 +70,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       break;
+    }
   }
 });
 

@@ -192,13 +192,14 @@
   > .Spinner {
     align-self: center;
     --spinner-size: 1.5rem;
+    margin-right: -.5rem;
   }
 
   > .Button {
     flex-shrink: 0;
     background: none !important;
-    width: 3.375rem;
-    height: 3.375rem;
+    width: 3.5rem;
+    height: 3.5rem;
     margin: 0;
     padding: 0.625rem;
     align-self: flex-end;
@@ -210,7 +211,17 @@
     }
 
     + .Button {
-      margin-left: -.25rem;
+      margin-left: -.625rem;
+    }
+
+    &.bot-commands {
+      color: var(--color-primary) !important;
+      padding-right: 0;
+
+      // SymbolMenu button should be accessible if BotCommandsMenu opened
+      body.is-touch-env &.activated + .Button.mobile-symbol-menu-button {
+        z-index: calc(var(--z-menu-backdrop) + 1);
+      }
     }
 
     &.scheduled-button i::after {

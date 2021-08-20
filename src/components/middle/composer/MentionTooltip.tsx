@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useState, useRef, memo,
+  FC, useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
 import usePrevious from '../../../hooks/usePrevious';
 
@@ -7,9 +7,8 @@ import { ApiUser } from '../../../api/types';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
-import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
-import cycleRestrict from '../../../util/cycleRestrict';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -18,7 +17,6 @@ import './MentionTooltip.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  filter: string;
   onClose: () => void;
   onInsertUserName: (user: ApiUser, forceFocus?: boolean) => void;
   filteredUsers?: ApiUser[];
@@ -27,7 +25,6 @@ export type OwnProps = {
 
 const MentionTooltip: FC<OwnProps> = ({
   isOpen,
-  filter,
   onClose,
   onInsertUserName,
   usersById,
@@ -36,21 +33,6 @@ const MentionTooltip: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
-
-  const getSelectedIndex = useCallback((newIndex: number) => {
-    if (!filteredUsers) {
-      return -1;
-    }
-    const membersCount = filteredUsers!.length;
-    return cycleRestrict(membersCount, newIndex);
-  }, [filteredUsers]);
-
-  const [selectedMentionIndex, setSelectedMentionIndex] = useState(-1);
-
-  const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
-    e.preventDefault();
-    setSelectedMentionIndex((index) => (getSelectedIndex(index + value)));
-  }, [setSelectedMentionIndex, getSelectedIndex]);
 
   const handleUserSelect = useCallback((userId: number, forceFocus = false) => {
     const user = usersById && usersById[userId];
@@ -61,37 +43,27 @@ const MentionTooltip: FC<OwnProps> = ({
     onInsertUserName(user, forceFocus);
   }, [usersById, onInsertUserName]);
 
-  const handleSelectMention = useCallback((e: KeyboardEvent) => {
-    if (filteredUsers && filteredUsers.length && selectedMentionIndex > -1) {
-      const member = filteredUsers[selectedMentionIndex];
-      if (member) {
-        e.preventDefault();
-        handleUserSelect(member.id, true);
-      }
-    }
-  }, [filteredUsers, selectedMentionIndex, handleUserSelect]);
+  const handleSelectMention = useCallback((member: ApiUser) => {
+    handleUserSelect(member.id, true);
+  }, [handleUserSelect]);
 
-  useEffect(() => (isOpen ? captureKeyboardListeners({
-    onEsc: onClose,
-    onUp: (e: KeyboardEvent) => handleArrowKey(-1, e),
-    onDown: (e: KeyboardEvent) => handleArrowKey(1, e),
-    onEnter: handleSelectMention,
-    onTab: handleSelectMention,
-  }) : undefined), [isOpen, onClose, handleArrowKey, handleSelectMention]);
+  const selectedMentionIndex = useKeyboardNavigation({
+    isActive: isOpen,
+    items: filteredUsers,
+    onSelect: handleSelectMention,
+    shouldSelectOnTab: true,
+    onClose,
+  });
+
+  useEffect(() => {
+    setTooltipItemVisible('.chat-item-clickable', selectedMentionIndex, containerRef);
+  }, [selectedMentionIndex]);
 
   useEffect(() => {
     if (filteredUsers && !filteredUsers.length) {
       onClose();
     }
   }, [filteredUsers, onClose]);
-
-  useEffect(() => {
-    setSelectedMentionIndex(0);
-  }, [filter]);
-
-  useEffect(() => {
-    setTooltipItemVisible('.chat-item-clickable', selectedMentionIndex, containerRef);
-  }, [selectedMentionIndex]);
 
   const prevChatMembers = usePrevious(
     filteredUsers && filteredUsers.length
