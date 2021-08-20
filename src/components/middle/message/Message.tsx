@@ -16,11 +16,8 @@ import {
   ApiUser,
   ApiChat,
   ApiSticker,
-  MAIN_THREAD_ID,
 } from '../../../api/types';
-import {
-  FocusDirection, IAlbum, ISettings, MediaViewerOrigin,
-} from '../../../types';
+import { FocusDirection, IAlbum, ISettings } from '../../../types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
@@ -59,7 +56,6 @@ import {
   getUserColorKey,
 } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
-import windowSize from '../../../util/windowSize';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
@@ -67,14 +63,15 @@ import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName, isEmojiOnlyMessage } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
-import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useFocusMessage from './hooks/useFocusMessage';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
+import useFocusMessage from './hooks/useFocusMessage';
+import useOuterHandlers from './hooks/useOuterHandlers';
+import useInnerHandlers from './hooks/useInnerHandlers';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -157,13 +154,7 @@ type StateProps = {
   shouldLoopStickers?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openAudioPlayer' |
-  'openUserInfo' | 'openChat' |
-  'cancelSendingMessage' | 'markMessagesRead' |
-  'sendPollVote' | 'toggleMessageSelection' | 'setReplyingToId' | 'openForwardMenu' |
-  'clickInlineButton' | 'disableContextMenuHint' | 'showNotification'
-)>;
+type DispatchProps = Pick<GlobalActions, 'toggleMessageSelection' | 'clickInlineButton' | 'disableContextMenuHint'>;
 
 const NBSP = '\u00A0';
 const GROUP_MESSAGE_HOVER_ATTRIBUTE = 'data-is-document-group-hover';
@@ -173,7 +164,6 @@ const APPENDIX_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/s
 const APPENDIX_NOT_OWN = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>';
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
-const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -222,20 +212,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldAutoLoadMedia,
   shouldAutoPlayMedia,
   shouldLoopStickers,
-  focusMessage,
-  openMediaViewer,
-  openAudioPlayer,
-  openUserInfo,
-  openChat,
-  cancelSendingMessage,
-  markMessagesRead,
-  sendPollVote,
   toggleMessageSelection,
-  setReplyingToId,
-  openForwardMenu,
   clickInlineButton,
   disableContextMenuHint,
-  showNotification,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -270,7 +249,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
-  const { chatId, id: messageId, threadInfo } = message;
+  const { id: messageId, chatId, threadInfo } = message;
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
@@ -279,7 +258,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const { forwardInfo, viaBotId } = message;
   const asForwarded = forwardInfo && !isChatWithSelf && !forwardInfo.isLinkedChannelPost;
-  const isInDocumentGroup = !!message.groupedId && !message.isInAlbum;
+  const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
   const isAlbum = Boolean(album) && album!.messages.length > 1;
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice,
@@ -303,6 +282,68 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const avatarPeer = forwardInfo && (isChatWithSelf || !sender) ? originSender : sender;
   const senderPeer = forwardInfo ? originSender : sender;
 
+  const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
+    if (isLocal) {
+      return;
+    }
+
+    toggleMessageSelection({
+      messageId,
+      groupedId,
+      ...(e && e.shiftKey && { withShift: true }),
+      ...(isAlbum && { childMessageIds: album!.messages.map(({ id }) => id) }),
+    });
+  }, [isLocal, toggleMessageSelection, messageId, isAlbum, album]);
+
+  const {
+    handleMouseDown,
+    handleClick,
+    handleContextMenu,
+    handleDoubleClick,
+    handleContentDoubleClick,
+    isSwiped,
+  } = useOuterHandlers(
+    selectMessage,
+    ref,
+    messageId,
+    isLocal,
+    isAlbum,
+    Boolean(isInSelectMode),
+    onContextMenu,
+    handleBeforeContextMenu,
+  );
+
+  const {
+    handleAvatarClick,
+    handleSenderClick,
+    handleViaBotClick,
+    handleReplyClick,
+    handleMediaClick,
+    handleAudioPlay,
+    handleAlbumMediaClick,
+    handleMetaClick,
+    handleReadMedia,
+    handleCancelUpload,
+    handleVoteSend,
+    handleGroupForward,
+    handleForward,
+    handleFocus,
+    handleFocusForwarded,
+    handleDocumentGroupSelectAll,
+  } = useInnerHandlers(
+    lang,
+    selectMessage,
+    message,
+    chatId,
+    threadId,
+    isInDocumentGroup,
+    Boolean(isScheduled),
+    album,
+    avatarPeer,
+    senderPeer,
+    botSender,
+  );
+
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -325,6 +366,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isInSelectMode && 'is-in-selection-mode',
     isThreadTop && 'is-thread-top',
     Boolean(message.inlineButtons) && 'has-inline-buttons',
+    isSwiped && 'is-swiped',
     transitionClassNames,
   );
   const contentClassName = buildContentClassName(message, {
@@ -350,175 +392,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
     appendixRef.current.innerHTML = isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN;
   }, [isOwn, withAppendix]);
-
-  const handleGroupDocumentMessagesSelect = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-
-    toggleMessageSelection({
-      messageId,
-      groupedId: message.groupedId,
-    });
-  }, [messageId, message.groupedId, toggleMessageSelection]);
-
-  const handleMessageSelect = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (isLocal) {
-      return;
-    }
-
-    const params = isAlbum && album && album.messages
-      ? {
-        messageId,
-        childMessageIds: album.messages.map(({ id }) => id),
-        withShift: e && e.shiftKey,
-      }
-      : { messageId, withShift: e && e.shiftKey };
-    toggleMessageSelection(params);
-  }, [isLocal, isAlbum, album, messageId, toggleMessageSelection]);
-
-  const handleContainerDoubleClick = useCallback(() => {
-    setReplyingToId({ messageId });
-  }, [setReplyingToId, messageId]);
-
-  const handleContentDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-  }, []);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    preventMessageInputBlur(e);
-
-    if (!isLocal) {
-      handleBeforeContextMenu(e);
-    }
-  };
-
-  const handleAvatarClick = useCallback(() => {
-    if (!avatarPeer) {
-      return;
-    }
-
-    if (isChatPrivate(avatarPeer.id)) {
-      openUserInfo({ id: avatarPeer.id });
-    } else {
-      openChat({ id: avatarPeer.id });
-    }
-  }, [avatarPeer, openUserInfo, openChat]);
-
-  const handleSenderClick = useCallback(() => {
-    if (!senderPeer) {
-      showNotification({ message: lang('HidAccount') });
-
-      return;
-    }
-
-    if (isChatPrivate(senderPeer.id)) {
-      openUserInfo({ id: senderPeer.id });
-    } else {
-      openChat({ id: senderPeer.id });
-    }
-  }, [senderPeer, showNotification, lang, openUserInfo, openChat]);
-
-  const handleViaBotClick = useCallback(() => {
-    if (!botSender) {
-      return;
-    }
-
-    openUserInfo({ id: botSender.id });
-  }, [botSender, openUserInfo]);
-
-  const handleReplyClick = useCallback((): void => {
-    focusMessage({
-      chatId, threadId, messageId: message.replyToMessageId, replyMessageId: messageId,
-    });
-  }, [focusMessage, chatId, threadId, message.replyToMessageId, messageId]);
-
-  const handleMediaClick = useCallback((): void => {
-    openMediaViewer({
-      chatId, threadId, messageId, origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
-    });
-  }, [chatId, threadId, messageId, openMediaViewer, isScheduled]);
-
-  const handleAudioPlay = useCallback((): void => {
-    openAudioPlayer({ chatId, messageId });
-  }, [chatId, messageId, openAudioPlayer]);
-
-  const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
-    openMediaViewer({
-      chatId,
-      threadId,
-      messageId: albumMessageId,
-      origin: isScheduled ? MediaViewerOrigin.ScheduledAlbum : MediaViewerOrigin.Album,
-    });
-  }, [chatId, threadId, openMediaViewer, isScheduled]);
-
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const target = e.target as HTMLDivElement;
-    if (!target.classList.contains('text-content') && !target.classList.contains('Message')) {
-      return;
-    }
-
-    if (IS_ANDROID) {
-      if (windowSize.getIsKeyboardVisible()) {
-        setTimeout(() => {
-          onContextMenu(e);
-        }, ANDROID_KEYBOARD_HIDE_DELAY_MS);
-      } else {
-        onContextMenu(e);
-      }
-    } else {
-      onContextMenu(e);
-    }
-  }, [onContextMenu]);
-
-  const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (IS_ANDROID) {
-      handleMessageSelect(e);
-    } else {
-      onContextMenu(e);
-    }
-  }, [onContextMenu, handleMessageSelect]);
-
-  const handleReadMedia = useCallback((): void => {
-    markMessagesRead({ messageIds: [messageId] });
-  }, [messageId, markMessagesRead]);
-
-  const handleCancelUpload = useCallback(() => {
-    cancelSendingMessage({ chatId, messageId });
-  }, [cancelSendingMessage, chatId, messageId]);
-
-  const handleVoteSend = useCallback((options: string[]) => {
-    sendPollVote({ chatId, messageId, options });
-  }, [chatId, messageId, sendPollVote]);
-
-  const handleGroupForward = useCallback(() => {
-    openForwardMenu({ fromChatId: chatId, groupedId: message.groupedId });
-  }, [openForwardMenu, chatId, message.groupedId]);
-
-  const handleForward = useCallback(() => {
-    if (album && album.messages) {
-      const messageIds = album.messages.map(({ id }) => id);
-      openForwardMenu({ fromChatId: chatId, messageIds });
-    } else {
-      openForwardMenu({ fromChatId: chatId, messageIds: [messageId] });
-    }
-  }, [album, openForwardMenu, chatId, messageId]);
-
-  const handleFocus = useCallback(() => {
-    focusMessage({
-      chatId, threadId: MAIN_THREAD_ID, messageId,
-    });
-  }, [focusMessage, chatId, messageId]);
-
-  const handleFocusForwarded = useCallback(() => {
-    if (isInDocumentGroup) {
-      focusMessage({
-        chatId: forwardInfo!.fromChatId, groupedId: message.groupedId, groupedChatId: chatId,
-      });
-      return;
-    }
-    focusMessage({
-      chatId: forwardInfo!.fromChatId, messageId: forwardInfo!.fromMessageId,
-    });
-  }, [focusMessage, forwardInfo, message, chatId, isInDocumentGroup]);
 
   let style = '';
   let calculatedWidth;
@@ -704,7 +577,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
                 message={message}
                 outgoingStatus={outgoingStatus}
                 signature={signature}
-                onClick={handleMessageSelect}
+                onClick={handleMetaClick}
               />
             )}
           </p>
@@ -788,10 +661,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       // @ts-ignore teact feature
       style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}
-      onClick={isInSelectMode ? handleMessageSelect : IS_ANDROID ? handleClick : undefined}
-      onDoubleClick={!isInSelectMode ? handleContainerDoubleClick : undefined}
-      onMouseDown={!isInSelectMode ? handleMouseDown : undefined}
-      onContextMenu={!isInSelectMode && !isLocal ? handleContextMenu : undefined}
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+      onContextMenu={handleContextMenu}
+      onDoubleClick={handleDoubleClick}
       onMouseEnter={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseEnter : undefined}
       onMouseLeave={isInDocumentGroup && !isLastInDocumentGroup ? handleDocumentGroupMouseLeave : undefined}
     >
@@ -810,7 +683,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       {!isLocal && isLastInDocumentGroup && (
         <div
           className={buildClassName('message-select-control group-select', isGroupSelected && 'is-selected')}
-          onClick={handleGroupDocumentMessagesSelect}
+          onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
             <i className="icon-select" />
@@ -820,7 +693,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       {withAvatar && renderAvatar()}
       <div
         className={buildClassName('message-content-wrapper', contentClassName.includes('text') && 'can-select-text')}
-        onClick={isInSelectMode && isInDocumentGroup ? handleMessageSelect : undefined}
       >
         <div
           className={contentClassName}
@@ -837,7 +709,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
               message={message}
               outgoingStatus={outgoingStatus}
               signature={signature}
-              onClick={handleMessageSelect}
+              onClick={handleMetaClick}
             />
           )}
           {canShowActionButton && canForward ? (
@@ -999,19 +871,8 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
-    'focusMessage',
-    'openMediaViewer',
-    'openAudioPlayer',
-    'cancelSendingMessage',
-    'openUserInfo',
-    'openChat',
-    'markMessagesRead',
-    'sendPollVote',
     'toggleMessageSelection',
-    'setReplyingToId',
-    'openForwardMenu',
     'clickInlineButton',
     'disableContextMenuHint',
-    'showNotification',
   ]),
 )(Message));
