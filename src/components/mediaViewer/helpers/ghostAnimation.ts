@@ -143,7 +143,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
 
   const existingGhost = document.getElementsByClassName('ghost')[0] as HTMLDivElement;
 
-  const ghost = existingGhost || createGhost(bestImageData || toImage, origin === MediaViewerOrigin.ProfileAvatar);
+  const ghost = existingGhost || createGhost(bestImageData || toImage, origin);
   if (!existingGhost) {
     applyStyles(ghost, {
       top: `${toTop}px`,
@@ -203,7 +203,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   });
 }
 
-function createGhost(source: string | HTMLImageElement | HTMLVideoElement, shouldAppendProfileInfo = false) {
+function createGhost(source: string | HTMLImageElement | HTMLVideoElement, origin?: MediaViewerOrigin) {
   const ghost = document.createElement('div');
   ghost.classList.add('ghost');
 
@@ -219,9 +219,16 @@ function createGhost(source: string | HTMLImageElement | HTMLVideoElement, shoul
 
   ghost.appendChild(img);
 
-  if (shouldAppendProfileInfo) {
+  if (origin === MediaViewerOrigin.ProfileAvatar || origin === MediaViewerOrigin.SettingsAvatar) {
     ghost.classList.add('ProfileInfo');
-    const profileInfo = document.querySelector('#RightColumn .ProfileInfo .info');
+    if (origin === MediaViewerOrigin.SettingsAvatar) {
+      ghost.classList.add('self');
+    }
+    const profileInfo = document.querySelector(
+      origin === MediaViewerOrigin.ProfileAvatar
+        ? '#RightColumn .ProfileInfo .info'
+        : '#Settings .ProfileInfo .info',
+    );
     if (profileInfo) {
       ghost.appendChild(profileInfo.cloneNode(true));
     }
@@ -314,6 +321,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       mediaSelector = 'img.avatar-media';
       break;
 
+    case MediaViewerOrigin.SettingsAvatar:
+      containerSelector = '#Settings .ProfileInfo .active .ProfilePhoto';
+      mediaSelector = 'img.avatar-media';
+      break;
+
     case MediaViewerOrigin.ProfileAvatar:
       containerSelector = '#RightColumn .ProfileInfo .active .ProfilePhoto';
       mediaSelector = 'img.avatar-media';
@@ -345,6 +357,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
       break;
 
     case MediaViewerOrigin.SharedMedia:
+    case MediaViewerOrigin.SettingsAvatar:
     case MediaViewerOrigin.ProfileAvatar:
     case MediaViewerOrigin.SearchResult:
       (ghost.firstChild as HTMLElement).style.objectFit = 'cover';

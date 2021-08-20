@@ -6,6 +6,10 @@
     flex-direction: column;
     overflow: hidden;
   }
+
+  .left-header {
+    padding-right: .8125rem;
+  }
 }
 
 .settings-main-header {
@@ -30,6 +34,7 @@
   background: var(--color-background);
   height: calc(100% - var(--header-height));
   overflow-y: auto;
+  overflow-y: overlay;
 
   &.infinite-scroll {
     display: flex;
@@ -84,36 +89,17 @@
 }
 
 .settings-main-menu {
-  padding: 0 0.5rem 1rem;
-}
+  padding: 0 0.5rem .75rem;
 
-.settings-current-user {
-  margin-bottom: 1.125rem;
-  text-align: center;
+  > .ChatExtra {
+    padding: 0 .5rem .3125rem;
+    margin: 0 -.5rem .625rem;
+    box-shadow: inset 0 -.0625rem 0 0 var(--color-background-secondary-accent);
+    border-bottom: .625rem solid var(--color-background-secondary);
 
-  .Avatar {
-    margin: 0 auto 1.5rem;
-  }
-
-  .name {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-    font-size: 1.5rem;
-    line-height: 2rem;
-    margin: 0;
-
-    .VerifiedIcon {
-      margin-left: 0.25rem;
-      margin-top: 0.1rem;
+    .ListItem.narrow {
+      margin-bottom: .25rem;
     }
-  }
-
-  .phone {
-    font-size: 0.875rem;
-    color: #868e96;
-    margin: 0;
   }
 }
 

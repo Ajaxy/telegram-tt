@@ -230,6 +230,7 @@ export enum MediaViewerOrigin {
   ScheduledInline,
   SharedMedia,
   ProfileAvatar,
+  SettingsAvatar,
   MiddleHeaderAvatar,
   Album,
   ScheduledAlbum,

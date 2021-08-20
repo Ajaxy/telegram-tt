@@ -46,10 +46,10 @@ import TabList from '../ui/TabList';
 import Spinner from '../ui/Spinner';
 import ListItem from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import ProfileInfo from './ProfileInfo';
+import ProfileInfo from '../common/ProfileInfo';
 import Document from '../common/Document';
 import Audio from '../common/Audio';
-import ChatExtra from './ChatExtra';
+import ChatExtra from '../common/ChatExtra';
 import Media from '../common/Media';
 import WebLink from '../common/WebLink';
 import NothingFound from '../common/NothingFound';
@@ -405,11 +405,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 function renderProfileInfo(chatId: number, resolvedUserId?: number) {
   return (
     <div className="profile-info">
-      <ProfileInfo
-        userId={resolvedUserId || chatId}
-        forceShowSelf={resolvedUserId !== chatId}
-      />
-      <ChatExtra chatOrUserId={resolvedUserId || chatId} forceShowSelf={resolvedUserId !== chatId} />
+      <ProfileInfo userId={resolvedUserId || chatId} />
+      <ChatExtra chatOrUserId={resolvedUserId || chatId} />
     </div>
   );
 }

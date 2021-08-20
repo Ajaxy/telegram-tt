@@ -12,13 +12,14 @@ import { selectChat, selectUser } from '../../modules/selectors';
 import {
   getUserFullName, getUserStatus, isChatChannel, isUserOnline,
 } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
+import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
+import buildClassName from '../../util/buildClassName';
 import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
 
-import VerifiedIcon from '../common/VerifiedIcon';
+import VerifiedIcon from './VerifiedIcon';
 import ProfilePhoto from './ProfilePhoto';
 import Transition from '../ui/Transition';
 
@@ -35,15 +36,16 @@ type StateProps = {
   isSavedMessages?: boolean;
   animationLevel: 0 | 1 | 2;
   serverTimeOffset: number;
-} & Pick<GlobalState, 'lastSyncTime'>;
+} & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
 
-const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+  forceShowSelf,
   user,
   chat,
   isSavedMessages,
-  lastSyncTime,
+  connectionState,
   animationLevel,
   loadFullUser,
   openMediaViewer,
@@ -69,10 +71,10 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const lang = useLang();
 
   useEffect(() => {
-    if (lastSyncTime && userId) {
+    if (connectionState === 'connectionStateReady' && userId && !forceShowSelf) {
       loadFullUser({ userId });
     }
-  }, [userId, loadFullUser, lastSyncTime]);
+  }, [userId, loadFullUser, connectionState, forceShowSelf]);
 
   usePhotosPreload(user || chat, photos, currentPhotoIndex);
 
@@ -80,9 +82,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     openMediaViewer({
       avatarOwnerId: userId || chatId,
       profilePhotoIndex: currentPhotoIndex,
-      origin: MediaViewerOrigin.ProfileAvatar,
+      origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
-  }, [openMediaViewer, userId, chatId, currentPhotoIndex]);
+  }, [openMediaViewer, userId, chatId, currentPhotoIndex, forceShowSelf]);
 
   const selectPreviousMedia = useCallback(() => {
     if (isFirst) {
@@ -174,7 +176,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const isVerifiedIconShown = (user && user.isVerified) || (chat && chat.isVerified);
 
   return (
-    <div className="ProfileInfo" dir={lang.isRtl ? 'rtl' : undefined}>
+    <div className={buildClassName('ProfileInfo', forceShowSelf && 'self')} dir={lang.isRtl ? 'rtl' : undefined}>
       <div className="photo-wrapper">
         {renderPhotoTabs()}
         <Transition activeKey={currentPhotoIndex} name={slideAnimation} className="profile-slide-container">
@@ -218,15 +220,15 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
-    const { lastSyncTime, serverTimeOffset } = global;
+    const { connectionState, serverTimeOffset } = global;
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { animationLevel } = global.settings.byKey;
 
     return {
-      lastSyncTime, user, chat, isSavedMessages, animationLevel, serverTimeOffset,
+      connectionState, user, chat, isSavedMessages, animationLevel, serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
-)(PrivateChatInfo));
+)(ProfileInfo));

@@ -334,6 +334,7 @@ const Settings: FC<OwnProps> = ({
           currentScreen={currentScreen}
           onReset={handleReset}
           onSaveFilter={handleSaveFilter}
+          onScreenSelect={onScreenSelect}
           editedFolderId={foldersState.folderId}
         />
         {renderCurrentSectionContent(isScreenActive, currentKey)}

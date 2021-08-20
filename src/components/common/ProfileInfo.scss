@@ -159,4 +159,25 @@
       transform: scaleX(-1);
     }
   }
+
+  &.self {
+    margin: 0 -.5rem .75rem;
+    overflow: hidden;
+
+    &.ghost {
+      margin: 0;
+    }
+
+    .prev-avatar-media {
+      z-index: 0;
+    }
+
+    .info {
+      padding-bottom: .75rem;
+    }
+
+    .status {
+      line-height: 1rem;
+    }
+  }
 }

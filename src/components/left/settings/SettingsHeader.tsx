@@ -20,6 +20,7 @@ type OwnProps = {
   editedFolderId?: number;
   onReset: () => void;
   onSaveFilter: () => void;
+  onScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type DispatchProps = Pick<GlobalActions, 'signOut' | 'deleteChatFolder'>;
@@ -31,6 +32,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
   onSaveFilter,
   signOut,
   deleteChatFolder,
+  onScreenSelect,
 }) => {
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false);
@@ -205,6 +207,16 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
           <div className="settings-main-header">
             <h3>{lang('SETTINGS')}</h3>
 
+            <Button
+              round
+              ripple={!IS_SINGLE_COLUMN_LAYOUT}
+              size="smaller"
+              color="translucent"
+              onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
+              ariaLabel={lang('lng_settings_information')}
+            >
+              <i className="icon-edit" />
+            </Button>
             <DropdownMenu
               className="settings-more-menu"
               trigger={SettingsMenuButton}
