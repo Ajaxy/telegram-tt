@@ -188,6 +188,11 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       }
     }
 
+    if (isSelectModeActive) {
+      exitMessageSelectMode();
+      return;
+    }
+
     if (threadId === MAIN_THREAD_ID && messageListType === 'thread' && currentTransitionKey === 0) {
       if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
@@ -197,10 +202,6 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       return;
-    }
-
-    if (messageListType === 'scheduled' && isSelectModeActive) {
-      exitMessageSelectMode();
     }
 
     openPreviousChat();
