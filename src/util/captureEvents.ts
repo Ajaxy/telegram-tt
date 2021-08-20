@@ -1,3 +1,5 @@
+import { IS_IOS } from './environment';
+
 export enum SwipeDirection {
   Up,
   Down,
@@ -29,8 +31,12 @@ export interface RealTouchEvent extends TouchEvent {
   pageY?: number;
 }
 
-type TSwipeAxis = 'x' | 'y' | undefined;
+type TSwipeAxis =
+  'x'
+  | 'y'
+  | undefined;
 
+const IOS_SCREEN_EDGE_THRESHOLD = 20;
 const MOVED_THRESHOLD = 15;
 const SWIPE_THRESHOLD = 50;
 
@@ -136,7 +142,15 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
   }
 
-  function onSwipe(e: Event, dragOffsetX: number, dragOffsetY: number) {
+  function onSwipe(e: MouseEvent | RealTouchEvent, dragOffsetX: number, dragOffsetY: number) {
+    // Avoid conflicts with swipe-to-back gestures
+    if (IS_IOS) {
+      const x = (e as RealTouchEvent).touches[0].pageX;
+      if (x <= IOS_SCREEN_EDGE_THRESHOLD || x >= window.innerWidth - IOS_SCREEN_EDGE_THRESHOLD) {
+        return;
+      }
+    }
+
     if (!currentSwipeAxis) {
       const xAbs = Math.abs(dragOffsetX);
       const yAbs = Math.abs(dragOffsetY);
@@ -170,7 +184,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
 function processSwipe(
   e: Event,
-  currentSwipeAxis:TSwipeAxis,
+  currentSwipeAxis: TSwipeAxis,
   dragOffsetX: number,
   dragOffsetY: number,
   onSwipe: (e: Event, direction: SwipeDirection) => void,
