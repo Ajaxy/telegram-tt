@@ -30,6 +30,7 @@ import {
   replaceScheduledMessages,
   updateThreadInfos,
   updateChat,
+  updateThreadUnreadFromForwardedMessage,
 } from '../../reducers';
 import {
   selectChat,
@@ -145,14 +146,29 @@ async function loadWithBudget(
 }
 
 addReducer('loadMessage', (global, actions, payload) => {
-  const { chatId, messageId, replyOriginForId } = payload!;
+  const {
+    chatId, messageId, replyOriginForId, threadUpdate,
+  } = payload!;
   const chat = selectChat(global, chatId);
 
   if (!chat) {
     return;
   }
 
-  void loadMessage(chat, messageId, replyOriginForId);
+  (async () => {
+    const message = await loadMessage(chat, messageId, replyOriginForId);
+    if (message && threadUpdate) {
+      const { lastMessageId, isDeleting } = threadUpdate;
+
+      setGlobal(updateThreadUnreadFromForwardedMessage(
+        getGlobal(),
+        message,
+        chatId,
+        lastMessageId,
+        isDeleting,
+      ));
+    }
+  })();
 });
 
 addReducer('sendMessage', (global, actions, payload) => {
@@ -683,7 +699,7 @@ async function loadViewportMessages(
 async function loadMessage(chat: ApiChat, messageId: number, replyOriginForId: number) {
   const result = await callApi('fetchMessage', { chat, messageId });
   if (!result) {
-    return;
+    return undefined;
   }
 
   if (result === MESSAGE_DELETED) {
@@ -697,13 +713,15 @@ async function loadMessage(chat: ApiChat, messageId: number, replyOriginForId: n
       setGlobal(global);
     }
 
-    return;
+    return undefined;
   }
 
   let global = getGlobal();
   global = updateChatMessage(global, chat.id, messageId, result.message);
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal(global);
+
+  return result.message;
 }
 
 function findClosestIndex(sourceIds: number[], offsetId: number) {

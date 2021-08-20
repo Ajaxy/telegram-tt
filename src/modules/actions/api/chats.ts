@@ -94,6 +94,14 @@ addReducer('openChat', (global, actions, payload) => {
     actions.toggleChatUnread({ id });
   }
 
+  // Please telegram send us some updates about linked chat 🙏
+  if (chat && chat.lastMessage && chat.lastMessage.threadInfo) {
+    actions.requestThreadInfoUpdate({
+      chatId: chat.lastMessage.threadInfo.chatId,
+      threadId: chat.lastMessage.threadInfo.threadId,
+    });
+  }
+
   if (!chat) {
     if (id === currentUserId) {
       void callApi('fetchChat', { type: 'self' });
