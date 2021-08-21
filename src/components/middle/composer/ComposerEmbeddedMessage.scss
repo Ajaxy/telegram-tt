@@ -18,16 +18,20 @@
     display: flex;
     align-items: center;
     padding-right: 0.625rem;
-    padding-top: 0.45rem;
+    padding-top: 0.1875rem;
   }
 
   & > div > .Button {
     flex-shrink: 0;
     background: none !important;
-    width: 2.125rem;
-    height: 2.125rem;
-    margin: 0 0.625rem;
+    width: 3.5rem;
+    height: 2.875rem;
+    margin: 0 -0.0625rem 0 0;
     padding: 0;
     align-self: center;
+
+    @media (max-width: 600px) {
+      width: 2.875rem;
+    }
   }
 }
