@@ -1,4 +1,4 @@
-import { IS_IOS } from './environment';
+import { IS_IOS, IS_TOUCH_ENV } from './environment';
 
 export enum SwipeDirection {
   Up,
@@ -17,10 +17,11 @@ interface CaptureOptions {
       dragOffsetX: number;
       dragOffsetY: number;
     },
-  ) => void;
-  onSwipe?: (e: Event, direction: SwipeDirection) => void;
+  ) => boolean | void;
+  onSwipe?: (e: Event, direction: SwipeDirection) => boolean | void;
   onClick?: (e: MouseEvent | TouchEvent) => void;
   excludedClosestSelector?: string;
+  selectorToPreventScroll?: string;
   withCursor?: boolean;
 }
 
@@ -100,6 +101,12 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       captureEvent = undefined;
 
       if (hasMoved) {
+        if (IS_TOUCH_ENV && options.selectorToPreventScroll) {
+          Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
+            scrollable.style.overflow = '';
+          });
+        }
+
         if (options.onRelease) {
           options.onRelease(e);
         }
@@ -131,13 +138,22 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         hasMoved = true;
       }
 
+      let shouldPreventScroll: boolean | void;
+
       if (options.onDrag) {
-        e.preventDefault();
-        options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
+        shouldPreventScroll = options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
       }
 
       if (options.onSwipe) {
-        onSwipe(e, dragOffsetX, dragOffsetY);
+        shouldPreventScroll = onSwipe(e, dragOffsetX, dragOffsetY);
+      }
+
+      if (IS_TOUCH_ENV && shouldPreventScroll && options.selectorToPreventScroll) {
+        if (options.selectorToPreventScroll) {
+          Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
+            scrollable.style.overflow = 'hidden';
+          });
+        }
       }
     }
   }
@@ -147,7 +163,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     if (IS_IOS) {
       const x = (e as RealTouchEvent).touches[0].pageX;
       if (x <= IOS_SCREEN_EDGE_THRESHOLD || x >= window.innerWidth - IOS_SCREEN_EDGE_THRESHOLD) {
-        return;
+        return undefined;
       }
     }
 
@@ -159,7 +175,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         const ratio = Math.max(xAbs, yAbs) / Math.min(xAbs, yAbs);
         // Diagonal swipe
         if (ratio < 2) {
-          return;
+          return undefined;
         }
       }
 
@@ -170,7 +186,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       }
     }
 
-    processSwipe(e, currentSwipeAxis, dragOffsetX, dragOffsetY, options.onSwipe!);
+    return processSwipe(e, currentSwipeAxis, dragOffsetX, dragOffsetY, options.onSwipe!);
   }
 
   element.addEventListener('mousedown', onCapture);
@@ -187,19 +203,21 @@ function processSwipe(
   currentSwipeAxis: TSwipeAxis,
   dragOffsetX: number,
   dragOffsetY: number,
-  onSwipe: (e: Event, direction: SwipeDirection) => void,
+  onSwipe: (e: Event, direction: SwipeDirection) => boolean | void,
 ) {
   if (currentSwipeAxis === 'x') {
     if (dragOffsetX < 0) {
-      onSwipe(e, SwipeDirection.Left);
+      return onSwipe(e, SwipeDirection.Left);
     } else {
-      onSwipe(e, SwipeDirection.Right);
+      return onSwipe(e, SwipeDirection.Right);
     }
   } else if (currentSwipeAxis === 'y') {
     if (dragOffsetY < 0) {
-      onSwipe(e, SwipeDirection.Up);
+      return onSwipe(e, SwipeDirection.Up);
     } else {
-      onSwipe(e, SwipeDirection.Down);
+      return onSwipe(e, SwipeDirection.Down);
     }
   }
+
+  return undefined;
 }

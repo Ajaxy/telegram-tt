@@ -75,6 +75,7 @@ export default function useOuterHandlers(
 
     let startedAt: number | undefined;
     return captureEvents(containerRef.current!, {
+      selectorToPreventScroll: '.MessageList',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
           if (!startedAt) {
@@ -82,11 +83,15 @@ export default function useOuterHandlers(
           }
 
           markSwiped();
+
+          return true;
         } else if (direction === SwipeDirection.Right) {
           startedAt = undefined;
 
           unmarkSwiped();
         }
+
+        return false;
       }),
       onRelease: () => {
         if (!startedAt) {
