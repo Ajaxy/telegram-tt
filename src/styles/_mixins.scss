@@ -7,11 +7,9 @@
 
 @mixin overflow-y-overlay() {
   @supports (overflow-y: overlay) {
-    body.is-android & {
-      overflow-y: overlay;
+    overflow-y: overlay;
 
-      //Workaround for Android <= 9
-      overflow-x: hidden;
-    }
+    //Workaround for Android <= 9
+    overflow-x: hidden;
   }
 }
