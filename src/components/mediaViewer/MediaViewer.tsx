@@ -428,6 +428,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
         } else if (!(e.target && (e.target as HTMLElement).closest('.MediaViewerFooter'))) {
           close();
         }
+
+        return true;
       } : undefined,
     });
   }, [close, isFooterHidden, isGif, isPhoto, isZoomed, selectNextMedia, selectPreviousMedia]);
