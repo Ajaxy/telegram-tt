@@ -357,10 +357,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
             lastItemElement,
             'end',
             BOTTOM_FOCUS_MARGIN,
-            undefined,
-            undefined,
-            undefined,
-            true,
           );
         });
       }
