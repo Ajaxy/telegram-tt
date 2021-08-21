@@ -333,23 +333,30 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }, FOCUSING_DURATION);
     }
 
-    const { scrollTop, scrollHeight, offsetHeight } = container;
-    const scrollOffset = scrollOffsetRef.current!;
-    const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
-
-    const isAtBottom = isViewportNewest && prevIsViewportNewest && (
-      scrollOffset - (prevContainerHeight || offsetHeight) <= BOTTOM_THRESHOLD
-    );
-
-    let newScrollTop!: number;
-
     const hasFirstMessageChanged = messageIds && prevMessageIds && messageIds[0] !== prevMessageIds[0];
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
+    const wasMessageAdded = hasLastMessageChanged && !hasFirstMessageChanged;
     const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
-    if (isAtBottom && hasLastMessageChanged && !hasFirstMessageChanged && !isAlreadyFocusing) {
+    const { scrollTop, scrollHeight, offsetHeight } = container;
+    const scrollOffset = scrollOffsetRef.current!;
+    const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
+
+    let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
+    if (wasMessageAdded) {
+      // If two new messages come at once (e.g. when bot responds) then the first message will update `scrollOffset`
+      // right away (before animation) which creates inconsistency until the animation completes. To workaround that,
+      // we calculate `isAtBottom` with a "buffer" of the latest message height (this is approximate).
+      const lastItemHeight = lastItemElement ? lastItemElement.offsetHeight : 0;
+      bottomOffset -= lastItemHeight;
+    }
+    const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
+
+    let newScrollTop!: number;
+
+    if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
       if (lastItemElement) {
         fastRaf(() => {
           fastSmoothScroll(
@@ -431,10 +438,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf);
   const noAvatars = Boolean(!withUsers || isChannelChat);
   const shouldRenderGreeting = isChatPrivate(chatId) && !isChatWithSelf && !isBot
-    && ((
-      !messageGroups && !lastMessage && messageIds
-      // Used to avoid flickering when deleting a greeting that has just been sent
-      && (!listItemElementsRef.current || listItemElementsRef.current.length === 0))
+    && (
+      (
+        !messageGroups && !lastMessage && messageIds
+        // Used to avoid flickering when deleting a greeting that has just been sent
+        && (!listItemElementsRef.current || listItemElementsRef.current.length === 0)
+      )
       || checkSingleMessageActionByType('contactSignUp', messageGroups)
       || (lastMessage && lastMessage.content.action && lastMessage.content.action.type === 'contactSignUp')
     );
@@ -508,12 +517,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
 function checkSingleMessageActionByType(type: ApiAction['type'], messageGroups?: MessageDateGroup[]) {
   return messageGroups
-  && messageGroups.length === 1
-  && messageGroups[0].senderGroups.length === 1
-  && messageGroups[0].senderGroups[0].length === 1
-  && 'content' in messageGroups[0].senderGroups[0][0]
-  && messageGroups[0].senderGroups[0][0].content.action
-  && messageGroups[0].senderGroups[0][0].content.action.type === type;
+    && messageGroups.length === 1
+    && messageGroups[0].senderGroups.length === 1
+    && messageGroups[0].senderGroups[0].length === 1
+    && 'content' in messageGroups[0].senderGroups[0][0]
+    && messageGroups[0].senderGroups[0][0].content.action
+    && messageGroups[0].senderGroups[0][0].content.action.type === type;
 }
 
 export default memo(withGlobal<OwnProps>(
