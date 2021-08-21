@@ -121,6 +121,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
     hasMoved = false;
     hasSwiped = false;
+    initialSwipeAxis = undefined;
   }
 
   function onMove(e: MouseEvent | RealTouchEvent) {
