@@ -1,6 +1,5 @@
 import React, {
   FC,
-  memo,
   useCallback,
   useEffect,
   useRef,
@@ -81,4 +80,4 @@ const Notification: FC<OwnProps> = ({
   );
 };
 
-export default memo(Notification);
+export default Notification;
