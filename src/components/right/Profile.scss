@@ -5,11 +5,6 @@
   overflow-y: scroll;
   overflow-x: hidden;
 
-  @supports (overflow-y: overlay) {
-    overflow-y: overlay !important;
-  }
-
-
   > .profile-info > .ChatInfo {
     grid-area: chat_info;
 

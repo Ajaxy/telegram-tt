@@ -109,6 +109,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
       setHsb(positions2hsb({ colorPosition, huePosition }, rectsRef.current!));
       markIsDragging();
+
+      return true;
     }
 
     captureEvents(colorPickerRef.current!, {
@@ -116,6 +118,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
       onDrag: handleColorDrag,
       onRelease: unmarkIsDragging,
       onClick: unmarkIsDragging,
+      selectorToPreventScroll: '.SettingsGeneralBackgroundColor',
       withCursor: true,
     });
 
@@ -125,6 +128,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
       setHsb(positions2hsb({ colorPosition, huePosition }, rectsRef.current!));
       markIsDragging();
+
+      return true;
     }
 
     captureEvents(huePickerRef.current!, {
@@ -132,6 +137,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
       onDrag: handleHueDrag,
       onRelease: unmarkIsDragging,
       onClick: unmarkIsDragging,
+      selectorToPreventScroll: '.SettingsGeneralBackgroundColor',
       withCursor: true,
     });
   }, [markIsDragging, unmarkIsDragging]);

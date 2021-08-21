@@ -110,12 +110,17 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return captureEvents(element, {
+      selectorToPreventScroll: '.Profile, .settings-content',
       onSwipe: IS_TOUCH_ENV ? (e, direction) => {
         if (direction === SwipeDirection.Right) {
           selectPreviousMedia();
+          return true;
         } else if (direction === SwipeDirection.Left) {
           selectNextMedia();
+          return true;
         }
+
+        return false;
       } : undefined,
     });
   }, [selectNextMedia, selectPreviousMedia]);

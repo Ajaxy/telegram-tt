@@ -211,12 +211,17 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return captureEvents(transitionRef.current, {
+      selectorToPreventScroll: '.Profile',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
           setActiveTab(Math.min(activeTab + 1, tabs.length - 1));
+          return true;
         } else if (direction === SwipeDirection.Right) {
           setActiveTab(Math.max(0, activeTab - 1));
+          return true;
         }
+
+        return false;
       }),
     });
   }, [activeTab, tabs.length]);
