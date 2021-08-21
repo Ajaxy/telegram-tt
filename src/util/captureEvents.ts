@@ -44,7 +44,7 @@ const SWIPE_THRESHOLD = 50;
 export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | undefined;
   let hasMoved = false;
-  let currentSwipeAxis: TSwipeAxis;
+  let hasSwiped = false;
 
   function onCapture(e: MouseEvent | RealTouchEvent) {
     if (options.excludedClosestSelector && (
@@ -116,7 +116,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     hasMoved = false;
-    currentSwipeAxis = undefined;
+    hasSwiped = false;
   }
 
   function onMove(e: MouseEvent | RealTouchEvent) {
@@ -144,8 +144,9 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         shouldPreventScroll = options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
       }
 
-      if (options.onSwipe) {
-        shouldPreventScroll = onSwipe(e, dragOffsetX, dragOffsetY);
+      if (options.onSwipe && !hasSwiped) {
+        hasSwiped = onSwipe(e, dragOffsetX, dragOffsetY);
+        shouldPreventScroll = hasSwiped;
       }
 
       if (IS_TOUCH_ENV && shouldPreventScroll && options.selectorToPreventScroll) {
@@ -163,30 +164,33 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     if (IS_IOS) {
       const x = (e as RealTouchEvent).touches[0].pageX;
       if (x <= IOS_SCREEN_EDGE_THRESHOLD || x >= window.innerWidth - IOS_SCREEN_EDGE_THRESHOLD) {
-        return undefined;
+        return false;
       }
     }
 
-    if (!currentSwipeAxis) {
-      const xAbs = Math.abs(dragOffsetX);
-      const yAbs = Math.abs(dragOffsetY);
+    const xAbs = Math.abs(dragOffsetX);
+    const yAbs = Math.abs(dragOffsetY);
 
-      if (dragOffsetX && dragOffsetY) {
-        const ratio = Math.max(xAbs, yAbs) / Math.min(xAbs, yAbs);
-        // Diagonal swipe
-        if (ratio < 2) {
-          return undefined;
-        }
-      }
-
-      if (xAbs >= SWIPE_THRESHOLD) {
-        currentSwipeAxis = 'x';
-      } else if (yAbs >= SWIPE_THRESHOLD) {
-        currentSwipeAxis = 'y';
+    if (dragOffsetX && dragOffsetY) {
+      const ratio = Math.max(xAbs, yAbs) / Math.min(xAbs, yAbs);
+      // Diagonal swipe
+      if (ratio < 2) {
+        return false;
       }
     }
 
-    return processSwipe(e, currentSwipeAxis, dragOffsetX, dragOffsetY, options.onSwipe!);
+    let axis: TSwipeAxis | undefined;
+    if (xAbs >= SWIPE_THRESHOLD) {
+      axis = 'x';
+    } else if (yAbs >= SWIPE_THRESHOLD) {
+      axis = 'y';
+    }
+
+    if (!axis) {
+      return false;
+    }
+
+    return processSwipe(e, axis, dragOffsetX, dragOffsetY, options.onSwipe!);
   }
 
   element.addEventListener('mousedown', onCapture);
@@ -205,19 +209,21 @@ function processSwipe(
   dragOffsetY: number,
   onSwipe: (e: Event, direction: SwipeDirection) => boolean | void,
 ) {
+  let isSwiped: boolean | void = false;
+
   if (currentSwipeAxis === 'x') {
     if (dragOffsetX < 0) {
-      return onSwipe(e, SwipeDirection.Left);
+      isSwiped = onSwipe(e, SwipeDirection.Left);
     } else {
-      return onSwipe(e, SwipeDirection.Right);
+      isSwiped = onSwipe(e, SwipeDirection.Right);
     }
   } else if (currentSwipeAxis === 'y') {
     if (dragOffsetY < 0) {
-      return onSwipe(e, SwipeDirection.Up);
+      isSwiped = onSwipe(e, SwipeDirection.Up);
     } else {
-      return onSwipe(e, SwipeDirection.Down);
+      isSwiped = onSwipe(e, SwipeDirection.Down);
     }
   }
 
-  return undefined;
+  return isSwiped === undefined ? true : isSwiped;
 }

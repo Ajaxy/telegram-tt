@@ -85,10 +85,6 @@ export default function useOuterHandlers(
           markSwiped();
 
           return true;
-        } else if (direction === SwipeDirection.Right) {
-          startedAt = undefined;
-
-          unmarkSwiped();
         }
 
         return false;
