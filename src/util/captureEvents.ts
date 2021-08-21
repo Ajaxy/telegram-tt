@@ -45,6 +45,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | undefined;
   let hasMoved = false;
   let hasSwiped = false;
+  let initialSwipeAxis: TSwipeAxis | undefined;
 
   function onCapture(e: MouseEvent | RealTouchEvent) {
     if (options.excludedClosestSelector && (
@@ -191,6 +192,13 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     if (!axis) {
+      return false;
+    }
+
+    if (!initialSwipeAxis) {
+      initialSwipeAxis = axis;
+    } else if (initialSwipeAxis !== axis) {
+      // Prevent horizontal swipe after vertical to prioritize scroll
       return false;
     }
 
