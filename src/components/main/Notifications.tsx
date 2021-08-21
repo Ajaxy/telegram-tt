@@ -5,9 +5,9 @@ import { GlobalActions } from '../../global/types';
 import { ApiNotification } from '../../api/types';
 
 import { pick } from '../../util/iteratees';
+import renderText from '../common/helpers/renderText';
 
 import Notification from '../ui/Notification';
-import renderText from '../common/helpers/renderText';
 
 type StateProps = {
   notifications: ApiNotification[];
@@ -22,10 +22,10 @@ const Notifications: FC<StateProps & DispatchProps> = ({ notifications, dismissN
 
   return (
     <div id="Notifications">
-      {notifications.map(({ message }) => (
+      {notifications.map(({ message, localId }) => (
         <Notification
           message={renderText(message, ['emoji', 'br', 'links', 'simple_markdown'])}
-          onDismiss={dismissNotification}
+          onDismiss={() => dismissNotification({ localId })}
         />
       ))}
     </div>

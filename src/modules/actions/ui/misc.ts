@@ -1,11 +1,12 @@
 import { addReducer } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
+import { ApiError } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { selectCurrentMessageList } from '../../selectors';
-import { ApiError } from '../../../api/types';
+import generateIdFor from '../../../util/generateIdFor';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
@@ -131,6 +132,7 @@ addReducer('addRecentSticker', (global, action, payload) => {
 
 addReducer('showNotification', (global, actions, payload) => {
   const notification = payload!;
+  notification.localId = generateIdFor({});
 
   const newNotifications = [...global.notifications];
   const existingNotificationIndex = newNotifications.findIndex((n) => n.message === notification.message);
@@ -146,10 +148,8 @@ addReducer('showNotification', (global, actions, payload) => {
   };
 });
 
-addReducer('dismissNotification', (global) => {
-  const newNotifications = [...global.notifications];
-
-  newNotifications.pop();
+addReducer('dismissNotification', (global, actions, payload) => {
+  const newNotifications = global.notifications.filter(({ localId }) => localId !== payload.localId);
 
   return {
     ...global,

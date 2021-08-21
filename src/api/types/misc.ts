@@ -67,3 +67,27 @@ export type ApiNotifyException = {
   isSilent?: boolean;
   shouldShowPreviews?: boolean;
 };
+
+export type ApiNotification = {
+  localId: string;
+  message: string;
+};
+
+export type ApiError = {
+  message: string;
+  hasErrorKey?: boolean;
+  isSlowMode?: boolean;
+  textParams?: Record<string, string>;
+};
+
+export type ApiFieldError = {
+  field: string;
+  message: string;
+};
+
+export type ApiInviteInfo = {
+  title: string;
+  hash: string;
+  isChannel?: boolean;
+  participantsCount?: number;
+};
