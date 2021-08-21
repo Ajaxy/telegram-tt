@@ -17,8 +17,8 @@ interface CaptureOptions {
       dragOffsetX: number;
       dragOffsetY: number;
     },
-  ) => boolean | void;
-  onSwipe?: (e: Event, direction: SwipeDirection) => boolean | void;
+  ) => void;
+  onSwipe?: (e: Event, direction: SwipeDirection) => boolean;
   onClick?: (e: MouseEvent | TouchEvent) => void;
   excludedClosestSelector?: string;
   selectorToPreventScroll?: string;
@@ -60,9 +60,12 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onRelease);
     } else if (e.type === 'touchstart') {
-      document.addEventListener('touchmove', onMove);
-      document.addEventListener('touchend', onRelease);
-      document.addEventListener('touchcancel', onRelease);
+      // We need to always listen on `touchstart` target:
+      // https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
+      const target = e.target as HTMLElement;
+      target.addEventListener('touchmove', onMove);
+      target.addEventListener('touchend', onRelease);
+      target.addEventListener('touchcancel', onRelease);
 
       if ('touches' in e) {
         if (e.pageX === undefined) {
@@ -94,19 +97,19 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
       document.removeEventListener('mouseup', onRelease);
       document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('touchcancel', onRelease);
-      document.removeEventListener('touchend', onRelease);
-      document.removeEventListener('touchmove', onMove);
+      (captureEvent.target as HTMLElement).removeEventListener('touchcancel', onRelease);
+      (captureEvent.target as HTMLElement).removeEventListener('touchend', onRelease);
+      (captureEvent.target as HTMLElement).removeEventListener('touchmove', onMove);
 
       captureEvent = undefined;
 
-      if (hasMoved) {
-        if (IS_TOUCH_ENV && options.selectorToPreventScroll) {
-          Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
-            scrollable.style.overflow = '';
-          });
-        }
+      if (options.selectorToPreventScroll) {
+        Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
+          scrollable.style.overflow = '';
+        });
+      }
 
+      if (hasMoved) {
         if (options.onRelease) {
           options.onRelease(e);
         }
@@ -138,10 +141,11 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         hasMoved = true;
       }
 
-      let shouldPreventScroll: boolean | void;
+      let shouldPreventScroll = false;
 
       if (options.onDrag) {
-        shouldPreventScroll = options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
+        options.onDrag(e, captureEvent, { dragOffsetX, dragOffsetY });
+        shouldPreventScroll = true;
       }
 
       if (options.onSwipe && !hasSwiped) {
@@ -207,23 +211,21 @@ function processSwipe(
   currentSwipeAxis: TSwipeAxis,
   dragOffsetX: number,
   dragOffsetY: number,
-  onSwipe: (e: Event, direction: SwipeDirection) => boolean | void,
+  onSwipe: (e: Event, direction: SwipeDirection) => boolean,
 ) {
-  let isSwiped: boolean | void = false;
-
   if (currentSwipeAxis === 'x') {
     if (dragOffsetX < 0) {
-      isSwiped = onSwipe(e, SwipeDirection.Left);
+      return onSwipe(e, SwipeDirection.Left);
     } else {
-      isSwiped = onSwipe(e, SwipeDirection.Right);
+      return onSwipe(e, SwipeDirection.Right);
     }
   } else if (currentSwipeAxis === 'y') {
     if (dragOffsetY < 0) {
-      isSwiped = onSwipe(e, SwipeDirection.Up);
+      return onSwipe(e, SwipeDirection.Up);
     } else {
-      isSwiped = onSwipe(e, SwipeDirection.Down);
+      return onSwipe(e, SwipeDirection.Down);
     }
   }
 
-  return isSwiped === undefined ? true : isSwiped;
+  return false;
 }
