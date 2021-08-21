@@ -1,11 +1,15 @@
+@import '../../styles/mixins';
+
 .MessageList {
   flex: 1;
   width: 100%;
+  margin-bottom: .5rem;
+
   overflow-anchor: none;
   overflow: scroll;
   overflow-x: hidden;
-  overflow-y: overlay;
-  margin-bottom: .5rem;
+  overflow-y: auto;
+  @include overflow-y-overlay();
 
   .mask-image-enabled & {
     mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);

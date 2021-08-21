@@ -1,3 +1,5 @@
+@import './mixins';
+
 // Common styles for all media-type components across the app.
 .media-inner {
   position: relative;
@@ -67,8 +69,10 @@
 .chat-list {
   background: var(--color-background);
   height: 100%;
-  overflow-y: auto;
   padding: .5rem .125rem .5rem .4375rem;
+
+  overflow-y: auto;
+  @include overflow-y-overlay();
 
   .scroll-container {
     position: relative;
