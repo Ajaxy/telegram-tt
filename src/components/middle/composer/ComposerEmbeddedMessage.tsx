@@ -97,7 +97,7 @@ const ComposerEmbeddedMessage: FC<StateProps & DispatchProps> = ({
   return (
     <div className={className}>
       <div>
-        <Button round color="translucent" ariaLabel="Cancel replying" onClick={clearEmbedded}>
+        <Button round faded color="translucent" ariaLabel="Cancel replying" onClick={clearEmbedded}>
           <i className="icon-close" />
         </Button>
         <EmbeddedMessage
