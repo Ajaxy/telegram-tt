@@ -1,4 +1,4 @@
-import { IS_IOS, IS_TOUCH_ENV } from './environment';
+import { IS_IOS } from './environment';
 
 export enum SwipeDirection {
   Up,
@@ -104,7 +104,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
       captureEvent = undefined;
 
-      if (options.selectorToPreventScroll) {
+      if (IS_IOS && options.selectorToPreventScroll) {
         Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
           scrollable.style.overflow = '';
         });
@@ -155,12 +155,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         shouldPreventScroll = hasSwiped;
       }
 
-      if (IS_TOUCH_ENV && shouldPreventScroll && options.selectorToPreventScroll) {
-        if (options.selectorToPreventScroll) {
-          Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
-            scrollable.style.overflow = 'hidden';
-          });
-        }
+      if (IS_IOS && shouldPreventScroll && options.selectorToPreventScroll) {
+        Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll)).forEach((scrollable) => {
+          scrollable.style.overflow = 'hidden';
+        });
       }
     }
   }

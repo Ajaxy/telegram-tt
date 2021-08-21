@@ -21,6 +21,12 @@
     }
   }
 
+  body.is-ios &, body.is-android & {
+    &:not(:last-of-type)::after {
+      transform: scaleY(0.5);
+    }
+  }
+
   .ListItem-button {
     width: 100%;
     background-color: var(--background-color);

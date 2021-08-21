@@ -73,8 +73,9 @@
   .Menu .bubble {
     min-width: 17rem;
     max-height: calc(100 * var(--vh) - 3.75rem);
+
     overflow-y: auto;
-    overflow-y: overlay;
+    @include overflow-y-overlay();
   }
 
   // @optimization

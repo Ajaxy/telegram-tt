@@ -1,3 +1,5 @@
+@import '../../../styles/mixins';
+
 .Composer {
   align-items: flex-end;
 
@@ -442,9 +444,10 @@
   border-radius: var(--border-radius-messages);
   padding: 0.5rem 0;
   max-height: 15rem;
+
   overflow-x: hidden;
   overflow-y: auto;
-  overflow-y: overlay;
+  @include overflow-y-overlay();
 
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
