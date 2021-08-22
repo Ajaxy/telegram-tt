@@ -72,7 +72,9 @@
   padding: .5rem .125rem .5rem .4375rem;
 
   overflow-y: auto;
-  @include overflow-y-overlay();
+  body.is-android & {
+    @include overflow-y-overlay();
+  }
 
   .scroll-container {
     position: relative;
