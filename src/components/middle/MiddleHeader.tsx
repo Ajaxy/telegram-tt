@@ -10,7 +10,7 @@ import {
   ApiChat,
   ApiUser,
   ApiTypingStatus,
-  MAIN_THREAD_ID,
+  MAIN_THREAD_ID, ApiUpdateConnectionStateType,
 } from '../../api/types';
 
 import {
@@ -52,6 +52,7 @@ import { pick } from '../../util/iteratees';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
+import useBrowserOnline from '../../hooks/useBrowserOnline';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -90,6 +91,7 @@ type StateProps = {
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
+  connectionState?: ApiUpdateConnectionStateType;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -119,6 +121,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
+  connectionState,
   openChatWithInfo,
   pinMessage,
   focusMessage,
@@ -278,7 +281,21 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [shouldUseStackedToolsClass, canRevealTools, canToolsCollideWithChatInfo, isRightColumnShown]);
 
+  const isBrowserOnline = useBrowserOnline();
+  const isConnecting = (!isBrowserOnline || connectionState === 'connectionStateConnecting')
+    && (IS_SINGLE_COLUMN_LAYOUT || (IS_TABLET_COLUMN_LAYOUT && !shouldShowCloseButton));
+
   function renderInfo() {
+    if (isConnecting) {
+      return (
+        <>
+          {renderBackButton()}
+          <h3>
+            {lang('WaitingForNetwork')}
+          </h3>
+        </>
+      );
+    }
     return (
       messageListType === 'thread' && threadId === MAIN_THREAD_ID ? (
         renderMainThreadInfo()
@@ -361,7 +378,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className="MiddleHeader" ref={componentRef}>
       <Transition
         name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
-        activeKey={currentTransitionKey}
+        activeKey={isConnecting ? Infinity : currentTransitionKey}
       >
         {renderInfo}
       </Transition>
@@ -438,6 +455,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
+      connectionState: global.connectionState,
     };
 
     const messagesById = selectChatMessages(global, chatId);
