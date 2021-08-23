@@ -42,6 +42,11 @@
     }
   }
 
+  img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+  }
+
   .text-content {
     margin: 0;
     word-break: break-word;
@@ -84,6 +89,7 @@
       html[data-message-text-size="19"] & {
         top: .5rem;
       }
+
       html[data-message-text-size="20"] & {
         top: .5625rem;
       }
@@ -109,6 +115,7 @@
       top: auto !important;
       bottom: -.5rem !important;
       margin-top: -.25rem;
+
       &:not([dir=rtl]) {
         margin-top: -1.25rem;
       }
@@ -127,6 +134,7 @@
 
   &:not(.custom-shape) {
     font-size: var(--message-text-size, 1rem);
+
     body.is-ios & {
       font-size: var(--message-text-size, 1.0625rem);
     }
