@@ -3,7 +3,7 @@ import {
   ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
-import { DEBUG } from '../config';
+import { DEBUG, IS_TEST } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
 import {
   getChatAvatarHash,
@@ -376,6 +376,14 @@ export async function showNewMessageNotification({
       playNotificationSound(message.id || chat.id);
     };
   }
+}
+
+export function closeMessageNotifications(payload: { chatId: number; lastReadInboxMessageId?: number }) {
+  if (IS_TEST || !navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({
+    type: 'closeMessageNotifications',
+    payload,
+  });
 }
 
 // Notify service worker that client is fully loaded
