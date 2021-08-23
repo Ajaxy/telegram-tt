@@ -32,7 +32,7 @@ export default (
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     document.body.classList.remove('no-selection');
 
-    if (isMenuDisabled || (shouldDisableOnLink && (e.target as HTMLElement).matches('a.text-entity-link[href]'))) {
+    if (isMenuDisabled || (shouldDisableOnLink && (e.target as HTMLElement).matches('a[href]'))) {
       return;
     }
     e.preventDefault();
@@ -91,7 +91,7 @@ export default (
 
       const { clientX, clientY, target } = originalEvent.touches[0];
 
-      if (contextMenuPosition || (shouldDisableOnLink && (target as HTMLElement).matches('a.text-entity-link[href]'))) {
+      if (contextMenuPosition || (shouldDisableOnLink && (target as HTMLElement).matches('a[href]'))) {
         return;
       }
 
