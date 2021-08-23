@@ -58,7 +58,7 @@ export default function useScrollHooks(
     }
 
     const { offsetHeight, scrollHeight, scrollTop } = containerRef.current!;
-    const scrollBottom = scrollHeight - scrollTop - offsetHeight;
+    const scrollBottom = Math.round(scrollHeight - scrollTop - offsetHeight);
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= 0;
 
