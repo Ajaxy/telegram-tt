@@ -31,6 +31,11 @@ type NotificationData = {
   icon?: string;
 };
 
+type CloseNotificationData = {
+  lastReadInboxMessageId?: number;
+  chatId: number;
+};
+
 let lastSyncAt = new Date().valueOf();
 const shownNotifications = new Set();
 const clickBuffer: Record<string, NotificationData> = {};
@@ -87,14 +92,15 @@ async function playNotificationSound(id: number) {
   });
 }
 
-async function showNotification({
+function showNotification({
   chatId,
   messageId,
   body,
   title,
   icon,
 }: NotificationData) {
-  const tag = String(chatId || 0);
+  const isFirstBatch = new Date().valueOf() - lastSyncAt < 1000;
+  const tag = String(isFirstBatch ? 0 : chatId || 0);
   const options: NotificationOptions = {
     body,
     data: {
@@ -107,19 +113,27 @@ async function showNotification({
     tag,
     vibrate: [200, 100, 200],
   };
-  const notifications = await self.registration.getNotifications({ tag });
-  if (notifications.length > 0) {
-    const current = notifications[0];
-    const count = current.data.count + 1;
-    options.data.count = count;
-    options.data.messageId = current.data.messageId;
-    options.body = `You have ${count} new messages`;
-    current.close();
-  }
+
   return Promise.all([
     playNotificationSound(messageId || chatId || 0),
     self.registration.showNotification(title, options),
   ]);
+}
+
+async function closeNotifications({
+  chatId,
+  lastReadInboxMessageId,
+}: CloseNotificationData) {
+  const notifications = await self.registration.getNotifications();
+  const lastMessageId = lastReadInboxMessageId || Number.MAX_VALUE;
+  notifications.forEach((notification) => {
+    if (
+      notification.tag === '0'
+      || (notification.data.chatId === chatId && notification.data.messageId <= lastMessageId)
+    ) {
+      notification.close();
+    }
+  });
 }
 
 export function handlePush(e: PushEvent) {
@@ -223,15 +237,15 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     }
   }
   if (e.data.type === 'newMessageNotification') {
-    // Do not show notifications right after sync (when browser is opened)
-    // To avoid stale notifications
-    if (new Date().valueOf() - lastSyncAt < 3000) return;
-
     // store messageId for already shown notification
     const notification: NotificationData = e.data.payload;
     // mark this notification as shown if it was handled locally
     shownNotifications.add(notification.messageId);
     e.waitUntil(showNotification(notification));
+  }
+
+  if (e.data.type === 'closeMessageNotifications') {
+    e.waitUntil(closeNotifications(e.data.payload));
   }
 }
 

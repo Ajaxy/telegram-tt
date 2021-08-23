@@ -4,7 +4,7 @@ import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { showNewMessageNotification } from '../../../util/notifications';
+import { closeMessageNotifications, showNewMessageNotification } from '../../../util/notifications';
 import { updateAppBadge } from '../../../util/appBadge';
 import {
   updateChat,
@@ -42,6 +42,13 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       setGlobal(newGlobal);
 
       runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnread(getGlobal())));
+
+      if (update.chat.id) {
+        closeMessageNotifications({
+          chatId: update.chat.id,
+          lastReadInboxMessageId: update.chat.lastReadInboxMessageId,
+        });
+      }
       break;
     }
 
