@@ -64,7 +64,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       // We need to always listen on `touchstart` target:
       // https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
       const target = e.target as HTMLElement;
-      target.addEventListener('touchmove', onMove);
+      target.addEventListener('touchmove', onMove, { passive: true });
       target.addEventListener('touchend', onRelease);
       target.addEventListener('touchcancel', onRelease);
 
