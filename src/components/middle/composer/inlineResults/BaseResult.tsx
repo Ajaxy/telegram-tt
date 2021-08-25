@@ -9,6 +9,7 @@ import useMedia from '../../../../hooks/useMedia';
 import ListItem from '../../../ui/ListItem';
 
 import './BaseResult.scss';
+import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
 
 export type OwnProps = {
   focus?: boolean;
@@ -46,6 +47,7 @@ const BaseResult: FC<OwnProps> = ({
     <ListItem
       focus={focus}
       className="BaseResult chat-item-clickable"
+      onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={onClick}
     >
       <span className="thumb">
