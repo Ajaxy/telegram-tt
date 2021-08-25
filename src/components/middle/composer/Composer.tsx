@@ -424,16 +424,15 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [closeStickerTooltip, closeCalendar, closeMentionTooltip, closeEmojiTooltip, closeSymbolMenu]);
 
-  // Handle chat change
-  const prevChatId = usePrevious(chatId);
+  // Handle chat change (ref is used to avoid redundant effect calls)
+  const stopRecordingVoiceRef = useRef<typeof stopRecordingVoice>();
+  stopRecordingVoiceRef.current = stopRecordingVoice;
   useEffect(() => {
-    if (!prevChatId || chatId === prevChatId) {
-      return;
-    }
-
-    stopRecordingVoice();
-    resetComposer();
-  }, [chatId, prevChatId, resetComposer, stopRecordingVoice]);
+    return () => {
+      stopRecordingVoiceRef.current!();
+      resetComposer();
+    };
+  }, [chatId, resetComposer, stopRecordingVoiceRef]);
 
   const handleEditComplete = useEditing(htmlRef, setHtml, editingMessage, resetComposer, openDeleteModal, editMessage);
   useDraft(draft, chatId, threadId, html, htmlRef, setHtml, editingMessage, saveDraft, clearDraft);
