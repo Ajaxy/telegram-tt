@@ -9,6 +9,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import './Menu.scss';
 
@@ -109,7 +110,7 @@ const Menu: FC<OwnProps> = ({
     >
       {isOpen && (
         // This only prevents click events triggering on underlying elements
-        <div className="backdrop" />
+        <div className="backdrop" onMouseDown={preventMessageInputBlurWithBubbling} />
       )}
       <div
         ref={menuRef}

@@ -15,16 +15,14 @@ import MenuItem from './MenuItem';
 
 import './ListItem.scss';
 
-type OnClickHandler = (e: React.MouseEvent<HTMLDivElement>) => void;
-
-type MenuItemContextAction = {
+interface MenuItemContextAction {
   title: string;
   icon: string;
   destructive?: boolean;
   handler?: () => void;
-};
+}
 
-type OwnProps = {
+interface OwnProps {
   ref?: RefObject<HTMLDivElement>;
   buttonRef?: RefObject<HTMLDivElement>;
   icon?: string;
@@ -40,8 +38,9 @@ type OwnProps = {
   multiline?: boolean;
   isStatic?: boolean;
   contextActions?: MenuItemContextAction[];
-  onClick?: OnClickHandler;
-};
+  onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+}
 
 const ListItem: FC<OwnProps> = (props) => {
   const {
@@ -60,6 +59,7 @@ const ListItem: FC<OwnProps> = (props) => {
     multiline,
     isStatic,
     contextActions,
+    onMouseDown,
     onClick,
   } = props;
 
@@ -147,6 +147,7 @@ const ListItem: FC<OwnProps> = (props) => {
       dir={lang.isRtl ? 'rtl' : undefined}
       // @ts-ignore
       style={style}
+      onMouseDown={onMouseDown}
     >
       <div
         className={buildClassName('ListItem-button', isTouched && 'active')}

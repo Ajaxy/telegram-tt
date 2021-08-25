@@ -11,6 +11,7 @@ import useTransitionForMedia from '../../hooks/useTransitionForMedia';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
+import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import Spinner from '../ui/Spinner';
 
@@ -66,6 +67,7 @@ const GifButton: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
+      onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={handleClick}
     >
       {hasThumbnail && (
