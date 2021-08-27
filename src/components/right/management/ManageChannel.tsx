@@ -63,8 +63,8 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
   isActive,
 }) => {
   const currentTitle = chat ? (chat.title || '') : '';
-  const currentAbout = chat && chat.fullInfo ? (chat.fullInfo.about || '') : '';
-  const hasLinkedChat = chat && chat.fullInfo && chat.fullInfo.linkedChatId;
+  const currentAbout = chat?.fullInfo ? (chat.fullInfo.about || '') : '';
+  const hasLinkedChat = chat?.fullInfo?.linkedChatId;
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
@@ -85,7 +85,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [progress]);
 
-  const adminsCount = (chat && chat.fullInfo && chat.fullInfo.adminMembers && chat.fullInfo.adminMembers.length) || 0;
+  const adminsCount = (chat?.fullInfo?.adminMembers?.length) || 0;
 
   const handleClickEditType = useCallback(() => {
     onScreenSelect(ManagementScreens.ChatPrivacyType);
@@ -220,7 +220,7 @@ const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
             onClick={handleClickSubscribers}
           >
             <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
-            <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount!, 'i')}</span>
+            <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount ?? 0, 'i')}</span>
           </ListItem>
         </div>
         <div className="section">
@@ -257,7 +257,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId)!;
     const { progress } = global.management;
-    const isSignaturesShown = Boolean(chat && chat.isSignaturesShown);
+    const isSignaturesShown = Boolean(chat?.isSignaturesShown);
 
     return {
       chat,

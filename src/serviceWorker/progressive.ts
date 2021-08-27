@@ -44,7 +44,7 @@ export async function respondForProgressive(e: FetchEvent) {
   if (start === 0 && end === 1) {
     const match = e.request.url.match(/fileSize=(\d+)&mimeType=([\w/]+)/);
     const fileSize = match && Number(match[1]);
-    const mimeType = match && match[2];
+    const mimeType = match?.[2];
 
     if (fileSize && mimeType) {
       return new Response(new Uint8Array(2).buffer, {

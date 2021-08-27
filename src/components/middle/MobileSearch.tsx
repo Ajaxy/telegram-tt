@@ -158,7 +158,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
       <div className="footer">
         <div className="counter">
           {query ? (
-            foundIds && foundIds.length ? (
+            foundIds?.length ? (
               `${focusedIndex + 1} of ${totalCount}`
             ) : foundIds && !foundIds.length ? (
               'No results'

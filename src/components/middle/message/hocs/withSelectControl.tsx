@@ -40,7 +40,7 @@ export default function withSelectControl(WrappedComponent: FC) {
 
     const handleMessageSelect = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
-      toggleMessageSelection({ messageId: message.id, withShift: e && e.shiftKey });
+      toggleMessageSelection({ messageId: message.id, withShift: e?.shiftKey });
     }, [toggleMessageSelection, message]);
 
     const newProps = useMemo(() => {

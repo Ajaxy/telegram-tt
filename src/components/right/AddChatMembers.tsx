@@ -186,7 +186,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       isChannel,
-      members: chat && chat.fullInfo ? chat.fullInfo.members : undefined,
+      members: chat?.fullInfo?.members,
       currentUserId,
       usersById,
       chatsById,

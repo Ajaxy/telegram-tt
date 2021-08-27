@@ -50,7 +50,7 @@ const MediaResult: FC<OwnProps> = ({
     return (
       <div className="MediaResult chat-item-clickable" onClick={handleClick}>
         {shouldRenderThumb && (
-          <img src={(photo && photo.thumbnail && photo.thumbnail.dataUri) || thumbnailDataUrl} alt="" />
+          <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" />
         )}
         {shouldRenderFullMedia && (
           <img src={mediaBlobUrl} className={`${transitionClassNames} full-media`} alt="" />
@@ -64,7 +64,7 @@ const MediaResult: FC<OwnProps> = ({
   return (
     <BaseResult
       focus={focus}
-      thumbUrl={shouldRenderFullMedia ? mediaBlobUrl : (thumbnail && thumbnail.dataUri) || thumbnailDataUrl}
+      thumbUrl={shouldRenderFullMedia ? mediaBlobUrl : (thumbnail?.dataUri) || thumbnailDataUrl}
       transitionClassNames={shouldRenderFullMedia ? transitionClassNames : undefined}
       title={title}
       description={description}

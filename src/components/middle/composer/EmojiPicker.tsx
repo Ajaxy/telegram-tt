@@ -124,7 +124,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
     const themeCategories = [...categories];
-    if (recentEmojis && recentEmojis.length) {
+    if (recentEmojis?.length) {
       themeCategories.unshift({
         id: 'recent',
         name: lang('RecentStickers'),

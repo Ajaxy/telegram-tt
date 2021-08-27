@@ -57,7 +57,7 @@ export async function fetchFullUser({
 export async function fetchNearestCountry() {
   const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc());
 
-  return dcInfo ? dcInfo.country : undefined;
+  return dcInfo?.country;
 }
 
 export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {

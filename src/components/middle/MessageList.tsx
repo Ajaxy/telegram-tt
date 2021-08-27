@@ -445,7 +445,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         && (!listItemElementsRef.current || listItemElementsRef.current.length === 0)
       )
       || checkSingleMessageActionByType('contactSignUp', messageGroups)
-      || (lastMessage && lastMessage.content.action && lastMessage.content.action.type === 'contactSignUp')
+      || (lastMessage?.content.action && lastMessage.content.action.type === 'contactSignUp')
     );
   const isGroupChatJustCreated = isGroupChat && isCreator
     && checkSingleMessageActionByType('chatCreate', messageGroups);

@@ -57,7 +57,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   deleteScheduledMessages,
 }) => {
   const handleDeleteMessageForAll = useCallback(() => {
-    const messageIds = album && album.messages
+    const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
       : [message.id];
     deleteMessages({ messageIds, shouldDeleteForAll: true });
@@ -65,7 +65,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [deleteMessages, message.id, onClose, album]);
 
   const handleDeleteMessageForSelf = useCallback(() => {
-    const messageIds = album && album.messages
+    const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
       : [message.id];
     if (isSchedule) {

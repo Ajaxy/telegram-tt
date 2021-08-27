@@ -44,9 +44,7 @@ export function getMessageCopyOptions(
   if (text) {
     // Detect if the user has selection in the current message
     const hasSelection = Boolean((
-      selection
-      && selection.anchorNode
-      && selection.anchorNode.parentNode
+      selection?.anchorNode?.parentNode
       && (selection.anchorNode.parentNode as HTMLElement).closest('.Message .content-inner')
       && selection.toString().replace(/(?:\r\n|\r|\n)/g, '') !== ''
     ));

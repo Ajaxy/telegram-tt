@@ -136,7 +136,7 @@ function getCheckoutInfo(paymentMethod?: string,
     return { paymentMethod };
   }
   const { shippingAddress } = info;
-  const fullAddress = shippingAddress && shippingAddress.streetLine1
+  const fullAddress = shippingAddress?.streetLine1
     ? `${shippingAddress.streetLine1}, ${shippingAddress.city}, ${shippingAddress.countryIso2}`
     : undefined;
   const { phone, name } = info;

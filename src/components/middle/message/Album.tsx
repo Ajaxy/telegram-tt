@@ -59,13 +59,13 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderAlbumMessage(message: ApiMessage, index: number) {
     const { photo, video } = getMessageContent(message);
     const fileUpload = uploadsById[message.previousLocalId || message.id];
-    const uploadProgress = fileUpload ? fileUpload.progress : undefined;
+    const uploadProgress = fileUpload?.progress;
     const { dimensions, sides } = albumLayout.layout[index];
 
     if (photo) {
       const shouldAffectAppendix = hasCustomAppendix && (
         // eslint-disable-next-line no-bitwise
-        isOwn ? index === mediaCount - 1 : Boolean(sides & AlbumRectPart.Left && sides & AlbumRectPart.Bottom)
+        (isOwn ? index === mediaCount - 1 : Boolean(sides & AlbumRectPart.Left && sides & AlbumRectPart.Bottom))
       );
 
       return (

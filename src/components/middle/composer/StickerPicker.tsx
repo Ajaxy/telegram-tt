@@ -131,7 +131,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const noPopulatedSets = useMemo(() => (
     areAddedLoaded
-    && allSets.filter((set) => set.stickers && set.stickers.length).length === 0
+    && allSets.filter((set) => set.stickers?.length).length === 0
   ), [allSets, areAddedLoaded]);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [loadAndPlay, loadFavoriteStickers, loadRecentStickers, loadStickerSets]);
 
   useEffect(() => {
-    if (addedSetIds && addedSetIds.length) {
+    if (addedSetIds?.length) {
       loadAddedStickers();
     }
   }, [addedSetIds, loadAddedStickers]);
@@ -184,7 +184,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   function renderCover(stickerSet: StickerSetOrRecent, index: number) {
-    const firstSticker = stickerSet.stickers && stickerSet.stickers[0];
+    const firstSticker = stickerSet.stickers?.[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',
       index === activeSetIndex && 'activated',

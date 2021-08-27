@@ -62,7 +62,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isConfirmUnlinkGroupDialogOpen, openConfirmUnlinkGroupDialog, closeConfirmUnlinkGroupDialog] = useFlag();
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
   const lang = useLang();
-  const linkedChatId = linkedChat && linkedChat.id;
+  const linkedChatId = linkedChat?.id;
 
   useHistoryBack(isActive, onClose);
 
@@ -261,7 +261,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { forDiscussionIds, byId: chatsByIds } = global.chats;
-    const linkedChat = chat && chat.fullInfo && chat.fullInfo.linkedChatId
+    const linkedChat = chat?.fullInfo?.linkedChatId
       ? selectChat(global, chat.fullInfo.linkedChatId)
       : undefined;
 

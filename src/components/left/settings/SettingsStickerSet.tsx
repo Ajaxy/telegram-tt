@@ -32,7 +32,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
     return undefined;
   }
 
-  const firstSticker = stickerSet.stickers && stickerSet.stickers[0];
+  const firstSticker = stickerSet.stickers?.[0];
 
   if (stickerSet.hasThumbnail || !firstSticker) {
     return (

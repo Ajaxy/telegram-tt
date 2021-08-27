@@ -221,7 +221,7 @@ async function signInUserWithQrCode(
         await Promise.race([updatePromise, inputPromise]);
     } catch (err) {
         if (err.message === 'RESTART_AUTH') {
-            return signInUser(client, apiCredentials, authParams);
+            return await signInUser(client, apiCredentials, authParams);
         }
 
         throw err;

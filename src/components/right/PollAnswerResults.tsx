@@ -136,8 +136,8 @@ export default memo(withGlobal<OwnProps>(
     const { voters, offsets } = global.pollResults;
 
     return {
-      voters: voters && voters[answer.option],
-      offset: (offsets && offsets[answer.option]) || '',
+      voters: voters?.[answer.option],
+      offset: (offsets?.[answer.option]) || '',
     };
   },
   (global, actions): DispatchProps => pick(actions, ['loadPollOptionResults', 'openChat', 'closePollResults']),

@@ -87,7 +87,7 @@ const StickerButton: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
-      title={title || (sticker && sticker.emoji)}
+      title={title || (sticker?.emoji)}
       // @ts-ignore
       style={style}
       data-sticker-id={sticker.id}

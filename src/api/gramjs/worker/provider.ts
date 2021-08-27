@@ -88,10 +88,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
         }
       }
     } else if (data.type === 'methodCallback') {
-      const requestState = requestStates.get(data.messageId);
-      if (requestState && requestState.callback) {
-        requestState.callback(...data.callbackArgs);
-      }
+      requestStates.get(data.messageId)?.callback?.(...data.callbackArgs);
     } else if (data.type === 'unhandledError') {
       throw data.error;
     }

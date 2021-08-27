@@ -54,7 +54,7 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
   const fullName = user ? getUserFullName(user) : (chat ? chat.title : '');
-  const photos = (user ? user.photos : (chat ? chat.photos : undefined)) || [];
+  const photos = user?.photos || chat?.photos || [];
   const slideAnimation = animationLevel >= 1 ? 'slide' : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -171,14 +171,14 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <span className="status" dir="auto">{
         isChatChannel(chat!)
-          ? lang('Subscribers', chat!.membersCount, 'i')
-          : lang('Members', chat!.membersCount, 'i')
+          ? lang('Subscribers', chat!.membersCount ?? 0, 'i')
+          : lang('Members', chat!.membersCount ?? 0, 'i')
       }
       </span>
     );
   }
 
-  const isVerifiedIconShown = (user && user.isVerified) || (chat && chat.isVerified);
+  const isVerifiedIconShown = (user || chat)?.isVerified;
 
   return (
     <div className={buildClassName('ProfileInfo', forceShowSelf && 'self')} dir={lang.isRtl ? 'rtl' : undefined}>

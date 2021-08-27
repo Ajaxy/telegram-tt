@@ -77,7 +77,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
   const link = getChatLink(chat);
-  const description = (fullInfo && fullInfo.bio) || getChatDescription(chat);
+  const description = (fullInfo?.bio) || getChatDescription(chat);
 
   return (
     <div className="ChatExtra">

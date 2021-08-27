@@ -420,7 +420,7 @@ addReducer('deleteHistory', (global, actions, payload) => {
       return;
     }
 
-    const maxId = chat.lastMessage && chat.lastMessage.id;
+    const maxId = chat.lastMessage?.id;
 
     await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
 

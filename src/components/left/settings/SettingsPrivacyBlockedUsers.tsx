@@ -82,7 +82,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
         <Avatar size="medium" user={user} chat={chat} />
         <div className="contact-info" dir="auto">
           <h3 dir="auto">{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
-          {user && user.phoneNumber && (
+          {user?.phoneNumber && (
             <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(user.phoneNumber)}</div>
           )}
           {user && !user.phoneNumber && user.username && (
@@ -103,7 +103,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
         </div>
 
         <div className="chat-list custom-scroll">
-          {blockedIds && blockedIds.length ? (
+          {blockedIds?.length ? (
             <div className="scroll-container">
               {blockedIds!.map((contactId, i) => renderContact(contactId, i, 0))}
             </div>

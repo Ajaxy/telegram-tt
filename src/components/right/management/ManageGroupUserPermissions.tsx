@@ -62,13 +62,13 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [chat, selectedChatMemberId]);
 
   useEffect(() => {
-    if (chat && chat.fullInfo && selectedChatMemberId && !selectedChatMember) {
+    if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.GroupPermissions);
     }
   }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
 
   useEffect(() => {
-    setPermissions((selectedChatMember && selectedChatMember.bannedRights) || (chat && chat.defaultBannedRights) || {});
+    setPermissions((selectedChatMember?.bannedRights) || (chat?.defaultBannedRights) || {});
     setHavePermissionChanged(false);
     setIsLoading(false);
   }, [chat, selectedChatMember]);

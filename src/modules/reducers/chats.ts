@@ -23,7 +23,7 @@ export function replaceChatListIds(
 
 export function updateChatListIds(global: GlobalState, type: 'active' | 'archived', idsUpdate: number[]): GlobalState {
   const { [type]: listIds } = global.chats.listIds;
-  const newIds = listIds && listIds.length
+  const newIds = listIds?.length
     ? idsUpdate.filter((id) => !listIds.includes(id))
     : idsUpdate;
 

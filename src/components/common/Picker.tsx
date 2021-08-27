@@ -104,7 +104,7 @@ const Picker: FC<OwnProps> = ({
         />
       </div>
 
-      {viewportIds && viewportIds.length ? (
+      {viewportIds?.length ? (
         <InfiniteScroll
           className="picker-list custom-scroll"
           items={viewportIds}

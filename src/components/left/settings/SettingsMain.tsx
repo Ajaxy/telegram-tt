@@ -36,7 +36,7 @@ const SettingsMain: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
 }) => {
   const lang = useLang();
-  const profileId = currentUser ? currentUser.id : undefined;
+  const profileId = currentUser?.id;
 
   useEffect(() => {
     if (profileId && lastSyncTime) {

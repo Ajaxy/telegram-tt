@@ -73,14 +73,14 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [chat, selectedChatMemberId]);
 
   useEffect(() => {
-    if (chat && chat.fullInfo && selectedChatMemberId && !selectedChatMember) {
+    if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.ChatAdministrators);
     }
   }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
 
   useEffect(() => {
-    setPermissions((selectedChatMember && selectedChatMember.adminRights) || {});
-    setCustomTitle(((selectedChatMember && selectedChatMember.customTitle) || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
+    setPermissions((selectedChatMember?.adminRights) || {});
+    setCustomTitle(((selectedChatMember?.customTitle) || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
     setIsTouched(false);
     setIsLoading(false);
   }, [selectedChatMember]);

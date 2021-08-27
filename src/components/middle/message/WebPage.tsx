@@ -43,7 +43,7 @@ const WebPage: FC<OwnProps> = ({
   const webPage = getMessageWebPage(message);
 
   let isSquarePhoto = false;
-  if (webPage && webPage.photo && !webPage.video) {
+  if (webPage?.photo && !webPage.video) {
     const { width, height } = calculateMediaDimensions(message);
     isSquarePhoto = width === height;
   }

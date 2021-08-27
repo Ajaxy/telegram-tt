@@ -62,7 +62,7 @@ const StickerTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
   const className = buildClassName(
     'StickerTooltip composer-tooltip custom-scroll',
     transitionClassNames,
-    !(displayedStickers && displayedStickers.length) && 'hidden',
+    !(displayedStickers?.length) && 'hidden',
   );
 
   return (

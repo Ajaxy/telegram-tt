@@ -22,7 +22,7 @@ export function buildApiThumbnailFromStripped(
   }
 
   const realSizes = sizes.filter((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
-  const { w, h } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
+  const { w, h } = realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
   const { bytes } = thumb;
   const dataUri = bytesToDataUri(
     !mimeType || mimeType === 'image/jpeg' ? strippedPhotoToJpg(bytes) : bytes,

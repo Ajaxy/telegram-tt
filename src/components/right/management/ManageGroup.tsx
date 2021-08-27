@@ -185,7 +185,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
     return totalCount;
   }, [chat]);
 
-  const adminsCount = (chat.fullInfo && chat.fullInfo.adminMembers && chat.fullInfo.adminMembers.length) || 0;
+  const adminsCount = (chat.fullInfo?.adminMembers?.length) || 0;
 
   const handleDeleteGroup = useCallback(() => {
     if (isBasicGroup) {
@@ -273,7 +273,7 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="section">
           <ListItem icon="group" multiline onClick={handleClickMembers}>
             <span className="title">{lang('GroupMembers')}</span>
-            <span className="subtitle">{formatInteger(chat.membersCount!)}</span>
+            <span className="subtitle">{formatInteger(chat.membersCount ?? 0)}</span>
           </ListItem>
 
           {chat.fullInfo && (
@@ -326,7 +326,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId)!;
     const { progress } = global.management;
-    const hasLinkedChannel = Boolean(chat.fullInfo && chat.fullInfo.linkedChatId);
+    const hasLinkedChannel = Boolean(chat.fullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
 
     return {

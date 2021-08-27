@@ -111,11 +111,11 @@ addReducer('replyToNextMessage', (global, actions, payload) => {
     if (threadId === MAIN_THREAD_ID) {
       const chat = selectChat(global, chatId);
 
-      messageId = chat && chat.lastMessage ? chat.lastMessage.id : undefined;
+      messageId = chat?.lastMessage?.id;
     } else {
       const threadInfo = selectThreadInfo(global, chatId, threadId);
 
-      messageId = threadInfo ? threadInfo.lastMessageId : undefined;
+      messageId = threadInfo?.lastMessageId;
     }
   } else {
     const chatMessageKeys = Object.keys(chatMessages);
@@ -228,11 +228,11 @@ addReducer('focusLastMessage', (global, actions) => {
   if (threadId === MAIN_THREAD_ID) {
     const chat = selectChat(global, chatId);
 
-    lastMessageId = chat && chat.lastMessage ? chat.lastMessage.id : undefined;
+    lastMessageId = chat?.lastMessage?.id;
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
 
-    lastMessageId = threadInfo ? threadInfo.lastMessageId : undefined;
+    lastMessageId = threadInfo?.lastMessageId;
   }
 
   if (!lastMessageId) {
@@ -283,7 +283,7 @@ addReducer('focusMessage', (global, actions, payload) => {
 
   if (groupedId !== undefined) {
     const ids = selectForwardedMessageIdsByGroupId(global, groupedChatId, groupedId);
-    if (ids && ids.length) {
+    if (ids?.length) {
       ([messageId] = ids);
     }
   }

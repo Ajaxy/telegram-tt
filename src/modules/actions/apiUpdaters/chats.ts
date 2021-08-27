@@ -166,7 +166,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       ids.forEach((id) => {
         const chatId = 'channelId' in update ? update.channelId : selectCommonBoxChatId(global, id);
         const chat = selectChat(global, chatId);
-        if (chat && chat.unreadMentionsCount) {
+        if (chat?.unreadMentionsCount) {
           global = updateChat(global, chatId, {
             unreadMentionsCount: chat.unreadMentionsCount - 1,
           });
@@ -326,7 +326,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       let shouldUpdate = false;
-      let members = targetChat.fullInfo && targetChat.fullInfo.members
+      let members = targetChat.fullInfo?.members
         ? [...targetChat.fullInfo.members]
         : [];
 
@@ -370,7 +370,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const { chatId, ids } = update;
       const chat = global.chats.byId[chatId];
 
-      if (chat && chat.photos) {
+      if (chat?.photos) {
         setGlobal(updateChat(global, chatId, {
           photos: chat.photos.filter((photo) => !ids.includes(photo.id)),
         }));

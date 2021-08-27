@@ -54,7 +54,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
   updatePrivateLink,
 }) => {
   const isPublic = Boolean(chat.username);
-  const privateLink = chat.fullInfo && chat.fullInfo.inviteLink;
+  const privateLink = chat.fullInfo?.inviteLink;
 
   const [privacyType, setPrivacyType] = useState<PrivacyType>(isPublic ? 'public' : 'private');
   const [username, setUsername] = useState();

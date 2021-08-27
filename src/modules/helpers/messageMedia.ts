@@ -43,7 +43,7 @@ export function getMessageVideo(message: ApiMessage) {
 export function getMessageRoundVideo(message: ApiMessage) {
   const { video } = message.content;
 
-  return video && video.isRound ? video : undefined;
+  return video?.isRound ? video : undefined;
 }
 
 export function getMessageAction(message: ApiMessage) {
@@ -93,19 +93,15 @@ export function getMessageWebPage(message: ApiMessage) {
 }
 
 export function getMessageWebPagePhoto(message: ApiMessage) {
-  const webPage = getMessageWebPage(message);
-  return webPage ? webPage.photo : undefined;
+  return getMessageWebPage(message)?.photo;
 }
 
 export function getMessageWebPageDocument(message: ApiMessage) {
-  const webPage = getMessageWebPage(message);
-  return webPage ? webPage.document : undefined;
+  return getMessageWebPage(message)?.document;
 }
 
 export function getMessageWebPageVideo(message: ApiMessage): ApiVideo | undefined {
-  const webPage = getMessageWebPage(message);
-  if (!webPage) return undefined;
-  return webPage.video;
+  return getMessageWebPage(message)?.video;
 }
 
 export function getMessageMediaThumbnail(message: ApiMessage) {
@@ -124,9 +120,7 @@ export function getMessageMediaThumbnail(message: ApiMessage) {
 }
 
 export function getMessageMediaThumbDataUri(message: ApiMessage) {
-  const thumbnail = getMessageMediaThumbnail(message);
-
-  return thumbnail ? thumbnail.dataUri : undefined;
+  return getMessageMediaThumbnail(message)?.dataUri;
 }
 
 export function getMessageMediaHash(
@@ -296,7 +290,7 @@ export function getMessageFileSize(message: ApiMessage) {
 export function hasMessageLocalBlobUrl(message: ApiMessage) {
   const { photo, video, document } = message.content;
 
-  return (photo && photo.blobUrl) || (video && video.blobUrl) || (document && document.previewBlobUrl);
+  return (photo?.blobUrl) || (video?.blobUrl) || (document?.previewBlobUrl);
 }
 
 export function getChatMediaMessageIds(

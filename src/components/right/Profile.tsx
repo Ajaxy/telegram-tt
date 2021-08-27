@@ -438,7 +438,7 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
-    const members = chat && chat.fullInfo && chat.fullInfo.members;
+    const members = chat?.fullInfo?.members;
     const areMembersHidden = hasMembersTab && chat && chat.fullInfo && !chat.fullInfo.canViewMembers;
     const canAddMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
@@ -463,7 +463,7 @@ export default memo(withGlobal<OwnProps>(
       canDeleteMembers,
       currentUserId: global.currentUserId,
       isRightColumnShown: selectIsRightColumnShown(global),
-      isRestricted: chat && chat.isRestricted,
+      isRestricted: chat?.isRestricted,
       lastSyncTime: global.lastSyncTime,
       serverTimeOffset: global.serverTimeOffset,
       ...(hasMembersTab && members && {

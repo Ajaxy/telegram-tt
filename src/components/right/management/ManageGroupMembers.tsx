@@ -84,7 +84,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { byId: usersById } = global.users;
-    const members = chat && chat.fullInfo && chat.fullInfo.members;
+    const members = chat?.fullInfo?.members;
     const isChannel = chat && isChatChannel(chat);
 
     return {

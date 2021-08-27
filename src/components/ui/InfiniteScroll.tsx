@@ -154,7 +154,7 @@ const InfiniteScroll: FC<OwnProps> = ({
         const nextAnchor = listItemElements[0];
         if (nextAnchor) {
           const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
-          const newAnchorTop = currentAnchor && currentAnchor.offsetParent && currentAnchor !== nextAnchor
+          const newAnchorTop = currentAnchor?.offsetParent && currentAnchor !== nextAnchor
             ? currentAnchor.getBoundingClientRect().top
             : nextAnchorTop;
           const isMovingUp = (
@@ -175,7 +175,7 @@ const InfiniteScroll: FC<OwnProps> = ({
         const nextAnchor = listItemElements[listLength - 1];
         if (nextAnchor) {
           const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
-          const newAnchorTop = currentAnchor && currentAnchor.offsetParent && currentAnchor !== nextAnchor
+          const newAnchorTop = currentAnchor?.offsetParent && currentAnchor !== nextAnchor
             ? currentAnchor.getBoundingClientRect().top
             : nextAnchorTop;
           const isMovingDown = (
@@ -193,7 +193,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       }
 
       if (!isUpdated) {
-        if (currentAnchor && currentAnchor.offsetParent) {
+        if (currentAnchor?.offsetParent) {
           stateRef.current.currentAnchorTop = currentAnchor.getBoundingClientRect().top;
         } else {
           const nextAnchor = listItemElements[0];

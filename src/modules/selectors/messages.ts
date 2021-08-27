@@ -54,15 +54,11 @@ export function selectCurrentChat(global: GlobalState) {
 }
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
-  const messages = global.messages.byChatId[chatId];
-
-  return messages ? messages.byId : undefined;
+  return global.messages.byChatId[chatId]?.byId;
 }
 
 export function selectScheduledMessages(global: GlobalState, chatId: number) {
-  const messages = global.scheduledMessages.byChatId[chatId];
-
-  return messages ? messages.byId : undefined;
+  return global.scheduledMessages.byChatId[chatId]?.byId;
 }
 
 export function selectThreadParam<K extends keyof Thread>(
@@ -364,7 +360,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME)
     && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
-      || (content.video && content.video.isRound)
+      || (content.video?.isRound)
     )
     && !isForwardedMessage(message)
     && !message.viaBotId
@@ -485,9 +481,7 @@ export function selectCanReportSelectedMessages(global: GlobalState) {
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
-  const fileTransfer = global.fileUploads.byMessageLocalId[message.previousLocalId || message.id];
-
-  return fileTransfer ? fileTransfer.progress : undefined;
+  return global.fileUploads.byMessageLocalId[message.previousLocalId || message.id]?.progress;
 }
 
 export function selectRealLastReadId(global: GlobalState, chatId: number, threadId: number) {

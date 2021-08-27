@@ -1,7 +1,7 @@
 import { ThemeKey } from '../types';
 
 let systemThemeCache: ThemeKey = (
-  window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  window.matchMedia?.('(prefers-color-scheme: dark)').matches
 ) ? 'dark' : 'light';
 
 export function getSystemTheme() {

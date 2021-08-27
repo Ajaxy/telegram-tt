@@ -98,8 +98,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [visibleIncludedChatIds, visibleExcludedChatIds] = useMemo(() => {
     const allLoadedChatsSet = new Set([
-      ...loadedActiveChatIds || [],
-      ...loadedArchivedChatIds || [],
+      ...(loadedActiveChatIds || []),
+      ...(loadedArchivedChatIds || []),
     ]);
 
     const loadedIncludedChatIds = findIntersectionWithSet(includedChatIds, allLoadedChatsSet);

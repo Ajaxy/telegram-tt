@@ -203,7 +203,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
           </>
         )}
 
-        {viewportIds && viewportIds.length ? (
+        {viewportIds?.length ? (
           viewportIds.map(renderItem)
         ) : viewportIds && !viewportIds.length ? (
           <p className="no-results" key="no-results">Sorry, nothing found.</p>

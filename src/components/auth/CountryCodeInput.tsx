@@ -89,7 +89,7 @@ const CountryCodeInput: FC<OwnProps> = ({
 
     const inputValue = filter !== undefined
       ? filter
-      : (value && value.name) || '';
+      : (value?.name) || '';
 
     return (
       <div className={buildClassName('input-group', value && 'touched')}>

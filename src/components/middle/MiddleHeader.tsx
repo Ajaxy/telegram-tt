@@ -430,10 +430,10 @@ export default memo(withGlobal<OwnProps>(
     let messagesCount: number | undefined;
     if (messageListType === 'pinned') {
       const pinnedIds = selectPinnedIds(global, chatId);
-      messagesCount = pinnedIds && pinnedIds.length;
+      messagesCount = pinnedIds?.length;
     } else if (messageListType === 'scheduled') {
       const scheduledIds = selectScheduledIds(global, chatId);
-      messagesCount = scheduledIds && scheduledIds.length;
+      messagesCount = scheduledIds?.length;
     } else if (messageListType === 'thread' && threadId !== MAIN_THREAD_ID) {
       const threadInfo = selectThreadInfo(global, chatId, threadId);
       if (threadInfo) {
@@ -479,7 +479,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const pinnedMessageIds = selectPinnedIds(global, chatId);
-    if (pinnedMessageIds && pinnedMessageIds.length) {
+    if (pinnedMessageIds?.length) {
       const firstPinnedMessage = messagesById[pinnedMessageIds[0]];
       const {
         canUnpin,

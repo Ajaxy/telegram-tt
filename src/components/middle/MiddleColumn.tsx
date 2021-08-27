@@ -436,11 +436,11 @@ export default memo(withGlobal(
       canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
       isScheduledMessageList,
-      currentUserBannedRights: chat && chat.currentUserBannedRights,
-      defaultBannedRights: chat && chat.defaultBannedRights,
+      currentUserBannedRights: chat?.currentUserBannedRights,
+      defaultBannedRights: chat?.defaultBannedRights,
       hasPinnedOrAudioMessage: (
         threadId !== MAIN_THREAD_ID
-        || Boolean(pinnedIds && pinnedIds.length)
+        || Boolean(pinnedIds?.length)
         || Boolean(audioChatId && audioMessageId)
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,

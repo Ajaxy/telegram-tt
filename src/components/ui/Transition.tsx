@@ -182,7 +182,7 @@ const Transition: FC<OwnProps> = ({
       }
 
       const watchedNode = name === 'mv-slide'
-        ? childNodes[activeIndex] && childNodes[activeIndex].firstChild
+        ? childNodes[activeIndex]?.firstChild
         : name === 'reveal' && isBackwards
           ? childNodes[prevActiveIndex]
           : childNodes[activeIndex];

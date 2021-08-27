@@ -29,12 +29,12 @@ addReducer('searchTextMessagesLocal', (global) => {
   }
 
   const { query, results } = currentSearch;
-  const offsetId = results ? results.nextOffsetId : undefined;
+  const offsetId = results?.nextOffsetId;
 
   let topMessageId: number | undefined;
   if (threadId !== MAIN_THREAD_ID) {
     const threadInfo = selectThreadInfo(global, chatId!, threadId);
-    topMessageId = threadInfo ? threadInfo.topMessageId : undefined;
+    topMessageId = threadInfo?.topMessageId;
   }
 
   void searchTextMessages(chat, threadId, topMessageId, query, offsetId);
@@ -53,7 +53,7 @@ addReducer('searchMediaMessagesLocal', (global) => {
 
   const { currentType: type, resultsByType } = currentSearch;
   const currentResults = type && resultsByType && resultsByType[type];
-  const offsetId = currentResults ? currentResults.nextOffsetId : undefined;
+  const offsetId = currentResults?.nextOffsetId;
 
   if (!type) {
     return;

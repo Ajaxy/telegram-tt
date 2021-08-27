@@ -197,10 +197,10 @@ addReducer('loadBlockedContacts', () => {
 
     let newGlobal = getGlobal();
 
-    if (result.users && result.users.length) {
+    if (result.users?.length) {
       newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
     }
-    if (result.chats && result.chats.length) {
+    if (result.chats?.length) {
       newGlobal = updateChats(newGlobal, buildCollectionByKey(result.chats, 'id'));
     }
 

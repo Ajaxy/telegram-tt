@@ -125,7 +125,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
     const { dataTransfer: { files } } = e;
 
-    if (files && files.length) {
+    if (files?.length) {
       const newFiles = isQuick
         ? Array.from(files).filter((file) => {
           return file.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.has(file.type);

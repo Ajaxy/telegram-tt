@@ -103,7 +103,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean | number {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
   } = message.content;
 
-  if (sticker || (video && video.isRound)) {
+  if (sticker || (video?.isRound)) {
     return true;
   }
 
@@ -132,7 +132,7 @@ export function getFirstLinkInMessage(message: ApiMessage) {
   const { text } = message.content;
 
   let match: RegExpMatchArray | null | undefined;
-  if (text && text.entities) {
+  if (text?.entities) {
     let link = text.entities.find((entity) => entity.type === ApiMessageEntityTypes.TextUrl);
     if (link) {
       match = link.url!.match(RE_LINK);
@@ -222,5 +222,5 @@ export function isHistoryClearMessage(message: ApiMessage) {
 export function getMessageAudioCaption(message: ApiMessage) {
   const { audio, text } = message.content;
 
-  return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text && text.text);
+  return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text?.text);
 }

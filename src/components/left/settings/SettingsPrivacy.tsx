@@ -227,11 +227,11 @@ export default memo(withGlobal<OwnProps>(
       sessionsCount: activeSessions.length,
       isSensitiveEnabled,
       canChangeSensitive,
-      visibilityPrivacyPhoneNumber: privacy.phoneNumber && privacy.phoneNumber.visibility,
-      visibilityPrivacyLastSeen: privacy.lastSeen && privacy.lastSeen.visibility,
-      visibilityPrivacyProfilePhoto: privacy.profilePhoto && privacy.profilePhoto.visibility,
-      visibilityPrivacyForwarding: privacy.forwards && privacy.forwards.visibility,
-      visibilityPrivacyGroupChats: privacy.chatInvite && privacy.chatInvite.visibility,
+      visibilityPrivacyPhoneNumber: privacy.phoneNumber?.visibility,
+      visibilityPrivacyLastSeen: privacy.lastSeen?.visibility,
+      visibilityPrivacyProfilePhoto: privacy.profilePhoto?.visibility,
+      visibilityPrivacyForwarding: privacy.forwards?.visibility,
+      visibilityPrivacyGroupChats: privacy.chatInvite?.visibility,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

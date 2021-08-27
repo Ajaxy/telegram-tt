@@ -67,7 +67,7 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
     return foundIds.map((id) => {
       const [chatId, messageId] = id.split('_').map(Number);
 
-      return globalMessagesByChatId[chatId] && globalMessagesByChatId[chatId].byId[messageId];
+      return globalMessagesByChatId[chatId]?.byId[messageId];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 

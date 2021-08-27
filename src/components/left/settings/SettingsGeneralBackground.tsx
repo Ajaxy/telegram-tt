@@ -95,7 +95,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleWallPaperSelect = useCallback((slug: string) => {
     setThemeSettings({ theme: themeRef.current, background: slug });
     const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
-    if (currentWallpaper && currentWallpaper.document.thumbnail) {
+    if (currentWallpaper?.document.thumbnail) {
       getAverageColor(currentWallpaper.document.thumbnail.dataUri)
         .then((color) => {
           const patternColor = getPatternColor(color);
@@ -113,7 +113,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.GeneralChatBackground);
 
-  const isUploading = loadedWallpapers && loadedWallpapers[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
+  const isUploading = loadedWallpapers?.[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
 
   return (
     <div className="SettingsGeneralBackground settings-content custom-scroll">

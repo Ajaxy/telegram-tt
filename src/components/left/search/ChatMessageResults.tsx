@@ -72,9 +72,7 @@ const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
       .map((id) => {
         const [chatId, messageId] = id.split('_').map(Number);
 
-        return (
-          globalMessagesByChatId && globalMessagesByChatId[chatId] && globalMessagesByChatId[chatId].byId[messageId]
-        );
+        return globalMessagesByChatId?.[chatId]?.byId[messageId];
       })
       .filter<ApiMessage>(Boolean as any)
       .sort((a, b) => b.date - a.date);
@@ -133,7 +131,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId, messages: { byChatId: globalMessagesByChatId }, lastSyncTime } = global;
     const { fetchingStatus, resultsByType } = global.globalSearch;
 
-    const { foundIds } = (resultsByType && resultsByType.text) || {};
+    const { foundIds } = (resultsByType?.text) || {};
 
     return {
       currentUserId,

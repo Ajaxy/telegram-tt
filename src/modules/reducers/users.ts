@@ -38,7 +38,7 @@ function updateContactList(global: GlobalState, updatedUsers: ApiUser[]): Global
   if (!contactUserIds) return global;
 
   const newContactUserIds = updatedUsers
-    .filter((user) => user && user.isContact && !contactUserIds.includes(user.id))
+    .filter((user) => user?.isContact && !contactUserIds.includes(user.id))
     .map((user) => user.id);
 
   if (newContactUserIds.length === 0) return global;

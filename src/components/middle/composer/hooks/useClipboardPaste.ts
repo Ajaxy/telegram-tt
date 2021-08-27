@@ -43,7 +43,7 @@ export default (
       }
 
       if (pastedText) {
-        insertTextAndUpdateCursor(pastedText, input ? input.id : undefined);
+        insertTextAndUpdateCursor(pastedText, input?.id);
       }
     }
 

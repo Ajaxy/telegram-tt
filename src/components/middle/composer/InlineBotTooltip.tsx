@@ -92,7 +92,7 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   }, [botId, openChat, startBot, switchPm]);
 
   const prevInlineBotResults = usePrevious(
-    inlineBotResults && inlineBotResults.length
+    inlineBotResults?.length
       ? inlineBotResults
       : undefined,
     shouldRender,

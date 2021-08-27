@@ -97,7 +97,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [loadStickerSets]);
 
   useEffect(() => {
-    if (stickerSetIds && stickerSetIds.length) {
+    if (stickerSetIds?.length) {
       loadAddedStickers();
     }
   }, [stickerSetIds, loadAddedStickers]);
@@ -127,7 +127,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openModal]);
 
   const stickerSets = stickerSetIds && stickerSetIds.map((id: string) => {
-    return stickerSetsById && stickerSetsById[id] && stickerSetsById[id].installedDate ? stickerSetsById[id] : false;
+    return stickerSetsById?.[id]?.installedDate ? stickerSetsById[id] : false;
   }).filter<ApiStickerSet>(Boolean as any);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);

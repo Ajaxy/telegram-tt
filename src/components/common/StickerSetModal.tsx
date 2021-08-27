@@ -94,7 +94,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
       hasCloseButton
       title={stickerSet ? renderText(stickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
     >
-      {stickerSet && stickerSet.stickers ? (
+      {stickerSet?.stickers ? (
         <>
           <div ref={containerRef} className="stickers custom-scroll">
             {stickerSet.stickers.map((sticker) => (
