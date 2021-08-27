@@ -288,13 +288,9 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const buttonClassName = buildClassName(
     'animated-close-icon',
+    isBackButton && 'state-back',
     (shouldSkipTransition || shouldSkipAnimation) && 'no-transition',
   );
-
-  // Add class in the next AF to synchronize with animation with Transition components
-  useEffect(() => {
-    backButtonRef.current!.classList.toggle('state-back', isBackButton);
-  }, [isBackButton]);
 
   return (
     <div className="RightHeader">
