@@ -1,13 +1,13 @@
 import { RefObject } from 'react';
 import { getDispatch } from '../../../lib/teact/teactn';
-import { useCallback, useMemo, useRef } from '../../../lib/teact/teact';
+import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import { LoadMoreDirection } from '../../../types';
 import { MessageListType } from '../../../global/types';
 
 import { debounce } from '../../../util/schedulers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../config';
+import { LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SENSITIVE_AREA } from '../../../config';
 import resetScroll from '../../../util/resetScroll';
 import useOnChange from '../../../hooks/useOnChange';
 
@@ -42,7 +42,7 @@ export default function useScrollHooks(
   // eslint-disable-next-line no-null/no-null
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
-  const toggleScrollTools = useCallback(() => {
+  function toggleScrollTools() {
     if (!isActive) return;
 
     if (!messageIds || !messageIds.length) {
@@ -64,7 +64,7 @@ export default function useScrollHooks(
 
     onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
-  }, [isActive, messageIds, isViewportNewest, containerRef, onFabToggle, isUnread, onNotchToggle]);
+  }
 
   const {
     observe: observeIntersection,
@@ -73,6 +73,12 @@ export default function useScrollHooks(
     margin: MESSAGE_LIST_SENSITIVE_AREA,
   }, (entries) => {
     if (!loadMoreForwards || !loadMoreBackwards) {
+      return;
+    }
+
+    // Loading history while sending a message can return the same message and cause ambiguity
+    const isFirstMessageLocal = messageIds[0] >= LOCAL_MESSAGE_ID_BASE;
+    if (isFirstMessageLocal) {
       return;
     }
 
