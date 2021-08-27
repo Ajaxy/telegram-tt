@@ -7,11 +7,18 @@ export async function respondWithCache(e: FetchEvent) {
   const cached = await cache.match(e.request);
 
   if (cached) {
-    return cached;
+    if (cached.ok) {
+      return cached;
+    } else {
+      await cache.delete(e.request);
+    }
   }
 
   const remote = await fetch(e.request);
-  cache.put(e.request, remote.clone());
+
+  if (remote.ok) {
+    cache.put(e.request, remote.clone());
+  }
 
   return remote;
 }
