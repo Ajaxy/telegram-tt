@@ -330,7 +330,7 @@ export function selectForwardedSender(global: GlobalState, message: ApiMessage):
   if (forwardInfo.isChannelPost && forwardInfo.fromChatId) {
     return selectChat(global, forwardInfo.fromChatId);
   } else if (forwardInfo.senderUserId) {
-    return selectUser(global, forwardInfo.senderUserId);
+    return selectUser(global, forwardInfo.senderUserId) || selectChat(global, forwardInfo.senderUserId);
   }
 
   return undefined;
