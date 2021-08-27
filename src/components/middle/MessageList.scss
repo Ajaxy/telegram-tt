@@ -300,30 +300,4 @@
       transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
     }
   }
-
-  &.select-mode-active,
-  &.has-focus-highlight,
-  body.has-context-menu &,
-  .animating > div > & {
-    /*
-      Remove scrollbar for full-width selection and compensate it with right padding
-    */
-    &::-webkit-scrollbar {
-      width: 0;
-    }
-
-    padding-right: 0;
-
-    /* Styles for Firefox */
-    @supports (scrollbar-width: none) {
-      padding-right: .6875rem;
-      scrollbar-width: none;
-    }
-  }
-
-  .is-safari &.select-mode-active,
-  .is-safari &.has-focus-highlight,
-  .is-safari.has-context-menu .messages-layout & {
-    padding-right: .375rem;
-  }
 }

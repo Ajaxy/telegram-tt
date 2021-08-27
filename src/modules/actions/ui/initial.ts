@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV,
+  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
@@ -31,9 +31,6 @@ addReducer('init', (global) => {
   switchTheme(theme, animationLevel === ANIMATION_LEVEL_MAX);
   startWebsync();
 
-  if (IS_SAFARI) {
-    document.body.classList.add('is-safari');
-  }
   if (IS_IOS) {
     document.body.classList.add('is-ios');
   } else if (IS_ANDROID) {
