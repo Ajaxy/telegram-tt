@@ -243,7 +243,7 @@ async function searchInlineBot({
   chatId,
   query,
   offset,
-} : {
+}: {
   username: string;
   inlineBotData: InlineBotSettings;
   chatId: number;
@@ -313,15 +313,18 @@ async function answerCallbackButton(chat: ApiChat, messageId: number, data: stri
     data,
   });
 
-  if (!result || !result.message) {
+  if (!result) {
     return;
   }
 
-  const { message, alert: isError } = result;
+  const { showDialog, showNotification, toggleSafeLinkModal } = getDispatch();
+  const { message, alert: isError, url } = result;
 
   if (isError) {
-    getDispatch().showDialog({ data: { message } });
-  } else {
-    getDispatch().showNotification({ message });
+    showDialog({ data: { message: message || 'Error' } });
+  } else if (message) {
+    showNotification({ message });
+  } else if (url) {
+    toggleSafeLinkModal({ url });
   }
 }
