@@ -8,7 +8,7 @@ export function selectUser(global: GlobalState, userId: number): ApiUser | undef
 export function selectIsUserBlocked(global: GlobalState, userId: number) {
   const user = selectUser(global, userId);
 
-  return user && user.fullInfo && user.fullInfo.isBlocked;
+  return user?.fullInfo?.isBlocked;
 }
 
 // Slow, not to be used in `withGlobal`

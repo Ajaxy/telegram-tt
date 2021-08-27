@@ -90,7 +90,7 @@ addReducer('openChat', (global, actions, payload) => {
   const { currentUserId } = global;
   const chat = selectChat(global, id);
 
-  if (chat && chat.hasUnreadMark) {
+  if (chat?.hasUnreadMark) {
     actions.toggleChatUnread({ id });
   }
 
@@ -162,7 +162,7 @@ addReducer('loadMoreChats', (global, actions, payload) => {
   const oldestChat = listIds
     ? listIds
       .map((id) => global.chats.byId[id])
-      .filter((chat) => Boolean(chat && chat.lastMessage) && !selectIsChatPinned(global, chat.id))
+      .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(global, chat.id))
       .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
     : undefined;
 
@@ -402,7 +402,7 @@ addReducer('editChatFolder', (global, actions, payload) => {
 addReducer('addChatFolder', (global, actions, payload) => {
   const { folder } = payload!;
   const { orderedIds } = global.chatFolders;
-  const maxId = orderedIds && orderedIds.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
+  const maxId = orderedIds?.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
 
   void createChatFolder(folder, maxId);
 });
@@ -738,7 +738,7 @@ addReducer('unlinkDiscussionGroup', (global, actions, payload) => {
   }
 
   let chat: ApiChat | undefined;
-  if (channel.fullInfo && channel.fullInfo.linkedChatId) {
+  if (channel.fullInfo?.linkedChatId) {
     chat = selectChat(global, channel.fullInfo.linkedChatId);
   }
 
@@ -768,7 +768,7 @@ addReducer('loadMoreMembers', (global) => {
       return;
     }
 
-    const offset = (chat.fullInfo && chat.fullInfo.members && chat.fullInfo.members.length) || undefined;
+    const offset = (chat.fullInfo?.members?.length) || undefined;
     const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
     if (!result) {
       return;

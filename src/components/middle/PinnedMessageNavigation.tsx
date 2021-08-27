@@ -40,7 +40,7 @@ const PinnedMessageNavigation: FC<OwnProps> = ({
     } = markupParams;
 
     const firstChild = containerRef.current.firstElementChild;
-    if (containerRef && containerRef.current) {
+    if (containerRef?.current) {
       const currentElement = containerRef.current;
       const { style } = currentElement;
       style.height = `${trackHeight}px`;

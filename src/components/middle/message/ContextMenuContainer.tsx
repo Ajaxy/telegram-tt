@@ -152,7 +152,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleForward = useCallback(() => {
     closeMenu();
-    if (album && album.messages) {
+    if (album?.messages) {
       const messageIds = album.messages.map(({ id }) => id);
       openForwardMenu({ fromChatId: message.chatId, messageIds });
     } else {
@@ -171,7 +171,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeMenu, message.content.sticker, unfaveSticker]);
 
   const handleSelectMessage = useCallback(() => {
-    const params = album && album.messages
+    const params = album?.messages
       ? {
         messageId: message.id,
         childMessageIds: album.messages.map(({ id }) => id),

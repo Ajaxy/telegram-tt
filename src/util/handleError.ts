@@ -20,6 +20,6 @@ export function handleError(err: Error) {
   console.error(err);
 
   if (APP_ENV === 'development' || APP_ENV === 'staging') {
-    throttledAlert(`${DEBUG_ALERT_MSG}\n\n${(err && err.message) || err}\n${err && err.stack}`);
+    throttledAlert(`${DEBUG_ALERT_MSG}\n\n${(err?.message) || err}\n${err?.stack}`);
   }
 }

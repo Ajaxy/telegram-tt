@@ -38,7 +38,7 @@ const GifButton: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const loadAndPlay = isIntersecting && !isDisabled;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !loadAndPlay, ApiMediaFormat.BlobUrl);
-  const thumbRef = useCanvasBlur(gif.thumbnail && gif.thumbnail.dataUri, Boolean(previewBlobUrl));
+  const thumbRef = useCanvasBlur(gif.thumbnail?.dataUri, Boolean(previewBlobUrl));
   const videoData = useMedia(localMediaHash, !loadAndPlay, ApiMediaFormat.BlobUrl);
   const shouldRenderVideo = Boolean(loadAndPlay && videoData);
   const { transitionClassNames } = useTransitionForMedia(hasThumbnail || previewBlobUrl || videoData, 'slow');

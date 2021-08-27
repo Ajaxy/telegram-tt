@@ -171,7 +171,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     ...(keyboardButtons && { keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons }),
     ...(mtpMessage.viaBotId && { viaBotId: mtpMessage.viaBotId }),
-    ...(replies && replies.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
+    ...(replies?.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { adminTitle: postAuthor }),
   };
 }
@@ -505,7 +505,7 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
   return {
     text,
     title,
-    photoUrl: photo && photo.url,
+    photoUrl: photo?.url,
     receiptMsgId,
     amount: Number(totalAmount),
     currency,

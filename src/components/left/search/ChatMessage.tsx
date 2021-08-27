@@ -84,7 +84,7 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
         chat={chat}
         user={privateChatUser}
         withOnlineStatus
-        isSavedMessages={privateChatUser && privateChatUser.isSelf}
+        isSavedMessages={privateChatUser?.isSelf}
         lastSyncTime={lastSyncTime}
       />
       <div className="info">

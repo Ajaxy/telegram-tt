@@ -179,7 +179,7 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       localContactIds,
       searchQuery,
-      isSearching: fetchingStatus && fetchingStatus.chats,
+      isSearching: fetchingStatus?.chats,
       globalUserIds,
       localUserIds,
     };

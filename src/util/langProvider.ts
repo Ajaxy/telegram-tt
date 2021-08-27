@@ -71,7 +71,7 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
     return key;
   }
 
-  const langString = (langPack && langPack[key]) || (fallbackLangPack && fallbackLangPack[key]);
+  const langString = (langPack?.[key]) || (fallbackLangPack?.[key]);
   if (!langString) {
     if (!fallbackLangPack) {
       void importFallbackLangPack();
@@ -125,8 +125,8 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   document.documentElement.lang = langCode;
 
   const { languages } = getGlobal().settings.byKey;
-  const langInfo = languages ? languages.find((l) => l.langCode === langCode) : undefined;
-  getTranslation.isRtl = Boolean(langInfo && langInfo.rtl);
+  const langInfo = languages?.find((l) => l.langCode === langCode);
+  getTranslation.isRtl = Boolean(langInfo?.rtl);
   getTranslation.code = langCode;
 
   if (callback) {
@@ -164,7 +164,7 @@ async function fetchRemoteString(
     keys: [key],
   });
 
-  if (remote && remote.length) {
+  if (remote?.length) {
     await cacheApi.save(LANG_CACHE_NAME, `${remoteLangPack}_${langCode}_${key}`, remote[0]);
 
     return remote[0];

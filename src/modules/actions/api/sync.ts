@@ -214,7 +214,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
               byId,
               threadsById: {
                 [MAIN_THREAD_ID]: {
-                  ...(currentMessageListInfo && currentMessageListInfo.threadsById[MAIN_THREAD_ID]),
+                  ...(currentMessageListInfo?.threadsById[MAIN_THREAD_ID]),
                   listedIds,
                   viewportIds: listedIds,
                   outlyingIds: undefined,
@@ -244,7 +244,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
                   byId: byIdOrigin,
                   threadsById: {
                     [MAIN_THREAD_ID]: {
-                      ...(currentMessageListInfoOrigin && currentMessageListInfoOrigin.threadsById[MAIN_THREAD_ID]),
+                      ...(currentMessageListInfoOrigin?.threadsById[MAIN_THREAD_ID]),
                       listedIds: listedIdsOrigin,
                       viewportIds: listedIdsOrigin,
                       outlyingIds: undefined,
@@ -256,7 +256,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
                   threadsById: {
                     ...global.messages.byChatId[currentChatId].threadsById,
                     [currentThreadId]: {
-                      ...(currentMessageListInfo && currentMessageListInfo.threadsById[currentThreadId]),
+                      ...(currentMessageListInfo?.threadsById[currentThreadId]),
                       outlyingIds: undefined,
                     },
                   },

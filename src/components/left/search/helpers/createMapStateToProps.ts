@@ -28,10 +28,10 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     // One component is used for two different types of results.
     // The differences between them are only in the isVoice property.
     // The rest of the search results use their own personal components.
-    const currentType = type !== 'audio' ? type : (props && props.isVoice ? 'voice' : 'audio');
+    const currentType = type !== 'audio' ? type : (props?.isVoice ? 'voice' : 'audio');
 
     const { byChatId: globalMessagesByChatId } = global.messages;
-    const { foundIds } = (resultsByType && resultsByType[currentType]) || {};
+    const foundIds = resultsByType?.[currentType]?.foundIds;
 
     return {
       theme: selectTheme(global),

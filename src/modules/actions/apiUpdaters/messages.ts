@@ -63,7 +63,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const newMessage = selectChatMessage(global, chatId, id)!;
 
       if (isMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
-        if (message.isOutgoing && !(message.content && message.content.action)) {
+        if (message.isOutgoing && !(message.content?.action)) {
           const currentMessageList = selectCurrentMessageList(global);
           if (currentMessageList) {
             // We do not use `actions.focusLastMessage` as it may be set with a delay (see below)
@@ -180,8 +180,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       const thread = selectThreadByMessage(global, chatId, message);
       // For some reason Telegram requires to manually mark outgoing thread messages read
-      // For some reason Telegram requires to manually mark outgoing thread messages read
-      if (thread && thread.threadInfo) {
+      if (thread?.threadInfo) {
         actions.markMessageListRead({ maxId: message.id });
 
         global = replaceThreadParam(global, chatId, thread.threadInfo.threadId, 'threadInfo', {
@@ -325,7 +324,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       const message = selectChatMessageByPollId(global, pollId);
 
-      if (message && message.content.poll) {
+      if (message?.content.poll) {
         const updatedPoll = { ...message.content.poll, ...pollUpdate };
 
         // Workaround for poll update bug: `chosen` option gets reset when someone votes after current user
@@ -474,7 +473,7 @@ function updateListedAndViewportIds(global: GlobalState, actions: GlobalActions,
   const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
 
   const chat = selectChat(global, chatId);
-  const isUnreadChatNotLoaded = chat && chat.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
+  const isUnreadChatNotLoaded = chat?.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
 
   global = updateThreadUnread(global, actions, message);
 
@@ -525,7 +524,7 @@ function updateChatLastMessage(
   force = false,
 ) {
   const { chats } = global;
-  const currentLastMessage = chats.byId[chatId] && chats.byId[chatId].lastMessage;
+  const currentLastMessage = chats.byId[chatId]?.lastMessage;
 
   if (currentLastMessage && !force) {
     const isSameOrNewer = (

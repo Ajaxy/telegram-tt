@@ -44,7 +44,7 @@ const AnimatedEmoji: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const thumbDataUri = sticker.thumbnail && sticker.thumbnail.dataUri;
+  const thumbDataUri = sticker.thumbnail?.dataUri;
   const previewBlobUrl = useMedia(
     `${localMediaHash}?size=m`,
     !isIntersecting && !forceLoadPreview,

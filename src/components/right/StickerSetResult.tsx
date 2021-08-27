@@ -41,7 +41,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);
-  const areStickersLoaded = Boolean(set && set.stickers);
+  const areStickersLoaded = Boolean(set?.stickers);
 
   const [isModalOpen, openModal, closeModal] = useFlag();
 
@@ -57,7 +57,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
     const coverStickerIds = (set.covers || []).map(({ id }) => id);
     const otherStickers = set.stickers ? set.stickers.filter(({ id }) => !coverStickerIds.includes(id)) : [];
 
-    return [...set.covers || [], ...otherStickers].slice(0, STICKERS_TO_DISPLAY);
+    return [...(set.covers || []), ...otherStickers].slice(0, STICKERS_TO_DISPLAY);
   }, [set]);
 
   useEffect(() => {

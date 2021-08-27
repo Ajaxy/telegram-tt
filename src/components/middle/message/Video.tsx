@@ -107,7 +107,7 @@ const Video: FC<OwnProps> = ({
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
   }, []);
 
-  const duration = (videoRef.current && videoRef.current.duration) || video.duration || 0;
+  const duration = (videoRef.current?.duration) || video.duration || 0;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);

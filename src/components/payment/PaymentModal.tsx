@@ -93,7 +93,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   }, [step, error]);
 
   useEffect(() => {
-    if (error && error.field) {
+    if (error?.field) {
       paymentDispatch({
         type: 'setFormErrors',
         payload: {
@@ -416,7 +416,7 @@ function findShippingOption(shippingOptions: ShippingOption[], optionId: string)
 
 function getShippingPrices(shippingOptions: ShippingOption[], shippingOption: string) {
   const option = findShippingOption(shippingOptions, shippingOption);
-  return option ? option.prices : undefined;
+  return option?.prices;
 }
 
 function getTotalPrice(prices: Price[] = [], shippingOptions: ShippingOption[] | undefined, shippingOption: string) {
@@ -439,7 +439,7 @@ function getCheckoutInfo(state: FormState, shippingOptions: ShippingOption[] | u
     : undefined;
   const { phone, fullName: name } = state;
   const shippingOption = shippingOptions ? findShippingOption(shippingOptions, state.shipping) : undefined;
-  const shippingMethod = shippingOption ? shippingOption.title : undefined;
+  const shippingMethod = shippingOption?.title;
   return {
     paymentMethod,
     paymentProvider,

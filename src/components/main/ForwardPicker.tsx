@@ -87,8 +87,8 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const chatIds = useMemo(() => {
     const listIds = [
-      ...activeListIds || [],
-      ...archivedListIds || [],
+      ...(activeListIds || []),
+      ...(archivedListIds || []),
     ];
 
     let priorityIds = pinnedIds || [];
@@ -158,7 +158,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       className="ForwardPicker"
       header={modalHeader}
     >
-      {viewportIds && viewportIds.length ? (
+      {viewportIds?.length ? (
         <InfiniteScroll
           className="picker-list custom-scroll"
           items={viewportIds}

@@ -59,7 +59,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         chat={chat}
         user={user}
         size="small"
-        isSavedMessages={user && user.isSelf}
+        isSavedMessages={user?.isSelf}
       />
     );
 

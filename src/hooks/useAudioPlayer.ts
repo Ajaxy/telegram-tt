@@ -44,9 +44,7 @@ export default (
         }
       }
 
-      if (handlers && handlers[eventName]) {
-        handlers[eventName](e);
-      }
+      handlers?.[eventName]?.(e);
     }, onForcePlay);
 
     const { proxy } = controllerRef.current!;

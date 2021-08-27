@@ -1097,16 +1097,16 @@ export default memo(withGlobal<OwnProps>(
       withScheduledButton: (
         threadId === MAIN_THREAD_ID
         && messageListType === 'thread'
-        && Boolean(scheduledIds && scheduledIds.length)
+        && Boolean(scheduledIds?.length)
       ),
       shouldSchedule: messageListType === 'scheduled',
       botKeyboardMessageId,
-      botKeyboardPlaceholder: keyboardMessage ? keyboardMessage.keyboardPlaceholder : undefined,
+      botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
       isForwarding: chatId === global.forwardMessages.toChatId,
       isPollModalOpen: global.isPollModalOpen,
       stickersForEmoji: global.stickers.forEmoji.stickers,
-      groupChatMembers: chat && chat.fullInfo && chat.fullInfo.members,
-      topInlineBotIds: global.topInlineBots && global.topInlineBots.userIds,
+      groupChatMembers: chat?.fullInfo?.members,
+      topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId: global.currentUserId,
       usersById: global.users.byId,
       lastSyncTime: global.lastSyncTime,
@@ -1115,8 +1115,8 @@ export default memo(withGlobal<OwnProps>(
       isReceiptModalOpen: Boolean(global.payment.receipt),
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
       recentEmojis: global.recentEmojis,
-      baseEmojiKeywords: baseEmojiKeywords ? baseEmojiKeywords.keywords : undefined,
-      emojiKeywords: emojiKeywords ? emojiKeywords.keywords : undefined,
+      baseEmojiKeywords: baseEmojiKeywords?.keywords,
+      emojiKeywords: emojiKeywords?.keywords,
       serverTimeOffset: global.serverTimeOffset,
       inlineBots: global.inlineBots.byUsername,
       isInlineBotLoading: global.inlineBots.isLoading,

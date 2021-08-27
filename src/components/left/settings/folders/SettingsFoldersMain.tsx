@@ -172,7 +172,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="settings-item pt-3">
         <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Filters')}</h4>
 
-        {userFolders && userFolders.length ? userFolders.map((folder) => (
+        {userFolders?.length ? userFolders.map((folder) => (
           <ListItem
             className="mb-2 no-icon"
             narrow

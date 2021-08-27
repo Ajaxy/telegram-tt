@@ -81,7 +81,7 @@ function getSuggestedFolderName(includeFilters?: FolderIncludeFilters) {
 
     if (
       Object.values(filters).filter(Boolean).length > 1
-      || (includedChatIds && includedChatIds.length)
+      || (includedChatIds?.length)
     ) {
       return '';
     }

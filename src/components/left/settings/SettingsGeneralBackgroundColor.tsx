@@ -109,6 +109,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
       setHsb(positions2hsb({ colorPosition, huePosition }, rectsRef.current!));
       markIsDragging();
+
+      return true;
     }
 
     captureEvents(colorPickerRef.current!, {
@@ -126,6 +128,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
 
       setHsb(positions2hsb({ colorPosition, huePosition }, rectsRef.current!));
       markIsDragging();
+
+      return true;
     }
 
     captureEvents(huePickerRef.current!, {

@@ -21,7 +21,7 @@ export default function useInlineBotTooltip(
   const usernameLowered = username.toLowerCase();
   const prevQuery = usePrevious(query);
   const prevUsername = usePrevious(username);
-  const inlineBotData = inlineBots && inlineBots[usernameLowered];
+  const inlineBotData = inlineBots?.[usernameLowered];
   const {
     id: botId,
     switchPm,
@@ -50,7 +50,7 @@ export default function useInlineBotTooltip(
   }, [offset, chatId, query, queryInlineBot, usernameLowered]);
 
   useEffect(() => {
-    if (isAllowed && botId && (switchPm || (results && results.length))) {
+    if (isAllowed && botId && (switchPm || (results?.length))) {
       markIsOpen();
     } else {
       unmarkIsOpen();

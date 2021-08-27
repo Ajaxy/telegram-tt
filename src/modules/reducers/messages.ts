@@ -76,9 +76,9 @@ function updateThread(
 
   return updateMessageStore(global, chatId, {
     threadsById: {
-      ...(current && current.threadsById),
+      ...(current?.threadsById),
       [threadId]: {
-        ...(current && current.threadsById[threadId]),
+        ...(current?.threadsById[threadId]),
         ...threadUpdate,
       },
     },
@@ -196,7 +196,7 @@ export function deleteChatMessages(
   }
   const newById = omit(byId, messageIds);
   const deletedForwardedPosts = Object.values(pickTruthy(byId, messageIds)).filter(
-    ({ forwardInfo }) => forwardInfo && forwardInfo.isLinkedChannelPost,
+    ({ forwardInfo }) => forwardInfo?.isLinkedChannelPost,
   );
 
   const threadIds = Object.keys(global.messages.byChatId[chatId].threadsById).map(Number);
@@ -207,7 +207,7 @@ export function deleteChatMessages(
     let outlyingIds = selectOutlyingIds(global, chatId, threadId);
     let viewportIds = selectViewportIds(global, chatId, threadId);
     let pinnedIds = selectPinnedIds(global, chatId);
-    let newMessageCount = threadInfo ? threadInfo.messagesCount : undefined;
+    let newMessageCount = threadInfo?.messagesCount;
 
     messageIds.forEach((messageId) => {
       if (listedIds && listedIds.includes(messageId)) {
@@ -245,7 +245,7 @@ export function deleteChatMessages(
     const currentMessageList = selectCurrentMessageList(global);
     const canDeleteCurrentThread = currentMessageList && currentMessageList.chatId === chatId
       && currentMessageList.type === 'thread';
-    const currentThreadId = currentMessageList && currentMessageList.threadId;
+    const currentThreadId = currentMessageList?.threadId;
 
     deletedForwardedPosts.forEach((message) => {
       const { fromChatId, fromMessageId } = message.forwardInfo!;
@@ -298,7 +298,7 @@ export function updateListedIds(
   idsUpdate: number[],
 ): GlobalState {
   const listedIds = selectListedIds(global, chatId, threadId);
-  const newIds = listedIds && listedIds.length
+  const newIds = listedIds?.length
     ? idsUpdate.filter((id) => !listedIds.includes(id))
     : idsUpdate;
 
@@ -319,7 +319,7 @@ export function updateOutlyingIds(
   idsUpdate: number[],
 ): GlobalState {
   const outlyingIds = selectOutlyingIds(global, chatId, threadId);
-  const newIds = outlyingIds && outlyingIds.length
+  const newIds = outlyingIds?.length
     ? idsUpdate.filter((id) => !outlyingIds.includes(id))
     : idsUpdate;
 

@@ -38,7 +38,7 @@ export default function useMentionTooltip(
   const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();
 
   const topInlineBots = useMemo(() => {
-    return (topInlineBotIds || []).map((id) => usersById && usersById[id]).filter<ApiUser>(Boolean as any);
+    return (topInlineBotIds || []).map((id) => usersById?.[id]).filter<ApiUser>(Boolean as any);
   }, [topInlineBotIds, usersById]);
 
   const getFilteredUsers = useCallback((filter, withInlineBots: boolean) => {
@@ -83,7 +83,7 @@ export default function useMentionTooltip(
   }, [canSuggestMembers, html, getFilteredUsers, markIsOpen, unmarkIsOpen]);
 
   useEffect(() => {
-    if (usersToMention && usersToMention.length) {
+    if (usersToMention?.length) {
       markIsOpen();
     } else {
       unmarkIsOpen();

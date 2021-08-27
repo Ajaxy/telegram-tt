@@ -49,7 +49,7 @@ export function buildContentClassName(
 
   if (customShape) {
     classNames.push('custom-shape');
-    if (video && video.isRound) {
+    if (video?.isRound) {
       classNames.push('round');
     }
 

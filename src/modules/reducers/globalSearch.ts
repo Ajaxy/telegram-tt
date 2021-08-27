@@ -38,7 +38,7 @@ export function updateGlobalSearchResults(
 
     return result;
   }, {} as Record<string, ApiMessage>);
-  const foundIdsForType = resultsByType && resultsByType[type] ? resultsByType[type]!.foundIds : undefined;
+  const foundIdsForType = resultsByType?.[type]?.foundIds;
 
   if (foundIdsForType !== undefined
     && Object.keys(newFoundMessagesById).every(

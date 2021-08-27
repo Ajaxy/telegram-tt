@@ -86,7 +86,7 @@ export function updateLocalTextSearchResults(
 ): GlobalState {
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
   const { results } = global.localTextSearch.byChatThreadKey[chatThreadKey] || {};
-  const prevFoundIds = (results && results.foundIds) || [];
+  const prevFoundIds = (results?.foundIds) || [];
   const foundIds = orderFoundIds(unique(Array.prototype.concat(prevFoundIds, newFoundIds)));
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
@@ -150,7 +150,7 @@ export function updateLocalMediaSearchResults(
   nextOffsetId?: number,
 ): GlobalState {
   const { resultsByType } = global.localMediaSearch.byChatId[chatId] || {};
-  const prevFoundIds = resultsByType && resultsByType[type] ? resultsByType[type]!.foundIds : [];
+  const prevFoundIds = resultsByType?.[type] ? resultsByType[type]!.foundIds : [];
   const foundIds = orderFoundIds(unique(Array.prototype.concat(prevFoundIds, newFoundIds)));
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 

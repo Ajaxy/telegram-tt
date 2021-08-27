@@ -94,7 +94,7 @@ const ContactGreeting: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { stickers } = global.stickers.greeting;
-    const sticker = stickers && stickers.length ? stickers[userId % stickers.length] : undefined;
+    const sticker = stickers?.length ? stickers[userId % stickers.length] : undefined;
     const chat = selectChat(global, userId);
     if (!chat) {
       return {};

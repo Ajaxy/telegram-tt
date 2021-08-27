@@ -206,7 +206,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       noFastList
       noScrollRestore
     >
-      {viewportIds && viewportIds.length && chatArrays ? (
+      {viewportIds?.length && chatArrays ? (
         renderChats()
       ) : viewportIds && !viewportIds.length ? (
         (

@@ -1,7 +1,7 @@
 export default function insertHtmlInSelection(html: string) {
   const selection = window.getSelection();
 
-  if (selection && selection.getRangeAt && selection.rangeCount) {
+  if (selection?.getRangeAt && selection.rangeCount) {
     const range = selection.getRangeAt(0);
     range.deleteContents();
 

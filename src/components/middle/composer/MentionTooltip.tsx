@@ -35,7 +35,7 @@ const MentionTooltip: FC<OwnProps> = ({
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
   const handleUserSelect = useCallback((userId: number, forceFocus = false) => {
-    const user = usersById && usersById[userId];
+    const user = usersById?.[userId];
     if (!user) {
       return;
     }
@@ -66,7 +66,7 @@ const MentionTooltip: FC<OwnProps> = ({
   }, [filteredUsers, onClose]);
 
   const prevChatMembers = usePrevious(
-    filteredUsers && filteredUsers.length
+    filteredUsers?.length
       ? filteredUsers
       : undefined,
     shouldRender,
@@ -86,7 +86,7 @@ const MentionTooltip: FC<OwnProps> = ({
 
   return (
     <div className={className} ref={containerRef}>
-      {renderedChatMembers && renderedChatMembers.map(({ id }, index) => (
+      {renderedChatMembers?.map(({ id }, index) => (
         <ListItem
           key={id}
           className="chat-item-clickable scroll-item"

@@ -34,7 +34,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
   const stickerSetInfo = stickerAttribute && stickerAttribute.stickerset instanceof GramJs.InputStickerSetID
     ? stickerAttribute.stickerset
     : undefined;
-  const emoji = stickerAttribute ? stickerAttribute.alt : undefined;
+  const emoji = stickerAttribute?.alt;
   const isAnimated = document.mimeType === ANIMATED_STICKER_MIME_TYPE;
   const cachedThumb = document.thumbs && document.thumbs.find(
     (s): s is GramJs.PhotoCachedSize => s instanceof GramJs.PhotoCachedSize,
@@ -83,7 +83,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     id: String(id),
     accessHash: String(accessHash),
     title,
-    hasThumbnail: Boolean(thumbs && thumbs.length),
+    hasThumbnail: Boolean(thumbs?.length),
     count,
     hash,
     shortName,

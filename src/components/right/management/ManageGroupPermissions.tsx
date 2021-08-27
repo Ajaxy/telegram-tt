@@ -88,7 +88,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [currentUserId, onChatMemberSelect, onScreenSelect]);
 
   useEffect(() => {
-    setPermissions((chat && chat.defaultBannedRights) || {});
+    setPermissions((chat?.defaultBannedRights) || {});
     setHavePermissionChanged(false);
     setTimeout(() => {
       setIsLoading(false);
@@ -148,7 +148,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
     return Object.keys(bannedRights).reduce((result, key) => {
       if (
         !bannedRights[key as keyof ApiChatBannedRights]
-        || (defaultBannedRights && defaultBannedRights[key as keyof ApiChatBannedRights])
+        || (defaultBannedRights?.[key as keyof ApiChatBannedRights])
         || key === 'sendInline' || key === 'viewMessages' || key === 'sendGames'
       ) {
         return result;

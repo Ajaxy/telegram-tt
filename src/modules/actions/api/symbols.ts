@@ -139,7 +139,7 @@ addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode 
   const { language } = payload;
 
   let currentEmojiKeywords = global.emojiKeywords[language];
-  if (currentEmojiKeywords && currentEmojiKeywords.isLoading) {
+  if (currentEmojiKeywords?.isLoading) {
     return;
   }
 
@@ -186,7 +186,7 @@ addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode 
           isLoading: false,
           version: emojiKeywords.version,
           keywords: {
-            ...(currentEmojiKeywords && currentEmojiKeywords.keywords),
+            ...(currentEmojiKeywords?.keywords),
             ...emojiKeywords.keywords,
           },
         },

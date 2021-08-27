@@ -64,7 +64,7 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return foundIds.map((id) => {
       const [chatId, messageId] = id.split('_').map(Number);
-      const message = globalMessagesByChatId[chatId] && globalMessagesByChatId[chatId].byId[messageId];
+      const message = globalMessagesByChatId[chatId]?.byId[messageId];
 
       return message && getMessageDocument(message) ? message : undefined;
     }).filter(Boolean) as ApiMessage[];

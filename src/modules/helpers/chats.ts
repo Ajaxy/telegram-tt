@@ -121,8 +121,8 @@ export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
 
 export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {
   return Boolean(
-    (chat.currentUserBannedRights && chat.currentUserBannedRights[key])
-    || (chat.defaultBannedRights && chat.defaultBannedRights[key]),
+    (chat.currentUserBannedRights?.[key])
+    || (chat.defaultBannedRights?.[key]),
   );
 }
 
@@ -183,7 +183,7 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
 export function getMessageSendingRestrictionReason(
   lang: LangFn, currentUserBannedRights?: ApiChatBannedRights, defaultBannedRights?: ApiChatBannedRights,
 ) {
-  if (currentUserBannedRights && currentUserBannedRights.sendMessages) {
+  if (currentUserBannedRights?.sendMessages) {
     const { untilDate } = currentUserBannedRights;
     return untilDate && untilDate < FOREVER_BANNED_DATE
       ? lang(
@@ -196,7 +196,7 @@ export function getMessageSendingRestrictionReason(
       : lang('Channel.Persmission.Denied.SendMessages.Forever');
   }
 
-  if (defaultBannedRights && defaultBannedRights.sendMessages) {
+  if (defaultBannedRights?.sendMessages) {
     return lang('Channel.Persmission.Denied.SendMessages.DefaultRestrictedText');
   }
 
@@ -420,7 +420,7 @@ export function getFolderUnreadDialogs(
 
   const listedChats = listIds
     .map((id) => chatsById[id])
-    .filter((chat) => (chat && chat.lastMessage && !chat.isRestricted && !chat.isNotJoined));
+    .filter((chat) => (chat?.lastMessage && !chat.isRestricted && !chat.isNotJoined));
 
   const unreadDialogsCount = listedChats
     .reduce((total, chat) => (chat.unreadCount || chat.hasUnreadMark ? total + 1 : total), 0);
@@ -456,8 +456,8 @@ export function getFolderDescriptionText(
   // we display folder chats count
   if (
     Object.values(filters).filter(Boolean).length > 1
-    || (excludedChatIds && excludedChatIds.length)
-    || (includedChatIds && includedChatIds.length)
+    || (excludedChatIds?.length)
+    || (includedChatIds?.length)
   ) {
     const length = getFolderChatsCount(chatsById, usersById, folder, chatIdsCache, notifySettings, notifyExceptions);
     return lang('Chats', length);

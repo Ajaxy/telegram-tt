@@ -9,10 +9,10 @@ import { getMessageMediaThumbDataUri } from '../modules/helpers';
 
 export default function useWebpThumbnail(message?: ApiMessage) {
   const thumbnail = message && getMessageMediaThumbDataUri(message);
-  const { sticker } = (message && message.content) || {};
+  const sticker = message?.content?.sticker;
   const shouldDecodeThumbnail = thumbnail && sticker && !isWebpSupported() && thumbnail.includes('image/webp');
   const [thumbnailDecoded, setThumbnailDecoded] = useState(EMPTY_IMAGE_DATA_URI);
-  const messageId = message && message.id;
+  const messageId = message?.id;
 
   useLayoutEffect(() => {
     if (!shouldDecodeThumbnail) {

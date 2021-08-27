@@ -28,7 +28,7 @@ const PollOption: FC<OwnProps> = ({
 }) => {
   const result = voteResults && voteResults.find((r) => r.option === answer.option);
   const correctAnswer = correctResults.length === 0 || correctResults.indexOf(answer.option) !== -1;
-  const showIcon = (correctResults.length > 0 && correctAnswer) || (result && result.isChosen);
+  const showIcon = (correctResults.length > 0 && correctAnswer) || (result?.isChosen);
   const answerPercent = result ? getPercentage(result.votersCount, totalVoters || 0) : 0;
   const [finalPercent, setFinalPercent] = useState(shouldAnimate ? 0 : answerPercent);
   // eslint-disable-next-line no-null/no-null

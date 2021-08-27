@@ -37,7 +37,7 @@ const WallpaperTile: FC<OwnProps> = ({
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
   const thumbRef = useCanvasBlur(
-    document.thumbnail && document.thumbnail.dataUri,
+    document.thumbnail?.dataUri,
     Boolean(previewBlobUrl),
     true,
   );

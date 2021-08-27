@@ -111,7 +111,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
       { title: lang.code === 'en' ? 'All' : lang('FilterAllChats') },
       ...displayedFolders.map((folder) => ({
         title: folder.title,
-        ...(folderCountersById && folderCountersById[folder.id]),
+        ...(folderCountersById?.[folder.id]),
       })),
     ];
   }, [displayedFolders, folderCountersById, lang]);
@@ -220,7 +220,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="ChatFolders">
-      {folderTabs && folderTabs.length ? (
+      {folderTabs?.length ? (
         <TabList tabs={folderTabs} activeTab={activeChatFolder} onSwitchTab={handleSwitchTab} />
       ) : shouldRenderPlaceholder ? (
         <div className={buildClassName('tabs-placeholder', transitionClassNames)} />

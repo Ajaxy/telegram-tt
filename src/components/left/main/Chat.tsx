@@ -126,7 +126,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const actionTargetUsers = useMemo(() => {
     return actionTargetUserIds
-      ? actionTargetUserIds.map((userId) => usersById && usersById[userId]).filter<ApiUser>(Boolean as any)
+      ? actionTargetUserIds.map((userId) => usersById?.[userId]).filter<ApiUser>(Boolean as any)
       : undefined;
   }, [actionTargetUserIds, usersById]);
 
@@ -205,7 +205,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
-    if (draft && draft.text.length) {
+    if (draft?.text.length) {
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>
@@ -273,7 +273,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           chat={chat}
           user={privateChatUser}
           withOnlineStatus
-          isSavedMessages={privateChatUser && privateChatUser.isSelf}
+          isSavedMessages={privateChatUser?.isSelf}
           lastSyncTime={lastSyncTime}
         />
       </div>

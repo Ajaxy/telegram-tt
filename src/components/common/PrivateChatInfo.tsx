@@ -130,7 +130,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
         ) : (
           <div className="title">
             <h3 dir="auto">{fullName && renderText(fullName)}</h3>
-            {user && user.isVerified && <VerifiedIcon />}
+            {user?.isVerified && <VerifiedIcon />}
           </div>
         )}
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}

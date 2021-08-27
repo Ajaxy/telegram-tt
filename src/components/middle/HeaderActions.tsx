@@ -208,7 +208,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const isChannel = Boolean(chat && isChatChannel(chat));
 
-    if (chat && chat.isRestricted) {
+    if (chat?.isRestricted) {
       return {
         noMenu: true,
       };

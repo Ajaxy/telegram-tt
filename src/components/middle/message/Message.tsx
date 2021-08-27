@@ -290,7 +290,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     toggleMessageSelection({
       messageId,
       groupedId,
-      ...(e && e.shiftKey && { withShift: true }),
+      ...(e?.shiftKey && { withShift: true }),
       ...(isAlbum && { childMessageIds: album!.messages.map(({ id }) => id) }),
     });
   }, [isLocal, toggleMessageSelection, messageId, isAlbum, album]);
@@ -432,9 +432,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderAvatar() {
     const isAvatarPeerUser = avatarPeer && isChatPrivate(avatarPeer.id);
-    const avatarUser = avatarPeer && isAvatarPeerUser ? avatarPeer as ApiUser : undefined;
-    const avatarChat = avatarPeer && !isAvatarPeerUser ? avatarPeer as ApiChat : undefined;
-    const hiddenName = !avatarPeer && forwardInfo ? forwardInfo.hiddenUserName : undefined;
+    const avatarUser = (avatarPeer && isAvatarPeerUser) ? avatarPeer as ApiUser : undefined;
+    const avatarChat = (avatarPeer && !isAvatarPeerUser) ? avatarPeer as ApiChat : undefined;
+    const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
 
     return (
       <Avatar
@@ -616,7 +616,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       if (!asForwarded) {
         senderColor = `color-${getUserColorKey(senderPeer)}`;
       }
-    } else if (forwardInfo && forwardInfo.hiddenUserName) {
+    } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
     }
 
@@ -644,7 +644,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             </span>
           </>
         )}
-        {forwardInfo && forwardInfo.isLinkedChannelPost ? (
+        {forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
         ) : message.adminTitle && !isChannel ? (
           <span className="admin-title" dir="auto">{message.adminTitle}</span>
@@ -795,7 +795,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChannel = chat && isChatChannel(chat);
-    const chatUsername = chat && chat.username;
+    const chatUsername = chat?.username;
 
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
     const canShowSender = withSenderName || withAvatar || forceSenderName;
@@ -830,7 +830,7 @@ export default memo(withGlobal<OwnProps>(
     const singleEmoji = getMessageSingleEmoji(message);
     let isSelected: boolean;
 
-    if (album && album.messages) {
+    if (album?.messages) {
       isSelected = album.messages.every(({ id: messageId }) => selectIsMessageSelected(global, messageId));
     } else {
       isSelected = selectIsMessageSelected(global, id);

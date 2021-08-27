@@ -57,7 +57,7 @@ addReducer('searchMessagesGlobal', (global, actions, payload) => {
   } = global.globalSearch;
   const maxDate = date ? timestampPlusDay(date) : date;
   const { type } = payload;
-  const { nextOffsetId } = (resultsByType && resultsByType[type as ApiGlobalMessageSearchType]) || {};
+  const nextOffsetId = (resultsByType?.[type as ApiGlobalMessageSearchType])?.nextOffsetId;
 
   const chat = chatId ? selectChat(global, chatId) : undefined;
 
