@@ -1,3 +1,5 @@
+import EMOJI_REGEX from '../lib/twemojiRegex';
+
 // Due to the fact that emoji from Apple do not contain some characters, it is necessary to remove them from emoji-data
 // https://github.com/iamcal/emoji-data/issues/136
 const EXCLUDE_EMOJIS = ['female_sign', 'male_sign', 'medical_symbol'];
@@ -10,6 +12,13 @@ export type EmojiData = {
   emojis: Record<string, Emoji>;
 };
 
+// Non-standard variations of emojis, used on some devices
+const EMOJI_EXCEPTIONS: [string | RegExp, string][] = [
+  [/\u{1f3f3}\u200d\u{1f308}/gu, '\u{1f3f3}\ufe0f\u200d\u{1f308}'], // 🏳‍🌈
+  [/\u{1f3f3}\u200d\u26a7\ufe0f/gu, '\u{1f3f3}\ufe0f\u200d\u26a7\ufe0f'], // 🏳️‍⚧️
+  [/\u{1f937}\u200d\u2642/gu, '\u{1f937}\u200d\u2642\ufe0f'], // 🤷‍♂️
+]
+
 function unifiedToNative(unified: string) {
   const unicodes = unified.split('-');
   const codePoints = unicodes.map((i) => parseInt(i, 16));
@@ -17,7 +26,17 @@ function unifiedToNative(unified: string) {
   return String.fromCodePoint(...codePoints);
 }
 
-export function nativeToUnfified(emoji: string) {
+export function fixNonStandardEmoji(text: string) {
+  // Non-standard sequences typically parsed as separate emojis, so no need to fix text without any
+  if (!text.match(EMOJI_REGEX)) return text;
+  for (let [regex, replacement] of EMOJI_EXCEPTIONS) {
+    text = text.replace(regex, replacement);
+  }
+
+  return text;
+}
+
+export function nativeToUnified(emoji: string) {
   let code;
 
   if (emoji.length === 1) {
