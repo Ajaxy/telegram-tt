@@ -671,6 +671,7 @@ async function loadViewportMessages(
   global = isOutlying
     ? updateOutlyingIds(global, chatId, threadId, ids)
     : updateListedIds(global, chatId, threadId, ids);
+
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = updateThreadInfos(global, chatId, threadInfos);
@@ -679,7 +680,7 @@ async function loadViewportMessages(
   const outlyingIds = selectOutlyingIds(global, chatId, threadId);
 
   if (isOutlying && listedIds && outlyingIds) {
-    if (areSortedArraysIntersecting(listedIds, outlyingIds)) {
+    if (!outlyingIds.length || areSortedArraysIntersecting(listedIds, outlyingIds)) {
       global = updateListedIds(global, chatId, threadId, outlyingIds);
       listedIds = selectListedIds(global, chatId, threadId);
       global = replaceThreadParam(global, chatId, threadId, 'outlyingIds', undefined);

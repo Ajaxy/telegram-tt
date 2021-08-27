@@ -4,12 +4,12 @@ import React, {
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import {
-  ApiAction, ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
+  ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
 } from '../../api/types';
 import { GlobalActions, MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
-import { ANIMATION_END_DELAY, MESSAGE_LIST_SLICE } from '../../config';
+import { ANIMATION_END_DELAY, LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../config';
 import {
   selectChatMessages,
   selectIsViewportNewest,
@@ -32,7 +32,7 @@ import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
-import { groupMessages, MessageDateGroup } from './helpers/groupMessages';
+import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useOnChange from '../../hooks/useOnChange';
 import useStickyDates from './hooks/useStickyDates';
@@ -259,11 +259,17 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     if (isReady) {
       containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
     }
-  }, [windowHeight, isReady]);
+  }, [windowHeight, isReady, canPost]);
 
   // Initial message loading
   useEffect(() => {
     if (!loadMoreAround || !isChatLoaded || isRestricted || focusingId) {
+      return;
+    }
+
+    // Loading history while sending a message can return the same message and cause ambiguity
+    const isFirstMessageLocal = messageIds && messageIds[0] >= LOCAL_MESSAGE_ID_BASE;
+    if (isFirstMessageLocal) {
       return;
     }
 
@@ -331,11 +337,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }, FOCUSING_DURATION);
     }
 
-    const hasFirstMessageChanged = messageIds && prevMessageIds && messageIds[0] !== prevMessageIds[0];
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
-    const wasMessageAdded = hasLastMessageChanged && !hasFirstMessageChanged;
+    const hasViewportShifted = (
+      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
+    );
+    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
     const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
@@ -442,11 +450,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         // Used to avoid flickering when deleting a greeting that has just been sent
         && (!listItemElementsRef.current || listItemElementsRef.current.length === 0)
       )
-      || checkSingleMessageActionByType('contactSignUp', messageGroups)
-      || (lastMessage?.content.action && lastMessage.content.action.type === 'contactSignUp')
+      || (messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'contactSignUp')
+      || (lastMessage?.content?.action?.type === 'contactSignUp')
     );
+
   const isGroupChatJustCreated = isGroupChat && isCreator
-    && checkSingleMessageActionByType('chatCreate', messageGroups);
+    && messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'chatCreate';
 
   const className = buildClassName(
     'MessageList custom-scroll',
@@ -511,16 +520,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     </div>
   );
 };
-
-function checkSingleMessageActionByType(type: ApiAction['type'], messageGroups?: MessageDateGroup[]) {
-  return messageGroups
-    && messageGroups.length === 1
-    && messageGroups[0].senderGroups.length === 1
-    && messageGroups[0].senderGroups[0].length === 1
-    && 'content' in messageGroups[0].senderGroups[0][0]
-    && messageGroups[0].senderGroups[0][0].content.action
-    && messageGroups[0].senderGroups[0][0].content.action.type === type;
-}
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, type }): StateProps => {
