@@ -300,4 +300,16 @@
       transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
     }
   }
+
+  .animating > div > & {
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+
+    /* Styles for Firefox */
+    @supports (scrollbar-width: none) {
+      padding-right: .6875rem;
+      scrollbar-width: none;
+    }
+  }
 }
