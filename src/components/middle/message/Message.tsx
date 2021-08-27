@@ -41,6 +41,7 @@ import {
   selectShouldAutoPlayMedia,
   selectShouldLoopStickers,
   selectTheme,
+  selectAllowedMessageActions,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -140,6 +141,7 @@ type StateProps = {
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
   isChannel?: boolean;
+  canReply?: boolean;
   lastSyncTime?: number;
   highlight?: string;
   isSingleEmoji?: boolean;
@@ -200,6 +202,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isForwarding,
   isChatWithSelf,
   isChannel,
+  canReply,
   lastSyncTime,
   highlight,
   animatedEmoji,
@@ -309,6 +312,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isLocal,
     isAlbum,
     Boolean(isInSelectMode),
+    Boolean(canReply),
     onContextMenu,
     handleBeforeContextMenu,
   );
@@ -836,6 +840,8 @@ export default memo(withGlobal<OwnProps>(
       isSelected = selectIsMessageSelected(global, id);
     }
 
+    const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
+
     return {
       theme: selectTheme(global),
       chatUsername,
@@ -851,6 +857,7 @@ export default memo(withGlobal<OwnProps>(
       isForwarding,
       isChatWithSelf,
       isChannel,
+      canReply,
       lastSyncTime,
       highlight,
       isSingleEmoji: Boolean(singleEmoji),
