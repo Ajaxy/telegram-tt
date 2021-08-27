@@ -2,10 +2,12 @@ import { DEBUG } from './config';
 import { respondForProgressive } from './serviceWorker/progressive';
 import { respondWithCache, clearAssetCache } from './serviceWorker/assetCache';
 import { handlePush, handleNotificationClick, handleClientMessage } from './serviceWorker/pushNotification';
+import { pause } from './util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 
 const ASSET_CACHE_PATTERN = /[0-9a-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|json|wasm)$/;
+const ACTIVATE_TIMEOUT = 3000;
 
 self.addEventListener('install', (e) => {
   if (DEBUG) {
@@ -23,9 +25,17 @@ self.addEventListener('activate', (e) => {
     console.log('ServiceWorker activated');
   }
 
-  e.waitUntil(clearAssetCache());
-  // Become available to all pages
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    Promise.race([
+      // An attempt to fix freezing UI on iOS
+      pause(ACTIVATE_TIMEOUT),
+      Promise.all([
+        clearAssetCache(),
+        // Become available to all pages
+        self.clients.claim(),
+      ]),
+    ]),
+  );
 });
 
 // eslint-disable-next-line no-restricted-globals
