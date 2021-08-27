@@ -5,9 +5,6 @@ import { IAnchorPosition } from '../types';
 import { IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 200;
-const SELECTION_ANIMATION_DURATION_MS = 200;
-
-let contextMenuCounter = 0;
 
 function checkIsDisabledForMobile() {
   return IS_SINGLE_COLUMN_LAYOUT
@@ -40,11 +37,6 @@ export default (
     if (contextMenuPosition) {
       return;
     }
-    document.body.classList.remove('no-selection');
-    if (contextMenuCounter === 0) {
-      document.body.classList.add('has-context-menu');
-    }
-    contextMenuCounter++;
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
@@ -57,13 +49,6 @@ export default (
   const handleContextMenuHide = useCallback(() => {
     setContextMenuPosition(undefined);
     document.body.classList.remove('no-selection');
-
-    setTimeout(() => {
-      contextMenuCounter--;
-      if (contextMenuCounter === 0) {
-        document.body.classList.remove('has-context-menu');
-      }
-    }, SELECTION_ANIMATION_DURATION_MS);
   }, []);
 
   // Support context menu on touch-devices

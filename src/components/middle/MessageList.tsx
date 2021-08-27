@@ -76,7 +76,6 @@ type StateProps = {
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
   focusingId?: number;
-  hasFocusHighlight?: boolean;
   isSelectModeActive?: boolean;
   animationLevel?: number;
   lastMessage?: ApiMessage;
@@ -123,7 +122,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isRestricted,
   restrictionReason,
   focusingId,
-  hasFocusHighlight,
   isSelectModeActive,
   loadViewportMessages,
   setScrollOffset,
@@ -455,7 +453,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     noAvatars && 'no-avatars',
     !canPost && 'no-composer',
     type === 'pinned' && 'type-pinned',
-    hasFocusHighlight && 'has-focus-highlight',
     isSelectModeActive && 'select-mode-active',
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
@@ -547,7 +544,6 @@ export default memo(withGlobal<OwnProps>(
 
     const { isRestricted, restrictionReason, lastMessage } = chat;
     const focusingId = selectFocusedMessageId(global, chatId);
-    const hasFocusHighlight = focusingId ? !global.focusedMessage!.noHighlight : undefined;
 
     const withLastMessageWhenPreloading = (
       threadId === MAIN_THREAD_ID
@@ -579,7 +575,6 @@ export default memo(withGlobal<OwnProps>(
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
       threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
       focusingId,
-      hasFocusHighlight,
       isSelectModeActive: selectIsInSelectMode(global),
       botDescription,
       threadTopMessageId,
