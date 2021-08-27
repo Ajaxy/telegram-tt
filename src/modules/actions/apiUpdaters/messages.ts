@@ -37,6 +37,7 @@ import {
   selectViewportIds,
   selectFirstUnreadId,
   selectChat,
+  selectIsChatWithBot,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
 
@@ -135,6 +136,20 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       global = updateChatLastMessage(global, chatId, newMessage);
 
       setGlobal(global);
+
+      // Scroll down if bot message height is changed with an updated inline keyboard.
+      // A drawback: this will scroll down even if the previous scroll was not at bottom.
+      const chat = selectChat(global, chatId);
+      if (
+        chat
+        && !message.isOutgoing
+        && chat.lastMessage?.id === message.id
+        && selectIsChatWithBot(global, chat)
+        && isMessageInCurrentMessageList(global, chatId, message as ApiMessage)
+        && selectIsViewportNewest(global, chatId, message.threadInfo?.threadId || MAIN_THREAD_ID)
+      ) {
+        actions.focusLastMessage();
+      }
 
       break;
     }
