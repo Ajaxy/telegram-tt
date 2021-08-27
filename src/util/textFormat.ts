@@ -1,3 +1,6 @@
+import EMOJI_REGEX from "../lib/twemojiRegex";
+import { fixNonStandardEmoji } from "./emoji";
+
 export function formatInteger(value: number) {
   return String(value).replace(/\d(?=(\d{3})+$)/g, '$& ');
 }
@@ -29,6 +32,14 @@ export function getFirstLetters(phrase: string, count = 2) {
     .trim()
     .split(/\s+/)
     .slice(0, count)
-    .map((word: string) => word.length && word.match(/./u)![0].toUpperCase())
+    .map((word: string) => {
+      if (!word.length) return '';
+      word = fixNonStandardEmoji(word);
+      const emojis = word.match(EMOJI_REGEX);
+      if (emojis && word.startsWith(emojis[0])) {
+        return emojis[0];
+      }
+      return word.match(/./u)![0].toUpperCase()
+    })
     .join('');
 }

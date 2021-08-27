@@ -4,7 +4,7 @@
   cursor: pointer;
   position: relative;
 
-  img {
+  img:not(.emoji) {
     width: 100%;
     object-fit: cover;
   }

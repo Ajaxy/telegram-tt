@@ -3,7 +3,7 @@ import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
 
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
-import { nativeToUnfified } from '../../../util/emoji';
+import { fixNonStandardEmoji, nativeToUnified } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
 
 import MentionLink from '../../middle/message/MentionLink';
@@ -89,12 +89,14 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
       return [...result, part];
     }
 
+    part = fixNonStandardEmoji(part);
     const parts = part.split(EMOJI_REGEX);
     const emojis = part.match(EMOJI_REGEX) || [];
     result.push(parts[0]);
 
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
-      const code = nativeToUnfified(removeVS16s(emoji));
+      const code = nativeToUnified(removeVS16s(emoji));
+      if (!code) return emojiResult;
       const className = buildClassName(
         'emoji',
         size === 'small' && 'emoji-small',
