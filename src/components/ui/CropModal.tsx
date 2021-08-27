@@ -15,7 +15,7 @@ import './CropModal.scss';
 // Change to 'base64' to get base64-encoded string
 const cropperResultOptions: Croppie.ResultOptions & { type: 'blob' } = {
   type: 'blob',
-  quality: 0.8,
+  quality: 1,
   format: 'jpeg',
   circle: false,
 };
