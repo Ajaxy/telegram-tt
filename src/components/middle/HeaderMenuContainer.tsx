@@ -37,7 +37,6 @@ export type OwnProps = {
   canSubscribe?: boolean;
   canSearch?: boolean;
   canMute?: boolean;
-  canSelect?: boolean;
   canLeave?: boolean;
   onSubscribeChannel: () => void;
   onSearchClick: () => void;
@@ -62,7 +61,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canSubscribe,
   canSearch,
   canMute,
-  canSelect,
   canLeave,
   chat,
   isPrivate,
@@ -183,14 +181,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang(isMuted ? 'ChatsUnmute' : 'ChatsMute')}
             </MenuItem>
           )}
-          {canSelect && (
-            <MenuItem
-              icon="select"
-              onClick={handleSelectMessages}
-            >
-              {lang('ReportSelectMessages')}
-            </MenuItem>
-          )}
+          <MenuItem
+            icon="select"
+            onClick={handleSelectMessages}
+          >
+            {lang('ReportSelectMessages')}
+          </MenuItem>
           {canLeave && (
             <MenuItem
               destructive
@@ -198,7 +194,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               onClick={handleDelete}
             >
               {lang(isPrivate
-                ? 'Delete'
+                ? 'DeleteChatUser'
                 : (canDeleteChat ? 'GroupInfo.DeleteAndExit' : (isChannel ? 'LeaveChannel' : 'Group.LeaveGroup')))}
             </MenuItem>
           )}
