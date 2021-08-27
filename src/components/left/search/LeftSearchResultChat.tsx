@@ -48,7 +48,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     isPinned,
     isMuted,
     handleDelete: openDeleteModal,
-  });
+  }, true);
 
   const handleClick = () => {
     onClick(chatId);

@@ -22,26 +22,20 @@ export default ({
   folderId?: number;
   isPinned?: boolean;
   isMuted?: boolean;
-}) => {
+}, isInSearch = false) => {
   const lang = useLang();
-
-  const {
-    toggleChatPinned,
-    updateChatMutedState,
-    toggleChatArchived,
-    toggleChatUnread,
-  } = getDispatch();
 
   return useMemo(() => {
     if (!chat) {
       return undefined;
     }
 
-    const isChatWithSelf = privateChatUser?.isSelf;
-
-    const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
-      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
-      : { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
+    const {
+      toggleChatPinned,
+      updateChatMutedState,
+      toggleChatArchived,
+      toggleChatUnread,
+    } = getDispatch();
 
     const actionPin = isPinned
       ? {
@@ -50,6 +44,14 @@ export default ({
         handler: () => toggleChatPinned({ id: chat.id, folderId }),
       }
       : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
+
+    if (isInSearch) {
+      return [actionPin];
+    }
+
+    const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
+      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
+      : { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
 
     const actionMute = isMuted
       ? {
@@ -81,14 +83,11 @@ export default ({
     return [
       actionUnreadMark,
       actionPin,
-      ...(!isChatWithSelf ? [
+      ...(!privateChatUser?.isSelf ? [
         actionMute,
         actionArchive,
       ] : []),
       actionDelete,
     ];
-  }, [
-    chat, privateChatUser, lang, isPinned, handleDelete, toggleChatUnread, toggleChatPinned, folderId,
-    updateChatMutedState, toggleChatArchived, isMuted,
-  ]);
+  }, [chat, isPinned, lang, isInSearch, isMuted, handleDelete, privateChatUser?.isSelf, folderId]);
 };
