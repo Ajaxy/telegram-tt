@@ -5,8 +5,9 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
-import { LangCode } from '../../types';
+import { LangCode, ISettings } from '../../types';
 
+import { selectTheme } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { setLanguage } from '../../util/langProvider';
 import renderText from '../common/helpers/renderText';
@@ -20,6 +21,7 @@ import Button from '../ui/Button';
 
 type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'> & {
   language?: LangCode;
+  theme: ISettings['theme'];
 };
 type DispatchProps = Pick<GlobalActions, (
   'returnToAuthPhoneNumber' | 'setSettingOption'
@@ -32,6 +34,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   authState,
   authQrCode,
   language,
+  theme,
   returnToAuthPhoneNumber,
   setSettingOption,
 }) => {
@@ -39,6 +42,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  const qrFillColor = theme === 'dark' ? '#868DF6' : '#4E96D4';
   const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
 
@@ -52,14 +56,16 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
     container.innerHTML = '';
     container.classList.remove('pre-animate');
 
+    const qrSize = Math.ceil(280 * window.devicePixelRatio);
+
     QrCreator.render({
       text: `${DATA_PREFIX}${authQrCode.token}`,
       radius: 0.5,
       ecLevel: 'M',
-      fill: '#4E96D4',
-      size: 280,
+      fill: qrFillColor,
+      size: qrSize,
     }, container);
-  }, [connectionState, authQrCode]);
+  }, [connectionState, authQrCode, qrFillColor]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();
@@ -105,6 +111,7 @@ export default memo(withGlobal(
     } = global;
 
     return {
+      theme: selectTheme(global),
       connectionState,
       authState,
       authQrCode,
