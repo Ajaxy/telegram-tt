@@ -89,5 +89,10 @@ function applyColorAnimationStep(startIndex: number, endIndex: number, interpola
     document.documentElement.style.setProperty(property, a !== undefined
       ? `rgba(${r},${g},${b},${a / 255})`
       : `rgb(${r},${g},${b})`);
+
+    // Override -rgb vars defined in _variables.scss:
+    if (a === undefined) {
+      document.documentElement.style.setProperty(`${property}-rgb`, `${r},${g},${b}`);
+    }
   });
 }
