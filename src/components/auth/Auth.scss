@@ -32,7 +32,8 @@
 
   #logo {
     background-size: 100%;
-    background: url('../../assets/telegram-logo.svg') center no-repeat;
+    background-color: var(--color-primary);
+    mask: url('../../assets/telegram-logo.svg') center no-repeat;
   }
 
   h2 {
