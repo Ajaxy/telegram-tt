@@ -18,6 +18,7 @@
   white-space: nowrap;
   cursor: pointer;
   transition: background-color .15s, color .15s;
+  user-select: none;
 
   body.animation-level-0 & {
     transition: none !important;

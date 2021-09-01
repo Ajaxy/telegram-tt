@@ -11,6 +11,7 @@
   color: white;
   cursor: pointer;
   max-width: 100%;
+  user-select: none;
 
   .message-time,
   .message-signature,
