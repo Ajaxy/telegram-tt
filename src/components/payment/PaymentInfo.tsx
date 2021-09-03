@@ -4,7 +4,7 @@ import React, {
 
 import { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import useLang from '../../hooks/useLang';
-import { countryList } from '../../util/phoneNumber';
+import countryList from '../../util/countries';
 
 import InputText from '../ui/InputText';
 import Checkbox from '../ui/Checkbox';

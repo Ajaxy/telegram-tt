@@ -22,14 +22,6 @@ type AnyFunction = (...args: any) => any;
 type AnyToVoidFunction = (...args: any) => void;
 type NoneToVoidFunction = () => void;
 
-type Country = {
-  id: string;
-  name: string;
-  flag: string;
-  code: string;
-  phoneFormat: RegExp;
-};
-
 type EmojiCategory = {
   id: string;
   name: string;

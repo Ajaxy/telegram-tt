@@ -19,6 +19,8 @@ import {
   ApiSession,
   ApiNewPoll,
   ApiInviteInfo,
+  ApiCountryCode,
+  ApiCountry,
 } from '../api/types';
 import {
   FocusDirection,
@@ -95,6 +97,10 @@ export type GlobalState = {
   authQrCode?: {
     token: string;
     expires: number;
+  };
+  countryList: {
+    phoneCodes: ApiCountryCode[];
+    general: ApiCountry[];
   };
 
   contactList?: {
@@ -428,7 +434,6 @@ export type GlobalState = {
   historyCalendarSelectedAt?: number;
   openedStickerSetShortName?: string;
 
-  // TODO To be removed in August 2021
   shouldShowContextMenuHint?: boolean;
 };
 
@@ -479,8 +484,9 @@ export type ActionTypes = (
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' | 'loadCurrentUser' |
-  'updateProfile' | 'checkUsername' | 'updateContact' | 'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadCountryList' | 'loadTopUsers' | 'loadContactList' |
+  'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'updateContact' |
+  'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
   // Channel / groups creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings

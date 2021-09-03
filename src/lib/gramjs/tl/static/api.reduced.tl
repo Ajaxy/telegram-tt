@@ -1055,6 +1055,7 @@ help.getConfig#c4f9186b = Config;
 help.getNearestDc#1fb33026 = NearestDc;
 help.getSupport#9cdf08cd = help.Support;
 help.acceptTermsOfService#ee72f79a id:DataJSON = Bool;
+help.getCountriesList#735787a8 lang_code:string hash:int = help.CountriesList;
 channels.readHistory#cc104937 channel:InputChannel max_id:int = Bool;
 channels.deleteMessages#84c1fd4e channel:InputChannel id:Vector<int> = messages.AffectedMessages;
 channels.getMessages#ad8c9a23 channel:InputChannel id:Vector<InputMessage> = messages.Messages;

@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiChat, ApiUser } from '../../../api/types';
+import { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
@@ -33,6 +33,7 @@ type StateProps = {
   chatsByIds: Record<number, ApiChat>;
   usersByIds: Record<number, ApiUser>;
   blockedIds: number[];
+  phoneCodeList: ApiCountryCode[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'unblockContact'>;
@@ -44,6 +45,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
   chatsByIds,
   usersByIds,
   blockedIds,
+  phoneCodeList,
   unblockContact,
 }) => {
   const handleUnblockClick = useCallback((contactId: number) => {
@@ -83,7 +85,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
         <div className="contact-info" dir="auto">
           <h3 dir="auto">{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
           {user?.phoneNumber && (
-            <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(user.phoneNumber)}</div>
+            <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(phoneCodeList, user.phoneNumber)}</div>
           )}
           {user && !user.phoneNumber && user.username && (
             <div className="contact-username" dir="auto">@{user.username}</div>
@@ -142,12 +144,16 @@ export default memo(withGlobal<OwnProps>(
       blocked: {
         ids,
       },
+      countryList: {
+        phoneCodes: phoneCodeList,
+      },
     } = global;
 
     return {
       chatsByIds,
       usersByIds,
       blockedIds: ids,
+      phoneCodeList,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['unblockContact']),

@@ -4,6 +4,8 @@ import EMOJI_REGEX from '../lib/twemojiRegex';
 // https://github.com/iamcal/emoji-data/issues/136
 const EXCLUDE_EMOJIS = ['female_sign', 'male_sign', 'medical_symbol'];
 
+const ISO_FLAGS_OFFSET = 127397;
+
 export type EmojiRawData = typeof import('emoji-data-ios/emoji-data.json');
 export type EmojiModule = { default: EmojiRawData };
 
@@ -17,7 +19,7 @@ const EMOJI_EXCEPTIONS: [string | RegExp, string][] = [
   [/\u{1f3f3}\u200d\u{1f308}/gu, '\u{1f3f3}\ufe0f\u200d\u{1f308}'], // 🏳‍🌈
   [/\u{1f3f3}\u200d\u26a7\ufe0f/gu, '\u{1f3f3}\ufe0f\u200d\u26a7\ufe0f'], // 🏳️‍⚧️
   [/\u{1f937}\u200d\u2642/gu, '\u{1f937}\u200d\u2642\ufe0f'], // 🤷‍♂️
-]
+];
 
 function unifiedToNative(unified: string) {
   const unicodes = unified.split('-');
@@ -29,7 +31,8 @@ function unifiedToNative(unified: string) {
 export function fixNonStandardEmoji(text: string) {
   // Non-standard sequences typically parsed as separate emojis, so no need to fix text without any
   if (!text.match(EMOJI_REGEX)) return text;
-  for (let [regex, replacement] of EMOJI_EXCEPTIONS) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [regex, replacement] of EMOJI_EXCEPTIONS) {
     text = text.replace(regex, replacement);
   }
 
@@ -89,4 +92,12 @@ export function uncompressEmoji(data: EmojiRawData): EmojiData {
   }
 
   return emojiData;
+}
+
+export function isoToEmoji(iso: string) {
+  const code = iso.toUpperCase();
+
+  if (!/^[A-Z]{2}$/.test(code)) return iso;
+  const codePoints = [...code].map((c) => c.codePointAt(0)! + ISO_FLAGS_OFFSET);
+  return String.fromCodePoint(...codePoints);
 }

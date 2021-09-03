@@ -26,7 +26,7 @@ export {
 } from './messages';
 
 export {
-  fetchFullUser, fetchNearestCountry,
+  fetchFullUser, fetchNearestCountry, fetchCountryList,
   fetchTopUsers, fetchContactList, fetchUsers,
   updateContact, deleteUser, fetchProfilePhotos,
 } from './users';

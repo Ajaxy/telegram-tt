@@ -1,13 +1,17 @@
 import React, {
   FC, useState, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+
+import { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { countryList } from '../../util/phoneNumber';
 import searchWords from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
+import { isoToEmoji } from '../../util/emoji';
+import useOnChange from '../../hooks/useOnChange';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -15,48 +19,59 @@ import Spinner from '../ui/Spinner';
 
 import './CountryCodeInput.scss';
 
+type StateProps = {
+  phoneCodeList: ApiCountryCode[];
+};
+
 type OwnProps = {
   id: string;
-  value?: Country;
+  value?: ApiCountryCode;
   isLoading?: boolean;
-  onChange: (value: Country) => void;
+  onChange: (value: ApiCountryCode) => void;
 };
 
 const MENU_HIDING_DURATION = 200 + ANIMATION_END_DELAY;
 const SELECT_TIMEOUT = 50;
 
-const CountryCodeInput: FC<OwnProps> = ({
+const CountryCodeInput: FC<OwnProps & StateProps> = ({
   id,
   value,
   isLoading,
   onChange,
+  phoneCodeList,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [filter, setFilter] = useState<string | undefined>();
-  const [filteredList, setFilteredList] = useState(countryList);
+  const [filteredList, setFilteredList] = useState<ApiCountryCode[]>([]);
 
-  function updateFilter(filterValue?: string) {
+  const updateFilter = useCallback((filterValue?: string) => {
     setFilter(filterValue);
-    setFilteredList(getFilteredList(filterValue));
-  }
+    setFilteredList(getFilteredList(phoneCodeList, filterValue));
+  }, [phoneCodeList]);
+
+  useOnChange(([prevPhoneCodeList]) => {
+    if (prevPhoneCodeList?.length === 0 && phoneCodeList.length > 0) {
+      updateFilter(filter);
+    }
+  }, [phoneCodeList, updateFilter]);
 
   const handleChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    const { countryId } = (e.currentTarget.firstElementChild as HTMLDivElement).dataset;
-    const country = countryList.find((c) => c.id === countryId);
+    const { countryCode } = (e.currentTarget.firstElementChild as HTMLDivElement).dataset;
+    const country = phoneCodeList.find((c) => c.countryCode === countryCode);
 
     if (country) {
       onChange(country);
     }
 
     setTimeout(() => updateFilter(undefined), MENU_HIDING_DURATION);
-  }, [onChange]);
+  }, [phoneCodeList, onChange, updateFilter]);
 
   const handleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
     updateFilter(e.currentTarget.value);
-  }, []);
+  }, [updateFilter]);
 
   const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode !== 8) {
@@ -69,7 +84,7 @@ const CountryCodeInput: FC<OwnProps> = ({
     }
 
     updateFilter(target.value);
-  }, [filter, value]);
+  }, [filter, updateFilter, value]);
 
   const CodeInput: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => {
     const handleTrigger = () => {
@@ -87,9 +102,12 @@ const CountryCodeInput: FC<OwnProps> = ({
       formEl.scrollTo({ top: formEl.scrollHeight, behavior: 'smooth' });
     };
 
-    const inputValue = filter !== undefined
-      ? filter
-      : (value?.name) || '';
+    const handleCodeInput = (e: React.FormEvent<HTMLInputElement>) => {
+      handleInput(e);
+      handleTrigger();
+    };
+
+    const inputValue = filter ?? (value?.name || value?.defaultName || '');
 
     return (
       <div className={buildClassName('input-group', value && 'touched')}>
@@ -102,7 +120,7 @@ const CountryCodeInput: FC<OwnProps> = ({
           autoComplete="off"
           onClick={handleTrigger}
           onFocus={handleTrigger}
-          onInput={handleInput}
+          onInput={handleCodeInput}
           onKeyDown={handleInputKeyDown}
         />
         <label>{lang('Login.SelectCountry.Title')}</label>
@@ -120,18 +138,19 @@ const CountryCodeInput: FC<OwnProps> = ({
       className="CountryCodeInput"
       trigger={CodeInput}
     >
-      {filteredList.map((country: Country) => (
-        <MenuItem
-          key={country.id}
-          className={value && country.id === value.id ? 'selected' : ''}
-          onClick={handleChange}
-        >
-          <span data-country-id={country.id} />
-          <span className="country-flag">{renderText(country.flag, ['hq_emoji'])}</span>
-          <span className="country-name">{country.name}</span>
-          <span className="country-code">{country.code}</span>
-        </MenuItem>
-      ))}
+      {filteredList
+        .map((country: ApiCountryCode) => (
+          <MenuItem
+            key={country.countryCode}
+            className={value && country.iso2 === value.iso2 ? 'selected' : ''}
+            onClick={handleChange}
+          >
+            <span data-country-code={country.countryCode} />
+            <span className="country-flag">{renderText(isoToEmoji(country.iso2), ['hq_emoji'])}</span>
+            <span className="country-name">{country.name || country.defaultName}</span>
+            <span className="country-code">{country.countryCode}</span>
+          </MenuItem>
+        ))}
       {!filteredList.length && (
         <MenuItem
           key="no-results"
@@ -145,10 +164,19 @@ const CountryCodeInput: FC<OwnProps> = ({
   );
 };
 
-function getFilteredList(filter = ''): Country[] {
-  return filter.length
-    ? countryList.filter((country) => searchWords(country.name, filter))
-    : countryList;
+function getFilteredList(countryList: ApiCountryCode[], filter = ''): ApiCountryCode[] {
+  const filtered = filter.length
+    ? countryList.filter((country) => (
+      searchWords(country.defaultName, filter) || (country.name && searchWords(country.name, filter))
+    )) : countryList;
+  return filtered;
 }
 
-export default memo(CountryCodeInput);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    const { countryList: { phoneCodes: phoneCodeList } } = global;
+    return {
+      phoneCodeList,
+    };
+  },
+)(CountryCodeInput));
