@@ -58,6 +58,9 @@ const CalendarModal: FC<OwnProps> = ({
   const [isTimeInputFocused, markTimeInputAsFocused, unmarkTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(defaultSelectedDate);
+  const [currentMonthAndYear, setCurrentMonthAndYear] = useState<Date>(
+    new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
+  );
   const [selectedHours, setSelectedHours] = useState<string>(
     formatInputTime(defaultSelectedDate.getHours()),
   );
@@ -65,15 +68,16 @@ const CalendarModal: FC<OwnProps> = ({
     formatInputTime(defaultSelectedDate.getMinutes()),
   );
 
-  const currentYear = selectedDate.getFullYear();
-  const currentMonth = selectedDate.getMonth();
-  const currentDate = selectedDate.getDate();
+  const selectedDay = formatDay(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+  const currentYear = currentMonthAndYear.getFullYear();
+  const currentMonth = currentMonthAndYear.getMonth();
 
   useEffect(() => {
     if (!prevIsOpen && isOpen) {
       setSelectedDate(defaultSelectedDate);
+      setCurrentMonthAndYear(new Date(defaultSelectedDate.getFullYear(), defaultSelectedDate.getMonth(), 1));
     }
-  }, [isOpen, defaultSelectedDate, prevIsOpen]);
+  }, [defaultSelectedDate, isOpen, prevIsOpen]);
 
   useEffect(() => {
     if (isFutureMode && !isTimeInputFocused && selectedDate.getTime() < defaultSelectedDate.getTime()) {
@@ -87,12 +91,12 @@ const CalendarModal: FC<OwnProps> = ({
     || (maxDate && currentYear >= maxDate.getFullYear() && currentMonth >= maxDate.getMonth());
   const shouldDisablePrevMonth = isFutureMode && currentYear <= now.getFullYear() && currentMonth <= now.getMonth();
 
-  const calendarGrid = useMemo(() => (
+  const { prevMonthGrid, currentMonthGrid, nextMonthGrid } = useMemo(() => (
     buildCalendarGrid(currentYear, currentMonth)
   ), [currentMonth, currentYear]);
 
   function handlePrevMonth() {
-    setSelectedDate((d) => {
+    setCurrentMonthAndYear((d) => {
       const dateCopy = new Date(d);
       dateCopy.setMonth(dateCopy.getMonth() - 1);
 
@@ -101,7 +105,7 @@ const CalendarModal: FC<OwnProps> = ({
   }
 
   function handleNextMonth() {
-    setSelectedDate((d) => {
+    setCurrentMonthAndYear((d) => {
       const dateCopy = new Date(d);
       dateCopy.setMonth(dateCopy.getMonth() + 1);
 
@@ -113,6 +117,8 @@ const CalendarModal: FC<OwnProps> = ({
     setSelectedDate((d) => {
       const dateCopy = new Date(d);
       dateCopy.setDate(date);
+      dateCopy.setMonth(currentMonth);
+      dateCopy.setFullYear(currentYear);
 
       return dateCopy;
     });
@@ -204,9 +210,9 @@ const CalendarModal: FC<OwnProps> = ({
           </Button>
 
           <h4>
-            {lang(`lng_month${selectedDate.getMonth() + 1}`)}
+            {lang(`lng_month${currentMonth + 1}`)}
             {' '}
-            {selectedDate.getFullYear()}
+            {currentYear}
           </h4>
 
           <Button
@@ -238,7 +244,10 @@ const CalendarModal: FC<OwnProps> = ({
               <span>{lang(day)}</span>
             </div>
           ))}
-          {calendarGrid.map((gridDate) => (
+          {prevMonthGrid.map((gridDate) => (
+            <div className="day-button disabled"><span>{gridDate}</span></div>
+          ))}
+          {currentMonthGrid.map((gridDate) => (
             <div
               role="button"
               tabIndex={0}
@@ -250,13 +259,16 @@ const CalendarModal: FC<OwnProps> = ({
                 )
                   ? 'disabled'
                   : `${gridDate ? 'clickable' : ''}`,
-                gridDate === currentDate && 'selected',
+                selectedDay === formatDay(currentYear, currentMonth, gridDate) && 'selected',
               )}
             >
               {!!gridDate && (
                 <span>{gridDate}</span>
               )}
             </div>
+          ))}
+          {nextMonthGrid.map((gridDate) => (
+            <div className="day-button disabled"><span>{gridDate}</span></div>
           ))}
         </div>
       </div>
@@ -278,26 +290,35 @@ const CalendarModal: FC<OwnProps> = ({
 };
 
 function buildCalendarGrid(year: number, month: number) {
-  const grid: number[] = [];
+  const prevMonthGrid: number[] = [];
+  const currentMonthGrid: number[] = [];
+  const nextMonthGrid: number[] = [];
 
   const date = new Date();
-  date.setFullYear(year);
-  date.setMonth(month);
   date.setDate(1);
+  date.setMonth(month);
+  date.setFullYear(year);
+  const firstDay = date.getDay();
+  const totalDaysInPrevMonth = new Date(year, month, 0).getDate();
 
-  const monthStartDay = date.getDay() || 7;
-  // Fill empty cells
-  for (let i = 1; i < monthStartDay; i++) {
-    grid.push(0);
+  for (let i = 1; i < firstDay; i++) {
+    prevMonthGrid.push(totalDaysInPrevMonth - firstDay + i + 1);
   }
 
   while (date.getMonth() === month) {
     const gridDate = date.getDate();
-    grid.push(gridDate);
+    currentMonthGrid.push(gridDate);
     date.setDate(gridDate + 1);
   }
 
-  return grid;
+  const lastRowDaysCount = (currentMonthGrid.length + prevMonthGrid.length) % 7;
+  if (lastRowDaysCount > 0) {
+    for (let i = 1; i <= 7 - lastRowDaysCount; i++) {
+      nextMonthGrid.push(i);
+    }
+  }
+
+  return { prevMonthGrid, currentMonthGrid, nextMonthGrid };
 }
 
 function isDisabledDay(year: number, month: number, day: number, minDate?: Date, maxDate?: Date) {
@@ -316,6 +337,10 @@ function isDisabledDay(year: number, month: number, day: number, minDate?: Date,
 
 function formatInputTime(value: string | number) {
   return String(value).padStart(2, '0');
+}
+
+function formatDay(year: number, month: number, day: number) {
+  return `${year}-${month + 1}-${day}`;
 }
 
 function formatSubmitLabel(lang: LangFn, date: Date) {
