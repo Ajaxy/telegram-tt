@@ -69,11 +69,17 @@ addReducer('sendBotCommand', (global, actions, payload) => {
   const { command, chatId } = payload;
   const { currentUserId } = global;
   const chat = chatId ? selectChat(global, chatId) : selectCurrentChat(global);
-  if (!currentUserId || !chat) {
+  const currentMessageList = selectCurrentMessageList(global);
+
+  if (!currentUserId || !chat || !currentMessageList) {
     return;
   }
 
-  void sendBotCommand(chat, currentUserId, command);
+  const { threadId } = currentMessageList;
+  actions.setReplyingToId({ messageId: undefined });
+  actions.clearWebPagePreview({ chatId: chat.id, threadId, value: false });
+
+  void sendBotCommand(chat, currentUserId, command, selectReplyingToId(global, chat.id, threadId));
 });
 
 addReducer('restartBot', (global, actions, payload) => {
@@ -298,10 +304,11 @@ async function searchInlineBot({
   setGlobal(global);
 }
 
-async function sendBotCommand(chat: ApiChat, currentUserId: number, command: string) {
+async function sendBotCommand(chat: ApiChat, currentUserId: number, command: string, replyingTo?: number) {
   await callApi('sendMessage', {
     chat,
     text: command,
+    replyingTo,
   });
 }
 
