@@ -142,13 +142,13 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   function checkSelection() {
     // Disable the formatter on iOS devices for now.
     if (IS_IOS) {
-      return;
+      return false;
     }
 
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount || isContextMenuOpenRef.current) {
       closeTextFormatter();
-      return;
+      return false;
     }
 
     const selectionRange = selection.getRangeAt(0);
@@ -161,9 +161,18 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       || !selectionRange.START_TO_END
     ) {
       closeTextFormatter();
+      return false;
+    }
+
+    return true;
+  }
+
+  function processSelection() {
+    if (!checkSelection()) {
       return;
     }
 
+    const selectionRange = window.getSelection()!.getRangeAt(0);
     const selectionRect = selectionRange.getBoundingClientRect();
     const inputRect = inputRef.current!.getBoundingClientRect();
 
@@ -186,7 +195,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function handleMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     function handleMouseUp() {
-      checkSelection();
+      processSelection();
 
       event.target.removeEventListener('mouseup', handleMouseUp);
     }
@@ -228,7 +237,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     function handleKeyUp() {
-      checkSelection();
+      processSelection();
 
       e.target.removeEventListener('keyup', handleKeyUp);
     }
@@ -264,14 +273,6 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  function handleTouchSelection() {
-    if (!IS_ANDROID) {
-      return;
-    }
-
-    checkSelection();
-  }
-
   function handleChange(e: ChangeEvent<HTMLDivElement>) {
     const { innerHTML, textContent } = e.currentTarget;
 
@@ -289,7 +290,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (!IS_ANDROID) {
+    if (!checkSelection()) {
       return;
     }
 
@@ -383,8 +384,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
-        onContextMenu={stopEvent}
-        onTouchCancel={handleTouchSelection}
+        onContextMenu={IS_ANDROID ? stopEvent : undefined}
+        onTouchCancel={IS_ANDROID ? processSelection : undefined}
       />
       <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
       {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
