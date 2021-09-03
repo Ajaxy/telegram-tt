@@ -1,11 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiSession, ApiWallpaper } from '../../types';
+import { ApiCountry, ApiSession, ApiWallpaper } from '../../types';
 import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument } from './messages';
 import { getApiChatIdFromMtpPeer } from './chats';
-import { pick } from '../../../util/iteratees';
+import { flatten, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
@@ -111,5 +111,43 @@ export function buildApiNotifyException(
     isMuted: silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil),
     ...(sound === '' && { isSilent: true }),
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
+  };
+}
+function buildApiCountry(country: GramJs.help.Country, code?: GramJs.help.CountryCode) {
+  const {
+    hidden, iso2, defaultName, name,
+  } = country;
+  const { countryCode, prefixes, patterns } = code || {};
+
+  return {
+    isHidden: hidden,
+    iso2,
+    defaultName,
+    name,
+    countryCode,
+    prefixes,
+    patterns,
+  };
+}
+
+export function buildApiCountryList(countries: GramJs.help.Country[]) {
+  const listByCode = flatten(countries
+    .filter((country) => !country.hidden)
+    .map((country) => (
+      country.countryCodes.map((code) => buildApiCountry(country, code))
+    ))).sort((a: ApiCountry, b: ApiCountry) => (
+    a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
+  ));
+
+  const generalList = countries
+    .filter((country) => !country.hidden)
+    .map((country) => buildApiCountry(country))
+    .sort((a, b) => (
+      a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
+    ));
+
+  return {
+    phoneCodes: listByCode,
+    general: generalList,
   };
 }

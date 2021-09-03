@@ -1,5 +1,5 @@
 import useReducer, { StateReducer, Dispatch } from '../useReducer';
-import { countryList } from '../../util/phoneNumber';
+import countryList from '../../util/countries';
 
 export type FormState = {
   streetLine1: string;

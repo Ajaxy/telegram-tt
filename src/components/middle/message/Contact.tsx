@@ -2,7 +2,7 @@ import React, { FC, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiUser, ApiContact } from '../../../api/types';
+import { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
 
 import { selectUser } from '../../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
@@ -19,12 +19,13 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
+  phoneCodeList: ApiCountryCode[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
 
 const Contact: FC<OwnProps & StateProps & DispatchProps> = ({
-  contact, user, openUserInfo,
+  contact, user, openUserInfo, phoneCodeList,
 }) => {
   const {
     firstName,
@@ -45,7 +46,7 @@ const Contact: FC<OwnProps & StateProps & DispatchProps> = ({
       <Avatar size="large" user={user} text={firstName || lastName} />
       <div className="contact-info">
         <div className="contact-name">{firstName} {lastName}</div>
-        <div className="contact-phone">{formatPhoneNumberWithCode(phoneNumber)}</div>
+        <div className="contact-phone">{formatPhoneNumberWithCode(phoneCodeList, phoneNumber)}</div>
       </div>
     </div>
   );
@@ -53,8 +54,10 @@ const Contact: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global, { contact }): StateProps => {
+    const { countryList: { phoneCodes: phoneCodeList } } = global;
     return {
       user: selectUser(global, contact.userId),
+      phoneCodeList,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

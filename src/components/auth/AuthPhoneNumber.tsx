@@ -10,12 +10,13 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../../global/types';
 import { LangCode } from '../../types';
+import { ApiCountryCode } from '../../api/types';
 
 import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
-import { formatPhoneNumber, getCountryById, getCountryFromPhoneNumber } from '../../util/phoneNumber';
+import { formatPhoneNumber, getCountryCodesByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
 import { setLanguage } from '../../util/langProvider';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
@@ -30,13 +31,16 @@ import CountryCodeInput from './CountryCodeInput';
 
 type StateProps = Pick<GlobalState, (
   'connectionState' | 'authState' |
-  'authPhoneNumber' | 'authIsLoading' | 'authIsLoadingQrCode' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+  'authPhoneNumber' | 'authIsLoading' |
+  'authIsLoadingQrCode' | 'authError' |
+  'authRememberMe' | 'authNearestCountry'
 )> & {
   language?: LangCode;
+  phoneCodeList: ApiCountryCode[];
 };
 type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'goToAuthQrCode' |
-  'setSettingOption'
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'loadCountryList' | 'clearAuthError' |
+  'goToAuthQrCode' | 'setSettingOption'
 )>;
 
 const MIN_NUMBER_LENGTH = 7;
@@ -52,10 +56,12 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   authError,
   authRememberMe,
   authNearestCountry,
+  phoneCodeList,
   language,
   setAuthPhoneNumber,
   setAuthRememberMe,
   loadNearestCountry,
+  loadCountryList,
   clearAuthError,
   goToAuthQrCode,
   setSettingOption,
@@ -66,13 +72,13 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   const suggestedLanguage = getSuggestedLanguage();
 
   const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
-  const [country, setCountry] = useState<Country | undefined>();
+  const [country, setCountry] = useState<ApiCountryCode | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
   const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
 
-  const fullNumber = country ? `${country.code} ${phoneNumber || ''}` : phoneNumber;
+  const fullNumber = country ? `+${country.countryCode} ${phoneNumber || ''}` : phoneNumber;
   const canSubmit = fullNumber && fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGTH;
 
   useEffect(() => {
@@ -88,31 +94,36 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   }, [connectionState, authNearestCountry, loadNearestCountry]);
 
   useEffect(() => {
-    if (authNearestCountry && !country && !isTouched) {
-      setCountry(getCountryById(authNearestCountry));
+    if (connectionState === 'connectionStateReady') {
+      loadCountryList({ langCode: language });
     }
-  }, [country, authNearestCountry, isTouched]);
+  }, [connectionState, language, loadCountryList]);
+
+  useEffect(() => {
+    if (authNearestCountry && phoneCodeList && !country && !isTouched) {
+      setCountry(getCountryCodesByIso(phoneCodeList, authNearestCountry)[0]);
+    }
+  }, [country, authNearestCountry, isTouched, phoneCodeList]);
 
   const parseFullNumber = useCallback((newFullNumber: string) => {
     if (!newFullNumber.length) {
       setPhoneNumber('');
     }
 
-    const suggestedCountry = getCountryFromPhoneNumber(newFullNumber);
+    const suggestedCountry = phoneCodeList && getCountryFromPhoneNumber(phoneCodeList, newFullNumber);
 
     // Any phone numbers should be allowed, in some cases ignoring formatting
     const selectedCountry = !country
-    || (suggestedCountry && suggestedCountry.id !== country.id)
+    || (suggestedCountry && suggestedCountry.iso2 !== country.iso2)
     || (!suggestedCountry && newFullNumber.length)
       ? suggestedCountry
       : country;
 
-    if (!country || !selectedCountry || (selectedCountry && selectedCountry.code !== country.code)) {
+    if (!country || !selectedCountry || (selectedCountry && selectedCountry.iso2 !== country.iso2)) {
       setCountry(selectedCountry);
     }
-
     setPhoneNumber(formatPhoneNumber(newFullNumber, selectedCountry));
-  }, [country]);
+  }, [phoneCodeList, country]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();
@@ -144,6 +155,11 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     });
   }, []);
 
+  const handleCountryChange = useCallback((value: ApiCountryCode) => {
+    setCountry(value);
+    setPhoneNumber('');
+  }, []);
+
   const handlePhoneNumberChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (authError) {
       clearAuthError();
@@ -169,7 +185,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       IS_SAFARI && country && fullNumber !== undefined
       && value.length - fullNumber.length > 1 && !isJustPastedRef.current
     );
-    parseFullNumber(shouldFixSafariAutoComplete ? `${country!.code} ${value}` : value);
+    parseFullNumber(shouldFixSafariAutoComplete ? `${country!.countryCode} ${value}` : value);
   }, [authError, clearAuthError, country, fullNumber, parseFullNumber]);
 
   const handleKeepSessionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -201,7 +217,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
             id="sign-in-phone-code"
             value={country}
             isLoading={!authNearestCountry && !country}
-            onChange={setCountry}
+            onChange={handleCountryChange}
           />
           <InputText
             ref={inputRef}
@@ -244,6 +260,7 @@ export default memo(withGlobal(
   (global): StateProps => {
     const {
       settings: { byKey: { language } },
+      countryList: { phoneCodes: phoneCodeList },
     } = global;
 
     return {
@@ -258,6 +275,7 @@ export default memo(withGlobal(
         'authNearestCountry',
       ]),
       language,
+      phoneCodeList,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -265,6 +283,7 @@ export default memo(withGlobal(
     'setAuthRememberMe',
     'clearAuthError',
     'loadNearestCountry',
+    'loadCountryList',
     'goToAuthQrCode',
     'setSettingOption',
   ]),

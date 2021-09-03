@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../../global/types';
-import { ApiChat, ApiUser } from '../../api/types';
+import { ApiChat, ApiCountryCode, ApiUser } from '../../api/types';
 
 import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
@@ -31,6 +31,7 @@ type StateProps = {
   chat?: ApiChat;
   canInviteUsers?: boolean;
   isMuted?: boolean;
+  phoneCodeList: ApiCountryCode[];
 } & Pick<GlobalState, 'lastSyncTime'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'updateChatMutedState' | 'showNotification'>;
@@ -42,6 +43,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   forceShowSelf,
   canInviteUsers,
   isMuted,
+  phoneCodeList,
   loadFullUser,
   showNotification,
   updateChatMutedState,
@@ -75,7 +77,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
     showNotification({ message: `${entity} was copied` });
   }
 
-  const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
+  const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneCodeList, phoneNumber);
   const link = getChatLink(chat);
   const description = (fullInfo?.bio) || getChatDescription(chat);
 
@@ -135,7 +137,7 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatOrUserId }): StateProps => {
-    const { lastSyncTime } = global;
+    const { lastSyncTime, countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
@@ -147,7 +149,7 @@ export default memo(withGlobal<OwnProps>(
     );
 
     return {
-      lastSyncTime, chat, user, canInviteUsers, isMuted,
+      lastSyncTime, phoneCodeList, chat, user, canInviteUsers, isMuted,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

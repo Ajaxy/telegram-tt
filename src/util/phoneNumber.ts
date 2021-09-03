@@ -1,57 +1,90 @@
-import countryList, { defaultPhoneNumberFormat } from './countries';
+import { ApiCountryCode } from '../api/types';
+import { flatten } from './iteratees';
 
-export function getCountryById(id: string) {
-  return countryList.find((c) => c.id === id) as Country;
+const PATTERN_PLACEHOLDER = 'X';
+const DEFAULT_PATTERN = 'XXX XXX XXX XXX';
+
+export function getCountryCodesByIso(phoneCodeList: ApiCountryCode[], iso: string) {
+  return phoneCodeList.filter((country) => country.iso2 === iso);
 }
 
-// Empty groups are used to preserve 5 callback arguments for `replace` method
-function getPhoneNumberFormat(country?: Country) {
-  return country ? country.phoneFormat : defaultPhoneNumberFormat;
-}
-
-export function getCountryFromPhoneNumber(input: string) {
+export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input: string = '') {
   let phoneNumber = input.replace(/[^\d+]+/g, '');
-  if (!phoneNumber.startsWith('+')) {
-    phoneNumber = `+${phoneNumber}`;
+  if (phoneNumber.startsWith('+')) {
+    phoneNumber = phoneNumber.substr(1);
   }
 
-  const possibleCountries = countryList
-    .filter((country: Country) => phoneNumber.startsWith(country.code))
+  const possibleCountries = phoneCodeList
+    .filter((country) => phoneNumber.startsWith(country.countryCode));
+  const codesWithPrefix: { code: string; country: ApiCountryCode }[] = flatten(possibleCountries
+    .map((country) => (country.prefixes || ['']).map((prefix) => {
+      return {
+        code: `${country.countryCode}${prefix}`,
+        country,
+      };
+    })));
+
+  const bestMatches = codesWithPrefix
+    .filter(({ code }) => phoneNumber.startsWith(code))
     .sort((a, b) => a.code.length - b.code.length);
 
-  return possibleCountries[possibleCountries.length - 1];
+  return bestMatches[bestMatches.length - 1]?.country;
 }
 
-export function formatPhoneNumber(input: string, country?: Country) {
+export function formatPhoneNumber(input: string, country?: ApiCountryCode) {
   let phoneNumber = input.replace(/[^\d]+/g, '');
   if (country) {
-    phoneNumber = phoneNumber.substr(country.code.length - 1);
+    phoneNumber = phoneNumber.substr(country.countryCode.length);
   } else if (input.startsWith('+')) {
     return input;
   }
+  const pattern = getBestPattern(phoneNumber, country?.patterns);
 
-  phoneNumber = phoneNumber.replace(getPhoneNumberFormat(country), (_, p1, p2, p3, p4, p5) => {
-    const separator = country && country.id === 'GB' ? ' ' : '-';
+  const result: string[] = []; // Result character array
+  let j = 0; // Position inside pattern
+  for (let i = 0; i < phoneNumber.length; i++) {
+    while (pattern[j] !== PATTERN_PLACEHOLDER && j < pattern.length) {
+      result.push(pattern[j]);
+      if (pattern[j] === phoneNumber[i]) { // If pattern contains digits, move input position too
+        i++;
+        if (i === phoneNumber.length) break; // But don't overdo it, or it will insert full pattern unexpectedly
+      }
+      j++;
+    }
 
-    let output = '';
-    if (p1) output = `${p1}`;
-    if (p2) output += ` ${p2}`;
-    if (p3) output += `${separator}${p3}`;
-    if (p4) output += `${separator}${p4}`;
-    if (p5) output += `${separator}${p5}`;
-    return output;
-  });
+    result.push(phoneNumber[i]); // For placeholder characters, setting current input digit
+    j++;
+  }
 
-  return phoneNumber;
+  return result.join('');
 }
 
-export function formatPhoneNumberWithCode(phoneNumber: string) {
+function getBestPattern(numberWithoutCode: string, patterns?: string[]) {
+  if (!patterns || patterns.length === 0) return DEFAULT_PATTERN;
+  if (patterns.length === 1) return patterns[0];
+
+  const defaultPattern = patterns.find((pattern) => pattern.startsWith(PATTERN_PLACEHOLDER)) || DEFAULT_PATTERN;
+
+  const bestMatches = patterns.filter((pattern) => {
+    const stripped = pattern.replace(/[^\dX]+/g, '');
+    if (stripped.startsWith(PATTERN_PLACEHOLDER)) return false; // Don't consider default number format here
+    for (let i = 0; i < numberWithoutCode.length; i++) {
+      if (i > stripped.length - 1 || (stripped[i] !== PATTERN_PLACEHOLDER && stripped[i] !== numberWithoutCode[i])) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Playing it safe: if not sure, use default for that region
+  return bestMatches.length === 1 ? bestMatches[0] : defaultPattern;
+}
+
+export function formatPhoneNumberWithCode(phoneCodeList: ApiCountryCode[], phoneNumber: string) {
   const numberWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const country = getCountryFromPhoneNumber(numberWithPlus);
+  const country = getCountryFromPhoneNumber(phoneCodeList, numberWithPlus);
   if (!country) {
     return numberWithPlus;
   }
-  return `${country.code} ${formatPhoneNumber(numberWithPlus, country)}`;
+  return `+${country.countryCode} ${formatPhoneNumber(numberWithPlus, country)}`;
 }
-
-export { countryList };

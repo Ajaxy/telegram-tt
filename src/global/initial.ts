@@ -15,6 +15,10 @@ export const INITIAL_STATE: GlobalState = {
   serverTimeOffset: 0,
 
   authRememberMe: true,
+  countryList: {
+    phoneCodes: [],
+    general: [],
+  },
 
   blocked: {
     ids: [],
