@@ -61,7 +61,7 @@
     opacity: 1;
     pointer-events: all;
 
-    &.no-composer {
+    &.no-composer:not(.with-extra-shift) {
       transform: translateY(4rem);
     }
   }
