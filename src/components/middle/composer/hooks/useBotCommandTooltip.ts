@@ -4,11 +4,12 @@ import {
 
 import { ApiBotCommand } from '../../../../api/types';
 
+import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import { throttle } from '../../../../util/schedulers';
 import useFlag from '../../../../hooks/useFlag';
 
 const runThrottled = throttle((cb) => cb(), 500, true);
-const RE_COMMAND = /[\w\d_-]*/i;
+const RE_COMMAND = /^[\w@]{1,32}\s?/i;
 
 export default function useBotCommandTooltip(
   isAllowed: boolean,
@@ -44,7 +45,7 @@ export default function useBotCommandTooltip(
     const shouldShowCommands = html.startsWith('/');
 
     if (shouldShowCommands) {
-      const filter = html.substr(1).match(RE_COMMAND);
+      const filter = prepareForRegExp(html.substr(1)).match(RE_COMMAND);
       getFilteredCommands(filter ? filter[0] : '');
     } else {
       unmarkIsOpen();
