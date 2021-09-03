@@ -145,6 +145,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    & > span {
+      max-width: 80%;
+      text-align: left;
+    }
+
+    .text-entity-link {
+      color: inherit !important;
+      text-decoration: underline;
+
+      &:hover, &:focus {
+        text-decoration: none;
+      }
+    }
   }
 
   .sticky-date,
@@ -161,7 +175,7 @@
       font-weight: 500;
       line-height: 1.75;
       padding: 0 .5rem;
-      border-radius: 2rem;
+      border-radius: var(--border-radius-messages);
       word-break: break-word;
 
       body.is-ios &,
@@ -174,23 +188,6 @@
         width: calc(1.25 * var(--message-text-size, 1rem));
         height: calc(1.25 * var(--message-text-size, 1rem));
         background-size: calc(1.25 * var(--message-text-size, 1rem));
-      }
-    }
-
-    &.rich {
-      > span {
-        max-width: 80%;
-        text-align: left;
-      }
-
-      a {
-        &, &:visited {
-          color: var(--color-links-darker) !important;
-        }
-
-        &:hover, &:active {
-          color: var(--color-links-darker-hover) !important;
-        }
       }
     }
   }

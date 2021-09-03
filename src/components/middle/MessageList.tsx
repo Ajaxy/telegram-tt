@@ -481,7 +481,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           </span>
         </div>
       ) : botDescription ? (
-        <div className="empty rich"><span>{renderText(lang(botDescription), ['br', 'emoji', 'links'])}</span></div>
+        <div className="empty"><span>{renderText(lang(botDescription), ['br', 'emoji', 'links'])}</span></div>
       ) : shouldRenderGreeting ? (
         <ContactGreeting userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated) ? (
