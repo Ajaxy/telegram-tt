@@ -20,6 +20,7 @@ import './ScrollDownButton.scss';
 type OwnProps = {
   isShown: boolean;
   canPost?: boolean;
+  withExtraShift?: boolean;
 };
 
 type StateProps = {
@@ -36,6 +37,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   canPost,
   messageListType,
   unreadCount,
+  withExtraShift,
   focusNextReply,
 }) => {
   const lang = useLang();
@@ -65,6 +67,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
     'ScrollDownButton',
     isShown && 'revealed',
     !canPost && 'no-composer',
+    withExtraShift && 'with-extra-shift',
   );
 
   return (

@@ -270,6 +270,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
 
+  const isMessagingDisabled = Boolean(!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason);
+
   return (
     <div
       id="MiddleColumn"
@@ -348,7 +350,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         </Button>
                       </div>
                     )}
-                    {!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason && (
+                    {isMessagingDisabled && (
                       <div className={messagingDisabledClassName}>
                         <div className="messaging-disabled-inner">
                           <span>
@@ -370,6 +372,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
             <ScrollDownButton
               isShown={renderingIsFabShown}
               canPost={renderingCanPost}
+              withExtraShift={isMessagingDisabled || isSelectModeActive || isPinnedMessageList}
             />
           </div>
           {IS_SINGLE_COLUMN_LAYOUT && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}

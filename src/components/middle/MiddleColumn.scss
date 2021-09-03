@@ -302,6 +302,7 @@
 .messaging-disabled {
   .mask-image-disabled & {
     box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
+    border-radius: var(--border-radius-messages);
   }
 }
 
