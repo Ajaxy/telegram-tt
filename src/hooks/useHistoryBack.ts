@@ -124,18 +124,20 @@ export default function useHistoryBack(
     } else {
       const prev = prevHashes || [];
       if (prev.length < hashes.length) {
-        const index = ++historyState.currentIndex;
-        historyState.currentIndexes.push(index);
+        setTimeout(() => {
+          const index = ++historyState.currentIndex;
+          historyState.currentIndexes.push(index);
 
-        window.history.pushState({
-          index,
-          state: currentState,
-        }, '', `#${hashes[hashes.length - 1]}`);
+          window.history.pushState({
+            index,
+            state: currentState,
+          }, '', `#${hashes[hashes.length - 1]}`);
 
-        indexHashRef.current.push({
-          index,
-          hash: hashes[hashes.length - 1],
-        });
+          indexHashRef.current.push({
+            index,
+            hash: hashes[hashes.length - 1],
+          });
+        }, 0);
       } else {
         const delta = prev.length - hashes.length;
         if (isHashChangedFromEvent.current) {
