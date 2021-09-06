@@ -17,7 +17,9 @@ import {
   ApiChat,
   ApiSticker,
 } from '../../../api/types';
-import { FocusDirection, IAlbum, ISettings } from '../../../types';
+import {
+  AudioOrigin, FocusDirection, IAlbum, ISettings,
+} from '../../../types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
@@ -547,6 +549,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Audio
             theme={theme}
             message={message}
+            origin={AudioOrigin.Inline}
             uploadProgress={uploadProgress}
             lastSyncTime={lastSyncTime}
             isSelectable={isInDocumentGroup}

@@ -132,14 +132,18 @@ export function formatMediaDateTime(lang: LangFn, datetime: number | Date) {
   return `${formatHumanDate(lang, date, true)}, ${formatTime(date)}`;
 }
 
-export function formatMediaDuration(duration: number) {
+export function formatMediaDuration(duration: number, maxValue?: number) {
   const hours = Math.floor(duration / 3600);
   const minutes = Math.floor((duration % 3600) / 60);
   const seconds = Math.floor(duration % 3600 % 60);
 
+  const maxHours = maxValue ? Math.floor(maxValue / 3600) : 0;
+  const maxMinutes = maxValue ? Math.floor((maxValue % 3600) / 60) : 0;
   let string = '';
-  if (hours > 0) {
+  if (hours > 0 || maxHours > 0) {
     string += `${String(hours).padStart(2, '0')}:`;
+    string += `${String(minutes).padStart(2, '0')}:`;
+  } else if (maxMinutes >= 10) {
     string += `${String(minutes).padStart(2, '0')}:`;
   } else {
     string += `${String(minutes)}:`;

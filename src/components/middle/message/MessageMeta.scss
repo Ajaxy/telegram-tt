@@ -20,11 +20,11 @@
   }
 
   .message-time {
-    margin-right: .1875rem;
+    margin-inline-end: .1875rem;
   }
 
   .message-views {
-    margin-left: .1875rem;
+    margin-inline-start: .1875rem;
   }
 
   .message-signature {
@@ -34,8 +34,8 @@
   }
 
   .icon-channelviews {
-    margin-left: 0.125rem;
-    margin-right: 0.375rem;
+    margin-inline-start: 0.125rem;
+    margin-inline-end: 0.375rem;
     font-size: 1.125rem;
     position: relative;
     top: -0.0625rem;

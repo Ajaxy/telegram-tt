@@ -101,7 +101,8 @@
     right: 1rem;
     top: 0;
     height: 1rem;
-
+    touch-action: none;
+    cursor: pointer;
 
     &-track {
       position: absolute;
@@ -141,19 +142,6 @@
         right: 0;
         top: 50%;
         transform: translate(.325rem, -50%);
-      }
-    }
-
-    &-input {
-      width: 100%;
-      opacity: 0;
-      margin: 0;
-      padding: 0;
-      cursor: pointer;
-      overflow: hidden;
-
-      &::-webkit-slider-thumb {
-        margin-top: -2rem;
       }
     }
   }

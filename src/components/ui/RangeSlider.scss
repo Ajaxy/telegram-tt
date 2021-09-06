@@ -96,6 +96,10 @@
     &::-webkit-slider-thumb {
       -webkit-appearance: none;
     }
+
+    &::-moz-slider-thumb {
+      -moz-appearance: none;
+    }
   }
 
   // Apply custom styles

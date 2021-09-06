@@ -68,6 +68,7 @@ export interface ApiAudio {
   duration: number;
   performer?: string;
   title?: string;
+  thumbnailSizes?: ApiPhotoSize[];
 }
 
 export interface ApiVoice {

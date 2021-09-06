@@ -159,7 +159,7 @@ addReducer('closeMediaViewer', (global) => {
 
 addReducer('openAudioPlayer', (global, actions, payload) => {
   const {
-    chatId, threadId, messageId,
+    chatId, threadId, messageId, origin,
   } = payload!;
 
   return {
@@ -168,6 +168,7 @@ addReducer('openAudioPlayer', (global, actions, payload) => {
       chatId,
       threadId,
       messageId,
+      origin,
     },
   };
 });

@@ -30,7 +30,8 @@
   height: 3.5rem;
   border: 0;
   border-radius: var(--border-radius-default);
-  background: transparent;
+  background-color: transparent;
+  background-size: cover;
   padding: 0.625rem;
   color: white;
   line-height: 1.2;
@@ -63,36 +64,36 @@
   }
 
   &.primary {
-    background: var(--color-primary);
+    background-color: var(--color-primary);
     color: var(--color-white);
     --ripple-color: rgba(0, 0, 0, .08);
 
     @include active-styles() {
-      background: var(--color-primary-shade);
+      background-color: var(--color-primary-shade);
     }
 
     @include no-ripple-styles() {
-      background: var(--color-primary-shade-darker);
+      background-color: var(--color-primary-shade-darker);
     }
   }
 
   &.secondary {
-    background: var(--color-background);
+    background-color: var(--color-background);
     color: rgba(var(--color-text-secondary-rgb), 0.75);
     --ripple-color: rgba(0, 0, 0, .08);
 
     @include active-styles() {
-      background: var(--color-primary);
+      background-color: var(--color-primary);
       color: white;
     }
 
     @include no-ripple-styles() {
-      background: var(--color-primary-shade);
+      background-color: var(--color-primary-shade);
     }
   }
 
   &.gray {
-    background: var(--color-background);
+    background-color: var(--color-background);
     color: var(--color-text-secondary);
     --ripple-color: rgba(0, 0, 0, .08);
 
@@ -101,54 +102,54 @@
     }
 
     @include no-ripple-styles() {
-      background: var(--color-chat-hover);
+      background-color: var(--color-chat-hover);
     }
   }
 
   &.danger {
-    background: var(--color-background);
+    background-color: var(--color-background);
     color: var(--color-error);
     --ripple-color: rgba(var(--color-error-rgb), .16);
 
     @include active-styles() {
-      background: var(--color-error);
+      background-color: var(--color-error);
       color: var(--color-white);
     }
 
     @include no-ripple-styles() {
-      background: var(--color-error-shade);
+      background-color: var(--color-error-shade);
     }
   }
 
   &.text {
-    background: none;
+    background-color: transparent;
 
     &.primary {
       color: var(--color-primary);
-      background: none;
+      background-color: transparent;
 
       @include active-styles() {
-        background: rgba(var(--color-primary-shade-rgb), .08);
+        background-color: rgba(var(--color-primary-shade-rgb), .08);
       }
 
       @include no-ripple-styles() {
-        background: rgba(var(--color-primary-shade-rgb), .16);
+        background-color: rgba(var(--color-primary-shade-rgb), .16);
       }
     }
 
     &.secondary {
-      background: none;
+      background-color: transparent;
       color: var(--color-text-secondary);
     }
 
     &.danger {
       @include active-styles() {
-        background: rgba(var(--color-error-rgb), .08);
+        background-color: rgba(var(--color-error-rgb), .08);
         color: var(--color-error);
       }
 
       @include no-ripple-styles() {
-        background: rgba(var(--color-error-rgb), .16);
+        background-color: rgba(var(--color-error-rgb), .16);
       }
     }
   }
@@ -315,5 +316,14 @@
 
   .emoji {
     vertical-align: -3px;
+  }
+
+  .backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }

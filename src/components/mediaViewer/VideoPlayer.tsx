@@ -118,10 +118,8 @@ const VideoPlayer: FC<OwnProps> = ({
     }
   }, [exitFullscreen, isFullscreen, setFullscreen]);
 
-  const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-
-    videoRef.current!.currentTime = (Number(e.target.value) * videoRef.current!.duration) / 100;
+  const handleSeek = useCallback((position: number) => {
+    videoRef.current!.currentTime = position;
   }, []);
 
   const toggleControls = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
