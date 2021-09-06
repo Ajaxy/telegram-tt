@@ -250,7 +250,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (chatId && lastSyncTime && threadId === MAIN_THREAD_ID && isReady) {
-      loadScheduledHistory();
+      loadScheduledHistory({ chatId });
     }
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
