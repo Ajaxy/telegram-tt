@@ -11,7 +11,7 @@ import {
 } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import {
-  NewChatMembersProgress, ISettings, MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType,
+  NewChatMembersProgress, ISettings, MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType, AudioOrigin,
 } from '../../types';
 
 import {
@@ -190,7 +190,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [profileId, openMediaViewer]);
 
   const handlePlayAudio = useCallback((messageId: number) => {
-    openAudioPlayer({ chatId: profileId, messageId });
+    openAudioPlayer({ chatId: profileId, messageId, origin: AudioOrigin.SharedMedia });
   }, [profileId, openAudioPlayer]);
 
   const handleMemberClick = useCallback((id: number) => {
@@ -325,7 +325,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               key={id}
               theme={theme}
               message={chatMessages[id]}
-              target="sharedMedia"
+              origin={AudioOrigin.SharedMedia}
               date={chatMessages[id].date}
               lastSyncTime={lastSyncTime}
               className="scroll-item"

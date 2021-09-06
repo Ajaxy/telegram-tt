@@ -12,13 +12,15 @@ const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of T
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 const TRUNCATED_SUMMARY_LENGTH = 80;
 
-export function getMessageKey(message: ApiMessage) {
+export type MessageKey = string; // `msg${number}-${number}`;
+
+export function getMessageKey(message: ApiMessage): MessageKey {
   const { chatId, id } = message;
 
   return `msg${chatId}-${id}`;
 }
 
-export function parseMessageKey(key: string) {
+export function parseMessageKey(key: MessageKey) {
   const match = key.match(/^msg(-?\d+)-(\d+)/)!;
 
   return { chatId: Number(match[1]), messageId: Number(match[2]) };

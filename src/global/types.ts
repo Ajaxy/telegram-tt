@@ -44,6 +44,7 @@ import {
   EmojiKeywords,
   InlineBotSettings,
   NewChatMembersProgress,
+  AudioOrigin,
 } from '../types';
 
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
@@ -320,6 +321,8 @@ export type GlobalState = {
   audioPlayer: {
     chatId?: number;
     messageId?: number;
+    threadId?: number;
+    origin?: AudioOrigin;
   };
 
   topPeers: {

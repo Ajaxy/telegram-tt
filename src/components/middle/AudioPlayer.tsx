@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
+import { AudioOrigin } from '../../types';
 import { GlobalActions } from '../../global/types';
 import {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
@@ -9,14 +10,17 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
 import {
-  getMediaDuration, getMessageAudio, getMessageKey, getMessageMediaHash, getSenderTitle,
+  getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle,
 } from '../../modules/helpers';
-import { selectSender } from '../../modules/selectors';
+import { selectChat, selectSender } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
+import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
+import { makeTrackId } from '../../util/audioPlayer';
+import { clearMediaSession } from '../../util/mediaSession';
 
 import RippleEffect from '../ui/RippleEffect';
 import Button from '../ui/Button';
@@ -25,25 +29,40 @@ import './AudioPlayer.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  origin?: AudioOrigin;
   className?: string;
   noUi?: boolean;
 };
 
 type StateProps = {
   sender?: ApiChat | ApiUser;
+  chat?: ApiChat;
 };
 
 type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer'>;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, className, noUi, sender, focusMessage, closeAudioPlayer,
+  message, origin = AudioOrigin.Inline, className, noUi, sender, focusMessage, closeAudioPlayer, chat,
 }) => {
   const lang = useLang();
-
+  const { audio, voice } = getMessageContent(message);
+  const isVoice = Boolean(voice);
   const senderName = sender ? getSenderTitle(lang, sender) : undefined;
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
-  const { playPause, isPlaying } = useAudioPlayer(
-    getMessageKey(message), getMediaDuration(message)!, mediaData, undefined, undefined, true,
+  const mediaMetadata = useMessageMediaMetadata(message, sender, chat);
+  const { playPause, stop, isPlaying } = useAudioPlayer(
+    makeTrackId(message),
+    getMediaDuration(message)!,
+    isVoice ? 'voice' : 'audio',
+    origin,
+    mediaData,
+    undefined,
+    mediaMetadata,
+    undefined,
+    true,
+    undefined,
+    undefined,
+    true,
   );
 
   const handleClick = useCallback(() => {
@@ -55,13 +74,13 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
       playPause();
     }
     closeAudioPlayer();
-  }, [closeAudioPlayer, isPlaying, playPause]);
+    clearMediaSession();
+    stop();
+  }, [closeAudioPlayer, isPlaying, playPause, stop]);
 
   if (noUi) {
     return undefined;
   }
-
-  const audio = getMessageAudio(message);
 
   return (
     <div className={buildClassName('AudioPlayer', className)} dir={lang.isRtl ? 'rtl' : undefined}>
@@ -122,8 +141,12 @@ function renderVoice(subtitle: string, senderName?: string) {
 export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const sender = selectSender(global, message);
+    const chat = selectChat(global, message.chatId);
 
-    return { sender };
+    return {
+      sender,
+      chat,
+    };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer']),
 )(AudioPlayer);

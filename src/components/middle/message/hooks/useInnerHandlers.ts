@@ -2,7 +2,7 @@ import React, { useCallback } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 
 import { isChatPrivate } from '../../../../modules/helpers';
-import { IAlbum, MediaViewerOrigin } from '../../../../types';
+import { AudioOrigin, IAlbum, MediaViewerOrigin } from '../../../../types';
 import {
   ApiChat, ApiMessage, ApiUser, MAIN_THREAD_ID,
 } from '../../../../api/types';
@@ -77,7 +77,7 @@ export default function useInnerHandlers(
   }, [chatId, threadId, messageId, openMediaViewer, isScheduled]);
 
   const handleAudioPlay = useCallback((): void => {
-    openAudioPlayer({ chatId, messageId });
+    openAudioPlayer({ chatId, messageId, origin: AudioOrigin.Inline });
   }, [chatId, messageId, openAudioPlayer]);
 
   const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {

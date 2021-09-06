@@ -27,7 +27,7 @@ import { DELETED_COMMENTS_CHANNEL_ID, LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIO
 import { pick } from '../../../util/iteratees';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { buildStickerFromDocument } from './symbols';
-import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
+import { buildApiPhoto, buildApiPhotoSize, buildApiThumbnailFromStripped } from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId } from '../helpers';
@@ -348,8 +348,13 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     return undefined;
   }
 
+  const thumbnailSizes = media.document.thumbs && media.document.thumbs
+    .filter((thumb): thumb is GramJs.PhotoSize => thumb instanceof GramJs.PhotoSize)
+    .map((thumb) => buildApiPhotoSize(thumb));
+
   return {
     fileName: getFilenameFromDocument(media.document, 'audio'),
+    thumbnailSizes,
     ...pick(media.document, ['size', 'mimeType']),
     ...pick(audioAttribute, ['duration', 'performer', 'title']),
   };

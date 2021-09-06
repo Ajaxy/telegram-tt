@@ -1,9 +1,12 @@
-import React, { FC, useState, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, useRef, useCallback,
+} from '../../lib/teact/teact';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import formatFileSize from './helpers/formatFileSize';
 import useLang from '../../hooks/useLang';
+import { captureEvents } from '../../util/captureEvents';
 
 import Button from '../ui/Button';
 
@@ -21,10 +24,8 @@ type IProps = {
   isFullscreen: boolean;
   onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onSeek: OnChangeHandler;
+  onSeek: (position: number) => void;
 };
-
-type OnChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => void;
 
 const stopEvent = (e: React.MouseEvent<HTMLElement>) => {
   e.stopPropagation();
@@ -47,6 +48,9 @@ const VideoPlayerControls: FC<IProps> = ({
   onSeek,
 }) => {
   const [isVisible, setVisibility] = useState(true);
+  // eslint-disable-next-line no-null/no-null
+  const seekerRef = useRef<HTMLDivElement>(null);
+  const isSeeking = useRef<boolean>(false);
 
   useEffect(() => {
     if (isForceVisible) {
@@ -86,13 +90,40 @@ const VideoPlayerControls: FC<IProps> = ({
 
   const lang = useLang();
 
+  const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
+    if (isSeeking.current && seekerRef.current) {
+      const { width, left } = seekerRef.current.getBoundingClientRect();
+      const clientX = e instanceof MouseEvent ? e.clientX : e.targetTouches[0].clientX;
+      onSeek(Math.max(Math.min(duration * ((clientX - left) / width), duration), 0));
+    }
+  }, [duration, onSeek]);
+
+  const handleStartSeek = useCallback((e: MouseEvent | TouchEvent) => {
+    isSeeking.current = true;
+    handleSeek(e);
+  }, [handleSeek]);
+
+  const handleStopSeek = useCallback(() => {
+    isSeeking.current = false;
+  }, []);
+
+  useEffect(() => {
+    if (!seekerRef.current || !isVisible) return undefined;
+    return captureEvents(seekerRef.current, {
+      onCapture: handleStartSeek,
+      onRelease: handleStopSeek,
+      onClick: handleStopSeek,
+      onDrag: handleSeek,
+    });
+  }, [isVisible, handleStartSeek, handleSeek, handleStopSeek]);
+
   if (!isVisible && !isForceVisible) {
     return undefined;
   }
 
   return (
     <div className={`VideoPlayerControls ${isForceMobileVersion ? 'mobile' : ''}`} onClick={stopEvent}>
-      {renderSeekLine(currentTime, duration, bufferedProgress, onSeek)}
+      {renderSeekLine(currentTime, duration, bufferedProgress, seekerRef)}
       <Button
         ariaLabel={lang('AccActionPlay')}
         size="tiny"
@@ -136,12 +167,14 @@ function renderFileSize(downloadedPercent: number, totalSize: number) {
   );
 }
 
-function renderSeekLine(currentTime: number, duration: number, bufferedProgress: number, onSeek: OnChangeHandler) {
+function renderSeekLine(
+  currentTime: number, duration: number, bufferedProgress: number, seekerRef: React.RefObject<HTMLDivElement>,
+) {
   const percentagePlayed = (currentTime / duration) * 100;
   const percentageBuffered = bufferedProgress * 100;
 
   return (
-    <div className="player-seekline">
+    <div className="player-seekline" ref={seekerRef}>
       <div className="player-seekline-track">
         <div
           className="player-seekline-buffered"
@@ -152,15 +185,6 @@ function renderSeekLine(currentTime: number, duration: number, bufferedProgress:
           className="player-seekline-played"
           // @ts-ignore teact feature
           style={`width: ${percentagePlayed || 0}%`}
-        />
-        <input
-          min="0"
-          max="100"
-          step={0.01}
-          type="range"
-          onInput={onSeek}
-          className="player-seekline-input"
-          value={percentagePlayed || 0}
         />
       </div>
     </div>

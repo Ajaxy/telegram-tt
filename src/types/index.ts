@@ -237,6 +237,12 @@ export enum MediaViewerOrigin {
   SearchResult,
 }
 
+export enum AudioOrigin {
+  Inline,
+  SharedMedia,
+  Search,
+}
+
 export enum ChatCreationProgress {
   Idle,
   InProgress,

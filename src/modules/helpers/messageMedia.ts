@@ -203,7 +203,7 @@ export function getMessageMediaHash(
     switch (target) {
       case 'micro':
       case 'pictogram':
-        return undefined;
+        return getAudioHasCover(audio) ? `${base}?size=m` : undefined;
       case 'download':
         return `${base}?download`;
       default:
@@ -230,6 +230,10 @@ function getVideoOrAudioBaseHash(media: ApiAudio | ApiVideo, base: string) {
   }
 
   return base;
+}
+
+export function getAudioHasCover(media: ApiAudio) {
+  return media.thumbnailSizes && media.thumbnailSizes.length > 0;
 }
 
 export function getMessageMediaFormat(

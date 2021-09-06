@@ -65,7 +65,7 @@
     justify-content: center;
     flex-direction: column;
     flex-shrink: 1;
-    padding: .25rem .5rem;
+    padding: 0 .5rem;
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -85,22 +85,20 @@
       font-weight: 500;
       font-size: 0.875rem !important;
       line-height: 1rem;
-      height: 1rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
 
       body.is-ios & {
         font-size: .9375rem !important;
-        line-height: .8125rem;
+        line-height: 1.125rem;
       }
     }
 
     .subtitle {
       font-size: 0.85rem !important;
       color: var(--color-text-secondary);
-      line-height: 1.125rem;
-      height: 1.125rem;
+      line-height: 0.85rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -108,6 +106,7 @@
 
       body.is-ios & {
         font-size: .9375rem !important;
+        line-height: 1.125rem;
       }
     }
   }

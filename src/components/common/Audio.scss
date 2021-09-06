@@ -1,9 +1,15 @@
 .Audio {
   display: flex;
   align-items: flex-start;
+  position: relative;
 
-  &.media-inner {
-    overflow: visible;
+  .media-loading {
+    position: absolute;
+    pointer-events: none;
+
+    &.interactive {
+      pointer-events: all;
+    }
   }
 
   &.own {
@@ -70,21 +76,13 @@
     }
   }
 
-  .media-loading {
-    pointer-events: none;
-
-    .interactive {
-      pointer-events: auto;
-    }
-  }
-
   .download-button {
     position: absolute;
-    width: 1.125rem !important;
-    height: 1.125rem !important;
+    width: 1.3125rem !important;
+    height: 1.3125rem !important;
     padding: 0;
-    left: 1.5rem;
-    top: 1.5rem;
+    left: 1.8rem;
+    top: 1.8rem;
     border: .125rem solid var(--background-color);
     z-index: 1;
 
@@ -115,6 +113,7 @@
     font-weight: 500;
     margin: 0;
     line-height: 1.25;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -123,12 +122,30 @@
     margin: .25rem 0 0;
     font-size: .875rem;
     color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
 
-    span {
-      margin-left: 0.25rem;
-      font-size: 1.5rem;
-      line-height: .875rem;
-      vertical-align: middle;
+    .unread {
+      display: block;
+      position: relative;
+      margin-left: 0.5rem;
+
+      &::before {
+        content: "";
+        display: block;
+        position: absolute;
+
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 50%;
+
+        background-color: var(--color-text-secondary);
+      }
     }
   }
 
@@ -139,41 +156,69 @@
   .waveform {
     cursor: pointer;
     margin-left: 1px;
+    touch-action: none;
   }
 
   .meta,
   .performer,
   .date {
     font-size: .875rem;
-    line-height: 1;
     color: var(--color-text-secondary);
     margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .duration {
-    margin: .1875rem 0 0;
     font-size: .875rem;
     color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    margin-top: 0.125rem;
+    padding-inline-end: 0.5rem;
+
+    & > span {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .performer {
+      flex-shrink: 0;
+    }
+
+    .duration.with-seekline {
+      margin-inline-end: 0.625rem;
+    }
+
+    .bullet {
+      margin: 0 0.25rem;
+      flex-shrink: 0;
+    }
   }
 
   .seekline {
-    width: calc(100% - 2px);
-    padding-left: 6px;
-    margin-bottom: .3125rem;
-    height: 12px;
+    flex-grow: 1;
+    height: 1.25rem;
     position: relative;
-    margin-left: -6px;
-    top: 1px;
+    top: 3px;
     cursor: pointer;
+    touch-action: none;
 
     &::before {
       content: '';
       position: absolute;
       width: 100%;
-      left: 6px;
       top: 6px;
       height: 2px;
       background-color: var(--color-interactive-inactive);
@@ -188,7 +233,6 @@
     overflow: hidden;
     width: 100%;
     top: 6px;
-    left: 6px;
 
     i {
       position: absolute;
@@ -220,7 +264,7 @@
         content: '';
         position: absolute;
         top: -6px;
-        right: -12px;
+        right: -6px;
         width: 12px;
         height: 12px;
         border-radius: 6px;
@@ -230,10 +274,6 @@
   }
 
   &.bigger {
-    .content {
-      margin-top: .1875rem;
-    }
-
     .title {
       white-space: nowrap;
       overflow: hidden;
@@ -242,15 +282,13 @@
       line-height: 1.5rem;
     }
 
-    .meta,
+    .meta {
+      height: 1.25rem;
+    }
+
     .performer,
     .date {
       line-height: 1.0625rem;
-    }
-
-    .seekline {
-      top: 2px;
-      margin-bottom: .5rem;
     }
 
     .duration {
@@ -276,6 +314,10 @@
   }
 
   &[dir=rtl] {
+    &:last-child {
+      margin-bottom: 0.625rem;
+    }
+
     .toggle-play {
       margin-left: .5rem;
       margin-right: 0;
@@ -286,6 +328,10 @@
       }
     }
 
+    .meta.duration.with-seekline {
+      margin-inline-start: 0.625rem;
+    }
+
     .content,
     .duration {
       text-align: right;
@@ -293,7 +339,11 @@
 
     .download-button {
       left: auto;
-      right: 1.5rem;
+      right: 2rem;
     }
   }
+}
+
+.has-replies .Audio[dir=rtl] {
+  margin-bottom: 1.625rem;
 }
