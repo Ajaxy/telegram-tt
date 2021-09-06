@@ -558,8 +558,9 @@ addReducer('forwardMessages', (global) => {
   }
 });
 
-addReducer('loadScheduledHistory', (global) => {
-  const chat = selectCurrentChat(global);
+addReducer('loadScheduledHistory', (global, actions, payload) => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
