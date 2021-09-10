@@ -467,7 +467,7 @@ export type ActionTypes = (
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
-  'reportMessages' | 'focusNextReply' |
+  'reportMessages' | 'focusNextReply' | 'openChatByInvite' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result

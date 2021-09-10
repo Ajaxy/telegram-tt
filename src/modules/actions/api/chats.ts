@@ -15,7 +15,7 @@ import {
   RE_TME_INVITE_LINK,
   RE_TME_LINK,
   TIPS_USERNAME,
-  LOCALIZED_TIPS,
+  LOCALIZED_TIPS, RE_TG_LINK, RE_TME_ADDSTICKERS_LINK,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -30,7 +30,6 @@ import {
 } from '../../reducers';
 import {
   selectChat,
-  selectCurrentChat,
   selectUser,
   selectChatListType,
   selectIsChatPinned,
@@ -39,12 +38,14 @@ import {
   selectChatByUsername,
   selectThreadTopMessageId,
   selectCurrentMessageList,
+  selectThreadInfo,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
   isChatSummaryOnly, isChatArchived, prepareChatList, isChatBasicGroup,
 } from '../../helpers';
+import { processDeepLink } from '../../../util/deeplink';
 
 const TOP_CHATS_PRELOAD_PAUSE = 100;
 // We expect this ID does not exist
@@ -432,33 +433,56 @@ addReducer('toggleChatUnread', (global, actions, payload) => {
   }
 });
 
+addReducer('openChatByInvite', (global, actions, payload) => {
+  const { hash } = payload!;
+
+  (async () => {
+    const result = await callApi('openChatByInvite', hash);
+    if (!result) {
+      return;
+    }
+
+    actions.openChat({ id: result.chatId });
+  })();
+});
+
 addReducer('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
-  let match = RE_TME_INVITE_LINK.exec(url);
-
-  if (match) {
-    const hash = match[1];
-
-    (async () => {
-      const result = await callApi('openChatByInvite', hash);
-      if (!result) {
-        return;
-      }
-
-      actions.openChat({ id: result.chatId });
-    })();
+  const stickersMatch = RE_TME_ADDSTICKERS_LINK.exec(url);
+  if (stickersMatch) {
+    actions.openStickerSetShortName({
+      stickerSetShortName: stickersMatch[1],
+    });
+  } else if (url.match(RE_TG_LINK)) {
+    processDeepLink(url.match(RE_TG_LINK)[0]);
   } else {
-    match = RE_TME_LINK.exec(url)!;
+    let match = RE_TME_INVITE_LINK.exec(url);
 
-    const username = match[1];
-    const chatOrChannelPostId = match[2] ? Number(match[2]) : undefined;
-    const messageId = match[3] ? Number(match[3]) : undefined;
+    if (match) {
+      const hash = match[1];
 
-    // Open message in private chat
-    if (username === 'c' && chatOrChannelPostId && messageId) {
-      actions.focusMessage({ chatId: -chatOrChannelPostId, messageId });
+      actions.openChatByInvite({ hash });
     } else {
-      void openChatByUsername(actions, username, chatOrChannelPostId);
+      match = RE_TME_LINK.exec(url)!;
+
+      const username = match[1];
+      const chatOrChannelPostId = match[2] ? Number(match[2]) : undefined;
+      const messageId = match[3] ? Number(match[3]) : undefined;
+      const commentId = match[4] === 'comment' && match[5] ? Number(match[5]) : undefined;
+
+      // Open message in private group
+      if (username === 'c' && chatOrChannelPostId && messageId) {
+        actions.focusMessage({
+          chatId: -chatOrChannelPostId,
+          messageId,
+        });
+      } else {
+        actions.openChatByUsername({
+          username,
+          messageId,
+          commentId,
+        });
+      }
     }
   }
 });
@@ -476,9 +500,18 @@ addReducer('acceptInviteConfirmation', (global, actions, payload) => {
 });
 
 addReducer('openChatByUsername', (global, actions, payload) => {
-  const { username } = payload!;
+  const { username, messageId, commentId } = payload!;
 
-  void openChatByUsername(actions, username);
+  (async () => {
+    if (!commentId) {
+      await openChatByUsername(actions, username, messageId);
+      return;
+    }
+
+    if (!messageId) return;
+
+    await openCommentsByUsername(actions, username, messageId, commentId);
+  })();
 });
 
 addReducer('togglePreHistoryHidden', (global, actions, payload) => {
@@ -1027,42 +1060,79 @@ async function deleteChatFolder(id: number) {
   await callApi('deleteChatFolder', id);
 }
 
+async function fetchChatByUsername(
+  username: string,
+) {
+  const global = getGlobal();
+  const localChat = selectChatByUsername(global, username);
+  if (localChat && !localChat.isMin) {
+    return localChat;
+  }
+
+  const chat = await callApi('getChatByUsername', username);
+  if (!chat) {
+    return undefined;
+  }
+
+  setGlobal(updateChat(getGlobal(), chat.id, chat));
+
+  return chat;
+}
+
 async function openChatByUsername(
   actions: GlobalActions,
   username: string,
   channelPostId?: number,
 ) {
-  const global = getGlobal();
-  const localChat = selectChatByUsername(global, username);
-  if (localChat && !localChat.isMin) {
-    if (channelPostId) {
-      actions.focusMessage({ chatId: localChat.id, messageId: channelPostId });
-    } else {
-      actions.openChat({ id: localChat.id });
-    }
-    return;
-  }
-
-  const previousChat = selectCurrentChat(global);
   // Open temporary empty chat to make the click response feel faster
   actions.openChat({ id: TMP_CHAT_ID });
 
-  const chat = await callApi('getChatByUsername', username);
+  const chat = await fetchChatByUsername(username);
+
   if (!chat) {
-    if (previousChat) {
-      actions.openChat({ id: previousChat.id });
-    }
-
+    actions.openPreviousChat();
     actions.showNotification({ message: 'User does not exist' });
-
     return;
   }
-
-  setGlobal(updateChat(getGlobal(), chat.id, chat));
 
   if (channelPostId) {
     actions.focusMessage({ chatId: chat.id, messageId: channelPostId });
   } else {
     actions.openChat({ id: chat.id });
   }
+}
+
+async function openCommentsByUsername(
+  actions: GlobalActions,
+  username: string,
+  messageId: number,
+  commentId: number,
+) {
+  actions.openChat({ id: TMP_CHAT_ID });
+
+  const chat = await fetchChatByUsername(username);
+
+  if (!chat) return;
+
+  const global = getGlobal();
+
+  const threadInfo = selectThreadInfo(global, chat.id, messageId);
+  let discussionChatId: number | undefined;
+
+  if (!threadInfo) {
+    const result = await callApi('requestThreadInfoUpdate', { chat, threadId: messageId });
+    if (!result) return;
+
+    discussionChatId = result.discussionChatId;
+  } else {
+    discussionChatId = threadInfo.chatId;
+  }
+
+  if (!discussionChatId) return;
+
+  actions.focusMessage({
+    chatId: discussionChatId,
+    threadId: messageId,
+    messageId: Number(commentId),
+  });
 }
