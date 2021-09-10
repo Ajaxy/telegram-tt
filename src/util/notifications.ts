@@ -332,7 +332,7 @@ export async function showNewMessageNotification({
   const icon = await getAvatar(chat);
 
   if (checkIfPushSupported()) {
-    if (navigator.serviceWorker.controller) {
+    if (navigator.serviceWorker?.controller) {
       // notify service worker about new message notification
       navigator.serviceWorker.controller.postMessage({
         type: 'newMessageNotification',
@@ -379,7 +379,7 @@ export async function showNewMessageNotification({
 }
 
 export function closeMessageNotifications(payload: { chatId: number; lastReadInboxMessageId?: number }) {
-  if (IS_TEST || !navigator.serviceWorker.controller) return;
+  if (IS_TEST || !navigator.serviceWorker?.controller) return;
   navigator.serviceWorker.controller.postMessage({
     type: 'closeMessageNotifications',
     payload,
@@ -388,7 +388,7 @@ export function closeMessageNotifications(payload: { chatId: number; lastReadInb
 
 // Notify service worker that client is fully loaded
 export function notifyClientReady() {
-  if (!navigator.serviceWorker.controller) return;
+  if (!navigator.serviceWorker?.controller) return;
   navigator.serviceWorker.controller.postMessage({
     type: 'clientReady',
   });
