@@ -1057,7 +1057,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         selectedAt={scheduledDefaultDate.getTime()}
         maxAt={getDayStartAt(scheduledMaxDate)}
         isFutureMode
-        secondButtonLabel={canScheduleUntilOnline ? 'Send When Online' : undefined}
+        secondButtonLabel={canScheduleUntilOnline ? lang('Schedule.SendWhenOnline') : undefined}
         onClose={handleCloseCalendar}
         onSubmit={handleMessageSchedule}
         onSecondButtonClick={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
