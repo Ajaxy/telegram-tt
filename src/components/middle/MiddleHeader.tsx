@@ -65,6 +65,7 @@ import AudioPlayer from './AudioPlayer';
 import './MiddleHeader.scss';
 
 const ANIMATION_DURATION = 350;
+const BACK_BUTTON_INACTIVE_TIME = 450;
 
 type OwnProps = {
   chatId: number;
@@ -132,6 +133,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   exitMessageSelectMode,
 }) => {
   const lang = useLang();
+  const isBackButtonActive = useRef(true);
 
   const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[pinnedMessageIndex] : pinnedMessageIds;
@@ -184,6 +186,10 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openChat, chatId]);
 
   const handleBackClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (!isBackButtonActive.current) return;
+
+    // Workaround for missing UI when quickly clicking the Back button
+    isBackButtonActive.current = false;
     if (IS_SINGLE_COLUMN_LAYOUT) {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID);
       if (messageInput) {
@@ -208,6 +214,9 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     openPreviousChat();
+    setTimeout(() => {
+      isBackButtonActive.current = true;
+    }, BACK_BUTTON_INACTIVE_TIME);
   }, [
     threadId, messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
     openChat, toggleLeftColumn, exitMessageSelectMode,
