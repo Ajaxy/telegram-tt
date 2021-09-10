@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -7,7 +7,6 @@ import { GlobalActions, MessageListType } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 import { IAlbum, IAnchorPosition } from '../../../types';
 import { selectAllowedMessageActions, selectCurrentMessageList } from '../../../modules/selectors';
-import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { pick } from '../../../util/iteratees';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
@@ -205,12 +204,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     copyTextToClipboard(`https://t.me/${chatUsername || `c/${Math.abs(message.chatId)}`}/${message.id}`);
     closeMenu();
   }, [chatUsername, closeMenu, message.chatId, message.id]);
-
-  useEffect(() => {
-    disableScrolling();
-
-    return enableScrolling;
-  }, []);
 
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 

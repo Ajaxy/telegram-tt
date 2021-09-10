@@ -1,9 +1,12 @@
-import React, { FC, useCallback } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect, useRef,
+} from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
+import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
 
@@ -83,6 +86,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
   onCopyLink,
 }) => {
+  // eslint-disable-next-line no-null/no-null
+  const menuRef = useRef<HTMLDivElement>(null);
   const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined);
 
   const getTriggerElement = useCallback(() => {
@@ -99,7 +104,9 @@ const MessageContextMenu: FC<OwnProps> = ({
     [],
   );
 
-  const { positionX, positionY, style } = useContextMenuPosition(
+  const {
+    positionX, positionY, style, menuStyle, withScroll,
+  } = useContextMenuPosition(
     anchor,
     getTriggerElement,
     getRootElement,
@@ -108,14 +115,22 @@ const MessageContextMenu: FC<OwnProps> = ({
     (document.querySelector('.MiddleHeader') as HTMLElement).offsetHeight,
   );
 
+  useEffect(() => {
+    disableScrolling(withScroll ? menuRef.current : undefined);
+
+    return enableScrolling;
+  }, [withScroll]);
+
   const lang = useLang();
 
   return (
     <Menu
+      ref={menuRef}
       isOpen={isOpen}
       positionX={positionX}
       positionY={positionY}
       style={style}
+      menuStyle={menuStyle}
       className="MessageContextMenu fluid"
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}

@@ -19,6 +19,7 @@ type OwnProps = {
   isOpen: boolean;
   className?: string;
   style?: string;
+  menuStyle?: string;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;
@@ -41,6 +42,7 @@ const Menu: FC<OwnProps> = ({
   isOpen,
   className,
   style,
+  menuStyle,
   children,
   positionX = 'left',
   positionY = 'top',
@@ -116,7 +118,7 @@ const Menu: FC<OwnProps> = ({
         ref={menuRef}
         className={bubbleClassName}
         // @ts-ignore teact feature
-        style={`transform-origin: ${positionY} ${positionX}`}
+        style={`transform-origin: ${positionY} ${positionX};${menuStyle || ''}`}
         onClick={autoClose ? onClose : undefined}
       >
         {children}

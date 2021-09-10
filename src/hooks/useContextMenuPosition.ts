@@ -2,6 +2,7 @@ import { useState, useEffect } from '../lib/teact/teact';
 import { IAnchorPosition } from '../types';
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
+const MENU_POSITION_BOTTOM_MARGIN = 12;
 
 export default (
   anchor: IAnchorPosition | undefined,
@@ -13,7 +14,9 @@ export default (
 ) => {
   const [positionX, setPositionX] = useState<'right' | 'left'>('right');
   const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
+  const [withScroll, setWithScroll] = useState(false);
   const [style, setStyle] = useState('');
+  const [menuStyle, setMenuStyle] = useState('');
 
   useEffect(() => {
     const triggerEl = getTriggerElement();
@@ -52,15 +55,22 @@ export default (
       setPositionY('bottom');
 
       if (y - menuRect.height < rootRect.top + extraTopPadding) {
-        y = rootRect.top + extraTopPadding + menuRect.height;
+        y = rootRect.top + rootRect.height;
       }
     }
 
     const left = horizontalPostition === 'left'
       ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
       : Math.max((x - triggerRect.left), menuRect.width + MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
+    const top = Math.min(
+      rootRect.height - triggerRect.top + triggerRect.height - MENU_POSITION_BOTTOM_MARGIN,
+      y - triggerRect.top,
+    );
+    const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN;
 
-    setStyle(`left: ${left}px; top: ${y - triggerRect.top}px;`);
+    setWithScroll(menuMaxHeight < menuRect.height);
+    setMenuStyle(`max-height: ${menuMaxHeight}px;`);
+    setStyle(`left: ${left}px; top: ${top}px`);
   }, [
     anchor, extraPaddingX, extraTopPadding,
     getMenuElement, getRootElement, getTriggerElement,
@@ -70,5 +80,7 @@ export default (
     positionX,
     positionY,
     style,
+    menuStyle,
+    withScroll,
   };
 };

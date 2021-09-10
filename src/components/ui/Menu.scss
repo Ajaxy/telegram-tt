@@ -25,6 +25,7 @@
     border-radius: var(--border-radius-default);
     min-width: 13.5rem;
     z-index: var(--z-menu-bubble);
+    overscroll-behavior: contain;
 
     transform: scale(0.2);
     transition: opacity .2s cubic-bezier(0.2, 0, 0.2, 1), transform .2s cubic-bezier(0.2, 0, 0.2, 1) !important;
