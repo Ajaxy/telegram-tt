@@ -718,12 +718,12 @@ export async function requestThreadInfoUpdate({
   ]);
 
   if (!topMessageResult || !topMessageResult.messages.length) {
-    return;
+    return undefined;
   }
 
   const discussionChatId = resolveMessageApiChatId(topMessageResult.messages[0]);
   if (!discussionChatId) {
-    return;
+    return undefined;
   }
 
   onUpdate({
@@ -749,6 +749,10 @@ export async function requestThreadInfoUpdate({
       noTopChatsRequest: true,
     });
   });
+
+  return {
+    discussionChatId,
+  };
 }
 
 export async function searchMessagesLocal({

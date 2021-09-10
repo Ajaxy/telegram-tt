@@ -7,8 +7,13 @@ export const createMessageHash = (messageList: MessageList): string => (
     : (messageList.threadId !== -1 ? `_${messageList.threadId}` : ''))
 );
 
-export const parseMessageHash = (value: string): MessageList => {
-  const [chatId, typeOrThreadId] = value.split('_');
+export const parseLocationHash = (value: string): MessageList | undefined => {
+  if (!value) return undefined;
+
+  const [chatId, typeOrThreadId] = value.replace(/^#/, '').split('_');
+
+  if (!chatId) return undefined;
+
   const isType = ['thread', 'pinned', 'scheduled'].includes(typeOrThreadId);
 
   return {

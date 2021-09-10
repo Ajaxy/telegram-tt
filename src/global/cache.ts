@@ -20,6 +20,8 @@ import { pick } from '../util/iteratees';
 import { selectCurrentMessageList } from '../modules/selectors';
 import { hasStoredSession } from '../util/sessions';
 import { INITIAL_STATE } from './initial';
+import { parseLocationHash } from '../util/routing';
+import { LOCATION_HASH } from '../hooks/useHistoryBack';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -55,7 +57,7 @@ export function initCache() {
   });
 }
 
-export function loadCache(initialState: GlobalState) {
+export function loadCache(initialState: GlobalState): GlobalState | undefined {
   if (GLOBAL_STATE_CACHE_DISABLED) {
     return undefined;
   }
@@ -87,7 +89,7 @@ function clearCaching() {
   }
 }
 
-function readCache(initialState: GlobalState) {
+function readCache(initialState: GlobalState): GlobalState {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.time('global-state-cache-read');
@@ -116,18 +118,24 @@ function readCache(initialState: GlobalState) {
       ...cached.chatFolders,
     };
 
-    if (!cached.messages.messageLists) {
-      cached.messages.messageLists = initialState.messages.messageLists;
-    }
-
     if (!cached.stickers.greeting) {
       cached.stickers.greeting = initialState.stickers.greeting;
     }
   }
 
-  return {
+  const newState = {
     ...initialState,
     ...cached,
+  };
+
+  const parsedMessageList = !IS_SINGLE_COLUMN_LAYOUT ? parseLocationHash(LOCATION_HASH) : undefined;
+
+  return {
+    ...newState,
+    messages: {
+      ...newState.messages,
+      messageLists: parsedMessageList ? [parsedMessageList] : [],
+    },
   };
 }
 
@@ -237,15 +245,9 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
     };
   });
 
-  const currentMessageList = selectCurrentMessageList(global);
-
   return {
     byChatId,
-    messageLists: !currentMessageList || IS_SINGLE_COLUMN_LAYOUT ? [] : [{
-      ...currentMessageList,
-      threadId: MAIN_THREAD_ID,
-      type: 'thread',
-    }],
+    messageLists: [],
   };
 }
 

@@ -128,8 +128,11 @@ export const CONTENT_TYPES_FOR_QUICK_UPLOAD = new Set([
 // eslint-disable-next-line max-len
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,63})\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)';
 export const RE_MENTION_TEMPLATE = '(@[\\w\\d_-]+)';
-export const RE_TME_LINK = /^(?:https?:\/\/)?(?:t\.me\/)([\d\w_]+)(?:\/([\d]+))?(?:\/([\d]+))?$/gm;
+export const RE_TG_LINK = /^tg:(\/\/)?([?=&\d\w_-]+)?/gm;
+// eslint-disable-next-line max-len
+export const RE_TME_LINK = /^(?:https?:\/\/)?(?:t\.me\/)([\d\w_]+)(?:\/([\d]+))?(?:\/([\d]+)(?:\?([\w]+)=([\d]+))?)?$/gm;
 export const RE_TME_INVITE_LINK = /^(?:https?:\/\/)?(?:t\.me\/joinchat\/)([\d\w_-]+)?$/gm;
+export const RE_TME_ADDSTICKERS_LINK = /^(?:https?:\/\/)?(?:t\.me\/addstickers\/)([\d\w_-]+)$/gm;
 
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
