@@ -288,7 +288,7 @@ export type ApiReplyKeyboard = {
   [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
 };
 
-export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'profilePhoto';
+export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'

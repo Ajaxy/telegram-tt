@@ -279,7 +279,7 @@ const Audio: FC<OwnProps> = ({
 
   const contentClassName = buildClassName('content', withSeekline && 'with-seekline');
 
-  function renderSearchResult() {
+  function renderWithTitle() {
     return (
       <>
         <div className={contentClassName}>
@@ -355,12 +355,13 @@ const Audio: FC<OwnProps> = ({
           <i className={isDownloadStarted ? 'icon-close' : 'icon-arrow-down'} />
         </Button>
       )}
-      {origin === AudioOrigin.Search && renderSearchResult()}
+      {origin === AudioOrigin.Search && renderWithTitle()}
       {origin !== AudioOrigin.Search && audio && renderAudio(
         lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef, (isDownloadStarted || isUploading),
         date, transferProgress, onDateClick ? handleDateClick : undefined,
       )}
-      {origin !== AudioOrigin.Search && voice && renderVoice(voice, renderedWaveform, playProgress, isMediaUnread)}
+      {origin === AudioOrigin.SharedMedia && voice && renderWithTitle()}
+      {origin === AudioOrigin.Inline && voice && renderVoice(voice, renderedWaveform, playProgress, isMediaUnread)}
     </div>
   );
 };
