@@ -32,6 +32,7 @@
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
+    color: var(--color-text-secondary);
 
     @media (max-width: 600px) {
       width: 2.875rem;

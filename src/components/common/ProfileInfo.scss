@@ -44,12 +44,12 @@
   .photo-dash {
     flex: 1 1 auto;
     background-color: var(--color-white);
-    opacity: .5;
+    opacity: .25;
     border-radius: .125rem;
     margin: 0 .125rem;
 
     &.current {
-      opacity: 1;
+      opacity: .75;
     }
   }
 
