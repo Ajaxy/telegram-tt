@@ -13,15 +13,15 @@
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
 
-$color-primary: #50a2e9;
+$color-primary: #268EE9;
 
-$color-links: #52a1ef;
+$color-links: #00468D;
 
 $color-placeholders: #A2ACB4;
 
-$color-text-green: #4fae4e;
-$color-green: #4dcd5e;
-$color-light-green: #eefedf;
+$color-text-green: #45AF54;
+$color-green: #00C73E;
+$color-light-green: #EDFFDF;
 
 $color-error: #e53935;
 
@@ -60,6 +60,7 @@ $color-user-8: #faa774;
   --color-background: #{$color-white};
   --color-background-selected: #f4f4f5;
   --color-background-secondary: #f4f4f5;
+  --color-background-search: #{$color-white};
   --color-background-secondary-accent: #E4E4E5;
   --color-background-own: #{$color-light-green};
   --color-background-own-selected: #{darken($color-light-green, 10%)};

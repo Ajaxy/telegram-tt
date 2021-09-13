@@ -1,11 +1,12 @@
 .SearchInput {
   position: relative;
   width: 100%;
-  color: rgba(var(--color-text-secondary-rgb), 0.5);
-  background-color: var(--color-chat-hover);
+  color: rgba(var(--color-text-secondary-rgb), 0.85);
+  background-color: var(--color-background-search);
   border: 2px solid var(--color-chat-hover);
   border-radius: 1.375rem;
   transition: border-color 0.15s ease;
+  --color-placeholders: rgba(var(--color-text-secondary-rgb), 0.85);
 
   &.with-picker-item {
     display: flex;
