@@ -52,6 +52,10 @@ export default function useProfileViewportIds(
     'audio', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
   );
 
+  const [voiceViewportIds, getMoreVoices, noProfileInfoForVoices] = useInfiniteScrollForSharedMedia(
+    'voice', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
+  );
+
   let viewportIds: number[] | undefined;
   let getMore: AnyToVoidFunction | undefined;
   let noProfileInfo = false;
@@ -81,6 +85,11 @@ export default function useProfileViewportIds(
       viewportIds = audioViewportIds;
       getMore = getMoreAudio;
       noProfileInfo = noProfileInfoForAudio;
+      break;
+    case 'voice':
+      viewportIds = voiceViewportIds;
+      getMore = getMoreVoices;
+      noProfileInfo = noProfileInfoForVoices;
       break;
   }
 

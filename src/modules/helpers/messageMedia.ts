@@ -365,6 +365,10 @@ export function getMessageContentIds(
       validator = getMessageAudio;
       break;
 
+    case 'voice':
+      validator = getMessageVoice;
+      break;
+
     case 'inlineMedia':
       validator = (message: ApiMessage) => {
         const video = getMessageVideo(message);

@@ -57,7 +57,7 @@
     z-index: 1;
 
     .Tab {
-      padding: 1rem .25rem;
+      padding: 1rem .75rem;
       i {
         bottom: -1rem;
       }
@@ -105,7 +105,8 @@
       }
     }
 
-    &.audio-list {
+    &.audio-list,
+    &.voice-list {
       padding: 1.25rem;
 
       & .Audio {
