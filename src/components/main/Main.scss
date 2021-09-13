@@ -95,6 +95,12 @@
     width: 100vw;
     transform: translate3d(-20vw, 0, 0);
   }
+
+
+  @supports (left: env(safe-area-inset-left)) {
+    left: env(safe-area-inset-left) !important;
+    max-width: calc(26.5rem - env(safe-area-inset-left)) !important;
+  }
 }
 
 #RightColumn {

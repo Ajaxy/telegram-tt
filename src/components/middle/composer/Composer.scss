@@ -8,6 +8,10 @@
     padding-right: 2rem;
     bottom: 0;
 
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      bottom: env(safe-area-inset-bottom);
+    }
+
     @media (max-width: 600px) {
       padding-right: 1rem;
     }
