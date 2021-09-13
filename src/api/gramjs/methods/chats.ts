@@ -381,6 +381,20 @@ async function getFullChannelInfo(
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
 
+  if (result?.chats?.length > 1) {
+    updateLocalDb(result);
+
+    const [, mtpLinkedChat] = result.chats;
+    const chat = buildApiChatFromPreview(mtpLinkedChat, undefined, true);
+    if (chat) {
+      onUpdate({
+        '@type': 'updateChat',
+        id: chat.id,
+        chat,
+      });
+    }
+  }
+
   return {
     fullInfo: {
       about,
