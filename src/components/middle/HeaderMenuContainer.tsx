@@ -23,7 +23,7 @@ import DeleteChatModal from '../common/DeleteChatModal';
 import './HeaderMenuContainer.scss';
 
 type DispatchProps = Pick<GlobalActions, (
-  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot'
+  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot' | 'openLinkedChat'
 )>;
 
 export type OwnProps = {
@@ -49,6 +49,7 @@ type StateProps = {
   isPrivate?: boolean;
   isMuted?: boolean;
   canDeleteChat?: boolean;
+  hasLinkedChat?: boolean;
 };
 
 const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -66,6 +67,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isPrivate,
   isMuted,
   canDeleteChat,
+  hasLinkedChat,
   onSubscribeChannel,
   onSearchClick,
   onClose,
@@ -74,6 +76,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   enterMessageSelectMode,
   sendBotCommand,
   restartBot,
+  openLinkedChat,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -108,6 +111,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     updateChatMutedState({ chatId, isMuted: !isMuted });
     closeMenu();
   }, [chatId, closeMenu, isMuted, updateChatMutedState]);
+
+  const handleLinkedChatClick = useCallback(() => {
+    openLinkedChat({ id: chatId });
+    closeMenu();
+  }, [chatId, closeMenu, openLinkedChat]);
 
   const handleSubscribe = useCallback(() => {
     onSubscribeChannel();
@@ -181,6 +189,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang(isMuted ? 'ChatsUnmute' : 'ChatsMute')}
             </MenuItem>
           )}
+          {hasLinkedChat && (
+            <MenuItem
+              icon="comments"
+              onClick={handleLinkedChatClick}
+            >
+              {lang('ViewDiscussion')}
+            </MenuItem>
+          )}
           <MenuItem
             icon="select"
             onClick={handleSelectMessages}
@@ -223,6 +239,7 @@ export default memo(withGlobal<OwnProps>(
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       isPrivate: isChatPrivate(chat.id),
       canDeleteChat: getCanDeleteChat(chat),
+      hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -230,5 +247,6 @@ export default memo(withGlobal<OwnProps>(
     'enterMessageSelectMode',
     'sendBotCommand',
     'restartBot',
+    'openLinkedChat',
   ]),
 )(HeaderMenuContainer));

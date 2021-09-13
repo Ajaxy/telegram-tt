@@ -124,6 +124,22 @@ addReducer('openChat', (global, actions, payload) => {
   }
 });
 
+addReducer('openLinkedChat', (global, actions, payload) => {
+  const { id } = payload!;
+  const chat = selectChat(global, id);
+  if (!chat) {
+    return;
+  }
+
+  (async () => {
+    const chatFullInfo = await callApi('fetchFullChat', chat);
+
+    if (chatFullInfo?.fullInfo?.linkedChatId) {
+      actions.openChat({ id: chatFullInfo.fullInfo.linkedChatId });
+    }
+  })();
+});
+
 addReducer('openSupportChat', (global, actions) => {
   const chat = selectSupportChat(global);
 
