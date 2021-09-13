@@ -36,7 +36,6 @@
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
-    color: var(--color-text-secondary);
 
     @media (max-width: 600px) {
       width: 2.875rem;
@@ -349,7 +348,7 @@
     text-decoration: none;
 
     &:hover, &:active, &:visited {
-      color: var(--color-links-hover) !important;
+      text-decoration: underline !important;
     }
   }
 

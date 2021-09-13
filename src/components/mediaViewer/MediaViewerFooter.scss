@@ -94,7 +94,7 @@
 
     &:hover,
     &:focus {
-      color: var(--color-links-hover);
+      text-decoration: underline;
     }
   }
 }
