@@ -1,12 +1,11 @@
 .SearchInput {
   position: relative;
   width: 100%;
-  color: rgba(var(--color-text-secondary-rgb), 0.85);
-  background-color: var(--color-background-search);
+  color: rgba(var(--color-text-secondary-rgb), 0.5);
+  background-color: var(--color-chat-hover);
   border: 2px solid var(--color-chat-hover);
   border-radius: 1.375rem;
   transition: border-color 0.15s ease;
-  --color-placeholders: rgba(var(--color-text-secondary-rgb), 0.85);
 
   &.with-picker-item {
     display: flex;
@@ -46,7 +45,7 @@
     border-radius: 1.375rem;
     background-color: transparent !important;
     box-shadow: none !important;
-    padding: calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width)) calc(0.5rem - var(--border-width)) calc(2.625rem - var(--border-width));
+    padding: calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width)) calc(0.5rem - var(--border-width)) calc(2.75rem - var(--border-width));
 
     &::placeholder {
       color: var(--color-placeholders);
@@ -57,7 +56,7 @@
     position: absolute;
     top: .5rem;
     left: .75rem;
-    font-size: 1.5rem;
+    font-size: 1.375rem;
   }
 
   .Loading {

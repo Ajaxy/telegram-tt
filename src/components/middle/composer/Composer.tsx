@@ -875,6 +875,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={buildClassName('bot-commands', isBotCommandMenuOpen && 'activated')}
               round
+              faded
               disabled={botCommands === undefined}
               color="translucent"
               onActivate={handleActivateBotCommandMenu}
@@ -887,6 +888,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <Button
               className={symbolMenuButtonClassName}
               round
+              faded
               color="translucent"
               onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
               ariaLabel="Choose emoji, sticker or GIF"
@@ -899,6 +901,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={isSymbolMenuOpen ? 'activated' : ''}
               round
+              faded
               color="translucent"
               onActivate={handleActivateSymbolMenu}
               ariaLabel="Choose emoji, sticker or GIF"
@@ -928,6 +931,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           {withScheduledButton && (
             <Button
               round
+              faded
               className="scheduled-button"
               color="translucent"
               onClick={handleAllScheduledClick}
@@ -940,6 +944,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={isBotKeyboardOpen ? 'activated' : ''}
               round
+              faded
               color="translucent"
               onActivate={openBotKeyboard}
               ariaLabel="Open bot command keyboard"
@@ -951,6 +956,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={isAttachMenuOpen ? 'activated' : ''}
               round
+              faded
               color="translucent"
               onActivate={openAttachMenu}
               ariaLabel="Add an attachment"

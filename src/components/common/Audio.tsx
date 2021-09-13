@@ -443,10 +443,10 @@ function renderWaveform(
     return undefined;
   }
 
-  const fillColor = theme === 'dark' ? '#494B75' : '#CBCBCB';
-  const fillOwnColor = theme === 'dark' ? '#C0BBED' : '#B0DEA6';
-  const progressFillColor = theme === 'dark' ? '#868DF5' : '#54a3e6';
-  const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#53ad53';
+  const fillColor = theme === 'dark' ? '#494A78' : '#ADD3F7';
+  const fillOwnColor = theme === 'dark' ? '#B7ABED' : '#AEDFA4';
+  const progressFillColor = theme === 'dark' ? '#8774E1' : '#3390EC';
+  const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#4FAE4E';
   const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
   const spikesCount = Math.round(MIN_SPIKES + (MAX_SPIKES - MIN_SPIKES) * durationFactor);
   const decodedWaveform = decodeWaveform(new Uint8Array(waveform));

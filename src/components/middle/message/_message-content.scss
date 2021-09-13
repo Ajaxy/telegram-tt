@@ -124,10 +124,10 @@
 
   .theme-dark .Message.own & {
     .text-entity-link {
-      text-decoration: underline;
+      text-decoration: underline !important;
 
       &:hover {
-        text-decoration: none;
+        text-decoration: none !important;
       }
     }
   }
@@ -717,14 +717,13 @@
 
 .text-entity-link {
   color: var(--color-links) !important;
-  text-decoration: none;
+  text-decoration: none !important;
   word-break: break-word;
   cursor: pointer;
   unicode-bidi: initial;
 
   &:hover, &:active, &:visited {
-    color: var(--color-links-hover) !important;
-    text-decoration: underline;
+    text-decoration: underline !important;
   }
 }
 

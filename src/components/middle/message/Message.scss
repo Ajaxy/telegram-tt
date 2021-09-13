@@ -108,7 +108,6 @@
     --color-code: var(--color-code-own);
     --color-code-bg: var(--color-code-own-bg);
     --color-links: var(--color-own-links);
-    --color-links-hover: var(--color-own-links);
     --meta-safe-area-base: 3.5rem;
     --deleting-translate-x: 50%;
     --color-text-green: var(--color-accent-own);
@@ -534,6 +533,7 @@
 
       .message-content.has-appendix {
         --border-bottom-right-radius: 0;
+        border-bottom-right-radius: 0;
       }
     }
   }
