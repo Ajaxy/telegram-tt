@@ -32,11 +32,6 @@
       max-width: unset;
       margin-top: -0.1875rem;
     }
-
-    @supports (padding-left: env(safe-area-inset-left)) {
-      padding-left: #{"max(0.75rem, env(safe-area-inset-left))"};
-      padding-right: #{"max(0.5rem, env(safe-area-inset-right))"};
-    }
   }
 
   .AudioPlayer {
@@ -85,22 +80,12 @@
   position: relative;
   z-index: var(--z-middle-header);
 
-  @supports (padding-left: env(safe-area-inset-left)) {
-    padding-left: #{"max(1.5rem, env(safe-area-inset-left))"};
-    padding-right: #{"max(.8125rem, env(safe-area-inset-right))"};
-  }
-
   @media (max-width: 600px) {
     padding: 0.5rem;
     position: relative;
     // Force rendering in the composite layer to fix the z-index rendering issue
     transform: translate3d(0, 0, 10px);
     transform-style: preserve-3d;
-
-    @supports (padding-left: env(safe-area-inset-left)) {
-      padding-left: #{"max(.5rem, env(safe-area-inset-left))"};
-      padding-right: #{"max(.5rem, env(safe-area-inset-right))"};
-    }
   }
 
   .Transition {

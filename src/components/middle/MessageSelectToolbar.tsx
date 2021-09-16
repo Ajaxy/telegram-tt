@@ -70,7 +70,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
-  const formattedMessagesCount = lang('VoiceOver.Chat.MessagesSelected', renderingSelectedMessagesCount, 'i');
+  const formattedMessagesCount = lang('VoiceOver.Chat.MessagesSelected', renderingSelectedMessagesCount);
 
   const className = buildClassName(
     'MessageSelectToolbar',

@@ -8,10 +8,6 @@
   justify-content: center;
   margin: 0;
 
-  @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    bottom: calc(.5rem + env(safe-area-inset-bottom));
-  }
-
   .mask-image-disabled &::before {
     left: auto !important;
     right: auto !important;
