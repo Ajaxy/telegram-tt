@@ -125,15 +125,17 @@ body.cursor-grabbing, body.cursor-grabbing * {
   }
 }
 
-.custom-scroll {
-  &::-webkit-scrollbar {
-    width: .375rem;
+@media (min-width: 601px) {
+  .custom-scroll {
+    &::-webkit-scrollbar {
+      width: .375rem;
+    }
   }
-}
 
-.custom-scroll-x {
-  &::-webkit-scrollbar {
-    height: .35rem;
+  .custom-scroll-x {
+    &::-webkit-scrollbar {
+      height: .35rem;
+    }
   }
 }
 
