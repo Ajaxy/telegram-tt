@@ -58,6 +58,8 @@ import Button from '../ui/Button';
 import MobileSearch from './MobileSearch.async';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
+import PaymentModal from '../payment/PaymentModal.async';
+import ReceiptModal from '../payment/ReceiptModal.async';
 
 import './MiddleColumn.scss';
 
@@ -82,6 +84,8 @@ type StateProps = {
   isBackgroundBlurred?: boolean;
   isMobileSearchActive?: boolean;
   isSelectModeActive?: boolean;
+  isPaymentModalOpen?: boolean;
+  isReceiptModalOpen?: boolean;
   animationLevel?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -89,7 +93,8 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'openChat' | 'unpinAllMessages' | 'loadUser' | 'closeLocalTextSearch' | 'exitMessageSelectMode'
+  'openChat' | 'unpinAllMessages' | 'loadUser' | 'closeLocalTextSearch' | 'exitMessageSelectMode' |
+  'closePaymentModal' | 'clearReceipt'
 )>;
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
@@ -119,6 +124,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   isBackgroundBlurred,
   isMobileSearchActive,
   isSelectModeActive,
+  isPaymentModalOpen,
+  isReceiptModalOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -127,6 +134,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   loadUser,
   closeLocalTextSearch,
   exitMessageSelectMode,
+  closePaymentModal,
+  clearReceipt,
 }) => {
   const { width: windowWidth } = useWindowSize();
 
@@ -386,6 +395,14 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                       isActive={isSelectModeActive}
                       canPost={renderingCanPost}
                     />
+                    <PaymentModal
+                      isOpen={Boolean(isPaymentModalOpen)}
+                      onClose={closePaymentModal}
+                    />
+                    <ReceiptModal
+                      isOpen={Boolean(isReceiptModalOpen)}
+                      onClose={clearReceipt}
+                    />
                   </div>
                 </>
               )}
@@ -434,6 +451,8 @@ export default memo(withGlobal(
       isBackgroundBlurred,
       isMobileSearchActive: Boolean(IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
+      isPaymentModalOpen: global.payment.isPaymentModalOpen,
+      isReceiptModalOpen: Boolean(global.payment.receipt),
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
     };
@@ -475,5 +494,6 @@ export default memo(withGlobal(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChat', 'unpinAllMessages', 'loadUser', 'closeLocalTextSearch', 'exitMessageSelectMode',
+    'closePaymentModal', 'clearReceipt',
   ]),
 )(MiddleColumn));

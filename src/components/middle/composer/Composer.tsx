@@ -94,8 +94,6 @@ import DropArea, { DropAreaState } from './DropArea.async';
 import WebPagePreview from './WebPagePreview';
 import Portal from '../../ui/Portal';
 import CalendarModal from '../../common/CalendarModal.async';
-import PaymentModal from '../../payment/PaymentModal.async';
-import ReceiptModal from '../../payment/ReceiptModal.async';
 
 import './Composer.scss';
 
@@ -118,8 +116,6 @@ type StateProps = {
   isSelectModeActive?: boolean;
   isForwarding?: boolean;
   isPollModalOpen?: boolean;
-  isPaymentModalOpen?: boolean;
-  isReceiptModalOpen?: boolean;
   botKeyboardMessageId?: number;
   botKeyboardPlaceholder?: string;
   withScheduledButton?: boolean;
@@ -146,8 +142,8 @@ type StateProps = {
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
   'clearDraft' | 'showDialog' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
-  'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' | 'closePaymentModal' |
-  'clearReceipt' | 'addRecentEmoji' | 'sendInlineBotResult'
+  'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' |
+  'addRecentEmoji' | 'sendInlineBotResult'
 )>;
 
 enum MainButtonState {
@@ -187,8 +183,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   isSelectModeActive,
   isForwarding,
   isPollModalOpen,
-  isPaymentModalOpen,
-  isReceiptModalOpen,
   botKeyboardMessageId,
   botKeyboardPlaceholder,
   withScheduledButton,
@@ -219,9 +213,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   openPollModal,
   closePollModal,
   loadScheduledHistory,
-  closePaymentModal,
   openChat,
-  clearReceipt,
   addRecentEmoji,
   sendInlineBotResult,
 }) => {
@@ -820,14 +812,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         onClear={closePollModal}
         onSend={handlePollSend}
       />
-      <PaymentModal
-        isOpen={Boolean(isPaymentModalOpen)}
-        onClose={closePaymentModal}
-      />
-      <ReceiptModal
-        isOpen={Boolean(isReceiptModalOpen)}
-        onClose={clearReceipt}
-      />
       {renderedEditedMessage && (
         <DeleteMessageModal
           isOpen={isDeleteModalOpen}
@@ -1111,8 +1095,6 @@ export default memo(withGlobal<OwnProps>(
       usersById: global.users.byId,
       lastSyncTime: global.lastSyncTime,
       contentToBeScheduled: global.messages.contentToBeScheduled,
-      isPaymentModalOpen: global.payment.isPaymentModalOpen,
-      isReceiptModalOpen: Boolean(global.payment.receipt),
       shouldSuggestStickers: global.settings.byKey.shouldSuggestStickers,
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
@@ -1135,8 +1117,6 @@ export default memo(withGlobal<OwnProps>(
     'forwardMessages',
     'openPollModal',
     'closePollModal',
-    'closePaymentModal',
-    'clearReceipt',
     'loadScheduledHistory',
     'openChat',
     'addRecentEmoji',
