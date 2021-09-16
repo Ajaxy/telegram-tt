@@ -138,7 +138,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[pinnedMessageIndex] : pinnedMessageIds;
   const pinnedMessage = messagesById && pinnedMessageId ? messagesById[pinnedMessageId] : undefined;
-  const pinnedMessagesCount = Array.isArray(pinnedMessageIds) ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : 0);
+  const pinnedMessagesCount = Array.isArray(pinnedMessageIds)
+    ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : undefined);
   const chatTitleLength = chat && getChatTitle(lang, chat).length;
   const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
 
@@ -176,7 +177,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     if (pinnedMessage) {
       focusMessage({ chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id });
 
-      const newIndex = cycleRestrict(pinnedMessagesCount, pinnedMessageIndex + 1);
+      const newIndex = cycleRestrict(pinnedMessagesCount || 1, pinnedMessageIndex + 1);
       setPinnedMessageIndex(newIndex);
     }
   }, [pinnedMessage, focusMessage, threadId, pinnedMessagesCount, pinnedMessageIndex]);
@@ -255,7 +256,9 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     transitionClassNames: pinnedMessageClassNames,
   } = useShowTransition(pinnedMessage && !shouldRenderAudioPlayer);
 
-  const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage);
+  const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
+  const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);
+  const renderingCanUnpin = useCurrentOrPrev(canUnpin, true);
   const renderingPinnedMessageTitle = useCurrentOrPrev(topMessageTitle);
 
   const canRevealTools = (shouldRenderPinnedMessage && renderingPinnedMessage)
@@ -397,11 +400,11 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           <HeaderPinnedMessage
             key={chatId}
             message={renderingPinnedMessage}
-            count={pinnedMessagesCount}
+            count={renderingPinnedMessagesCount || 0}
             index={pinnedMessageIndex}
             customTitle={renderingPinnedMessageTitle}
             className={pinnedMessageClassNames}
-            onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
+            onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
             onClick={handlePinnedMessageClick}
             onAllPinnedClick={handleAllPinnedClick}
           />
