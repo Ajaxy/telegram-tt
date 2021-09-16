@@ -140,6 +140,23 @@ addReducer('openLinkedChat', (global, actions, payload) => {
   })();
 });
 
+addReducer('focusMessageInComments', (global, actions, payload) => {
+  const { chatId, threadId, messageId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('requestThreadInfoUpdate', { chat, threadId });
+    if (!result) {
+      return;
+    }
+
+    actions.focusMessage({ chatId, threadId, messageId });
+  })();
+});
+
 addReducer('openSupportChat', (global, actions) => {
   const chat = selectSupportChat(global);
 

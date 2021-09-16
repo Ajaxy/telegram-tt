@@ -10,7 +10,7 @@ import {
 import { NotifyException, NotifySettings } from '../../types';
 import { LangFn } from '../../hooks/useLang';
 
-import { ARCHIVED_FOLDER_ID } from '../../config';
+import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
@@ -42,6 +42,10 @@ export function isChatChannel(chat: ApiChat) {
 
 export function isCommonBoxChat(chat: ApiChat) {
   return chat.type === 'chatTypePrivate' || chat.type === 'chatTypeBasicGroup';
+}
+
+export function isChatWithRepliesBot(chatId: number) {
+  return chatId === REPLIES_USER_ID;
 }
 
 export function getChatTypeString(chat: ApiChat) {
@@ -131,7 +135,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: number) {
     return true;
   }
 
-  if (chat.isRestricted || chat.migratedTo || chat.isNotJoined) {
+  if (chat.isRestricted || chat.migratedTo || chat.isNotJoined || isChatWithRepliesBot(chat.id)) {
     return false;
   }
 

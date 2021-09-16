@@ -126,6 +126,7 @@ div {
     --color-user: var(--color-user-8);
   }
 
+  &.replies-bot-account,
   &.saved-messages {
     --color-user: var(--color-primary);
   }

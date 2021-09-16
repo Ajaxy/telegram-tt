@@ -23,6 +23,7 @@
 
   .spinner-wrapper,
   &.deleted-account,
+  &.replies-bot-account,
   &.no-photo,
   &.saved-messages {
     display: flex;
@@ -37,6 +38,7 @@
     font-size: 14rem;
   }
 
+  &.replies-bot-account,
   &.deleted-account,
   &.saved-messages {
     font-size: 20rem;

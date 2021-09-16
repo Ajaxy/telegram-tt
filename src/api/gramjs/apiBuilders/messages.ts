@@ -137,7 +137,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     content.action = action;
   }
 
-  const { replyToMsgId, replyToTopId } = mtpMessage.replyTo || {};
+  const { replyToMsgId, replyToTopId, replyToPeerId } = mtpMessage.replyTo || {};
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse,
@@ -158,6 +158,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     views: mtpMessage.views,
     isFromScheduled: mtpMessage.fromScheduled,
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
+    ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
     ...(isEdited && { isEdited }),

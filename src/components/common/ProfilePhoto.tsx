@@ -5,7 +5,7 @@ import {
 } from '../../api/types';
 
 import {
-  getChatAvatarHash, isDeletedUser, getUserColorKey, getChatTitle, isChatPrivate, getUserFullName,
+  getChatAvatarHash, isDeletedUser, getUserColorKey, getChatTitle, isChatPrivate, getUserFullName, isChatWithRepliesBot,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
@@ -40,6 +40,7 @@ const ProfilePhoto: FC<OwnProps> = ({
 }) => {
   const lang = useLang();
   const isDeleted = user && isDeletedUser(user);
+  const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
 
   function getMediaHash(size: 'normal' | 'big' = 'big', forceAvatar?: boolean) {
     if (photo && !forceAvatar) {
@@ -47,7 +48,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     }
 
     let hash: string | undefined;
-    if (!isSavedMessages && !isDeleted) {
+    if (!isSavedMessages && !isDeleted && !isRepliesChat) {
       if (user) {
         hash = getChatAvatarHash(user, size);
       } else if (chat) {
@@ -81,6 +82,8 @@ const ProfilePhoto: FC<OwnProps> = ({
     content = <i className="icon-avatar-saved-messages" />;
   } else if (isDeleted) {
     content = <i className="icon-avatar-deleted-account" />;
+  } else if (isRepliesChat) {
+    content = <i className="icon-reply-filled" />;
   } else if (imageSrc) {
     content = <img src={imageSrc} className="avatar-media" alt="" decoding="async" />;
   } else if (!imageSrc && user) {
@@ -102,6 +105,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     `color-bg-${getUserColorKey(user || chat)}`,
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
+    isRepliesChat && 'replies-bot-account',
     (!isSavedMessages && !(imageSrc)) && 'no-photo',
   );
 

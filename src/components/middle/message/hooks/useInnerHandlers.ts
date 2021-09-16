@@ -16,6 +16,7 @@ export default function useInnerHandlers(
   threadId: number,
   isInDocumentGroup: boolean,
   isScheduled?: boolean,
+  isChatWithRepliesBot?: boolean,
   album?: IAlbum,
   avatarPeer?: ApiUser | ApiChat,
   senderPeer?: ApiUser | ApiChat,
@@ -23,11 +24,11 @@ export default function useInnerHandlers(
 ) {
   const {
     openUserInfo, openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
-    markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu,
+    markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
   } = getDispatch();
 
   const {
-    id: messageId, forwardInfo, replyToMessageId, groupedId,
+    id: messageId, forwardInfo, replyToMessageId, replyToChatId, replyToTopMessageId, groupedId,
   } = message;
 
   const handleAvatarClick = useCallback(() => {
@@ -66,9 +67,12 @@ export default function useInnerHandlers(
 
   const handleReplyClick = useCallback((): void => {
     focusMessage({
-      chatId, threadId, messageId: replyToMessageId, replyMessageId: messageId,
+      chatId: isChatWithRepliesBot && replyToChatId ? replyToChatId : chatId,
+      threadId,
+      messageId: replyToMessageId,
+      replyMessageId: isChatWithRepliesBot && replyToChatId ? undefined : messageId,
     });
-  }, [focusMessage, chatId, threadId, replyToMessageId, messageId]);
+  }, [focusMessage, isChatWithRepliesBot, replyToChatId, chatId, threadId, replyToMessageId, messageId]);
 
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({
@@ -127,10 +131,22 @@ export default function useInnerHandlers(
       });
       return;
     }
-    focusMessage({
-      chatId: forwardInfo!.fromChatId, messageId: forwardInfo!.fromMessageId,
-    });
-  }, [isInDocumentGroup, focusMessage, forwardInfo, groupedId, chatId]);
+
+    if (isChatWithRepliesBot && replyToChatId) {
+      focusMessageInComments({
+        chatId: replyToChatId,
+        threadId: replyToTopMessageId,
+        messageId: forwardInfo!.fromMessageId,
+      });
+    } else {
+      focusMessage({
+        chatId: forwardInfo!.fromChatId, messageId: forwardInfo!.fromMessageId,
+      });
+    }
+  }, [
+    isInDocumentGroup, isChatWithRepliesBot, replyToChatId, focusMessage, forwardInfo, groupedId, chatId,
+    focusMessageInComments, replyToTopMessageId,
+  ]);
 
   const selectWithGroupedId = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
