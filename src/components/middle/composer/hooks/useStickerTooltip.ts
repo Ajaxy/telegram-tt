@@ -1,4 +1,4 @@
-import { useEffect } from '../../../../lib/teact/teact';
+import { useEffect, useMemo } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 
 import { ApiSticker } from '../../../../api/types';
@@ -6,6 +6,7 @@ import { ApiSticker } from '../../../../api/types';
 import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
 
 import parseEmojiOnlyString from '../../../common/helpers/parseEmojiOnlyString';
+import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
 export default function useStickerTooltip(
   isAllowed: boolean,
@@ -13,9 +14,10 @@ export default function useStickerTooltip(
   stickers?: ApiSticker[],
   isDisabled = false,
 ) {
+  const cleanHtml = useMemo(() => prepareForRegExp(html).trim(), [html]);
   const { loadStickersForEmoji, clearStickersForEmoji } = getDispatch();
   const isSingleEmoji = (
-    (IS_EMOJI_SUPPORTED && parseEmojiOnlyString(html) === 1)
+    (IS_EMOJI_SUPPORTED && parseEmojiOnlyString(cleanHtml) === 1)
     || (!IS_EMOJI_SUPPORTED && Boolean(html.match(/^<img.[^>]*?>$/g)))
   );
   const hasStickers = Boolean(stickers) && isSingleEmoji;
@@ -24,7 +26,7 @@ export default function useStickerTooltip(
     if (isDisabled) return;
 
     if (isAllowed && isSingleEmoji) {
-      loadStickersForEmoji({ emoji: html });
+      loadStickersForEmoji({ emoji: cleanHtml });
     } else if (hasStickers || !isSingleEmoji) {
       clearStickersForEmoji();
     }

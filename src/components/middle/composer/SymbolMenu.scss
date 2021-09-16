@@ -15,6 +15,7 @@
       padding-right: env(safe-area-inset-right);
       padding-bottom: env(safe-area-inset-bottom);
       padding-left: env(safe-area-inset-left);
+      transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height) + env(safe-area-inset-bottom)), 0);
     }
 
     &.open {
