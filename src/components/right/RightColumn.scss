@@ -32,10 +32,6 @@
     transform: translate3d(110vw, 0, 0);
   }
 
-  @supports (padding-right: env(safe-area-inset-right)) {
-    padding-right: env(safe-area-inset-right);
-  }
-
   > .Transition {
     height: calc(100% - var(--header-height));
     overflow: hidden;

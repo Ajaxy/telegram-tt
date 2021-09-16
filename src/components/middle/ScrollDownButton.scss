@@ -10,10 +10,6 @@
   z-index: var(--z-scroll-down-button);
   pointer-events: none;
 
-  @supports (right: env(safe-area-inset-right)) {
-    right: #{"max(1rem, env(safe-area-inset-right))"};
-  }
-
   body.animation-level-0 & {
     transform: none !important;
 
@@ -23,12 +19,6 @@
   @media (max-width: 600px) {
     right: 0.5rem;
     bottom: 4.5rem;
-
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      body:not(.keyboard-visible) & {
-        bottom: calc(4.5rem + env(safe-area-inset-bottom));
-      }
-    }
   }
 
   &-inner {
@@ -74,10 +64,6 @@
 
     &.no-composer:not(.with-extra-shift) {
       transform: translateY(4rem);
-
-      @supports (padding-bottom: env(safe-area-inset-bottom)) {
-        transform: translateY(calc(4rem - env(safe-area-inset-bottom)));
-      }
     }
   }
 

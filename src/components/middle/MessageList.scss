@@ -11,12 +11,6 @@
   overflow-y: auto;
   @include overflow-y-overlay();
 
-  transition: transform var(--layer-transition);
-
-  body.animation-level-0 & {
-    transition: none !important;
-  }
-
   .mask-image-enabled & {
     mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
   }
@@ -28,12 +22,6 @@
     &.select-mode-active {
       user-select: auto;
       touch-callout: default;
-    }
-  }
-
-  @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    body.keyboard-visible & {
-      transform: translateY(env(safe-area-inset-bottom));
     }
   }
 
@@ -79,12 +67,6 @@
 
       @media (max-width: 600px) {
         margin-bottom: 4.25rem;
-
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-          body:not(.keyboard-visible) & {
-            margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
-          }
-        }
       }
 
       &.ActionMessage {
