@@ -36,6 +36,7 @@
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
+    color: var(--color-composer-button);
 
     @media (max-width: 600px) {
       width: 2.875rem;
@@ -210,6 +211,10 @@
     padding: 0;
     align-self: flex-end;
 
+    &:not(.faded):not(.activated) {
+      color: var(--color-composer-button);
+    }
+
     + .Button {
       margin-left: -1rem;
     }
@@ -236,7 +241,7 @@
       content: '';
       position: absolute;
       top: .75rem;
-      right: .75rem;
+      right: .875rem;
       border: .1875rem solid var(--color-background);
       box-sizing: content-box;
       width: .5rem;
