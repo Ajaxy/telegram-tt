@@ -3,10 +3,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { AudioOrigin } from '../../types';
+import { AudioOrigin, LangCode } from '../../types';
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
-import { LangCode } from '../../types';
 
 import '../../modules/actions/all';
 import {

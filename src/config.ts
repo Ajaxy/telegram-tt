@@ -136,7 +136,7 @@ export const RE_TME_ADDSTICKERS_LINK = /^(?:https?:\/\/)?(?:t\.me\/addstickers\/
 
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
-export const REPLIES_USER_ID = 1271266957;
+export const REPLIES_USER_ID = 1271266957; // TODO For Test connection ID must be equal to 708513
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const DELETED_COMMENTS_CHANNEL_ID = 777;

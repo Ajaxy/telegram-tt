@@ -116,16 +116,36 @@ export async function fetchMessages({
 export async function fetchMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
-  const result = await invokeRequest(
-    isChannel
-      ? new GramJs.channels.GetMessages({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-        id: [new GramJs.InputMessageID({ id: messageId })],
-      })
-      : new GramJs.messages.GetMessages({
-        id: [new GramJs.InputMessageID({ id: messageId })],
-      }),
-  );
+  let result;
+  try {
+    result = await invokeRequest(
+      isChannel
+        ? new GramJs.channels.GetMessages({
+          channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+          id: [new GramJs.InputMessageID({ id: messageId })],
+        })
+        : new GramJs.messages.GetMessages({
+          id: [new GramJs.InputMessageID({ id: messageId })],
+        }),
+      undefined,
+      true,
+    );
+  } catch (err) {
+    const { message } = err;
+
+    // When fetching messages for the bot @replies, there may be situations when the user was banned
+    // in the comment group or this group was deleted
+    if (message !== 'CHANNEL_PRIVATE') {
+      onUpdate({
+        '@type': 'error',
+        error: {
+          message,
+          isSlowMode: false,
+          hasErrorKey: true,
+        },
+      });
+    }
+  }
 
   if (!result || result instanceof GramJs.messages.MessagesNotModified) {
     return undefined;
@@ -731,6 +751,7 @@ export async function requestThreadInfoUpdate({
     chatId: discussionChatId,
     threadId,
     threadInfo: {
+      threadId,
       topMessageId: topMessageResult.messages[topMessageResult.messages.length - 1].id,
       lastReadInboxMessageId: topMessageResult.readInboxMaxId,
       messagesCount: (repliesResult instanceof GramJs.messages.ChannelMessages) ? repliesResult.count : undefined,

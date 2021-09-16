@@ -52,6 +52,7 @@ import {
   isAnonymousOwnMessage,
   isMessageLocal,
   isChatPrivate,
+  isChatWithRepliesBot,
   getMessageCustomShape,
   isChatChannel,
   getMessageSingleEmoji,
@@ -142,6 +143,7 @@ type StateProps = {
   isResizingContainer?: boolean;
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
+  isRepliesChat?: boolean;
   isChannel?: boolean;
   canReply?: boolean;
   lastSyncTime?: number;
@@ -203,6 +205,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isResizingContainer,
   isForwarding,
   isChatWithSelf,
+  isRepliesChat,
   isChannel,
   canReply,
   lastSyncTime,
@@ -262,7 +265,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const { forwardInfo, viaBotId } = message;
-  const asForwarded = forwardInfo && !isChatWithSelf && !forwardInfo.isLinkedChannelPost;
+  const asForwarded = forwardInfo && !isChatWithSelf && !isRepliesChat && !forwardInfo.isLinkedChannelPost;
   const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
   const isAlbum = Boolean(album) && album!.messages.length > 1;
   const {
@@ -283,8 +286,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   );
   const canForward = isChannel && !isScheduled;
   const canFocus = Boolean(isPinnedList
-    || (forwardInfo && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn)) && forwardInfo.fromMessageId));
-  const avatarPeer = forwardInfo && (isChatWithSelf || !sender) ? originSender : sender;
+    || (forwardInfo
+      && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat)
+      && forwardInfo.fromMessageId
+    ));
+  const avatarPeer = forwardInfo && (isChatWithSelf || isRepliesChat || !sender) ? originSender : sender;
   const senderPeer = forwardInfo ? originSender : sender;
 
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
@@ -344,6 +350,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     threadId,
     isInDocumentGroup,
     Boolean(isScheduled),
+    isRepliesChat,
     album,
     avatarPeer,
     senderPeer,
@@ -389,7 +396,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     && messageListType === 'thread' && !noComments;
   const withAppendix = contentClassName.includes('has-appendix');
 
-  useEnsureMessage(chatId, hasReply ? message.replyToMessageId : undefined, replyMessage, message.id);
+  useEnsureMessage(
+    isRepliesChat && message.replyToChatId ? message.replyToChatId : chatId,
+    hasReply ? message.replyToMessageId : undefined,
+    replyMessage,
+    message.id,
+  );
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer);
   useLayoutEffect(() => {
     if (!appendixRef.current) {
@@ -796,11 +808,12 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType,
     } = ownProps;
     const {
-      id, chatId, viaBotId, replyToMessageId, isOutgoing,
+      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing,
     } = message;
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
+    const isRepliesChat = isChatWithRepliesBot(chatId);
     const isChannel = chat && isChatChannel(chat);
     const chatUsername = chat?.username;
 
@@ -815,7 +828,7 @@ export default memo(withGlobal<OwnProps>(
 
     const shouldHideReply = replyToMessageId === threadTopMessageId;
     const replyMessage = replyToMessageId && !shouldHideReply
-      ? selectChatMessage(global, chatId, replyToMessageId)
+      ? selectChatMessage(global, isRepliesChat && replyToChatId ? replyToChatId : chatId, replyToMessageId)
       : undefined;
     const replyMessageSender = replyMessage && selectSender(global, replyMessage);
 
@@ -859,6 +872,7 @@ export default memo(withGlobal<OwnProps>(
       isFocused,
       isForwarding,
       isChatWithSelf,
+      isRepliesChat,
       isChannel,
       canReply,
       lastSyncTime,

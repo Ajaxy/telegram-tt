@@ -26,7 +26,12 @@ import {
   selectScheduledMessages,
   selectCurrentMessageIds,
 } from '../../modules/selectors';
-import { isChatChannel, isChatGroup, isChatPrivate } from '../../modules/helpers';
+import {
+  isChatChannel,
+  isChatPrivate,
+  isChatWithRepliesBot,
+  isChatGroup,
+} from '../../modules/helpers';
 import { orderBy, pick } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -67,6 +72,7 @@ type StateProps = {
   isChannelChat?: boolean;
   isGroupChat?: boolean;
   isChatWithSelf?: boolean;
+  isRepliesChat?: boolean;
   isCreator?: boolean;
   isBot?: boolean;
   messageIds?: number[];
@@ -112,6 +118,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isReady,
   isActive,
   isChatWithSelf,
+  isRepliesChat,
   isCreator,
   isBot,
   messageIds,
@@ -441,7 +448,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const lang = useLang();
 
   const isPrivate = Boolean(chatId && isChatPrivate(chatId));
-  const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf);
+  const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat);
   const noAvatars = Boolean(!withUsers || isChannelChat);
   const shouldRenderGreeting = isChatPrivate(chatId) && !isChatWithSelf && !isBot
     && (
@@ -567,6 +574,7 @@ export default memo(withGlobal<OwnProps>(
       isGroupChat: isChatGroup(chat),
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
+      isRepliesChat: isChatWithRepliesBot(chatId),
       isBot: Boolean(chatBot),
       messageIds,
       messagesById,

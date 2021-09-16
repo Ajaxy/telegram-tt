@@ -214,11 +214,11 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       console.error(err);
     }
 
-    dispatchErrorUpdate(err, request);
-
     if (shouldThrow) {
       throw err;
     }
+
+    dispatchErrorUpdate(err, request);
 
     return undefined;
   }

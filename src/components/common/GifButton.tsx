@@ -7,7 +7,6 @@ import { ApiMediaFormat, ApiVideo } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
 import useCanvasBlur from '../../hooks/useCanvasBlur';

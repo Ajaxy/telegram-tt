@@ -236,6 +236,7 @@ export interface ApiMessage {
   date: number;
   isOutgoing: boolean;
   senderId?: number;
+  replyToChatId?: number;
   replyToMessageId?: number;
   replyToTopMessageId?: number;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';

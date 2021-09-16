@@ -6,7 +6,7 @@ import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
 import { IS_TEST } from '../../config';
 import {
   getChatAvatarHash, getChatTitle, isChatPrivate,
-  getUserFullName, isUserOnline, isDeletedUser, getUserColorKey,
+  getUserFullName, isUserOnline, isDeletedUser, getUserColorKey, isChatWithRepliesBot,
 } from '../../modules/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
@@ -41,6 +41,7 @@ const Avatar: FC<OwnProps> = ({
   onClick,
 }) => {
   const isDeleted = user && isDeletedUser(user);
+  const isReplies = user && isChatWithRepliesBot(user.id);
   let imageHash: string | undefined;
 
   if (!isSavedMessages && !isDeleted) {
@@ -62,6 +63,8 @@ const Avatar: FC<OwnProps> = ({
     content = <i className="icon-avatar-saved-messages" />;
   } else if (isDeleted) {
     content = <i className="icon-avatar-deleted-account" />;
+  } else if (isReplies) {
+    content = <i className="icon-reply-filled" />;
   } else if (shouldRenderFullMedia) {
     content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
@@ -81,6 +84,7 @@ const Avatar: FC<OwnProps> = ({
     `color-bg-${getUserColorKey(user || chat)}`,
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
+    isReplies && 'replies-bot-account',
     withOnlineStatus && isOnline && 'online',
     onClick && 'interactive',
     (!isSavedMessages && !shouldRenderFullMedia) && 'no-photo',

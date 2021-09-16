@@ -315,14 +315,14 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <>
           {renderBackButton()}
           <h3>
-            {lang('CommentsCount', messagesCount)}
+            {lang('CommentsCount', messagesCount, 'i')}
           </h3>
         </>
       ) : messageListType === 'pinned' ? (
         <>
           {renderBackButton()}
           <h3>
-            {lang('PinnedMessagesCount', messagesCount)}
+            {lang('PinnedMessagesCount', messagesCount, 'i')}
           </h3>
         </>
       ) : messageListType === 'scheduled' ? (
@@ -448,9 +448,7 @@ export default memo(withGlobal<OwnProps>(
       messagesCount = scheduledIds?.length;
     } else if (messageListType === 'thread' && threadId !== MAIN_THREAD_ID) {
       const threadInfo = selectThreadInfo(global, chatId, threadId);
-      if (threadInfo) {
-        messagesCount = threadInfo.messagesCount;
-      }
+      messagesCount = threadInfo?.messagesCount || 0;
     }
 
     const state: StateProps = {
