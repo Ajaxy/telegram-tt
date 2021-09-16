@@ -86,11 +86,8 @@ const VideoPlayer: FC<OwnProps> = ({
       videoRef.current!.pause();
       setIsPlayed(false);
     } else {
-      safePlay(videoRef.current!);
+      videoRef.current!.play();
       setIsPlayed(true);
-      if (IS_SINGLE_COLUMN_LAYOUT) {
-        setIsControlsVisible(false);
-      }
     }
   }, [isPlayed]);
 
@@ -111,7 +108,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const handleEnded = useCallback(() => {
     setCurrentTime(0);
     setIsPlayed(false);
-    setIsControlsVisible(true);
   }, []);
 
   const handleFullscreenChange = useCallback(() => {
@@ -129,10 +125,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const toggleControls = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsControlsVisible(!isControlsVisible);
-    if (!isControlsVisible) {
-      videoRef.current!.pause();
-      setIsPlayed(false);
-    }
   }, [isControlsVisible]);
 
   useEffect(() => {
@@ -157,8 +149,8 @@ const VideoPlayer: FC<OwnProps> = ({
     <div
       className="VideoPlayer"
       onClick={!isGif && IS_SINGLE_COLUMN_LAYOUT ? toggleControls : undefined}
-      onMouseOver={!isGif && !IS_TOUCH_ENV ? handleMouseOver : undefined}
-      onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
+      onMouseOver={!isGif ? handleMouseOver : undefined}
+      onMouseOut={!isGif ? handleMouseOut : undefined}
     >
       <div
         // @ts-ignore
@@ -210,7 +202,7 @@ const VideoPlayer: FC<OwnProps> = ({
           isFullscreen={isFullscreen}
           fileSize={fileSize}
           duration={videoRef.current ? videoRef.current.duration : 0}
-          isForceVisible={isControlsVisible}
+          isForceVisible={!isPlayed || isControlsVisible}
           isForceMobileVersion={posterSize && posterSize.width < MOBILE_VERSION_CONTROL_WIDTH}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}
