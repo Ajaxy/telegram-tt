@@ -50,9 +50,11 @@ export const IS_SINGLE_COLUMN_LAYOUT = window.innerWidth <= MOBILE_SCREEN_MAX_WI
 export const IS_TABLET_COLUMN_LAYOUT = !IS_SINGLE_COLUMN_LAYOUT && (
   window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
 );
-export const IS_VOICE_RECORDING_SUPPORTED = (navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
-  window.AudioContext || (window as any).webkitAudioContext
-));
+export const IS_VOICE_RECORDING_SUPPORTED = Boolean(
+  navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
+    window.AudioContext || (window as any).webkitAudioContext
+  ),
+);
 export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentElement.style;
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && (IS_MAC_OS || IS_IOS);
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
