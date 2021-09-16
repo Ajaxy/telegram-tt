@@ -27,7 +27,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
-import usePreventIosPinchZoom from '../../hooks/usePreventIosPinchZoom';
+import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import { processDeepLink } from '../../util/deeplink';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 
@@ -228,7 +228,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   useBackgroundMode(handleBlur, handleFocus);
   useBeforeUnload(handleBlur);
 
-  usePreventIosPinchZoom(isMediaViewerOpen);
+  usePreventPinchZoomGesture(isMediaViewerOpen);
 
   function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
