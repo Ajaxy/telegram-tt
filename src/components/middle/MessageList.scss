@@ -79,16 +79,20 @@
 
       @media (max-width: 600px) {
         margin-bottom: 4.25rem;
-
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-          body:not(.keyboard-visible) & {
-            margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
-          }
-        }
       }
 
       &.ActionMessage {
         padding-bottom: 0.125rem;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    &.type-pinned .last-in-list {
+      @supports (padding-bottom: env(safe-area-inset-bottom)) {
+        body:not(.keyboard-visible) & {
+          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+        }
       }
     }
   }
