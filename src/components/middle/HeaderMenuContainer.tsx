@@ -191,10 +191,10 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           )}
           {hasLinkedChat && (
             <MenuItem
-              icon="comments"
+              icon={isChannel ? 'comments' : 'channel'}
               onClick={handleLinkedChatClick}
             >
-              {lang('ViewDiscussion')}
+              {lang(isChannel ? 'ViewDiscussion' : 'lng_profile_view_channel')}
             </MenuItem>
           )}
           <MenuItem

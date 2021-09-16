@@ -37,5 +37,6 @@
   "--color-code": ["#4a729a", "#8774E1"],
   "--color-code-own": ["#3c7940", "#FFFFFF"],
   "--color-code-bg": ["#70757914", "#ffffff26"],
-  "--color-code-own-bg": ["#70757914", "#ffffff26"]
+  "--color-code-own-bg": ["#70757914", "#ffffff26"],
+  "--color-composer-button": ["#707579CC", "#AAAAAACC"]
 }

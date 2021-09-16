@@ -146,7 +146,7 @@
     > .Button {
       opacity: 1;
       transform: scale(1);
-      transition: opacity var(--select-transition), transform var(--select-transition);
+      transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s, color 0.15s;
 
       body.animation-level-0 & {
         transition: none !important;
