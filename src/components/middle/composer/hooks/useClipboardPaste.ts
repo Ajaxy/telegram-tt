@@ -24,7 +24,8 @@ export default (
       }
 
       const { items } = e.clipboardData;
-      const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
+      const media = Array.from(items)
+        .find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type) && item.kind === 'file');
       const file = media && media.getAsFile();
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
 
