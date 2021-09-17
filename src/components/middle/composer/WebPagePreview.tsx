@@ -79,7 +79,7 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   const isShown = Boolean(webPagePreview && messageText.length && !noWebPage && !disabled);
   const { shouldRender, transitionClassNames } = useShowTransition(isShown);
 
-  const renderingWebPage = useCurrentOrPrev(webPagePreview);
+  const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 
   if (!shouldRender || !renderingWebPage) {
     return undefined;
