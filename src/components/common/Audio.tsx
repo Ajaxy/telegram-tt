@@ -156,12 +156,11 @@ const Audio: FC<OwnProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring);
 
-  const handleButtonClick = useCallback(() => {
-    if (isUploading && !isPlaying) {
-      if (onCancelUpload) {
-        onCancelUpload();
-      }
+  const shouldRenderCross = shouldRenderSpinner && (isLoadingForPlaying || isUploading);
 
+  const handleButtonClick = useCallback(() => {
+    if (isUploading) {
+      onCancelUpload?.();
       return;
     }
 
@@ -269,7 +268,7 @@ const Audio: FC<OwnProps> = ({
   );
 
   const buttonClassNames = ['toggle-play'];
-  if (isLoadingForPlaying) {
+  if (shouldRenderCross) {
     buttonClassNames.push('loading');
   } else if (isPlaying) {
     buttonClassNames.push('pause');
@@ -334,13 +333,13 @@ const Audio: FC<OwnProps> = ({
         <i className="icon-pause" />
       </Button>
       {shouldRenderSpinner && (
-        <div className={buildClassName('media-loading', spinnerClassNames, isLoadingForPlaying && 'interactive')}>
+        <div className={buildClassName('media-loading', spinnerClassNames, shouldRenderCross && 'interactive')}>
           <ProgressSpinner
             progress={transferProgress}
             transparent
             size="m"
-            onClick={isLoadingForPlaying ? handleButtonClick : undefined}
-            noCross={!isLoadingForPlaying}
+            onClick={shouldRenderCross ? handleButtonClick : undefined}
+            noCross={!shouldRenderCross}
           />
         </div>
       )}
