@@ -151,12 +151,15 @@ const AttachmentModal: FC<OwnProps> = ({
 
   const areAllPhotos = renderingAttachments.every((a) => a.mimeType.startsWith('image/'));
   const areAllVideos = renderingAttachments.every((a) => a.mimeType.startsWith('video/'));
+  const areAllAudios = renderingAttachments.every((a) => a.mimeType.startsWith('audio/'));
 
   let title = '';
   if (areAllPhotos) {
     title = lang('PreviewSender.SendPhoto', renderingAttachments.length, 'i');
   } else if (areAllVideos) {
     title = lang('PreviewSender.SendVideo', renderingAttachments.length, 'i');
+  } else if (areAllAudios) {
+    title = lang('PreviewSender.SendAudio', renderingAttachments.length, 'i');
   } else {
     title = lang('PreviewSender.SendFile', renderingAttachments.length, 'i');
   }

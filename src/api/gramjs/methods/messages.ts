@@ -515,6 +515,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
           duration,
           w: width,
           h: height,
+          supportsStreaming: true,
         }));
       }
     }

@@ -194,7 +194,9 @@ const Video: FC<OwnProps> = ({
         <i className="icon-download" />
       )}
       {isTransferring ? (
-        <span className="message-upload-progress">...</span>
+        <span className="message-upload-progress">
+          {isUploading ? `${Math.round(transferProgress * 100)}%` : '...'}
+        </span>
       ) : (
         <div className="message-media-duration">
           {video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
