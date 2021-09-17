@@ -184,6 +184,28 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [animationLevel]);
 
+  // Fix for mobile virtual keyboard
+  useEffect(() => {
+    const { visualViewport } = window as any;
+    if (!visualViewport) {
+      return undefined;
+    }
+
+    const handleResize = () => {
+      if (window.visualViewport.height !== document.documentElement.clientHeight) {
+        document.body.classList.add('keyboard-visible');
+      } else {
+        document.body.classList.remove('keyboard-visible');
+      }
+    };
+
+    visualViewport.addEventListener('resize', handleResize);
+
+    return () => {
+      visualViewport.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
     if (e.propertyName === 'transform' && e.target === e.currentTarget) {
       setIsReady(Boolean(chatId));
