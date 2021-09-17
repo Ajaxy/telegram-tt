@@ -122,7 +122,7 @@ export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
 export const CONTENT_TYPES_FOR_QUICK_UPLOAD = new Set([
-  'image/png', 'image/gif', 'image/jpeg',
+  'image/png', 'image/gif', 'image/jpeg', 'video/mp4', 'video/avi', 'video/quicktime',
 ]);
 
 // eslint-disable-next-line max-len
