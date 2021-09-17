@@ -94,8 +94,8 @@ async function searchChats(query: string) {
     },
     globalResults: {
       ...global.globalSearch.globalResults,
-      chatIds: globalUsers.map(({ id }) => id),
-      userIds: globalChats.map(({ id }) => id),
+      chatIds: globalChats.map(({ id }) => id),
+      userIds: globalUsers.map(({ id }) => id),
     },
   });
 
