@@ -185,6 +185,10 @@ addReducer('loadProfilePhotos', (global, actions, payload) => {
   const user = isPrivate ? selectUser(global, profileId) : undefined;
   const chat = !isPrivate ? selectChat(global, profileId) : undefined;
 
+  if (!user && !chat) {
+    return;
+  }
+
   (async () => {
     const result = await callApi('fetchProfilePhotos', user, chat);
     if (!result || !result.photos) {
