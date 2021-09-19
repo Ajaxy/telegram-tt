@@ -41,20 +41,25 @@ async function scale(
 ) {
   // Safari does not have built-in resize method with quality control
   if ('createImageBitmap' in window) {
-    const bitmap = await window.createImageBitmap(img,
-      { resizeWidth: width, resizeHeight: height, resizeQuality: 'high' });
-    return new Promise((res) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const ctx = canvas.getContext('bitmaprenderer');
-      if (ctx) {
-        ctx.transferFromImageBitmap(bitmap);
-      } else {
-        canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
-      }
-      canvas.toBlob(res, outputType);
-    });
+    try {
+      const bitmap = await window.createImageBitmap(img,
+        { resizeWidth: width, resizeHeight: height, resizeQuality: 'high' });
+      return await new Promise((res) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const ctx = canvas.getContext('bitmaprenderer');
+        if (ctx) {
+          ctx.transferFromImageBitmap(bitmap);
+        } else {
+          canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+        }
+        canvas.toBlob(res, outputType);
+      });
+    } catch (e) {
+      // Fallback. Firefox below 93 does not recognize `createImageBitmap` with 2 parameters
+      return steppedScale(img, width, height, 0.5, outputType);
+    }
   } else {
     return steppedScale(img, width, height, 0.5, outputType);
   }
