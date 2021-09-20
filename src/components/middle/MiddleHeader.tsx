@@ -186,6 +186,12 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: chatId, threadId: MAIN_THREAD_ID, type: 'pinned' });
   }, [openChat, chatId]);
 
+  const setBackButtonActive = useCallback(() => {
+    setTimeout(() => {
+      isBackButtonActive.current = true;
+    }, BACK_BUTTON_INACTIVE_TIME);
+  }, []);
+
   const handleBackClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (!isBackButtonActive.current) return;
 
@@ -200,6 +206,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (isSelectModeActive) {
       exitMessageSelectMode();
+      setBackButtonActive();
       return;
     }
 
@@ -211,16 +218,16 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         toggleLeftColumn();
       }
 
+      setBackButtonActive();
+
       return;
     }
 
     openPreviousChat();
-    setTimeout(() => {
-      isBackButtonActive.current = true;
-    }, BACK_BUTTON_INACTIVE_TIME);
+    setBackButtonActive();
   }, [
     threadId, messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
-    openChat, toggleLeftColumn, exitMessageSelectMode,
+    openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive,
   ]);
 
   const unreadCount = useMemo(() => {
