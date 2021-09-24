@@ -1,4 +1,5 @@
 import { ApiAttachment } from '../../../../api/types';
+import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../../config';
 import {
   preloadImage,
   preloadVideo,
@@ -17,7 +18,7 @@ export default async function buildAttachment(
   let quick;
   let previewBlobUrl;
 
-  if (mimeType.startsWith('image/')) {
+  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
     if (isQuick) {
       const img = await preloadImage(blobUrl);
       const { width, height } = img;
@@ -33,7 +34,7 @@ export default async function buildAttachment(
     } else {
       previewBlobUrl = blobUrl;
     }
-  } else if (mimeType.startsWith('video/')) {
+  } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
     const { videoWidth: width, videoHeight: height, duration } = await preloadVideo(blobUrl);
     quick = { width, height, duration };
 

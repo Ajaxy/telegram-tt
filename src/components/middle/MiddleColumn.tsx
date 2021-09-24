@@ -13,12 +13,12 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
-  CONTENT_TYPES_FOR_QUICK_UPLOAD,
   ANIMATION_LEVEL_MAX,
   ANIMATION_END_DELAY,
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
   ANIMATION_LEVEL_MIN,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
 } from '../../config';
 import {
   IS_SINGLE_COLUMN_LAYOUT,
@@ -99,8 +99,8 @@ type DispatchProps = Pick<GlobalActions, (
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
-function canBeQuicklyUploaded(item: DataTransferItem) {
-  return item.kind === 'file' && item.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.has(item.type);
+function isImage(item: DataTransferItem) {
+  return item.kind === 'file' && item.type && SUPPORTED_IMAGE_CONTENT_TYPES.has(item.type);
 }
 
 const MiddleColumn: FC<StateProps & DispatchProps> = ({
@@ -228,7 +228,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
       .filter((item) => item.type !== 'text/uri-list')
-      .every(canBeQuicklyUploaded);
+      // As of September 2021, native clients suggest "send quick, but compressed" only for images
+      .every(isImage);
 
     setDropAreaState(shouldDrawQuick ? DropAreaState.QuickFile : DropAreaState.Document);
   }, []);

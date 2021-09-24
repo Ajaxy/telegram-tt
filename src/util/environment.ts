@@ -4,6 +4,8 @@ import {
   MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT,
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
   IS_TEST,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+  VIDEO_MOV_TYPE,
 } from '../config';
 
 export * from './environmentWebp';
@@ -66,6 +68,14 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slide-fade' : IS_IOS ? 'slide-layers' : 'push-slide';
+
+const TEST_VIDEO = document.createElement('video');
+export const IS_MOV_SUPPORTED = Boolean(
+  TEST_VIDEO.canPlayType(VIDEO_MOV_TYPE).replace('no', '')
+  || IS_IOS, // IOS reports '', but still plays .mov files
+);
+
+if (IS_MOV_SUPPORTED) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
 
 export const DPR = window.devicePixelRatio || 1;
 

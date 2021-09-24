@@ -121,8 +121,19 @@ export const BASE_EMOJI_KEYWORD_LANG = 'en';
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
-export const CONTENT_TYPES_FOR_QUICK_UPLOAD = new Set([
-  'image/png', 'image/gif', 'image/jpeg', 'video/mp4', 'video/avi', 'video/quicktime',
+export const VIDEO_MOV_TYPE = 'video/quicktime';
+
+export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
+  'image/png', 'image/gif', 'image/jpeg',
+]);
+
+export const SUPPORTED_VIDEO_CONTENT_TYPES = new Set([
+  'video/mp4', // video/quicktime added dynamically in environment.ts
+]);
+
+export const CONTENT_TYPES_WITH_PREVIEW = new Set([
+  ...SUPPORTED_IMAGE_CONTENT_TYPES,
+  ...SUPPORTED_VIDEO_CONTENT_TYPES,
 ]);
 
 // eslint-disable-next-line max-len

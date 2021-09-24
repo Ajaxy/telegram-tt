@@ -4,6 +4,7 @@ export interface ApiInitialArgs {
   userAgent: string;
   platform?: string;
   sessionData?: ApiSessionData;
+  isMovSupported?: boolean;
 }
 
 export interface ApiOnProgress {

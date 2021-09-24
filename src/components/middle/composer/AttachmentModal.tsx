@@ -4,7 +4,12 @@ import React, {
 
 import { ApiAttachment, ApiChatMember, ApiUser } from '../../../api/types';
 
-import { CONTENT_TYPES_FOR_QUICK_UPLOAD, EDITABLE_INPUT_MODAL_ID } from '../../../config';
+import {
+  CONTENT_TYPES_WITH_PREVIEW,
+  EDITABLE_INPUT_MODAL_ID,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+} from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
@@ -128,7 +133,7 @@ const AttachmentModal: FC<OwnProps> = ({
     if (files?.length) {
       const newFiles = isQuick
         ? Array.from(files).filter((file) => {
-          return file.type && CONTENT_TYPES_FOR_QUICK_UPLOAD.has(file.type);
+          return file.type && CONTENT_TYPES_WITH_PREVIEW.has(file.type);
         })
         : Array.from(files);
 
@@ -149,8 +154,8 @@ const AttachmentModal: FC<OwnProps> = ({
     return undefined;
   }
 
-  const areAllPhotos = renderingAttachments.every((a) => a.mimeType.startsWith('image/'));
-  const areAllVideos = renderingAttachments.every((a) => a.mimeType.startsWith('video/'));
+  const areAllPhotos = renderingAttachments.every((a) => SUPPORTED_IMAGE_CONTENT_TYPES.has(a.mimeType));
+  const areAllVideos = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
   const areAllAudios = renderingAttachments.every((a) => a.mimeType.startsWith('audio/'));
 
   let title = '';

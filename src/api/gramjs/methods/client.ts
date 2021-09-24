@@ -44,8 +44,13 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   onUpdate = _onUpdate;
 
-  const { userAgent, platform, sessionData } = initialArgs;
+  const {
+    userAgent, platform, sessionData, isMovSupported,
+  } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
+
+  // eslint-disable-next-line no-restricted-globals
+  (self as any).isMovSupported = isMovSupported;
 
   client = new TelegramClient(
     session,

@@ -18,7 +18,13 @@ import {
   ApiReportReason,
 } from '../../types';
 
-import { ALL_FOLDER_ID, DEBUG, PINNED_MESSAGES_LIMIT } from '../../../config';
+import {
+  ALL_FOLDER_ID,
+  DEBUG,
+  PINNED_MESSAGES_LIMIT,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+} from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
@@ -506,9 +512,11 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (quick) {
-    if (mimeType.startsWith('image/')) {
+    if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
       return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
-    } else {
+    }
+
+    if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
       const { width, height, duration } = quick;
       if (duration !== undefined) {
         attributes.push(new GramJs.DocumentAttributeVideo({
