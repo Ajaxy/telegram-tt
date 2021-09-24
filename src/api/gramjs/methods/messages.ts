@@ -813,7 +813,7 @@ export async function searchMessagesLocal({
       filter = new GramJs.InputMessagesFilterMusic();
       break;
     case 'voice':
-      filter = new GramJs.InputMessagesFilterVoice();
+      filter = new GramJs.InputMessagesFilterRoundVoice();
       break;
     case 'profilePhoto':
       filter = new GramJs.InputMessagesFilterChatPhotos();
@@ -890,7 +890,7 @@ export async function searchMessagesGlobal({
       filter = new GramJs.InputMessagesFilterMusic();
       break;
     case 'voice':
-      filter = new GramJs.InputMessagesFilterVoice();
+      filter = new GramJs.InputMessagesFilterRoundVoice();
       break;
     case 'text':
     default: {

@@ -79,8 +79,8 @@ const Audio: FC<OwnProps> = ({
   onCancelUpload,
   onDateClick,
 }) => {
-  const { content: { audio, voice }, isMediaUnread } = message;
-  const isVoice = Boolean(voice);
+  const { content: { audio, voice, video }, isMediaUnread } = message;
+  const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
   const playStateBeforeSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
@@ -229,7 +229,7 @@ const Audio: FC<OwnProps> = ({
     if (isVoice) {
       return (
         <div className="meta" dir={isRtl ? 'rtl' : undefined}>
-          {formatMediaDuration(voice!.duration)}
+          {formatMediaDuration((voice || video)!.duration)}
         </div>
       );
     }
@@ -359,7 +359,7 @@ const Audio: FC<OwnProps> = ({
         lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef, (isDownloadStarted || isUploading),
         date, transferProgress, onDateClick ? handleDateClick : undefined,
       )}
-      {origin === AudioOrigin.SharedMedia && voice && renderWithTitle()}
+      {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
       {origin === AudioOrigin.Inline && voice && renderVoice(voice, renderedWaveform, playProgress, isMediaUnread)}
     </div>
   );
@@ -408,7 +408,7 @@ function renderAudio(
           {date && (
             <>
               <span className="bullet">&bull;</span>
-              <Link className="date" onClick={handleDateClick}>{formatMediaDateTime(lang, date * 1000)}</Link>
+              <Link className="date" onClick={handleDateClick}>{formatMediaDateTime(lang, date * 1000, true)}</Link>
             </>
           )}
         </div>

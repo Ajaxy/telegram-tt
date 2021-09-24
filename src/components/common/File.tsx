@@ -147,8 +147,8 @@ const File: FC<OwnProps> = ({
           {sender && <span className="file-sender">{renderText(sender)}</span>}
           {!sender && timestamp && (
             <>
-              {' '}
-              <Link onClick={onDateClick}>{formatMediaDateTime(lang, timestamp * 1000)}</Link>
+              <span className="bullet" />
+              <Link onClick={onDateClick}>{formatMediaDateTime(lang, timestamp * 1000, true)}</Link>
             </>
           )}
         </div>

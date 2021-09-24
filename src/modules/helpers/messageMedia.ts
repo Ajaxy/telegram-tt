@@ -366,7 +366,10 @@ export function getMessageContentIds(
       break;
 
     case 'voice':
-      validator = getMessageVoice;
+      validator = (message: ApiMessage) => {
+        const video = getMessageVideo(message);
+        return getMessageVoice(message) || (video && video.isRound);
+      };
       break;
 
     case 'inlineMedia':

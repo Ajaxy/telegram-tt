@@ -75,20 +75,26 @@ export function formatMonthAndYear(lang: LangFn, date: Date, isShort = false) {
   return formatDate(lang, date, format);
 }
 
-export function formatHumanDate(lang: LangFn, datetime: number | Date, isShort = false, noWeekdays = false) {
+export function formatHumanDate(
+  lang: LangFn,
+  datetime: number | Date,
+  isShort = false,
+  noWeekdays = false,
+  isUpperFirst?: boolean,
+) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = getDayStart(new Date());
 
   if (!noWeekdays) {
     if (toIsoString(date) === toIsoString(today)) {
-      return (isShort ? lowerFirst : upperFirst)(lang('Weekday.Today'));
+      return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(lang('Weekday.Today'));
     }
 
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
     if (toIsoString(date) === toIsoString(yesterday)) {
-      return (isShort ? lowerFirst : upperFirst)(lang('Weekday.Yesterday'));
+      return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(lang('Weekday.Yesterday'));
     }
 
     const weekAgo = new Date(today);
@@ -97,9 +103,9 @@ export function formatHumanDate(lang: LangFn, datetime: number | Date, isShort =
     weekAhead.setDate(today.getDate() + 7);
     if (date >= weekAgo && date <= weekAhead) {
       const weekDay = WEEKDAYS_FULL[date.getDay()];
-      return isShort
-        ? lowerFirst(lang(`Weekday.Short${weekDay}`))
-        : upperFirst(lang(`Weekday.${weekDay}`));
+      const weekDayString = isShort ? lang(`Weekday.Short${weekDay}`) : lang(`Weekday.${weekDay}`);
+
+      return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(weekDayString);
     }
   }
 
@@ -109,7 +115,7 @@ export function formatHumanDate(lang: LangFn, datetime: number | Date, isShort =
     : (withYear ? 'chatFullDate' : 'chatDate');
   const format = lang(formatKey) || 'd MMMM yyyy';
 
-  return (isShort ? lowerFirst : upperFirst)(formatDate(lang, date, format));
+  return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(formatDate(lang, date, format));
 }
 
 function formatDate(lang: LangFn, date: Date, format: string) {
@@ -126,10 +132,10 @@ function formatDate(lang: LangFn, date: Date, format: string) {
     .replace('yyyy', String(date.getFullYear()));
 }
 
-export function formatMediaDateTime(lang: LangFn, datetime: number | Date) {
+export function formatMediaDateTime(lang: LangFn, datetime: number | Date, isUpperFirst?: boolean) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  return `${formatHumanDate(lang, date, true)}, ${formatTime(date)}`;
+  return `${formatHumanDate(lang, date, true, undefined, isUpperFirst)}, ${formatTime(date)}`;
 }
 
 export function formatMediaDuration(duration: number, maxValue?: number) {

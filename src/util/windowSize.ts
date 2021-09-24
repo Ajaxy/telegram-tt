@@ -36,11 +36,21 @@ const handleResize = throttle(() => {
   }
 }, 250, true);
 
-window.addEventListener('resize', handleResize);
 window.addEventListener('orientationchange', handleResize);
+if (IS_IOS) {
+  window.visualViewport.addEventListener('resize', handleResize);
+} else {
+  window.addEventListener('resize', handleResize);
+}
 
 export function updateSizes(): IDimensions {
-  const vh = window.innerHeight * 0.01;
+  let height: number;
+  if (IS_IOS) {
+    height = window.visualViewport.height + window.visualViewport.pageTop;
+  } else {
+    height = window.innerHeight;
+  }
+  const vh = height * 0.01;
 
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 

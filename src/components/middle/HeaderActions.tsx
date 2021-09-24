@@ -162,21 +162,19 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           <i className="icon-search" />
         </Button>
       )}
-      {(IS_SINGLE_COLUMN_LAYOUT || !canSubscribe) && (
-        <Button
-          ref={menuButtonRef}
-          className={isMenuOpen ? 'active' : ''}
-          round
-          ripple={!IS_SINGLE_COLUMN_LAYOUT}
-          size="smaller"
-          color="translucent"
-          disabled={noMenu}
-          ariaLabel="More actions"
-          onClick={handleHeaderMenuOpen}
-        >
-          <i className="icon-more" />
-        </Button>
-      )}
+      <Button
+        ref={menuButtonRef}
+        className={isMenuOpen ? 'active' : ''}
+        round
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        size="smaller"
+        color="translucent"
+        disabled={noMenu}
+        ariaLabel="More actions"
+        onClick={handleHeaderMenuOpen}
+      >
+        <i className="icon-more" />
+      </Button>
       {menuPosition && (
         <HeaderMenuContainer
           chatId={chatId}
@@ -226,15 +224,8 @@ export default memo(withGlobal<OwnProps>(
     const canMute = isMainThread && !isChatWithSelf && !canSubscribe;
     const canLeave = isMainThread && !canSubscribe;
 
-    const noMenu = !(
-      (IS_SINGLE_COLUMN_LAYOUT && canSubscribe)
-      || (IS_SINGLE_COLUMN_LAYOUT && canSearch)
-      || canMute
-      || canLeave
-    );
-
     return {
-      noMenu,
+      noMenu: false,
       isChannel,
       isRightColumnShown,
       canStartBot,

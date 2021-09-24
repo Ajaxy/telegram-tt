@@ -170,7 +170,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (play || playSegment) {
       if (isFrozen.current) {
         wasPlaying.current = true;
-      } else {
+      } else if (!animation.isPlaying()) {
         playAnimation(noLoop);
       }
     } else {
