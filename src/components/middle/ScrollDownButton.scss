@@ -74,10 +74,6 @@
 
     &.no-composer:not(.with-extra-shift) {
       transform: translateY(4rem);
-
-      @supports (padding-bottom: env(safe-area-inset-bottom)) {
-        transform: translateY(calc(4rem - env(safe-area-inset-bottom)));
-      }
     }
   }
 
