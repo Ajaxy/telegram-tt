@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
-  IS_ANDROID, IS_FIREFOX, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV,
+  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
@@ -37,11 +37,6 @@ addReducer('init', (global) => {
     document.body.classList.add('is-android');
   } else if (IS_MAC_OS) {
     document.body.classList.add('is-macos');
-  }
-  if (IS_FIREFOX) {
-    document.body.classList.add('is-firefox');
-  } else if (IS_SAFARI) {
-    document.body.classList.add('is-safari');
   }
 });
 
