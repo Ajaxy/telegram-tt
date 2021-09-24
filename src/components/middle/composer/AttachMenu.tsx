@@ -1,6 +1,6 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
-import { CONTENT_TYPES_FOR_QUICK_UPLOAD } from '../../../config';
+import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { IAllowedAttachmentOptions } from '../../../modules/helpers';
@@ -35,7 +35,7 @@ const AttachMenu: FC<OwnProps> = ({
 
   const handleQuickSelect = useCallback(() => {
     openSystemFilesDialog(
-      Array.from(CONTENT_TYPES_FOR_QUICK_UPLOAD).join(','),
+      Array.from(CONTENT_TYPES_WITH_PREVIEW).join(','),
       (e) => handleFileSelect(e, true),
     );
   }, [handleFileSelect]);
