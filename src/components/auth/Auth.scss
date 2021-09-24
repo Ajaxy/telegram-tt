@@ -121,6 +121,13 @@
       opacity: 0.5;
       transform: scale(0.8);
     }
+
+    canvas {
+      padding: .625rem;
+      border-radius: var(--border-radius-default);
+      background: var(--color-white);
+      margin-top: -.625rem;
+    }
   }
 
   h3 {
