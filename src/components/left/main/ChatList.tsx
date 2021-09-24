@@ -45,7 +45,9 @@ type StateProps = {
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages' | 'openChat' | 'openNextChat'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadMoreChats' | 'preloadTopChatMessages' | 'preloadArchivedChats' | 'openChat' | 'openNextChat'
+)>;
 
 enum FolderTypeToListType {
   'all' = 'active',
@@ -68,6 +70,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   onScreenSelect,
   loadMoreChats,
   preloadTopChatMessages,
+  preloadArchivedChats,
   openChat,
   openNextChat,
 }) => {
@@ -122,8 +125,9 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     if (lastSyncTime && folderType === 'all') {
       preloadTopChatMessages();
+      preloadArchivedChats();
     }
-  }, [lastSyncTime, folderType, preloadTopChatMessages]);
+  }, [lastSyncTime, folderType, preloadTopChatMessages, preloadArchivedChats]);
 
   const getAnimationType = useChatAnimationType(orderDiffById);
 
@@ -255,6 +259,7 @@ export default memo(withGlobal<OwnProps>(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadMoreChats',
     'preloadTopChatMessages',
+    'preloadArchivedChats',
     'openChat',
     'openNextChat',
   ]),

@@ -47,11 +47,12 @@ import {
 } from '../../helpers';
 import { processDeepLink } from '../../../util/deeplink';
 
-const TOP_CHATS_PRELOAD_PAUSE = 100;
+const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
+const CHATS_PRELOAD_INTERVAL = 300;
 // We expect this ID does not exist
 const TMP_CHAT_ID = -1;
 
-const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
+const runThrottledForLoadChats = throttle((cb) => cb(), CHATS_PRELOAD_INTERVAL, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
@@ -60,7 +61,7 @@ addReducer('preloadTopChatMessages', (global, actions) => {
     const preloadedChatIds: number[] = [];
 
     for (let i = 0; i < TOP_CHAT_MESSAGES_PRELOAD_LIMIT; i++) {
-      await pause(TOP_CHATS_PRELOAD_PAUSE);
+      await pause(TOP_CHAT_MESSAGES_PRELOAD_INTERVAL);
 
       const {
         byId,
@@ -207,6 +208,24 @@ addReducer('loadMoreChats', (global, actions, payload) => {
   }
 });
 
+addReducer('preloadArchivedChats', () => {
+  (async () => {
+    while (!getGlobal().chats.isFullyLoaded.archived) {
+      const currentGlobal = getGlobal();
+      const listIds = currentGlobal.chats.listIds.archived;
+      const oldestChat = listIds
+        ? listIds
+          .map((id) => currentGlobal.chats.byId[id])
+          .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(currentGlobal, chat.id))
+          .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
+        : undefined;
+
+      await loadChats('archived', oldestChat?.id, oldestChat?.lastMessage!.date);
+      await pause(CHATS_PRELOAD_INTERVAL);
+    }
+  })();
+});
+
 addReducer('loadFullChat', (global, actions, payload) => {
   const { chatId, force } = payload!;
   const chat = selectChat(global, chatId);
@@ -279,7 +298,7 @@ addReducer('joinChannel', (global, actions, payload) => {
 
 addReducer('deleteChatUser', (global, actions, payload) => {
   (async () => {
-    const { chatId, userId } : { chatId: number; userId: number } = payload!;
+    const { chatId, userId }: { chatId: number; userId: number } = payload!;
     const chat = selectChat(global, chatId);
     const user = selectUser(global, userId);
     if (!chat || !user) {
@@ -296,7 +315,7 @@ addReducer('deleteChatUser', (global, actions, payload) => {
 
 addReducer('deleteChat', (global, actions, payload) => {
   (async () => {
-    const { chatId } : { chatId: number } = payload!;
+    const { chatId }: { chatId: number } = payload!;
     const chat = selectChat(global, chatId);
     if (!chat) {
       return;

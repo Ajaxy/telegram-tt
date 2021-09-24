@@ -452,7 +452,8 @@ export type ActionTypes = (
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
   // chats
-  'preloadTopChatMessages' | 'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'openLinkedChat' |
+  'preloadTopChatMessages' | 'preloadArchivedChats' | 'loadChats' | 'loadMoreChats' | 'openChat' |
+  'openChatWithInfo' | 'openLinkedChat' |
   'openSupportChat' | 'openTipsChat' | 'focusMessageInComments' |
   'loadFullChat' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
