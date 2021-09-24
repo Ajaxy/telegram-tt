@@ -271,14 +271,16 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
           break;
         case 'documents':
-          text = lang('lng_media_file_empty_search');
+          text = lang('lng_media_file_empty');
           break;
         case 'links':
-          text = lang('lng_media_link_empty_search');
+          text = lang('lng_media_link_empty');
+          break;
+        case 'audio':
+          text = lang('lng_media_song_empty');
           break;
         case 'voice':
-        case 'audio':
-          text = lang('lng_media_song_empty_search');
+          text = lang('lng_media_audio_empty');
           break;
         default:
           text = lang('SharedMedia.EmptyTitle');

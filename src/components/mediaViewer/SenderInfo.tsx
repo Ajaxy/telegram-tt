@@ -62,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date" dir="auto">
-          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(lang, message!.date * 1000)}
+          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(lang, message!.date * 1000, true)}
         </div>
       </div>
     </div>

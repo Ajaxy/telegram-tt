@@ -18,6 +18,7 @@ import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
 import buildClassName from '../../../util/buildClassName';
+import { stopCurrentAudio } from '../../../util/audioPlayer';
 import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import usePauseOnInactive from './hooks/usePauseOnInactive';
@@ -156,6 +157,7 @@ const RoundVideo: FC<OwnProps> = ({
     if (isActivated) {
       if (playerEl.paused) {
         safePlay(playerEl);
+        stopCurrentAudio();
       } else {
         playerEl.pause();
       }
@@ -165,6 +167,7 @@ const RoundVideo: FC<OwnProps> = ({
       playerEl.pause();
       playerEl.currentTime = 0;
       safePlay(playerEl);
+      stopCurrentAudio();
 
       setIsActivated(true);
     }

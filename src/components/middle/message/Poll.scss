@@ -121,9 +121,13 @@
     margin-top: -2px;
 
     .Avatar {
-      border: 1px solid var(--color-white);
+      border: .0625rem solid var(--color-white);
       margin-right: 0;
       box-sizing: content-box;
+
+      .Message.own & {
+        border: .0625rem solid var(--secondary-color);
+      }
 
       &:not(:first-child) {
         margin-left: -3px;
