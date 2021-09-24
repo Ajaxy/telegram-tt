@@ -46,7 +46,10 @@
 
       i {
         font-size: 1.625rem;
-        margin-top: -.025rem;
+
+        &.icon-pause {
+          font-size: 1.5625rem;
+        }
       }
     }
 
@@ -54,9 +57,9 @@
       position: absolute;
 
       &.icon-play {
-        margin-left: .125rem;
+        margin-left: .1875rem;
         @media (max-width: 600px) {
-          margin-left: .0625rem;
+          margin-left: .125rem;
         }
       }
     }
@@ -78,11 +81,11 @@
 
   .download-button {
     position: absolute;
-    width: 1.3125rem !important;
-    height: 1.3125rem !important;
+    width: 1.1875rem !important;
+    height: 1.1875rem !important;
     padding: 0;
-    left: 1.8rem;
-    top: 1.8rem;
+    left: 1.9375rem;
+    top: 1.9375rem;
     border: .125rem solid var(--background-color);
     z-index: 1;
 
@@ -124,28 +127,16 @@
     color: var(--color-text-secondary);
     font-variant-numeric: tabular-nums;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
 
-    .unread {
-      display: block;
+    &.unread::after {
+      content: '';
       position: relative;
-      margin-left: 0.5rem;
-
-      &::before {
-        content: "";
-        display: block;
-        position: absolute;
-
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-        width: 0.4rem;
-        height: 0.4rem;
-        border-radius: 50%;
-
-        background-color: var(--accent-color);
-      }
+      margin: 0 0 .375rem .25rem;
+      width: 0.4375rem;
+      height: 0.4375rem;
+      border-radius: 50%;
+      background-color: var(--accent-color);
     }
   }
 

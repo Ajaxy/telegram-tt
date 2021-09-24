@@ -57,7 +57,7 @@ type OwnProps = {
   onDateClick?: (messageId: number, chatId: number) => void;
 };
 
-const AVG_VOICE_DURATION = 30;
+const AVG_VOICE_DURATION = 10;
 const MIN_SPIKES = IS_SINGLE_COLUMN_LAYOUT ? 20 : 25;
 const MAX_SPIKES = IS_SINGLE_COLUMN_LAYOUT ? 50 : 75;
 // This is needed for browsers requiring user interaction before playing.
@@ -421,9 +421,8 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, playProgress: numbe
   return (
     <div className="content">
       {renderedWaveform}
-      <p className="voice-duration" dir="auto">
+      <p className={buildClassName('voice-duration', isMediaUnread && 'unread')} dir="auto">
         {playProgress === 0 ? formatMediaDuration(voice.duration) : formatMediaDuration(voice.duration * playProgress)}
-        {isMediaUnread && <span className="unread" />}
       </p>
     </div>
   );
