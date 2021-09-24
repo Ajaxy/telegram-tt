@@ -175,6 +175,7 @@ const VideoPlayer: FC<OwnProps> = ({
           id="media-viewer-video"
           // @ts-ignore
           style={videoStyle}
+          onPlay={IS_IOS ? () => setIsPlayed(true) : undefined}
           onEnded={handleEnded}
           onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
           onDoubleClick={handleFullscreenChange}
