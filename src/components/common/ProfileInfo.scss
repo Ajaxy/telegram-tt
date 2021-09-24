@@ -1,6 +1,12 @@
 .ProfileInfo {
   aspect-ratio: 1 / 1;
   position: relative;
+  overflow: hidden;
+
+  body.is-safari #Main & {
+    transform: translateZ(-1px) scale(2);
+    transform-origin: 0 0;
+  }
 
   @supports not (aspect-ratio: 1 / 1) {
     &::before {
@@ -22,6 +28,11 @@
     left: 0;
     top: 0;
     bottom: 0;
+
+    body:not(.is-firefox):not(.is-safari) & {
+      transform: translateZ(-1px) scale(2);
+      transform-origin: 0 0;
+    }
 
     > .Transition {
       width: 100%;

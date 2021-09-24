@@ -147,6 +147,12 @@ body:not(.is-ios) {
   }
 }
 
+body:not(.is-firefox) .parallax-scroll {
+  perspective: 1px;
+  perspective-origin: left top;
+  transform: translateZ(0px);
+}
+
 .emoji-small {
   background: no-repeat;
   background-size: 1.25rem;

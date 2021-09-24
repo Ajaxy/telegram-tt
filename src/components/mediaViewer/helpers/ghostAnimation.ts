@@ -53,6 +53,11 @@ export function animateOpening(
     fromHeight = uncovered.height;
   }
 
+  if (origin === MediaViewerOrigin.ProfileAvatar || origin === MediaViewerOrigin.SettingsAvatar) {
+    fromWidth = fromImage.offsetWidth;
+    fromHeight = fromImage.offsetHeight;
+  }
+
   const fromTranslateX = (fromLeft + fromWidth / 2) - (toLeft + toWidth / 2);
   const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
   const fromScaleX = fromWidth / toWidth;
@@ -105,9 +110,8 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   const {
     top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
   } = fromImage.getBoundingClientRect();
-  const {
-    top: targetTop, left: toLeft, width: toWidth, height: toHeight,
-  } = toImage.getBoundingClientRect();
+  const { top: targetTop, left: toLeft } = toImage.getBoundingClientRect();
+  const { offsetWidth: toWidth, offsetHeight: toHeight } = toImage;
 
   let toTop = targetTop;
   if (!isElementInViewport(container)) {

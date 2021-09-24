@@ -47,7 +47,7 @@ const SettingsMain: FC<OwnProps & StateProps & DispatchProps> = ({
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Main);
 
   return (
-    <div className="settings-content custom-scroll">
+    <div className="settings-content custom-scroll parallax-scroll">
       <div className="settings-main-menu">
         {currentUser && (
           <ProfileInfo

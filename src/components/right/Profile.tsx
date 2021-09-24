@@ -375,7 +375,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <InfiniteScroll
       ref={containerRef}
-      className="Profile custom-scroll"
+      className="Profile custom-scroll parallax-scroll"
       itemSelector={buildInfiniteScrollItemSelector(resultType)}
       items={canRenderContents ? viewportIds : undefined}
       cacheBuster={cacheBuster}
