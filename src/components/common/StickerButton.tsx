@@ -76,6 +76,7 @@ const StickerButton: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'StickerButton',
+    onClick && 'interactive',
     sticker.isAnimated && 'animated',
     stickerSelector,
     className,

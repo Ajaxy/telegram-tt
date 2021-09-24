@@ -8,10 +8,13 @@ import { GlobalActions } from '../../global/types';
 
 import { STICKER_SIZE_MODAL } from '../../config';
 import { pick } from '../../util/iteratees';
-import { selectStickerSet, selectStickerSetByShortName } from '../../modules/selectors';
+import {
+  selectChat, selectCurrentMessageList, selectStickerSet, selectStickerSetByShortName,
+} from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
+import { getAllowedAttachmentOptions, getCanPostInChat } from '../../modules/helpers';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -28,6 +31,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  canSendStickers?: boolean;
   stickerSet?: ApiStickerSet;
 };
 
@@ -40,6 +44,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
   fromSticker,
   stickerSetShortName,
   stickerSet,
+  canSendStickers,
   onClose,
   loadStickers,
   toggleStickerSet,
@@ -102,7 +107,7 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
                 sticker={sticker}
                 size={STICKER_SIZE_MODAL}
                 observeIntersection={observeIntersection}
-                onClick={handleSelect}
+                onClick={canSendStickers ? handleSelect : undefined}
                 clickArg={sticker}
               />
             ))}
@@ -129,9 +134,18 @@ const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, { fromSticker, stickerSetShortName }: OwnProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { fromSticker, stickerSetShortName }): StateProps => {
+    const currentMessageList = selectCurrentMessageList(global);
+    const { chatId, threadId } = currentMessageList || {};
+    const chat = chatId && selectChat(global, chatId);
+    const sendOptions = chat ? getAllowedAttachmentOptions(chat) : undefined;
+    const canSendStickers = Boolean(
+      chat && threadId && getCanPostInChat(chat, threadId) && sendOptions?.canSendStickers,
+    );
+
     return {
+      canSendStickers,
       stickerSet: fromSticker
         ? selectStickerSet(global, fromSticker.stickerSetId)
         : stickerSetShortName
