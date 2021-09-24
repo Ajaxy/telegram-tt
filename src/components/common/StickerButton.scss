@@ -6,9 +6,21 @@
   border-radius: var(--border-radius-messages-small);
   background: transparent no-repeat center;
   background-size: contain;
-  cursor: pointer;
   transition: background-color .15s ease, opacity .3s ease !important;
   position: relative;
+
+  &.interactive {
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-interactive-element-hover);
+
+      .sticker-unfave-button {
+        opacity: 1;
+      }
+    }
+
+  }
 
   @media (max-width: 600px) {
     margin: 0.25rem;
@@ -51,13 +63,5 @@
     }
 
     opacity: 0;
-  }
-
-  &:hover {
-    background-color: var(--color-interactive-element-hover);
-
-    .sticker-unfave-button {
-      opacity: 1;
-    }
   }
 }
