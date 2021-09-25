@@ -32,6 +32,7 @@ export function useIntersectionObserver({
   margin,
   threshold,
   isDisabled,
+  isAutoUnfreezeDisabled = false,
 }: {
   rootRef: RefObject<HTMLDivElement>;
   throttleMs?: number;
@@ -40,6 +41,7 @@ export function useIntersectionObserver({
   margin?: number;
   threshold?: number | number[];
   isDisabled?: boolean;
+  isAutoUnfreezeDisabled?: boolean;
 }, rootCallback?: RootCallback): Response {
   const controllerRef = useRef<IntersectionController>();
   const rootCallbackRef = useRef<RootCallback>();
@@ -65,6 +67,10 @@ export function useIntersectionObserver({
   const freeze = useCallback(() => {
     freezeFlagsRef.current++;
 
+    if (isAutoUnfreezeDisabled) {
+      return;
+    }
+
     if (autoUnfreezeTimeoutRef.current) {
       clearTimeout(autoUnfreezeTimeoutRef.current);
       autoUnfreezeTimeoutRef.current = undefined;
@@ -81,7 +87,7 @@ export function useIntersectionObserver({
       freezeFlagsRef.current = 1;
       unfreeze();
     }, AUTO_UNFREEZE_TIMEOUT);
-  }, [unfreeze]);
+  }, [isAutoUnfreezeDisabled, unfreeze]);
 
   useHeavyAnimationCheck(freeze, unfreeze);
 
