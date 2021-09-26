@@ -93,9 +93,6 @@
   @media (max-width: 600px) {
     padding: 0.5rem;
     position: relative;
-    // Force rendering in the composite layer to fix the z-index rendering issue
-    transform: translate3d(0, 0, 10px);
-    transform-style: preserve-3d;
 
     @supports (padding-left: env(safe-area-inset-left)) {
       padding-left: #{"max(.5rem, env(safe-area-inset-left))"};
@@ -486,12 +483,6 @@
 
   @media (max-width: 600px) {
     @include mobile-header-styles();
-
-    .HeaderPinnedMessage-wrapper,
-    .AudioPlayer {
-      // Force rendering in the composite layer to fix the z-index rendering issue
-      transform: translate3d(0, 0, 0);
-    }
   }
 
   @media (min-width: 925px) and (max-width: 1149.9px) {
