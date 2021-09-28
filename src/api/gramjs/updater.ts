@@ -85,6 +85,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     || update instanceof GramJs.UpdateServiceNotification
   ) {
     let message: ApiMessage | undefined;
+    let shouldForceReply: boolean | undefined;
 
     if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);
@@ -113,6 +114,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       }
 
       message = buildApiMessage(update.message)!;
+      shouldForceReply = 'replyMarkup' in update.message
+        && update.message?.replyMarkup instanceof GramJs.ReplyKeyboardForceReply
+        && (!update.message.replyMarkup.selective || message.isMentioned);
     }
 
     // eslint-disable-next-line no-underscore-dangle
@@ -161,6 +165,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         id: message.id,
         chatId: message.chatId,
         message,
+        shouldForceReply,
       });
     }
 

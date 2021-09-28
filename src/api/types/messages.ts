@@ -245,6 +245,7 @@ export interface ApiMessage {
   previousLocalId?: number;
   views?: number;
   isEdited?: boolean;
+  isMentioned?: boolean;
   isMediaUnread?: boolean;
   groupedId?: string;
   isInAlbum?: boolean;

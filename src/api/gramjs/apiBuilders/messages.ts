@@ -171,6 +171,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     ...(isEdited && { isEdited }),
     ...(isMediaUnread && { isMediaUnread }),
     ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
+    ...(mtpMessage.mentioned && { isMentioned: true }),
     ...(groupedId && {
       groupedId,
       isInAlbum,

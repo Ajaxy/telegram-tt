@@ -158,6 +158,7 @@ export type ApiUpdateNewMessage = {
   chatId: number;
   id: number;
   message: Partial<ApiMessage>;
+  shouldForceReply?: boolean;
 };
 
 export type ApiUpdateMessage = {
