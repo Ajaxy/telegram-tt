@@ -621,7 +621,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderSenderName() {
     const shouldRender = !(customShape && !viaBotId) && (
       (withSenderName && !photo && !video) || asForwarded || viaBotId || forceSenderName
-    ) && (!isInDocumentGroup || isFirstInDocumentGroup);
+    ) && (!isInDocumentGroup || isFirstInDocumentGroup) && !(hasReply && customShape);
 
     if (!shouldRender) {
       return undefined;
