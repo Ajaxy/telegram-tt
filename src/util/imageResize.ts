@@ -44,6 +44,9 @@ async function scale(
     try {
       const bitmap = await window.createImageBitmap(img,
         { resizeWidth: width, resizeHeight: height, resizeQuality: 'high' });
+      if (bitmap.width != width || bitmap.height != height) {
+        throw "not resized";
+      }
       return await new Promise((res) => {
         const canvas = document.createElement('canvas');
         canvas.width = bitmap.width;
