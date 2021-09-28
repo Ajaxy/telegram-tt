@@ -3,6 +3,9 @@ import { IS_IOS, IS_PWA, IS_TOUCH_ENV } from '../util/environment';
 
 const metaViewport = document.querySelector('meta[name="viewport"]');
 const defaultViewportContent = metaViewport?.getAttribute('content') || '';
+const allowedZoomViewportContent = defaultViewportContent
+  .replace(/\s*maximum-scale=1\.0,?/i, '')
+  .replace(/\s*user-scalable=no,?/i, '');
 
 export default function usePreventPinchZoomGesture(isDisabled = false) {
   useEffect(() => {
@@ -13,7 +16,7 @@ export default function usePreventPinchZoomGesture(isDisabled = false) {
     if (isDisabled) {
       // Clean viewport content from values values that disable the ability to zoom a webpage
       // https://web.dev/meta-viewport/
-      metaViewport?.setAttribute('content', 'width=device-width, initial-scale=1, shrink-to-fit=no');
+      metaViewport?.setAttribute('content', allowedZoomViewportContent);
       return undefined;
     }
 
