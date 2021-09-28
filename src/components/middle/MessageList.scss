@@ -33,7 +33,12 @@
 
   @supports (padding-bottom: env(safe-area-inset-bottom)) {
     body.keyboard-visible & {
-      transform: translateY(env(safe-area-inset-bottom));
+      transition: margin-bottom 150ms ease-out;
+      margin-bottom: calc(.5rem - env(safe-area-inset-bottom));
+
+      body.keyboard-visible.animation-level-0 & {
+        transition: none !important;
+      }
     }
   }
 
