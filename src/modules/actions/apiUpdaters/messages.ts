@@ -46,7 +46,9 @@ const ANIMATION_DELAY = 350;
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'newMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, shouldForceReply,
+      } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
@@ -86,7 +88,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         // @perf Wait until scroll animation finishes or simply rely on delivery status update (which is itself delayed)
         if (!isMessageLocal(message as ApiMessage)) {
           setTimeout(() => {
-            setGlobal(updateChatLastMessage(getGlobal(), chatId, newMessage));
+            let delayedGlobal = getGlobal();
+            if (shouldForceReply) {
+              delayedGlobal = replaceThreadParam(delayedGlobal, chatId, MAIN_THREAD_ID, 'replyingToId', id);
+            }
+            setGlobal(updateChatLastMessage(delayedGlobal, chatId, newMessage));
           }, ANIMATION_DELAY);
         }
       } else {

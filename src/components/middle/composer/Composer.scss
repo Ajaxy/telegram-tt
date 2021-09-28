@@ -334,15 +334,15 @@
     font-size: var(--composer-text-size, 1rem);
     top: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2);
     bottom: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .forced-placeholder {
     z-index: var(--z-below);
     left: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    max-width: 100%;
-    text-overflow: ellipsis;
   }
 
   &[dir=rtl] .placeholder-text {
