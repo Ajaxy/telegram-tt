@@ -32,9 +32,10 @@
   }
 
   @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    transition: bottom 150ms ease-out, transform var(--layer-transition);
     body.keyboard-visible & {
-      transition: margin-bottom 150ms ease-out;
-      margin-bottom: calc(.5rem - env(safe-area-inset-bottom));
+      position: relative;
+      bottom: calc(0px - env(safe-area-inset-bottom));
 
       body.keyboard-visible.animation-level-0 & {
         transition: none !important;
