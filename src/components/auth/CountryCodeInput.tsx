@@ -58,16 +58,11 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
     }
   }, [phoneCodeList, updateFilter]);
 
-  const handleChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    const { countryCode } = (e.currentTarget.firstElementChild as HTMLDivElement).dataset;
-    const country = phoneCodeList.find((c) => c.countryCode === countryCode);
-
-    if (country) {
-      onChange(country);
-    }
+  const handleChange = useCallback((country: ApiCountryCode) => {
+    onChange(country);
 
     setTimeout(() => updateFilter(undefined), MENU_HIDING_DURATION);
-  }, [phoneCodeList, onChange, updateFilter]);
+  }, [onChange, updateFilter]);
 
   const handleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
     updateFilter(e.currentTarget.value);
@@ -141,11 +136,10 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
       {filteredList
         .map((country: ApiCountryCode) => (
           <MenuItem
-            key={country.countryCode}
+            key={country.iso2}
             className={value && country.iso2 === value.iso2 ? 'selected' : ''}
-            onClick={handleChange}
+            onClick={() => handleChange(country)}
           >
-            <span data-country-code={country.countryCode} />
             <span className="country-flag">{renderText(isoToEmoji(country.iso2), ['hq_emoji'])}</span>
             <span className="country-name">{country.name || country.defaultName}</span>
             <span className="country-code">{country.countryCode}</span>
