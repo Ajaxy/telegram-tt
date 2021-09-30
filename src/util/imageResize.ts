@@ -44,6 +44,9 @@ async function scale(
     try {
       const bitmap = await window.createImageBitmap(img,
         { resizeWidth: width, resizeHeight: height, resizeQuality: 'high' });
+      if (bitmap.height !== height || bitmap.width !== width) {
+        throw new Error('Image bitmap resize not supported!'); // FF93 added support for options, but not resize
+      }
       return await new Promise((res) => {
         const canvas = document.createElement('canvas');
         canvas.width = bitmap.width;
@@ -58,10 +61,10 @@ async function scale(
       });
     } catch (e) {
       // Fallback. Firefox below 93 does not recognize `createImageBitmap` with 2 parameters
-      return steppedScale(img, width, height, 0.5, outputType);
+      return steppedScale(img, width, height, undefined, outputType);
     }
   } else {
-    return steppedScale(img, width, height, 0.5, outputType);
+    return steppedScale(img, width, height, undefined, outputType);
   }
 }
 
