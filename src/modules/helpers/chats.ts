@@ -498,14 +498,6 @@ function getFolderChatsCount(
   return pinnedChats.length + otherChats.length;
 }
 
-export function isChat(chatOrUser?: ApiUser | ApiChat): chatOrUser is ApiChat {
-  if (!chatOrUser) {
-    return false;
-  }
-
-  return chatOrUser.id < 0;
-}
-
 export function getMessageSenderName(lang: LangFn, chatId: number, sender?: ApiUser) {
   if (!sender || isChatPrivate(chatId)) {
     return undefined;

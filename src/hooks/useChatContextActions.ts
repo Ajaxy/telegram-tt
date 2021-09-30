@@ -12,6 +12,7 @@ export default ({
   chat,
   privateChatUser,
   handleDelete,
+  handleChatFolderChange,
   folderId,
   isPinned,
   isMuted,
@@ -19,6 +20,7 @@ export default ({
   chat: ApiChat | undefined;
   privateChatUser: ApiUser | undefined;
   handleDelete: () => void;
+  handleChatFolderChange: () => void;
   folderId?: number;
   isPinned?: boolean;
   isMuted?: boolean;
@@ -37,6 +39,12 @@ export default ({
       toggleChatUnread,
     } = getDispatch();
 
+    const actionAddToFolder = {
+      title: lang('ChatList.Filter.AddToFolder'),
+      icon: 'folder',
+      handler: handleChatFolderChange,
+    };
+
     const actionPin = isPinned
       ? {
         title: lang('UnpinFromTop'),
@@ -46,7 +54,7 @@ export default ({
       : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
 
     if (isInSearch) {
-      return [actionPin];
+      return [actionPin, actionAddToFolder];
     }
 
     const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
@@ -81,6 +89,7 @@ export default ({
     };
 
     return [
+      actionAddToFolder,
       actionUnreadMark,
       actionPin,
       ...(!privateChatUser?.isSelf ? [
@@ -89,5 +98,7 @@ export default ({
       ] : []),
       actionDelete,
     ];
-  }, [chat, isPinned, lang, isInSearch, isMuted, handleDelete, privateChatUser?.isSelf, folderId]);
+  }, [
+    chat, isPinned, lang, isInSearch, isMuted, handleDelete, handleChatFolderChange, privateChatUser?.isSelf, folderId,
+  ]);
 };

@@ -3,6 +3,7 @@ import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
+import renderText from '../common/helpers/renderText';
 
 import Spinner from './Spinner';
 
@@ -69,8 +70,8 @@ const Checkbox: FC<OwnProps> = ({
         onChange={handleChange}
       />
       <div className="Checkbox-main">
-        <span className="label" dir="auto">{label}</span>
-        {subLabel && <span className="subLabel" dir="auto">{subLabel}</span>}
+        <span className="label" dir="auto">{renderText(label)}</span>
+        {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
       </div>
       {isLoading && <Spinner />}
     </label>
