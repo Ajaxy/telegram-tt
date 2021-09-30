@@ -29,11 +29,11 @@ export default (
       const file = media && media.getAsFile();
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
 
+      e.preventDefault();
+
       if (!file && !pastedText) {
         return;
       }
-
-      e.preventDefault();
 
       if (file && !editedMessage) {
         const attachment = await buildAttachment(file.name, file, true);
