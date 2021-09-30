@@ -17,6 +17,7 @@ import PrivateChatInfo from '../../common/PrivateChatInfo';
 import GroupChatInfo from '../../common/GroupChatInfo';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import ListItem from '../../ui/ListItem';
+import ChatFolderModal from '../ChatFolderModal.async';
 
 type OwnProps = {
   chatId: number;
@@ -41,6 +42,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   onClick,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
 
   const contextActions = useChatContextActions({
     chat,
@@ -48,6 +50,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     isPinned,
     isMuted,
     handleDelete: openDeleteModal,
+    handleChatFolderChange: openChatFolderModal,
   }, true);
 
   const handleClick = () => {
@@ -76,6 +79,11 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
         chat={chat}
+      />
+      <ChatFolderModal
+        isOpen={isChatFolderModalOpen}
+        onClose={closeChatFolderModal}
+        chatId={chatId}
       />
     </ListItem>
   );

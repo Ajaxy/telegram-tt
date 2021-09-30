@@ -30,7 +30,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   loadingOptions,
   onChange,
 }) => {
-  const [values, setValues] = useState<string[]>([]);
+  const [values, setValues] = useState<string[]>(selected || []);
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.currentTarget;

@@ -7,7 +7,7 @@ import {
   getMessageContent,
   getMessageSummaryText,
   getUserFullName,
-  isChat,
+  isChatPrivate,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -167,9 +167,9 @@ function renderMessageContent(lang: LangFn, message: ApiMessage, options: Action
 }
 
 function renderOriginContent(lang: LangFn, origin: ApiUser | ApiChat, asPlain?: boolean) {
-  return isChat(origin)
-    ? renderChatContent(lang, origin, asPlain)
-    : renderUserContent(origin, asPlain);
+  return isChatPrivate(origin.id)
+    ? renderUserContent(origin as ApiUser, asPlain)
+    : renderChatContent(lang, origin as ApiChat, asPlain);
 }
 
 function renderUserContent(sender: ApiUser, asPlain?: boolean): string | TextPart | undefined {

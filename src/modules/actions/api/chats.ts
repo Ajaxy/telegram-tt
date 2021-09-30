@@ -435,6 +435,37 @@ addReducer('loadRecommendedChatFolders', () => {
   void loadRecommendedChatFolders();
 });
 
+addReducer('editChatFolders', (global, actions, payload) => {
+  const { chatId, idsToRemove, idsToAdd } = payload!;
+
+  (idsToRemove as number[]).forEach(async (id) => {
+    const folder = selectChatFolder(global, id);
+    if (folder) {
+      await callApi('editChatFolder', {
+        id,
+        folderUpdate: {
+          ...folder,
+          pinnedChatIds: folder.pinnedChatIds?.filter((pinnedId) => pinnedId !== chatId),
+          includedChatIds: folder.includedChatIds.filter((includedId) => includedId !== chatId),
+        },
+      });
+    }
+  });
+
+  (idsToAdd as number[]).forEach(async (id) => {
+    const folder = selectChatFolder(global, id);
+    if (folder) {
+      await callApi('editChatFolder', {
+        id,
+        folderUpdate: {
+          ...folder,
+          includedChatIds: folder.includedChatIds.concat(chatId),
+        },
+      });
+    }
+  });
+});
+
 addReducer('editChatFolder', (global, actions, payload) => {
   const { id, folderUpdate } = payload!;
   const folder = selectChatFolder(global, id);
