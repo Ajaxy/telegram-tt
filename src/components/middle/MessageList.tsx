@@ -382,7 +382,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       newScrollTop = scrollHeight - offsetHeight;
-      scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
+      scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
 
       // Scroll still needs to be restored after container resize
       if (!shouldForceScroll) {
@@ -421,7 +421,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       newScrollTop = scrollHeight - scrollOffset;
     }
 
-    resetScroll(container, newScrollTop);
+    resetScroll(container, Math.ceil(newScrollTop));
 
     if (!memoFocusingIdRef.current) {
       isScrollTopJustUpdatedRef.current = true;
@@ -430,7 +430,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       });
     }
 
-    scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
+    scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
 
     if (process.env.APP_ENV === 'perf') {
       // eslint-disable-next-line no-console
