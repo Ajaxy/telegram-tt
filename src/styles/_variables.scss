@@ -63,7 +63,6 @@ $color-user-8: #faa774;
   --color-background-secondary-accent: #E4E4E5;
   --color-background-own: #{$color-light-green};
   --color-background-own-selected: #{darken($color-light-green, 10%)};
-  --color-background-own-rgb: #{toRGB($color-light-green)};
   --color-text: #{$color-black};
   --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
@@ -86,7 +85,6 @@ $color-user-8: #faa774;
   --color-composer-button: #{$color-text-secondary}CC;
 
   --color-primary: #{$color-primary};
-  --color-primary-rgb: #{toRGB($color-primary)};
   --color-primary-shade: #{mix($color-primary, $color-black, 92%)};
   --color-primary-shade-darker: #{mix($color-primary, $color-black, 84%)};
   --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
