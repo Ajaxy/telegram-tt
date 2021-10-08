@@ -36,7 +36,10 @@
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
-    color: var(--color-composer-button);
+
+    &:not(.danger) {
+      color: var(--color-composer-button);
+    }
 
     @media (max-width: 600px) {
       width: 2.875rem;
