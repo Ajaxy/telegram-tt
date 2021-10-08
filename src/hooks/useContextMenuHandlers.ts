@@ -2,13 +2,21 @@ import { RefObject } from 'react';
 import { useState, useEffect, useCallback } from '../lib/teact/teact';
 
 import { IAnchorPosition } from '../types';
-import { IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
+import {
+  IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT, IS_PWA, IS_IOS,
+} from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 200;
 
 function checkIsDisabledForMobile() {
   return IS_SINGLE_COLUMN_LAYOUT
   && window.document.body.classList.contains('enable-symbol-menu-transforms');
+}
+
+function stopEvent(e: Event) {
+  e.stopImmediatePropagation();
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 export default (
@@ -80,13 +88,19 @@ export default (
         return;
       }
 
-      // temporarily intercept and clear the next click
+      // Temporarily intercept and clear the next click
       element.addEventListener('touchend', function cancelClickOnce(e) {
         element.removeEventListener('touchend', cancelClickOnce, true);
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        e.stopPropagation();
+        stopEvent(e);
       }, true);
+
+      // On iOS15, in PWA mode, the context menu immediately closes after opening
+      if (IS_PWA && IS_IOS) {
+        element.addEventListener('mousedown', function cancelClickOnce(e) {
+          element.removeEventListener('mousedown', cancelClickOnce, true);
+          stopEvent(e);
+        }, true);
+      }
 
       document.body.classList.add('no-selection');
       setIsContextMenuOpen(true);
