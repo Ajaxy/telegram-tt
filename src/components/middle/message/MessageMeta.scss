@@ -23,6 +23,12 @@
     margin-inline-end: .1875rem;
   }
 
+  body.is-ios & {
+    .message-time {
+      margin-inline-end: .25rem;
+    }
+  }
+
   .message-views {
     margin-inline-start: .1875rem;
   }
@@ -48,7 +54,7 @@
 
   .media:not(.text) &,
   .Message .custom-shape & {
-    background: rgba(0,0,0, 0.2);
+    background: rgba(0, 0, 0, 0.2);
     --color-accent-own: white;
     --color-accent: white;
     color: white !important;

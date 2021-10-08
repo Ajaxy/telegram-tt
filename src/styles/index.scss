@@ -40,6 +40,11 @@ html[lang=fa] body {
   }
 }
 
+body.is-ios {
+  --border-radius-messages: 1rem;
+  --border-radius-messages-small: 0.5rem;
+}
+
 body.cursor-grabbing, body.cursor-grabbing * {
   cursor: grabbing !important;
 }

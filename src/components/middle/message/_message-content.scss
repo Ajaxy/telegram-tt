@@ -253,6 +253,14 @@
     }
   }
 
+  body.is-ios &.has-solid-background {
+    padding-bottom: 0.4375rem;
+  }
+
+  body.is-ios .Message.own &.has-solid-background {
+    padding-left: 0.625rem;
+  }
+
   &:not(.has-appendix) .svg-appendix {
     display: none;
   }

@@ -140,6 +140,12 @@
     }
   }
 
+  body.is-ios & {
+    .voice-duration.unread::after {
+      margin-bottom: .4375rem;
+    }
+  }
+
   &:not(.own) .voice-duration span {
     color: var(--color-primary);
   }
