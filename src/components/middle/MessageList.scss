@@ -194,6 +194,7 @@
   .ActionMessage,
   .empty {
     text-align: center;
+    user-select: none;
 
     > span {
       display: inline-block;

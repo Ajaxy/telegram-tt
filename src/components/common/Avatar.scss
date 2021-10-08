@@ -11,6 +11,7 @@
   font-weight: bold;
   display: flex;
   white-space: nowrap;
+  user-select: none;
 
   img:not(.emoji) {
     border-radius: 50%;
