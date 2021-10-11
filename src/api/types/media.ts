@@ -2,7 +2,6 @@
 // and messages media as Blob for smaller size.
 
 export enum ApiMediaFormat {
-  DataUri,
   BlobUrl,
   Lottie,
   Progressive,

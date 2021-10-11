@@ -23,31 +23,38 @@ export async function fetch(
       return undefined;
     }
 
+    const contentType = response.headers.get('Content-Type');
+
     switch (type) {
       case Type.Text:
         return await response.text();
       case Type.Blob: {
+        // Ignore deprecated data-uri avatars
+        if (key.startsWith('avatar') && contentType && contentType.startsWith('text')) {
+          return undefined;
+        }
+
         const blob = await response.blob();
 
         // Safari does not return correct Content-Type header for webp images.
-        if (key.substr(0, 7) === 'sticker') {
+        if (key.startsWith('sticker')) {
           return new Blob([blob], { type: 'image/webp' });
         }
 
+        const shouldRecreate = !blob.type || (!isHtmlAllowed && blob.type.includes('html'));
         // iOS Safari fails to preserve `type` in cache
-        if (!blob.type) {
-          const contentType = response.headers.get('Content-Type');
-          if (contentType) {
-            return new Blob([blob], { type: isHtmlAllowed ? contentType : contentType.replace(/html/gi, '') });
-          }
+        let resolvedType = blob.type || contentType;
+
+        if (!(shouldRecreate && resolvedType)) {
+          return blob;
         }
 
         // Prevent HTML-in-video attacks (for files that were cached before fix)
-        if (!isHtmlAllowed && blob.type.includes('html')) {
-          return new Blob([blob], { type: blob.type.replace(/html/gi, '') });
+        if (!isHtmlAllowed) {
+          resolvedType = resolvedType.replace(/html/gi, '');
         }
 
-        return blob;
+        return new Blob([blob], { type: resolvedType });
       }
       case Type.Json:
         return await response.json();

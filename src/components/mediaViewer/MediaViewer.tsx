@@ -166,7 +166,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     return message && getMessageMediaHash(message, isFull ? 'viewerFull' : 'viewerPreview');
   }
 
-  const blobUrlPictogram = useMedia(
+  const pictogramBlobUrl = useMedia(
     message && (isFromSharedMedia || isFromSearch) && getMessageMediaHash(message, 'pictogram'),
     undefined,
     ApiMediaFormat.BlobUrl,
@@ -174,16 +174,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     isGhostAnimation && ANIMATION_DURATION,
   );
   const previewMediaHash = getMediaHash();
-  const blobUrlPreview = useMedia(
+  const previewBlobUrl = useMedia(
     previewMediaHash,
     undefined,
-    isAvatar && previewMediaHash && previewMediaHash.startsWith('profilePhoto')
-      ? ApiMediaFormat.DataUri
-      : ApiMediaFormat.BlobUrl,
+    ApiMediaFormat.BlobUrl,
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
-  const { mediaData: fullMediaData, downloadProgress } = useMediaWithDownloadProgress(
+  const { mediaData: fullMediaBlobUrl, downloadProgress } = useMediaWithDownloadProgress(
     getMediaHash(true),
     undefined,
     message && getMessageMediaFormat(message, 'viewerFull'),
@@ -192,7 +190,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   );
 
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
-  let bestImageData = (!isVideo && (localBlobUrl || fullMediaData)) || blobUrlPreview || blobUrlPictogram;
+  let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
   const thumbDataUri = useBlurSync(!bestImageData && message && getMessageMediaThumbDataUri(message));
   if (!bestImageData && origin !== MediaViewerOrigin.SearchResult) {
     bestImageData = thumbDataUri;
@@ -459,7 +457,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       return (
         <div key={chatId} className="media-viewer-content">
           {renderPhoto(
-            fullMediaData || blobUrlPreview,
+            fullMediaBlobUrl || previewBlobUrl,
             calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false),
             !IS_SINGLE_COLUMN_LAYOUT && !isZoomed,
           )}
@@ -476,14 +474,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           onClick={handleToggleFooterVisibility}
         >
           {isPhoto && renderPhoto(
-            localBlobUrl || fullMediaData || blobUrlPreview || blobUrlPictogram,
+            localBlobUrl || fullMediaBlobUrl || previewBlobUrl || pictogramBlobUrl,
             message && calculateMediaViewerDimensions(dimensions!, hasFooter),
             !IS_SINGLE_COLUMN_LAYOUT && !isZoomed,
           )}
           {isVideo && (
             <VideoPlayer
               key={messageId}
-              url={localBlobUrl || fullMediaData}
+              url={localBlobUrl || fullMediaBlobUrl}
               isGif={isGif}
               posterData={bestImageData}
               posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
@@ -550,7 +548,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               {renderSenderInfo}
             </Transition>
             <MediaViewerActions
-              mediaData={fullMediaData || blobUrlPreview}
+              mediaData={fullMediaBlobUrl || previewBlobUrl}
               isVideo={isVideo}
               isZoomed={isZoomed}
               message={message}

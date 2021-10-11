@@ -8,9 +8,9 @@ import { EMPTY_IMAGE_DATA_URI, webpToPngBase64 } from '../util/webpToPng';
 import { getMessageMediaThumbDataUri } from '../modules/helpers';
 
 export default function useWebpThumbnail(message?: ApiMessage) {
-  const thumbnail = message && getMessageMediaThumbDataUri(message);
+  const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const sticker = message?.content?.sticker;
-  const shouldDecodeThumbnail = thumbnail && sticker && !isWebpSupported() && thumbnail.includes('image/webp');
+  const shouldDecodeThumbnail = thumbDataUri && sticker && !isWebpSupported() && thumbDataUri.includes('image/webp');
   const [thumbnailDecoded, setThumbnailDecoded] = useState(EMPTY_IMAGE_DATA_URI);
   const messageId = message?.id;
 
@@ -19,7 +19,7 @@ export default function useWebpThumbnail(message?: ApiMessage) {
       return;
     }
 
-    webpToPngBase64(`b64-${messageId}`, thumbnail!)
+    webpToPngBase64(`b64-${messageId}`, thumbDataUri!)
       .then(setThumbnailDecoded)
       .catch((err) => {
         if (DEBUG) {
@@ -27,7 +27,7 @@ export default function useWebpThumbnail(message?: ApiMessage) {
           console.error(err);
         }
       });
-  }, [messageId, shouldDecodeThumbnail, thumbnail]);
+  }, [messageId, shouldDecodeThumbnail, thumbDataUri]);
 
-  return shouldDecodeThumbnail ? thumbnailDecoded : thumbnail;
+  return shouldDecodeThumbnail ? thumbnailDecoded : thumbDataUri;
 }

@@ -36,11 +36,7 @@ const WallpaperTile: FC<OwnProps> = ({
   const localMediaHash = `wallpaper${document.id!}`;
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
-  const thumbRef = useCanvasBlur(
-    document.thumbnail?.dataUri,
-    Boolean(previewBlobUrl),
-    true,
-  );
+  const thumbRef = useCanvasBlur(document.thumbnail?.dataUri, Boolean(previewBlobUrl), true);
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
   } = useTransitionForMedia(previewBlobUrl || localBlobUrl, 'slow');

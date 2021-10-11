@@ -25,17 +25,17 @@ export async function webpToPng(url: string, blob: Blob): Promise<Blob | undefin
   return createPng({ result, width, height });
 }
 
-export async function webpToPngBase64(key: string, url: string): Promise<string> {
-  if (isWebpSupported() || url.substr(0, 15) !== 'data:image/webp') {
-    return url;
+export async function webpToPngBase64(key: string, dataUri: string): Promise<string> {
+  if (isWebpSupported() || dataUri.substr(0, 15) !== 'data:image/webp') {
+    return dataUri;
   }
 
   initWebpWorker();
 
-  const pngBlob = await webpToPng(key, dataUriToBlob(url));
+  const pngBlob = await webpToPng(key, dataUriToBlob(dataUri));
 
   if (!pngBlob) {
-    throw new Error(`Can't convert webp to png. Url: ${url}`);
+    throw new Error(`Can't convert webp to png. Url: ${dataUri}`);
   }
 
   return blobToDataUri(pngBlob);

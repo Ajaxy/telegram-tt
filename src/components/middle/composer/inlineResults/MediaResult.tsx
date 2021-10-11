@@ -64,7 +64,7 @@ const MediaResult: FC<OwnProps> = ({
   return (
     <BaseResult
       focus={focus}
-      thumbUrl={shouldRenderFullMedia ? mediaBlobUrl : (thumbnail?.dataUri) || thumbnailDataUrl}
+      thumbUrl={shouldRenderFullMedia ? mediaBlobUrl : (thumbnail?.dataUri || thumbnailDataUrl)}
       transitionClassNames={shouldRenderFullMedia ? transitionClassNames : undefined}
       title={title}
       description={description}
