@@ -157,12 +157,7 @@ const Button: FC<OwnProps> = ({
           <span dir={isRtl ? 'auto' : undefined}>Please wait...</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
-      ) : (
-        <>
-          {backgroundImage && <div className="backdrop" />}
-          {children}
-        </>
-      )}
+      ) : children }
       {!disabled && ripple && (
         <RippleEffect />
       )}
