@@ -1,11 +1,17 @@
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import {
-  ApiUser, ApiChat, ApiMediaFormat, ApiPhoto,
+  ApiChat, ApiMediaFormat, ApiPhoto, ApiUser,
 } from '../../api/types';
 
 import {
-  getChatAvatarHash, isDeletedUser, getUserColorKey, getChatTitle, isChatPrivate, getUserFullName, isChatWithRepliesBot,
+  getChatAvatarHash,
+  getChatTitle,
+  getUserColorKey,
+  getUserFullName,
+  isChatPrivate,
+  isChatWithRepliesBot,
+  isDeletedUser,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
@@ -42,7 +48,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
 
-  function getMediaHash(size: 'normal' | 'big' = 'big', forceAvatar?: boolean) {
+  function getMediaHash(size: 'normal' | 'big', forceAvatar?: boolean) {
     if (photo && !forceAvatar) {
       return `photo${photo.id}?size=c`;
     }
@@ -59,21 +65,11 @@ const ProfilePhoto: FC<OwnProps> = ({
     return hash;
   }
 
-  const imageHash = getMediaHash();
-  const fullMediaData = useMedia(
-    imageHash,
-    false,
-    imageHash?.startsWith('avatar') ? ApiMediaFormat.DataUri : ApiMediaFormat.BlobUrl,
-    lastSyncTime,
-  );
-  const avatarThumbnailData = useMedia(
-    !fullMediaData && isFirstPhoto ? getMediaHash('normal', true) : undefined,
-    false,
-    ApiMediaFormat.DataUri,
-    lastSyncTime,
-  );
-  const thumbDataUri = useBlurSync(!fullMediaData && photo && photo.thumbnail && photo.thumbnail.dataUri);
-  const imageSrc = fullMediaData || avatarThumbnailData || thumbDataUri;
+  const photoBlobUrl = useMedia(getMediaHash('big'), false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const avatarMediaHash = isFirstPhoto && !photoBlobUrl ? getMediaHash('normal', true) : undefined;
+  const avatarBlobUrl = useMedia(avatarMediaHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const thumbDataUri = useBlurSync(!photoBlobUrl && photo && photo.thumbnail && photo.thumbnail.dataUri);
+  const imageSrc = photoBlobUrl || avatarBlobUrl || thumbDataUri;
   const prevImageSrc = usePrevious(imageSrc);
 
   let content: string | undefined = '';

@@ -17,7 +17,6 @@ import { oggToWav } from './oggToWav';
 import { webpToPng } from './webpToPng';
 
 const asCacheApiType = {
-  [ApiMediaFormat.DataUri]: cacheApi.Type.Text,
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
   [ApiMediaFormat.Lottie]: cacheApi.Type.Json,
   [ApiMediaFormat.Progressive]: undefined,
@@ -82,6 +81,7 @@ async function fetchFromCacheOrRemote(
   if (!MEDIA_CACHE_DISABLED) {
     const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
     const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!, isHtmlAllowed);
+
     if (cached) {
       let media = cached;
 

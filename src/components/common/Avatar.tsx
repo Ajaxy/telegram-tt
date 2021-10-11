@@ -1,12 +1,18 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
-import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
+import { ApiChat, ApiMediaFormat, ApiUser } from '../../api/types';
 
 import { IS_TEST } from '../../config';
 import {
-  getChatAvatarHash, getChatTitle, isChatPrivate,
-  getUserFullName, isUserOnline, isDeletedUser, getUserColorKey, isChatWithRepliesBot,
+  getChatAvatarHash,
+  getChatTitle,
+  getUserColorKey,
+  getUserFullName,
+  isChatPrivate,
+  isChatWithRepliesBot,
+  isDeletedUser,
+  isUserOnline,
 } from '../../modules/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
@@ -52,8 +58,8 @@ const Avatar: FC<OwnProps> = ({
     }
   }
 
-  const dataUri = useMedia(imageHash, false, ApiMediaFormat.DataUri, lastSyncTime);
-  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
+  const blobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(blobUrl, 'slow');
 
   const lang = useLang();
 
@@ -66,7 +72,7 @@ const Avatar: FC<OwnProps> = ({
   } else if (isReplies) {
     content = <i className="icon-reply-filled" />;
   } else if (shouldRenderFullMedia) {
-    content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
+    content = <img src={blobUrl} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;

@@ -14,7 +14,6 @@ import {
 } from '../../../config';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
-import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = (
@@ -221,8 +220,6 @@ async function parseMedia(
   data: Buffer, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): Promise<ApiParsedMedia | undefined> {
   switch (mediaFormat) {
-    case ApiMediaFormat.DataUri:
-      return blobToDataUri(new Blob([data], { type: mimeType }));
     case ApiMediaFormat.BlobUrl:
       return new Blob([data], { type: mimeType });
     case ApiMediaFormat.Lottie: {

@@ -57,7 +57,7 @@ function preloadAvatars() {
       return undefined;
     }
 
-    return mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri);
+    return mediaLoader.fetch(avatarHash, ApiMediaFormat.BlobUrl);
   }));
 }
 
