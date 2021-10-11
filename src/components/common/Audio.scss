@@ -39,6 +39,10 @@
   .toggle-play {
     margin-inline-end: .5rem;
 
+    &.translucent-white {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
     &.smaller {
       width: 3rem;
       height: 3rem;
