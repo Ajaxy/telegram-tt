@@ -12,6 +12,7 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { updateAppBadge } from '../../../util/appBadge';
 import {
   replaceChatListIds,
   replaceChats,
@@ -23,7 +24,13 @@ import {
   replaceThreadParam,
 } from '../../reducers';
 import {
-  selectUser, selectChat, selectCurrentMessageList, selectDraft, selectChatMessage, selectThreadInfo,
+  selectUser,
+  selectChat,
+  selectCurrentMessageList,
+  selectDraft,
+  selectChatMessage,
+  selectThreadInfo,
+  selectCountNotMutedUnread,
 } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
 
@@ -74,6 +81,8 @@ async function afterSync(actions: GlobalActions) {
   ]);
 
   await callApi('fetchCurrentUser');
+
+  updateAppBadge(selectCountNotMutedUnread(getGlobal()));
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
