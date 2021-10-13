@@ -1,5 +1,4 @@
 #Main {
-  display: flex;
   height: 100%;
   text-align: left;
   overflow: hidden;
@@ -11,13 +10,25 @@
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }
+
+  @media (min-width: 926px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 100%;
+  }
 }
 
 #LeftColumn {
-  flex: 1;
-  min-width: 18rem;
+  min-width: 12rem;
+  width: 25vw;
   max-width: 26.5rem;
   height: 100%;
+  position: relative;
+
+  & > div {
+    height: 100%;
+    overflow: hidden;
+  }
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -27,8 +38,12 @@
     border-left: 1px solid var(--color-borders);
   }
 
-  @media (max-width: 1275px) {
-    flex: 2;
+  @media (min-width: 926px) {
+    max-width: 40vw;
+  }
+
+  @media (min-width: 1276px) {
+    max-width: 33vw;
   }
 
   @media (max-width: 925px) {
@@ -36,7 +51,7 @@
     left: 0;
     top: 0;
     height: calc(var(--vh, 1vh) * 100);
-    width: 26.5rem;
+    width: 26.5rem !important;
 
     transform: translate3d(-5rem, 0, 0);
     transition: transform var(--layer-transition);
@@ -92,7 +107,7 @@
 
   @media (max-width: 600px) {
     max-width: none;
-    width: 100vw;
+    width: 100vw !important;
     transform: translate3d(-20vw, 0, 0);
 
     @supports (left: env(safe-area-inset-left)) {
@@ -125,21 +140,10 @@
 }
 
 #MiddleColumn {
-  flex: 3;
   border-left: 1px solid var(--color-borders);
-  max-width: 75vw;
-
-  @media (max-width: 1275px) {
-    max-width: calc(100vw - 26.5rem);
-  }
-
-  @media (max-width: 66.25rem) {
-    max-width: 60vw;
-  }
 
   @media (min-width: 1680px) {
     border-right: 1px solid var(--color-borders);
-    max-width: calc(1680px - 26.5rem);
   }
 
   @media (max-width: 925px) {

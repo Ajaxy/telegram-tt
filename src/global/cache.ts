@@ -164,6 +164,7 @@ function updateCache() {
       'recentEmojis',
       'push',
       'shouldShowContextMenuHint',
+      'leftColumnWidth',
     ]),
     isChatInfoShown: reduceShowChatInfo(global),
     users: reduceUsers(global),

@@ -49,9 +49,13 @@ body.cursor-grabbing, body.cursor-grabbing * {
   cursor: grabbing !important;
 }
 
+body.cursor-ew-resize {
+  cursor: ew-resize !important;
+}
+
 #root {
   height: 100%;
-  max-width: 1680px;
+  max-width: 1920px;
   margin: 0 auto;
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -73,6 +77,21 @@ body.cursor-grabbing, body.cursor-grabbing * {
 .no-selection {
   user-select: none;
   -webkit-user-select: none !important;
+}
+
+.resize-handle {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: -.1875rem;
+  bottom: 0;
+  width: .1875rem;
+  z-index: var(--z-resize-handle);
+  cursor: ew-resize;
+
+  @media (min-width: 926px) {
+    display: block;
+  }
 }
 
 /*

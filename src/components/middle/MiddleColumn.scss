@@ -76,6 +76,7 @@
   height: 100%;
   position: relative;
   z-index: 1;
+  min-width: 0;
 
   @media (max-width: 600px) {
     overflow: hidden;

@@ -11,16 +11,33 @@
     right: 0;
     margin: 0 auto;
     width: 100%;
-    max-width: 1680px;
+    max-width: 1920px;
     height: 100%;
     z-index: var(--z-ui-loader-mask);
     display: flex;
 
+
+    @media (min-width: 600px) {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: 100%;
+    }
+
     .left {
       flex: 1;
       background: var(--color-background);
-      min-width: 15.5rem;
-      max-width: 26.5rem;
+      min-width: 18rem;
+      width: 26.5rem;
+      max-width: 33vw;
+
+      @media (min-width: 926px) {
+        width: 25vw;
+        max-width: 40vw;
+      }
+
+      @media (min-width: 1276px) {
+        max-width: 33vw;
+      }
 
       @media (min-width: 1680px) {
         border-left: 1px solid var(--color-borders);

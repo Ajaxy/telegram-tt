@@ -83,6 +83,7 @@ export type GlobalState = {
   currentUserId?: number;
   lastSyncTime?: number;
   serverTimeOffset: number;
+  leftColumnWidth?: number;
 
   // TODO Move to `auth`.
   isLoggingOut?: boolean;
@@ -447,7 +448,7 @@ export type ActionTypes = (
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
-  'setNewChatMembersDialogState' | 'disableHistoryAnimations' |
+  'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |

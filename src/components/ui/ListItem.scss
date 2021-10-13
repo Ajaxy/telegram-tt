@@ -76,6 +76,10 @@
     .ListItem-button {
       cursor: pointer;
 
+      body.cursor-ew-resize & {
+        cursor: ew-resize !important;
+      }
+
       @media (hover: hover) {
         &:hover, &:focus {
           --background-color: var(--color-chat-hover);
