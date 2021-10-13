@@ -34,7 +34,7 @@
     height: calc(var(--vh, 1vh) * 100);
   }
 
-  @media (min-width: 1680px) {
+  @media (min-width: 1920px) {
     border-left: 1px solid var(--color-borders);
   }
 
@@ -118,7 +118,7 @@
 }
 
 #RightColumn {
-  @media (min-width: 1680px) {
+  @media (min-width: 1920px) {
     border-right: 1px solid var(--color-borders);
   }
 
@@ -142,7 +142,7 @@
 #MiddleColumn {
   border-left: 1px solid var(--color-borders);
 
-  @media (min-width: 1680px) {
+  @media (min-width: 1920px) {
     border-right: 1px solid var(--color-borders);
   }
 
