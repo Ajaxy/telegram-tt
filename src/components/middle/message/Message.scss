@@ -18,7 +18,6 @@
   --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width));
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
-  --select-background-color: white;
 
   &.is-swiped {
     transform: translateX(-2.5rem) !important;
@@ -57,11 +56,6 @@
   }
 
   &.is-in-selection-mode {
-    .Album {
-      border: 1px var(--select-background-color) solid;
-      background-color: var(--select-background-color);
-    }
-
     body.is-android & {
       .can-select-text {
         z-index: var(--z-message-select-control);
@@ -259,11 +253,6 @@
       top: 0.438rem;
       right: 0.438rem;
       left: unset;
-    }
-
-    .media-inner {
-      border: 0 var(--select-background-color) solid;
-      transition: border-width var(--select-transition);
     }
 
     img, video {

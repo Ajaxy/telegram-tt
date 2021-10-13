@@ -533,6 +533,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             shouldAffectAppendix={hasCustomAppendix}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
+            theme={theme}
           />
         )}
         {!isAlbum && video && video.isRound && (
@@ -611,6 +612,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             lastSyncTime={lastSyncTime}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
+            theme={theme}
           />
         )}
         {invoice && <Invoice message={message} />}
