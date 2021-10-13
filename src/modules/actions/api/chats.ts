@@ -38,7 +38,7 @@ import {
   selectChatByUsername,
   selectThreadTopMessageId,
   selectCurrentMessageList,
-  selectThreadInfo,
+  selectThreadInfo, selectCurrentChat,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -562,7 +562,7 @@ addReducer('openTelegramLink', (global, actions, payload) => {
       } else {
         actions.openChatByUsername({
           username,
-          messageId,
+          messageId: messageId || chatOrChannelPostId,
           commentId,
         });
       }
@@ -586,9 +586,30 @@ addReducer('openChatByUsername', (global, actions, payload) => {
   const { username, messageId, commentId } = payload!;
 
   (async () => {
+    const chat = selectCurrentChat(global);
+
     if (!commentId) {
+      if (chat && chat.username === username) {
+        actions.focusMessage({ chatId: chat.id, messageId });
+        return;
+      }
       await openChatByUsername(actions, username, messageId);
       return;
+    }
+
+    const { chatId, type } = selectCurrentMessageList(global) || {};
+    const usernameChat = selectChatByUsername(global, username);
+    if (chatId && usernameChat && type === 'thread') {
+      const threadInfo = selectThreadInfo(global, chatId, messageId);
+
+      if (threadInfo && threadInfo.chatId === chatId) {
+        actions.focusMessage({
+          chatId: threadInfo.chatId,
+          threadId: threadInfo.threadId,
+          messageId: commentId,
+        });
+        return;
+      }
     }
 
     if (!messageId) return;
