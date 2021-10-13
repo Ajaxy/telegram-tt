@@ -2,6 +2,7 @@ import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { ISettings } from '../../../types';
 
 import { getMessageWebPage } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
@@ -25,6 +26,7 @@ type OwnProps = {
   shouldAutoPlay?: boolean;
   inPreview?: boolean;
   lastSyncTime?: number;
+  theme: ISettings['theme'];
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -37,6 +39,7 @@ const WebPage: FC<OwnProps> = ({
   shouldAutoPlay,
   inPreview,
   lastSyncTime,
+  theme,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
@@ -91,6 +94,7 @@ const WebPage: FC<OwnProps> = ({
           nonInteractive={!isMediaInteractive}
           onClick={isMediaInteractive ? handleMediaClick : undefined}
           onCancelUpload={onCancelMediaTransfer}
+          theme={theme}
         />
       )}
       <div className="WebPage-text">

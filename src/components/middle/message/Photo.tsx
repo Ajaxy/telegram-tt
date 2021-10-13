@@ -3,6 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
+import { ISettings } from '../../../types';
 import { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import {
@@ -37,6 +38,7 @@ export type OwnProps = {
   shouldAffectAppendix?: boolean;
   dimensions?: IMediaDimensions & { isSmall?: boolean };
   nonInteractive?: boolean;
+  theme: ISettings['theme'];
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
@@ -56,6 +58,7 @@ const Photo: FC<OwnProps> = ({
   dimensions,
   nonInteractive,
   shouldAffectAppendix,
+  theme,
   onClick,
   onCancelUpload,
 }) => {
@@ -108,14 +111,14 @@ const Photo: FC<OwnProps> = ({
     const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
 
     if (fullMediaData) {
-      getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected).then((appendixBg) => {
+      getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });
     } else {
       contentEl.classList.add('has-appendix-thumb');
     }
-  }, [fullMediaData, isOwn, shouldAffectAppendix, isInSelectMode, isSelected]);
+  }, [fullMediaData, isOwn, shouldAffectAppendix, isInSelectMode, isSelected, theme]);
 
   const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, noAvatars);
 

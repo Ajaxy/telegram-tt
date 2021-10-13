@@ -2,7 +2,7 @@ import React, { FC, useCallback } from '../../../lib/teact/teact';
 
 import { GlobalActions, GlobalState } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
-import { IAlbum } from '../../../types';
+import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
 import { getMessageContent } from '../../../modules/helpers';
@@ -10,6 +10,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { pick } from '../../../util/iteratees';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { selectTheme } from '../../../modules/selectors';
 
 import Photo from './Photo';
 import Video from './Video';
@@ -32,6 +33,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  theme: ISettings['theme'];
   uploadsById: GlobalState['fileUploads']['byMessageLocalId'];
 };
 
@@ -48,6 +50,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   albumLayout,
   onMediaClick,
   uploadsById,
+  theme,
   cancelSendingMessage,
 }) => {
   const mediaCount = album.messages.length;
@@ -79,6 +82,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           dimensions={dimensions}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
+          theme={theme}
         />
       );
     } else if (video) {
@@ -94,6 +98,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           dimensions={dimensions}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
+          theme={theme}
         />
       );
     }
@@ -116,7 +121,9 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global): StateProps => {
+    const theme = selectTheme(global);
     return {
+      theme,
       uploadsById: global.fileUploads.byMessageLocalId,
     };
   },

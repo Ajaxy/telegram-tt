@@ -1,7 +1,23 @@
-const SELECTED_APPENDIX_BACKGROUND = Promise.resolve('rgba(255,255,255,1)');
+import { ISettings } from '../../../../types';
 
-export default function getCustomAppendixBg(src: string, isOwn: boolean, inSelectMode?: boolean, isSelected?: boolean) {
-  return isSelected ? SELECTED_APPENDIX_BACKGROUND : getAppendixColorFromImage(src, isOwn);
+const SELECTED_APPENDIX_COLORS = {
+  dark: {
+    outgoing: 'rgb(135,116,225)',
+    incoming: 'rgb(33,33,33)',
+  },
+  light: {
+    outgoing: 'rgb(238,255,222)',
+    incoming: 'rgb(255,255,255)',
+  },
+};
+
+export default function getCustomAppendixBg(
+  src: string, isOwn: boolean, inSelectMode?: boolean, isSelected?: boolean, theme?: ISettings['theme'],
+) {
+  if (isSelected) {
+    return Promise.resolve(SELECTED_APPENDIX_COLORS[theme || 'light'][isOwn ? 'outgoing' : 'incoming']);
+  }
+  return getAppendixColorFromImage(src, isOwn);
 }
 
 async function getAppendixColorFromImage(src: string, isOwn: boolean) {
