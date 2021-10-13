@@ -32,6 +32,7 @@ type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimation
   hasCustomBackground?: boolean;
   hasCustomBackgroundColor: boolean;
   isRightColumnShown?: boolean;
+  leftColumnWidth?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
@@ -83,6 +84,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   hasCustomBackgroundColor,
   isRightColumnShown,
   shouldSkipHistoryAnimations,
+  leftColumnWidth,
   setIsUiReady,
 }) => {
   const [isReady, markReady] = useFlag();
@@ -131,7 +133,11 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className={buildClassName('mask', transitionClassNames)}>
           {page === 'main' ? (
             <>
-              <div className="left" />
+              <div
+                className="left"
+                // @ts-ignore teact feature
+                style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
+              />
               <div
                 className={buildClassName(
                   'middle',
@@ -162,6 +168,7 @@ export default withGlobal<OwnProps>(
       hasCustomBackground: Boolean(background),
       hasCustomBackgroundColor: Boolean(backgroundColor),
       isRightColumnShown: selectIsRightColumnShown(global),
+      leftColumnWidth: global.leftColumnWidth,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
