@@ -74,7 +74,7 @@ export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
 }
 
 export function throttleWithPrimaryRaf<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(fastPrimaryRaf, fn);
+  return throttleWith(fastRafPrimary, fn);
 }
 
 export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
@@ -102,10 +102,6 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
       });
     }
   };
-}
-
-export function onTickEnd(cb: NoneToVoidFunction) {
-  Promise.resolve().then(cb);
 }
 
 export function onIdle(cb: NoneToVoidFunction) {
@@ -156,8 +152,35 @@ export function fastRaf(callback: NoneToVoidFunction, isPrimary = false) {
   }
 }
 
-export function fastPrimaryRaf(callback: NoneToVoidFunction) {
+export function fastRafPrimary(callback: NoneToVoidFunction) {
   fastRaf(callback, true);
+}
+
+let onTickEndCallbacks: NoneToVoidFunction[] | undefined;
+let onTickEndPrimaryCallbacks: NoneToVoidFunction[] | undefined;
+
+export function onTickEnd(callback: NoneToVoidFunction, isPrimary = false) {
+  if (!onTickEndCallbacks) {
+    onTickEndCallbacks = isPrimary ? [] : [callback];
+    onTickEndPrimaryCallbacks = isPrimary ? [callback] : [];
+
+    Promise.resolve().then(() => {
+      const currentCallbacks = onTickEndCallbacks!;
+      const currentPrimaryCallbacks = onTickEndPrimaryCallbacks!;
+      onTickEndCallbacks = undefined;
+      onTickEndPrimaryCallbacks = undefined;
+      currentPrimaryCallbacks.forEach((cb) => cb());
+      currentCallbacks.forEach((cb) => cb());
+    });
+  } else if (isPrimary) {
+    onTickEndPrimaryCallbacks!.push(callback);
+  } else {
+    onTickEndCallbacks.push(callback);
+  }
+}
+
+export function onTickEndPrimary(callback: NoneToVoidFunction) {
+  onTickEnd(callback, true);
 }
 
 let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;

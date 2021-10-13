@@ -1,6 +1,6 @@
 import { DEBUG, DEBUG_MORE } from '../../config';
 import {
-  fastRaf, onTickEnd, throttleWithPrimaryRaf, throttleWithRaf,
+  fastRaf, fastRafPrimary, onTickEnd, onTickEndPrimary, throttleWithPrimaryRaf, throttleWithRaf,
 } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
 import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
@@ -10,11 +10,9 @@ import { removeAllDelegatedListeners } from './dom-events';
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export type FC_withDebug =
-  FC
-  & {
-    DEBUG_contentComponentName?: string;
-  };
+export type FC_withDebug = FC & {
+  DEBUG_contentComponentName?: string;
+};
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -511,6 +509,7 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
 
 function useLayoutEffectBase(
   schedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
+  primarySchedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
   effect: () => Function | void,
   dependencies?: any[],
   debugKey?: string,
@@ -518,7 +517,7 @@ function useLayoutEffectBase(
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const componentInstance = renderingInstance;
 
-  const exec = () => {
+  function execCleanup() {
     if (!componentInstance.isMounted) {
       return;
     }
@@ -531,9 +530,15 @@ function useLayoutEffectBase(
         handleError(err);
       }
     }
+  }
+
+  function exec() {
+    if (!componentInstance.isMounted) {
+      return;
+    }
 
     byCursor[cursor].cleanup = effect() as Function;
-  };
+  }
 
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
@@ -556,9 +561,11 @@ function useLayoutEffectBase(
         );
       }
 
+      primarySchedulerFn(execCleanup);
       schedulerFn(exec);
     }
   } else {
+    primarySchedulerFn(execCleanup);
     schedulerFn(exec);
   }
 
@@ -572,11 +579,11 @@ function useLayoutEffectBase(
 }
 
 export function useEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
-  return useLayoutEffectBase(fastRaf, effect, dependencies, debugKey);
+  return useLayoutEffectBase(fastRaf, fastRafPrimary, effect, dependencies, debugKey);
 }
 
 export function useLayoutEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
-  return useLayoutEffectBase(onTickEnd, effect, dependencies, debugKey);
+  return useLayoutEffectBase(onTickEnd, onTickEndPrimary, effect, dependencies, debugKey);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {
