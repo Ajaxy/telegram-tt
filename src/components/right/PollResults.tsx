@@ -5,6 +5,7 @@ import { ApiMessage, ApiChat } from '../../api/types';
 import { selectChat, selectChatMessage } from '../../modules/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../modules/helpers';
+import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
@@ -47,7 +48,7 @@ const PollResults: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
-      <h3 className="poll-question" dir="auto">{summary.question}</h3>
+      <h3 className="poll-question" dir="auto">{renderText(summary.question, ['emoji', 'br'])}</h3>
       <div className="poll-results-list custom-scroll">
         {lastSyncTime && summary.answers.map((answer) => (
           <PollAnswerResults
