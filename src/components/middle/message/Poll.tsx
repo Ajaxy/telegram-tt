@@ -260,7 +260,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="Poll" dir={lang.isRtl ? 'auto' : 'ltr'}>
       {renderSolution()}
-      <div className="poll-question">{renderText(summary.question)}</div>
+      <div className="poll-question">{renderText(summary.question, ['emoji', 'br'])}</div>
       <div className="poll-type">
         {lang(getPollTypeString(summary))}
         {renderRecentVoters()}
