@@ -19,6 +19,12 @@
 
   &.revealed {
     transform: translateY(0);
+
+    @media (max-width: 600px) {
+      // Force rendering in the composite layer to fix the z-index rendering issue
+      transform: translate3d(0,0,10px);
+      transform-style: preserve-3d;
+    }
   }
 
   &.menu-is-open {
