@@ -80,12 +80,18 @@ function getNotificationData(data: PushData): NotificationData {
   };
 }
 
-async function playNotificationSound(id: number) {
+async function getClients() {
+  const appUrl = new URL(self.registration.scope).origin;
   const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
-  const clientsInScope = clients.filter((client) => client.url === self.registration.scope);
-  const client = clientsInScope[0];
+  return clients.filter((client) => {
+    return new URL(client.url).origin === appUrl;
+  });
+}
+
+async function playNotificationSound(id: number) {
+  const clients = await getClients();
+  const client = clients[0];
   if (!client) return;
-  if (clientsInScope.length === 0) return;
   client.postMessage({
     type: 'playNotificationSound',
     payload: { id },
@@ -191,15 +197,12 @@ export function handleNotificationClick(e: NotificationEvent) {
   e.notification.close(); // Android needs explicit close.
   const { data } = e.notification;
   const notifyClients = async () => {
-    const clients = await self.clients.matchAll({ type: 'window' }) as WindowClient[];
-    const clientsInScope = clients.filter((client) => {
-      return new URL(client.url).origin === appUrl;
-    });
-    await Promise.all(clientsInScope.map((client) => {
+    const clients = await getClients();
+    await Promise.all(clients.map((client) => {
       clickBuffer[client.id] = data;
       return focusChatMessage(client, data);
     }));
-    if (!self.clients.openWindow || clientsInScope.length > 0) return undefined;
+    if (!self.clients.openWindow || clients.length > 0) return undefined;
     // Store notification data for default client (fix for android)
     clickBuffer[0] = data;
     // If there is no opened client we need to open one and wait until it is fully loaded
