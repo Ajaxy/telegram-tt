@@ -96,7 +96,7 @@ async function playSound(id: number) {
   const volume = notificationSoundVolume / 10;
   if (volume === 0) return;
 
-  const audio = new Audio('/notification.mp3');
+  const audio = new Audio('./notification.mp3');
   audio.volume = volume;
   audio.setAttribute('mozaudiochannel', 'notification');
   audio.addEventListener('ended', () => {
