@@ -20,7 +20,7 @@
 
 #LeftColumn {
   min-width: 12rem;
-  width: 25vw;
+  width: 33vw;
   max-width: 26.5rem;
   height: 100%;
   position: relative;
@@ -43,6 +43,7 @@
   }
 
   @media (min-width: 1276px) {
+    width: 25vw;
     max-width: 33vw;
   }
 
