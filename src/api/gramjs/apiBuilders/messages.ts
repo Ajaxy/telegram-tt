@@ -212,6 +212,10 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
 }
 
 export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMessage['content'] | undefined {
+  if ('ttlSeconds' in media && media.ttlSeconds) {
+    return undefined;
+  }
+
   const sticker = buildSticker(media);
   if (sticker) return { sticker };
 
@@ -275,10 +279,6 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | undefined {
 
 function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
   if (!(media instanceof GramJs.MessageMediaPhoto) || !media.photo || !(media.photo instanceof GramJs.Photo)) {
-    return undefined;
-  }
-
-  if (media.ttlSeconds) {
     return undefined;
   }
 
@@ -402,10 +402,6 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
 
 function buildDocumentFromMedia(media: GramJs.TypeMessageMedia) {
   if (!(media instanceof GramJs.MessageMediaDocument) || !media.document) {
-    return undefined;
-  }
-
-  if (media.ttlSeconds) {
     return undefined;
   }
 
