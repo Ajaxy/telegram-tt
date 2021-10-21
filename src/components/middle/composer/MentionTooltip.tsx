@@ -52,6 +52,7 @@ const MentionTooltip: FC<OwnProps> = ({
     items: filteredUsers,
     onSelect: handleSelectMention,
     shouldSelectOnTab: true,
+    shouldSaveSelectionOnUpdateItems: true,
     onClose,
   });
 

@@ -5,6 +5,7 @@ import cycleRestrict from '../../../../util/cycleRestrict';
 export function useKeyboardNavigation({
   isActive,
   isHorizontal,
+  shouldSaveSelectionOnUpdateItems,
   shouldRemoveSelectionOnReset,
   noArrowNavigation,
   items,
@@ -14,6 +15,7 @@ export function useKeyboardNavigation({
 }: {
   isActive: boolean;
   isHorizontal?: boolean;
+  shouldSaveSelectionOnUpdateItems?: boolean;
   shouldRemoveSelectionOnReset?: boolean;
   noArrowNavigation?: boolean;
   items?: any[];
@@ -46,9 +48,12 @@ export function useKeyboardNavigation({
     }
   }, [items, onSelect, selectedItemIndex]);
 
+  const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;
   useEffect(() => {
-    setSelectedItemIndex(shouldRemoveSelectionOnReset ? -1 : 0);
-  }, [items, shouldRemoveSelectionOnReset]);
+    if (!shouldSaveSelectionOnUpdateItems || isSelectionOutOfRange) {
+      setSelectedItemIndex(shouldRemoveSelectionOnReset ? -1 : 0);
+    }
+  }, [isSelectionOutOfRange, shouldRemoveSelectionOnReset, shouldSaveSelectionOnUpdateItems]);
 
   useEffect(() => (isActive ? captureKeyboardListeners({
     onEsc: onClose,
