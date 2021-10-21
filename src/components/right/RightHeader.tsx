@@ -238,6 +238,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           <SearchInput
             value={stickerSearchQuery}
             placeholder={lang('SearchStickersHint')}
+            autoFocusSearch
             onChange={handleStickerSearchQueryChange}
           />
         );
@@ -246,6 +247,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           <SearchInput
             value={gifSearchQuery}
             placeholder={lang('SearchGifsTitle')}
+            autoFocusSearch
             onChange={handleGifSearchQueryChange}
           />
         );

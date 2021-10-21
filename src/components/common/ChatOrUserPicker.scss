@@ -1,4 +1,4 @@
-.ForwardPicker {
+.ChatOrUserPicker {
   z-index: var(--z-media-viewer);
 
   .modal-dialog {
@@ -21,6 +21,7 @@
 
     .input-group {
       margin: 0;
+      flex: 1;
     }
 
     .form-control {
@@ -69,6 +70,5 @@
         }
       }
     }
-
   }
 }

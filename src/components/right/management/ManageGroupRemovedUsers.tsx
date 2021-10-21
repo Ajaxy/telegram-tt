@@ -7,13 +7,16 @@ import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
 import { selectChat } from '../../../modules/selectors';
-import { getUserFullName } from '../../../modules/helpers';
+import { getHasAdminRight, getUserFullName } from '../../../modules/helpers';
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useFlag from '../../../hooks/useFlag';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import RemoveGroupUserModal from './RemoveGroupUserModal';
 
 type OwnProps = {
   chatId: number;
@@ -24,6 +27,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   usersById: Record<number, ApiUser>;
+  canDeleteMembers?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'updateChatMemberBannedRights'>;
@@ -31,11 +35,13 @@ type DispatchProps = Pick<GlobalActions, 'updateChatMemberBannedRights'>;
 const ManageGroupRemovedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   usersById,
+  canDeleteMembers,
   updateChatMemberBannedRights,
   onClose,
   isActive,
 }) => {
   const lang = useLang();
+  const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
   useHistoryBack(isActive, onClose);
 
@@ -96,6 +102,22 @@ const ManageGroupRemovedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
               />
             </ListItem>
           ))}
+          {canDeleteMembers && (
+            <FloatingActionButton
+              isShown
+              onClick={openRemoveUserModal}
+              ariaLabel={lang('Channel.EditAdmin.Permission.BanUsers')}
+            >
+              <i className="icon-add-user-filled" />
+            </FloatingActionButton>
+          )}
+          {chat && canDeleteMembers && (
+            <RemoveGroupUserModal
+              chat={chat}
+              isOpen={isRemoveUserModalOpen}
+              onClose={closeRemoveUserModal}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -106,8 +128,9 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { byId: usersById } = global.users;
+    const canDeleteMembers = chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
 
-    return { chat, usersById };
+    return { chat, usersById, canDeleteMembers };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['updateChatMemberBannedRights']),
 )(ManageGroupRemovedUsers));
