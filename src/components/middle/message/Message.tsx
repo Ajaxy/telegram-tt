@@ -64,7 +64,7 @@ import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
-import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
+import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName, isEmojiOnlyMessage } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
@@ -428,7 +428,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       width = calculateMediaDimensions(message, noAvatars).width;
     } else if (video) {
       if (video.isRound) {
-        width = ROUND_VIDEO_DIMENSIONS;
+        width = ROUND_VIDEO_DIMENSIONS_PX;
       } else {
         width = calculateMediaDimensions(message, noAvatars).width;
       }
