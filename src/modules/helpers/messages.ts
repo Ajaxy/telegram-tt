@@ -258,7 +258,7 @@ export function getMessageContentFilename(message: ApiMessage) {
   const baseFilename = getMessageKey(message);
 
   if (photo) {
-    return `${baseFilename}.png`;
+    return `${baseFilename}.jpg`;
   }
 
   if (content.voice) {
