@@ -9,7 +9,7 @@ import { getDispatch } from '../../../lib/teact/teactn';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
-import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
+import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
@@ -105,7 +105,9 @@ const RoundVideo: FC<OwnProps> = ({
       return;
     }
 
-    const circumference = 94 * 2 * Math.PI;
+    const svgCenter = ROUND_VIDEO_DIMENSIONS_PX / 2;
+    const svgMargin = 6;
+    const circumference = (svgCenter - svgMargin) * 2 * Math.PI;
     const strokeDashOffset = circumference - progress * circumference;
 
     const playerEl = playerRef.current!;
@@ -113,8 +115,10 @@ const RoundVideo: FC<OwnProps> = ({
     const svgEl = playingProgressEl.firstElementChild;
 
     if (!svgEl) {
-      playingProgressEl.innerHTML = `<svg width="200px" height="200px">
-          <circle cx="100" cy="100" r="94" class="progress-circle" transform="rotate(-90, 100, 100)"
+      playingProgressEl.innerHTML = `
+        <svg width="${ROUND_VIDEO_DIMENSIONS_PX}px" height="${ROUND_VIDEO_DIMENSIONS_PX}px">
+          <circle cx="${svgCenter}" cy="${svgCenter}" r="${svgCenter - svgMargin}" class="progress-circle"
+            transform="rotate(-90, ${svgCenter}, ${svgCenter})"
             stroke-dasharray="${circumference} ${circumference}"
             stroke-dashoffset="${circumference}"
           />
@@ -208,7 +212,7 @@ const RoundVideo: FC<OwnProps> = ({
             ref={thumbRef}
             className="thumbnail"
             // @ts-ignore teact feature
-            style={`width: ${ROUND_VIDEO_DIMENSIONS}px; height: ${ROUND_VIDEO_DIMENSIONS}px`}
+            style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
           />
         </div>
       )}
@@ -218,8 +222,8 @@ const RoundVideo: FC<OwnProps> = ({
           <video
             ref={playerRef}
             className={videoClassName}
-            width={ROUND_VIDEO_DIMENSIONS}
-            height={ROUND_VIDEO_DIMENSIONS}
+            width={ROUND_VIDEO_DIMENSIONS_PX}
+            height={ROUND_VIDEO_DIMENSIONS_PX}
             autoPlay
             muted={!isActivated}
             loop={!isActivated}
