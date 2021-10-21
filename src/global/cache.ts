@@ -121,6 +121,12 @@ function readCache(initialState: GlobalState): GlobalState {
     if (!cached.stickers.greeting) {
       cached.stickers.greeting = initialState.stickers.greeting;
     }
+
+    if (!cached.activeDownloads) {
+      cached.activeDownloads = {
+        byChatId: {},
+      };
+    }
   }
 
   const newState = {

@@ -10,7 +10,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { pick } from '../../../util/iteratees';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { selectTheme } from '../../../modules/selectors';
+import { selectActiveDownloadIds, selectTheme } from '../../../modules/selectors';
 
 import Photo from './Photo';
 import Video from './Video';
@@ -35,6 +35,7 @@ type OwnProps = {
 type StateProps = {
   theme: ISettings['theme'];
   uploadsById: GlobalState['fileUploads']['byMessageLocalId'];
+  activeDownloadIds: number[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'cancelSendingMessage'>;
@@ -50,6 +51,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   albumLayout,
   onMediaClick,
   uploadsById,
+  activeDownloadIds,
   theme,
   cancelSendingMessage,
 }) => {
@@ -82,6 +84,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           dimensions={dimensions}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
+          isDownloading={activeDownloadIds.includes(message.id)}
           theme={theme}
         />
       );
@@ -98,6 +101,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           dimensions={dimensions}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
+          isDownloading={activeDownloadIds.includes(message.id)}
           theme={theme}
         />
       );
@@ -120,11 +124,14 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { album }): StateProps => {
+    const { chatId } = album.mainMessage;
     const theme = selectTheme(global);
+    const activeDownloadIds = selectActiveDownloadIds(global, chatId);
     return {
       theme,
       uploadsById: global.fileUploads.byMessageLocalId,
+      activeDownloadIds,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

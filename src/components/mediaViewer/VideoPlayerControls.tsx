@@ -159,10 +159,10 @@ function renderTime(currentTime: number, duration: number) {
   );
 }
 
-function renderFileSize(downloadedPercent: number, totalSize: number) {
+function renderFileSize(loadedPercent: number, totalSize: number) {
   return (
     <div className="player-file-size">
-      {`${formatFileSize(totalSize * downloadedPercent)} / ${formatFileSize(totalSize)}`}
+      {`${formatFileSize(totalSize * loadedPercent)} / ${formatFileSize(totalSize)}`}
     </div>
   );
 }

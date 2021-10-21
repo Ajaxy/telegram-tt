@@ -5,7 +5,7 @@ import { getDispatch } from '../lib/teact/teactn';
 
 import { AudioOrigin } from '../types';
 
-import { register, Track } from '../util/audioPlayer';
+import { register, Track, TrackId } from '../util/audioPlayer';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
 import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
 import useOnChange from './useOnChange';
@@ -18,7 +18,7 @@ type Handler = (e: Event) => void;
 const DEFAULT_SKIP_TIME = 10;
 
 export default (
-  trackId: string,
+  trackId: TrackId,
   originalDuration: number, // Sometimes incorrect for voice messages
   trackType: Track['type'],
   origin: AudioOrigin,

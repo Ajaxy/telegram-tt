@@ -41,6 +41,7 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
   globalMessagesByChatId,
   foundIds,
   lastSyncTime,
+  activeDownloads,
   searchMessagesGlobal,
   focusMessage,
   openAudioPlayer,
@@ -104,6 +105,7 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
             className="scroll-item"
             onPlay={handlePlayAudio}
             onDateClick={handleMessageFocus}
+            isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
           />
         </div>
       );

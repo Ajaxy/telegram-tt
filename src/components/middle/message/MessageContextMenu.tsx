@@ -33,6 +33,8 @@ type OwnProps = {
   canCopy?: boolean;
   canCopyLink?: boolean;
   canSelect?: boolean;
+  canDownload?: boolean;
+  isDownloading?: boolean;
   onReply: () => void;
   onEdit: () => void;
   onPin: () => void;
@@ -48,6 +50,7 @@ type OwnProps = {
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onCopyLink?: () => void;
+  onDownload?: () => void;
 };
 
 const SCROLLBAR_WIDTH = 10;
@@ -70,6 +73,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canCopy,
   canCopyLink,
   canSelect,
+  canDownload,
+  isDownloading,
   onReply,
   onEdit,
   onPin,
@@ -85,6 +90,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
   onCopyLink,
+  onDownload,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -152,6 +158,11 @@ const MessageContextMenu: FC<OwnProps> = ({
       ))}
       {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
       {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
+      {canDownload && (
+        <MenuItem icon="download" onClick={onDownload}>
+          {isDownloading ? lang('lng_context_cancel_download') : lang('lng_media_download')}
+        </MenuItem>
+      )}
       {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
       {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
       {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}

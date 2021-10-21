@@ -6,7 +6,11 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions, MessageListType } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 import { IAlbum, IAnchorPosition } from '../../../types';
-import { selectAllowedMessageActions, selectCurrentMessageList } from '../../../modules/selectors';
+import {
+  selectActiveDownloadIds,
+  selectAllowedMessageActions,
+  selectCurrentMessageList,
+} from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
@@ -46,11 +50,14 @@ type StateProps = {
   canCopy?: boolean;
   canCopyLink?: boolean;
   canSelect?: boolean;
+  canDownload?: boolean;
+  activeDownloads: number[];
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'setReplyingToId' | 'setEditingId' | 'pinMessage' | 'openForwardMenu' |
-  'faveSticker' | 'unfaveSticker' | 'toggleMessageSelection' | 'sendScheduledMessages' | 'rescheduleMessage'
+  'faveSticker' | 'unfaveSticker' | 'toggleMessageSelection' | 'sendScheduledMessages' | 'rescheduleMessage' |
+  'downloadMessageMedia' | 'cancelMessageMediaDownload'
 )>;
 
 const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -77,6 +84,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canCopy,
   canCopyLink,
   canSelect,
+  canDownload,
+  activeDownloads,
   setReplyingToId,
   setEditingId,
   pinMessage,
@@ -86,6 +95,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   toggleMessageSelection,
   sendScheduledMessages,
   rescheduleMessage,
+  downloadMessageMedia,
+  cancelMessageMediaDownload,
 }) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -93,6 +104,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
+
+  const isDownloading = album ? album.messages.some((msg) => activeDownloads.includes(msg.id))
+    : activeDownloads.includes(message.id);
 
   const handleDelete = useCallback(() => {
     setIsMenuOpen(false);
@@ -205,6 +219,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     closeMenu();
   }, [chatUsername, closeMenu, message.chatId, message.id]);
 
+  const handleDownloadClick = useCallback(() => {
+    (album?.messages || [message]).forEach((msg) => {
+      if (isDownloading) {
+        cancelMessageMediaDownload({ message: msg });
+      } else {
+        downloadMessageMedia({ message: msg });
+      }
+    });
+    closeMenu();
+  }, [album, message, closeMenu, isDownloading, cancelMessageMediaDownload, downloadMessageMedia]);
+
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
   if (noOptions) {
@@ -236,6 +261,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canCopy={canCopy}
         canCopyLink={canCopyLink}
         canSelect={canSelect}
+        canDownload={canDownload}
+        isDownloading={isDownloading}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}
@@ -250,6 +277,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         onReschedule={handleOpenCalendar}
         onClose={closeMenu}
         onCopyLink={handleCopyLink}
+        onDownload={handleDownloadClick}
       />
       <DeleteMessageModal
         isOpen={isDeleteModalOpen}
@@ -285,6 +313,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, messageListType }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
+    const activeDownloads = selectActiveDownloadIds(global, message.chatId);
     const {
       noOptions,
       canReply,
@@ -299,6 +328,7 @@ export default memo(withGlobal<OwnProps>(
       canCopy,
       canCopyLink,
       canSelect,
+      canDownload,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
@@ -319,6 +349,8 @@ export default memo(withGlobal<OwnProps>(
       canCopy,
       canCopyLink: !isScheduled && canCopyLink,
       canSelect,
+      canDownload,
+      activeDownloads,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -331,5 +363,7 @@ export default memo(withGlobal<OwnProps>(
     'toggleMessageSelection',
     'sendScheduledMessages',
     'rescheduleMessage',
+    'downloadMessageMedia',
+    'cancelMessageMediaDownload',
   ]),
 )(ContextMenuContainer));

@@ -163,4 +163,8 @@ export const INITIAL_STATE: GlobalState = {
   twoFaSettings: {},
 
   shouldShowContextMenuHint: true,
+
+  activeDownloads: {
+    byChatId: {},
+  },
 };

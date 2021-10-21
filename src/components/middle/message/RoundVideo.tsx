@@ -5,14 +5,15 @@ import React, {
   useRef,
   useState,
 } from '../../../lib/teact/teact';
+import { getDispatch } from '../../../lib/teact/teactn';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
 import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
@@ -36,6 +37,7 @@ type OwnProps = {
   shouldAutoLoad?: boolean;
   shouldAutoPlay?: boolean;
   lastSyncTime?: number;
+  isDownloading?: boolean;
 };
 
 let currentOnRelease: NoneToVoidFunction;
@@ -56,6 +58,7 @@ const RoundVideo: FC<OwnProps> = ({
   shouldAutoLoad,
   shouldAutoPlay,
   lastSyncTime,
+  isDownloading,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -68,23 +71,30 @@ const RoundVideo: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [isDownloadAllowed, setIsDownloadAllowed] = useState(shouldAutoLoad && shouldAutoPlay);
-  const shouldDownload = Boolean(isDownloadAllowed && isIntersecting && lastSyncTime);
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
+  const [isLoadAllowed, setIsLoadAllowed] = useState(shouldAutoLoad && shouldAutoPlay);
+  const shouldLoad = Boolean(isLoadAllowed && isIntersecting && lastSyncTime);
+  const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
-    !shouldDownload,
+    !shouldLoad,
     getMessageMediaFormat(message, 'inline'),
+    lastSyncTime,
+  );
+
+  const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
+    getMessageMediaHash(message, 'download'),
+    !isDownloading,
+    ApiMediaFormat.BlobUrl,
     lastSyncTime,
   );
   const thumbRef = useBlurredMediaThumbRef(message, mediaData);
 
   const { isBuffered, bufferingHandlers } = useBuffering();
-  const isTransferring = isDownloadAllowed && !isBuffered;
-  const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
+  const isTransferring = (isLoadAllowed && !isBuffered) || isDownloading;
+  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring || !isBuffered, undefined, wasDownloadDisabled);
+  } = useShowTransition(isTransferring || !isBuffered, undefined, wasLoadDisabled);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
 
   const [isActivated, setIsActivated] = useState<boolean>(false);
@@ -148,8 +158,13 @@ const RoundVideo: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (!mediaData) {
-      setIsDownloadAllowed((isAllowed) => !isAllowed);
+      setIsLoadAllowed((isAllowed) => !isAllowed);
 
+      return;
+    }
+
+    if (isDownloading) {
+      getDispatch().cancelMessageMediaDownload({ message });
       return;
     }
 
@@ -171,7 +186,7 @@ const RoundVideo: FC<OwnProps> = ({
 
       setIsActivated(true);
     }
-  }, [capturePlaying, isActivated, mediaData]);
+  }, [capturePlaying, isActivated, isDownloading, mediaData, message]);
 
   const handleTimeUpdate = useCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
@@ -221,10 +236,10 @@ const RoundVideo: FC<OwnProps> = ({
       <div className="progress" ref={playingProgressRef} />
       {shouldSpinnerRender && (
         <div className={`media-loading ${spinnerClassNames}`}>
-          <ProgressSpinner progress={downloadProgress} />
+          <ProgressSpinner progress={isDownloading ? downloadProgress : loadProgress} />
         </div>
       )}
-      {!mediaData && !isDownloadAllowed && (
+      {!mediaData && !isLoadAllowed && (
         <i className="icon-large-play" />
       )}
       <div className="message-media-duration">

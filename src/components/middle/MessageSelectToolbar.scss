@@ -9,7 +9,7 @@
   margin: 0;
 
   @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    bottom: calc(.5rem + env(safe-area-inset-bottom));
+    bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
 
   .mask-image-disabled &::before {
@@ -123,16 +123,53 @@
     margin-left: auto;
     display: flex;
 
-    .MenuItem {
+    .item {
+      width: 100%;
+      background: none;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      line-height: 1.5rem;
+      white-space: nowrap;
+      color: var(--color-text);
+      --ripple-color: rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      unicode-bidi: plaintext;
+
       padding: 0.6875rem;
       border-radius: 50%;
 
       i {
-        margin-right: 0;
+        font-size: 1.5rem;
+        color: var(--color-text-secondary);
       }
 
-      .item-text {
-        display: none;
+      &.destructive {
+        color: var(--color-error);
+        i {
+          color: inherit;
+        }
+      }
+
+      &.disabled {
+        opacity: 0.5;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      &:not(.disabled):active {
+        background-color: var(--color-item-active);
+        transition: none !important;
+      }
+
+      @media (hover: hover) {
+        &:hover, &:focus {
+          background-color: var(--color-chat-hover);
+          text-decoration: none;
+        }
       }
     }
   }

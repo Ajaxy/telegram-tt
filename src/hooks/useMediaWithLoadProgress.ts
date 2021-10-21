@@ -7,12 +7,13 @@ import { ApiMediaFormat } from '../api/types';
 import { throttle } from '../util/schedulers';
 import * as mediaLoader from '../util/mediaLoader';
 import useForceUpdate from './useForceUpdate';
+import useUniqueId from './useUniqueId';
 
 const STREAMING_PROGRESS = 0.75;
 const STREAMING_TIMEOUT = 1500;
 const PROGRESS_THROTTLE = 500;
 
-export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
+export default function useMediaWithLoadProgress<T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaHash: string | undefined,
   noLoad = false,
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
@@ -20,19 +21,20 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   cacheBuster?: number,
   delay?: number | false,
   isHtmlAllowed = false,
-) => {
+) {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
   const isStreaming = mediaFormat === ApiMediaFormat.Stream || (
     IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive
   );
   const forceUpdate = useForceUpdate();
-  const [downloadProgress, setDownloadProgress] = useState(mediaData && !isStreaming ? 1 : 0);
+  const id = useUniqueId();
+  const [loadProgress, setLoadProgress] = useState(mediaData && !isStreaming ? 1 : 0);
   const startedAtRef = useRef<number>();
 
   const handleProgress = useMemo(() => {
     return throttle((progress: number) => {
-      if (!delay || (Date.now() - startedAtRef.current! > delay)) {
-        setDownloadProgress(progress);
+      if (startedAtRef.current && (!delay || (Date.now() - startedAtRef.current > delay))) {
+        setLoadProgress(progress);
       }
     }, PROGRESS_THROTTLE, true);
   }, [delay]);
@@ -40,7 +42,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   useEffect(() => {
     if (!noLoad && mediaHash) {
       if (!mediaData) {
-        setDownloadProgress(0);
+        setLoadProgress(0);
 
         if (startedAtRef.current) {
           mediaLoader.cancelProgress(handleProgress);
@@ -48,7 +50,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
 
         startedAtRef.current = Date.now();
 
-        mediaLoader.fetch(mediaHash, mediaFormat, isHtmlAllowed, handleProgress).then(() => {
+        mediaLoader.fetch(mediaHash, mediaFormat, isHtmlAllowed, handleProgress, id).then(() => {
           const spentTime = Date.now() - startedAtRef.current!;
           startedAtRef.current = undefined;
 
@@ -60,21 +62,30 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
         });
       } else if (isStreaming) {
         setTimeout(() => {
-          setDownloadProgress(STREAMING_PROGRESS);
+          setLoadProgress(STREAMING_PROGRESS);
         }, STREAMING_TIMEOUT);
       }
     }
   }, [
     noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isStreaming, delay, handleProgress,
-    isHtmlAllowed,
+    isHtmlAllowed, id,
   ]);
 
   useEffect(() => {
     if (noLoad && startedAtRef.current) {
       mediaLoader.cancelProgress(handleProgress);
-      setDownloadProgress(0);
+      setLoadProgress(0);
+      startedAtRef.current = undefined;
     }
   }, [handleProgress, noLoad]);
 
-  return { mediaData, downloadProgress };
-};
+  useEffect(() => {
+    return () => {
+      if (mediaHash) {
+        mediaLoader.removeCallback(mediaHash, id);
+      }
+    };
+  }, [id, mediaHash]);
+
+  return { mediaData, loadProgress };
+}

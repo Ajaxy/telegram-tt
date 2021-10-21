@@ -34,6 +34,7 @@ import {
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
 import { getServerTime } from '../../util/serverTime';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 
@@ -413,11 +414,16 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const canCopy = !isAction;
   const canCopyLink = !isAction && (isChannel || isSuperGroup);
   const canSelect = !isAction;
+
+  const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
+    || content.audio || content.voice || content.photo || content.video || content.document || content.sticker);
+
   const noOptions = [
     canReply,
     canEdit,
     canPin,
     canUnpin,
+    canReport,
     canDelete,
     canDeleteForAll,
     canForward,
@@ -426,6 +432,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canCopy,
     canCopyLink,
     canSelect,
+    canDownload,
   ].every((ability) => !ability);
 
   return {
@@ -434,8 +441,8 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canEdit,
     canPin,
     canUnpin,
-    canDelete,
     canReport,
+    canDelete,
     canDeleteForAll,
     canForward,
     canFaveSticker,
@@ -443,6 +450,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canCopy,
     canCopyLink,
     canSelect,
+    canDownload,
   };
 }
 
@@ -478,6 +486,30 @@ export function selectCanReportSelectedMessages(global: GlobalState) {
     .filter(Boolean);
 
   return messageActions.every((actions) => actions.canReport);
+}
+
+export function selectCanDownloadSelectedMessages(global: GlobalState) {
+  const { messageIds: selectedMessageIds } = global.selectedMessages || {};
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  const chatMessages = chatId && selectChatMessages(global, chatId);
+  if (!chatMessages || !selectedMessageIds || !threadId) {
+    return false;
+  }
+
+  const messageActions = selectedMessageIds
+    .map((id) => chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId))
+    .filter(Boolean);
+
+  return messageActions.some((actions) => actions.canDownload);
+}
+
+export function selectIsDownloading(global: GlobalState, message: ApiMessage) {
+  const activeInChat = global.activeDownloads.byChatId[message.chatId];
+  return activeInChat ? activeInChat.includes(message.id) : false;
+}
+
+export function selectActiveDownloadIds(global: GlobalState, chatId: number) {
+  return global.activeDownloads.byChatId[chatId] || MEMO_EMPTY_ARRAY;
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
