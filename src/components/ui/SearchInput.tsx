@@ -6,6 +6,7 @@ import React, {
 import buildClassName from '../../util/buildClassName';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
 
 import Loading from './Loading';
 import Button from './Button';
@@ -25,6 +26,7 @@ type OwnProps = {
   disabled?: boolean;
   autoComplete?: string;
   canClose?: boolean;
+  autoFocusSearch?: boolean;
   onChange: (value: string) => void;
   onReset?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
@@ -44,6 +46,7 @@ const SearchInput: FC<OwnProps> = ({
   disabled,
   autoComplete,
   canClose,
+  autoFocusSearch,
   onChange,
   onReset,
   onFocus,
@@ -56,6 +59,8 @@ const SearchInput: FC<OwnProps> = ({
   }
 
   const [isInputFocused, markInputFocused, unmarkInputFocused] = useFlag(focused);
+
+  useInputFocusOnOpen(inputRef, autoFocusSearch, unmarkInputFocused);
 
   useEffect(() => {
     if (!inputRef.current) {
