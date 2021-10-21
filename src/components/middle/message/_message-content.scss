@@ -425,6 +425,10 @@
   &.is-reply .Album {
     margin-left: -0.5rem;
     margin-right: -0.5rem;
+
+    body.is-ios .Message.own & {
+      margin-left: -0.625rem;
+    }
   }
 
   &.text .media-inner {
@@ -437,6 +441,10 @@
   .message-title ~ .media-inner {
     margin-top: 0.375rem;
     margin-bottom: -0.375rem;
+
+    body.is-ios .Message.own & {
+      margin-bottom: -0.4375rem;
+    }
   }
 
   // Moved below .is-reply to overwrite its styles
