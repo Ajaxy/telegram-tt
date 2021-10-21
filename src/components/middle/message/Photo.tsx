@@ -14,7 +14,7 @@ import {
   isOwnMessage,
 } from '../../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
@@ -38,6 +38,7 @@ export type OwnProps = {
   shouldAffectAppendix?: boolean;
   dimensions?: IMediaDimensions & { isSmall?: boolean };
   nonInteractive?: boolean;
+  isDownloading: boolean;
   theme: ISettings['theme'];
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
@@ -58,6 +59,7 @@ const Photo: FC<OwnProps> = ({
   dimensions,
   nonInteractive,
   shouldAffectAppendix,
+  isDownloading,
   theme,
   onClick,
   onCancelUpload,
@@ -70,22 +72,30 @@ const Photo: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [isDownloadAllowed, setIsDownloadAllowed] = useState(shouldAutoLoad);
-  const shouldDownload = isDownloadAllowed && isIntersecting;
+  const [isLoadAllowed, setIsLoadAllowed] = useState(shouldAutoLoad);
+  const shouldLoad = isLoadAllowed && isIntersecting;
   const {
-    mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !shouldDownload);
+    mediaData, loadProgress,
+  } = useMediaWithLoadProgress(getMessageMediaHash(message, size), !shouldLoad);
   const fullMediaData = localBlobUrl || mediaData;
   const thumbRef = useBlurredMediaThumbRef(message, fullMediaData);
 
   const {
+    loadProgress: downloadProgress,
+  } = useMediaWithLoadProgress(getMessageMediaHash(message, 'download'), !isDownloading);
+
+  const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !fullMediaData);
-  const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
+  } = getMediaTransferState(
+    message,
+    uploadProgress || isDownloading ? downloadProgress : loadProgress,
+    shouldLoad && !fullMediaData,
+  );
+  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasDownloadDisabled, 'slow');
+  } = useShowTransition(isTransferring, undefined, wasLoadDisabled, 'slow');
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
   } = useTransitionForMedia(fullMediaData, 'slow');
@@ -96,7 +106,7 @@ const Photo: FC<OwnProps> = ({
         onCancelUpload(message);
       }
     } else if (!fullMediaData) {
-      setIsDownloadAllowed((isAllowed) => !isAllowed);
+      setIsLoadAllowed((isAllowed) => !isAllowed);
     } else if (onClick) {
       onClick(message.id);
     }
@@ -164,11 +174,11 @@ const Photo: FC<OwnProps> = ({
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {!fullMediaData && !isDownloadAllowed && (
+      {!fullMediaData && !isLoadAllowed && (
         <i className="icon-download" />
       )}
       {isTransferring && (
-        <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
+        <span className="message-transfer-progress">{Math.round(transferProgress * 100)}%</span>
       )}
     </div>
   );

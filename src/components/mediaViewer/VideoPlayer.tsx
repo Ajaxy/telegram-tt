@@ -22,7 +22,7 @@ type OwnProps = {
   isGif?: boolean;
   posterData?: string;
   posterSize?: ApiDimensions;
-  downloadProgress?: number;
+  loadProgress?: number;
   fileSize: number;
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
@@ -36,7 +36,7 @@ const VideoPlayer: FC<OwnProps> = ({
   isGif,
   posterData,
   posterSize,
-  downloadProgress,
+  loadProgress,
   fileSize,
   isMediaViewerOpen,
   noPlay,
@@ -196,7 +196,7 @@ const VideoPlayer: FC<OwnProps> = ({
           {!isBuffered && <div className="buffering">Buffering...</div>}
           <ProgressSpinner
             size="xl"
-            progress={isBuffered ? 1 : downloadProgress}
+            progress={isBuffered ? 1 : loadProgress}
             square
             onClick={onClose}
           />

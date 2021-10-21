@@ -36,6 +36,7 @@ import MiddleColumn from '../middle/MiddleColumn';
 import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
+import DownloadManager from './DownloadManager';
 import Notifications from './Notifications.async';
 import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
@@ -252,6 +253,7 @@ const Main: FC<StateProps & DispatchProps> = ({
         onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
       />
+      <DownloadManager />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
+import { getDispatch } from '../../lib/teact/teactn';
 
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
@@ -12,7 +13,6 @@ import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '.
 import {
   getMediaDuration,
   getMediaTransferState,
-  getMessageAudioCaption,
   getMessageMediaFormat,
   getMessageMediaHash,
   isMessageLocal,
@@ -23,11 +23,10 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import { getFileSizeString } from './helpers/documentInfo';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useMediaDownload from '../../hooks/useMediaDownload';
 import useLang, { LangFn } from '../../hooks/useLang';
 import { captureEvents } from '../../util/captureEvents';
 import useMedia from '../../hooks/useMedia';
@@ -51,6 +50,7 @@ type OwnProps = {
   className?: string;
   isSelectable?: boolean;
   isSelected?: boolean;
+  isDownloading: boolean;
   onPlay: (messageId: number, chatId: number) => void;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
@@ -74,6 +74,7 @@ const Audio: FC<OwnProps> = ({
   className,
   isSelectable,
   isSelected,
+  isDownloading,
   onPlay,
   onReadMedia,
   onCancelUpload,
@@ -87,16 +88,22 @@ const Audio: FC<OwnProps> = ({
   const seekerRef = useRef<HTMLElement>(null);
   const lang = useLang();
   const { isRtl } = lang;
+  const dispatch = getDispatch();
 
   const [isActivated, setIsActivated] = useState(false);
-  const shouldDownload = (isActivated || PRELOAD) && lastSyncTime;
+  const shouldLoad = (isActivated || PRELOAD) && lastSyncTime;
   const coverHash = getMessageMediaHash(message, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
 
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
+  const mediaData = useMedia(
     getMessageMediaHash(message, 'inline'),
-    !shouldDownload,
+    !shouldLoad,
     getMessageMediaFormat(message, 'inline'),
+  );
+
+  const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
+    getMessageMediaHash(message, 'download'),
+    !isDownloading,
   );
 
   const handleForcePlay = useCallback(() => {
@@ -135,20 +142,14 @@ const Audio: FC<OwnProps> = ({
     setIsActivated(isPlaying);
   }, [isPlaying]);
 
-  const {
-    isDownloadStarted,
-    downloadProgress: directDownloadProgress,
-    handleDownloadClick,
-  } = useMediaDownload(getMessageMediaHash(message, 'download'), getMessageAudioCaption(message));
-
   const isLoadingForPlaying = isActivated && !isBuffered;
 
   const {
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(
     message,
-    isDownloadStarted ? directDownloadProgress : (uploadProgress || downloadProgress),
-    isLoadingForPlaying || isDownloadStarted,
+    uploadProgress || downloadProgress,
+    isLoadingForPlaying || isDownloading,
   );
 
   const {
@@ -173,10 +174,18 @@ const Audio: FC<OwnProps> = ({
   }, [isPlaying, isUploading, message.id, message.chatId, onCancelUpload, onPlay, playPause, isActivated]);
 
   useEffect(() => {
-    if (isPlaying && onReadMedia && isMediaUnread) {
+    if (onReadMedia && isMediaUnread && (isPlaying || isDownloading)) {
       onReadMedia();
     }
-  }, [isPlaying, isMediaUnread, onReadMedia]);
+  }, [isPlaying, isMediaUnread, onReadMedia, isDownloading]);
+
+  const handleDownloadClick = useCallback(() => {
+    if (isDownloading) {
+      dispatch.cancelMessageMediaDownload({ message });
+    } else {
+      dispatch.downloadMessageMedia({ message });
+    }
+  }, [dispatch, isDownloading, message]);
 
   const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
     if (isSeeking.current && seekerRef.current) {
@@ -348,15 +357,15 @@ const Audio: FC<OwnProps> = ({
           round
           size="tiny"
           className="download-button"
-          ariaLabel={isDownloadStarted ? 'Cancel download' : 'Download'}
+          ariaLabel={isDownloading ? 'Cancel download' : 'Download'}
           onClick={handleDownloadClick}
         >
-          <i className={isDownloadStarted ? 'icon-close' : 'icon-arrow-down'} />
+          <i className={isDownloading ? 'icon-close' : 'icon-arrow-down'} />
         </Button>
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
       {origin !== AudioOrigin.Search && audio && renderAudio(
-        lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef, (isDownloadStarted || isUploading),
+        lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef, (isDownloading || isUploading),
         date, transferProgress, onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}

@@ -30,6 +30,7 @@ import {
   selectCurrentMediaSearch,
   selectIsRightColumnShown,
   selectTheme,
+  selectActiveDownloadIds,
 } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -85,6 +86,7 @@ type StateProps = {
   isRestricted?: boolean;
   lastSyncTime?: number;
   serverTimeOffset: number;
+  activeDownloadIds: number[];
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -123,6 +125,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   isRightColumnShown,
   isRestricted,
   lastSyncTime,
+  activeDownloadIds,
   setLocalMediaSearchType,
   loadMoreMembers,
   searchMediaMessagesLocal,
@@ -316,6 +319,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               smaller
               className="scroll-item"
               onDateClick={handleMessageFocus}
+              isDownloading={activeDownloadIds.includes(id)}
             />
           ))
         ) : resultType === 'links' ? (
@@ -338,6 +342,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
+              isDownloading={activeDownloadIds.includes(id)}
             />
           ))
         ) : resultType === 'voice' ? (
@@ -353,6 +358,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
+              isDownloading={activeDownloadIds.includes(id)}
             />
           ))
         ) : resultType === 'members' ? (
@@ -465,6 +471,8 @@ export default memo(withGlobal<OwnProps>(
     const canAddMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
 
+    const activeDownloadIds = selectActiveDownloadIds(global, chatId);
+
     let resolvedUserId;
     if (userId) {
       resolvedUserId = userId;
@@ -488,6 +496,7 @@ export default memo(withGlobal<OwnProps>(
       isRestricted: chat?.isRestricted,
       lastSyncTime: global.lastSyncTime,
       serverTimeOffset: global.serverTimeOffset,
+      activeDownloadIds,
       usersById,
       chatsById,
       ...(hasMembersTab && members && { members }),

@@ -6,11 +6,11 @@ import { ApiMessage } from '../api/types';
 import { IS_SAFARI } from './environment';
 import safePlay from './safePlay';
 import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSafariProgressiveAudio';
-import { getMessageKey, parseMessageKey } from '../modules/helpers';
+import { getMessageKey, MessageKey, parseMessageKey } from '../modules/helpers';
 import { fastRaf } from './schedulers';
 
 type Handler = (eventName: string, e: Event) => void;
-type TrackId = string; // `${MessageKey}-${number}`;
+export type TrackId = `${MessageKey}-${number}`;
 
 export interface Track {
   audio: HTMLAudioElement;
@@ -131,7 +131,7 @@ export function stopCurrentAudio() {
 }
 
 export function register(
-  trackId: string,
+  trackId: TrackId,
   trackType: Track['type'],
   origin: AudioOrigin,
   handler: Handler,
@@ -317,7 +317,7 @@ export function makeTrackId(message: ApiMessage): TrackId {
 }
 
 function splitTrackId(trackId: TrackId) {
-  const messageKey = trackId.match(/^msg(-?\d+)-(\d+)/)![0];
+  const messageKey = trackId.match(/^msg(-?\d+)-(\d+)/)![0] as MessageKey;
   const date = Number(trackId.split('-').pop());
   return {
     messageKey,

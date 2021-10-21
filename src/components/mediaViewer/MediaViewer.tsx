@@ -51,7 +51,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useMedia from '../../hooks/useMedia';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useBlurSync from '../../hooks/useBlurSync';
 import usePrevious from '../../hooks/usePrevious';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
@@ -181,7 +181,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
-  const { mediaData: fullMediaBlobUrl, downloadProgress } = useMediaWithDownloadProgress(
+  const { mediaData: fullMediaBlobUrl, loadProgress } = useMediaWithLoadProgress(
     getMediaHash(true),
     undefined,
     message && getMessageMediaFormat(message, 'viewerFull'),
@@ -485,7 +485,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               isGif={isGif}
               posterData={bestImageData}
               posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
-              downloadProgress={downloadProgress}
+              loadProgress={loadProgress}
               fileSize={videoSize!}
               isMediaViewerOpen={isOpen}
               noPlay={!isActive}

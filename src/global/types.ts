@@ -438,6 +438,10 @@ export type GlobalState = {
   historyCalendarSelectedAt?: number;
   openedStickerSetShortName?: string;
 
+  activeDownloads: {
+    byChatId: Record<number, number[]>;
+  };
+
   shouldShowContextMenuHint?: boolean;
 };
 
@@ -470,6 +474,8 @@ export type ActionTypes = (
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
   'reportMessages' | 'focusNextReply' | 'openChatByInvite' |
+  // downloads
+  'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result

@@ -27,20 +27,26 @@ const PROGRESSIVE_URL_PREFIX = './progressive/';
 
 const memoryCache = new Map<string, ApiPreparedMedia>();
 const fetchPromises = new Map<string, Promise<ApiPreparedMedia | undefined>>();
+const progressCallbacks = new Map<string, Map<string, ApiOnProgress>>();
+const cancellableCallbacks = new Map<string, ApiOnProgress>();
 
 export function fetch<T extends ApiMediaFormat>(
-  url: string, mediaFormat: T, isHtmlAllowed = false, onProgress?: ApiOnProgress,
+  url: string,
+  mediaFormat: T,
+  isHtmlAllowed = false,
+  onProgress?: ApiOnProgress,
+  callbackUniqueId?: string,
 ): Promise<ApiMediaFormatToPrepared<T>> {
   if (mediaFormat === ApiMediaFormat.Progressive) {
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? getProgressive(url)
-        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress)
+        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
     ) as Promise<ApiMediaFormatToPrepared<T>>;
   }
 
   if (!fetchPromises.has(url)) {
-    const promise = fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed, onProgress)
+    const promise = fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed)
       .catch((err) => {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -51,9 +57,20 @@ export function fetch<T extends ApiMediaFormat>(
       })
       .finally(() => {
         fetchPromises.delete(url);
+        progressCallbacks.delete(url);
+        cancellableCallbacks.delete(url);
       });
 
     fetchPromises.set(url, promise);
+  }
+
+  if (onProgress && callbackUniqueId) {
+    let activeCallbacks = progressCallbacks.get(url);
+    if (!activeCallbacks) {
+      activeCallbacks = new Map<string, ApiOnProgress>();
+      progressCallbacks.set(url, activeCallbacks);
+    }
+    activeCallbacks.set(callbackUniqueId, onProgress);
   }
 
   return fetchPromises.get(url) as Promise<ApiMediaFormatToPrepared<T>>;
@@ -64,7 +81,23 @@ export function getFromMemory<T extends ApiMediaFormat>(url: string) {
 }
 
 export function cancelProgress(progressCallback: ApiOnProgress) {
-  cancelApiProgress(progressCallback);
+  progressCallbacks.forEach((map, url) => {
+    map.forEach((callback) => {
+      if (callback === progressCallback) {
+        const parentCallback = cancellableCallbacks.get(url)!;
+
+        cancelApiProgress(parentCallback);
+        cancellableCallbacks.delete(url);
+        progressCallbacks.delete(url);
+      }
+    });
+  });
+}
+
+export function removeCallback(url: string, callbackUniqueId: string) {
+  const callbacks = progressCallbacks.get(url);
+  if (!callbacks) return;
+  callbacks.delete(callbackUniqueId);
 }
 
 function getProgressive(url: string) {
@@ -76,7 +109,7 @@ function getProgressive(url: string) {
 }
 
 async function fetchFromCacheOrRemote(
-  url: string, mediaFormat: ApiMediaFormat, isHtmlAllowed: boolean, onProgress?: ApiOnProgress,
+  url: string, mediaFormat: ApiMediaFormat, isHtmlAllowed: boolean,
 ) {
   if (!MEDIA_CACHE_DISABLED) {
     const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
@@ -117,30 +150,22 @@ async function fetchFromCacheOrRemote(
 
       const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
 
-      void callApi('downloadMedia', { url, mediaFormat }, (progress: number, arrayBuffer: ArrayBuffer) => {
-        if (onProgress) {
-          onProgress(progress);
-        }
+      const onProgress = makeOnProgress(url, mediaSource, sourceBuffer);
+      cancellableCallbacks.set(url, onProgress);
 
-        if (progress === 1) {
-          mediaSource.endOfStream();
-        }
-
-        if (!arrayBuffer) {
-          return;
-        }
-
-        sourceBuffer.appendBuffer(arrayBuffer!);
-      });
+      void callApi('downloadMedia', { url, mediaFormat }, onProgress);
     });
 
     memoryCache.set(url, streamUrl);
     return streamUrl;
   }
 
+  const onProgress = makeOnProgress(url);
+  cancellableCallbacks.set(url, onProgress);
+
   const remote = await callApi('downloadMedia', { url, mediaFormat, isHtmlAllowed }, onProgress);
   if (!remote) {
-    throw new Error('Failed to fetch media');
+    throw new Error(`Failed to fetch media ${url}`);
   }
 
   let { prepared, mimeType } = remote;
@@ -150,7 +175,7 @@ async function fetchFromCacheOrRemote(
     URL.revokeObjectURL(prepared as string);
     const media = await oggToWav(blob);
     prepared = prepareMedia(media);
-    mimeType = blob.type;
+    mimeType = media.type;
   }
 
   if (mimeType === 'image/webp' && !isWebpSupported()) {
@@ -165,6 +190,27 @@ async function fetchFromCacheOrRemote(
   memoryCache.set(url, prepared);
 
   return prepared;
+}
+
+function makeOnProgress(url: string, mediaSource?: MediaSource, sourceBuffer?: SourceBuffer) {
+  const onProgress: ApiOnProgress = (progress: number, arrayBuffer: ArrayBuffer) => {
+    progressCallbacks.get(url)?.forEach((callback) => {
+      callback(progress);
+      if (callback.isCanceled) onProgress.isCanceled = true;
+    });
+
+    if (progress === 1) {
+      mediaSource?.endOfStream();
+    }
+
+    if (!arrayBuffer) {
+      return;
+    }
+
+    sourceBuffer?.appendBuffer(arrayBuffer);
+  };
+
+  return onProgress;
 }
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {

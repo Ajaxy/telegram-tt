@@ -4,20 +4,25 @@ import {
 import { LangFn } from '../../hooks/useLang';
 
 import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID, RE_LINK_TEMPLATE } from '../../config';
-import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
 import { getUserFullName } from './users';
+import { isWebpSupported, IS_OPUS_SUPPORTED } from '../../util/environment';
 import { getChatTitle } from './chats';
+import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 const TRUNCATED_SUMMARY_LENGTH = 80;
 
-export type MessageKey = string; // `msg${number}-${number}`;
+export type MessageKey = `msg${number}-${number}`;
 
 export function getMessageKey(message: ApiMessage): MessageKey {
   const { chatId, id } = message;
 
-  return `msg${chatId}-${id}`;
+  return buildMessageKey(chatId, id);
+}
+
+export function buildMessageKey(chatId: number, msgId: number): MessageKey {
+  return `msg${chatId}-${msgId}`;
 }
 
 export function parseMessageKey(key: MessageKey) {
@@ -225,4 +230,40 @@ export function getMessageAudioCaption(message: ApiMessage) {
   const { audio, text } = message.content;
 
   return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text?.text);
+}
+
+export function getMessageContentFilename(message: ApiMessage) {
+  const { content } = message;
+
+  const video = content.webPage ? content.webPage.video : content.video;
+  const photo = content.webPage ? content.webPage.photo : content.photo;
+  const document = content.webPage ? content.webPage.document : content.document;
+  if (document) {
+    return document.fileName;
+  }
+
+  if (video) {
+    return video.fileName;
+  }
+
+  if (content.sticker) {
+    const extension = content.sticker.isAnimated ? 'tgs' : isWebpSupported() ? 'webp' : 'png';
+    return `${content.sticker.id}.${extension}`;
+  }
+
+  if (content.audio) {
+    return content.audio.fileName;
+  }
+
+  const baseFilename = getMessageKey(message);
+
+  if (photo) {
+    return `${baseFilename}.png`;
+  }
+
+  if (content.voice) {
+    return IS_OPUS_SUPPORTED ? `${baseFilename}.ogg` : `${baseFilename}.wav`;
+  }
+
+  return baseFilename;
 }

@@ -10,7 +10,7 @@ import { fetchBlob } from '../../../util/files';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
-import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
@@ -40,15 +40,15 @@ const WallpaperTile: FC<OwnProps> = ({
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
   } = useTransitionForMedia(previewBlobUrl || localBlobUrl, 'slow');
-  const [isDownloadAllowed, setIsDownloadAllowed] = useState(false);
+  const [isLoadAllowed, setIsLoadAllowed] = useState(false);
   const {
-    mediaData: fullMedia, downloadProgress,
-  } = useMediaWithDownloadProgress(localMediaHash, !isDownloadAllowed);
-  const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
+    mediaData: fullMedia, loadProgress,
+  } = useMediaWithLoadProgress(localMediaHash, !isLoadAllowed);
+  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
   const { shouldRender: shouldRenderSpinner, transitionClassNames: spinnerClassNames } = useShowTransition(
-    (isDownloadAllowed && !fullMedia) || slug === UPLOADING_WALLPAPER_SLUG,
+    (isLoadAllowed && !fullMedia) || slug === UPLOADING_WALLPAPER_SLUG,
     undefined,
-    wasDownloadDisabled,
+    wasLoadDisabled,
     'slow',
   );
   // To prevent triggering of the effect for useCallback
@@ -73,7 +73,7 @@ const WallpaperTile: FC<OwnProps> = ({
     if (fullMedia) {
       handleSelect();
     } else {
-      setIsDownloadAllowed((isAllowed) => !isAllowed);
+      setIsLoadAllowed((isAllowed) => !isAllowed);
     }
   }, [fullMedia, handleSelect]);
 
@@ -100,7 +100,7 @@ const WallpaperTile: FC<OwnProps> = ({
         )}
         {shouldRenderSpinner && (
           <div className={buildClassName('spinner-container', spinnerClassNames)}>
-            <ProgressSpinner progress={downloadProgress} onClick={handleClick} />
+            <ProgressSpinner progress={loadProgress} onClick={handleClick} />
           </div>
         )}
       </div>

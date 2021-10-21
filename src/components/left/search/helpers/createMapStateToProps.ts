@@ -15,6 +15,7 @@ export type StateProps = {
   foundIds?: string[];
   lastSyncTime?: number;
   searchChatId?: number;
+  activeDownloads: Record<number, number[]>;
 };
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
@@ -33,6 +34,8 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     const { byChatId: globalMessagesByChatId } = global.messages;
     const foundIds = resultsByType?.[currentType]?.foundIds;
 
+    const activeDownloads = global.activeDownloads.byChatId;
+
     return {
       theme: selectTheme(global),
       isLoading: foundIds === undefined
@@ -42,6 +45,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       globalMessagesByChatId,
       foundIds,
       searchChatId: chatId,
+      activeDownloads,
       lastSyncTime: global.lastSyncTime,
     };
   };

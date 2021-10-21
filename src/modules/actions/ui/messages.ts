@@ -394,6 +394,53 @@ addReducer('openForwardMenuForSelectedMessages', (global, actions) => {
   actions.openForwardMenu({ fromChatId, messageIds });
 });
 
+addReducer('cancelMessageMediaDownload', (global, actions, payload) => {
+  const { message } = payload!;
+
+  const byChatId = global.activeDownloads.byChatId[message.chatId];
+  if (!byChatId || !byChatId.length) return;
+
+  setGlobal({
+    ...global,
+    activeDownloads: {
+      byChatId: {
+        ...global.activeDownloads.byChatId,
+        [message.chatId]: byChatId.filter((id) => id !== message.id),
+      },
+    },
+  });
+});
+
+addReducer('downloadMessageMedia', (global, actions, payload) => {
+  const { message } = payload!;
+  if (!message) return;
+
+  setGlobal({
+    ...global,
+    activeDownloads: {
+      byChatId: {
+        ...global.activeDownloads.byChatId,
+        [message.chatId]: [...(global.activeDownloads.byChatId[message.chatId] || []), message.id],
+      },
+    },
+  });
+});
+
+addReducer('downloadSelectedMessages', (global, actions) => {
+  if (!global.selectedMessages) {
+    return;
+  }
+
+  const { chatId, messageIds } = global.selectedMessages;
+  const { threadId } = selectCurrentMessageList(global) || {};
+
+  const chatMessages = selectChatMessages(global, chatId);
+  if (!chatMessages || !threadId) return;
+  const messages = messageIds.map((id) => chatMessages[id])
+    .filter((message) => selectAllowedMessageActions(global, message, threadId).canDownload);
+  messages.forEach((message) => actions.downloadMessageMedia({ message }));
+});
+
 addReducer('enterMessageSelectMode', (global, actions, payload) => {
   const { messageId } = payload || {};
   const openChat = selectCurrentChat(global);

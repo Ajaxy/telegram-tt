@@ -44,6 +44,7 @@ import {
   selectShouldLoopStickers,
   selectTheme,
   selectAllowedMessageActions,
+  selectIsDownloading,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -153,6 +154,7 @@ type StateProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
+  isDownloading: boolean;
   threadId?: number;
   isPinnedList?: boolean;
   shouldAutoLoadMedia?: boolean;
@@ -217,6 +219,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   threadId,
   messageListType,
   isPinnedList,
+  isDownloading,
   shouldAutoLoadMedia,
   shouldAutoPlayMedia,
   shouldLoopStickers,
@@ -533,6 +536,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             shouldAffectAppendix={hasCustomAppendix}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
+            isDownloading={isDownloading}
             theme={theme}
           />
         )}
@@ -543,6 +547,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             shouldAutoLoad={shouldAutoLoadMedia}
             shouldAutoPlay={shouldAutoPlayMedia}
             lastSyncTime={lastSyncTime}
+            isDownloading={isDownloading}
           />
         )}
         {!isAlbum && video && !video.isRound && (
@@ -556,6 +561,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             lastSyncTime={lastSyncTime}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
+            isDownloading={isDownloading}
           />
         )}
         {(audio || voice) && (
@@ -570,6 +576,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             onPlay={handleAudioPlay}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
+            isDownloading={isDownloading}
           />
         )}
         {document && (
@@ -581,6 +588,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             isSelected={isSelected}
             onMediaClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
+            isDownloading={isDownloading}
           />
         )}
         {contact && (
@@ -612,6 +620,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             lastSyncTime={lastSyncTime}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
+            isDownloading={isDownloading}
             theme={theme}
           />
         )}
@@ -859,6 +868,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
+    const isDownloading = selectIsDownloading(global, message);
 
     return {
       theme: selectTheme(global),
@@ -887,6 +897,7 @@ export default memo(withGlobal<OwnProps>(
         !!message.groupedId && !message.isInAlbum && selectIsDocumentGroupSelected(global, chatId, message.groupedId)
       ),
       threadId,
+      isDownloading,
       isPinnedList: messageListType === 'pinned',
       shouldAutoLoadMedia: chat ? selectShouldAutoLoadMedia(global, message, chat, sender) : undefined,
       shouldAutoPlayMedia: selectShouldAutoPlayMedia(global, message),

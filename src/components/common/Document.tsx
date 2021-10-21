@@ -1,6 +1,7 @@
 import React, {
-  FC, useCallback, useEffect, useState, memo, useRef,
+  FC, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
+import { getDispatch } from '../../lib/teact/teactn';
 
 import { ApiMediaFormat, ApiMessage } from '../../api/types';
 
@@ -12,9 +13,8 @@ import {
   isMessageDocumentVideo,
 } from '../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../hooks/useMedia';
-import download from '../../util/download';
 
 import File from './File';
 
@@ -29,6 +29,7 @@ type OwnProps = {
   datetime?: number;
   className?: string;
   sender?: string;
+  isDownloading: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
   onDateClick?: (messageId: number, chatId: number) => void;
@@ -48,6 +49,7 @@ const Document: FC<OwnProps> = ({
   onCancelUpload,
   onMediaClick,
   onDateClick,
+  isDownloading,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -58,16 +60,14 @@ const Document: FC<OwnProps> = ({
   const withMediaViewer = onMediaClick && Boolean(document.mediaType);
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const dispatch = getDispatch();
 
-  const [isDownloadAllowed, setIsDownloadAllowed] = useState(false);
-  const {
-    mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
-    getMessageMediaHash(message, 'download'), !isDownloadAllowed, undefined, undefined, undefined, true,
+  const { loadProgress: downloadProgress } = useMediaWithLoadProgress<ApiMediaFormat.BlobUrl>(
+    getMessageMediaHash(message, 'download'), !isDownloading, undefined, undefined, undefined, true,
   );
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isDownloadAllowed);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isDownloading);
 
   const hasPreview = getDocumentHasPreview(document);
   const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
@@ -75,27 +75,28 @@ const Document: FC<OwnProps> = ({
   const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
 
   const handleClick = useCallback(() => {
-    if (withMediaViewer) {
-      onMediaClick!();
-    } else if (isUploading) {
+    if (isDownloading) {
+      dispatch.cancelMessageMediaDownload({ message });
+      return;
+    }
+
+    if (isUploading) {
       if (onCancelUpload) {
         onCancelUpload();
       }
-    } else {
-      setIsDownloadAllowed((isAllowed) => !isAllowed);
+      return;
     }
-  }, [withMediaViewer, isUploading, onCancelUpload, onMediaClick]);
+
+    if (withMediaViewer) {
+      onMediaClick!();
+    } else {
+      dispatch.downloadMessageMedia({ message });
+    }
+  }, [withMediaViewer, isUploading, isDownloading, onMediaClick, onCancelUpload, dispatch, message]);
 
   const handleDateClick = useCallback(() => {
     onDateClick!(message.id, message.chatId);
   }, [onDateClick, message.id, message.chatId]);
-
-  useEffect(() => {
-    if (isDownloadAllowed && mediaData) {
-      download(mediaData, fileName);
-      setIsDownloadAllowed(false);
-    }
-  }, [fileName, mediaData, isDownloadAllowed]);
 
   return (
     <File

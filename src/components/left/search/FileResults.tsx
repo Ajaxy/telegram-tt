@@ -40,6 +40,7 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
   usersById,
   globalMessagesByChatId,
   foundIds,
+  activeDownloads,
   lastSyncTime,
   searchMessagesGlobal,
   focusMessage,
@@ -94,6 +95,7 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
             sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
             onDateClick={handleMessageFocus}
+            isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
           />
         </div>
       );

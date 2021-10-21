@@ -1,11 +1,20 @@
-import React, { FC, useMemo } from '../../lib/teact/teact';
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useMemo,
+} from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 
+import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaHash } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
-import useMediaDownload from '../../hooks/useMediaDownload';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
+import { selectIsDownloading } from '../../modules/selectors';
+import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -13,6 +22,10 @@ import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewerActions.scss';
+
+type StateProps = {
+  isDownloading: boolean;
+};
 
 type OwnProps = {
   mediaData?: string;
@@ -26,25 +39,34 @@ type OwnProps = {
   onZoomToggle: NoneToVoidFunction;
 };
 
-const MediaViewerActions: FC<OwnProps> = ({
+type DispatchProps = Pick<GlobalActions, 'downloadMessageMedia' | 'cancelMessageMediaDownload'>;
+
+const MediaViewerActions: FC<OwnProps & StateProps & DispatchProps> = ({
   mediaData,
   isVideo,
   isZoomed,
   message,
   fileName,
   isAvatar,
+  isDownloading,
   onCloseMediaViewer,
   onForward,
   onZoomToggle,
+  downloadMessageMedia,
+  cancelMessageMediaDownload,
 }) => {
-  const {
-    isDownloadStarted,
-    downloadProgress,
-    handleDownloadClick,
-  } = useMediaDownload(
-    message && isVideo ? getMessageMediaHash(message, 'download') : undefined,
-    fileName,
+  const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
+    message && getMessageMediaHash(message, 'download'),
+    !isDownloading,
   );
+
+  const handleDownloadClick = useCallback(() => {
+    if (isDownloading) {
+      cancelMessageMediaDownload({ message });
+    } else {
+      downloadMessageMedia({ message });
+    }
+  }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
 
   const lang = useLang();
 
@@ -80,10 +102,10 @@ const MediaViewerActions: FC<OwnProps> = ({
           )}
           {isVideo ? (
             <MenuItem
-              icon={isDownloadStarted ? 'close' : 'download'}
+              icon={isDownloading ? 'close' : 'download'}
               onClick={handleDownloadClick}
             >
-              {isDownloadStarted ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download'}
+              {isDownloading ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download'}
             </MenuItem>
           ) : (
             <MenuItem
@@ -95,7 +117,7 @@ const MediaViewerActions: FC<OwnProps> = ({
             </MenuItem>
           )}
         </DropdownMenu>
-        {isDownloadStarted && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
+        {isDownloading && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
       </div>
     );
   }
@@ -123,7 +145,7 @@ const MediaViewerActions: FC<OwnProps> = ({
           ariaLabel={lang('AccActionDownload')}
           onClick={handleDownloadClick}
         >
-          {isDownloadStarted ? (
+          {isDownloading ? (
             <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
           ) : (
             <i className="icon-download" />
@@ -163,4 +185,16 @@ const MediaViewerActions: FC<OwnProps> = ({
   );
 };
 
-export default MediaViewerActions;
+export default memo(withGlobal<OwnProps>(
+  (global, { message }): StateProps => {
+    const isDownloading = message ? selectIsDownloading(global, message) : false;
+
+    return {
+      isDownloading,
+    };
+  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'downloadMessageMedia',
+    'cancelMessageMediaDownload',
+  ]),
+)(MediaViewerActions));

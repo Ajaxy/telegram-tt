@@ -1,10 +1,13 @@
-import React, { FC, memo, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useEffect,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, MessageListType } from '../../global/types';
 
 import {
   selectCanDeleteSelectedMessages,
+  selectCanDownloadSelectedMessages,
   selectCanReportSelectedMessages,
   selectCurrentMessageList,
   selectSelectedMessagesCount,
@@ -17,7 +20,6 @@ import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
-import MenuItem from '../ui/MenuItem';
 
 import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
 import ReportMessageModal from '../common/ReportMessageModal';
@@ -35,10 +37,13 @@ type StateProps = {
   selectedMessagesCount?: number;
   canDeleteMessages?: boolean;
   canReportMessages?: boolean;
+  canDownloadMessages?: boolean;
   selectedMessageIds?: number[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'exitMessageSelectMode' | 'openForwardMenuForSelectedMessages'>;
+type DispatchProps = Pick<GlobalActions, (
+  'exitMessageSelectMode' | 'openForwardMenuForSelectedMessages' | 'downloadSelectedMessages'
+)>;
 
 const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
   canPost,
@@ -48,9 +53,11 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
   selectedMessagesCount,
   canDeleteMessages,
   canReportMessages,
+  canDownloadMessages,
   selectedMessageIds,
   exitMessageSelectMode,
   openForwardMenuForSelectedMessages,
+  downloadSelectedMessages,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
@@ -65,6 +72,11 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
       : undefined;
   }, [isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode]);
 
+  const handleDownload = useCallback(() => {
+    downloadSelectedMessages();
+    exitMessageSelectMode();
+  }, [downloadSelectedMessages, exitMessageSelectMode]);
+
   const prevSelectedMessagesCount = usePrevious(selectedMessagesCount || undefined, true);
   const renderingSelectedMessagesCount = isActive ? selectedMessagesCount : prevSelectedMessagesCount;
 
@@ -77,6 +89,26 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
     canPost && 'with-composer',
     isActive && 'shown',
   );
+
+  const renderButton = (
+    icon: string, label: string, onClick: AnyToVoidFunction, disabled?: boolean, destructive?: boolean,
+  ) => {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        className={buildClassName(
+          'item',
+          disabled && 'disabled',
+          destructive && 'destructive',
+        )}
+        onClick={!disabled ? onClick : undefined}
+        title={label}
+      >
+        <i className={`icon-${icon}`} />
+      </div>
+    );
+  };
 
   return (
     <div className={className}>
@@ -96,39 +128,15 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
         {!!selectedMessagesCount && (
           <div className="MessageSelectToolbar-actions">
             {messageListType !== 'scheduled' && (
-              <MenuItem
-                icon="forward"
-                ariaLabel="Forward Messages"
-                onClick={openForwardMenuForSelectedMessages}
-              >
-                <span className="item-text">
-                  {lang('Forward')}
-                </span>
-              </MenuItem>
+              renderButton('forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages)
             )}
             {canReportMessages && (
-              <MenuItem
-                icon="flag"
-                onClick={openReportModal}
-                disabled={!canReportMessages}
-                ariaLabel={lang('Conversation.ReportMessages')}
-              >
-                <span className="item-text">
-                  {lang('Report')}
-                </span>
-              </MenuItem>
+              renderButton('flag', lang('Conversation.ReportMessages'), openReportModal)
             )}
-            <MenuItem
-              destructive
-              icon="delete"
-              onClick={openDeleteModal}
-              disabled={!canDeleteMessages}
-              ariaLabel={lang('EditAdminGroupDeleteMessages')}
-            >
-              <span className="item-text">
-                {lang('Delete')}
-              </span>
-            </MenuItem>
+            {canDownloadMessages && (
+              renderButton('download', lang('lng_media_download'), handleDownload)
+            )}
+            {renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, !canDeleteMessages, true)}
           </div>
         )}
       </div>
@@ -151,6 +159,7 @@ export default memo(withGlobal<OwnProps>(
     const { type: messageListType } = selectCurrentMessageList(global) || {};
     const { canDelete } = selectCanDeleteSelectedMessages(global);
     const canReport = selectCanReportSelectedMessages(global);
+    const canDownload = selectCanDownloadSelectedMessages(global);
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
 
     return {
@@ -158,8 +167,11 @@ export default memo(withGlobal<OwnProps>(
       selectedMessagesCount: selectSelectedMessagesCount(global),
       canDeleteMessages: canDelete,
       canReportMessages: canReport,
+      canDownloadMessages: canDownload,
       selectedMessageIds,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['exitMessageSelectMode', 'openForwardMenuForSelectedMessages']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'exitMessageSelectMode', 'openForwardMenuForSelectedMessages', 'downloadSelectedMessages',
+  ]),
 )(MessageSelectToolbar));
