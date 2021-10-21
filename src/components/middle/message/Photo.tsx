@@ -88,7 +88,7 @@ const Photo: FC<OwnProps> = ({
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(
     message,
-    uploadProgress || isDownloading ? downloadProgress : loadProgress,
+    uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     shouldLoad && !fullMediaData,
   );
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;

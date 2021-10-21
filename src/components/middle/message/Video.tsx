@@ -102,7 +102,7 @@ const Video: FC<OwnProps> = ({
   const { isBuffered, bufferingHandlers } = useBuffering(!shouldAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     message,
-    uploadProgress || isDownloading ? downloadProgress : loadProgress,
+    uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     (shouldLoad && !isBuffered) || isDownloading,
   );
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;

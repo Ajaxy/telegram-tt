@@ -84,7 +84,8 @@ export function cancelProgress(progressCallback: ApiOnProgress) {
   progressCallbacks.forEach((map, url) => {
     map.forEach((callback) => {
       if (callback === progressCallback) {
-        const parentCallback = cancellableCallbacks.get(url)!;
+        const parentCallback = cancellableCallbacks.get(url);
+        if (!parentCallback) return;
 
         cancelApiProgress(parentCallback);
         cancellableCallbacks.delete(url);
