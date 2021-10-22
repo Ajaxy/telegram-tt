@@ -1,5 +1,23 @@
-**Welcome to the __dev__ version.**
+**Telegram Web Z was updated to version 1.18**
 
-⛱
+👏 **Harder**
+· Support downloading for all kinds of media (via context menu).
+· Support downloading multiple selected messages.
+· Group Permissions: Allow to remove/ban users.
+· Privacy and Security: Allow to block users.
+· Add fancy changelogs.
 
-This is a demo notification.
+🤩 **Better**
+· Message: Make circle videos and gifs larger.
+· Sticker and GIF Search: Auto-focus when opening.
+
+🚀 **Faster**
+· Optimize animations.
+
+💪 **Stronger**
+· Notifications: Fix missing sound.
+· Left Column: Fix default width on small screens.
+· Message: Prevent showing self-destructing videos.
+· Media Viewer: Fix pinch zoom in iOS PWA (again).
+· Audio: Fix download button in RTL.
+· Various layout fixes.
