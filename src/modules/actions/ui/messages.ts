@@ -1,9 +1,14 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { MAIN_THREAD_ID } from '../../../api/types';
+import { ApiMessage, MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
 
-import { ANIMATION_END_DELAY, FAST_SMOOTH_MAX_DURATION } from '../../../config';
+import {
+  ANIMATION_END_DELAY,
+  APP_VERSION,
+  FAST_SMOOTH_MAX_DURATION,
+  SERVICE_NOTIFICATIONS_USER_ID,
+} from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import {
   enterMessageSelectMode,
@@ -29,10 +34,15 @@ import {
   selectReplyStack,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
+
+// @ts-ignore
+import versionNotification from '../../../versionNotification.txt';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
+const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e4;
 
 let blurTimeout: number | undefined;
 
@@ -505,4 +515,66 @@ addReducer('closePollModal', (global) => {
     ...global,
     isPollModalOpen: false,
   };
+});
+
+addReducer('checkVersionNotification', (global, actions) => {
+  const currentVersion = APP_VERSION.split('.').slice(0, 2).join('.');
+  const { serviceNotifications } = global;
+
+  if (serviceNotifications.find(({ version }) => version === currentVersion)) {
+    return;
+  }
+
+  const message: Omit<ApiMessage, 'id'> = {
+    chatId: SERVICE_NOTIFICATIONS_USER_ID,
+    date: getServerTime(global.serverTimeOffset),
+    content: {
+      text: {
+        text: versionNotification,
+      },
+    },
+    isOutgoing: false,
+  };
+
+  actions.createServiceNotification({
+    message,
+    version: currentVersion,
+  });
+});
+
+addReducer('createServiceNotification', (global, actions, payload) => {
+  const { message, version } = payload;
+  const { serviceNotifications } = global;
+  const serviceChat = selectChat(global, SERVICE_NOTIFICATIONS_USER_ID)!;
+
+  const maxId = Math.max(
+    serviceChat.lastMessage?.id || 0,
+    ...serviceNotifications.map(({ id }) => id),
+  );
+  const fractionalPart = (serviceNotifications.length + 1) / SERVICE_NOTIFICATIONS_MAX_AMOUNT;
+  // The fractional ID is made of the largest integer ID and an incremented fractional part
+  const id = Math.floor(maxId) + fractionalPart;
+
+  message.id = id;
+
+  const serviceNotification = {
+    id,
+    message,
+    version,
+  };
+
+  setGlobal({
+    ...global,
+    serviceNotifications: [
+      ...serviceNotifications,
+      serviceNotification,
+    ],
+  });
+
+  actions.apiUpdate({
+    '@type': 'newMessage',
+    id: message.id,
+    chatId: message.chatId,
+    message,
+  });
 });

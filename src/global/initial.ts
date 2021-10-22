@@ -167,4 +167,6 @@ export const INITIAL_STATE: GlobalState = {
   activeDownloads: {
     byChatId: {},
   },
+
+  serviceNotifications: [],
 };

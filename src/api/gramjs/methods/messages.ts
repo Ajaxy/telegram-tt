@@ -688,7 +688,7 @@ export async function markMessageListRead({
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    void requestChatUpdate({ chat, serverTimeOffset });
+    void requestChatUpdate({ chat, serverTimeOffset, noLastMessage: true });
   } else {
     void requestThreadInfoUpdate({ chat, threadId });
   }

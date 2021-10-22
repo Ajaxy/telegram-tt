@@ -127,6 +127,10 @@ function readCache(initialState: GlobalState): GlobalState {
         byChatId: {},
       };
     }
+
+    if (!cached.serviceNotifications) {
+      cached.serviceNotifications = [];
+    }
   }
 
   const newState = {
@@ -171,6 +175,7 @@ function updateCache() {
       'push',
       'shouldShowContextMenuHint',
       'leftColumnWidth',
+      'serviceNotifications',
     ]),
     isChatInfoShown: reduceShowChatInfo(global),
     users: reduceUsers(global),

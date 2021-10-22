@@ -82,7 +82,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     || update instanceof GramJs.UpdateNewChannelMessage
     || update instanceof GramJs.UpdateShortChatMessage
     || update instanceof GramJs.UpdateShortMessage
-    || update instanceof GramJs.UpdateServiceNotification
   ) {
     let message: ApiMessage | undefined;
     let shouldForceReply: boolean | undefined;
@@ -91,13 +90,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       message = buildApiMessageFromShortChat(update);
     } else if (update instanceof GramJs.UpdateShortMessage) {
       message = buildApiMessageFromShort(update);
-    } else if (update instanceof GramJs.UpdateServiceNotification) {
-      const currentDate = Date.now() / 1000 + serverTimeOffset;
-      message = buildApiMessageFromNotification(update, currentDate);
-
-      if (isMessageWithMedia(update)) {
-        addMessageToLocalDb(buildMessageFromUpdate(message.id, message.chatId, update));
-      }
     } else {
       // TODO Remove if proven not reproducing
       if (update.message instanceof GramJs.MessageEmpty) {
@@ -319,6 +311,18 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         });
       }, DELETE_MISSING_CHANNEL_MESSAGE_DELAY);
     }
+  } else if (update instanceof GramJs.UpdateServiceNotification) {
+    const currentDate = Date.now() / 1000 + serverTimeOffset;
+    const message = buildApiMessageFromNotification(update, currentDate);
+
+    if (isMessageWithMedia(update)) {
+      addMessageToLocalDb(buildMessageFromUpdate(message.id, message.chatId, update));
+    }
+
+    onUpdate({
+      '@type': 'updateServiceNotification',
+      message,
+    });
   } else if ((
     originRequest instanceof GramJs.messages.SendMessage
     || originRequest instanceof GramJs.messages.SendMedia

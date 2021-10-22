@@ -18,6 +18,7 @@ import {
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
+  selectIsServiceChatReady,
 } from '../../modules/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import buildClassName from '../../util/buildClassName';
@@ -62,11 +63,12 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   language?: LangCode;
   openedStickerSetShortName?: string;
+  isServiceChatReady?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
-  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName' | 'loadCountryList'
+  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName' | 'loadCountryList' | 'checkVersionNotification'
 )>;
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -92,6 +94,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   shouldSkipHistoryAnimations,
   language,
   openedStickerSetShortName,
+  isServiceChatReady,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
@@ -100,6 +103,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   loadEmojiKeywords,
   loadCountryList,
   openStickerSetShortName,
+  checkVersionNotification,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -127,6 +131,12 @@ const Main: FC<StateProps & DispatchProps> = ({
     lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline,
     loadTopInlineBots, loadEmojiKeywords, loadCountryList, language,
   ]);
+
+  useEffect(() => {
+    if (lastSyncTime && isServiceChatReady) {
+      checkVersionNotification();
+    }
+  }, [lastSyncTime, isServiceChatReady, checkVersionNotification]);
 
   useEffect(() => {
     if (lastSyncTime && LOCATION_HASH.startsWith('#?tgaddr=')) {
@@ -302,10 +312,11 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       language: global.settings.byKey.language,
       openedStickerSetShortName: global.openedStickerSetShortName,
+      isServiceChatReady: selectIsServiceChatReady(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
-    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName', 'loadCountryList',
+    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName', 'loadCountryList', 'checkVersionNotification',
   ]),
 )(Main));

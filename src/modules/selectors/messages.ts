@@ -348,18 +348,20 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const isBasicGroup = isChatBasicGroup(chat);
   const isSuperGroup = isChatSuperGroup(chat);
   const isChannel = isChatChannel(chat);
+  const isLocal = isMessageLocal(message);
   const isServiceNotification = isServiceNotificationMessage(message);
-
   const isOwn = isOwnMessage(message);
   const isAction = isActionMessage(message);
   const { content } = message;
+
   const canEditMessagesIndefinitely = isChatWithSelf
     || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
     || (isChannel && getHasAdminRight(chat, 'editMessages'));
   const isMessageEditable = (
-    (canEditMessagesIndefinitely
-    || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME)
-    && !(
+    (
+      canEditMessagesIndefinitely
+      || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME
+    ) && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
       || (content.video?.isRound)
     )
@@ -367,7 +369,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     && !message.viaBotId
   );
 
-  const canReply = getCanPostInChat(chat, threadId) && !isServiceNotification;
+  const canReply = !isLocal && !isServiceNotification && getCanPostInChat(chat, threadId);
 
   const hasPinPermission = isPrivate || (
     chat.isCreator
@@ -375,7 +377,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || getHasAdminRight(chat, 'pinMessages')
   );
 
-  let canPin = !isAction && hasPinPermission;
+  let canPin = !isLocal && !isServiceNotification && !isAction && hasPinPermission;
   let canUnpin = false;
 
   const pinnedMessageIds = selectPinnedIds(global, chat.id);
@@ -385,27 +387,29 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canPin = !canUnpin;
   }
 
-  const canDelete = isPrivate
+  const canDelete = !isLocal && !isServiceNotification && (
+    isPrivate
     || isOwn
     || isBasicGroup
     || chat.isCreator
-    || getHasAdminRight(chat, 'deleteMessages');
+    || getHasAdminRight(chat, 'deleteMessages')
+  );
 
   const canReport = !isPrivate && !isOwn;
 
-  const canDeleteForAll = canDelete && !isServiceNotification && (
+  const canDeleteForAll = canDelete && (
     (isPrivate && !isChatWithSelf)
     || (isBasicGroup && (
       isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator
     ))
   );
 
-  const canEdit = !isAction && isMessageEditable && (
+  const canEdit = !isLocal && !isAction && isMessageEditable && (
     isOwn
     || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
   );
 
-  const canForward = !isAction && !isServiceNotification;
+  const canForward = !isLocal && !isServiceNotification && !isAction;
 
   const hasSticker = Boolean(message.content.sticker);
   const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
@@ -750,4 +754,11 @@ export function selectShouldAutoPlayMedia(global: GlobalState, message: ApiMessa
 
 export function selectShouldLoopStickers(global: GlobalState) {
   return global.settings.byKey.shouldLoopStickers;
+}
+
+export function selectLastServiceNotification(global: GlobalState) {
+  const { serviceNotifications } = global;
+  const maxId = Math.max(...serviceNotifications.map(({ id }) => id));
+
+  return serviceNotifications.find(({ id }) => id === maxId);
 }

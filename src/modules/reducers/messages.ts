@@ -366,14 +366,15 @@ export function safeReplaceViewportIds(
   threadId: number,
   newViewportIds: number[],
 ): GlobalState {
-  const viewportIds = selectViewportIds(global, chatId, threadId) || [];
+  const currentIds = selectViewportIds(global, chatId, threadId) || [];
+  const newIds = orderHistoryIds(newViewportIds);
 
   return replaceThreadParam(
     global,
     chatId,
     threadId,
     'viewportIds',
-    areSortedArraysEqual(viewportIds, newViewportIds) ? viewportIds : newViewportIds,
+    areSortedArraysEqual(currentIds, newIds) ? currentIds : newIds,
   );
 }
 

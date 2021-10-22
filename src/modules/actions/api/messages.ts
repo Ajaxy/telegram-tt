@@ -15,7 +15,7 @@ import {
 } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { MAX_MEDIA_FILES_FOR_ALBUM, MESSAGE_LIST_SLICE } from '../../../config';
+import { MAX_MEDIA_FILES_FOR_ALBUM, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import { areSortedArraysIntersecting, buildCollectionByKey, split } from '../../../util/iteratees';
 import {
@@ -663,10 +663,14 @@ async function loadViewportMessages(
     messages, users, chats, threadInfos,
   } = result;
 
-  const byId = buildCollectionByKey(messages, 'id');
-  const ids = Object.keys(byId).map(Number);
-
   let global = getGlobal();
+
+  const localMessages = chatId === SERVICE_NOTIFICATIONS_USER_ID
+    ? global.serviceNotifications.map(({ message }) => message)
+    : [];
+  const allMessages = ([] as ApiMessage[]).concat(messages, localMessages);
+  const byId = buildCollectionByKey(allMessages, 'id');
+  const ids = Object.keys(byId).map(Number);
 
   global = addChatMessagesById(global, chatId, byId);
   global = isOutlying

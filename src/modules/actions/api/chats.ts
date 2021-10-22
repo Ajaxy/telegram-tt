@@ -15,7 +15,7 @@ import {
   RE_TME_INVITE_LINK,
   RE_TME_LINK,
   TIPS_USERNAME,
-  LOCALIZED_TIPS, RE_TG_LINK, RE_TME_ADDSTICKERS_LINK,
+  LOCALIZED_TIPS, RE_TG_LINK, RE_TME_ADDSTICKERS_LINK, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -38,7 +38,7 @@ import {
   selectChatByUsername,
   selectThreadTopMessageId,
   selectCurrentMessageList,
-  selectThreadInfo, selectCurrentChat,
+  selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -255,6 +255,9 @@ addReducer('requestChatUpdate', (global, actions, payload) => {
   void callApi('requestChatUpdate', {
     chat,
     serverTimeOffset,
+    ...(chatId === SERVICE_NOTIFICATIONS_USER_ID && {
+      lastLocalMessage: selectLastServiceNotification(global)?.message,
+    }),
   });
 });
 
@@ -964,12 +967,15 @@ addReducer('deleteChatMember', (global, actions, payload) => {
 });
 
 async function loadChats(listType: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
+  let global = getGlobal();
+
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     archived: listType === 'archived',
-    withPinned: getGlobal().chats.orderedPinnedIds[listType] === undefined,
-    serverTimeOffset: getGlobal().serverTimeOffset,
+    withPinned: global.chats.orderedPinnedIds[listType] === undefined,
+    serverTimeOffset: global.serverTimeOffset,
+    lastLocalServiceMessage: selectLastServiceNotification(global)?.message,
   });
 
   if (!result) {
@@ -982,7 +988,7 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
     chatIds.shift();
   }
 
-  let global = getGlobal();
+  global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));

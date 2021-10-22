@@ -21,7 +21,10 @@
       "error",
       120
     ],
-    "array-bracket-newline": [2, "consistent"],
+    "array-bracket-newline": [
+      2,
+      "consistent"
+    ],
     "no-null/no-null": 2,
     "no-console": "error",
     "semi": "error",
@@ -68,5 +71,8 @@
   },
   "parserOptions": {
     "project": "./tsconfig.json"
-  }
+  },
+  "ignorePatterns": [
+    "webpack.config.js"
+  ]
 }
