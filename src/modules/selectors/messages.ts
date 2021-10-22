@@ -409,7 +409,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
   );
 
-  const canForward = !isLocal && !isServiceNotification && !isAction;
+  const canForward = !isLocal && !isAction;
 
   const hasSticker = Boolean(message.content.sticker);
   const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
