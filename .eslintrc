@@ -73,6 +73,7 @@
     "project": "./tsconfig.json"
   },
   "ignorePatterns": [
-    "webpack.config.js"
+    "webpack.config.js",
+    "jest.config.js"
   ]
 }

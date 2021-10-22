@@ -10,4 +10,8 @@ module.exports = {
     '<rootDir>/client/src/stylesheets/',
   ],
   testEnvironment: 'jsdom',
+  transform: {
+    '\\.(jsx?|tsx?)$': 'babel-jest',
+    '\\.txt$': 'jest-raw-loader',
+  },
 };
