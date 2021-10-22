@@ -16,6 +16,7 @@ import {
 import { LoadMoreDirection } from '../../../types';
 
 import { MAX_MEDIA_FILES_FOR_ALBUM, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { IS_IOS } from '../../../util/environment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import { areSortedArraysIntersecting, buildCollectionByKey, split } from '../../../util/iteratees';
 import {
@@ -54,7 +55,7 @@ import {
   selectFirstUnreadId,
 } from '../../selectors';
 import { debounce, rafPromise } from '../../../util/schedulers';
-import { IS_IOS } from '../../../util/environment';
+import { isServiceNotificationMessage } from '../../helpers';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
@@ -553,9 +554,39 @@ addReducer('forwardMessages', (global) => {
       .map((id) => selectChatMessage(global, fromChatId, id)).filter<ApiMessage>(Boolean as any)
     : undefined;
 
-  if (fromChat && toChat && messages && messages.length) {
-    void forwardMessages(fromChat, toChat, messages);
+  if (!fromChat || !toChat || !messages) {
+    return;
   }
+
+  const realMessages = messages.filter((m) => !isServiceNotificationMessage(m));
+  if (realMessages.length) {
+    void callApi('forwardMessages', {
+      fromChat,
+      toChat,
+      messages: realMessages,
+      serverTimeOffset: getGlobal().serverTimeOffset,
+    });
+  }
+
+  messages
+    .filter((m) => isServiceNotificationMessage(m))
+    .forEach((message) => {
+      const { text, entities } = message.content.text || {};
+      const { sticker, poll } = message.content;
+
+      void sendMessage({
+        chat: toChat,
+        text,
+        entities,
+        sticker,
+        poll,
+      });
+    });
+
+  setGlobal({
+    ...getGlobal(),
+    forwardMessages: {},
+  });
 });
 
 addReducer('loadScheduledHistory', (global, actions, payload) => {
@@ -781,13 +812,13 @@ function getViewportSlice(
 
 async function sendMessage(params: {
   chat: ApiChat;
-  text: string;
-  entities: ApiMessageEntity[];
-  replyingTo: number;
-  attachment: ApiAttachment;
-  sticker: ApiSticker;
-  gif: ApiVideo;
-  poll: ApiNewPoll;
+  text?: string;
+  entities?: ApiMessageEntity[];
+  replyingTo?: number;
+  attachment?: ApiAttachment;
+  sticker?: ApiSticker;
+  gif?: ApiVideo;
+  poll?: ApiNewPoll;
   serverTimeOffset?: number;
 }) {
   let localId: number | undefined;
@@ -832,24 +863,6 @@ async function sendMessage(params: {
   if (progressCallback && localId) {
     uploadProgressCallbacks.delete(localId);
   }
-}
-
-function forwardMessages(
-  fromChat: ApiChat,
-  toChat: ApiChat,
-  messages: ApiMessage[],
-) {
-  callApi('forwardMessages', {
-    fromChat,
-    toChat,
-    messages,
-    serverTimeOffset: getGlobal().serverTimeOffset,
-  });
-
-  setGlobal({
-    ...getGlobal(),
-    forwardMessages: {},
-  });
 }
 
 async function loadPollOptionResults(
