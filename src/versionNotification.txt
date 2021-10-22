@@ -1,23 +1,23 @@
 **Telegram Web Z was updated to version alpha 1.18**
 
 👏 **Harder**
-· Support downloading for all kinds of media (via context menu).
-· Support downloading multiple selected messages.
-· Group Permissions: Allow to remove/ban users.
-· Privacy and Security: Allow to block users.
-· Add fancy changelogs.
+· Support for downloading all media types (via context menu).
+· Support for downloading media from multiple selected messages.
+· Group Management: Users can now be removed via the Member List and the Permissions screen.
+· Privacy and Security: Tap the `+` button in Privacy and Security > Blocked Users to add additional users to the list.
+· These fancy new changelogs.
 
 🤩 **Better**
-· Message: Make circle videos and gifs larger.
-· Sticker and GIF Search: Auto-focus when opening.
+· Message: Video Mesages and GIFs are now larger in chat.
+· Sticker and GIF Search: Your cursor automatically moves to the panel when you open it.
 
 🚀 **Faster**
-· Optimize animations.
+· Optimized, more efficient animations.
 
 💪 **Stronger**
-· Notifications: Fix missing sound.
-· Left Column: Fix default width on small screens.
-· Message: Prevent showing self-destructing videos.
-· Media Viewer: Fix pinch zoom in iOS PWA (again).
-· Audio: Fix download button in RTL.
-· Various layout fixes.
+· Notifications: Fixed missing sounds.
+· Left Column: Fixed default width for smaller screens.
+· Media Viewer: Fixed pinch-to-zoom for iOS users.
+· Audio: Fixed the download button for RTL language users.
+· Messages: Self-destructing videos must now be opened in the Telegram App for iOS or Android.
+· Various other layout improvements.
