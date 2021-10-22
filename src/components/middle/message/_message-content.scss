@@ -451,6 +451,10 @@
   &.text .media-inner,
   &.text .Album {
     margin-bottom: 0.375rem;
+
+    body.is-ios .Message.own & {
+      margin-bottom: 0.375rem;
+    }
   }
 
   .media-loading {
