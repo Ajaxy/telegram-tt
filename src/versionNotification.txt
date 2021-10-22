@@ -1,4 +1,4 @@
-**Telegram Web Z was updated to version 1.18**
+**Telegram Web Z was updated to version alpha 1.18**
 
 👏 **Harder**
 · Support downloading for all kinds of media (via context menu).
