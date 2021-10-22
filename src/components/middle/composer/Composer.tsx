@@ -46,7 +46,7 @@ import {
 } from '../../../modules/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
-import parseMessageInput from './helpers/parseMessageInput';
+import parseMessageInput from '../../../util/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
 import renderText from '../../common/helpers/renderText';
 import insertHtmlInSelection from '../../../util/insertHtmlInSelection';

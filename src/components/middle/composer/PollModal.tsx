@@ -6,7 +6,7 @@ import React, {
 import { ApiNewPoll } from '../../../api/types';
 
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import parseMessageInput from './helpers/parseMessageInput';
+import parseMessageInput from '../../../util/parseMessageInput';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';

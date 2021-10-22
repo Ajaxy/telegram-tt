@@ -4,7 +4,7 @@ import { ApiMessage } from '../../../../api/types';
 import { GlobalActions } from '../../../../global/types';
 
 import { EDITABLE_INPUT_ID } from '../../../../config';
-import parseMessageInput from '../helpers/parseMessageInput';
+import parseMessageInput from '../../../../util/parseMessageInput';
 import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../modules/helpers';

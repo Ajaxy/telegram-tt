@@ -38,6 +38,7 @@ import { getServerTime } from '../../../util/serverTime';
 
 // @ts-ignore
 import versionNotification from '../../../versionNotification.txt';
+import parseMessageInput from '../../../util/parseMessageInput';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
@@ -529,9 +530,7 @@ addReducer('checkVersionNotification', (global, actions) => {
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
     date: getServerTime(global.serverTimeOffset),
     content: {
-      text: {
-        text: versionNotification,
-      },
+      text: parseMessageInput(versionNotification),
     },
     isOutgoing: false,
   };
