@@ -1,5 +1,5 @@
-import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../../../../api/types';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
+import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../api/types';
+import { IS_EMOJI_SUPPORTED } from './environment';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   B: ApiMessageEntityTypes.Bold,

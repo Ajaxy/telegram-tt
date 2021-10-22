@@ -10,7 +10,7 @@ import { ISettings } from '../../../types';
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectNoWebPage, selectTheme } from '../../../modules/selectors';
 import { pick } from '../../../util/iteratees';
-import parseMessageInput from './helpers/parseMessageInput';
+import parseMessageInput from '../../../util/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';

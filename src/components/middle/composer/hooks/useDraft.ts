@@ -7,7 +7,7 @@ import { DRAFT_DEBOUNCE, EDITABLE_INPUT_ID } from '../../../../config';
 import usePrevious from '../../../../hooks/usePrevious';
 import { debounce } from '../../../../util/schedulers';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import parseMessageInput from '../helpers/parseMessageInput';
+import parseMessageInput from '../../../../util/parseMessageInput';
 import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
