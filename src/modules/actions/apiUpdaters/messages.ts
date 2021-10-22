@@ -38,6 +38,7 @@ import {
   selectFirstUnreadId,
   selectChat,
   selectIsChatWithBot,
+  selectIsServiceChatReady,
 } from '../../selectors';
 import { getMessageContent, isChatPrivate, isMessageLocal } from '../../helpers';
 
@@ -430,6 +431,16 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
           },
         },
       ));
+
+      break;
+    }
+
+    case 'updateServiceNotification': {
+      const { message } = update;
+
+      if (selectIsServiceChatReady(global)) {
+        actions.createServiceNotification({ message });
+      }
 
       break;
     }

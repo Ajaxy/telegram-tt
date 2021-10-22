@@ -1,12 +1,15 @@
 const path = require('path');
 const dotenv = require('dotenv');
 
-const { EnvironmentPlugin, ProvidePlugin } = require('webpack');
+const {
+  EnvironmentPlugin,
+  ProvidePlugin,
+} = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserJSPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 dotenv.config();
 
@@ -84,7 +87,7 @@ module.exports = (env = {}, argv = {}) => {
           },
         },
         {
-          test: /\.tl$/i,
+          test: /\.(txt|tl)$/i,
           loader: 'raw-loader',
         },
       ],
@@ -92,11 +95,11 @@ module.exports = (env = {}, argv = {}) => {
     resolve: {
       extensions: ['.js', '.ts', '.tsx'],
       fallback: {
-        path: require.resolve("path-browserify"),
-        os: require.resolve("os-browserify/browser"),
-        buffer: require.resolve("buffer/"),
+        path: require.resolve('path-browserify'),
+        os: require.resolve('os-browserify/browser'),
+        buffer: require.resolve('buffer/'),
         fs: false,
-      }
+      },
     },
     plugins: [
       new HtmlPlugin({

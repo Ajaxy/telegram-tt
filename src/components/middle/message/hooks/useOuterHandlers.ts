@@ -15,7 +15,6 @@ export default function useOuterHandlers(
   selectMessage: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
   containerRef: RefObject<HTMLDivElement>,
   messageId: number,
-  isLocal: boolean,
   isAlbum: boolean,
   isInSelectMode: boolean,
   canReply: boolean,
@@ -28,14 +27,11 @@ export default function useOuterHandlers(
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     preventMessageInputBlur(e);
-
-    if (!isLocal) {
-      handleBeforeContextMenu(e);
-    }
+    handleBeforeContextMenu(e);
   }
 
   function handleClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (isInSelectMode && !isLocal) {
+    if (isInSelectMode) {
       selectMessage(e);
     } else if (IS_ANDROID) {
       const target = e.target as HTMLDivElement;
@@ -111,7 +107,7 @@ export default function useOuterHandlers(
   return {
     handleMouseDown: !isInSelectMode ? handleMouseDown : undefined,
     handleClick,
-    handleContextMenu: !isInSelectMode && !isLocal ? handleContextMenu : undefined,
+    handleContextMenu: !isInSelectMode ? handleContextMenu : undefined,
     handleDoubleClick: !isInSelectMode ? handleContainerDoubleClick : undefined,
     handleContentDoubleClick: !IS_TOUCH_ENV ? stopPropagation : undefined,
     isSwiped,

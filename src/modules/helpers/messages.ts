@@ -199,7 +199,7 @@ export function isActionMessage(message: ApiMessage) {
 }
 
 export function isServiceNotificationMessage(message: ApiMessage) {
-  return message.chatId === SERVICE_NOTIFICATIONS_USER_ID && isMessageLocal(message);
+  return message.chatId === SERVICE_NOTIFICATIONS_USER_ID && Math.round(message.id) !== message.id;
 }
 
 export function isAnonymousOwnMessage(message: ApiMessage) {

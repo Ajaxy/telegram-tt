@@ -5,7 +5,9 @@ import {
   getPrivateChatUserId, isChatChannel, isChatPrivate, isHistoryClearMessage, isUserBot, isUserOnline, selectIsChatMuted,
 } from '../helpers';
 import { selectUser } from './users';
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE } from '../../config';
+import {
+  ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
+} from '../../config';
 import { selectNotifyExceptions, selectNotifySettings } from './settings';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
@@ -174,4 +176,8 @@ export function selectCountNotMutedUnread(global: GlobalState) {
 
     return acc;
   }, 0);
+}
+
+export function selectIsServiceChatReady(global: GlobalState) {
+  return Boolean(selectChat(global, SERVICE_NOTIFICATIONS_USER_ID));
 }

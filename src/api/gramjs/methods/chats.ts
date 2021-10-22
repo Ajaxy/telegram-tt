@@ -12,7 +12,9 @@ import {
   ApiChatAdminRights,
 } from '../../types';
 
-import { DEBUG, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE } from '../../../config';
+import {
+  DEBUG, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
+} from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiChatFromDialog,
@@ -52,12 +54,14 @@ export async function fetchChats({
   archived,
   withPinned,
   serverTimeOffset,
+  lastLocalServiceMessage,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
   withPinned?: boolean;
   serverTimeOffset: number;
+  lastLocalServiceMessage?: ApiMessage;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
@@ -111,7 +115,17 @@ export async function fetchChats({
 
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
     const chat = buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset);
-    chat.lastMessage = lastMessagesByChatId[chat.id];
+
+    if (
+      chat.id === SERVICE_NOTIFICATIONS_USER_ID
+      && lastLocalServiceMessage
+      && (!lastMessagesByChatId[chat.id] || lastLocalServiceMessage.date > lastMessagesByChatId[chat.id].date)
+    ) {
+      chat.lastMessage = lastLocalServiceMessage;
+    } else {
+      chat.lastMessage = lastMessagesByChatId[chat.id];
+    }
+
     chat.isListed = true;
     chats.push(chat);
 
@@ -232,8 +246,10 @@ export async function fetchChat({
 export async function requestChatUpdate({
   chat,
   serverTimeOffset,
+  lastLocalMessage,
+  noLastMessage,
 }: {
-  chat: ApiChat; serverTimeOffset: number;
+  chat: ApiChat; serverTimeOffset: number; lastLocalMessage?: ApiMessage; noLastMessage?: boolean;
 }) {
   const { id, accessHash } = chat;
 
@@ -260,14 +276,23 @@ export async function requestChatUpdate({
 
   updateLocalDb(result);
 
-  const lastMessage = buildApiMessage(result.messages[0]);
+  let lastMessage: ApiMessage | undefined;
+  if (!noLastMessage) {
+    const lastRemoteMessage = buildApiMessage(result.messages[0]);
+
+    if (lastLocalMessage && (!lastRemoteMessage || (lastLocalMessage.date > lastRemoteMessage.date))) {
+      lastMessage = lastLocalMessage;
+    } else {
+      lastMessage = lastRemoteMessage;
+    }
+  }
 
   onUpdate({
     '@type': 'updateChat',
     id,
     chat: {
       ...buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset),
-      lastMessage,
+      ...(lastMessage && { lastMessage }),
     },
   });
 }
@@ -442,6 +467,7 @@ export async function updateChatMutedState({
   void requestChatUpdate({
     chat,
     serverTimeOffset,
+    noLastMessage: true,
   });
 }
 

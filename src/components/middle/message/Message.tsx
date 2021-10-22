@@ -297,17 +297,13 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const senderPeer = forwardInfo ? originSender : sender;
 
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
-    if (isLocal) {
-      return;
-    }
-
     toggleMessageSelection({
       messageId,
       groupedId,
       ...(e?.shiftKey && { withShift: true }),
       ...(isAlbum && { childMessageIds: album!.messages.map(({ id }) => id) }),
     });
-  }, [isLocal, toggleMessageSelection, messageId, isAlbum, album]);
+  }, [toggleMessageSelection, messageId, isAlbum, album]);
 
   const {
     handleMouseDown,
@@ -320,7 +316,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     selectMessage,
     ref,
     messageId,
-    isLocal,
     isAlbum,
     Boolean(isInSelectMode),
     Boolean(canReply),
@@ -705,12 +700,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-has-unread-mention={message.hasUnreadMention}
       />
-      {!isLocal && !isInDocumentGroup && (
+      {!isInDocumentGroup && (
         <div className="message-select-control">
           {isSelected && <i className="icon-select" />}
         </div>
       )}
-      {!isLocal && isLastInDocumentGroup && (
+      {isLastInDocumentGroup && (
         <div
           className={buildClassName('message-select-control group-select', isGroupSelected && 'is-selected')}
           onClick={handleDocumentGroupSelectAll}

@@ -396,7 +396,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
-    const anchor = anchorIdRef.current && container.querySelector(`#${anchorIdRef.current}`);
+    const anchor = anchorIdRef.current && document.getElementById(anchorIdRef.current);
     const unreadDivider = (
       !anchor
       && memoUnreadDividerBeforeIdRef.current

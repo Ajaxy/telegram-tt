@@ -3,12 +3,12 @@ import {
 } from '../../../lib/teact/teactn';
 
 import {
-  ApiChat, ApiFormattedText, ApiUser, MAIN_THREAD_ID,
+  ApiChat, ApiFormattedText, ApiMessage, ApiUser, MAIN_THREAD_ID,
 } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
 import {
-  CHAT_LIST_LOAD_SLICE, DEBUG, MESSAGE_LIST_SLICE,
+  CHAT_LIST_LOAD_SLICE, DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -22,6 +22,9 @@ import {
   updateChatListSecondaryInfo,
   updateThreadInfos,
   replaceThreadParam,
+  updateListedIds,
+  safeReplaceViewportIds,
+  addChatMessagesById,
 } from '../../reducers';
 import {
   selectUser,
@@ -31,6 +34,7 @@ import {
   selectChatMessage,
   selectThreadInfo,
   selectCountNotMutedUnread,
+  selectLastServiceNotification,
 } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
 
@@ -91,16 +95,20 @@ async function afterSync(actions: GlobalActions) {
 }
 
 async function loadAndReplaceChats() {
+  let global = getGlobal();
+
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     withPinned: true,
-    serverTimeOffset: getGlobal().serverTimeOffset,
+    serverTimeOffset: global.serverTimeOffset,
+    lastLocalServiceMessage: selectLastServiceNotification(global)?.message,
   });
+
   if (!result) {
     return undefined;
   }
 
-  let global = getGlobal();
+  global = getGlobal();
 
   const { recentlyFoundChatIds } = global.globalSearch;
   const { userIds: contactIds } = global.contactList || {};
@@ -211,28 +219,24 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
 
     if (result && newCurrentChatId === currentChatId) {
       const currentMessageListInfo = global.messages.byChatId[currentChatId];
-      const byId = buildCollectionByKey(result.messages, 'id');
+      const localMessages = currentChatId === SERVICE_NOTIFICATIONS_USER_ID
+        ? global.serviceNotifications.map(({ message }) => message)
+        : [];
+      const allMessages = ([] as ApiMessage[]).concat(result.messages, localMessages);
+      const byId = buildCollectionByKey(allMessages, 'id');
       const listedIds = Object.keys(byId).map(Number);
 
       global = {
         ...global,
         messages: {
           ...global.messages,
-          byChatId: {
-            [currentChatId]: {
-              byId,
-              threadsById: {
-                [MAIN_THREAD_ID]: {
-                  ...(currentMessageListInfo?.threadsById[MAIN_THREAD_ID]),
-                  listedIds,
-                  viewportIds: listedIds,
-                  outlyingIds: undefined,
-                },
-              },
-            },
-          },
+          byChatId: {},
         },
       };
+
+      global = addChatMessagesById(global, currentChatId, byId);
+      global = updateListedIds(global, currentChatId, MAIN_THREAD_ID, listedIds);
+      global = safeReplaceViewportIds(global, currentChatId, MAIN_THREAD_ID, listedIds);
 
       if (currentThreadId && threadInfo && threadInfo.originChannelId) {
         const { originChannelId } = threadInfo;
@@ -275,6 +279,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
           };
         }
       }
+
       global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
       global = updateThreadInfos(global, currentChatId, result.threadInfos);
 

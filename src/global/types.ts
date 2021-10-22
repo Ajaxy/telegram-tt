@@ -72,6 +72,12 @@ export interface Thread {
   replyStack?: number[];
 }
 
+export interface ServiceNotification {
+  id: number;
+  message: ApiMessage;
+  version?: string;
+}
+
 export type GlobalState = {
   isChatInfoShown: boolean;
   isLeftColumnShown: boolean;
@@ -443,6 +449,8 @@ export type GlobalState = {
   };
 
   shouldShowContextMenuHint?: boolean;
+
+  serviceNotifications: ServiceNotification[];
 };
 
 export type ActionTypes = (
@@ -521,7 +529,7 @@ export type ActionTypes = (
   // misc
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |
-  'deleteDeviceToken' |
+  'deleteDeviceToken' | 'checkVersionNotification' | 'createServiceNotification' |
   // payment
   'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |
