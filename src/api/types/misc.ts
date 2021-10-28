@@ -4,6 +4,7 @@ export interface ApiInitialArgs {
   userAgent: string;
   platform?: string;
   sessionData?: ApiSessionData;
+  isTest?: boolean;
   isMovSupported?: boolean;
 }
 
