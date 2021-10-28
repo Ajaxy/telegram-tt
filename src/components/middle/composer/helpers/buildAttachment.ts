@@ -9,6 +9,7 @@ import {
 import { scaleImage } from '../../../../util/imageResize';
 
 const MAX_QUICK_IMG_SIZE = 1280; // px
+const FILE_EXT_REGEX = /\.[^/.]+$/;
 
 export default async function buildAttachment(
   filename: string, blob: Blob, isQuick: boolean, options?: Partial<ApiAttachment>,
@@ -28,6 +29,10 @@ export default async function buildAttachment(
         URL.revokeObjectURL(blobUrl);
         const newBlob = await fetchBlob(resizedUrl);
         return buildAttachment(filename, newBlob, true, options);
+      }
+
+      if (mimeType === 'image/jpeg') {
+        filename = filename.replace(FILE_EXT_REGEX, '.jpg');
       }
 
       quick = { width, height };
