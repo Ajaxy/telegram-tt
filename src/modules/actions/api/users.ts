@@ -6,7 +6,7 @@ import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { debounce, throttle } from '../../../util/schedulers';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import { isChatPrivate } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectUser } from '../../selectors';
@@ -150,7 +150,19 @@ async function updateContact(
 
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.InProgress));
 
-  const result = await callApi('updateContact', { phone: user.phoneNumber, firstName, lastName });
+  let result;
+  if (user.phoneNumber) {
+    result = await callApi('updateContact', { phone: user.phoneNumber, firstName, lastName });
+  } else {
+    const { id, accessHash } = user;
+    result = await callApi('addContact', {
+      id,
+      accessHash,
+      phoneNumber: '',
+      firstName,
+      lastName,
+    });
+  }
 
   if (result) {
     setGlobal(updateUser(
@@ -215,6 +227,16 @@ addReducer('setUserSearchQuery', (global, actions, payload) => {
   void runThrottledForSearch(() => {
     searchUsers(query);
   });
+});
+
+addReducer('addContact', (global, actions, payload) => {
+  const { userId } = payload!;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  void callApi('addContact', pick(user, ['id', 'accessHash', 'firstName', 'lastName', 'phoneNumber']));
 });
 
 async function searchUsers(query: string) {
