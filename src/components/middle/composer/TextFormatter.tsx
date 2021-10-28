@@ -292,6 +292,15 @@ const TextFormatter: FC<OwnProps> = ({
     onClose();
   }
 
+	const keyFromEvent = (e: KeyboardEvent): string => {
+		if (e.hasOwnProperty('key')) return e.key;
+		if (e.code.startsWith("Key")) {
+			const key = e.code.slice(3);
+			return e.shiftKey || key.length > 1 ? key : key.tolowerCase();
+		}
+		return "";
+	}
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
       k: openLinkControl,
@@ -302,7 +311,7 @@ const TextFormatter: FC<OwnProps> = ({
       s: handleStrikethroughText,
     };
 
-    const handler = HANDLERS_BY_KEY[e.key];
+    const handler = HANDLERS_BY_KEY[keyFromEvent(e)];
 
     if (
       e.altKey
