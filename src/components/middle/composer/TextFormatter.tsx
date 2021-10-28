@@ -293,16 +293,16 @@ const TextFormatter: FC<OwnProps> = ({
   }
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const HANDLERS_BY_KEY_CODE: Record<string, AnyToVoidFunction> = {
-      KeyK: openLinkControl,
-      KeyB: handleBoldText,
-      KeyU: handleUnderlineText,
-      KeyI: handleItalicText,
-      KeyM: handleMonospaceText,
-      KeyS: handleStrikethroughText,
+    const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
+      k: openLinkControl,
+      b: handleBoldText,
+      u: handleUnderlineText,
+      i: handleItalicText,
+      m: handleMonospaceText,
+      s: handleStrikethroughText,
     };
 
-    const handler = HANDLERS_BY_KEY_CODE[e.code];
+    const handler = HANDLERS_BY_KEY[e.key];
 
     if (
       e.altKey
