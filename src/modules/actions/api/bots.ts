@@ -6,7 +6,7 @@ import { ApiChat } from '../../../api/types';
 import { InlineBotSettings } from '../../../types';
 
 import {
-  RE_TG_LINK, RE_TME_ADDSTICKERS_LINK, RE_TME_INVITE_LINK, RE_TME_LINK,
+  RE_TG_LINK, RE_TME_LINK,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -30,8 +30,7 @@ addReducer('clickInlineButton', (global, actions, payload) => {
       actions.sendBotCommand({ command: button.value });
       break;
     case 'url':
-      if (button.value.match(RE_TME_INVITE_LINK) || button.value.match(RE_TME_LINK) || button.value.match(RE_TG_LINK)
-        || button.value.match(RE_TME_ADDSTICKERS_LINK)) {
+      if (button.value.match(RE_TME_LINK) || button.value.match(RE_TG_LINK)) {
         actions.openTelegramLink({ url: button.value });
       } else {
         actions.toggleSafeLinkModal({ url: button.value });

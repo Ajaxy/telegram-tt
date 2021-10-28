@@ -12,10 +12,8 @@ import {
   ARCHIVED_FOLDER_ID,
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
-  RE_TME_INVITE_LINK,
-  RE_TME_LINK,
   TIPS_USERNAME,
-  LOCALIZED_TIPS, RE_TG_LINK, RE_TME_ADDSTICKERS_LINK, SERVICE_NOTIFICATIONS_USER_ID,
+  LOCALIZED_TIPS, RE_TG_LINK, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -534,42 +532,50 @@ addReducer('openChatByInvite', (global, actions, payload) => {
 
 addReducer('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
-  const stickersMatch = RE_TME_ADDSTICKERS_LINK.exec(url);
-  if (stickersMatch) {
-    actions.openStickerSetShortName({
-      stickerSetShortName: stickersMatch[1],
-    });
-  } else if (url.match(RE_TG_LINK)) {
+  if (url.match(RE_TG_LINK)) {
     processDeepLink(url.match(RE_TG_LINK)[0]);
+    return;
+  }
+
+  const uri = new URL(url.startsWith('http') ? url : `https://${url}`);
+  const [part1, part2, part3] = uri.pathname.split('/').filter(Boolean).map((l) => decodeURI(l));
+  const params = Object.fromEntries(uri.searchParams);
+
+  let hash: string | undefined;
+  if (part1 === 'joinchat') {
+    hash = part2;
+  }
+
+  if (part1.startsWith(' ') || part1.startsWith('+')) {
+    hash = part1.substr(1, part1.length - 1);
+  }
+
+  if (hash) {
+    actions.openChatByInvite({ hash });
+    return;
+  }
+
+  if (part1 === 'addstickers') {
+    actions.openStickerSetShortName({
+      stickerSetShortName: part2,
+    });
+    return;
+  }
+
+  const chatOrChannelPostId = part2 ? Number(part2) : undefined;
+  const messageId = part3 ? Number(part3) : undefined;
+  const commentId = params.comment ? Number(params.comment) : undefined;
+  if (part1 === 'c' && chatOrChannelPostId && messageId) {
+    actions.focusMessage({
+      chatId: -chatOrChannelPostId,
+      messageId,
+    });
   } else {
-    let match = RE_TME_INVITE_LINK.exec(url);
-
-    if (match) {
-      const hash = match[1];
-
-      actions.openChatByInvite({ hash });
-    } else {
-      match = RE_TME_LINK.exec(url)!;
-
-      const username = match[1];
-      const chatOrChannelPostId = match[2] ? Number(match[2]) : undefined;
-      const messageId = match[3] ? Number(match[3]) : undefined;
-      const commentId = match[4] === 'comment' && match[5] ? Number(match[5]) : undefined;
-
-      // Open message in private group
-      if (username === 'c' && chatOrChannelPostId && messageId) {
-        actions.focusMessage({
-          chatId: -chatOrChannelPostId,
-          messageId,
-        });
-      } else {
-        actions.openChatByUsername({
-          username,
-          messageId: messageId || chatOrChannelPostId,
-          commentId,
-        });
-      }
-    }
+    actions.openChatByUsername({
+      username: part1,
+      messageId: messageId || chatOrChannelPostId,
+      commentId,
+    });
   }
 });
 
