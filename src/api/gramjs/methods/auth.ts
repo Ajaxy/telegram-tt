@@ -9,10 +9,11 @@ import {
 import { DEBUG } from '../../../config';
 
 const ApiErrors: { [k: string]: string } = {
-  PHONE_NUMBER_INVALID: 'PHONE_NUMBER_INVALID',
-  PHONE_CODE_INVALID: 'PHONE_CODE_INVALID',
-  PASSWORD_HASH_INVALID: 'PASSWORD_HASH_INVALID',
-  PHONE_PASSWORD_FLOOD: 'You have tried logging in too many times',
+  PHONE_NUMBER_INVALID: 'Invalid phone number.',
+  PHONE_CODE_INVALID: 'Invalid code.',
+  PASSWORD_HASH_INVALID: 'Incorrect password.',
+  PHONE_PASSWORD_FLOOD: 'Limit exceeded. Please try again later.',
+  PHONE_NUMBER_BANNED: 'This phone number is banned.',
 };
 
 const authController: {
