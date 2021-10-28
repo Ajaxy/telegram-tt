@@ -504,7 +504,7 @@ export type ActionTypes = (
   'acceptInviteConfirmation' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadCountryList' | 'loadTopUsers' | 'loadContactList' |
-  'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'updateContact' |
+  'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
   'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
   // Channel / groups creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |

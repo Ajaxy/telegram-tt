@@ -149,6 +149,27 @@ export function updateContact({
   }));
 }
 
+export function addContact({
+  id,
+  accessHash,
+  phoneNumber = '',
+  firstName = '',
+  lastName = '',
+}: {
+  id: number;
+  accessHash?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+}) {
+  return invokeRequest(new GramJs.contacts.AddContact({
+    id: buildInputEntity(id, accessHash) as GramJs.InputUser,
+    firstName,
+    lastName,
+    phone: phoneNumber,
+  }), true);
+}
+
 export async function deleteUser({
   id,
   accessHash,

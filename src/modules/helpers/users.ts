@@ -183,6 +183,10 @@ export function isUserBot(user: ApiUser) {
   return user.type === 'userTypeBot';
 }
 
+export function getCanAddContact(user: ApiUser) {
+  return !user.isContact && !isUserBot(user);
+}
+
 export function sortUserIds(
   userIds: number[],
   usersById: Record<number, ApiUser>,
