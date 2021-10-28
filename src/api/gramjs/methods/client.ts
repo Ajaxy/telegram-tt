@@ -45,7 +45,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   onUpdate = _onUpdate;
 
   const {
-    userAgent, platform, sessionData, isMovSupported,
+    userAgent, platform, sessionData, isTest, isMovSupported,
   } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
@@ -61,6 +61,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
+      testServers: isTest,
     } as any,
   );
 

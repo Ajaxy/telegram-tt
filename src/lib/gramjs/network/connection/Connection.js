@@ -15,11 +15,12 @@ const AsyncQueue = require('../../extensions/AsyncQueue');
 class Connection {
     PacketCodecClass = undefined;
 
-    constructor(ip, port, dcId, loggers) {
+    constructor(ip, port, dcId, loggers, testServers) {
         this._ip = ip;
         this._port = port;
         this._dcId = dcId;
         this._log = loggers;
+        this._testServers = testServers;
         this._connected = false;
         this._sendTask = undefined;
         this._recvTask = undefined;
@@ -39,7 +40,7 @@ class Connection {
     async _connect() {
         this._log.debug('Connecting');
         this._codec = new this.PacketCodecClass(this);
-        await this.socket.connect(this._port, this._ip, this);
+        await this.socket.connect(this._port, this._ip, this._testServers);
         this._log.debug('Finished connecting');
         // await this.socket.connect({host: this._ip, port: this._port});
         await this._initConn();
@@ -151,7 +152,6 @@ class ObfuscatedConnection extends Connection {
     _send(data) {
         this._obfuscation.write(this._codec.encodePacket(data));
     }
-
 
     _recv() {
         return this._codec.readPacket(this._obfuscation);

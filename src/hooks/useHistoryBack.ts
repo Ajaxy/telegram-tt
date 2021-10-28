@@ -5,12 +5,6 @@ import usePrevious from './usePrevious';
 import { getDispatch } from '../lib/teact/teactn';
 import { areSortedArraysEqual } from '../util/iteratees';
 
-// Carefully selected by swiping and observing visual changes
-// TODO: may be different on other devices such as iPad, maybe take dpi into account?
-const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
-const SAFARI_EDGE_BACK_GESTURE_DURATION = 350;
-export const LOCATION_HASH = window.location.hash;
-
 type HistoryState = {
   currentIndex: number;
   nextStateIndexToReplace: number;
@@ -19,6 +13,13 @@ type HistoryState = {
   isEdge: boolean;
   currentIndexes: number[];
 };
+
+// Carefully selected by swiping and observing visual changes
+// TODO: may be different on other devices such as iPad, maybe take dpi into account?
+const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
+const SAFARI_EDGE_BACK_GESTURE_DURATION = 350;
+export const LOCATION_HASH = window.location.hash;
+const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 
 const historyState: HistoryState = {
   currentIndex: 0,
@@ -55,7 +56,7 @@ if (IS_IOS) {
   window.addEventListener('popstate', handleTouchEnd);
 }
 
-window.history.replaceState({ index: historyState.currentIndex }, '', window.location.pathname);
+window.history.replaceState({ index: historyState.currentIndex }, '', PATH_BASE);
 
 export default function useHistoryBack(
   isActive: boolean | undefined,
@@ -87,14 +88,16 @@ export default function useHistoryBack(
 
             historyState.currentIndexes.push(index);
 
-            window.history[
-              (historyState.currentIndexes.includes(historyState.nextStateIndexToReplace - 1)
+            window.history[(
+              (
+                historyState.currentIndexes.includes(historyState.nextStateIndexToReplace - 1)
                 && window.history.state.index !== 0
                 && historyState.nextStateIndexToReplace === index
-                && !shouldReplaceNext)
+                && !shouldReplaceNext
+              )
                 ? 'replaceState'
                 : 'pushState'
-            ]({
+            )]({
               index,
               state: currentState,
             }, '');
@@ -170,7 +173,7 @@ export default function useHistoryBack(
               window.history.replaceState({
                 index,
                 state: currentState,
-              }, '', `#${hashes[hashes.length - 1]}`);
+              }, '', `${PATH_BASE}#${hashes[hashes.length - 1]}`);
 
               indexHashRef.current[indexHashRef.current.length - 1] = {
                 index,

@@ -37,6 +37,7 @@ addReducer('initApi', (global: GlobalState, actions) => {
       userAgent: navigator.userAgent,
       platform: PLATFORM_ENV,
       sessionData: loadStoredSession(),
+      isTest: window.location.search.includes('test'),
       isMovSupported: IS_MOV_SUPPORTED,
     });
   })();

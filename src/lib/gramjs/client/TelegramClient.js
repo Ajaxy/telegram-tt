@@ -38,7 +38,6 @@ const PING_DISCONNECT_DELAY = 60000; // 1 min
 // All types
 const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's'];
 
-
 class TelegramClient {
     static DEFAULT_OPTIONS = {
         connection: ConnectionTCPObfuscated,
@@ -59,6 +58,7 @@ class TelegramClient {
         baseLogger: 'gramjs',
         useWSS: false,
         additionalDcsDisabled: false,
+        testServers: false,
     };
 
     /**
@@ -148,7 +148,6 @@ class TelegramClient {
         this._destroyed = false;
     }
 
-
     // region Connecting
 
     /**
@@ -181,7 +180,7 @@ class TelegramClient {
         this._sender._disconnected = true;
 
         const connection = new this._connection(
-            this.session.serverAddress, this.session.port, this.session.dcId, this._log,
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
         );
 
         const newConnection = await this._sender.connect(connection);
@@ -337,6 +336,7 @@ class TelegramClient {
                     dc.port,
                     dcId,
                     this._log,
+                    this._args.testServers,
                 ));
 
                 if (this.session.dcId !== dcId && !sender._authenticated) {
@@ -551,7 +551,6 @@ class TelegramClient {
         return undefined;
     }
 
-
     _downloadCachedPhotoSize(size) {
         // No need to download anything, simply write the bytes
         let data;
@@ -688,7 +687,6 @@ class TelegramClient {
         // This causes issues for now because not enough utils
         // await request.resolve(this, utils)
 
-
         this._lastRequest = new Date().getTime();
         let attempt = 0;
         for (attempt = 0; attempt < this._requestRetries; attempt++) {
@@ -800,7 +798,6 @@ class TelegramClient {
         this._dispatchUpdate(args);
     }
 
-
     // endregion
 
     // region private methods
@@ -882,7 +879,6 @@ class TelegramClient {
     }
     */
     // endregion
-
 
     // users region
     /**
@@ -1067,6 +1063,7 @@ async function attempts(cb, times, pause) {
     for (let i = 0; i < times; i++) {
         try {
             // We need to `return await` here so it can be caught locally
+            // eslint-disable-next-line no-return-await
             return await cb();
         } catch (err) {
             if (i === times - 1) {

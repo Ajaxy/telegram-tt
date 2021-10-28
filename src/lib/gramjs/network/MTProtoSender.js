@@ -844,6 +844,7 @@ class MTProtoSender {
             this._connection._port,
             this._connection._dcId,
             this._connection._log,
+            this._connection._testServers,
         );
         await this.connect(newConnection, true);
 
