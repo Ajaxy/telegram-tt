@@ -48,7 +48,6 @@ import StickerSetModal from '../common/StickerSetModal.async';
 import './Main.scss';
 
 type StateProps = {
-  animationLevel: number;
   lastSyncTime?: number;
   isLeftColumnShown: boolean;
   isRightColumnShown: boolean;
@@ -61,14 +60,17 @@ type StateProps = {
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
-  language?: LangCode;
   openedStickerSetShortName?: string;
   isServiceChatReady?: boolean;
+  animationLevel: number;
+  language?: LangCode;
+  wasTimeFormatSetManually?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
-  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName' | 'loadCountryList' | 'checkVersionNotification'
+  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName' |
+  'loadCountryList' | 'ensureTimeFormat' | 'checkVersionNotification'
 )>;
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -84,7 +86,6 @@ const Main: FC<StateProps & DispatchProps> = ({
   isRightColumnShown,
   isMediaViewerOpen,
   isForwardModalOpen,
-  animationLevel,
   hasNotifications,
   hasDialogs,
   audioMessage,
@@ -92,9 +93,11 @@ const Main: FC<StateProps & DispatchProps> = ({
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
-  language,
   openedStickerSetShortName,
   isServiceChatReady,
+  animationLevel,
+  language,
+  wasTimeFormatSetManually,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
@@ -102,6 +105,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   loadTopInlineBots,
   loadEmojiKeywords,
   loadCountryList,
+  ensureTimeFormat,
   openStickerSetShortName,
   checkVersionNotification,
 }) => {
@@ -137,6 +141,12 @@ const Main: FC<StateProps & DispatchProps> = ({
       checkVersionNotification();
     }
   }, [lastSyncTime, isServiceChatReady, checkVersionNotification]);
+
+  useEffect(() => {
+    if (lastSyncTime && !wasTimeFormatSetManually) {
+      ensureTimeFormat();
+    }
+  }, [lastSyncTime, wasTimeFormatSetManually, ensureTimeFormat]);
 
   useEffect(() => {
     if (lastSyncTime && LOCATION_HASH.startsWith('#?tgaddr=')) {
@@ -291,13 +301,13 @@ function updatePageTitle(nextTitle: string) {
 
 export default memo(withGlobal(
   (global): StateProps => {
+    const { settings: { byKey: { animationLevel, language, wasTimeFormatSetManually } } } = global;
     const { chatId: audioChatId, messageId: audioMessageId, origin } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
 
     return {
-      animationLevel: global.settings.byKey.animationLevel,
       lastSyncTime: global.lastSyncTime,
       isLeftColumnShown: global.isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),
@@ -310,13 +320,16 @@ export default memo(withGlobal(
       safeLinkModalUrl: global.safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
-      language: global.settings.byKey.language,
       openedStickerSetShortName: global.openedStickerSetShortName,
       isServiceChatReady: selectIsServiceChatReady(global),
+      animationLevel,
+      language,
+      wasTimeFormatSetManually,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
-    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName', 'loadCountryList', 'checkVersionNotification',
+    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName', 'loadCountryList', 'ensureTimeFormat',
+    'checkVersionNotification',
   ]),
 )(Main));

@@ -8,7 +8,7 @@ export function getCountryCodesByIso(phoneCodeList: ApiCountryCode[], iso: strin
   return phoneCodeList.filter((country) => country.iso2 === iso);
 }
 
-export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input: string = '') {
+export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input = '') {
   let phoneNumber = input.replace(/[^\d+]+/g, '');
   if (phoneNumber.startsWith('+')) {
     phoneNumber = phoneNumber.substr(1);
