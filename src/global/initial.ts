@@ -145,6 +145,7 @@ export const INITIAL_STATE: GlobalState = {
       shouldSuggestStickers: true,
       shouldLoopStickers: true,
       language: 'en',
+      timeFormat: '24h',
     },
     themes: {
       light: {

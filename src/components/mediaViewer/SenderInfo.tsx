@@ -34,7 +34,13 @@ type StateProps = {
 type DispatchProps = Pick<GlobalActions, 'closeMediaViewer' | 'focusMessage'>;
 
 const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
-  chatId, messageId, sender, isAvatar, message, closeMediaViewer, focusMessage,
+  chatId,
+  messageId,
+  sender,
+  isAvatar,
+  message,
+  closeMediaViewer,
+  focusMessage,
 }) => {
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();
@@ -62,7 +68,9 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date" dir="auto">
-          {isAvatar ? lang('lng_mediaview_profile_photo') : formatMediaDateTime(lang, message!.date * 1000, true)}
+          {isAvatar
+            ? lang('lng_mediaview_profile_photo')
+            : formatMediaDateTime(lang, message!.date * 1000, true)}
         </div>
       </div>
     </div>

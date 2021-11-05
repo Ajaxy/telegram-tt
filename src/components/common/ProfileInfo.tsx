@@ -47,9 +47,9 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   isSavedMessages,
   connectionState,
   animationLevel,
+  serverTimeOffset,
   loadFullUser,
   openMediaViewer,
-  serverTimeOffset,
 }) => {
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
@@ -232,7 +232,12 @@ export default memo(withGlobal<OwnProps>(
     const { animationLevel } = global.settings.byKey;
 
     return {
-      connectionState, user, chat, isSavedMessages, animationLevel, serverTimeOffset,
+      connectionState,
+      user,
+      chat,
+      isSavedMessages,
+      animationLevel,
+      serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),

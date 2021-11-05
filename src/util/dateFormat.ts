@@ -10,7 +10,7 @@ const MONTHS_FULL_LOWERCASE = MONTHS_FULL.map((month) => month.toLowerCase());
 const MIN_SEARCH_YEAR = 2015;
 const MAX_DAY_IN_MONTH = 31;
 const MAX_MONTH_IN_YEAR = 12;
-export const MILISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
+export const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
 
 export function getDayStart(datetime: number | Date) {
   const date = new Date(datetime);
@@ -31,12 +31,17 @@ function toIsoString(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
-export function formatTime(datetime: number | Date) {
+export function formatTime(datetime: number | Date, lang: LangFn) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const timeFormat = lang.timeFormat || '24h';
 
-  return `${hours}:${minutes}`;
+  const time = date.toLocaleTimeString(lang.code, {
+    hour12: timeFormat === '12h',
+    hour: timeFormat === '12h' ? 'numeric' : '2-digit',
+    minute: '2-digit',
+  });
+
+  return timeFormat === '12h' ? time.replace(/^0:/, '12:') : time;
 }
 
 export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
@@ -44,7 +49,7 @@ export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
 
   const today = getDayStart(new Date());
   if (date >= today) {
-    return formatTime(date);
+    return formatTime(date, lang);
   }
 
   const weekAgo = new Date(today);
@@ -132,10 +137,14 @@ function formatDate(lang: LangFn, date: Date, format: string) {
     .replace('yyyy', String(date.getFullYear()));
 }
 
-export function formatMediaDateTime(lang: LangFn, datetime: number | Date, isUpperFirst?: boolean) {
+export function formatMediaDateTime(
+  lang: LangFn,
+  datetime: number | Date,
+  isUpperFirst?: boolean,
+) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  return `${formatHumanDate(lang, date, true, undefined, isUpperFirst)}, ${formatTime(date)}`;
+  return `${formatHumanDate(lang, date, true, undefined, isUpperFirst)}, ${formatTime(date, lang)}`;
 }
 
 export function formatMediaDuration(duration: number, maxValue?: number) {
@@ -231,7 +240,7 @@ export function parseDateString(query = ''): string | undefined {
 }
 
 export function timestampPlusDay(timestamp: number) {
-  return timestamp + MILISECONDS_IN_DAY / 1000;
+  return timestamp + MILLISECONDS_IN_DAY / 1000;
 }
 
 function lowerFirst(str: string) {

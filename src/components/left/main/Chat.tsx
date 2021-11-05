@@ -292,7 +292,10 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           {chat.isVerified && <VerifiedIcon />}
           {isMuted && <i className="icon-muted-chat" />}
           {chat.lastMessage && (
-            <LastMessageMeta message={chat.lastMessage} outgoingStatus={lastMessageOutgoingStatus} />
+            <LastMessageMeta
+              message={chat.lastMessage}
+              outgoingStatus={lastMessageOutgoingStatus}
+            />
           )}
         </div>
         <div className="subtitle">

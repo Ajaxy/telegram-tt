@@ -23,7 +23,9 @@ type OwnProps = {
   onMessageClick: (messageId: number, chatId: number) => void;
 };
 
-const WebLink: FC<OwnProps> = ({ message, senderTitle, onMessageClick }) => {
+const WebLink: FC<OwnProps> = ({
+  message, senderTitle, onMessageClick,
+}) => {
   const lang = useLang();
 
   let linkData: ApiWebPage | undefined = getMessageWebPage(message);

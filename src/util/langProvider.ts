@@ -1,7 +1,7 @@
 import { getGlobal } from '../lib/teact/teactn';
 
 import { ApiLangPack, ApiLangString } from '../api/types';
-import { LangCode } from '../types';
+import { LangCode, TimeFormat } from '../types';
 
 import {
   DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,
@@ -16,6 +16,7 @@ interface LangFn {
 
   isRtl?: boolean;
   code?: LangCode;
+  timeFormat?: TimeFormat;
 }
 
 const SUBSTITUTION_REGEX = /%\d?\$?[sdf@]/g;
@@ -57,6 +58,7 @@ const {
 export { addCallback, removeCallback };
 
 let currentLangCode: string | undefined;
+let currentTimeFormat: TimeFormat | undefined;
 
 export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') => {
   if (value !== undefined) {
@@ -124,10 +126,30 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   langPack = newLangPack;
   document.documentElement.lang = langCode;
 
-  const { languages } = getGlobal().settings.byKey;
+  const { languages, timeFormat } = getGlobal().settings.byKey;
   const langInfo = languages?.find((l) => l.langCode === langCode);
   getTranslation.isRtl = Boolean(langInfo?.rtl);
   getTranslation.code = langCode;
+  getTranslation.timeFormat = timeFormat;
+
+  if (callback) {
+    callback();
+  }
+
+  runCallbacks();
+}
+
+export function setTimeFormat(timeFormat: TimeFormat, callback?: NoneToVoidFunction) {
+  if (timeFormat && timeFormat === currentTimeFormat) {
+    if (callback) {
+      callback();
+    }
+
+    return;
+  }
+
+  currentTimeFormat = timeFormat;
+  getTranslation.timeFormat = timeFormat;
 
   if (callback) {
     callback();

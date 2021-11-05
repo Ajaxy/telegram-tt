@@ -185,7 +185,9 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
 }
 
 export function getMessageSendingRestrictionReason(
-  lang: LangFn, currentUserBannedRights?: ApiChatBannedRights, defaultBannedRights?: ApiChatBannedRights,
+  lang: LangFn,
+  currentUserBannedRights?: ApiChatBannedRights,
+  defaultBannedRights?: ApiChatBannedRights,
 ) {
   if (currentUserBannedRights?.sendMessages) {
     const { untilDate } = currentUserBannedRights;
@@ -194,7 +196,7 @@ export function getMessageSendingRestrictionReason(
         'Channel.Persmission.Denied.SendMessages.Until',
         lang(
           'formatDateAtTime',
-          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(untilDate * 1000)],
+          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(untilDate * 1000, lang)],
         ),
       )
       : lang('Channel.Persmission.Denied.SendMessages.Forever');

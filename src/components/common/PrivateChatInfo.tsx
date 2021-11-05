@@ -55,9 +55,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   isSavedMessages,
   areMessagesLoaded,
   lastSyncTime,
+  serverTimeOffset,
   loadFullUser,
   openMediaViewer,
-  serverTimeOffset,
 }) => {
   const { id: userId } = user || {};
   const fullName = getUserFullName(user);

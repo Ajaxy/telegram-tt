@@ -4,11 +4,12 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { SettingsScreens, ISettings } from '../../../types';
+import { SettingsScreens, ISettings, TimeFormat } from '../../../types';
 import { ApiSticker, ApiStickerSet } from '../../../api/types';
 
 import { IS_IOS, IS_MAC_OS, IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
+import { setTimeFormat } from '../../../util/langProvider';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -17,7 +18,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 import Checkbox from '../../ui/Checkbox';
-import RadioGroup from '../../ui/RadioGroup';
+import RadioGroup, { IRadioOption } from '../../ui/RadioGroup';
 import SettingsStickerSet from './SettingsStickerSet';
 import StickerSetModal from '../../common/StickerSetModal.async';
 
@@ -38,7 +39,8 @@ type StateProps = Pick<ISettings, (
   'shouldAutoPlayGifs' |
   'shouldAutoPlayVideos' |
   'shouldSuggestStickers' |
-  'shouldLoopStickers'
+  'shouldLoopStickers' |
+  'timeFormat'
 )> & {
   stickerSetIds?: string[];
   stickerSetsById?: Record<string, ApiStickerSet>;
@@ -53,6 +55,14 @@ const ANIMATION_LEVEL_OPTIONS = [
   'Nice and Fast',
   'Lots of Stuff',
 ];
+
+const TIME_FORMAT_OPTIONS: IRadioOption[] = [{
+  label: '12-hour',
+  value: '12h',
+}, {
+  label: '24-hour',
+  value: '24h',
+}];
 
 const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   isActive,
@@ -71,6 +81,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldAutoPlayVideos,
   shouldSuggestStickers,
   shouldLoopStickers,
+  timeFormat,
   setSettingOption,
   loadStickerSets,
   loadAddedStickers,
@@ -121,6 +132,12 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
     setSettingOption({ messageTextSize: newSize });
   }, [setSettingOption]);
 
+  const handleTimeFormatChange = useCallback((value: string) => {
+    setTimeFormat(value as TimeFormat, () => {
+      setSettingOption({ timeFormat: value });
+    });
+  }, [setSettingOption]);
+
   const handleStickerSetClick = useCallback((value: ApiSticker) => {
     setSticker(value);
     openModal();
@@ -151,6 +168,18 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           {lang('ChatBackground')}
         </ListItem>
+      </div>
+
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          Time Format
+        </h4>
+        <RadioGroup
+          name="timeformat"
+          options={TIME_FORMAT_OPTIONS}
+          selected={timeFormat}
+          onChange={handleTimeFormatChange}
+        />
       </div>
 
       <div className="settings-item">
@@ -274,6 +303,7 @@ export default memo(withGlobal<OwnProps>(
         'shouldLoopStickers',
         'isSensitiveEnabled',
         'canChangeSensitive',
+        'timeFormat',
       ]),
       stickerSetIds: global.stickers.added.setIds,
       stickerSetsById: global.stickers.setsById,

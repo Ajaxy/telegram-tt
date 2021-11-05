@@ -58,6 +58,11 @@
 
     .Tab {
       padding: 1rem .75rem;
+
+      span {
+        white-space: nowrap;
+      }
+
       i {
         bottom: -1rem;
       }
