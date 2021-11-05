@@ -81,6 +81,12 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'pictogram'),
     lastSyncTime,
   );
+  const {
+    shouldRenderThumb,
+    shouldRenderFullMedia: shouldRenderPreview,
+    transitionClassNames: previewClassNames,
+  } = useTransitionForMedia(previewBlobUrl, 'slow');
+
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
     !shouldLoad,
@@ -110,7 +116,6 @@ const Video: FC<OwnProps> = ({
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
-  const { transitionClassNames } = useTransitionForMedia(fullMediaData, 'slow');
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -145,8 +150,6 @@ const Video: FC<OwnProps> = ({
   }, [isUploading, isDownloading, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
-  const videoClassName = buildClassName('full-media', transitionClassNames);
-
   const style = dimensions
     ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;`
     : '';
@@ -160,7 +163,7 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {!previewBlobUrl && (
+      {shouldRenderThumb && (
         <canvas
           ref={thumbRef}
           className="thumbnail"
@@ -168,10 +171,10 @@ const Video: FC<OwnProps> = ({
           style={`width: ${width}px; height: ${height}px;`}
         />
       )}
-      {previewBlobUrl && (
+      {shouldRenderPreview && (
         <img
           src={previewBlobUrl}
-          className="thumbnail"
+          className={buildClassName('thumbnail', previewClassNames)}
           // @ts-ignore teact feature
           style={`width: ${width}px; height: ${height}px;`}
           alt=""
@@ -180,7 +183,7 @@ const Video: FC<OwnProps> = ({
       {isInline && (
         <video
           ref={videoRef}
-          className={videoClassName}
+          className="full-media"
           width={width}
           height={height}
           autoPlay={isPlayAllowed}
