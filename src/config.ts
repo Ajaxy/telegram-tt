@@ -88,6 +88,7 @@ export const MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH = 950; // px
 export const MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT = 450; // px
 
 export const LOCAL_MESSAGE_ID_BASE = 1e9;
+export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
 

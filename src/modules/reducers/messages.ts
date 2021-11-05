@@ -4,7 +4,9 @@ import {
 import { ApiMessage, ApiThreadInfo, MAIN_THREAD_ID } from '../../api/types';
 import { FocusDirection } from '../../types';
 
-import { IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT } from '../../config';
+import {
+  IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
+} from '../../config';
 import {
   selectListedIds,
   selectChatMessages,
@@ -22,8 +24,6 @@ import {
 import {
   areSortedArraysEqual, omit, pickTruthy, unique,
 } from '../../util/iteratees';
-
-const TMP_CHAT_ID = '-1';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
