@@ -18,7 +18,7 @@ import { getFirstLetters } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import useMedia from '../../hooks/useMedia';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 
 import './Avatar.scss';
@@ -59,7 +59,8 @@ const Avatar: FC<OwnProps> = ({
   }
 
   const blobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(blobUrl, 'slow');
+  const hasBlobUrl = Boolean(blobUrl);
+  const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
 
   const lang = useLang();
 
@@ -71,8 +72,10 @@ const Avatar: FC<OwnProps> = ({
     content = <i className="icon-avatar-deleted-account" />;
   } else if (isReplies) {
     content = <i className="icon-reply-filled" />;
-  } else if (shouldRenderFullMedia) {
-    content = <img src={blobUrl} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
+  } else if (blobUrl) {
+    content = (
+      <img src={blobUrl} className={buildClassName('avatar-media', transitionClassNames)} alt="" decoding="async" />
+    );
   } else if (user) {
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
@@ -93,14 +96,15 @@ const Avatar: FC<OwnProps> = ({
     isReplies && 'replies-bot-account',
     withOnlineStatus && isOnline && 'online',
     onClick && 'interactive',
-    (!isSavedMessages && !shouldRenderFullMedia) && 'no-photo',
+    (!isSavedMessages && !blobUrl) && 'no-photo',
   );
 
+  const hasImage = Boolean(isSavedMessages || blobUrl);
   const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
     if (onClick) {
-      onClick(e, isSavedMessages || shouldRenderFullMedia);
+      onClick(e, hasImage);
     }
-  }, [onClick, isSavedMessages, shouldRenderFullMedia]);
+  }, [onClick, hasImage]);
 
   const senderId = (user || chat) && (user || chat)!.id;
 

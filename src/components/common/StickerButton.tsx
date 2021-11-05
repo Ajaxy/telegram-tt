@@ -7,7 +7,7 @@ import { ApiMediaFormat, ApiSticker } from '../../api/types';
 
 import { useIsIntersecting, ObserveFn } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useShowTransition from '../../hooks/useShowTransition';
 import useFlag from '../../hooks/useFlag';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
@@ -48,11 +48,12 @@ const StickerButton: FC<OwnProps> = ({
   const [isAnimationLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
   const canAnimatedPlay = isAnimationLoaded && shouldPlay;
 
-  const {
-    shouldRenderThumb,
-    shouldRenderFullMedia: shouldRenderPreview,
-    transitionClassNames: previewTransitionClassNames,
-  } = useTransitionForMedia(previewBlobUrl || canAnimatedPlay, 'slow');
+  const { transitionClassNames: previewTransitionClassNames } = useShowTransition(
+    Boolean(previewBlobUrl || canAnimatedPlay),
+    undefined,
+    undefined,
+    'slow',
+  );
 
   // To avoid flickering
   useEffect(() => {
@@ -82,7 +83,7 @@ const StickerButton: FC<OwnProps> = ({
     className,
   );
 
-  const style = shouldRenderThumb && thumbDataUri ? `background-image: url('${thumbDataUri}');` : '';
+  const style = thumbDataUri ? `background-image: url('${thumbDataUri}');` : '';
 
   return (
     <div
@@ -95,7 +96,7 @@ const StickerButton: FC<OwnProps> = ({
       onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={handleClick}
     >
-      {shouldRenderPreview && !canAnimatedPlay && (
+      {!canAnimatedPlay && (
         // eslint-disable-next-line jsx-a11y/alt-text
         <img src={previewBlobUrl} className={previewTransitionClassNames} />
       )}

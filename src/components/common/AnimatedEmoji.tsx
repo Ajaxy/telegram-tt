@@ -7,7 +7,7 @@ import { ApiMediaFormat, ApiSticker } from '../../api/types';
 import { LIKE_STICKER_ID } from './helpers/mediaDimensions';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
 
 import AnimatedSticker from './AnimatedSticker';
@@ -51,7 +51,7 @@ const AnimatedEmoji: FC<OwnProps> = ({
     ApiMediaFormat.BlobUrl,
     lastSyncTime,
   );
-  const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
+  const transitionClassNames = useMediaTransition(previewBlobUrl);
 
   const mediaData = useMedia(localMediaHash, !isIntersecting, ApiMediaFormat.Lottie, lastSyncTime);
   const isMediaLoaded = Boolean(mediaData);

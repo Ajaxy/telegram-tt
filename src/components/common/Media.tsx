@@ -8,8 +8,9 @@ import {
   getMessageMediaThumbDataUri,
   getMessageVideo,
 } from '../../modules/helpers';
+import buildClassName from '../../util/buildClassName';
 import useMedia from '../../hooks/useMedia';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
 import './Media.scss';
 
@@ -26,20 +27,14 @@ const Media: FC<OwnProps> = ({ message, idPrefix = 'shared-media', onClick }) =>
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(mediaBlobUrl, 'slow');
+  const transitionClassNames = useMediaTransition(mediaBlobUrl);
 
   const video = getMessageVideo(message);
 
   return (
     <div id={`${idPrefix}${message.id}`} className="Media scroll-item" onClick={onClick ? handleClick : undefined}>
-      {shouldRenderThumb && (
-        <img src={thumbDataUri} alt="" />
-      )}
-      {shouldRenderFullMedia && (
-        <img src={mediaBlobUrl} className={`${transitionClassNames} full-media`} alt="" />
-      )}
+      <img src={thumbDataUri} alt="" />
+      <img src={mediaBlobUrl} className={buildClassName('full-media', transitionClassNames)} alt="" />
       {video && <span className="video-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</span>}
     </div>
   );

@@ -15,7 +15,6 @@ import {
 } from '../../../modules/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import usePrevious from '../../../hooks/usePrevious';
@@ -24,6 +23,7 @@ import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 
 export type OwnProps = {
   id?: string;
@@ -92,13 +92,12 @@ const Photo: FC<OwnProps> = ({
     shouldLoad && !fullMediaData,
   );
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+
+  const transitionClassNames = useMediaTransition(fullMediaData);
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled, 'slow');
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(fullMediaData, 'slow');
 
   const handleClick = useCallback(() => {
     if (isUploading) {
@@ -152,23 +151,19 @@ const Photo: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {shouldRenderThumb && (
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-          // @ts-ignore teact feature
-          style={`width: ${width}px; height: ${height}px`}
-        />
-      )}
-      {shouldRenderFullMedia && (
-        <img
-          src={fullMediaData}
-          className={`full-media ${transitionClassNames}`}
-          width={width}
-          height={height}
-          alt=""
-        />
-      )}
+      <canvas
+        ref={thumbRef}
+        className="thumbnail"
+        // @ts-ignore teact feature
+        style={`width: ${width}px; height: ${height}px`}
+      />
+      <img
+        src={fullMediaData}
+        className={`full-media ${transitionClassNames}`}
+        width={width}
+        height={height}
+        alt=""
+      />
       {shouldRenderSpinner && (
         <div className={`media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />

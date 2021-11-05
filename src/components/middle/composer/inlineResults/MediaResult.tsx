@@ -4,8 +4,9 @@ import {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiPhoto, ApiThumbnail, ApiWebDocument,
 } from '../../../../api/types';
 
+import buildClassName from '../../../../util/buildClassName';
 import useMedia from '../../../../hooks/useMedia';
-import useTransitionForMedia from '../../../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../../../hooks/useMediaTransition';
 
 import BaseResult from './BaseResult';
 
@@ -38,9 +39,7 @@ const MediaResult: FC<OwnProps> = ({
 
   const thumbnailDataUrl = useMedia(webThumbnail ? `webDocument:${webThumbnail.url}` : undefined);
   const mediaBlobUrl = useMedia(photo && `photo${photo.id}?size=m`);
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(mediaBlobUrl, 'slow');
+  const transitionClassNames = useMediaTransition(mediaBlobUrl);
 
   const handleClick = useCallback(() => {
     onClick(inlineResult);
@@ -49,12 +48,8 @@ const MediaResult: FC<OwnProps> = ({
   if (isForGallery) {
     return (
       <div className="MediaResult chat-item-clickable" onClick={handleClick}>
-        {shouldRenderThumb && (
-          <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" />
-        )}
-        {shouldRenderFullMedia && (
-          <img src={mediaBlobUrl} className={`${transitionClassNames} full-media`} alt="" />
-        )}
+        <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" />
+        <img src={mediaBlobUrl} className={buildClassName('full-media', transitionClassNames)} alt="" />
       </div>
     );
   }
@@ -64,8 +59,8 @@ const MediaResult: FC<OwnProps> = ({
   return (
     <BaseResult
       focus={focus}
-      thumbUrl={shouldRenderFullMedia ? mediaBlobUrl : (thumbnail?.dataUri || thumbnailDataUrl)}
-      transitionClassNames={shouldRenderFullMedia ? transitionClassNames : undefined}
+      thumbUrl={mediaBlobUrl || (thumbnail?.dataUri || thumbnailDataUrl)}
+      transitionClassNames={transitionClassNames}
       title={title}
       description={description}
       onClick={handleClick}

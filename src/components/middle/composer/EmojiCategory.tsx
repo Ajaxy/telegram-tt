@@ -4,7 +4,7 @@ import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import windowSize from '../../../util/windowSize';
 import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useLang from '../../../hooks/useLang';
 
 import EmojiButton from './EmojiButton';
@@ -31,7 +31,7 @@ const EmojiCategory: FC<OwnProps> = ({
 
   useOnIntersect(ref, observeIntersection);
 
-  const { transitionClassNames } = useShowTransition(shouldRender, undefined, undefined, 'slow');
+  const transitionClassNames = useMediaTransition(shouldRender);
 
   const lang = useLang();
 

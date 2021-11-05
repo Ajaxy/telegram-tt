@@ -8,7 +8,7 @@ import { STICKER_SIZE_PICKER } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import StickerButton from '../../common/StickerButton';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import buildClassName from '../../../util/buildClassName';
 
 type OwnProps = {
@@ -39,7 +39,7 @@ const StickerSet: FC<OwnProps> = ({
 
   useOnIntersect(ref, observeIntersection);
 
-  const { transitionClassNames } = useShowTransition(shouldRender, undefined, undefined, 'slow');
+  const transitionClassNames = useMediaTransition(shouldRender);
 
   const stickersPerRow = IS_SINGLE_COLUMN_LAYOUT
     ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (STICKER_SIZE_PICKER + STICKER_MARGIN))

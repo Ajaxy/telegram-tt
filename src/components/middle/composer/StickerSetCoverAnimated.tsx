@@ -1,11 +1,13 @@
-import React, { FC, memo, useRef } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useMemo, useRef,
+} from '../../../lib/teact/teact';
 
 import { ApiMediaFormat, ApiStickerSet } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import { getFirstLetters } from '../../../util/textFormat';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -28,12 +30,18 @@ const StickerSetCoverAnimated: FC<OwnProps> = ({
 
   const mediaHash = `stickerSet${stickerSet.id}`;
   const lottieData = useMedia(mediaHash, !isIntersecting, ApiMediaFormat.Lottie);
-  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(lottieData, 'slow');
+  const transitionClassNames = useMediaTransition(lottieData);
+
+  const firstLetters = useMemo(() => {
+    if (lottieData) return undefined;
+
+    return getFirstLetters(stickerSet.title, 2);
+  }, [lottieData, stickerSet.title]);
 
   return (
     <div ref={ref} className="sticker-set-cover">
-      {!shouldRenderFullMedia && getFirstLetters(stickerSet.title, 2)}
-      {shouldRenderFullMedia && lottieData && (
+      {firstLetters}
+      {lottieData && (
         <AnimatedSticker
           id={mediaHash}
           size={size}

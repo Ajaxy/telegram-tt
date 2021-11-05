@@ -5,10 +5,10 @@ import { ApiMessage } from '../../../api/types';
 import { MEMOJI_STICKER_ID } from '../../../config';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
-import useMedia from '../../../hooks/useMedia';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useMedia from '../../../hooks/useMedia';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useFlag from '../../../hooks/useFlag';
 import useWebpThumbnail from '../../../hooks/useWebpThumbnail';
 
@@ -52,7 +52,7 @@ const Sticker: FC<OwnProps> = ({
   const isMediaLoaded = Boolean(mediaData);
   const [isAnimationLoaded, markAnimationLoaded] = useFlag(isMediaLoaded);
   const isMediaReady = isAnimated ? isAnimationLoaded : isMediaLoaded;
-  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(isMediaReady, 'slow');
+  const transitionClassNames = useMediaTransition(isMediaReady);
 
   const { width, height } = getStickerDimensions(sticker);
   const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
@@ -74,7 +74,7 @@ const Sticker: FC<OwnProps> = ({
           className={thumbClassName}
         />
       )}
-      {!isAnimated && shouldRenderFullMedia && (
+      {!isAnimated && (
         <img
           id={`sticker-${message.id}`}
           src={mediaData as string}
