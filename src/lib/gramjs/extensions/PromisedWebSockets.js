@@ -128,16 +128,13 @@ class PromisedWebSockets {
 
     receive() {
         this.client.onmessage = async (message) => {
-            const release = await mutex.acquire();
-            try {
+            await mutex.runExclusive(async () => {
                 const data = message.data instanceof ArrayBuffer
                     ? Buffer.from(message.data)
                     : Buffer.from(await new Response(message.data).arrayBuffer());
                 this.stream = Buffer.concat([this.stream, data]);
                 this.resolveRead(true);
-            } finally {
-                release();
-            }
+            });
         };
     }
 }
