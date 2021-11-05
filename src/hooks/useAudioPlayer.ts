@@ -49,13 +49,28 @@ export default (
     controllerRef.current = register(trackId, trackType, origin, (eventName, e) => {
       switch (eventName) {
         case 'onPlay': {
-          const { setVolume, proxy } = controllerRef.current!;
+          const {
+            setVolume, setPlaybackRate, toggleMuted, proxy,
+          } = controllerRef.current!;
           setIsPlaying(true);
 
           registerMediaSession(metadata, makeMediaHandlers(controllerRef));
           setPlaybackState('playing');
           setVolume(getGlobal().audioPlayer.volume);
+          toggleMuted(!!getGlobal().audioPlayer.isMuted);
+          if (trackType === 'voice') {
+            setPlaybackRate(getGlobal().audioPlayer.playbackRate);
+          }
 
+          setPositionState({
+            duration: proxy.duration || 0,
+            playbackRate: proxy.playbackRate,
+            position: proxy.currentTime,
+          });
+          break;
+        }
+        case 'onRateChange': {
+          const { proxy } = controllerRef.current!;
           setPositionState({
             duration: proxy.duration || 0,
             playbackRate: proxy.playbackRate,
@@ -111,6 +126,8 @@ export default (
     isLast,
     requestNextTrack,
     requestPreviousTrack,
+    setPlaybackRate,
+    toggleMuted,
   } = controllerRef.current!;
   const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
 
@@ -179,6 +196,8 @@ export default (
     requestPreviousTrack,
     isFirst: isFirst(),
     isLast: isLast(),
+    setPlaybackRate,
+    toggleMuted,
   };
 };
 

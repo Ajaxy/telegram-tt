@@ -61,6 +61,7 @@ export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 export const ALL_CHATS_PRELOAD_DISABLED = false;
 
 export const DEFAULT_VOLUME = 1;
+export const DEFAULT_PLAYBACK_RATE = 1;
 
 export const ANIMATION_LEVEL_MIN = 0;
 export const ANIMATION_LEVEL_MED = 1;

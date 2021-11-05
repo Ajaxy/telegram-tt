@@ -7,7 +7,8 @@ import {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+
 import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle,
@@ -39,9 +40,19 @@ type StateProps = {
   sender?: ApiChat | ApiUser;
   chat?: ApiChat;
   volume: number;
+  playbackRate: number;
+  isMuted: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer' | 'setAudioPlayerVolume'>;
+type DispatchProps = Pick<GlobalActions, (
+  'focusMessage' |
+  'closeAudioPlayer' |
+  'setAudioPlayerVolume' |
+  'setAudioPlayerPlaybackRate' |
+  'setAudioPlayerMuted'
+)>;
+
+const FAST_PLAYBACK_RATE = 1.8;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -51,19 +62,32 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   sender,
   chat,
   volume,
+  playbackRate,
+  isMuted,
   setAudioPlayerVolume,
+  setAudioPlayerPlaybackRate,
+  setAudioPlayerMuted,
   focusMessage,
   closeAudioPlayer,
 }) => {
   const lang = useLang();
-  const { audio, voice } = getMessageContent(message);
-  const isVoice = Boolean(voice);
+  const { audio, voice, video } = getMessageContent(message);
+  const isVoice = Boolean(voice || video);
   const senderName = sender ? getSenderTitle(lang, sender) : undefined;
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
   const mediaMetadata = useMessageMediaMetadata(message, sender, chat);
 
   const {
-    playPause, stop, isPlaying, requestNextTrack, requestPreviousTrack, isFirst, isLast, setVolume,
+    playPause,
+    stop,
+    isPlaying,
+    requestNextTrack,
+    requestPreviousTrack,
+    isFirst,
+    isLast,
+    setVolume,
+    toggleMuted,
+    setPlaybackRate,
   } = useAudioPlayer(
     makeTrackId(message),
     getMediaDuration(message)!,
@@ -94,15 +118,33 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleVolumeChange = useCallback((value: number) => {
     setAudioPlayerVolume({ volume: value / 100 });
+    setAudioPlayerMuted({ isMuted: false });
+
     setVolume(value / 100);
-  }, [setAudioPlayerVolume, setVolume]);
+  }, [setAudioPlayerMuted, setAudioPlayerVolume, setVolume]);
+
+  const handleVolumeClick = useCallback(() => {
+    if (IS_TOUCH_ENV && !IS_IOS) return;
+    toggleMuted();
+    setAudioPlayerMuted({ isMuted: !isMuted });
+  }, [isMuted, setAudioPlayerMuted, toggleMuted]);
+
+  const handlePlaybackClick = useCallback(() => {
+    if (playbackRate === 1) {
+      setPlaybackRate(FAST_PLAYBACK_RATE);
+      setAudioPlayerPlaybackRate({ playbackRate: FAST_PLAYBACK_RATE });
+    } else {
+      setPlaybackRate(1);
+      setAudioPlayerPlaybackRate({ playbackRate: 1 });
+    }
+  }, [playbackRate, setAudioPlayerPlaybackRate, setPlaybackRate]);
 
   const volumeIcon = useMemo(() => {
-    if (volume === 0) return 'icon-muted';
+    if (volume === 0 || isMuted) return 'icon-muted';
     if (volume < 0.3) return 'icon-volume-1';
     if (volume < 0.6) return 'icon-volume-2';
     return 'icon-volume-3';
-  }, [volume]);
+  }, [volume, isMuted]);
 
   if (noUi) {
     return undefined;
@@ -152,22 +194,39 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         <RippleEffect />
       </div>
 
-      {!IS_IOS && (
+      <Button
+        round
+        className="player-button volume-button"
+        color="translucent"
+        size="smaller"
+        ariaLabel="Volume"
+        withClickPropagation
+      >
+        <i className={volumeIcon} onClick={handleVolumeClick} />
+        {!IS_IOS && (
+          <>
+            <div className="volume-slider-spacer" />
+            <div className="volume-slider">
+              <RangeSlider value={isMuted ? 0 : volume * 100} onChange={handleVolumeChange} />
+            </div>
+          </>
+        )}
+      </Button>
+
+      {isVoice && (
         <Button
           round
-          className="player-button volume-button"
+          className={buildClassName('playback-button', playbackRate !== 1 && 'applied')}
           color="translucent"
           size="smaller"
-          ariaLabel="Volume"
-          withClickPropagation
+          ariaLabel="Playback Rate"
+          ripple={!IS_SINGLE_COLUMN_LAYOUT}
+          onClick={handlePlaybackClick}
         >
-          <i className={volumeIcon} />
-          <div className="volume-slider-spacer" />
-          <div className="volume-slider">
-            <RangeSlider value={volume * 100} onChange={handleVolumeChange} />
-          </div>
+          <span className="playback-button-inner">2Х</span>
         </Button>
       )}
+
       <Button
         round
         className="player-close"
@@ -208,13 +267,18 @@ export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const sender = selectSender(global, message);
     const chat = selectChat(global, message.chatId);
-    const { volume } = global.audioPlayer;
+    const { volume, playbackRate, isMuted } = global.audioPlayer;
 
     return {
       sender,
       chat,
       volume,
+      playbackRate,
+      isMuted,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer', 'setAudioPlayerVolume']),
+  (setGlobal, actions): DispatchProps => pick(
+    actions,
+    ['focusMessage', 'closeAudioPlayer', 'setAudioPlayerVolume', 'setAudioPlayerPlaybackRate', 'setAudioPlayerMuted'],
+  ),
 )(AudioPlayer);
