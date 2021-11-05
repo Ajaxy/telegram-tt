@@ -14,7 +14,7 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import {
-  IS_ANDROID, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
+  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
@@ -279,7 +279,12 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     onUpdate(innerHTML === SAFARI_BR ? '' : innerHTML);
 
     // Reset focus on the input to remove any active styling when input is cleared
-    if (!IS_TOUCH_ENV && (!textContent || !textContent.length)) {
+    if (
+      !IS_TOUCH_ENV
+      && (!textContent || !textContent.length)
+      // When emojis are not supported, innerHTML contains an emoji img tag that doesn't exist in the textContext
+      && !(!IS_EMOJI_SUPPORTED && innerHTML.includes('emoji-small'))
+    ) {
       const selection = window.getSelection()!;
       if (selection) {
         inputRef.current!.blur();
