@@ -37,7 +37,7 @@ type OwnProps = {
 
 type StateProps = {
   recentVoterIds?: number[];
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
   serverTimeOffset: number;
 };
 

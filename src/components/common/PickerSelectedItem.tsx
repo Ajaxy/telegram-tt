@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../modules/selectors';
-import { getChatTitle, getUserFirstOrLastName, isChatPrivate } from '../../modules/helpers';
+import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
@@ -14,7 +14,7 @@ import Avatar from './Avatar';
 import './PickerSelectedItem.scss';
 
 type OwnProps = {
-  chatOrUserId?: number;
+  chatOrUserId?: string;
   icon?: string;
   title?: string;
   isMinimized?: boolean;
@@ -106,7 +106,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
-    const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
 
     return {
       chat,

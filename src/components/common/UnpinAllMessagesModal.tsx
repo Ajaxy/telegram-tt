@@ -7,7 +7,7 @@ import Button from '../ui/Button';
 
 export type OwnProps = {
   isOpen: boolean;
-  chatId?: number;
+  chatId?: string;
   pinnedMessagesCount?: number;
   onClose: () => void;
   onUnpin: () => void;

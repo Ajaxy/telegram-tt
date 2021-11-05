@@ -4,7 +4,7 @@ import { getDispatch } from '../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../api/types';
 
 import {
-  isChatArchived, getCanDeleteChat, isChatPrivate, isChatChannel,
+  isChatArchived, getCanDeleteChat, isUserId, isChatChannel,
 } from '../modules/helpers';
 import useLang from './useLang';
 
@@ -78,7 +78,7 @@ export default ({
       : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
 
     const actionDelete = {
-      title: isChatPrivate(chat.id)
+      title: isUserId(chat.id)
         ? lang('Delete')
         : lang(getCanDeleteChat(chat)
           ? 'DeleteChat'

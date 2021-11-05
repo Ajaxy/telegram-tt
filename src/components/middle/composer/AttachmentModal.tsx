@@ -31,9 +31,9 @@ export type OwnProps = {
   attachments: ApiAttachment[];
   caption: string;
   isReady?: boolean;
-  currentUserId?: number;
+  currentUserId?: string;
   groupChatMembers?: ApiChatMember[];
-  usersById?: Record<number, ApiUser>;
+  usersById?: Record<string, ApiUser>;
   recentEmojis: string[];
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;

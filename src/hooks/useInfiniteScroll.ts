@@ -6,29 +6,29 @@ import useForceUpdate from './useForceUpdate';
 import usePrevious from './usePrevious';
 
 type GetMore = (args: { direction: LoadMoreDirection }) => void;
-type LoadMoreBackwards = (args: { offsetId?: number }) => void;
+type LoadMoreBackwards = (args: { offsetId?: string | number }) => void;
 
 const DEFAULT_LIST_SLICE = 30;
 
-export default (
+export default <ListId extends string | number>(
   loadMoreBackwards?: LoadMoreBackwards,
-  listIds?: number[],
+  listIds?: ListId[],
   isDisabled = false,
   listSlice = DEFAULT_LIST_SLICE,
   forceFullPreload = false,
-): [number[]?, GetMore?] => {
+): [ListId[]?, GetMore?] => {
   const lastParamsRef = useRef<{
     direction?: LoadMoreDirection;
-    offsetId?: number;
+    offsetId?: ListId;
   }>();
 
-  const viewportIdsRef = useRef<number[] | undefined>((() => {
+  const viewportIdsRef = useRef<ListId[] | undefined>((() => {
     // Only run once to initialize
     if (!listIds || lastParamsRef.current) {
       return undefined;
     }
 
-    const { newViewportIds } = getViewportSlice(listIds, listIds[0], LoadMoreDirection.Forwards, listSlice);
+    const { newViewportIds } = getViewportSlice(listIds, LoadMoreDirection.Forwards, listSlice, listIds[0]);
     return newViewportIds;
   })());
 
@@ -38,7 +38,7 @@ export default (
   const prevIsDisabled = usePrevious(isDisabled);
   if (listIds && !isDisabled && (listIds !== prevListIds || isDisabled !== prevIsDisabled)) {
     const { offsetId = listIds[0], direction = LoadMoreDirection.Forwards } = lastParamsRef.current || {};
-    const { newViewportIds } = getViewportSlice(listIds, offsetId, direction, listSlice);
+    const { newViewportIds } = getViewportSlice(listIds, direction, listSlice, offsetId);
 
     if (!viewportIdsRef.current || !areSortedArraysEqual(viewportIdsRef.current, newViewportIds)) {
       viewportIdsRef.current = newViewportIds;
@@ -76,7 +76,7 @@ export default (
 
     const {
       newViewportIds, areSomeLocal, areAllLocal,
-    } = getViewportSlice(listIds, offsetId, direction, listSlice);
+    } = getViewportSlice(listIds, direction, listSlice, offsetId);
 
     if (areSomeLocal && !(viewportIds && areSortedArraysEqual(viewportIds, newViewportIds))) {
       viewportIdsRef.current = newViewportIds;
@@ -91,14 +91,14 @@ export default (
   return isDisabled ? [listIds] : [viewportIdsRef.current, getMore];
 };
 
-function getViewportSlice(
-  sourceIds: number[],
-  offsetId = 0,
+function getViewportSlice<ListId extends string | number>(
+  sourceIds: ListId[],
   direction: LoadMoreDirection,
   listSlice: number,
+  offsetId?: ListId,
 ) {
   const { length } = sourceIds;
-  const index = sourceIds.indexOf(offsetId);
+  const index = offsetId ? sourceIds.indexOf(offsetId) : 0;
   const isForwards = direction === LoadMoreDirection.Forwards;
   const indexForDirection = isForwards ? index : (index + 1) || length;
   const from = Math.max(0, indexForDirection - listSlice);

@@ -42,7 +42,7 @@ function replaceLocalTextSearch(
 
 export function updateLocalTextSearch(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   threadId: number,
   isActive: boolean,
   query?: string,
@@ -58,7 +58,7 @@ export function updateLocalTextSearch(
 
 export function replaceLocalTextSearchResults(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   threadId: number,
   foundIds?: number[],
   totalCount?: number,
@@ -78,7 +78,7 @@ export function replaceLocalTextSearchResults(
 
 export function updateLocalTextSearchResults(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   threadId: number,
   newFoundIds: number[],
   totalCount?: number,
@@ -95,7 +95,7 @@ export function updateLocalTextSearchResults(
 
 function replaceLocalMediaSearch(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   searchParams: MediaSearchParams,
 ): GlobalState {
   return {
@@ -111,7 +111,7 @@ function replaceLocalMediaSearch(
 
 export function updateLocalMediaSearchType(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   currentType: SharedMediaType | undefined,
 ): GlobalState {
   return replaceLocalMediaSearch(global, chatId, {
@@ -122,7 +122,7 @@ export function updateLocalMediaSearchType(
 
 export function replaceLocalMediaSearchResults(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   type: ApiMessageSearchType,
   foundIds?: number[],
   totalCount?: number,
@@ -143,7 +143,7 @@ export function replaceLocalMediaSearchResults(
 
 export function updateLocalMediaSearchResults(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   type: SharedMediaType,
   newFoundIds: number[],
   totalCount?: number,

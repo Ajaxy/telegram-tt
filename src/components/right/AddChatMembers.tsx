@@ -26,9 +26,9 @@ import Spinner from '../ui/Spinner';
 import './AddChatMembers.scss';
 
 export type OwnProps = {
-  chatId: number;
+  chatId: string;
   isActive: boolean;
-  onNextStep: (memberIds: number[]) => void;
+  onNextStep: (memberIds: string[]) => void;
   onClose: NoneToVoidFunction;
 };
 
@@ -36,15 +36,15 @@ type StateProps = {
   connectionState?: ApiUpdateConnectionStateType;
   isChannel?: boolean;
   members?: ApiChatMember[];
-  currentUserId?: number;
-  usersById: Record<number, ApiUser>;
-  chatsById: Record<number, ApiChat>;
-  localContactIds?: number[];
+  currentUserId?: string;
+  usersById: Record<string, ApiUser>;
+  chatsById: Record<string, ApiChat>;
+  localContactIds?: string[];
   searchQuery?: string;
   isLoading: boolean;
   isSearching?: boolean;
-  localUserIds?: number[];
-  globalUserIds?: number[];
+  localUserIds?: string[];
+  globalUserIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setUserSearchQuery'>;
@@ -69,7 +69,7 @@ const AddChatMembers: FC<OwnProps & StateProps & DispatchProps> = ({
   loadContactList,
 }) => {
   const lang = useLang();
-  const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const prevSelectedMemberIds = usePrevious(selectedMemberIds);
   const noPickerScrollRestore = prevSelectedMemberIds === selectedMemberIds;
 

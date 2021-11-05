@@ -20,12 +20,12 @@ import ManageGroupMembers from './ManageGroupMembers';
 import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate';
 
 export type OwnProps = {
-  chatId: number;
+  chatId: string;
   currentScreen: ManagementScreens;
-  selectedChatMemberId?: number;
+  selectedChatMemberId?: string;
   isPromotedByCurrentUser?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
-  onChatMemberSelect: (memberId: number, isPromotedByCurrentUser?: boolean) => void;
+  onChatMemberSelect: (memberId: string, isPromotedByCurrentUser?: boolean) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };

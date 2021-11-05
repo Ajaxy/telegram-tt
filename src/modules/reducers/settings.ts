@@ -48,7 +48,7 @@ export function addNotifyExceptions(
 }
 
 export function addNotifyException(
-  global: GlobalState, id: number, notifyException: NotifyException,
+  global: GlobalState, id: string, notifyException: NotifyException,
 ): GlobalState {
   return {
     ...global,
@@ -87,7 +87,7 @@ export function updateNotifySettings(
   }
 }
 
-export function addBlockedContact(global: GlobalState, contactId: number): GlobalState {
+export function addBlockedContact(global: GlobalState, contactId: string): GlobalState {
   global = updateUserBlockedState(global, contactId, true);
 
   return {
@@ -100,7 +100,7 @@ export function addBlockedContact(global: GlobalState, contactId: number): Globa
   };
 }
 
-export function removeBlockedContact(global: GlobalState, contactId: number): GlobalState {
+export function removeBlockedContact(global: GlobalState, contactId: string): GlobalState {
   global = updateUserBlockedState(global, contactId, false);
 
   return {

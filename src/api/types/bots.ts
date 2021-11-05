@@ -40,7 +40,7 @@ export interface ApiBotInlineSwitchPm {
 }
 
 export interface ApiBotCommand {
-  botId: number;
+  botId: string;
   command: string;
   description: string;
 }

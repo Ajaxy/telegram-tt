@@ -64,7 +64,7 @@ export interface ApiSessionData {
 }
 
 export type ApiNotifyException = {
-  chatId: number;
+  chatId: string;
   isMuted: boolean;
   isSilent?: boolean;
   shouldShowPreviews?: boolean;

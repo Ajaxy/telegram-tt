@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiChat,
@@ -10,7 +11,7 @@ import {
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
-  isInputPeerChannel, isInputPeerChat, isInputPeerUser, isPeerChat, isPeerUser,
+  buildApiPeerId, getApiChatIdFromMtpPeer, isPeerChat, isPeerUser,
 } from './peers';
 import { omitVirtualClassFields } from './helpers';
 import { getServerTime } from '../../../util/serverTime';
@@ -93,11 +94,13 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
   }
 
   return {
-    adminRights: omitVirtualClassFields(peerEntity.adminRights),
-    currentUserBannedRights: peerEntity instanceof GramJs.Channel
+    adminRights: peerEntity.adminRights ? omitVirtualClassFields(peerEntity.adminRights) : undefined,
+    currentUserBannedRights: peerEntity instanceof GramJs.Channel && peerEntity.bannedRights
       ? omitVirtualClassFields(peerEntity.bannedRights)
       : undefined,
-    defaultBannedRights: omitVirtualClassFields(peerEntity.defaultBannedRights),
+    defaultBannedRights: peerEntity.defaultBannedRights
+      ? omitVirtualClassFields(peerEntity.defaultBannedRights)
+      : undefined,
   };
 }
 
@@ -146,7 +149,7 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
 
 function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
   migratedTo?: {
-    chatId: number;
+    chatId: string;
     accessHash?: string;
   };
 } {
@@ -159,7 +162,7 @@ function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
       migratedTo: {
         chatId: getApiChatIdFromMtpPeer(peerEntity.migratedTo),
         ...(peerEntity.migratedTo instanceof GramJs.InputChannel && {
-          accessHash: peerEntity.migratedTo.accessHash.toString(),
+          accessHash: String(peerEntity.migratedTo.accessHash),
         }),
       },
     };
@@ -200,32 +203,11 @@ export function buildApiChatFromPreview(
   }
 
   return {
-    id: preview instanceof GramJs.User ? preview.id : -preview.id,
+    id: buildApiPeerId(preview.id, preview instanceof GramJs.User ? 'user' : 'chat'),
     type: getApiChatTypeFromPeerEntity(preview),
     title: preview instanceof GramJs.User ? getUserName(preview) : preview.title,
     ...buildApiChatFieldsFromPeerEntity(preview, isSupport),
   };
-}
-
-export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {
-  if (isPeerUser(peer)) {
-    return peer.userId;
-  } else if (isPeerChat(peer)) {
-    return -peer.chatId;
-  } else {
-    return -peer.channelId;
-  }
-}
-
-export function getApiChatIdFromInputMtpPeer(peer: GramJs.TypeInputPeer): number | undefined {
-  if (isInputPeerUser(peer)) {
-    return peer.userId;
-  } else if (isInputPeerChat(peer)) {
-    return -peer.chatId;
-  } else if (isInputPeerChannel(peer)) {
-    return -peer.channelId;
-  }
-  return undefined;
 }
 
 export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJs.TypeUser) {
@@ -268,7 +250,7 @@ function getUserName(user: GramJs.User) {
 
 export function buildAvatarHash(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
   if ('photoId' in photo) {
-    return photo.photoId.toString();
+    return String(photo.photoId);
   }
 
   return undefined;
@@ -279,14 +261,14 @@ export function buildChatMember(
 ): ApiChatMember | undefined {
   const userId = (member instanceof GramJs.ChannelParticipantBanned || member instanceof GramJs.ChannelParticipantLeft)
     ? getApiChatIdFromMtpPeer(member.peer)
-    : member.userId;
+    : buildApiPeerId(member.userId, 'user');
 
   return {
     userId,
-    inviterId: 'inviterId' in member ? member.inviterId : undefined,
+    inviterId: 'inviterId' in member ? buildApiPeerId(member.inviterId as BigInt.BigInteger, 'user') : undefined,
     joinedDate: 'date' in member ? member.date : undefined,
-    kickedByUserId: 'kickedBy' in member ? member.kickedBy : undefined,
-    promotedByUserId: 'promotedBy' in member ? member.promotedBy : undefined,
+    kickedByUserId: 'kickedBy' in member ? buildApiPeerId(member.kickedBy, 'user') : undefined,
+    promotedByUserId: 'promotedBy' in member ? buildApiPeerId(member.promotedBy, 'user') : undefined,
     bannedRights: 'bannedRights' in member ? omitVirtualClassFields(member.bannedRights) : undefined,
     adminRights: 'adminRights' in member ? omitVirtualClassFields(member.adminRights) : undefined,
     customTitle: 'rank' in member ? member.rank : undefined,
@@ -362,9 +344,9 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
       'excludeMuted', 'excludeRead', 'excludeArchived',
     ]),
     channels: filter.broadcasts,
-    pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
-    includedChatIds: filter.includePeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
-    excludedChatIds: filter.excludePeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
+    pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
+    includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
+    excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
   };
 }
 
@@ -382,8 +364,10 @@ export function buildApiChatFolderFromSuggested({
 
 export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
   return botInfos.reduce((botCommands, botInfo) => {
+    const botId = buildApiPeerId(botInfo.userId, 'user');
+
     botCommands = botCommands.concat(botInfo.commands.map((mtpCommand) => ({
-      botId: botInfo.userId,
+      botId,
       ...omitVirtualClassFields(mtpCommand),
     })));
 

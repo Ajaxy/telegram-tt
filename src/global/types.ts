@@ -50,7 +50,7 @@ import {
 export type MessageListType = 'thread' | 'pinned' | 'scheduled';
 
 export interface MessageList {
-  chatId: number;
+  chatId: string;
   threadId: number;
   type: MessageListType;
 }
@@ -86,7 +86,7 @@ export type GlobalState = {
   uiReadyState: 0 | 1 | 2;
   shouldSkipHistoryAnimations?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
-  currentUserId?: number;
+  currentUserId?: string;
   lastSyncTime?: number;
   serverTimeOffset: number;
   leftColumnWidth?: number;
@@ -112,31 +112,30 @@ export type GlobalState = {
   };
 
   contactList?: {
-    hash: number;
-    userIds: number[];
+    userIds: string[];
   };
 
   blocked: {
-    ids: number[];
+    ids: string[];
     totalCount: number;
   };
 
   users: {
-    byId: Record<number, ApiUser>;
+    byId: Record<string, ApiUser>;
     // TODO Remove
-    selectedId?: number;
+    selectedId?: string;
   };
 
   chats: {
     // TODO Replace with `Partial<Record>` to properly handle missing keys
-    byId: Record<number, ApiChat>;
+    byId: Record<string, ApiChat>;
     listIds: {
-      active?: number[];
-      archived?: number[];
+      active?: string[];
+      archived?: string[];
     };
     orderedPinnedIds: {
-      active?: number[];
-      archived?: number[];
+      active?: string[];
+      archived?: string[];
     };
     totalCount: {
       all?: number;
@@ -146,11 +145,11 @@ export type GlobalState = {
       active?: boolean;
       archived?: boolean;
     };
-    forDiscussionIds?: number[];
+    forDiscussionIds?: string[];
   };
 
   messages: {
-    byChatId: Record<number, {
+    byChatId: Record<string, {
       byId: Record<number, ApiMessage>;
       threadsById: Record<number, Thread>;
     }>;
@@ -164,9 +163,8 @@ export type GlobalState = {
   };
 
   scheduledMessages: {
-    byChatId: Record<number, {
+    byChatId: Record<string, {
       byId: Record<number, ApiMessage>;
-      hash: number;
     }>;
   };
 
@@ -178,7 +176,7 @@ export type GlobalState = {
   };
 
   focusedMessage?: {
-    chatId?: number;
+    chatId?: string;
     threadId?: number;
     messageId?: number;
     direction?: FocusDirection;
@@ -187,7 +185,7 @@ export type GlobalState = {
   };
 
   selectedMessages?: {
-    chatId: number;
+    chatId: string;
     messageIds: number[];
   };
 
@@ -202,23 +200,23 @@ export type GlobalState = {
   stickers: {
     setsById: Record<string, ApiStickerSet>;
     added: {
-      hash?: number;
+      hash?: string;
       setIds?: string[];
     };
     recent: {
-      hash?: number;
+      hash?: string;
       stickers: ApiSticker[];
     };
     favorite: {
-      hash?: number;
+      hash?: string;
       stickers: ApiSticker[];
     };
     greeting: {
-      hash?: number;
+      hash?: string;
       stickers: ApiSticker[];
     };
     featured: {
-      hash?: number;
+      hash?: string;
       setIds?: string[];
     };
     search: {
@@ -228,7 +226,7 @@ export type GlobalState = {
     forEmoji: {
       emoji?: string;
       stickers?: ApiSticker[];
-      hash?: number;
+      hash?: string;
     };
   };
 
@@ -237,7 +235,7 @@ export type GlobalState = {
 
   gifs: {
     saved: {
-      hash?: number;
+      hash?: string;
       gifs?: ApiVideo[];
     };
     search: {
@@ -255,20 +253,20 @@ export type GlobalState = {
   globalSearch: {
     query?: string;
     date?: number;
-    recentlyFoundChatIds?: number[];
+    recentlyFoundChatIds?: string[];
     currentContent?: GlobalSearchContent;
-    chatId?: number;
+    chatId?: string;
     fetchingStatus?: {
       chats?: boolean;
       messages?: boolean;
     };
     localResults?: {
-      chatIds?: number[];
-      userIds?: number[];
+      chatIds?: string[];
+      userIds?: string[];
     };
     globalResults?: {
-      chatIds?: number[];
-      userIds?: number[];
+      chatIds?: string[];
+      userIds?: string[];
     };
     resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
       totalCount?: number;
@@ -280,8 +278,8 @@ export type GlobalState = {
   userSearch: {
     query?: string;
     fetchingStatus?: boolean;
-    localUserIds?: number[];
-    globalUserIds?: number[];
+    localUserIds?: string[];
+    globalUserIds?: string[];
   };
 
   localTextSearch: {
@@ -297,7 +295,7 @@ export type GlobalState = {
   };
 
   localMediaSearch: {
-    byChatId: Record<number, {
+    byChatId: Record<string, {
       currentType?: SharedMediaType;
       resultsByType?: Partial<Record<SharedMediaType, {
         totalCount?: number;
@@ -309,7 +307,7 @@ export type GlobalState = {
 
   management: {
     progress?: ManagementProgress;
-    byChatId: Record<number, {
+    byChatId: Record<string, {
       isActive: boolean;
       isUsernameAvailable?: boolean;
       error?: string;
@@ -317,30 +315,28 @@ export type GlobalState = {
   };
 
   mediaViewer: {
-    chatId?: number;
+    chatId?: string;
     threadId?: number;
     messageId?: number;
-    avatarOwnerId?: number;
+    avatarOwnerId?: string;
     profilePhotoIndex?: number;
     origin?: MediaViewerOrigin;
   };
 
   audioPlayer: {
-    chatId?: number;
+    chatId?: string;
     messageId?: number;
     threadId?: number;
     origin?: AudioOrigin;
   };
 
   topPeers: {
-    hash?: number;
-    userIds?: number[];
+    userIds?: string[];
     lastRequestedAt?: number;
   };
 
   topInlineBots: {
-    hash?: number;
-    userIds?: number[];
+    userIds?: string[];
     lastRequestedAt?: number;
   };
 
@@ -348,20 +344,20 @@ export type GlobalState = {
 
   forwardMessages: {
     isModalShown?: boolean;
-    fromChatId?: number;
+    fromChatId?: string;
     messageIds?: number[];
-    toChatId?: number;
+    toChatId?: string;
   };
 
   pollResults: {
-    chatId?: number;
+    chatId?: string;
     messageId?: number;
-    voters?: Record<string, number[]>;
+    voters?: Record<string, string[]>; // TODO Rename to `voterIds`
     offsets?: Record<string, string>;
   };
 
   payment: {
-    chatId?: number;
+    chatId?: string;
     messageId?: number;
     step?: PaymentStep;
     shippingOptions?: ShippingOption[];
@@ -379,7 +375,7 @@ export type GlobalState = {
       isTest?: boolean;
     };
     nativeProvider?: string;
-    providerId?: number;
+    providerId?: string;
     nativeParams?: {
       needCardholderName: boolean;
       needCountry: boolean;
@@ -445,7 +441,7 @@ export type GlobalState = {
   openedStickerSetShortName?: string;
 
   activeDownloads: {
-    byChatId: Record<number, number[]>;
+    byChatId: Record<string, number[]>;
   };
 
   shouldShowContextMenuHint?: boolean;

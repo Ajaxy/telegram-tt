@@ -30,7 +30,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  voters?: number[];
+  voters?: string[];
   offset: string;
 };
 
@@ -78,7 +78,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
     setIsLoading(false);
   }, [voters]);
 
-  const handleMemberClick = useCallback((id: number) => {
+  const handleMemberClick = useCallback((id: string) => {
     openChat({ id });
     closePollResults();
   }, [closePollResults, openChat]);

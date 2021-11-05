@@ -23,7 +23,7 @@ import {
 } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
-  isChatPrivate,
+  isUserId,
   getMessageKey,
   getChatTitle,
   getSenderTitle,
@@ -68,7 +68,7 @@ const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   messageListType: MessageListType;
   isReady?: boolean;
@@ -85,7 +85,7 @@ type StateProps = {
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
-  chatsById?: Record<number, ApiChat>;
+  chatsById?: Record<string, ApiChat>;
   messagesCount?: number;
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
@@ -348,7 +348,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <>
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, true)}
         <div className="chat-info-wrapper" onClick={handleHeaderClick}>
-          {isChatPrivate(chatId) ? (
+          {isUserId(chatId) ? (
             <PrivateChatInfo
               userId={chatId}
               typingStatus={typingStatus}

@@ -36,11 +36,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
   sender?: ApiUser | ApiChat;
-  targetUserIds?: number[];
+  targetUserIds?: string[];
   targetMessage?: ApiMessage;
-  targetChatId?: number;
+  targetChatId?: string;
   isFocused: boolean;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;

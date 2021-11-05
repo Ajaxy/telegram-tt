@@ -47,7 +47,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  currentChatId?: number;
+  currentChatId?: string;
   replyingToId?: number;
   noTabCapture?: boolean;
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];

@@ -32,7 +32,7 @@ export type OwnProps = {
 
 type StateProps = {
   currentContent?: GlobalSearchContent;
-  chatId?: number;
+  chatId?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, ('setGlobalSearchContent' | 'setGlobalSearchDate')>;

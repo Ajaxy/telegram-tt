@@ -5,10 +5,11 @@ import { ApiChat, ApiUser } from '../../types';
 
 import localDb from '../localDb';
 import { invokeRequest } from './client';
-import { buildInputPeer, calculateResultHash, generateRandomBigInt } from '../gramjsBuilders';
+import { buildInputPeer, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildApiPeerId } from '../apiBuilders/peers';
 
 export function init() {
 }
@@ -17,7 +18,7 @@ export function answerCallbackButton(
   {
     chatId, accessHash, messageId, data,
   }: {
-    chatId: number; accessHash?: string; messageId: number; data: string;
+    chatId: string; accessHash?: string; messageId: number; data: string;
   },
 ) {
   return invokeRequest(new GramJs.messages.GetBotCallbackAnswer({
@@ -27,9 +28,8 @@ export function answerCallbackButton(
   }));
 }
 
-export async function fetchTopInlineBots({ hash = 0 }: { hash?: number }) {
+export async function fetchTopInlineBots() {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
-    hash,
     botsInline: true,
   }));
 
@@ -41,7 +41,6 @@ export async function fetchTopInlineBots({ hash = 0 }: { hash?: number }) {
   const ids = users.map(({ id }) => id);
 
   return {
-    hash: calculateResultHash(ids),
     ids,
     users,
   };
@@ -160,7 +159,7 @@ function getInlineBotResultsNextOffset(username: string, nextOffset?: string) {
 }
 
 function addUserToLocalDb(user: GramJs.User) {
-  localDb.users[user.id] = user;
+  localDb.users[buildApiPeerId(user.id, 'user')] = user;
 }
 
 function addDocumentToLocalDb(document: GramJs.Document) {

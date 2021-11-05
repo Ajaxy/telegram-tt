@@ -60,13 +60,13 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_').map(Number);
+      const [chatId, messageId] = id.split('_');
 
-      return globalMessagesByChatId[chatId]?.byId[messageId];
+      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleSelectMedia = useCallback((messageId: number, chatId: number) => {
+  const handleSelectMedia = useCallback((messageId: number, chatId: string) => {
     openMediaViewer({
       chatId,
       messageId,

@@ -74,23 +74,23 @@ export interface ISettings extends NotifySettings, Record<string, any> {
 
 export interface ApiPrivacySettings {
   visibility: PrivacyVisibility;
-  allowUserIds: number[];
-  allowChatIds: number[];
-  blockUserIds: number[];
-  blockChatIds: number[];
+  allowUserIds: string[];
+  allowChatIds: string[];
+  blockUserIds: string[];
+  blockChatIds: string[];
 }
 
-export interface IInputPrivacyContact {
-  id: number;
+export interface InputPrivacyContact {
+  id: string;
   accessHash?: string;
 }
 
-export interface IInputPrivacyRules {
+export interface InputPrivacyRules {
   visibility: PrivacyVisibility;
-  allowedUsers?: IInputPrivacyContact[];
-  allowedChats?: IInputPrivacyContact[];
-  blockedUsers?: IInputPrivacyContact[];
-  blockedChats?: IInputPrivacyContact[];
+  allowedUsers?: InputPrivacyContact[];
+  allowedChats?: InputPrivacyContact[];
+  blockedUsers?: InputPrivacyContact[];
+  blockedChats?: InputPrivacyContact[];
 }
 
 export type IAnchorPosition = {
@@ -324,7 +324,7 @@ export type EmojiKeywords = {
 };
 
 export type InlineBotSettings = {
-  id: number;
+  id: string;
   help?: string;
   query?: string;
   offset?: string;

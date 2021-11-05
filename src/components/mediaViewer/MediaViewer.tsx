@@ -74,10 +74,10 @@ import PanZoom from './PanZoom';
 import './MediaViewer.scss';
 
 type StateProps = {
-  chatId?: number;
+  chatId?: string;
   threadId?: number;
   messageId?: number;
-  senderId?: number;
+  senderId?: string;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
   profilePhotoIndex?: number;
@@ -139,7 +139,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   /* Animation */
   const animationKey = useRef<number>();
-  const prevSenderId = usePrevious<number | undefined>(senderId);
+  const prevSenderId = usePrevious<string | undefined>(senderId);
   if (isOpen && (!prevSenderId || prevSenderId !== senderId || !animationKey.current)) {
     animationKey.current = selectedMediaMessageIndex;
   }

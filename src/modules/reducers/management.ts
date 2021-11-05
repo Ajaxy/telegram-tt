@@ -17,7 +17,7 @@ export function updateManagementProgress(global: GlobalState, progress: Manageme
   };
 }
 
-export function updateManagement(global: GlobalState, chatId: number, update: Partial<ManagementState>): GlobalState {
+export function updateManagement(global: GlobalState, chatId: string, update: Partial<ManagementState>): GlobalState {
   return {
     ...global,
     management: {

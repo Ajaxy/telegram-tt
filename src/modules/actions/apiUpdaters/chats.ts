@@ -164,7 +164,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       ids.forEach((id) => {
-        const chatId = 'channelId' in update ? update.channelId : selectCommonBoxChatId(global, id);
+        const chatId = ('channelId' in update ? update.channelId : selectCommonBoxChatId(global, id))!;
         const chat = selectChat(global, chatId);
         if (chat?.unreadMentionsCount) {
           global = updateChat(global, chatId, {

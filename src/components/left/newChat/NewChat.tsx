@@ -29,7 +29,7 @@ const NewChat: FC<OwnProps> = ({
   onContentChange,
   onReset,
 }) => {
-  const [newChatMemberIds, setNewChatMemberIds] = useState<number[]>([]);
+  const [newChatMemberIds, setNewChatMemberIds] = useState<string[]>([]);
 
   const handleNextStep = useCallback(() => {
     onContentChange(isChannel ? LeftColumnContent.NewChannelStep2 : LeftColumnContent.NewGroupStep2);

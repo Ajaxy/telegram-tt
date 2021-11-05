@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
 import {
-  ApiPrivacyKey, PrivacyVisibility, ProfileEditProgress, IInputPrivacyRules, IInputPrivacyContact,
+  ApiPrivacyKey, PrivacyVisibility, ProfileEditProgress, InputPrivacyRules, InputPrivacyContact,
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
@@ -14,7 +14,7 @@ import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
   addNotifyExceptions,
 } from '../../reducers';
-import { isChatPrivate } from '../../helpers';
+import { isUserId } from '../../helpers';
 
 addReducer('updateProfile', (global, actions, payload) => {
   const {
@@ -109,7 +109,7 @@ addReducer('checkUsername', (global, actions, payload) => {
 
 addReducer('loadWallpapers', () => {
   (async () => {
-    const result = await callApi('fetchWallpapers', 0);
+    const result = await callApi('fetchWallpapers');
     if (!result) {
       return;
     }
@@ -235,7 +235,7 @@ addReducer('blockContact', (global, actions, payload) => {
 addReducer('unblockContact', (global, actions, payload) => {
   const { contactId } = payload!;
   let accessHash: string | undefined;
-  const isPrivate = isChatPrivate(contactId);
+  const isPrivate = isUserId(contactId);
 
   if (isPrivate) {
     const user = selectUser(global, contactId);
@@ -479,22 +479,22 @@ function buildInputPrivacyRules(global: GlobalState, {
   deniedIds,
 }: {
   visibility: PrivacyVisibility;
-  allowedIds: number[];
-  deniedIds: number[];
-}): IInputPrivacyRules {
+  allowedIds: string[];
+  deniedIds: string[];
+}): InputPrivacyRules {
   const {
     users: { byId: usersById },
     chats: { byId: chatsById },
   } = global;
 
-  const rules: IInputPrivacyRules = {
+  const rules: InputPrivacyRules = {
     visibility,
   };
-  let users: IInputPrivacyContact[];
-  let chats: IInputPrivacyContact[];
+  let users: InputPrivacyContact[];
+  let chats: InputPrivacyContact[];
 
-  const collectUsers = (userId: number) => {
-    if (!isChatPrivate(userId)) {
+  const collectUsers = (userId: string) => {
+    if (!isUserId(userId)) {
       return undefined;
     }
     const { id, accessHash } = usersById[userId] || {};
@@ -505,8 +505,8 @@ function buildInputPrivacyRules(global: GlobalState, {
     return { id, accessHash };
   };
 
-  const collectChats = (userId: number) => {
-    if (isChatPrivate(userId)) {
+  const collectChats = (userId: string) => {
+    if (isUserId(userId)) {
       return undefined;
     }
     const chat = chatsById[userId];
@@ -515,8 +515,8 @@ function buildInputPrivacyRules(global: GlobalState, {
   };
 
   if (visibility === 'contacts' || visibility === 'nobody') {
-    users = allowedIds.map(collectUsers).filter(Boolean) as IInputPrivacyContact[];
-    chats = allowedIds.map(collectChats).filter(Boolean) as IInputPrivacyContact[];
+    users = allowedIds.map(collectUsers).filter(Boolean) as InputPrivacyContact[];
+    chats = allowedIds.map(collectChats).filter(Boolean) as InputPrivacyContact[];
 
     if (users.length > 0) {
       rules.allowedUsers = users;
@@ -527,8 +527,8 @@ function buildInputPrivacyRules(global: GlobalState, {
   }
 
   if (visibility === 'everybody' || visibility === 'contacts') {
-    users = deniedIds.map(collectUsers).filter(Boolean) as IInputPrivacyContact[];
-    chats = deniedIds.map(collectChats).filter(Boolean) as IInputPrivacyContact[];
+    users = deniedIds.map(collectUsers).filter(Boolean) as InputPrivacyContact[];
+    chats = deniedIds.map(collectChats).filter(Boolean) as InputPrivacyContact[];
 
     if (users.length > 0) {
       rules.blockedUsers = users;

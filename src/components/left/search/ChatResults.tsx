@@ -33,16 +33,16 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  currentUserId?: number;
-  localContactIds?: number[];
-  localChatIds?: number[];
-  localUserIds?: number[];
-  globalChatIds?: number[];
-  globalUserIds?: number[];
+  currentUserId?: string;
+  localContactIds?: string[];
+  localChatIds?: string[];
+  localUserIds?: string[];
+  globalChatIds?: string[];
+  globalUserIds?: string[];
   foundIds?: string[];
-  globalMessagesByChatId?: Record<number, { byId: Record<number, ApiMessage> }>;
-  chatsById: Record<number, ApiChat>;
-  usersById: Record<number, ApiUser>;
+  globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
   fetchingStatus?: { chats?: boolean; messages?: boolean };
   lastSyncTime?: number;
 };
@@ -79,7 +79,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
 
   const handleChatClick = useCallback(
-    (id: number) => {
+    (id: string) => {
       openChat({ id, shouldReplaceHistory: true });
 
       if (id !== currentUserId) {
@@ -93,7 +93,7 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
     [currentUserId, openChat, addRecentlyFoundChatId, onReset],
   );
 
-  const handlePickerItemClick = useCallback((id: number) => {
+  const handlePickerItemClick = useCallback((id: string) => {
     setGlobalSearchChatId({ id });
   }, [setGlobalSearchChatId]);
 
@@ -142,9 +142,9 @@ const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return foundIds
       .map((id) => {
-        const [chatId, messageId] = id.split('_').map(Number);
+        const [chatId, messageId] = id.split('_');
 
-        return globalMessagesByChatId?.[chatId]?.byId[messageId];
+        return globalMessagesByChatId?.[chatId]?.byId[Number(messageId)];
       })
       .filter<ApiMessage>(Boolean as any)
       .sort((a, b) => b.date - a.date);

@@ -24,9 +24,9 @@ type OwnProps = {
 };
 
 type StateProps = {
-  topUserIds?: number[];
-  usersById: Record<number, ApiUser>;
-  recentlyFoundChatIds?: number[];
+  topUserIds?: string[];
+  usersById: Record<string, ApiUser>;
+  recentlyFoundChatIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -58,16 +58,13 @@ const RecentContacts: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useHorizontalScroll(topUsersRef.current, !topUserIds);
 
-  const handleClick = useCallback(
-    (id: number) => {
-      openChat({ id, shouldReplaceHistory: true });
-      onReset();
-      setTimeout(() => {
-        addRecentlyFoundChatId({ id });
-      }, SEARCH_CLOSE_TIMEOUT_MS);
-    },
-    [openChat, addRecentlyFoundChatId, onReset],
-  );
+  const handleClick = useCallback((id: string) => {
+    openChat({ id, shouldReplaceHistory: true });
+    onReset();
+    setTimeout(() => {
+      addRecentlyFoundChatId({ id });
+    }, SEARCH_CLOSE_TIMEOUT_MS);
+  }, [openChat, addRecentlyFoundChatId, onReset]);
 
   const lang = useLang();
 

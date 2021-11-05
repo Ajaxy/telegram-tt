@@ -13,7 +13,7 @@ import Checkbox from '../../ui/Checkbox';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };

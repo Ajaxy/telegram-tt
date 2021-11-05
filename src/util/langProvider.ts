@@ -86,7 +86,7 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
 };
 
 export async function getTranslationForLangString(langCode: string, key: string) {
-  let translateString = await cacheApi.fetch(
+  let translateString: ApiLangString | undefined = await cacheApi.fetch(
     LANG_CACHE_NAME,
     `${DEFAULT_LANG_PACK}_${langCode}_${key}`,
     cacheApi.Type.Json,
@@ -179,7 +179,7 @@ async function fetchRemote(langCode: string): Promise<ApiLangPack | undefined> {
 
 async function fetchRemoteString(
   remoteLangPack: typeof LANG_PACKS[number], langCode: string, key: string,
-): Promise<string | undefined> {
+): Promise<ApiLangString | undefined> {
   const remote = await callApi('fetchLangStrings', {
     langPack: remoteLangPack,
     langCode,

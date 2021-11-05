@@ -9,7 +9,7 @@ import {
   getChatTitle,
   getUserColorKey,
   getUserFullName,
-  isChatPrivate,
+  isUserId,
   isChatWithRepliesBot,
   isDeletedUser,
 } from '../../modules/helpers';
@@ -87,7 +87,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
   } else if (!imageSrc && chat) {
     const title = getChatTitle(lang, chat);
-    content = title && getFirstLetters(title, isChatPrivate(chat.id) ? 2 : 1);
+    content = title && getFirstLetters(title, isUserId(chat.id) ? 2 : 1);
   } else {
     content = (
       <div className="spinner-wrapper">

@@ -7,7 +7,7 @@ import { ApiChat, ApiUser } from '../../../api/types';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
-import { isChatPrivate, getPrivateChatUserId, selectIsChatMuted } from '../../../modules/helpers';
+import { isUserId, getPrivateChatUserId, selectIsChatMuted } from '../../../modules/helpers';
 import {
   selectChat, selectUser, selectIsChatPinned, selectNotifySettings, selectNotifyExceptions,
 } from '../../../modules/selectors';
@@ -20,9 +20,9 @@ import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   withUsername?: boolean;
-  onClick: (id: number) => void;
+  onClick: (id: string) => void;
 };
 
 type StateProps = {
@@ -70,7 +70,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       contextActions={contextActions}
       buttonRef={buttonRef}
     >
-      {isChatPrivate(chatId) ? (
+      {isUserId(chatId) ? (
         <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" />
       ) : (
         <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />

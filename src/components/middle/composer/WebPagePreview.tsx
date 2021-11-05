@@ -22,7 +22,7 @@ import Button from '../../ui/Button';
 import './WebPagePreview.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   messageText: string;
   disabled?: boolean;

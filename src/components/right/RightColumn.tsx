@@ -35,9 +35,9 @@ import './RightColumn.scss';
 
 type StateProps = {
   contentKey?: RightColumnContent;
-  chatId?: number;
+  chatId?: string;
   threadId?: number;
-  currentProfileUserId?: number;
+  currentProfileUserId?: string;
   isChatSelected: boolean;
   shouldSkipHistoryAnimations?: boolean;
 };
@@ -79,7 +79,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const { width: windowWidth } = useWindowSize();
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
   const [managementScreen, setManagementScreen] = useState<ManagementScreens>(ManagementScreens.Initial);
-  const [selectedChatMemberId, setSelectedChatMemberId] = useState<number | undefined>();
+  const [selectedChatMemberId, setSelectedChatMemberId] = useState<string | undefined>();
   const [isPromotedByCurrentUser, setIsPromotedByCurrentUser] = useState<boolean | undefined>();
   const isScrolledDown = profileState !== ProfileState.Profile;
 
@@ -173,7 +173,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     setIsPromotedByCurrentUser(isPromoted);
   }, []);
 
-  const handleAppendingChatMembers = useCallback((memberIds: number[]) => {
+  const handleAppendingChatMembers = useCallback((memberIds: string[]) => {
     addChatMembers({ chatId, memberIds });
   }, [addChatMembers, chatId]);
 

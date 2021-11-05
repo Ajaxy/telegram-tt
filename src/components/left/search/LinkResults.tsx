@@ -61,13 +61,13 @@ const LinkResults: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_').map(Number);
+      const [chatId, messageId] = id.split('_');
 
-      return globalMessagesByChatId[chatId]?.byId[messageId];
+      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleMessageFocus = useCallback((messageId: number, chatId: number) => {
+  const handleMessageFocus = useCallback((messageId: number, chatId: string) => {
     focusMessage({ chatId, messageId });
   }, [focusMessage]);
 

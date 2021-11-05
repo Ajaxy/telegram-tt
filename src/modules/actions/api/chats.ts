@@ -56,7 +56,7 @@ const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
 addReducer('preloadTopChatMessages', (global, actions) => {
   (async () => {
-    const preloadedChatIds: number[] = [];
+    const preloadedChatIds: string[] = [];
 
     for (let i = 0; i < TOP_CHAT_MESSAGES_PRELOAD_LIMIT; i++) {
       await pause(TOP_CHAT_MESSAGES_PRELOAD_INTERVAL);
@@ -276,8 +276,8 @@ addReducer('createChannel', (global, actions, payload) => {
     title, about, photo, memberIds,
   } = payload!;
 
-  const members = (memberIds as number[])
-    .map((id: number) => selectUser(global, id))
+  const members = (memberIds as string[])
+    .map((id) => selectUser(global, id))
     .filter<ApiUser>(Boolean as any);
 
   void createChannel(title, members, about, photo);
@@ -299,7 +299,7 @@ addReducer('joinChannel', (global, actions, payload) => {
 
 addReducer('deleteChatUser', (global, actions, payload) => {
   (async () => {
-    const { chatId, userId }: { chatId: number; userId: number } = payload!;
+    const { chatId, userId }: { chatId: string; userId: string } = payload!;
     const chat = selectChat(global, chatId);
     const user = selectUser(global, userId);
     if (!chat || !user) {
@@ -316,7 +316,7 @@ addReducer('deleteChatUser', (global, actions, payload) => {
 
 addReducer('deleteChat', (global, actions, payload) => {
   (async () => {
-    const { chatId }: { chatId: number } = payload!;
+    const { chatId }: { chatId: string } = payload!;
     const chat = selectChat(global, chatId);
     if (!chat) {
       return;
@@ -374,8 +374,8 @@ addReducer('deleteChannel', (global, actions, payload) => {
 
 addReducer('createGroupChat', (global, actions, payload) => {
   const { title, memberIds, photo } = payload!;
-  const members = (memberIds as number[])
-    .map((id: number) => selectUser(global, id))
+  const members = (memberIds as string[])
+    .map((id) => selectUser(global, id))
     .filter<ApiUser>(Boolean as any);
 
   void createGroupChat(title, members, photo);
@@ -824,14 +824,14 @@ addReducer('loadGroupsForDiscussion', () => {
       }
 
       return result;
-    }, {} as Record<number, ApiChat>);
+    }, {} as Record<string, ApiChat>);
 
     const global = addChats(getGlobal(), addedById);
     setGlobal({
       ...global,
       chats: {
         ...global.chats,
-        forDiscussionIds: Object.keys(addedById).map(Number),
+        forDiscussionIds: Object.keys(addedById),
       },
     });
   })();
@@ -943,7 +943,7 @@ addReducer('loadMoreMembers', (global) => {
 addReducer('addChatMembers', (global, actions, payload) => {
   const { chatId, memberIds } = payload;
   const chat = selectChat(global, chatId);
-  const users = (memberIds as number[]).map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any);
+  const users = (memberIds as string[]).map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any);
 
   if (!chat || !users.length) {
     return;
@@ -972,7 +972,7 @@ addReducer('deleteChatMember', (global, actions, payload) => {
   })();
 });
 
-async function loadChats(listType: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
+async function loadChats(listType: 'active' | 'archived', offsetId?: string, offsetDate?: number) {
   let global = getGlobal();
 
   const result = await callApi('fetchChats', {
@@ -1001,13 +1001,13 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
   global = updateChatListIds(global, listType, chatIds);
   global = updateChatListSecondaryInfo(global, listType, result);
 
-  Object.keys(result.draftsById).map(Number).forEach((chatId) => {
+  Object.keys(result.draftsById).forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
     );
   });
 
-  Object.keys(result.replyingToById).map(Number).forEach((chatId) => {
+  Object.keys(result.replyingToById).forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
     );
@@ -1233,7 +1233,7 @@ async function openCommentsByUsername(
   const global = getGlobal();
 
   const threadInfo = selectThreadInfo(global, chat.id, messageId);
-  let discussionChatId: number | undefined;
+  let discussionChatId: string | undefined;
 
   if (!threadInfo) {
     const result = await callApi('requestThreadInfoUpdate', { chat, threadId: messageId });

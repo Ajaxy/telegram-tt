@@ -16,7 +16,7 @@ import './Media.scss';
 type OwnProps = {
   message: ApiMessage;
   idPrefix?: string;
-  onClick?: (messageId: number, chatId: number) => void;
+  onClick?: (messageId: number, chatId: string) => void;
 };
 
 const Media: FC<OwnProps> = ({ message, idPrefix = 'shared-media', onClick }) => {

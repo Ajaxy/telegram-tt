@@ -25,7 +25,7 @@ import Avatar from '../../common/Avatar';
 import { isChatChannel } from '../../../modules/helpers';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;
@@ -33,9 +33,9 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  chatsByIds: Record<number, ApiChat>;
+  chatsByIds: Record<string, ApiChat>;
   linkedChat?: ApiChat;
-  forDiscussionIds?: number[];
+  forDiscussionIds?: string[];
   isChannel?: boolean;
 };
 
@@ -55,7 +55,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   linkDiscussionGroup,
   unlinkDiscussionGroup,
 }) => {
-  const [linkedGroupId, setLinkedGroupId] = useState<number>();
+  const [linkedGroupId, setLinkedGroupId] = useState<string>();
   const [animationData, setAnimationData] = useState<Record<string, any>>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
@@ -89,7 +89,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
     linkDiscussionGroup({ channelId: chatId, chatId: linkedGroupId });
   }, [closeConfirmLinkGroupDialog, linkDiscussionGroup, chatId, linkedGroupId]);
 
-  const onDiscussionClick = (groupId: number) => {
+  const onDiscussionClick = (groupId: string) => {
     setLinkedGroupId(groupId);
     openConfirmLinkGroupDialog();
   };

@@ -195,7 +195,7 @@ addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode 
   })();
 });
 
-async function loadStickerSets(hash = 0) {
+async function loadStickerSets(hash?: string) {
   const addedStickers = await callApi('fetchStickerSets', { hash });
   if (!addedStickers) {
     return;
@@ -209,7 +209,7 @@ async function loadStickerSets(hash = 0) {
   ));
 }
 
-async function loadRecentStickers(hash = 0) {
+async function loadRecentStickers(hash?: string) {
   const recentStickers = await callApi('fetchRecentStickers', { hash });
   if (!recentStickers) {
     return;
@@ -226,7 +226,7 @@ async function loadRecentStickers(hash = 0) {
   });
 }
 
-async function loadFavoriteStickers(hash = 0) {
+async function loadFavoriteStickers(hash?: string) {
   const favoriteStickers = await callApi('fetchFavoriteStickers', { hash });
   if (!favoriteStickers) {
     return;
@@ -243,7 +243,7 @@ async function loadFavoriteStickers(hash = 0) {
   });
 }
 
-async function loadFeaturedStickers(hash = 0) {
+async function loadFeaturedStickers(hash?: string) {
   const featuredStickers = await callApi('fetchFeaturedStickers', { hash });
   if (!featuredStickers) {
     return;
@@ -258,8 +258,10 @@ async function loadFeaturedStickers(hash = 0) {
 }
 
 async function loadStickers(stickerSetId: string, accessHash: string, stickerSetShortName?: string) {
-  const stickerSet = await callApi('fetchStickers',
-    { stickerSetShortName, stickerSetId, accessHash });
+  const stickerSet = await callApi(
+    'fetchStickers',
+    { stickerSetShortName, stickerSetId, accessHash },
+  );
   if (!stickerSet) {
     return;
   }
@@ -365,7 +367,7 @@ addReducer('openStickerSetShortName', (global, actions, payload) => {
   };
 });
 
-async function searchStickers(query: string, hash = 0) {
+async function searchStickers(query: string, hash?: string) {
   const result = await callApi('searchStickers', { query, hash });
 
   if (!result) {
@@ -406,7 +408,7 @@ async function searchGifs(query: string, offset?: string) {
   setGlobal(updateGifSearch(getGlobal(), !offset, result.gifs, result.nextOffset));
 }
 
-async function loadSavedGifs(hash = 0) {
+async function loadSavedGifs(hash?: string) {
   const savedGifs = await callApi('fetchSavedGifs', { hash });
   if (!savedGifs) {
     return;
@@ -423,7 +425,7 @@ async function loadSavedGifs(hash = 0) {
   });
 }
 
-async function loadStickersForEmoji(emoji: string, hash = 0) {
+async function loadStickersForEmoji(emoji: string, hash?: string) {
   let global = getGlobal();
   setGlobal({
     ...global,

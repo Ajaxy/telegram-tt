@@ -15,10 +15,10 @@ export default function useProfileViewportIds(
   tabType: ProfileTabType,
   mediaSearchType?: SharedMediaType,
   groupChatMembers?: ApiChatMember[],
-  usersById?: Record<number, ApiUser>,
+  usersById?: Record<string, ApiUser>,
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
-  chatId?: number,
+  chatId?: string,
   lastSyncTime?: number,
   serverTimeOffset = 0,
 ) {
@@ -56,7 +56,7 @@ export default function useProfileViewportIds(
     'voice', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
   );
 
-  let viewportIds: number[] | undefined;
+  let viewportIds: number[] | string[] | undefined;
   let getMore: AnyToVoidFunction | undefined;
   let noProfileInfo = false;
 
@@ -100,7 +100,7 @@ function useInfiniteScrollForMembers(
   currentResultType?: ProfileTabType,
   handleLoadMore?: AnyToVoidFunction,
   lastSyncTime?: number,
-  memberIds?: number[],
+  memberIds?: string[],
 ) {
   const [viewportIds, getMore] = useInfiniteScroll(
     lastSyncTime ? handleLoadMore : undefined,

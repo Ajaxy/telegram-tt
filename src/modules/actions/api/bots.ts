@@ -105,19 +105,19 @@ addReducer('restartBot', (global, actions, payload) => {
 });
 
 addReducer('loadTopInlineBots', (global) => {
-  const { hash, lastRequestedAt } = global.topInlineBots;
+  const { lastRequestedAt } = global.topInlineBots;
 
   if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
     return;
   }
 
   (async () => {
-    const result = await callApi('fetchTopInlineBots', { hash });
+    const result = await callApi('fetchTopInlineBots');
     if (!result) {
       return;
     }
 
-    const { hash: newHash, ids, users } = result;
+    const { ids, users } = result;
 
     let newGlobal = getGlobal();
     newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
@@ -125,7 +125,6 @@ addReducer('loadTopInlineBots', (global) => {
       ...newGlobal,
       topInlineBots: {
         ...newGlobal.topInlineBots,
-        hash: newHash,
         userIds: ids,
         lastRequestedAt: getServerTime(global.serverTimeOffset),
       },
@@ -254,7 +253,7 @@ async function searchInlineBot({
 }: {
   username: string;
   inlineBotData: InlineBotSettings;
-  chatId: number;
+  chatId: string;
   query: string;
   offset?: string;
 }) {
@@ -306,7 +305,7 @@ async function searchInlineBot({
   setGlobal(global);
 }
 
-async function sendBotCommand(chat: ApiChat, currentUserId: number, command: string, replyingTo?: number) {
+async function sendBotCommand(chat: ApiChat, currentUserId: string, command: string, replyingTo?: number) {
   await callApi('sendMessage', {
     chat,
     text: command,

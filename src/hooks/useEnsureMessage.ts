@@ -6,7 +6,7 @@ import { ApiMessage } from '../api/types';
 import { throttle } from '../util/schedulers';
 
 export default (
-  chatId: number,
+  chatId: string,
   messageId?: number,
   message?: ApiMessage,
   replyOriginForId?: number,

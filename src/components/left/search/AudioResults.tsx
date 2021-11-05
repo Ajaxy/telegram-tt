@@ -66,17 +66,17 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_').map(Number);
+      const [chatId, messageId] = id.split('_');
 
-      return globalMessagesByChatId[chatId]?.byId[messageId];
+      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleMessageFocus = useCallback((messageId: number, chatId: number) => {
+  const handleMessageFocus = useCallback((messageId: number, chatId: string) => {
     focusMessage({ chatId, messageId });
   }, [focusMessage]);
 
-  const handlePlayAudio = useCallback((messageId: number, chatId: number) => {
+  const handlePlayAudio = useCallback((messageId: number, chatId: string) => {
     openAudioPlayer({ chatId, messageId, origin: AudioOrigin.Search });
   }, [openAudioPlayer]);
 

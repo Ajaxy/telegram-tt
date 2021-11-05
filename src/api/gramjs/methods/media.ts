@@ -91,16 +91,16 @@ async function download(
   }
 
   let entityType: EntityType;
-  let entityId: string | number = mediaMatch[2];
+  const entityId: string | number = mediaMatch[2];
   const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : undefined;
   let entity: (
     GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Photo |
-    GramJs.Message | GramJs.Document | GramJs.StickerSet | GramJs.TypeWebDocument | undefined
+    GramJs.Message | GramJs.MessageService |
+    GramJs.Document | GramJs.StickerSet | GramJs.TypeWebDocument | undefined
   );
 
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
-    entityType = getEntityTypeById(Number(entityId));
-    entityId = Math.abs(Number(entityId));
+    entityType = getEntityTypeById(entityId);
   } else {
     entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument';
   }
@@ -108,27 +108,27 @@ async function download(
   switch (entityType) {
     case 'channel':
     case 'chat':
-      entity = localDb.chats[entityId as number];
+      entity = localDb.chats[entityId];
       break;
     case 'user':
-      entity = localDb.users[entityId as number];
+      entity = localDb.users[entityId];
       break;
     case 'msg':
-      entity = localDb.messages[entityId as string];
+      entity = localDb.messages[entityId];
       break;
     case 'sticker':
     case 'gif':
     case 'wallpaper':
-      entity = localDb.documents[entityId as string];
+      entity = localDb.documents[entityId];
       break;
     case 'photo':
-      entity = localDb.photos[entityId as string];
+      entity = localDb.photos[entityId];
       break;
     case 'stickerSet':
-      entity = localDb.stickerSets[entityId as string];
+      entity = localDb.stickerSets[entityId];
       break;
     case 'webDocument':
-      entity = localDb.webDocuments[entityId as string];
+      entity = localDb.webDocuments[entityId];
       break;
   }
 

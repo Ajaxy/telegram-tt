@@ -2,7 +2,7 @@ import React, {
   FC, useCallback, useRef, useEffect, memo,
 } from '../../../../lib/teact/teact';
 
-import { isChatPrivate } from '../../../../modules/helpers';
+import { isUserId } from '../../../../modules/helpers';
 import {
   INCLUDED_CHAT_TYPES,
   EXCLUDED_CHAT_TYPES,
@@ -25,11 +25,11 @@ import './SettingsFoldersChatsPicker.scss';
 
 type OwnProps = {
   mode: 'included' | 'excluded';
-  chatIds: number[];
-  selectedIds: number[];
+  chatIds: string[];
+  selectedIds: string[];
   selectedChatTypes: string[];
   filterValue?: string;
-  onSelectedIdsChange: (ids: number[]) => void;
+  onSelectedIdsChange: (ids: string[]) => void;
   onSelectedChatTypesChange: (types: string[]) => void;
   onFilterChange: (value: string) => void;
   onLoadMore: () => void;
@@ -67,7 +67,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
     }, FOCUS_DELAY_MS);
   }, []);
 
-  const handleItemClick = useCallback((id: number) => {
+  const handleItemClick = useCallback((id: string) => {
     const newSelectedIds = [...selectedIds];
     if (newSelectedIds.includes(id)) {
       newSelectedIds.splice(newSelectedIds.indexOf(id), 1);
@@ -131,7 +131,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
     );
   }
 
-  function renderItem(id: number) {
+  function renderItem(id: string) {
     const isSelected = selectedIds.includes(id);
 
     return (
@@ -142,7 +142,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
         ripple
         disabled={!isSelected && hasMaxChats}
       >
-        {isChatPrivate(id) ? (
+        {isUserId(id) ? (
           <PrivateChatInfo userId={id} />
         ) : (
           <GroupChatInfo chatId={id} withChatType />

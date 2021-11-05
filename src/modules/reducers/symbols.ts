@@ -6,7 +6,7 @@ import { selectStickersForEmoji } from '../selectors';
 export function updateStickerSets(
   global: GlobalState,
   category: 'added' | 'featured' | 'search',
-  hash: number,
+  hash: string,
   sets: ApiStickerSet[],
   resultIds?: string[],
 ): GlobalState {
@@ -100,7 +100,7 @@ export function replaceAnimatedEmojis(global: GlobalState, stickerSet: ApiSticke
 }
 
 export function updateStickersForEmoji(
-  global: GlobalState, emoji: string, remoteStickers?: ApiSticker[], hash?: number,
+  global: GlobalState, emoji: string, remoteStickers?: ApiSticker[], hash?: string,
 ): GlobalState {
   const localStickers = selectStickersForEmoji(global, emoji);
   const allStickers = [...localStickers, ...(remoteStickers || [])];

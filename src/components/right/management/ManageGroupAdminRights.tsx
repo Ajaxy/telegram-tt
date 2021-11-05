@@ -23,8 +23,8 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import InputText from '../../ui/InputText';
 
 type OwnProps = {
-  chatId: number;
-  selectedChatMemberId?: number;
+  chatId: string;
+  selectedChatMemberId?: string;
   isPromotedByCurrentUser?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;
@@ -33,8 +33,8 @@ type OwnProps = {
 
 type StateProps = {
   chat: ApiChat;
-  usersById: Record<number, ApiUser>;
-  currentUserId?: number;
+  usersById: Record<string, ApiUser>;
+  currentUserId?: string;
   isChannel: boolean;
   isFormFullyDisabled: boolean;
 };

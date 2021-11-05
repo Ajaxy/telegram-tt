@@ -26,7 +26,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 type PrivacyType = 'private' | 'public';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };

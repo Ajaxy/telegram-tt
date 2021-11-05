@@ -11,7 +11,7 @@
     "deploy:production": "npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
     "inc_version": "echo $((`cat .patch-version` + 1)) > .patch-version && echo \"$(node -p -e \"require('./package.json').version.match(/^\\d+\\.\\d+/)[0]\").$(cat .patch-version)\"",
     "perf:serve": "cross-env APP_ENV=perf parcel src/index-perf.html",
-    "lint": "eslint . --ext .ts,.tsx --ignore-pattern src/lib/gramjs",
+    "lint": "tsc && eslint . --ext .ts,.tsx --ignore-pattern src/lib/gramjs",
     "lint:fix": "npm run lint -- --fix",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint:fix": "eslint ./src/lib/gramjs --ignore-path=src/lib/gramjs/.eslintignore --fix",

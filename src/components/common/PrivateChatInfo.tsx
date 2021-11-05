@@ -19,7 +19,7 @@ import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
 type OwnProps = {
-  userId: number;
+  userId: string;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;

@@ -143,11 +143,11 @@ export const RE_TG_LINK = /^tg:(\/\/)?([?=&\d\w_-]+)?/gm;
 export const RE_TME_LINK = /^(?:https?:\/\/)?(?:t\.me\/)/gm;
 
 // MTProto constants
-export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
-export const REPLIES_USER_ID = 1271266957; // TODO For Test connection ID must be equal to 708513
+export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
+export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
-export const DELETED_COMMENTS_CHANNEL_ID = 777;
+export const DELETED_COMMENTS_CHANNEL_ID = '-777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;

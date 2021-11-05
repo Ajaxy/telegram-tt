@@ -26,8 +26,8 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
-  contactIds?: number[];
+  usersById: Record<string, ApiUser>;
+  contactIds?: string[];
   serverTimeOffset: number;
 };
 
@@ -49,12 +49,9 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useHistoryBack(isActive, onReset);
 
-  const handleClick = useCallback(
-    (id: number) => {
-      openChat({ id, shouldReplaceHistory: true });
-    },
-    [openChat],
-  );
+  const handleClick = useCallback((id: string) => {
+    openChat({ id, shouldReplaceHistory: true });
+  }, [openChat]);
 
   const listIds = useMemo(() => {
     if (!contactIds) {

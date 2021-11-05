@@ -23,7 +23,7 @@ import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   withMediaViewer?: boolean;

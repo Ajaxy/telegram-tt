@@ -17,7 +17,7 @@ export interface ApiPaymentSavedInfo {
 export interface ApiPaymentForm {
   canSaveCredentials?: boolean;
   passwordMissing?: boolean;
-  providerId: number;
+  providerId: string;
   nativeProvider?: string;
   savedInfo: any;
   invoice: {

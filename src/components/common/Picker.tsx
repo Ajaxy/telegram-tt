@@ -2,7 +2,7 @@ import React, {
   FC, useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
 
-import { isChatPrivate } from '../../modules/helpers';
+import { isUserId } from '../../modules/helpers';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Checkbox from '../ui/Checkbox';
@@ -19,15 +19,15 @@ import Loading from '../ui/Loading';
 import './Picker.scss';
 
 type OwnProps = {
-  itemIds: number[];
-  selectedIds: number[];
+  itemIds: string[];
+  selectedIds: string[];
   filterValue?: string;
   filterPlaceholder?: string;
   notFoundText?: string;
   searchInputId?: string;
   isLoading?: boolean;
   noScrollRestore?: boolean;
-  onSelectedIdsChange: (ids: number[]) => void;
+  onSelectedIdsChange: (ids: string[]) => void;
   onFilterChange: (value: string) => void;
   onLoadMore?: () => void;
 };
@@ -63,7 +63,7 @@ const Picker: FC<OwnProps> = ({
     }, FOCUS_DELAY_MS);
   }, []);
 
-  const handleItemClick = useCallback((id: number) => {
+  const handleItemClick = useCallback((id: string) => {
     const newSelectedIds = [...selectedIds];
     if (newSelectedIds.includes(id)) {
       newSelectedIds.splice(newSelectedIds.indexOf(id), 1);
@@ -119,7 +119,7 @@ const Picker: FC<OwnProps> = ({
               ripple
             >
               <Checkbox label="" checked={selectedIds.includes(id)} />
-              {isChatPrivate(id) ? (
+              {isUserId(id) ? (
                 <PrivateChatInfo userId={id} />
               ) : (
                 <GroupChatInfo chatId={id} />

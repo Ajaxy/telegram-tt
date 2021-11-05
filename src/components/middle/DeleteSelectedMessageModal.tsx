@@ -7,7 +7,7 @@ import { GlobalActions } from '../../global/types';
 
 import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../modules/selectors';
 import {
-  isChatPrivate,
+  isUserId,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
@@ -115,7 +115,7 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const { canDeleteForAll } = selectCanDeleteSelectedMessages(global);
     const chat = selectCurrentChat(global);
-    const contactName = chat && isChatPrivate(chat.id)
+    const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 

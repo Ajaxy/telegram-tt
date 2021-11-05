@@ -1,3 +1,3 @@
-export function buildChatThreadKey(chatId: number, threadId: number) {
+export function buildChatThreadKey(chatId: string, threadId: number) {
   return `${chatId}_${threadId}`;
 }

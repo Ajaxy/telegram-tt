@@ -23,7 +23,7 @@ import { pick } from '../../../util/iteratees';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
-import { isChatPrivate } from '../../../modules/helpers';
+import { isUserId } from '../../../modules/helpers';
 
 import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -154,7 +154,7 @@ export default memo(withGlobal(
         sender = selectSender(global, message);
       }
     } else if (isForwarding) {
-      sender = isChatPrivate(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
+      sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
     }
 
     return {

@@ -20,7 +20,6 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       setGlobal({
         ...getGlobal(),
         contactList: {
-          hash: 0,
           userIds: [],
         },
       });

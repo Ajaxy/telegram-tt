@@ -13,7 +13,7 @@ import {
   selectUser,
 } from '../../modules/selectors';
 import {
-  isChatPrivate,
+  isUserId,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
@@ -115,7 +115,7 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const { canDeleteForAll } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const chat = selectChat(global, message.chatId);
-    const contactName = chat && isChatPrivate(chat.id)
+    const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 

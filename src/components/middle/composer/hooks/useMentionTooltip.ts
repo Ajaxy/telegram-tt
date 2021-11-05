@@ -28,9 +28,9 @@ export default function useMentionTooltip(
   onUpdateHtml: (html: string) => void,
   inputId: string = EDITABLE_INPUT_ID,
   groupChatMembers?: ApiChatMember[],
-  topInlineBotIds?: number[],
-  currentUserId?: number,
-  usersById?: Record<number, ApiUser>,
+  topInlineBotIds?: string[],
+  currentUserId?: string,
+  usersById?: Record<string, ApiUser>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();

@@ -33,7 +33,7 @@ import Avatar from '../common/Avatar';
 import './RightSearch.scss';
 
 export type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   onClose: NoneToVoidFunction;
   isActive: boolean;

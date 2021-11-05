@@ -19,11 +19,11 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
-  blockedIds: number[];
-  contactIds?: number[];
-  localContactIds?: number[];
-  currentUserId?: number;
+  usersById: Record<string, ApiUser>;
+  blockedIds: string[];
+  contactIds?: string[];
+  localContactIds?: string[];
+  currentUserId?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setUserSearchQuery' | 'blockContact'>;
@@ -54,7 +54,7 @@ const BlockUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
       return !blockedIds.includes(contactId) && contactId !== currentUserId;
     });
 
-    return unique(availableContactsId).reduce((acc, contactId) => {
+    return unique(availableContactsId).reduce<string[]>((acc, contactId) => {
       if (
         !filter
         || !usersById[contactId]
@@ -65,7 +65,7 @@ const BlockUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       return acc;
-    }, [] as number[])
+    }, [])
       .sort((firstId, secondId) => {
         const firstName = getUserFullName(usersById[firstId]) || '';
         const secondName = getUserFullName(usersById[secondId]) || '';
@@ -74,7 +74,7 @@ const BlockUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
       });
   }, [blockedIds, contactIds, currentUserId, filter, localContactIds, usersById]);
 
-  const handleRemoveUser = useCallback((userId: number) => {
+  const handleRemoveUser = useCallback((userId: string) => {
     const { id: contactId, accessHash } = usersById[userId] || {};
     if (!contactId || !accessHash) {
       return;

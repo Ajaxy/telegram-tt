@@ -10,13 +10,14 @@ import { pick } from '../../util/iteratees';
 import { selectChat } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
+import { getUserIdDividend } from '../../modules/helpers';
 
 import StickerButton from '../common/StickerButton';
 
 import './ContactGreeting.scss';
 
 type OwnProps = {
-  userId: number;
+  userId: string;
 };
 
 type StateProps = {
@@ -94,7 +95,8 @@ const ContactGreeting: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { stickers } = global.stickers.greeting;
-    const sticker = stickers?.length ? stickers[userId % stickers.length] : undefined;
+    const dividend = getUserIdDividend(userId) + getUserIdDividend(global.currentUserId!);
+    const sticker = stickers?.length ? stickers[dividend % stickers.length] : undefined;
     const chat = selectChat(global, userId);
     if (!chat) {
       return {};
@@ -111,5 +113,4 @@ export default memo(withGlobal<OwnProps>(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadGreetingStickers', 'sendMessage', 'markMessageListRead',
   ]),
-
 )(ContactGreeting));

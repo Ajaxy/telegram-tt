@@ -188,9 +188,9 @@ export function getCanAddContact(user: ApiUser) {
 }
 
 export function sortUserIds(
-  userIds: number[],
-  usersById: Record<number, ApiUser>,
-  priorityIds?: number[],
+  userIds: string[],
+  usersById: Record<string, ApiUser>,
+  priorityIds?: string[],
   serverTimeOffset = 0,
 ) {
   return orderBy(userIds, (id) => {
@@ -227,10 +227,19 @@ export function sortUserIds(
   }, 'desc');
 }
 
+export function getUserIdDividend(userId: string) {
+  // Workaround for old-fashioned IDs stored locally
+  if (typeof userId === 'number') {
+    return Math.abs(userId);
+  }
+
+  return Math.abs(Number(userId));
+}
+
 // eslint-disable-next-line max-len
 // https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
 export function getUserColorKey(peer: ApiUser | ApiChat | undefined) {
-  const index = peer ? Math.abs(peer.id) % 7 : 0;
+  const index = peer ? getUserIdDividend(peer.id) % 7 : 0;
 
   return USER_COLOR_KEYS[index];
 }

@@ -5,7 +5,7 @@ import { GlobalActions } from '../../global/types';
 
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
-  isChatPrivate,
+  isUserId,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
@@ -21,7 +21,7 @@ import Button from '../ui/Button';
 
 export type OwnProps = {
   isOpen: boolean;
-  chatId: number;
+  chatId: string;
   messageId: number;
   onClose: () => void;
 };
@@ -103,14 +103,14 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const isPrivateChat = isChatPrivate(chatId);
+    const isPrivateChat = isUserId(chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const chat = selectChat(global, chatId);
     const isChannel = !!chat && isChatChannel(chat);
     const isGroup = !!chat && isChatBasicGroup(chat);
     const isSuperGroup = !!chat && isChatSuperGroup(chat);
     const canPinForAll = (isPrivateChat && !isChatWithSelf) || isSuperGroup || isGroup;
-    const contactName = chat && isChatPrivate(chat.id)
+    const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 
