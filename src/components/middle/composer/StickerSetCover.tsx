@@ -1,11 +1,13 @@
-import React, { FC, memo, useRef } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useMemo, useRef,
+} from '../../../lib/teact/teact';
 
 import { ApiStickerSet } from '../../../api/types';
 
+import { getFirstLetters } from '../../../util/textFormat';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
-import { getFirstLetters } from '../../../util/textFormat';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 
 type OwnProps = {
   stickerSet: ApiStickerSet;
@@ -19,14 +21,18 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const mediaData = useMedia(stickerSet.hasThumbnail && `stickerSet${stickerSet.id}`, !isIntersecting);
-  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
+  const transitionClassNames = useMediaTransition(mediaData);
+
+  const firstLetters = useMemo(() => {
+    if (mediaData) return undefined;
+
+    return getFirstLetters(stickerSet.title, 2);
+  }, [mediaData, stickerSet.title]);
 
   return (
     <div ref={ref} className="sticker-set-cover">
-      {!shouldRenderFullMedia && getFirstLetters(stickerSet.title, 2)}
-      {shouldRenderFullMedia && (
-        <img src={mediaData} className={transitionClassNames} alt="" />
-      )}
+      {firstLetters}
+      <img src={mediaData} className={transitionClassNames} alt="" />
     </div>
   );
 };

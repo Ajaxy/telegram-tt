@@ -22,7 +22,6 @@ import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObse
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
 import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
@@ -81,11 +80,12 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'pictogram'),
     lastSyncTime,
   );
-  const {
-    shouldRenderThumb,
-    shouldRenderFullMedia: shouldRenderPreview,
-    transitionClassNames: previewClassNames,
-  } = useTransitionForMedia(previewBlobUrl, 'slow');
+  const { transitionClassNames: previewClassNames } = useShowTransition(
+    Boolean(previewBlobUrl),
+    undefined,
+    undefined,
+    'slow',
+  );
 
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
@@ -163,23 +163,19 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {shouldRenderThumb && (
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-          // @ts-ignore teact feature
-          style={`width: ${width}px; height: ${height}px;`}
-        />
-      )}
-      {shouldRenderPreview && (
-        <img
-          src={previewBlobUrl}
-          className={buildClassName('thumbnail', previewClassNames)}
-          // @ts-ignore teact feature
-          style={`width: ${width}px; height: ${height}px;`}
-          alt=""
-        />
-      )}
+      <canvas
+        ref={thumbRef}
+        className="thumbnail"
+        // @ts-ignore teact feature
+        style={`width: ${width}px; height: ${height}px;`}
+      />
+      <img
+        src={previewBlobUrl}
+        className={buildClassName('thumbnail', previewClassNames)}
+        // @ts-ignore teact feature
+        style={`width: ${width}px; height: ${height}px;`}
+        alt=""
+      />
       {isInline && (
         <video
           ref={videoRef}

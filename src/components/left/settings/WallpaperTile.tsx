@@ -7,7 +7,6 @@ import { ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { CUSTOM_BG_CACHE_NAME } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';
 import { fetchBlob } from '../../../util/files';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
@@ -37,9 +36,12 @@ const WallpaperTile: FC<OwnProps> = ({
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
   const thumbRef = useCanvasBlur(document.thumbnail?.dataUri, Boolean(previewBlobUrl), true);
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(previewBlobUrl || localBlobUrl, 'slow');
+  const { transitionClassNames } = useShowTransition(
+    Boolean(previewBlobUrl || localBlobUrl),
+    undefined,
+    undefined,
+    'slow',
+  );
   const [isLoadAllowed, setIsLoadAllowed] = useState(false);
   const {
     mediaData: fullMedia, loadProgress,
@@ -85,19 +87,15 @@ const WallpaperTile: FC<OwnProps> = ({
   return (
     <div className={className} onClick={handleClick}>
       <div className="media-inner">
-        {shouldRenderThumb && (
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-          />
-        )}
-        {shouldRenderFullMedia && (
-          <img
-            src={previewBlobUrl || localBlobUrl}
-            className={`full-media ${transitionClassNames}`}
-            alt=""
-          />
-        )}
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+        />
+        <img
+          src={previewBlobUrl || localBlobUrl}
+          className={buildClassName('full-media', transitionClassNames)}
+          alt=""
+        />
         {shouldRenderSpinner && (
           <div className={buildClassName('spinner-container', spinnerClassNames)}>
             <ProgressSpinner progress={loadProgress} onClick={handleClick} />

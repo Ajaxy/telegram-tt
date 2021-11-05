@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import React, { FC, memo, useRef } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
-import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatPastTimeShort } from '../../util/dateFormat';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
@@ -63,16 +63,15 @@ const File: FC<OwnProps> = ({
     elementRef = ref;
   }
 
+  const transitionClassNames = useMediaTransition(previewData);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, true);
+
   const color = getColorFromExtension(extension);
   const sizeString = getFileSizeString(size);
 
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(previewData, 'slow');
   const { width, height } = getDocumentThumbnailDimensions(smaller);
 
   const fullClassName = buildClassName(
@@ -93,24 +92,20 @@ const File: FC<OwnProps> = ({
       <div className="file-icon-container" onClick={isUploading ? undefined : onClick}>
         {thumbnailDataUri || previewData ? (
           <div className="file-preview media-inner">
-            {shouldRenderThumb && (
-              <img
-                src={thumbnailDataUri}
-                width={width}
-                height={height}
-                className="thumbnail"
-                alt=""
-              />
-            )}
-            {shouldRenderFullMedia && (
-              <img
-                src={previewData}
-                className={`full-media ${transitionClassNames}`}
-                width={width}
-                height={height}
-                alt=""
-              />
-            )}
+            <img
+              src={thumbnailDataUri}
+              width={width}
+              height={height}
+              className="thumbnail"
+              alt=""
+            />
+            <img
+              src={previewData}
+              className={buildClassName('full-media', transitionClassNames)}
+              width={width}
+              height={height}
+              alt=""
+            />
           </div>
         ) : (
           <div className={`file-icon ${color}`}>

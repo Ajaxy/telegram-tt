@@ -10,22 +10,22 @@ import { getDispatch } from '../../../lib/teact/teactn';
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
-import { formatMediaDuration } from '../../../util/dateFormat';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
+import { formatMediaDuration } from '../../../util/dateFormat';
+import buildClassName from '../../../util/buildClassName';
+import { stopCurrentAudio } from '../../../util/audioPlayer';
+import safePlay from '../../../util/safePlay';
+import { fastRaf } from '../../../util/schedulers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
-import buildClassName from '../../../util/buildClassName';
-import { stopCurrentAudio } from '../../../util/audioPlayer';
 import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import usePauseOnInactive from './hooks/usePauseOnInactive';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
-import safePlay from '../../../util/safePlay';
-import { fastRaf } from '../../../util/schedulers';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -91,11 +91,12 @@ const RoundVideo: FC<OwnProps> = ({
   const { isBuffered, bufferingHandlers } = useBuffering();
   const isTransferring = (isLoadAllowed && !isBuffered) || isDownloading;
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+
+  const transitionClassNames = useMediaTransition(mediaData);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring || !isBuffered, undefined, wasLoadDisabled);
-  const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
 
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
@@ -206,16 +207,14 @@ const RoundVideo: FC<OwnProps> = ({
       className="RoundVideo media-inner"
       onClick={handleClick}
     >
-      {(shouldRenderThumb || mediaData) && (
-        <div className="thumbnail-wrapper">
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-            // @ts-ignore teact feature
-            style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
-          />
-        </div>
-      )}
+      <div className="thumbnail-wrapper">
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+          // @ts-ignore teact feature
+          style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
+        />
+      </div>
       {mediaData && (
         <div className="video-wrapper">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
