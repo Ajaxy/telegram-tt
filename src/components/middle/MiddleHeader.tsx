@@ -261,7 +261,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const {
     shouldRender: shouldRenderPinnedMessage,
     transitionClassNames: pinnedMessageClassNames,
-  } = useShowTransition(pinnedMessage && !shouldRenderAudioPlayer);
+  } = useShowTransition(Boolean(pinnedMessage));
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
   const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);
@@ -380,7 +380,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           size="smaller"
           color="translucent"
           onClick={handleBackClick}
-          ariaLabel={asClose ? 'Close' : 'Back'}
+          ariaLabel={lang(asClose ? 'Close' : 'Back')}
         >
           <div className={buildClassName('animated-close-icon', !asClose && 'state-back')} />
         </Button>
@@ -393,6 +393,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
+  const isAudioPlayerRendered = Boolean(shouldRenderAudioPlayer && renderingAudioMessage);
+
   return (
     <div className="MiddleHeader" ref={componentRef}>
       <Transition
@@ -402,23 +404,23 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         {renderInfo}
       </Transition>
 
+      {shouldRenderPinnedMessage && renderingPinnedMessage && (
+        <HeaderPinnedMessage
+          key={chatId}
+          message={renderingPinnedMessage}
+          count={renderingPinnedMessagesCount || 0}
+          index={pinnedMessageIndex}
+          customTitle={renderingPinnedMessageTitle}
+          className={buildClassName(pinnedMessageClassNames, isAudioPlayerRendered && 'full-width')}
+          onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
+          onClick={handlePinnedMessageClick}
+          onAllPinnedClick={handleAllPinnedClick}
+        />
+      )}
       <div className="header-tools">
-        {shouldRenderPinnedMessage && renderingPinnedMessage && !shouldRenderAudioPlayer && (
-          <HeaderPinnedMessage
-            key={chatId}
-            message={renderingPinnedMessage}
-            count={renderingPinnedMessagesCount || 0}
-            index={pinnedMessageIndex}
-            customTitle={renderingPinnedMessageTitle}
-            className={pinnedMessageClassNames}
-            onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
-            onClick={handlePinnedMessageClick}
-            onAllPinnedClick={handleAllPinnedClick}
-          />
-        )}
-        {shouldRenderAudioPlayer && renderingAudioMessage && (
+        {isAudioPlayerRendered && (
           <AudioPlayer
-            key={getMessageKey(renderingAudioMessage)}
+            key={getMessageKey(renderingAudioMessage!)}
             message={renderingAudioMessage!}
             className={audioPlayerClassNames}
           />
