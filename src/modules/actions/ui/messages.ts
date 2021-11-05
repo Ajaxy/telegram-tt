@@ -170,7 +170,7 @@ addReducer('closeMediaViewer', (global) => {
 
 addReducer('openAudioPlayer', (global, actions, payload) => {
   const {
-    chatId, threadId, messageId, origin, volume,
+    chatId, threadId, messageId, origin, volume, playbackRate, isMuted,
   } = payload!;
 
   return {
@@ -181,6 +181,8 @@ addReducer('openAudioPlayer', (global, actions, payload) => {
       messageId,
       origin,
       volume: volume || global.audioPlayer.volume,
+      playbackRate: playbackRate || global.audioPlayer.playbackRate,
+      isMuted: isMuted || global.audioPlayer.isMuted,
     },
   };
 });
@@ -199,11 +201,41 @@ addReducer('setAudioPlayerVolume', (global, actions, payload) => {
   };
 });
 
+addReducer('setAudioPlayerPlaybackRate', (global, actions, payload) => {
+  const {
+    playbackRate,
+  } = payload!;
+
+  return {
+    ...global,
+    audioPlayer: {
+      ...global.audioPlayer,
+      playbackRate,
+    },
+  };
+});
+
+addReducer('setAudioPlayerMuted', (global, actions, payload) => {
+  const {
+    isMuted,
+  } = payload!;
+
+  return {
+    ...global,
+    audioPlayer: {
+      ...global.audioPlayer,
+      isMuted,
+    },
+  };
+});
+
 addReducer('closeAudioPlayer', (global) => {
   return {
     ...global,
     audioPlayer: {
-      volume: global.audioPlayer.volume, // Preserve only volume for the next play
+      volume: global.audioPlayer.volume,
+      playbackRate: global.audioPlayer.playbackRate,
+      isMuted: global.audioPlayer.isMuted,
     },
   };
 });

@@ -14,6 +14,7 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
   DEFAULT_VOLUME,
+  DEFAULT_PLAYBACK_RATE,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { ANIMATION_END_EVENT, ANIMATION_START_EVENT } from '../hooks/useHeavyAnimationCheck';
@@ -137,6 +138,9 @@ function readCache(initialState: GlobalState): GlobalState {
     if (cached.audioPlayer.volume === undefined) {
       cached.audioPlayer.volume = DEFAULT_VOLUME;
     }
+    if (cached.audioPlayer.playbackRate === undefined) {
+      cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
+    }
   }
 
   const newState = {
@@ -185,6 +189,8 @@ function updateCache() {
     ]),
     audioPlayer: {
       volume: global.audioPlayer.volume,
+      playbackRate: global.audioPlayer.playbackRate,
+      isMuted: global.audioPlayer.isMuted,
     },
     isChatInfoShown: reduceShowChatInfo(global),
     users: reduceUsers(global),

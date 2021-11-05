@@ -329,6 +329,8 @@ export type GlobalState = {
     threadId?: number;
     origin?: AudioOrigin;
     volume: number;
+    playbackRate: number;
+    isMuted: boolean;
   };
 
   topPeers: {
@@ -503,7 +505,7 @@ export type ActionTypes = (
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
   'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
-  // Channel / groups creation
+  // chat creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
   'setSettingOption' | 'loadPasswordInfo' | 'clearTwoFaError' |
@@ -514,7 +516,8 @@ export type ActionTypes = (
   'updateWebNotificationSettings' | 'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' |
   'setPrivacySettings' | 'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
   'loadContentSettings' | 'updateContentSettings' |
-  // Stickers & GIFs
+  'loadCountryList' | 'ensureTimeFormat' |
+  // stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
@@ -524,12 +527,14 @@ export type ActionTypes = (
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
   // media viewer & audio player
-  'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'setAudioPlayerVolume' | 'closeAudioPlayer' |
+  'openMediaViewer' | 'closeMediaViewer' |
+  'openAudioPlayer' | 'setAudioPlayerVolume' | 'setAudioPlayerPlaybackRate' |
+  'setAudioPlayerMuted' | 'closeAudioPlayer' |
   // misc
-  'openPollModal' | 'closePollModal' | 'loadWebPagePreview' | 'clearWebPagePreview' |
-  'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' | 'deleteDeviceToken' |
+  'openPollModal' | 'closePollModal' |
+  'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |
+  'setDeviceToken' | 'deleteDeviceToken' |
   'checkVersionNotification' | 'createServiceNotification' |
-  'loadCountryList' | 'ensureTimeFormat' |
   // payment
   'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |

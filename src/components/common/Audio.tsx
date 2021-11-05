@@ -258,14 +258,14 @@ const Audio: FC<OwnProps> = ({
 
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(
-    () => voice && renderWaveform(
+    () => origin === AudioOrigin.Inline && voice && renderWaveform(
       voice,
       (isMediaUnread && !isOwn) ? 1 : playProgress,
       isOwn,
       theme,
       seekerRef,
     ),
-    [voice, isMediaUnread, isOwn, playProgress, theme],
+    [origin, voice, isMediaUnread, isOwn, playProgress, theme],
   );
 
   const fullClassName = buildClassName(

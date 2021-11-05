@@ -211,6 +211,21 @@ export function register(
     setVolume(volume: number) {
       if (currentTrackId === trackId) {
         audio.volume = volume;
+        audio.muted = false;
+      }
+    },
+
+    setPlaybackRate(rate: number) {
+      if (currentTrackId === trackId) {
+        audio.playbackRate = rate;
+      }
+    },
+
+    toggleMuted(muted?: boolean) {
+      if (muted === undefined) {
+        audio.muted = !audio.muted;
+      } else {
+        audio.muted = muted;
       }
     },
 
