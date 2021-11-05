@@ -48,7 +48,7 @@ export function updateMetadata(metadata?: MediaMetadata) {
   const { mediaSession } = window.navigator;
   if (mediaSession) {
     // eslint-disable-next-line no-null/no-null
-    mediaSession.metadata = metadata !== undefined ? metadata : null;
+    mediaSession.metadata = metadata ?? null;
   }
 }
 
@@ -73,7 +73,7 @@ export function clearMediaSession() {
     mediaSession.metadata = null;
     setMediaSessionHandlers(DEFAULT_HANDLERS);
     if (mediaSession.playbackState) mediaSession.playbackState = 'none';
-    if (mediaSession.setPositionState) mediaSession.setPositionState(undefined);
+    mediaSession.setPositionState?.();
   }
 }
 
@@ -85,29 +85,23 @@ export function setPlaybackState(state: 'none' | 'paused' | 'playing' = 'none') 
 }
 
 export function setPositionState(state?: MediaPositionState) {
-  if (!state || !state.position || !state.duration) return;
+  if (!state || state.position === undefined || state.duration === undefined) return;
+  state.position = Math.min(state.position, state.duration);
+
   const { mediaSession } = window.navigator;
-  if (mediaSession && mediaSession.setPositionState) {
-    mediaSession.setPositionState(state);
-  }
+  mediaSession?.setPositionState?.(state);
 }
 
 export function setMicrophoneActive(active: boolean) {
   const { mediaSession } = window.navigator;
   // @ts-ignore typings not updated yet
-  if (mediaSession && mediaSession.setMicrophoneActive) {
-    // @ts-ignore
-    mediaSession.setMicrophoneActive(active);
-  }
+  mediaSession?.setMicrophoneActive?.(active);
 }
 
 export function setCameraActive(active: boolean) {
   const { mediaSession } = window.navigator;
   // @ts-ignore typings not updated yet
-  if (mediaSession && mediaSession.setCameraActive) {
-    // @ts-ignore
-    mediaSession.setCameraActive(active);
-  }
+  mediaSession?.setCameraActive?.(active);
 }
 
 export function buildMediaMetadata({

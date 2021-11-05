@@ -156,8 +156,8 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <RangeSlider
           label={lang('TextSize')}
-          // TODO Remove memo-killer
-          range={{ min: 12, max: 20 }}
+          min={12}
+          max={20}
           value={messageTextSize}
           onChange={handleMessageTextSizeChange}
         />

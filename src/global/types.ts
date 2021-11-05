@@ -328,6 +328,7 @@ export type GlobalState = {
     messageId?: number;
     threadId?: number;
     origin?: AudioOrigin;
+    volume: number;
   };
 
   topPeers: {
@@ -523,9 +524,10 @@ export type ActionTypes = (
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
   // misc
-  'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' | 'openPollModal' | 'closePollModal' |
-  'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' |
-  'deleteDeviceToken' | 'checkVersionNotification' | 'createServiceNotification' |
+  'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'setAudioPlayerVolume' | 'closeAudioPlayer' |
+  'openPollModal' | 'closePollModal' | 'loadWebPagePreview' | 'clearWebPagePreview' |
+  'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' | 'deleteDeviceToken' |
+  'checkVersionNotification' | 'createServiceNotification' |
   // payment
   'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |

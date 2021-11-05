@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { AudioOrigin } from '../../types';
@@ -7,7 +7,7 @@ import {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle,
@@ -24,6 +24,7 @@ import { clearMediaSession } from '../../util/mediaSession';
 
 import RippleEffect from '../ui/RippleEffect';
 import Button from '../ui/Button';
+import RangeSlider from '../ui/RangeSlider';
 
 import './AudioPlayer.scss';
 
@@ -37,12 +38,22 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiChat | ApiUser;
   chat?: ApiChat;
+  volume: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer'>;
+type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer' | 'setAudioPlayerVolume'>;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, origin = AudioOrigin.Inline, className, noUi, sender, focusMessage, closeAudioPlayer, chat,
+  message,
+  origin = AudioOrigin.Inline,
+  className,
+  noUi,
+  sender,
+  chat,
+  volume,
+  setAudioPlayerVolume,
+  focusMessage,
+  closeAudioPlayer,
 }) => {
   const lang = useLang();
   const { audio, voice } = getMessageContent(message);
@@ -50,7 +61,10 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   const senderName = sender ? getSenderTitle(lang, sender) : undefined;
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
   const mediaMetadata = useMessageMediaMetadata(message, sender, chat);
-  const { playPause, stop, isPlaying } = useAudioPlayer(
+
+  const {
+    playPause, stop, isPlaying, requestNextTrack, requestPreviousTrack, isFirst, isLast, setVolume,
+  } = useAudioPlayer(
     makeTrackId(message),
     getMediaDuration(message)!,
     isVoice ? 'voice' : 'audio',
@@ -78,6 +92,18 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     stop();
   }, [closeAudioPlayer, isPlaying, playPause, stop]);
 
+  const handleVolumeChange = useCallback((value: number) => {
+    setAudioPlayerVolume({ volume: value / 100 });
+    setVolume(value / 100);
+  }, [setAudioPlayerVolume, setVolume]);
+
+  const volumeIcon = useMemo(() => {
+    if (volume === 0) return 'icon-muted';
+    if (volume < 0.3) return 'icon-volume-1';
+    if (volume < 0.6) return 'icon-volume-2';
+    return 'icon-volume-3';
+  }, [volume]);
+
   if (noUi) {
     return undefined;
   }
@@ -89,12 +115,36 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         ripple={!IS_SINGLE_COLUMN_LAYOUT}
         color="translucent"
         size="smaller"
-        className={buildClassName('toggle-play', isPlaying ? 'pause' : 'play')}
+        className="player-button"
+        disabled={isFirst}
+        onClick={requestPreviousTrack}
+        ariaLabel="Previous track"
+      >
+        <i className="icon-skip-previous" />
+      </Button>
+      <Button
+        round
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        color="translucent"
+        size="smaller"
+        className={buildClassName('toggle-play', 'player-button', isPlaying ? 'pause' : 'play')}
         onClick={playPause}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
       >
         <i className="icon-play" />
         <i className="icon-pause" />
+      </Button>
+      <Button
+        round
+        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        color="translucent"
+        size="smaller"
+        className="player-button"
+        disabled={isLast}
+        onClick={requestNextTrack}
+        ariaLabel="Next track"
+      >
+        <i className="icon-skip-next" />
       </Button>
 
       <div className="AudioPlayer-content" onClick={handleClick}>
@@ -102,6 +152,22 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         <RippleEffect />
       </div>
 
+      {!IS_IOS && (
+        <Button
+          round
+          className="player-button volume-button"
+          color="translucent"
+          size="smaller"
+          ariaLabel="Volume"
+          withClickPropagation
+        >
+          <i className={volumeIcon} />
+          <div className="volume-slider-spacer" />
+          <div className="volume-slider">
+            <RangeSlider value={volume * 100} onChange={handleVolumeChange} />
+          </div>
+        </Button>
+      )}
       <Button
         round
         className="player-close"
@@ -142,11 +208,13 @@ export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const sender = selectSender(global, message);
     const chat = selectChat(global, message.chatId);
+    const { volume } = global.audioPlayer;
 
     return {
       sender,
       chat,
+      volume,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer', 'setAudioPlayerVolume']),
 )(AudioPlayer);

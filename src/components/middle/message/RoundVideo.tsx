@@ -248,7 +248,7 @@ const RoundVideo: FC<OwnProps> = ({
       )}
       <div className="message-media-duration">
         {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
-        {(!isActivated || playerRef.current!.paused) && <i className="icon-muted-chat" />}
+        {(!isActivated || playerRef.current!.paused) && <i className="icon-muted" />}
       </div>
     </div>
   );

@@ -290,7 +290,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="title">
           <h3>{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
           {chat.isVerified && <VerifiedIcon />}
-          {isMuted && <i className="icon-muted-chat" />}
+          {isMuted && <i className="icon-muted" />}
           {chat.lastMessage && (
             <LastMessageMeta
               message={chat.lastMessage}

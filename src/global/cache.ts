@@ -13,6 +13,7 @@ import {
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
+  DEFAULT_VOLUME,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { ANIMATION_END_EVENT, ANIMATION_START_EVENT } from '../hooks/useHeavyAnimationCheck';
@@ -132,6 +133,10 @@ function readCache(initialState: GlobalState): GlobalState {
     if (!cached.serviceNotifications) {
       cached.serviceNotifications = [];
     }
+
+    if (cached.audioPlayer.volume === undefined) {
+      cached.audioPlayer.volume = DEFAULT_VOLUME;
+    }
   }
 
   const newState = {
@@ -178,6 +183,9 @@ function updateCache() {
       'leftColumnWidth',
       'serviceNotifications',
     ]),
+    audioPlayer: {
+      volume: global.audioPlayer.volume,
+    },
     isChatInfoShown: reduceShowChatInfo(global),
     users: reduceUsers(global),
     chats: reduceChats(global),
