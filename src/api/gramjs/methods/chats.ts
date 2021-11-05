@@ -277,23 +277,17 @@ export async function requestChatUpdate({
 
   updateLocalDb(result);
 
-  let lastMessage: ApiMessage | undefined;
-  if (!noLastMessage) {
-    const lastRemoteMessage = buildApiMessage(result.messages[0]);
-
-    if (lastLocalMessage && (!lastRemoteMessage || (lastLocalMessage.date > lastRemoteMessage.date))) {
-      lastMessage = lastLocalMessage;
-    } else {
-      lastMessage = lastRemoteMessage;
-    }
-  }
+  const lastRemoteMessage = buildApiMessage(result.messages[0]);
+  const lastMessage = lastLocalMessage && (!lastRemoteMessage || (lastLocalMessage.date > lastRemoteMessage.date))
+    ? lastLocalMessage
+    : lastRemoteMessage;
 
   onUpdate({
     '@type': 'updateChat',
     id,
     chat: {
       ...buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset),
-      ...(lastMessage && { lastMessage }),
+      ...(!noLastMessage && { lastMessage }),
     },
   });
 }
