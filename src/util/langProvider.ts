@@ -139,21 +139,13 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   runCallbacks();
 }
 
-export function setTimeFormat(timeFormat: TimeFormat, callback?: NoneToVoidFunction) {
+export function setTimeFormat(timeFormat: TimeFormat) {
   if (timeFormat && timeFormat === currentTimeFormat) {
-    if (callback) {
-      callback();
-    }
-
     return;
   }
 
   currentTimeFormat = timeFormat;
   getTranslation.timeFormat = timeFormat;
-
-  if (callback) {
-    callback();
-  }
 
   runCallbacks();
 }

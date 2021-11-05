@@ -3,7 +3,6 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import {
   OnApiUpdate, ApiUser, ApiChat, ApiPhoto,
 } from '../../types';
-import { LangCode } from '../../../types';
 
 import { PROFILE_PHOTOS_LIMIT } from '../../../config';
 import { invokeRequest } from './client';
@@ -18,7 +17,6 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import localDb from '../localDb';
 import { addPhotoToLocalDb } from '../helpers';
-import { buildApiCountryList } from '../apiBuilders/misc';
 import { buildApiPeerId } from '../apiBuilders/peers';
 
 let onUpdate: OnApiUpdate;
@@ -60,17 +58,6 @@ export async function fetchNearestCountry() {
   const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc());
 
   return dcInfo?.country;
-}
-
-export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCode }) {
-  const countryList = await invokeRequest(new GramJs.help.GetCountriesList({
-    langCode,
-  }));
-
-  if (!(countryList instanceof GramJs.help.CountriesList)) {
-    return undefined;
-  }
-  return buildApiCountryList(countryList.countries);
 }
 
 export async function fetchTopUsers() {

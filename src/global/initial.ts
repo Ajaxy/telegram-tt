@@ -149,6 +149,7 @@ export const INITIAL_STATE: GlobalState = {
       shouldLoopStickers: true,
       language: 'en',
       timeFormat: '24h',
+      wasTimeFormatSetManually: false,
     },
     themes: {
       light: {

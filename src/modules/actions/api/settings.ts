@@ -6,9 +6,11 @@ import {
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
+import { COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { subscribe, unsubscribe } from '../../../util/notifications';
+import { setTimeFormat } from '../../../util/langProvider';
 import { selectUser } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
@@ -561,6 +563,42 @@ addReducer('updateContentSettings', (global, actions, payload) => {
     const result = await callApi('updateContentSettings', payload);
     if (!result) {
       setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: !payload }));
+    }
+  })();
+});
+
+addReducer('loadCountryList', (global, actions, payload = {}) => {
+  let { langCode } = payload;
+  if (!langCode) langCode = global.settings.byKey.language;
+
+  (async () => {
+    const countryList = await callApi('fetchCountryList', { langCode });
+    if (!countryList) return;
+
+    setGlobal({
+      ...getGlobal(),
+      countryList,
+    });
+  })();
+});
+
+addReducer('ensureTimeFormat', (global, actions) => {
+  if (global.authNearestCountry) {
+    const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
+    actions.setSettingOption({ timeFormat });
+    setTimeFormat(timeFormat);
+  }
+
+  (async () => {
+    if (getGlobal().settings.byKey.wasTimeFormatSetManually) {
+      return;
+    }
+
+    const nearestCountryCode = await callApi('fetchNearestCountry');
+    if (nearestCountryCode) {
+      const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
+      actions.setSettingOption({ timeFormat });
+      setTimeFormat(timeFormat);
     }
   })();
 });

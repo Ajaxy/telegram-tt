@@ -182,21 +182,6 @@ addReducer('loadNearestCountry', (global) => {
   })();
 });
 
-addReducer('loadCountryList', (global, actions, payload = {}) => {
-  let { langCode } = payload;
-  if (!langCode) langCode = global.settings.byKey.language;
-
-  (async () => {
-    const countryList = await callApi('fetchCountryList', { langCode });
-    if (!countryList) return;
-
-    setGlobal({
-      ...getGlobal(),
-      countryList,
-    });
-  })();
-});
-
 addReducer('setDeviceToken', (global, actions, deviceToken) => {
   setGlobal({
     ...global,

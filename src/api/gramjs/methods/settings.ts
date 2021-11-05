@@ -4,11 +4,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiChat, ApiLangString, ApiLanguage, ApiNotifyException, ApiUser, ApiWallpaper,
 } from '../../types';
-import { ApiPrivacyKey, InputPrivacyRules } from '../../../types';
+import { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, LANG_PACKS } from '../../../config';
 import {
-  buildApiWallpaper, buildApiSession, buildPrivacyRules, buildApiNotifyException,
+  buildApiWallpaper, buildApiSession, buildPrivacyRules, buildApiNotifyException, buildApiCountryList,
 } from '../apiBuilders/misc';
 
 import { buildApiUser } from '../apiBuilders/users';
@@ -17,9 +17,9 @@ import { buildInputPrivacyKey, buildInputPeer, buildInputEntity } from '../gramj
 import { invokeRequest, uploadFile, getClient } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import localDb from '../localDb';
 import { getServerTime } from '../../../util/serverTime';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import localDb from '../localDb';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
@@ -446,4 +446,15 @@ function updateLocalDb(
       localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
     }
   });
+}
+
+export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCode }) {
+  const countryList = await invokeRequest(new GramJs.help.GetCountriesList({
+    langCode,
+  }));
+
+  if (!(countryList instanceof GramJs.help.CountriesList)) {
+    return undefined;
+  }
+  return buildApiCountryList(countryList.countries);
 }

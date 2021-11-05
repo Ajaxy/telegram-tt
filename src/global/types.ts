@@ -500,7 +500,7 @@ export type ActionTypes = (
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadCountryList' | 'loadTopUsers' | 'loadContactList' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
   'deleteUser' | 'loadUser' | 'setUserSearchQuery' |
   // Channel / groups creation
@@ -523,11 +523,13 @@ export type ActionTypes = (
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
-  // misc
+  // media viewer & audio player
   'openMediaViewer' | 'closeMediaViewer' | 'openAudioPlayer' | 'setAudioPlayerVolume' | 'closeAudioPlayer' |
+  // misc
   'openPollModal' | 'closePollModal' | 'loadWebPagePreview' | 'clearWebPagePreview' |
   'loadWallpapers' | 'uploadWallpaper' | 'setDeviceToken' | 'deleteDeviceToken' |
   'checkVersionNotification' | 'createServiceNotification' |
+  'loadCountryList' | 'ensureTimeFormat' |
   // payment
   'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |

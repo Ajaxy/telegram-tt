@@ -132,10 +132,11 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
     setSettingOption({ messageTextSize: newSize });
   }, [setSettingOption]);
 
-  const handleTimeFormatChange = useCallback((value: string) => {
-    setTimeFormat(value as TimeFormat, () => {
-      setSettingOption({ timeFormat: value });
-    });
+  const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
+    setSettingOption({ timeFormat: newTimeFormat });
+    setSettingOption({ wasTimeFormatSetManually: true });
+
+    setTimeFormat(newTimeFormat as TimeFormat);
   }, [setSettingOption]);
 
   const handleStickerSetClick = useCallback((value: ApiSticker) => {

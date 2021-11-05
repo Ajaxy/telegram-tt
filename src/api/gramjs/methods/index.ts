@@ -26,8 +26,7 @@ export {
 } from './messages';
 
 export {
-  fetchFullUser, fetchNearestCountry, fetchCountryList,
-  fetchTopUsers, fetchContactList, fetchUsers,
+  fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
   addContact, updateContact, deleteUser, fetchProfilePhotos,
 } from './users';
 
@@ -47,7 +46,7 @@ export {
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
-  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings,
+  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList,
 } from './settings';
 
 export {

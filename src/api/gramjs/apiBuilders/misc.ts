@@ -132,13 +132,16 @@ function buildApiCountry(country: GramJs.help.Country, code?: GramJs.help.Countr
 }
 
 export function buildApiCountryList(countries: GramJs.help.Country[]) {
-  const listByCode = flatten(countries
-    .filter((country) => !country.hidden)
-    .map((country) => (
-      country.countryCodes.map((code) => buildApiCountry(country, code))
-    ))).sort((a: ApiCountry, b: ApiCountry) => (
-    a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
-  ));
+  const listByCode = flatten(
+    countries
+      .filter((country) => !country.hidden)
+      .map((country) => (
+        country.countryCodes.map((code) => buildApiCountry(country, code))
+      )),
+  )
+    .sort((a: ApiCountry, b: ApiCountry) => (
+      a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
+    ));
 
   const generalList = countries
     .filter((country) => !country.hidden)
