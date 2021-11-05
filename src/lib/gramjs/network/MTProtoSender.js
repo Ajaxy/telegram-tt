@@ -35,7 +35,6 @@ const { LogOut } = require('../tl').requests.auth;
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 
-
 /**
  * MTProto Mobile Protocol sender
  * (https://core.telegram.org/mtproto/description)
@@ -81,7 +80,6 @@ class MTProtoSender {
         this._autoReconnectCallback = args.autoReconnectCallback;
         this._isMainSender = args.isMainSender;
         this._onConnectionBreak = args.onConnectionBreak;
-
 
         /**
          * whether we disconnected ourself or telegram did it.
@@ -557,9 +555,14 @@ class MTProtoSender {
             this._send_queue.append(new RequestState(new MsgsAck({ msgIds: [state.msgId] })));
             state.reject(error);
         } else {
-            const reader = new BinaryReader(result.body);
-            const read = state.request.readResult(reader);
-            state.resolve(read);
+            try {
+                const reader = new BinaryReader(result.body);
+                const read = state.request.readResult(reader);
+                state.resolve(read);
+            } catch (err) {
+                state.reject(err);
+                throw err;
+            }
         }
     }
 
