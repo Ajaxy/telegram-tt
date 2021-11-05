@@ -13,7 +13,10 @@ import {
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
   TIPS_USERNAME,
-  LOCALIZED_TIPS, RE_TG_LINK, SERVICE_NOTIFICATIONS_USER_ID,
+  LOCALIZED_TIPS,
+  RE_TG_LINK,
+  SERVICE_NOTIFICATIONS_USER_ID,
+  TMP_CHAT_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -47,8 +50,6 @@ import { processDeepLink } from '../../../util/deeplink';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const CHATS_PRELOAD_INTERVAL = 300;
-// We expect this ID does not exist
-const TMP_CHAT_ID = -1;
 
 const runThrottledForLoadChats = throttle((cb) => cb(), CHATS_PRELOAD_INTERVAL, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
@@ -158,17 +159,17 @@ addReducer('focusMessageInComments', (global, actions, payload) => {
 
 addReducer('openSupportChat', (global, actions) => {
   const chat = selectSupportChat(global);
-
-  actions.openChat({ id: chat ? chat.id : TMP_CHAT_ID });
-
   if (chat) {
+    actions.openChat({ id: chat.id, shouldReplaceHistory: true });
     return;
   }
+
+  actions.openChat({ id: TMP_CHAT_ID, shouldReplaceHistory: true });
 
   (async () => {
     const result = await callApi('fetchChat', { type: 'support' });
     if (result) {
-      actions.openChat({ id: result.chatId });
+      actions.openChat({ id: result.chatId, shouldReplaceHistory: true });
     }
   })();
 });
@@ -1071,7 +1072,7 @@ async function createChannel(title: string, users: ApiUser[], about?: string, ph
     },
   };
   setGlobal(global);
-  getDispatch().openChat({ id: channelId });
+  getDispatch().openChat({ id: channelId, shouldReplaceHistory: true });
 
   if (channelId && accessHash && photo) {
     await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
@@ -1103,7 +1104,7 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
     },
   };
   setGlobal(global);
-  getDispatch().openChat({ id: chatId });
+  getDispatch().openChat({ id: chatId, shouldReplaceHistory: true });
 
   if (chatId && photo) {
     await callApi('editChatPhoto', { chatId, photo });
