@@ -20,10 +20,6 @@
     --color-white: var(--color-background-own);
   }
 
-  .MiddleHeader & + .HeaderActions {
-    margin-left: 1.5rem;
-  }
-
   .player-button {
     &.smaller {
       width: 3rem;
@@ -76,7 +72,7 @@
 
     &:hover .volume-slider-spacer, .volume-slider-spacer:hover {
       visibility: visible;
-    } 
+    }
 
     .volume-slider {
       opacity: 0;
@@ -101,8 +97,8 @@
       }
     }
 
-    &:hover .volume-slider, 
-    .volume-slider:hover, 
+    &:hover .volume-slider,
+    .volume-slider:hover,
     .volume-slider-spacer:hover + .volume-slider {
       opacity: 1;
       visibility: visible;
