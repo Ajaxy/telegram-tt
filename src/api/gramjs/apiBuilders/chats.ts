@@ -344,6 +344,8 @@ export function buildChatTypingStatus(
     action = 'lng_send_action_record_round';
   } else if (update.action instanceof GramJs.SendMessageUploadRoundAction) {
     action = 'lng_send_action_upload_round';
+  } else if (update.action instanceof GramJs.SpeakingInGroupCallAction) {
+    return undefined;
   }
 
   return {
