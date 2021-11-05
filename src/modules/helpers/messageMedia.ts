@@ -184,6 +184,7 @@ export function getMessageMediaHash(
         }
 
         return `${base}?size=m`;
+      case 'viewerFull':
       case 'download':
         return base;
     }
