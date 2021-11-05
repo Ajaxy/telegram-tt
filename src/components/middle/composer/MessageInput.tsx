@@ -242,7 +242,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       e.target.removeEventListener('keyup', handleKeyUp);
     }
 
-    if (e.metaKey && !html.length) {
+    if (!html.length && (e.metaKey || e.ctrlKey)) {
       const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
       if (targetIndexDelta) {
         e.preventDefault();
@@ -265,7 +265,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
         closeTextFormatter();
         onSend();
       }
-    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.altKey) {
+    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
       editLastMessage();
     } else {
