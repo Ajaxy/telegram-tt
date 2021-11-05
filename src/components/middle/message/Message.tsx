@@ -52,7 +52,7 @@ import {
   isReplyMessage,
   isAnonymousOwnMessage,
   isMessageLocal,
-  isChatPrivate,
+  isUserId,
   isChatWithRepliesBot,
   getMessageCustomShape,
   isChatChannel,
@@ -447,7 +447,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   function renderAvatar() {
-    const isAvatarPeerUser = avatarPeer && isChatPrivate(avatarPeer.id);
+    const isAvatarPeerUser = avatarPeer && isUserId(avatarPeer.id);
     const avatarUser = (avatarPeer && isAvatarPeerUser) ? avatarPeer as ApiUser : undefined;
     const avatarChat = (avatarPeer && !isAvatarPeerUser) ? avatarPeer as ApiChat : undefined;
     const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;

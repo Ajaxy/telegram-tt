@@ -29,7 +29,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import './Management.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;

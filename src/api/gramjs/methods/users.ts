@@ -10,7 +10,6 @@ import { invokeRequest } from './client';
 import { searchMessagesLocal } from './messages';
 import {
   buildInputEntity,
-  calculateResultHash,
   buildInputPeer,
   buildInputContact,
 } from '../gramjsBuilders';
@@ -20,6 +19,7 @@ import { buildApiPhoto } from '../apiBuilders/common';
 import localDb from '../localDb';
 import { addPhotoToLocalDb } from '../helpers';
 import { buildApiCountryList } from '../apiBuilders/misc';
+import { buildApiPeerId } from '../apiBuilders/peers';
 
 let onUpdate: OnApiUpdate;
 
@@ -31,7 +31,7 @@ export async function fetchFullUser({
   id,
   accessHash,
 }: {
-  id: number;
+  id: string;
   accessHash?: string;
 }) {
   const input = buildInputEntity(id, accessHash);
@@ -73,9 +73,8 @@ export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCod
   return buildApiCountryList(countryList.countries);
 }
 
-export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
+export async function fetchTopUsers() {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
-    hash,
     correspondents: true,
   }));
   if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
@@ -86,29 +85,24 @@ export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
   const ids = users.map(({ id }) => id);
 
   return {
-    hash: calculateResultHash(ids),
     ids,
     users,
   };
 }
 
-export async function fetchContactList({ hash = 0 }: { hash?: number }) {
-  const result = await invokeRequest(new GramJs.contacts.GetContacts({ hash }));
+export async function fetchContactList() {
+  const result = await invokeRequest(new GramJs.contacts.GetContacts({ hash: BigInt('0') }));
   if (!result || result instanceof GramJs.contacts.ContactsNotModified) {
     return undefined;
   }
 
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
-      localDb.users[user.id] = user;
+      localDb.users[buildApiPeerId(user.id, 'user')] = user;
     }
   });
 
   return {
-    hash: calculateResultHash([
-      result.savedCount,
-      ...result.contacts.map(({ userId }) => userId),
-    ]),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
     chats: result.users.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any),
   };
@@ -124,7 +118,7 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
 
   result.forEach((user) => {
     if (user instanceof GramJs.User) {
-      localDb.users[user.id] = user;
+      localDb.users[buildApiPeerId(user.id, 'user')] = user;
     }
   });
 
@@ -156,7 +150,7 @@ export function addContact({
   firstName = '',
   lastName = '',
 }: {
-  id: number;
+  id: string;
   accessHash?: string;
   phoneNumber?: string;
   firstName?: string;
@@ -174,7 +168,7 @@ export async function deleteUser({
   id,
   accessHash,
 }: {
-  id: number;
+  id: string;
   accessHash?: string;
 }) {
   const input = buildInputEntity(id, accessHash);

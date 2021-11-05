@@ -36,7 +36,7 @@ import {
   selectCountNotMutedUnread,
   selectLastServiceNotification,
 } from '../../selectors';
-import { isChatPrivate } from '../../helpers';
+import { isUserId } from '../../helpers';
 
 addReducer('sync', (global, actions) => {
   void sync(actions.afterSync);
@@ -135,7 +135,7 @@ async function loadAndReplaceChats() {
       savedChats.push(selectedChat);
     }
 
-    if (isChatPrivate(currentChatId)) {
+    if (isUserId(currentChatId)) {
       const selectedChatUser = selectUser(global, currentChatId);
       if (selectedChatUser && !savedPrivateChatIds.includes(currentChatId)) {
         savedUsers.push(selectedChatUser);
@@ -158,11 +158,11 @@ async function loadAndReplaceChats() {
 
   global = updateChatListSecondaryInfo(global, 'active', result);
 
-  Object.keys(result.draftsById).map(Number).forEach((chatId) => {
+  Object.keys(result.draftsById).forEach((chatId) => {
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId]);
   });
 
-  Object.keys(result.replyingToById).map(Number).forEach((chatId) => {
+  Object.keys(result.replyingToById).forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
     );
@@ -205,10 +205,14 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
   const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
   // Memoize drafts
-  const draftChatIds = Object.keys(global.messages.byChatId).map(Number);
-  const draftsByChatId = draftChatIds.reduce<Record<number, ApiFormattedText>>((acc, chatId) => {
+  const draftChatIds = Object.keys(global.messages.byChatId);
+  const draftsByChatId = draftChatIds.reduce<Record<string, ApiFormattedText>>((acc, chatId) => {
     const draft = selectDraft(global, chatId, MAIN_THREAD_ID);
-    return draft ? { ...acc, [chatId]: draft } : acc;
+    if (draft) {
+      acc[chatId] = draft;
+    }
+
+    return acc;
   }, {});
 
   if (currentChatId) {
@@ -244,8 +248,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
         const resultOrigin = await loadTopMessages(global.chats.byId[originChannelId]);
         if (resultOrigin) {
           const byIdOrigin = buildCollectionByKey(resultOrigin.messages, 'id');
-          const listedIdsOrigin = Object.keys(byIdOrigin)
-            .map(Number);
+          const listedIdsOrigin = Object.keys(byIdOrigin).map(Number);
 
           global = {
             ...global,
@@ -299,7 +302,7 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
   }
 
   // Restore drafts
-  Object.keys(draftsByChatId).map(Number).forEach((chatId) => {
+  Object.keys(draftsByChatId).forEach((chatId) => {
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', draftsByChatId[chatId]);
   });
 

@@ -15,18 +15,18 @@ import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onScreenSelect: (screen: ManagementScreens) => void;
-  onChatMemberSelect: (memberId: number, isPromotedByCurrentUser?: boolean) => void;
+  onChatMemberSelect: (memberId: string, isPromotedByCurrentUser?: boolean) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
 
 type StateProps = {
   chat: ApiChat;
-  currentUserId?: number;
+  currentUserId?: string;
   isChannel: boolean;
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
 };
 
 const ManageChatAdministrators: FC<OwnProps & StateProps> = ({

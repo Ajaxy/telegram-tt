@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
 
@@ -15,8 +16,8 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function fetchStickerSets({ hash }: { hash: number }) {
-  const allStickers = await invokeRequest(new GramJs.messages.GetAllStickers({ hash }));
+export async function fetchStickerSets({ hash = '0' }: { hash?: string }) {
+  const allStickers = await invokeRequest(new GramJs.messages.GetAllStickers({ hash: BigInt(hash) }));
 
   if (!allStickers || allStickers instanceof GramJs.messages.AllStickersNotModified) {
     return undefined;
@@ -29,46 +30,46 @@ export async function fetchStickerSets({ hash }: { hash: number }) {
   });
 
   return {
-    hash: allStickers.hash,
+    hash: String(allStickers.hash),
     sets: allStickers.sets.map(buildStickerSet),
   };
 }
 
-export async function fetchRecentStickers({ hash }: { hash: number }) {
-  const result = await invokeRequest(new GramJs.messages.GetRecentStickers({ hash }));
+export async function fetchRecentStickers({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetRecentStickers({ hash: BigInt(hash) }));
 
   if (!result || result instanceof GramJs.messages.RecentStickersNotModified) {
     return undefined;
   }
 
   return {
-    hash: result.hash,
+    hash: String(result.hash),
     stickers: processStickerResult(result.stickers.slice(0, RECENT_STICKERS_LIMIT)),
   };
 }
 
-export async function fetchFavoriteStickers({ hash }: { hash: number }) {
-  const result = await invokeRequest(new GramJs.messages.GetFavedStickers({ hash }));
+export async function fetchFavoriteStickers({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetFavedStickers({ hash: BigInt(hash) }));
 
   if (!result || result instanceof GramJs.messages.FavedStickersNotModified) {
     return undefined;
   }
 
   return {
-    hash: result.hash,
+    hash: String(result.hash),
     stickers: processStickerResult(result.stickers),
   };
 }
 
-export async function fetchFeaturedStickers({ hash }: { hash: number }) {
-  const result = await invokeRequest(new GramJs.messages.GetFeaturedStickers({ hash }));
+export async function fetchFeaturedStickers({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetFeaturedStickers({ hash: BigInt(hash) }));
 
   if (!result || result instanceof GramJs.messages.FeaturedStickersNotModified) {
     return undefined;
   }
 
   return {
-    hash: result.hash,
+    hash: String(result.hash),
     sets: result.sets.map(buildStickerSetCovered),
   };
 }
@@ -93,8 +94,10 @@ export async function faveSticker({
   }
 }
 
-export async function fetchStickers({ stickerSetShortName, stickerSetId, accessHash }:
-{ stickerSetShortName?: string; stickerSetId?: string; accessHash: string }) {
+export async function fetchStickers(
+  { stickerSetShortName, stickerSetId, accessHash }:
+  { stickerSetShortName?: string; stickerSetId?: string; accessHash: string },
+) {
   const result = await invokeRequest(new GramJs.messages.GetStickerSet({
     stickerset: stickerSetId
       ? buildInputStickerSet(stickerSetId, accessHash)
@@ -127,10 +130,10 @@ export async function fetchAnimatedEmojis() {
   };
 }
 
-export async function searchStickers({ query, hash }: { query: string; hash: number }) {
+export async function searchStickers({ query, hash = '0' }: { query: string; hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.SearchStickerSets({
     q: query,
-    hash,
+    hash: BigInt(hash),
   }));
 
   if (!result || result instanceof GramJs.messages.FoundStickerSetsNotModified) {
@@ -138,20 +141,20 @@ export async function searchStickers({ query, hash }: { query: string; hash: num
   }
 
   return {
-    hash: result.hash,
+    hash: String(result.hash),
     sets: result.sets.map(buildStickerSetCovered),
   };
 }
 
-export async function fetchSavedGifs({ hash }: { hash: number }) {
-  const result = await invokeRequest(new GramJs.messages.GetSavedGifs({ hash }));
+export async function fetchSavedGifs({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetSavedGifs({ hash: BigInt(hash) }));
 
   if (!result || result instanceof GramJs.messages.SavedGifsNotModified) {
     return undefined;
   }
 
   return {
-    hash: result.hash,
+    hash: String(result.hash),
     gifs: processGifResult(result.gifs),
   };
 }
@@ -233,11 +236,11 @@ export async function searchGifs({ query, offset = '' }: { query: string; offset
 }
 
 export async function fetchStickersForEmoji({
-  emoji, hash = 0,
-}: { emoji: string; hash?: number }) {
+  emoji, hash = '0',
+}: { emoji: string; hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.GetStickers({
     emoticon: emoji,
-    hash,
+    hash: BigInt(hash),
   }));
 
   if (!result || result instanceof GramJs.messages.StickersNotModified) {
@@ -246,7 +249,7 @@ export async function fetchStickersForEmoji({
 
   return {
     stickers: processStickerResult(result.stickers),
-    hash: result.hash,
+    hash: String(result.hash),
   };
 }
 

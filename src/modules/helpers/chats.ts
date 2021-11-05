@@ -20,8 +20,13 @@ const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
 
-export function isChatPrivate(chatId: number) {
-  return chatId > 0;
+export function isUserId(entityId: string) {
+  // Workaround for old-fashioned IDs stored locally
+  if (typeof entityId === 'number') {
+    return entityId > 0;
+  }
+
+  return !entityId.startsWith('-');
 }
 
 export function isChatGroup(chat: ApiChat) {
@@ -44,7 +49,7 @@ export function isCommonBoxChat(chat: ApiChat) {
   return chat.type === 'chatTypePrivate' || chat.type === 'chatTypeBasicGroup';
 }
 
-export function isChatWithRepliesBot(chatId: number) {
+export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
 }
 
@@ -143,7 +148,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: number) {
     return true;
   }
 
-  if (isChatPrivate(chat.id)) {
+  if (isUserId(chat.id)) {
     return true;
   }
 
@@ -177,7 +182,7 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
 
   return {
     canAttachMedia: isAdmin || !isUserRightBanned(chat, 'sendMedia'),
-    canAttachPolls: (isAdmin || !isUserRightBanned(chat, 'sendPolls')) && (!isChatPrivate(chat.id) || isChatWithBot),
+    canAttachPolls: (isAdmin || !isUserRightBanned(chat, 'sendPolls')) && (!isUserId(chat.id) || isChatWithBot),
     canSendStickers: isAdmin || !isUserRightBanned(chat, 'sendStickers'),
     canSendGifs: isAdmin || !isUserRightBanned(chat, 'sendGifs'),
     canAttachEmbedLinks: isAdmin || !isUserRightBanned(chat, 'embedLinks'),
@@ -230,7 +235,7 @@ export function isChatArchived(chat: ApiChat) {
 }
 
 export function selectIsChatMuted(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<number, NotifyException> = [],
+  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
 ) {
   // If this chat is in exceptions they take precedence
   if (notifyExceptions[chat.id] && notifyExceptions[chat.id].isMuted !== undefined) {
@@ -239,14 +244,14 @@ export function selectIsChatMuted(
 
   return (
     chat.isMuted
-    || (isChatPrivate(chat.id) && !notifySettings.hasPrivateChatsNotifications)
+    || (isUserId(chat.id) && !notifySettings.hasPrivateChatsNotifications)
     || (isChatChannel(chat) && !notifySettings.hasBroadcastNotifications)
     || (isChatGroup(chat) && !notifySettings.hasGroupNotifications)
   );
 }
 
 export function selectShouldShowMessagePreview(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<number, NotifyException> = [],
+  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
 ) {
   const {
     hasPrivateChatsMessagePreview = true,
@@ -258,7 +263,7 @@ export function selectShouldShowMessagePreview(
     return notifyExceptions[chat.id].shouldShowPreviews;
   }
 
-  return (isChatPrivate(chat.id) && hasPrivateChatsMessagePreview)
+  return (isUserId(chat.id) && hasPrivateChatsMessagePreview)
     || (isChatChannel(chat) && hasBroadcastMessagePreview)
     || (isChatGroup(chat) && hasGroupMessagePreview);
 }
@@ -268,17 +273,17 @@ export function getCanDeleteChat(chat: ApiChat) {
 }
 
 export function prepareFolderListIds(
-  chatsById: Record<number, ApiChat>,
-  usersById: Record<number, ApiUser>,
+  chatsById: Record<string, ApiChat>,
+  usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
-  chatIdsCache?: number[],
+  chatIdsCache?: string[],
 ) {
   const excludedChatIds = folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined;
   const includedChatIds = folder.excludedChatIds ? new Set(folder.includedChatIds) : undefined;
   const pinnedChatIds = folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined;
-  const listIds = (chatIdsCache || Object.keys(chatsById).map(Number))
+  const listIds = (chatIdsCache || Object.keys(chatsById))
     .filter((id) => {
       return filterChatFolder(
         chatsById[id],
@@ -298,12 +303,12 @@ export function prepareFolderListIds(
 function filterChatFolder(
   chat: ApiChat,
   folder: ApiChatFolder,
-  usersById: Record<number, ApiUser>,
+  usersById: Record<string, ApiUser>,
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
-  excludedChatIds?: Set<number>,
-  includedChatIds?: Set<number>,
-  pinnedChatIds?: Set<number>,
+  excludedChatIds?: Set<string>,
+  includedChatIds?: Set<string>,
+  pinnedChatIds?: Set<string>,
 ) {
   if (!chat.isListed) {
     return false;
@@ -333,7 +338,7 @@ function filterChatFolder(
     return false;
   }
 
-  if (isChatPrivate(chat.id)) {
+  if (isUserId(chat.id)) {
     const privateChatUser = usersById[chat.id];
 
     const isChatWithBot = privateChatUser && privateChatUser.type === 'userTypeBot';
@@ -360,9 +365,9 @@ function filterChatFolder(
 }
 
 export function prepareChatList(
-  chatsById: Record<number, ApiChat>,
-  listIds: number[],
-  orderedPinnedIds?: number[],
+  chatsById: Record<string, ApiChat>,
+  listIds: string[],
+  orderedPinnedIds?: string[],
   folderType: 'all' | 'archived' | 'folder' = 'all',
 ) {
   function chatFilter(chat?: ApiChat) {
@@ -415,10 +420,10 @@ export function prepareChatList(
 }
 
 export function getFolderUnreadDialogs(
-  chatsById: Record<number, ApiChat>,
-  usersById: Record<number, ApiUser>,
+  chatsById: Record<string, ApiChat>,
+  usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: number[],
+  chatIdsCache: string[],
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
 ) {
@@ -444,10 +449,10 @@ export function getFolderUnreadDialogs(
 
 export function getFolderDescriptionText(
   lang: LangFn,
-  chatsById: Record<number, ApiChat>,
-  usersById: Record<number, ApiUser>,
+  chatsById: Record<string, ApiChat>,
+  usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: number[],
+  chatIdsCache: string[],
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
 ) {
@@ -486,12 +491,12 @@ export function getFolderDescriptionText(
 }
 
 function getFolderChatsCount(
-  chatsById: Record<number, ApiChat>,
-  usersById: Record<number, ApiUser>,
+  chatsById: Record<string, ApiChat>,
+  usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: number[],
+  chatIdsCache: string[],
   notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
+  notifyExceptions?: Record<string, NotifyException>,
 ) {
   const [listIds, pinnedIds] = prepareFolderListIds(
     chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache,
@@ -500,8 +505,8 @@ function getFolderChatsCount(
   return pinnedChats.length + otherChats.length;
 }
 
-export function getMessageSenderName(lang: LangFn, chatId: number, sender?: ApiUser) {
-  if (!sender || isChatPrivate(chatId)) {
+export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiUser) {
+  if (!sender || isUserId(chatId)) {
     return undefined;
   }
 
@@ -513,10 +518,10 @@ export function getMessageSenderName(lang: LangFn, chatId: number, sender?: ApiU
 }
 
 export function sortChatIds(
-  chatIds: number[],
-  chatsById: Record<number, ApiChat>,
+  chatIds: string[],
+  chatsById: Record<string, ApiChat>,
   shouldPrioritizeVerified = false,
-  priorityIds?: number[],
+  priorityIds?: string[],
 ) {
   return orderBy(chatIds, (id) => {
     const chat = chatsById[id];

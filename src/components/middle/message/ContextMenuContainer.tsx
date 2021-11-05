@@ -215,7 +215,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [message.chatId, message.id, rescheduleMessage]);
 
   const handleCopyLink = useCallback(() => {
-    copyTextToClipboard(`https://t.me/${chatUsername || `c/${Math.abs(message.chatId)}`}/${message.id}`);
+    copyTextToClipboard(`https://t.me/${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
     closeMenu();
   }, [chatUsername, closeMenu, message.chatId, message.id]);
 

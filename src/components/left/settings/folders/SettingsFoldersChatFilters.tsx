@@ -32,11 +32,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<number, ApiChat>;
-  listIds?: number[];
-  orderedPinnedIds?: number[];
-  archivedListIds?: number[];
-  archivedPinnedIds?: number[];
+  chatsById: Record<string, ApiChat>;
+  listIds?: string[];
+  orderedPinnedIds?: string[];
+  archivedListIds?: string[];
+  archivedPinnedIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadMoreChats'>;
@@ -101,7 +101,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [dispatch]);
 
-  const handleSelectedIdsChange = useCallback((ids: number[]) => {
+  const handleSelectedIdsChange = useCallback((ids: string[]) => {
     if (mode === 'included') {
       dispatch({
         type: 'setIncludeFilters',

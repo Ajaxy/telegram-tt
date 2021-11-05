@@ -30,14 +30,14 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<number, ApiChat>;
-  usersById: Record<number, ApiUser>;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
   chatFoldersById: Record<number, ApiChatFolder>;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
   orderedFolderIds?: number[];
   activeChatFolder: number;
-  currentUserId?: number;
+  currentUserId?: string;
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
 };
@@ -86,7 +86,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    const chatIds = Object.keys(chatsById).map(Number);
+    const chatIds = Object.keys(chatsById);
     const counters = displayedFolders.map((folder) => {
       const {
         unreadDialogsCount, hasActiveDialogs,

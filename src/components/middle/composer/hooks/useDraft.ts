@@ -14,12 +14,12 @@ import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { IS_TOUCH_ENV } from '../../../../util/environment';
 
 // Used to avoid running debounced callbacks when chat changes.
-let currentChatId: number | undefined;
+let currentChatId: string | undefined;
 let currentThreadId: number | undefined;
 
 export default (
   draft: ApiFormattedText | undefined,
-  chatId: number,
+  chatId: string,
   threadId: number,
   html: string,
   htmlRef: { current: string },
@@ -28,7 +28,7 @@ export default (
   saveDraft: GlobalActions['saveDraft'],
   clearDraft: GlobalActions['clearDraft'],
 ) => {
-  const updateDraft = useCallback((draftChatId: number, draftThreadId: number) => {
+  const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     if (htmlRef.current.length && !editedMessage) {
       saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(htmlRef.current!) });
     } else {

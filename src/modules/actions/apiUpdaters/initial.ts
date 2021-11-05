@@ -201,7 +201,7 @@ function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
   updateSessionUserId(currentUser.id);
 }
 
-function updateSessionUserId(currentUserId: number) {
+function updateSessionUserId(currentUserId: string) {
   const sessionUserAuth = localStorage.getItem(SESSION_USER_KEY);
   if (!sessionUserAuth) return;
 

@@ -6,7 +6,7 @@ import { GlobalActions } from '../../global/types';
 
 import { selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
-  isChatPrivate,
+  isUserId,
   isUserBot,
   getUserFirstOrLastName,
   getPrivateChatUserId,
@@ -39,7 +39,7 @@ type StateProps = {
   isPrivateChat: boolean;
   isBasicGroup: boolean;
   isSuperGroup: boolean;
-  currentUserId: number | undefined;
+  currentUserId: string | undefined;
   canDeleteForAll?: boolean;
   contactName?: string;
 };
@@ -196,7 +196,7 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chat }): StateProps => {
-    const isPrivateChat = isChatPrivate(chat.id);
+    const isPrivateChat = isUserId(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
     const user = isPrivateChat && selectUser(global, getPrivateChatUserId(chat)!);
     const isBot = user && isUserBot(user) && !chat.isSupport;

@@ -124,7 +124,7 @@ addReducer('addRecentSticker', (global, action, payload) => {
       stickers: {
         ...global.stickers,
         recent: {
-          hash: 0,
+          hash: '0',
           stickers: [sticker],
         },
       },

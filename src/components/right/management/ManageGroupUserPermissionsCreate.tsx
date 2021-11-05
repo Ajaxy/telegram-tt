@@ -15,15 +15,15 @@ import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onScreenSelect: (screen: ManagementScreens) => void;
-  onChatMemberSelect: (memberId: number) => void;
+  onChatMemberSelect: (memberId: string) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
   members?: ApiChatMember[];
   isChannel?: boolean;
   serverTimeOffset: number;
@@ -52,7 +52,7 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
     );
   }, [members, serverTimeOffset, usersById]);
 
-  const handleExceptionMemberClick = useCallback((memberId: number) => {
+  const handleExceptionMemberClick = useCallback((memberId: string) => {
     onChatMemberSelect(memberId);
     onScreenSelect(ManagementScreens.GroupUserPermissions);
   }, [onChatMemberSelect, onScreenSelect]);

@@ -20,8 +20,8 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
-  currentUserId?: number;
+  usersById: Record<string, ApiUser>;
+  currentUserId?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadMoreMembers' | 'deleteChatMember'>;
@@ -45,7 +45,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
       return !member.isAdmin && !member.isOwner && member.userId !== currentUserId;
     });
 
-    return availableMembers.reduce((acc, member) => {
+    return availableMembers.reduce<string[]>((acc, member) => {
       if (
         !filter
         || !usersById[member.userId]
@@ -55,10 +55,10 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       return acc;
-    }, [] as number[]);
+    }, []);
   }, [chat.fullInfo?.members, currentUserId, filter, usersById]);
 
-  const handleRemoveUser = useCallback((userId: number) => {
+  const handleRemoveUser = useCallback((userId: string) => {
     deleteChatMember({ chatId: chat.id, userId });
     onClose();
   }, [chat.id, deleteChatMember, onClose]);

@@ -25,7 +25,7 @@ type PushData = {
 
 type NotificationData = {
   messageId?: number;
-  chatId?: number;
+  chatId?: string;
   title: string;
   body: string;
   icon?: string;
@@ -33,7 +33,7 @@ type NotificationData = {
 
 type CloseNotificationData = {
   lastReadInboxMessageId?: number;
-  chatId: number;
+  chatId: string;
 };
 
 let lastSyncAt = new Date().valueOf();
@@ -54,15 +54,14 @@ function getPushData(e: PushEvent | Notification): PushData | undefined {
 
 function getChatId(data: PushData) {
   if (data.custom.from_id) {
-    return parseInt(data.custom.from_id, 10);
+    return data.custom.from_id;
   }
-  // Chats and channels have negative IDs
-  if (data.custom.chat_id) {
-    return parseInt(data.custom.chat_id, 10) * -1;
+
+  // Chats and channels have “negative” IDs
+  if (data.custom.chat_id || data.custom.channel_id) {
+    return `-${data.custom.chat_id || data.custom.channel_id}`;
   }
-  if (data.custom.channel_id) {
-    return parseInt(data.custom.channel_id, 10) * -1;
-  }
+
   return undefined;
 }
 
@@ -88,7 +87,7 @@ async function getClients() {
   });
 }
 
-async function playNotificationSound(id: number) {
+async function playNotificationSound(id: string) {
   const clients = await getClients();
   const client = clients[0];
   if (!client) return;
@@ -121,7 +120,7 @@ function showNotification({
   };
 
   return Promise.all([
-    playNotificationSound(messageId || chatId || 0),
+    playNotificationSound(String(messageId) || chatId || ''),
     self.registration.showNotification(title, options),
   ]);
 }
@@ -168,7 +167,7 @@ export function handlePush(e: PushEvent) {
   e.waitUntil(showNotification(notification));
 }
 
-async function focusChatMessage(client: WindowClient, data: { chatId?: number; messageId?: number }) {
+async function focusChatMessage(client: WindowClient, data: { chatId?: string; messageId?: number }) {
   const {
     chatId,
     messageId,

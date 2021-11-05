@@ -18,7 +18,9 @@ import { LoadMoreDirection } from '../../../types';
 import { MAX_MEDIA_FILES_FOR_ALBUM, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { IS_IOS } from '../../../util/environment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
-import { areSortedArraysIntersecting, buildCollectionByKey, split } from '../../../util/iteratees';
+import {
+  areSortedArraysIntersecting, buildCollectionByKey, split, unique,
+} from '../../../util/iteratees';
 import {
   addUsers,
   addChatMessagesById,
@@ -596,9 +598,7 @@ addReducer('loadScheduledHistory', (global, actions, payload) => {
     return;
   }
 
-  const { hash } = global.scheduledMessages.byChatId[chat.id] || {};
-
-  void loadScheduledHistory(chat, hash);
+  void loadScheduledHistory(chat);
 });
 
 addReducer('sendScheduledMessages', (global, actions, payload) => {
@@ -881,7 +881,6 @@ async function loadPollOptionResults(
     return;
   }
 
-  const isUnique = (v: number, i: number, a: number[]) => a.indexOf(v) === i;
   let global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
@@ -893,10 +892,10 @@ async function loadPollOptionResults(
       ...global.pollResults,
       voters: {
         ...voters,
-        [option]: [
+        [option]: unique([
           ...(!shouldResetVoters && voters && voters[option] ? voters[option] : []),
           ...(result && result.users.map((user) => user.id)),
-        ].filter(isUnique),
+        ]),
       },
       offsets: {
         ...(global.pollResults.offsets ? global.pollResults.offsets : {}),
@@ -935,19 +934,19 @@ async function loadPinnedMessages(chat: ApiChat) {
   setGlobal(global);
 }
 
-async function loadScheduledHistory(chat: ApiChat, historyHash?: number) {
-  const result = await callApi('fetchScheduledHistory', { chat, hash: historyHash });
+async function loadScheduledHistory(chat: ApiChat) {
+  const result = await callApi('fetchScheduledHistory', { chat });
   if (!result) {
     return;
   }
 
-  const { hash, messages } = result;
+  const { messages } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
   const ids = Object.keys(byId).map(Number).sort((a, b) => b - a);
 
   let global = getGlobal();
-  global = replaceScheduledMessages(global, chat.id, byId, hash);
+  global = replaceScheduledMessages(global, chat.id, byId);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   setGlobal(global);
 }

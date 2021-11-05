@@ -15,7 +15,7 @@ import Button from '../ui/Button';
 
 export type OwnProps = {
   isOpen: boolean;
-  userId?: number;
+  userId?: string;
   onClose: () => void;
 };
 

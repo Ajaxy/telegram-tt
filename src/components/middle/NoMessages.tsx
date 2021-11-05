@@ -7,7 +7,7 @@ import useLang, { LangFn } from '../../hooks/useLang';
 import './NoMessages.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   isChatWithSelf?: boolean;
   type: MessageListType;
   isGroupChatJustCreated?: boolean;

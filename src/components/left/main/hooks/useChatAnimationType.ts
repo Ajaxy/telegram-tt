@@ -6,15 +6,15 @@ export enum ChatAnimationTypes {
   None,
 }
 
-export function useChatAnimationType(orderDiffById: Record<number, number>) {
-  const movesUp = useCallback((id: number) => orderDiffById[id] < 0, [orderDiffById]);
-  const movesDown = useCallback((id: number) => orderDiffById[id] > 0, [orderDiffById]);
+export function useChatAnimationType(orderDiffById: Record<string, number>) {
+  const movesUp = useCallback((id: string) => orderDiffById[id] < 0, [orderDiffById]);
+  const movesDown = useCallback((id: string) => orderDiffById[id] > 0, [orderDiffById]);
 
-  const orderDiffIds = Object.keys(orderDiffById).map(Number);
+  const orderDiffIds = Object.keys(orderDiffById);
   const numberOfUp = orderDiffIds.filter(movesUp).length;
   const numberOfDown = orderDiffIds.filter(movesDown).length;
 
-  return useCallback((chatId: number): ChatAnimationTypes => {
+  return useCallback((chatId: string): ChatAnimationTypes => {
     const orderDiff = orderDiffById[chatId];
 
     if (orderDiff === 0) {

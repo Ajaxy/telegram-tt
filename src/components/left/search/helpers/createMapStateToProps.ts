@@ -9,13 +9,13 @@ import { selectTheme } from '../../../../modules/selectors';
 export type StateProps = {
   theme: ISettings['theme'];
   isLoading?: boolean;
-  chatsById: Record<number, ApiChat>;
-  usersById: Record<number, ApiUser>;
-  globalMessagesByChatId?: Record<number, { byId: Record<number, ApiMessage> }>;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
+  globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   foundIds?: string[];
   lastSyncTime?: number;
-  searchChatId?: number;
-  activeDownloads: Record<number, number[]>;
+  searchChatId?: string;
+  activeDownloads: Record<string, number[]>;
 };
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {

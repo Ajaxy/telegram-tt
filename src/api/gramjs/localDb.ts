@@ -4,8 +4,8 @@ import { ApiMessage } from '../types';
 interface LocalDb {
   localMessages: Record<string, ApiMessage>;
   // Used for loading avatars and media through in-memory Gram JS instances.
-  chats: Record<number, GramJs.Chat | GramJs.Channel>;
-  users: Record<number, GramJs.User>;
+  chats: Record<string, GramJs.Chat | GramJs.Channel>;
+  users: Record<string, GramJs.User>;
   messages: Record<string, GramJs.Message | GramJs.MessageService>;
   documents: Record<string, GramJs.Document>;
   stickerSets: Record<string, GramJs.StickerSet>;

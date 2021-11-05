@@ -32,7 +32,7 @@ type OwnProps = {
   isDownloading: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
-  onDateClick?: (messageId: number, chatId: number) => void;
+  onDateClick?: (messageId: number, chatId: string) => void;
 };
 
 const Document: FC<OwnProps> = ({

@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
   OnApiUpdate,
@@ -21,7 +22,6 @@ import {
   getPeerKey,
   buildChatMembers,
   buildApiChatFromPreview,
-  getApiChatIdFromMtpPeer,
   buildApiChatFolder,
   buildApiChatFolderFromSuggested,
   buildApiChatBotCommands,
@@ -40,6 +40,7 @@ import {
   buildChatAdminRights,
 } from '../gramjsBuilders';
 import { addMessageToLocalDb } from '../helpers';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 let onUpdate: OnApiUpdate;
@@ -96,12 +97,12 @@ export async function fetchChats({
     ...preparePeers(result),
   };
   const chats: ApiChat[] = [];
-  const draftsById: Record<number, ApiFormattedText> = {};
-  const replyingToById: Record<number, number> = {};
+  const draftsById: Record<string, ApiFormattedText> = {};
+  const replyingToById: Record<string, number> = {};
 
   const dialogs = (resultPinned ? resultPinned.dialogs : []).concat(result.dialogs);
 
-  const orderedPinnedIds: number[] = [];
+  const orderedPinnedIds: string[] = [];
 
   dialogs.forEach((dialog) => {
     if (
@@ -325,12 +326,12 @@ export function clearDraft(chat: ApiChat) {
   }));
 }
 
-async function getFullChatInfo(chatId: number): Promise<{
+async function getFullChatInfo(chatId: string): Promise<{
   fullInfo: ApiChatFullInfo;
   users?: ApiUser[];
 } | undefined> {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({
-    chatId: buildInputEntity(chatId) as number,
+    chatId: buildInputEntity(chatId) as BigInt.BigInteger,
   }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
@@ -366,7 +367,7 @@ async function getFullChatInfo(chatId: number): Promise<{
 }
 
 async function getFullChannelInfo(
-  id: number,
+  id: string,
   accessHash: string,
   adminRights?: ApiChatAdminRights,
 ) {
@@ -430,7 +431,7 @@ async function getFullChannelInfo(
         nextSendDate: slowmodeNextSendDate,
       } : undefined,
       migratedFrom: migratedFromChatId ? {
-        chatId: getApiChatIdFromMtpPeer({ chatId: migratedFromChatId } as GramJs.TypePeer),
+        chatId: buildApiPeerId(migratedFromChatId, 'chat'),
         maxMessageId: migratedFromMaxId,
       } : undefined,
       canViewMembers: canViewParticipants,
@@ -438,8 +439,8 @@ async function getFullChannelInfo(
       members,
       kickedMembers,
       adminMembers,
-      groupCallId: call ? call.id.toString() : undefined,
-      linkedChatId: linkedChatId ? getApiChatIdFromMtpPeer({ chatId: linkedChatId } as GramJs.TypePeer) : undefined,
+      groupCallId: call ? String(call.id) : undefined,
+      linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'chat') : undefined,
       botCommands,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
@@ -515,7 +516,7 @@ export async function createChannel({
 export function joinChannel({
   channelId, accessHash,
 }: {
-  channelId: number; accessHash: string;
+  channelId: string; accessHash: string;
 }) {
   return invokeRequest(new GramJs.channels.JoinChannel({
     channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
@@ -529,7 +530,7 @@ export function deleteChatUser({
 }) {
   if (chat.type !== 'chatTypeBasicGroup') return undefined;
   return invokeRequest(new GramJs.messages.DeleteChatUser({
-    chatId: buildInputEntity(chat.id, chat.accessHash) as number,
+    chatId: buildInputEntity(chat.id, chat.accessHash) as BigInt.BigInteger,
     userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
   }), true);
 }
@@ -537,17 +538,17 @@ export function deleteChatUser({
 export function deleteChat({
   chatId,
 }: {
-  chatId: number;
+  chatId: string;
 }) {
   return invokeRequest(new GramJs.messages.DeleteChat({
-    chatId: buildInputEntity(chatId) as number,
+    chatId: buildInputEntity(chatId) as BigInt.BigInteger,
   }), true);
 }
 
 export function leaveChannel({
   channelId, accessHash,
 }: {
-  channelId: number; accessHash: string;
+  channelId: string; accessHash: string;
 }) {
   return invokeRequest(new GramJs.channels.LeaveChannel({
     channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
@@ -557,7 +558,7 @@ export function leaveChannel({
 export function deleteChannel({
   channelId, accessHash,
 }: {
-  channelId: number; accessHash: string;
+  channelId: string; accessHash: string;
 }) {
   return invokeRequest(new GramJs.channels.DeleteChannel({
     channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
@@ -600,7 +601,7 @@ export async function createGroupChat({
 export async function editChatPhoto({
   chatId, accessHash, photo,
 }: {
-  chatId: number; accessHash?: string; photo: File;
+  chatId: string; accessHash?: string; photo: File;
 }) {
   const uploadedPhoto = await uploadFile(photo);
   const inputEntity = buildInputEntity(chatId, accessHash);
@@ -614,7 +615,7 @@ export async function editChatPhoto({
         }),
       })
       : new GramJs.messages.EditChatPhoto({
-        chatId: inputEntity as number,
+        chatId: inputEntity as BigInt.BigInteger,
         photo: new GramJs.InputChatUploadedPhoto({
           file: uploadedPhoto,
         }),
@@ -837,7 +838,7 @@ export async function updateChatTitle(chat: ApiChat, title: string) {
         channel: inputEntity as GramJs.InputChannel,
         title,
       }) : new GramJs.messages.EditChatTitle({
-        chatId: inputEntity as number,
+        chatId: inputEntity as BigInt.BigInteger,
         title,
       }),
     true,
@@ -881,7 +882,7 @@ type ChannelMembersFilter =
   | 'recent';
 
 export async function fetchMembers(
-  chatId: number,
+  chatId: string,
   accessHash: string,
   memberFilter: ChannelMembersFilter = 'recent',
   offset?: number,
@@ -946,7 +947,7 @@ export function setDiscussionGroup({
 
 export async function migrateChat(chat: ApiChat) {
   const result = await invokeRequest(
-    new GramJs.messages.MigrateChat({ chatId: buildInputEntity(chat.id) as number }), true,
+    new GramJs.messages.MigrateChat({ chatId: buildInputEntity(chat.id) as BigInt.BigInteger }), true,
   );
 
   // `migrateChat` can return a lot of different update types according to docs,
@@ -1014,7 +1015,7 @@ export function addChatMembers(chat: ApiChat, users: ApiUser[]) {
 
   return Promise.all(users.map((user) => {
     return invokeRequest(new GramJs.messages.AddChatUser({
-      chatId: buildInputEntity(chat.id) as number,
+      chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
       userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
     }), true);
   }));
@@ -1043,7 +1044,7 @@ export function deleteChatMember(chat: ApiChat, user: ApiUser) {
     });
   } else {
     return invokeRequest(new GramJs.messages.DeleteChatUser({
-      chatId: buildInputEntity(chat.id) as number,
+      chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
       userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
     }), true);
   }
@@ -1074,7 +1075,7 @@ function updateLocalDb(result: (
   if ('users' in result) {
     result.users.forEach((user) => {
       if (user instanceof GramJs.User) {
-        localDb.users[user.id] = user;
+        localDb.users[buildApiPeerId(user.id, 'user')] = user;
       }
     });
   }
@@ -1082,7 +1083,7 @@ function updateLocalDb(result: (
   if ('chats' in result) {
     result.chats.forEach((chat) => {
       if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-        localDb.chats[chat.id] = chat;
+        localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
       }
     });
   }
@@ -1102,7 +1103,5 @@ export async function importChatInvite({ hash }: { hash: string }) {
     return undefined;
   }
 
-  const chat = buildApiChatFromPreview(updates.chats[0]);
-
-  return chat;
+  return buildApiChatFromPreview(updates.chats[0]);
 }

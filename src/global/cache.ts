@@ -22,6 +22,7 @@ import { hasStoredSession } from '../util/sessions';
 import { INITIAL_STATE } from './initial';
 import { parseLocationHash } from '../util/routing';
 import { LOCATION_HASH } from '../hooks/useHistoryBack';
+import { isUserId } from '../modules/helpers';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -201,12 +202,12 @@ function reduceShowChatInfo(global: GlobalState): boolean {
 function reduceUsers(global: GlobalState): GlobalState['users'] {
   const { users: { byId, selectedId } } = global;
   const idsToSave = [
-    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter((cid) => cid > 0),
+    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter(isUserId),
     ...Object.keys(byId),
   ].slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 
   return {
-    byId: pick(byId, idsToSave as number[]),
+    byId: pick(byId, idsToSave),
     selectedId: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN ? selectedId : undefined,
   };
 }

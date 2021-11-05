@@ -4,7 +4,7 @@ import { ApiUser } from '../../api/types';
 import { omit } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-export function replaceUsers(global: GlobalState, newById: Record<number, ApiUser>): GlobalState {
+export function replaceUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
   return {
     ...global,
     users: {
@@ -15,7 +15,7 @@ export function replaceUsers(global: GlobalState, newById: Record<number, ApiUse
 }
 
 // @optimization Don't spread/unspread global for each element, do it in a batch
-function getUpdatedUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>): ApiUser {
+function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial<ApiUser>): ApiUser {
   const { byId } = global.users;
   const user = byId[userId];
   const shouldOmitMinInfo = userUpdate.isMin && user && !user.isMin;
@@ -33,7 +33,7 @@ function getUpdatedUser(global: GlobalState, userId: number, userUpdate: Partial
 }
 
 function updateContactList(global: GlobalState, updatedUsers: ApiUser[]): GlobalState {
-  const { hash, userIds: contactUserIds } = global.contactList || {};
+  const { userIds: contactUserIds } = global.contactList || {};
 
   if (!contactUserIds) return global;
 
@@ -46,7 +46,6 @@ function updateContactList(global: GlobalState, updatedUsers: ApiUser[]): Global
   return {
     ...global,
     contactList: {
-      hash: hash || 0,
       userIds: [
         ...newContactUserIds,
         ...contactUserIds,
@@ -55,7 +54,7 @@ function updateContactList(global: GlobalState, updatedUsers: ApiUser[]): Global
   };
 }
 
-export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>): GlobalState {
+export function updateUser(global: GlobalState, userId: string, userUpdate: Partial<ApiUser>): GlobalState {
   const { byId } = global.users;
 
   const updatedUser = getUpdatedUser(global, userId, userUpdate);
@@ -68,8 +67,8 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
   });
 }
 
-export function updateUsers(global: GlobalState, updatedById: Record<number, ApiUser>): GlobalState {
-  const updatedUsers = Object.keys(updatedById).map(Number).reduce<Record<number, ApiUser>>((acc, id) => {
+export function updateUsers(global: GlobalState, updatedById: Record<string, ApiUser>): GlobalState {
+  const updatedUsers = Object.keys(updatedById).reduce<Record<string, ApiUser>>((acc, id) => {
     const updatedUser = getUpdatedUser(global, id, updatedById[id]);
     if (updatedUser) {
       acc[id] = updatedUser;
@@ -88,11 +87,11 @@ export function updateUsers(global: GlobalState, updatedById: Record<number, Api
 }
 
 // @optimization Allows to avoid redundant updates which cause a lot of renders
-export function addUsers(global: GlobalState, addedById: Record<number, ApiUser>): GlobalState {
+export function addUsers(global: GlobalState, addedById: Record<string, ApiUser>): GlobalState {
   const { byId } = global.users;
   let isAdded = false;
 
-  const addedUsers = Object.keys(addedById).map(Number).reduce<Record<number, ApiUser>>((acc, id) => {
+  const addedUsers = Object.keys(addedById).reduce<Record<string, ApiUser>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
       const updatedUser = getUpdatedUser(global, id, addedById[id]);
       if (updatedUser) {
@@ -118,7 +117,7 @@ export function addUsers(global: GlobalState, addedById: Record<number, ApiUser>
   return global;
 }
 
-export function updateSelectedUserId(global: GlobalState, selectedId?: number): GlobalState {
+export function updateSelectedUserId(global: GlobalState, selectedId?: string): GlobalState {
   if (global.users.selectedId === selectedId) {
     return global;
   }
@@ -132,15 +131,14 @@ export function updateSelectedUserId(global: GlobalState, selectedId?: number): 
   };
 }
 
-export function deleteUser(global: GlobalState, userId: number): GlobalState {
+export function deleteUser(global: GlobalState, userId: string): GlobalState {
   const { byId } = global.users;
-  const { hash, userIds } = global.contactList || {};
+  const { userIds } = global.contactList || {};
   delete byId[userId];
 
   global = {
     ...global,
     contactList: {
-      hash: hash || 0,
       userIds: userIds ? userIds.filter((id) => id !== userId) : MEMO_EMPTY_ARRAY,
     },
   };
@@ -169,7 +167,7 @@ export function updateUserSearchFetchingStatus(
   });
 }
 
-export function updateUserBlockedState(global: GlobalState, userId: number, isBlocked: boolean) {
+export function updateUserBlockedState(global: GlobalState, userId: string, isBlocked: boolean) {
   const { byId } = global.users;
   const user = byId[userId];
   if (!user || !user.fullInfo) {

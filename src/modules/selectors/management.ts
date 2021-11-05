@@ -2,9 +2,9 @@ import { GlobalState } from '../../global/types';
 
 import { selectCurrentMessageList } from './messages';
 import { selectChat } from './chats';
-import { isChatGroup, isChatPrivate } from '../helpers';
+import { isChatGroup, isUserId } from '../helpers';
 
-export function selectManagement(global: GlobalState, chatId: number) {
+export function selectManagement(global: GlobalState, chatId: string) {
   return global.management.byChatId[chatId];
 }
 
@@ -28,7 +28,7 @@ export function selectCurrentManagementType(global: GlobalState) {
     return undefined;
   }
 
-  if (isChatPrivate(chatId)) {
+  if (isUserId(chatId)) {
     return 'user';
   }
 

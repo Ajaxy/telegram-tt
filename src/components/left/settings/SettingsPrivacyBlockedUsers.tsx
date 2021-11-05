@@ -11,7 +11,7 @@ import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { pick } from '../../../util/iteratees';
 import {
-  getChatTitle, getUserFullName, isChatPrivate,
+  getChatTitle, getUserFullName, isUserId,
 } from '../../../modules/helpers';
 import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
@@ -32,9 +32,9 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chatsByIds: Record<number, ApiChat>;
-  usersByIds: Record<number, ApiUser>;
-  blockedIds: number[];
+  chatsByIds: Record<string, ApiChat>;
+  usersByIds: Record<string, ApiUser>;
+  blockedIds: string[];
   phoneCodeList: ApiCountryCode[];
 };
 
@@ -52,14 +52,14 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
 }) => {
   const lang = useLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
-  const handleUnblockClick = useCallback((contactId: number) => {
+  const handleUnblockClick = useCallback((contactId: string) => {
     unblockContact({ contactId });
   }, [unblockContact]);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.PrivacyBlockedUsers);
 
-  function renderContact(contactId: number, i: number, viewportOffset: number) {
-    const isPrivate = isChatPrivate(contactId);
+  function renderContact(contactId: string, i: number, viewportOffset: number) {
+    const isPrivate = isUserId(contactId);
     const user = isPrivate ? usersByIds[contactId] : undefined;
     const chat = !isPrivate ? chatsByIds[contactId] : undefined;
 

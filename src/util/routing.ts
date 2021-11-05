@@ -17,7 +17,7 @@ export const parseLocationHash = (value: string): MessageList | undefined => {
   const isType = ['thread', 'pinned', 'scheduled'].includes(typeOrThreadId);
 
   return {
-    chatId: Number(chatId),
+    chatId,
     type: !!typeOrThreadId && isType ? (typeOrThreadId as MessageListType) : 'thread',
     threadId: !!typeOrThreadId && !isType ? Number(typeOrThreadId) : MAIN_THREAD_ID,
   };

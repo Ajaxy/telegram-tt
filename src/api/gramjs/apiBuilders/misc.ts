@@ -4,7 +4,7 @@ import { ApiCountry, ApiSession, ApiWallpaper } from '../../types';
 import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument } from './messages';
-import { getApiChatIdFromMtpPeer } from './chats';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { flatten, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 
@@ -60,10 +60,10 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
 
 export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
   let visibility: PrivacyVisibility | undefined;
-  let allowUserIds: number[] | undefined;
-  let allowChatIds: number[] | undefined;
-  let blockUserIds: number[] | undefined;
-  let blockChatIds: number[] | undefined;
+  let allowUserIds: string[] | undefined;
+  let allowChatIds: string[] | undefined;
+  let blockUserIds: string[] | undefined;
+  let blockChatIds: string[] | undefined;
 
   rules.forEach((rule) => {
     if (rule instanceof GramJs.PrivacyValueAllowAll) {
@@ -75,13 +75,13 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
       visibility = visibility || 'nobody';
     } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
-      allowUserIds = rule.users;
+      allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
-      blockUserIds = rule.users;
+      blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
-      allowChatIds = rule.chats.map((id) => -id);
+      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
     } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
-      blockChatIds = rule.chats.map((id) => -id);
+      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
     }
   });
 
@@ -113,6 +113,7 @@ export function buildApiNotifyException(
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
   };
 }
+
 function buildApiCountry(country: GramJs.help.Country, code?: GramJs.help.CountryCode) {
   const {
     hidden, iso2, defaultName, name,

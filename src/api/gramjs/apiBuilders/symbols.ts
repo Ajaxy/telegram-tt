@@ -72,7 +72,6 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     title,
     thumbs,
     count,
-    hash,
     shortName,
   } = set;
 
@@ -85,7 +84,6 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     title,
     hasThumbnail: Boolean(thumbs?.length),
     count,
-    hash,
     shortName,
   };
 }

@@ -9,7 +9,7 @@ import {
   getChatTitle,
   getUserColorKey,
   getUserFullName,
-  isChatPrivate,
+  isUserId,
   isChatWithRepliesBot,
   isDeletedUser,
   isUserOnline,
@@ -78,7 +78,7 @@ const Avatar: FC<OwnProps> = ({
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
   } else if (chat) {
     const title = getChatTitle(lang, chat);
-    content = title && getFirstLetters(title, isChatPrivate(chat.id) ? 2 : 1);
+    content = title && getFirstLetters(title, isUserId(chat.id) ? 2 : 1);
   } else if (text) {
     content = getFirstLetters(text, 2);
   }

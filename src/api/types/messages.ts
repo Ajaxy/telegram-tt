@@ -39,7 +39,6 @@ export interface ApiStickerSet {
   title: string;
   hasThumbnail?: boolean;
   count: number;
-  hash: number;
   stickers?: ApiSticker[];
   packs?: Record<string, ApiSticker[]>;
   covers?: ApiSticker[];
@@ -92,7 +91,7 @@ export interface ApiContact {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  userId: number;
+  userId: string;
 }
 
 export interface ApiPollAnswer {
@@ -122,7 +121,7 @@ export interface ApiPoll {
   results: {
     results?: ApiPollResult[];
     totalVoters?: number;
-    recentVoterIds?: number[];
+    recentVoterIds?: string[];
     solution?: string;
     solutionEntities?: ApiMessageEntity[];
   };
@@ -149,8 +148,8 @@ export type ApiNewPoll = {
 
 export interface ApiAction {
   text: string;
-  targetUserIds?: number[];
-  targetChatId?: number;
+  targetUserIds?: string[];
+  targetChatId?: string;
   type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -176,8 +175,8 @@ export interface ApiMessageForwardInfo {
   isChannelPost: boolean;
   channelPostId?: number;
   isLinkedChannelPost?: boolean;
-  fromChatId?: number;
-  senderUserId?: number;
+  fromChatId?: string;
+  senderUserId?: string;
   fromMessageId?: number;
   hiddenUserName?: string;
   adminTitle?: string;
@@ -187,7 +186,7 @@ export interface ApiMessageEntity {
   type: string;
   offset: number;
   length: number;
-  userId?: number;
+  userId?: string;
   url?: string;
 }
 
@@ -218,7 +217,7 @@ export interface ApiFormattedText {
 
 export interface ApiMessage {
   id: number;
-  chatId: number;
+  chatId: string;
   content: {
     text?: ApiFormattedText;
     photo?: ApiPhoto;
@@ -235,8 +234,8 @@ export interface ApiMessage {
   };
   date: number;
   isOutgoing: boolean;
-  senderId?: number;
-  replyToChatId?: number;
+  senderId?: string;
+  replyToChatId?: string;
   replyToMessageId?: number;
   replyToTopMessageId?: number;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
@@ -254,7 +253,7 @@ export interface ApiMessage {
   keyboardButtons?: ApiKeyboardButtons;
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
-  viaBotId?: number;
+  viaBotId?: string;
   threadInfo?: ApiThreadInfo;
   adminTitle?: string;
   isScheduled?: boolean;
@@ -264,13 +263,13 @@ export interface ApiMessage {
 
 export interface ApiThreadInfo {
   threadId: number;
-  chatId: number;
+  chatId: string;
   topMessageId?: number;
-  originChannelId?: number;
+  originChannelId?: string;
   messagesCount: number;
   lastMessageId?: number;
   lastReadInboxMessageId?: number;
-  recentReplierIds?: number[];
+  recentReplierIds?: string[];
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

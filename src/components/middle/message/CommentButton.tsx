@@ -9,7 +9,7 @@ import {
 import { GlobalActions } from '../../../global/types';
 
 import { pick } from '../../../util/iteratees';
-import { isChatPrivate } from '../../../modules/helpers';
+import { isUserId } from '../../../modules/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
 import { selectThreadInfo } from '../../../modules/selectors';
@@ -26,8 +26,8 @@ type OwnProps = {
 
 type StateProps = {
   threadInfo: ApiThreadInfo;
-  usersById?: Record<number, ApiUser>;
-  chatsById?: Record<number, ApiChat>;
+  usersById?: Record<string, ApiUser>;
+  chatsById?: Record<string, ApiChat>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
@@ -53,7 +53,7 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   const recentRepliers = recentReplierIds && recentReplierIds.map((peerId) => {
-    return isChatPrivate(peerId) ? usersById![peerId] : chatsById![peerId];
+    return isUserId(peerId) ? usersById![peerId] : chatsById![peerId];
   }).filter(Boolean);
 
   function renderRecentRepliers() {
@@ -64,8 +64,8 @@ const CommentButton: FC<OwnProps & StateProps & DispatchProps> = ({
             <Avatar
               key={user.id}
               size="small"
-              user={isChatPrivate(user.id) ? user as ApiUser : undefined}
-              chat={!isChatPrivate(user.id) ? user as ApiChat : undefined}
+              user={isUserId(user.id) ? user as ApiUser : undefined}
+              chat={!isUserId(user.id) ? user as ApiChat : undefined}
             />
           ))}
         </div>

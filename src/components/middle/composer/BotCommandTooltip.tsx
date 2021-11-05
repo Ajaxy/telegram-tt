@@ -26,7 +26,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'sendBotCommand'>;

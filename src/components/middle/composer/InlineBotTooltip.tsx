@@ -32,7 +32,7 @@ const runThrottled = throttle((cb) => cb(), 500, true);
 
 export type OwnProps = {
   isOpen: boolean;
-  botId?: number;
+  botId?: string;
   isGallery?: boolean;
   allowedAttachmentOptions: IAllowedAttachmentOptions;
   inlineBotResults?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];

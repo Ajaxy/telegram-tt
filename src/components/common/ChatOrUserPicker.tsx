@@ -7,7 +7,7 @@ import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import { isChatPrivate } from '../../modules/helpers';
+import { isUserId } from '../../modules/helpers';
 
 import Loading from '../ui/Loading';
 import Modal from '../ui/Modal';
@@ -21,15 +21,15 @@ import PrivateChatInfo from './PrivateChatInfo';
 import './ChatOrUserPicker.scss';
 
 export type OwnProps = {
-  currentUserId?: number;
-  chatOrUserIds: number[];
+  currentUserId?: string;
+  chatOrUserIds: string[];
   isOpen: boolean;
   filterRef: RefObject<HTMLInputElement>;
   filterPlaceholder: string;
   filter: string;
   onFilterChange: (filter: string) => void;
   loadMore: NoneToVoidFunction;
-  onSelectChatOrUser: (chatOrUserId: number) => void;
+  onSelectChatOrUser: (chatOrUserId: string) => void;
   onClose: NoneToVoidFunction;
 };
 
@@ -104,7 +104,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
               className="chat-item-clickable force-rounded-corners"
               onClick={() => onSelectChatOrUser(id)}
             >
-              {isChatPrivate(id) ? (
+              {isUserId(id) ? (
                 <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
               ) : (
                 <GroupChatInfo chatId={id} />

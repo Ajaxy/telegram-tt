@@ -1,11 +1,11 @@
 import { GlobalState } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-export function selectUser(global: GlobalState, userId: number): ApiUser | undefined {
+export function selectUser(global: GlobalState, userId: string): ApiUser | undefined {
   return global.users.byId[userId];
 }
 
-export function selectIsUserBlocked(global: GlobalState, userId: number) {
+export function selectIsUserBlocked(global: GlobalState, userId: string) {
   const user = selectUser(global, userId);
 
   return user?.fullInfo?.isBlocked;

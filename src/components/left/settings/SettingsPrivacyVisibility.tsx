@@ -23,8 +23,8 @@ type OwnProps = {
 };
 
 type StateProps = Partial<ApiPrivacySettings> & {
-  chatsById?: Record<number, ApiChat>;
-  usersById?: Record<number, ApiUser>;
+  chatsById?: Record<string, ApiChat>;
+  usersById?: Record<string, ApiUser>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setPrivacyVisibility'>;

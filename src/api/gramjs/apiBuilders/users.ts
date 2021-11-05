@@ -2,21 +2,24 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiBotCommand, ApiUser, ApiUserStatus, ApiUserType,
 } from '../../types';
+import { buildApiPeerId } from './peers';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
   const {
     about, commonChatsCount, pinnedMsgId, botInfo, blocked,
   } = mtpUserFull;
 
+  const user = buildApiUser(mtpUserFull.user)!;
+
   return {
-    ...(buildApiUser(mtpUserFull.user) as ApiUser),
+    ...user,
     fullInfo: {
       bio: about,
       commonChatsCount,
       pinnedMessageId: pinnedMsgId,
       isBlocked: Boolean(blocked),
       ...(botInfo && { botDescription: botInfo.description }),
-      ...(botInfo && botInfo.commands.length && { botCommands: buildApiBotCommands(mtpUserFull.user.id, botInfo) }),
+      ...(botInfo && botInfo.commands.length && { botCommands: buildApiBotCommands(user.id, botInfo) }),
     },
   };
 }
@@ -33,7 +36,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const userType = buildApiUserType(mtpUser);
 
   return {
-    id,
+    id: buildApiPeerId(id, 'user'),
     isMin: Boolean(mtpUser.min),
     ...(mtpUser.self && { isSelf: true }),
     ...(mtpUser.verified && { isVerified: true }),
@@ -78,7 +81,7 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   }
 }
 
-function buildApiBotCommands(botId: number, botInfo: GramJs.BotInfo) {
+function buildApiBotCommands(botId: string, botInfo: GramJs.BotInfo) {
   return botInfo.commands.map(({ command, description }) => ({
     botId,
     command,

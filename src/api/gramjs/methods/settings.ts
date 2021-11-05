@@ -4,7 +4,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiChat, ApiLangString, ApiLanguage, ApiNotifyException, ApiUser, ApiWallpaper,
 } from '../../types';
-import { ApiPrivacyKey, IInputPrivacyRules } from '../../../types';
+import { ApiPrivacyKey, InputPrivacyRules } from '../../../types';
 
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, LANG_PACKS } from '../../../config';
 import {
@@ -12,13 +12,14 @@ import {
 } from '../apiBuilders/misc';
 
 import { buildApiUser } from '../apiBuilders/users';
-import { buildApiChatFromPreview, getApiChatIdFromMtpPeer } from '../apiBuilders/chats';
-import { buildInputPrivacyKey, buildInputPeer } from '../gramjsBuilders';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildInputPrivacyKey, buildInputPeer, buildInputEntity } from '../gramjsBuilders';
 import { invokeRequest, uploadFile, getClient } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 import { getServerTime } from '../../../util/serverTime';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
@@ -61,8 +62,8 @@ export async function uploadProfilePhoto(file: File) {
   }));
 }
 
-export async function fetchWallpapers(hash: number) {
-  const result = await invokeRequest(new GramJs.account.GetWallPapers({ hash }));
+export async function fetchWallpapers() {
+  const result = await invokeRequest(new GramJs.account.GetWallPapers({ hash: BigInt('0') }));
 
   if (!result || result instanceof GramJs.account.WallPapersNotModified) {
     return undefined;
@@ -84,7 +85,6 @@ export async function fetchWallpapers(hash: number) {
   });
 
   return {
-    hash: result.hash,
     wallpapers: filteredWallpapers.map(buildApiWallpaper).filter<ApiWallpaper>(Boolean as any),
   };
 }
@@ -130,13 +130,13 @@ export async function fetchBlockedContacts() {
   };
 }
 
-export function blockContact(chatOrUserId: number, accessHash?: string) {
+export function blockContact(chatOrUserId: string, accessHash?: string) {
   return invokeRequest(new GramJs.contacts.Block({
     id: buildInputPeer(chatOrUserId, accessHash),
   }));
 }
 
-export function unblockContact(chatOrUserId: number, accessHash?: string) {
+export function unblockContact(chatOrUserId: string, accessHash?: string) {
   return invokeRequest(new GramJs.contacts.Unblock({
     id: buildInputPeer(chatOrUserId, accessHash),
   }));
@@ -353,29 +353,29 @@ export function unregisterDevice(token: string) {
 }
 
 export async function setPrivacySettings(
-  privacyKey: ApiPrivacyKey, rules: IInputPrivacyRules,
+  privacyKey: ApiPrivacyKey, rules: InputPrivacyRules,
 ) {
   const key = buildInputPrivacyKey(privacyKey);
   const privacyRules: GramJs.TypeInputPrivacyRule[] = [];
 
   if (rules.allowedUsers) {
     privacyRules.push(new GramJs.InputPrivacyValueAllowUsers({
-      users: rules.allowedUsers.map(({ id, accessHash }) => buildInputPeer(id, accessHash)),
+      users: rules.allowedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
     }));
   }
   if (rules.allowedChats) {
     privacyRules.push(new GramJs.InputPrivacyValueAllowChatParticipants({
-      chats: rules.allowedChats.map(({ id }) => -id),
+      chats: rules.allowedChats.map(({ id }) => buildInputEntity(id) as BigInt.BigInteger),
     }));
   }
   if (rules.blockedUsers) {
     privacyRules.push(new GramJs.InputPrivacyValueDisallowUsers({
-      users: rules.blockedUsers.map(({ id, accessHash }) => buildInputPeer(id, accessHash)),
+      users: rules.blockedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
     }));
   }
   if (rules.blockedChats) {
     privacyRules.push(new GramJs.InputPrivacyValueDisallowChatParticipants({
-      chats: rules.blockedChats.map(({ id }) => -id),
+      chats: rules.blockedChats.map(({ id }) => buildInputEntity(id) as BigInt.BigInteger),
     }));
   }
   switch (rules.visibility) {
@@ -437,13 +437,13 @@ function updateLocalDb(
 ) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
-      localDb.users[user.id] = user;
+      localDb.users[buildApiPeerId(user.id, 'user')] = user;
     }
   });
 
   result.chats.forEach((chat) => {
     if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-      localDb.chats[chat.id] = chat;
+      localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
     }
   });
 }

@@ -8,7 +8,7 @@ import { pick } from '../../../util/iteratees';
 import { selectUser } from '../../../modules/selectors';
 
 type OwnProps = {
-  userId?: number;
+  userId?: string;
   username?: string;
   children: any;
 };

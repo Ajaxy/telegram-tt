@@ -14,7 +14,7 @@ import { ANIMATION_END_DELAY } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   getChatTitle,
-  isChatPrivate,
+  isUserId,
   isActionMessage,
   getPrivateChatUserId,
   getMessageAction,
@@ -56,7 +56,7 @@ import './Chat.scss';
 
 type OwnProps = {
   style?: string;
-  chatId: number;
+  chatId: string;
   folderId?: number;
   orderDiff: number;
   animationType: ChatAnimationTypes;
@@ -67,10 +67,10 @@ type StateProps = {
   chat?: ApiChat;
   isMuted?: boolean;
   privateChatUser?: ApiUser;
-  actionTargetUserIds?: number[];
-  usersById?: Record<number, ApiUser>;
+  actionTargetUserIds?: string[];
+  usersById?: Record<string, ApiUser>;
   actionTargetMessage?: ApiMessage;
-  actionTargetChatId?: number;
+  actionTargetChatId?: string;
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiFormattedText;
@@ -264,7 +264,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const className = buildClassName(
     'Chat chat-item-clickable',
-    isChatPrivate(chatId) ? 'private' : 'group',
+    isUserId(chatId) ? 'private' : 'group',
     isSelected && 'selected',
   );
 

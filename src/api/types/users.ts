@@ -2,7 +2,7 @@ import { ApiPhoto } from './messages';
 import { ApiBotCommand } from './bots';
 
 export interface ApiUser {
-  id: number;
+  id: string;
   isMin: boolean;
   isSelf?: true;
   isVerified?: true;

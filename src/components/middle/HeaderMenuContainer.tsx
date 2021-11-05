@@ -14,7 +14,7 @@ import {
 } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import {
-  isChatPrivate, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
+  isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
 } from '../../modules/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
@@ -31,7 +31,7 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 export type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   isOpen: boolean;
   anchor: IAnchorPosition;
@@ -253,7 +253,7 @@ export default memo(withGlobal<OwnProps>(
     if (!chat || chat.isRestricted) {
       return {};
     }
-    const isPrivate = isChatPrivate(chat.id);
+    const isPrivate = isUserId(chat.id);
     const user = isPrivate ? selectUser(global, chatId) : undefined;
     const canAddContact = user && getCanAddContact(user);
 

@@ -43,12 +43,12 @@ type OwnProps = {
 type StateProps = {
   searchQuery?: string;
   isLoading: boolean;
-  currentUserId?: number;
-  globalSearchChatId?: number;
+  currentUserId?: string;
+  globalSearchChatId?: string;
   searchDate?: number;
   theme: ISettings['theme'];
   animationLevel: 0 | 1 | 2;
-  chatsById?: Record<number, ApiChat>;
+  chatsById?: Record<string, ApiChat>;
 };
 
 type DispatchProps = Pick<GlobalActions, (

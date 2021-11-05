@@ -21,8 +21,8 @@ import Spinner from '../../ui/Spinner';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
 type OwnProps = {
-  chatId: number;
-  selectedChatMemberId?: number;
+  chatId: string;
+  selectedChatMemberId?: string;
   isPromotedByCurrentUser?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;

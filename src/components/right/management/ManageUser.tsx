@@ -28,7 +28,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import './Management.scss';
 
 type OwnProps = {
-  userId: number;
+  userId: string;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };

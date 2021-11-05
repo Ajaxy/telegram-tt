@@ -28,7 +28,7 @@ import {
 } from '../../modules/selectors';
 import {
   isChatChannel,
-  isChatPrivate,
+  isUserId,
   isChatWithRepliesBot,
   isChatGroup,
 } from '../../modules/helpers';
@@ -56,7 +56,7 @@ import NoMessages from './NoMessages';
 import './MessageList.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   type: MessageListType;
   canPost: boolean;
@@ -447,10 +447,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const lang = useLang();
 
-  const isPrivate = Boolean(chatId && isChatPrivate(chatId));
+  const isPrivate = Boolean(chatId && isUserId(chatId));
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat);
   const noAvatars = Boolean(!withUsers || isChannelChat);
-  const shouldRenderGreeting = isChatPrivate(chatId) && !isChatWithSelf && !isBot
+  const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot
     && (
       (
         !messageGroups && !lastMessage && messageIds

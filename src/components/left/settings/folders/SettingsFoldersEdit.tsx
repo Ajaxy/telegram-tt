@@ -8,7 +8,7 @@ import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { findIntersectionWithSet, pick } from '../../../../util/iteratees';
-import { isChatPrivate } from '../../../../modules/helpers';
+import { isUserId } from '../../../../modules/helpers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
 import {
   EXCLUDED_CHAT_TYPES,
@@ -41,8 +41,8 @@ type OwnProps = {
 };
 
 type StateProps = {
-  loadedActiveChatIds?: number[];
-  loadedArchivedChatIds?: number[];
+  loadedActiveChatIds?: string[];
+  loadedArchivedChatIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'editChatFolder' | 'addChatFolder' | 'loadMoreChats'>;
@@ -212,7 +212,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
             narrow
             inactive
           >
-            {isChatPrivate(id) ? (
+            {isUserId(id) ? (
               <PrivateChatInfo avatarSize="small" userId={id} />
             ) : (
               <GroupChatInfo avatarSize="small" chatId={id} />

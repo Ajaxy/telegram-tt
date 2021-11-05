@@ -9,9 +9,9 @@ const STATUS_UPDATE_THROTTLE = 3000;
 
 const flushStatusUpdatesThrottled = throttle(flushStatusUpdates, STATUS_UPDATE_THROTTLE, true);
 
-let pendingStatusUpdates: [number, ApiUserStatus][] = [];
+let pendingStatusUpdates: [string, ApiUserStatus][] = [];
 
-function scheduleStatusUpdate(userId: number, statusUpdate: ApiUserStatus) {
+function scheduleStatusUpdate(userId: string, statusUpdate: ApiUserStatus) {
   pendingStatusUpdates.push([userId, statusUpdate]);
   flushStatusUpdatesThrottled();
 }

@@ -22,7 +22,7 @@ import {
   getCanAddContact,
   isChatAdmin,
   isChatChannel,
-  isChatPrivate,
+  isUserId,
 } from '../../modules/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -34,7 +34,7 @@ import './RightHeader.scss';
 import { getDayStartAt } from '../../util/dateFormat';
 
 type OwnProps = {
-  chatId?: number;
+  chatId?: string;
   isColumnOpen?: boolean;
   isProfile?: boolean;
   isSearch?: boolean;
@@ -53,7 +53,7 @@ type StateProps = {
   canAddContact?: boolean;
   canManage?: boolean;
   isChannel?: boolean;
-  userId?: number;
+  userId?: string;
   messageSearchQuery?: string;
   stickerSearchQuery?: string;
   gifSearchQuery?: string;
@@ -349,7 +349,7 @@ export default memo(withGlobal<OwnProps>(
     const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
-    const user = isProfile && chatId && isChatPrivate(chatId) ? selectUser(global, chatId) : undefined;
+    const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
 
     const canAddContact = user && getCanAddContact(user);
     const canManage = Boolean(
@@ -359,7 +359,7 @@ export default memo(withGlobal<OwnProps>(
       && chat
       && !selectIsChatWithSelf(global, chat.id)
       // chat.isCreator is for Basic Groups
-      && (isChatPrivate(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
+      && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
 
     return {

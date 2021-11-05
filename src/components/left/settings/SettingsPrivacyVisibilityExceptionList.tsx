@@ -12,7 +12,7 @@ import { pick } from '../../../util/iteratees';
 import searchWords from '../../../util/searchWords';
 import { getPrivacyKey } from './helper/privacy';
 import {
-  getChatTitle, isChatGroup, isChatPrivate, prepareChatList,
+  getChatTitle, isChatGroup, isUserId, prepareChatList,
 } from '../../../modules/helpers';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -28,12 +28,12 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  currentUserId?: number;
-  chatsById: Record<number, ApiChat>;
-  listIds?: number[];
-  orderedPinnedIds?: number[];
-  archivedListIds?: number[];
-  archivedPinnedIds?: number[];
+  currentUserId?: string;
+  chatsById: Record<string, ApiChat>;
+  listIds?: string[];
+  orderedPinnedIds?: string[];
+  archivedListIds?: string[];
+  archivedPinnedIds?: string[];
   settings?: ApiPrivacySettings;
 };
 
@@ -69,7 +69,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
   }, [isAllowList, settings]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSubmitShown, setIsSubmitShown] = useState<boolean>(false);
-  const [newSelectedContactIds, setNewSelectedContactIds] = useState<number[]>(selectedContactIds);
+  const [newSelectedContactIds, setNewSelectedContactIds] = useState<string[]>(selectedContactIds);
 
   const chats = useMemo(() => {
     const activeChatArrays = listIds
@@ -102,7 +102,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
 
     return chats
       .filter((chat) => (
-        ((isChatPrivate(chat.id) && chat.id !== currentUserId) || isChatGroup(chat))
+        ((isUserId(chat.id) && chat.id !== currentUserId) || isChatGroup(chat))
         && (
           !searchQuery
         || searchWords(getChatTitle(lang, chat), searchQuery)
@@ -112,7 +112,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
       .map(({ id }) => id);
   }, [chats, currentUserId, lang, searchQuery, selectedContactIds]);
 
-  const handleSelectedContactIdsChange = useCallback((value: number[]) => {
+  const handleSelectedContactIdsChange = useCallback((value: string[]) => {
     setNewSelectedContactIds(value);
     setIsSubmitShown(true);
   }, []);

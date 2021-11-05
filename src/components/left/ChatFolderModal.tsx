@@ -15,7 +15,7 @@ import CheckboxGroup from '../ui/CheckboxGroup';
 
 export type OwnProps = {
   isOpen: boolean;
-  chatId: number;
+  chatId: string;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
 };
@@ -63,8 +63,8 @@ const ChatFolderModal: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [folderOrderedIds, foldersById]);
 
   const handleSubmit = useCallback(() => {
-    const idsToRemove = initialSelectedFolderIds.filter((id) => !selectedFolderIds.includes(id)).map(Number);
-    const idsToAdd = selectedFolderIds.filter((id) => !initialSelectedFolderIds.includes(id)).map(Number);
+    const idsToRemove = initialSelectedFolderIds.filter((id) => !selectedFolderIds.includes(id));
+    const idsToAdd = selectedFolderIds.filter((id) => !initialSelectedFolderIds.includes(id));
 
     editChatFolders({ chatId, idsToRemove, idsToAdd });
     onClose();

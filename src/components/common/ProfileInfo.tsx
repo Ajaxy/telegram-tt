@@ -26,7 +26,7 @@ import Transition from '../ui/Transition';
 import './ProfileInfo.scss';
 
 type OwnProps = {
-  userId: number;
+  userId: string;
   forceShowSelf?: boolean;
 };
 

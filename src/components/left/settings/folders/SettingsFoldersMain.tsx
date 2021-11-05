@@ -30,8 +30,8 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<number, ApiChat>;
-  usersById: Record<number, ApiUser>;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
   orderedFolderIds?: number[];
   foldersById: Record<number, ApiChatFolder>;
   recommendedChatFolders?: ApiChatFolder[];
@@ -104,7 +104,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    const chatIds = Object.keys(chatsById).map(Number);
+    const chatIds = Object.keys(chatsById);
 
     return orderedFolderIds.map((id) => {
       const folder = foldersById[id];

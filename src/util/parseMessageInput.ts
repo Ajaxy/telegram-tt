@@ -112,12 +112,12 @@ function getEntityDataFromNode(
   const { length } = rawText.substring(index, index + node.textContent.length);
 
   let url: string | undefined;
-  let userId: number | undefined;
+  let userId: string | undefined;
   if (type === ApiMessageEntityTypes.TextUrl) {
     url = (node as HTMLAnchorElement).href;
   }
   if (type === ApiMessageEntityTypes.MentionName) {
-    userId = Number((node as HTMLAnchorElement).dataset.userId);
+    userId = (node as HTMLAnchorElement).dataset.userId;
   }
 
   return {

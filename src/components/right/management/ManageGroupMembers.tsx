@@ -15,13 +15,13 @@ import NothingFound from '../../common/NothingFound';
 import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
 
 type StateProps = {
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
   members?: ApiChatMember[];
   isChannel?: boolean;
   serverTimeOffset: number;
@@ -46,7 +46,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
     return sortUserIds(members.map(({ userId }) => userId), usersById, undefined, serverTimeOffset);
   }, [members, serverTimeOffset, usersById]);
 
-  const handleMemberClick = useCallback((id: number) => {
+  const handleMemberClick = useCallback((id: string) => {
     openUserInfo({ id });
   }, [openUserInfo]);
 

@@ -20,21 +20,21 @@ import Button from '../../ui/Button';
 export type OwnProps = {
   isChannel?: boolean;
   isActive: boolean;
-  selectedMemberIds: number[];
-  onSelectedMemberIdsChange: (ids: number[]) => void;
+  selectedMemberIds: string[];
+  onSelectedMemberIdsChange: (ids: string[]) => void;
   onNextStep: () => void;
   onReset: () => void;
 };
 
 type StateProps = {
-  currentUserId?: number;
-  usersById: Record<number, ApiUser>;
-  chatsById: Record<number, ApiChat>;
-  localContactIds?: number[];
+  currentUserId?: string;
+  usersById: Record<string, ApiUser>;
+  chatsById: Record<string, ApiChat>;
+  localContactIds?: string[];
   searchQuery?: string;
   isSearching?: boolean;
-  localUserIds?: number[];
-  globalUserIds?: number[];
+  localUserIds?: string[];
+  globalUserIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setGlobalSearchQuery'>;

@@ -20,7 +20,7 @@ export type OwnProps = {
   onClose: () => void;
   onInsertUserName: (user: ApiUser, forceFocus?: boolean) => void;
   filteredUsers?: ApiUser[];
-  usersById?: Record<number, ApiUser>;
+  usersById?: Record<string, ApiUser>;
 };
 
 const MentionTooltip: FC<OwnProps> = ({
@@ -34,7 +34,7 @@ const MentionTooltip: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
-  const handleUserSelect = useCallback((userId: number, forceFocus = false) => {
+  const handleUserSelect = useCallback((userId: string, forceFocus = false) => {
     const user = usersById?.[userId];
     if (!user) {
       return;

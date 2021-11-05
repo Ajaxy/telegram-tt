@@ -18,12 +18,12 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<number, ApiChat>;
-  pinnedIds?: number[];
-  activeListIds?: number[];
-  archivedListIds?: number[];
-  orderedPinnedIds?: number[];
-  currentUserId?: number;
+  chatsById: Record<string, ApiChat>;
+  pinnedIds?: string[];
+  activeListIds?: string[];
+  archivedListIds?: string[];
+  orderedPinnedIds?: string[];
+  currentUserId?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setForwardChatId' | 'exitForwardMode' | 'loadMoreChats'>;
@@ -75,7 +75,7 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     ], chatsById, undefined, priorityIds);
   }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, pinnedIds]);
 
-  const handleSelectUser = useCallback((userId: number) => {
+  const handleSelectUser = useCallback((userId: string) => {
     setForwardChatId({ id: userId });
   }, [setForwardChatId]);
 

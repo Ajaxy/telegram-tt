@@ -51,10 +51,10 @@ type OwnProps = {
   isSelectable?: boolean;
   isSelected?: boolean;
   isDownloading: boolean;
-  onPlay: (messageId: number, chatId: number) => void;
+  onPlay: (messageId: number, chatId: string) => void;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
-  onDateClick?: (messageId: number, chatId: number) => void;
+  onDateClick?: (messageId: number, chatId: string) => void;
 };
 
 const AVG_VOICE_DURATION = 10;

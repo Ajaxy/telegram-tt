@@ -7,7 +7,7 @@ import { omit } from '../../util/iteratees';
 export function replaceChatListIds(
   global: GlobalState,
   type: 'active' | 'archived',
-  newIds: number[] | undefined,
+  newIds: string[] | undefined,
 ): GlobalState {
   return {
     ...global,
@@ -21,7 +21,7 @@ export function replaceChatListIds(
   };
 }
 
-export function updateChatListIds(global: GlobalState, type: 'active' | 'archived', idsUpdate: number[]): GlobalState {
+export function updateChatListIds(global: GlobalState, type: 'active' | 'archived', idsUpdate: string[]): GlobalState {
   const { [type]: listIds } = global.chats.listIds;
   const newIds = listIds?.length
     ? idsUpdate.filter((id) => !listIds.includes(id))
@@ -37,7 +37,7 @@ export function updateChatListIds(global: GlobalState, type: 'active' | 'archive
   ]);
 }
 
-export function replaceChats(global: GlobalState, newById: Record<number, ApiChat>): GlobalState {
+export function replaceChats(global: GlobalState, newById: Record<string, ApiChat>): GlobalState {
   return {
     ...global,
     chats: {
@@ -49,7 +49,7 @@ export function replaceChats(global: GlobalState, newById: Record<number, ApiCha
 
 // @optimization Don't spread/unspread global for each element, do it in a batch
 function getUpdatedChat(
-  global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+  global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
 ): ApiChat {
   const { byId } = global.chats;
   const chat = byId[chatId];
@@ -68,7 +68,7 @@ function getUpdatedChat(
 }
 
 export function updateChat(
-  global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+  global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
 ): GlobalState {
   const { byId } = global.chats;
 
@@ -80,8 +80,8 @@ export function updateChat(
   });
 }
 
-export function updateChats(global: GlobalState, updatedById: Record<number, ApiChat>): GlobalState {
-  const updatedChats = Object.keys(updatedById).map(Number).reduce<Record<number, ApiChat>>((acc, id) => {
+export function updateChats(global: GlobalState, updatedById: Record<string, ApiChat>): GlobalState {
+  const updatedChats = Object.keys(updatedById).reduce<Record<string, ApiChat>>((acc, id) => {
     const updatedChat = getUpdatedChat(global, id, updatedById[id]);
     if (updatedChat) {
       acc[id] = updatedChat;
@@ -98,11 +98,11 @@ export function updateChats(global: GlobalState, updatedById: Record<number, Api
 }
 
 // @optimization Allows to avoid redundant updates which cause a lot of renders
-export function addChats(global: GlobalState, addedById: Record<number, ApiChat>): GlobalState {
+export function addChats(global: GlobalState, addedById: Record<string, ApiChat>): GlobalState {
   const { byId } = global.chats;
   let isAdded = false;
 
-  const addedChats = Object.keys(addedById).map(Number).reduce<Record<number, ApiChat>>((acc, id) => {
+  const addedChats = Object.keys(addedById).reduce<Record<string, ApiChat>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
       const updatedChat = getUpdatedChat(global, id, addedById[id]);
       if (updatedChat) {
@@ -128,7 +128,7 @@ export function addChats(global: GlobalState, addedById: Record<number, ApiChat>
 
 export function updateChatListType(
   global: GlobalState,
-  chatId: number,
+  chatId: string,
   folderId?: number,
 ): GlobalState {
   const listType = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
@@ -166,7 +166,7 @@ export function updateChatListSecondaryInfo(
   global: GlobalState,
   type: 'active' | 'archived',
   info: {
-    orderedPinnedIds?: number[];
+    orderedPinnedIds?: string[];
     totalChatCount: number;
   },
 ): GlobalState {

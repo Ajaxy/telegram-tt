@@ -35,11 +35,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<number, ApiChat>;
-  usersById: Record<number, ApiUser>;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
   chatFolder?: ApiChatFolder;
-  listIds?: number[];
-  orderedPinnedIds?: number[];
+  listIds?: string[];
+  orderedPinnedIds?: string[];
   lastSyncTime?: number;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;

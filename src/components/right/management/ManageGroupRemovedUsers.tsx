@@ -19,14 +19,14 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import RemoveGroupUserModal from './RemoveGroupUserModal';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
 
 type StateProps = {
   chat?: ApiChat;
-  usersById: Record<number, ApiUser>;
+  usersById: Record<string, ApiUser>;
   canDeleteMembers?: boolean;
 };
 

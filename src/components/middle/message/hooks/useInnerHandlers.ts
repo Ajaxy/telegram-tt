@@ -1,7 +1,7 @@
 import React, { useCallback } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 
-import { isChatPrivate } from '../../../../modules/helpers';
+import { isUserId } from '../../../../modules/helpers';
 import { AudioOrigin, IAlbum, MediaViewerOrigin } from '../../../../types';
 import {
   ApiChat, ApiMessage, ApiUser, MAIN_THREAD_ID,
@@ -12,7 +12,7 @@ export default function useInnerHandlers(
   lang: LangFn,
   selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
   message: ApiMessage,
-  chatId: number,
+  chatId: string,
   threadId: number,
   isInDocumentGroup: boolean,
   isScheduled?: boolean,
@@ -36,7 +36,7 @@ export default function useInnerHandlers(
       return;
     }
 
-    if (isChatPrivate(avatarPeer.id)) {
+    if (isUserId(avatarPeer.id)) {
       openUserInfo({ id: avatarPeer.id });
     } else {
       openChat({ id: avatarPeer.id });
@@ -50,7 +50,7 @@ export default function useInnerHandlers(
       return;
     }
 
-    if (isChatPrivate(senderPeer.id)) {
+    if (isUserId(senderPeer.id)) {
       openUserInfo({ id: senderPeer.id });
     } else {
       openChat({ id: senderPeer.id });

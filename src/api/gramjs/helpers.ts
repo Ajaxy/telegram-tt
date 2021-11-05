@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../lib/gramjs';
 import localDb from './localDb';
-import { getApiChatIdFromMtpPeer } from './apiBuilders/chats';
+import { getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {

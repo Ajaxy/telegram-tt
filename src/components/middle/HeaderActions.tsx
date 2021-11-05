@@ -29,7 +29,7 @@ import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
 
 interface OwnProps {
-  chatId: number;
+  chatId: string;
   threadId: number;
   messageListType: MessageListType;
 }

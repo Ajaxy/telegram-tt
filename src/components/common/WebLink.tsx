@@ -20,7 +20,7 @@ const MAX_TEXT_LENGTH = 170; // symbols
 type OwnProps = {
   message: ApiMessage;
   senderTitle?: string;
-  onMessageClick: (messageId: number, chatId: number) => void;
+  onMessageClick: (messageId: number, chatId: string) => void;
 };
 
 const WebLink: FC<OwnProps> = ({

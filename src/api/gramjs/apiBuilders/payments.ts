@@ -96,7 +96,7 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
     canSaveCredentials,
     passwordMissing,
     formId: String(formId),
-    providerId,
+    providerId: String(providerId),
     nativeProvider,
     savedInfo,
     invoice: {

@@ -8,7 +8,7 @@ type ApiChatType = (
 );
 
 export interface ApiChat {
-  id: number;
+  id: string;
   folderId?: number;
   type: ApiChatType;
   title?: string;
@@ -47,7 +47,7 @@ export interface ApiChat {
   defaultBannedRights?: ApiChatBannedRights;
 
   migratedTo?: {
-    chatId: number;
+    chatId: string;
     accessHash?: string;
   };
 
@@ -58,24 +58,9 @@ export interface ApiChat {
 }
 
 export interface ApiTypingStatus {
-  userId?: number;
+  userId?: string;
   action: string;
   timestamp: number;
-}
-
-export interface ApiTypeGroupCall {
-  joinMuted?: true;
-  canChangeJoinMuted?: true;
-  joinDateAsc?: true;
-  scheduleStartSubscribed?: true;
-  id: number;
-  participantsCount: number;
-  params?: any;
-  title?: string;
-  streamDcId?: number;
-  recordStartDate?: number;
-  scheduleDate?: number;
-  version: number;
 }
 
 export interface ApiChatFullInfo {
@@ -93,19 +78,19 @@ export interface ApiChatFullInfo {
     nextSendDate?: number;
   };
   migratedFrom?: {
-    chatId: number;
+    chatId: string;
     maxMessageId?: number;
   };
-  linkedChatId?: number;
+  linkedChatId?: string;
   botCommands?: ApiBotCommand[];
 }
 
 export interface ApiChatMember {
-  userId: number;
-  inviterId?: number;
+  userId: string;
+  inviterId?: string;
   joinedDate?: number;
-  kickedByUserId?: number;
-  promotedByUserId?: number;
+  kickedByUserId?: string;
+  promotedByUserId?: string;
   bannedRights?: ApiChatBannedRights;
   adminRights?: ApiChatAdminRights;
   customTitle?: string;
@@ -159,7 +144,7 @@ export interface ApiChatFolder {
   excludeMuted?: true;
   excludeRead?: true;
   excludeArchived?: true;
-  pinnedChatIds?: number[];
-  includedChatIds: number[];
-  excludedChatIds: number[];
+  pinnedChatIds?: string[];
+  includedChatIds: string[];
+  excludedChatIds: string[];
 }

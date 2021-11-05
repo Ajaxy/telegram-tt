@@ -37,7 +37,7 @@ import {
   selectPinnedIds,
   selectTheme,
 } from '../../modules/selectors';
-import { getCanPostInChat, getMessageSendingRestrictionReason, isChatPrivate } from '../../modules/helpers';
+import { getCanPostInChat, getMessageSendingRestrictionReason, isUserId } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
@@ -64,7 +64,7 @@ import ReceiptModal from '../payment/ReceiptModal.async';
 import './MiddleColumn.scss';
 
 type StateProps = {
-  chatId?: number;
+  chatId?: string;
   threadId?: number;
   messageListType?: MessageListType;
   isPrivate?: boolean;
@@ -477,7 +477,7 @@ export default memo(withGlobal(
       chatId,
       threadId,
       messageListType,
-      isPrivate: isChatPrivate(chatId),
+      isPrivate: isUserId(chatId),
       canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
       isScheduledMessageList,

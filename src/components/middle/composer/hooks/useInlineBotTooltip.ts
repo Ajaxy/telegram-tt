@@ -10,7 +10,7 @@ const HAS_NEW_LINE = /^@([a-z0-9_]{1,32})[\u00A0\u0020]+\n{2,}/i;
 
 export default function useInlineBotTooltip(
   isAllowed: boolean,
-  chatId: number,
+  chatId: string,
   html: string,
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {

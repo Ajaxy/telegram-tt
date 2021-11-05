@@ -41,7 +41,7 @@ import {
 import {
   getAllowedAttachmentOptions,
   getChatSlowModeOptions,
-  isChatPrivate,
+  isUserId,
   isChatAdmin,
 } from '../../../modules/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
@@ -98,7 +98,7 @@ import CalendarModal from '../../common/CalendarModal.async';
 import './Composer.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   threadId: number;
   messageListType: MessageListType;
   dropAreaState: string;
@@ -123,8 +123,8 @@ type StateProps = {
   canScheduleUntilOnline?: boolean;
   stickersForEmoji?: ApiSticker[];
   groupChatMembers?: ApiChatMember[];
-  currentUserId?: number;
-  usersById?: Record<number, ApiUser>;
+  currentUserId?: string;
+  usersById?: Record<string, ApiUser>;
   recentEmojis: string[];
   lastSyncTime?: number;
   contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
@@ -132,7 +132,7 @@ type StateProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   serverTimeOffset: number;
-  topInlineBotIds?: number[];
+  topInlineBotIds?: string[];
   isInlineBotLoading: boolean;
   inlineBots?: Record<string, false | InlineBotSettings>;
   botCommands?: ApiBotCommand[] | false;
@@ -1069,7 +1069,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf,
       canScheduleUntilOnline: (
         !isChatWithSelf && !isChatWithBot
-        && (chat && chatUser && isChatPrivate(chatId) && chatUser.status && Boolean(chatUser.status.wasOnline))
+        && (chat && chatUser && isUserId(chatId) && chatUser.status && Boolean(chatUser.status.wasOnline))
       ),
       isRightColumnShown: selectIsRightColumnShown(global),
       isSelectModeActive: selectIsInSelectMode(global),

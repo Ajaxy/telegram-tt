@@ -88,10 +88,10 @@ function checkIfNotificationsSupported() {
 const expirationTime = 12 * 60 * 60 * 1000; // 12 hours
 // Notification id is removed from soundPlayed cache after 3 seconds
 const soundPlayedDelay = 3 * 1000;
-const soundPlayed = new Set<number>();
+const soundPlayedIds = new Set<string>();
 
-async function playSound(id: number) {
-  if (soundPlayed.has(id)) return;
+async function playSound(id: string) {
+  if (soundPlayedIds.has(id)) return;
   const { notificationSoundVolume } = selectNotifySettings(getGlobal());
   const volume = notificationSoundVolume / 10;
   if (volume === 0) return;
@@ -100,11 +100,11 @@ async function playSound(id: number) {
   audio.volume = volume;
   audio.setAttribute('mozaudiochannel', 'notification');
   audio.addEventListener('ended', () => {
-    soundPlayed.add(id);
+    soundPlayedIds.add(id);
   }, { once: true });
 
   setTimeout(() => {
-    soundPlayed.delete(id);
+    soundPlayedIds.delete(id);
   }, soundPlayedDelay);
 
   try {
@@ -351,7 +351,7 @@ export async function showNewMessageNotification({
       body,
       icon,
       badge: icon,
-      tag: message.id.toString(),
+      tag: String(message.id),
     };
 
     if ('vibrate' in navigator) {
@@ -373,12 +373,12 @@ export async function showNewMessageNotification({
 
     // Play sound when notification is displayed
     notification.onshow = () => {
-      playNotificationSound(message.id || chat.id);
+      playNotificationSound(String(message.id) || chat.id);
     };
   }
 }
 
-export function closeMessageNotifications(payload: { chatId: number; lastReadInboxMessageId?: number }) {
+export function closeMessageNotifications(payload: { chatId: string; lastReadInboxMessageId?: number }) {
   if (IS_TEST || !navigator.serviceWorker?.controller) return;
   navigator.serviceWorker.controller.postMessage({
     type: 'closeMessageNotifications',

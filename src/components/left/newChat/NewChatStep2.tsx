@@ -21,7 +21,7 @@ import PrivateChatInfo from '../../common/PrivateChatInfo';
 export type OwnProps = {
   isChannel?: boolean;
   isActive: boolean;
-  memberIds: number[];
+  memberIds: string[];
   onReset: (forceReturnToChatList?: boolean) => void;
 };
 

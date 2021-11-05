@@ -27,7 +27,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import './Management.scss';
 
 type OwnProps = {
-  chatId: number;
+  chatId: string;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;

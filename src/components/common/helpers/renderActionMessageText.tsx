@@ -7,7 +7,7 @@ import {
   getMessageContent,
   getMessageSummaryText,
   getUserFullName,
-  isChatPrivate,
+  isUserId,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -32,7 +32,7 @@ export function renderActionMessageText(
   actionOrigin?: ApiUser | ApiChat,
   targetUsers?: ApiUser[],
   targetMessage?: ApiMessage,
-  targetChatId?: number,
+  targetChatId?: string,
   options: ActionMessageTextOptions = {},
 ) {
   if (!message.content.action) {
@@ -167,7 +167,7 @@ function renderMessageContent(lang: LangFn, message: ApiMessage, options: Action
 }
 
 function renderOriginContent(lang: LangFn, origin: ApiUser | ApiChat, asPlain?: boolean) {
-  return isChatPrivate(origin.id)
+  return isUserId(origin.id)
     ? renderUserContent(origin as ApiUser, asPlain)
     : renderChatContent(lang, origin as ApiChat, asPlain);
 }
@@ -192,7 +192,7 @@ function renderChatContent(lang: LangFn, chat: ApiChat, asPlain?: boolean): stri
   return <ChatLink className="action-link" chatId={chat.id}>{chat && renderText(text!)}</ChatLink>;
 }
 
-function renderMigratedContent(chatId: number, asPlain?: boolean): string | TextPart | undefined {
+function renderMigratedContent(chatId: string, asPlain?: boolean): string | TextPart | undefined {
   const text = 'another chat';
 
   if (asPlain) {

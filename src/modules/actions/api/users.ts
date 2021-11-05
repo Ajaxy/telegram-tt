@@ -7,7 +7,7 @@ import { ManagementProgress } from '../../../types';
 
 import { debounce, throttle } from '../../../util/schedulers';
 import { buildCollectionByKey, pick } from '../../../util/iteratees';
-import { isChatPrivate } from '../../helpers';
+import { isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectUser } from '../../selectors';
 import {
@@ -52,20 +52,15 @@ addReducer('loadUser', (global, actions, payload) => {
 });
 
 addReducer('loadTopUsers', (global) => {
-  const {
-    topPeers: {
-      hash, lastRequestedAt,
-    },
-  } = global;
+  const { topPeers: { lastRequestedAt } } = global;
 
   if (!lastRequestedAt || getServerTime(global.serverTimeOffset) - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
-    void loadTopUsers(hash);
+    void loadTopUsers();
   }
 });
 
-addReducer('loadContactList', (global) => {
-  const { hash } = global.contactList || {};
-  void loadContactList(hash);
+addReducer('loadContactList', () => {
+  void loadContactList();
 });
 
 addReducer('loadCurrentUser', () => {
@@ -86,13 +81,13 @@ addReducer('deleteUser', (global, actions, payload) => {
   void deleteUser(userId);
 });
 
-async function loadTopUsers(usersHash?: number) {
-  const result = await callApi('fetchTopUsers', { hash: usersHash });
+async function loadTopUsers() {
+  const result = await callApi('fetchTopUsers');
   if (!result) {
     return;
   }
 
-  const { hash, ids, users } = result;
+  const { ids, users } = result;
 
   let global = getGlobal();
   global = addUsers(global, buildCollectionByKey(users, 'id'));
@@ -100,7 +95,6 @@ async function loadTopUsers(usersHash?: number) {
     ...global,
     topPeers: {
       ...global.topPeers,
-      hash,
       userIds: ids,
       lastRequestedAt: getServerTime(global.serverTimeOffset),
     },
@@ -108,8 +102,8 @@ async function loadTopUsers(usersHash?: number) {
   setGlobal(global);
 }
 
-async function loadContactList(hash?: number) {
-  const contactList = await callApi('fetchContactList', { hash });
+async function loadContactList() {
+  const contactList = await callApi('fetchContactList');
   if (!contactList) {
     return;
   }
@@ -128,14 +122,13 @@ async function loadContactList(hash?: number) {
   setGlobal({
     ...global,
     contactList: {
-      hash: contactList.hash,
       userIds: sortedUsers.map((user) => user.id),
     },
   });
 }
 
 async function updateContact(
-  userId: number,
+  userId: string,
   isMuted: boolean,
   firstName: string,
   lastName?: string,
@@ -178,7 +171,7 @@ async function updateContact(
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.Complete));
 }
 
-async function deleteUser(userId: number) {
+async function deleteUser(userId: string) {
   const global = getGlobal();
   const user = selectUser(global, userId);
 
@@ -193,7 +186,7 @@ async function deleteUser(userId: number) {
 
 addReducer('loadProfilePhotos', (global, actions, payload) => {
   const { profileId } = payload!;
-  const isPrivate = isChatPrivate(profileId);
+  const isPrivate = isUserId(profileId);
   const user = isPrivate ? selectUser(global, profileId) : undefined;
   const chat = !isPrivate ? selectChat(global, profileId) : undefined;
 

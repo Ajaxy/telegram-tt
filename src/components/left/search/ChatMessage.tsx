@@ -36,7 +36,7 @@ import './ChatMessage.scss';
 type OwnProps = {
   searchQuery?: string;
   message: ApiMessage;
-  chatId: number;
+  chatId: string;
 };
 
 type StateProps = {

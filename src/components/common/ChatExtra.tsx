@@ -10,7 +10,7 @@ import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../../modules/selectors';
 import {
-  getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isChatPrivate, isUserRightBanned, selectIsChatMuted,
+  getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isUserId, isUserRightBanned, selectIsChatMuted,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
@@ -22,7 +22,7 @@ import ListItem from '../ui/ListItem';
 import Switcher from '../ui/Switcher';
 
 type OwnProps = {
-  chatOrUserId: number;
+  chatOrUserId: string;
   forceShowSelf?: boolean;
 };
 
@@ -140,7 +140,7 @@ export default memo(withGlobal<OwnProps>(
     const { lastSyncTime, countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
-    const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     const canInviteUsers = chat && !user && (

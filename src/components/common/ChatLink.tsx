@@ -10,7 +10,7 @@ import Link from '../ui/Link';
 
 type OwnProps = {
   className?: string;
-  chatId?: number;
+  chatId?: string;
   children: any;
 };
 
