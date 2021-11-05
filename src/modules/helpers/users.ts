@@ -128,7 +128,7 @@ export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: num
         }
 
         // other
-        return lang('LastSeen.TodayAt', formatTime(wasOnlineDate));
+        return lang('LastSeen.TodayAt', formatTime(wasOnlineDate, lang));
       }
 
       // yesterday
@@ -137,7 +137,7 @@ export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: num
       yesterday.setHours(0, 0, 0, 0);
       const serverYesterday = new Date(yesterday.getTime() + serverTimeOffset * 1000);
       if (wasOnlineDate > serverYesterday) {
-        return lang('LastSeen.YesterdayAt', formatTime(wasOnlineDate));
+        return lang('LastSeen.YesterdayAt', formatTime(wasOnlineDate, lang));
       }
 
       return lang('LastSeen.AtDate', formatFullDate(lang, wasOnlineDate));

@@ -365,8 +365,8 @@ const Audio: FC<OwnProps> = ({
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
       {origin !== AudioOrigin.Search && audio && renderAudio(
-        lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef, (isDownloading || isUploading),
-        date, transferProgress, onDateClick ? handleDateClick : undefined,
+        lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef,
+        (isDownloading || isUploading), date, transferProgress, onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
       {origin === AudioOrigin.Inline && voice && renderVoice(voice, renderedWaveform, playProgress, isMediaUnread)}
@@ -417,7 +417,9 @@ function renderAudio(
           {date && (
             <>
               <span className="bullet">&bull;</span>
-              <Link className="date" onClick={handleDateClick}>{formatMediaDateTime(lang, date * 1000, true)}</Link>
+              <Link className="date" onClick={handleDateClick}>
+                {formatMediaDateTime(lang, date * 1000, true)}
+              </Link>
             </>
           )}
         </div>

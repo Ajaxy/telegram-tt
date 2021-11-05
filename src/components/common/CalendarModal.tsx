@@ -348,10 +348,10 @@ function formatSubmitLabel(lang: LangFn, date: Date) {
   const today = formatDateToString(new Date(), lang.code);
 
   if (day === today) {
-    return lang('Conversation.ScheduleMessage.SendToday', formatTime(date));
+    return lang('Conversation.ScheduleMessage.SendToday', formatTime(date, lang));
   }
 
-  return lang('Conversation.ScheduleMessage.SendOn', [day, formatTime(date)]);
+  return lang('Conversation.ScheduleMessage.SendOn', [day, formatTime(date, lang)]);
 }
 
 export default memo(CalendarModal);

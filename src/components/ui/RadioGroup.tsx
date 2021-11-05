@@ -3,7 +3,7 @@ import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 
 import Radio from './Radio';
 
-type IRadioOption = {
+export type IRadioOption = {
   label: string;
   subLabel?: string;
   value: string;

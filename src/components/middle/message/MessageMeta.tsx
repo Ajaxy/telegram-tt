@@ -38,7 +38,7 @@ const MessageMeta: FC<OwnProps> = ({
       )}
       <span className="message-time">
         {message.isEdited && `${lang('EditedMessage')} `}
-        {formatTime(message.date * 1000)}
+        {formatTime(message.date * 1000, lang)}
       </span>
       {outgoingStatus && (
         <MessageOutgoingStatus status={outgoingStatus} />

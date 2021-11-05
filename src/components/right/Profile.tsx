@@ -126,6 +126,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   isRestricted,
   lastSyncTime,
   activeDownloadIds,
+  serverTimeOffset,
   setLocalMediaSearchType,
   loadMoreMembers,
   searchMediaMessagesLocal,
@@ -135,7 +136,6 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   focusMessage,
   loadProfilePhotos,
   setNewChatMembersDialogState,
-  serverTimeOffset,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

@@ -48,6 +48,8 @@ export type LangCode = (
   | 'tr' | 'uk' | 'uz'
 );
 
+export type TimeFormat = '24h' | '12h';
+
 export interface ISettings extends NotifySettings, Record<string, any> {
   theme: ThemeKey;
   shouldUseSystemTheme: boolean;
@@ -67,6 +69,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   language: LangCode;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
+  timeFormat: TimeFormat;
 }
 
 export interface ApiPrivacySettings {

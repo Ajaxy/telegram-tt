@@ -42,9 +42,7 @@ const HistoryCalendar: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    return {
-      selectedAt: global.historyCalendarSelectedAt,
-    };
+    return { selectedAt: global.historyCalendarSelectedAt };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'searchMessagesByDate', 'closeHistoryCalendar',
