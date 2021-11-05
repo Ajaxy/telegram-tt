@@ -41,7 +41,7 @@ export function formatTime(datetime: number | Date, lang: LangFn) {
     minute: '2-digit',
   });
 
-  return timeFormat === '12h' ? time.replace(/^0:/, '12:') : time;
+  return timeFormat === '12h' ? time.replace(/^0:/, '12:') : time.replace('24:', '00:');
 }
 
 export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
