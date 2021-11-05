@@ -32,6 +32,24 @@
   }
 }
 
+.icon-loop:before {
+  content: "\e981";
+}
+.icon-skip-next:before {
+  content: "\e982";
+}
+.icon-skip-previous:before {
+  content: "\e983";
+}
+.icon-volume-1:before {
+  content: "\e984";
+}
+.icon-volume-2:before {
+  content: "\e985";
+}
+.icon-volume-3:before {
+  content: "\e986";
+}
 .icon-bot-commands-filled:before {
   content: "\e97f";
 }
@@ -404,7 +422,7 @@
 .icon-eye:before {
   content: "\e924";
 }
-.icon-muted-chat:before {
+.icon-muted:before {
   content: "\e95d";
 }
 .icon-avatar-archived-chats:before {

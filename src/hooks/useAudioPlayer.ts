@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useRef, useState,
 } from '../lib/teact/teact';
-import { getDispatch } from '../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../lib/teact/teactn';
 
 import { AudioOrigin } from '../types';
 
@@ -48,12 +48,21 @@ export default (
   useOnChange(() => {
     controllerRef.current = register(trackId, trackType, origin, (eventName, e) => {
       switch (eventName) {
-        case 'onPlay':
+        case 'onPlay': {
+          const { setVolume, proxy } = controllerRef.current!;
           setIsPlaying(true);
 
           registerMediaSession(metadata, makeMediaHandlers(controllerRef));
           setPlaybackState('playing');
+          setVolume(getGlobal().audioPlayer.volume);
+
+          setPositionState({
+            duration: proxy.duration || 0,
+            playbackRate: proxy.playbackRate,
+            position: proxy.currentTime,
+          });
           break;
+        }
         case 'onPause':
           setIsPlaying(false);
           setPlaybackState('paused');
@@ -62,11 +71,6 @@ export default (
           const { proxy } = controllerRef.current!;
           const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
           if (!noProgressUpdates) setPlayProgress(proxy.currentTime / duration);
-          setPositionState({
-            duration: proxy.duration,
-            playbackRate: proxy.playbackRate,
-            position: proxy.currentTime,
-          });
           break;
         }
         case 'onEnded': {
@@ -95,7 +99,18 @@ export default (
   }, [metadata, isPlaying]);
 
   const {
-    play, pause, setCurrentTime, proxy, destroy, setVolume, setCurrentOrigin, stop,
+    play,
+    pause,
+    setCurrentTime,
+    proxy,
+    destroy,
+    setVolume,
+    setCurrentOrigin,
+    stop,
+    isFirst,
+    isLast,
+    requestNextTrack,
+    requestPreviousTrack,
   } = controllerRef.current!;
   const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
 
@@ -160,6 +175,10 @@ export default (
     setVolume,
     audioProxy: proxy,
     duration,
+    requestNextTrack,
+    requestPreviousTrack,
+    isFirst: isFirst(),
+    isLast: isLast(),
   };
 };
 

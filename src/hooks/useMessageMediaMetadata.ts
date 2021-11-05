@@ -32,7 +32,9 @@ export default (message: ApiMessage, sender?: ApiUser | ApiChat, chat?: ApiChat)
   const hash = (audio && audioCoverHash) || (voice && avatarHash);
   const media = useMedia(hash);
 
-  const size = getCoverSize(audio, voice, media);
+  const size = useMemo(() => {
+    return getCoverSize(audio, voice, media);
+  }, [audio, media, voice]);
   const { result: url } = useAsync(() => makeGoodArtwork(media, size), [media, size], telegramLogoPath);
   return useMemo(() => {
     return buildMediaMetadata({

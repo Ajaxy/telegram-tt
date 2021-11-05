@@ -124,10 +124,8 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           <RangeSlider
             label="Sound"
             disabled={!hasWebNotifications}
-            range={{
-              min: 0,
-              max: 10,
-            }}
+            min={0}
+            max={10}
             value={notificationSoundVolume}
             onChange={(volume) => {
               updateWebNotificationSettings({ notificationSoundVolume: volume });

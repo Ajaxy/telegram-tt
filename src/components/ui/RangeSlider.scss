@@ -100,6 +100,14 @@
     &::-moz-slider-thumb {
       -moz-appearance: none;
     }
+
+    &::-webkit-slider-runnable-track {
+      cursor: pointer;
+    }
+
+    &::-moz-range-track, &::-moz-range-progress {
+      cursor: pointer;
+    }
   }
 
   // Apply custom styles

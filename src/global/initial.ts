@@ -3,6 +3,7 @@ import { NewChatMembersProgress } from '../types';
 
 import {
   ANIMATION_LEVEL_DEFAULT, DARK_THEME_PATTERN_COLOR, DEFAULT_MESSAGE_TEXT_SIZE_PX, DEFAULT_PATTERN_COLOR,
+  DEFAULT_VOLUME,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX, MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/environment';
@@ -110,7 +111,9 @@ export const INITIAL_STATE: GlobalState = {
 
   mediaViewer: {},
 
-  audioPlayer: {},
+  audioPlayer: {
+    volume: DEFAULT_VOLUME,
+  },
 
   forwardMessages: {},
 

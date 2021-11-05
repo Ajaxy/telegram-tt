@@ -13,7 +13,7 @@
     margin: .125rem;
   }
 
-  > .toggle-play {
+  > .player-button {
     --color-text-secondary: var(--color-primary);
     --color-text-secondary-rgb: var(--color-primary-shade-rgb);
     --color-primary-shade: var(--color-green);
@@ -24,7 +24,7 @@
     margin-left: 1.5rem;
   }
 
-  .toggle-play {
+  .player-button {
     &.smaller {
       width: 3rem;
       height: 3rem;
@@ -60,6 +60,55 @@
     }
   }
 
+  .volume-button {
+    position: relative;
+    overflow: visible;
+
+    .volume-slider-spacer {
+      position: absolute;
+      transform: translateY(100%);
+      bottom: 0;
+      height: 1rem;
+      width: 8rem;
+      cursor: default;
+      visibility: hidden;
+    }
+
+    &:hover .volume-slider-spacer, .volume-slider-spacer:hover {
+      visibility: visible;
+    } 
+
+    .volume-slider {
+      opacity: 0;
+      visibility: hidden;
+
+      position: absolute;
+      background: var(--color-background);
+      bottom: -1rem;
+      transform: translateY(100%);
+      transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+      width: 8rem;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      cursor: default;
+      box-shadow: 0 1px 2px var(--color-default-shadow);
+
+      .RangeSlider {
+        margin-bottom: 0;
+        input[type=range] {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    &:hover .volume-slider, 
+    .volume-slider:hover, 
+    .volume-slider-spacer:hover + .volume-slider {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
   &-content {
     display: flex;
     justify-content: center;
@@ -69,7 +118,6 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    max-width: 15rem;
     border-radius: var(--border-radius-messages-small);
 
     &:hover {

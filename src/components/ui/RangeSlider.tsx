@@ -10,7 +10,9 @@ import './RangeSlider.scss';
 
 type OwnProps = {
   options?: string[];
-  range?: { min: number; max: number; step?: number };
+  min?: number;
+  max?: number;
+  step?: number;
   label?: string;
   value: number;
   disabled?: boolean;
@@ -19,7 +21,9 @@ type OwnProps = {
 
 const RangeSlider: FC<OwnProps> = ({
   options,
-  range,
+  min = 0,
+  max = options ? options.length - 1 : 100,
+  step = 1,
   label,
   value,
   disabled,
@@ -38,29 +42,19 @@ const RangeSlider: FC<OwnProps> = ({
   const trackWidth = useMemo(() => {
     if (options) {
       return (value / (options.length - 1)) * 100;
-    } else if (range) {
-      const possibleValuesLength = (range.max - range.min) / (range.step || 1);
-      return ((value - range.min) / possibleValuesLength) * 100;
+    } else {
+      const possibleValuesLength = (max - min) / step;
+      return ((value - min) / possibleValuesLength) * 100;
     }
     return 0;
-  }, [value, options, range]);
-
-  const [min, max, step] = useMemo(() => {
-    if (options) {
-      return [0, options.length - 1, 1];
-    } else if (range) {
-      return [range.min, range.max, range.step || 1];
-    }
-
-    return [0, 0, 0];
-  }, [range, options]);
+  }, [options, value, max, min, step]);
 
   return (
     <div className={className}>
       {label && (
         <div className="slider-top-row" dir={lang.isRtl ? 'rtl' : undefined}>
           <span className="label" dir="auto">{label}</span>
-          {range && (
+          {!options && (
             <span className="value" dir="auto">{value}</span>
           )}
         </div>
