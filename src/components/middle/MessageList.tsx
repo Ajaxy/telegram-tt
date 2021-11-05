@@ -77,6 +77,7 @@ type StateProps = {
   isBot?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
+  isUnread?: boolean;
   firstUnreadId?: number;
   isViewportNewest?: boolean;
   isRestricted?: boolean;
@@ -124,6 +125,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   messageIds,
   messagesById,
   firstUnreadId,
+  isUnread,
   isViewportNewest,
   threadFirstMessageId,
   isRestricted,
@@ -172,11 +174,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [firstUnreadId]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
+  const withUnreadDivider = areMessagesLoaded && isUnread;
   useOnChange(() => {
-    if (areMessagesLoaded) {
+    if (withUnreadDivider) {
       memoUnreadDividerBeforeIdRef.current = memoFirstUnreadIdRef.current;
     }
-  }, [areMessagesLoaded]);
+  }, [withUnreadDivider]);
 
   useOnChange(() => {
     memoFocusingIdRef.current = focusingId;
@@ -503,7 +506,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
           isViewportNewest={Boolean(isViewportNewest)}
-          isUnread={Boolean(firstUnreadId)}
+          isUnread={Boolean(isUnread)}
           withUsers={withUsers}
           noAvatars={noAvatars}
           containerRef={containerRef}
@@ -578,6 +581,7 @@ export default memo(withGlobal<OwnProps>(
       isBot: Boolean(chatBot),
       messageIds,
       messagesById,
+      isUnread: Boolean(chat.unreadCount),
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
       threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
