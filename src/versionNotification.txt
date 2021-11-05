@@ -1,13 +1,23 @@
-**Telegram Web Z was updated to version 1.19**
+**Telegram Web Z was updated to version alpha 1.20**
 
 👏 **Harder**
-· You can now add users as a contact from their profile.
-· Improvements in handling t.me/ links.
+· Adjust playback speed and volume and navigate between tracks with the new audio player controls.
+· Switch between 12/24-hour clock from Settings > General > Time Format.
+· Reply to recent messages with Ctrl+Up.
+· Application has been updated to support new 64-bit identifiers.
 
 🤩 **Better**
-· Redesigned error messages in the login flow for invalid numbers and too many attempts.
-· Composer: Support for non-standard JPEG extensions.
-· Enhanced icons for app shortcuts and the “Favorites" tab in your browser.
+· Smooth loading for videos.
+· Various visual improvements.
+
+🚀 **Faster**
+· Optimized scrolling in chats with lots of media.
+· Optimized rendering of voice messages.
 
 💪 **Stronger**
-· Added fixes for editing contacts.
+· Fixed hidden pinned messages when listening to audio files.
+· Fixed chat remaining in list after deleting.
+· Fixed cursor jumping when entering emoji.
+· Fixed the resolution of document previews.
+· Fixed marking changelog messages as read.
+· Fixed Firefox favicon.
