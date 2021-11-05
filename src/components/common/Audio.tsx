@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getDispatch } from '../../lib/teact/teactn';
 
@@ -18,7 +18,7 @@ import {
   isMessageLocal,
   isOwnMessage,
 } from '../../modules/helpers';
-import { renderWaveformToDataUri } from './helpers/waveform';
+import { renderWaveform } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import { getFileSizeString } from './helpers/documentInfo';
@@ -85,7 +85,7 @@ const Audio: FC<OwnProps> = ({
   const isSeeking = useRef<boolean>(false);
   const playStateBeforeSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
-  const seekerRef = useRef<HTMLElement>(null);
+  const seekerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
   const { isRtl } = lang;
   const dispatch = getDispatch();
@@ -135,6 +135,9 @@ const Audio: FC<OwnProps> = ({
     handleTrackChange,
     isMessageLocal(message),
   );
+
+  const isOwn = isOwnMessage(message);
+  const waveformCanvasRef = useWaveformCanvas(theme, voice, (isMediaUnread && !isOwn) ? 1 : playProgress, isOwn);
 
   const withSeekline = isPlaying || (playProgress > 0 && playProgress < 1);
 
@@ -224,7 +227,7 @@ const Audio: FC<OwnProps> = ({
     });
   }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek]);
 
-  function getFirstLine() {
+  function renderFirstLine() {
     if (isVoice) {
       return senderTitle || 'Voice';
     }
@@ -234,7 +237,7 @@ const Audio: FC<OwnProps> = ({
     return title || fileName;
   }
 
-  function getSecondLine() {
+  function renderSecondLine() {
     if (isVoice) {
       return (
         <div className="meta" dir={isRtl ? 'rtl' : undefined}>
@@ -255,18 +258,6 @@ const Audio: FC<OwnProps> = ({
       </div>
     );
   }
-
-  const isOwn = isOwnMessage(message);
-  const renderedWaveform = useMemo(
-    () => origin === AudioOrigin.Inline && voice && renderWaveform(
-      voice,
-      (isMediaUnread && !isOwn) ? 1 : playProgress,
-      isOwn,
-      theme,
-      seekerRef,
-    ),
-    [origin, voice, isMediaUnread, isOwn, playProgress, theme],
-  );
 
   const fullClassName = buildClassName(
     'Audio',
@@ -292,7 +283,7 @@ const Audio: FC<OwnProps> = ({
       <>
         <div className={contentClassName}>
           <div className="content-row">
-            <p className="title" dir="auto" title={getFirstLine()}>{renderText(getFirstLine())}</p>
+            <p className="title" dir="auto" title={renderFirstLine()}>{renderText(renderFirstLine())}</p>
 
             <div className="message-date">
               {date && (
@@ -314,7 +305,7 @@ const Audio: FC<OwnProps> = ({
               {renderSeekline(playProgress, bufferedProgress, seekerRef)}
             </div>
           )}
-          {!withSeekline && getSecondLine()}
+          {!withSeekline && renderSecondLine()}
         </div>
       </>
     );
@@ -369,7 +360,9 @@ const Audio: FC<OwnProps> = ({
         (isDownloading || isUploading), date, transferProgress, onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
-      {origin === AudioOrigin.Inline && voice && renderVoice(voice, renderedWaveform, playProgress, isMediaUnread)}
+      {origin === AudioOrigin.Inline && voice && (
+        renderVoice(voice, seekerRef, waveformCanvasRef, playProgress, isMediaUnread)
+      )}
     </div>
   );
 };
@@ -428,10 +421,22 @@ function renderAudio(
   );
 }
 
-function renderVoice(voice: ApiVoice, renderedWaveform: any, playProgress: number, isMediaUnread?: boolean) {
+function renderVoice(
+  voice: ApiVoice,
+  seekerRef: React.Ref<HTMLDivElement>,
+  waveformCanvasRef: React.Ref<HTMLCanvasElement>,
+  playProgress: number,
+  isMediaUnread?: boolean,
+) {
   return (
     <div className="content">
-      {renderedWaveform}
+      <div
+        className="waveform"
+        draggable={false}
+        ref={seekerRef}
+      >
+        <canvas ref={waveformCanvasRef} />
+      </div>
       <p className={buildClassName('voice-duration', isMediaUnread && 'unread')} dir="auto">
         {playProgress === 0 ? formatMediaDuration(voice.duration) : formatMediaDuration(voice.duration * playProgress)}
       </p>
@@ -439,45 +444,51 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, playProgress: numbe
   );
 }
 
-function renderWaveform(
-  voice: ApiVoice,
+function useWaveformCanvas(
+  theme: ISettings['theme'],
+  voice?: ApiVoice,
   playProgress = 0,
   isOwn = false,
-  theme: ISettings['theme'],
-  seekerRef: React.Ref<HTMLElement>,
 ) {
-  const { waveform, duration } = voice;
+  // eslint-disable-next-line no-null/no-null
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  if (!waveform) {
-    return undefined;
-  }
+  const { data: spikes, peak } = useMemo(() => {
+    if (!voice) {
+      return undefined;
+    }
 
-  const fillColor = theme === 'dark' ? '#494A78' : '#ADD3F7';
-  const fillOwnColor = theme === 'dark' ? '#B7ABED' : '#AEDFA4';
-  const progressFillColor = theme === 'dark' ? '#8774E1' : '#3390EC';
-  const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#4FAE4E';
-  const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
-  const spikesCount = Math.round(MIN_SPIKES + (MAX_SPIKES - MIN_SPIKES) * durationFactor);
-  const decodedWaveform = decodeWaveform(new Uint8Array(waveform));
-  const { data: spikes, peak } = interpolateArray(decodedWaveform, spikesCount);
-  const { src, width, height } = renderWaveformToDataUri(spikes, playProgress, {
-    peak,
-    fillStyle: isOwn ? fillOwnColor : fillColor,
-    progressFillStyle: isOwn ? progressFillOwnColor : progressFillColor,
-  });
+    const { waveform, duration } = voice;
+    if (!waveform) {
+      return undefined;
+    }
 
-  return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <img
-      src={src}
-      alt=""
-      width={width}
-      height={height}
-      className="waveform"
-      draggable={false}
-      ref={seekerRef as React.Ref<HTMLImageElement>}
-    />
-  );
+    const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
+    const spikesCount = Math.round(MIN_SPIKES + (MAX_SPIKES - MIN_SPIKES) * durationFactor);
+    const decodedWaveform = decodeWaveform(new Uint8Array(waveform));
+
+    return interpolateArray(decodedWaveform, spikesCount);
+  }, [voice]) || {};
+
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !spikes || !peak) {
+      return;
+    }
+
+    const fillColor = theme === 'dark' ? '#494A78' : '#ADD3F7';
+    const fillOwnColor = theme === 'dark' ? '#B7ABED' : '#AEDFA4';
+    const progressFillColor = theme === 'dark' ? '#8774E1' : '#3390EC';
+    const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#4FAE4E';
+
+    renderWaveform(canvas, spikes, playProgress, {
+      peak,
+      fillStyle: isOwn ? fillOwnColor : fillColor,
+      progressFillStyle: isOwn ? progressFillOwnColor : progressFillColor,
+    });
+  }, [isOwn, peak, playProgress, spikes, theme]);
+
+  return canvasRef;
 }
 
 function renderSeekline(
