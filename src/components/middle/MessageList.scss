@@ -163,6 +163,10 @@
     &.has-menu-open {
       &::before {
         opacity: 0.1;
+
+        .theme-dark & {
+          opacity: .6;
+        }
       }
     }
   }
