@@ -101,6 +101,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     undefined,
     undefined,
     true,
+    true,
   );
 
   const handleClick = useCallback(() => {
