@@ -31,17 +31,19 @@ function toIsoString(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
+// @optimization `toLocaleTimeString` is avoided because of bad performance
 export function formatTime(datetime: number | Date, lang: LangFn) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const timeFormat = lang.timeFormat || '24h';
 
-  const time = date.toLocaleTimeString(lang.code, {
-    hour12: timeFormat === '12h',
-    hour: timeFormat === '12h' ? 'numeric' : '2-digit',
-    minute: '2-digit',
-  });
+  let hours = date.getHours();
+  let marker = '';
+  if (timeFormat === '12h') {
+    marker = hours >= 12 ? ' PM' : ' AM';
+    hours %= 12;
+  }
 
-  return timeFormat === '12h' ? time.replace(/^0:/, '12:') : time.replace('24:', '00:');
+  return `${String(hours).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}${marker}`;
 }
 
 export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {

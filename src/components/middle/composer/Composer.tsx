@@ -409,7 +409,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     closeEmojiTooltip();
 
     if (IS_SINGLE_COLUMN_LAYOUT) {
-      // @perf
+      // @optimization
       setTimeout(() => closeSymbolMenu(), SENDING_ANIMATION_DURATION);
     } else {
       closeSymbolMenu();
