@@ -282,8 +282,21 @@
       }
     }
 
-    .user-status, .status {
+    .status {
+      display: flex;
       unicode-bidi: plaintext;
+    }
+
+    .user-status {
+      unicode-bidi: plaintext;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @media (min-width: 1275px) {
+        #Main.right-column-open & {
+          max-width: calc(100% - var(--right-column-width));
+        }
+      }
     }
   }
 
