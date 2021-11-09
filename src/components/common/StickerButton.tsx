@@ -83,7 +83,7 @@ const StickerButton: FC<OwnProps> = ({
     className,
   );
 
-  const style = thumbDataUri ? `background-image: url('${thumbDataUri}');` : '';
+  const style = thumbDataUri && !canAnimatedPlay ? `background-image: url('${thumbDataUri}');` : '';
 
   return (
     <div
