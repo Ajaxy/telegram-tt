@@ -240,9 +240,9 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <div className={fullClassName}>
         {!canSendStickers ? (
-          <div className="picker-disabled">Sending stickers is not allowed in this chat.</div>
+          <div className="picker-disabled">{lang('ErrorSendRestrictedStickersAll')}</div>
         ) : noPopulatedSets ? (
-          <div className="picker-disabled">You have no saved Stickers.</div>
+          <div className="picker-disabled">{lang('NoStickers')}</div>
         ) : (
           <Loading />
         )}
