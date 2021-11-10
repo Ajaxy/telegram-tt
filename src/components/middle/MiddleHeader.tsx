@@ -429,6 +429,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           chatId={chatId}
           threadId={threadId}
           messageListType={messageListType}
+          canExpandActions={!isAudioPlayerRendered}
         />
       </div>
     </div>
