@@ -32,6 +32,7 @@ interface OwnProps {
   chatId: string;
   threadId: number;
   messageListType: MessageListType;
+  canExpandActions: boolean;
 }
 
 interface StateProps {
@@ -63,6 +64,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
   canMute,
   canLeave,
   isRightColumnShown,
+  canExpandActions,
   joinChannel,
   sendBotCommand,
   openLocalTextSearch,
@@ -120,17 +122,17 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="HeaderActions">
-      {!IS_SINGLE_COLUMN_LAYOUT && canSubscribe && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canSubscribe && (
         <Button
           size="tiny"
           ripple
           fluid
           onClick={handleSubscribeClick}
         >
-          {lang(isChannel ? 'Subscribe' : 'Join Group')}
+          {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
         </Button>
       )}
-      {!IS_SINGLE_COLUMN_LAYOUT && canStartBot && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canStartBot && (
         <Button
           size="tiny"
           ripple
@@ -140,7 +142,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           {lang('BotStart')}
         </Button>
       )}
-      {!IS_SINGLE_COLUMN_LAYOUT && canRestartBot && (
+      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canRestartBot && (
         <Button
           size="tiny"
           ripple
@@ -181,6 +183,7 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           threadId={threadId}
           isOpen={isMenuOpen}
           anchor={menuPosition}
+          withExtraActions={IS_SINGLE_COLUMN_LAYOUT || !canExpandActions}
           isChannel={isChannel}
           canStartBot={canStartBot}
           canRestartBot={canRestartBot}

@@ -34,6 +34,7 @@ export type OwnProps = {
   chatId: string;
   threadId: number;
   isOpen: boolean;
+  withExtraActions: boolean;
   anchor: IAnchorPosition;
   isChannel?: boolean;
   canStartBot?: boolean;
@@ -60,6 +61,7 @@ type StateProps = {
 const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   isOpen,
+  withExtraActions,
   anchor,
   isChannel,
   canStartBot,
@@ -161,7 +163,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
-          {IS_SINGLE_COLUMN_LAYOUT && canStartBot && (
+          {withExtraActions && canStartBot && (
             <MenuItem
               icon="bots"
               onClick={handleStartBot}
@@ -169,7 +171,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang('BotStart')}
             </MenuItem>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT && canRestartBot && (
+          {withExtraActions && canRestartBot && (
             <MenuItem
               icon="bots"
               onClick={handleRestartBot}
@@ -177,12 +179,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang('BotRestart')}
             </MenuItem>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT && canSubscribe && (
+          {withExtraActions && canSubscribe && (
             <MenuItem
               icon={isChannel ? 'channel' : 'group'}
               onClick={handleSubscribe}
             >
-              {lang(isChannel ? 'Subscribe' : 'Join Group')}
+              {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
             </MenuItem>
           )}
           {canAddContact && (
