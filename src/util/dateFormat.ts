@@ -40,7 +40,7 @@ export function formatTime(datetime: number | Date, lang: LangFn) {
   let marker = '';
   if (timeFormat === '12h') {
     marker = hours >= 12 ? ' PM' : ' AM';
-    hours %= 12;
+    hours = hours > 12 ? hours % 12 : hours;
   }
 
   return `${String(hours).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}${marker}`;
