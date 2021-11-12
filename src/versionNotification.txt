@@ -1,23 +1,18 @@
-**Telegram Web Z was updated to version alpha 1.20**
+**Telegram Web Z was updated to version alpha 1.21**
 
 👏 **Harder**
-· Adjust playback speed and volume and navigate between tracks with the new audio player controls.
-· Switch between 12/24-hour clock from Settings > General > Time Format.
-· Reply to recent messages with Ctrl+Up.
-· Application has been updated to support new 64-bit identifiers.
+· Specify auto-download settings for media by chat type in Settings > Data & Storage.
+· The ‘Choosing a Sticker’ user status now appears in chats and the chat list.
 
 🤩 **Better**
-· Smooth loading for videos.
-· Various visual improvements.
+· Various UI fixes.
 
 🚀 **Faster**
-· Optimized scrolling in chats with lots of media.
-· Optimized rendering of voice messages.
+· Optimized animations for voice message playback.
+· Faster rendering of chats and messages with optimized time formatting.
 
 💪 **Stronger**
-· Fixed hidden pinned messages when listening to audio files.
-· Fixed chat remaining in list after deleting.
-· Fixed cursor jumping when entering emoji.
-· Fixed the resolution of document previews.
-· Fixed marking changelog messages as read.
-· Fixed Firefox favicon.
+· Fixed scrolling jumps in message list.
+· Fixed leaving/deleting groups and channels.
+· Fixed marking service notifications as read.
+· Fixed time display issues for both 12 and 24-hour formats.
