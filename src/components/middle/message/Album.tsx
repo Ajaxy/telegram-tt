@@ -23,8 +23,8 @@ const VideoWithSelect = withSelectControl(Video);
 type OwnProps = {
   album: IAlbum;
   observeIntersection: ObserveFn;
-  shouldAutoLoad?: boolean;
-  shouldAutoPlay?: boolean;
+  canAutoLoad?: boolean;
+  canAutoPlay?: boolean;
   hasCustomAppendix?: boolean;
   lastSyncTime?: number;
   isOwn: boolean;
@@ -43,8 +43,8 @@ type DispatchProps = Pick<GlobalActions, 'cancelSendingMessage'>;
 const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   album,
   observeIntersection,
-  shouldAutoLoad,
-  shouldAutoPlay,
+  canAutoLoad,
+  canAutoPlay,
   hasCustomAppendix,
   lastSyncTime,
   isOwn,
@@ -78,7 +78,7 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           id={`album-media-${message.id}`}
           message={message}
           observeIntersection={observeIntersection}
-          shouldAutoLoad={shouldAutoLoad}
+          canAutoLoad={canAutoLoad}
           shouldAffectAppendix={shouldAffectAppendix}
           uploadProgress={uploadProgress}
           dimensions={dimensions}
@@ -94,8 +94,8 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           id={`album-media-${message.id}`}
           message={message}
           observeIntersection={observeIntersection}
-          shouldAutoLoad={shouldAutoLoad}
-          shouldAutoPlay={shouldAutoPlay}
+          canAutoLoad={canAutoLoad}
+          canAutoPlay={canAutoPlay}
           uploadProgress={uploadProgress}
           lastSyncTime={lastSyncTime}
           dimensions={dimensions}

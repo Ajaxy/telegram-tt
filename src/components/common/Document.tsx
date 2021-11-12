@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, memo, useRef,
+  FC, useCallback, memo, useRef, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getDispatch } from '../../lib/teact/teactn';
 
@@ -15,6 +15,7 @@ import {
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../hooks/useMedia';
+import useFlag from '../../hooks/useFlag';
 
 import File from './File';
 
@@ -24,21 +25,27 @@ type OwnProps = {
   smaller?: boolean;
   isSelected?: boolean;
   isSelectable?: boolean;
+  canAutoLoad?: boolean;
   uploadProgress?: number;
   withDate?: boolean;
   datetime?: number;
   className?: string;
   sender?: string;
+  autoLoadFileMaxSizeMb?: number;
   isDownloading: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
   onDateClick?: (messageId: number, chatId: string) => void;
 };
 
+const BYTES_PER_MB = 1024 * 1024;
+
 const Document: FC<OwnProps> = ({
   message,
   observeIntersection,
   smaller,
+  canAutoLoad,
+  autoLoadFileMaxSizeMb,
   uploadProgress,
   withDate,
   datetime,
@@ -51,39 +58,62 @@ const Document: FC<OwnProps> = ({
   onDateClick,
   isDownloading,
 }) => {
+  const dispatch = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
   const document = message.content.document!;
-  const extension = getDocumentExtension(document) || '';
   const { fileName, size, timestamp } = document;
-  const withMediaViewer = onMediaClick && Boolean(document.mediaType);
+  const extension = getDocumentExtension(document) || '';
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
-  const dispatch = getDispatch();
+  const [wasIntersected, markIntersected] = useFlag();
+  useEffect(() => {
+    if (isIntersecting) {
+      markIntersected();
+    }
+  }, [isIntersecting, markIntersected]);
 
-  const { loadProgress: downloadProgress } = useMediaWithLoadProgress<ApiMediaFormat.BlobUrl>(
-    getMessageMediaHash(message, 'download'), !isDownloading, undefined, undefined, undefined, true,
+  // Auto-loading does not use global download manager because requires additional click to save files locally
+  const [isLoadAllowed, setIsLoadAllowed] = useState(
+    canAutoLoad && (!autoLoadFileMaxSizeMb || size <= autoLoadFileMaxSizeMb * BYTES_PER_MB),
   );
+
+  const shouldDownload = Boolean(isDownloading || (isLoadAllowed && wasIntersected));
+
+  const documentHash = getMessageMediaHash(message, 'download');
+  const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress<ApiMediaFormat.BlobUrl>(
+    documentHash, !shouldDownload, undefined, undefined, undefined, true,
+  );
+  const isLoaded = Boolean(mediaData);
+
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isDownloading);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !isLoaded);
 
   const hasPreview = getDocumentHasPreview(document);
   const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
   const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
 
+  const withMediaViewer = onMediaClick && Boolean(document.mediaType);
+
   const handleClick = useCallback(() => {
+    if (isUploading) {
+      if (onCancelUpload) {
+        onCancelUpload();
+      }
+      return;
+    }
+
     if (isDownloading) {
       dispatch.cancelMessageMediaDownload({ message });
       return;
     }
 
-    if (isUploading) {
-      if (onCancelUpload) {
-        onCancelUpload();
-      }
+    if (isTransferring) {
+      setIsLoadAllowed(false);
       return;
     }
 
@@ -92,7 +122,9 @@ const Document: FC<OwnProps> = ({
     } else {
       dispatch.downloadMessageMedia({ message });
     }
-  }, [withMediaViewer, isUploading, isDownloading, onMediaClick, onCancelUpload, dispatch, message]);
+  }, [
+    isUploading, isDownloading, isTransferring, withMediaViewer, onCancelUpload, dispatch, message, onMediaClick,
+  ]);
 
   const handleDateClick = useCallback(() => {
     onDateClick!(message.id, message.chatId);

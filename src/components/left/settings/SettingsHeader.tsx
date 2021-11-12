@@ -90,6 +90,8 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
         return <h3>{lang('General')}</h3>;
       case SettingsScreens.Notifications:
         return <h3>{lang('Notifications')}</h3>;
+      case SettingsScreens.DataStorage:
+        return <h3>{lang('DataSettings')}</h3>;
       case SettingsScreens.Privacy:
         return <h3>{lang('PrivacySettings')}</h3>;
       case SettingsScreens.Language:

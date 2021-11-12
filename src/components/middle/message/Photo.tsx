@@ -18,19 +18,19 @@ import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import usePrevious from '../../../hooks/usePrevious';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
-import useMediaTransition from '../../../hooks/useMediaTransition';
 
 export type OwnProps = {
   id?: string;
   message: ApiMessage;
   observeIntersection?: ObserveFn;
   noAvatars?: boolean;
-  shouldAutoLoad?: boolean;
+  canAutoLoad?: boolean;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   uploadProgress?: number;
@@ -51,7 +51,7 @@ const Photo: FC<OwnProps> = ({
   message,
   observeIntersection,
   noAvatars,
-  shouldAutoLoad,
+  canAutoLoad,
   isInSelectMode,
   isSelected,
   uploadProgress,
@@ -72,7 +72,7 @@ const Photo: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [isLoadAllowed, setIsLoadAllowed] = useState(shouldAutoLoad);
+  const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = isLoadAllowed && isIntersecting;
   const {
     mediaData, loadProgress,
@@ -98,6 +98,10 @@ const Photo: FC<OwnProps> = ({
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled, 'slow');
+  const {
+    shouldRender: shouldRenderDownloadButton,
+    transitionClassNames: downloadButtonClassNames,
+  } = useShowTransition(!fullMediaData && !isLoadAllowed);
 
   const handleClick = useCallback(() => {
     if (isUploading) {
@@ -164,14 +168,12 @@ const Photo: FC<OwnProps> = ({
         height={height}
         alt=""
       />
-      {shouldRenderSpinner && (
+      {shouldRenderSpinner && !shouldRenderDownloadButton && (
         <div className={`media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {!fullMediaData && !isLoadAllowed && (
-        <i className="icon-download" />
-      )}
+      {shouldRenderDownloadButton && <i className={buildClassName('icon-download', downloadButtonClassNames)} />}
       {isTransferring && (
         <span className="message-transfer-progress">{Math.round(transferProgress * 100)}%</span>
       )}

@@ -15,6 +15,7 @@ type OwnProps = {
   step?: number;
   label?: string;
   value: number;
+  renderValue?: (value: number) => string;
   disabled?: boolean;
   onChange: (value: number) => void;
 };
@@ -26,6 +27,7 @@ const RangeSlider: FC<OwnProps> = ({
   step = 1,
   label,
   value,
+  renderValue,
   disabled,
   onChange,
 }) => {
@@ -46,7 +48,6 @@ const RangeSlider: FC<OwnProps> = ({
       const possibleValuesLength = (max - min) / step;
       return ((value - min) / possibleValuesLength) * 100;
     }
-    return 0;
   }, [options, value, max, min, step]);
 
   return (
@@ -55,7 +56,7 @@ const RangeSlider: FC<OwnProps> = ({
         <div className="slider-top-row" dir={lang.isRtl ? 'rtl' : undefined}>
           <span className="label" dir="auto">{label}</span>
           {!options && (
-            <span className="value" dir="auto">{value}</span>
+            <span className="value" dir="auto">{renderValue ? renderValue(value) : value}</span>
           )}
         </div>
       )}

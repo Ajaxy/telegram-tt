@@ -39,8 +39,8 @@ import {
   selectSender,
   selectForwardedSender,
   selectThreadTopMessageId,
-  selectShouldAutoLoadMedia,
-  selectShouldAutoPlayMedia,
+  selectCanAutoLoadMedia,
+  selectCanAutoPlayMedia,
   selectShouldLoopStickers,
   selectTheme,
   selectAllowedMessageActions,
@@ -157,9 +157,10 @@ type StateProps = {
   isDownloading: boolean;
   threadId?: number;
   isPinnedList?: boolean;
-  shouldAutoLoadMedia?: boolean;
-  shouldAutoPlayMedia?: boolean;
+  canAutoLoadMedia?: boolean;
+  canAutoPlayMedia?: boolean;
   shouldLoopStickers?: boolean;
+  autoLoadFileMaxSizeMb: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'toggleMessageSelection' | 'clickInlineButton' | 'disableContextMenuHint'>;
@@ -220,9 +221,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   messageListType,
   isPinnedList,
   isDownloading,
-  shouldAutoLoadMedia,
-  shouldAutoPlayMedia,
+  canAutoLoadMedia,
+  canAutoPlayMedia,
   shouldLoopStickers,
+  autoLoadFileMaxSizeMb,
   toggleMessageSelection,
   clickInlineButton,
   disableContextMenuHint,
@@ -513,8 +515,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             album={album!}
             albumLayout={albumLayout!}
             observeIntersection={observeIntersectionForMedia}
-            shouldAutoLoad={shouldAutoLoadMedia}
-            shouldAutoPlay={shouldAutoPlayMedia}
+            canAutoLoad={canAutoLoadMedia}
+            canAutoPlay={canAutoPlayMedia}
             isOwn={isOwn}
             hasCustomAppendix={hasCustomAppendix}
             lastSyncTime={lastSyncTime}
@@ -526,7 +528,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             observeIntersection={observeIntersectionForMedia}
             noAvatars={noAvatars}
-            shouldAutoLoad={shouldAutoLoadMedia}
+            canAutoLoad={canAutoLoadMedia}
             uploadProgress={uploadProgress}
             shouldAffectAppendix={hasCustomAppendix}
             onClick={handleMediaClick}
@@ -539,8 +541,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <RoundVideo
             message={message}
             observeIntersection={observeIntersectionForMedia}
-            shouldAutoLoad={shouldAutoLoadMedia}
-            shouldAutoPlay={shouldAutoPlayMedia}
+            canAutoLoad={canAutoLoadMedia}
             lastSyncTime={lastSyncTime}
             isDownloading={isDownloading}
           />
@@ -550,8 +551,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             observeIntersection={observeIntersectionForMedia}
             noAvatars={noAvatars}
-            shouldAutoLoad={shouldAutoLoadMedia}
-            shouldAutoPlay={shouldAutoPlayMedia}
+            canAutoLoad={canAutoLoadMedia}
+            canAutoPlay={canAutoPlayMedia}
             uploadProgress={uploadProgress}
             lastSyncTime={lastSyncTime}
             onClick={handleMediaClick}
@@ -578,6 +579,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Document
             message={message}
             observeIntersection={observeIntersectionForMedia}
+            canAutoLoad={canAutoLoadMedia}
+            autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             uploadProgress={uploadProgress}
             isSelectable={isInDocumentGroup}
             isSelected={isSelected}
@@ -610,8 +613,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             observeIntersection={observeIntersectionForMedia}
             noAvatars={noAvatars}
-            shouldAutoLoad={shouldAutoLoadMedia}
-            shouldAutoPlay={shouldAutoPlayMedia}
+            canAutoLoad={canAutoLoadMedia}
+            canAutoPlay={canAutoPlayMedia}
             lastSyncTime={lastSyncTime}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
@@ -825,7 +828,7 @@ export default memo(withGlobal<OwnProps>(
 
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
     const canShowSender = withSenderName || withAvatar || forceSenderName;
-    const sender = canShowSender ? selectSender(global, message) : undefined;
+    const sender = selectSender(global, message);
     const originSender = selectForwardedSender(global, message);
     const botSender = viaBotId ? selectUser(global, viaBotId) : undefined;
 
@@ -869,7 +872,7 @@ export default memo(withGlobal<OwnProps>(
       theme: selectTheme(global),
       chatUsername,
       forceSenderName,
-      sender,
+      sender: canShowSender ? sender : undefined,
       originSender,
       botSender,
       shouldHideReply,
@@ -894,8 +897,9 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       isDownloading,
       isPinnedList: messageListType === 'pinned',
-      shouldAutoLoadMedia: chat ? selectShouldAutoLoadMedia(global, message, chat, sender) : undefined,
-      shouldAutoPlayMedia: selectShouldAutoPlayMedia(global, message),
+      canAutoLoadMedia: chat ? selectCanAutoLoadMedia(global, message, chat, sender) : undefined,
+      canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
+      autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

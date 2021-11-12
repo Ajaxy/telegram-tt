@@ -56,12 +56,21 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   messageTextSize: number;
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
-  shouldAutoDownloadMediaFromContacts: boolean;
-  shouldAutoDownloadMediaInPrivateChats: boolean;
-  shouldAutoDownloadMediaInGroups: boolean;
-  shouldAutoDownloadMediaInChannels: boolean;
-  shouldAutoPlayGifs: boolean;
-  shouldAutoPlayVideos: boolean;
+  canAutoLoadPhotoFromContacts: boolean;
+  canAutoLoadPhotoInPrivateChats: boolean;
+  canAutoLoadPhotoInGroups: boolean;
+  canAutoLoadPhotoInChannels: boolean;
+  canAutoLoadVideoFromContacts: boolean;
+  canAutoLoadVideoInPrivateChats: boolean;
+  canAutoLoadVideoInGroups: boolean;
+  canAutoLoadVideoInChannels: boolean;
+  canAutoLoadFileFromContacts: boolean;
+  canAutoLoadFileInPrivateChats: boolean;
+  canAutoLoadFileInGroups: boolean;
+  canAutoLoadFileInChannels: boolean;
+  autoLoadFileMaxSizeMb: number;
+  canAutoPlayGifs: boolean;
+  canAutoPlayVideos: boolean;
   shouldSuggestStickers: boolean;
   shouldLoopStickers: boolean;
   hasPassword?: boolean;
@@ -145,6 +154,7 @@ export enum SettingsScreens {
   Main,
   EditProfile,
   Notifications,
+  DataStorage,
   Language,
   General,
   GeneralChatBackground,

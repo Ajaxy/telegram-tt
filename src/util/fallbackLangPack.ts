@@ -476,6 +476,10 @@ export default {
     key: 'Notifications',
     value: 'Notifications',
   },
+  DataSettings: {
+    key: 'DataSettings',
+    value: 'Data and Storage',
+  },
   PrivacySettings: {
     key: 'PrivacySettings',
     value: 'Privacy and Security',
@@ -1804,5 +1808,17 @@ export default {
   PleaseEnterPassword: {
     key: 'PleaseEnterPassword',
     value: 'Enter your new password',
+  },
+  AutoDownloadPhotosTitle: {
+    key: 'AutoDownloadPhotosTitle',
+    value: 'Auto-download photos',
+  },
+  AutoDownloadVideosTitle: {
+    key: 'AutoDownloadVideosTitle',
+    value: 'Auto-download videos and GIFs',
+  },
+  AutoDownloadFilesTitle: {
+    key: 'AutoDownloadFilesTitle',
+    value: 'Auto-download files and music',
   },
 } as ApiLangPack;

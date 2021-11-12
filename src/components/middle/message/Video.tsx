@@ -36,8 +36,8 @@ export type OwnProps = {
   message: ApiMessage;
   observeIntersection: ObserveFn;
   noAvatars?: boolean;
-  shouldAutoLoad?: boolean;
-  shouldAutoPlay?: boolean;
+  canAutoLoad?: boolean;
+  canAutoPlay?: boolean;
   uploadProgress?: number;
   dimensions?: IMediaDimensions;
   lastSyncTime?: number;
@@ -51,8 +51,8 @@ const Video: FC<OwnProps> = ({
   message,
   observeIntersection,
   noAvatars,
-  shouldAutoLoad,
-  shouldAutoPlay,
+  canAutoLoad,
+  canAutoPlay,
   uploadProgress,
   lastSyncTime,
   dimensions,
@@ -70,9 +70,9 @@ const Video: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [isLoadAllowed, setIsLoadAllowed] = useState(shouldAutoLoad);
+  const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting && lastSyncTime);
-  const [isPlayAllowed, setIsPlayAllowed] = useState(shouldAutoPlay);
+  const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay);
 
   const previewBlobUrl = useMedia(
     getMessageMediaHash(message, 'pictogram'),
@@ -105,7 +105,7 @@ const Video: FC<OwnProps> = ({
     lastSyncTime,
   );
 
-  const { isBuffered, bufferingHandlers } = useBuffering(!shouldAutoLoad);
+  const { isBuffered, bufferingHandlers } = useBuffering(!canAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
@@ -116,6 +116,10 @@ const Video: FC<OwnProps> = ({
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
+  const {
+    shouldRender: shouldRenderPlayButton,
+    transitionClassNames: playButtonClassNames,
+  } = useShowTransition(isLoadAllowed && !isPlayAllowed && !shouldRenderSpinner);
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -128,7 +132,7 @@ const Video: FC<OwnProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
 
-  useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && shouldAutoPlay));
+  useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && canAutoPlay));
   usePauseOnInactive(videoRef, isPlayAllowed);
   useVideoCleanup(videoRef, [isInline]);
 
@@ -193,11 +197,9 @@ const Video: FC<OwnProps> = ({
           <source src={fullMediaData} />
         </video>
       )}
-      {(isLoadAllowed && !isPlayAllowed && !shouldRenderSpinner) && (
-        <i className="icon-large-play" />
-      )}
+      {shouldRenderPlayButton && <i className={buildClassName('icon-large-play', playButtonClassNames)} />}
       {shouldRenderSpinner && (
-        <div className={`media-loading ${spinnerClassNames}`}>
+        <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner progress={transferProgress} onClick={handleClick} />
         </div>
       )}

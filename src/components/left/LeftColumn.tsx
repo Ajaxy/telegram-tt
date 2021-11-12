@@ -118,6 +118,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.Folders:
         case SettingsScreens.General:
         case SettingsScreens.Notifications:
+        case SettingsScreens.DataStorage:
         case SettingsScreens.Privacy:
         case SettingsScreens.Language:
           setSettingsScreen(SettingsScreens.Main);

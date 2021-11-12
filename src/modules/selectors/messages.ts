@@ -30,6 +30,11 @@ import {
   isChatSuperGroup,
   getMessageVideo,
   getMessageWebPageVideo,
+  getMessagePhoto,
+  getMessageAudio,
+  getMessageVoice,
+  getMessageDocument,
+  getMessageWebPagePhoto,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -732,41 +737,110 @@ export function selectNewestMessageWithBotKeyboardButtons(
   return messageId ? chatMessages[messageId] : undefined;
 }
 
-export function selectShouldAutoLoadMedia(
+export function selectCanAutoLoadMedia(
   global: GlobalState, message: ApiMessage, chat: ApiChat, sender?: ApiChat | ApiUser,
 ) {
+  const isPhoto = Boolean(getMessagePhoto(message) || getMessageWebPagePhoto(message));
+  const isVideo = Boolean(getMessageVideo(message) || getMessageWebPageVideo(message));
+  const isFile = Boolean(getMessageAudio(message) || getMessageVoice(message) || getMessageDocument(message));
+
   const {
-    shouldAutoDownloadMediaFromContacts,
-    shouldAutoDownloadMediaInPrivateChats,
-    shouldAutoDownloadMediaInGroups,
-    shouldAutoDownloadMediaInChannels,
+    canAutoLoadPhotoFromContacts,
+    canAutoLoadPhotoInPrivateChats,
+    canAutoLoadPhotoInGroups,
+    canAutoLoadPhotoInChannels,
+    canAutoLoadVideoFromContacts,
+    canAutoLoadVideoInPrivateChats,
+    canAutoLoadVideoInGroups,
+    canAutoLoadVideoInChannels,
+    canAutoLoadFileFromContacts,
+    canAutoLoadFileInPrivateChats,
+    canAutoLoadFileInGroups,
+    canAutoLoadFileInChannels,
   } = global.settings.byKey;
 
+  if (isPhoto) {
+    return canAutoLoadMedia({
+      global,
+      chat,
+      sender,
+      canAutoLoadMediaFromContacts: canAutoLoadPhotoFromContacts,
+      canAutoLoadMediaInPrivateChats: canAutoLoadPhotoInPrivateChats,
+      canAutoLoadMediaInGroups: canAutoLoadPhotoInGroups,
+      canAutoLoadMediaInChannels: canAutoLoadPhotoInChannels,
+    });
+  }
+
+  if (isVideo) {
+    return canAutoLoadMedia({
+      global,
+      chat,
+      sender,
+      canAutoLoadMediaFromContacts: canAutoLoadVideoFromContacts,
+      canAutoLoadMediaInPrivateChats: canAutoLoadVideoInPrivateChats,
+      canAutoLoadMediaInGroups: canAutoLoadVideoInGroups,
+      canAutoLoadMediaInChannels: canAutoLoadVideoInChannels,
+    });
+  }
+
+  if (isFile) {
+    return canAutoLoadMedia({
+      global,
+      chat,
+      sender,
+      canAutoLoadMediaFromContacts: canAutoLoadFileFromContacts,
+      canAutoLoadMediaInPrivateChats: canAutoLoadFileInPrivateChats,
+      canAutoLoadMediaInGroups: canAutoLoadFileInGroups,
+      canAutoLoadMediaInChannels: canAutoLoadFileInChannels,
+    });
+  }
+
+  return true;
+}
+
+function canAutoLoadMedia({
+  global,
+  chat,
+  sender,
+  canAutoLoadMediaFromContacts,
+  canAutoLoadMediaInPrivateChats,
+  canAutoLoadMediaInGroups,
+  canAutoLoadMediaInChannels,
+}: {
+  global: GlobalState;
+  chat: ApiChat;
+  canAutoLoadMediaFromContacts: boolean;
+  canAutoLoadMediaInPrivateChats: boolean;
+  canAutoLoadMediaInGroups: boolean;
+  canAutoLoadMediaInChannels: boolean;
+  sender?: ApiChat | ApiUser;
+}) {
+  const isMediaFromContact = Boolean(sender && (
+    sender.id === global.currentUserId || selectIsUserOrChatContact(global, sender)
+  ));
+
   return Boolean(
-    (shouldAutoDownloadMediaInPrivateChats && isUserId(chat.id))
-    || (shouldAutoDownloadMediaInGroups && isChatGroup(chat))
-    || (shouldAutoDownloadMediaInChannels && isChatChannel(chat))
-    || (shouldAutoDownloadMediaFromContacts && sender && (
-      sender.id === global.currentUserId
-      || selectIsUserOrChatContact(global, sender)
-    )),
+    (isMediaFromContact && canAutoLoadMediaFromContacts)
+    || (!isMediaFromContact && canAutoLoadMediaInPrivateChats && isUserId(chat.id))
+    || (canAutoLoadMediaInGroups && isChatGroup(chat))
+    || (canAutoLoadMediaInChannels && isChatChannel(chat)),
   );
 }
 
-export function selectShouldAutoPlayMedia(global: GlobalState, message: ApiMessage) {
+export function selectCanAutoPlayMedia(global: GlobalState, message: ApiMessage) {
   const video = getMessageVideo(message) || getMessageWebPageVideo(message);
   if (!video) {
     return undefined;
   }
 
   const {
-    shouldAutoPlayVideos,
-    shouldAutoPlayGifs,
+    canAutoPlayVideos,
+    canAutoPlayGifs,
   } = global.settings.byKey;
 
   const asGif = video.isGif || video.isRound;
 
-  return (shouldAutoPlayVideos && !asGif) || (shouldAutoPlayGifs && asGif);
+  return (canAutoPlayVideos && !asGif) || (canAutoPlayGifs && asGif);
 }
 
 export function selectShouldLoopStickers(global: GlobalState) {
