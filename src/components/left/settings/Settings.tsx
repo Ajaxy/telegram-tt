@@ -10,6 +10,7 @@ import Transition from '../../ui/Transition';
 import SettingsHeader from './SettingsHeader';
 import SettingsMain from './SettingsMain';
 import SettingsEditProfile from './SettingsEditProfile';
+import SettingsDataStorage from './SettingsDataStorage';
 import SettingsFolders from './folders/SettingsFolders';
 import SettingsGeneral from './SettingsGeneral';
 import SettingsGeneralBackground from './SettingsGeneralBackground';
@@ -186,6 +187,10 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Notifications:
         return (
           <SettingsNotifications onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
+        );
+      case SettingsScreens.DataStorage:
+        return (
+          <SettingsDataStorage onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Privacy:
         return (

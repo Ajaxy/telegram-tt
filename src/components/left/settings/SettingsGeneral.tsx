@@ -32,12 +32,6 @@ type StateProps = Pick<ISettings, (
   'messageTextSize' |
   'animationLevel' |
   'messageSendKeyCombo' |
-  'shouldAutoDownloadMediaFromContacts' |
-  'shouldAutoDownloadMediaInPrivateChats' |
-  'shouldAutoDownloadMediaInGroups' |
-  'shouldAutoDownloadMediaInChannels' |
-  'shouldAutoPlayGifs' |
-  'shouldAutoPlayVideos' |
   'shouldSuggestStickers' |
   'shouldLoopStickers' |
   'timeFormat'
@@ -73,12 +67,6 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   messageTextSize,
   animationLevel,
   messageSendKeyCombo,
-  shouldAutoDownloadMediaFromContacts,
-  shouldAutoDownloadMediaInPrivateChats,
-  shouldAutoDownloadMediaInGroups,
-  shouldAutoDownloadMediaInChannels,
-  shouldAutoPlayGifs,
-  shouldAutoPlayVideos,
   shouldSuggestStickers,
   shouldLoopStickers,
   timeFormat,
@@ -212,46 +200,6 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
 
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoDownloadMedia')}</h4>
-
-        <Checkbox
-          label={lang('Contacts')}
-          checked={shouldAutoDownloadMediaFromContacts}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoDownloadMediaFromContacts: isChecked })}
-        />
-        <Checkbox
-          label={lang('AutodownloadPrivateChats')}
-          checked={shouldAutoDownloadMediaInPrivateChats}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoDownloadMediaInPrivateChats: isChecked })}
-        />
-        <Checkbox
-          label={lang('AutodownloadGroupChats')}
-          checked={shouldAutoDownloadMediaInGroups}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoDownloadMediaInGroups: isChecked })}
-        />
-        <Checkbox
-          label={lang('FilterChannels')}
-          checked={shouldAutoDownloadMediaInChannels}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoDownloadMediaInChannels: isChecked })}
-        />
-      </div>
-
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoplayMedia')}</h4>
-
-        <Checkbox
-          label={lang('GifsTab2')}
-          checked={shouldAutoPlayGifs}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoPlayGifs: isChecked })}
-        />
-        <Checkbox
-          label={lang('DataAndStorage.Autoplay.Videos')}
-          checked={shouldAutoPlayVideos}
-          onCheck={(isChecked) => setSettingOption({ shouldAutoPlayVideos: isChecked })}
-        />
-      </div>
-
-      <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AccDescrStickers')}</h4>
 
         <Checkbox
@@ -294,12 +242,6 @@ export default memo(withGlobal<OwnProps>(
         'messageTextSize',
         'animationLevel',
         'messageSendKeyCombo',
-        'shouldAutoDownloadMediaFromContacts',
-        'shouldAutoDownloadMediaInPrivateChats',
-        'shouldAutoDownloadMediaInGroups',
-        'shouldAutoDownloadMediaInChannels',
-        'shouldAutoPlayGifs',
-        'shouldAutoPlayVideos',
         'shouldSuggestStickers',
         'shouldLoopStickers',
         'isSensitiveEnabled',

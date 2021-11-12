@@ -107,40 +107,7 @@ function readCache(initialState: GlobalState): GlobalState {
   }
 
   if (cached) {
-    // Pre-fill defaults in nested objects which may be missing in older cache
-    cached.settings.byKey = {
-      ...initialState.settings.byKey,
-      ...cached.settings.byKey,
-    };
-    cached.settings.themes = {
-      ...initialState.settings.themes,
-      ...cached.settings.themes,
-    };
-    cached.chatFolders = {
-      ...initialState.chatFolders,
-      ...cached.chatFolders,
-    };
-
-    if (!cached.stickers.greeting) {
-      cached.stickers.greeting = initialState.stickers.greeting;
-    }
-
-    if (!cached.activeDownloads) {
-      cached.activeDownloads = {
-        byChatId: {},
-      };
-    }
-
-    if (!cached.serviceNotifications) {
-      cached.serviceNotifications = [];
-    }
-
-    if (cached.audioPlayer.volume === undefined) {
-      cached.audioPlayer.volume = DEFAULT_VOLUME;
-    }
-    if (cached.audioPlayer.playbackRate === undefined) {
-      cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
-    }
+    migrateCache(cached, initialState);
   }
 
   const newState = {
@@ -157,6 +124,71 @@ function readCache(initialState: GlobalState): GlobalState {
       messageLists: parsedMessageList ? [parsedMessageList] : [],
     },
   };
+}
+
+function migrateCache(cached: GlobalState, initialState: GlobalState) {
+  if ('shouldAutoDownloadMediaFromContacts' in cached.settings.byKey) {
+    const {
+      shouldAutoDownloadMediaFromContacts,
+      shouldAutoDownloadMediaInPrivateChats,
+      shouldAutoDownloadMediaInGroups,
+      shouldAutoDownloadMediaInChannels,
+      shouldAutoPlayVideos,
+      shouldAutoPlayGifs,
+      ...rest
+    } = cached.settings.byKey;
+
+    cached.settings.byKey = {
+      ...rest,
+      canAutoLoadPhotoFromContacts: shouldAutoDownloadMediaFromContacts,
+      canAutoLoadVideoFromContacts: shouldAutoDownloadMediaFromContacts,
+      canAutoLoadPhotoInPrivateChats: shouldAutoDownloadMediaInPrivateChats,
+      canAutoLoadVideoInPrivateChats: shouldAutoDownloadMediaInPrivateChats,
+      canAutoLoadPhotoInGroups: shouldAutoDownloadMediaInGroups,
+      canAutoLoadVideoInGroups: shouldAutoDownloadMediaInGroups,
+      canAutoLoadPhotoInChannels: shouldAutoDownloadMediaInChannels,
+      canAutoLoadVideoInChannels: shouldAutoDownloadMediaInChannels,
+      canAutoPlayVideos: shouldAutoPlayVideos,
+      canAutoPlayGifs: shouldAutoPlayGifs,
+    };
+  }
+
+  cached.settings.byKey = {
+    ...initialState.settings.byKey,
+    ...cached.settings.byKey,
+  };
+
+  cached.settings.themes = {
+    ...initialState.settings.themes,
+    ...cached.settings.themes,
+  };
+
+  cached.chatFolders = {
+    ...initialState.chatFolders,
+    ...cached.chatFolders,
+  };
+
+  if (!cached.stickers.greeting) {
+    cached.stickers.greeting = initialState.stickers.greeting;
+  }
+
+  if (!cached.activeDownloads) {
+    cached.activeDownloads = {
+      byChatId: {},
+    };
+  }
+
+  if (!cached.serviceNotifications) {
+    cached.serviceNotifications = [];
+  }
+
+  if (cached.audioPlayer.volume === undefined) {
+    cached.audioPlayer.volume = DEFAULT_VOLUME;
+  }
+
+  if (cached.audioPlayer.playbackRate === undefined) {
+    cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
+  }
 }
 
 function updateCache() {

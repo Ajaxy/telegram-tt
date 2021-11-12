@@ -22,8 +22,8 @@ type OwnProps = {
   message: ApiMessage;
   observeIntersection?: ObserveFn;
   noAvatars?: boolean;
-  shouldAutoLoad?: boolean;
-  shouldAutoPlay?: boolean;
+  canAutoLoad?: boolean;
+  canAutoPlay?: boolean;
   inPreview?: boolean;
   lastSyncTime?: number;
   isDownloading?: boolean;
@@ -36,8 +36,8 @@ const WebPage: FC<OwnProps> = ({
   message,
   observeIntersection,
   noAvatars,
-  shouldAutoLoad,
-  shouldAutoPlay,
+  canAutoLoad,
+  canAutoPlay,
   inPreview,
   lastSyncTime,
   isDownloading = false,
@@ -91,7 +91,7 @@ const WebPage: FC<OwnProps> = ({
           message={message}
           observeIntersection={observeIntersection}
           noAvatars={noAvatars}
-          shouldAutoLoad={shouldAutoLoad}
+          canAutoLoad={canAutoLoad}
           size={isSquarePhoto ? 'pictogram' : 'inline'}
           nonInteractive={!isMediaInteractive}
           onClick={isMediaInteractive ? handleMediaClick : undefined}
@@ -114,8 +114,8 @@ const WebPage: FC<OwnProps> = ({
           message={message}
           observeIntersection={observeIntersection!}
           noAvatars={noAvatars}
-          shouldAutoLoad={shouldAutoLoad}
-          shouldAutoPlay={shouldAutoPlay}
+          canAutoLoad={canAutoLoad}
+          canAutoPlay={canAutoPlay}
           lastSyncTime={lastSyncTime}
           onClick={isMediaInteractive ? handleMediaClick : undefined}
           onCancelUpload={onCancelMediaTransfer}

@@ -80,6 +80,12 @@ const SettingsMain: FC<OwnProps & StateProps & DispatchProps> = ({
           {lang('PrivacySettings')}
         </ListItem>
         <ListItem
+          icon="data"
+          onClick={() => onScreenSelect(SettingsScreens.DataStorage)}
+        >
+          {lang('DataSettings')}
+        </ListItem>
+        <ListItem
           icon="folder"
           onClick={() => onScreenSelect(SettingsScreens.Folders)}
         >

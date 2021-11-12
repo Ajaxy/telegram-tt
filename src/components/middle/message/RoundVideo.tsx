@@ -34,8 +34,7 @@ import './RoundVideo.scss';
 type OwnProps = {
   message: ApiMessage;
   observeIntersection: ObserveFn;
-  shouldAutoLoad?: boolean;
-  shouldAutoPlay?: boolean;
+  canAutoLoad?: boolean;
   lastSyncTime?: number;
   isDownloading?: boolean;
 };
@@ -55,8 +54,7 @@ function createCapture(onRelease: NoneToVoidFunction) {
 const RoundVideo: FC<OwnProps> = ({
   message,
   observeIntersection,
-  shouldAutoLoad,
-  shouldAutoPlay,
+  canAutoLoad,
   lastSyncTime,
   isDownloading,
 }) => {
@@ -71,7 +69,7 @@ const RoundVideo: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [isLoadAllowed, setIsLoadAllowed] = useState(shouldAutoLoad && shouldAutoPlay);
+  const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting && lastSyncTime);
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
@@ -243,7 +241,7 @@ const RoundVideo: FC<OwnProps> = ({
         </div>
       )}
       {!mediaData && !isLoadAllowed && (
-        <i className="icon-large-play" />
+        <i className="icon-download" />
       )}
       <div className="message-media-duration">
         {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}

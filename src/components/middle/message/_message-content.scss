@@ -495,6 +495,14 @@
       border-radius: 50%;
       background: rgba(black, 0.25);
     }
+
+    &.opacity-transition {
+      transition: opacity .15s ease;
+
+      &:not(.open) {
+        opacity: 0;
+      }
+    }
   }
 
   .icon-download {
