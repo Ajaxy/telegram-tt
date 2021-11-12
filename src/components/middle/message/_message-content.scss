@@ -703,6 +703,8 @@
 }
 
 .forwarded-message {
+  .message-content.contact &,
+  .message-content.voice &,
   .message-content.poll & {
     // MessageOutgoingStatus's icon needs more space
     margin-bottom: 0.5rem;

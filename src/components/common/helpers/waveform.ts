@@ -4,6 +4,7 @@ type IWaveformProps = {
   progressFillStyle: string;
 };
 
+export const MAX_EMPTY_WAVEFORM_POINTS = 30;
 const SPIKE_WIDTH = 2;
 const SPIKE_STEP = 4;
 const SPIKE_RADIUS = 1;
