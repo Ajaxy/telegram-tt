@@ -3,6 +3,7 @@ import { ApiChat, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { omit } from '../../util/iteratees';
+import { selectChatListType } from '../selectors';
 
 export function replaceChatListIds(
   global: GlobalState,
@@ -192,4 +193,21 @@ export function updateChatListSecondaryInfo(
       },
     },
   };
+}
+
+export function leaveChat(global: GlobalState, leftChatId: string): GlobalState {
+  const listType = selectChatListType(global, leftChatId);
+  if (!listType) {
+    return global;
+  }
+
+  const { [listType]: listIds } = global.chats.listIds;
+
+  if (listIds) {
+    global = replaceChatListIds(global, listType, listIds.filter((listId) => listId !== leftChatId));
+  }
+
+  global = updateChat(global, leftChatId, { isNotJoined: true });
+
+  return global;
 }
