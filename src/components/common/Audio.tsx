@@ -18,7 +18,7 @@ import {
   isMessageLocal,
   isOwnMessage,
 } from '../../modules/helpers';
-import { renderWaveform } from './helpers/waveform';
+import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import { getFileSizeString } from './helpers/documentInfo';
@@ -460,7 +460,10 @@ function useWaveformCanvas(
 
     const { waveform, duration } = voice;
     if (!waveform) {
-      return undefined;
+      return {
+        data: new Array(Math.min(duration, MAX_EMPTY_WAVEFORM_POINTS)).fill(0),
+        peak: 0,
+      };
     }
 
     const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
@@ -472,7 +475,8 @@ function useWaveformCanvas(
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !spikes || !peak) {
+
+    if (!canvas || !spikes || peak === undefined) {
       return;
     }
 
