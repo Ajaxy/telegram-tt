@@ -125,6 +125,10 @@
     text-overflow: ellipsis;
   }
 
+  canvas {
+    height: 23px;
+  }
+
   .voice-duration {
     margin: .25rem 0 0;
     font-size: .875rem;
