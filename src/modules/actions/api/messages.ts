@@ -485,15 +485,24 @@ addReducer('markMessageListRead', (global, actions, payload) => {
     return undefined;
   }
 
+  if (chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+    global = {
+      ...global,
+      serviceNotifications: global.serviceNotifications.map((notification) => {
+        return notification.isUnread && notification.id <= maxId ? { ...notification, isUnread: false } : notification;
+      }),
+    };
+  }
+
   const viewportIds = selectViewportIds(global, chatId, threadId);
   const minId = selectFirstUnreadId(global, chatId, threadId);
   if (!viewportIds || !minId || !chat.unreadCount) {
-    return undefined;
+    return global;
   }
 
   const readCount = countSortedIds(viewportIds!, minId, maxId);
   if (!readCount) {
-    return undefined;
+    return global;
   }
 
   return updateChat(global, chatId, {

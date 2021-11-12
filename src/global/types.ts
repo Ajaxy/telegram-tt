@@ -76,6 +76,7 @@ export interface ServiceNotification {
   id: number;
   message: ApiMessage;
   version?: string;
+  isUnread?: boolean;
 }
 
 export type GlobalState = {

@@ -7,7 +7,7 @@ import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import { LOCAL_MESSAGE_ID_BASE } from '../../config';
+import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import {
   selectChat, selectIsChatWithBot, selectIsChatWithSelf,
 } from './chats';
@@ -583,19 +583,36 @@ export function selectFirstUnreadId(global: GlobalState, chatId: string, threadI
     return undefined;
   }
 
-  if (outlyingIds) {
-    const found = !lastReadId ? outlyingIds[0] : outlyingIds.find((id) => {
-      return id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled);
+  const lastReadServiceNotificationId = chatId === SERVICE_NOTIFICATIONS_USER_ID
+    ? global.serviceNotifications.reduce((max, notification) => {
+      return !notification.isUnread && notification.id > max ? notification.id : max;
+    }, -1)
+    : -1;
+
+  function findAfterLastReadId(listIds: number[]) {
+    if (!lastReadId) {
+      return listIds[0];
+    }
+
+    return listIds.find((id) => {
+      return (
+        id > lastReadId
+        && byId[id]
+        && (!byId[id].isOutgoing || byId[id].isFromScheduled)
+        && id > lastReadServiceNotificationId
+      );
     });
+  }
+
+  if (outlyingIds) {
+    const found = findAfterLastReadId(outlyingIds);
     if (found) {
       return found;
     }
   }
 
   if (listedIds) {
-    const found = !lastReadId ? listedIds[0] : listedIds.find((id) => {
-      return id > lastReadId && byId[id] && (!byId[id].isOutgoing || byId[id].isFromScheduled);
-    });
+    const found = findAfterLastReadId(listedIds);
     if (found) {
       return found;
     }

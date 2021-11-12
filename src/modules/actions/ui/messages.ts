@@ -43,7 +43,7 @@ import parseMessageInput from '../../../util/parseMessageInput';
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
-const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e4;
+const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
 
@@ -609,12 +609,13 @@ addReducer('createServiceNotification', (global, actions, payload) => {
     id,
     message,
     version,
+    isUnread: true,
   };
 
   setGlobal({
     ...global,
     serviceNotifications: [
-      ...serviceNotifications,
+      ...serviceNotifications.slice(-SERVICE_NOTIFICATIONS_MAX_AMOUNT),
       serviceNotification,
     ],
   });
