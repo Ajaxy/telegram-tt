@@ -8,10 +8,10 @@ import { closeMessageNotifications, showNewMessageNotification } from '../../../
 import { updateAppBadge } from '../../../util/appBadge';
 import {
   updateChat,
-  replaceChatListIds,
   updateChatListIds,
   updateChatListType,
   replaceThreadParam,
+  leaveChat,
 } from '../../reducers';
 import {
   selectChat,
@@ -70,19 +70,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateChatLeave': {
-      const listType = selectChatListType(global, update.id);
-      if (!listType) {
-        break;
-      }
-
-      const { [listType]: listIds } = global.chats.listIds;
-
-      if (listIds) {
-        global = replaceChatListIds(global, listType, listIds.filter((listId) => listId !== update.id));
-      }
-
-      global = updateChat(global, update.id, { isNotJoined: true });
-      setGlobal(global);
+      setGlobal(leaveChat(global, update.id));
 
       break;
     }

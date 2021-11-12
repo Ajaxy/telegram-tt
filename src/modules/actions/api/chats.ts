@@ -28,6 +28,7 @@ import {
   updateChat,
   updateChatListSecondaryInfo,
   updateManagementProgress,
+  leaveChat,
 } from '../../reducers';
 import {
   selectChat,
@@ -299,78 +300,78 @@ addReducer('joinChannel', (global, actions, payload) => {
 });
 
 addReducer('deleteChatUser', (global, actions, payload) => {
-  (async () => {
-    const { chatId, userId }: { chatId: string; userId: string } = payload!;
-    const chat = selectChat(global, chatId);
-    const user = selectUser(global, userId);
-    if (!chat || !user) {
-      return;
-    }
-    await callApi('deleteChatUser', { chat, user });
+  const { chatId, userId }: { chatId: string; userId: string } = payload!;
+  const chat = selectChat(global, chatId);
+  const user = selectUser(global, userId);
+  if (!chat || !user) {
+    return;
+  }
 
-    const activeChat = selectCurrentMessageList(global);
-    if (activeChat && activeChat.chatId === chatId && global.currentUserId === userId) {
-      actions.openChat({ id: undefined });
-    }
-  })();
+  global = leaveChat(global, chatId);
+  setGlobal(global);
+
+  if (selectCurrentMessageList(global)?.chatId === chatId) {
+    actions.openChat({ id: undefined });
+  }
+
+  void callApi('deleteChatUser', { chat, user });
 });
 
 addReducer('deleteChat', (global, actions, payload) => {
-  (async () => {
-    const { chatId }: { chatId: string } = payload!;
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return;
-    }
-    await callApi('deleteChat', { chatId: chat.id });
+  const { chatId }: { chatId: string } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
 
-    const activeChat = selectCurrentMessageList(global);
-    if (activeChat && activeChat.chatId === chatId) {
-      actions.openChat({ id: undefined });
-    }
-  })();
+  global = leaveChat(global, chatId);
+  setGlobal(global);
+
+  if (selectCurrentMessageList(global)?.chatId === chatId) {
+    actions.openChat({ id: undefined });
+  }
+
+  void callApi('deleteChat', { chatId: chat.id });
 });
 
 addReducer('leaveChannel', (global, actions, payload) => {
-  (async () => {
-    const { chatId } = payload!;
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return;
-    }
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
 
-    const { id: channelId, accessHash } = chat;
+  global = leaveChat(global, chatId);
+  setGlobal(global);
 
-    if (channelId && accessHash) {
-      await callApi('leaveChannel', { channelId, accessHash });
-    }
+  if (selectCurrentMessageList(global)?.chatId === chatId) {
+    actions.openChat({ id: undefined });
+  }
 
-    const activeChannel = selectCurrentMessageList(global);
-    if (activeChannel && activeChannel.chatId === chatId) {
-      actions.openChat({ id: undefined });
-    }
-  })();
+  const { id: channelId, accessHash } = chat;
+  if (channelId && accessHash) {
+    void callApi('leaveChannel', { channelId, accessHash });
+  }
 });
 
 addReducer('deleteChannel', (global, actions, payload) => {
-  (async () => {
-    const { chatId } = payload!;
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return;
-    }
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
 
-    const { id: channelId, accessHash } = chat;
+  global = leaveChat(global, chatId);
+  setGlobal(global);
 
-    if (channelId && accessHash) {
-      await callApi('deleteChannel', { channelId, accessHash });
-    }
+  if (selectCurrentMessageList(global)?.chatId === chatId) {
+    actions.openChat({ id: undefined });
+  }
 
-    const activeChannel = selectCurrentMessageList(global);
-    if (activeChannel && activeChannel.chatId === chatId) {
-      actions.openChat({ id: undefined });
-    }
-  })();
+  const { id: channelId, accessHash } = chat;
+  if (channelId && accessHash) {
+    void callApi('deleteChannel', { channelId, accessHash });
+  }
 });
 
 addReducer('createGroupChat', (global, actions, payload) => {
