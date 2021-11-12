@@ -32,9 +32,12 @@ export function storeSession(sessionData: ApiSessionData, currentUserId?: string
   Object.keys(keys).map(Number).forEach((dcId) => {
     localStorage.setItem(`dc${dcId}_auth_key`, JSON.stringify(keys[dcId]));
   });
-  Object.keys(hashes).map(Number).forEach((dcId) => {
-    localStorage.setItem(`dc${dcId}_hash`, JSON.stringify(hashes[dcId]));
-  });
+
+  if (hashes) {
+    Object.keys(hashes).map(Number).forEach((dcId) => {
+      localStorage.setItem(`dc${dcId}_hash`, JSON.stringify(hashes[dcId]));
+    });
+  }
 }
 
 export function clearStoredSession() {
