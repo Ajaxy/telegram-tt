@@ -338,6 +338,9 @@ class MTProtoSender {
                 const ack = new RequestState(new MsgsAck({ msgIds: Array(...this._pending_ack) }));
                 this._send_queue.append(ack);
                 this._last_acks.push(ack);
+                if (this._last_acks.length >= 10) {
+                    this._last_acks.shift();
+                }
                 this._pending_ack.clear();
             }
             this._log.debug(`Waiting for messages to send...${this._reconnecting}`);
