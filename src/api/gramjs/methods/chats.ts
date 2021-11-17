@@ -39,7 +39,7 @@ import {
   buildChatBannedRights,
   buildChatAdminRights,
 } from '../gramjsBuilders';
-import { addMessageToLocalDb } from '../helpers';
+import { addChatToLocalDb, addMessageToLocalDb } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
@@ -1075,11 +1075,7 @@ function updateLocalDb(result: (
   }
 
   if ('chats' in result) {
-    result.chats.forEach((chat) => {
-      if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-        localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
-      }
-    });
+    result.chats.forEach(addChatToLocalDb);
   }
 
   if ('messages' in result) {

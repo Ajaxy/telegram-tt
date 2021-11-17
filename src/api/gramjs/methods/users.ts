@@ -4,19 +4,21 @@ import {
   OnApiUpdate, ApiUser, ApiChat, ApiPhoto,
 } from '../../types';
 
-import { PROFILE_PHOTOS_LIMIT } from '../../../config';
+import { COMMON_CHATS_LIMIT, PROFILE_PHOTOS_LIMIT } from '../../../config';
 import { invokeRequest } from './client';
 import { searchMessagesLocal } from './messages';
 import {
   buildInputEntity,
   buildInputPeer,
   buildInputContact,
+  buildMtpPeerId,
+  getEntityTypeById,
 } from '../gramjsBuilders';
 import { buildApiUser, buildApiUserFromFull } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import localDb from '../localDb';
-import { addPhotoToLocalDb } from '../helpers';
+import { addChatToLocalDb, addPhotoToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
 
 let onUpdate: OnApiUpdate;
@@ -52,6 +54,34 @@ export async function fetchFullUser({
       fullInfo: userWithFullInfo.fullInfo,
     },
   });
+}
+
+export async function fetchCommonChats(id: string, accessHash?: string, maxId?: string) {
+  const commonChats = await invokeRequest(new GramJs.messages.GetCommonChats({
+    userId: buildInputEntity(id, accessHash) as GramJs.InputUser,
+    maxId: maxId ? buildMtpPeerId(maxId, getEntityTypeById(maxId)) : undefined,
+    limit: COMMON_CHATS_LIMIT,
+  }));
+
+  if (!commonChats) {
+    return undefined;
+  }
+
+  updateLocalDb(commonChats);
+
+  const chatIds: string[] = [];
+  const chats: ApiChat[] = [];
+
+  commonChats.chats.forEach((mtpChat) => {
+    const chat = buildApiChatFromPreview(mtpChat);
+
+    if (chat) {
+      chats.push(chat);
+      chatIds.push(chat.id);
+    }
+  });
+
+  return { chats, chatIds, isFullyLoaded: chatIds.length < COMMON_CHATS_LIMIT };
 }
 
 export async function fetchNearestCountry() {
@@ -217,6 +247,12 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   };
 }
 
-function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice)) {
-  result.photos.forEach(addPhotoToLocalDb);
+function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {
+  if ('chats' in result) {
+    result.chats.forEach(addChatToLocalDb);
+  }
+
+  if ('photos' in result) {
+    result.photos.forEach(addPhotoToLocalDb);
+  }
 }

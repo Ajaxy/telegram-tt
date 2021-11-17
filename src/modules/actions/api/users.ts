@@ -6,10 +6,10 @@ import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { debounce, throttle } from '../../../util/schedulers';
-import { buildCollectionByKey, pick } from '../../../util/iteratees';
-import { isUserId } from '../../helpers';
+import { buildCollectionByKey, pick, unique } from '../../../util/iteratees';
+import { isUserBot, isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
-import { selectChat, selectUser } from '../../selectors';
+import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import {
   addChats, addUsers, updateChat, updateManagementProgress, updateUser, updateUsers,
   updateUserSearch, updateUserSearchFetchingStatus,
@@ -65,6 +65,37 @@ addReducer('loadContactList', () => {
 
 addReducer('loadCurrentUser', () => {
   void callApi('fetchCurrentUser');
+});
+
+addReducer('loadCommonChats', (global) => {
+  const { chatId } = selectCurrentMessageList(global) || {};
+  const user = chatId ? selectUser(global, chatId) : undefined;
+  if (!user || isUserBot(user) || user.commonChats?.isFullyLoaded) {
+    return;
+  }
+
+  (async () => {
+    const maxId = user.commonChats?.maxId;
+    const result = await callApi('fetchCommonChats', user.id, user.accessHash!, maxId);
+    if (!result) {
+      return;
+    }
+
+    const { chats, chatIds, isFullyLoaded } = result;
+
+    global = getGlobal();
+    if (chats.length) {
+      global = addChats(global, buildCollectionByKey(chats, 'id'));
+    }
+    global = updateUser(global, user.id, {
+      commonChats: {
+        maxId: chatIds.length ? chatIds[chatIds.length - 1] : '0',
+        ids: unique((user.commonChats?.ids || []).concat(chatIds)),
+        isFullyLoaded,
+      },
+    });
+    setGlobal(global);
+  })();
 });
 
 addReducer('updateContact', (global, actions, payload) => {

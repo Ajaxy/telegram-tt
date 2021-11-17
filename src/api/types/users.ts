@@ -18,6 +18,11 @@ export interface ApiUser {
   photos?: ApiPhoto[];
   botPlaceholder?: string;
   canBeInvitedToGroup?: boolean;
+  commonChats?: {
+    ids: string[];
+    maxId: string;
+    isFullyLoaded: boolean;
+  };
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;

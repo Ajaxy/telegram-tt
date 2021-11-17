@@ -7,7 +7,8 @@ import {
   ApiMessage,
   ApiChatMember,
   ApiUser,
-  MAIN_THREAD_ID, ApiChat,
+  ApiChat,
+  MAIN_THREAD_ID,
 } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import {
@@ -31,6 +32,7 @@ import {
   selectIsRightColumnShown,
   selectTheme,
   selectActiveDownloadIds,
+  selectUser,
 } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -57,6 +59,7 @@ import WebLink from '../common/WebLink';
 import NothingFound from '../common/NothingFound';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import DeleteMemberModal from './DeleteMemberModal';
+import GroupChatInfo from '../common/GroupChatInfo';
 
 import './Profile.scss';
 
@@ -75,11 +78,13 @@ type StateProps = {
   chatMessages?: Record<number, ApiMessage>;
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
+  hasCommonChatsTab?: boolean;
   hasMembersTab?: boolean;
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
   members?: ApiChatMember[];
+  commonChatIds?: string[];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
   isRightColumnShown: boolean;
@@ -90,8 +95,9 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'setLocalMediaSearchType' | 'loadMoreMembers' | 'searchMediaMessagesLocal' | 'openMediaViewer' |
-  'openAudioPlayer' | 'openUserInfo' | 'focusMessage' | 'loadProfilePhotos' | 'setNewChatMembersDialogState'
+  'setLocalMediaSearchType' | 'loadMoreMembers' | 'searchMediaMessagesLocal' | 'openMediaViewer' | 'loadCommonChats' |
+  'openAudioPlayer' | 'openUserInfo' | 'focusMessage' | 'loadProfilePhotos' | 'setNewChatMembersDialogState' |
+  'openChat'
 )>;
 
 const TABS = [
@@ -115,10 +121,12 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatMessages,
   foundIds,
   mediaSearchType,
+  hasCommonChatsTab,
   hasMembersTab,
   areMembersHidden,
   canAddMembers,
   canDeleteMembers,
+  commonChatIds,
   members,
   usersById,
   chatsById,
@@ -129,6 +137,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   serverTimeOffset,
   setLocalMediaSearchType,
   loadMoreMembers,
+  loadCommonChats,
+  openChat,
   searchMediaMessagesLocal,
   openMediaViewer,
   openAudioPlayer,
@@ -150,12 +160,15 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       type: 'members', title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
     ...TABS,
-  ]), [hasMembersTab, isChannel]);
+    ...(hasCommonChatsTab ? [{
+      type: 'commonChats', title: 'SharedGroupsTab2',
+    }] : []),
+  ]), [hasCommonChatsTab, hasMembersTab, isChannel]);
   const tabType = tabs[activeTab].type as ProfileTabType;
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
-    isRightColumnShown, loadMoreMembers, searchMediaMessagesLocal, tabType, mediaSearchType, members,
-    usersById, chatMessages, foundIds, chatId, lastSyncTime, serverTimeOffset,
+    isRightColumnShown, loadMoreMembers, loadCommonChats, searchMediaMessagesLocal, tabType, mediaSearchType, members,
+    commonChatIds, usersById, chatsById, chatMessages, foundIds, chatId, lastSyncTime, serverTimeOffset,
   );
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
@@ -273,6 +286,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         case 'members':
           text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
           break;
+        case 'commonChats':
+          text = lang('NoGroupsInCommon');
+          break;
         case 'documents':
           text = lang('lng_media_file_empty');
           break;
@@ -371,6 +387,17 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               contextActions={getMemberContextAction(id)}
             >
               <PrivateChatInfo userId={id} forceShowSelf />
+            </ListItem>
+          ))
+        ) : resultType === 'commonChats' ? (
+          (viewportIds as string[])!.map((id, i) => (
+            <ListItem
+              key={id}
+              teactOrderKey={i}
+              className="chat-item-clickable scroll-item small-icon"
+              onClick={() => openChat({ id })}
+            >
+              <GroupChatInfo chatId={id} />
             </ListItem>
           ))
         ) : undefined}
@@ -474,10 +501,15 @@ export default memo(withGlobal<OwnProps>(
     const activeDownloadIds = selectActiveDownloadIds(global, chatId);
 
     let resolvedUserId;
+    let user;
     if (userId) {
       resolvedUserId = userId;
     } else if (isUserId(chatId)) {
       resolvedUserId = chatId;
+    }
+    const hasCommonChatsTab = Boolean(resolvedUserId);
+    if (resolvedUserId) {
+      user = selectUser(global, resolvedUserId);
     }
 
     return {
@@ -487,6 +519,7 @@ export default memo(withGlobal<OwnProps>(
       chatMessages,
       foundIds,
       mediaSearchType,
+      hasCommonChatsTab,
       hasMembersTab,
       areMembersHidden,
       canAddMembers,
@@ -500,6 +533,7 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       chatsById,
       ...(hasMembersTab && members && { members }),
+      ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -512,5 +546,7 @@ export default memo(withGlobal<OwnProps>(
     'focusMessage',
     'loadProfilePhotos',
     'setNewChatMembersDialogState',
+    'loadCommonChats',
+    'openChat',
   ]),
 )(Profile));

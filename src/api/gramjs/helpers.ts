@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../lib/gramjs';
 import localDb from './localDb';
-import { getApiChatIdFromMtpPeer } from './apiBuilders/peers';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
@@ -39,5 +39,11 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
 export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
   if (photo instanceof GramJs.Photo) {
     localDb.photos[String(photo.id)] = photo;
+  }
+}
+
+export function addChatToLocalDb(chat: GramJs.TypeChat) {
+  if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
+    localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
   }
 }
