@@ -270,7 +270,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const { forwardInfo, viaBotId } = message;
-  const asForwarded = forwardInfo && !isChatWithSelf && !isRepliesChat && !forwardInfo.isLinkedChannelPost;
+  const asForwarded = (
+    forwardInfo && (!isChatWithSelf || isScheduled) && !isRepliesChat && !forwardInfo.isLinkedChannelPost
+  );
   const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
   const isAlbum = Boolean(album) && album!.messages.length > 1;
   const {

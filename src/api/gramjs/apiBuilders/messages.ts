@@ -849,10 +849,11 @@ export function buildLocalMessage(
   };
 }
 
-export function buildForwardedMessage(
+export function buildLocalForwardedMessage(
   toChat: ApiChat,
   message: ApiMessage,
   serverTimeOffset: number,
+  scheduledAt?: number,
 ): ApiMessage {
   const localId = localMessageCounter++;
   const {
@@ -873,10 +874,12 @@ export function buildForwardedMessage(
     id: localId,
     chatId: toChat.id,
     content,
-    date: Math.round(Date.now() / 1000) + serverTimeOffset,
+    date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
     senderId: currentUserId,
     sendingState: 'messageSendingStatePending',
+    groupedId,
+    isInAlbum,
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(senderId !== currentUserId && !isAudio && {
       forwardInfo: {
@@ -886,8 +889,7 @@ export function buildForwardedMessage(
         senderUserId: senderId,
       },
     }),
-    groupedId,
-    isInAlbum,
+    ...(scheduledAt && { isScheduled: true }),
   };
 }
 

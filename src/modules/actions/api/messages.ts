@@ -555,7 +555,7 @@ addReducer('loadPollOptionResults', (global, actions, payload) => {
   void loadPollOptionResults(chat, messageId, option, offset, limit, shouldResetVoters);
 });
 
-addReducer('forwardMessages', (global) => {
+addReducer('forwardMessages', (global, action, payload) => {
   const { fromChatId, messageIds, toChatId } = global.forwardMessages;
   const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
@@ -569,6 +569,8 @@ addReducer('forwardMessages', (global) => {
     return;
   }
 
+  const { isSilent, scheduledAt } = payload;
+
   const realMessages = messages.filter((m) => !isServiceNotificationMessage(m));
   if (realMessages.length) {
     void callApi('forwardMessages', {
@@ -576,6 +578,8 @@ addReducer('forwardMessages', (global) => {
       toChat,
       messages: realMessages,
       serverTimeOffset: getGlobal().serverTimeOffset,
+      isSilent,
+      scheduledAt,
     });
   }
 
@@ -591,6 +595,8 @@ addReducer('forwardMessages', (global) => {
         entities,
         sticker,
         poll,
+        isSilent,
+        scheduledAt,
       });
     });
 
@@ -829,6 +835,8 @@ async function sendMessage(params: {
   gif?: ApiVideo;
   poll?: ApiNewPoll;
   serverTimeOffset?: number;
+  isSilent?: boolean;
+  scheduledAt?: number;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
