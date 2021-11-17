@@ -275,8 +275,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     // Loading history while sending a message can return the same message and cause ambiguity
-    const isFirstMessageLocal = messageIds && messageIds[0] >= LOCAL_MESSAGE_ID_BASE;
-    if (isFirstMessageLocal) {
+    const isLastMessageLocal = messageIds && messageIds[messageIds.length - 1] >= LOCAL_MESSAGE_ID_BASE;
+    if (isLastMessageLocal) {
       return;
     }
 
