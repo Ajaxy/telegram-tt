@@ -1,6 +1,6 @@
 const MessageContainer = require('../tl/core/MessageContainer');
 const TLMessage = require('../tl/core/TLMessage');
-const BinaryWriter = require('../extensions/BinaryWriter');
+const BinaryWriter = require('./BinaryWriter');
 
 const USE_INVOKE_AFTER_WITH = [
     'messages.SendMessage', 'messages.SendMedia', 'messages.SendMultiMedia',
@@ -35,11 +35,10 @@ class MessagePacker {
             }
         }
 
-
         this._queue.push(state);
         this.setReady(true);
-
-        if (state) {
+        // 1658238041=MsgsAck, we don't care about MsgsAck here because they never resolve anyway.
+        if (state && state.request.CONSTRUCTOR_ID !== 1658238041) {
             this._pendingStates.push(state);
             state.promise
                 // Using finally causes triggering `unhandledrejection` event
