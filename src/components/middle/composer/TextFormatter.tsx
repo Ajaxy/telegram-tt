@@ -20,6 +20,7 @@ export type OwnProps = {
   isOpen: boolean;
   anchorPosition?: IAnchorPosition;
   selectedRange?: Range;
+  setSelectedRange: (range: Range) => void;
   onClose: () => void;
 };
 
@@ -46,6 +47,7 @@ const TextFormatter: FC<OwnProps> = ({
   isOpen,
   anchorPosition,
   selectedRange,
+  setSelectedRange,
   onClose,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -113,6 +115,13 @@ const TextFormatter: FC<OwnProps> = ({
       selection.addRange(selectedRange);
     }
   }
+
+  const updateSelectedRange = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection) {
+      setSelectedRange(selection.getRangeAt(0));
+    }
+  }, [setSelectedRange]);
 
   const getSelectedText = useCallback(() => {
     if (!selectedRange) {
@@ -187,28 +196,31 @@ const TextFormatter: FC<OwnProps> = ({
         }
       });
 
+      updateSelectedRange();
       return {
         ...selectedFormats,
         bold: !selectedFormats.bold,
       };
     });
-  }, []);
+  }, [updateSelectedRange]);
 
   const handleItalicText = useCallback(() => {
     document.execCommand('italic');
+    updateSelectedRange();
     setSelectedTextFormats((selectedFormats) => ({
       ...selectedFormats,
       italic: !selectedFormats.italic,
     }));
-  }, []);
+  }, [updateSelectedRange]);
 
   const handleUnderlineText = useCallback(() => {
     document.execCommand('underline');
+    updateSelectedRange();
     setSelectedTextFormats((selectedFormats) => ({
       ...selectedFormats,
       underline: !selectedFormats.underline,
     }));
-  }, []);
+  }, [updateSelectedRange]);
 
   const handleStrikethroughText = useCallback(() => {
     if (selectedTextFormats.strikethrough) {
