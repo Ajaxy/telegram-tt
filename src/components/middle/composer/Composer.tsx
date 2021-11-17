@@ -526,8 +526,12 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         isSilent,
       });
     }
+
     if (isForwarding) {
-      forwardMessages();
+      forwardMessages({
+        scheduledAt,
+        isSilent,
+      });
     }
 
     lastMessageSendTimeSeconds.current = getServerTime(serverTimeOffset);

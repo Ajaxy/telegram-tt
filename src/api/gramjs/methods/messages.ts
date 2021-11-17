@@ -30,7 +30,7 @@ import {
   buildApiMessage,
   buildLocalMessage,
   buildWebPage,
-  buildForwardedMessage,
+  buildLocalForwardedMessage,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -1024,21 +1024,25 @@ export async function forwardMessages({
   toChat,
   messages,
   serverTimeOffset,
+  isSilent,
+  scheduledAt,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
   messages: ApiMessage[];
   serverTimeOffset: number;
+  isSilent?: boolean;
+  scheduledAt?: number;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
 
   messages.forEach((message, index) => {
-    const localMessage = buildForwardedMessage(toChat, message, serverTimeOffset);
+    const localMessage = buildLocalForwardedMessage(toChat, message, serverTimeOffset, scheduledAt);
     localDb.localMessages[String(randomIds[index])] = localMessage;
 
     onUpdate({
-      '@type': 'newMessage',
+      '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
       id: localMessage.id,
       chatId: toChat.id,
       message: localMessage,
@@ -1050,6 +1054,8 @@ export async function forwardMessages({
     toPeer: buildInputPeer(toChat.id, toChat.accessHash),
     randomId: randomIds,
     id: messageIds,
+    ...(isSilent && { sil2ent: isSilent }),
+    ...(scheduledAt && { scheduleDate: scheduledAt }),
   }), true);
 }
 
