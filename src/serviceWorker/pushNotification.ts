@@ -180,19 +180,21 @@ async function focusChatMessage(client: WindowClient, data: { chatId?: string; m
       messageId,
     },
   });
-  // Catch "focus not allowed" DOM Exceptions
-  try {
-    await client.focus();
-  } catch (error) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('[SW] ', error);
+  if (!client.focused) {
+    // Catch "focus not allowed" DOM Exceptions
+    try {
+      await client.focus();
+    } catch (error) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.warn('[SW] ', error);
+      }
     }
   }
 }
 
 export function handleNotificationClick(e: NotificationEvent) {
-  const appUrl = new URL(self.registration.scope).origin;
+  const appUrl = self.registration.scope;
   e.notification.close(); // Android needs explicit close.
   const { data } = e.notification;
   const notifyClients = async () => {
