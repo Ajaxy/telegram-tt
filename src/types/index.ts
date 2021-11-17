@@ -284,7 +284,7 @@ export enum NewChatMembersProgress {
   Loading,
 }
 
-export type ProfileTabType = 'members' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type ProfileTabType = 'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'forwards' | 'chatInvite';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'nonContacts' | 'nobody';

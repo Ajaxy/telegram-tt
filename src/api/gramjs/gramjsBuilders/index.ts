@@ -416,7 +416,7 @@ export function buildInputReportReason(reason: ApiReportReason) {
   return undefined;
 }
 
-function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
+export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
   // Workaround for old-fashioned IDs stored locally
   if (typeof id === 'number') {
     return BigInt(Math.abs(id));

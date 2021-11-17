@@ -1027,6 +1027,7 @@ messages.saveDraft#bc39e14b flags:# no_webpage:flags.1?true reply_to_msg_id:flag
 messages.getAllDrafts#6a3f8d65 = Updates;
 messages.readFeaturedStickers#5b118126 id:Vector<long> = Bool;
 messages.getRecentStickers#9da9403b flags:# attached:flags.0?true hash:long = messages.RecentStickers;
+messages.getCommonChats#e40ca104 user_id:InputUser max_id:long limit:int = messages.Chats;
 messages.getWebPage#32ca8f91 url:string hash:int = WebPage;
 messages.toggleDialogPin#a731e257 flags:# pinned:flags.0?true peer:InputDialogPeer = Bool;
 messages.getPinnedDialogs#d6b94df2 folder_id:int = messages.PeerDialogs;
