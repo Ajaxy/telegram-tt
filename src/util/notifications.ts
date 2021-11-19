@@ -90,22 +90,24 @@ const expirationTime = 12 * 60 * 60 * 1000; // 12 hours
 const soundPlayedDelay = 3 * 1000;
 const soundPlayedIds = new Set<string>();
 
-async function playSound(id: string) {
-  if (soundPlayedIds.has(id)) return;
+export async function playNotifySound(id?: string, volume?: number) {
+  if (id !== undefined && soundPlayedIds.has(id)) return;
   const { notificationSoundVolume } = selectNotifySettings(getGlobal());
-  const volume = notificationSoundVolume / 10;
-  if (volume === 0) return;
+  const currentVolume = volume ? volume / 10 : notificationSoundVolume / 10;
+  if (currentVolume === 0) return;
 
   const audio = new Audio('./notification.mp3');
-  audio.volume = volume;
+  audio.volume = currentVolume;
   audio.setAttribute('mozaudiochannel', 'notification');
-  audio.addEventListener('ended', () => {
-    soundPlayedIds.add(id);
-  }, { once: true });
+  if (id !== undefined) {
+    audio.addEventListener('ended', () => {
+      soundPlayedIds.add(id);
+    }, { once: true });
 
-  setTimeout(() => {
-    soundPlayedIds.delete(id);
-  }, soundPlayedDelay);
+    setTimeout(() => {
+      soundPlayedIds.delete(id);
+    }, soundPlayedDelay);
+  }
 
   try {
     await audio.play();
@@ -117,7 +119,7 @@ async function playSound(id: string) {
   }
 }
 
-export const playNotificationSound = debounce(playSound, 1000, true, false);
+export const playNotifySoundDebounced = debounce(playNotifySound, 1000, true, false);
 
 function checkIfShouldResubscribe(subscription: PushSubscription | null) {
   const global = getGlobal();
@@ -168,7 +170,7 @@ let areSettingsLoaded = false;
 
 // Load notification settings from the api
 async function loadNotificationSettings() {
-  if (areSettingsLoaded) return;
+  if (areSettingsLoaded) return selectNotifySettings(getGlobal());
   const [resultSettings, resultExceptions] = await Promise.all([
     callApi('fetchNotificationSettings', {
       serverTimeOffset: getGlobal().serverTimeOffset,
@@ -177,7 +179,7 @@ async function loadNotificationSettings() {
       serverTimeOffset: getGlobal().serverTimeOffset,
     }),
   ]);
-  if (!resultSettings) return;
+  if (!resultSettings) return selectNotifySettings(getGlobal());
 
   let global = replaceSettings(getGlobal(), resultSettings);
   if (resultExceptions) {
@@ -185,6 +187,7 @@ async function loadNotificationSettings() {
   }
   setGlobal(global);
   areSettingsLoaded = true;
+  return selectNotifySettings(global);
 }
 
 export async function subscribe() {
@@ -313,16 +316,20 @@ async function getAvatar(chat: ApiChat) {
   return mediaData;
 }
 
-export async function showNewMessageNotification({
+export async function notifyAboutNewMessage({
   chat,
   message,
   isActiveChat,
 }: { chat: ApiChat; message: Partial<ApiMessage>; isActiveChat: boolean }) {
+  const { hasWebNotifications } = await loadNotificationSettings();
+  if (!checkIfShouldNotify(chat, isActiveChat)) return;
+  if (!hasWebNotifications) {
+    // only play sound if web notifications are disabled
+    playNotifySoundDebounced(String(message.id) || chat.id);
+    return;
+  }
   if (!checkIfNotificationsSupported()) return;
   if (!message.id) return;
-
-  await loadNotificationSettings();
-  if (!checkIfShouldNotify(chat, isActiveChat)) return;
 
   const {
     title,
@@ -373,7 +380,7 @@ export async function showNewMessageNotification({
 
     // Play sound when notification is displayed
     notification.onshow = () => {
-      playNotificationSound(String(message.id) || chat.id);
+      playNotifySoundDebounced(String(message.id) || chat.id);
     };
   }
 }

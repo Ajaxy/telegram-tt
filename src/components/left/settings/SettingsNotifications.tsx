@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import useDebounce from '../../../hooks/useDebounce';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
@@ -10,6 +11,7 @@ import { SettingsScreens } from '../../../types';
 import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import { playNotifySound } from '../../../util/notifications';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
@@ -60,6 +62,8 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     loadNotificationSettings();
   }, [loadNotificationSettings]);
+
+  const runDebounced = useDebounce(500, false, true);
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
@@ -123,12 +127,12 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="settings-item-slider">
           <RangeSlider
             label="Sound"
-            disabled={!hasWebNotifications}
             min={0}
             max={10}
             value={notificationSoundVolume}
             onChange={(volume) => {
               updateWebNotificationSettings({ notificationSoundVolume: volume });
+              runDebounced(() => playNotifySound(undefined, volume));
             }}
           />
         </div>
