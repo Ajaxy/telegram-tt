@@ -4,7 +4,7 @@ import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { closeMessageNotifications, showNewMessageNotification } from '../../../util/notifications';
+import { closeMessageNotifications, notifyAboutNewMessage } from '../../../util/notifications';
 import { updateAppBadge } from '../../../util/appBadge';
 import {
   updateChat,
@@ -20,7 +20,6 @@ import {
   selectChatListType,
   selectCurrentMessageList,
   selectCountNotMutedUnread,
-  selectNotifySettings,
 } from '../../selectors';
 import { throttle } from '../../../util/schedulers';
 
@@ -131,15 +130,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       updateAppBadge(selectCountNotMutedUnread(getGlobal()));
-
-      const { hasWebNotifications } = selectNotifySettings(global);
-      if (hasWebNotifications) {
-        showNewMessageNotification({
-          chat,
-          message,
-          isActiveChat,
-        });
-      }
+      notifyAboutNewMessage({
+        chat,
+        message,
+        isActiveChat,
+      });
 
       break;
     }

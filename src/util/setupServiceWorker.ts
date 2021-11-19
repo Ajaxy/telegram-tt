@@ -1,7 +1,7 @@
 import { DEBUG } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
-import { notifyClientReady, playNotificationSound } from './notifications';
+import { notifyClientReady, playNotifySoundDebounced } from './notifications';
 
 type WorkerAction = {
   type: string;
@@ -23,7 +23,7 @@ function handleWorkerMessage(e: MessageEvent) {
       }
       break;
     case 'playNotificationSound':
-      playNotificationSound(action.payload.id);
+      playNotifySoundDebounced(action.payload.id);
       break;
   }
 }
