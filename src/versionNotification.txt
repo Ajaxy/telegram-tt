@@ -1,18 +1,22 @@
-**Telegram Web Z was updated to version alpha 1.21**
+**Telegram Web Z was updated to version alpha 1.22**
 
 👏 **Harder**
-· Specify auto-download settings for media by chat type in Settings > Data & Storage.
-· The ‘Choosing a Sticker’ user status now appears in chats and the chat list.
+· Messages you forward can now be sent as Scheduled Messages.
+· Groups you have in common with another user are now listed on their Profile.
+· Added text and image previews for the WebZ URL.
 
 🤩 **Better**
-· Various UI fixes.
+· Notifications are no longer shown when the app is in the foreground.
+· Various UI improvements.
 
 🚀 **Faster**
-· Optimized animations for voice message playback.
-· Faster rendering of chats and messages with optimized time formatting.
+· Fixed some minor memory leaks.
 
 💪 **Stronger**
-· Fixed scrolling jumps in message list.
-· Fixed leaving/deleting groups and channels.
-· Fixed marking service notifications as read.
-· Fixed time display issues for both 12 and 24-hour formats.
+· Fixed opening unread comments on posts.
+· Fixed notifications opening the browser instead of the installed app.
+· Fixed missing Sticker Search section.
+· Fixed flickering when sending a message to an empty channel.
+· Fixed ESG panel sometimes being stuck.
+· Fixed app freezes when formatting text.
+· Fixed issues when creating a group.
