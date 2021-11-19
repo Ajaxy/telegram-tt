@@ -27,6 +27,7 @@ import localDb from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
+const DEFAULT_PLATFORM = 'Unknown platform';
 const APP_CODE_NAME = 'Z';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
@@ -59,6 +60,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     process.env.TELEGRAM_T_API_HASH,
     {
       deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
+      systemVersion: platform || DEFAULT_PLATFORM,
       appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
