@@ -239,15 +239,15 @@ export async function subscribe() {
   }
 }
 
-function checkIfShouldNotify(chat: ApiChat, isActive: boolean) {
+function checkIfShouldNotify(chat: ApiChat) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
   const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
   if (isMuted || chat.isNotJoined || !chat.isListed) {
     return false;
   }
-  // Dont show notification for active chat if client has focus
-  return !(isActive && document.hasFocus());
+
+  return document.hasFocus();
 }
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage) {
@@ -319,10 +319,9 @@ async function getAvatar(chat: ApiChat) {
 export async function notifyAboutNewMessage({
   chat,
   message,
-  isActiveChat,
-}: { chat: ApiChat; message: Partial<ApiMessage>; isActiveChat: boolean }) {
+}: { chat: ApiChat; message: Partial<ApiMessage> }) {
   const { hasWebNotifications } = await loadNotificationSettings();
-  if (!checkIfShouldNotify(chat, isActiveChat)) return;
+  if (!checkIfShouldNotify(chat)) return;
   if (!hasWebNotifications) {
     // only play sound if web notifications are disabled
     playNotifySoundDebounced(String(message.id) || chat.id);
