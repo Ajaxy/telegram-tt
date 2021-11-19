@@ -247,7 +247,7 @@ function checkIfShouldNotify(chat: ApiChat) {
     return false;
   }
 
-  return document.hasFocus();
+  return !document.hasFocus();
 }
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage) {
