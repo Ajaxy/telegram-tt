@@ -567,7 +567,7 @@ export async function createGroupChat({
   const result = await invokeRequest(new GramJs.messages.CreateChat({
     title,
     users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-  }), true);
+  }), true, true);
 
   // `createChat` can return a lot of different update types according to docs,
   // but currently chat creation returns only `Updates` type.

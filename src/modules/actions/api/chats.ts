@@ -1088,27 +1088,52 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
     },
   });
 
-  const createdChat = await callApi('createGroupChat', { title, users });
-  if (!createdChat) {
-    return;
-  }
+  try {
+    const createdChat = await callApi('createGroupChat', {
+      title,
+      users,
+    });
 
-  const { id: chatId } = createdChat;
+    if (!createdChat) {
+      return;
+    }
 
-  let global = getGlobal();
-  global = updateChat(global, chatId, createdChat);
-  global = {
-    ...global,
-    chatCreation: {
-      ...global.chatCreation,
-      progress: createdChat ? ChatCreationProgress.Complete : ChatCreationProgress.Error,
-    },
-  };
-  setGlobal(global);
-  getDispatch().openChat({ id: chatId, shouldReplaceHistory: true });
+    const { id: chatId } = createdChat;
 
-  if (chatId && photo) {
-    await callApi('editChatPhoto', { chatId, photo });
+    let global = getGlobal();
+    global = updateChat(global, chatId, createdChat);
+    global = {
+      ...global,
+      chatCreation: {
+        ...global.chatCreation,
+        progress: createdChat ? ChatCreationProgress.Complete : ChatCreationProgress.Error,
+      },
+    };
+    setGlobal(global);
+    getDispatch()
+      .openChat({
+        id: chatId,
+        shouldReplaceHistory: true,
+      });
+
+    if (chatId && photo) {
+      await callApi('editChatPhoto', {
+        chatId,
+        photo,
+      });
+    }
+  } catch (e) {
+    if (e.message === 'USERS_TOO_FEW') {
+      const global = getGlobal();
+      setGlobal({
+        ...global,
+        chatCreation: {
+          ...global.chatCreation,
+          progress: ChatCreationProgress.Error,
+          error: 'CreateGroupError',
+        },
+      });
+    }
   }
 }
 

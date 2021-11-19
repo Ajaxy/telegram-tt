@@ -113,7 +113,7 @@ const NewChatStep2: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [creationProgress, onReset]);
 
-  const renderedError = creationError || (
+  const renderedError = (creationError && lang(creationError)) || (
     error !== chatTitleEmptyError && error !== channelTitleEmptyError
       ? error
       : undefined
