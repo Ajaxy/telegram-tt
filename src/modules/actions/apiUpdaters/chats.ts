@@ -133,7 +133,6 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       notifyAboutNewMessage({
         chat,
         message,
-        isActiveChat,
       });
 
       break;
