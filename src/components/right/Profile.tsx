@@ -23,7 +23,7 @@ import {
 } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
-  getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserId,
+  getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId,
 } from '../../modules/helpers';
 import {
   selectChatMessages,
@@ -500,6 +500,7 @@ export default memo(withGlobal<OwnProps>(
 
     const activeDownloadIds = selectActiveDownloadIds(global, chatId);
 
+    let hasCommonChatsTab;
     let resolvedUserId;
     let user;
     if (userId) {
@@ -507,9 +508,9 @@ export default memo(withGlobal<OwnProps>(
     } else if (isUserId(chatId)) {
       resolvedUserId = chatId;
     }
-    const hasCommonChatsTab = Boolean(resolvedUserId);
     if (resolvedUserId) {
       user = selectUser(global, resolvedUserId);
+      hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
     }
 
     return {
