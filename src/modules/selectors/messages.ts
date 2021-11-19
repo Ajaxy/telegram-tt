@@ -571,7 +571,8 @@ export function selectFirstUnreadId(global: GlobalState, chatId: string, threadI
     }
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
-    if (!threadInfo || threadInfo.lastMessageId === threadInfo.lastReadInboxMessageId) {
+    if (!threadInfo
+      || (threadInfo.lastMessageId !== undefined && threadInfo.lastMessageId === threadInfo.lastReadInboxMessageId)) {
       return undefined;
     }
   }
