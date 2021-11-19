@@ -8,13 +8,7 @@ let closeTimeout: number | undefined;
 export default function useMouseInside(
   isOpen: boolean, onClose: NoneToVoidFunction, menuCloseTimeout = MENU_CLOSE_TIMEOUT, isDisabled = false,
 ) {
-  const isMouseInside = useRef(true);
-
-  useEffect(() => {
-    if (isOpen) {
-      isMouseInside.current = true;
-    }
-  }, [isOpen]);
+  const isMouseInside = useRef(false);
 
   useEffect(() => {
     if (closeTimeout) {
