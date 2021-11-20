@@ -322,12 +322,13 @@ export async function notifyAboutNewMessage({
 }: { chat: ApiChat; message: Partial<ApiMessage> }) {
   const { hasWebNotifications } = await loadNotificationSettings();
   if (!checkIfShouldNotify(chat)) return;
-  if (!hasWebNotifications) {
+  const areNotificationsSupported = checkIfNotificationsSupported();
+  if (!hasWebNotifications || !areNotificationsSupported) {
     // only play sound if web notifications are disabled
     playNotifySoundDebounced(String(message.id) || chat.id);
     return;
   }
-  if (!checkIfNotificationsSupported()) return;
+  if (!areNotificationsSupported) return;
   if (!message.id) return;
 
   const {
