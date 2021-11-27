@@ -22,9 +22,8 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
-import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
-import usePauseOnInactive from './hooks/usePauseOnInactive';
+import useVideoAutoPause from './hooks/useVideoAutoPause';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -155,8 +154,7 @@ const RoundVideo: FC<OwnProps> = ({
     }
   }, [shouldPlay]);
 
-  useHeavyAnimationCheckForVideo(playerRef, shouldPlay);
-  usePauseOnInactive(playerRef, Boolean(mediaData));
+  useVideoAutoPause(playerRef, shouldPlay);
   useVideoCleanup(playerRef, [mediaData]);
 
   const handleClick = useCallback(() => {
