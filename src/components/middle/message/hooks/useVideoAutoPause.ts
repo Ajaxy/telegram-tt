@@ -15,11 +15,11 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
       return;
     }
 
-    if (!wasPlaying.current) {
-      wasPlaying.current = !playerRef.current.paused;
-    }
+    wasPlaying.current = !playerRef.current.paused;
 
-    playerRef.current.pause();
+    if (wasPlaying.current) {
+      playerRef.current.pause();
+    }
   }, [playerRef]);
 
   const unfreezePlaying = useCallback(() => {
@@ -30,8 +30,6 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
     ) {
       safePlay(playerRef.current);
     }
-
-    wasPlaying.current = false;
   }, [playerRef]);
 
   const unfreezePlayingOnRaf = useCallback(() => {
