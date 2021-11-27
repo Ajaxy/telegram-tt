@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { AudioOrigin, LangCode } from '../../types';
+import { LangCode } from '../../types';
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
@@ -56,7 +56,6 @@ type StateProps = {
   hasNotifications: boolean;
   hasDialogs: boolean;
   audioMessage?: ApiMessage;
-  audioOrigin?: AudioOrigin;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -89,7 +88,6 @@ const Main: FC<StateProps & DispatchProps> = ({
   hasNotifications,
   hasDialogs,
   audioMessage,
-  audioOrigin,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
@@ -265,7 +263,7 @@ const Main: FC<StateProps & DispatchProps> = ({
       <ForwardPicker isOpen={isForwardModalOpen} />
       <Notifications isOpen={hasNotifications} />
       <Dialogs isOpen={hasDialogs} />
-      {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} origin={audioOrigin} noUi />}
+      {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
@@ -302,7 +300,7 @@ function updatePageTitle(nextTitle: string) {
 export default memo(withGlobal(
   (global): StateProps => {
     const { settings: { byKey: { animationLevel, language, wasTimeFormatSetManually } } } = global;
-    const { chatId: audioChatId, messageId: audioMessageId, origin } = global.audioPlayer;
+    const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
@@ -316,7 +314,6 @@ export default memo(withGlobal(
       hasNotifications: Boolean(global.notifications.length),
       hasDialogs: Boolean(global.dialogs.length),
       audioMessage,
-      audioOrigin: origin,
       safeLinkModalUrl: global.safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,

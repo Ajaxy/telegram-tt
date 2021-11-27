@@ -210,7 +210,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [profileId, openMediaViewer]);
 
   const handlePlayAudio = useCallback((messageId: number) => {
-    openAudioPlayer({ chatId: profileId, messageId, origin: AudioOrigin.SharedMedia });
+    openAudioPlayer({ chatId: profileId, messageId });
   }, [profileId, openAudioPlayer]);
 
   const handleMemberClick = useCallback((id: string) => {
