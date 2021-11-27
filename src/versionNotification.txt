@@ -1,22 +1,20 @@
-**Telegram Web Z was updated to version alpha 1.22**
+**Telegram Web Z was updated to version alpha 1.23**
 
 👏 **Harder**
-· Messages you forward can now be sent as Scheduled Messages.
-· Groups you have in common with another user are now listed on their Profile.
-· Added text and image previews for the WebZ URL.
+· An early version of **Video Chats** is available in all groups.
 
 🤩 **Better**
-· Notifications are no longer shown when the app is in the foreground.
 · Various UI improvements.
 
 🚀 **Faster**
-· Fixed some minor memory leaks.
+· Optimized the rendering engine.
+. Optimized rendering the chat list.
+· Fixed memory leaks in large audio playlists.
 
 💪 **Stronger**
-· Fixed opening unread comments on posts.
-· Fixed notifications opening the browser instead of the installed app.
-· Fixed missing Sticker Search section.
-· Fixed flickering when sending a message to an empty channel.
-· Fixed ESG panel sometimes being stuck.
-· Fixed app freezes when formatting text.
-· Fixed issues when creating a group.
+· Fixed videos pausing during playback.
+· Fixed missing sounds when notifications are disabled.
+· Fixed page refresh when listening to voice messages.
+· Fixed incorrect track order in audio playlists.
+· Fixed opening links without `https://` formatting.
+· Fixed scroll jumps in new chats.
