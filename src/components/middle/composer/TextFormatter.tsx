@@ -6,6 +6,7 @@ import { IAnchorPosition } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+import { ensureProtocol } from '../../../util/ensureProtocol';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
@@ -280,7 +281,7 @@ const TextFormatter: FC<OwnProps> = ({
   ]);
 
   function handleLinkUrlConfirm() {
-    const formattedLinkUrl = encodeURI(linkUrl.includes('://') ? linkUrl : `http://${linkUrl}`);
+    const formattedLinkUrl = encodeURI(ensureProtocol(linkUrl) || '');
 
     if (isEditingLink) {
       const element = getSelectedElement();

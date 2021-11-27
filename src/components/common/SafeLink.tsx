@@ -6,6 +6,7 @@ import {
   DEBUG, RE_TG_LINK, RE_TME_LINK,
 } from '../../config';
 import buildClassName from '../../util/buildClassName';
+import { ensureProtocol } from '../../util/ensureProtocol';
 
 type OwnProps = {
   url?: string;
@@ -71,14 +72,6 @@ const SafeLink: FC<OwnProps> = ({
     </a>
   );
 };
-
-function ensureProtocol(url?: string) {
-  if (!url) {
-    return undefined;
-  }
-
-  return url.includes('://') ? url : `https://${url}`;
-}
 
 function getDomain(url?: string) {
   if (!url) {
