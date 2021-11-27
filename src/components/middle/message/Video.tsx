@@ -24,9 +24,8 @@ import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
-import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
-import usePauseOnInactive from './hooks/usePauseOnInactive';
+import useVideoAutoPause from './hooks/useVideoAutoPause';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -132,8 +131,7 @@ const Video: FC<OwnProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
 
-  useHeavyAnimationCheckForVideo(videoRef, Boolean(isInline && canAutoPlay));
-  usePauseOnInactive(videoRef, isPlayAllowed);
+  useVideoAutoPause(videoRef, isInline);
   useVideoCleanup(videoRef, [isInline]);
 
   const handleClick = useCallback(() => {
