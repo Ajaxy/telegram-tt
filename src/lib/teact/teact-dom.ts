@@ -223,7 +223,9 @@ function createNode($element: VirtualElement): Node {
   }
 
   Object.keys(props).forEach((key) => {
-    addAttribute(element, key, props[key]);
+    if (props[key] !== undefined) {
+      setAttribute(element, key, props[key]);
+    }
   });
 
   $element.children = children.map(($child, i) => (
@@ -395,31 +397,31 @@ function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement
   const newKeys = Object.keys($new.props);
 
   currentKeys.forEach((key) => {
-    if ($current.props[key] !== undefined && $new.props[key] === undefined) {
-      removeAttribute(element, key, $current.props[key]);
+    const currentValue = $current.props[key];
+    const newValue = $new.props[key];
+
+    if (
+      currentValue !== undefined
+      && (
+        newValue === undefined
+        || (currentValue !== newValue && key.startsWith('on'))
+      )
+    ) {
+      removeAttribute(element, key, currentValue);
     }
   });
 
   newKeys.forEach((key) => {
-    if ($new.props[key] === undefined) {
-      return;
-    }
+    const currentValue = $current.props[key];
+    const newValue = $new.props[key];
 
-    if ($current.props[key] !== $new.props[key]) {
-      if ($current.props[key] === undefined) {
-        addAttribute(element, key, $new.props[key]);
-      } else {
-        updateAttribute(element, key, $current.props[key], $new.props[key]);
-      }
+    if (newValue !== undefined && newValue !== currentValue) {
+      setAttribute(element, key, newValue);
     }
   });
 }
 
-function addAttribute(element: HTMLElement, key: string, value: any) {
-  if (value === undefined) {
-    return;
-  }
-
+function setAttribute(element: HTMLElement, key: string, value: any) {
   // An optimization attempt
   if (key === 'className') {
     element.className = value;
@@ -428,6 +430,9 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
     (element as HTMLInputElement).value = value;
   } else if (key === 'style') {
     element.style.cssText = value;
+  } else if (key === 'dangerouslySetInnerHTML') {
+    // eslint-disable-next-line no-underscore-dangle
+    element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
   } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
@@ -444,22 +449,14 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     (element as HTMLInputElement).value = '';
   } else if (key === 'style') {
     element.style.cssText = '';
+  } else if (key === 'dangerouslySetInnerHTML') {
+    element.innerHTML = '';
   } else if (key.startsWith('on')) {
     removeEventListener(element, key, value, key.endsWith('Capture'));
   } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
     element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     delete (element as any)[MAPPED_ATTRIBUTES[key] || key];
-  }
-}
-
-function updateAttribute(element: HTMLElement, key: string, oldValue: any, newValue: any) {
-  if (key === 'value') {
-    // Removing and adding value causes a cursor jump
-    (element as HTMLInputElement).value = newValue !== undefined ? newValue : '';
-  } else {
-    removeAttribute(element, key, oldValue);
-    addAttribute(element, key, newValue);
   }
 }
 
