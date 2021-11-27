@@ -1,4 +1,4 @@
-import { APP_NAME, DEBUG } from '../config';
+import { APP_NAME, DEBUG, DEBUG_MORE } from '../config';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -225,7 +225,7 @@ export function handleNotificationClick(e: NotificationEvent) {
 }
 
 export function handleClientMessage(e: ExtendableMessageEvent) {
-  if (DEBUG) {
+  if (DEBUG_MORE) {
     // eslint-disable-next-line no-console
     console.log('[SW] New message from client', e);
   }
