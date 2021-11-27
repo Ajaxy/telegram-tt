@@ -596,13 +596,9 @@ export function selectFirstUnreadId(global: GlobalState, chatId: string, threadI
     : -1;
 
   function findAfterLastReadId(listIds: number[]) {
-    if (!lastReadId) {
-      return listIds[0];
-    }
-
     return listIds.find((id) => {
       return (
-        id > lastReadId
+        (!lastReadId || id > lastReadId)
         && byId[id]
         && (!byId[id].isOutgoing || byId[id].isFromScheduled)
         && id > lastReadServiceNotificationId
