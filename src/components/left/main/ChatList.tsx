@@ -14,7 +14,9 @@ import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../
 import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
-import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
+import {
+  getChatOrder, prepareChatList, prepareFolderListIds, reduceChatList,
+} from '../../../modules/helpers';
 import {
   selectChatFolder, selectNotifyExceptions, selectNotifySettings,
 } from '../../../modules/selectors';
@@ -80,19 +82,20 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       : [listIds, orderedPinnedIds];
   }, [folderType, chatFolder, chatsById, usersById, notifySettings, notifyExceptions, listIds, orderedPinnedIds]);
 
-  const [orderById, orderedIds] = useMemo(() => {
+  const [orderById, orderedIds, chatArrays] = useMemo(() => {
     if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
       return [];
     }
+
     const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, folderType);
-    const singleList = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats];
+    const singleList = ([] as ApiChat[]).concat(newChatArrays.pinnedChats, newChatArrays.otherChats);
     const newOrderedIds = singleList.map(({ id }) => id);
     const newOrderById = singleList.reduce((acc, chat, i) => {
       acc[chat.id] = i;
       return acc;
     }, {} as Record<string, number>);
 
-    return [newOrderById, newOrderedIds];
+    return [newOrderById, newOrderedIds, newChatArrays];
   }, [currentListIds, currentPinnedIds, folderType, chatFolder, chatsById]);
 
   const prevOrderById = usePrevious(orderById);
@@ -119,8 +122,13 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     folderType === 'all' && !ALL_CHATS_PRELOAD_DISABLED,
   );
 
-  // TODO Refactor to not call `prepareChatList` twice
-  const chatArrays = viewportIds && prepareChatList(chatsById, viewportIds, currentPinnedIds, folderType);
+  const viewportChatArrays = useMemo(() => {
+    if (!viewportIds || !chatArrays) {
+      return undefined;
+    }
+
+    return reduceChatList(chatArrays, viewportIds);
+  }, [chatArrays, viewportIds]);
 
   useEffect(() => {
     if (lastSyncTime && folderType === 'all') {
@@ -133,7 +141,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    const pinnedOffset = viewportOffset + chatArrays!.pinnedChats.length;
+    const pinnedOffset = viewportOffset + viewportChatArrays!.pinnedChats.length;
 
     return (
       <div
@@ -142,7 +150,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
         style={IS_ANDROID ? `height: ${orderedIds!.length * CHAT_HEIGHT_PX}px` : undefined}
         teactFastList
       >
-        {chatArrays!.pinnedChats.map(({ id }, i) => (
+        {viewportChatArrays!.pinnedChats.map(({ id }, i) => (
           <Chat
             key={id}
             teactOrderKey={i}
@@ -155,7 +163,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
             style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
           />
         ))}
-        {chatArrays!.otherChats.map((chat, i) => (
+        {viewportChatArrays!.otherChats.map((chat, i) => (
           <Chat
             key={chat.id}
             teactOrderKey={getChatOrder(chat)}
@@ -210,7 +218,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       noFastList
       noScrollRestore
     >
-      {viewportIds?.length && chatArrays ? (
+      {viewportIds?.length && viewportChatArrays ? (
         renderChats()
       ) : viewportIds && !viewportIds.length ? (
         (
