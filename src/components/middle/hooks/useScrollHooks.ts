@@ -12,7 +12,8 @@ import resetScroll from '../../../util/resetScroll';
 import useOnChange from '../../../hooks/useOnChange';
 
 const FAB_THRESHOLD = 50;
-const TOOLS_FREEZE_TIMEOUT = 100;
+const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect
+const TOOLS_FREEZE_TIMEOUT = 250; // Approximate message sending animation duration
 
 export default function useScrollHooks(
   type: MessageListType,
@@ -60,7 +61,7 @@ export default function useScrollHooks(
     const { offsetHeight, scrollHeight, scrollTop } = containerRef.current!;
     const scrollBottom = Math.round(scrollHeight - scrollTop - offsetHeight);
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
-    const isAtBottom = scrollBottom <= 0;
+    const isAtBottom = scrollBottom <= NOTCH_THRESHOLD;
 
     onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
@@ -107,7 +108,7 @@ export default function useScrollHooks(
     unfreeze: unfreezeForFab,
   } = useIntersectionObserver({
     rootRef: containerRef,
-    margin: FAB_THRESHOLD,
+    margin: FAB_THRESHOLD * 2,
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
@@ -118,6 +119,7 @@ export default function useScrollHooks(
     unfreeze: unfreezeForNotch,
   } = useIntersectionObserver({
     rootRef: containerRef,
+    margin: NOTCH_THRESHOLD,
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
