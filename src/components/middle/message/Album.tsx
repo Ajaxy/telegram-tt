@@ -6,11 +6,16 @@ import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
 import { getMessageContent } from '../../../modules/helpers';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getGlobal, withGlobal } from '../../../lib/teact/teactn';
 import { pick } from '../../../util/iteratees';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { selectActiveDownloadIds, selectTheme } from '../../../modules/selectors';
+import {
+  selectActiveDownloadIds,
+  selectCanAutoLoadMedia,
+  selectCanAutoPlayMedia,
+  selectTheme,
+} from '../../../modules/selectors';
 
 import Photo from './Photo';
 import Video from './Video';
@@ -23,8 +28,6 @@ const VideoWithSelect = withSelectControl(Video);
 type OwnProps = {
   album: IAlbum;
   observeIntersection: ObserveFn;
-  canAutoLoad?: boolean;
-  canAutoPlay?: boolean;
   hasCustomAppendix?: boolean;
   lastSyncTime?: number;
   isOwn: boolean;
@@ -43,8 +46,6 @@ type DispatchProps = Pick<GlobalActions, 'cancelSendingMessage'>;
 const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   album,
   observeIntersection,
-  canAutoLoad,
-  canAutoPlay,
   hasCustomAppendix,
   lastSyncTime,
   isOwn,
@@ -66,6 +67,10 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
     const fileUpload = uploadsById[message.previousLocalId || message.id];
     const uploadProgress = fileUpload?.progress;
     const { dimensions, sides } = albumLayout.layout[index];
+
+    // Ignoring global updates is a known drawback here
+    const canAutoLoad = selectCanAutoLoadMedia(getGlobal(), message);
+    const canAutoPlay = selectCanAutoPlayMedia(getGlobal(), message);
 
     if (photo) {
       const shouldAffectAppendix = hasCustomAppendix && (
