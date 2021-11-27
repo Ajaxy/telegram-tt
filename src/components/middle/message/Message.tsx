@@ -508,8 +508,6 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             album={album!}
             albumLayout={albumLayout!}
             observeIntersection={observeIntersectionForMedia}
-            canAutoLoad={canAutoLoadMedia}
-            canAutoPlay={canAutoPlayMedia}
             isOwn={isOwn}
             hasCustomAppendix={hasCustomAppendix}
             lastSyncTime={lastSyncTime}
@@ -892,7 +890,7 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       isDownloading,
       isPinnedList: messageListType === 'pinned',
-      canAutoLoadMedia: chat ? selectCanAutoLoadMedia(global, message, chat, sender) : undefined,
+      canAutoLoadMedia: selectCanAutoLoadMedia(global, message),
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),

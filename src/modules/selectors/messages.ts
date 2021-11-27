@@ -734,9 +734,14 @@ export function selectNewestMessageWithBotKeyboardButtons(
   return messageId ? chatMessages[messageId] : undefined;
 }
 
-export function selectCanAutoLoadMedia(
-  global: GlobalState, message: ApiMessage, chat: ApiChat, sender?: ApiChat | ApiUser,
-) {
+export function selectCanAutoLoadMedia(global: GlobalState, message: ApiMessage) {
+  const chat = selectChat(global, message.chatId);
+  if (!chat) {
+    return undefined;
+  }
+
+  const sender = selectSender(global, message);
+
   const isPhoto = Boolean(getMessagePhoto(message) || getMessageWebPagePhoto(message));
   const isVideo = Boolean(getMessageVideo(message) || getMessageWebPageVideo(message));
   const isFile = Boolean(getMessageAudio(message) || getMessageVoice(message) || getMessageDocument(message));
