@@ -1,6 +1,8 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 import buildClassName from '../../../util/buildClassName';
 
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+
 import './ChatCallStatus.scss';
 
 type OwnProps = {
@@ -13,7 +15,12 @@ const ChatCallStatus: FC<OwnProps> = ({
   isActive,
 }) => {
   return (
-    <div className={buildClassName('ChatCallStatus', isActive && 'active', isSelected && 'selected')}>
+    <div className={buildClassName(
+      'ChatCallStatus',
+      isActive && 'active',
+      isSelected && !IS_SINGLE_COLUMN_LAYOUT && 'selected',
+    )}
+    >
       <div className="indicator">
         <div />
         <div />

@@ -4,12 +4,14 @@ export enum Bundles {
   Auth,
   Main,
   Extra,
+  Calls,
 }
 
 interface ImportedBundles {
   [Bundles.Auth]: typeof import('../bundles/auth');
   [Bundles.Main]: typeof import('../bundles/main');
   [Bundles.Extra]: typeof import('../bundles/extra');
+  [Bundles.Calls]: typeof import('../bundles/calls');
 }
 
 type BundlePromises = {
@@ -37,6 +39,9 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
         break;
       case Bundles.Extra:
         LOAD_PROMISES[Bundles.Extra] = import('../bundles/extra');
+        break;
+      case Bundles.Calls:
+        LOAD_PROMISES[Bundles.Calls] = import('../bundles/calls');
         break;
     }
 

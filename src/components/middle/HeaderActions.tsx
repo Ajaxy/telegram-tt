@@ -11,9 +11,9 @@ import { GlobalActions, MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { IAnchorPosition } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { ARE_CALLS_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { pick } from '../../util/iteratees';
-import { isChatChannel, isChatSuperGroup } from '../../modules/helpers';
+import { isChatBasicGroup, isChatChannel, isChatSuperGroup } from '../../modules/helpers';
 import {
   selectChat,
   selectChatBot,
@@ -45,6 +45,8 @@ interface StateProps {
   canSearch?: boolean;
   canMute?: boolean;
   canLeave?: boolean;
+  canEnterVoiceChat?: boolean;
+  canCreateVoiceChat?: boolean;
 }
 
 type DispatchProps = Pick<GlobalActions, 'joinChannel' | 'sendBotCommand' | 'openLocalTextSearch' | 'restartBot'>;
@@ -63,6 +65,8 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
   canSearch,
   canMute,
   canLeave,
+  canEnterVoiceChat,
+  canCreateVoiceChat,
   isRightColumnShown,
   canExpandActions,
   joinChannel,
@@ -191,6 +195,8 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
           canSearch={canSearch}
           canMute={canMute}
           canLeave={canLeave}
+          canEnterVoiceChat={canEnterVoiceChat}
+          canCreateVoiceChat={canCreateVoiceChat}
           onSubscribeChannel={handleSubscribeClick}
           onSearchClick={handleSearchClick}
           onClose={handleHeaderMenuClose}
@@ -226,6 +232,9 @@ export default memo(withGlobal<OwnProps>(
     const canSearch = isMainThread || isDiscussionThread;
     const canMute = isMainThread && !isChatWithSelf && !canSubscribe;
     const canLeave = isMainThread && !canSubscribe;
+    const canEnterVoiceChat = ARE_CALLS_SUPPORTED && chat && chat.isCallActive;
+    const canCreateVoiceChat = ARE_CALLS_SUPPORTED && chat && !chat.isCallActive
+      && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
 
     return {
       noMenu: false,
@@ -237,6 +246,8 @@ export default memo(withGlobal<OwnProps>(
       canSearch,
       canMute,
       canLeave,
+      canEnterVoiceChat,
+      canCreateVoiceChat,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

@@ -18,6 +18,14 @@
   }
 }
 
+.has-group-call-header {
+  --group-call-header-height: 2rem;
+  #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
+    height: calc(100% - 2rem);
+    margin-top: 2rem;
+  }
+}
+
 #LeftColumn {
   min-width: 12rem;
   width: 33vw;

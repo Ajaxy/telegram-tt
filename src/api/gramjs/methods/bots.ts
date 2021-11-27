@@ -9,7 +9,7 @@ import { buildInputPeer, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildApiPeerId } from '../apiBuilders/peers';
+import { addUserToLocalDb } from '../helpers';
 
 export function init() {
 }
@@ -156,10 +156,6 @@ function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineRe
 
 function getInlineBotResultsNextOffset(username: string, nextOffset?: string) {
   return username === 'gif' && nextOffset === '0' ? '' : nextOffset;
-}
-
-function addUserToLocalDb(user: GramJs.User) {
-  localDb.users[buildApiPeerId(user.id, 'user')] = user;
 }
 
 function addDocumentToLocalDb(document: GramJs.Document) {

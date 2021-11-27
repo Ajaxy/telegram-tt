@@ -270,6 +270,16 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
+          <div className="ListItem no-selection">
+            <Checkbox
+              name="manageCall"
+              checked={!!permissions.manageCall}
+              label={lang('StartVoipChatPermission')}
+              blocking
+              disabled={getControlIsDisabled('manageCall')}
+              onChange={handlePermissionChange}
+            />
+          </div>
           {!isChannel && (
             <div className="ListItem no-selection">
               <Checkbox

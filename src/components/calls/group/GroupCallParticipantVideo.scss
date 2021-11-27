@@ -1,0 +1,125 @@
+.GroupCallParticipantVideo {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+  max-height: 12.875rem;
+  width: calc(50% - 0.25rem);
+  transition: 0.25s ease-out width;
+  cursor: pointer;
+
+  .thumbnail-avatar {
+    position: absolute;
+    border-radius: 0;
+    width: 100%;
+    height: 100%;
+    transform: scale(1.1);
+
+    img {
+      filter: blur(10px);
+      border-radius: 0;
+      object-fit: cover;
+    }
+  }
+
+  &:last-child:nth-child(odd) {
+    width: 100%;
+  }
+
+  &::before {
+    box-shadow: 0 0 0 3px transparent inset;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: block;
+    content: "";
+    z-index: 5;
+    border-radius: 0.75rem;
+    transition: 0.25s ease-out box-shadow;
+  }
+
+  &.active::before {
+    box-shadow: 0px 0px 0px 3px #78ee7e inset;
+  }
+
+  .back-button {
+    position: absolute;
+    z-index: 5;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 0;
+    color: white;
+    border-radius: 1rem;
+    padding: 0.25rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: 0.25s ease-out opacity, 0.25s ease-out background-color;
+    opacity: 0;
+    cursor: pointer;
+    outline: none !important;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  video {
+    display: block;
+    width: 100%;
+  }
+
+  .video {
+    object-fit: contain;
+    height: 12.5rem;
+    position: relative;
+  }
+
+  .thumbnail-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    width: 100%;
+    transform: translate(-50%, -50%) scale(1.5);
+    background: black;
+  }
+
+  .thumbnail {
+    filter: blur(10px) brightness(0.5);
+    object-fit: cover;
+  }
+
+  .info {
+    position: absolute;
+    bottom: 0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem 0.25rem;
+    width: 100%;
+    height: 2rem;
+    background: linear-gradient(0deg, #000, transparent);
+    transition: 0.25s ease-out opacity;
+    opacity: 0;
+
+    .name {
+      margin-left: 0.5rem;
+    }
+
+    .last-icon {
+      margin-left: auto;
+    }
+  }
+}
+
+.videos:hover .GroupCallParticipantVideo {
+
+  .info {
+    opacity: 1;
+  }
+
+  .back-button {
+    opacity: 1;
+  }
+}

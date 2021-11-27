@@ -1,0 +1,348 @@
+.GroupCall {
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 37.5rem;
+  }
+
+  .modal-dialog {
+    max-height: calc(100% - 4rem);
+    background: #181F27;
+  }
+
+  .Menu .bubble {
+    --color-background: #232A34;
+    --color-chat-hover: #2F363E;
+    --color-item-active: #2F363E;
+    --color-text: #fff;
+    box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
+  }
+
+  // Compact menu items
+  .MenuItem {
+    padding: 0.75rem 1rem !important;
+  }
+
+  &.single-column {
+    opacity: 1 !important;
+
+    .modal-dialog {
+      max-width: 100% !important;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      margin-top: auto;
+      margin-bottom: 0;
+      transform: translate3d(0, 100%, 0);
+      transition: transform .3s ease, opacity .3s ease;
+    }
+
+    .modal-backdrop {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &.open {
+      .modal-backdrop {
+        opacity: 1;
+      }
+
+      .modal-dialog {
+        transform: translate3d(0, 0, 0);
+      }
+    }
+  }
+
+  .header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    margin-bottom: 0.5rem;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin: 0 auto 0 0.5rem;
+    }
+  }
+
+  .videos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .participants {
+    margin-top: 0.75rem;
+    background: #222B34;
+    border-radius: 0.75rem;
+
+    .Loading {
+      padding: 2rem 0;
+    }
+
+    .invite-btn {
+      padding: 0.25rem 0.75rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0.75rem;
+      transition: .15s ease-out background-color;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+
+      &:hover {
+        background: #2F363E;
+      }
+
+      .text {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .scrollable {
+    overflow: auto;
+    padding-bottom: 2rem;
+    max-width: 37.5rem;
+    width: 100%;
+  }
+
+  .buttons {
+    max-width: 37.5rem;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    position: relative;
+    height: 8.75rem;
+
+    button {
+      cursor: pointer;
+    }
+
+    &::before {
+      position: absolute;
+      content: "";
+      width: 100%;
+      height: 2rem;
+      background: linear-gradient(0deg, #181F27, rgba(24, 31, 39, 0));
+      z-index: 0;
+      top: -2rem;
+    }
+
+    .button-wrapper {
+      width: 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .button-text {
+        white-space: nowrap;
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+        color: #fff;
+      }
+
+      &.microphone-wrapper {
+        width: 6rem;
+
+        .button-text {
+          margin-top: 0.75rem;
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .Loading {
+      position: absolute;
+      transform: translate(0, -1.125rem);
+
+      .Spinner {
+        --spinner-size: 6.5rem;
+      }
+    }
+
+    .video-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .small-button, .smaller-button {
+      outline: none;
+      border: 0;
+      background: #15415b;
+      border-radius: 50%;
+      width: 3rem;
+      height: 3rem;
+      color: #fff;
+      font-size: 1.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.25s ease-out background-color;
+
+      &:hover {
+        background: #11364b;
+      }
+    }
+
+    .small-button.camera.active {
+      background: #15415b;
+
+      &:hover {
+        background: #11364b;
+      }
+    }
+
+    .small-button.speaker {
+      background: #2B3A51;
+
+      &.active {
+        background: #496092;
+      }
+    }
+
+    .small-button.leave {
+      background: #5A2824;
+
+      &:hover {
+        background: #49201d;
+      }
+    }
+
+    .smaller-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0;
+    }
+  }
+
+
+  &.landscape .scrollable {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    gap: 1rem;
+    align-items: flex-start;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  &.landscape .GroupCallParticipantVideo {
+    max-height: initial;
+
+    video {
+      height: 100%;
+    }
+  }
+
+  &.landscape .buttons {
+    position: absolute;
+    left: calc(50% - 15.625rem / 2);
+    transform: translateX(-50%);
+    width: auto;
+    gap: 1rem;
+    bottom: 4rem;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    z-index: 5;
+    padding: 0.75rem 1rem;
+    height: auto;
+
+    .button-text {
+      display: none;
+    }
+
+    .video-buttons {
+      flex-direction: row;
+      gap: 1rem;
+
+      .smaller-button {
+        margin-bottom: 0;
+      }
+    }
+
+    .Loading {
+      transform: none;
+      .Spinner {
+        --spinner-size: 3.25rem;
+      }
+    }
+
+    .MicrophoneButton {
+      canvas {
+        width: 2rem !important;
+        height: 2rem !important;
+      }
+    }
+
+    .MicrophoneButton, .microphone-wrapper {
+      width: 3rem;
+      height: 3rem;
+
+      .AnimatedSticker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    &::before {
+      display: none;
+    }
+  }
+
+  &.landscape.no-sidebar .buttons {
+    left: calc(50%);
+  }
+
+  &.landscape .streams {
+    width: 100%;
+    height: 100%;
+  }
+
+  &.landscape .videos {
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+    --column-count: 1;
+    grid-template-columns: repeat(var(--column-count), 1fr);
+    grid-auto-rows: 1fr;
+
+    .GroupCallParticipantVideo {
+      max-height: 100%;
+      width: 100%;
+
+      .thumbnail-wrapper {
+        height: 100%;
+      }
+    }
+
+    &.span-last-video .GroupCallParticipantVideo:last-child {
+      grid-column: span var(--column-count);
+    }
+  }
+
+  &.landscape .participants {
+    width: 15.625rem;
+    margin-top: 0;
+  }
+}

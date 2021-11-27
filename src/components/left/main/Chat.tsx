@@ -51,6 +51,7 @@ import DeleteChatModal from '../../common/DeleteChatModal';
 import ListItem from '../../ui/ListItem';
 import Badge from './Badge';
 import ChatFolderModal from '../ChatFolderModal.async';
+import ChatCallStatus from './ChatCallStatus';
 
 import './Chat.scss';
 
@@ -285,6 +286,9 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           isSavedMessages={privateChatUser?.isSelf}
           lastSyncTime={lastSyncTime}
         />
+        {chat.isCallActive && chat.isCallNotEmpty && (
+          <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
+        )}
       </div>
       <div className="info">
         <div className="title">

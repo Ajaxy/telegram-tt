@@ -14,6 +14,10 @@ declare namespace React {
   interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
     loading?: 'auto' | 'eager' | 'lazy';
   }
+
+  interface VideoHTMLAttributes {
+    srcObject?: MediaStream;
+  }
 }
 
 type AnyLiteral = Record<string, any>;

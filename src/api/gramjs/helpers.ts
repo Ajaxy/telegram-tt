@@ -47,3 +47,7 @@ export function addChatToLocalDb(chat: GramJs.TypeChat) {
     localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
   }
 }
+
+export function addUserToLocalDb(user: GramJs.User) {
+  localDb.users[buildApiPeerId(user.id, 'user')] = user;
+}

@@ -1,0 +1,22 @@
+.ActiveCallHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2rem;
+  width: 100%;
+  z-index: 1;
+
+  display: flex;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #fff;
+  align-items: center;
+  padding: 0 1rem;
+  background: linear-gradient(90deg, rgb(82, 206, 93), rgb(0, 177, 192));
+  transform: translateY(-100%);
+
+  &.open {
+    transform: translateY(0);
+  }
+}

@@ -21,6 +21,7 @@ import {
   ApiChat,
   ApiThreadInfo,
   ApiInvoice,
+  ApiGroupCall,
 } from '../../types';
 
 import {
@@ -593,6 +594,7 @@ function buildAction(
     return undefined;
   }
 
+  let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let currency: string | undefined;
   let text: string;
@@ -677,6 +679,13 @@ function buildAction(
       const mins = Math.max(Math.round(action.duration! / 60), 1);
       translationValues.push(`${mins} min${mins > 1 ? 's' : ''}`);
     }
+  } else if (action instanceof GramJs.MessageActionInviteToGroupCall) {
+    text = 'Notification.VoiceChatInvitation';
+    call = {
+      id: action.call.id.toString(),
+      accessHash: action.call.accessHash.toString(),
+    };
+    translationValues.push('%action_origin%', '%target_user%');
   } else if (action instanceof GramJs.MessageActionContactSignUp) {
     text = 'Notification.Joined';
     translationValues.push('%action_origin%');
@@ -696,6 +705,10 @@ function buildAction(
       translationValues.push(`${mins} min${mins > 1 ? 's' : ''}`);
     } else {
       text = 'Notification.VoiceChatStartedChannel';
+      call = {
+        id: action.call.id.toString(),
+        accessHash: action.call.accessHash.toString(),
+      };
     }
   } else if (action instanceof GramJs.MessageActionBotAllowed) {
     text = 'Chat.Service.BotPermissionAllowed';
@@ -718,6 +731,7 @@ function buildAction(
     amount,
     currency,
     translationValues,
+    call,
   };
 }
 

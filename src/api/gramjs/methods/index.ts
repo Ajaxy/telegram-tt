@@ -60,3 +60,9 @@ export {
 export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt,
 } from './payments';
+
+export {
+  getGroupCall, joinGroupCall, discardGroupCall, createGroupCall,
+  editGroupCallTitle, editGroupCallParticipant, exportGroupCallInvite, fetchGroupCallParticipants,
+  joinGroupCallPresentation, leaveGroupCall, leaveGroupCallPresentation, toggleGroupCallStartSubscription,
+} from './calls';

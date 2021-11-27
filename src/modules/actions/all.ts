@@ -8,6 +8,7 @@ import './ui/users';
 import './ui/settings';
 import './ui/misc';
 import './ui/payments';
+import './ui/calls';
 
 import './api/initial';
 import './api/chats';
@@ -31,3 +32,4 @@ import './apiUpdaters/symbols';
 import './apiUpdaters/misc';
 import './apiUpdaters/settings';
 import './apiUpdaters/twoFaSettings';
+import './apiUpdaters/calls';

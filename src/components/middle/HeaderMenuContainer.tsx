@@ -27,7 +27,8 @@ import DeleteChatModal from '../common/DeleteChatModal';
 import './HeaderMenuContainer.scss';
 
 type DispatchProps = Pick<GlobalActions, (
-  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot' | 'openLinkedChat' | 'addContact'
+  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot' | 'openLinkedChat' |
+  'joinGroupCall' | 'createGroupCall' | 'addContact'
 )>;
 
 export type OwnProps = {
@@ -43,6 +44,8 @@ export type OwnProps = {
   canSearch?: boolean;
   canMute?: boolean;
   canLeave?: boolean;
+  canEnterVoiceChat?: boolean;
+  canCreateVoiceChat?: boolean;
   onSubscribeChannel: () => void;
   onSearchClick: () => void;
   onClose: () => void;
@@ -70,6 +73,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canSearch,
   canMute,
   canLeave,
+  canEnterVoiceChat,
+  canCreateVoiceChat,
   chat,
   isPrivate,
   isMuted,
@@ -84,6 +89,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   enterMessageSelectMode,
   sendBotCommand,
   restartBot,
+  joinGroupCall,
+  createGroupCall,
   openLinkedChat,
   addContact,
 }) => {
@@ -120,6 +127,20 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     updateChatMutedState({ chatId, isMuted: !isMuted });
     closeMenu();
   }, [chatId, closeMenu, isMuted, updateChatMutedState]);
+
+  const handleEnterVoiceChatClick = useCallback(() => {
+    if (canCreateVoiceChat) {
+      // TODO show popup to schedule
+      createGroupCall({
+        chatId,
+      });
+    } else {
+      joinGroupCall({
+        chatId,
+      });
+    }
+    closeMenu();
+  }, [closeMenu, canCreateVoiceChat, chatId, joinGroupCall, createGroupCall]);
 
   const handleLinkedChatClick = useCallback(() => {
     openLinkedChat({ id: chatId });
@@ -211,6 +232,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {lang(isMuted ? 'ChatsUnmute' : 'ChatsMute')}
             </MenuItem>
           )}
+          {(canEnterVoiceChat || canCreateVoiceChat) && (
+            <MenuItem
+              icon="voice-chat"
+              onClick={handleEnterVoiceChatClick}
+            >
+              {lang(canCreateVoiceChat ? 'StartVoipChat' : 'VoipGroupJoinCall')}
+            </MenuItem>
+          )}
           {hasLinkedChat && (
             <MenuItem
               icon={isChannel ? 'comments' : 'channel'}
@@ -273,6 +302,8 @@ export default memo(withGlobal<OwnProps>(
     'enterMessageSelectMode',
     'sendBotCommand',
     'restartBot',
+    'joinGroupCall',
+    'createGroupCall',
     'openLinkedChat',
     'addContact',
   ]),

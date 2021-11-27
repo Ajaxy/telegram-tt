@@ -11,6 +11,7 @@ import {
   ApiChatFolder,
   ApiChatBannedRights,
   ApiChatAdminRights,
+  ApiGroupCall,
 } from '../../types';
 
 import {
@@ -323,6 +324,7 @@ export function clearDraft(chat: ApiChat) {
 async function getFullChatInfo(chatId: string): Promise<{
   fullInfo: ApiChatFullInfo;
   users?: ApiUser[];
+  groupCall?: Partial<ApiGroupCall>;
 } | undefined> {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({
     chatId: buildInputEntity(chatId) as BigInt.BigInteger,
@@ -339,6 +341,7 @@ async function getFullChatInfo(chatId: string): Promise<{
     participants,
     exportedInvite,
     botInfo,
+    call,
   } = result.fullChat;
 
   const members = buildChatMembers(participants);
@@ -355,8 +358,19 @@ async function getFullChatInfo(chatId: string): Promise<{
       ...(exportedInvite && {
         inviteLink: exportedInvite.link,
       }),
+      groupCallId: call?.id.toString(),
     },
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    groupCall: call ? {
+      chatId,
+      isLoaded: false,
+      id: call.id.toString(),
+      accessHash: call.accessHash.toString(),
+      connectionState: 'disconnected',
+      participantsCount: 0,
+      version: 0,
+      participants: {},
+    } : undefined,
   };
 }
 
@@ -364,7 +378,11 @@ async function getFullChannelInfo(
   id: string,
   accessHash: string,
   adminRights?: ApiChatAdminRights,
-) {
+): Promise<{
+    fullInfo: ApiChatFullInfo;
+    users?: ApiUser[];
+    groupCall?: Partial<ApiGroupCall>;
+  } | undefined> {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({
     channel: buildInputEntity(id, accessHash) as GramJs.InputChannel,
   }));
@@ -438,6 +456,16 @@ async function getFullChannelInfo(
       botCommands,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
+    groupCall: call ? {
+      chatId: id,
+      isLoaded: false,
+      id: call.id.toString(),
+      accessHash: call?.accessHash.toString(),
+      participants: {},
+      version: 0,
+      participantsCount: 0,
+      connectionState: 'disconnected',
+    } : undefined,
   };
 }
 

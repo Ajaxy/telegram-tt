@@ -108,6 +108,7 @@ export interface ApiChatAdminRights {
   pinMessages?: true;
   addAdmins?: true;
   anonymous?: true;
+  manageCall?: true;
 }
 
 export interface ApiChatBannedRights {

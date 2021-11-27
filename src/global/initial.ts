@@ -44,6 +44,10 @@ export const INITIAL_STATE: GlobalState = {
     messageLists: [],
   },
 
+  groupCalls: {
+    byId: {},
+  },
+
   scheduledMessages: {
     byChatId: {},
   },

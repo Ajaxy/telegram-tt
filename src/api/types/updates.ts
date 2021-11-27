@@ -1,3 +1,4 @@
+import { GroupCallConnectionData, GroupCallParticipant, GroupCallConnectionState } from '../../lib/secret-sauce';
 import {
   ApiChat,
   ApiChatFullInfo,
@@ -12,6 +13,9 @@ import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 import {
   ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
+import {
+  ApiGroupCall,
+} from './calls';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -378,6 +382,48 @@ export type ApiUpdateServerTimeOffset = {
   serverTimeOffset: number;
 };
 
+export type ApiUpdateGroupCall = {
+  '@type': 'updateGroupCall';
+  call: ApiGroupCall;
+};
+
+export type ApiUpdateGroupCallChatId = {
+  '@type': 'updateGroupCallChatId';
+  call: Partial<ApiGroupCall>;
+  chatId: string;
+};
+
+export type ApiUpdateGroupCallLeavePresentation = {
+  '@type': 'updateGroupCallLeavePresentation';
+};
+
+export type ApiUpdateGroupCallParticipants = {
+  '@type': 'updateGroupCallParticipants';
+  groupCallId: string;
+  participants: GroupCallParticipant[];
+  nextOffset?: string;
+};
+
+export type ApiUpdateGroupCallConnection = {
+  '@type': 'updateGroupCallConnection';
+  data: GroupCallConnectionData;
+  presentation: boolean;
+};
+
+export type ApiUpdateGroupCallStreams = {
+  '@type': 'updateGroupCallStreams';
+  userId: string;
+  hasAudioStream: boolean;
+  hasVideoStream: boolean;
+  hasPresentationStream: boolean;
+};
+
+export type ApiUpdateGroupCallConnectionState = {
+  '@type': 'updateGroupCallConnectionState';
+  connectionState: GroupCallConnectionState;
+  isSpeakerDisabled?: boolean;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -395,7 +441,9 @@ export type ApiUpdate = (
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset | ApiUpdateShowInvite
+  ApiUpdateServerTimeOffset | ApiUpdateShowInvite |
+  ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
+  ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

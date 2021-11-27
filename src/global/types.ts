@@ -21,6 +21,7 @@ import {
   ApiInviteInfo,
   ApiCountryCode,
   ApiCountry,
+  ApiGroupCall,
 } from '../api/types';
 import {
   FocusDirection,
@@ -161,6 +162,12 @@ export type GlobalState = {
       poll?: ApiNewPoll;
       isSilent?: boolean;
     };
+  };
+
+  groupCalls: {
+    byId: Record<string, ApiGroupCall>;
+    activeGroupCallId?: string;
+    isGroupCallPanelHidden?: boolean;
   };
 
   scheduledMessages: {
@@ -539,7 +546,12 @@ export type ActionTypes = (
   // payment
   'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
   'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |
-  'sendCredentialsInfo' | 'setInvoiceMessageInfo' | 'clearPaymentError' | 'clearReceipt'
+  'sendCredentialsInfo' | 'setInvoiceMessageInfo' | 'clearPaymentError' | 'clearReceipt' |
+  // calls
+  'joinGroupCall' | 'toggleGroupCallMute' | 'toggleGroupCallPresentation' | 'leaveGroupCall' |
+  'toggleGroupCallVideo' | 'requestToSpeak' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' |
+  'createGroupCall' | 'joinVoiceChatByLink' | 'subscribeToGroupCallUpdates' | 'createGroupCallInviteLink' |
+  'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' | 'playGroupCallSound'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

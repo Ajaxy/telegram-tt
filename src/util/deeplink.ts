@@ -13,6 +13,7 @@ export const processDeepLink = (url: string) => {
     openChatByUsername,
     openStickerSetShortName,
     focusMessage,
+    joinVoiceChatByLink,
   } = getDispatch();
 
   const method = pathname.replace(/^\/\//, '') as DeepLinkMethod;
@@ -23,14 +24,23 @@ export const processDeepLink = (url: string) => {
 
   switch (method) {
     case 'resolve': {
-      const { domain, post, comment } = params;
+      const {
+        domain, post, comment, voicechat, livestream,
+      } = params;
 
       if (domain !== 'telegrampassport') {
-        openChatByUsername({
-          username: domain,
-          messageId: Number(post),
-          commentId: Number(comment),
-        });
+        if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
+          joinVoiceChatByLink({
+            username: domain,
+            inviteHash: voicechat || livestream,
+          });
+        } else {
+          openChatByUsername({
+            username: domain,
+            messageId: Number(post),
+            commentId: Number(comment),
+          });
+        }
       }
       break;
     }

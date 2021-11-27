@@ -61,6 +61,7 @@ import Button from '../ui/Button';
 import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 import AudioPlayer from './AudioPlayer';
+import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 
 import './MiddleHeader.scss';
 
@@ -403,6 +404,14 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       >
         {renderInfo}
       </Transition>
+
+      <GroupCallTopPane
+        hasPinnedOffset={
+          (shouldRenderPinnedMessage && !!renderingPinnedMessage)
+          || (shouldRenderAudioPlayer && !!renderingAudioMessage)
+        }
+        chatId={chatId}
+      />
 
       {shouldRenderPinnedMessage && renderingPinnedMessage && (
         <HeaderPinnedMessage

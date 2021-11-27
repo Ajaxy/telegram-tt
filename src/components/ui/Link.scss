@@ -3,5 +3,9 @@
 
   &:hover {
     color: inherit;
+
+    &.GroupCallLink {
+      text-decoration: none;
+    }
   }
 }

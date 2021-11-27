@@ -33,22 +33,58 @@
 }
 
 .icon-loop:before {
-  content: "\e981";
+  content: "\e98c";
 }
 .icon-skip-next:before {
-  content: "\e982";
+  content: "\e98d";
 }
 .icon-skip-previous:before {
-  content: "\e983";
+  content: "\e98e";
 }
 .icon-volume-1:before {
-  content: "\e984";
+  content: "\e98f";
 }
 .icon-volume-2:before {
-  content: "\e985";
+  content: "\e990";
 }
 .icon-volume-3:before {
+  content: "\e991";
+}
+.icon-sidebar:before {
+  content: "\e992";
+}
+.icon-video-stop:before {
+  content: "\e98b";
+}
+.icon-speaker:before {
+  content: "\e981";
+}
+.icon-speaker-outline:before {
+  content: "\e982";
+}
+.icon-phone-discard-outline:before {
+  content: "\e983";
+}
+.icon-allow-speak:before {
+  content: "\e984";
+}
+.icon-stop-raising-hand:before {
+  content: "\e985";
+}
+.icon-share-screen:before {
   content: "\e986";
+}
+.icon-voice-chat:before {
+  content: "\e987";
+}
+.icon-video:before {
+  content: "\e988";
+}
+.icon-noise-suppression:before {
+  content: "\e989";
+}
+.icon-phone-discard:before {
+  content: "\e98a";
 }
 .icon-bot-commands-filled:before {
   content: "\e97f";
@@ -422,7 +458,7 @@
 .icon-eye:before {
   content: "\e924";
 }
-.icon-muted:before {
+.icon-muted-chat:before {
   content: "\e95d";
 }
 .icon-avatar-archived-chats:before {
