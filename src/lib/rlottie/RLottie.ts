@@ -89,6 +89,7 @@ class RLottie {
     private animationData: AnyLiteral,
     private params: Params = {},
     private onLoad?: () => void,
+    private customColor?: [number, number, number],
   ) {
     this.initContainer();
     this.initConfig();
@@ -199,6 +200,46 @@ class RLottie {
     this.canvas.remove();
   }
 
+  private onChangeData(framesCount: number) {
+    this.isWaiting = false;
+    this.framesCount = framesCount;
+    this.chunksCount = Math.ceil(framesCount / this.chunkSize);
+    this.isAnimating = false;
+
+    this.doPlay();
+  }
+
+  setColor(newColor: [number, number, number] | undefined) {
+    this.customColor = newColor;
+    if (this.customColor) {
+      const imageData = this.ctx.getImageData(0, 0, this.imgSize, this.imgSize);
+      const arr = imageData.data;
+      for (let i = 0; i < arr.length; i += 4) {
+        /* eslint-disable prefer-destructuring */
+        arr[i] = this.customColor[0];
+        arr[i + 1] = this.customColor[1];
+        arr[i + 2] = this.customColor[2];
+        /* eslint-enable prefer-destructuring */
+      }
+      this.ctx.putImageData(imageData, 0, 0);
+    }
+  }
+
+  changeData(animationData: AnyLiteral) {
+    this.pause();
+    this.animationData = animationData;
+    this.initConfig();
+
+    workers[this.workerIndex].request({
+      name: 'changeData',
+      args: [
+        this.key,
+        this.animationData,
+        this.onChangeData.bind(this),
+      ],
+    });
+  }
+
   private initRenderer() {
     this.workerIndex = cycleRestrict(MAX_WORKERS, ++lastWorkerIndex);
 
@@ -264,7 +305,8 @@ class RLottie {
       const frameIndex = Math.round(this.approxFrameIndex);
       const chunkIndex = this.getChunkIndex(frameIndex);
       const chunk = this.chunks[chunkIndex];
-      if (!chunk) {
+
+      if (!chunk || chunk.length === 0) {
         this.requestChunk(chunkIndex);
         this.isAnimating = false;
         this.isWaiting = true;
@@ -285,7 +327,17 @@ class RLottie {
           return false;
         }
 
-        const imageData = new ImageData(new Uint8ClampedArray(frame), this.imgSize, this.imgSize);
+        const arr = new Uint8ClampedArray(frame);
+        if (this.customColor) {
+          for (let i = 0; i < arr.length; i += 4) {
+            /* eslint-disable prefer-destructuring */
+            arr[i] = this.customColor[0];
+            arr[i + 1] = this.customColor[1];
+            arr[i + 2] = this.customColor[2];
+            /* eslint-enable prefer-destructuring */
+          }
+        }
+        const imageData = new ImageData(arr, this.imgSize, this.imgSize);
         this.ctx.putImageData(imageData, 0, 0);
 
         if (this.onLoad && !this.isOnLoadFired) {
@@ -373,7 +425,7 @@ class RLottie {
   }
 
   private requestChunk(chunkIndex: number) {
-    if (this.chunks[chunkIndex]) {
+    if (this.chunks[chunkIndex] && this.chunks[chunkIndex]?.length !== 0) {
       return;
     }
 

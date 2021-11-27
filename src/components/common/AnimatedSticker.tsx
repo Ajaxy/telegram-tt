@@ -19,6 +19,7 @@ type OwnProps = {
   quality?: number;
   isLowPriority?: boolean;
   onLoad?: NoneToVoidFunction;
+  color?: [number, number, number];
 };
 
 type RLottieClass = typeof import('../../lib/rlottie/RLottie').default;
@@ -52,6 +53,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   quality,
   isLowPriority,
   onLoad,
+  color,
 }) => {
   const [animation, setAnimation] = useState<RLottieInstance>();
   // eslint-disable-next-line no-null/no-null
@@ -85,6 +87,7 @@ const AnimatedSticker: FC<OwnProps> = ({
           isLowPriority,
         },
         onLoad,
+        color,
       );
 
       if (speed) {
@@ -105,7 +108,13 @@ const AnimatedSticker: FC<OwnProps> = ({
         });
       });
     }
-  }, [animation, animationData, id, isLowPriority, noLoop, onLoad, quality, size, speed]);
+  }, [color, animation, animationData, id, isLowPriority, noLoop, onLoad, quality, size, speed]);
+
+  useEffect(() => {
+    if (!animation) return;
+
+    animation.setColor(color);
+  }, [color, animation]);
 
   useEffect(() => {
     return () => {
@@ -182,6 +191,13 @@ const AnimatedSticker: FC<OwnProps> = ({
       }
     }
   }, [animation, play, playSegment, noLoop, playAnimation, pauseAnimation]);
+
+  useEffect(() => {
+    if (animation) {
+      animation.changeData(animationData);
+      playAnimation();
+    }
+  }, [playAnimation, animation, animationData]);
 
   useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation);
   // Pausing frame may not happen in background

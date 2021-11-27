@@ -1,0 +1,98 @@
+@import '../../../styles/mixins';
+
+.participant-menu {
+  position: absolute;
+  .bubble {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible;
+    color: #ffffff;
+
+    .group {
+      box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
+      overflow: hidden;
+      background: var(--color-background);
+      border-radius: var(--border-radius-default);
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .volume-control {
+    height: 3rem;
+
+    .info {
+      pointer-events: none;
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0.75rem 1rem;
+
+      .AnimatedSticker {
+        margin-right: 2rem;
+      }
+    }
+
+    &.high {
+      --range-color: #4DA6E0;
+    }
+
+    &.normal {
+      --range-color: #57BC6C;
+    }
+
+    &.medium {
+      --range-color: #CAA53B;
+    }
+
+    &.low {
+      --range-color: #CB5757;
+    }
+
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    @mixin thumb-styles() {
+      border: none;
+      height: 3rem;
+      width: 1.5rem;
+      background: var(--range-color);
+      border-radius: var(--border-radius-default);
+      box-shadow: -13.5rem 0 0 12.75rem var(--range-color);
+      transition: 0.25s ease-in-out background-color, 0.25s ease-in-out box-shadow;
+    }
+
+    @include reset-range();
+
+    // Apply custom styles
+    input[type="range"] {
+      height: 3rem;
+      position: absolute;
+      left: -1.5rem;
+      top: 0;
+      width: calc(100% + 3rem);
+      margin: 0;
+      z-index: 0;
+
+      // Note that while we're repeating code here, that's necessary as you can't comma-separate these type of selectors.
+      // Browsers will drop the entire selector if it doesn't understand a part of it.
+      &::-webkit-slider-thumb {
+        @include thumb-styles();
+      }
+
+      &::-moz-range-thumb {
+        @include thumb-styles();
+      }
+
+      &::-ms-thumb {
+        @include thumb-styles();
+      }
+    }
+  }
+}

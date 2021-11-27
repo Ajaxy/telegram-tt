@@ -1,0 +1,78 @@
+.GroupCallParticipant {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  transition: .15s ease-out background-color;
+  cursor: pointer;
+
+  &:hover {
+    background: #2F363E;
+  }
+
+  audio {
+    display: none;
+  }
+
+  .Avatar {
+    margin-right: 1rem;
+  }
+
+  .info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    .name {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .about {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      color: #848D94;
+      font-size: 0.75rem;
+
+      &.blue {
+        color: #4DA6E0;
+      }
+
+      &.green {
+        color: #57BC6C;
+      }
+
+      &.red {
+        color: #FF706F;
+      }
+    }
+  }
+
+  .microphone {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: auto;
+    font-size: 1.5rem;
+    color: #FF706F;
+  }
+
+  &.can-self-unmute {
+    .microphone {
+      color: #848D94;
+    }
+  }
+
+  .streams {
+    cursor: pointer;
+    display: flex;
+  }
+}

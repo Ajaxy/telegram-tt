@@ -1,0 +1,58 @@
+.MicrophoneButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: none !important;
+  position: relative;
+  width: 6rem;
+  height: 6rem;
+  border: 0;
+  background: radial-gradient(100% 100% at 100% 0%, #00a0b9 0%, #33c659 55%, #33c659 100%);
+  border-radius: 50%;
+  font-size: 2rem;
+  color: #fff;
+  transition: 0.25s ease-out filter;
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 8rem;
+    height: 8rem;
+    background: #64C166;
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: 0.2;
+    pointer-events: none;
+
+    body.is-ios & {
+      display: none;
+    }
+  }
+
+  &:hover {
+    filter: brightness(0.9);
+  }
+
+  &.crossed {
+    background: radial-gradient(100% 100% at 100% 0%, #00AFFE 0%, #00AFFE 55%, #007FFF 100%);
+
+    &::before {
+      background: #00AFFE;
+    }
+  }
+
+  &.muted-by-admin {
+    background: radial-gradient(85.5% 103.5% at 87.5% 20.65%, #CE4D74 0%, #3D52DF 100%);
+    &::before {
+      background: #3D52DF;
+    }
+  }
+
+  &.is-connecting, &.is-connecting:hover {
+    background: #222B34;
+    &::before {
+      background: transparent;
+    }
+  }
+}

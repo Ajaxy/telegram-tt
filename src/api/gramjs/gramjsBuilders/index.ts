@@ -5,15 +5,16 @@ import { ApiPrivacyKey } from '../../../types';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 import {
-  ApiSticker,
-  ApiVideo,
-  ApiNewPoll,
+  ApiChatAdminRights,
+  ApiChatBannedRights,
+  ApiChatFolder,
+  ApiGroupCall,
   ApiMessageEntity,
   ApiMessageEntityTypes,
-  ApiChatFolder,
-  ApiChatBannedRights,
-  ApiChatAdminRights,
+  ApiNewPoll,
   ApiReportReason,
+  ApiSticker,
+  ApiVideo,
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';
@@ -237,6 +238,10 @@ export function generateRandomBigInt() {
   return readBigIntFromBuffer(generateRandomBytes(8), true, true);
 }
 
+export function generateRandomInt() {
+  return readBigIntFromBuffer(generateRandomBytes(4), true, true).toJSNumber();
+}
+
 export function buildMessageFromUpdate(
   id: number,
   chatId: string,
@@ -423,4 +428,11 @@ export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
   }
 
   return type === 'user' ? BigInt(id) : BigInt(id.slice(1));
+}
+
+export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
+  return new GramJs.InputGroupCall({
+    id: BigInt(groupCall.id!),
+    accessHash: BigInt(groupCall.accessHash!),
+  });
 }

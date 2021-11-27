@@ -1,3 +1,5 @@
+import { ApiGroupCall } from './calls';
+
 export interface ApiDimensions {
   width: number;
   height: number;
@@ -155,6 +157,7 @@ export interface ApiAction {
   amount?: number;
   currency?: string;
   translationValues: string[];
+  call?: Partial<ApiGroupCall>;
 }
 
 export interface ApiWebPage {

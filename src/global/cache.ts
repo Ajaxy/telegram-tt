@@ -189,6 +189,10 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (cached.audioPlayer.playbackRate === undefined) {
     cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
   }
+
+  if (cached.groupCalls === undefined) {
+    cached.groupCalls = initialState.groupCalls;
+  }
 }
 
 function updateCache() {

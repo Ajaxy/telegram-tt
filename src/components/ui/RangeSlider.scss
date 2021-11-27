@@ -1,3 +1,5 @@
+@import '../../styles/mixins';
+
 @mixin thumb-styles() {
   background: var(--slider-color);
   border: none;
@@ -72,43 +74,7 @@
   }
 
   // Reset range input browser styles
-  input[type="range"] {
-    -webkit-appearance: none;
-    display: block;
-    width: 100%;
-    height: 0.75rem;
-    margin-bottom: 0.5rem;
-    background: transparent;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::-ms-track {
-      width: 100%;
-      cursor: pointer;
-
-      background: transparent;
-      border-color: transparent;
-      color: transparent;
-    }
-
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-    }
-
-    &::-moz-slider-thumb {
-      -moz-appearance: none;
-    }
-
-    &::-webkit-slider-runnable-track {
-      cursor: pointer;
-    }
-
-    &::-moz-range-track, &::-moz-range-progress {
-      cursor: pointer;
-    }
-  }
+  @include reset-range();
 
   // Apply custom styles
   input[type="range"] {

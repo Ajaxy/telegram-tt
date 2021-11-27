@@ -44,6 +44,8 @@ import ForwardPicker from './ForwardPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 import StickerSetModal from '../common/StickerSetModal.async';
+import GroupCall from '../calls/group/GroupCall.async';
+import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 
 import './Main.scss';
 
@@ -60,6 +62,7 @@ type StateProps = {
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
+  activeGroupCallId?: string;
   isServiceChatReady?: boolean;
   animationLevel: number;
   language?: LangCode;
@@ -88,6 +91,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   hasNotifications,
   hasDialogs,
   audioMessage,
+  activeGroupCallId,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
@@ -271,6 +275,12 @@ const Main: FC<StateProps & DispatchProps> = ({
         onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
       />
+      {activeGroupCallId && (
+        <>
+          <GroupCall groupCallId={activeGroupCallId} />
+          <ActiveCallHeader groupCallId={activeGroupCallId} />
+        </>
+      )}
       <DownloadManager />
     </div>
   );
@@ -319,6 +329,7 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       openedStickerSetShortName: global.openedStickerSetShortName,
       isServiceChatReady: selectIsServiceChatReady(global),
+      activeGroupCallId: global.groupCalls.activeGroupCallId,
       animationLevel,
       language,
       wasTimeFormatSetManually,

@@ -302,8 +302,9 @@
 
   .Avatar {
     margin-right: .625rem;
-    width: 2.5rem;
-    height: 2.5rem;
+    // TODO For some reason webpack imports `Audio.scss` second time when loading calls bundle 
+    width: 2.5rem !important;
+    height: 2.5rem !important;
     font-size: 1.0625rem;
   }
 

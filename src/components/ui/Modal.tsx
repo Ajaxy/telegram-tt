@@ -1,3 +1,4 @@
+import { RefObject } from 'react';
 import React, {
   FC, useEffect, useRef,
 } from '../../lib/teact/teact';
@@ -31,6 +32,7 @@ type OwnProps = {
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
+  dialogRef?: RefObject<HTMLDivElement>;
 };
 
 type StateProps = {
@@ -38,6 +40,7 @@ type StateProps = {
 };
 
 const Modal: FC<OwnProps & StateProps> = ({
+  dialogRef,
   title,
   className,
   isOpen,
@@ -78,7 +81,6 @@ const Modal: FC<OwnProps & StateProps> = ({
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', isOpen);
-
     if (isOpen || (!isOpen && prevIsOpen !== undefined)) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION);
     }
@@ -138,7 +140,7 @@ const Modal: FC<OwnProps & StateProps> = ({
       >
         <div className="modal-container">
           <div className="modal-backdrop" onClick={onClose} />
-          <div className="modal-dialog">
+          <div className="modal-dialog" ref={dialogRef}>
             {renderHeader()}
             <div className="modal-content custom-scroll">
               {children}

@@ -56,6 +56,23 @@ async function init(
   onInit(Math.ceil(framesCount / reduceFactor));
 }
 
+async function changeData(
+  key: string,
+  animationData: AnyLiteral,
+  onInit: CancellableCallback,
+) {
+  if (!rLottieApi) {
+    await rLottieApiPromise;
+  }
+
+  const json = JSON.stringify(animationData);
+  const { reduceFactor, handle } = renderers.get(key)!;
+
+  const stringOnWasmHeap = allocate(intArrayFromString(json), 'i8', 0);
+  const framesCount = rLottieApi.loadFromData(handle, stringOnWasmHeap);
+  onInit(Math.ceil(framesCount / reduceFactor));
+}
+
 async function renderFrames(
   key: string, fromIndex: number, toIndex: number, onProgress: CancellableCallback,
 ) {
@@ -86,6 +103,7 @@ function destroy(key: string) {
 
 createWorkerInterface({
   init,
+  changeData,
   renderFrames,
   destroy,
 });

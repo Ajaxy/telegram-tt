@@ -42,12 +42,14 @@ import {
   selectCurrentMessageList,
   selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
 } from '../../selectors';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
   isChatSummaryOnly, isChatArchived, prepareChatList, isChatBasicGroup,
 } from '../../helpers';
 import { processDeepLink } from '../../../util/deeplink';
+import { updateGroupCall } from '../../reducers/calls';
+import { selectGroupCall } from '../../selectors/calls';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const CHATS_PRELOAD_INTERVAL = 300;
@@ -567,7 +569,13 @@ addReducer('openTelegramLink', (global, actions, payload) => {
   const chatOrChannelPostId = part2 ? Number(part2) : undefined;
   const messageId = part3 ? Number(part3) : undefined;
   const commentId = params.comment ? Number(params.comment) : undefined;
-  if (part1 === 'c' && chatOrChannelPostId && messageId) {
+
+  if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
+    actions.joinVoiceChatByLink({
+      username: part1,
+      inviteHash: params.voicechat || params.livestream,
+    });
+  } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
     actions.focusMessage({
       chatId: -chatOrChannelPostId,
       messageId,
@@ -869,7 +877,7 @@ addReducer('linkDiscussionGroup', (global, actions, payload) => {
       fullInfo = fullChat.fullInfo;
     }
 
-    if (fullInfo.isPreHistoryHidden) {
+    if (fullInfo!.isPreHistoryHidden) {
       await callApi('togglePreHistoryHidden', { chat, isEnabled: false });
     }
 
@@ -1031,21 +1039,35 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: string, off
   setGlobal(global);
 }
 
-async function loadFullChat(chat: ApiChat) {
+export async function loadFullChat(chat: ApiChat) {
   const result = await callApi('fetchFullChat', chat);
   if (!result) {
-    return;
+    return undefined;
   }
 
-  const { users, fullInfo } = result;
+  const { users, fullInfo, groupCall } = result;
 
   let global = getGlobal();
   if (users) {
     global = addUsers(global, buildCollectionByKey(users, 'id'));
   }
+
+  if (groupCall) {
+    const existingGroupCall = selectGroupCall(global, groupCall.id!);
+    global = updateGroupCall(
+      global,
+      groupCall.id!,
+      omit(groupCall, ['connectionState']),
+      undefined,
+      existingGroupCall ? undefined : groupCall.participantsCount,
+    );
+  }
+
   global = updateChat(global, chat.id, { fullInfo });
 
   setGlobal(global);
+
+  return result;
 }
 
 async function createChannel(title: string, users: ApiUser[], about?: string, photo?: File) {
@@ -1203,7 +1225,7 @@ async function deleteChatFolder(id: number) {
   await callApi('deleteChatFolder', id);
 }
 
-async function fetchChatByUsername(
+export async function fetchChatByUsername(
   username: string,
 ) {
   const global = getGlobal();

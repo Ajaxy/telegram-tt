@@ -16,6 +16,22 @@ import FoldersAll from '../../../assets/FoldersAll.tgs';
 import FoldersNew from '../../../assets/FoldersNew.tgs';
 // @ts-ignore
 import DiscussionGroups from '../../../assets/DiscussionGroupsDucks.tgs';
+// @ts-ignore
+import CameraFlip from '../../../assets/animatedIcons/CameraFlip.tgs';
+// @ts-ignore
+import HandFilled from '../../../assets/animatedIcons/HandFilled.tgs';
+// @ts-ignore
+import HandOutline from '../../../assets/animatedIcons/HandOutline.tgs';
+// @ts-ignore
+import Speaker from '../../../assets/animatedIcons/Speaker.tgs';
+// @ts-ignore
+import VoiceAllowTalk from '../../../assets/animatedIcons/VoiceAllowTalk.tgs';
+// @ts-ignore
+import VoiceMini from '../../../assets/animatedIcons/VoiceMini.tgs';
+// @ts-ignore
+import VoiceMuted from '../../../assets/animatedIcons/VoiceMuted.tgs';
+// @ts-ignore
+import VoiceOutlined from '../../../assets/animatedIcons/VoiceOutlined.tgs';
 
 export const ANIMATED_STICKERS_PATHS = {
   MonkeyIdle,
@@ -25,6 +41,14 @@ export const ANIMATED_STICKERS_PATHS = {
   FoldersAll,
   FoldersNew,
   DiscussionGroups,
+  CameraFlip,
+  HandFilled,
+  HandOutline,
+  Speaker,
+  VoiceAllowTalk,
+  VoiceMini,
+  VoiceMuted,
+  VoiceOutlined,
 };
 
 export default function getAnimationData(name: keyof typeof ANIMATED_STICKERS_PATHS) {

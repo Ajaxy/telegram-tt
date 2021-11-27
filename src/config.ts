@@ -58,6 +58,7 @@ export const BLOCKED_LIST_LIMIT = 100;
 export const PROFILE_PHOTOS_LIMIT = 40;
 export const PROFILE_SENSITIVE_AREA = 500;
 export const COMMON_CHATS_LIMIT = 100;
+export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
 
 export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 export const ALL_CHATS_PRELOAD_DISABLED = false;
@@ -170,3 +171,8 @@ export const LIGHT_THEME_BG_COLOR = '#A2AF8E';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0a0a0a8c';
 export const DEFAULT_PATTERN_COLOR = 'rgba(90, 110, 70, 0.6)';
+
+// Group calls
+export const GROUP_CALL_VOLUME_MULTIPLIER = 100;
+export const GROUP_CALL_DEFAULT_VOLUME = 100 * GROUP_CALL_VOLUME_MULTIPLIER;
+export const ENABLE_THUMBNAIL_VIDEO = false;

@@ -25,6 +25,7 @@ module.exports = (env = {}, argv = {}) => {
         path.resolve(__dirname, 'node_modules/opus-recorder/dist'),
         path.resolve(__dirname, 'src/lib/webp'),
         path.resolve(__dirname, 'src/lib/rlottie'),
+        path.resolve(__dirname, 'src/lib/secret-sauce'),
       ],
       port: 1234,
       host: '0.0.0.0',

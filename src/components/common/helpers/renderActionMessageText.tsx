@@ -1,6 +1,8 @@
 import React from '../../../lib/teact/teact';
 
-import { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import {
+  ApiChat, ApiMessage, ApiUser, ApiGroupCall,
+} from '../../../api/types';
 import { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
@@ -17,6 +19,7 @@ import renderText from './renderText';
 import UserLink from '../UserLink';
 import MessageLink from '../MessageLink';
 import ChatLink from '../ChatLink';
+import GroupCallLink from '../GroupCallLink';
 
 interface ActionMessageTextOptions {
   maxTextLength?: number;
@@ -39,7 +42,7 @@ export function renderActionMessageText(
     return [];
   }
   const {
-    text, translationValues, amount, currency,
+    text, translationValues, amount, currency, call,
   } = message.content.action;
   const content: TextPart[] = [];
   const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 32 };
@@ -115,6 +118,10 @@ export function renderActionMessageText(
     return content.join('').trim();
   }
 
+  if (call) {
+    return renderGroupCallContent(call, content);
+  }
+
   return content;
 }
 
@@ -170,6 +177,14 @@ function renderOriginContent(lang: LangFn, origin: ApiUser | ApiChat, asPlain?: 
   return isUserId(origin.id)
     ? renderUserContent(origin as ApiUser, asPlain)
     : renderChatContent(lang, origin as ApiChat, asPlain);
+}
+
+function renderGroupCallContent(groupCall: Partial<ApiGroupCall>, text: TextPart[]): string | TextPart | undefined {
+  return (
+    <GroupCallLink groupCall={groupCall}>
+      {text}
+    </GroupCallLink>
+  );
 }
 
 function renderUserContent(sender: ApiUser, asPlain?: boolean): string | TextPart | undefined {
