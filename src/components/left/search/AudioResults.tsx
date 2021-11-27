@@ -77,7 +77,7 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [focusMessage]);
 
   const handlePlayAudio = useCallback((messageId: number, chatId: string) => {
-    openAudioPlayer({ chatId, messageId, origin: AudioOrigin.Search });
+    openAudioPlayer({ chatId, messageId });
   }, [openAudioPlayer]);
 
   function renderList() {

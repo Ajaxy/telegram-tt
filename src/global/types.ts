@@ -530,7 +530,7 @@ export type ActionTypes = (
   // media viewer & audio player
   'openMediaViewer' | 'closeMediaViewer' |
   'openAudioPlayer' | 'setAudioPlayerVolume' | 'setAudioPlayerPlaybackRate' |
-  'setAudioPlayerMuted' | 'closeAudioPlayer' |
+  'setAudioPlayerMuted' | 'setAudioPlayerOrigin' | 'closeAudioPlayer' |
   // misc
   'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |

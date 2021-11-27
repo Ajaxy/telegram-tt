@@ -3,8 +3,6 @@ import {
 } from '../lib/teact/teact';
 import { getDispatch, getGlobal } from '../lib/teact/teactn';
 
-import { AudioOrigin } from '../types';
-
 import { register, Track, TrackId } from '../util/audioPlayer';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
 import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
@@ -21,7 +19,6 @@ export default (
   trackId: TrackId,
   originalDuration: number, // Sometimes incorrect for voice messages
   trackType: Track['type'],
-  origin: AudioOrigin,
   src?: string,
   handlers?: Record<string, Handler>,
   metadata?: MediaMetadata,
@@ -46,7 +43,7 @@ export default (
   }, [onTrackChange]);
 
   useOnChange(() => {
-    controllerRef.current = register(trackId, trackType, origin, (eventName, e) => {
+    controllerRef.current = register(trackId, trackType, (eventName, e) => {
       switch (eventName) {
         case 'onPlay': {
           const {
@@ -120,7 +117,6 @@ export default (
     proxy,
     destroy,
     setVolume,
-    setCurrentOrigin,
     stop,
     isFirst,
     isLast,
@@ -161,10 +157,9 @@ export default (
 
   const playIfPresent = useCallback(() => {
     if (src) {
-      setCurrentOrigin(origin);
       play(src);
     }
-  }, [src, origin, play, setCurrentOrigin]);
+  }, [src, play]);
 
   const playPause = useCallback(() => {
     if (isPlaying) {
@@ -194,8 +189,8 @@ export default (
     duration,
     requestNextTrack,
     requestPreviousTrack,
-    isFirst: isFirst(),
-    isLast: isLast(),
+    isFirst,
+    isLast,
     setPlaybackRate,
     toggleMuted,
   };

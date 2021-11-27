@@ -125,7 +125,6 @@ const Audio: FC<OwnProps> = ({
     makeTrackId(message),
     getMediaDuration(message)!,
     isVoice ? 'voice' : 'audio',
-    origin,
     mediaData,
     bufferingHandlers,
     undefined,
@@ -172,9 +171,10 @@ const Audio: FC<OwnProps> = ({
       onPlay(message.id, message.chatId);
     }
 
+    getDispatch().setAudioPlayerOrigin({ origin });
     setIsActivated(!isActivated);
     playPause();
-  }, [isPlaying, isUploading, message.id, message.chatId, onCancelUpload, onPlay, playPause, isActivated]);
+  }, [isUploading, isPlaying, isActivated, playPause, onCancelUpload, onPlay, message.id, message.chatId, origin]);
 
   useEffect(() => {
     if (onReadMedia && isMediaUnread && (isPlaying || isDownloading)) {

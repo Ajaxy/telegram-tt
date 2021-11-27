@@ -179,8 +179,8 @@ addReducer('openAudioPlayer', (global, actions, payload) => {
       chatId,
       threadId,
       messageId,
-      origin,
-      volume: volume || global.audioPlayer.volume,
+      origin: origin ?? global.audioPlayer.origin,
+      volume: volume ?? global.audioPlayer.volume,
       playbackRate: playbackRate || global.audioPlayer.playbackRate,
       isMuted: isMuted || global.audioPlayer.isMuted,
     },
@@ -225,6 +225,20 @@ addReducer('setAudioPlayerMuted', (global, actions, payload) => {
     audioPlayer: {
       ...global.audioPlayer,
       isMuted,
+    },
+  };
+});
+
+addReducer('setAudioPlayerOrigin', (global, actions, payload) => {
+  const {
+    origin,
+  } = payload!;
+
+  return {
+    ...global,
+    audioPlayer: {
+      ...global.audioPlayer,
+      origin,
     },
   };
 });

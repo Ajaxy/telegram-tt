@@ -13,7 +13,7 @@ import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/enviro
 
 import * as mediaLoader from '../../util/mediaLoader';
 import {
-  getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle,
+  getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
 } from '../../modules/helpers';
 import { selectChat, selectSender } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
@@ -59,7 +59,6 @@ const FAST_PLAYBACK_RATE = 1.8;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
-  origin = AudioOrigin.Inline,
   className,
   noUi,
   sender,
@@ -95,7 +94,6 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     makeTrackId(message),
     getMediaDuration(message)!,
     isVoice ? 'voice' : 'audio',
-    origin,
     mediaData,
     undefined,
     mediaMetadata,
@@ -103,7 +101,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     true,
     undefined,
     undefined,
-    true,
+    isMessageLocal(message),
     true,
   );
 
@@ -176,7 +174,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         color="translucent"
         size="smaller"
         className="player-button"
-        disabled={isFirst}
+        disabled={isFirst()}
         onClick={requestPreviousTrack}
         ariaLabel="Previous track"
       >
@@ -200,7 +198,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         color="translucent"
         size="smaller"
         className="player-button"
-        disabled={isLast}
+        disabled={isLast()}
         onClick={requestNextTrack}
         ariaLabel="Next track"
       >
