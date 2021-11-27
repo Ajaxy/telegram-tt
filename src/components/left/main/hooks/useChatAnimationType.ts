@@ -24,8 +24,8 @@ export function useChatAnimationType(orderDiffById: Record<string, number>) {
     if (
       orderDiff === Infinity
       || orderDiff === -Infinity
-      || (movesUp(chatId) && numberOfUp <= numberOfDown)
-      || (movesDown(chatId) && numberOfDown < numberOfUp)
+      || (numberOfUp <= numberOfDown && movesUp(chatId))
+      || (numberOfDown < numberOfUp && movesDown(chatId))
     ) {
       return ChatAnimationTypes.Opacity;
     }

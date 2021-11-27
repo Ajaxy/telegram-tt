@@ -23,7 +23,7 @@ type DispatchProps = Pick<GlobalActions, 'cancelMessageMediaDownload'>;
 
 const startedDownloads = new Set<string>();
 
-const DownloadsManager: FC<StateProps & DispatchProps> = ({
+const DownloadManager: FC<StateProps & DispatchProps> = ({
   activeDownloads,
   messages,
   cancelMessageMediaDownload,
@@ -78,4 +78,4 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['cancelMessageMediaDownload']),
-)(DownloadsManager));
+)(DownloadManager));

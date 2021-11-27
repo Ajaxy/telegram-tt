@@ -223,11 +223,7 @@ export function getChatSlowModeOptions(chat?: ApiChat) {
 }
 
 export function getChatOrder(chat: ApiChat) {
-  return Math.max(
-    chat.joinDate || 0,
-    chat.draftDate || 0,
-    chat.lastMessage ? chat.lastMessage.date : 0,
-  );
+  return Math.max(chat.joinDate || 0, chat.draftDate || 0, chat.lastMessage?.date || 0);
 }
 
 export function isChatArchived(chat: ApiChat) {
@@ -370,52 +366,66 @@ export function prepareChatList(
   orderedPinnedIds?: string[],
   folderType: 'all' | 'archived' | 'folder' = 'all',
 ) {
-  function chatFilter(chat?: ApiChat) {
-    if (!chat || !chat.lastMessage || chat.migratedTo) {
-      return false;
-    }
-
-    switch (folderType) {
-      case 'all':
-        if (isChatArchived(chat)) {
-          return false;
-        }
-        break;
-      case 'archived':
-        if (!isChatArchived(chat)) {
-          return false;
-        }
-        break;
-    }
-
-    return !chat.isRestricted && !chat.isNotJoined;
-  }
-
-  const listedChats = listIds
-    .map((id) => chatsById[id])
-    .filter(chatFilter);
-
   const listIdsSet = new Set(listIds);
-  const pinnedChats = orderedPinnedIds
-    ? (
-      orderedPinnedIds
-        .map((id) => chatsById[id])
-        .filter(chatFilter)
-        .filter((chat) => listIdsSet.has(chat.id))
-    )
-    : [];
+  const orderedPinnedIdsSet = orderedPinnedIds ? new Set(orderedPinnedIds) : undefined;
 
-  const otherChats = orderBy(
-    orderedPinnedIds
-      ? listedChats.filter((chat) => !orderedPinnedIds.includes(chat.id))
-      : listedChats,
-    getChatOrder,
-    'desc',
-  );
+  const pinnedChats = orderedPinnedIds?.reduce((acc, id) => {
+    const chat = chatsById[id];
+
+    if (chat && listIdsSet.has(chat.id) && chatFilter(chat, folderType)) {
+      acc.push(chat);
+    }
+
+    return acc;
+  }, [] as ApiChat[]) || [];
+
+  const otherChats = listIds.reduce((acc, id) => {
+    const chat = chatsById[id];
+
+    if (chat && (!orderedPinnedIdsSet || !orderedPinnedIdsSet.has(chat.id)) && chatFilter(chat, folderType)) {
+      acc.push(chat);
+    }
+
+    return acc;
+  }, [] as ApiChat[]);
+  const otherChatsOrdered = orderBy(otherChats, getChatOrder, 'desc');
 
   return {
     pinnedChats,
-    otherChats,
+    otherChats: otherChatsOrdered,
+  };
+}
+
+function chatFilter(chat: ApiChat, folderType: 'all' | 'archived' | 'folder') {
+  if (!chat.lastMessage || chat.migratedTo) {
+    return false;
+  }
+
+  switch (folderType) {
+    case 'all':
+      if (isChatArchived(chat)) {
+        return false;
+      }
+      break;
+    case 'archived':
+      if (!isChatArchived(chat)) {
+        return false;
+      }
+      break;
+  }
+
+  return !chat.isRestricted && !chat.isNotJoined;
+}
+
+export function reduceChatList(
+  chatArrays: { pinnedChats: ApiChat[]; otherChats: ApiChat[] },
+  filteredIds: string[],
+) {
+  const filteredIdsSet = new Set(filteredIds);
+
+  return {
+    pinnedChats: chatArrays.pinnedChats.filter(({ id }) => filteredIdsSet.has(id)),
+    otherChats: chatArrays.otherChats.filter(({ id }) => filteredIdsSet.has(id)),
   };
 }
 
