@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useMemo } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect, useMemo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { AudioOrigin } from '../../types';
@@ -15,13 +17,14 @@ import {
 } from '../../modules/helpers';
 import { selectChat, selectSender } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
-import renderText from '../common/helpers/renderText';
-import useAudioPlayer from '../../hooks/useAudioPlayer';
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
-import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
 import { makeTrackId } from '../../util/audioPlayer';
 import { clearMediaSession } from '../../util/mediaSession';
+import windowSize from '../../util/windowSize';
+import useAudioPlayer from '../../hooks/useAudioPlayer';
+import useLang from '../../hooks/useLang';
+import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
+import renderText from '../common/helpers/renderText';
 
 import RippleEffect from '../ui/RippleEffect';
 import Button from '../ui/Button';
@@ -103,6 +106,20 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     true,
     true,
   );
+
+  // Prevent refresh by accidentally rotating device when listening to a voice message
+  const isVoicePlaying = isVoice && isPlaying;
+  useEffect(() => {
+    if (!isVoicePlaying) {
+      return undefined;
+    }
+
+    windowSize.disableRefresh();
+
+    return () => {
+      windowSize.enableRefresh();
+    };
+  }, [isVoicePlaying]);
 
   const handleClick = useCallback(() => {
     focusMessage({ chatId: message.chatId, messageId: message.id });
