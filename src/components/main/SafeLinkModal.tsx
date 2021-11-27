@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
+import { ensureProtocol } from '../../util/ensureProtocol';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
@@ -20,7 +21,7 @@ const SafeLinkModal: FC<OwnProps & DispatchProps> = ({ url, toggleSafeLinkModal 
   const lang = useLang();
 
   const handleOpen = useCallback(() => {
-    window.open(url);
+    window.open(ensureProtocol(url));
     toggleSafeLinkModal({ url: undefined });
   }, [toggleSafeLinkModal, url]);
 
