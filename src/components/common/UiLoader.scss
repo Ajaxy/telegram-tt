@@ -26,16 +26,16 @@
     .left {
       flex: 1;
       background: var(--color-background);
-      min-width: 18rem;
-      width: 26.5rem;
-      max-width: 33vw;
+      min-width: 12rem;
+      width: 33vw;
+      max-width: 26.5rem;
 
       @media (min-width: 926px) {
-        width: 25vw;
         max-width: 40vw;
       }
 
       @media (min-width: 1276px) {
+        width: 25vw;
         max-width: 33vw;
       }
 
@@ -48,12 +48,12 @@
       }
 
       @media (max-width: 925px) {
-        min-width: 26.5rem;
+        width: 26.5rem !important;
       }
 
       @media (max-width: 600px) {
         max-width: none;
-        width: 100vw;
+        width: 100vw !important;
       }
     }
 
