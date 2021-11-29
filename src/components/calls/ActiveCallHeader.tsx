@@ -32,6 +32,10 @@ const ActiveCallHeader: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     document.body.classList.toggle('has-group-call-header', isGroupCallPanelHidden);
+
+    return () => {
+      document.body.classList.toggle('has-group-call-header', false);
+    };
   }, [isGroupCallPanelHidden]);
 
   if (!groupCall || !meParticipant) return undefined;

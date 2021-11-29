@@ -184,6 +184,13 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [closeFullscreen, isFullscreen, openFullscreen]);
 
+  const handleClose = () => {
+    toggleGroupCallPanel();
+    if (isFullscreen) {
+      closeFullscreen();
+    }
+  };
+
   useEffect(() => {
     if (!IS_REQUEST_FULLSCREEN_SUPPORTED) return undefined;
     const container = containerRef.current;
@@ -302,7 +309,7 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
           round
           size="smaller"
           color="translucent"
-          onClick={toggleGroupCallPanel}
+          onClick={handleClose}
         >
           <i className="icon-close" />
         </Button>
