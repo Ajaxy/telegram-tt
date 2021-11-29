@@ -13,10 +13,14 @@
   color: #fff;
   align-items: center;
   padding: 0 1rem;
-  background: linear-gradient(90deg, rgb(82, 206, 93), rgb(0, 177, 192));
+  background: linear-gradient(135deg, rgb(49, 82, 232), rgb(143, 74, 172));
   transform: translateY(-100%);
 
   &.open {
     transform: translateY(0);
+  }
+
+  span {
+    line-height: 100%;
   }
 }
