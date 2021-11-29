@@ -126,47 +126,51 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="HeaderActions">
-      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canSubscribe && (
-        <Button
-          size="tiny"
-          ripple
-          fluid
-          onClick={handleSubscribeClick}
-        >
-          {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
-        </Button>
-      )}
-      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canStartBot && (
-        <Button
-          size="tiny"
-          ripple
-          fluid
-          onClick={handleStartBot}
-        >
-          {lang('BotStart')}
-        </Button>
-      )}
-      {!IS_SINGLE_COLUMN_LAYOUT && canExpandActions && canRestartBot && (
-        <Button
-          size="tiny"
-          ripple
-          fluid
-          onClick={handleRestartBot}
-        >
-          {lang('BotRestart')}
-        </Button>
-      )}
-      {!IS_SINGLE_COLUMN_LAYOUT && canSearch && (
-        <Button
-          round
-          ripple={isRightColumnShown}
-          color="translucent"
-          size="smaller"
-          onClick={handleSearchClick}
-          ariaLabel="Search in this chat"
-        >
-          <i className="icon-search" />
-        </Button>
+      {!IS_SINGLE_COLUMN_LAYOUT && (
+        <>
+          {canExpandActions && canSubscribe && (
+            <Button
+              size="tiny"
+              ripple
+              fluid
+              onClick={handleSubscribeClick}
+            >
+              {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
+            </Button>
+          )}
+          {canExpandActions && canStartBot && (
+            <Button
+              size="tiny"
+              ripple
+              fluid
+              onClick={handleStartBot}
+            >
+              {lang('BotStart')}
+            </Button>
+          )}
+          {canExpandActions && canRestartBot && (
+            <Button
+              size="tiny"
+              ripple
+              fluid
+              onClick={handleRestartBot}
+            >
+              {lang('BotRestart')}
+            </Button>
+          )}
+          {canSearch && (
+            <Button
+              round
+              ripple={isRightColumnShown}
+              color="translucent"
+              size="smaller"
+              onClick={handleSearchClick}
+              ariaLabel="Search in this chat"
+            >
+              <i className="icon-search" />
+            </Button>
+          )}
+        </>
       )}
       <Button
         ref={menuButtonRef}
