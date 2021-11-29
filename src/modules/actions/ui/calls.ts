@@ -149,19 +149,31 @@ addReducer('createGroupCall', (global, actions, payload) => {
 addReducer('createGroupCallInviteLink', (global, actions) => {
   const groupCall = selectActiveGroupCall(global);
 
-  if (!groupCall) {
+  if (!groupCall || !groupCall.chatId) {
     return;
   }
 
+  const chat = selectChat(global, groupCall.chatId);
+  if (!chat) {
+    return;
+  }
+
+  const canInvite = !!chat && !!chat.username;
+
   (async () => {
-    const result = await callApi('exportGroupCallInvite', {
-      call: groupCall,
-      canSelfUnmute: false,
-    });
+    let { inviteLink } = chat.fullInfo!;
+    if (canInvite) {
+      inviteLink = await callApi('exportGroupCallInvite', {
+        call: groupCall,
+        canSelfUnmute: false,
+      });
+    }
 
-    if (!result) return;
+    if (!inviteLink) {
+      return;
+    }
 
-    copyTextToClipboard(result);
+    copyTextToClipboard(inviteLink);
     actions.showNotification({
       message: 'Link copied to clipboard',
     });

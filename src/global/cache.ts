@@ -222,7 +222,6 @@ function updateCache() {
       'shouldShowContextMenuHint',
       'leftColumnWidth',
       'serviceNotifications',
-      // TODO Support 'groupCalls'
     ]),
     audioPlayer: {
       volume: global.audioPlayer.volume,
