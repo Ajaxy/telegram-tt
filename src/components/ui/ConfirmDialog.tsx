@@ -18,6 +18,7 @@ type OwnProps = {
   confirmHandler: () => void;
   confirmIsDestructive?: boolean;
   isButtonsInOneRow?: boolean;
+  children?: any;
 };
 
 const ConfirmDialog: FC<OwnProps> = ({
@@ -32,6 +33,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   confirmHandler,
   confirmIsDestructive,
   isButtonsInOneRow,
+  children,
 }) => {
   const lang = useLang();
 
@@ -48,7 +50,7 @@ const ConfirmDialog: FC<OwnProps> = ({
       {text && text.split('\\n').map((textPart) => (
         <p>{textPart}</p>
       ))}
-      {textParts}
+      {textParts || children}
       <div className={isButtonsInOneRow ? 'dialog-buttons mt-2' : ''}>
         <Button
           className="confirm-dialog-button"

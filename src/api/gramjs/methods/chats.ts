@@ -495,10 +495,10 @@ export async function updateChatMutedState({
 }
 
 export async function createChannel({
-  title, about, users,
+  title, about = '', users,
 }: {
-  title: string; about?: string; users: ApiUser[];
-}): Promise<ApiChat | undefined> {
+  title: string; about?: string; users?: ApiUser[];
+}, noErrorUpdate = false): Promise<ApiChat | undefined> {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
     broadcast: true,
     title,
@@ -527,10 +527,16 @@ export async function createChannel({
 
   const channel = buildApiChatFromPreview(newChannel)!;
 
-  await invokeRequest(new GramJs.channels.InviteToChannel({
-    channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
-    users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-  }));
+  if (users?.length) {
+    try {
+      await invokeRequest(new GramJs.channels.InviteToChannel({
+        channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
+        users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
+      }), true, noErrorUpdate);
+    } catch (err) {
+      // `noErrorUpdate` will cause an exception which we don't want either
+    }
+  }
 
   return channel;
 }
@@ -1027,20 +1033,25 @@ export async function openChatByInvite(hash: string) {
   return { chatId: chat.id };
 }
 
-export function addChatMembers(chat: ApiChat, users: ApiUser[]) {
-  if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-    return invokeRequest(new GramJs.channels.InviteToChannel({
-      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-      users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
-    }), true);
-  }
+export function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
+  try {
+    if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
+      return invokeRequest(new GramJs.channels.InviteToChannel({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
+      }), true, noErrorUpdate);
+    }
 
-  return Promise.all(users.map((user) => {
-    return invokeRequest(new GramJs.messages.AddChatUser({
-      chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
-      userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
-    }), true);
-  }));
+    return Promise.all(users.map((user) => {
+      return invokeRequest(new GramJs.messages.AddChatUser({
+        chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
+        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+      }), true, noErrorUpdate);
+    }));
+  } catch (err) {
+    // `noErrorUpdate` will cause an exception which we don't want either
+    return undefined;
+  }
 }
 
 export function deleteChatMember(chat: ApiChat, user: ApiUser) {
