@@ -28,7 +28,7 @@ import './HeaderMenuContainer.scss';
 
 type DispatchProps = Pick<GlobalActions, (
   'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot' | 'openLinkedChat' |
-  'joinGroupCall' | 'createGroupCall' | 'addContact'
+  'joinGroupCall' | 'createGroupCall' | 'addContact' | 'openCallFallbackConfirm'
 )>;
 
 export type OwnProps = {
@@ -42,6 +42,7 @@ export type OwnProps = {
   canRestartBot?: boolean;
   canSubscribe?: boolean;
   canSearch?: boolean;
+  canCall?: boolean;
   canMute?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
@@ -71,6 +72,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canRestartBot,
   canSubscribe,
   canSearch,
+  canCall,
   canMute,
   canLeave,
   canEnterVoiceChat,
@@ -93,6 +95,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   createGroupCall,
   openLinkedChat,
   addContact,
+  openCallFallbackConfirm,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -157,6 +160,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     closeMenu();
   }, [closeMenu, onSubscribeChannel]);
 
+  const handleCall = useCallback(() => {
+    openCallFallbackConfirm();
+    closeMenu();
+  }, [closeMenu, openCallFallbackConfirm]);
+
   const handleSearch = useCallback(() => {
     onSearchClick();
     closeMenu();
@@ -214,6 +222,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               onClick={handleAddContactClick}
             >
               {lang('AddContact')}
+            </MenuItem>
+          )}
+          {IS_SINGLE_COLUMN_LAYOUT && canCall && (
+            <MenuItem
+              icon="phone"
+              onClick={handleCall}
+            >
+              {lang('Call')}
             </MenuItem>
           )}
           {IS_SINGLE_COLUMN_LAYOUT && canSearch && (
@@ -306,5 +322,6 @@ export default memo(withGlobal<OwnProps>(
     'createGroupCall',
     'openLinkedChat',
     'addContact',
+    'openCallFallbackConfirm',
   ]),
 )(HeaderMenuContainer));

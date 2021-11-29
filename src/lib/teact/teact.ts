@@ -617,9 +617,9 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
   return current;
 }
 
-export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[]): F {
+export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[], debugKey?: string): F {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => newCallback, dependencies);
+  return useMemo(() => newCallback, dependencies, debugKey);
 }
 
 export function useRef<T>(initial: T): { current: T };

@@ -48,7 +48,10 @@ import {
   AudioOrigin,
 } from '../types';
 
-export type MessageListType = 'thread' | 'pinned' | 'scheduled';
+export type MessageListType =
+  'thread'
+  | 'pinned'
+  | 'scheduled';
 
 export interface MessageList {
   chatId: string;
@@ -168,6 +171,9 @@ export type GlobalState = {
     byId: Record<string, ApiGroupCall>;
     activeGroupCallId?: string;
     isGroupCallPanelHidden?: boolean;
+    isFallbackConfirmOpen?: boolean;
+    fallbackChatId?: string;
+    fallbackUserIdsToRemove?: string[];
   };
 
   scheduledMessages: {
@@ -551,7 +557,8 @@ export type ActionTypes = (
   'joinGroupCall' | 'toggleGroupCallMute' | 'toggleGroupCallPresentation' | 'leaveGroupCall' |
   'toggleGroupCallVideo' | 'requestToSpeak' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' |
   'createGroupCall' | 'joinVoiceChatByLink' | 'subscribeToGroupCallUpdates' | 'createGroupCallInviteLink' |
-  'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' | 'playGroupCallSound'
+  'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' | 'playGroupCallSound' |
+  'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

@@ -46,6 +46,7 @@ import HistoryCalendar from './HistoryCalendar.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
+import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
 
 import './Main.scss';
 
@@ -67,6 +68,7 @@ type StateProps = {
   animationLevel: number;
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
+  isCallFallbackConfirmOpen: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -100,6 +102,7 @@ const Main: FC<StateProps & DispatchProps> = ({
   animationLevel,
   language,
   wasTimeFormatSetManually,
+  isCallFallbackConfirmOpen,
   loadAnimatedEmojis,
   loadNotificationSettings,
   loadNotificationExceptions,
@@ -282,6 +285,7 @@ const Main: FC<StateProps & DispatchProps> = ({
         </>
       )}
       <DownloadManager />
+      <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
     </div>
   );
 };
@@ -333,6 +337,7 @@ export default memo(withGlobal(
       animationLevel,
       language,
       wasTimeFormatSetManually,
+      isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

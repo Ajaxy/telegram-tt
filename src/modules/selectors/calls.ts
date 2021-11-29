@@ -1,6 +1,7 @@
 import { GlobalState } from '../../global/types';
 import { selectChat } from './chats';
-import { isChatBasicGroup } from '../helpers';
+import { getUserFullName, isChatBasicGroup } from '../helpers';
+import { selectUser } from './users';
 
 export function selectChatGroupCall(global: GlobalState, chatId: string) {
   const chat = selectChat(global, chatId);
@@ -35,4 +36,10 @@ export function selectActiveGroupCall(global: GlobalState) {
   }
 
   return selectGroupCall(global, activeGroupCallId);
+}
+
+export function selectCallFallbackChannelTitle(global: GlobalState) {
+  const currentUser = selectUser(global, global.currentUserId!);
+
+  return `Calls: ${getUserFullName(currentUser!)}`;
 }

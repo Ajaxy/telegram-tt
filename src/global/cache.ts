@@ -222,6 +222,7 @@ function updateCache() {
       'shouldShowContextMenuHint',
       'leftColumnWidth',
       'serviceNotifications',
+      // TODO Support 'groupCalls'
     ]),
     audioPlayer: {
       volume: global.audioPlayer.volume,
@@ -237,6 +238,7 @@ function updateCache() {
     },
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
+    groupCalls: reduceGroupCalls(global),
   };
 
   const json = JSON.stringify(reducedGlobal);
@@ -329,6 +331,16 @@ function reduceChatFolders(global: GlobalState): GlobalState['chatFolders'] {
   return {
     ...global.chatFolders,
     activeChatFolder: 0,
+  };
+}
+
+function reduceGroupCalls(global: GlobalState): GlobalState['groupCalls'] {
+  return {
+    ...global.groupCalls,
+    byId: {},
+    activeGroupCallId: undefined,
+    isGroupCallPanelHidden: undefined,
+    isFallbackConfirmOpen: undefined,
   };
 }
 

@@ -49,10 +49,6 @@ export default function useProfileViewportIds(
     resultType, loadMoreMembers, lastSyncTime, memberIds,
   );
 
-  const [commonChatViewportIds, getMoreCommonChats, noProfileInfoForCommonChats] = useInfiniteScrollForLoadableItems(
-    resultType, loadCommonChats, lastSyncTime, chatIds,
-  );
-
   const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(
     'media', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
   );
@@ -71,6 +67,10 @@ export default function useProfileViewportIds(
 
   const [voiceViewportIds, getMoreVoices, noProfileInfoForVoices] = useInfiniteScrollForSharedMedia(
     'voice', resultType, searchMessages, lastSyncTime, chatMessages, foundIds,
+  );
+
+  const [commonChatViewportIds, getMoreCommonChats, noProfileInfoForCommonChats] = useInfiniteScrollForLoadableItems(
+    resultType, loadCommonChats, lastSyncTime, chatIds,
   );
 
   let viewportIds: number[] | string[] | undefined;

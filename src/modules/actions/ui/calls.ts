@@ -61,11 +61,13 @@ async function fetchGroupCall(groupCall: Partial<ApiGroupCall>) {
 
   const existingGroupCall = selectGroupCall(global, groupCall.id!);
 
-  global = updateGroupCall(global,
+  global = updateGroupCall(
+    global,
     groupCall.id!,
     omit(result.groupCall, ['connectionState']),
     undefined,
-    existingGroupCall?.isLoaded ? undefined : result.groupCall.participantsCount);
+    existingGroupCall?.isLoaded ? undefined : result.groupCall.participantsCount,
+  );
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
@@ -309,3 +311,23 @@ export function removeGroupCallAudioElement() {
   audioContext = undefined;
   audioElement = undefined;
 }
+
+addReducer('openCallFallbackConfirm', (global) => {
+  return {
+    ...global,
+    groupCalls: {
+      ...global.groupCalls,
+      isFallbackConfirmOpen: true,
+    },
+  };
+});
+
+addReducer('closeCallFallbackConfirm', (global) => {
+  return {
+    ...global,
+    groupCalls: {
+      ...global.groupCalls,
+      isFallbackConfirmOpen: false,
+    },
+  };
+});

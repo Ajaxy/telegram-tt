@@ -42,15 +42,19 @@ export async function setChatUsername(
   }
 }
 
-export async function updatePrivateLink(
-  { chat }: { chat: ApiChat },
-) {
+export async function updatePrivateLink({
+  chat, usageLimit, expireDate,
+}: {
+  chat: ApiChat; usageLimit?: number; expireDate?: number;
+}) {
   const result = await invokeRequest(new GramJs.messages.ExportChatInvite({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    usageLimit,
+    expireDate,
   }));
 
-  if (!result || !(result instanceof GramJs.ChatInviteExported)) {
-    return;
+  if (!result) {
+    return undefined;
   }
 
   onUpdate({
@@ -60,4 +64,6 @@ export async function updatePrivateLink(
       inviteLink: result.link,
     },
   });
+
+  return result.link;
 }

@@ -1,3 +1,4 @@
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
   joinGroupCall,
   startSharingScreen,
@@ -7,11 +8,15 @@ import {
   setVolume,
   handleUpdateGroupCallParticipants, handleUpdateGroupCallConnection,
 } from '../../../lib/secret-sauce';
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+
+import { ApiUpdate } from '../../../api/types';
+
+import { GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import { callApi } from '../../../api/gramjs';
-import { selectChat, selectUser } from '../../selectors';
+import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import {
   selectActiveGroupCall,
+  selectCallFallbackChannelTitle,
   selectGroupCallParticipant,
 } from '../../selectors/calls';
 import {
@@ -20,11 +25,15 @@ import {
   updateGroupCall,
   updateGroupCallParticipant,
 } from '../../reducers/calls';
-import { ApiUpdate } from '../../../api/types';
-import { GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import { omit } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
+import { fetchFile } from '../../../util/files';
 import { getGroupCallAudioContext, getGroupCallAudioElement, removeGroupCallAudioElement } from '../ui/calls';
 import { loadFullChat } from './chats';
+
+import callFallbackAvatarPath from '../../../assets/call-fallback-avatar.png';
+
+const FALLBACK_INVITE_EXPIRE_SECONDS = 1800; // 30 min
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   const { activeGroupCallId } = global.groupCalls;
@@ -88,16 +97,25 @@ addReducer('leaveGroupCall', (global, actions, payload) => {
     return;
   }
 
-  global = updateActiveGroupCall(global, {
-    connectionState: 'disconnected',
-  }, groupCall.participantsCount - 1);
+  setGlobal(updateActiveGroupCall(global, { connectionState: 'disconnected' }, groupCall.participantsCount - 1));
 
   (async () => {
     await callApi('leaveGroupCall', {
       call: groupCall,
     });
 
+    let shouldResetFallbackState = false;
     if (shouldDiscard) {
+      global = getGlobal();
+
+      if (global.groupCalls.fallbackChatId === groupCall.chatId) {
+        shouldResetFallbackState = true;
+
+        global.groupCalls.fallbackUserIdsToRemove?.forEach((userId) => {
+          actions.deleteChatMember({ chatId: global.groupCalls.fallbackChatId, userId });
+        });
+      }
+
       await callApi('discardGroupCall', {
         call: groupCall,
       });
@@ -116,6 +134,10 @@ addReducer('leaveGroupCall', (global, actions, payload) => {
         ...global.groupCalls,
         isGroupCallPanelHidden: true,
         activeGroupCallId: undefined,
+        ...(shouldResetFallbackState && {
+          fallbackChatId: undefined,
+          fallbackUserIdsToRemove: undefined,
+        }),
       },
     });
 
@@ -279,5 +301,83 @@ addReducer('connectToActiveGroupCall', (global, actions) => {
       if (!chat) return;
       await loadFullChat(chat);
     }
+  })();
+});
+
+addReducer('inviteToCallFallback', (global, actions, payload) => {
+  const { chatId } = selectCurrentMessageList(global) || {};
+  if (!chatId) {
+    return;
+  }
+
+  const user = selectUser(global, chatId);
+  if (!user) {
+    return;
+  }
+
+  const { shouldRemove } = payload;
+
+  (async () => {
+    const fallbackChannelTitle = selectCallFallbackChannelTitle(global);
+
+    let fallbackChannel = Object.values(global.chats.byId).find((channel) => {
+      return (
+        channel.title === fallbackChannelTitle
+        && channel.isCreator
+        && !channel.isRestricted
+      );
+    });
+    if (!fallbackChannel) {
+      fallbackChannel = await callApi('createChannel', {
+        title: fallbackChannelTitle,
+        users: [user],
+      });
+
+      if (!fallbackChannel) {
+        return;
+      }
+
+      const photo = await fetchFile(callFallbackAvatarPath, 'avatar.png');
+      void callApi('editChatPhoto', {
+        chatId: fallbackChannel.id,
+        accessHash: fallbackChannel.accessHash,
+        photo,
+      });
+    } else {
+      actions.updateChatMemberBannedRights({
+        chatId: fallbackChannel.id,
+        userId: chatId,
+        bannedRights: {},
+      });
+
+      void callApi('addChatMembers', fallbackChannel, [user], true);
+    }
+
+    const inviteLink = await callApi('updatePrivateLink', {
+      chat: fallbackChannel,
+      usageLimit: 1,
+      expireDate: getServerTime(global.serverTimeOffset) + FALLBACK_INVITE_EXPIRE_SECONDS,
+    });
+    if (!inviteLink) {
+      return;
+    }
+
+    if (shouldRemove) {
+      global = getGlobal();
+      const fallbackUserIdsToRemove = global.groupCalls.fallbackUserIdsToRemove || [];
+      setGlobal({
+        ...global,
+        groupCalls: {
+          ...global.groupCalls,
+          fallbackChatId: fallbackChannel.id,
+          fallbackUserIdsToRemove: [...fallbackUserIdsToRemove, chatId],
+        },
+      });
+    }
+
+    actions.sendMessage({ text: `Join a call: ${inviteLink}` });
+    actions.openChat({ id: fallbackChannel.id });
+    actions.createGroupCall({ chatId: fallbackChannel.id });
+    actions.closeCallFallbackConfirm();
   })();
 });
