@@ -127,10 +127,6 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [connectionState, playGroupCallSound]);
 
-  const handleShouldEndGroupCallChange = useCallback(() => {
-    setShouldEndGroupCall(!shouldEndGroupCall);
-  }, [shouldEndGroupCall]);
-
   const handleCloseConfirmLeaveModal = () => {
     closeConfirmLeaveModal();
     setIsEndGroupCallModal(false);
@@ -302,7 +298,14 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
             )}
           </DropdownMenu>
         )}
-
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          onClick={toggleGroupCallPanel}
+        >
+          <i className="icon-close" />
+        </Button>
       </div>
 
       <div className="scrollable custom-scroll">
@@ -370,7 +373,7 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
           <Checkbox
             label={lang('VoipGroupEndChat')}
             checked={shouldEndGroupCall}
-            onChange={handleShouldEndGroupCallChange}
+            onCheck={setShouldEndGroupCall}
           />
         )}
         <Button isText className="confirm-dialog-button" onClick={handleLeaveGroupCall}>
