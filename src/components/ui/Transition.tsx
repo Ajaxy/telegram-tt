@@ -133,10 +133,7 @@ const Transition: FC<OwnProps> = ({
       }
     });
 
-    let dispatchHeavyAnimationStop: NoneToVoidFunction;
-    if (animationLevel > 0) {
-      dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
-    }
+    const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
     requestAnimationFrame(() => {
       container.classList.add('animating');
@@ -169,9 +166,7 @@ const Transition: FC<OwnProps> = ({
             }
           }
 
-          if (dispatchHeavyAnimationStop) {
-            dispatchHeavyAnimationStop();
-          }
+          dispatchHeavyAnimationStop();
 
           cleanup();
 
@@ -189,7 +184,7 @@ const Transition: FC<OwnProps> = ({
 
       currentKeyRef.current = activeKey;
 
-      if (animationLevel > 0 && watchedNode) {
+      if (watchedNode) {
         waitForAnimationEnd(watchedNode, onAnimationEnd);
       } else {
         onAnimationEnd();
