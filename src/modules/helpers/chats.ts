@@ -7,6 +7,7 @@ import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
+import { GlobalState } from '../../global/types';
 import { NotifyException, NotifySettings } from '../../types';
 import { LangFn } from '../../hooks/useLang';
 
@@ -269,17 +270,17 @@ export function getCanDeleteChat(chat: ApiChat) {
 }
 
 export function prepareFolderListIds(
+  allListIds: GlobalState['chats']['listIds'],
   chatsById: Record<string, ApiChat>,
   usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
-  chatIdsCache?: string[],
 ) {
   const excludedChatIds = folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined;
   const includedChatIds = folder.excludedChatIds ? new Set(folder.includedChatIds) : undefined;
   const pinnedChatIds = folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined;
-  const listIds = (chatIdsCache || Object.keys(chatsById))
+  const listIds = ([] as string[]).concat(allListIds.active || [], allListIds.archived || [])
     .filter((id) => {
       return filterChatFolder(
         chatsById[id],
@@ -296,6 +297,7 @@ export function prepareFolderListIds(
   return [listIds, folder.pinnedChatIds] as const;
 }
 
+// This function is the most expensive in the project, so any possible optimizations are welcome
 function filterChatFolder(
   chat: ApiChat,
   folder: ApiChatFolder,
@@ -310,51 +312,55 @@ function filterChatFolder(
     return false;
   }
 
-  if (excludedChatIds && excludedChatIds.has(chat.id)) {
+  const { id: chatId, type, unreadMentionsCount } = chat;
+
+  if (excludedChatIds?.has(chatId)) {
     return false;
   }
 
-  if (includedChatIds && includedChatIds.has(chat.id)) {
+  if (includedChatIds?.has(chatId)) {
     return true;
   }
 
-  if (pinnedChatIds && pinnedChatIds.has(chat.id)) {
+  if (pinnedChatIds?.has(chatId)) {
     return true;
   }
 
-  if (isChatArchived(chat) && folder.excludeArchived) {
+  if (folder.excludeArchived && chat.folderId === ARCHIVED_FOLDER_ID) {
     return false;
   }
 
-  if (folder.excludeMuted && !chat.unreadMentionsCount && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
+  if (folder.excludeRead && !chat.unreadCount && !unreadMentionsCount && !chat.hasUnreadMark) {
     return false;
   }
 
-  if (!chat.unreadCount && !chat.unreadMentionsCount && !chat.hasUnreadMark && folder.excludeRead) {
+  if (folder.excludeMuted && !unreadMentionsCount && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
     return false;
   }
 
-  if (isUserId(chat.id)) {
-    const privateChatUser = usersById[chat.id];
+  if (type === 'chatTypePrivate') {
+    const user = usersById[chatId];
+    if (user) {
+      const { type: userType, isContact } = user;
 
-    const isChatWithBot = privateChatUser && privateChatUser.type === 'userTypeBot';
-    if (isChatWithBot) {
-      if (folder.bots) {
-        return true;
-      }
-    } else {
-      if (folder.contacts && privateChatUser && privateChatUser.isContact) {
-        return true;
-      }
+      if (userType === 'userTypeBot') {
+        if (folder.bots) {
+          return true;
+        }
+      } else {
+        if (folder.contacts && isContact) {
+          return true;
+        }
 
-      if (folder.nonContacts && privateChatUser && !privateChatUser.isContact) {
-        return true;
+        if (folder.nonContacts && !isContact) {
+          return true;
+        }
       }
     }
-  } else if (isChatGroup(chat)) {
-    return !!folder.groups;
-  } else if (isChatChannel(chat)) {
+  } else if (type === 'chatTypeChannel') {
     return !!folder.channels;
+  } else if (type === 'chatTypeBasicGroup' || type === 'chatTypeSuperGroup') {
+    return !!folder.groups;
   }
 
   return false;
@@ -365,6 +371,7 @@ export function prepareChatList(
   listIds: string[],
   orderedPinnedIds?: string[],
   folderType: 'all' | 'archived' | 'folder' = 'all',
+  noOrder = false,
 ) {
   const listIdsSet = new Set(listIds);
   const orderedPinnedIdsSet = orderedPinnedIds ? new Set(orderedPinnedIds) : undefined;
@@ -372,7 +379,7 @@ export function prepareChatList(
   const pinnedChats = orderedPinnedIds?.reduce((acc, id) => {
     const chat = chatsById[id];
 
-    if (chat && listIdsSet.has(chat.id) && chatFilter(chat, folderType)) {
+    if (chat && listIdsSet.has(chat.id) && checkChat(chat, folderType)) {
       acc.push(chat);
     }
 
@@ -382,39 +389,25 @@ export function prepareChatList(
   const otherChats = listIds.reduce((acc, id) => {
     const chat = chatsById[id];
 
-    if (chat && (!orderedPinnedIdsSet || !orderedPinnedIdsSet.has(chat.id)) && chatFilter(chat, folderType)) {
+    if (chat && (!orderedPinnedIdsSet || !orderedPinnedIdsSet.has(chat.id)) && checkChat(chat, folderType)) {
       acc.push(chat);
     }
 
     return acc;
   }, [] as ApiChat[]);
-  const otherChatsOrdered = orderBy(otherChats, getChatOrder, 'desc');
 
   return {
     pinnedChats,
-    otherChats: otherChatsOrdered,
+    otherChats: noOrder ? otherChats : orderBy(otherChats, getChatOrder, 'desc'),
   };
 }
 
-function chatFilter(chat: ApiChat, folderType: 'all' | 'archived' | 'folder') {
-  if (!chat.lastMessage || chat.migratedTo) {
-    return false;
-  }
-
-  switch (folderType) {
-    case 'all':
-      if (isChatArchived(chat)) {
-        return false;
-      }
-      break;
-    case 'archived':
-      if (!isChatArchived(chat)) {
-        return false;
-      }
-      break;
-  }
-
-  return !chat.isRestricted && !chat.isNotJoined;
+function checkChat(chat: ApiChat, folderType: 'all' | 'archived' | 'folder') {
+  return (
+    chat.lastMessage && !chat.migratedTo && !chat.isRestricted && !chat.isNotJoined
+    && !(folderType === 'all' && chat.folderId === ARCHIVED_FOLDER_ID)
+    && !(folderType === 'archived' && chat.folderId !== ARCHIVED_FOLDER_ID)
+  );
 }
 
 export function reduceChatList(
@@ -430,26 +423,36 @@ export function reduceChatList(
 }
 
 export function getFolderUnreadDialogs(
+  allListIds: GlobalState['chats']['listIds'],
   chatsById: Record<string, ApiChat>,
   usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: string[],
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
 ) {
-  const [listIds] = prepareFolderListIds(chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache);
+  const [listIds] = prepareFolderListIds(allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions);
 
-  const listedChats = listIds
-    .map((id) => chatsById[id])
-    .filter((chat) => (chat?.lastMessage && !chat.isRestricted && !chat.isNotJoined));
+  let hasActiveDialogs = false;
+  const unreadDialogsCount = listIds.reduce((acc, id) => {
+    const chat = chatsById[id];
+    if (!chat?.lastMessage || chat?.isRestricted || chat?.isNotJoined) {
+      return acc;
+    }
 
-  const unreadDialogsCount = listedChats
-    .reduce((total, chat) => (chat.unreadCount || chat.hasUnreadMark ? total + 1 : total), 0);
+    const isUnread = chat.unreadCount || chat.hasUnreadMark;
 
-  const hasActiveDialogs = listedChats.some((chat) => (
-    chat.unreadMentionsCount
-    || (!selectIsChatMuted(chat, notifySettings, notifyExceptions) && (chat.unreadCount || chat.hasUnreadMark))
-  ));
+    if (isUnread) {
+      acc++;
+    }
+
+    if (!hasActiveDialogs && (
+      chat.unreadMentionsCount || (isUnread && !selectIsChatMuted(chat, notifySettings, notifyExceptions))
+    )) {
+      hasActiveDialogs = true;
+    }
+
+    return acc;
+  }, 0);
 
   return {
     unreadDialogsCount,
@@ -459,10 +462,10 @@ export function getFolderUnreadDialogs(
 
 export function getFolderDescriptionText(
   lang: LangFn,
+  allListIds: GlobalState['chats']['listIds'],
   chatsById: Record<string, ApiChat>,
   usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: string[],
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
 ) {
@@ -480,7 +483,7 @@ export function getFolderDescriptionText(
     || (excludedChatIds?.length)
     || (includedChatIds?.length)
   ) {
-    const length = getFolderChatsCount(chatsById, usersById, folder, chatIdsCache, notifySettings, notifyExceptions);
+    const length = getFolderChatsCount(allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions);
     return lang('Chats', length);
   }
 
@@ -501,17 +504,17 @@ export function getFolderDescriptionText(
 }
 
 function getFolderChatsCount(
+  allListIds: GlobalState['chats']['listIds'],
   chatsById: Record<string, ApiChat>,
   usersById: Record<string, ApiUser>,
   folder: ApiChatFolder,
-  chatIdsCache: string[],
   notifySettings: NotifySettings,
   notifyExceptions?: Record<string, NotifyException>,
 ) {
   const [listIds, pinnedIds] = prepareFolderListIds(
-    chatsById, usersById, folder, notifySettings, notifyExceptions, chatIdsCache,
+    allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions,
   );
-  const { pinnedChats, otherChats } = prepareChatList(chatsById, listIds, pinnedIds, 'folder');
+  const { pinnedChats, otherChats } = prepareChatList(chatsById, listIds, pinnedIds, 'folder', true);
   return pinnedChats.length + otherChats.length;
 }
 

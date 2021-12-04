@@ -76,7 +76,7 @@ addReducer('preloadTopChatMessages', (global, actions) => {
       }
 
       const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
-      const { pinnedChats, otherChats } = prepareChatList(byId, listIds, orderedPinnedIds);
+      const { pinnedChats, otherChats } = prepareChatList(byId, listIds, orderedPinnedIds, 'all', true);
       const topChats = [...pinnedChats, ...otherChats];
       const chatToPreload = topChats.find(({ id }) => id !== currentChatId && !preloadedChatIds.includes(id));
       if (!chatToPreload) {
