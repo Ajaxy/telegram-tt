@@ -1,4 +1,4 @@
-import { ApiChat, ApiUser } from '../../api/types';
+import { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
@@ -65,7 +65,9 @@ export function getUserFullName(user?: ApiUser) {
   return undefined;
 }
 
-export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: number) {
+export function getUserStatus(
+  lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined, serverTimeOffset: number,
+) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications').toLowerCase();
   }
@@ -74,11 +76,11 @@ export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: num
     return lang('Bot');
   }
 
-  if (!user.status) {
+  if (!userStatus) {
     return '';
   }
 
-  switch (user.status.type) {
+  switch (userStatus.type) {
     case 'userStatusEmpty': {
       return lang('ALongTimeAgo');
     }
@@ -92,7 +94,7 @@ export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: num
     }
 
     case 'userStatusOffline': {
-      const { wasOnline } = user.status;
+      const { wasOnline } = userStatus;
 
       if (!wasOnline) return lang('LastSeen.Offline');
 
@@ -156,10 +158,10 @@ export function getUserStatus(lang: LangFn, user: ApiUser, serverTimeOffset: num
   }
 }
 
-export function isUserOnline(user: ApiUser) {
-  const { id, status, type } = user;
+export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
+  const { id, type } = user;
 
-  if (!status) {
+  if (!userStatus) {
     return false;
   }
 
@@ -167,11 +169,11 @@ export function isUserOnline(user: ApiUser) {
     return false;
   }
 
-  return status.type === 'userStatusOnline' && type !== 'userTypeBot';
+  return userStatus.type === 'userStatusOnline' && type !== 'userTypeBot';
 }
 
 export function isDeletedUser(user: ApiUser) {
-  if (!user.status || user.type === 'userTypeBot' || user.id === SERVICE_NOTIFICATIONS_USER_ID) {
+  if (user.noStatus || user.type === 'userTypeBot' || user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return false;
   }
 
@@ -190,6 +192,7 @@ export function getCanAddContact(user: ApiUser) {
 export function sortUserIds(
   userIds: string[],
   usersById: Record<string, ApiUser>,
+  userStatusesById: Record<string, ApiUserStatus>,
   priorityIds?: string[],
   serverTimeOffset = 0,
 ) {
@@ -204,17 +207,18 @@ export function sortUserIds(
     }
 
     const user = usersById[id];
-    if (!user || !user.status) {
+    const userStatus = userStatusesById[id];
+    if (!user || !userStatus) {
       return 0;
     }
 
-    if (user.status.type === 'userStatusOnline') {
-      return user.status.expires;
-    } else if (user.status.type === 'userStatusOffline' && user.status.wasOnline) {
-      return user.status.wasOnline;
+    if (userStatus.type === 'userStatusOnline') {
+      return userStatus.expires;
+    } else if (userStatus.type === 'userStatusOffline' && userStatus.wasOnline) {
+      return userStatus.wasOnline;
     }
 
-    switch (user.status.type) {
+    switch (userStatus.type) {
       case 'userStatusRecently':
         return now - 60 * 60 * 24;
       case 'userStatusLastWeek':

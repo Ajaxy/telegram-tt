@@ -1,8 +1,12 @@
 import { GlobalState } from '../../global/types';
-import { ApiChat, ApiUser } from '../../api/types';
+import { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
 
 export function selectUser(global: GlobalState, userId: string): ApiUser | undefined {
   return global.users.byId[userId];
+}
+
+export function selectUserStatus(global: GlobalState, userId: string): ApiUserStatus | undefined {
+  return global.users.statusesById[userId];
 }
 
 export function selectIsUserBlocked(global: GlobalState, userId: string) {

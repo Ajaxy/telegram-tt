@@ -11,7 +11,7 @@ import { isUserBot, isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import {
-  addChats, addUsers, updateChat, updateManagementProgress, updateUser, updateUsers,
+  addChats, addUsers, replaceUserStatuses, updateChat, updateManagementProgress, updateUser, updateUsers,
   updateUserSearch, updateUserSearchFetchingStatus,
 } from '../../reducers';
 import { getServerTime } from '../../../util/serverTime';
@@ -40,13 +40,21 @@ addReducer('loadUser', (global, actions, payload) => {
   }
 
   (async () => {
-    const updatedUsers = await callApi('fetchUsers', { users: [user] });
-    if (!updatedUsers) {
+    const result = await callApi('fetchUsers', { users: [user] });
+    if (!result) {
       return;
     }
 
+    const { users, userStatusesById } = result;
+
     global = getGlobal();
-    global = updateUsers(global, buildCollectionByKey(updatedUsers, 'id'));
+
+    global = updateUsers(global, buildCollectionByKey(users, 'id'));
+    setGlobal(replaceUserStatuses(global, {
+      ...global.users.statusesById,
+      ...userStatusesById,
+    }));
+
     setGlobal(global);
   })();
 });

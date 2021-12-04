@@ -46,7 +46,11 @@ export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
   }
 
   return chat.fullInfo.members.reduce((onlineCount, { userId }) => {
-    if (global.users.byId[userId] && isUserOnline(global.users.byId[userId]) && userId !== global.currentUserId) {
+    if (
+      userId !== global.currentUserId
+      && global.users.byId[userId]
+      && isUserOnline(global.users.byId[userId], global.users.statusesById[userId])
+    ) {
       return onlineCount + 1;
     }
 

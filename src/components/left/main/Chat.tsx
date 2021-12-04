@@ -7,7 +7,7 @@ import useLang, { LangFn } from '../../../hooks/useLang';
 
 import { GlobalActions } from '../../../global/types';
 import {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText, MAIN_THREAD_ID,
+  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText, MAIN_THREAD_ID, ApiUserStatus,
 } from '../../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
@@ -30,7 +30,7 @@ import {
 } from '../../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
-  selectNotifySettings, selectNotifyExceptions,
+  selectNotifySettings, selectNotifyExceptions, selectUserStatus,
 } from '../../../modules/selectors';
 import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
 import renderText from '../../common/helpers/renderText';
@@ -67,7 +67,8 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   isMuted?: boolean;
-  privateChatUser?: ApiUser;
+  user?: ApiUser;
+  userStatus?: ApiUserStatus;
   actionTargetUserIds?: string[];
   usersById?: Record<string, ApiUser>;
   actionTargetMessage?: ApiMessage;
@@ -94,7 +95,8 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   isPinned,
   chat,
   isMuted,
-  privateChatUser,
+  user,
+  userStatus,
   actionTargetUserIds,
   usersById,
   lastMessageSender,
@@ -196,7 +198,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const contextActions = useChatContextActions({
     chat,
-    privateChatUser,
+    user,
     handleDelete,
     handleChatFolderChange,
     folderId,
@@ -281,9 +283,9 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       <div className="status">
         <Avatar
           chat={chat}
-          user={privateChatUser}
-          withOnlineStatus
-          isSavedMessages={privateChatUser?.isSelf}
+          user={user}
+          userStatus={userStatus}
+          isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
         />
         {chat.isCallActive && chat.isCallNotEmpty && (
@@ -292,7 +294,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
       <div className="info">
         <div className="title">
-          <h3>{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
+          <h3>{renderText(getChatTitle(lang, chat, user))}</h3>
           {chat.isVerified && <VerifiedIcon />}
           {isMuted && <i className="icon-muted" />}
           {chat.lastMessage && (
@@ -377,7 +379,10 @@ export default memo(withGlobal<OwnProps>(
       canScrollDown: isSelected && messageListType === 'thread',
       lastSyncTime: global.lastSyncTime,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
-      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
+      ...(privateChatUserId && {
+        user: selectUser(global, privateChatUserId),
+        userStatus: selectUserStatus(global, privateChatUserId),
+      }),
       ...(actionTargetUserIds && { usersById }),
     };
   },

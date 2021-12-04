@@ -29,6 +29,7 @@ export const INITIAL_STATE: GlobalState = {
 
   users: {
     byId: {},
+    statusesById: {},
   },
 
   chats: {

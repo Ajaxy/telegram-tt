@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChatMember, ApiUser } from '../../../api/types';
+import { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectChat } from '../../../modules/selectors';
@@ -24,6 +24,7 @@ type OwnProps = {
 
 type StateProps = {
   usersById: Record<string, ApiUser>;
+  userStatusesById: Record<string, ApiUserStatus>;
   members?: ApiChatMember[];
   isChannel?: boolean;
   serverTimeOffset: number;
@@ -31,6 +32,7 @@ type StateProps = {
 
 const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   usersById,
+  userStatusesById,
   members,
   isChannel,
   onScreenSelect,
@@ -48,9 +50,12 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
 
     return sortUserIds(
       members.filter((member) => !member.isOwner).map(({ userId }) => userId),
-      usersById, undefined, serverTimeOffset,
+      usersById,
+      userStatusesById,
+      undefined,
+      serverTimeOffset,
     );
-  }, [members, serverTimeOffset, usersById]);
+  }, [members, serverTimeOffset, usersById, userStatusesById]);
 
   const handleExceptionMemberClick = useCallback((memberId: string) => {
     onChatMemberSelect(memberId);
@@ -88,13 +93,14 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const { byId: usersById } = global.users;
+    const { byId: usersById, statusesById: userStatusesById } = global.users;
     const members = chat?.fullInfo?.members;
     const isChannel = chat && isChatChannel(chat);
 
     return {
       members,
       usersById,
+      userStatusesById,
       isChannel,
       serverTimeOffset: global.serverTimeOffset,
     };

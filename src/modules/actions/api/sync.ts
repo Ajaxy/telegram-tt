@@ -17,7 +17,9 @@ import {
   replaceChatListIds,
   replaceChats,
   replaceUsers,
+  replaceUserStatuses,
   updateUsers,
+  addUserStatuses,
   updateChats,
   updateChatListSecondaryInfo,
   updateThreadInfos,
@@ -146,16 +148,10 @@ async function loadAndReplaceChats() {
   savedUsers.push(...result.users);
   savedChats.push(...result.chats);
 
+  global = replaceUserStatuses(global, result.userStatusesById);
+
   global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
   global = replaceChatListIds(global, 'active', result.chatIds);
-
-  global = {
-    ...global,
-    chats: {
-      ...global.chats,
-    },
-  };
-
   global = updateChatListSecondaryInfo(global, 'active', result);
 
   Object.keys(result.draftsById).forEach((chatId) => {
@@ -190,10 +186,14 @@ async function loadAndReplaceArchivedChats() {
   }
 
   let global = getGlobal();
+
   global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addUserStatuses(global, result.userStatusesById);
+
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = replaceChatListIds(global, 'archived', result.chatIds);
   global = updateChatListSecondaryInfo(global, 'archived', result);
+
   setGlobal(global);
 }
 
@@ -337,13 +337,16 @@ async function loadAndUpdateUsers() {
     ...(contactIds || []),
   ].map((id) => selectUser(global, id)).filter<ApiUser>(Boolean as any);
 
-  const updatedUsers = await callApi('fetchUsers', { users });
-  if (!updatedUsers) {
+  const result = await callApi('fetchUsers', { users });
+  if (!result) {
     return;
   }
 
+  const { users: updatedUsers, userStatusesById } = result;
+
   global = getGlobal();
   global = updateUsers(global, buildCollectionByKey(updatedUsers, 'id'));
+  global = addUserStatuses(global, userStatusesById);
   setGlobal(global);
 }
 

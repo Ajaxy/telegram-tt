@@ -1,7 +1,7 @@
 import { GlobalState } from '../../global/types';
-import { ApiUser } from '../../api/types';
+import { ApiUser, ApiUserStatus } from '../../api/types';
 
-import { omit } from '../../util/iteratees';
+import { mapValues, omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 export function replaceUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
@@ -12,24 +12,6 @@ export function replaceUsers(global: GlobalState, newById: Record<string, ApiUse
       byId: newById,
     },
   };
-}
-
-// @optimization Don't spread/unspread global for each element, do it in a batch
-function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial<ApiUser>): ApiUser {
-  const { byId } = global.users;
-  const user = byId[userId];
-  const shouldOmitMinInfo = userUpdate.isMin && user && !user.isMin;
-
-  const updatedUser = {
-    ...user,
-    ...(shouldOmitMinInfo ? omit(userUpdate, ['isMin', 'accessHash']) : userUpdate),
-  };
-
-  if (!updatedUser.id || !updatedUser.type) {
-    return user;
-  }
-
-  return updatedUser;
 }
 
 function updateContactList(global: GlobalState, updatedUsers: ApiUser[]): GlobalState {
@@ -67,54 +49,67 @@ export function updateUser(global: GlobalState, userId: string, userUpdate: Part
   });
 }
 
-export function updateUsers(global: GlobalState, updatedById: Record<string, ApiUser>): GlobalState {
-  const updatedUsers = Object.keys(updatedById).reduce<Record<string, ApiUser>>((acc, id) => {
-    const updatedUser = getUpdatedUser(global, id, updatedById[id]);
-    if (updatedUser) {
-      acc[id] = updatedUser;
-    }
-    return acc;
-  }, {});
-
-  global = updateContactList(global, Object.values(updatedUsers));
+export function updateUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
+  const updatedById = mapValues(newById, (user, id) => {
+    return getUpdatedUser(global, id, user);
+  });
 
   global = replaceUsers(global, {
     ...global.users.byId,
-    ...updatedUsers,
+    ...updatedById,
   });
+
+  global = updateContactList(global, Object.values(updatedById));
 
   return global;
 }
 
 // @optimization Allows to avoid redundant updates which cause a lot of renders
-export function addUsers(global: GlobalState, addedById: Record<string, ApiUser>): GlobalState {
+export function addUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
   const { byId } = global.users;
   let isAdded = false;
 
-  const addedUsers = Object.keys(addedById).reduce<Record<string, ApiUser>>((acc, id) => {
-    if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
-      const updatedUser = getUpdatedUser(global, id, addedById[id]);
-      if (updatedUser) {
-        acc[id] = updatedUser;
+  const addedById = Object.keys(newById).reduce<Record<string, ApiUser>>((acc, id) => {
+    if (!byId[id] || (byId[id].isMin && !newById[id].isMin)) {
+      acc[id] = getUpdatedUser(global, id, newById[id]);
 
-        if (!isAdded) {
-          isAdded = true;
-        }
+      if (!isAdded) {
+        isAdded = true;
       }
     }
     return acc;
   }, {});
 
-  if (isAdded) {
-    global = replaceUsers(global, {
-      ...global.users.byId,
-      ...addedUsers,
-    });
-
-    global = updateContactList(global, Object.values(addedUsers));
+  if (!isAdded) {
+    return global;
   }
 
+  global = replaceUsers(global, {
+    ...byId,
+    ...addedById,
+  });
+
+  global = updateContactList(global, Object.values(addedById));
+
   return global;
+}
+
+// @optimization Don't spread/unspread global for each element, do it in a batch
+function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial<ApiUser>) {
+  const { byId } = global.users;
+  const user = byId[userId];
+  const shouldOmitMinInfo = userUpdate.isMin && user && !user.isMin;
+
+  const updatedUser = {
+    ...user,
+    ...(shouldOmitMinInfo ? omit(userUpdate, ['isMin', 'accessHash']) : userUpdate),
+  };
+
+  if (!updatedUser.id || !updatedUser.type) {
+    return user;
+  }
+
+  return updatedUser;
 }
 
 export function updateSelectedUserId(global: GlobalState, selectedId?: string): GlobalState {
@@ -181,4 +176,31 @@ export function updateUserBlockedState(global: GlobalState, userId: string, isBl
       isBlocked,
     },
   });
+}
+
+export function replaceUserStatuses(global: GlobalState, newById: Record<string, ApiUserStatus>): GlobalState {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      statusesById: newById,
+    },
+  };
+}
+
+// @optimization Allows to avoid redundant updates which cause a lot of renders
+export function addUserStatuses(global: GlobalState, newById: Record<string, ApiUserStatus>): GlobalState {
+  const { statusesById } = global.users;
+
+  const newKeys = Object.keys(newById).filter((id) => !statusesById[id]);
+  if (!newKeys.length) {
+    return global;
+  }
+
+  global = replaceUserStatuses(global, {
+    ...statusesById,
+    ...pick(newById, newKeys),
+  });
+
+  return global;
 }
