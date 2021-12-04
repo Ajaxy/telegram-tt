@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
+import { GlobalActions, GlobalState } from '../../../global/types';
 import {
   ApiChat, ApiChatFolder, ApiUser,
 } from '../../../api/types';
@@ -37,11 +37,12 @@ type OwnProps = {
 };
 
 type StateProps = {
+  allListIds: GlobalState['chats']['listIds'];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
-  chatFolder?: ApiChatFolder;
   listIds?: string[];
   orderedPinnedIds?: string[];
+  chatFolder?: ApiChatFolder;
   lastSyncTime?: number;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
@@ -60,15 +61,16 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   folderType,
   folderId,
   isActive,
-  chatFolder,
+  allListIds,
   chatsById,
   usersById,
   listIds,
   orderedPinnedIds,
+  chatFolder,
   lastSyncTime,
-  foldersDispatch,
   notifySettings,
   notifyExceptions,
+  foldersDispatch,
   onScreenSelect,
   loadMoreChats,
   preloadTopChatMessages,
@@ -78,9 +80,12 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const [currentListIds, currentPinnedIds] = useMemo(() => {
     return folderType === 'folder' && chatFolder
-      ? prepareFolderListIds(chatsById, usersById, chatFolder, notifySettings, notifyExceptions)
+      ? prepareFolderListIds(allListIds, chatsById, usersById, chatFolder, notifySettings, notifyExceptions)
       : [listIds, orderedPinnedIds];
-  }, [folderType, chatFolder, chatsById, usersById, notifySettings, notifyExceptions, listIds, orderedPinnedIds]);
+  }, [
+    folderType, chatFolder, allListIds, chatsById, usersById,
+    notifySettings, notifyExceptions, listIds, orderedPinnedIds,
+  ]);
 
   const [orderById, orderedIds, chatArrays] = useMemo(() => {
     if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
@@ -106,7 +111,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return mapValues(orderById, (order, id) => {
-      return order - (prevOrderById[id] !== undefined ? prevOrderById[id] : Infinity);
+      return prevOrderById[id] !== undefined ? order - prevOrderById[id] : -Infinity;
     });
   }, [orderById, prevOrderById]);
 
@@ -136,6 +141,39 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       preloadArchivedChats();
     }
   }, [lastSyncTime, folderType, preloadTopChatMessages, preloadArchivedChats]);
+
+  // Support <Cmd>+<Digit> and <Alt>+<Up/Down> to navigate between chats
+  useEffect(() => {
+    if (!isActive || !orderedIds) {
+      return undefined;
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (IS_PWA && ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
+        const [, digit] = e.code.match(/Digit(\d)/) || [];
+        if (!digit) return;
+
+        const position = Number(digit) - 1;
+        if (position > orderedIds!.length - 1) return;
+
+        openChat({ id: orderedIds![position], shouldReplaceHistory: true });
+      }
+
+      if (e.altKey) {
+        const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
+        if (!targetIndexDelta) return;
+
+        e.preventDefault();
+        openNextChat({ targetIndexDelta, orderedIds });
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isActive, openChat, openNextChat, orderedIds]);
 
   const getAnimationType = useChatAnimationType(orderDiffById);
 
@@ -179,36 +217,6 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isActive && orderedIds) {
-        if (IS_PWA && ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
-          const [, digit] = e.code.match(/Digit(\d)/) || [];
-          if (!digit) return;
-
-          const position = Number(digit) - 1;
-          if (position > orderedIds.length - 1) return;
-
-          openChat({ id: orderedIds[position], shouldReplaceHistory: true });
-        }
-
-        if (e.altKey) {
-          const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
-          if (!targetIndexDelta) return;
-
-          e.preventDefault();
-          openNextChat({ targetIndexDelta, orderedIds });
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown, false);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, false);
-    };
-  });
-
   return (
     <InfiniteScroll
       className="chat-list custom-scroll"
@@ -251,6 +259,7 @@ export default memo(withGlobal<OwnProps>(
     const chatFolder = folderId ? selectChatFolder(global, folderId) : undefined;
 
     return {
+      allListIds: listIds,
       chatsById,
       usersById,
       lastSyncTime,

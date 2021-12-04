@@ -3,7 +3,7 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../../global/types';
+import { GlobalActions, GlobalState } from '../../../../global/types';
 import { ApiChatFolder, ApiChat, ApiUser } from '../../../../api/types';
 import { NotifyException, NotifySettings, SettingsScreens } from '../../../../types';
 
@@ -22,14 +22,15 @@ import Loading from '../../../ui/Loading';
 import AnimatedSticker from '../../../common/AnimatedSticker';
 
 type OwnProps = {
+  isActive?: boolean;
   onCreateFolder: () => void;
   onEditFolder: (folder: ApiChatFolder) => void;
-  isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
 type StateProps = {
+  allListIds: GlobalState['chats']['listIds'];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
   orderedFolderIds?: number[];
@@ -46,11 +47,8 @@ const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
 const MAX_ALLOWED_FOLDERS = 10;
 
 const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
-  onCreateFolder,
-  onEditFolder,
   isActive,
-  onScreenSelect,
-  onReset,
+  allListIds,
   chatsById,
   usersById,
   orderedFolderIds,
@@ -58,6 +56,10 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   recommendedChatFolders,
   notifySettings,
   notifyExceptions,
+  onCreateFolder,
+  onEditFolder,
+  onScreenSelect,
+  onReset,
   loadRecommendedChatFolders,
   addChatFolder,
   showDialog,
@@ -104,8 +106,6 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    const chatIds = Object.keys(chatsById);
-
     return orderedFolderIds.map((id) => {
       const folder = foldersById[id];
 
@@ -113,11 +113,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
         id: folder.id,
         title: folder.title,
         subtitle: getFolderDescriptionText(
-          lang, chatsById, usersById, folder, chatIds, notifySettings, notifyExceptions,
+          lang, allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions,
         ),
       };
     });
-  }, [orderedFolderIds, chatsById, foldersById, usersById, notifySettings, notifyExceptions, lang]);
+  }, [lang, allListIds, foldersById, chatsById, usersById, orderedFolderIds, notifySettings, notifyExceptions]);
 
   const handleCreateFolderFromRecommended = useCallback((folder: ApiChatFolder) => {
     if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
@@ -229,7 +229,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      chats: { byId: chatsById },
+      chats: { listIds: allListIds, byId: chatsById },
       users: { byId: usersById },
     } = global;
 
@@ -240,6 +240,7 @@ export default memo(withGlobal<OwnProps>(
     } = global.chatFolders;
 
     return {
+      allListIds,
       chatsById,
       usersById,
       orderedFolderIds,

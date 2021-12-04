@@ -1,4 +1,4 @@
-import { useCallback } from '../../../../lib/teact/teact';
+import { useMemo } from '../../../../lib/teact/teact';
 
 export enum ChatAnimationTypes {
   Move,
@@ -7,29 +7,27 @@ export enum ChatAnimationTypes {
 }
 
 export function useChatAnimationType(orderDiffById: Record<string, number>) {
-  const movesUp = useCallback((id: string) => orderDiffById[id] < 0, [orderDiffById]);
-  const movesDown = useCallback((id: string) => orderDiffById[id] > 0, [orderDiffById]);
+  return useMemo(() => {
+    const orderDiffs = Object.values(orderDiffById);
+    const numberOfUp = orderDiffs.filter((diff) => diff < 0).length;
+    const numberOfDown = orderDiffs.filter((diff) => diff > 0).length;
 
-  const orderDiffIds = Object.keys(orderDiffById);
-  const numberOfUp = orderDiffIds.filter(movesUp).length;
-  const numberOfDown = orderDiffIds.filter(movesDown).length;
+    return (chatId: string): ChatAnimationTypes => {
+      const orderDiff = orderDiffById[chatId];
+      if (orderDiff === 0) {
+        return ChatAnimationTypes.None;
+      }
 
-  return useCallback((chatId: string): ChatAnimationTypes => {
-    const orderDiff = orderDiffById[chatId];
+      if (
+        orderDiff === Infinity
+        || orderDiff === -Infinity
+        || (numberOfUp <= numberOfDown && orderDiff < 0)
+        || (numberOfDown < numberOfUp && orderDiff > 0)
+      ) {
+        return ChatAnimationTypes.Opacity;
+      }
 
-    if (orderDiff === 0) {
-      return ChatAnimationTypes.None;
-    }
-
-    if (
-      orderDiff === Infinity
-      || orderDiff === -Infinity
-      || (numberOfUp <= numberOfDown && movesUp(chatId))
-      || (numberOfDown < numberOfUp && movesDown(chatId))
-    ) {
-      return ChatAnimationTypes.Opacity;
-    }
-
-    return ChatAnimationTypes.Move;
-  }, [movesDown, movesUp, numberOfDown, numberOfUp, orderDiffById]);
+      return ChatAnimationTypes.Move;
+    };
+  }, [orderDiffById]);
 }

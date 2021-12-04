@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
+import { GlobalActions, GlobalState } from '../../../global/types';
 import { NotifyException, NotifySettings, SettingsScreens } from '../../../types';
 import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
@@ -30,6 +30,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  allListIds: GlobalState['chats']['listIds'];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
   chatFoldersById: Record<number, ApiChatFolder>;
@@ -48,6 +49,7 @@ const INFO_THROTTLE = 3000;
 const SAVED_MESSAGES_HOTKEY = '0';
 
 const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
+  allListIds,
   chatsById,
   usersById,
   chatFoldersById,
@@ -86,11 +88,10 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    const chatIds = Object.keys(chatsById);
     const counters = displayedFolders.map((folder) => {
       const {
         unreadDialogsCount, hasActiveDialogs,
-      } = getFolderUnreadDialogs(chatsById, usersById, folder, chatIds, notifySettings, notifyExceptions) || {};
+      } = getFolderUnreadDialogs(allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions) || {};
 
       return {
         id: folder.id,
@@ -100,7 +101,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
     });
 
     return buildCollectionByKey(counters, 'id');
-  }, INFO_THROTTLE, [displayedFolders, chatsById, usersById, notifySettings, notifyExceptions]);
+  }, INFO_THROTTLE, [displayedFolders, allListIds, chatsById, usersById, notifySettings, notifyExceptions]);
 
   const folderTabs = useMemo(() => {
     if (!displayedFolders || !displayedFolders.length) {
@@ -240,7 +241,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      chats: { byId: chatsById },
+      chats: { listIds: allListIds, byId: chatsById },
       users: { byId: usersById },
       chatFolders: {
         byId: chatFoldersById,
@@ -253,6 +254,7 @@ export default memo(withGlobal<OwnProps>(
     } = global;
 
     return {
+      allListIds,
       chatsById,
       usersById,
       chatFoldersById,
