@@ -291,7 +291,7 @@ const Main: FC<StateProps & DispatchProps> = ({
 };
 
 function updateIcon(asUnread: boolean) {
-  document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')
+  document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="alternate icon"]')
     .forEach((link) => {
       if (asUnread) {
         if (!link.href.includes('favicon-unread')) {
