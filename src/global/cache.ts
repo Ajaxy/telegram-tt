@@ -256,10 +256,9 @@ function reduceShowChatInfo(global: GlobalState): boolean {
 
 function reduceUsers(global: GlobalState): GlobalState['users'] {
   const { users: { byId, statusesById, selectedId } } = global;
-  const idsToSave = [
-    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter(isUserId),
-    ...Object.keys(byId),
-  ].slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
+  const chatIds = (global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter(isUserId);
+  const userIds = Object.keys(byId);
+  const idsToSave = chatIds.concat(userIds).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 
   return {
     byId: pick(byId, idsToSave),
@@ -269,16 +268,15 @@ function reduceUsers(global: GlobalState): GlobalState['users'] {
 }
 
 function reduceChats(global: GlobalState): GlobalState['chats'] {
-  const chatIdsToSave = [
-    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT),
-  ];
+  const newListIds = (global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
   const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
+  const idsToSave = newListIds.concat(currentChatId ? [currentChatId] : []);
 
   return {
     ...global.chats,
-    byId: pick(global.chats.byId, currentChatId ? [...chatIdsToSave, currentChatId] : chatIdsToSave),
+    byId: pick(global.chats.byId, idsToSave),
     listIds: {
-      active: chatIdsToSave,
+      active: newListIds,
     },
     isFullyLoaded: {},
     orderedPinnedIds: {
@@ -291,10 +289,9 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const byChatId: GlobalState['messages']['byChatId'] = {};
   const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
 
-  const chatIdsToSave = [
-    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT),
-    ...(currentChatId ? [currentChatId] : []),
-  ];
+  const chatIds = (global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
+  const chatIdsToSave = chatIds.concat(currentChatId ? [currentChatId] : []);
+
   chatIdsToSave.forEach((chatId) => {
     const current = global.messages.byChatId[chatId];
     if (!current) {
