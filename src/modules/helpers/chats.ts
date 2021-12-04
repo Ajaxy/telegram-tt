@@ -282,8 +282,9 @@ export function prepareFolderListIds(
   const pinnedChatIds = folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined;
   const listIds = ([] as string[]).concat(allListIds.active || [], allListIds.archived || [])
     .filter((id) => {
-      return filterChatFolder(
-        chatsById[id],
+      const chat = chatsById[id];
+      return chat && filterChatFolder(
+        chat,
         folder,
         usersById,
         notifySettings,
