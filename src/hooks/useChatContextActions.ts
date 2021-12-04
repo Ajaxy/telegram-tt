@@ -11,7 +11,7 @@ import useLang from './useLang';
 
 export default ({
   chat,
-  privateChatUser,
+  user,
   handleDelete,
   handleChatFolderChange,
   folderId,
@@ -19,7 +19,7 @@ export default ({
   isMuted,
 }: {
   chat: ApiChat | undefined;
-  privateChatUser: ApiUser | undefined;
+  user: ApiUser | undefined;
   handleDelete: () => void;
   handleChatFolderChange: () => void;
   folderId?: number;
@@ -28,7 +28,7 @@ export default ({
 }, isInSearch = false) => {
   const lang = useLang();
 
-  const { isSelf } = privateChatUser || {};
+  const { isSelf } = user || {};
 
   return useMemo(() => {
     if (!chat) {

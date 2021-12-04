@@ -37,6 +37,7 @@ import {
   selectChatBot,
   selectChatUser,
   selectChatMessage,
+  selectUserStatus,
 } from '../../../modules/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -106,38 +107,40 @@ type OwnProps = {
   onDropHide: NoneToVoidFunction;
 };
 
-type StateProps = {
-  editingMessage?: ApiMessage;
-  chat?: ApiChat;
-  draft?: ApiFormattedText;
-  isChatWithBot?: boolean;
-  isChatWithSelf?: boolean;
-  isRightColumnShown?: boolean;
-  isSelectModeActive?: boolean;
-  isForwarding?: boolean;
-  isPollModalOpen?: boolean;
-  botKeyboardMessageId?: number;
-  botKeyboardPlaceholder?: string;
-  withScheduledButton?: boolean;
-  shouldSchedule?: boolean;
-  canScheduleUntilOnline?: boolean;
-  stickersForEmoji?: ApiSticker[];
-  groupChatMembers?: ApiChatMember[];
-  currentUserId?: string;
-  usersById?: Record<string, ApiUser>;
-  recentEmojis: string[];
-  lastSyncTime?: number;
-  contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
-  shouldSuggestStickers?: boolean;
-  baseEmojiKeywords?: Record<string, string[]>;
-  emojiKeywords?: Record<string, string[]>;
-  serverTimeOffset: number;
-  topInlineBotIds?: string[];
-  isInlineBotLoading: boolean;
-  inlineBots?: Record<string, false | InlineBotSettings>;
-  botCommands?: ApiBotCommand[] | false;
-  chatBotCommands?: ApiBotCommand[];
-} & Pick<GlobalState, 'connectionState'>;
+type StateProps =
+  {
+    editingMessage?: ApiMessage;
+    chat?: ApiChat;
+    draft?: ApiFormattedText;
+    isChatWithBot?: boolean;
+    isChatWithSelf?: boolean;
+    isRightColumnShown?: boolean;
+    isSelectModeActive?: boolean;
+    isForwarding?: boolean;
+    isPollModalOpen?: boolean;
+    botKeyboardMessageId?: number;
+    botKeyboardPlaceholder?: string;
+    withScheduledButton?: boolean;
+    shouldSchedule?: boolean;
+    canScheduleUntilOnline?: boolean;
+    stickersForEmoji?: ApiSticker[];
+    groupChatMembers?: ApiChatMember[];
+    currentUserId?: string;
+    usersById?: Record<string, ApiUser>;
+    recentEmojis: string[];
+    lastSyncTime?: number;
+    contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
+    shouldSuggestStickers?: boolean;
+    baseEmojiKeywords?: Record<string, string[]>;
+    emojiKeywords?: Record<string, string[]>;
+    serverTimeOffset: number;
+    topInlineBotIds?: string[];
+    isInlineBotLoading: boolean;
+    inlineBots?: Record<string, false | InlineBotSettings>;
+    botCommands?: ApiBotCommand[] | false;
+    chatBotCommands?: ApiBotCommand[];
+  }
+  & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
@@ -1071,9 +1074,9 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isChatWithBot,
       isChatWithSelf,
-      canScheduleUntilOnline: (
-        !isChatWithSelf && !isChatWithBot
-        && (chat && chatUser && isUserId(chatId) && chatUser.status && Boolean(chatUser.status.wasOnline))
+      canScheduleUntilOnline: Boolean(
+        !isChatWithSelf && !isChatWithBot && chat && chatUser
+        && isUserId(chatId) && selectUserStatus(global, chatId)?.wasOnline,
       ),
       isRightColumnShown: selectIsRightColumnShown(global),
       isSelectModeActive: selectIsInSelectMode(global),

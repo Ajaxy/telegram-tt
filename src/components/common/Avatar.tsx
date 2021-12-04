@@ -1,7 +1,9 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
-import { ApiChat, ApiMediaFormat, ApiUser } from '../../api/types';
+import {
+  ApiChat, ApiMediaFormat, ApiUser, ApiUserStatus,
+} from '../../api/types';
 
 import { IS_TEST } from '../../config';
 import {
@@ -26,9 +28,9 @@ import './Avatar.scss';
 type OwnProps = {
   className?: string;
   size?: 'micro' | 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
-  withOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
+  userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
   lastSyncTime?: number;
@@ -40,8 +42,8 @@ const Avatar: FC<OwnProps> = ({
   size = 'large',
   chat,
   user,
+  userStatus,
   text,
-  withOnlineStatus,
   isSavedMessages,
   lastSyncTime,
   onClick,
@@ -86,7 +88,7 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
-  const isOnline = !isSavedMessages && user && isUserOnline(user);
+  const isOnline = !isSavedMessages && user && userStatus && isUserOnline(user, userStatus);
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
@@ -94,7 +96,7 @@ const Avatar: FC<OwnProps> = ({
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
-    withOnlineStatus && isOnline && 'online',
+    isOnline && 'online',
     onClick && 'interactive',
     (!isSavedMessages && !blobUrl) && 'no-photo',
   );

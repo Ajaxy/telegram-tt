@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiUser } from '../../../api/types';
+import { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { throttle } from '../../../util/schedulers';
@@ -27,6 +27,7 @@ export type OwnProps = {
 
 type StateProps = {
   usersById: Record<string, ApiUser>;
+  userStatusesById: Record<string, ApiUserStatus>;
   contactIds?: string[];
   serverTimeOffset: number;
 };
@@ -36,8 +37,15 @@ type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'openChat'>;
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
-  isActive, onReset,
-  filter, usersById, contactIds, loadContactList, openChat, serverTimeOffset,
+  isActive,
+  filter,
+  usersById,
+  userStatusesById,
+  contactIds,
+  serverTimeOffset,
+  onReset,
+  loadContactList,
+  openChat,
 }) => {
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -67,8 +75,8 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
       return fullName && searchWords(fullName, filter);
     }) : contactIds;
 
-    return sortUserIds(resultIds, usersById, undefined, serverTimeOffset);
-  }, [contactIds, filter, usersById, serverTimeOffset]);
+    return sortUserIds(resultIds, usersById, userStatusesById, undefined, serverTimeOffset);
+  }, [contactIds, filter, usersById, userStatusesById, serverTimeOffset]);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));
 
@@ -99,10 +107,11 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: contactIds } = global.contactList || {};
-    const { byId: usersById } = global.users;
+    const { byId: usersById, statusesById: userStatusesById } = global.users;
 
     return {
       usersById,
+      userStatusesById,
       contactIds,
       serverTimeOffset: global.serverTimeOffset,
     };

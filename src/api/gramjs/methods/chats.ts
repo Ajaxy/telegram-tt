@@ -28,7 +28,7 @@ import {
   buildApiChatBotCommands,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
-import { buildApiUser } from '../apiBuilders/users';
+import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 import {
@@ -146,13 +146,11 @@ export async function fetchChats({
     }
   });
 
-  const users = (resultPinned ? resultPinned.users : []).concat(result.users)
-    .map(buildApiUser)
-    .filter<ApiUser>(Boolean as any);
   const chatIds = chats.map((chat) => chat.id);
 
-  let totalChatCount: number;
+  const { users, userStatusesById } = buildApiUsersAndStatuses((resultPinned?.users || []).concat(result.users));
 
+  let totalChatCount: number;
   if (result instanceof GramJs.messages.DialogsSlice) {
     totalChatCount = result.count;
   } else {
@@ -163,6 +161,7 @@ export async function fetchChats({
     chatIds,
     chats,
     users,
+    userStatusesById,
     draftsById,
     replyingToById,
     orderedPinnedIds: withPinned ? orderedPinnedIds : undefined,

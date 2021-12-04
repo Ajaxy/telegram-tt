@@ -3,6 +3,7 @@ import {
   ApiMessage,
   ApiThreadInfo,
   ApiUser,
+  ApiUserStatus,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
   ApiStickerSet,
@@ -127,6 +128,7 @@ export type GlobalState = {
 
   users: {
     byId: Record<string, ApiUser>;
+    statusesById: Record<string, ApiUserStatus>;
     // TODO Remove
     selectedId?: string;
   };

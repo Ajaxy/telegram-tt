@@ -47,7 +47,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(lastName && { lastName }),
     username: mtpUser.username || '',
     phoneNumber: mtpUser.phone || '',
-    status: buildApiUserStatus(mtpUser.status),
+    noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
     ...(avatarHash && { avatarHash }),
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
@@ -87,4 +87,24 @@ function buildApiBotCommands(botId: string, botInfo: GramJs.BotInfo) {
     command,
     description,
   })) as ApiBotCommand[];
+}
+
+export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
+  const userStatusesById: Record<string, ApiUserStatus> = {};
+  const users: ApiUser[] = [];
+
+  mtpUsers.forEach((mtpUser) => {
+    const user = buildApiUser(mtpUser);
+    if (!user) {
+      return;
+    }
+
+    users.push(user);
+
+    if ('status' in mtpUser) {
+      userStatusesById[user.id] = buildApiUserStatus(mtpUser.status);
+    }
+  });
+
+  return { users, userStatusesById };
 }

@@ -2,7 +2,7 @@ import { GlobalState } from '../../global/types';
 import { ApiChat, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
-import { omit } from '../../util/iteratees';
+import { mapValues, omit } from '../../util/iteratees';
 import { selectChatListType } from '../selectors';
 
 export function replaceChatListIds(
@@ -48,26 +48,6 @@ export function replaceChats(global: GlobalState, newById: Record<string, ApiCha
   };
 }
 
-// @optimization Don't spread/unspread global for each element, do it in a batch
-function getUpdatedChat(
-  global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
-): ApiChat {
-  const { byId } = global.chats;
-  const chat = byId[chatId];
-  const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
-  const updatedChat = {
-    ...chat,
-    ...(shouldOmitMinInfo ? omit(chatUpdate, ['isMin', 'accessHash']) : chatUpdate),
-    ...(photo && { photos: [photo, ...(chat.photos || [])] }),
-  };
-
-  if (!updatedChat.id || !updatedChat.type) {
-    return updatedChat;
-  }
-
-  return updatedChat;
-}
-
 export function updateChat(
   global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
 ): GlobalState {
@@ -81,50 +61,65 @@ export function updateChat(
   });
 }
 
-export function updateChats(global: GlobalState, updatedById: Record<string, ApiChat>): GlobalState {
-  const updatedChats = Object.keys(updatedById).reduce<Record<string, ApiChat>>((acc, id) => {
-    const updatedChat = getUpdatedChat(global, id, updatedById[id]);
-    if (updatedChat) {
-      acc[id] = updatedChat;
-    }
-    return acc;
-  }, {});
+export function updateChats(global: GlobalState, newById: Record<string, ApiChat>): GlobalState {
+  const updatedById = mapValues(newById, (chat, id) => {
+    return getUpdatedChat(global, id, chat);
+  });
 
   global = replaceChats(global, {
     ...global.chats.byId,
-    ...updatedChats,
+    ...updatedById,
   });
 
   return global;
 }
 
 // @optimization Allows to avoid redundant updates which cause a lot of renders
-export function addChats(global: GlobalState, addedById: Record<string, ApiChat>): GlobalState {
+export function addChats(global: GlobalState, newById: Record<string, ApiChat>): GlobalState {
   const { byId } = global.chats;
   let isAdded = false;
 
-  const addedChats = Object.keys(addedById).reduce<Record<string, ApiChat>>((acc, id) => {
-    if (!byId[id] || (byId[id].isMin && !addedById[id].isMin)) {
-      const updatedChat = getUpdatedChat(global, id, addedById[id]);
-      if (updatedChat) {
-        acc[id] = updatedChat;
+  const addedById = Object.keys(newById).reduce<Record<string, ApiChat>>((acc, id) => {
+    if (!byId[id] || (byId[id].isMin && !newById[id].isMin)) {
+      acc[id] = getUpdatedChat(global, id, newById[id]);
 
-        if (!isAdded) {
-          isAdded = true;
-        }
+      if (!isAdded) {
+        isAdded = true;
       }
     }
     return acc;
   }, {});
 
-  if (isAdded) {
-    global = replaceChats(global, {
-      ...global.chats.byId,
-      ...addedChats,
-    });
+  if (!isAdded) {
+    return global;
   }
 
+  global = replaceChats(global, {
+    ...byId,
+    ...addedById,
+  });
+
   return global;
+}
+
+// @optimization Don't spread/unspread global for each element, do it in a batch
+function getUpdatedChat(
+  global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+) {
+  const { byId } = global.chats;
+  const chat = byId[chatId];
+  const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
+  const updatedChat: ApiChat = {
+    ...chat,
+    ...(shouldOmitMinInfo ? omit(chatUpdate, ['isMin', 'accessHash']) : chatUpdate),
+    ...(photo && { photos: [photo, ...(chat.photos || [])] }),
+  };
+
+  if (!updatedChat.id || !updatedChat.type) {
+    return updatedChat;
+  }
+
+  return updatedChat;
 }
 
 export function updateChatListType(

@@ -3,12 +3,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiUser, ApiChat } from '../../api/types';
+import { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
-import { selectChat, selectUser } from '../../modules/selectors';
+import { selectChat, selectUser, selectUserStatus } from '../../modules/selectors';
 import {
   getUserFullName, getUserStatus, isChatChannel, isUserOnline,
 } from '../../modules/helpers';
@@ -32,6 +32,7 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
+  userStatus?: ApiUserStatus;
   chat?: ApiChat;
   isSavedMessages?: boolean;
   animationLevel: 0 | 1 | 2;
@@ -43,6 +44,7 @@ type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
 const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   forceShowSelf,
   user,
+  userStatus,
   chat,
   isSavedMessages,
   connectionState,
@@ -162,8 +164,8 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderStatus() {
     if (user) {
       return (
-        <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
-          <span className="user-status" dir="auto">{getUserStatus(lang, user, serverTimeOffset)}</span>
+        <div className={`status ${isUserOnline(user, userStatus) ? 'online' : ''}`}>
+          <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
         </div>
       );
     }
@@ -227,6 +229,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { connectionState, serverTimeOffset } = global;
     const user = selectUser(global, userId);
+    const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { animationLevel } = global.settings.byKey;
@@ -234,6 +237,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       connectionState,
       user,
+      userStatus,
       chat,
       isSavedMessages,
       animationLevel,

@@ -14,7 +14,7 @@ import {
   buildMtpPeerId,
   getEntityTypeById,
 } from '../gramjsBuilders';
-import { buildApiUser, buildApiUserFromFull } from '../apiBuilders/users';
+import { buildApiUser, buildApiUserFromFull, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import localDb from '../localDb';
@@ -139,7 +139,7 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
     }
   });
 
-  return result.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  return buildApiUsersAndStatuses(result);
 }
 
 export function updateContact({

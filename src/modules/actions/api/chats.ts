@@ -22,6 +22,7 @@ import { callApi } from '../../../api/gramjs';
 import {
   addChats,
   addUsers,
+  addUserStatuses,
   replaceThreadParam,
   updateChatListIds,
   updateChats,
@@ -1007,6 +1008,8 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: string, off
   global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addUserStatuses(global, result.userStatusesById);
+
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateChatListIds(global, listType, chatIds);
   global = updateChatListSecondaryInfo(global, listType, result);

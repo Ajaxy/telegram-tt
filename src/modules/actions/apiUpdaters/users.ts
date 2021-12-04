@@ -2,30 +2,29 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiUserStatus } from '../../../api/types';
 
-import { deleteUser, updateUser } from '../../reducers';
+import { deleteUser, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 
 const flushStatusUpdatesThrottled = throttle(flushStatusUpdates, STATUS_UPDATE_THROTTLE, true);
 
-let pendingStatusUpdates: [string, ApiUserStatus][] = [];
+let pendingStatusUpdates: Record<string, ApiUserStatus> = {};
 
 function scheduleStatusUpdate(userId: string, statusUpdate: ApiUserStatus) {
-  pendingStatusUpdates.push([userId, statusUpdate]);
+  pendingStatusUpdates[userId] = statusUpdate;
   flushStatusUpdatesThrottled();
 }
 
 function flushStatusUpdates() {
-  let global = getGlobal();
-  pendingStatusUpdates.forEach(([userId, statusUpdate]) => {
-    global = updateUser(global, userId, {
-      status: statusUpdate,
-    });
-  });
-  setGlobal(global);
+  const global = getGlobal();
 
-  pendingStatusUpdates = [];
+  setGlobal(replaceUserStatuses(global, {
+    ...global.users.statusesById,
+    ...pendingStatusUpdates,
+  }));
+
+  pendingStatusUpdates = {};
 }
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {

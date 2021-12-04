@@ -83,7 +83,6 @@ const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
       <Avatar
         chat={chat}
         user={privateChatUser}
-        withOnlineStatus
         isSavedMessages={privateChatUser?.isSelf}
         lastSyncTime={lastSyncTime}
       />

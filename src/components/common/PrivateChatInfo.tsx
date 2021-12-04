@@ -4,11 +4,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiUser, ApiTypingStatus } from '../../api/types';
+import { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { selectChatMessages, selectUser } from '../../modules/selectors';
+import { selectChatMessages, selectUser, selectUserStatus } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
@@ -34,6 +34,7 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
+  userStatus?: ApiUserStatus;
   isSavedMessages?: boolean;
   areMessagesLoaded: boolean;
   serverTimeOffset: number;
@@ -52,6 +53,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   noStatusOrTyping,
   noRtl,
   user,
+  userStatus,
   isSavedMessages,
   areMessagesLoaded,
   lastSyncTime,
@@ -106,9 +108,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return (
-      <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
+      <div className={`status ${isUserOnline(user, userStatus) ? 'online' : ''}`}>
         {withUsername && user.username && <span className="handle">{user.username}</span>}
-        <span className="user-status" dir="auto">{getUserStatus(lang, user, serverTimeOffset)}</span>
+        <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
       </div>
     );
   }
@@ -143,11 +145,12 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { lastSyncTime, serverTimeOffset } = global;
     const user = selectUser(global, userId);
+    const userStatus = selectUserStatus(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
 
     return {
-      lastSyncTime, user, isSavedMessages, areMessagesLoaded, serverTimeOffset,
+      lastSyncTime, user, userStatus, isSavedMessages, areMessagesLoaded, serverTimeOffset,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),

@@ -190,8 +190,12 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
   }
 
-  if (cached.groupCalls === undefined) {
+  if (!cached.groupCalls) {
     cached.groupCalls = initialState.groupCalls;
+  }
+
+  if (!cached.users.statusesById) {
+    cached.users.statusesById = {};
   }
 }
 
@@ -251,7 +255,7 @@ function reduceShowChatInfo(global: GlobalState): boolean {
 }
 
 function reduceUsers(global: GlobalState): GlobalState['users'] {
-  const { users: { byId, selectedId } } = global;
+  const { users: { byId, statusesById, selectedId } } = global;
   const idsToSave = [
     ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter(isUserId),
     ...Object.keys(byId),
@@ -259,6 +263,7 @@ function reduceUsers(global: GlobalState): GlobalState['users'] {
 
   return {
     byId: pick(byId, idsToSave),
+    statusesById: pick(statusesById, idsToSave),
     selectedId: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN ? selectedId : undefined,
   };
 }

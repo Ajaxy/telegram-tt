@@ -10,7 +10,7 @@ export interface ApiUser {
   type: ApiUserType;
   firstName?: string;
   lastName?: string;
-  status?: ApiUserStatus;
+  noStatus?: boolean;
   username: string;
   phoneNumber: string;
   accessHash?: string;

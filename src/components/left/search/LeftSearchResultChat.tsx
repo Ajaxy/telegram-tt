@@ -27,7 +27,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  privateChatUser?: ApiUser;
+  user?: ApiUser;
   isPinned?: boolean;
   isMuted?: boolean;
 };
@@ -35,7 +35,7 @@ type StateProps = {
 const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
-  privateChatUser,
+  user,
   isPinned,
   isMuted,
   withUsername,
@@ -46,7 +46,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
 
   const contextActions = useChatContextActions({
     chat,
-    privateChatUser,
+    user,
     isPinned,
     isMuted,
     handleDelete: openDeleteModal,
@@ -93,7 +93,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const privateChatUserId = chat && getPrivateChatUserId(chat);
-    const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const isPinned = selectIsChatPinned(global, chatId);
     const isMuted = chat
       ? selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))
@@ -101,7 +101,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      privateChatUser,
+      user,
       isPinned,
       isMuted,
     };

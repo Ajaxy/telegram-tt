@@ -4,11 +4,12 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import {
+  MAIN_THREAD_ID,
   ApiMessage,
+  ApiChat,
   ApiChatMember,
   ApiUser,
-  ApiChat,
-  MAIN_THREAD_ID,
+  ApiUserStatus,
 } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import {
@@ -87,6 +88,7 @@ type StateProps = {
   commonChatIds?: string[];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
+  userStatusesById: Record<string, ApiUserStatus>;
   isRightColumnShown: boolean;
   isRestricted?: boolean;
   lastSyncTime?: number;
@@ -129,6 +131,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   commonChatIds,
   members,
   usersById,
+  userStatusesById,
   chatsById,
   isRightColumnShown,
   isRestricted,
@@ -168,7 +171,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     isRightColumnShown, loadMoreMembers, loadCommonChats, searchMediaMessagesLocal, tabType, mediaSearchType, members,
-    commonChatIds, usersById, chatsById, chatMessages, foundIds, chatId, lastSyncTime, serverTimeOffset,
+    commonChatIds, usersById, userStatusesById, chatsById, chatMessages, foundIds, chatId, lastSyncTime,
+    serverTimeOffset,
   );
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
@@ -487,7 +491,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
-    const { byId: usersById } = global.users;
+    const { byId: usersById, statusesById: userStatusesById } = global.users;
     const { byId: chatsById } = global.chats;
 
     const isGroup = chat && isChatGroup(chat);
@@ -532,6 +536,7 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset: global.serverTimeOffset,
       activeDownloadIds,
       usersById,
+      userStatusesById,
       chatsById,
       ...(hasMembersTab && members && { members }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),

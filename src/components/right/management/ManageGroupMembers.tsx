@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChatMember, ApiUser } from '../../../api/types';
+import { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 import { selectChat } from '../../../modules/selectors';
 import { sortUserIds, isChatChannel } from '../../../modules/helpers';
@@ -22,6 +22,7 @@ type OwnProps = {
 
 type StateProps = {
   usersById: Record<string, ApiUser>;
+  userStatusesById: Record<string, ApiUserStatus>;
   members?: ApiChatMember[];
   isChannel?: boolean;
   serverTimeOffset: number;
@@ -32,6 +33,7 @@ type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
 const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
   members,
   usersById,
+  userStatusesById,
   isChannel,
   openUserInfo,
   onClose,
@@ -43,8 +45,14 @@ const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
-    return sortUserIds(members.map(({ userId }) => userId), usersById, undefined, serverTimeOffset);
-  }, [members, serverTimeOffset, usersById]);
+    return sortUserIds(
+      members.map(({ userId }) => userId),
+      usersById,
+      userStatusesById,
+      undefined,
+      serverTimeOffset,
+    );
+  }, [members, serverTimeOffset, usersById, userStatusesById]);
 
   const handleMemberClick = useCallback((id: string) => {
     openUserInfo({ id });
@@ -83,13 +91,14 @@ const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const { byId: usersById } = global.users;
+    const { byId: usersById, statusesById: userStatusesById } = global.users;
     const members = chat?.fullInfo?.members;
     const isChannel = chat && isChatChannel(chat);
 
     return {
       members,
       usersById,
+      userStatusesById,
       isChannel,
       serverTimeOffset: global.serverTimeOffset,
     };
