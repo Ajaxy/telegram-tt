@@ -97,7 +97,7 @@ const BOTTOM_THRESHOLD = 20;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
 const SCROLL_DEBOUNCE = 200;
-const FOCUSING_DURATION = 1000;
+const MESSAGE_ANIMATION_DURATION = 500;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
@@ -325,10 +325,20 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
+    const hasLastMessageChanged = (
+      messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
+    );
+    const hasViewportShifted = (
+      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
+    );
+    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
+    const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
+
     // Add extra height when few messages to allow smooth scroll animation. Uses assumption that `parentElement`
     // is a Transition slide and its CSS class can not be reset in a declarative way.
     const shouldForceScroll = (
       isViewportNewest
+      && wasMessageAdded
       && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
       && !container.parentElement!.classList.contains('force-messages-scroll')
       && (container.firstElementChild as HTMLDivElement)!.clientHeight <= container.offsetHeight * 2
@@ -341,17 +351,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         if (container.parentElement) {
           container.parentElement.classList.remove('force-messages-scroll');
         }
-      }, FOCUSING_DURATION);
+      }, MESSAGE_ANIMATION_DURATION);
     }
-
-    const hasLastMessageChanged = (
-      messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
-    );
-    const hasViewportShifted = (
-      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
-    );
-    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
-    const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
     const scrollOffset = scrollOffsetRef.current!;
