@@ -431,7 +431,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <Transition
             ref={transitionRef}
-            name={lang.isRtl ? 'slide-rtl' : 'slide'}
+            name={lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
