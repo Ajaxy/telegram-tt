@@ -29,15 +29,19 @@ import {
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
+  selectChatBot,
   selectCurrentMessageList,
   selectCurrentTextSearch,
   selectIsChatBotNotStarted,
   selectIsInSelectMode,
   selectIsRightColumnShown,
+  selectIsUserBlocked,
   selectPinnedIds,
   selectTheme,
 } from '../../modules/selectors';
-import { getCanPostInChat, getMessageSendingRestrictionReason, isUserId } from '../../modules/helpers';
+import {
+  getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
+} from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
@@ -90,11 +94,15 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   messageLists?: GlobalMessageList[];
+  isChannel?: boolean;
+  canSubscribe?: boolean;
+  canStartBot?: boolean;
+  canRestartBot?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'openChat' | 'unpinAllMessages' | 'loadUser' | 'closeLocalTextSearch' | 'exitMessageSelectMode' |
-  'closePaymentModal' | 'clearReceipt'
+  'closePaymentModal' | 'clearReceipt' | 'joinChannel' | 'sendBotCommand' | 'restartBot'
 )>;
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
@@ -129,6 +137,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
+  isChannel,
+  canSubscribe,
+  canStartBot,
+  canRestartBot,
   openChat,
   unpinAllMessages,
   loadUser,
@@ -136,6 +148,9 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   exitMessageSelectMode,
   closePaymentModal,
   clearReceipt,
+  joinChannel,
+  sendBotCommand,
+  restartBot,
 }) => {
   const { width: windowWidth } = useWindowSize();
 
@@ -163,6 +178,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION);
   const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
   const renderingIsFabShown = usePrevDuringAnimation(isFabShown, CLOSE_ANIMATION_DURATION);
+  const renderingIsChannel = usePrevDuringAnimation(isChannel, CLOSE_ANIMATION_DURATION);
+  const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, CLOSE_ANIMATION_DURATION);
+  const renderingCanStartBot = usePrevDuringAnimation(canStartBot, CLOSE_ANIMATION_DURATION);
+  const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, CLOSE_ANIMATION_DURATION);
 
   useEffect(() => {
     return chatId
@@ -256,6 +275,18 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     openChat({ id: chatId });
   }, [openChat, chatId]);
 
+  const handleSubscribeClick = useCallback(() => {
+    joinChannel({ chatId });
+  }, [joinChannel, chatId]);
+
+  const handleStartBot = useCallback(() => {
+    sendBotCommand({ command: '/start' });
+  }, [sendBotCommand]);
+
+  const handleRestartBot = useCallback(() => {
+    restartBot({ chatId });
+  }, [chatId, restartBot]);
+
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const className = buildClassName(
@@ -303,6 +334,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
 
   const isMessagingDisabled = Boolean(!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason);
+  const withExtraShift = Boolean(
+    isMessagingDisabled || isSelectModeActive || isPinnedMessageList
+    || renderingCanSubscribe || renderingCanStartBot || renderingCanRestartBot,
+  );
 
   return (
     <div
@@ -391,6 +426,36 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         </div>
                       </div>
                     )}
+                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanSubscribe && (
+                      <Button
+                        size="smaller"
+                        ripple
+                        className="join-subscribe-button"
+                        onClick={handleSubscribeClick}
+                      >
+                        {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
+                      </Button>
+                    )}
+                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanStartBot && (
+                      <Button
+                        size="smaller"
+                        ripple
+                        className="join-subscribe-button"
+                        onClick={handleStartBot}
+                      >
+                        {lang('BotStart')}
+                      </Button>
+                    )}
+                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanRestartBot && (
+                      <Button
+                        size="smaller"
+                        ripple
+                        className="join-subscribe-button"
+                        onClick={handleRestartBot}
+                      >
+                        {lang('BotRestart')}
+                      </Button>
+                    )}
                     <MessageSelectToolbar
                       messageListType={renderingMessageListType}
                       isActive={isSelectModeActive}
@@ -412,7 +477,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
             <ScrollDownButton
               isShown={renderingIsFabShown}
               canPost={renderingCanPost}
-              withExtraShift={isMessagingDisabled || isSelectModeActive || isPinnedMessageList}
+              withExtraShift={withExtraShift}
             />
           </div>
           {IS_SINGLE_COLUMN_LAYOUT && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
@@ -464,6 +529,7 @@ export default memo(withGlobal(
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
     const chat = selectChat(global, chatId);
+    const bot = selectChatBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId);
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
 
@@ -471,6 +537,13 @@ export default memo(withGlobal(
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isScheduledMessageList = messageListType === 'scheduled';
+    const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
+    const isChannel = Boolean(chat && isChatChannel(chat));
+    const canSubscribe = Boolean(
+      chat && isMainThread && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
+    );
+    const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
+    const canStartBot = !canRestartBot && isBotNotStarted;
 
     return {
       ...state,
@@ -491,10 +564,14 @@ export default memo(withGlobal(
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       messageLists,
+      isChannel,
+      canSubscribe,
+      canStartBot,
+      canRestartBot,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChat', 'unpinAllMessages', 'loadUser', 'closeLocalTextSearch', 'exitMessageSelectMode',
-    'closePaymentModal', 'clearReceipt',
+    'closePaymentModal', 'clearReceipt', 'joinChannel', 'sendBotCommand', 'restartBot',
   ]),
 )(MiddleColumn));
