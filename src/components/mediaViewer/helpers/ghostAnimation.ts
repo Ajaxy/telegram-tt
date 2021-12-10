@@ -96,7 +96,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   }
 
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
-    '.Transition__slide--active .media-viewer-content img, .Transition__slide--active .media-viewer-content video',
+    '.MediaViewerSlide.active img, .MediaViewerSlide.active video',
   );
   if (!fromImage || !toImage) {
     return;

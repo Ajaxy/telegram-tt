@@ -14,7 +14,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import './Transition.scss';
 
 type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => any;
-type OwnProps = {
+export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
   name: (
@@ -26,6 +26,7 @@ type OwnProps = {
   shouldRestoreHeight?: boolean;
   shouldCleanup?: boolean;
   cleanupExceptionKey?: number;
+  isDisabled?: boolean;
   id?: string;
   className?: string;
   onStart?: NoneToVoidFunction;
@@ -39,7 +40,7 @@ const classNames = {
   active: 'Transition__slide--active',
 };
 
-const Transition: FC<OwnProps> = ({
+const Transition: FC<TransitionProps> = ({
   ref,
   activeKey,
   name,

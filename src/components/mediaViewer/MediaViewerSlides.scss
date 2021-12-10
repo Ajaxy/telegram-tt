@@ -1,0 +1,37 @@
+.MediaViewerSlides {
+  position: absolute;
+  display: flex;
+  height: 100%;
+  max-height: 100vh;
+  min-height: -moz-available;
+  max-height: -webkit-fill-available;
+  width: 100%;
+  overflow: hidden;
+  -ms-touch-action: none;
+  touch-action: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  & * {
+    -ms-scroll-chaining: none;
+  }
+}
+
+.MediaViewerSlide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  flex: 100% 0 0;
+  z-index: 0;
+  touch-action: none;
+  transform-origin: 0 0;
+
+  &.active {
+    z-index: 1;
+  }
+}
