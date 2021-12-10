@@ -53,11 +53,15 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   loadFullUser,
   openMediaViewer,
 }) => {
+  const lang = useLang();
+
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
   const fullName = user ? getUserFullName(user) : (chat ? chat.title : '');
   const photos = user?.photos || chat?.photos || [];
-  const slideAnimation = animationLevel >= 1 ? 'slide' : 'none';
+  const slideAnimation = animationLevel >= 1
+    ? (lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized')
+    : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const isFirst = isSavedMessages || photos.length <= 1 || currentPhotoIndex === 0;
@@ -69,8 +73,6 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       setCurrentPhotoIndex(Math.max(0, photos.length - 1));
     }
   }, [currentPhotoIndex, photos.length]);
-
-  const lang = useLang();
 
   useEffect(() => {
     if (connectionState === 'connectionStateReady' && userId && !forceShowSelf) {

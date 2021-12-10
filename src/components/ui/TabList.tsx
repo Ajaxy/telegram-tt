@@ -2,6 +2,7 @@ import React, {
   FC, memo, useRef, useEffect,
 } from '../../lib/teact/teact';
 
+import { IS_ANDROID, IS_IOS } from '../../util/environment';
 import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';
 import usePrevious from '../../hooks/usePrevious';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
@@ -25,6 +26,8 @@ type OwnProps = {
 };
 
 const TAB_SCROLL_THRESHOLD_PX = 16;
+// Should match duration from `--slide-transition` CSS variable
+const SCROLL_DURATION = IS_IOS || IS_ANDROID ? 450 : 300;
 
 const TabList: FC<OwnProps> = ({
   tabs, activeTab, big, onSwitchTab,
@@ -38,21 +41,24 @@ const TabList: FC<OwnProps> = ({
   // Scroll container to place active tab in the center
   useEffect(() => {
     const container = containerRef.current!;
-    if (container.scrollWidth <= container.offsetWidth) {
+    const { scrollWidth, offsetWidth, scrollLeft } = container;
+    if (scrollWidth <= offsetWidth) {
       return;
     }
 
-    const activeTabElement = container.querySelector('.Tab.active') as HTMLElement | null;
-    if (activeTabElement) {
-      const newLeft = activeTabElement.offsetLeft - (container.offsetWidth / 2) + (activeTabElement.offsetWidth / 2);
-
-      // Prevent scrolling by only a couple of pixels, which doesn't look smooth
-      if (Math.abs(newLeft - container.scrollLeft) < TAB_SCROLL_THRESHOLD_PX) {
-        return;
-      }
-
-      fastSmoothScrollHorizontal(container, newLeft);
+    const activeTabElement = container.childNodes[activeTab] as HTMLElement | null;
+    if (!activeTabElement) {
+      return;
     }
+
+    const newLeft = activeTabElement.offsetLeft - (offsetWidth / 2) + (activeTabElement.offsetWidth / 2);
+
+    // Prevent scrolling by only a couple of pixels, which doesn't look smooth
+    if (Math.abs(newLeft - scrollLeft) < TAB_SCROLL_THRESHOLD_PX) {
+      return;
+    }
+
+    fastSmoothScrollHorizontal(container, newLeft, SCROLL_DURATION);
   }, [activeTab]);
 
   const lang = useLang();
@@ -67,7 +73,7 @@ const TabList: FC<OwnProps> = ({
         <Tab
           key={tab.title}
           title={lang(tab.title)}
-          active={i === activeTab}
+          isActive={i === activeTab}
           badgeCount={tab.badgeCount}
           isBadgeActive={tab.isBadgeActive}
           previousActiveTab={previousActiveTab}

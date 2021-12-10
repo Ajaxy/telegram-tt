@@ -1,7 +1,6 @@
 import { getGlobal } from '../lib/teact/teactn';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
-import { IS_IOS } from './environment';
 import { animate } from './animation';
 
 const DEFAULT_DURATION = 300;
@@ -11,15 +10,7 @@ export default function fastSmoothScrollHorizontal(container: HTMLElement, left:
     duration = 0;
   }
 
-  // Native way seems to be smoother in Chrome
-  if (!IS_IOS) {
-    container.scrollTo({
-      left,
-      ...(duration && { behavior: 'smooth' }),
-    });
-  } else {
-    scrollWithJs(container, left, duration);
-  }
+  scrollWithJs(container, left, duration);
 }
 
 function scrollWithJs(container: HTMLElement, left: number, duration: number) {

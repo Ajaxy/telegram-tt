@@ -403,7 +403,9 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   // Support for swipe gestures and closing on click
   useEffect(() => {
-    const element = document.querySelector<HTMLDivElement>('.slide-container > .active, .slide-container > .to');
+    const element = document.querySelector<HTMLDivElement>(
+      '.slide-container > .Transition__slide--active, .slide-container > .to',
+    );
     if (!element) {
       return undefined;
     }

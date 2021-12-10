@@ -97,11 +97,11 @@ const MessageContextMenu: FC<OwnProps> = ({
   const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined);
 
   const getTriggerElement = useCallback(() => {
-    return document.querySelector(`.active > .MessageList div[data-message-id="${message.id}"]`);
+    return document.querySelector(`.Transition__slide--active > .MessageList div[data-message-id="${message.id}"]`);
   }, [message.id]);
 
   const getRootElement = useCallback(
-    () => document.querySelector('.active > .MessageList'),
+    () => document.querySelector('.Transition__slide--active > .MessageList'),
     [],
   );
 

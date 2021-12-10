@@ -1,6 +1,6 @@
 // @optimization
 @mixin while-transition() {
-  .Transition > div:not(.active) &, body.animating-right-column & {
+  .Transition > div:not(.Transition__slide--active) &, body.animating-right-column & {
     @content;
   }
 }

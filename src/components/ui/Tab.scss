@@ -20,16 +20,16 @@
     outline: none;
   }
 
-  &.active {
+  &--active {
     cursor: default;
     color: var(--color-primary);
 
     i {
-      opacity: 1;
+      opacity: 1 !important;
     }
   }
 
-  &:not(.active):hover {
+  &:not(&--active):hover {
     background: var(--color-interactive-element-hover);
   }
 
@@ -57,10 +57,10 @@
     body.is-macos & {
       line-height: 1.25rem;
     }
+  }
 
-    &.active {
-      background: var(--color-primary);
-    }
+  &__badge--active {
+    background: var(--color-primary) !important;
   }
 
   i {

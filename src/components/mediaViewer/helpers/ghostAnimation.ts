@@ -96,7 +96,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   }
 
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
-    '.active .media-viewer-content img, .active .media-viewer-content video',
+    '.Transition__slide--active .media-viewer-content img, .Transition__slide--active .media-viewer-content video',
   );
   if (!fromImage || !toImage) {
     return;
@@ -271,7 +271,7 @@ function isElementInViewport(el: HTMLElement) {
 }
 
 function isMessageImageFullyVisible(container: HTMLElement, imageEl: HTMLElement) {
-  const messageListElement = document.querySelector<HTMLDivElement>('.active > .MessageList')!;
+  const messageListElement = document.querySelector<HTMLDivElement>('.Transition__slide--active > .MessageList')!;
   let imgOffsetTop = container.offsetTop + imageEl.closest<HTMLDivElement>('.content-inner, .WebPage')!.offsetTop;
   if (container.id.includes('album-media-')) {
     imgOffsetTop += container.parentElement!.offsetTop + container.closest<HTMLDivElement>('.Message')!.offsetTop;
@@ -302,7 +302,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
   switch (origin) {
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
-      containerSelector = `.active > .MessageList #album-media-${message!.id}`;
+      containerSelector = `.Transition__slide--active > .MessageList #album-media-${message!.id}`;
       mediaSelector = '.full-media';
       break;
 
@@ -322,19 +322,19 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       break;
 
     case MediaViewerOrigin.SettingsAvatar:
-      containerSelector = '#Settings .ProfileInfo .active .ProfilePhoto';
+      containerSelector = '#Settings .ProfileInfo .Transition__slide--active .ProfilePhoto';
       mediaSelector = 'img.avatar-media';
       break;
 
     case MediaViewerOrigin.ProfileAvatar:
-      containerSelector = '#RightColumn .ProfileInfo .active .ProfilePhoto';
+      containerSelector = '#RightColumn .ProfileInfo .Transition__slide--active .ProfilePhoto';
       mediaSelector = 'img.avatar-media';
       break;
 
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:
-      containerSelector = `.active > .MessageList #message${message!.id}`;
+      containerSelector = `.Transition__slide--active > .MessageList #message${message!.id}`;
       mediaSelector = '.message-content .full-media, .message-content .thumbnail';
   }
 
