@@ -107,14 +107,14 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           setProfileState(ProfileState.Profile);
           break;
         }
-        toggleChatInfo(undefined, true);
+        toggleChatInfo(undefined, { forceSyncOnIOs: true });
         break;
       case RightColumnContent.UserInfo:
         if (isScrolledDown && shouldScrollUp) {
           setProfileState(ProfileState.Profile);
           break;
         }
-        openUserInfo({ id: undefined }, true);
+        openUserInfo({ id: undefined }, { forceSyncOnIOs: true });
         break;
       case RightColumnContent.Management: {
         switch (managementScreen) {

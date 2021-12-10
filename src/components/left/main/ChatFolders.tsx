@@ -118,7 +118,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [displayedFolders, folderCountersById, lang]);
 
   const handleSwitchTab = useCallback((index: number) => {
-    setActiveChatFolder(index);
+    setActiveChatFolder(index, { forceOnHeavyAnimation: true });
   }, [setActiveChatFolder]);
 
   // Prevent `activeTab` pointing at non-existing folder after update
@@ -141,10 +141,10 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
       selectorToPreventScroll: '.chat-list',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
-          setActiveChatFolder(Math.min(activeChatFolder + 1, folderTabs.length - 1));
+          setActiveChatFolder(Math.min(activeChatFolder + 1, folderTabs.length - 1), { forceOnHeavyAnimation: true });
           return true;
         } else if (direction === SwipeDirection.Right) {
-          setActiveChatFolder(Math.max(0, activeChatFolder - 1));
+          setActiveChatFolder(Math.max(0, activeChatFolder - 1), { forceOnHeavyAnimation: true });
           return true;
         }
 
@@ -161,7 +161,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }) : undefined), [activeChatFolder, setActiveChatFolder]);
 
-  useHistoryBack(activeChatFolder !== 0, () => setActiveChatFolder(0));
+  useHistoryBack(activeChatFolder !== 0, () => setActiveChatFolder(0, { forceOnHeavyAnimation: true }));
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -177,7 +177,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
         const folder = Number(digit) - 1;
         if (folder > folderTabs.length - 1) return;
 
-        setActiveChatFolder(folder);
+        setActiveChatFolder(folder, { forceOnHeavyAnimation: true });
         e.preventDefault();
       }
     };

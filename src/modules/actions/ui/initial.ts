@@ -88,7 +88,7 @@ addReducer('disableHistoryAnimations', () => {
   setGlobal({
     ...getGlobal(),
     shouldSkipHistoryAnimations: true,
-  }, true);
+  }, { forceSyncOnIOs: true });
 });
 
 function subscribeToSystemThemeChange() {
