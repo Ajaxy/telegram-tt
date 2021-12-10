@@ -98,6 +98,9 @@ export type VirtualElementChildren = VirtualElement[];
 
 const Fragment = Symbol('Fragment');
 
+const DEBUG_RENDER_THRESHOLD = 7;
+const DEBUG_EFFECT_THRESHOLD = 7;
+
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
@@ -285,13 +288,13 @@ export function renderComponent(componentInstance: ComponentInstance) {
     newRenderedValue = Component(props);
 
     if (DEBUG) {
-      const renderTime = performance.now() - DEBUG_startAt!;
+      const duration = performance.now() - DEBUG_startAt!;
       const componentName = componentInstance.name;
-      if (renderTime > 7) {
+      if (duration > DEBUG_RENDER_THRESHOLD) {
         // eslint-disable-next-line no-console
-        console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(renderTime)} ms`);
+        console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(duration)} ms`);
       }
-      DEBUG_components[componentName].renderTimes.push(renderTime);
+      DEBUG_components[componentName].renderTimes.push(duration);
       DEBUG_components[componentName].renderCount++;
     }
   } catch (err) {
@@ -525,7 +528,24 @@ function useLayoutEffectBase(
     const { cleanup } = byCursor[cursor];
     if (typeof cleanup === 'function') {
       try {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        let DEBUG_startAt: number | undefined;
+        if (DEBUG) {
+          DEBUG_startAt = performance.now();
+        }
+
         cleanup();
+
+        if (DEBUG) {
+          const duration = performance.now() - DEBUG_startAt!;
+          const componentName = componentInstance.name;
+          if (duration > DEBUG_EFFECT_THRESHOLD) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `[Teact] Slow cleanup at effect cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`,
+            );
+          }
+        }
       } catch (err) {
         handleError(err);
       }
@@ -537,7 +557,22 @@ function useLayoutEffectBase(
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    let DEBUG_startAt: number | undefined;
+    if (DEBUG) {
+      DEBUG_startAt = performance.now();
+    }
+
     byCursor[cursor].cleanup = effect() as Function;
+
+    if (DEBUG) {
+      const duration = performance.now() - DEBUG_startAt!;
+      const componentName = componentInstance.name;
+      if (duration > DEBUG_EFFECT_THRESHOLD) {
+        // eslint-disable-next-line no-console
+        console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
+      }
+    }
   }
 
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
