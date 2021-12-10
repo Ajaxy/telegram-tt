@@ -45,7 +45,7 @@
     transform: scaleX(1) translateX(0);
   }
 
-  .no-composer .unpin-button-container + &,
+  .no-composer .middle-column-footer-button-container + &,
   .no-composer .messaging-disabled + & {
     top: auto;
   }

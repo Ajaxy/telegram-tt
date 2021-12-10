@@ -179,13 +179,14 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const renderingChatId = usePrevDuringAnimation(chatId, CLOSE_ANIMATION_DURATION);
   const renderingThreadId = usePrevDuringAnimation(threadId, CLOSE_ANIMATION_DURATION);
   const renderingMessageListType = usePrevDuringAnimation(messageListType, CLOSE_ANIMATION_DURATION);
-  const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION);
-  const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
-  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, CLOSE_ANIMATION_DURATION);
-  const renderingIsChannel = usePrevDuringAnimation(isChannel, CLOSE_ANIMATION_DURATION);
   const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, CLOSE_ANIMATION_DURATION);
   const renderingCanStartBot = usePrevDuringAnimation(canStartBot, CLOSE_ANIMATION_DURATION);
   const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, CLOSE_ANIMATION_DURATION);
+  const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION)
+    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe;
+  const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
+  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, CLOSE_ANIMATION_DURATION);
+  const renderingIsChannel = usePrevDuringAnimation(isChannel, CLOSE_ANIMATION_DURATION);
 
   const prevTransitionKey = usePrevious(currentTransitionKey);
   const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
@@ -349,10 +350,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
 
   const isMessagingDisabled = Boolean(!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason);
-  const withExtraShift = Boolean(
-    isMessagingDisabled || isSelectModeActive || isPinnedMessageList
-    || renderingCanSubscribe || renderingCanStartBot || renderingCanRestartBot,
+  const withMessageListBottomShift = Boolean(
+    renderingCanRestartBot || renderingCanSubscribe || renderingCanStartBot || isPinnedMessageList,
   );
+  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || withMessageListBottomShift);
 
   return (
     <div
@@ -408,6 +409,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     onNotchToggle={setIsNotchShown}
                     isReady={isReady && !willSwitchMessageList}
                     isActive={isActive}
+                    withBottomShift={withMessageListBottomShift}
                   />
                   <div className={footerClassName}>
                     {renderingCanPost && (
@@ -421,7 +423,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                       />
                     )}
                     {isPinnedMessageList && (
-                      <div className="unpin-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                         <Button
                           size="tiny"
                           fluid
@@ -444,34 +446,43 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                       </div>
                     )}
                     {IS_SINGLE_COLUMN_LAYOUT && renderingCanSubscribe && (
-                      <Button
-                        size="smaller"
-                        ripple
-                        className="join-subscribe-button"
-                        onClick={handleSubscribeClick}
-                      >
-                        {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
-                      </Button>
+                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                        <Button
+                          size="tiny"
+                          fluid
+                          ripple
+                          className="join-subscribe-button"
+                          onClick={handleSubscribeClick}
+                        >
+                          {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
+                        </Button>
+                      </div>
                     )}
                     {IS_SINGLE_COLUMN_LAYOUT && renderingCanStartBot && (
-                      <Button
-                        size="smaller"
-                        ripple
-                        className="join-subscribe-button"
-                        onClick={handleStartBot}
-                      >
-                        {lang('BotStart')}
-                      </Button>
+                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                        <Button
+                          size="tiny"
+                          fluid
+                          ripple
+                          className="join-subscribe-button"
+                          onClick={handleStartBot}
+                        >
+                          {lang('BotStart')}
+                        </Button>
+                      </div>
                     )}
                     {IS_SINGLE_COLUMN_LAYOUT && renderingCanRestartBot && (
-                      <Button
-                        size="smaller"
-                        ripple
-                        className="join-subscribe-button"
-                        onClick={handleRestartBot}
-                      >
-                        {lang('BotRestart')}
-                      </Button>
+                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                        <Button
+                          size="tiny"
+                          fluid
+                          ripple
+                          className="join-subscribe-button"
+                          onClick={handleRestartBot}
+                        >
+                          {lang('BotRestart')}
+                        </Button>
+                      </div>
                     )}
                     <MessageSelectToolbar
                       messageListType={renderingMessageListType}

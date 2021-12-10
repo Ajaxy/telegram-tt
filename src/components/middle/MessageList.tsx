@@ -65,6 +65,7 @@ type OwnProps = {
   onFabToggle: (shouldShow: boolean) => void;
   onNotchToggle: (shouldShow: boolean) => void;
   hasTools?: boolean;
+  withBottomShift?: boolean;
 };
 
 type StateProps = {
@@ -136,6 +137,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   botDescription,
   threadTopMessageId,
   hasLinkedChat,
+  withBottomShift,
   openHistoryCalendar,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -470,6 +472,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     noAvatars && 'no-avatars',
     !canPost && 'no-composer',
     type === 'pinned' && 'type-pinned',
+    withBottomShift && 'with-bottom-shift',
     isSelectModeActive && 'select-mode-active',
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
