@@ -27,7 +27,7 @@ type OwnProps = {
 
 const TAB_SCROLL_THRESHOLD_PX = 16;
 // Should match duration from `--slide-transition` CSS variable
-const SCROLL_DURATION = IS_IOS || IS_ANDROID ? 450 : 300;
+const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
   tabs, activeTab, big, onSwitchTab,
