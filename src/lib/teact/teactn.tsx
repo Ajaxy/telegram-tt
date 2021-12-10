@@ -10,6 +10,7 @@ import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallo
 import { orderBy } from '../../util/iteratees';
 import { GlobalState, GlobalActions, ActionTypes } from '../../global/types';
 import { handleError } from '../../util/handleError';
+import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
 export default React;
 
@@ -40,11 +41,16 @@ const containers = new Map<string, {
   DEBUG_componentName: string;
 }>();
 
+const runCallbacksThrottled = throttleWithRaf(runCallbacks);
+
 function runCallbacks() {
+  if (isHeavyAnimating()) {
+    runCallbacksThrottled();
+    return;
+  }
+
   callbacks.forEach((cb) => cb(currentGlobal));
 }
-
-const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
 // `noThrottle = true` is used as a workaround for iOS gesture history navigation
 export function setGlobal(newGlobal?: GlobalState, noThrottle = false) {

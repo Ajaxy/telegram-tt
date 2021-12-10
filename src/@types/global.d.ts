@@ -65,7 +65,7 @@ interface IWebpWorker extends Worker {
 
 interface Window {
   ClipboardItem?: any;
-  requestIdleCallback: (cb: AnyToVoidFunction) => void;
+  requestIdleCallback: (cb: AnyToVoidFunction, options:{ timeout?: number }) => void;
 }
 
 interface Clipboard { write?: any }
