@@ -1,10 +1,16 @@
+import React, {
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+} from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+
+import { GlobalActions } from '../../global/types';
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
 } from '../../api/types';
+import { MediaViewerOrigin } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 
-import { GlobalActions } from '../../global/types';
 import useBlurSync from '../../hooks/useBlurSync';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
@@ -12,12 +18,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-
 import usePrevious from '../../hooks/usePrevious';
-import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
 import {
   getChatAvatarHash,
   getChatMediaMessageIds,
@@ -46,7 +47,6 @@ import {
   selectScheduledMessages,
   selectUser,
 } from '../../modules/selectors';
-import { MediaViewerOrigin } from '../../types';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { captureEvents } from '../../util/captureEvents';
@@ -55,18 +55,19 @@ import { pick } from '../../util/iteratees';
 import windowSize from '../../util/windowSize';
 import { AVATAR_FULL_DIMENSIONS, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
+import { animateClosing, animateOpening } from './helpers/ghostAnimation';
+
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import Transition from '../ui/Transition';
-import { animateClosing, animateOpening } from './helpers/ghostAnimation';
-
-import './MediaViewer.scss';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerSlides from './MediaViewerSlides';
 import PanZoom from './PanZoom';
 import SenderInfo from './SenderInfo';
 import SlideTransition from './SlideTransition';
 import ZoomControls from './ZoomControls';
+
+import './MediaViewer.scss';
 
 type StateProps = {
   chatId?: string;
@@ -414,7 +415,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (isZoomed || IS_TOUCH_ENV) return undefined;
-    const element = document.querySelector<HTMLDivElement>('.MediaViewerSlide.active');
+    const element = document.querySelector<HTMLDivElement>('.MediaViewerSlide--active');
     if (!element) {
       return undefined;
     }
@@ -492,7 +493,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               activeKey={selectedMediaMessageIndex}
               name={slideAnimation}
             >
-              {(isActive) => (
+              {(isActive: boolean) => (
                 <MediaViewerSlides
                   messageId={messageId}
                   getMessageId={getMessageId}
