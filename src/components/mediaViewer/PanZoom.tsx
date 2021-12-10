@@ -45,7 +45,7 @@ const SCALE_VALUES = {
 const ZOOM_SAFE_AREA = 150;
 
 function calculateSafeZoneOnZoom(oldScale: number, matrixData: number[], wrapper: HTMLDivElement | null) {
-  const image = wrapper && wrapper.querySelector('.active img');
+  const image = wrapper && wrapper.querySelector('.Transition__slide--active img');
   if (!wrapper || !image) {
     return matrixData;
   }

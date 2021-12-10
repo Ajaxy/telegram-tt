@@ -13,7 +13,7 @@
       left: 0;
     }
 
-    &:not(.active):not(.from):not(.to) {
+    &:not(.Transition__slide--active):not(.from):not(.to) {
       display: none !important; // Best performance when animating container
       //transform: scale(0); // Shortest initial delay
     }
@@ -26,6 +26,20 @@
   /*
    * slide
    */
+  &.slide-optimized,
+  &.slide-optimized-rtl {
+    // Create a new composite layer to reduce the page repaint area when switching a tab
+    transform: translate3d(0, 0, 0);
+
+    #root & > div {
+      position: absolute;
+      display: block !important;
+      top: 0;
+      left: 0;
+      transition: transform var(--slide-transition);
+      transform: scale(0);
+    }
+  }
 
   &.slide {
     > .to {
@@ -60,7 +74,7 @@
   }
 
 
-  &.slide-reversed {
+  &.slide-rtl {
     > .to {
       transform: translateX(-100%);
     }

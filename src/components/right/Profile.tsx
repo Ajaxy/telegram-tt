@@ -431,7 +431,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           <Transition
             ref={transitionRef}
-            name={lang.isRtl ? 'slide-reversed' : 'slide'}
+            name={lang.isRtl ? 'slide-rtl' : 'slide'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
@@ -479,7 +479,7 @@ function buildInfiniteScrollItemSelector(resultType: string) {
     // Used on first render
     `.shared-media-transition > div:only-child > .${resultType}-list > .scroll-item`,
     // Used after transition
-    `.shared-media-transition > div.active > .${resultType}-list > .scroll-item`,
+    `.shared-media-transition > .Transition__slide--active > .${resultType}-list > .scroll-item`,
   ].join(', ');
 }
 

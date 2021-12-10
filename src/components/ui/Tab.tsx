@@ -1,8 +1,9 @@
 import React, {
-  FC, useLayoutEffect, useRef, memo,
+  FC, useRef, memo, useEffect,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import forceReflow from '../../util/forceReflow';
 import renderText from '../common/helpers/renderText';
 
 import './Tab.scss';
@@ -10,7 +11,7 @@ import './Tab.scss';
 type OwnProps = {
   className?: string;
   title: string;
-  active?: boolean;
+  isActive?: boolean;
   badgeCount?: number;
   isBadgeActive?: boolean;
   previousActiveTab?: number;
@@ -18,10 +19,15 @@ type OwnProps = {
   clickArg: number;
 };
 
+const classNames = {
+  active: 'Tab--active',
+  badgeActive: 'Tab__badge--active',
+};
+
 const Tab: FC<OwnProps> = ({
   className,
   title,
-  active,
+  isActive,
   badgeCount,
   isBadgeActive,
   previousActiveTab,
@@ -29,56 +35,51 @@ const Tab: FC<OwnProps> = ({
   clickArg,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  const tabRef = useRef<HTMLButtonElement>(null);
+  const tabRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    if (!active || previousActiveTab === undefined) {
+  useEffect(() => {
+    if (!isActive || previousActiveTab === undefined) {
       return;
     }
 
-    const tab = tabRef.current!;
-    const indicator = tab.querySelector('i')!;
-    const prevTab = tab.parentElement!.children[previousActiveTab];
-    if (!prevTab) {
+    const tabEl = tabRef.current!;
+    const prevTabEl = tabEl.parentElement!.children[previousActiveTab];
+    if (!prevTabEl) {
       return;
     }
-    const currentIndicator = prevTab.querySelector('i')!;
 
-    currentIndicator.classList.remove('animate');
-    indicator.classList.remove('animate');
+    const platformEl = tabEl.querySelector('i')!;
+    const prevPlatformEl = prevTabEl.querySelector('i')!;
 
-    // We move and resize our indicator so it repeats the position and size of the previous one.
-    const shiftLeft = currentIndicator.parentElement!.offsetLeft - indicator.parentElement!.offsetLeft;
-    const scaleFactor = currentIndicator.clientWidth / indicator.clientWidth;
-    indicator.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
+    // We move and resize the platform, so it repeats the position and size of the previous one
+    const shiftLeft = prevPlatformEl.parentElement!.offsetLeft - platformEl.parentElement!.offsetLeft;
+    const scaleFactor = prevPlatformEl.clientWidth / platformEl.clientWidth;
 
-    // 3 AFs needed here to synchronize animations with Transition component
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Now we remove the transform to let it animate to its own position and size.
-          indicator.classList.add('animate');
-          indicator.style.transform = 'none';
-        });
-      });
-    });
-  }, [active, previousActiveTab]);
+    prevPlatformEl.classList.remove('animate');
+    platformEl.classList.remove('animate');
+    platformEl.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
+    forceReflow(platformEl);
+    platformEl.classList.add('animate');
+    platformEl.style.transform = 'none';
+
+    prevTabEl.classList.remove(classNames.active);
+    tabEl.classList.add(classNames.active);
+  }, [isActive, previousActiveTab]);
 
   return (
-    <button
-      type="button"
-      className={buildClassName('Tab', className, active && 'active')}
+    <div
+      className={buildClassName('Tab', className)}
       onClick={() => onClick(clickArg)}
       ref={tabRef}
     >
       <span>
         {renderText(title)}
         {!!badgeCount && (
-          <span className={buildClassName('badge', isBadgeActive && 'active')}>{badgeCount}</span>
+          <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
         <i />
       </span>
-    </button>
+    </div>
   );
 };
 

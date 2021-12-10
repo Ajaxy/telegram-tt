@@ -228,7 +228,7 @@ const ChatFolders: FC<OwnProps & StateProps & DispatchProps> = ({
       ) : undefined}
       <Transition
         ref={transitionRef}
-        name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slide-reversed' : 'slide'}
+        name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized'}
         activeKey={activeChatFolder}
         renderCount={folderTabs ? folderTabs.length : undefined}
       >

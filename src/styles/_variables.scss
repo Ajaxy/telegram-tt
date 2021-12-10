@@ -210,21 +210,15 @@ $color-user-8: #faa774;
 
   --layer-transition: 300ms cubic-bezier(0.33, 1, 0.68, 1);
   --layer-blackout-opacity: 0.3;
-
-  // For some reason these parameters cause worse animation in desktop Chrome
-  @media (max-width: 600px) {
-    --layer-transition: 450ms cubic-bezier(0.33, 1, 0.68, 1);
-
-    body.is-android {
-      --layer-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
-    }
-  }
-
   --slide-transition: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  --select-transition: 200ms ease-out;
+
+  body.is-ios {
+    --layer-transition: 450ms cubic-bezier(0.33, 1, 0.68, 1);
+  }
 
   body.is-android {
-    --slide-transition: 200ms ease-in-out;
+    --layer-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+    --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
   }
-
-  --select-transition: 200ms ease-out;
 }

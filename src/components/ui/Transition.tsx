@@ -4,11 +4,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../lib/teact/teactn';
 
+import buildClassName from '../../util/buildClassName';
+import forceReflow from '../../util/forceReflow';
+import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import usePrevious from '../../hooks/usePrevious';
-import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import { waitForAnimationEnd } from '../../util/cssAnimationEndListeners';
 
 import './Transition.scss';
 
@@ -17,8 +18,8 @@ type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
   name: (
-    'none' | 'slide' | 'slide-reversed' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
-    | 'fade' | 'push-slide' | 'reveal'
+    'none' | 'slide' | 'slide-rtl' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
+    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
@@ -27,12 +28,16 @@ type OwnProps = {
   cleanupExceptionKey?: number;
   id?: string;
   className?: string;
-  onStart?: () => void;
-  onStop?: () => void;
+  onStart?: NoneToVoidFunction;
+  onStop?: NoneToVoidFunction;
   children: ChildrenFn;
 };
 
 const CLEANED_UP = Symbol('CLEANED_UP');
+
+const classNames = {
+  active: 'Transition__slide--active',
+};
 
 const Transition: FC<OwnProps> = ({
   ref,
@@ -85,7 +90,11 @@ const Transition: FC<OwnProps> = ({
 
     const childElements = container.children;
     if (childElements.length === 1 && !activeKeyChanged) {
-      childElements[0].classList.add('active');
+      if (name.startsWith('slide-optimized')) {
+        (childElements[0] as HTMLElement).style.transform = 'translate3d(0, 0, 0)';
+      }
+
+      childElements[0].classList.add(classNames.active);
 
       return;
     }
@@ -96,24 +105,44 @@ const Transition: FC<OwnProps> = ({
       return;
     }
 
+    currentKeyRef.current = activeKey;
+
     const isBackwards = (
       direction === -1
       || (direction === 'auto' && prevActiveKey > activeKey)
       || (direction === 'inverse' && prevActiveKey < activeKey)
     );
 
-    container.classList.remove('animating');
-    container.classList.toggle('backwards', isBackwards);
-
     const keys = Object.keys(rendersRef.current).map(Number);
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
+
+    if (name === 'slide-optimized' || name === 'slide-optimized-rtl') {
+      performSlideOptimized(
+        name,
+        isBackwards,
+        cleanup,
+        activeKey,
+        currentKeyRef,
+        container,
+        shouldRestoreHeight,
+        onStart,
+        onStop,
+        childNodes[activeIndex] as HTMLElement,
+        childNodes[prevActiveIndex] as HTMLElement,
+      );
+
+      return;
+    }
+
+    container.classList.remove('animating');
+    container.classList.toggle('backwards', isBackwards);
 
     if (name === 'none' || animationLevel === 0) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           node.classList.remove('from', 'through', 'to');
-          node.classList.toggle('active', i === activeIndex);
+          node.classList.toggle(classNames.active, i === activeIndex);
         }
       });
 
@@ -124,7 +153,7 @@ const Transition: FC<OwnProps> = ({
 
     childNodes.forEach((node, i) => {
       if (node instanceof HTMLElement) {
-        node.classList.remove('active');
+        node.classList.remove(classNames.active);
         node.classList.toggle('from', i === prevActiveIndex);
         node.classList.toggle('through', (
           (i > prevActiveIndex && i < activeIndex) || (i < prevActiveIndex && i > activeIndex)
@@ -138,9 +167,7 @@ const Transition: FC<OwnProps> = ({
     requestAnimationFrame(() => {
       container.classList.add('animating');
 
-      if (onStart) {
-        onStart();
-      }
+      onStart?.();
 
       function onAnimationEnd() {
         requestAnimationFrame(() => {
@@ -153,12 +180,12 @@ const Transition: FC<OwnProps> = ({
           childNodes.forEach((node, i) => {
             if (node instanceof HTMLElement) {
               node.classList.remove('from', 'through', 'to');
-              node.classList.toggle('active', i === activeIndex);
+              node.classList.toggle(classNames.active, i === activeIndex);
             }
           });
 
           if (shouldRestoreHeight) {
-            const activeElement = container.querySelector<HTMLDivElement>('.active');
+            const activeElement = container.querySelector<HTMLDivElement>(`.${classNames.active}`);
 
             if (activeElement) {
               activeElement.style.height = 'auto';
@@ -166,13 +193,9 @@ const Transition: FC<OwnProps> = ({
             }
           }
 
+          onStop?.();
           dispatchHeavyAnimationStop();
-
           cleanup();
-
-          if (onStop) {
-            onStop();
-          }
         });
       }
 
@@ -181,8 +204,6 @@ const Transition: FC<OwnProps> = ({
         : name === 'reveal' && isBackwards
           ? childNodes[prevActiveIndex]
           : childNodes[activeIndex];
-
-      currentKeyRef.current = activeKey;
 
       if (watchedNode) {
         waitForAnimationEnd(watchedNode, onAnimationEnd);
@@ -209,7 +230,7 @@ const Transition: FC<OwnProps> = ({
   useLayoutEffect(() => {
     if (shouldRestoreHeight) {
       const container = containerRef.current!;
-      const activeElement = container.querySelector<HTMLDivElement>('.active')
+      const activeElement = container.querySelector<HTMLDivElement>(`.${classNames.active}`)
         || container.querySelector<HTMLDivElement>('.from');
 
       if (activeElement) {
@@ -222,27 +243,85 @@ const Transition: FC<OwnProps> = ({
 
   const renders = rendersRef.current;
   const collection = Object.keys(renderCount ? new Array(renderCount).fill(undefined) : renders).map(Number);
+
   const contents = collection.map((key) => {
     const render = renders[key];
 
     return (
-      typeof render === 'function'
-        ? <div key={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
-        : undefined
+      typeof render === 'function' ? (
+        <div key={key} teactOrderKey={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
+      ) : undefined
     );
   });
 
-  const fullClassName = buildClassName(
-    'Transition',
-    className,
-    name,
-  );
-
   return (
-    <div ref={containerRef} id={id} className={fullClassName}>
+    <div ref={containerRef} id={id} className={buildClassName('Transition', className, name)} teactFastList>
       {contents}
     </div>
   );
 };
 
 export default Transition;
+
+function performSlideOptimized(
+  name: 'slide-optimized' | 'slide-optimized-rtl',
+  isBackwards: boolean,
+  cleanup: NoneToVoidFunction,
+  activeKey: number,
+  currentKeyRef: { current: number | undefined },
+  container: HTMLElement,
+  shouldRestoreHeight?: boolean,
+  onStart?: NoneToVoidFunction,
+  onStop?: NoneToVoidFunction,
+  currentSlide?: HTMLElement,
+  prevSlide?: HTMLElement,
+) {
+  if (!prevSlide || !currentSlide) {
+    return;
+  }
+
+  if (name === 'slide-optimized-rtl') {
+    isBackwards = !isBackwards;
+  }
+
+  const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+
+  requestAnimationFrame(() => {
+    onStart?.();
+
+    prevSlide.style.transition = 'none';
+    prevSlide.style.transform = 'translate3d(0, 0, 0)';
+
+    currentSlide.style.transition = 'none';
+    currentSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+
+    forceReflow(currentSlide);
+
+    prevSlide.style.transition = '';
+    prevSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
+
+    currentSlide.style.transition = '';
+    currentSlide.style.transform = 'translate3d(0, 0, 0)';
+
+    prevSlide.classList.remove(classNames.active);
+    currentSlide.classList.add(classNames.active);
+
+    waitForTransitionEnd(prevSlide, () => {
+      if (activeKey !== currentKeyRef.current) {
+        return;
+      }
+
+      prevSlide.style.transition = 'none';
+      prevSlide.style.transform = '';
+
+      if (shouldRestoreHeight) {
+        currentSlide.style.height = 'auto';
+        container.style.height = `${currentSlide.clientHeight}px`;
+      }
+
+      onStop?.();
+      dispatchHeavyAnimationStop();
+      cleanup();
+    });
+  });
+}
