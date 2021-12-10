@@ -12,4 +12,21 @@
   .backdrop {
     touch-action: none;
   }
+
+  .avatars {
+    display: flex;
+    align-self: center;
+    margin-left: auto;
+    padding-left: 1rem;
+
+    .Avatar {
+      border: .0625rem solid var(--color-background);
+      margin-right: 0;
+      box-sizing: content-box;
+
+      &:not(:first-child) {
+        margin-left: -0.1875rem;
+      }
+    }
+  }
 }
