@@ -25,6 +25,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
 import useVideoCleanup from '../../../hooks/useVideoCleanup';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useVideoAutoPause from './hooks/useVideoAutoPause';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
@@ -79,12 +80,7 @@ const Video: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'pictogram'),
     lastSyncTime,
   );
-  const { transitionClassNames: previewClassNames } = useShowTransition(
-    Boolean(previewBlobUrl),
-    undefined,
-    undefined,
-    'slow',
-  );
+  const previewClassNames = useMediaTransition(previewBlobUrl);
 
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
