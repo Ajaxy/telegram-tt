@@ -15,6 +15,7 @@ import {
   ApiUser,
   ApiChat,
   ApiSticker,
+  ApiThreadInfo,
 } from '../../../api/types';
 import {
   AudioOrigin, FocusDirection, IAlbum, ISettings,
@@ -44,6 +45,7 @@ import {
   selectTheme,
   selectAllowedMessageActions,
   selectIsDownloading,
+  selectThreadInfo,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -160,9 +162,12 @@ type StateProps = {
   canAutoPlayMedia?: boolean;
   shouldLoopStickers?: boolean;
   autoLoadFileMaxSizeMb: number;
+  threadInfo?: ApiThreadInfo;
 };
 
-type DispatchProps = Pick<GlobalActions, 'toggleMessageSelection' | 'clickInlineButton' | 'disableContextMenuHint'>;
+type DispatchProps = Pick<GlobalActions, (
+  'toggleMessageSelection' | 'clickInlineButton' | 'disableContextMenuHint' | 'openChat'
+)>;
 
 const NBSP = '\u00A0';
 const GROUP_MESSAGE_HOVER_ATTRIBUTE = 'data-is-document-group-hover';
@@ -224,9 +229,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   canAutoPlayMedia,
   shouldLoopStickers,
   autoLoadFileMaxSizeMb,
+  threadInfo,
   toggleMessageSelection,
   clickInlineButton,
   disableContextMenuHint,
+  openChat,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -260,7 +267,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
-  const { id: messageId, chatId, threadInfo } = message;
+  const { id: messageId, chatId } = message;
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
@@ -389,11 +396,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     asForwarded,
     hasThread,
     forceSenderName,
-    hasComments: message.threadInfo && message.threadInfo.messagesCount > 0,
+    hasComments: threadInfo && threadInfo?.messagesCount > 0,
     hasActionButton: canForward || canFocus,
   });
-  const withCommentButton = message.threadInfo && (!isInDocumentGroup || isLastInDocumentGroup)
-    && messageListType === 'thread' && !noComments;
+  const withCommentButton = (
+    threadInfo && (!isInDocumentGroup || isLastInDocumentGroup) && messageListType === 'thread' && !noComments
+  );
   const withAppendix = contentClassName.includes('has-appendix');
 
   useEnsureMessage(
@@ -754,7 +762,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
               <i className="icon-arrow-right" />
             </Button>
           ) : undefined}
-          {withCommentButton && <CommentButton message={message} disabled={noComments} />}
+          {withCommentButton && <CommentButton threadInfo={threadInfo!} disabled={noComments} openChat={openChat} />}
           {withAppendix && (
             <div className="svg-appendix" dangerouslySetInnerHTML={isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN} />
           )}
@@ -810,7 +818,7 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType,
     } = ownProps;
     const {
-      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing,
+      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, threadInfo,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -860,6 +868,9 @@ export default memo(withGlobal<OwnProps>(
 
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
     const isDownloading = selectIsDownloading(global, message);
+    const actualThreadInfo = threadInfo
+      ? selectThreadInfo(global, threadInfo.chatId, threadInfo.threadId) || threadInfo
+      : undefined;
 
     return {
       theme: selectTheme(global),
@@ -894,6 +905,7 @@ export default memo(withGlobal<OwnProps>(
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
+      threadInfo: actualThreadInfo,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
@@ -903,5 +915,6 @@ export default memo(withGlobal<OwnProps>(
     'toggleMessageSelection',
     'clickInlineButton',
     'disableContextMenuHint',
+    'openChat',
   ]),
 )(Message));
