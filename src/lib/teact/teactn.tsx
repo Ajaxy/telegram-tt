@@ -8,7 +8,9 @@ import generateIdFor from '../../util/generateIdFor';
 import { throttleWithRaf } from '../../util/schedulers';
 import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
-import { GlobalState, GlobalActions, ActionTypes } from '../../global/types';
+import {
+  GlobalState, GlobalActions, ActionTypes, DispatchOptions,
+} from '../../global/types';
 import { handleError } from '../../util/handleError';
 import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
@@ -43,8 +45,8 @@ const containers = new Map<string, {
 
 const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
-function runCallbacks() {
-  if (isHeavyAnimating()) {
+function runCallbacks(forceOnHeavyAnimation = false) {
+  if (!forceOnHeavyAnimation && isHeavyAnimating()) {
     runCallbacksThrottled();
     return;
   }
@@ -52,14 +54,13 @@ function runCallbacks() {
   callbacks.forEach((cb) => cb(currentGlobal));
 }
 
-// `noThrottle = true` is used as a workaround for iOS gesture history navigation
-export function setGlobal(newGlobal?: GlobalState, noThrottle = false) {
+export function setGlobal(newGlobal?: GlobalState, options?: DispatchOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     currentGlobal = newGlobal;
-    if (!noThrottle) {
-      runCallbacksThrottled();
+    if (options?.forceSyncOnIOs) {
+      runCallbacks(true);
     } else {
-      runCallbacks();
+      runCallbacksThrottled(options?.forceOnHeavyAnimation);
     }
   }
 }
@@ -72,12 +73,12 @@ export function getDispatch() {
   return actions;
 }
 
-function onDispatch(name: string, payload?: ActionPayload, noThrottle?: boolean) {
+function onDispatch(name: string, payload?: ActionPayload, options?: DispatchOptions) {
   if (reducers[name]) {
     reducers[name].forEach((reducer) => {
       const newGlobal = reducer(currentGlobal, actions, payload);
       if (newGlobal) {
-        setGlobal(newGlobal, noThrottle);
+        setGlobal(newGlobal, options);
       }
     });
   }
@@ -151,8 +152,8 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
   if (!reducers[name]) {
     reducers[name] = [];
 
-    actions[name] = (payload?: ActionPayload, noThrottle = false) => {
-      onDispatch(name, payload, noThrottle);
+    actions[name] = (payload?: ActionPayload, options?: DispatchOptions) => {
+      onDispatch(name, payload, options);
     };
   }
 

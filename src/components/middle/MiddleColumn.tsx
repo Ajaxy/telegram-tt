@@ -337,7 +337,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   );
 
   const closeChat = () => {
-    openChat({ id: undefined }, true);
+    openChat({ id: undefined }, { forceSyncOnIOs: true });
   };
 
   useHistoryBack(

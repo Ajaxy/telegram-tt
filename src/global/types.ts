@@ -569,4 +569,10 @@ export type ActionTypes = (
   'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback'
 );
 
-export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;
+export interface DispatchOptions {
+  forceOnHeavyAnimation?: boolean;
+  // Workaround for iOS gesture history navigation
+  forceSyncOnIOs?: boolean;
+}
+
+export type GlobalActions = Record<ActionTypes, (payload?: any, options?: DispatchOptions) => void>;
