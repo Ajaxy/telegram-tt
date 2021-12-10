@@ -17,7 +17,7 @@ import {
   DEFAULT_PLAYBACK_RATE,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
-import { ANIMATION_END_EVENT, ANIMATION_START_EVENT } from '../hooks/useHeavyAnimationCheck';
+import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 import { pick } from '../util/iteratees';
 import { selectCurrentMessageList } from '../modules/selectors';
 import { hasStoredSession } from '../util/sessions';
@@ -31,10 +31,7 @@ const UPDATE_THROTTLE = 5000;
 const updateCacheThrottled = throttle(() => onIdle(updateCache), UPDATE_THROTTLE, false);
 
 let isCaching = false;
-let isHeavyAnimating = false;
 let unsubscribeFromBeforeUnload: NoneToVoidFunction | undefined;
-
-setupHeavyAnimationListeners();
 
 export function initCache() {
   if (GLOBAL_STATE_CACHE_DISABLED) {
@@ -200,7 +197,7 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
 }
 
 function updateCache() {
-  if (!isCaching || isHeavyAnimating) {
+  if (!isCaching || isHeavyAnimating()) {
     return;
   }
 
@@ -343,13 +340,4 @@ function reduceGroupCalls(global: GlobalState): GlobalState['groupCalls'] {
     isGroupCallPanelHidden: undefined,
     isFallbackConfirmOpen: undefined,
   };
-}
-
-function setupHeavyAnimationListeners() {
-  document.addEventListener(ANIMATION_START_EVENT, () => {
-    isHeavyAnimating = true;
-  });
-  document.addEventListener(ANIMATION_END_EVENT, () => {
-    isHeavyAnimating = false;
-  });
 }

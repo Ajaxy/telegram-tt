@@ -104,11 +104,11 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
   };
 }
 
-export function onIdle(cb: NoneToVoidFunction) {
+export function onIdle(cb: NoneToVoidFunction, timeout?: number) {
   // eslint-disable-next-line no-restricted-globals
   if (self.requestIdleCallback) {
     // eslint-disable-next-line no-restricted-globals
-    self.requestIdleCallback(cb);
+    self.requestIdleCallback(cb, { timeout });
   } else {
     onTickEnd(cb);
   }

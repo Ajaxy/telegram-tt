@@ -19,6 +19,7 @@ import {
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
+import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import useLang from '../../../hooks/useLang';
@@ -125,8 +126,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [html]);
 
   const focusInput = useCallback(() => {
-    // Avoid focusing during animation
-    if (inputRef.current!.closest('.from, .to')) {
+    if (isHeavyAnimating()) {
       setTimeout(focusInput, FOCUS_DELAY_MS);
       return;
     }
