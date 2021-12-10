@@ -286,14 +286,6 @@
       background: linear-gradient(90deg, rgba(127, 127, 127, 0) 0%, rgba(127, 127, 127, 0.4) 2%, rgba(127, 127, 127, 0.4) 98%, rgba(127, 127, 127, 0) 100%);
     }
   }
-
-  .join-subscribe-button {
-    margin-bottom: 0.5rem;
-
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      margin-bottom: calc(0.5rem + env(safe-area-inset-bottom));
-    }
-  }
 }
 
 /* Common styles for message list fade-out shadow */
@@ -310,6 +302,7 @@
 .Composer,
 .MessageSelectToolbar,
 .unpin-all-button,
+.join-subscribe-button,
 .messaging-disabled {
   width: 100%;
   display: flex;
@@ -319,6 +312,7 @@
 
 .MessageSelectToolbar-inner,
 .unpin-all-button,
+.join-subscribe-button,
 .messaging-disabled {
   .mask-image-disabled & {
     box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
@@ -326,7 +320,7 @@
   }
 }
 
-.unpin-button-container {
+.middle-column-footer-button-container {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -336,24 +330,11 @@
   .unpin-all-button {
     text-transform: capitalize;
     color: var(--color-black);
-    height: 3.5rem;
-    overflow: visible;
-    transform: scaleX(1);
-    transition: transform var(--select-transition), background-color .15s, color .15s;
 
     &:hover {
       .icon-unpin {
         color: var(--color-white);
       }
-    }
-
-    .select-mode-active + .middle-column-footer & {
-      box-shadow: none;
-      transform: scaleX(var(--unpin-hidden-scale));
-    }
-
-    @media (max-width: 600px) {
-      height: 2.5rem;
     }
 
     .icon-unpin {
@@ -362,6 +343,23 @@
       color: var(--color-text-secondary);
       font-size: 1.5rem;
       transition: color .15s
+    }
+  }
+
+  .join-subscribe-button,
+  .unpin-all-button {
+    height: 3.5rem;
+    overflow: visible;
+    transform: scaleX(1);
+    transition: transform var(--select-transition), background-color .15s, color .15s;
+
+    .select-mode-active + .middle-column-footer & {
+      box-shadow: none;
+      transform: scaleX(var(--unpin-hidden-scale));
+    }
+
+    @media (max-width: 600px) {
+      height: 2.5rem;
     }
   }
 
