@@ -256,7 +256,12 @@ const Transition: FC<TransitionProps> = ({
   });
 
   return (
-    <div ref={containerRef} id={id} className={buildClassName('Transition', className, name)} teactFastList>
+    <div
+      ref={containerRef}
+      id={id}
+      className={buildClassName('Transition', className, name)}
+      teactFastList={!shouldCleanup}
+    >
       {contents}
     </div>
   );
