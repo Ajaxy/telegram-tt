@@ -165,6 +165,10 @@ $color-user-8: #faa774;
     --right-column-width: 25vw;
   }
 
+  @media (min-width: 1921px) {
+    --messages-container-width: 50vw;
+  }
+
   @media (max-width: 600px) {
     --right-column-width: 100vw;
     --symbol-menu-width: 100vw;

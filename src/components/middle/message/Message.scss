@@ -19,6 +19,10 @@
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
 
+  @media (min-width: 1921px) {
+    --max-width: calc(30vw - 1rem);
+  }
+
   &.is-swiped {
     transform: translateX(-2.5rem) !important;
   }
@@ -105,6 +109,10 @@
     --meta-safe-area-base: 3.5rem;
     --deleting-translate-x: 50%;
     --color-text-green: var(--color-accent-own);
+
+    @media (min-width: 1921px) {
+      --max-width: 30vw;
+    }
 
     body.is-ios &,
     body.is-macos & {

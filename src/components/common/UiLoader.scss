@@ -11,7 +11,6 @@
     right: 0;
     margin: 0 auto;
     width: 100%;
-    max-width: 1920px;
     height: 100%;
     z-index: var(--z-ui-loader-mask);
     display: flex;
@@ -37,10 +36,6 @@
       @media (min-width: 1276px) {
         width: 25vw;
         max-width: 33vw;
-      }
-
-      @media (min-width: 1920px) {
-        border-left: 1px solid var(--color-borders);
       }
 
       @media (max-width: 1275px) {
@@ -120,8 +115,6 @@
       z-index: 1;
       height: 100%;
       width: var(--right-column-width);
-      min-width: 15.5rem;
-      max-width: 26.5rem;
       border-left: 1px solid var(--color-borders);
       background: var(--color-background);
     }
