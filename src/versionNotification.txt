@@ -1,15 +1,21 @@
-**Telegram Web Z was updated to version alpha 1.24**
+**Telegram Web Z was updated to version alpha 1.25**
 
 👏 **Harder**
-• Starting a one-on-one call with another user creates a private channel to host the call. 
-• Development is ongoing for direct one-on-one calls.
+• Brand new Media Viewer for touch screens with swipe, pinch, double-tap and pan gestures.
+• Read receipts are available for your messages in groups.
+• Join Group, Subscribe to Channel and Start Bot buttons are now shown on mobile screens.
+• Added support for wide screens up to 4K.
+• More accessibility support.
 
 🤩 **Better**
-• Various UI improvements.
+• Context menus are more compact.
+• Animations adjust to be more native on various devices.
+• Several UI improvements.
 
 🚀 **Faster**
-• UI speed and animations were significantly improved by optimizing heavy calculations.
+• Slide transitions and context menus were drastically optimized.
+• UI effects are faster and more efficient.
 
 💪 **Stronger**
-· Fixed missing red dot on unread favicon.
-· Fixed redundant scrolling in small message lists.
+• Deep links properly open in Safari.
+• Increased protocol security.
