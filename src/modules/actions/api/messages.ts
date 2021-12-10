@@ -932,6 +932,25 @@ addReducer('loadPinnedMessages', (global, actions, payload) => {
   void loadPinnedMessages(chat);
 });
 
+addReducer('loadSeenBy', (global, actions, payload) => {
+  const { chatId, messageId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('fetchSeenBy', { chat, messageId });
+    if (!result) {
+      return;
+    }
+
+    setGlobal(updateChatMessage(getGlobal(), chatId, messageId, {
+      seenByUserIds: result,
+    }));
+  })();
+});
+
 async function loadPinnedMessages(chat: ApiChat) {
   const result = await callApi('fetchPinnedMessages', { chat });
   if (!result) {

@@ -1,8 +1,8 @@
 import React, {
-  FC, useCallback, useEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMessage, ApiUser } from '../../../api/types';
 import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
@@ -12,6 +12,7 @@ import useLang from '../../../hooks/useLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
+import Avatar from '../../common/Avatar';
 
 import './MessageContextMenu.scss';
 
@@ -35,6 +36,8 @@ type OwnProps = {
   canSelect?: boolean;
   canDownload?: boolean;
   isDownloading?: boolean;
+  canShowSeenBy?: boolean;
+  seenByRecentUsers?: ApiUser[];
   onReply: () => void;
   onEdit: () => void;
   onPin: () => void;
@@ -51,6 +54,7 @@ type OwnProps = {
   onCloseAnimationEnd?: () => void;
   onCopyLink?: () => void;
   onDownload?: () => void;
+  onShowSeenBy?: () => void;
 };
 
 const SCROLLBAR_WIDTH = 10;
@@ -75,6 +79,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canSelect,
   canDownload,
   isDownloading,
+  canShowSeenBy,
+  seenByRecentUsers,
   onReply,
   onEdit,
   onPin,
@@ -91,6 +97,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
   onCopyLink,
   onDownload,
+  onShowSeenBy,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -166,9 +173,24 @@ const MessageContextMenu: FC<OwnProps> = ({
       {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
       {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
       {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
+      {canShowSeenBy && (
+        <MenuItem icon="group" onClick={onShowSeenBy} disabled={!message.seenByUserIds?.length}>
+          {message.seenByUserIds?.length
+            ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
+            : lang('Conversation.ContextMenuNoViews')}
+          <div className="avatars">
+            {seenByRecentUsers?.map((user) => (
+              <Avatar
+                size="micro"
+                user={user}
+              />
+            ))}
+          </div>
+        </MenuItem>
+      )}
       {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}
     </Menu>
   );
 };
 
-export default MessageContextMenu;
+export default memo(MessageContextMenu);

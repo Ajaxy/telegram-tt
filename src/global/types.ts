@@ -205,6 +205,11 @@ export type GlobalState = {
     messageIds: number[];
   };
 
+  seenByModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   fileUploads: {
     byMessageLocalId: Record<string, {
       progress: number;
@@ -476,6 +481,7 @@ export type ActionTypes = (
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
+  'openSeenByModal' | 'closeSeenByModal' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
@@ -496,7 +502,7 @@ export type ActionTypes = (
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
-  'reportMessages' | 'focusNextReply' | 'openChatByInvite' |
+  'reportMessages' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
   // downloads
   'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages

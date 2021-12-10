@@ -171,6 +171,9 @@ export const LIGHT_THEME_BG_COLOR = '#A2AF8E';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0a0a0a8c';
 export const DEFAULT_PATTERN_COLOR = 'rgba(90, 110, 70, 0.6)';
+// TODO Get values from `getConfig` method once it's available
+export const SEEN_BY_MEMBERS_CHAT_MAX = 50;
+export const SEEN_BY_MEMBERS_EXPIRE = 604680; // One week - 2 min
 
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;

@@ -1,7 +1,7 @@
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions, MessageListType } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
@@ -9,9 +9,14 @@ import { IAlbum, IAnchorPosition } from '../../../types';
 import {
   selectActiveDownloadIds,
   selectAllowedMessageActions,
+  selectChat,
   selectCurrentMessageList,
 } from '../../../modules/selectors';
+import { isChatGroup, isOwnMessage } from '../../../modules/helpers';
+import { SEEN_BY_MEMBERS_EXPIRE, SEEN_BY_MEMBERS_CHAT_MAX } from '../../../config';
 import { pick } from '../../../util/iteratees';
+import { getDayStartAt } from '../../../util/dateFormat';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 
@@ -20,8 +25,6 @@ import ReportMessageModal from '../../common/ReportMessageModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
-import { getDayStartAt } from '../../../util/dateFormat';
-import { copyTextToClipboard } from '../../../util/clipboard';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -52,12 +55,14 @@ type StateProps = {
   canSelect?: boolean;
   canDownload?: boolean;
   activeDownloads: number[];
+  canShowSeenBy?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'setReplyingToId' | 'setEditingId' | 'pinMessage' | 'openForwardMenu' |
   'faveSticker' | 'unfaveSticker' | 'toggleMessageSelection' | 'sendScheduledMessages' | 'rescheduleMessage' |
-  'downloadMessageMedia' | 'cancelMessageMediaDownload'
+  'downloadMessageMedia' | 'cancelMessageMediaDownload' | 'loadSeenBy' |
+  'openSeenByModal'
 )>;
 
 const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -86,6 +91,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canSelect,
   canDownload,
   activeDownloads,
+  canShowSeenBy,
   setReplyingToId,
   setEditingId,
   pinMessage,
@@ -97,6 +103,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   rescheduleMessage,
   downloadMessageMedia,
   cancelMessageMediaDownload,
+  loadSeenBy,
+  openSeenByModal,
 }) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -104,6 +112,22 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
+
+  useEffect(() => {
+    if (canShowSeenBy && isOpen) {
+      loadSeenBy({ chatId: message.chatId, messageId: message.id });
+    }
+  }, [loadSeenBy, isOpen, message.chatId, message.id, canShowSeenBy]);
+
+  const seenByRecentUsers = useMemo(() => {
+    if (!message.seenByUserIds) {
+      return undefined;
+    }
+
+    // No need for expensive global updates on users, so we avoid them
+    const usersById = getGlobal().users.byId;
+    return message.seenByUserIds?.slice(0, 3).map((id) => usersById[id]).filter(Boolean);
+  }, [message.seenByUserIds]);
 
   const isDownloading = album ? album.messages.some((msg) => activeDownloads.includes(msg.id))
     : activeDownloads.includes(message.id);
@@ -206,6 +230,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     openCalendar();
   }, [openCalendar]);
 
+  const handleOpenSeenByModal = useCallback(() => {
+    closeMenu();
+    openSeenByModal({ chatId: message.chatId, messageId: message.id });
+  }, [closeMenu, message.chatId, message.id, openSeenByModal]);
+
   const handleRescheduleMessage = useCallback((date: Date) => {
     rescheduleMessage({
       chatId: message.chatId,
@@ -262,7 +291,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canCopyLink={canCopyLink}
         canSelect={canSelect}
         canDownload={canDownload}
+        canShowSeenBy={canShowSeenBy}
         isDownloading={isDownloading}
+        seenByRecentUsers={seenByRecentUsers}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}
@@ -278,6 +309,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         onClose={closeMenu}
         onCopyLink={handleCopyLink}
         onDownload={handleDownloadClick}
+        onShowSeenBy={handleOpenSeenByModal}
       />
       <DeleteMessageModal
         isOpen={isDeleteModalOpen}
@@ -314,6 +346,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { message, messageListType }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
     const activeDownloads = selectActiveDownloadIds(global, message.chatId);
+    const chat = selectChat(global, message.chatId);
     const {
       noOptions,
       canReply,
@@ -332,6 +365,12 @@ export default memo(withGlobal<OwnProps>(
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
+    const canShowSeenBy = Boolean(chat
+      && isChatGroup(chat)
+      && isOwnMessage(message)
+      && chat.membersCount
+      && chat.membersCount < SEEN_BY_MEMBERS_CHAT_MAX
+      && message.date > Date.now() / 1000 - SEEN_BY_MEMBERS_EXPIRE);
 
     return {
       noOptions,
@@ -351,6 +390,7 @@ export default memo(withGlobal<OwnProps>(
       canSelect,
       canDownload,
       activeDownloads,
+      canShowSeenBy,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -365,5 +405,7 @@ export default memo(withGlobal<OwnProps>(
     'rescheduleMessage',
     'downloadMessageMedia',
     'cancelMessageMediaDownload',
+    'loadSeenBy',
+    'openSeenByModal',
   ]),
 )(ContextMenuContainer));

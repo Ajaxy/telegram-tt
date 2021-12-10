@@ -641,3 +641,19 @@ addReducer('createServiceNotification', (global, actions, payload) => {
     message,
   });
 });
+
+addReducer('openSeenByModal', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+
+  return {
+    ...global,
+    seenByModal: { chatId, messageId },
+  };
+});
+
+addReducer('closeSeenByModal', (global) => {
+  return {
+    ...global,
+    seenByModal: undefined,
+  };
+});

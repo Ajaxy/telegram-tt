@@ -64,6 +64,7 @@ import MessageSelectToolbar from './MessageSelectToolbar.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
+import SeenByModal from '../common/SeenByModal.async';
 
 import './MiddleColumn.scss';
 
@@ -90,6 +91,7 @@ type StateProps = {
   isSelectModeActive?: boolean;
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
+  isSeenByModalOpen: boolean;
   animationLevel?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -134,6 +136,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   isSelectModeActive,
   isPaymentModalOpen,
   isReceiptModalOpen,
+  isSeenByModalOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -469,6 +472,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                       isOpen={Boolean(isReceiptModalOpen)}
                       onClose={clearReceipt}
                     />
+                    <SeenByModal isOpen={isSeenByModalOpen} />
                   </div>
                 </>
               )}
@@ -519,6 +523,7 @@ export default memo(withGlobal(
       isSelectModeActive: selectIsInSelectMode(global),
       isPaymentModalOpen: global.payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(global.payment.receipt),
+      isSeenByModalOpen: Boolean(global.seenByModal),
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
     };

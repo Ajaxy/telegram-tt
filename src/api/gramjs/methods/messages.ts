@@ -1172,3 +1172,12 @@ export async function fetchPinnedMessages({ chat }: { chat: ApiChat }) {
     chats,
   };
 }
+
+export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageId: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetMessageReadParticipants({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+  }));
+
+  return result ? result.map(String) : undefined;
+}
