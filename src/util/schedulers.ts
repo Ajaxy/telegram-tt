@@ -16,14 +16,12 @@ export function debounce<F extends AnyToVoidFunction>(
       clearTimeout(waitingTimeout);
       waitingTimeout = undefined;
     } else if (shouldRunFirst) {
-      // @ts-ignore
       fn(...args);
     }
 
     // eslint-disable-next-line no-restricted-globals
     waitingTimeout = self.setTimeout(() => {
       if (shouldRunLast) {
-        // @ts-ignore
         fn(...args);
       }
 
@@ -48,7 +46,6 @@ export function throttle<F extends AnyToVoidFunction>(
     if (!interval) {
       if (shouldRunFirst) {
         isPending = false;
-        // @ts-ignore
         fn(...args);
       }
 
@@ -62,7 +59,6 @@ export function throttle<F extends AnyToVoidFunction>(
         }
 
         isPending = false;
-        // @ts-ignore
         fn(...args);
       }, ms);
     }
@@ -97,7 +93,6 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
 
       schedulerFn(() => {
         waiting = false;
-        // @ts-ignore
         fn(...args);
       });
     }
