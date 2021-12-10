@@ -341,9 +341,19 @@
     text-transform: capitalize;
     color: var(--color-black);
 
-    &:hover {
-      .icon-unpin {
-        color: var(--color-white);
+    @media (hover: hover) {
+      &:hover {
+        .icon-unpin {
+          color: var(--color-white);
+        }
+      }
+    }
+
+    @media (max-width: 600px) {
+      &:active, &:focus {
+        .icon-unpin {
+          color: var(--color-white);
+        }
       }
     }
 
@@ -359,7 +369,6 @@
   .join-subscribe-button,
   .unpin-all-button {
     height: 3.5rem;
-    overflow: visible;
     transform: scaleX(1);
     transition: transform var(--select-transition), background-color .15s, color .15s;
 
