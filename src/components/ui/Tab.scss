@@ -29,8 +29,16 @@
     }
   }
 
-  &:not(&--active):hover {
-    background: var(--color-interactive-element-hover);
+  @media (hover:hover) {
+    &:not(&--active):hover {
+      background: var(--color-interactive-element-hover);
+    }
+  }
+
+  @media (max-width: 600px) {
+    &:not(&--active):active {
+      background: var(--color-interactive-element-hover);
+    }
   }
 
   > span {

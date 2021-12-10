@@ -260,7 +260,7 @@ const Transition: FC<TransitionProps> = ({
       ref={containerRef}
       id={id}
       className={buildClassName('Transition', className, name)}
-      teactFastList={!shouldCleanup}
+      teactFastList={!renderCount && !shouldCleanup}
     >
       {contents}
     </div>

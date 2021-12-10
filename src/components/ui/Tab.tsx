@@ -38,6 +38,11 @@ const Tab: FC<OwnProps> = ({
   const tabRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Set initial active state
+    if (isActive && previousActiveTab === undefined && tabRef.current) {
+      tabRef.current.classList.add(classNames.active);
+    }
+
     if (!isActive || previousActiveTab === undefined) {
       return;
     }
