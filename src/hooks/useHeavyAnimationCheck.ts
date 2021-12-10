@@ -6,6 +6,9 @@ const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
 let timeout: number | undefined;
 let isAnimating = false;
 
+// Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
+const AUTO_END_TIMEOUT = 1000;
+
 export default (
   handleAnimationStart: AnyToVoidFunction,
   handleAnimationEnd: AnyToVoidFunction,
@@ -29,7 +32,7 @@ export function isHeavyAnimating() {
   return isAnimating;
 }
 
-export function dispatchHeavyAnimationEvent(duration?: number) {
+export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
   if (!isAnimating) {
     isAnimating = true;
     document.dispatchEvent(new Event(ANIMATION_START_EVENT));
@@ -40,16 +43,18 @@ export function dispatchHeavyAnimationEvent(duration?: number) {
     timeout = undefined;
   }
 
-  if (duration) {
-    timeout = window.setTimeout(() => {
-      isAnimating = false;
-      document.dispatchEvent(new Event(ANIMATION_END_EVENT));
+  // Race condition may happen if another `dispatchHeavyAnimationEvent` is called before `onEnd`
+  function onEnd() {
+    if (timeout) {
+      clearTimeout(timeout);
       timeout = undefined;
-    }, duration);
-  }
+    }
 
-  return () => {
     isAnimating = false;
     document.dispatchEvent(new Event(ANIMATION_END_EVENT));
-  };
+  }
+
+  timeout = window.setTimeout(onEnd, duration);
+
+  return onEnd;
 }
