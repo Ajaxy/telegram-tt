@@ -77,7 +77,7 @@ type StateProps = {
   canPost?: boolean;
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
-  hasPinnedOrAudioMessage?: boolean;
+  hasPinnedOrAudioPlayer?: boolean;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
   customBackground?: string;
@@ -121,7 +121,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   canPost,
   currentUserBannedRights,
   defaultBannedRights,
-  hasPinnedOrAudioMessage,
+  hasPinnedOrAudioPlayer,
   pinnedMessagesCount,
   customBackground,
   theme,
@@ -161,7 +161,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
   const [isReady, setIsReady] = useState(!IS_SINGLE_COLUMN_LAYOUT || animationLevel === ANIMATION_LEVEL_MIN);
 
-  const hasTools = hasPinnedOrAudioMessage && (
+  const hasTools = hasPinnedOrAudioPlayer && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
     || (
       isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
@@ -556,9 +556,9 @@ export default memo(withGlobal(
       isScheduledMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
-      hasPinnedOrAudioMessage: (
+      hasPinnedOrAudioPlayer: (
         threadId !== MAIN_THREAD_ID
-        || Boolean(pinnedIds?.length)
+        || Boolean(!isPinnedMessageList && pinnedIds?.length)
         || Boolean(audioChatId && audioMessageId)
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
