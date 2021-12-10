@@ -128,31 +128,39 @@ const Main: FC<StateProps & DispatchProps> = ({
       loadNotificationSettings();
       loadNotificationExceptions();
       loadTopInlineBots();
-
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
+    }
+  }, [
+    lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
+    loadTopInlineBots, updateIsOnline,
+  ]);
+
+  // Language-based API calls
+  useEffect(() => {
+    if (lastSyncTime) {
       if (language !== BASE_EMOJI_KEYWORD_LANG) {
         loadEmojiKeywords({ language });
       }
 
       loadCountryList({ langCode: language });
     }
-  }, [
-    lastSyncTime, loadAnimatedEmojis, loadNotificationExceptions, loadNotificationSettings, updateIsOnline,
-    loadTopInlineBots, loadEmojiKeywords, loadCountryList, language,
-  ]);
+  }, [language, lastSyncTime, loadCountryList, loadEmojiKeywords]);
 
+  // Check version when service chat is ready
   useEffect(() => {
     if (lastSyncTime && isServiceChatReady) {
       checkVersionNotification();
     }
   }, [lastSyncTime, isServiceChatReady, checkVersionNotification]);
 
+  // Ensure time format
   useEffect(() => {
     if (lastSyncTime && !wasTimeFormatSetManually) {
       ensureTimeFormat();
     }
   }, [lastSyncTime, wasTimeFormatSetManually, ensureTimeFormat]);
 
+  // Parse deep link
   useEffect(() => {
     if (lastSyncTime && LOCATION_HASH.startsWith('#?tgaddr=')) {
       processDeepLink(decodeURIComponent(LOCATION_HASH.substr('#?tgaddr='.length)));
