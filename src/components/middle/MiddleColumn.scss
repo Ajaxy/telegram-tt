@@ -286,6 +286,14 @@
       background: linear-gradient(90deg, rgba(127, 127, 127, 0) 0%, rgba(127, 127, 127, 0.4) 2%, rgba(127, 127, 127, 0.4) 98%, rgba(127, 127, 127, 0) 100%);
     }
   }
+
+  .join-subscribe-button {
+    margin-bottom: 0.5rem;
+
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      margin-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
+  }
 }
 
 /* Common styles for message list fade-out shadow */
