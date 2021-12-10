@@ -1,11 +1,14 @@
+import React, { FC, memo } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
 } from '../../api/types';
+import { MediaViewerOrigin } from '../../types';
+
 import useBlurSync from '../../hooks/useBlurSync';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
 import {
   getChatAvatarHash,
   getMessageDocument,
@@ -25,13 +28,14 @@ import {
 import {
   selectChat, selectChatMessage, selectScheduledMessage, selectUser,
 } from '../../modules/selectors';
-import { MediaViewerOrigin } from '../../types';
 import { AVATAR_FULL_DIMENSIONS, calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
+
 import Spinner from '../ui/Spinner';
-import './MediaViewerContent.scss';
 import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
+
+import './MediaViewerContent.scss';
 
 type OwnProps = {
   messageId?: number;

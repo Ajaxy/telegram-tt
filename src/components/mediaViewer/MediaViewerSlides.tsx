@@ -1,16 +1,19 @@
-import useDebounce from '../../hooks/useDebounce';
-import useForceUpdate from '../../hooks/useForceUpdate';
-import {
+import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import React from '../../lib/teact/teactn';
+
 import { MediaViewerOrigin } from '../../types';
+
+import useDebounce from '../../hooks/useDebounce';
+import useForceUpdate from '../../hooks/useForceUpdate';
 import { animateNumber, timingFunctions } from '../../util/animation';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
 import { captureEvents } from '../../util/captureEvents';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
+
 import MediaViewerContent from './MediaViewerContent';
+
 import './MediaViewerSlides.scss';
 
 type OwnProps = {
@@ -430,7 +433,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
       )}
       {activeMessageId && (
         <div
-          className={`MediaViewerSlide ${isActive ? 'active' : ''}`}
+          className={`MediaViewerSlide ${isActive ? 'MediaViewerSlide--active' : ''}`}
           onClick={handleToggleFooterVisibility}
           ref={activeSlideRef}
           /* @ts-ignore */
@@ -454,6 +457,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     </div>
   );
 };
+
 export default memo(MediaViewerSlides);
 
 function getAnimationStyle(x = 0, y = 0, scale = 1) {

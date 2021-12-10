@@ -1,5 +1,7 @@
 import React, { FC } from '../../lib/teact/teact';
+
 import { IS_TOUCH_ENV } from '../../util/environment';
+
 import Transition, { TransitionProps } from '../ui/Transition';
 
 const SlideTransition: FC<TransitionProps> = ({ children, ...props }) => {

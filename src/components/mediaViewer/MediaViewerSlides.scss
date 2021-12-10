@@ -31,7 +31,7 @@
   touch-action: none;
   transform-origin: 0 0;
 
-  &.active {
+  &--active {
     z-index: 1;
   }
 }
