@@ -55,8 +55,6 @@ body.cursor-ew-resize {
 
 #root {
   height: 100%;
-  max-width: 1920px;
-  margin: 0 auto;
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }

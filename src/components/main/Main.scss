@@ -42,10 +42,6 @@
     height: calc(var(--vh, 1vh) * 100);
   }
 
-  @media (min-width: 1920px) {
-    border-left: 1px solid var(--color-borders);
-  }
-
   @media (min-width: 926px) {
     max-width: 40vw;
   }
@@ -127,10 +123,6 @@
 }
 
 #RightColumn {
-  @media (min-width: 1920px) {
-    border-right: 1px solid var(--color-borders);
-  }
-
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100 + 1px);
   }
@@ -150,10 +142,6 @@
 
 #MiddleColumn {
   border-left: 1px solid var(--color-borders);
-
-  @media (min-width: 1920px) {
-    border-right: 1px solid var(--color-borders);
-  }
 
   @media (max-width: 925px) {
     max-width: none;

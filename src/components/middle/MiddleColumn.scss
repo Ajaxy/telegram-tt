@@ -68,6 +68,16 @@
       transform: scale(0.67) !important;
     }
   }
+
+  body.animation-level-2 #Main.right-column-open &::after {
+    @media screen and (min-width: 1921px) {
+      transform: scale(0.8) !important;
+    }
+
+    @media screen and (min-width: 2600px) {
+      transform: scale(0.95) !important;
+    }
+  }
 }
 
 #MiddleColumn {
