@@ -7,15 +7,18 @@
   background: rgba(0, 0, 0, .9);
   color: #fff;
   z-index: var(--z-media-viewer);
-  padding: 0.5rem 0;
 
   display: grid;
   grid-template-columns: auto;
-  grid-template-rows: 2.75rem 1fr;
+  grid-template-rows: auto 1fr;
   grid-column-gap: 0;
   grid-row-gap: 0;
   justify-items: stretch;
   align-items: center;
+
+  @media (max-width: 600px) {
+    background: rgba(0, 0, 0, 1);
+  }
 
   // Potential perf improvement
   &:not(.shown) {
@@ -50,7 +53,7 @@
       z-index: 2;
     }
 
-    .media-viewer-content {
+    .MediaViewerSlide {
       position: fixed;
       top: 0;
       left: 0;
@@ -64,7 +67,7 @@
   .media-viewer-head {
     display: flex;
     grid-area: 1 / 1 / 2 / -2;
-    padding: 0 1.25rem;
+    padding: 0.5rem 1.25rem;
     position: relative;
     z-index: var(--z-media-viewer-head);
     min-width: 0;
@@ -75,10 +78,10 @@
     }
 
     @media (max-width: 600px) {
-      padding: 0 0.5rem;
+      padding: 0.5rem;
 
       @supports (padding: 0 env(safe-area-inset-left)) {
-        padding: 0 #{"max(0.5rem, env(safe-area-inset-left))"};
+        padding: 0.5rem #{"max(0.5rem, env(safe-area-inset-left))"};
       }
 
       .media-viewer-close {
@@ -86,8 +89,8 @@
       }
     }
 
-    @supports (padding: 0 env(safe-area-inset-left)) {
-      padding: 0 #{"max(1.25rem, env(safe-area-inset-left))"};
+    @supports (padding: 0.5rem env(safe-area-inset-left)) {
+      padding: 0.5rem #{"max(1.25rem, env(safe-area-inset-left))"};
     }
   }
 
@@ -106,61 +109,6 @@
     display: flex;
     align-items: center;
     overflow: hidden;
-  }
-
-  .media-viewer-content {
-    position: relative;
-    z-index: 1;
-    padding: 3.25rem 0;
-    height: 100%;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-
-    &.has-footer {
-      padding: 7rem 0;
-      @media (min-width: 600px) {
-        min-width: 600px;
-      }
-
-      @media (max-height: 640px) {
-        padding: 4rem 0;
-      }
-
-      > img {
-        max-height: calc(100vh - 15rem);
-        @media (max-height: 640px) {
-          max-height: calc(100vh - 10rem);
-        }
-      }
-    }
-
-    .thumbnail {
-      position: relative;
-
-      img {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-    }
-
-    > img {
-      max-width: 100vw;
-      max-height: calc(100vh - 8.25rem);
-      object-fit: contain;
-      transition: transform .2s;
-    }
-
-    .spinner-wrapper {
-      max-width: 100vw;
-      margin: auto;
-    }
-
-    .Spinner {
-      margin: auto;
-    }
   }
 
   .navigation {

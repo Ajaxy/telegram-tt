@@ -19,9 +19,29 @@ interface CaptureOptions {
     },
   ) => void;
   onSwipe?: (e: Event, direction: SwipeDirection) => boolean;
+  onZoom?: (e: TouchEvent, params: {
+    // Relative zoom factor
+    zoomFactor: number;
+
+    // center coordinate of the initial pinch
+    initialCenterX: number;
+    initialCenterY: number;
+
+    // offset of the pinch center (current from initial)
+    dragOffsetX: number;
+    dragOffsetY: number;
+
+    // center coordinate of the current pinch
+    currentCenterX: number;
+    currentCenterY: number;
+  }) => void;
   onClick?: (e: MouseEvent | TouchEvent) => void;
+  onDoubleClick?: (e: MouseEvent | RealTouchEvent, params: { centerX: number; centerY: number }) => void;
   excludedClosestSelector?: string;
   selectorToPreventScroll?: string;
+  maxZoom?: number;
+  minZoom?: number;
+  isNotPassive?: boolean;
   withCursor?: boolean;
 }
 
@@ -41,10 +61,26 @@ const IOS_SCREEN_EDGE_THRESHOLD = 20;
 const MOVED_THRESHOLD = 15;
 const SWIPE_THRESHOLD = 50;
 
+function getDistance(a: Touch, b?: Touch) {
+  if (!b) return 0;
+  return Math.sqrt((b.pageX - a.pageX) ** 2 + (b.pageY - a.pageY) ** 2);
+}
+
+function getTouchCenter(a: Touch, b: Touch) {
+  return {
+    x: (a.pageX + b.pageX) / 2,
+    y: (a.pageY + b.pageY) / 2,
+  };
+}
+
+let lastClickTime = 0;
+
 export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | undefined;
   let hasMoved = false;
   let hasSwiped = false;
+  let initialDistance = 0;
+  let initialTouchCenter = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   let initialSwipeAxis: TSwipeAxis | undefined;
 
   function onCapture(e: MouseEvent | RealTouchEvent) {
@@ -60,6 +96,13 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     if (e.type === 'mousedown') {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onRelease);
+      if (options.onDoubleClick && Date.now() - lastClickTime < 300) {
+        options.onDoubleClick(e, {
+          centerX: e.pageX!,
+          centerY: e.pageY!,
+        });
+      }
+      lastClickTime = Date.now();
     } else if (e.type === 'touchstart') {
       // We need to always listen on `touchstart` target:
       // https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
@@ -75,6 +118,11 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
         if (e.pageY === undefined) {
           e.pageY = e.touches[0].pageY;
+        }
+
+        if (e.touches.length === 2) {
+          initialDistance = getDistance(e.touches[0], e.touches[1]);
+          initialTouchCenter = getTouchCenter(e.touches[0], e.touches[1]);
         }
       }
     }
@@ -121,7 +169,9 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
     hasMoved = false;
     hasSwiped = false;
+    initialDistance = 0;
     initialSwipeAxis = undefined;
+    initialTouchCenter = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   }
 
   function onMove(e: MouseEvent | RealTouchEvent) {
@@ -133,6 +183,24 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
         if (e.pageY === undefined) {
           e.pageY = e.touches[0].pageY;
+        }
+
+        if (options.onZoom && initialDistance > 0 && e.touches.length === 2) {
+          const endDistance = getDistance(e.touches[0], e.touches[1]);
+          const touchCenter = getTouchCenter(e.touches[0], e.touches[1]);
+          const dragOffsetX = touchCenter.x - initialTouchCenter.x;
+          const dragOffsetY = touchCenter.y - initialTouchCenter.y;
+          const zoomFactor = endDistance / initialDistance;
+          options.onZoom(e, {
+            zoomFactor,
+            initialCenterX: initialTouchCenter.x,
+            initialCenterY: initialTouchCenter.y,
+            dragOffsetX,
+            dragOffsetY,
+            currentCenterX: touchCenter.x,
+            currentCenterY: touchCenter.y,
+          });
+          if (zoomFactor !== 1) hasMoved = true;
         }
       }
 
@@ -205,7 +273,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   }
 
   element.addEventListener('mousedown', onCapture);
-  element.addEventListener('touchstart', onCapture, { passive: true });
+  element.addEventListener('touchstart', onCapture, { passive: !options.isNotPassive });
 
   return () => {
     element.removeEventListener('mousedown', onCapture);
