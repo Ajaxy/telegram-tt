@@ -36,7 +36,6 @@
   }
 
   &-main {
-    width: var(--symbol-menu-width);
     height: var(--symbol-menu-height);
     max-height: calc(100vh - var(--symbol-menu-footer-height));
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
@@ -107,9 +106,13 @@
   }
 
   .bubble {
+    width: calc(var(--symbol-menu-width) + .25rem); // Reserve width for scrollbar
     padding: 0;
-    width: var(--symbol-menu-width);
     overflow: hidden;
+
+    @supports (overflow: overlay) {
+      width: var(--symbol-menu-width);
+    }
   }
 
   .picker-disabled {
