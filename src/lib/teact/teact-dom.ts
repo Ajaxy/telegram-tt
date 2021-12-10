@@ -22,7 +22,7 @@ type VirtualDomHead = {
 };
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
-const HTML_ATTRIBUTES = new Set(['dir']);
+const HTML_ATTRIBUTES = new Set(['dir', 'role']);
 const MAPPED_ATTRIBUTES: { [k: string]: string } = {
   autoPlay: 'autoplay',
   autoComplete: 'autocomplete',
@@ -435,7 +435,7 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
     element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
+  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
@@ -453,7 +453,7 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
     removeEventListener(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || HTML_ATTRIBUTES.has(key)) {
+  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
     element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     delete (element as any)[MAPPED_ATTRIBUTES[key] || key];
