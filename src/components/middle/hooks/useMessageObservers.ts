@@ -31,7 +31,6 @@ export default function useMessageObservers(
   } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE_FOR_READING,
-    noAutoFreeze: true,
   }, (entries) => {
     if (type !== 'thread') {
       return;
