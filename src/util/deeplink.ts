@@ -1,10 +1,13 @@
 import { getDispatch } from '../lib/teact/teactn';
+import { IS_SAFARI } from './environment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'setlanguage' |
 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url';
 
 export const processDeepLink = (url: string) => {
-  const { protocol, searchParams, pathname } = new URL(url);
+  const {
+    protocol, searchParams, pathname, hostname,
+  } = new URL(url);
 
   if (protocol !== 'tg:') return;
 
@@ -16,7 +19,8 @@ export const processDeepLink = (url: string) => {
     joinVoiceChatByLink,
   } = getDispatch();
 
-  const method = pathname.replace(/^\/\//, '') as DeepLinkMethod;
+  // Safari thinks the path in tg://path links is hostname for some reason
+  const method = (IS_SAFARI ? hostname : pathname).replace(/^\/\//, '') as DeepLinkMethod;
   const params: Record<string, string> = {};
   searchParams.forEach((value, key) => {
     params[key] = value;
