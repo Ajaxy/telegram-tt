@@ -45,13 +45,14 @@ import {
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
+import { createMessageHash } from '../../util/routing';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useWindowSize from '../../hooks/useWindowSize';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import { createMessageHash } from '../../util/routing';
+import usePrevious from '../../hooks/usePrevious';
+import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -185,6 +186,15 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, CLOSE_ANIMATION_DURATION);
   const renderingCanStartBot = usePrevDuringAnimation(canStartBot, CLOSE_ANIMATION_DURATION);
   const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, CLOSE_ANIMATION_DURATION);
+
+  const prevTransitionKey = usePrevious(currentTransitionKey);
+  const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
+  if (willSwitchMessageList) {
+    setIsReady(false);
+  }
+  const cleanupExceptionKey = (
+    prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
+  );
 
   useEffect(() => {
     return chatId
@@ -329,9 +339,11 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     openChat({ id: undefined }, true);
   };
 
-  useHistoryBack(renderingChatId && renderingThreadId,
+  useHistoryBack(
+    renderingChatId && renderingThreadId,
     closeChat, undefined, undefined, undefined,
-    messageLists ? messageLists.map(createMessageHash) : []);
+    messageLists?.map(createMessageHash) || [],
+  );
 
   useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
@@ -374,12 +386,14 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               chatId={renderingChatId}
               threadId={renderingThreadId}
               messageListType={renderingMessageListType}
-              isReady={isReady}
+              isReady={isReady && !willSwitchMessageList}
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
               activeKey={currentTransitionKey}
               shouldCleanup
+              cleanupExceptionKey={cleanupExceptionKey}
+              onStop={() => setIsReady(true)}
             >
               {(isActive) => (
                 <>
@@ -392,7 +406,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     hasTools={renderingHasTools}
                     onFabToggle={setIsFabShown}
                     onNotchToggle={setIsNotchShown}
-                    isReady={isReady}
+                    isReady={isReady && !willSwitchMessageList}
                     isActive={isActive}
                   />
                   <div className={footerClassName}>
@@ -403,7 +417,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         messageListType={renderingMessageListType}
                         dropAreaState={dropAreaState}
                         onDropHide={handleHideDropArea}
-                        isReady={isReady}
+                        isReady={isReady && !willSwitchMessageList}
                       />
                     )}
                     {isPinnedMessageList && (
