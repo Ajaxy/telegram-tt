@@ -60,6 +60,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   const container = useRef<HTMLDivElement>(null);
   const wasPlaying = useRef(false);
   const isFrozen = useRef(false);
+  const isFirstRender = useRef(true);
 
   const playRef = useRef();
   playRef.current = play;
@@ -194,8 +195,12 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   useEffect(() => {
     if (animation) {
-      animation.changeData(animationData);
-      playAnimation();
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+      } else {
+        animation.changeData(animationData);
+        playAnimation();
+      }
     }
   }, [playAnimation, animation, animationData]);
 
