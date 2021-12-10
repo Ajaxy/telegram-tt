@@ -28,8 +28,11 @@
    */
   &.slide-optimized,
   &.slide-optimized-rtl {
-    // Create a new composite layer to reduce the page repaint area when switching a tab
-    transform: translate3d(0, 0, 0);
+    contain: strict;
+    body.is-safari & {
+      // Create a new composite layer to reduce the page repaint area when switching a tab (as `contain` is not supported in Safari)
+      transform: translate3d(0, 0, 0);
+    }
 
     #root & > div {
       position: absolute;
