@@ -352,7 +352,7 @@
 
     @media (min-width: 1276px) {
       transform: translate3d(0, 0, 0);
-      transition: transform var(--layer-transition);
+      transition: opacity 0.15s ease, transform var(--layer-transition);
 
       #Main.right-column-open & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
@@ -377,7 +377,7 @@
       padding: .25rem .8125rem .25rem 1rem;
       box-shadow: 0 .125rem .125rem var(--color-light-shadow);
       transform: translate3d(0, 0, 0);
-      transition: transform var(--layer-transition);
+      transition: opacity 0.15s ease, transform var(--layer-transition);
 
       &::before {
         content: "";
@@ -402,7 +402,7 @@
 
       @media (min-width: 1276px) {
         transform: translate3d(0, 0, 0);
-        transition: transform var(--layer-transition);
+        transition: opacity 0.15s ease, transform var(--layer-transition);
 
         #Main.right-column-open & {
             padding-left: calc(var(--right-column-width) + 1rem);
