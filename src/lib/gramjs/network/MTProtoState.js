@@ -49,6 +49,7 @@ class MTProtoState {
         this.id = undefined;
         this._sequence = undefined;
         this._lastMsgId = undefined;
+        this.msgIds = [];
         this.reset();
     }
 
@@ -60,6 +61,7 @@ class MTProtoState {
         this.id = Helpers.generateRandomLong(true);
         this._sequence = 0;
         this._lastMsgId = BigInt(0);
+        this.msgIds = [];
     }
 
     /**
@@ -196,6 +198,16 @@ class MTProtoState {
         }
 
         const remoteMsgId = reader.readLong();
+        // if we get a duplicate message id we should ignore it.
+        if (this.msgIds.includes(remoteMsgId.toString())) {
+            throw new SecurityError('Duplicate msgIds');
+        }
+        // we only store the latest 500 message ids from the server
+        if (this.msgIds.length > 500) {
+            this.msgIds.shift();
+        }
+        this.msgIds.push(remoteMsgId.toString());
+
         const remoteSequence = reader.readInt();
         const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
         const diff = body.length - containerLen;
