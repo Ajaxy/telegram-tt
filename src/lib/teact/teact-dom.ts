@@ -273,7 +273,8 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
     $new.children.map(($newChild) => {
       const key = 'props' in $newChild && $newChild.props.key;
 
-      if (DEBUG && isRealElement($newChild) && !key) {
+      // eslint-disable-next-line no-null/no-null
+      if (DEBUG && isRealElement($newChild) && (key === undefined || key === null)) {
         // eslint-disable-next-line no-console
         console.warn('Missing `key` in `teactFastList`');
       }
@@ -286,13 +287,15 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
   const remainingByKey = $current.children
     .reduce((acc, $currentChild, i) => {
       let key = 'props' in $currentChild ? $currentChild.props.key : undefined;
+      // eslint-disable-next-line no-null/no-null
+      const isKeyPresent = key !== undefined && key !== null;
 
       // First we handle removed children
-      if (key && !newKeys.has(key)) {
+      if (isKeyPresent && !newKeys.has(key)) {
         renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
 
         return acc;
-      } else if (!key) {
+      } else if (!isKeyPresent) {
         const $newChild = $new.children[i];
         const newChildKey = ($newChild && 'props' in $newChild) ? $newChild.props.key : undefined;
         // If a non-key element remains at the same index we preserve it with a virtual `key`
