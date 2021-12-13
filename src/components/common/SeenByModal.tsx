@@ -57,7 +57,7 @@ const SeenByModal: FC<OwnProps & StateProps & DispatchProps> = ({
             className="chat-item-clickable scroll-item small-icon"
             onClick={() => handleClick(userId)}
           >
-            <PrivateChatInfo userId={userId} />
+            <PrivateChatInfo userId={userId} noStatusOrTyping />
           </ListItem>
         ))}
       </div>
