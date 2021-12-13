@@ -8,7 +8,7 @@ import { GlobalActions } from '../../../global/types';
 import { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { selectCurrentMessageList, selectReplyingToId } from '../../../modules/selectors';
+import { selectReplyingToId } from '../../../modules/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
@@ -34,12 +34,14 @@ const TRANSITION_DURATION_FACTOR = 50;
 
 type OwnProps = {
   id: string;
+  chatId: string;
+  threadId: number;
   isAttachmentModalInput?: boolean;
   editableInputId?: string;
   html: string;
   placeholder: string;
   forcedPlaceholder?: string;
-  shouldSetFocus: boolean;
+  canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
   shouldSuppressTextFormatter?: boolean;
   onUpdate: (html: string) => void;
@@ -48,7 +50,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  currentChatId?: string;
+  chatId?: string;
   replyingToId?: number;
   noTabCapture?: boolean;
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
@@ -77,18 +79,18 @@ function clearSelection() {
 
 const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   id,
+  chatId,
   isAttachmentModalInput,
   editableInputId,
   html,
   placeholder,
   forcedPlaceholder,
-  shouldSetFocus,
+  canAutoFocus,
   shouldSuppressFocus,
   shouldSuppressTextFormatter,
   onUpdate,
   onSuppressedFocus,
   onSend,
-  currentChatId,
   replyingToId,
   noTabCapture,
   messageSendKeyCombo,
@@ -125,6 +127,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [html]);
 
+  const chatIdRef = useRef(chatId);
+  chatIdRef.current = chatId;
   const focusInput = useCallback(() => {
     if (isHeavyAnimating()) {
       setTimeout(focusInput, FOCUS_DELAY_MS);
@@ -335,10 +339,10 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
-    if (shouldSetFocus) {
+    if (canAutoFocus) {
       focusInput();
     }
-  }, [currentChatId, focusInput, replyingToId, shouldSetFocus]);
+  }, [chatId, focusInput, replyingToId, canAutoFocus]);
 
   useEffect(() => {
     if (noTabCapture) {
@@ -407,14 +411,12 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { chatId: currentChatId, threadId } = selectCurrentMessageList(global) || {};
+  (global, { chatId, threadId }: OwnProps): StateProps => {
     const { messageSendKeyCombo } = global.settings.byKey;
 
     return {
-      currentChatId,
       messageSendKeyCombo,
-      replyingToId: currentChatId && threadId ? selectReplyingToId(global, currentChatId, threadId) : undefined,
+      replyingToId: chatId && threadId ? selectReplyingToId(global, chatId, threadId) : undefined,
       noTabCapture: global.isPollModalOpen || global.payment.isPaymentModalOpen,
     };
   },
