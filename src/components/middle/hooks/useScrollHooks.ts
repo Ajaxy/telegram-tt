@@ -23,7 +23,7 @@ export default function useScrollHooks(
   isUnread: boolean,
   onFabToggle: AnyToVoidFunction,
   onNotchToggle: AnyToVoidFunction,
-  isActive: boolean,
+  isReady: boolean,
 ) {
   const { loadViewportMessages } = getDispatch();
 
@@ -44,7 +44,7 @@ export default function useScrollHooks(
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
   function toggleScrollTools() {
-    if (!isActive) return;
+    if (!isReady) return;
 
     if (!messageIds || !messageIds.length) {
       onFabToggle(false);
@@ -123,6 +123,12 @@ export default function useScrollHooks(
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
+
+  useOnChange(() => {
+    if (isReady) {
+      toggleScrollTools();
+    }
+  }, [isReady]);
 
   // Workaround for FAB and notch flickering with tall incoming message
   useOnChange(() => {
