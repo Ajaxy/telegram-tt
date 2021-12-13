@@ -388,6 +388,7 @@
     max-height: 26rem;
     line-height: 1.3125;
     padding: calc((3.5rem - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
+    white-space: pre-wrap;
 
     @media (max-width: 600px) {
       height: 2.875rem;
