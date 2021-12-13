@@ -799,6 +799,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
         </Portal>
       )}
       <AttachmentModal
+        chatId={chatId}
+        threadId={threadId}
         attachments={attachments}
         caption={attachments.length ? html : ''}
         groupChatMembers={groupChatMembers}
@@ -899,6 +901,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
           )}
           <MessageInput
             id="message-input-text"
+            chatId={chatId}
+            threadId={threadId}
             html={!attachments.length ? html : ''}
             placeholder={
               activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER
@@ -906,7 +910,7 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
                 : botKeyboardPlaceholder || lang('Message')
             }
             forcedPlaceholder={inlineBotHelp}
-            shouldSetFocus={!attachments.length}
+            canAutoFocus={isReady && !attachments.length}
             shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
             shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onUpdate={setHtml}

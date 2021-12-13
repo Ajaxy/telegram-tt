@@ -28,6 +28,8 @@ import EmojiTooltip from './EmojiTooltip.async';
 import './AttachmentModal.scss';
 
 export type OwnProps = {
+  chatId: string;
+  threadId: number;
   attachments: ApiAttachment[];
   caption: string;
   isReady?: boolean;
@@ -47,6 +49,8 @@ export type OwnProps = {
 const DROP_LEAVE_TIMEOUT_MS = 150;
 
 const AttachmentModal: FC<OwnProps> = ({
+  chatId,
+  threadId,
   attachments,
   caption,
   isReady,
@@ -246,13 +250,15 @@ const AttachmentModal: FC<OwnProps> = ({
           />
           <MessageInput
             id="caption-input-text"
+            chatId={chatId}
+            threadId={threadId}
             isAttachmentModalInput
             html={caption}
             editableInputId={EDITABLE_INPUT_MODAL_ID}
             placeholder={lang('Caption')}
             onUpdate={onCaptionUpdate}
             onSend={onSend}
-            shouldSetFocus={Boolean(attachments.length)}
+            canAutoFocus={Boolean(isReady && attachments.length)}
           />
         </div>
       </div>
