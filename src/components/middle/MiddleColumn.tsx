@@ -396,7 +396,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               cleanupExceptionKey={cleanupExceptionKey}
               onStop={() => setIsReady(true)}
             >
-              {(isActive) => (
+              {() => (
                 <>
                   <MessageList
                     key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
@@ -408,7 +408,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     onFabToggle={setIsFabShown}
                     onNotchToggle={setIsNotchShown}
                     isReady={isReady && !willSwitchMessageList}
-                    isActive={isActive}
                     withBottomShift={withMessageListBottomShift}
                   />
                   <div className={footerClassName}>

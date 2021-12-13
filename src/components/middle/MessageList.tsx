@@ -61,7 +61,6 @@ type OwnProps = {
   type: MessageListType;
   canPost: boolean;
   isReady: boolean;
-  isActive: boolean;
   onFabToggle: (shouldShow: boolean) => void;
   onNotchToggle: (shouldShow: boolean) => void;
   hasTools?: boolean;
@@ -117,7 +116,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isGroupChat,
   canPost,
   isReady,
-  isActive,
   isChatWithSelf,
   isRepliesChat,
   isCreator,
@@ -516,7 +514,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           memoFirstUnreadIdRef={memoFirstUnreadIdRef}
           threadId={threadId}
           type={type}
-          isActive={isActive}
+          isReady={isReady}
           threadTopMessageId={threadTopMessageId}
           hasLinkedChat={hasLinkedChat}
           isSchedule={messageGroups ? type === 'scheduled' : false}
