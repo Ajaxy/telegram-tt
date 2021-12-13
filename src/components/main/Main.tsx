@@ -24,12 +24,13 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import buildClassName from '../../util/buildClassName';
 import { fastRaf } from '../../util/schedulers';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
+import { processDeepLink } from '../../util/deeplink';
+import windowSize from '../../util/windowSize';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
-import { processDeepLink } from '../../util/deeplink';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 
 import LeftColumn from '../left/LeftColumn';
@@ -166,6 +167,19 @@ const Main: FC<StateProps & DispatchProps> = ({
       processDeepLink(decodeURIComponent(LOCATION_HASH.substr('#?tgaddr='.length)));
     }
   }, [lastSyncTime]);
+
+  // Prevent refresh by accidentally rotating device when listening to a voice chat
+  useEffect(() => {
+    if (!activeGroupCallId) {
+      return undefined;
+    }
+
+    windowSize.disableRefresh();
+
+    return () => {
+      windowSize.enableRefresh();
+    };
+  }, [activeGroupCallId]);
 
   const {
     transitionClassNames: middleColumnTransitionClassNames,
