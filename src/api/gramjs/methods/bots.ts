@@ -9,7 +9,7 @@ import { buildInputPeer, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addUserToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb } from '../helpers';
 
 export function init() {
 }
@@ -84,7 +84,7 @@ export async function fetchInlineBotResults({
     return undefined;
   }
 
-  result.users.map(addUserToLocalDb);
+  addEntitiesWithPhotosToLocalDb(result.users);
 
   return {
     isGallery: Boolean(result.gallery),

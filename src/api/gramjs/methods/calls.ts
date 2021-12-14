@@ -13,7 +13,7 @@ import {
 } from '../apiBuilders/calls';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addChatToLocalDb, addUserToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../config';
 
 let onUpdate: OnApiUpdate;
@@ -35,8 +35,8 @@ export async function getGroupCall({
     return undefined;
   }
 
-  result.users.map(addUserToLocalDb);
-  result.chats.map(addChatToLocalDb);
+  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesWithPhotosToLocalDb(result.chats);
 
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
@@ -122,8 +122,8 @@ export async function fetchGroupCallParticipants({
     return undefined;
   }
 
-  result.users.map(addUserToLocalDb);
-  result.chats.map(addChatToLocalDb);
+  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesWithPhotosToLocalDb(result.chats);
 
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
