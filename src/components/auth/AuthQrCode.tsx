@@ -7,6 +7,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 import { LangCode } from '../../types';
 
+import { DEFAULT_LANG_CODE } from '../../config';
 import { pick } from '../../util/iteratees';
 import { setLanguage } from '../../util/langProvider';
 import renderText from '../common/helpers/renderText';
@@ -60,6 +61,12 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
       size: 280,
     }, container);
   }, [connectionState, authQrCode]);
+
+  useEffect(() => {
+    if (connectionState === 'connectionStateReady') {
+      void setLanguage(DEFAULT_LANG_CODE);
+    }
+  }, [connectionState]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();
