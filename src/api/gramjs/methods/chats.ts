@@ -30,7 +30,6 @@ import {
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import localDb from '../localDb';
 import {
   buildInputEntity,
   buildInputPeer,
@@ -40,7 +39,7 @@ import {
   buildChatBannedRights,
   buildChatAdminRights,
 } from '../gramjsBuilders';
-import { addChatToLocalDb, addMessageToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
@@ -1105,15 +1104,11 @@ function updateLocalDb(result: (
   GramJs.messages.Chats | GramJs.messages.ChatsSlice | GramJs.TypeUpdates
 )) {
   if ('users' in result) {
-    result.users.forEach((user) => {
-      if (user instanceof GramJs.User) {
-        localDb.users[buildApiPeerId(user.id, 'user')] = user;
-      }
-    });
+    addEntitiesWithPhotosToLocalDb(result.users);
   }
 
   if ('chats' in result) {
-    result.chats.forEach(addChatToLocalDb);
+    addEntitiesWithPhotosToLocalDb(result.chats);
   }
 
   if ('messages' in result) {

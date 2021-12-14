@@ -42,12 +42,26 @@ export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
   }
 }
 
-export function addChatToLocalDb(chat: GramJs.TypeChat) {
-  if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-    localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
+function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel, noOverwrite = false) {
+  const id = buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel');
+  if (!noOverwrite || !localDb.chats[id]) {
+    localDb.chats[id] = chat;
   }
 }
 
-export function addUserToLocalDb(user: GramJs.User) {
-  localDb.users[buildApiPeerId(user.id, 'user')] = user;
+export function addUserToLocalDb(user: GramJs.User, shouldOverwrite = false) {
+  const id = buildApiPeerId(user.id, 'user');
+  if (shouldOverwrite || !localDb.users[id]) {
+    localDb.users[id] = user;
+  }
+}
+
+export function addEntitiesWithPhotosToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
+  entities.forEach((entity) => {
+    if (entity instanceof GramJs.User && entity.photo) {
+      addUserToLocalDb(entity);
+    } else if ((entity instanceof GramJs.Chat || entity instanceof GramJs.Channel) && entity.photo) {
+      addChatToLocalDb(entity);
+    }
+  });
 }

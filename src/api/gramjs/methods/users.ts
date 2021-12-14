@@ -18,7 +18,7 @@ import { buildApiUser, buildApiUserFromFull, buildApiUsersAndStatuses } from '..
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import localDb from '../localDb';
-import { addChatToLocalDb, addPhotoToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
 
 let onUpdate: OnApiUpdate;
@@ -249,7 +249,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
 
 function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {
   if ('chats' in result) {
-    result.chats.forEach(addChatToLocalDb);
+    addEntitiesWithPhotosToLocalDb(result.chats);
   }
 
   if ('photos' in result) {

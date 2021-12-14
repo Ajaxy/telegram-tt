@@ -31,7 +31,12 @@ import {
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import { DEBUG } from '../../config';
-import { addMessageToLocalDb, addPhotoToLocalDb, resolveMessageApiChatId } from './helpers';
+import {
+  addMessageToLocalDb,
+  addEntitiesWithPhotosToLocalDb,
+  addPhotoToLocalDb,
+  resolveMessageApiChatId,
+} from './helpers';
 import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
 import { buildApiPhoto } from './apiBuilders/common';
 import {
@@ -56,37 +61,36 @@ export function init(_onUpdate: OnApiUpdate) {
 const sentMessageIds = new Set();
 let serverTimeOffset = 0;
 
-function addEntities(entities: (GramJs.TypeUser | GramJs.TypeChat)[] | undefined) {
-  if (entities?.length) {
-    entities
-      .filter((e) => e instanceof GramJs.User)
-      .map(buildApiUser)
-      .forEach((user) => {
-        if (!user) {
-          return;
-        }
+function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
+  entities
+    .filter((e) => e instanceof GramJs.User)
+    .map(buildApiUser)
+    .forEach((user) => {
+      if (!user) {
+        return;
+      }
 
-        onUpdate({
-          '@type': 'updateUser',
-          id: user.id,
-          user,
-        });
+      onUpdate({
+        '@type': 'updateUser',
+        id: user.id,
+        user,
       });
-    entities
-      .filter((e) => e instanceof GramJs.Chat || e instanceof GramJs.Channel)
-      .map((e) => buildApiChatFromPreview(e))
-      .forEach((chat) => {
-        if (!chat) {
-          return;
-        }
+    });
 
-        onUpdate({
-          '@type': 'updateChat',
-          id: chat.id,
-          chat,
-        });
+  entities
+    .filter((e) => e instanceof GramJs.Chat || e instanceof GramJs.Channel)
+    .map((e) => buildApiChatFromPreview(e))
+    .forEach((chat) => {
+      if (!chat) {
+        return;
+      }
+
+      onUpdate({
+        '@type': 'updateChat',
+        id: chat.id,
+        chat,
       });
-  }
+    });
 }
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
@@ -150,7 +154,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     }
 
     // eslint-disable-next-line no-underscore-dangle
-    addEntities(update._entities);
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
 
     if (update instanceof GramJs.UpdateNewScheduledMessage) {
       onUpdate({
@@ -818,7 +826,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   } else if (update instanceof GramJs.UpdateGroupCallParticipants) {
     // eslint-disable-next-line no-underscore-dangle
-    addEntities(update._entities);
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
 
     onUpdate({
       '@type': 'updateGroupCallParticipants',
