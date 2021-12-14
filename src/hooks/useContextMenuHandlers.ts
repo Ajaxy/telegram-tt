@@ -30,12 +30,12 @@ export default (
 
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
-      document.body.classList.add('no-selection');
+      (e.target as HTMLElement).classList.add('no-selection');
     }
   }, [isMenuDisabled]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    document.body.classList.remove('no-selection');
+    (e.target as HTMLElement).classList.remove('no-selection');
 
     if (isMenuDisabled || (shouldDisableOnLink && (e.target as HTMLElement).matches('a[href]'))) {
       return;
