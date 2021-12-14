@@ -10,6 +10,7 @@ import { getCanPostInChat, getChatTitle, sortChatIds } from '../../modules/helpe
 import searchWords from '../../util/searchWords';
 import { pick, unique } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 import ChatOrUserPicker from '../common/ChatOrUserPicker';
 
@@ -45,6 +46,10 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const filterRef = useRef<HTMLInputElement>(null);
 
   const chatIds = useMemo(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
     const listIds = [...(activeListIds || []), ...(archivedListIds || [])];
 
     let priorityIds = pinnedIds || [];
@@ -68,17 +73,19 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
       return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
     }), chatsById, undefined, priorityIds);
-  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, pinnedIds]);
+  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, isOpen, lang, pinnedIds]);
 
   const handleSelectUser = useCallback((userId: string) => {
     setForwardChatId({ id: userId });
   }, [setForwardChatId]);
 
+  const renderingChatIds = useCurrentOrPrev(chatIds)!;
+
   return (
     <ChatOrUserPicker
       currentUserId={currentUserId}
       isOpen={isOpen}
-      chatOrUserIds={chatIds}
+      chatOrUserIds={renderingChatIds}
       filterRef={filterRef}
       filterPlaceholder={lang('ForwardTo')}
       filter={filter}
