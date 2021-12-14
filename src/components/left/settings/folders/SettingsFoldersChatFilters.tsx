@@ -72,11 +72,9 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return [
-      ...(activeChatArrays
-        ? [...activeChatArrays.pinnedChats, ...activeChatArrays.otherChats]
-        : []
-      ),
-      ...(archivedChatArrays ? archivedChatArrays.otherChats : []),
+      ...(activeChatArrays?.pinnedChats || []),
+      ...(activeChatArrays?.otherChats || []),
+      ...(archivedChatArrays?.otherChats || []),
     ];
   }, [chatsById, listIds, orderedPinnedIds, archivedListIds, archivedPinnedIds]);
 
@@ -140,8 +138,10 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [mode, selectedChatIds, dispatch]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect,
-    mode === 'included' ? SettingsScreens.FoldersIncludedChats : SettingsScreens.FoldersExcludedChats);
+  useHistoryBack(
+    isActive, onReset, onScreenSelect,
+    mode === 'included' ? SettingsScreens.FoldersIncludedChats : SettingsScreens.FoldersExcludedChats,
+  );
 
   if (!displayedIds) {
     return <Loading />;
