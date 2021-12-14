@@ -45,34 +45,29 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const filterRef = useRef<HTMLInputElement>(null);
 
   const chatIds = useMemo(() => {
-    const listIds = [
-      ...(activeListIds || []),
-      ...(archivedListIds || []),
-    ];
+    const listIds = [...(activeListIds || []), ...(archivedListIds || [])];
 
     let priorityIds = pinnedIds || [];
     if (currentUserId) {
       priorityIds = unique([currentUserId, ...priorityIds]);
     }
 
-    return sortChatIds([
-      ...listIds.filter((id) => {
-        const chat = chatsById[id];
-        if (!chat) {
-          return true;
-        }
+    return sortChatIds(listIds.filter((id) => {
+      const chat = chatsById[id];
+      if (!chat) {
+        return true;
+      }
 
-        if (!getCanPostInChat(chat, MAIN_THREAD_ID)) {
-          return false;
-        }
+      if (!getCanPostInChat(chat, MAIN_THREAD_ID)) {
+        return false;
+      }
 
-        if (!filter) {
-          return true;
-        }
+      if (!filter) {
+        return true;
+      }
 
-        return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
-      }),
-    ], chatsById, undefined, priorityIds);
+      return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
+    }), chatsById, undefined, priorityIds);
   }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, lang, pinnedIds]);
 
   const handleSelectUser = useCallback((userId: string) => {

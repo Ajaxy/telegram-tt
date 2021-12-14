@@ -70,12 +70,14 @@ function escapeHtml(textParts: TextPart[]): TextPart[] {
   const divEl = document.createElement('div');
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string') {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     divEl.innerText = part;
+    result.push(divEl.innerHTML);
 
-    return [...result, divEl.innerHTML];
+    return result;
   }, [] as TextPart[]);
 }
 
@@ -86,7 +88,8 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
 
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string') {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     part = fixNonStandardEmoji(part);
@@ -129,12 +132,13 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
 }
 
 function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
-  return textParts.reduce((result, part) => {
+  return textParts.reduce((result: TextPart[], part) => {
     if (typeof part !== 'string') {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
-    return [...result, ...part
+    const splittenParts = part
       .split(/\r\n|\r|\n/g)
       .reduce((parts: TextPart[], line: string, i, source) => {
         // This adds non-breaking space if line was indented with spaces, to preserve the indentation
@@ -149,21 +153,25 @@ function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] 
         }
 
         return parts;
-      }, [])];
-  }, [] as TextPart[]);
+      }, []);
+
+    return [...result, ...splittenParts];
+  }, []);
 }
 
 function addHighlight(textParts: TextPart[], highlight: string | undefined): TextPart[] {
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string' || !highlight) {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     const lowerCaseText = part.toLowerCase();
     const queryPosition = lowerCaseText.indexOf(highlight.toLowerCase());
     const nextSymbol = lowerCaseText[queryPosition + highlight.length];
     if (queryPosition < 0 || (nextSymbol && nextSymbol.match(RE_LETTER_OR_DIGIT))) {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     const newParts: TextPart[] = [];
@@ -184,12 +192,14 @@ const RE_LINK = new RegExp(`${RE_LINK_TEMPLATE}|${RE_MENTION_TEMPLATE}`, 'ig');
 function addLinks(textParts: TextPart[]): TextPart[] {
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string') {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     const links = part.match(RE_LINK);
     if (!links || !links.length) {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     const content: TextPart[] = [];
@@ -226,7 +236,8 @@ function addLinks(textParts: TextPart[]): TextPart[] {
 function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
   return textParts.reduce((result, part) => {
     if (typeof part !== 'string') {
-      return [...result, part];
+      result.push(part);
+      return result;
     }
 
     const parts = part.split(SIMPLE_MARKDOWN_REGEX);
