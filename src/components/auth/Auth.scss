@@ -2,16 +2,14 @@
   width: 100%;
   max-width: 25.5rem;
   margin: 0 auto;
-  padding: 1rem;
-  padding-top: 6rem;
+  padding: 6rem 1rem 1rem;
   text-align: center;
 
   @media (min-width: 600px) and (min-height: 450px) {
-    padding: 1.5rem;
-    padding-top: 6.8rem;
+    padding: 6.8rem 1.5rem 1.5rem;
 
     &.qr {
-      padding-top: 5rem;
+      padding-top: 4rem;
     }
   }
 

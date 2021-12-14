@@ -1771,7 +1771,7 @@ export default {
   },
   'Login.QR.Help2': {
     key: 'Login.QR.Help2',
-    value: 'Go to **Settings** > **Devices** > **Scan QR**',
+    value: 'Go to **Settings** > **Devices** > **Link Desktop Device**',
   },
   'Login.QR.Help3': {
     key: 'Login.QR.Help3',
