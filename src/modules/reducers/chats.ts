@@ -2,7 +2,7 @@ import { GlobalState } from '../../global/types';
 import { ApiChat, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
-import { mapValues, omit } from '../../util/iteratees';
+import { omit } from '../../util/iteratees';
 import { selectChatListType } from '../selectors';
 
 export function replaceChatListIds(
@@ -54,6 +54,9 @@ export function updateChat(
   const { byId } = global.chats;
 
   const updatedChat = getUpdatedChat(global, chatId, chatUpdate, photo);
+  if (!updatedChat) {
+    return global;
+  }
 
   return replaceChats(global, {
     ...byId,
@@ -62,9 +65,14 @@ export function updateChat(
 }
 
 export function updateChats(global: GlobalState, newById: Record<string, ApiChat>): GlobalState {
-  const updatedById = mapValues(newById, (chat, id) => {
-    return getUpdatedChat(global, id, chat);
-  });
+  const updatedById = Object.keys(newById).reduce((acc: Record<string, ApiChat>, id) => {
+    const updatedChat = getUpdatedChat(global, id, newById[id]);
+    if (updatedChat) {
+      acc[id] = updatedChat;
+    }
+
+    return acc;
+  }, {});
 
   global = replaceChats(global, {
     ...global.chats.byId,
@@ -77,20 +85,22 @@ export function updateChats(global: GlobalState, newById: Record<string, ApiChat
 // @optimization Allows to avoid redundant updates which cause a lot of renders
 export function addChats(global: GlobalState, newById: Record<string, ApiChat>): GlobalState {
   const { byId } = global.chats;
-  let isAdded = false;
+  let isUpdated = false;
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiChat>>((acc, id) => {
     if (!byId[id] || (byId[id].isMin && !newById[id].isMin)) {
-      acc[id] = getUpdatedChat(global, id, newById[id]);
-
-      if (!isAdded) {
-        isAdded = true;
+      const updatedChat = getUpdatedChat(global, id, newById[id]);
+      if (updatedChat) {
+        acc[id] = updatedChat;
+        if (!isUpdated) {
+          isUpdated = true;
+        }
       }
     }
     return acc;
   }, {});
 
-  if (!isAdded) {
+  if (!isUpdated) {
     return global;
   }
 
@@ -116,7 +126,7 @@ function getUpdatedChat(
   };
 
   if (!updatedChat.id || !updatedChat.type) {
-    return updatedChat;
+    return undefined;
   }
 
   return updatedChat;
