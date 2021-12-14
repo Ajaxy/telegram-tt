@@ -84,9 +84,18 @@ function parseMarkdown(html: string) {
   parsedHtml = parsedHtml.replace(/[`]{1}([^`\n]+)[`]{1}/g, '<code>$1</code>');
 
   // Other simple markdown
-  parsedHtml = parsedHtml.replace(/[*]{2}([^*\n]+)[*]{2}/g, '<b>$1</b>');
-  parsedHtml = parsedHtml.replace(/[_]{2}([^*\n]+)[_]{2}/g, '<i>$1</i>');
-  parsedHtml = parsedHtml.replace(/[~]{2}([^~\n]+)[~]{2}/g, '<s>$1</s>');
+  parsedHtml = parsedHtml.replace(
+    /(^|\s)(?!<code[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/code>)(\s|$)/g,
+    '$1<b>$2</b>$3',
+  );
+  parsedHtml = parsedHtml.replace(
+    /(^|\s)(?!<code[^<]*|<\/)[_]{2}([^_\n]+)[_]{2}(?![^<]*<\/code>)(\s|$)/g,
+    '$1<i>$2</i>$3',
+  );
+  parsedHtml = parsedHtml.replace(
+    /(^|\s)(?!<code[^<]*|<\/)[~]{2}([^~\n]+)[~]{2}(?![^<]*<\/code>)(\s|$)/g,
+    '$1<s>$2</s>$3',
+  );
 
   return parsedHtml;
 }
