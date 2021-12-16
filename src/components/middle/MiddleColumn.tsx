@@ -56,6 +56,7 @@ import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTran
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
+import Immedia from './immedia/Immedia';
 import MessageList from './MessageList';
 import ScrollDownButton from './ScrollDownButton';
 import Composer from './composer/Composer';
@@ -389,6 +390,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               messageListType={renderingMessageListType}
               isReady={isReady && !willSwitchMessageList}
             />
+            <Immedia />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
               activeKey={currentTransitionKey}
