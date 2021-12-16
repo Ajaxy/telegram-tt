@@ -104,6 +104,7 @@
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
+    "@types/sockjs-client": "^1.5.1",
     "async-mutex": "^0.3.1",
     "big-integer": "github:painor/BigInteger.js",
     "croppie": "^2.6.5",
@@ -115,6 +116,7 @@
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
     "qr-creator": "^1.0.0",
+    "sockjs-client": "^1.5.2",
     "websocket": "^1.0.34"
   }
 }
