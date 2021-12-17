@@ -83,15 +83,19 @@ const ChatFolderModal: FC<OwnProps & StateProps & DispatchProps> = ({
       className="delete"
       title={lang('FilterAddTo')}
     >
-      <CheckboxGroup
-        options={folders}
-        selected={selectedFolderIds}
-        onChange={setSelectedFolderIds}
-        round
-      />
-      <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
-        {lang('FilterAddTo')}
-      </Button>
+      {folders.length ? (
+        <CheckboxGroup
+          options={folders}
+          selected={selectedFolderIds}
+          onChange={setSelectedFolderIds}
+          round
+        />
+      ) : 'You have no folders yet. You can create one from Setting->Folders->Create New Folder'}
+      {!!folders.length && (
+        <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+          {lang('FilterAddTo')}
+        </Button>
+      )}
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
     </Modal>
   );
