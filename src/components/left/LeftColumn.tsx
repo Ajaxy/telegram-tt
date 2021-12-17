@@ -265,6 +265,25 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [clearTwoFaError, loadPasswordInfo, settingsScreen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case 'f':
+            e.preventDefault();
+            setContent(LeftColumnContent.GlobalSearch);
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, false);
+    };
+  }, [setContent]);
+
   const {
     initResize, resetResize, handleMouseUp,
   } = useResize(resizeRef, setLeftColumnWidth, resetLeftColumnWidth, leftColumnWidth);
