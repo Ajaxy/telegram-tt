@@ -390,7 +390,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               messageListType={renderingMessageListType}
               isReady={isReady && !willSwitchMessageList}
             />
-            <Immedia />
+            <Immedia chatId={renderingChatId} />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
               activeKey={currentTransitionKey}
