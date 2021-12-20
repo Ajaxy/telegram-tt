@@ -12,8 +12,10 @@ const WEBSOCKET_URL = DEBUG
 // String pre-attached to console.log messages
 const INIT = 'IMMEDIA: ';
 
+const GC_RATE = 1500; // 1.5 seconds
+const REMOVE_THRESHOLD = 1000 * 20; // 20 seconds
 const SNAPSHOT_RATE = 500; // 0.5 seconds
-// const PING_RATE = 1000 * 10; // 10 seconds
+const PING_RATE = 1000 * 5; // 5 seconds
 const UPDATE_RATE = 1000 * 5; // 1 second
 
 // Let prehook commit with console.logs
@@ -35,7 +37,7 @@ type ImmediaProps = {
 
 const Immedia = ({ chatId }: ImmediaProps) => {
   // State that tracks when update is being run. Triggers another update after UPDATE_RATE seconds.
-  const [runningUpdate, setRunningUpdate] = useState(false);
+  // const [runningUpdate, setRunningUpdate] = useState(false);
   const [lastSnapshot, setLastSnapshot] = useState<string | undefined>(
     undefined,
   );
@@ -128,7 +130,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     // TODO: Check if this is how we have to implement it.
     return room.replace('s', '').replace('-', '');
   };
-
+  // TODO: Correct true value of messageId. Using callbacks overwrites the value.
   const enterRoom = () => {
     console.log(INIT, 'EnterRoom');
     const currentMessageId = messageId + 1;
@@ -257,88 +259,145 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return () => clearInterval(result);
   }, [enteredRoom]);
 
-  const sendUpdate = () => {
-    if (ws.current) {
-      const currentMessageId = messageId + 1;
-      setMessageId(currentMessageId);
-      const message = {
-        msgId: currentMessageId,
-        id: userId,
-        type: 'app',
-        room: formatRoom(chatId),
-        data: {
-          type: 'update',
-          data: {
-            image: lastSnapshot,
-            timestamp: new Date().getTime(),
-            nickname,
-          },
-        },
-      };
-      console.log(INIT, 'Updating with message: ', message);
-      ws.current.send(JSON.stringify(message));
-      setRunningUpdate(false);
+  // TODO: Add a GC that runs every GC_RATE seconds and checks if, for each participant,
+  // their last snapshot was taken inside a REMOVE_THRESHOLD seconds time frame.
+  // If not, it will remove the participant.
+  useEffect(() => {
+    const updateParticipants = () => {
+      console.log(INIT, 'Garbage collect participants');
+      participants.forEach((participant) => {
+        const removeThreshold = new Date().getTime() - REMOVE_THRESHOLD;
+        if (participant.timestamp && participant.timestamp < removeThreshold) {
+          console.log(INIT, 'Garbage collect participant', participant.id);
+          setParticipants(participants.filter((p) => p.id !== participant.id));
+        }
+      });
+      if (participants.length === 0) {
+        console.log(INIT, 'There is 1 participant left');
+      } else {
+        console.log(
+          INIT,
+          'There are',
+          1 + participants.length,
+          'participants left.',
+        );
+      }
+    };
+
+    if (participants.length) {
+      let participantsInterval: NodeJS.Timeout;
+      if (enteredRoom) {
+        participantsInterval = setInterval(updateParticipants, GC_RATE);
+      }
+      return () => clearInterval(participantsInterval);
     }
-  };
+    return undefined;
+  }, [enteredRoom, participants]);
 
   // TODO: I think this approach is cleaner that using a Timeout.
   // But there's a problem with the function reading the states.
-  // useEffect(() => {
-  //   var updateInterval: NodeJS.Timeout;
-  //   if (enteredRoom && userId !== undefined) {
-  //     updateInterval = setInterval(sendUpdate, UPDATE_RATE);
-  //   }
-  //   return () => clearInterval(updateInterval);
-  // }, [enteredRoom, userId]);
-
   useEffect(() => {
-    // Run updates to backend when the user is inside a room
-    // var updateInterval: NodeJS.Timeout | undefined = undefined;
-    if (
-      enteredRoom
-      && lastSnapshot !== undefined
-      && userId !== undefined
-      && !runningUpdate
-    ) {
-      // console.log(INIT, "RUNNING UPDATE INTERVAL EVERY ", UPDATE_RATE);
-      setRunningUpdate(true);
-      // TODO: I think it's simpler to use the setInterval function.
-      // updateInterval =
-      setTimeout(sendUpdate, UPDATE_RATE);
+    const sendUpdate = () => {
+      if (ws.current) {
+        const currentMessageId = messageId + 1;
+        setMessageId(currentMessageId);
+        const message = {
+          msgId: currentMessageId,
+          id: userId,
+          type: 'app',
+          room: formatRoom(chatId),
+          data: {
+            type: 'update',
+            data: {
+              image: lastSnapshot,
+              timestamp: new Date().getTime(),
+              nickname,
+            },
+          },
+        };
+        console.log(INIT, 'Updating with message: ', message);
+        ws.current.send(JSON.stringify(message));
+        // setRunningUpdate(false);
+      }
+    };
+    if (lastSnapshot !== undefined && userId !== undefined) {
+      let updateInterval: NodeJS.Timeout;
+      if (enteredRoom) {
+        console.log(INIT, 'Running Updates');
+        updateInterval = setInterval(sendUpdate, UPDATE_RATE);
+      }
+      return () => clearInterval(updateInterval);
     }
-    // FIX: clear remaining timeouts. When we leave the room there is still some timeouts running.
-    // else {
-    //   console.error(INIT + "NOT RUNNING UPDATE INTERVAL");
-    //   console.log(
-    //     INIT,
-    //     "lastSnapshot is undefined? ",
-    //     lastSnapshot === undefined
-    //   );
-    //   console.log(INIT, "userId is undefined? ", userId === undefined);
-    //   console.log(INIT, "runningUpdate is true? ", runningUpdate);
-    //   console.log(INIT, "enteredRoom is true? ", enteredRoom);
-    //   // if (!enteredRoom && updateInterval === undefined) {
-    //   //   console.log(INIT, "Clear update interval");
-    //   //   clearTimeout(updateInterval);
-    //   // }
-    // }
-    // return () => clearTimeout(updateInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enteredRoom, userId, lastSnapshot, runningUpdate]);
+    return undefined;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enteredRoom, userId, messageId, nickname, chatId]);
+
+  // useEffect(() => {
+  //   // Run updates to backend when the user is inside a room
+  //   // var updateInterval: NodeJS.Timeout | undefined = undefined;
+  //   if (
+  //     enteredRoom &&
+  //     lastSnapshot !== undefined &&
+  //     userId !== undefined &&
+  //     !runningUpdate
+  //   ) {
+  //     // console.log(INIT, "RUNNING UPDATE INTERVAL EVERY ", UPDATE_RATE);
+  //     setRunningUpdate(true);
+  //     // TODO: I think it's simpler to use the setInterval function.
+  //     // updateInterval =
+  //     setTimeout(sendUpdate, UPDATE_RATE);
+  //   }
+  //   // FIX: clear remaining timeouts. When we leave the room there is still some timeouts running.
+  //   // else {
+  //   //   console.error(INIT + "NOT RUNNING UPDATE INTERVAL");
+  //   //   console.log(
+  //   //     INIT,
+  //   //     "lastSnapshot is undefined? ",
+  //   //     lastSnapshot === undefined
+  //   //   );
+  //   //   console.log(INIT, "userId is undefined? ", userId === undefined);
+  //   //   console.log(INIT, "runningUpdate is true? ", runningUpdate);
+  //   //   console.log(INIT, "enteredRoom is true? ", enteredRoom);
+  //   //   // if (!enteredRoom && updateInterval === undefined) {
+  //   //   //   console.log(INIT, "Clear update interval");
+  //   //   //   clearTimeout(updateInterval);
+  //   //   // }
+  //   // }
+  //   // return () => clearTimeout(updateInterval);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [enteredRoom, userId, lastSnapshot, runningUpdate]);
 
   // TODO: Run PING and PONG messages to keep connection alive.
   // Keep Track of connection status
-  // useEffect(() => {
-  //   var pingInterval: NodeJS.Timeout;
-  //   if (enteredRoom) {
-  //     console.log(INIT, "RUNNING PING INTERVAL EVERY ", PING_RATE);
-  //     // before entering a room ping and get-conf
-  //     // this is not necessary
-  //     pingInterval = setInterval(ping, PING_RATE);
-  //     // getConf();
-  //   }
-  //   return () => clearInterval(pingInterval);
-  // }, [enteredRoom]);
+  useEffect(() => {
+    const ping = () => {
+      const type = 'ping';
+      if (ws.current) {
+        const currentMessageId = messageId + 1;
+        setMessageId(currentMessageId);
+        const message = {
+          msgId: currentMessageId,
+          type,
+          room: formatRoom(chatId),
+          data: undefined,
+        };
+        console.log(INIT, `${type.toUpperCase()}: `, message);
+        ws.current.send(JSON.stringify(message));
+      }
+    };
+
+    if (chatId !== undefined && userId !== undefined) {
+      let pingInterval: NodeJS.Timeout;
+      if (enteredRoom) {
+        console.log(INIT, 'RUNNING PING INTERVAL EVERY ', PING_RATE);
+        pingInterval = setInterval(ping, PING_RATE);
+      }
+      return () => clearInterval(pingInterval);
+    }
+    return undefined;
+  }, [enteredRoom, userId, messageId, chatId]);
+
+  // TODO: Define the Heartbeat function to keep track user connection.
 
   // TODO: Remove this feature. We don't need to send text messages.
   const sendMessage = (text: string) => {
@@ -384,29 +443,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       ws.current.send(JSON.stringify(message));
     }
   };
-
-  // const ping = () => {
-  //   basicMessage("ping");
-  // };
-
-  // const getConf = () => {
-  //   basicMessage("get-conf");
-  // };
-
-  // const basicMessage = (type: string) => {
-  //   const currentMessageId = messageId + 1;
-  //   setMessageId(currentMessageId);
-  //   const message = {
-  //     msgId: currentMessageId,
-  //     type,
-  //     room: formatRoom(chatId),
-  //     data: null,
-  //   };
-  //   console.log(INIT, `${type.toUpperCase()}: `, message);
-  //   if (ws.current) {
-  //     ws.current.send(JSON.stringify(message));
-  //   }
-  // };
 
   const getRandomString = () => {
     return Math.random().toString(36).substring(2, 15);
@@ -459,19 +495,28 @@ const Immedia = ({ chatId }: ImmediaProps) => {
           </div>
           <div className="OtherParticipants">
             {participants
-              && participants.map(({ id, nickname: participantNickname }) => {
-                return (
-                  <div key={id} className="VideoName">
-                    <canvas
-                      className="CanvasVideo"
-                      id={`canvas-${id}`}
-                      width="70"
-                      height="50"
-                    />
-                    <text className="Nickname">{participantNickname}</text>
-                  </div>
-                );
-              })}
+              && participants.map(
+                ({ id, nickname: participantNickname }) => {
+                  return (
+                    <div key={id} className="VideoName">
+                      <canvas
+                        className="CanvasVideo"
+                        id={`canvas-${id}`}
+                        width="70"
+                        height="50"
+                      />
+                      {/* FIX: Display image in place of canvas */}
+                      {/* {image ||
+                        (participantNickname && (
+                          <i className="icon-video-stop"></i>
+                        ))} */}
+                      <text className="Nickname">
+                        {participantNickname || '\u00a0\u00a0'}
+                      </text>
+                    </div>
+                  );
+                },
+              )}
           </div>
         </div>
       )}
