@@ -48,6 +48,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   const [enteredRoom, setEnteredRoom] = useState(false);
   const [participants, setParticipants] = useState<ParticipantsType[]>([]);
   const ws = useRef<WebSocket | undefined>(undefined);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMessage = (data: any) => {
     // TODO: Switch beetween data.types: 'join', 'update' and 'left'
@@ -75,6 +76,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         break;
       }
       case 'left': {
+        // TODO: Set a warning message if leftUser has length > 1 or better, handle accordingly.
         const leftUser = data.data;
         console.log(INIT, 'USER LEFT with ID: ', leftUser[0]);
         const filteredParticipants = participants.filter(
@@ -111,7 +113,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       console.log(INIT, 'ws error');
       console.log(INIT, event);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleMessage]);
 
   // Nickname is set when the user leaves a room, correct.
@@ -435,7 +437,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       </div>
       {enteredRoom && (
         <div id="participants" className="Participants">
-          <div id="me">
+          <div className="MeParticipant">
             <video
               id="video-me"
               autoPlay
@@ -455,7 +457,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
               <text className="Nickname">{nickname}</text>
             </div>
           </div>
-          <div id="others">
+          <div className="OtherParticipants">
             {participants
               && participants.map(({ id, nickname: participantNickname }) => {
                 return (
