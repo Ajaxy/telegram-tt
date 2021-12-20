@@ -37,7 +37,6 @@ type ImmediaProps = {
 
 const Immedia = ({ chatId }: ImmediaProps) => {
   // State that tracks when update is being run. Triggers another update after UPDATE_RATE seconds.
-  // const [runningUpdate, setRunningUpdate] = useState(false);
   const [lastSnapshot, setLastSnapshot] = useState<string | undefined>(
     undefined,
   );
@@ -51,13 +50,14 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   const [participants, setParticipants] = useState<ParticipantsType[]>([]);
   const ws = useRef<WebSocket | undefined>(undefined);
 
+  const isParticipantPresent = (id: string) => participants.some((p) => p.id === id);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMessage = (data: any) => {
-    // TODO: Switch beetween data.types: 'join', 'update' and 'left'
     switch (data.type) {
       case 'join': {
         const joinedUser = data.data;
-        if (!participants[joinedUser.id]) {
+        if (!isParticipantPresent(joinedUser.id)) {
           console.log(INIT, 'USER JOINED!');
           setParticipants([...participants, { id: joinedUser }]);
           console.log(
@@ -71,10 +71,23 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       }
       case 'update': {
         const updatedUser = data.data;
-        console.log(INIT, 'USER UPDATED!');
-        setParticipants(
-          participants.map((p) => (p.id === updatedUser.id ? updatedUser : p)),
-        );
+        // check if participant is already present
+        if (isParticipantPresent(updatedUser.id)) {
+          console.log(INIT, 'USER UPDATED!');
+          setParticipants(
+            participants.map((p) => (p.id === updatedUser.id ? updatedUser : p)),
+          );
+        } else {
+          // TODO: Use code from join
+          console.log(INIT, 'USER CREATED!');
+          setParticipants([...participants, updatedUser]);
+          console.log(
+            INIT,
+            'THERE ARE ',
+            1 + participants.length,
+            'PARTICIPANTS IN THE ROOM',
+          );
+        }
         break;
       }
       case 'left': {
@@ -147,8 +160,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     }
   };
 
-  // TODO: When leaving the room generate a new suggestedRoom query and work with array of rooms.
-  // Also improve general room array handling.
   const leaveRoom = () => {
     if (ws.current) {
       const currentMessageId = messageId + 1;
@@ -259,7 +270,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return () => clearInterval(result);
   }, [enteredRoom]);
 
-  // TODO: Add a GC that runs every GC_RATE seconds and checks if, for each participant,
+  // GC that runs every GC_RATE seconds and checks if, for each participant,
   // their last snapshot was taken inside a REMOVE_THRESHOLD seconds time frame.
   // If not, it will remove the participant.
   useEffect(() => {
@@ -294,8 +305,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return undefined;
   }, [enteredRoom, participants]);
 
-  // TODO: I think this approach is cleaner that using a Timeout.
-  // But there's a problem with the function reading the states.
   useEffect(() => {
     const sendUpdate = () => {
       if (ws.current) {
@@ -317,7 +326,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         };
         console.log(INIT, 'Updating with message: ', message);
         ws.current.send(JSON.stringify(message));
-        // setRunningUpdate(false);
       }
     };
     if (lastSnapshot !== undefined && userId !== undefined) {
@@ -331,41 +339,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return undefined;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enteredRoom, userId, messageId, nickname, chatId]);
-
-  // useEffect(() => {
-  //   // Run updates to backend when the user is inside a room
-  //   // var updateInterval: NodeJS.Timeout | undefined = undefined;
-  //   if (
-  //     enteredRoom &&
-  //     lastSnapshot !== undefined &&
-  //     userId !== undefined &&
-  //     !runningUpdate
-  //   ) {
-  //     // console.log(INIT, "RUNNING UPDATE INTERVAL EVERY ", UPDATE_RATE);
-  //     setRunningUpdate(true);
-  //     // TODO: I think it's simpler to use the setInterval function.
-  //     // updateInterval =
-  //     setTimeout(sendUpdate, UPDATE_RATE);
-  //   }
-  //   // FIX: clear remaining timeouts. When we leave the room there is still some timeouts running.
-  //   // else {
-  //   //   console.error(INIT + "NOT RUNNING UPDATE INTERVAL");
-  //   //   console.log(
-  //   //     INIT,
-  //   //     "lastSnapshot is undefined? ",
-  //   //     lastSnapshot === undefined
-  //   //   );
-  //   //   console.log(INIT, "userId is undefined? ", userId === undefined);
-  //   //   console.log(INIT, "runningUpdate is true? ", runningUpdate);
-  //   //   console.log(INIT, "enteredRoom is true? ", enteredRoom);
-  //   //   // if (!enteredRoom && updateInterval === undefined) {
-  //   //   //   console.log(INIT, "Clear update interval");
-  //   //   //   clearTimeout(updateInterval);
-  //   //   // }
-  //   // }
-  //   // return () => clearTimeout(updateInterval);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [enteredRoom, userId, lastSnapshot, runningUpdate]);
 
   // TODO: Run PING and PONG messages to keep connection alive.
   // Keep Track of connection status
