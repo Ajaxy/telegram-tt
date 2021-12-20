@@ -115,7 +115,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   }, [handleMessage]);
 
   // Nickname is set when the user leaves a room, correct.
-  // TODO: Remove this. It's not necessary.
+  // TODO: Set the user first name/ last name or username from Telegram API as nickname.
   useEffect(() => {
     console.log(INIT, 'Setting nickname');
     setNickname('Matias');
@@ -228,7 +228,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
                   canvas.width,
                   canvas.height,
                 );
-                // TODO: Send snapshot to server in an update message
                 const image = canvas.toDataURL('image/png');
                 setLastSnapshot(image);
               }, SNAPSHOT_RATE / 5);
@@ -446,23 +445,29 @@ const Immedia = ({ chatId }: ImmediaProps) => {
             >
               <track kind="captions" /> {/* avoid eslint error */}
             </video>
-            <canvas
-              id="canvas-me"
-              className="CanvasVideo"
-              width="70"
-              height="50"
-            />
+            <div className="VideoName">
+              <canvas
+                id="canvas-me"
+                className="CanvasVideo"
+                width="70"
+                height="50"
+              />
+              <text className="Nickname">{nickname}</text>
+            </div>
           </div>
           <div id="others">
             {participants
-              && participants.map(({ id }) => {
+              && participants.map(({ id, nickname: participantNickname }) => {
                 return (
-                  <canvas
-                    className="CanvasVideo"
-                    id={`canvas-${id}`}
-                    width="70"
-                    height="50"
-                  />
+                  <div key={id} className="VideoName">
+                    <canvas
+                      className="CanvasVideo"
+                      id={`canvas-${id}`}
+                      width="70"
+                      height="50"
+                    />
+                    <text className="Nickname">{participantNickname}</text>
+                  </div>
                 );
               })}
           </div>

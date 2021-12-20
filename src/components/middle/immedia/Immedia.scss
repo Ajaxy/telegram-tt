@@ -3,9 +3,9 @@
 }
 
 .Participants {
-  border: 1px solid red;
   clear: both;
   display: flex;
+  flex-wrap: wrap;
 }
 
 .MainImmedia {
@@ -14,4 +14,19 @@
 
 .CanvasVideo {
   margin: 5px;
+}
+
+.VideoName {
+  border: 2px solid red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+}
+
+.Nickname {
+  font-size: 0.7em;
+  font-weight: bold;
+  width: 70px;
+  text-align: center;
 }
