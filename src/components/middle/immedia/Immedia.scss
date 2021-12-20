@@ -5,8 +5,13 @@
 .Participants {
   border: 1px solid red;
   clear: both;
+  display: flex;
 }
 
 .MainImmedia {
   width: 100%;
+}
+
+.CanvasVideo {
+  margin: 5px;
 }

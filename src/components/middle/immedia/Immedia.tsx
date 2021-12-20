@@ -1,21 +1,37 @@
 import SockJS from 'sockjs-client';
 import React, { useEffect, useState, useRef } from '../../../lib/teact/teact';
+import { DEBUG } from '../../../config';
 
 import './Immedia.scss';
+
+const WEBSOCKET_URL = DEBUG
+  ? 'http://localhost:3000/ws'
+  : 'http://immedia.herokuapp.com/ws';
+// const WEBSOCKET_URL = "http://immedia.herokuapp.com/ws";
 
 // String pre-attached to console.log messages
 const INIT = 'IMMEDIA: ';
 
 const SNAPSHOT_RATE = 500; // 0.5 seconds
-const UPDATE_RATE = 1000 * 5; // 1 second
 // const PING_RATE = 1000 * 10; // 10 seconds
+const UPDATE_RATE = 1000 * 5; // 1 second
 
 // Let prehook commit with console.logs
 /* eslint-disable no-console */
+type ParticipantsType = {
+  id: string;
+  nickname?: string;
+  timestamp?: number;
+  image?: string;
+};
 
 type ImmediaProps = {
   chatId: string;
 };
+
+// TODO: We need to unsubscribe the user when
+// he/she leaves the chat by clicking another chat for example.
+// That can be solved by using ping/pong messages.
 
 const Immedia = ({ chatId }: ImmediaProps) => {
   // State that tracks when update is being run. Triggers another update after UPDATE_RATE seconds.
@@ -30,31 +46,76 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   // Although an intermediate state is call it snooze and applied that feature.
   // Or be an awarness trigger. Simply refactor Enter Room <-> Awarness.
   const [enteredRoom, setEnteredRoom] = useState(false);
+  const [participants, setParticipants] = useState<ParticipantsType[]>([]);
   const ws = useRef<WebSocket | undefined>(undefined);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleMessage = (data: any) => {
+    // TODO: Switch beetween data.types: 'join', 'update' and 'left'
+    switch (data.type) {
+      case 'join': {
+        const joinedUser = data.data;
+        if (!participants[joinedUser.id]) {
+          console.log(INIT, 'USER JOINED!');
+          setParticipants([...participants, { id: joinedUser }]);
+          console.log(
+            INIT,
+            'THERE ARE ',
+            1 + participants.length,
+            'PARTICIPANTS IN THE ROOM',
+          );
+        }
+        break;
+      }
+      case 'update': {
+        const updatedUser = data.data;
+        console.log(INIT, 'USER UPDATED!');
+        setParticipants(
+          participants.map((p) => (p.id === updatedUser.id ? updatedUser : p)),
+        );
+        break;
+      }
+      case 'left': {
+        const leftUser = data.data;
+        console.log(INIT, 'USER LEFT with ID: ', leftUser[0]);
+        const filteredParticipants = participants.filter(
+          (p) => p.id !== leftUser[0],
+        );
+        console.log(INIT, 'FILTERED RESULTS: ', filteredParticipants);
+        setParticipants(filteredParticipants);
+        break;
+      }
+      default:
+        console.log(INIT, 'UNKNOWN MESSAGE TYPE!');
+    }
+  };
 
   useEffect(() => {
-    ws.current = new SockJS('http://localhost:3000/ws');
+    // dont change reference to ws
+    if (ws.current === undefined) ws.current = new SockJS(WEBSOCKET_URL);
     ws.current.onopen = () => console.log(INIT, 'ws opened');
     ws.current.onclose = () => console.log(INIT, 'ws closed');
 
     ws.current.onmessage = (event) => {
-      const { data } = JSON.parse(event.data);
+      const response = JSON.parse(event.data);
+      const { data } = response;
       console.log(INIT, 'RECEIVED MESSAGE!');
-      console.log(INIT, data);
-      if (data.id && data.id !== userId) {
+      console.log(INIT, response);
+      if (data.id && data.success === true) {
         console.log(INIT, 'SET USER ID: ', data.id);
         setUserId(data.id);
       }
+      handleMessage(response);
     };
 
     ws.current.onerror = (event) => {
       console.log(INIT, 'ws error');
       console.log(INIT, event);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleMessage]);
 
   // Nickname is set when the user leaves a room, correct.
+  // TODO: Remove this. It's not necessary.
   useEffect(() => {
     console.log(INIT, 'Setting nickname');
     setNickname('Matias');
@@ -102,6 +163,43 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       // TODO: stop video stream
     }
   };
+
+  useEffect(() => {
+    const getParticipantsSnapshots = () => {
+      if (participants.length) {
+        console.log(
+          INIT,
+          'There are ',
+          participants.length,
+          'participants to add.',
+        );
+        console.log(INIT, participants);
+        // update each participant's snapshot
+        participants.forEach((participant) => {
+          console.log(INIT, 'Getting snapshot for', participant);
+          const canvas = document.getElementById(
+            `canvas-${participant.id}`,
+          ) as HTMLCanvasElement;
+          if (canvas) {
+            const context = canvas.getContext('2d');
+            const image = new Image();
+            image.onload = () => {
+              context?.drawImage(image, 0, 0, canvas.width, canvas.height);
+            };
+            if (participant.image) image.src = participant.image;
+          }
+        });
+      }
+    };
+
+    let participantsInterval: NodeJS.Timeout;
+    if (enteredRoom) {
+      participantsInterval = setInterval(getParticipantsSnapshots, UPDATE_RATE);
+    }
+    return () => {
+      clearInterval(participantsInterval);
+    };
+  }, [participants, enteredRoom]);
 
   useEffect(() => {
     const getSnapshotVideo = () => {
@@ -181,6 +279,16 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       setRunningUpdate(false);
     }
   };
+
+  // TODO: I think this approach is cleaner that using a Timeout.
+  // But there's a problem with the function reading the states.
+  // useEffect(() => {
+  //   var updateInterval: NodeJS.Timeout;
+  //   if (enteredRoom && userId !== undefined) {
+  //     updateInterval = setInterval(sendUpdate, UPDATE_RATE);
+  //   }
+  //   return () => clearInterval(updateInterval);
+  // }, [enteredRoom, userId]);
 
   useEffect(() => {
     // Run updates to backend when the user is inside a room
@@ -328,7 +436,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       </div>
       {enteredRoom && (
         <div id="participants" className="Participants">
-          <div>
+          <div id="me">
             <video
               id="video-me"
               autoPlay
@@ -338,9 +446,26 @@ const Immedia = ({ chatId }: ImmediaProps) => {
             >
               <track kind="captions" /> {/* avoid eslint error */}
             </video>
-            <canvas id="canvas-me" width="70" height="50" />
+            <canvas
+              id="canvas-me"
+              className="CanvasVideo"
+              width="70"
+              height="50"
+            />
           </div>
-          <div id="video-others" />
+          <div id="others">
+            {participants
+              && participants.map(({ id }) => {
+                return (
+                  <canvas
+                    className="CanvasVideo"
+                    id={`canvas-${id}`}
+                    width="70"
+                    height="50"
+                  />
+                );
+              })}
+          </div>
         </div>
       )}
     </div>
