@@ -52,6 +52,8 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   const isParticipantPresent = (id: string) => participants.some((p) => p.id === id);
 
+  const formatRoom = (room: string) => room.replace('-', 's');
+
   const cleanUp = () => {
     console.log(INIT, 'CLEANING UP!');
     setParticipants([]);
@@ -62,12 +64,12 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMessage = (data: any) => {
+    const messageData = data.data;
     switch (data.type) {
-      case 'join': {
-        const joinedUser = data.data;
-        if (!isParticipantPresent(joinedUser.id)) {
+      case 'join':
+        if (!isParticipantPresent(messageData.id)) {
           console.log(INIT, 'USER JOINED!');
-          setParticipants([...participants, { id: joinedUser }]);
+          setParticipants([...participants, { id: messageData }]);
           console.log(
             INIT,
             'THERE ARE ',
@@ -76,19 +78,17 @@ const Immedia = ({ chatId }: ImmediaProps) => {
           );
         }
         break;
-      }
-      case 'update': {
-        const updatedUser = data.data;
+      case 'update':
         // check if participant is already present
-        if (isParticipantPresent(updatedUser.id)) {
+        if (isParticipantPresent(messageData.id)) {
           console.log(INIT, 'USER UPDATED!');
           setParticipants(
-            participants.map((p) => (p.id === updatedUser.id ? updatedUser : p)),
+            participants.map((p) => (p.id === messageData.id ? messageData : p)),
           );
         } else {
           // TODO: Use code from join
           console.log(INIT, 'USER CREATED!');
-          setParticipants([...participants, updatedUser]);
+          setParticipants([...participants, messageData]);
           console.log(
             INIT,
             'THERE ARE ',
@@ -97,20 +97,16 @@ const Immedia = ({ chatId }: ImmediaProps) => {
           );
         }
         break;
-      }
-      case 'left': {
-        const leftUser = data.data;
-        if (leftUser.length > 1) {
+      case 'left':
+        if (messageData.length > 1) {
           console.warn(INIT, 'LEFT USER HAS LENGTH > 1');
           console.warn(INIT, 'TODO: HANDLE THIS WARNING ACCORDINGLY');
         }
-        console.log(INIT, 'USER LEFT with ID: ', leftUser[0]);
-        const filteredParticipants = participants.filter(
-          (p) => p.id !== leftUser[0],
-        );
-        setParticipants(filteredParticipants);
+        console.log(INIT, 'USER LEFT with ID: ', messageData[0]);
+        setParticipants(participants.filter(
+          (p) => p.id !== messageData[0],
+        ));
         break;
-      }
       default:
         console.log(INIT, 'UNKNOWN MESSAGE TYPE!');
     }
@@ -166,10 +162,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     console.log(INIT, 'Setting nickname');
     setNickname('Matias');
   }, []);
-
-  const formatRoom = (room: string) => {
-    return room.replace('-', 's');
-  };
 
   // TODO: Correct true value of messageId. Using callbacks overwrites the value.
   const enterRoom = () => {
