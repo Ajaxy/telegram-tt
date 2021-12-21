@@ -96,11 +96,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         break;
       case 'left':
         // {type: 'left', data: ['idxxx', 'idyyy', ...]}
-        if (messageData.length > 1) {
-          console.warn(INIT, 'LEFT USER HAS LENGTH > 1');
-          console.warn(INIT, 'TODO: HANDLE THIS WARNING ACCORDINGLY');
-        }
-        leftParticipant({ id: messageData[0] });
+        messageData.forEach((id: string) => leftParticipant({ id }));
         break;
       default:
         console.log(INIT, 'UNKNOWN MESSAGE TYPE!');
