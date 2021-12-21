@@ -1,3 +1,5 @@
+const { RPCError } = require('../errors');
+
 const MtProtoPlainSender = require('./MTProtoPlainSender');
 const MTProtoState = require('./MTProtoState');
 const Helpers = require('../Helpers');
@@ -420,13 +422,7 @@ class MTProtoSender {
                 } else if (e instanceof InvalidBufferError) {
                     // 404 means that the server has "forgotten" our auth key and we need to create a new one.
                     if (e.code === 404) {
-                        this._log.warn(`Broken authorization key for dc ${this._dcId}; resetting`);
-                        if (this._updateCallback && this._isMainSender) {
-                            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.broken));
-                        } else if (this._onConnectionBreak && !this._isMainSender) {
-                            // Deletes the current sender from the object
-                            this._onConnectionBreak(this._dcId);
-                        }
+                        this._handleBadAuthKey();
                     } else {
                         // this happens sometimes when telegram is having some internal issues.
                         // reconnecting should be enough usually
@@ -445,9 +441,26 @@ class MTProtoSender {
             try {
                 await this._processMessage(message);
             } catch (e) {
-                this._log.error('Unhandled error while receiving data');
-                this._log.error(e);
+                // `RPCError` errors except for 'AUTH_KEY_UNREGISTERED' should be handled by the client
+                if (e instanceof RPCError) {
+                    if (e.message === 'AUTH_KEY_UNREGISTERED') {
+                        this._handleBadAuthKey();
+                    }
+                } else {
+                    this._log.error('Unhandled error while receiving data');
+                    this._log.error(e);
+                }
             }
+        }
+    }
+
+    _handleBadAuthKey() {
+        this._log.warn(`Broken authorization key for dc ${this._dcId}; resetting`);
+        if (this._updateCallback && this._isMainSender) {
+            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.broken));
+        } else if (this._onConnectionBreak && !this._isMainSender) {
+            // Deletes the current sender from the object
+            this._onConnectionBreak(this._dcId);
         }
     }
 
@@ -557,6 +570,7 @@ class MTProtoSender {
             const error = RPCMessageToError(result.error, state.request);
             this._send_queue.append(new RequestState(new MsgsAck({ msgIds: [state.msgId] })));
             state.reject(error);
+            throw error;
         } else {
             try {
                 const reader = new BinaryReader(result.body);
