@@ -3,7 +3,7 @@ import React, {
   memo,
   useRef,
   useCallback,
-  useState,
+  useState, useEffect,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -130,7 +130,24 @@ const HeaderActions: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openLocalTextSearch]);
 
   const lang = useLang();
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case 'f':
+            e.preventDefault();
+            handleSearchClick();
+            break;
+        }
+      }
+    };
 
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, false);
+    };
+  }, [handleSearchClick]);
   return (
     <div className="HeaderActions">
       {!IS_SINGLE_COLUMN_LAYOUT && (
