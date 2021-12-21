@@ -52,6 +52,14 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   const isParticipantPresent = (id: string) => participants.some((p) => p.id === id);
 
+  const cleanUp = () => {
+    console.log(INIT, 'CLEANING UP!');
+    setParticipants([]);
+    setEnteredRoom(false);
+    setLastSnapshot(undefined);
+    // TODO: We need to also clean up set intervals.
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMessage = (data: any) => {
     switch (data.type) {
@@ -109,47 +117,55 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   };
 
   useEffect(() => {
-    // dont change reference to ws
-    if (ws.current === undefined) ws.current = new SockJS(WEBSOCKET_URL);
+    // If the user changed chats, we need to clean up the old chat.
+    cleanUp();
+  }, [chatId]);
+
+  const createConnection = () => {
+    ws.current = new SockJS(WEBSOCKET_URL);
     ws.current.onopen = () => console.log(INIT, 'ws opened');
     ws.current.onclose = () => {
       console.log(INIT, 'ws closed');
-      // clean up
-      ws.current = undefined;
-      setEnteredRoom(false);
-      setParticipants([]);
+      // reconnect
+      setTimeout(createConnection, 1000);
     };
-
-    ws.current.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      const { data } = response;
-      console.log(INIT, 'RECEIVED MESSAGE!');
-      console.log(INIT, response);
-      if (data.id && data.success === true) {
-        console.log(INIT, 'SET USER ID: ', data.id);
-        setUserId(data.id);
-      }
-      handleMessage(response);
-    };
-
     ws.current.onerror = (event) => {
       console.log(INIT, 'ws error');
       console.log(INIT, event);
       // clean up
       ws.current = undefined;
-      setEnteredRoom(false);
-      setParticipants([]);
-      // TODO: reconnect
+      cleanUp();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  };
+
+  useEffect(() => {
+    createConnection();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (ws.current) {
+      ws.current.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        const { data } = response;
+        console.log(INIT, 'RECEIVED MESSAGE!');
+        console.log(INIT, response);
+        if (data.id && data.success === true) {
+          console.log(INIT, 'SET USER ID: ', data.id);
+          setUserId(data.id);
+        }
+        handleMessage(response);
+      };
+    }
   }, [handleMessage]);
 
   // Nickname is set when the user leaves a room, correct.
   // TODO: Set the user first name/ last name or username from Telegram API as nickname.
+  // Given that they can be undefined maybe it's better to let the user change it.
   useEffect(() => {
     console.log(INIT, 'Setting nickname');
     setNickname('Matias');
-  }, [userId]);
+  }, []);
 
   const formatRoom = (room: string) => {
     return room.replace('-', 's');
