@@ -55,50 +55,52 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     // TODO: We need to also clean up set intervals.
   };
 
+  const joinedParticipant = (participant: ParticipantsType) => {
+    console.log(INIT, 'USER JOINED!');
+    setParticipants([...participants, participant]);
+    console.log(
+      INIT,
+      'THERE ARE ',
+      1 + participants.length,
+      'PARTICIPANTS IN THE ROOM',
+    );
+  };
+
+  const updatedParticipant = (participant: ParticipantsType) => {
+    console.log(INIT, 'USER UPDATED!');
+    setParticipants(
+      participants.map((p) => (p.id === participant.id ? participant : p)),
+    );
+  };
+
+  const leftParticipant = (participant: ParticipantsType) => {
+    console.log(INIT, 'USER LEFT with ID: ', participant);
+    setParticipants(participants.filter(
+      (p) => p.id !== participant.id,
+    ));
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMessage = (data: any) => {
     const messageData = data.data;
     switch (data.type) {
       case 'join':
-        if (!isParticipantPresent(messageData.id)) {
-          console.log(INIT, 'USER JOINED!');
-          setParticipants([...participants, { id: messageData }]);
-          console.log(
-            INIT,
-            'THERE ARE ',
-            1 + participants.length,
-            'PARTICIPANTS IN THE ROOM',
-          );
-        }
+        // {type: 'join', data: 'idxxx'}
+        if (!isParticipantPresent(messageData)) joinedParticipant({ id: messageData });
         break;
       case 'update':
+        // {type: 'update', data: {id: 'idxxx', timestamp: 123456789, nickname: 'nckxxx', image: 'img_url'}}
         // check if participant is already present
-        if (isParticipantPresent(messageData.id)) {
-          console.log(INIT, 'USER UPDATED!');
-          setParticipants(
-            participants.map((p) => (p.id === messageData.id ? messageData : p)),
-          );
-        } else {
-          // TODO: Use code from join
-          console.log(INIT, 'USER CREATED!');
-          setParticipants([...participants, messageData]);
-          console.log(
-            INIT,
-            'THERE ARE ',
-            1 + participants.length,
-            'PARTICIPANTS IN THE ROOM',
-          );
-        }
+        if (isParticipantPresent(messageData.id)) updatedParticipant(messageData);
+        else joinedParticipant(messageData);
         break;
       case 'left':
+        // {type: 'left', data: ['idxxx', 'idyyy', ...]}
         if (messageData.length > 1) {
           console.warn(INIT, 'LEFT USER HAS LENGTH > 1');
           console.warn(INIT, 'TODO: HANDLE THIS WARNING ACCORDINGLY');
         }
-        console.log(INIT, 'USER LEFT with ID: ', messageData[0]);
-        setParticipants(participants.filter(
-          (p) => p.id !== messageData[0],
-        ));
+        leftParticipant({ id: messageData[0] });
         break;
       default:
         console.log(INIT, 'UNKNOWN MESSAGE TYPE!');
