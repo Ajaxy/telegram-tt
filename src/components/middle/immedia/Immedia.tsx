@@ -31,10 +31,6 @@ type ImmediaProps = {
   chatId: string;
 };
 
-// TODO: We need to unsubscribe the user when
-// he/she leaves the chat by clicking another chat for example.
-// That can be solved by using ping/pong messages.
-
 const Immedia = ({ chatId }: ImmediaProps) => {
   // State that tracks when update is being run. Triggers another update after UPDATE_RATE seconds.
   const [lastSnapshot, setLastSnapshot] = useState<string | undefined>(
@@ -43,10 +39,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   const [messageId, setMessageId] = useState(0);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [nickname, setNickname] = useState('');
-  // TODO: Remove. It's not necessary. When the component renders it's already connected.
-  // Although an intermediate state is call it snooze and applied that feature.
-  // Or be an awarness trigger. Simply refactor Enter Room <-> Awarness.
-  const [enteredRoom, setEnteredRoom] = useState(false);
+  const [awareness, setAwareness] = useState(false);
   const [participants, setParticipants] = useState<ParticipantsType[]>([]);
   const ws = useRef<WebSocket | undefined>(undefined);
 
@@ -57,7 +50,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   const cleanUp = () => {
     console.log(INIT, 'CLEANING UP!');
     setParticipants([]);
-    setEnteredRoom(false);
+    setAwareness(false);
     setLastSnapshot(undefined);
     // TODO: We need to also clean up set intervals.
   };
@@ -164,8 +157,8 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   }, []);
 
   // TODO: Correct true value of messageId. Using callbacks overwrites the value.
-  const enterRoom = () => {
-    console.log(INIT, 'EnterRoom');
+  const enableAwareness = () => {
+    console.log(INIT, 'Enabled Awareness');
     const currentMessageId = messageId + 1;
     setMessageId(currentMessageId);
     const message = {
@@ -176,11 +169,11 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     };
     if (ws.current) {
       ws.current.send(JSON.stringify(message));
-      setEnteredRoom(true);
+      setAwareness(true);
     }
   };
 
-  const leaveRoom = () => {
+  const disableAwareness = () => {
     if (ws.current) {
       const currentMessageId = messageId + 1;
       setMessageId(currentMessageId);
@@ -190,9 +183,9 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         room: formatRoom(chatId),
         type: 'uns',
       };
-      console.log(INIT, 'LeaveRoom');
+      console.log(INIT, 'Disabled Awareness');
       ws.current.send(JSON.stringify(message));
-      setEnteredRoom(false);
+      setAwareness(false);
       setUserId(undefined);
       setLastSnapshot(undefined);
       // TODO: stop video stream
@@ -224,12 +217,12 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         }
       });
     };
-    if (enteredRoom && participants.length) getParticipantsSnapshots();
-  }, [participants, enteredRoom]);
+    if (awareness && participants.length) getParticipantsSnapshots();
+  }, [participants, awareness]);
 
   useEffect(() => {
     const getSnapshotVideo = () => {
-      if (enteredRoom) {
+      if (awareness) {
         const video = document.getElementById('video-me') as HTMLVideoElement;
         const canvas = document.getElementById(
           'canvas-me',
@@ -274,12 +267,12 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     };
 
     let result: NodeJS.Timeout;
-    if (enteredRoom) {
+    if (awareness) {
       // get webcam snapshots every SNAPSHOT_RATE seconds
       result = setInterval(getSnapshotVideo, SNAPSHOT_RATE);
     }
     return () => clearInterval(result);
-  }, [enteredRoom]);
+  }, [awareness]);
 
   // GC that runs every GC_RATE seconds and checks if, for each participant,
   // their last snapshot was taken inside a REMOVE_THRESHOLD seconds time frame.
@@ -308,13 +301,13 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
     if (participants.length) {
       let participantsInterval: NodeJS.Timeout;
-      if (enteredRoom) {
+      if (awareness) {
         participantsInterval = setInterval(updateParticipants, GC_RATE);
       }
       return () => clearInterval(participantsInterval);
     }
     return undefined;
-  }, [enteredRoom, participants]);
+  }, [awareness, participants]);
 
   useEffect(() => {
     const sendUpdate = () => {
@@ -342,7 +335,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     };
     if (lastSnapshot !== undefined && userId !== undefined) {
       let updateInterval: NodeJS.Timeout;
-      if (enteredRoom) {
+      if (awareness) {
         console.log(INIT, 'Running Updates');
         updateInterval = setInterval(sendUpdate, UPDATE_RATE);
       }
@@ -350,7 +343,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     }
     return undefined;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enteredRoom, userId, messageId, nickname, chatId]);
+  }, [awareness, userId, messageId, nickname, chatId]);
 
   // TODO: Run PING and PONG messages to keep connection alive.
   // Keep Track of connection status
@@ -373,14 +366,14 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
     if (chatId !== undefined && userId !== undefined) {
       let pingInterval: NodeJS.Timeout;
-      if (enteredRoom) {
+      if (awareness) {
         console.log(INIT, 'RUNNING PING INTERVAL EVERY ', PING_RATE);
         pingInterval = setInterval(ping, PING_RATE);
       }
       return () => clearInterval(pingInterval);
     }
     return undefined;
-  }, [enteredRoom, userId, messageId, chatId]);
+  }, [awareness, userId, messageId, chatId]);
 
   // TODO: Define the Heartbeat function to keep track user connection.
 
@@ -436,13 +429,13 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   return (
     <div className="MainImmedia">
       <div className="MiddleHeader">
-        {enteredRoom ? (
+        {awareness ? (
           <>
             <div className="HeaderActions">
               <button onClick={() => sendMessage(getRandomString())}>
                 Message
               </button>
-              <button onClick={leaveRoom}>Leave</button>
+              <button onClick={disableAwareness}>Disable Awareness</button>
               <button onClick={getAvailableMessages}>
                 Get Available Messages
               </button>
@@ -451,12 +444,12 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         ) : (
           <>
             <div className="HeaderActions">
-              <button onClick={enterRoom}>Enter Room</button>
+              <button onClick={enableAwareness}>Enable Awareness</button>
             </div>
           </>
         )}
       </div>
-      {enteredRoom && (
+      {awareness && (
         <div id="participants" className="Participants">
           <div className="MeParticipant">
             <video
