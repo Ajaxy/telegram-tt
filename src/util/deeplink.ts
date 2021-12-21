@@ -54,7 +54,7 @@ export const processDeepLink = (url: string) => {
       } = params;
 
       focusMessage({
-        chatId: -Number(channel),
+        chatId: `-${channel}`,
         id: post,
       });
       break;

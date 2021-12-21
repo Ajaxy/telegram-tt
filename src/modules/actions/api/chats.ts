@@ -567,7 +567,7 @@ addReducer('openTelegramLink', (global, actions, payload) => {
     return;
   }
 
-  const chatOrChannelPostId = part2 ? Number(part2) : undefined;
+  const chatOrChannelPostId = part2 || undefined;
   const messageId = part3 ? Number(part3) : undefined;
   const commentId = params.comment ? Number(params.comment) : undefined;
 
@@ -578,13 +578,13 @@ addReducer('openTelegramLink', (global, actions, payload) => {
     });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
     actions.focusMessage({
-      chatId: -chatOrChannelPostId,
+      chatId: `-${chatOrChannelPostId}`,
       messageId,
     });
   } else {
     actions.openChatByUsername({
       username: part1,
-      messageId: messageId || chatOrChannelPostId,
+      messageId: messageId || Number(chatOrChannelPostId),
       commentId,
     });
   }
