@@ -155,17 +155,17 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   // TODO: Correct true value of messageId. Using callbacks overwrites the value.
   const enableAwareness = () => {
-    console.log(INIT, 'Enabled Awareness');
-    const currentMessageId = messageId + 1;
-    setMessageId(currentMessageId);
-    const message = {
-      msgId: currentMessageId,
-      type: 'sub',
-      room: formatRoom(chatId),
-      data: { password: false },
-    };
     if (ws.current) {
+      const currentMessageId = messageId + 1;
+      setMessageId(currentMessageId);
+      const message = {
+        msgId: currentMessageId,
+        type: 'sub',
+        room: formatRoom(chatId),
+        data: { password: false },
+      };
       ws.current.send(JSON.stringify(message));
+      console.log(INIT, 'Enabled Awareness');
       setAwareness(true);
     }
   };
@@ -180,8 +180,8 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         room: formatRoom(chatId),
         type: 'uns',
       };
-      console.log(INIT, 'Disabled Awareness');
       ws.current.send(JSON.stringify(message));
+      console.log(INIT, 'Disabled Awareness');
       setAwareness(false);
       setUserId(undefined);
       setLastSnapshot(undefined);
@@ -191,13 +191,6 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   useEffect(() => {
     const getParticipantsSnapshots = () => {
-      console.log(
-        INIT,
-        'There are ',
-        participants.length,
-        'participants to add.',
-      );
-      console.log(INIT, participants);
       // update each participant's snapshot
       participants.forEach((participant) => {
         console.log(INIT, 'Getting snapshot for', participant);
@@ -231,6 +224,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
             if (video && context) {
               video.srcObject = stream;
               // Wait some time beacuse the video is not ready
+              // FIX: Maybe there's a better way to do this.
               setTimeout(() => {
                 // show snapshot
                 context.drawImage(
