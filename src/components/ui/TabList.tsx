@@ -51,7 +51,8 @@ const TabList: FC<OwnProps> = ({
       return;
     }
 
-    const newLeft = activeTabElement.offsetLeft - (offsetWidth / 2) + (activeTabElement.offsetWidth / 2);
+    const { offsetLeft: activeTabOffsetLeft, offsetWidth: activeTabOffsetWidth } = activeTabElement;
+    const newLeft = activeTabOffsetLeft - (offsetWidth / 2) + (activeTabOffsetWidth / 2);
 
     // Prevent scrolling by only a couple of pixels, which doesn't look smooth
     if (Math.abs(newLeft - scrollLeft) < TAB_SCROLL_THRESHOLD_PX) {

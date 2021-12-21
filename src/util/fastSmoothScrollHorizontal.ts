@@ -14,11 +14,12 @@ export default function fastSmoothScrollHorizontal(container: HTMLElement, left:
 }
 
 function scrollWithJs(container: HTMLElement, left: number, duration: number) {
+  const isRtl = container.getAttribute('dir') === 'rtl';
   const { scrollLeft, offsetWidth: containerWidth, scrollWidth } = container;
   let path = left - scrollLeft;
 
   if (path < 0) {
-    const remainingPath = -scrollLeft;
+    const remainingPath = -scrollLeft * (isRtl ? -1 : 1);
     path = Math.max(path, remainingPath);
   } else if (path > 0) {
     const remainingPath = scrollWidth - (scrollLeft + containerWidth);
