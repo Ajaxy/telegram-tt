@@ -79,6 +79,7 @@ type StateProps = {
   animationLevel?: number;
   isSelected?: boolean;
   canScrollDown?: boolean;
+  canChangeFolder?: boolean;
   lastSyncTime?: number;
 };
 
@@ -107,6 +108,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   animationLevel,
   isSelected,
   canScrollDown,
+  canChangeFolder,
   lastSyncTime,
   openChat,
   focusLastMessage,
@@ -204,6 +206,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     folderId,
     isPinned,
     isMuted,
+    canChangeFolder,
   });
 
   const lang = useLang();
@@ -377,6 +380,7 @@ export default memo(withGlobal<OwnProps>(
       animationLevel: global.settings.byKey.animationLevel,
       isSelected,
       canScrollDown: isSelected && messageListType === 'thread',
+      canChangeFolder: Boolean(global.chatFolders.orderedIds),
       lastSyncTime: global.lastSyncTime,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && {
