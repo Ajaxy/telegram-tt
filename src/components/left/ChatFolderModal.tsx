@@ -63,8 +63,8 @@ const ChatFolderModal: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [folderOrderedIds, foldersById]);
 
   const handleSubmit = useCallback(() => {
-    const idsToRemove = initialSelectedFolderIds.filter((id) => !selectedFolderIds.includes(id));
-    const idsToAdd = selectedFolderIds.filter((id) => !initialSelectedFolderIds.includes(id));
+    const idsToRemove = initialSelectedFolderIds.filter((id) => !selectedFolderIds.includes(id)).map(Number);
+    const idsToAdd = selectedFolderIds.filter((id) => !initialSelectedFolderIds.includes(id)).map(Number);
 
     editChatFolders({ chatId, idsToRemove, idsToAdd });
     onClose();

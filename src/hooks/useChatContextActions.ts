@@ -17,6 +17,7 @@ export default ({
   folderId,
   isPinned,
   isMuted,
+  canChangeFolder,
 }: {
   chat: ApiChat | undefined;
   user: ApiUser | undefined;
@@ -25,6 +26,7 @@ export default ({
   folderId?: number;
   isPinned?: boolean;
   isMuted?: boolean;
+  canChangeFolder?: boolean;
 }, isInSearch = false) => {
   const lang = useLang();
 
@@ -42,11 +44,11 @@ export default ({
       toggleChatUnread,
     } = getDispatch();
 
-    const actionAddToFolder = {
+    const actionAddToFolder = canChangeFolder ? {
       title: lang('ChatList.Filter.AddToFolder'),
       icon: 'folder',
       handler: handleChatFolderChange,
-    };
+    } : undefined;
 
     const actionPin = isPinned
       ? {
@@ -57,7 +59,7 @@ export default ({
       : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
 
     if (isInSearch) {
-      return [actionPin, actionAddToFolder];
+      return compact([actionPin, actionAddToFolder]);
     }
 
     const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
@@ -101,5 +103,7 @@ export default ({
       !isSelf && !isInFolder && actionArchive,
       actionDelete,
     ]);
-  }, [chat, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, handleDelete, folderId, isSelf]);
+  }, [
+    chat, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, handleDelete, folderId, isSelf,
+  ]);
 };
