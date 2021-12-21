@@ -353,7 +353,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingCanStartBot || isPinnedMessageList,
   );
-  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || withMessageListBottomShift);
+  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
 
   return (
     <div
