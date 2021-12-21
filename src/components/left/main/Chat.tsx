@@ -380,7 +380,7 @@ export default memo(withGlobal<OwnProps>(
       animationLevel: global.settings.byKey.animationLevel,
       isSelected,
       canScrollDown: isSelected && messageListType === 'thread',
-      canChangeFolder: Boolean(global.chatFolders.orderedIds),
+      canChangeFolder: Boolean(global.chatFolders.orderedIds?.length),
       lastSyncTime: global.lastSyncTime,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && {

@@ -89,7 +89,13 @@ const ChatFolderModal: FC<OwnProps & StateProps & DispatchProps> = ({
         onChange={setSelectedFolderIds}
         round
       />
-      <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+      <Button
+        disabled={!selectedFolderIds.length}
+        color="primary"
+        className="confirm-dialog-button"
+        isText
+        onClick={handleSubmit}
+      >
         {lang('FilterAddTo')}
       </Button>
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
