@@ -1,5 +1,9 @@
-.videoStream {
-  display: none;
+.ImmediaHeader {
+  min-height: 110px;
+}
+
+.ImmediaBackground {
+  background-color: transparent;
 }
 
 .Participants {
@@ -8,20 +12,29 @@
   flex-wrap: wrap;
 }
 
-.MainImmedia {
-  width: 100%;
+.MeParticipant {
+  padding: 2px;
 }
 
-.CanvasVideo {
-  margin: 5px;
+.videoStream {
+  display: none;
 }
 
 .VideoName {
-  border: 2px solid red;
+  border: 2px solid var(--color-chat-active);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2px;
+}
+
+.VideoNameParticipants {
+  margin-right: 3px;
+  border: 2px solid gray;
+}
+
+.CanvasVideo {
+  margin: 5px;
 }
 
 .Nickname {
@@ -33,8 +46,6 @@
 
 .OtherParticipants {
   padding: 2px;
-}
-
-.MeParticipant {
-  padding: 2px;
+  display:flex;
+  flex-direction: row;
 }

@@ -1,5 +1,6 @@
 import SockJS from 'sockjs-client';
 import React, { useEffect, useState, useRef } from '../../../lib/teact/teact';
+import MenuItem from '../../ui/MenuItem';
 import { DEBUG } from '../../../config';
 
 import './Immedia.scss';
@@ -344,7 +345,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awareness, userId, messageId, nickname, chatId]);
 
-  // TODO: Run PING and PONG messages to keep connection alive.
+  // TODO: Define the Heartbeat function to keep track user connection.
   // Keep Track of connection status
   useEffect(() => {
     const ping = () => {
@@ -374,18 +375,15 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return undefined;
   }, [awareness, userId, messageId, chatId]);
 
-  // TODO: Define the Heartbeat function to keep track user connection.
   return (
-    <div className="MainImmedia">
-      <div className="MiddleHeader">
-        <div className="HeaderActions">
-          <button onClick={awareness ? disableAwareness : enableAwareness}>
-            {awareness ? 'Disable Awareness' : 'Enable Awareness'}
-          </button>
-        </div>
-      </div>
+    <div
+      className={`MiddleHeader ImmediaHeader ${
+        awareness || 'ImmediaBackground'
+      }`}
+    >
+      {/* Participants */}
       {awareness && (
-        <div id="participants" className="Participants">
+        <div className="Participants">
           <div className="MeParticipant">
             <video
               id="video-me"
@@ -394,7 +392,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
               width="640"
               height="480"
             >
-              <track kind="captions" /> {/* avoid eslint error */}
+              <track kind="captions" />
             </video>
             <div className="VideoName">
               <canvas
@@ -410,7 +408,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
             {participants
               && participants.map(({ id, nickname: participantNickname }) => {
                 return (
-                  <div key={id} className="VideoName">
+                  <div key={id} className="VideoName VideoNameParticipants">
                     <canvas
                       className="CanvasVideo"
                       id={`canvas-${id}`}
@@ -423,6 +421,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
                           <i className="icon-video-stop"></i>
                         ))} */}
                     <text className="Nickname">
+                      {/* Add whitespace until data is loaded */}
                       {participantNickname || '\u00a0\u00a0'}
                     </text>
                   </div>
@@ -431,6 +430,15 @@ const Immedia = ({ chatId }: ImmediaProps) => {
           </div>
         </div>
       )}
+      {/* Action Buttons */}
+      <div className="HeaderActions">
+        <MenuItem
+          icon={awareness ? 'close' : 'enter'}
+          onClick={awareness ? disableAwareness : enableAwareness}
+        >
+          {awareness ? 'Disable Awareness' : 'Enable Awareness'}
+        </MenuItem>
+      </div>
     </div>
   );
 };
