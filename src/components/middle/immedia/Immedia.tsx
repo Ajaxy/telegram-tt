@@ -91,13 +91,15 @@ const Immedia = ({ chatId }: ImmediaProps) => {
         break;
       }
       case 'left': {
-        // TODO: Set a warning message if leftUser has length > 1 or better, handle accordingly.
         const leftUser = data.data;
+        if (leftUser.length > 1) {
+          console.warn(INIT, 'LEFT USER HAS LENGTH > 1');
+          console.warn(INIT, 'TODO: HANDLE THIS WARNING ACCORDINGLY');
+        }
         console.log(INIT, 'USER LEFT with ID: ', leftUser[0]);
         const filteredParticipants = participants.filter(
           (p) => p.id !== leftUser[0],
         );
-        console.log(INIT, 'FILTERED RESULTS: ', filteredParticipants);
         setParticipants(filteredParticipants);
         break;
       }
@@ -110,7 +112,13 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     // dont change reference to ws
     if (ws.current === undefined) ws.current = new SockJS(WEBSOCKET_URL);
     ws.current.onopen = () => console.log(INIT, 'ws opened');
-    ws.current.onclose = () => console.log(INIT, 'ws closed');
+    ws.current.onclose = () => {
+      console.log(INIT, 'ws closed');
+      // clean up
+      ws.current = undefined;
+      setEnteredRoom(false);
+      setParticipants([]);
+    };
 
     ws.current.onmessage = (event) => {
       const response = JSON.parse(event.data);
@@ -127,6 +135,11 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     ws.current.onerror = (event) => {
       console.log(INIT, 'ws error');
       console.log(INIT, event);
+      // clean up
+      ws.current = undefined;
+      setEnteredRoom(false);
+      setParticipants([]);
+      // TODO: reconnect
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleMessage]);
@@ -139,10 +152,9 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   }, [userId]);
 
   const formatRoom = (room: string) => {
-    // this will work for both new and old version of telegram
-    // TODO: Check if this is how we have to implement it.
-    return room.replace('s', '').replace('-', '');
+    return room.replace('-', 's');
   };
+
   // TODO: Correct true value of messageId. Using callbacks overwrites the value.
   const enterRoom = () => {
     console.log(INIT, 'EnterRoom');
@@ -181,39 +193,30 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   useEffect(() => {
     const getParticipantsSnapshots = () => {
-      if (participants.length) {
-        console.log(
-          INIT,
-          'There are ',
-          participants.length,
-          'participants to add.',
-        );
-        console.log(INIT, participants);
-        // update each participant's snapshot
-        participants.forEach((participant) => {
-          console.log(INIT, 'Getting snapshot for', participant);
-          const canvas = document.getElementById(
-            `canvas-${participant.id}`,
-          ) as HTMLCanvasElement;
-          if (canvas) {
-            const context = canvas.getContext('2d');
-            const image = new Image();
-            image.onload = () => {
-              context?.drawImage(image, 0, 0, canvas.width, canvas.height);
-            };
-            if (participant.image) image.src = participant.image;
-          }
-        });
-      }
+      console.log(
+        INIT,
+        'There are ',
+        participants.length,
+        'participants to add.',
+      );
+      console.log(INIT, participants);
+      // update each participant's snapshot
+      participants.forEach((participant) => {
+        console.log(INIT, 'Getting snapshot for', participant);
+        const canvas = document.getElementById(
+          `canvas-${participant.id}`,
+        ) as HTMLCanvasElement;
+        if (canvas) {
+          const context = canvas.getContext('2d');
+          const image = new Image();
+          image.onload = () => {
+            context?.drawImage(image, 0, 0, canvas.width, canvas.height);
+          };
+          if (participant.image) image.src = participant.image;
+        }
+      });
     };
-
-    let participantsInterval: NodeJS.Timeout;
-    if (enteredRoom) {
-      participantsInterval = setInterval(getParticipantsSnapshots, UPDATE_RATE);
-    }
-    return () => {
-      clearInterval(participantsInterval);
-    };
+    if (enteredRoom && participants.length) getParticipantsSnapshots();
   }, [participants, enteredRoom]);
 
   useEffect(() => {
@@ -321,6 +324,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
               image: lastSnapshot,
               timestamp: new Date().getTime(),
               nickname,
+              id: userId,
             },
           },
         };
