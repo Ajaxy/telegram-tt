@@ -75,9 +75,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   const leftParticipant = (participant: ParticipantsType) => {
     console.log(INIT, 'USER LEFT with ID: ', participant);
-    setParticipants(participants.filter(
-      (p) => p.id !== participant.id,
-    ));
+    setParticipants(participants.filter((p) => p.id !== participant.id));
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +125,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
 
   useEffect(() => {
     createConnection();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -307,6 +305,9 @@ const Immedia = ({ chatId }: ImmediaProps) => {
     return undefined;
   }, [awareness, participants]);
 
+  // FIX: Make the function use the latest value of state.
+  // I think the issue arises when the callback is sent the value used is the one when timeout was called.
+  // async states?
   useEffect(() => {
     const sendUpdate = () => {
       if (ws.current) {
@@ -340,7 +341,7 @@ const Immedia = ({ chatId }: ImmediaProps) => {
       return () => clearInterval(updateInterval);
     }
     return undefined;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awareness, userId, messageId, nickname, chatId]);
 
   // TODO: Run PING and PONG messages to keep connection alive.
@@ -374,78 +375,14 @@ const Immedia = ({ chatId }: ImmediaProps) => {
   }, [awareness, userId, messageId, chatId]);
 
   // TODO: Define the Heartbeat function to keep track user connection.
-
-  // TODO: Remove this feature. We don't need to send text messages.
-  const sendMessage = (text: string) => {
-    // FIX: Make the function use the latest value of state.
-    // I think the issue arises when the callback is sent the value used is the one when timeout was called.
-    // async states?
-    if (ws.current) {
-      const currentMessageId = messageId + 1;
-      setMessageId(currentMessageId);
-      const message = {
-        msgId: currentMessageId,
-        id: userId,
-        type: 'app',
-        room: formatRoom(chatId),
-        data: {
-          type: 'message',
-          data: {
-            text,
-            timestamp: new Date().getTime(),
-            nickname,
-            image: lastSnapshot,
-          },
-        },
-      };
-      console.log(INIT, 'Sending message: ', message);
-      ws.current.send(JSON.stringify(message));
-    }
-  };
-
-  // TODO: Remove this feature.
-  const getAvailableMessages = () => {
-    const currentMessageId = messageId + 1;
-    setMessageId(currentMessageId);
-    const message = {
-      msgId: currentMessageId,
-      id: userId,
-      type: 'app',
-      room: formatRoom(chatId),
-      data: { type: 'get-all-messages', data: undefined },
-    };
-    console.log(INIT, 'Getting available messages: ', message);
-    if (ws.current) {
-      ws.current.send(JSON.stringify(message));
-    }
-  };
-
-  const getRandomString = () => {
-    return Math.random().toString(36).substring(2, 15);
-  };
-
   return (
     <div className="MainImmedia">
       <div className="MiddleHeader">
-        {awareness ? (
-          <>
-            <div className="HeaderActions">
-              <button onClick={() => sendMessage(getRandomString())}>
-                Message
-              </button>
-              <button onClick={disableAwareness}>Disable Awareness</button>
-              <button onClick={getAvailableMessages}>
-                Get Available Messages
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="HeaderActions">
-              <button onClick={enableAwareness}>Enable Awareness</button>
-            </div>
-          </>
-        )}
+        <div className="HeaderActions">
+          <button onClick={awareness ? disableAwareness : enableAwareness}>
+            {awareness ? 'Disable Awareness' : 'Enable Awareness'}
+          </button>
+        </div>
       </div>
       {awareness && (
         <div id="participants" className="Participants">
@@ -471,28 +408,26 @@ const Immedia = ({ chatId }: ImmediaProps) => {
           </div>
           <div className="OtherParticipants">
             {participants
-              && participants.map(
-                ({ id, nickname: participantNickname }) => {
-                  return (
-                    <div key={id} className="VideoName">
-                      <canvas
-                        className="CanvasVideo"
-                        id={`canvas-${id}`}
-                        width="70"
-                        height="50"
-                      />
-                      {/* FIX: Display image in place of canvas */}
-                      {/* {image ||
+              && participants.map(({ id, nickname: participantNickname }) => {
+                return (
+                  <div key={id} className="VideoName">
+                    <canvas
+                      className="CanvasVideo"
+                      id={`canvas-${id}`}
+                      width="70"
+                      height="50"
+                    />
+                    {/* FIX: Display image in place of canvas */}
+                    {/* {image ||
                         (participantNickname && (
                           <i className="icon-video-stop"></i>
                         ))} */}
-                      <text className="Nickname">
-                        {participantNickname || '\u00a0\u00a0'}
-                      </text>
-                    </div>
-                  );
-                },
-              )}
+                    <text className="Nickname">
+                      {participantNickname || '\u00a0\u00a0'}
+                    </text>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
