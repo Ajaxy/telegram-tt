@@ -577,8 +577,15 @@ addReducer('openTelegramLink', (global, actions, payload) => {
       inviteHash: params.voicechat || params.livestream,
     });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
+    const chatId = `-${chatOrChannelPostId}`;
+    const chat = selectChat(global, chatId);
+    if (!chat) {
+      actions.showNotification({ message: 'Chat does not exist' });
+      return;
+    }
+
     actions.focusMessage({
-      chatId: `-${chatOrChannelPostId}`,
+      chatId,
       messageId,
     });
   } else {
