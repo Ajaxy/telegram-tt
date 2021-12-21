@@ -339,17 +339,26 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       }, DELETE_MISSING_CHANNEL_MESSAGE_DELAY);
     }
   } else if (update instanceof GramJs.UpdateServiceNotification) {
-    const currentDate = Date.now() / 1000 + serverTimeOffset;
-    const message = buildApiMessageFromNotification(update, currentDate);
+    if (update.popup) {
+      onUpdate({
+        '@type': 'error',
+        error: {
+          message: update.message,
+        },
+      });
+    } else {
+      const currentDate = Date.now() / 1000 + serverTimeOffset;
+      const message = buildApiMessageFromNotification(update, currentDate);
 
-    if (isMessageWithMedia(update)) {
-      addMessageToLocalDb(buildMessageFromUpdate(message.id, message.chatId, update));
+      if (isMessageWithMedia(update)) {
+        addMessageToLocalDb(buildMessageFromUpdate(message.id, message.chatId, update));
+      }
+
+      onUpdate({
+        '@type': 'updateServiceNotification',
+        message,
+      });
     }
-
-    onUpdate({
-      '@type': 'updateServiceNotification',
-      message,
-    });
   } else if ((
     originRequest instanceof GramJs.messages.SendMessage
     || originRequest instanceof GramJs.messages.SendMedia

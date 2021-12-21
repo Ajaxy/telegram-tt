@@ -66,7 +66,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       if (paymentShippingError) {
         actions.addPaymentError({ error: paymentShippingError });
       } else if (actions.showDialog) {
-        actions.showDialog({ data: { ...update.error, hasErrorKey: true } });
+        actions.showDialog({ data: update.error });
       }
 
       break;
