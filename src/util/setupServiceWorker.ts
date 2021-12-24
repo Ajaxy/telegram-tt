@@ -1,4 +1,4 @@
-import { DEBUG } from '../config';
+import { DEBUG, DEBUG_MORE } from '../config';
 import { getDispatch } from '../lib/teact/teactn';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
@@ -10,7 +10,7 @@ type WorkerAction = {
 
 function handleWorkerMessage(e: MessageEvent) {
   const action: WorkerAction = e.data;
-  if (DEBUG) {
+  if (DEBUG_MORE) {
     // eslint-disable-next-line no-console
     console.log('[SW] Message from worker', action);
   }
