@@ -48,7 +48,10 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   const lang = useLang();
   const [viewportIds, getMore] = useInfiniteScroll(loadMore, chatOrUserIds, Boolean(filter));
 
-  useInputFocusOnOpen(filterRef, isOpen, () => { onFilterChange(''); });
+  const resetFilter = useCallback(() => {
+    onFilterChange('');
+  }, [onFilterChange]);
+  useInputFocusOnOpen(filterRef, isOpen, resetFilter);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
