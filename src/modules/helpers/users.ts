@@ -5,6 +5,7 @@ import { formatFullDate, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { LangFn } from '../../hooks/useLang';
 import { getServerTime } from '../../util/serverTime';
+import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 
 const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
@@ -229,6 +230,24 @@ export function sortUserIds(
         return 0;
     }
   }, 'desc');
+}
+
+export function filterUsersByName(userIds: string[], usersById: Record<string, ApiUser>, query?: string) {
+  if (!query) {
+    return userIds;
+  }
+
+  const searchWords = prepareSearchWordsForNeedle(query);
+
+  return userIds.filter((id) => {
+    const user = usersById[id];
+    if (!user) {
+      return false;
+    }
+
+    const name = getUserFullName(user);
+    return (name && searchWords(name)) || searchWords(user.username);
+  });
 }
 
 export function getUserIdDividend(userId: string) {

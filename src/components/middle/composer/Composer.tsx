@@ -299,7 +299,6 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     groupChatMembers,
     topInlineBotIds,
     currentUserId,
-    usersById,
   );
 
   const {

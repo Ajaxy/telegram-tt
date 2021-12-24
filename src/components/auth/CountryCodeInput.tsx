@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import searchWords from '../../util/searchWords';
+import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
@@ -159,11 +159,15 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
 };
 
 function getFilteredList(countryList: ApiCountryCode[], filter = ''): ApiCountryCode[] {
-  const filtered = filter.length
-    ? countryList.filter((country) => (
-      searchWords(country.defaultName, filter) || (country.name && searchWords(country.name, filter))
-    )) : countryList;
-  return filtered;
+  if (!filter.length) {
+    return countryList;
+  }
+
+  const searchWords = prepareSearchWordsForNeedle(filter);
+
+  return countryList.filter((country) => (
+    searchWords(country.defaultName) || (country.name && searchWords(country.name))
+  ));
 }
 
 export default memo(withGlobal<OwnProps>(
