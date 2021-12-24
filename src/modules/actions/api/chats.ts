@@ -593,6 +593,7 @@ addReducer('openTelegramLink', (global, actions, payload) => {
       username: part1,
       messageId: messageId || Number(chatOrChannelPostId),
       commentId,
+      startParam: params.start,
     });
   }
 });
@@ -610,7 +611,9 @@ addReducer('acceptInviteConfirmation', (global, actions, payload) => {
 });
 
 addReducer('openChatByUsername', (global, actions, payload) => {
-  const { username, messageId, commentId } = payload!;
+  const {
+    username, messageId, commentId, startParam,
+  } = payload!;
 
   (async () => {
     const chat = selectCurrentChat(global);
@@ -620,7 +623,7 @@ addReducer('openChatByUsername', (global, actions, payload) => {
         actions.focusMessage({ chatId: chat.id, messageId });
         return;
       }
-      await openChatByUsername(actions, username, messageId);
+      await openChatByUsername(actions, username, messageId, startParam);
       return;
     }
 
@@ -1258,6 +1261,7 @@ async function openChatByUsername(
   actions: GlobalActions,
   username: string,
   channelPostId?: number,
+  startParam?: string,
 ) {
   // Open temporary empty chat to make the click response feel faster
   actions.openChat({ id: TMP_CHAT_ID });
@@ -1274,6 +1278,9 @@ async function openChatByUsername(
     actions.focusMessage({ chatId: chat.id, messageId: channelPostId });
   } else {
     actions.openChat({ id: chat.id });
+  }
+  if (startParam) {
+    actions.startBot({ botId: chat.id, param: startParam });
   }
 }
 
