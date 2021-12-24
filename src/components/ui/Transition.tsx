@@ -92,6 +92,7 @@ const Transition: FC<TransitionProps> = ({
     const childElements = container.children;
     if (childElements.length === 1 && !activeKeyChanged) {
       if (name.startsWith('slide-optimized')) {
+        (childElements[0] as HTMLElement).style.transition = 'none';
         (childElements[0] as HTMLElement).style.transform = 'translate3d(0, 0, 0)';
       }
 
