@@ -333,6 +333,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     threadId,
     messageId: id,
     origin,
+  }, {
+    forceOnHeavyAnimation: true,
   }), [chatId, openMediaViewer, origin, threadId]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(() => {
