@@ -6,20 +6,28 @@
   right: 0;
   overflow: hidden;
   z-index: -1;
+  background-color: var(--theme-background-color);
 
-  &::before,
   &::after {
     content: "";
-    display: block;
     position: absolute;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
     background-color: var(--theme-background-color);
-  }
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 
-  &::after {
+    body:not(.animation-level-0) #root & {
+      transition: transform var(--layer-transition), background .2s !important;
+    }
+
+    body.animation-level-0 & {
+      transition: none;
+    }
+
     .theme-light & {
       background-image: url('../../assets/chat-bg.jpg');
 
@@ -27,31 +35,19 @@
         background-image: url('../../assets/chat-bg-mobile.jpg');
       }
     }
-
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-
-    body:not(.animation-level-0) #root & {
-      transition: transform var(--layer-transition), opacity .2s !important;
-    }
-
-    body.animation-level-0 & {
-      transition: none;
-    }
   }
 
-  .custom-bg-color:not(.custom-bg-image) > &::after {
+  .custom-bg-color:not(.custom-bg-image) &::after {
     opacity: 0;
   }
 
-  .custom-bg-image > &::after {
+  .custom-bg-image &::after {
     background-image: var(--custom-background) !important;
     filter: none;
     transform: scale(1.1);
   }
 
-  .custom-bg-image.blurred > &::after {
+  .custom-bg-image.blurred &::after {
     filter: blur(12px);
   }
 
@@ -64,12 +60,12 @@
       transition: transform var(--layer-transition);
     }
 
-    body.animation-level-2 #Main.right-column-open &::after {
+    body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
       transform: scale(0.67) !important;
     }
   }
 
-  body.animation-level-2 #Main.right-column-open &::after {
+  body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
     @media screen and (min-width: 1921px) {
       transform: scale(0.8) !important;
     }
