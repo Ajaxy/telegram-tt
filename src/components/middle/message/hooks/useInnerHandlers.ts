@@ -50,12 +50,14 @@ export default function useInnerHandlers(
       return;
     }
 
-    if (isUserId(senderPeer.id)) {
+    if (forwardInfo?.channelPostId) {
+      focusMessage({ chatId: senderPeer.id, messageId: forwardInfo.channelPostId });
+    } else if (isUserId(senderPeer.id)) {
       openUserInfo({ id: senderPeer.id });
     } else {
       openChat({ id: senderPeer.id });
     }
-  }, [senderPeer, showNotification, lang, openUserInfo, openChat]);
+  }, [focusMessage, forwardInfo?.channelPostId, lang, openChat, openUserInfo, senderPeer, showNotification]);
 
   const handleViaBotClick = useCallback(() => {
     if (!botSender) {
