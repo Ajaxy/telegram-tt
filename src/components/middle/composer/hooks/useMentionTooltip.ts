@@ -1,15 +1,15 @@
 import {
-  useCallback, useEffect, useState, useMemo,
+  useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
+import { getGlobal } from '../../../../lib/teact/teactn';
 
 import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/types';
 import { EDITABLE_INPUT_ID } from '../../../../config';
-import { getUserFirstOrLastName } from '../../../../modules/helpers';
-import searchUserName from '../helpers/searchUserName';
+import { filterUsersByName, getUserFirstOrLastName } from '../../../../modules/helpers';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import useFlag from '../../../../hooks/useFlag';
-import { unique } from '../../../../util/iteratees';
+import { pickTruthy, unique } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -30,39 +30,37 @@ export default function useMentionTooltip(
   groupChatMembers?: ApiChatMember[],
   topInlineBotIds?: string[],
   currentUserId?: string,
-  usersById?: Record<string, ApiUser>,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();
 
-  const topInlineBots = useMemo(() => {
-    return (topInlineBotIds || []).map((id) => usersById?.[id]).filter<ApiUser>(Boolean as any);
-  }, [topInlineBotIds, usersById]);
+  const updateFilteredUsers = useCallback((filter, withInlineBots: boolean) => {
+    // No need for expensive global updates on users, so we avoid them
+    const usersById = getGlobal().users.byId;
 
-  const getFilteredUsers = useCallback((filter, withInlineBots: boolean) => {
     if (!(groupChatMembers || topInlineBotIds) || !usersById) {
       setUsersToMention(undefined);
 
       return;
     }
+
     runThrottled(() => {
-      const inlineBots = (withInlineBots ? topInlineBots : []).filter((inlineBot) => {
-        return !filter || searchUserName(filter, inlineBot);
-      });
+      const memberIds = groupChatMembers?.reduce((acc: string[], member) => {
+        if (member.userId !== currentUserId) {
+          acc.push(member.userId);
+        }
 
-      const chatMembers = (groupChatMembers || [])
-        .map(({ userId }) => usersById[userId])
-        .filter((user) => {
-          if (!user || user.id === currentUserId) {
-            return false;
-          }
+        return acc;
+      }, []);
 
-          return !filter || searchUserName(filter, user);
-        });
+      const filteredIds = filterUsersByName(unique([
+        ...((withInlineBots && topInlineBotIds) || []),
+        ...(memberIds || []),
+      ]), usersById, filter);
 
-      setUsersToMention(unique(inlineBots.concat(chatMembers)));
+      setUsersToMention(Object.values(pickTruthy(usersById, filteredIds)));
     });
-  }, [currentUserId, groupChatMembers, topInlineBotIds, topInlineBots, usersById]);
+  }, [currentUserId, groupChatMembers, topInlineBotIds]);
 
   useEffect(() => {
     if (!canSuggestMembers || !html.length) {
@@ -74,11 +72,11 @@ export default function useMentionTooltip(
 
     if (usernameFilter) {
       const filter = usernameFilter ? usernameFilter.substr(1) : '';
-      getFilteredUsers(filter, canSuggestInlineBots(html));
+      updateFilteredUsers(filter, canSuggestInlineBots(html));
     } else {
       unmarkIsOpen();
     }
-  }, [canSuggestMembers, html, getFilteredUsers, markIsOpen, unmarkIsOpen]);
+  }, [canSuggestMembers, html, updateFilteredUsers, markIsOpen, unmarkIsOpen]);
 
   useEffect(() => {
     if (usersToMention?.length) {

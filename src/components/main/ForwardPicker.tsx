@@ -1,13 +1,17 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
-import { getCanPostInChat, getChatTitle, sortChatIds } from '../../modules/helpers';
-import searchWords from '../../util/searchWords';
+import {
+  filterChatsByName,
+  filterUsersByName,
+  getCanPostInChat,
+  sortChatIds,
+} from '../../modules/helpers';
 import { pick, unique } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
@@ -20,10 +24,10 @@ export type OwnProps = {
 
 type StateProps = {
   chatsById: Record<string, ApiChat>;
-  pinnedIds?: string[];
   activeListIds?: string[];
   archivedListIds?: string[];
-  orderedPinnedIds?: string[];
+  pinnedIds?: string[];
+  contactIds?: string[];
   currentUserId?: string;
 };
 
@@ -31,9 +35,10 @@ type DispatchProps = Pick<GlobalActions, 'setForwardChatId' | 'exitForwardMode' 
 
 const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
-  pinnedIds,
   activeListIds,
   archivedListIds,
+  pinnedIds,
+  contactIds,
   currentUserId,
   isOpen,
   setForwardChatId,
@@ -45,47 +50,45 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   // eslint-disable-next-line no-null/no-null
   const filterRef = useRef<HTMLInputElement>(null);
 
-  const chatIds = useMemo(() => {
+  const chatAndContactIds = useMemo(() => {
     if (!isOpen) {
       return undefined;
     }
-
-    const listIds = [...(activeListIds || []), ...(archivedListIds || [])];
 
     let priorityIds = pinnedIds || [];
     if (currentUserId) {
       priorityIds = unique([currentUserId, ...priorityIds]);
     }
 
-    return sortChatIds(listIds.filter((id) => {
+    const chatIds = [
+      ...(activeListIds || []),
+      ...(archivedListIds || []),
+    ].filter((id) => {
       const chat = chatsById[id];
-      if (!chat) {
-        return true;
-      }
 
-      if (!getCanPostInChat(chat, MAIN_THREAD_ID)) {
-        return false;
-      }
+      return chat && getCanPostInChat(chat, MAIN_THREAD_ID);
+    });
 
-      if (!filter) {
-        return true;
-      }
+    // No need for expensive global updates on users, so we avoid them
+    const usersById = getGlobal().users.byId;
 
-      return searchWords(getChatTitle(lang, chatsById[id], undefined, id === currentUserId), filter);
-    }), chatsById, undefined, priorityIds);
-  }, [activeListIds, archivedListIds, chatsById, currentUserId, filter, isOpen, lang, pinnedIds]);
+    return sortChatIds(unique([
+      ...filterChatsByName(lang, chatIds, chatsById, filter, currentUserId),
+      ...(contactIds ? filterUsersByName(contactIds, usersById, filter) : []),
+    ]), chatsById, undefined, priorityIds);
+  }, [activeListIds, archivedListIds, chatsById, contactIds, currentUserId, filter, isOpen, lang, pinnedIds]);
 
   const handleSelectUser = useCallback((userId: string) => {
     setForwardChatId({ id: userId });
   }, [setForwardChatId]);
 
-  const renderingChatIds = useCurrentOrPrev(chatIds)!;
+  const renderingChatAndContactIds = useCurrentOrPrev(chatAndContactIds)!;
 
   return (
     <ChatOrUserPicker
       currentUserId={currentUserId}
       isOpen={isOpen}
-      chatOrUserIds={renderingChatIds}
+      chatOrUserIds={renderingChatAndContactIds}
       filterRef={filterRef}
       filterPlaceholder={lang('ForwardTo')}
       filter={filter}
@@ -110,9 +113,10 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chatsById,
-      pinnedIds: orderedPinnedIds.active,
       activeListIds: listIds.active,
       archivedListIds: listIds.archived,
+      pinnedIds: orderedPinnedIds.active,
+      contactIds: global.contactList?.userIds,
       currentUserId,
     };
   },

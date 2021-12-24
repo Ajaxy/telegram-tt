@@ -15,6 +15,7 @@ import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
+import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
@@ -559,4 +560,27 @@ export function sortChatIds(
 
     return priority;
   }, 'desc');
+}
+
+export function filterChatsByName(
+  lang: LangFn,
+  chatIds: string[],
+  chatsById: Record<string, ApiChat>,
+  query?: string,
+  currentUserId?: string,
+) {
+  if (!query) {
+    return chatIds;
+  }
+
+  const searchWords = prepareSearchWordsForNeedle(query);
+
+  return chatIds.filter((id) => {
+    const chat = chatsById[id];
+    if (!chat) {
+      return false;
+    }
+
+    return searchWords(getChatTitle(lang, chat, undefined, id === currentUserId));
+  });
 }

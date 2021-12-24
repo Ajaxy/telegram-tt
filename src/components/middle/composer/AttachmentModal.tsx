@@ -85,7 +85,6 @@ const AttachmentModal: FC<OwnProps> = ({
     groupChatMembers,
     undefined,
     currentUserId,
-    usersById,
   );
   const {
     isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
