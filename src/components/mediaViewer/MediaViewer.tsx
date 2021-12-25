@@ -394,7 +394,11 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   });
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
       switch (e.key) {
         case 'Left': // IE/Edge specific value
         case 'ArrowLeft':
@@ -406,14 +410,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           selectMessage(nextMessageId);
           break;
       }
-    };
+    }
 
     document.addEventListener('keydown', handleKeyDown, false);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, false);
     };
-  }, [nextMessageId, previousMessageId, selectMessage]);
+  }, [isOpen, nextMessageId, previousMessageId, selectMessage]);
 
   useEffect(() => {
     if (isZoomed || IS_TOUCH_ENV) return undefined;
