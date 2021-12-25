@@ -1,21 +1,29 @@
-**Telegram Web Z was updated to version alpha 1.25**
+**Telegram Web Z was updated to version 1.26**
 
 👏 **Harder**
-• Brand new Media Viewer for touch screens with swipe, pinch, double-tap and pan gestures.
-• Read receipts are available for your messages in groups.
-• Join Group, Subscribe to Channel and Start Bot buttons are now shown on mobile screens.
-• Added support for wide screens up to 4K.
-• More accessibility support.
+• Added bot `start` parameter for t.me links.
+• Changed display of service notifications for errors.
 
 🤩 **Better**
-• Context menus are more compact.
-• Animations adjust to be more native on various devices.
-• Several UI improvements.
+• Fixed scroll jumps in message history.
+• Improved font for Arabic and Persian languages.
+• Various fixes for RTL languages.
+• Rotating your device will no longer refresh the page during video chats.
+• Various UI improvements.
 
 🚀 **Faster**
-• Slide transitions and context menus were drastically optimized.
-• UI effects are faster and more efficient.
+• Optimized rendering for context menus.
+• Optimized search in large lists.
 
 💪 **Stronger**
-• Deep links properly open in Safari.
-• Increased protocol security.
+• Fixed echo cancellation in calls.
+• Fixed focusing from forwarded channel posts.
+• Fixed keyboard navigation, missing contacts, and auto-focus when forwarding.
+• Fixed markdown parsing inside code and links.
+• Fixed missing UI elements when going back in history stack.
+• Fixed flickering profile photos in Safari.
+• Fixed t.me message links to private chats.
+• Fixed duplicated folders.
+• Fixed missing media due to outdated auth key.
+• Fixed loading default language pack on auth screen.
+• Fixed missing profile pictures in comments.
