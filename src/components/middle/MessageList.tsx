@@ -327,11 +327,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
 
-    // TODO Consider removing
-    if (!container.offsetParent) {
-      return;
-    }
-
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
@@ -362,8 +357,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    // TODO Consider `scrollOffset = scrollHeight - scrollTop`
-    const scrollOffset = scrollOffsetRef.current!;
+    const scrollOffset = scrollOffsetRef.current;
     const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
 
     let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
@@ -405,8 +399,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
-    // TODO Look up within active transition slide
-    const anchor = anchorIdRef.current && document.getElementById(anchorIdRef.current);
+    const anchor = anchorIdRef.current && container.querySelector(`#${anchorIdRef.current}`);
     const unreadDivider = (
       !anchor
       && memoUnreadDividerBeforeIdRef.current
