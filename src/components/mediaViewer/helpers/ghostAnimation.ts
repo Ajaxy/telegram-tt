@@ -317,7 +317,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       break;
 
     case MediaViewerOrigin.MiddleHeaderAvatar:
-      containerSelector = '.MiddleHeader .ChatInfo .Avatar';
+      containerSelector = '.MiddleHeader .Transition__slide--active .ChatInfo .Avatar';
       mediaSelector = 'img.avatar-media';
       break;
 
