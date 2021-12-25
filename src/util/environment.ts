@@ -39,9 +39,11 @@ export const IS_MAC_OS = PLATFORM_ENV === 'macOS';
 export const IS_IOS = PLATFORM_ENV === 'iOS';
 export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-export const IS_PWA = window.matchMedia('(display-mode: standalone)').matches
-|| (window.navigator as any).standalone
-|| document.referrer.includes('android-app://');
+export const IS_PWA = (
+  window.matchMedia('(display-mode: standalone)').matches
+  || (window.navigator as any).standalone
+  || document.referrer.includes('android-app://')
+);
 
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
 // Keep in mind the landscape orientation
@@ -82,3 +84,8 @@ if (IS_MOV_SUPPORTED) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
 export const DPR = window.devicePixelRatio || 1;
 
 export const MASK_IMAGE_DISABLED = true;
+
+export const IS_SCROLL_PATCH_NEEDED = !IS_MAC_OS && !IS_IOS && !IS_ANDROID;
+
+// Smaller area reduces scroll jumps caused by `patchChromiumScroll`
+export const MESSAGE_LIST_SENSITIVE_AREA = IS_SCROLL_PATCH_NEEDED ? 300 : 750;
