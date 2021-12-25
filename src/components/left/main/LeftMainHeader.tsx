@@ -185,7 +185,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
-          footer={`${APP_NAME} alpha ${APP_VERSION}`}
+          footer={`${APP_NAME} ${APP_VERSION}`}
         >
           <MenuItem
             icon="saved-messages"
