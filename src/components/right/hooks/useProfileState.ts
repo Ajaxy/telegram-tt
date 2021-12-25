@@ -47,7 +47,7 @@ export default function useProfileState(
     }
 
     const tabListEl = container.querySelector<HTMLDivElement>('.TabList');
-    if (!tabListEl) {
+    if (!tabListEl || tabListEl.offsetTop > container.scrollTop) {
       return;
     }
 
