@@ -165,7 +165,6 @@ const InfiniteScroll: FC<OwnProps> = ({
             stateRef.current.currentAnchor = nextAnchor;
             stateRef.current.currentAnchorTop = nextAnchorTop;
             isUpdated = true;
-            resetScroll(container);
             loadMoreForwards();
           }
         }
@@ -186,7 +185,6 @@ const InfiniteScroll: FC<OwnProps> = ({
             stateRef.current.currentAnchor = nextAnchor;
             stateRef.current.currentAnchorTop = nextAnchorTop;
             isUpdated = true;
-            resetScroll(container);
             loadMoreBackwards();
           }
         }

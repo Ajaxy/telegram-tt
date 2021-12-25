@@ -6,9 +6,8 @@ import { LoadMoreDirection } from '../../../types';
 import { MessageListType } from '../../../global/types';
 
 import { LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../../config';
-import { IS_MAC_OS, IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';
+import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';
 import { debounce } from '../../../util/schedulers';
-import resetScroll from '../../../util/resetScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useOnChange from '../../../hooks/useOnChange';
 
@@ -100,12 +99,8 @@ export default function useScrollHooks(
         isScrollPatchNeededRef.current = true;
       }
 
-      // TODO Consider removing
-      resetScroll(containerRef.current!);
       loadMoreBackwards();
     } else if (target.className === 'forwards-trigger') {
-      // TODO Consider removing
-      resetScroll(containerRef.current!);
       loadMoreForwards();
     }
   });
