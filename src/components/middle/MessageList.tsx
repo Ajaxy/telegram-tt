@@ -42,7 +42,7 @@ import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useOnChange from '../../hooks/useOnChange';
 import useStickyDates from './hooks/useStickyDates';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import resetScroll from '../../util/resetScroll';
+import resetScroll, { patchChromiumScroll } from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
@@ -210,11 +210,16 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
+  const isScrollingRef = useRef<boolean>();
+  const isScrollPatchNeededRef = useRef<boolean>();
+
   const handleScroll = useCallback(() => {
     if (isScrollTopJustUpdatedRef.current) {
       isScrollTopJustUpdatedRef.current = false;
       return;
     }
+
+    isScrollingRef.current = true;
 
     const container = containerRef.current!;
 
@@ -223,6 +228,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     runDebouncedForScroll(() => {
+      isScrollingRef.current = false;
+
       fastRaf(() => {
         if (!container.parentElement) {
           return;
@@ -320,7 +327,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
 
-    // During animation
+    // TODO Consider removing
     if (!container.offsetParent) {
       return;
     }
@@ -355,6 +362,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
+    // TODO Consider `scrollOffset = scrollHeight - scrollTop`
     const scrollOffset = scrollOffsetRef.current!;
     const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
 
@@ -397,6 +405,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
+    // TODO Look up within active transition slide
     const anchor = anchorIdRef.current && document.getElementById(anchorIdRef.current);
     const unreadDivider = (
       !anchor
@@ -411,6 +420,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
       newScrollTop = scrollHeight - offsetHeight;
     } else if (anchor) {
+      if (isScrollPatchNeededRef.current) {
+        isScrollPatchNeededRef.current = false;
+        patchChromiumScroll(container);
+      }
+
       const newAnchorTop = anchor.getBoundingClientRect().top;
       newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
     } else if (unreadDivider) {
@@ -515,6 +529,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           threadId={threadId}
           type={type}
           isReady={isReady}
+          isScrollingRef={isScrollingRef}
+          isScrollPatchNeededRef={isScrollPatchNeededRef}
           threadTopMessageId={threadTopMessageId}
           hasLinkedChat={hasLinkedChat}
           isSchedule={messageGroups ? type === 'scheduled' : false}

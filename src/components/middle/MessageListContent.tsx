@@ -31,6 +31,8 @@ interface OwnProps {
   threadId: number;
   type: MessageListType;
   isReady: boolean;
+  isScrollingRef: { current: boolean | undefined };
+  isScrollPatchNeededRef: { current: boolean | undefined };
   threadTopMessageId: number | undefined;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
@@ -56,6 +58,8 @@ const MessageListContent: FC<OwnProps> = ({
   threadId,
   type,
   isReady,
+  isScrollingRef,
+  isScrollPatchNeededRef,
   threadTopMessageId,
   hasLinkedChat,
   isSchedule,
@@ -83,6 +87,8 @@ const MessageListContent: FC<OwnProps> = ({
     onFabToggle,
     onNotchToggle,
     isReady,
+    isScrollingRef,
+    isScrollPatchNeededRef,
   );
 
   const lang = useLang();

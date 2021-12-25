@@ -41,7 +41,6 @@ const isBigScreen = typeof window !== 'undefined' && window.innerHeight >= 900;
 
 export const MIN_PASSWORD_LENGTH = 1;
 
-export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 export const MESSAGE_LIST_SLICE = isBigScreen ? 60 : 40;
 export const MESSAGE_LIST_VIEWPORT_LIMIT = MESSAGE_LIST_SLICE * 2;
 
