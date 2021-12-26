@@ -52,6 +52,7 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import usePrevious from '../../hooks/usePrevious';
+import useForceUpdate from '../../hooks/useForceUpdate';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
 import Transition from '../ui/Transition';
@@ -163,7 +164,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
-  const [isReady, setIsReady] = useState(!IS_SINGLE_COLUMN_LAYOUT || animationLevel === ANIMATION_LEVEL_MIN);
 
   const hasTools = hasPinnedOrAudioPlayer && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
@@ -189,12 +189,13 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   const renderingIsChannel = usePrevDuringAnimation(isChannel, CLOSE_ANIMATION_DURATION);
 
   const prevTransitionKey = usePrevious(currentTransitionKey);
-  const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
-  if (willSwitchMessageList) {
-    setIsReady(false);
-  }
+
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
+  );
+
+  const { isReady, handleOpenEnd, handleSlideStop } = useIsReady(
+    animationLevel, currentTransitionKey, prevTransitionKey, chatId,
   );
 
   useEffect(() => {
@@ -210,12 +211,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     setIsFabShown(undefined);
     setIsNotchShown(undefined);
   }, [chatId]);
-
-  useEffect(() => {
-    if (animationLevel === ANIMATION_LEVEL_MIN) {
-      setIsReady(true);
-    }
-  }, [animationLevel]);
 
   // Fix for mobile virtual keyboard
   useEffect(() => {
@@ -238,12 +233,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       visualViewport.removeEventListener('resize', handleResize);
     };
   }, []);
-
-  const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
-    if (e.propertyName === 'transform' && e.target === e.currentTarget) {
-      setIsReady(Boolean(chatId));
-    }
-  };
 
   useEffect(() => {
     if (isPrivate) {
@@ -359,7 +348,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     <div
       id="MiddleColumn"
       className={className}
-      onTransitionEnd={handleTransitionEnd}
+      onTransitionEnd={handleOpenEnd}
       // @ts-ignore teact-feature
       style={`
         --composer-hidden-scale: ${composerHiddenScale};
@@ -387,14 +376,14 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
               chatId={renderingChatId}
               threadId={renderingThreadId}
               messageListType={renderingMessageListType}
-              isReady={isReady && !willSwitchMessageList}
+              isReady={isReady}
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
               activeKey={currentTransitionKey}
               shouldCleanup
               cleanupExceptionKey={cleanupExceptionKey}
-              onStop={() => setIsReady(true)}
+              onStop={handleSlideStop}
             >
               {() => (
                 <>
@@ -407,7 +396,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                     hasTools={renderingHasTools}
                     onFabToggle={setIsFabShown}
                     onNotchToggle={setIsNotchShown}
-                    isReady={isReady && !willSwitchMessageList}
+                    isReady={isReady}
                     withBottomShift={withMessageListBottomShift}
                   />
                   <div className={footerClassName}>
@@ -418,7 +407,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
                         messageListType={renderingMessageListType}
                         dropAreaState={dropAreaState}
                         onDropHide={handleHideDropArea}
-                        isReady={isReady && !willSwitchMessageList}
+                        isReady={isReady}
                       />
                     )}
                     {isPinnedMessageList && (
@@ -604,3 +593,44 @@ export default memo(withGlobal(
     'closePaymentModal', 'clearReceipt', 'joinChannel', 'sendBotCommand', 'restartBot',
   ]),
 )(MiddleColumn));
+
+function useIsReady(
+  animationLevel?: number,
+  currentTransitionKey?: number,
+  prevTransitionKey?: number,
+  chatId?: string,
+) {
+  const [isReady, setIsReady] = useState(!IS_SINGLE_COLUMN_LAYOUT);
+  const forceUpdate = useForceUpdate();
+
+  const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
+  if (willSwitchMessageList) {
+    if (animationLevel !== ANIMATION_LEVEL_MIN) {
+      setIsReady(false);
+    } else {
+      forceUpdate();
+    }
+  }
+
+  useEffect(() => {
+    if (animationLevel === ANIMATION_LEVEL_MIN) {
+      setIsReady(true);
+    }
+  }, [animationLevel]);
+
+  function handleOpenEnd(e: React.TransitionEvent<HTMLDivElement>) {
+    if (e.propertyName === 'transform' && e.target === e.currentTarget) {
+      setIsReady(Boolean(chatId));
+    }
+  }
+
+  function handleSlideStop() {
+    setIsReady(true);
+  }
+
+  return {
+    isReady: isReady && !willSwitchMessageList,
+    handleOpenEnd: animationLevel !== ANIMATION_LEVEL_MIN ? handleOpenEnd : undefined,
+    handleSlideStop: animationLevel !== ANIMATION_LEVEL_MIN ? handleSlideStop : undefined,
+  };
+}
