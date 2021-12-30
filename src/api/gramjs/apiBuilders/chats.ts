@@ -178,7 +178,7 @@ function buildApiChatRestrictionReason(
     return undefined;
   }
 
-  const targetReason = restrictionReasons.find(({ platform }) => platform === 'all');
+  const targetReason = restrictionReasons.find(({ platform, reason }) => platform === 'all' && reason !== 'terms');
   return targetReason ? pick(targetReason, ['reason', 'text']) : undefined;
 }
 
