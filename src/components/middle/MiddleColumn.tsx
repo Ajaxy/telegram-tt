@@ -52,6 +52,7 @@ import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useOnChange from '../../hooks/useOnChange';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
 import Transition from '../ui/Transition';
@@ -203,7 +204,7 @@ const MiddleColumn: FC<StateProps> = ({
       : undefined;
   }, [chatId, openChat]);
 
-  useEffect(() => {
+  useOnChange(() => {
     setDropAreaState(DropAreaState.None);
     setIsFabShown(undefined);
     setIsNotchShown(undefined);
@@ -605,7 +606,7 @@ function useIsReady(
     }
   }
 
-  useEffect(() => {
+  useOnChange(() => {
     if (animationLevel === ANIMATION_LEVEL_MIN) {
       setIsReady(true);
     }
