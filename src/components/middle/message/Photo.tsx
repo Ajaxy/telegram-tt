@@ -39,6 +39,7 @@ export type OwnProps = {
   dimensions?: IMediaDimensions & { isSmall?: boolean };
   nonInteractive?: boolean;
   isDownloading: boolean;
+  isProtected?: boolean;
   theme: ISettings['theme'];
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
@@ -60,6 +61,7 @@ const Photo: FC<OwnProps> = ({
   nonInteractive,
   shouldAffectAppendix,
   isDownloading,
+  isProtected,
   theme,
   onClick,
   onCancelUpload,
@@ -167,7 +169,9 @@ const Photo: FC<OwnProps> = ({
         width={width}
         height={height}
         alt=""
+        draggable={!isProtected}
       />
+      {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (
         <div className={`media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />

@@ -30,6 +30,7 @@ type OwnProps = {
   hasCustomAppendix?: boolean;
   lastSyncTime?: number;
   isOwn: boolean;
+  isProtected?: boolean;
   albumLayout: IAlbumLayout;
   onMediaClick: (messageId: number) => void;
 };
@@ -46,6 +47,7 @@ const Album: FC<OwnProps & StateProps> = ({
   hasCustomAppendix,
   lastSyncTime,
   isOwn,
+  isProtected,
   albumLayout,
   onMediaClick,
   uploadsById,
@@ -85,6 +87,7 @@ const Album: FC<OwnProps & StateProps> = ({
           shouldAffectAppendix={shouldAffectAppendix}
           uploadProgress={uploadProgress}
           dimensions={dimensions}
+          isProtected={isProtected}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
           isDownloading={activeDownloadIds.includes(message.id)}
@@ -102,6 +105,7 @@ const Album: FC<OwnProps & StateProps> = ({
           uploadProgress={uploadProgress}
           lastSyncTime={lastSyncTime}
           dimensions={dimensions}
+          isProtected={isProtected}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
           isDownloading={activeDownloadIds.includes(message.id)}

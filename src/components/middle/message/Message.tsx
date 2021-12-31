@@ -45,6 +45,7 @@ import {
   selectAllowedMessageActions,
   selectIsDownloading,
   selectThreadInfo,
+  selectIsMessageProtected,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -138,6 +139,7 @@ type StateProps = {
   replyMessageSender?: ApiUser | ApiChat;
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
+  isProtected?: boolean;
   isFocused?: boolean;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
@@ -201,6 +203,7 @@ const Message: FC<OwnProps & StateProps> = ({
   replyMessageSender,
   outgoingStatus,
   uploadProgress,
+  isProtected,
   isFocused,
   focusDirection,
   noFocusHighlight,
@@ -325,6 +328,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isAlbum,
     Boolean(isInSelectMode),
     Boolean(canReply),
+    Boolean(isProtected),
     onContextMenu,
     handleBeforeContextMenu,
   );
@@ -364,6 +368,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
+    isProtected && 'is-protected',
     isLastInGroup && 'last-in-group',
     isFirstInDocumentGroup && 'first-in-document-group',
     isLastInDocumentGroup && 'last-in-document-group',
@@ -485,6 +490,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasReply && (
           <EmbeddedMessage
             message={replyMessage}
+            isProtected={isProtected}
             sender={replyMessageSender}
             observeIntersection={observeIntersectionForMedia}
             onClick={handleReplyClick}
@@ -514,6 +520,7 @@ const Message: FC<OwnProps & StateProps> = ({
             albumLayout={albumLayout!}
             observeIntersection={observeIntersectionForMedia}
             isOwn={isOwn}
+            isProtected={isProtected}
             hasCustomAppendix={hasCustomAppendix}
             lastSyncTime={lastSyncTime}
             onMediaClick={handleAlbumMediaClick}
@@ -530,6 +537,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
+            isProtected={isProtected}
             theme={theme}
           />
         )}
@@ -554,6 +562,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
+            isProtected={isProtected}
           />
         )}
         {(audio || voice) && (
@@ -615,6 +624,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
             isDownloading={isDownloading}
+            isProtected={isProtected}
             theme={theme}
           />
         )}
@@ -880,6 +890,7 @@ export default memo(withGlobal<OwnProps>(
       isThreadTop,
       replyMessage,
       replyMessageSender,
+      isProtected: selectIsMessageProtected(global, message),
       isFocused,
       isForwarding,
       isChatWithSelf,

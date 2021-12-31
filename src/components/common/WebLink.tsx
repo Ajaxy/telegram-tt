@@ -20,11 +20,12 @@ const MAX_TEXT_LENGTH = 170; // symbols
 type OwnProps = {
   message: ApiMessage;
   senderTitle?: string;
+  isProtected?: boolean;
   onMessageClick: (messageId: number, chatId: string) => void;
 };
 
 const WebLink: FC<OwnProps> = ({
-  message, senderTitle, onMessageClick,
+  message, senderTitle, isProtected, onMessageClick,
 }) => {
   const lang = useLang();
 
@@ -76,7 +77,7 @@ const WebLink: FC<OwnProps> = ({
       dir={lang.isRtl ? 'rtl' : undefined}
     >
       {photo && (
-        <Media message={message} />
+        <Media message={message} isProtected={isProtected} />
       )}
       <div className="content">
         <Link isRtl={lang.isRtl} className="site-title" onClick={handleMessageClick}>

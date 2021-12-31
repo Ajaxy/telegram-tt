@@ -1130,3 +1130,14 @@ export async function importChatInvite({ hash }: { hash: string }) {
 
   return buildApiChatFromPreview(updates.chats[0]);
 }
+
+export function toggleIsProtected({
+  chat, isProtected,
+}: { chat: ApiChat; isProtected: boolean }) {
+  const { id, accessHash } = chat;
+
+  return invokeRequest(new GramJs.messages.ToggleNoForwards({
+    peer: buildInputPeer(id, accessHash),
+    enabled: isProtected,
+  }), true);
+}

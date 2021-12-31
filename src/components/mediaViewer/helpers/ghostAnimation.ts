@@ -10,6 +10,7 @@ import {
   REM,
 } from '../../common/helpers/mediaDimensions';
 import windowSize from '../../../util/windowSize';
+import stopEvent from '../../../util/stopEvent';
 
 const ANIMATION_DURATION = 200;
 
@@ -208,6 +209,8 @@ function createGhost(source: string | HTMLImageElement | HTMLVideoElement, origi
   ghost.classList.add('ghost');
 
   const img = new Image();
+  img.draggable = false;
+  img.oncontextmenu = stopEvent;
 
   if (typeof source === 'string') {
     img.src = source;

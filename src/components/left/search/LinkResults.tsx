@@ -35,6 +35,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   foundIds,
   lastSyncTime,
+  isChatProtected,
 }) => {
   const {
     searchMessagesGlobal,
@@ -89,6 +90,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
             key={message.id}
             message={message}
             senderTitle={getSenderName(lang, message, chatsById, usersById)}
+            isProtected={isChatProtected || message.isProtected}
             onMessageClick={handleMessageFocus}
           />
         </div>

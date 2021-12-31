@@ -21,9 +21,7 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import UsernameInput from '../../common/UsernameInput';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
-type PrivacyType =
-  'private'
-  | 'public';
+type PrivacyType = 'private' | 'public';
 
 type OwnProps = {
   chatId: string;
@@ -36,6 +34,7 @@ type StateProps = {
   isChannel: boolean;
   progress?: ManagementProgress;
   isUsernameAvailable?: boolean;
+  isProtected?: boolean;
 };
 
 const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
@@ -45,11 +44,13 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   isChannel,
   progress,
   isUsernameAvailable,
+  isProtected,
 }) => {
   const {
     checkPublicLink,
     updatePublicLink,
     updatePrivateLink,
+    toggleIsProtected,
   } = getDispatch();
 
   const isPublic = Boolean(chat.username);
@@ -76,6 +77,13 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     setPrivacyType(value as PrivacyType);
   }, []);
 
+  const handleForwardingOptionChange = useCallback((value: string) => {
+    toggleIsProtected({
+      chatId: chat.id,
+      isProtected: value === 'protected',
+    });
+  }, [chat.id, toggleIsProtected]);
+
   const handleSave = useCallback(() => {
     updatePublicLink({ username: privacyType === 'public' ? username : '' });
   }, [privacyType, updatePublicLink, username]);
@@ -93,6 +101,14 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     { value: 'private', label: lang(`${langPrefix1}Private`), subLabel: lang(`${langPrefix1}PrivateInfo`) },
     { value: 'public', label: lang(`${langPrefix1}Public`), subLabel: lang(`${langPrefix1}PublicInfo`) },
   ];
+
+  const forwardingOptions = [{
+    value: 'allowed',
+    label: lang('ChannelVisibility.Forwarding.Enabled'),
+  }, {
+    value: 'protected',
+    label: lang('ChannelVisibility.Forwarding.Disabled'),
+  }];
 
   const isLoading = progress === ManagementProgress.InProgress;
 
@@ -148,6 +164,22 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
             </p>
           </div>
         )}
+        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
+          <h3 className="section-heading">
+            {lang(isChannel ? 'ChannelVisibility.Forwarding.ChannelTitle' : 'ChannelVisibility.Forwarding.GroupTitle')}
+          </h3>
+          <RadioGroup
+            selected={isProtected ? 'protected' : 'allowed'}
+            name="channel-type"
+            options={forwardingOptions}
+            onChange={handleForwardingOptionChange}
+          />
+          <p className="section-info">
+            {isChannel
+              ? lang('ChannelVisibility.Forwarding.ChannelInfo')
+              : lang('ChannelVisibility.Forwarding.GroupInfo')}
+          </p>
+        </div>
       </div>
       <FloatingActionButton
         isShown={canUpdate}
@@ -175,6 +207,7 @@ export default memo(withGlobal<OwnProps>(
       isChannel: isChatChannel(chat),
       progress: global.management.progress,
       isUsernameAvailable,
+      isProtected: chat?.isProtected,
     };
   },
 )(ManageChatPrivacyType));

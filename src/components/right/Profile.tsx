@@ -92,6 +92,7 @@ type StateProps = {
   lastSyncTime?: number;
   serverTimeOffset: number;
   activeDownloadIds: number[];
+  isChatProtected?: boolean;
 };
 
 const TABS = [
@@ -130,6 +131,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   activeDownloadIds,
   serverTimeOffset,
+  isChatProtected,
 }) => {
   const {
     setLocalMediaSearchType,
@@ -322,6 +324,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             <Media
               key={id}
               message={chatMessages[id]}
+              isProtected={isChatProtected || chatMessages[id].isProtected}
               onClick={handleSelectMedia}
             />
           ))
@@ -342,6 +345,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             <WebLink
               key={id}
               message={chatMessages[id]}
+              isProtected={isChatProtected || chatMessages[id].isProtected}
               onMessageClick={handleMessageFocus}
             />
           ))
@@ -533,6 +537,7 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       userStatusesById,
       chatsById,
+      isChatProtected: chat?.isProtected,
       ...(hasMembersTab && members && { members }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };

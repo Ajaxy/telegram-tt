@@ -31,6 +31,7 @@ export interface ApiChat {
   isSupport?: boolean;
   photos?: ApiPhoto[];
   draftDate?: number;
+  isProtected?: boolean;
 
   // Calls
   isCallActive?: boolean;

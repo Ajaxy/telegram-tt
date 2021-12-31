@@ -265,6 +265,7 @@ export interface ApiMessage {
   shouldHideKeyboardButtons?: boolean;
   isFromScheduled?: boolean;
   seenByUserIds?: string[];
+  isProtected?: boolean;
 }
 
 export interface ApiThreadInfo {

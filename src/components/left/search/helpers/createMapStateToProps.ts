@@ -4,7 +4,7 @@ import {
 } from '../../../../api/types';
 import { ISettings } from '../../../../types';
 
-import { selectTheme } from '../../../../modules/selectors';
+import { selectChat, selectTheme } from '../../../../modules/selectors';
 
 export type StateProps = {
   theme: ISettings['theme'];
@@ -16,6 +16,7 @@ export type StateProps = {
   lastSyncTime?: number;
   searchChatId?: string;
   activeDownloads: Record<string, number[]>;
+  isChatProtected?: boolean;
 };
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
@@ -46,6 +47,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       foundIds,
       searchChatId: chatId,
       activeDownloads,
+      isChatProtected: chatId ? selectChat(global, chatId)?.isProtected : undefined,
       lastSyncTime: global.lastSyncTime,
     };
   };
