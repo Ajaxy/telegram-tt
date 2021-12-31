@@ -45,10 +45,6 @@
     }
   }
 
-  body:not(.animation-level-0) & .send-as-button {
-    animation: 0.25s ease-in-out forwards show-send-as-button;
-  }
-
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
@@ -136,6 +132,16 @@
 
   .send-as-button {
     z-index: 1;
+  }
+
+  body:not(.animation-level-0) & .send-as-button {
+    animation: 0.25s ease-in-out forwards show-send-as-button;
+  }
+
+  @media (max-width: 600px) {
+    .send-as-button {
+      animation: none !important;
+    }
   }
 
   .mobile-symbol-menu-button {
@@ -317,7 +323,7 @@
   position: relative;
 
   .form-control {
-    padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)  calc(.9rem - var(--border-width));
+    padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2) calc(.9rem - var(--border-width));
     overflow: hidden;
     line-height: 1.375;
     font-family: Roboto, -apple-system, "Apple Color Emoji", "Helvetica Neue", sans-serif;
