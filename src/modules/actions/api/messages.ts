@@ -459,6 +459,20 @@ addReducer('reportMessages', (global, actions, payload) => {
   })();
 });
 
+addReducer('sendMessageAction', (global, actions, payload) => {
+  (async () => {
+    const { action, chatId, threadId } = payload!;
+    if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
+
+    const chat = selectChat(global, chatId)!;
+    if (!chat) return;
+
+    await callApi('sendMessageAction', {
+      peer: chat, threadId, action,
+    });
+  })();
+});
+
 addReducer('markMessageListRead', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);

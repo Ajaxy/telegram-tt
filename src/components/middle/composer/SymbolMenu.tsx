@@ -27,6 +27,8 @@ import './SymbolMenu.scss';
 const ANIMATION_DURATION = 350;
 
 export type OwnProps = {
+  chatId: string;
+  threadId?: number;
   isOpen: boolean;
   allowedAttachmentOptions: IAllowedAttachmentOptions;
   onLoad: () => void;
@@ -46,10 +48,19 @@ type StateProps = {
 let isActivated = false;
 
 const SymbolMenu: FC<OwnProps & StateProps> = ({
-  isOpen, allowedAttachmentOptions, isLeftColumnShown,
-  onLoad, onClose,
-  onEmojiSelect, onStickerSelect, onGifSelect,
-  onRemoveSymbol, onSearchOpen, addRecentEmoji,
+  chatId,
+  threadId,
+  isOpen,
+  allowedAttachmentOptions,
+  isLeftColumnShown,
+  onLoad,
+  onClose,
+  onEmojiSelect,
+  onStickerSelect,
+  onGifSelect,
+  onRemoveSymbol,
+  onSearchOpen,
+  addRecentEmoji,
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
@@ -138,6 +149,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             loadAndPlay={canSendStickers ? isOpen && (isActive || isFrom) : false}
             canSendStickers={canSendStickers}
             onStickerSelect={handleStickerSelect}
+            chatId={chatId}
+            threadId={threadId}
           />
         );
       case SymbolMenuTabs.GIFs:

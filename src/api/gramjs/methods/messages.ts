@@ -16,6 +16,7 @@ import {
   MESSAGE_DELETED,
   ApiGlobalMessageSearchType,
   ApiReportReason,
+  ApiSendMessageAction,
 } from '../../types';
 
 import {
@@ -44,6 +45,7 @@ import {
   isMessageWithMedia,
   isServiceMessageWithMedia,
   buildInputReportReason,
+  buildSendMessageAction,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -659,6 +661,28 @@ export async function reportMessages({
     message: description,
   }));
 
+  return result;
+}
+
+export async function sendMessageAction({
+  peer, threadId, action,
+}: {
+  peer: ApiChat | ApiUser; threadId?: number; action: ApiSendMessageAction;
+}) {
+  const gramAction = buildSendMessageAction(action);
+  if (!gramAction) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('Unsupported message action', action);
+    }
+    return undefined;
+  }
+
+  const result = await invokeRequest(new GramJs.messages.SetTyping({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    topMsgId: threadId,
+    action: gramAction,
+  }));
   return result;
 }
 

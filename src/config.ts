@@ -75,6 +75,7 @@ export const IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 17;
 export const MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 15;
 
 export const DRAFT_DEBOUNCE = 10000; // 10s
+export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
 
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';

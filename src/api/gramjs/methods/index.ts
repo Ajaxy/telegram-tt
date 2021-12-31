@@ -22,7 +22,7 @@ export {
   markMessageListRead, markMessagesRead, requestThreadInfoUpdate, searchMessagesLocal, searchMessagesGlobal,
   fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
   fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
-  reportMessages, fetchSeenBy,
+  reportMessages, sendMessageAction, fetchSeenBy,
 } from './messages';
 
 export {

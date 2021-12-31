@@ -16,6 +16,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
+import useSendMessageAction from '../../../hooks/useSendMessageAction';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -27,6 +28,8 @@ import StickerSetCoverAnimated from './StickerSetCoverAnimated';
 import './StickerPicker.scss';
 
 type OwnProps = {
+  chatId: string;
+  threadId?: number;
   className: string;
   loadAndPlay: boolean;
   canSendStickers: boolean;
@@ -48,6 +51,8 @@ const STICKER_INTERSECTION_THROTTLE = 200;
 const stickerSetIntersections: boolean[] = [];
 
 const StickerPicker: FC<OwnProps & StateProps> = ({
+  chatId,
+  threadId,
   className,
   loadAndPlay,
   canSendStickers,
@@ -72,6 +77,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const headerRef = useRef<HTMLDivElement>(null);
   const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
+  const sendMessageAction = useSendMessageAction(chatId, threadId);
 
   const { observe: observeIntersection } = useIntersectionObserver({
     rootRef: containerRef,
@@ -135,8 +141,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       loadStickerSets();
       loadRecentStickers();
       loadFavoriteStickers();
+      sendMessageAction({ type: 'chooseSticker' });
     }
-  }, [loadAndPlay, loadFavoriteStickers, loadRecentStickers, loadStickerSets]);
+  }, [loadAndPlay, loadFavoriteStickers, loadRecentStickers, loadStickerSets, sendMessageAction]);
 
   useEffect(() => {
     if (addedSetIds?.length) {
@@ -176,6 +183,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   const handleStickerUnfave = useCallback((sticker: ApiSticker) => {
     unfaveSticker({ sticker });
   }, [unfaveSticker]);
+
+  const handleMouseMove = useCallback(() => {
+    sendMessageAction({ type: 'chooseSticker' });
+  }, [sendMessageAction]);
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
@@ -256,6 +267,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       </div>
       <div
         ref={containerRef}
+        onMouseMove={handleMouseMove}
         className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
       >
         {allSets.map((stickerSet, i) => (

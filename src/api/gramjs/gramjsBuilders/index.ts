@@ -13,6 +13,7 @@ import {
   ApiMessageEntityTypes,
   ApiNewPoll,
   ApiReportReason,
+  ApiSendMessageAction,
   ApiSticker,
   ApiVideo,
 } from '../../types';
@@ -418,6 +419,20 @@ export function buildInputReportReason(reason: ApiReportReason) {
       return new GramJs.InputReportReasonOther();
   }
 
+  return undefined;
+}
+
+export function buildSendMessageAction(action: ApiSendMessageAction) {
+  switch (action.type) {
+    case 'cancel':
+      return new GramJs.SendMessageCancelAction();
+    case 'typing':
+      return new GramJs.SendMessageTypingAction();
+    case 'recordAudio':
+      return new GramJs.SendMessageRecordAudioAction();
+    case 'chooseSticker':
+      return new GramJs.SendMessageChooseStickerAction();
+  }
   return undefined;
 }
 

@@ -12,6 +12,7 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
+import useSendMessageAction from '../../../hooks/useSendMessageAction';
 
 import Loading from '../../ui/Loading';
 import StickerButton from '../../common/StickerButton';
@@ -19,6 +20,8 @@ import StickerButton from '../../common/StickerButton';
 import './StickerTooltip.scss';
 
 export type OwnProps = {
+  chatId: string;
+  threadId?: number;
   isOpen: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
 };
@@ -30,6 +33,8 @@ type StateProps = {
 const INTERSECTION_THROTTLE = 200;
 
 const StickerTooltip: FC<OwnProps & StateProps> = ({
+  chatId,
+  threadId,
   isOpen,
   onStickerSelect,
   stickers,
@@ -41,6 +46,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
   const prevStickers = usePrevious(stickers, true);
   const displayedStickers = stickers || prevStickers;
+  const sendMessageAction = useSendMessageAction(chatId, threadId);
 
   const {
     observe: observeIntersection,
@@ -50,6 +56,10 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
 
   const handleMouseEnter = () => {
     document.body.classList.add('no-select');
+  };
+
+  const handleMouseMove = () => {
+    sendMessageAction({ type: 'chooseSticker' });
   };
 
   const handleMouseLeave = () => {
@@ -68,6 +78,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
       className={className}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      onMouseMove={handleMouseMove}
     >
       {shouldRender && displayedStickers ? (
         displayedStickers.map((sticker) => (

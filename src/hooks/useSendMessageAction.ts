@@ -1,0 +1,15 @@
+import { useMemo } from '../lib/teact/teact';
+import { getDispatch } from '../lib/teact/teactn';
+
+import { ApiSendMessageAction } from '../api/types';
+
+import { SEND_MESSAGE_ACTION_INTERVAL } from '../config';
+import { throttle } from '../util/schedulers';
+
+export default (chatId: string, threadId?: number) => {
+  return useMemo(() => {
+    return throttle((action: ApiSendMessageAction) => {
+      getDispatch().sendMessageAction({ chatId, threadId, action });
+    }, SEND_MESSAGE_ACTION_INTERVAL);
+  }, [chatId, threadId]);
+};
