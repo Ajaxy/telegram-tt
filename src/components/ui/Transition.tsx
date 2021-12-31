@@ -3,7 +3,9 @@ import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../lib/teact/teactn';
+import { GlobalState } from '../../global/types';
 
+import { ANIMATION_LEVEL_MIN } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import forceReflow from '../../util/forceReflow';
 import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
@@ -121,6 +123,7 @@ const Transition: FC<TransitionProps> = ({
 
     if (name === 'slide-optimized' || name === 'slide-optimized-rtl') {
       performSlideOptimized(
+        animationLevel,
         name,
         isBackwards,
         cleanup,
@@ -140,7 +143,7 @@ const Transition: FC<TransitionProps> = ({
     container.classList.remove('animating');
     container.classList.toggle('backwards', isBackwards);
 
-    if (name === 'none' || animationLevel === 0) {
+    if (name === 'none' || animationLevel === ANIMATION_LEVEL_MIN) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           node.classList.remove('from', 'through', 'to');
@@ -271,6 +274,7 @@ const Transition: FC<TransitionProps> = ({
 export default Transition;
 
 function performSlideOptimized(
+  animationLevel: GlobalState['settings']['byKey']['animationLevel'],
   name: 'slide-optimized' | 'slide-optimized-rtl',
   isBackwards: boolean,
   cleanup: NoneToVoidFunction,
@@ -280,10 +284,24 @@ function performSlideOptimized(
   shouldRestoreHeight?: boolean,
   onStart?: NoneToVoidFunction,
   onStop?: NoneToVoidFunction,
-  currentSlide?: HTMLElement,
-  prevSlide?: HTMLElement,
+  toSlide?: HTMLElement,
+  fromSlide?: HTMLElement,
 ) {
-  if (!prevSlide || !currentSlide) {
+  if (!fromSlide || !toSlide) {
+    return;
+  }
+
+  if (animationLevel === ANIMATION_LEVEL_MIN) {
+    fromSlide.style.transition = 'none';
+    fromSlide.style.transform = '';
+    fromSlide.classList.remove(classNames.active);
+
+    toSlide.style.transition = 'none';
+    toSlide.style.transform = 'translate3d(0, 0, 0)';
+    toSlide.classList.add(classNames.active);
+
+    cleanup();
+
     return;
   }
 
@@ -296,34 +314,34 @@ function performSlideOptimized(
   requestAnimationFrame(() => {
     onStart?.();
 
-    prevSlide.style.transition = 'none';
-    prevSlide.style.transform = 'translate3d(0, 0, 0)';
+    fromSlide.style.transition = 'none';
+    fromSlide.style.transform = 'translate3d(0, 0, 0)';
 
-    currentSlide.style.transition = 'none';
-    currentSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+    toSlide.style.transition = 'none';
+    toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
 
-    forceReflow(currentSlide);
+    forceReflow(toSlide);
 
-    prevSlide.style.transition = '';
-    prevSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
+    fromSlide.style.transition = '';
+    fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
 
-    currentSlide.style.transition = '';
-    currentSlide.style.transform = 'translate3d(0, 0, 0)';
+    toSlide.style.transition = '';
+    toSlide.style.transform = 'translate3d(0, 0, 0)';
 
-    prevSlide.classList.remove(classNames.active);
-    currentSlide.classList.add(classNames.active);
+    fromSlide.classList.remove(classNames.active);
+    toSlide.classList.add(classNames.active);
 
-    waitForTransitionEnd(prevSlide, () => {
+    waitForTransitionEnd(fromSlide, () => {
       if (activeKey !== currentKeyRef.current) {
         return;
       }
 
-      prevSlide.style.transition = 'none';
-      prevSlide.style.transform = '';
+      fromSlide.style.transition = 'none';
+      fromSlide.style.transform = '';
 
       if (shouldRestoreHeight) {
-        currentSlide.style.height = 'auto';
-        container.style.height = `${currentSlide.clientHeight}px`;
+        toSlide.style.height = 'auto';
+        container.style.height = `${toSlide.clientHeight}px`;
       }
 
       onStop?.();
