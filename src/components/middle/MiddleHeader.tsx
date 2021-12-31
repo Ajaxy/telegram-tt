@@ -1,10 +1,10 @@
 import React, {
   FC, useCallback, useMemo, memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 import cycleRestrict from '../../util/cycleRestrict';
 
-import { GlobalActions, MessageListType } from '../../global/types';
+import { MessageListType } from '../../global/types';
 import {
   ApiMessage,
   ApiChat,
@@ -48,7 +48,6 @@ import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
 import useShowTransition from '../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import { pick } from '../../util/iteratees';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
@@ -96,12 +95,7 @@ type StateProps = {
   connectionState?: ApiUpdateConnectionStateType;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'openChatWithInfo' | 'pinMessage' | 'focusMessage' | 'openChat' | 'openPreviousChat' | 'loadPinnedMessages' |
-  'toggleLeftColumn' | 'exitMessageSelectMode'
-)>;
-
-const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
+const MiddleHeader: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   messageListType,
@@ -124,15 +118,18 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
-  openChatWithInfo,
-  pinMessage,
-  focusMessage,
-  openChat,
-  openPreviousChat,
-  loadPinnedMessages,
-  toggleLeftColumn,
-  exitMessageSelectMode,
 }) => {
+  const {
+    openChatWithInfo,
+    pinMessage,
+    focusMessage,
+    openChat,
+    openPreviousChat,
+    loadPinnedMessages,
+    toggleLeftColumn,
+    exitMessageSelectMode,
+  } = getDispatch();
+
   const lang = useLang();
   const isBackButtonActive = useRef(true);
 
@@ -523,14 +520,4 @@ export default memo(withGlobal<OwnProps>(
 
     return state;
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openChatWithInfo',
-    'pinMessage',
-    'focusMessage',
-    'openChat',
-    'openPreviousChat',
-    'loadPinnedMessages',
-    'toggleLeftColumn',
-    'exitMessageSelectMode',
-  ]),
 )(MiddleHeader));

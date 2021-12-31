@@ -1,10 +1,8 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
-import { pick } from '../../util/iteratees';
 import { selectCurrentChat, selectUser } from '../../modules/selectors';
 import { getUserFirstOrLastName } from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
@@ -24,16 +22,15 @@ type StateProps = {
   contactName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'deleteChatMember'>;
-
-const DeleteMemberModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const DeleteMemberModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chat,
   userId,
   contactName,
   onClose,
-  deleteChatMember,
 }) => {
+  const { deleteChatMember } = getDispatch();
+
   const lang = useLang();
 
   const handleDeleteChatMember = useCallback(() => {
@@ -73,5 +70,4 @@ export default memo(withGlobal<OwnProps>(
       contactName,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['deleteChatMember']),
 )(DeleteMemberModal));

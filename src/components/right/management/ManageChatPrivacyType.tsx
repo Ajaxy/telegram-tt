@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { selectChat, selectManagement } from '../../../modules/selectors';
-import { pick } from '../../../util/iteratees';
 import { isChatChannel } from '../../../modules/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -23,7 +21,9 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import UsernameInput from '../../common/UsernameInput';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
-type PrivacyType = 'private' | 'public';
+type PrivacyType =
+  'private'
+  | 'public';
 
 type OwnProps = {
   chatId: string;
@@ -38,21 +38,20 @@ type StateProps = {
   isUsernameAvailable?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'checkPublicLink' | 'updatePublicLink' | 'updatePrivateLink'
-)>;
-
-const ManageChatPrivacyType: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   chat,
   onClose,
   isActive,
   isChannel,
   progress,
   isUsernameAvailable,
-  checkPublicLink,
-  updatePublicLink,
-  updatePrivateLink,
 }) => {
+  const {
+    checkPublicLink,
+    updatePublicLink,
+    updatePrivateLink,
+  } = getDispatch();
+
   const isPublic = Boolean(chat.username);
   const privateLink = chat.fullInfo?.inviteLink;
 
@@ -178,7 +177,4 @@ export default memo(withGlobal<OwnProps>(
       isUsernameAvailable,
     };
   },
-  (setGlobal, actions) => pick(actions, [
-    'checkPublicLink', 'updatePublicLink', 'updatePrivateLink',
-  ]),
 )(ManageChatPrivacyType));

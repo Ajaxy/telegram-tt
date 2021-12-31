@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 import { selectChat } from '../../../modules/selectors';
 import { sortUserIds, isChatChannel } from '../../../modules/helpers';
-import { pick } from '../../../util/iteratees';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -28,18 +26,17 @@ type StateProps = {
   serverTimeOffset: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
-
-const ManageGroupMembers: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   members,
   usersById,
   userStatusesById,
   isChannel,
-  openUserInfo,
   onClose,
   isActive,
   serverTimeOffset,
 }) => {
+  const { openUserInfo } = getDispatch();
+
   const memberIds = useMemo(() => {
     if (!members || !usersById) {
       return undefined;
@@ -103,7 +100,4 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset: global.serverTimeOffset,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openUserInfo',
-  ]),
 )(ManageGroupMembers));

@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 
 import { debounce } from '../../util/schedulers';
 import { selectCurrentTextSearch, selectCurrentChat } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import { getDayStartAt } from '../../util/dateFormat';
 
 import Button from '../ui/Button';
@@ -29,26 +27,24 @@ type StateProps = {
   isHistoryCalendarOpen?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'setLocalTextSearchQuery' | 'searchTextMessagesLocal' | 'closeLocalTextSearch' | 'openHistoryCalendar' |
-  'focusMessage'
-)>;
-
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
-const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
+const MobileSearchFooter: FC<StateProps> = ({
   isActive,
   chat,
   query,
   totalCount,
   foundIds,
   isHistoryCalendarOpen,
-  setLocalTextSearchQuery,
-  searchTextMessagesLocal,
-  focusMessage,
-  closeLocalTextSearch,
-  openHistoryCalendar,
 }) => {
+  const {
+    setLocalTextSearchQuery,
+    searchTextMessagesLocal,
+    focusMessage,
+    closeLocalTextSearch,
+    openHistoryCalendar,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -218,11 +214,4 @@ export default memo(withGlobal<OwnProps>(
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setLocalTextSearchQuery',
-    'searchTextMessagesLocal',
-    'focusMessage',
-    'closeLocalTextSearch',
-    'openHistoryCalendar',
-  ]),
 )(MobileSearchFooter));

@@ -1,9 +1,8 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
 } from '../../api/types';
@@ -51,7 +50,6 @@ import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { captureEvents } from '../../util/captureEvents';
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
-import { pick } from '../../util/iteratees';
 import windowSize from '../../util/windowSize';
 import { AVATAR_FULL_DIMENSIONS, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
@@ -83,11 +81,9 @@ type StateProps = {
   animationLevel: 0 | 1 | 2;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'closeMediaViewer' | 'openForwardMenu' | 'focusMessage'>;
-
 const ANIMATION_DURATION = 350;
 
-const MediaViewer: FC<StateProps & DispatchProps> = ({
+const MediaViewer: FC<StateProps> = ({
   chatId,
   threadId,
   messageId,
@@ -98,12 +94,15 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   message,
   chatMessages,
   collectionIds,
-  openMediaViewer,
-  closeMediaViewer,
-  openForwardMenu,
-  focusMessage,
   animationLevel,
 }) => {
+  const {
+    openMediaViewer,
+    closeMediaViewer,
+    openForwardMenu,
+    focusMessage,
+  } = getDispatch();
+
   const isOpen = Boolean(avatarOwner || messageId);
 
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
@@ -641,7 +640,4 @@ export default memo(withGlobal(
       animationLevel,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openMediaViewer', 'closeMediaViewer', 'openForwardMenu', 'focusMessage',
-  ]),
 )(MediaViewer));

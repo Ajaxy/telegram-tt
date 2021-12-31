@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { getDispatch } from '../../../../lib/teact/teactn';
 
 import { ApiMessage } from '../../../../api/types';
-import { GlobalActions } from '../../../../global/types';
 
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import parseMessageInput from '../../../../util/parseMessageInput';
@@ -15,8 +15,9 @@ export default (
   editedMessage: ApiMessage | undefined,
   resetComposer: () => void,
   openDeleteModal: () => void,
-  editMessage: GlobalActions['editMessage'],
 ) => {
+  const { editMessage } = getDispatch();
+
   // TODO useOnChange
   // Handle editing message
   useEffect(() => {

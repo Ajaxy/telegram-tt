@@ -1,15 +1,13 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { createMapStateToProps, StateProps } from './helpers/createMapStateToProps';
-import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
@@ -25,21 +23,22 @@ export type OwnProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, ('searchMessagesGlobal' | 'openMediaViewer')>;
-
 const CURRENT_TYPE = 'media';
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const MediaResults: FC<OwnProps & StateProps> = ({
   searchQuery,
   searchChatId,
   isLoading,
   globalMessagesByChatId,
   foundIds,
   lastSyncTime,
-  searchMessagesGlobal,
-  openMediaViewer,
 }) => {
+  const {
+    searchMessagesGlobal,
+    openMediaViewer,
+  } = getDispatch();
+
   const lang = useLang();
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
@@ -133,8 +132,4 @@ const MediaResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   createMapStateToProps(CURRENT_TYPE),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'searchMessagesGlobal',
-    'openMediaViewer',
-  ]),
 )(MediaResults));

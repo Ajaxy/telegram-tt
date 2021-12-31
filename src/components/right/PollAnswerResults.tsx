@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useState, memo, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import {
   ApiChat,
@@ -9,8 +9,6 @@ import {
   ApiPollAnswer,
   ApiPollResult,
 } from '../../api/types';
-import { GlobalActions } from '../../global/types';
-import { pick } from '../../util/iteratees';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 
@@ -34,12 +32,10 @@ type StateProps = {
   offset: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadPollOptionResults' | 'openChat' | 'closePollResults'>;
-
 const INITIAL_LIMIT = 4;
 const VIEW_MORE_LIMIT = 50;
 
-const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const PollAnswerResults: FC<OwnProps & StateProps> = ({
   chat,
   message,
   answer,
@@ -47,10 +43,13 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   totalVoters,
   voters,
   offset,
-  loadPollOptionResults,
-  openChat,
-  closePollResults,
 }) => {
+  const {
+    loadPollOptionResults,
+    openChat,
+    closePollResults,
+  } = getDispatch();
+
   const prevVotersCount = usePrevious<number>(answerVote.votersCount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(voters);
@@ -140,5 +139,4 @@ export default memo(withGlobal<OwnProps>(
       offset: (offsets?.[answer.option]) || '',
     };
   },
-  (global, actions): DispatchProps => pick(actions, ['loadPollOptionResults', 'openChat', 'closePollResults']),
 )(PollAnswerResults));

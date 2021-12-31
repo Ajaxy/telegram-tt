@@ -1,12 +1,11 @@
 import React, {
   FC, useCallback, useEffect, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat } from '../../../api/types';
 
-import { pick, unique } from '../../../util/iteratees';
+import { unique } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { filterUsersByName, isUserBot, sortChatIds } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
@@ -34,11 +33,9 @@ type StateProps = {
   globalUserIds?: string[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setGlobalSearchQuery'>;
-
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
+const NewChatStep1: FC<OwnProps & StateProps> = ({
   isChannel,
   isActive,
   selectedMemberIds,
@@ -51,9 +48,12 @@ const NewChatStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   isSearching,
   localUserIds,
   globalUserIds,
-  loadContactList,
-  setGlobalSearchQuery,
 }) => {
+  const {
+    loadContactList,
+    setGlobalSearchQuery,
+  } = getDispatch();
+
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
@@ -162,5 +162,4 @@ export default memo(withGlobal<OwnProps>(
       localUserIds,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'setGlobalSearchQuery']),
 )(NewChatStep1));

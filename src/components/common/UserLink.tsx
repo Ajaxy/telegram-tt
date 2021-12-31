@@ -1,13 +1,11 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 
 import Link from '../ui/Link';
+import { getDispatch } from '../../lib/teact/teactn';
 
 type OwnProps = {
   className?: string;
@@ -15,11 +13,11 @@ type OwnProps = {
   children: any;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
-
-const UserLink: FC<OwnProps & DispatchProps> = ({
-  className, sender, openUserInfo, children,
+const UserLink: FC<OwnProps> = ({
+  className, sender, children,
 }) => {
+  const { openUserInfo } = getDispatch();
+
   const handleClick = useCallback(() => {
     if (sender) {
       openUserInfo({ id: sender.id });
@@ -35,7 +33,4 @@ const UserLink: FC<OwnProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
-  undefined,
-  (setGlobal, actions): DispatchProps => pick(actions, ['openUserInfo']),
-)(UserLink);
+export default UserLink;

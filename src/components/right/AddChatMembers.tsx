@@ -1,15 +1,14 @@
 import React, {
   FC, useCallback, useMemo, memo, useState, useEffect,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import {
   ApiChat, ApiChatMember, ApiUpdateConnectionStateType,
 } from '../../api/types';
 import { NewChatMembersProgress } from '../../types';
 
-import { pick, unique } from '../../util/iteratees';
+import { unique } from '../../util/iteratees';
 import { selectChat } from '../../modules/selectors';
 import {
   filterUsersByName, isChatChannel, isUserBot, sortChatIds,
@@ -45,9 +44,7 @@ type StateProps = {
   globalUserIds?: string[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setUserSearchQuery'>;
-
-const AddChatMembers: FC<OwnProps & StateProps & DispatchProps> = ({
+const AddChatMembers: FC<OwnProps & StateProps> = ({
   isChannel,
   connectionState,
   members,
@@ -60,11 +57,11 @@ const AddChatMembers: FC<OwnProps & StateProps & DispatchProps> = ({
   isSearching,
   localUserIds,
   globalUserIds,
-  setUserSearchQuery,
   onClose,
   isActive,
-  loadContactList,
 }) => {
+  const { setUserSearchQuery, loadContactList } = getDispatch();
+
   const lang = useLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const prevSelectedMemberIds = usePrevious(selectedMemberIds);
@@ -184,5 +181,4 @@ export default memo(withGlobal<OwnProps>(
       connectionState,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'setUserSearchQuery']),
 )(AddChatMembers));

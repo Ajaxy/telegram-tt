@@ -1,9 +1,8 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -12,7 +11,7 @@ import {
   getCanPostInChat,
   sortChatIds,
 } from '../../modules/helpers';
-import { pick, unique } from '../../util/iteratees';
+import { unique } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
@@ -31,9 +30,7 @@ type StateProps = {
   currentUserId?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setForwardChatId' | 'exitForwardMode' | 'loadMoreChats'>;
-
-const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
+const ForwardPicker: FC<OwnProps & StateProps> = ({
   chatsById,
   activeListIds,
   archivedListIds,
@@ -41,10 +38,13 @@ const ForwardPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   contactIds,
   currentUserId,
   isOpen,
-  setForwardChatId,
-  exitForwardMode,
-  loadMoreChats,
 }) => {
+  const {
+    setForwardChatId,
+    exitForwardMode,
+    loadMoreChats,
+  } = getDispatch();
+
   const lang = useLang();
   const [filter, setFilter] = useState('');
   // eslint-disable-next-line no-null/no-null
@@ -120,5 +120,4 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatId', 'exitForwardMode', 'loadMoreChats']),
 )(ForwardPicker));

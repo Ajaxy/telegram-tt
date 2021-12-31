@@ -2,9 +2,8 @@ import { ChangeEvent, MutableRefObject, RefObject } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { SettingsScreens, ThemeKey } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
@@ -32,8 +31,6 @@ type StateProps = {
   theme: ThemeKey;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setThemeSettings'>;
-
 interface CanvasRects {
   colorRect: {
     offsetLeft: number;
@@ -53,14 +50,15 @@ const PREDEFINED_COLORS = [
   '#ccd0af', '#a6a997', '#7a7072', '#fdd7af', '#fdb76e', '#dd8851',
 ];
 
-const SettingsGeneralBackground: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
   theme,
   backgroundColor,
-  setThemeSettings,
 }) => {
+  const { setThemeSettings } = getDispatch();
+
   const themeRef = useRef<string>();
   themeRef.current = theme;
   // eslint-disable-next-line no-null/no-null
@@ -358,5 +356,4 @@ export default memo(withGlobal<OwnProps>(
       theme,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setThemeSettings']),
 )(SettingsGeneralBackground));

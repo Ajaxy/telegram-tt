@@ -1,8 +1,8 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMediaFormat } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 
 import { getChatAvatarHash } from '../../modules/helpers/chats'; // Direct import for better module splitting
 import useFlag from '../../hooks/useFlag';
@@ -12,7 +12,6 @@ import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 
 import './UiLoader.scss';
@@ -28,14 +27,14 @@ type OwnProps = {
   children: any;
 };
 
-type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
-  hasCustomBackground?: boolean;
-  hasCustomBackgroundColor: boolean;
-  isRightColumnShown?: boolean;
-  leftColumnWidth?: number;
-};
-
-type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
+type StateProps =
+  Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'>
+  & {
+    hasCustomBackground?: boolean;
+    hasCustomBackgroundColor: boolean;
+    isRightColumnShown?: boolean;
+    leftColumnWidth?: number;
+  };
 
 const MAX_PRELOAD_DELAY = 700;
 const SECOND_STATE_DELAY = 1000;
@@ -77,7 +76,7 @@ const preloadTasks = {
   authQrCode: preloadFonts,
 };
 
-const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
+const UiLoader: FC<OwnProps & StateProps> = ({
   page,
   children,
   hasCustomBackground,
@@ -85,8 +84,9 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   isRightColumnShown,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
-  setIsUiReady,
 }) => {
+  const { setIsUiReady } = getDispatch();
+
   const [isReady, markReady] = useFlag();
   const {
     shouldRender: shouldRenderMask, transitionClassNames,
@@ -171,5 +171,4 @@ export default withGlobal<OwnProps>(
       leftColumnWidth: global.leftColumnWidth,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
 )(UiLoader);

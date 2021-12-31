@@ -1,7 +1,6 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiError, ApiInviteInfo } from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
@@ -18,9 +17,9 @@ type StateProps = {
   dialogs: (ApiError | ApiInviteInfo)[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'dismissDialog' | 'acceptInviteConfirmation'>;
+const Dialogs: FC<StateProps> = ({ dialogs }) => {
+  const { dismissDialog, acceptInviteConfirmation } = getDispatch();
 
-const Dialogs: FC<StateProps & DispatchProps> = ({ dialogs, dismissDialog, acceptInviteConfirmation }) => {
   const lang = useLang();
 
   if (!dialogs.length) {
@@ -104,5 +103,4 @@ function getErrorHeader(error: ApiError) {
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['dialogs']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['dismissDialog', 'acceptInviteConfirmation']),
 )(Dialogs));

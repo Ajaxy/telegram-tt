@@ -1,9 +1,8 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
 } from '../../../api/types';
@@ -20,7 +19,6 @@ import {
 } from '../../../modules/helpers';
 import { selectChat, selectUser } from '../../../modules/selectors';
 import renderText from '../../common/helpers/renderText';
-import { pick } from '../../../util/iteratees';
 import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useLang, { LangFn } from '../../../hooks/useLang';
@@ -46,17 +44,16 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusMessage'>;
-
-const ChatMessage: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatMessage: FC<OwnProps & StateProps> = ({
   message,
   searchQuery,
   chatId,
   chat,
   privateChatUser,
-  focusMessage,
   lastSyncTime,
 }) => {
+  const { focusMessage } = getDispatch();
+
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
@@ -140,7 +137,4 @@ export default memo(withGlobal<OwnProps>(
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'focusMessage',
-  ]),
 )(ChatMessage));

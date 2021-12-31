@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import {
   MAIN_THREAD_ID,
@@ -11,7 +11,6 @@ import {
   ApiUser,
   ApiUserStatus,
 } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 import {
   NewChatMembersProgress, ISettings, MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType, AudioOrigin,
 } from '../../types';
@@ -35,7 +34,6 @@ import {
   selectActiveDownloadIds,
   selectUser,
 } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 import useCacheBuster from '../../hooks/useCacheBuster';
@@ -96,12 +94,6 @@ type StateProps = {
   activeDownloadIds: number[];
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'setLocalMediaSearchType' | 'loadMoreMembers' | 'searchMediaMessagesLocal' | 'openMediaViewer' | 'loadCommonChats' |
-  'openAudioPlayer' | 'openUserInfo' | 'focusMessage' | 'loadProfilePhotos' | 'setNewChatMembersDialogState' |
-  'openChat'
-)>;
-
 const TABS = [
   { type: 'media', title: 'SharedMediaTab2' },
   { type: 'documents', title: 'SharedFilesTab2' },
@@ -112,7 +104,7 @@ const TABS = [
 
 const HIDDEN_RENDER_DELAY = 1000;
 
-const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
+const Profile: FC<OwnProps & StateProps> = ({
   chatId,
   profileState,
   onProfileStateChange,
@@ -138,18 +130,21 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   activeDownloadIds,
   serverTimeOffset,
-  setLocalMediaSearchType,
-  loadMoreMembers,
-  loadCommonChats,
-  openChat,
-  searchMediaMessagesLocal,
-  openMediaViewer,
-  openAudioPlayer,
-  openUserInfo,
-  focusMessage,
-  loadProfilePhotos,
-  setNewChatMembersDialogState,
 }) => {
+  const {
+    setLocalMediaSearchType,
+    loadMoreMembers,
+    loadCommonChats,
+    openChat,
+    searchMediaMessagesLocal,
+    openMediaViewer,
+    openAudioPlayer,
+    openUserInfo,
+    focusMessage,
+    loadProfilePhotos,
+    setNewChatMembersDialogState,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -542,17 +537,4 @@ export default memo(withGlobal<OwnProps>(
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setLocalMediaSearchType',
-    'loadMoreMembers',
-    'searchMediaMessagesLocal',
-    'openMediaViewer',
-    'openAudioPlayer',
-    'openUserInfo',
-    'focusMessage',
-    'loadProfilePhotos',
-    'setNewChatMembersDialogState',
-    'loadCommonChats',
-    'openChat',
-  ]),
 )(Profile));

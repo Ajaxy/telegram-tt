@@ -2,9 +2,8 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, useEffect, useRef, memo, useState, useCallback,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
@@ -12,7 +11,6 @@ import { selectReplyingToId } from '../../../modules/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
-import { pick } from '../../../util/iteratees';
 import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
 } from '../../../util/environment';
@@ -56,8 +54,6 @@ type StateProps = {
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
 };
 
-type DispatchProps = Pick<GlobalActions, 'editLastMessage' | 'replyToNextMessage'>;
-
 const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
@@ -77,7 +73,7 @@ function clearSelection() {
   }
 }
 
-const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
+const MessageInput: FC<OwnProps & StateProps> = ({
   id,
   chatId,
   isAttachmentModalInput,
@@ -94,9 +90,12 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   replyingToId,
   noTabCapture,
   messageSendKeyCombo,
-  editLastMessage,
-  replyToNextMessage,
 }) => {
+  const {
+    editLastMessage,
+    replyToNextMessage,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -420,5 +419,4 @@ export default memo(withGlobal<OwnProps>(
       noTabCapture: global.isPollModalOpen || global.payment.isPaymentModalOpen,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['editLastMessage', 'replyToNextMessage']),
 )(MessageInput));

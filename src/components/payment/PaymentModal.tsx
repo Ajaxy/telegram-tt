@@ -1,12 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { PaymentStep, ShippingOption, Price } from '../../types';
 
-import { pick } from '../../util/iteratees';
 import { formatCurrency } from '../../util/formatCurrency';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
 import usePaymentReducer, { FormState } from '../../hooks/reducers/usePaymentReducer';
@@ -46,14 +45,13 @@ type StateProps = {
   needZip?: boolean;
 };
 
-type GlobalStateProps = Pick<GlobalState['payment'], 'step' | 'shippingOptions' |
-'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoiceContent' |
-'error'>;
+type GlobalStateProps = Pick<GlobalState['payment'], (
+  'step' | 'shippingOptions' |
+  'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoiceContent' |
+  'error'
+)>;
 
-type DispatchProps = Pick<GlobalActions, 'validateRequestedInfo' | 'sendPaymentForm' | 'setPaymentStep'
-| 'sendCredentialsInfo' | 'clearPaymentError' >;
-
-const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
+const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
   isOpen,
   onClose,
   step,
@@ -76,12 +74,15 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
   needCountry,
   needZip,
   error,
-  validateRequestedInfo,
-  sendPaymentForm,
-  setPaymentStep,
-  sendCredentialsInfo,
-  clearPaymentError,
 }) => {
+  const {
+    validateRequestedInfo,
+    sendPaymentForm,
+    setPaymentStep,
+    sendCredentialsInfo,
+    clearPaymentError,
+  } = getDispatch();
+
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
@@ -250,7 +251,8 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps & DispatchProps> = ({
       case PaymentStep.Checkout:
         return sendForm();
       default:
-        return () => {};
+        return () => {
+        };
     }
   }, [step, validateRequest, setStep, sendCredentials, sendForm]);
 
@@ -398,15 +400,6 @@ export default memo(withGlobal<OwnProps>(
       needZip,
       error,
     };
-  },
-  (setGlobal, actions): DispatchProps => {
-    return pick(actions, [
-      'validateRequestedInfo',
-      'sendPaymentForm',
-      'setPaymentStep',
-      'sendCredentialsInfo',
-      'clearPaymentError',
-    ]);
   },
 )(Invoice));
 

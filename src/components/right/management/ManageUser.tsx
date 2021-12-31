@@ -2,13 +2,11 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../../../modules/selectors';
@@ -40,26 +38,25 @@ type StateProps = {
   isMuted?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'updateContact' | 'deleteUser' | 'deleteHistory' | 'closeManagement' | 'openChat'
-)>;
-
 const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
 
-const ManageUser: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageUser: FC<OwnProps & StateProps> = ({
   userId,
   user,
   chat,
   progress,
   isMuted,
-  updateContact,
-  deleteUser,
-  deleteHistory,
-  closeManagement,
-  openChat,
   onClose,
   isActive,
 }) => {
+  const {
+    updateContact,
+    deleteUser,
+    deleteHistory,
+    closeManagement,
+    openChat,
+  } = getDispatch();
+
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -219,7 +216,4 @@ export default memo(withGlobal<OwnProps>(
       user, chat, progress, isMuted,
     };
   },
-  (global, actions): DispatchProps => pick(actions, [
-    'updateContact', 'deleteUser', 'closeManagement', 'openChat', 'deleteHistory',
-  ]),
 )(ManageUser));

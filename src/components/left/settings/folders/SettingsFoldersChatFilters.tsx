@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useMemo, useCallback,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../../global/types';
 import { ApiChat } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
 import useLang from '../../../../hooks/useLang';
-import { pick } from '../../../../util/iteratees';
 import searchWords from '../../../../util/searchWords';
 import { prepareChatList, getChatTitle } from '../../../../modules/helpers';
 import {
@@ -39,9 +37,7 @@ type StateProps = {
   archivedPinnedIds?: string[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreChats'>;
-
-const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -53,8 +49,9 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps & DispatchProps> = ({
   orderedPinnedIds,
   archivedListIds,
   archivedPinnedIds,
-  loadMoreChats,
 }) => {
+  const { loadMoreChats } = getDispatch();
+
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
 
@@ -180,5 +177,4 @@ export default memo(withGlobal<OwnProps>(
       archivedListIds: listIds.archived,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats']),
 )(SettingsFoldersChatFilters));

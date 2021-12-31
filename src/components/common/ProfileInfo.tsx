@@ -1,10 +1,10 @@
 import React, {
   FC, useEffect, useCallback, memo, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
@@ -13,7 +13,6 @@ import {
   getUserFullName, getUserStatus, isChatChannel, isUserOnline,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
-import { pick } from '../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
 import usePhotosPreload from './hooks/usePhotosPreload';
@@ -30,18 +29,18 @@ type OwnProps = {
   forceShowSelf?: boolean;
 };
 
-type StateProps = {
-  user?: ApiUser;
-  userStatus?: ApiUserStatus;
-  chat?: ApiChat;
-  isSavedMessages?: boolean;
-  animationLevel: 0 | 1 | 2;
-  serverTimeOffset: number;
-} & Pick<GlobalState, 'connectionState'>;
+type StateProps =
+  {
+    user?: ApiUser;
+    userStatus?: ApiUserStatus;
+    chat?: ApiChat;
+    isSavedMessages?: boolean;
+    animationLevel: 0 | 1 | 2;
+    serverTimeOffset: number;
+  }
+  & Pick<GlobalState, 'connectionState'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
-
-const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
   user,
   userStatus,
@@ -50,9 +49,12 @@ const ProfileInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   connectionState,
   animationLevel,
   serverTimeOffset,
-  loadFullUser,
-  openMediaViewer,
 }) => {
+  const {
+    loadFullUser,
+    openMediaViewer,
+  } = getDispatch();
+
   const lang = useLang();
 
   const { id: userId } = user || {};
@@ -246,5 +248,4 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
 )(ProfileInfo));

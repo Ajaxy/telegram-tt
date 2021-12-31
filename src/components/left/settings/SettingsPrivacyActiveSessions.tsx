@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiSession } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -26,19 +24,18 @@ type StateProps = {
   activeSessions: ApiSession[];
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations'
-)>;
-
-const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
   activeSessions,
-  loadAuthorizations,
-  terminateAuthorization,
-  terminateAllAuthorizations,
 }) => {
+  const {
+    loadAuthorizations,
+    terminateAuthorization,
+    terminateAllAuthorizations,
+  } = getDispatch();
+
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   useEffect(() => {
     loadAuthorizations();
@@ -162,7 +159,4 @@ export default memo(withGlobal<OwnProps>(
       activeSessions: global.activeSessions,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadAuthorizations', 'terminateAuthorization', 'terminateAllAuthorizations',
-  ]),
 )(SettingsPrivacyActiveSessions));

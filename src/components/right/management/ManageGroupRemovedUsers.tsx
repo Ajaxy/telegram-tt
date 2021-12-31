@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
 import { selectChat } from '../../../modules/selectors';
 import { getHasAdminRight, getUserFullName } from '../../../modules/helpers';
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useFlag from '../../../hooks/useFlag';
@@ -30,16 +28,15 @@ type StateProps = {
   canDeleteMembers?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'updateChatMemberBannedRights'>;
-
-const ManageGroupRemovedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageGroupRemovedUsers: FC<OwnProps & StateProps> = ({
   chat,
   usersById,
   canDeleteMembers,
-  updateChatMemberBannedRights,
   onClose,
   isActive,
 }) => {
+  const { updateChatMemberBannedRights } = getDispatch();
+
   const lang = useLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
@@ -132,5 +129,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { chat, usersById, canDeleteMembers };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['updateChatMemberBannedRights']),
 )(ManageGroupRemovedUsers));

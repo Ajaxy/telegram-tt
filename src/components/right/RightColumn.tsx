@@ -1,16 +1,14 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
 } from '../../types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { pick } from '../../util/iteratees';
 import {
   selectAreActiveChatsLoaded,
   selectCurrentMessageList,
@@ -42,12 +40,6 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'toggleManagement' | 'openUserInfo' | 'setNewChatMembersDialogState' |
-  'closeLocalTextSearch' | 'closePollResults' | 'addChatMembers' |
-  'setStickerSearchQuery' | 'setGifSearchQuery'
-)>;
-
 const COLUMN_CLOSE_DELAY_MS = 300;
 const MAIN_SCREENS_COUNT = Object.keys(RightColumnContent).length / 2;
 const MANAGEMENT_SCREENS_COUNT = Object.keys(ManagementScreens).length / 2;
@@ -59,23 +51,26 @@ function blurSearchInput() {
   }
 }
 
-const RightColumn: FC<StateProps & DispatchProps> = ({
+const RightColumn: FC<StateProps> = ({
   contentKey,
   chatId,
   threadId,
   currentProfileUserId,
   isChatSelected,
-  toggleChatInfo,
-  toggleManagement,
-  openUserInfo,
-  closeLocalTextSearch,
-  setStickerSearchQuery,
-  setGifSearchQuery,
-  closePollResults,
-  addChatMembers,
-  setNewChatMembersDialogState,
   shouldSkipHistoryAnimations,
 }) => {
+  const {
+    toggleChatInfo,
+    toggleManagement,
+    openUserInfo,
+    closeLocalTextSearch,
+    setStickerSearchQuery,
+    setGifSearchQuery,
+    closePollResults,
+    addChatMembers,
+    setNewChatMembersDialogState,
+  } = getDispatch();
+
   const { width: windowWidth } = useWindowSize();
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
   const [managementScreen, setManagementScreen] = useState<ManagementScreens>(ManagementScreens.Initial);
@@ -314,15 +309,4 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openUserInfo',
-    'toggleChatInfo',
-    'toggleManagement',
-    'closeLocalTextSearch',
-    'setStickerSearchQuery',
-    'setGifSearchQuery',
-    'closePollResults',
-    'addChatMembers',
-    'setNewChatMembersDialogState',
-  ]),
 )(RightColumn));

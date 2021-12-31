@@ -1,9 +1,8 @@
 import React, {
   FC, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent, ISettings } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
@@ -12,7 +11,6 @@ import {
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import { pick } from '../../../util/iteratees';
 import { isChatArchived } from '../../../modules/helpers';
 import { formatDateToString } from '../../../util/dateFormat';
 import { selectTheme } from '../../../modules/selectors';
@@ -51,10 +49,6 @@ type StateProps = {
   chatsById?: Record<string, ApiChat>;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'openChat' | 'openTipsChat' | 'setGlobalSearchDate' | 'setGlobalSearchChatId' | 'setSettingOption'
-)>;
-
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 
 const PRODUCTION_HOSTNAME = 'web.telegram.org';
@@ -62,14 +56,13 @@ const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 const PERMANENT_VERSION_KEY = 'kz_version';
 
-const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
+const LeftMainHeader: FC<OwnProps & StateProps> = ({
   content,
   contactsFilter,
   onSearchQuery,
   onSelectSettings,
   onSelectContacts,
   onSelectArchived,
-  setGlobalSearchChatId,
   onReset,
   searchQuery,
   isLoading,
@@ -80,11 +73,14 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   theme,
   animationLevel,
   chatsById,
-  openChat,
-  openTipsChat,
-  setGlobalSearchDate,
-  setSettingOption,
 }) => {
+  const {
+    openChat,
+    openTipsChat,
+    setGlobalSearchDate,
+    setSettingOption, setGlobalSearchChatId,
+  } = getDispatch();
+
   const lang = useLang();
   const hasMenu = content === LeftColumnContent.ChatList;
   const clearedDateSearchParam = { date: undefined };
@@ -327,11 +323,4 @@ export default memo(withGlobal<OwnProps>(
       animationLevel,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openChat',
-    'openTipsChat',
-    'setGlobalSearchDate',
-    'setGlobalSearchChatId',
-    'setSettingOption',
-  ]),
 )(LeftMainHeader));

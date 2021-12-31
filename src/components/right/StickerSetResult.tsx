@@ -1,14 +1,12 @@
 import React, {
   FC, useEffect, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiStickerSet } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 import { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_SEARCH } from '../../config';
-import { pick } from '../../util/iteratees';
 import { selectShouldLoopStickers, selectStickerSet } from '../../modules/selectors';
 import useFlag from '../../hooks/useFlag';
 import useOnChange from '../../hooks/useOnChange';
@@ -31,14 +29,14 @@ type StateProps = {
   shouldPlay?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadStickers' | 'toggleStickerSet'>;
-
 const STICKERS_TO_DISPLAY = 5;
 
-const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
+const StickerSetResult: FC<OwnProps & StateProps> = ({
   stickerSetId, observeIntersection, set, shouldPlay,
-  loadStickers, toggleStickerSet, isSomeModalOpen, onModalToggle,
+  isSomeModalOpen, onModalToggle,
 }) => {
+  const { loadStickers, toggleStickerSet } = getDispatch();
+
   const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);
   const areStickersLoaded = Boolean(set?.stickers);
@@ -125,5 +123,4 @@ export default memo(withGlobal<OwnProps>(
       shouldPlay: selectShouldLoopStickers(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadStickers', 'toggleStickerSet']),
 )(StickerSetResult));

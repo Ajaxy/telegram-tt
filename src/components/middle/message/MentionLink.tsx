@@ -1,10 +1,8 @@
 import React, { FC } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiUser } from '../../../api/types';
 
-import { pick } from '../../../util/iteratees';
 import { selectUser } from '../../../modules/selectors';
 
 type OwnProps = {
@@ -17,15 +15,16 @@ type StateProps = {
   userOrChat?: ApiUser | ApiChat;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'openChatByUsername'>;
-
-const MentionLink: FC<OwnProps & StateProps & DispatchProps> = ({
+const MentionLink: FC<OwnProps & StateProps> = ({
   username,
   userOrChat,
   children,
-  openChat,
-  openChatByUsername,
 }) => {
+  const {
+    openChat,
+    openChatByUsername,
+  } = getDispatch();
+
   const handleClick = () => {
     if (userOrChat) {
       openChat({ id: userOrChat.id });
@@ -47,5 +46,4 @@ export default withGlobal<OwnProps>(
       userOrChat: userId ? selectUser(global, userId) : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['openChat', 'openChatByUsername']),
 )(MentionLink);

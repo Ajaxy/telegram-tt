@@ -1,13 +1,11 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback,
 } from '../../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat } from '../../../api/types';
 
 import { filterUsersByName } from '../../../modules/helpers';
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 
 import ChatOrUserPicker from '../../common/ChatOrUserPicker';
@@ -22,16 +20,17 @@ type StateProps = {
   currentUserId?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreMembers' | 'deleteChatMember'>;
-
-const RemoveGroupUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
   chat,
   currentUserId,
   isOpen,
   onClose,
-  loadMoreMembers,
-  deleteChatMember,
 }) => {
+  const {
+    loadMoreMembers,
+    deleteChatMember,
+  } = getDispatch();
+
   const lang = useLang();
   const [filter, setFilter] = useState('');
   // eslint-disable-next-line no-null/no-null
@@ -78,5 +77,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { currentUserId };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreMembers', 'deleteChatMember']),
 )(RemoveGroupUserModal));

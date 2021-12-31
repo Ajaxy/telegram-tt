@@ -24,8 +24,7 @@ type Reducer = (
   payload: any,
 ) => GlobalState | void;
 
-type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral | null);
-type MapActionsToProps = ((setGlobal: Function, actions: GlobalActions) => Partial<GlobalActions> | null);
+type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral);
 
 let currentGlobal = {} as GlobalState;
 
@@ -34,7 +33,6 @@ const callbacks: Function[] = [updateContainers];
 const actions = {} as GlobalActions;
 const containers = new Map<string, {
   mapStateToProps: MapStateToProps<any>;
-  mapReducersToProps: MapActionsToProps;
   ownProps: Props;
   mappedProps?: Props;
   forceUpdate: Function;
@@ -94,16 +92,13 @@ function updateContainers() {
   // eslint-disable-next-line no-restricted-syntax
   for (const container of containers.values()) {
     const {
-      mapStateToProps, mapReducersToProps, ownProps, mappedProps, forceUpdate,
+      mapStateToProps, ownProps, mappedProps, forceUpdate,
     } = container;
 
     let newMappedProps;
 
     try {
-      newMappedProps = {
-        ...mapStateToProps(currentGlobal, ownProps),
-        ...mapReducersToProps(setGlobal, actions),
-      };
+      newMappedProps = mapStateToProps(currentGlobal, ownProps);
     } catch (err) {
       handleError(err);
 
@@ -173,7 +168,6 @@ export function removeCallback(cb: Function) {
 
 export function withGlobal<OwnProps>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
-  mapReducersToProps: MapActionsToProps = () => ({}),
 ) {
   return (Component: FC) => {
     return function TeactNContainer(props: OwnProps) {
@@ -192,7 +186,6 @@ export function withGlobal<OwnProps>(
       if (!container) {
         container = {
           mapStateToProps,
-          mapReducersToProps,
           ownProps: props,
           areMappedPropsChanged: false,
           forceUpdate,
@@ -211,10 +204,7 @@ export function withGlobal<OwnProps>(
         container.ownProps = props;
 
         try {
-          container.mappedProps = {
-            ...mapStateToProps(currentGlobal, props),
-            ...mapReducersToProps(setGlobal, actions),
-          };
+          container.mappedProps = mapStateToProps(currentGlobal, props);
         } catch (err) {
           handleError(err);
         }

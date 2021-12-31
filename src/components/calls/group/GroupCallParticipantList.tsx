@@ -1,10 +1,7 @@
 import { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
-
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import { selectActiveGroupCall } from '../../../modules/selectors/calls';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -22,15 +19,16 @@ type StateProps = {
   canInvite?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'createGroupCallInviteLink' | 'loadMoreGroupCallParticipants'>;
-
-const GroupCallParticipantList: FC<OwnProps & StateProps & DispatchProps> = ({
-  createGroupCallInviteLink,
-  loadMoreGroupCallParticipants,
+const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
   participants,
   participantsCount,
   openParticipantMenu,
 }) => {
+  const {
+    createGroupCallInviteLink,
+    loadMoreGroupCallParticipants,
+  } = getDispatch();
+
   const lang = useLang();
 
   const participantsIds = useMemo(() => {
@@ -82,8 +80,4 @@ export default memo(withGlobal<OwnProps>(
       participantsCount: participantsCount || 0,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'createGroupCallInviteLink',
-    'loadMoreGroupCallParticipants',
-  ]),
 )(GroupCallParticipantList));

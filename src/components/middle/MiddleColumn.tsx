@@ -1,10 +1,10 @@
 import React, {
   FC, useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
-import { GlobalActions, MessageListType, MessageList as GlobalMessageList } from '../../global/types';
+import { MessageListType, MessageList as GlobalMessageList } from '../../global/types';
 import { ThemeKey } from '../../types';
 
 import {
@@ -43,7 +43,6 @@ import {
   getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import { createMessageHash } from '../../util/routing';
 import useCustomBackground from '../../hooks/useCustomBackground';
@@ -104,18 +103,13 @@ type StateProps = {
   canRestartBot?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'openChat' | 'unpinAllMessages' | 'loadUser' | 'closeLocalTextSearch' | 'exitMessageSelectMode' |
-  'closePaymentModal' | 'clearReceipt' | 'joinChannel' | 'sendBotCommand' | 'restartBot'
-)>;
-
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
 
 function isImage(item: DataTransferItem) {
   return item.kind === 'file' && item.type && SUPPORTED_IMAGE_CONTENT_TYPES.has(item.type);
 }
 
-const MiddleColumn: FC<StateProps & DispatchProps> = ({
+const MiddleColumn: FC<StateProps> = ({
   chatId,
   threadId,
   messageListType,
@@ -146,17 +140,20 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   canSubscribe,
   canStartBot,
   canRestartBot,
-  openChat,
-  unpinAllMessages,
-  loadUser,
-  closeLocalTextSearch,
-  exitMessageSelectMode,
-  closePaymentModal,
-  clearReceipt,
-  joinChannel,
-  sendBotCommand,
-  restartBot,
 }) => {
+  const {
+    openChat,
+    unpinAllMessages,
+    loadUser,
+    closeLocalTextSearch,
+    exitMessageSelectMode,
+    closePaymentModal,
+    clearReceipt,
+    joinChannel,
+    sendBotCommand,
+    restartBot,
+  } = getDispatch();
+
   const { width: windowWidth } = useWindowSize();
 
   const lang = useLang();
@@ -588,10 +585,6 @@ export default memo(withGlobal(
       canRestartBot,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openChat', 'unpinAllMessages', 'loadUser', 'closeLocalTextSearch', 'exitMessageSelectMode',
-    'closePaymentModal', 'clearReceipt', 'joinChannel', 'sendBotCommand', 'restartBot',
-  ]),
 )(MiddleColumn));
 
 function useIsReady(

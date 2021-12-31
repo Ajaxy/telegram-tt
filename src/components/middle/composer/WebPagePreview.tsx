@@ -1,15 +1,13 @@
 import React, {
   FC, memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
 import { ISettings } from '../../../types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectNoWebPage, selectTheme } from '../../../modules/selectors';
-import { pick } from '../../../util/iteratees';
 import parseMessageInput from '../../../util/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -33,11 +31,10 @@ type StateProps = {
   noWebPage?: boolean;
   theme: ISettings['theme'];
 };
-type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview' | 'toggleMessageWebPage'>;
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
-const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
+const WebPagePreview: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   messageText,
@@ -45,10 +42,13 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   webPagePreview,
   noWebPage,
   theme,
-  loadWebPagePreview,
-  clearWebPagePreview,
-  toggleMessageWebPage,
 }) => {
+  const {
+    loadWebPagePreview,
+    clearWebPagePreview,
+    toggleMessageWebPage,
+  } = getDispatch();
+
   const link = useMemo(() => {
     const { text, entities } = parseMessageInput(messageText);
 
@@ -121,7 +121,4 @@ export default memo(withGlobal<OwnProps>(
       noWebPage,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadWebPagePreview', 'clearWebPagePreview', 'toggleMessageWebPage',
-  ]),
 )(WebPagePreview));

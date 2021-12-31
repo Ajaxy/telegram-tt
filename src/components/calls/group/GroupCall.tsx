@@ -5,10 +5,9 @@ import {
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 import '../../../modules/actions/calls';
 
-import { GlobalActions } from '../../../global/types';
 import { IAnchorPosition } from '../../../types';
 
 import {
@@ -17,7 +16,6 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
   IS_SINGLE_COLUMN_LAYOUT,
 } from '../../../util/environment';
-import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import {
   selectGroupCall,
@@ -59,12 +57,7 @@ type StateProps = {
   participants: Record<string, TypeGroupCallParticipant>;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'toggleGroupCallVideo' | 'leaveGroupCall' | 'toggleGroupCallPresentation' | 'toggleGroupCallPanel' |
-  'connectToActiveGroupCall' | 'playGroupCallSound'
-)>;
-
-const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
+const GroupCall: FC<OwnProps & StateProps> = ({
   groupCallId,
   isGroupCallPanelHidden,
   connectionState,
@@ -74,13 +67,16 @@ const GroupCall: FC<OwnProps & StateProps & DispatchProps> = ({
   isAdmin,
   participants,
 
-  toggleGroupCallVideo,
-  toggleGroupCallPresentation,
-  leaveGroupCall,
-  toggleGroupCallPanel,
-  connectToActiveGroupCall,
-  playGroupCallSound,
 }) => {
+  const {
+    toggleGroupCallVideo,
+    toggleGroupCallPresentation,
+    leaveGroupCall,
+    toggleGroupCallPanel,
+    connectToActiveGroupCall,
+    playGroupCallSound,
+  } = getDispatch();
+
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -411,12 +407,4 @@ export default memo(withGlobal<OwnProps>(
       participants,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'toggleGroupCallVideo',
-    'leaveGroupCall',
-    'toggleGroupCallPresentation',
-    'toggleGroupCallPanel',
-    'connectToActiveGroupCall',
-    'playGroupCallSound',
-  ]),
 )(GroupCall));

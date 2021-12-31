@@ -3,13 +3,10 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch } from '../../lib/teact/teactn';
 
 import { ApiReportReason } from '../../api/types';
 
-import { GlobalActions } from '../../global/types';
-
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -23,15 +20,16 @@ export type OwnProps = {
   onClose: () => void;
 };
 
-type DispatchProps = Pick<GlobalActions, 'reportMessages' | 'exitMessageSelectMode'>;
-
-const ReportMessageModal: FC<OwnProps & DispatchProps> = ({
+const ReportMessageModal: FC<OwnProps> = ({
   isOpen,
   messageIds,
-  reportMessages,
-  exitMessageSelectMode,
   onClose,
 }) => {
+  const {
+    reportMessages,
+    exitMessageSelectMode,
+  } = getDispatch();
+
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
   const [description, setDescription] = useState('');
 
@@ -91,8 +89,4 @@ const ReportMessageModal: FC<OwnProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  undefined, (setGlobal, actions): DispatchProps => pick(actions, [
-    'reportMessages', 'exitMessageSelectMode',
-  ]),
-)(ReportMessageModal));
+export default memo(ReportMessageModal);

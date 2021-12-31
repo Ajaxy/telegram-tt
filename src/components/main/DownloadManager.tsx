@@ -1,7 +1,7 @@
 import { FC, memo, useEffect } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, Thread } from '../../global/types';
+import { Thread } from '../../global/types';
 import { ApiMediaFormat, ApiMessage } from '../../api/types';
 
 import * as mediaLoader from '../../util/mediaLoader';
@@ -9,7 +9,6 @@ import download from '../../util/download';
 import {
   getMessageContentFilename, getMessageMediaHash,
 } from '../../modules/helpers';
-import { pick } from '../../util/iteratees';
 
 type StateProps = {
   activeDownloads: Record<number, number[]>;
@@ -19,15 +18,14 @@ type StateProps = {
   }>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'cancelMessageMediaDownload'>;
-
 const startedDownloads = new Set<string>();
 
-const DownloadManager: FC<StateProps & DispatchProps> = ({
+const DownloadManager: FC<StateProps> = ({
   activeDownloads,
   messages,
-  cancelMessageMediaDownload,
 }) => {
+  const { cancelMessageMediaDownload } = getDispatch();
+
   useEffect(() => {
     Object.entries(activeDownloads).forEach(([chatId, messageIds]) => {
       const activeMessages = messageIds.map((id) => messages[Number(chatId)].byId[id]);
@@ -77,5 +75,4 @@ export default memo(withGlobal(
       messages,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['cancelMessageMediaDownload']),
 )(DownloadManager));

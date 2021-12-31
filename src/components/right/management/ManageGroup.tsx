@@ -2,11 +2,10 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
 import { ApiChat, ApiChatBannedRights, ApiMediaFormat } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
 import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
@@ -14,7 +13,6 @@ import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import { selectChat } from '../../../modules/selectors';
 import { formatInteger } from '../../../util/textFormat';
-import { pick } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -44,18 +42,13 @@ type StateProps = {
   canBanUsers?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'togglePreHistoryHidden' | 'updateChat' | 'closeManagement' |
-  'leaveChannel' | 'deleteChannel' | 'deleteChat' | 'openChat'
-)>;
-
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
 
 // Some checkboxes control multiple rights, and some rights are not controlled from Permissions screen,
 // so we need to define the amount manually
 const TOTAL_PERMISSIONS_COUNT = 8;
 
-const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageGroup: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   progress,
@@ -64,16 +57,19 @@ const ManageGroup: FC<OwnProps & StateProps & DispatchProps> = ({
   canChangeInfo,
   canBanUsers,
   onScreenSelect,
-  togglePreHistoryHidden,
-  updateChat,
-  deleteChat,
-  leaveChannel,
-  deleteChannel,
-  closeManagement,
-  openChat,
   onClose,
   isActive,
 }) => {
+  const {
+    togglePreHistoryHidden,
+    updateChat,
+    deleteChat,
+    leaveChannel,
+    deleteChannel,
+    closeManagement,
+    openChat,
+  } = getDispatch();
+
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const currentTitle = chat.title;
   const currentAbout = chat.fullInfo ? (chat.fullInfo.about || '') : '';
@@ -338,8 +334,4 @@ export default memo(withGlobal<OwnProps>(
       canBanUsers: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'banUsers'),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'togglePreHistoryHidden', 'updateChat', 'closeManagement',
-    'leaveChannel', 'deleteChannel', 'deleteChat', 'openChat',
-  ]),
 )(ManageGroup));

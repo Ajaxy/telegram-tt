@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatAdminRights, ApiUser } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
-import { GlobalActions } from '../../../global/types';
 
-import { pick } from '../../../util/iteratees';
 import { selectChat } from '../../../modules/selectors';
 import { getUserFullName, isChatBasicGroup, isChatChannel } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
@@ -39,11 +37,9 @@ type StateProps = {
   isFormFullyDisabled: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'updateChatAdmin'>;
-
 const CUSTOM_TITLE_MAX_LENGTH = 16;
 
-const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   selectedChatMemberId,
   onScreenSelect,
   chat,
@@ -51,10 +47,11 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps & DispatchProps> = ({
   currentUserId,
   isChannel,
   isFormFullyDisabled,
-  updateChatAdmin,
   onClose,
   isActive,
 }) => {
+  const { updateChatAdmin } = getDispatch();
+
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
   const [isTouched, setIsTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -359,5 +356,4 @@ export default memo(withGlobal<OwnProps>(
       isFormFullyDisabled,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['updateChatAdmin']),
 )(ManageGroupAdminRights));

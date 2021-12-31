@@ -1,9 +1,9 @@
 import React, {
   FC, memo, useMemo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../../global/types';
+import { GlobalState } from '../../../global/types';
 import {
   ApiChat, ApiChatFolder, ApiUser,
 } from '../../../api/types';
@@ -13,7 +13,7 @@ import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../../../config';
 import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import usePrevious from '../../../hooks/usePrevious';
-import { mapValues, pick } from '../../../util/iteratees';
+import { mapValues } from '../../../util/iteratees';
 import {
   getChatOrder, prepareChatList, prepareFolderListIds, reduceChatList,
 } from '../../../modules/helpers';
@@ -48,16 +48,12 @@ type StateProps = {
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadMoreChats' | 'preloadTopChatMessages' | 'preloadArchivedChats' | 'openChat' | 'openNextChat'
-)>;
-
 enum FolderTypeToListType {
   'all' = 'active',
   'archived' = 'archived',
 }
 
-const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatList: FC<OwnProps & StateProps> = ({
   folderType,
   folderId,
   isActive,
@@ -72,12 +68,15 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   notifyExceptions,
   foldersDispatch,
   onScreenSelect,
-  loadMoreChats,
-  preloadTopChatMessages,
-  preloadArchivedChats,
-  openChat,
-  openNextChat,
 }) => {
+  const {
+    loadMoreChats,
+    preloadTopChatMessages,
+    preloadArchivedChats,
+    openChat,
+    openNextChat,
+  } = getDispatch();
+
   const [currentListIds, currentPinnedIds] = useMemo(() => {
     return folderType === 'folder' && chatFolder
       ? prepareFolderListIds(allListIds, chatsById, usersById, chatFolder, notifySettings, notifyExceptions)
@@ -273,11 +272,4 @@ export default memo(withGlobal<OwnProps>(
       }),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadMoreChats',
-    'preloadTopChatMessages',
-    'preloadArchivedChats',
-    'openChat',
-    'openNextChat',
-  ]),
 )(ChatList));

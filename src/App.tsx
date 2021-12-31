@@ -1,7 +1,7 @@
 import { FC, useEffect } from './lib/teact/teact';
-import React, { withGlobal } from './lib/teact/teactn';
+import React, { getDispatch, withGlobal } from './lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from './global/types';
+import { GlobalState } from './global/types';
 
 import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { pick } from './util/iteratees';
@@ -17,9 +17,10 @@ import { hasStoredSession } from './util/sessions';
 // import Test from './components/test/TestNoRedundancy';
 
 type StateProps = Pick<GlobalState, 'authState'>;
-type DispatchProps = Pick<GlobalActions, 'disconnect'>;
 
-const App: FC<StateProps & DispatchProps> = ({ authState, disconnect }) => {
+const App: FC<StateProps> = ({ authState }) => {
+  const { disconnect } = getDispatch();
+
   const [isInactive, markInactive] = useFlag(false);
 
   useEffect(() => {
@@ -67,5 +68,4 @@ function renderMain() {
 
 export default withGlobal(
   (global): StateProps => pick(global, ['authState']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['disconnect']),
 )(App);

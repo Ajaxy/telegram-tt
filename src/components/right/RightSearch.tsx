@@ -1,10 +1,9 @@
 import React, {
   FC, useMemo, memo, useRef,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 
 import {
   selectUser,
@@ -20,7 +19,7 @@ import {
 } from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
-import { orderBy, pick } from '../../util/iteratees';
+import { orderBy } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -47,8 +46,6 @@ type StateProps = {
   foundIds?: number[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'searchTextMessagesLocal' | 'focusMessage'>;
-
 interface Result {
   message: ApiMessage;
   senderUser?: ApiUser;
@@ -56,7 +53,7 @@ interface Result {
   onClick: NoneToVoidFunction;
 }
 
-const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
+const RightSearch: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   onClose,
@@ -66,9 +63,12 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   query,
   totalCount,
   foundIds,
-  searchTextMessagesLocal,
-  focusMessage,
 }) => {
+  const {
+    searchTextMessagesLocal,
+    focusMessage,
+  } = getDispatch();
+
   const lang = useLang();
 
   const foundResults = useMemo(() => {
@@ -186,5 +186,4 @@ export default memo(withGlobal<OwnProps>(
       foundIds,
     };
   },
-  (global, actions): DispatchProps => pick(actions, ['searchTextMessagesLocal', 'focusMessage']),
 )(RightSearch));

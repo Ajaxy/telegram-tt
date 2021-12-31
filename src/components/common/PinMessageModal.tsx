@@ -1,7 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-
-import { GlobalActions } from '../../global/types';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
@@ -12,7 +10,6 @@ import {
   isChatSuperGroup,
   isChatChannel,
 } from '../../modules/helpers';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
 
@@ -36,9 +33,7 @@ type StateProps = {
   contactName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'pinMessage'>;
-
-const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const PinMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
   messageId,
   chatId,
@@ -48,8 +43,9 @@ const PinMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   canPinForAll,
   contactName,
   onClose,
-  pinMessage,
 }) => {
+  const { pinMessage } = getDispatch();
+
   const handlePinMessageForAll = useCallback(() => {
     pinMessage({
       chatId, messageId, isUnpin: false,
@@ -124,5 +120,4 @@ export default memo(withGlobal<OwnProps>(
       contactName,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['pinMessage']),
 )(PinMessageModal));

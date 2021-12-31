@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ManagementScreens, ProfileState } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import {
   selectChat,
@@ -59,11 +57,6 @@ type StateProps = {
   gifSearchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'setLocalTextSearchQuery' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
-  'searchTextMessagesLocal' | 'toggleManagement' | 'openHistoryCalendar' | 'addContact'
-)>;
-
 const COLUMN_CLOSE_DELAY_MS = 300;
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
@@ -91,7 +84,7 @@ enum HeaderContent {
   AddingMembers,
 }
 
-const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
+const RightHeader: FC<OwnProps & StateProps> = ({
   isColumnOpen,
   isProfile,
   isSearch,
@@ -110,15 +103,17 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   messageSearchQuery,
   stickerSearchQuery,
   gifSearchQuery,
-  setLocalTextSearchQuery,
-  setStickerSearchQuery,
-  setGifSearchQuery,
-  searchTextMessagesLocal,
-  toggleManagement,
-  openHistoryCalendar,
   shouldSkipAnimation,
-  addContact,
 }) => {
+  const {
+    setLocalTextSearchQuery,
+    setStickerSearchQuery,
+    setGifSearchQuery,
+    searchTextMessagesLocal,
+    toggleManagement,
+    openHistoryCalendar, addContact,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
 
@@ -372,13 +367,4 @@ export default memo(withGlobal<OwnProps>(
       gifSearchQuery,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setLocalTextSearchQuery',
-    'setStickerSearchQuery',
-    'setGifSearchQuery',
-    'searchTextMessagesLocal',
-    'toggleManagement',
-    'openHistoryCalendar',
-    'addContact',
-  ]),
 )(RightHeader));

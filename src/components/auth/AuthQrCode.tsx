@@ -2,13 +2,12 @@ import QrCreator from 'qr-creator';
 import React, {
   FC, useEffect, useRef, memo, useCallback,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalState, GlobalActions } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE } from '../../config';
-import { pick } from '../../util/iteratees';
 import { setLanguage } from '../../util/langProvider';
 import renderText from '../common/helpers/renderText';
 import useLangString from '../../hooks/useLangString';
@@ -19,23 +18,25 @@ import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 
-type StateProps = Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'> & {
-  language?: LangCode;
-};
-type DispatchProps = Pick<GlobalActions, (
-  'returnToAuthPhoneNumber' | 'setSettingOption'
-)>;
+type StateProps =
+  Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
+  & {
+    language?: LangCode;
+  };
 
 const DATA_PREFIX = 'tg://login?token=';
 
-const AuthCode: FC<StateProps & DispatchProps> = ({
+const AuthCode: FC<StateProps> = ({
   connectionState,
   authState,
   authQrCode,
   language,
-  returnToAuthPhoneNumber,
-  setSettingOption,
 }) => {
+  const {
+    returnToAuthPhoneNumber,
+    setSettingOption,
+  } = getDispatch();
+
   const suggestedLanguage = getSuggestedLanguage();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -118,7 +119,4 @@ export default memo(withGlobal(
       language,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'returnToAuthPhoneNumber', 'setSettingOption',
-  ]),
 )(AuthCode));

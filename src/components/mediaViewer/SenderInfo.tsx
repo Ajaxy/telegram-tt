@@ -1,7 +1,6 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { getSenderTitle, isUserId } from '../../modules/helpers';
@@ -13,7 +12,6 @@ import {
   selectSender,
   selectUser,
 } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Avatar from '../common/Avatar';
@@ -31,17 +29,18 @@ type StateProps = {
   message?: ApiMessage;
 };
 
-type DispatchProps = Pick<GlobalActions, 'closeMediaViewer' | 'focusMessage'>;
-
-const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+const SenderInfo: FC<OwnProps & StateProps> = ({
   chatId,
   messageId,
   sender,
   isAvatar,
   message,
-  closeMediaViewer,
-  focusMessage,
 }) => {
+  const {
+    closeMediaViewer,
+    focusMessage,
+  } = getDispatch();
+
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();
     focusMessage({ chatId, messageId });
@@ -95,5 +94,4 @@ export default withGlobal<OwnProps>(
       sender: message && selectSender(global, message),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['closeMediaViewer', 'focusMessage']),
 )(SenderInfo);

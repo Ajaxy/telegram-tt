@@ -2,13 +2,10 @@ import { GroupCallConnectionState } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
-
-import { GlobalActions } from '../../../global/types';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
-import { pick } from '../../../util/iteratees';
 import usePrevious from '../../../hooks/usePrevious';
 import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../modules/selectors/calls';
 import useLang from '../../../hooks/useLang';
@@ -27,22 +24,23 @@ type StateProps = {
   noAudioStream: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'toggleGroupCallMute' | 'requestToSpeak' | 'playGroupCallSound'>;
-
 const REQUEST_TO_SPEAK_THROTTLE = 3000;
 const HOLD_TO_SPEAK_TIME = 200;
 const ICON_SIZE = 48;
 
-const MicrophoneButton: FC<StateProps & DispatchProps> = ({
+const MicrophoneButton: FC<StateProps> = ({
   noAudioStream,
   canSelfUnmute,
   isMuted,
   hasRequestedToSpeak,
   connectionState,
-  toggleGroupCallMute,
-  requestToSpeak,
-  playGroupCallSound,
 }) => {
+  const {
+    toggleGroupCallMute,
+    requestToSpeak,
+    playGroupCallSound,
+  } = getDispatch();
+
   const lang = useLang();
   const muteMouseDownState = useRef('up');
 
@@ -179,9 +177,4 @@ export default memo(withGlobal(
       isMuted,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'toggleGroupCallMute',
-    'requestToSpeak',
-    'playGroupCallSound',
-  ]),
 )(MicrophoneButton));

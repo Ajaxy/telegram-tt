@@ -1,8 +1,7 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 
 import { selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
@@ -15,7 +14,6 @@ import {
   isChatChannel,
   getChatTitle,
 } from '../../modules/helpers';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
 
@@ -44,11 +42,7 @@ type StateProps = {
   contactName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'leaveChannel' | 'deleteHistory' | 'deleteChannel' | 'deleteChatUser' | 'blockContact'
-)>;
-
-const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const DeleteChatModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chat,
   isChannel,
@@ -62,12 +56,15 @@ const DeleteChatModal: FC<OwnProps & StateProps & DispatchProps> = ({
   contactName,
   onClose,
   onCloseAnimationEnd,
-  leaveChannel,
-  deleteHistory,
-  deleteChannel,
-  deleteChatUser,
-  blockContact,
 }) => {
+  const {
+    leaveChannel,
+    deleteHistory,
+    deleteChannel,
+    deleteChatUser,
+    blockContact,
+  } = getDispatch();
+
   const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);
 
@@ -217,6 +214,4 @@ export default memo(withGlobal<OwnProps>(
       contactName,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions,
-    ['leaveChannel', 'deleteHistory', 'deleteChannel', 'deleteChatUser', 'blockContact']),
 )(DeleteChatModal));

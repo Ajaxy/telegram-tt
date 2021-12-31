@@ -1,12 +1,11 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../../../lib/teact/teactn';
 
 import {
   ApiChat, ApiThreadInfo, ApiUser,
 } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
 import { isUserId } from '../../../modules/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
@@ -20,14 +19,14 @@ import './CommentButton.scss';
 type OwnProps = {
   threadInfo: ApiThreadInfo;
   disabled?: boolean;
-  openChat: GlobalActions['openChat'];
 };
 
 const CommentButton: FC<OwnProps> = ({
   threadInfo,
   disabled,
-  openChat,
 }) => {
+  const { openChat } = getDispatch();
+
   const lang = useLang();
   const {
     threadId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds,

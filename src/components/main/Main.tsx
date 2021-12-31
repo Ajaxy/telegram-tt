@@ -1,17 +1,15 @@
 import React, {
   FC, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { LangCode } from '../../types';
-import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
 import '../../modules/actions/all';
 import {
   BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../config';
-import { pick } from '../../util/iteratees';
 import {
   selectChatMessage,
   selectCountNotMutedUnread,
@@ -72,12 +70,6 @@ type StateProps = {
   isCallFallbackConfirmOpen: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadAnimatedEmojis' | 'loadNotificationSettings' | 'loadNotificationExceptions' | 'updateIsOnline' |
-  'loadTopInlineBots' | 'loadEmojiKeywords' | 'openStickerSetShortName' |
-  'loadCountryList' | 'ensureTimeFormat' | 'checkVersionNotification'
-)>;
-
 const NOTIFICATION_INTERVAL = 1000;
 
 let notificationInterval: number | undefined;
@@ -85,7 +77,7 @@ let notificationInterval: number | undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
 
-const Main: FC<StateProps & DispatchProps> = ({
+const Main: FC<StateProps> = ({
   lastSyncTime,
   isLeftColumnShown,
   isRightColumnShown,
@@ -104,17 +96,20 @@ const Main: FC<StateProps & DispatchProps> = ({
   language,
   wasTimeFormatSetManually,
   isCallFallbackConfirmOpen,
-  loadAnimatedEmojis,
-  loadNotificationSettings,
-  loadNotificationExceptions,
-  updateIsOnline,
-  loadTopInlineBots,
-  loadEmojiKeywords,
-  loadCountryList,
-  ensureTimeFormat,
-  openStickerSetShortName,
-  checkVersionNotification,
 }) => {
+  const {
+    loadAnimatedEmojis,
+    loadNotificationSettings,
+    loadNotificationExceptions,
+    updateIsOnline,
+    loadTopInlineBots,
+    loadEmojiKeywords,
+    loadCountryList,
+    ensureTimeFormat,
+    openStickerSetShortName,
+    checkVersionNotification,
+  } = getDispatch();
+
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
     // eslint-disable-next-line no-console
@@ -362,9 +357,4 @@ export default memo(withGlobal(
       isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadAnimatedEmojis', 'loadNotificationSettings', 'loadNotificationExceptions', 'updateIsOnline',
-    'loadTopInlineBots', 'loadEmojiKeywords', 'openStickerSetShortName', 'loadCountryList', 'ensureTimeFormat',
-    'checkVersionNotification',
-  ]),
 )(Main));

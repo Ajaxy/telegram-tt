@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiSticker, ApiStickerSet } from '../../api/types';
-import { GlobalActions } from '../../global/types';
 
 import { STICKER_SIZE_MODAL } from '../../config';
-import { pick } from '../../util/iteratees';
 import {
   selectChat, selectCurrentMessageList, selectStickerSet, selectStickerSetByShortName,
 } from '../../modules/selectors';
@@ -35,21 +33,22 @@ type StateProps = {
   stickerSet?: ApiStickerSet;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadStickers' | 'toggleStickerSet' | 'sendMessage'>;
-
 const INTERSECTION_THROTTLE = 200;
 
-const StickerSetModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const StickerSetModal: FC<OwnProps & StateProps> = ({
   isOpen,
   fromSticker,
   stickerSetShortName,
   stickerSet,
   canSendStickers,
   onClose,
-  loadStickers,
-  toggleStickerSet,
-  sendMessage,
 }) => {
+  const {
+    loadStickers,
+    toggleStickerSet,
+    sendMessage,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
@@ -153,9 +152,4 @@ export default memo(withGlobal<OwnProps>(
           : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadStickers',
-    'toggleStickerSet',
-    'sendMessage',
-  ]),
 )(StickerSetModal));

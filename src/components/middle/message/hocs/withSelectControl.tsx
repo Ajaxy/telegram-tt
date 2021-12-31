@@ -5,38 +5,35 @@ import React, {
   useMemo,
   memo,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
 
 import { OwnProps as PhotoProps } from '../Photo';
 import { OwnProps as VideoProps } from '../Video';
 
 import buildClassName from '../../../../util/buildClassName';
-import { GlobalActions } from '../../../../global/types';
 import {
   selectIsInSelectMode,
   selectIsMessageSelected,
 } from '../../../../modules/selectors';
 
-import { pick } from '../../../../util/iteratees';
-
-type OwnProps = PhotoProps & VideoProps;
+type OwnProps =
+  PhotoProps
+  & VideoProps;
 
 type StateProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, ('toggleMessageSelection')>;
-
 export default function withSelectControl(WrappedComponent: FC) {
-  const ComponentWithSelectControl: FC<OwnProps & StateProps & DispatchProps> = (props) => {
+  const ComponentWithSelectControl: FC<OwnProps & StateProps> = (props) => {
     const {
       isInSelectMode,
       isSelected,
       message,
-      toggleMessageSelection,
       dimensions,
     } = props;
+    const { toggleMessageSelection } = getDispatch();
 
     const handleMessageSelect = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
@@ -59,12 +56,7 @@ export default function withSelectControl(WrappedComponent: FC) {
 
     return (
       <div
-        className={
-          buildClassName(
-            'album-item-select-wrapper',
-            isSelected && 'is-selected',
-          )
-        }
+        className={buildClassName('album-item-select-wrapper', isSelected && 'is-selected')}
         // @ts-ignore
         style={dimensions ? `left: ${dimensions.x}px; top: ${dimensions.y}px;` : ''}
         onClick={isInSelectMode ? handleMessageSelect : undefined}
@@ -90,8 +82,5 @@ export default function withSelectControl(WrappedComponent: FC) {
         isSelected: selectIsMessageSelected(global, message.id),
       };
     },
-    (setGlobal, actions) => pick(actions, [
-      'toggleMessageSelection',
-    ]),
   )(ComponentWithSelectControl));
 }

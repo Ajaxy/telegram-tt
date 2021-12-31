@@ -1,13 +1,12 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiUser } from '../../../api/types';
 
 import { filterUsersByName, getUserFullName } from '../../../modules/helpers';
-import { pick, unique } from '../../../util/iteratees';
+import { unique } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 
 import ChatOrUserPicker from '../../common/ChatOrUserPicker';
@@ -25,9 +24,7 @@ type StateProps = {
   currentUserId?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'setUserSearchQuery' | 'blockContact'>;
-
-const BlockUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const BlockUserModal: FC<OwnProps & StateProps> = ({
   usersById,
   blockedIds,
   contactIds,
@@ -35,10 +32,13 @@ const BlockUserModal: FC<OwnProps & StateProps & DispatchProps> = ({
   currentUserId,
   isOpen,
   onClose,
-  loadContactList,
-  setUserSearchQuery,
-  blockContact,
 }) => {
+  const {
+    loadContactList,
+    setUserSearchQuery,
+    blockContact,
+  } = getDispatch();
+
   const lang = useLang();
   const [filter, setFilter] = useState('');
   // eslint-disable-next-line no-null/no-null
@@ -110,7 +110,4 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadContactList', 'setUserSearchQuery', 'blockContact',
-  ]),
 )(BlockUserModal));

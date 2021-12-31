@@ -1,14 +1,13 @@
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiMessage } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
-import { unique, pick } from '../../../util/iteratees';
+import { unique } from '../../../util/iteratees';
 import { getMessageSummaryText, sortChatIds, filterUsersByName } from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -45,21 +44,21 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'openChat' | 'addRecentlyFoundChatId' | 'searchMessagesGlobal' | 'setGlobalSearchChatId'
-)>;
-
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 4;
 const LESS_LIST_ITEMS_AMOUNT = 5;
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const ChatResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatResults: FC<OwnProps & StateProps> = ({
   searchQuery, searchDate, dateSearchQuery, currentUserId,
   localContactIds, localChatIds, localUserIds, globalChatIds, globalUserIds,
   foundIds, globalMessagesByChatId, chatsById, fetchingStatus, lastSyncTime,
-  onReset, onSearchDateSelect, openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
+  onReset, onSearchDateSelect,
 }) => {
+  const {
+    openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
+  } = getDispatch();
+
   const lang = useLang();
 
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
@@ -306,10 +305,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'openChat',
-    'addRecentlyFoundChatId',
-    'searchMessagesGlobal',
-    'setGlobalSearchChatId',
-  ]),
 )(ChatResults));
