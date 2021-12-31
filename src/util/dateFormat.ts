@@ -197,13 +197,29 @@ export function formatVoiceRecordDuration(durationInMs: number) {
   return `${parts.join(':')},${String(milliseconds).padStart(2, '0')}`;
 }
 
-export function formatDateToString(date: Date, locale = 'en-US') {
+export function formatDateToString(datetime: Date | number, locale = 'en-US') {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   return date.toLocaleString(
     locale,
     {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+    },
+  );
+}
+
+export function formatDateTimeToString(datetime: Date | number, locale = 'en-US') {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+  return date.toLocaleString(
+    locale,
+    {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
     },
   );
 }
