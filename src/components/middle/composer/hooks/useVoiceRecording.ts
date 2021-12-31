@@ -50,7 +50,6 @@ export default () => {
     if (recordButtonRef.current) {
       recordButtonRef.current.style.boxShadow = 'none';
     }
-
     try {
       return activeVoiceRecording!.pause();
     } catch (err) {

@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useMemo,
+  FC, memo, useMemo,
 } from '../../../lib/teact/teact';
 
 import { ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';

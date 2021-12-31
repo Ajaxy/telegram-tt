@@ -301,6 +301,10 @@ export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
 | 'copyright' | 'geoIrrelevant' | 'fake' | 'other';
 
+export type ApiSendMessageAction = {
+  type: 'cancel' | 'typing' | 'recordAudio' | 'chooseSticker';
+};
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

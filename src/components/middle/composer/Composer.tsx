@@ -22,7 +22,7 @@ import {
 import { InlineBotSettings } from '../../../types';
 
 import {
-  BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, REPLIES_USER_ID, SCHEDULED_WHEN_ONLINE,
+  BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, REPLIES_USER_ID, SCHEDULED_WHEN_ONLINE, SEND_MESSAGE_ACTION_INTERVAL,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import {
@@ -71,6 +71,8 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
 import useInlineBotTooltip from './hooks/useInlineBotTooltip';
 import useBotCommandTooltip from './hooks/useBotCommandTooltip';
+import useSendMessageAction from '../../../hooks/useSendMessageAction';
+import useInterval from '../../../hooks/useInterval';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -225,6 +227,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     scheduledMessageArgs, setScheduledMessageArgs,
   ] = useState<GlobalState['messages']['contentToBeScheduled'] | undefined>();
   const { width: windowWidth } = windowSize.get();
+  const sendMessageAction = useSendMessageAction(chatId, threadId);
 
   // Cache for frequently updated state
   const htmlRef = useRef<string>(html);
@@ -274,6 +277,16 @@ const Composer: FC<OwnProps & StateProps> = ({
     recordButtonRef: mainButtonRef,
     startRecordTimeRef,
   } = useVoiceRecording();
+
+  useInterval(() => {
+    sendMessageAction({ type: 'recordAudio' });
+  }, activeVoiceRecording && SEND_MESSAGE_ACTION_INTERVAL);
+
+  useEffect(() => {
+    if (!activeVoiceRecording) {
+      sendMessageAction({ type: 'cancel' });
+    }
+  }, [activeVoiceRecording, sendMessageAction]);
 
   const mainButtonState = editingMessage
     ? MainButtonState.Edit
@@ -952,6 +965,8 @@ const Composer: FC<OwnProps & StateProps> = ({
             </span>
           )}
           <StickerTooltip
+            chatId={chatId}
+            threadId={threadId}
             isOpen={isStickerTooltipOpen}
             onStickerSelect={handleStickerSelect}
           />
@@ -984,6 +999,8 @@ const Composer: FC<OwnProps & StateProps> = ({
             />
           )}
           <SymbolMenu
+            chatId={chatId}
+            threadId={threadId}
             isOpen={isSymbolMenuOpen}
             allowedAttachmentOptions={allowedAttachmentOptions}
             onLoad={onSymbolMenuLoadingComplete}
