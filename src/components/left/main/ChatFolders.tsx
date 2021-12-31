@@ -9,6 +9,7 @@ import { NotifyException, NotifySettings, SettingsScreens } from '../../../types
 import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
+import { ALL_FOLDER_ID } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { getFolderUnreadDialogs } from '../../../modules/helpers';
@@ -110,7 +111,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     }
 
     return [
-      { title: lang.code === 'en' ? 'All' : lang('FilterAllChats') },
+      { title: lang.code === 'en' ? 'All' : lang('FilterAllChats'), id: ALL_FOLDER_ID },
       ...displayedFolders.map((folder) => ({
         title: folder.title,
         ...(folderCountersById?.[folder.id]),
@@ -196,7 +197,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   function renderCurrentTab(isActive: boolean) {
     const activeFolder = Object.values(chatFoldersById)
-      .find(({ title }) => title === folderTabs![activeChatFolder].title);
+      .find(({ id }) => id === folderTabs![activeChatFolder].id);
 
     if (!activeFolder || activeChatFolder === 0) {
       return (
