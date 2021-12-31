@@ -5,7 +5,7 @@ import React, {
 import { DEBUG, DEBUG_MORE } from '../../config';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import generateIdFor from '../../util/generateIdFor';
-import { throttleWithRaf } from '../../util/schedulers';
+import { fastRaf, throttleWithTickEnd } from '../../util/schedulers';
 import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
 import {
@@ -41,11 +41,11 @@ const containers = new Map<string, {
   DEBUG_componentName: string;
 }>();
 
-const runCallbacksThrottled = throttleWithRaf(runCallbacks);
+const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
 function runCallbacks(forceOnHeavyAnimation = false) {
   if (!forceOnHeavyAnimation && isHeavyAnimating()) {
-    runCallbacksThrottled();
+    fastRaf(runCallbacksThrottled);
     return;
   }
 
