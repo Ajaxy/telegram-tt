@@ -175,6 +175,7 @@ export interface ApiWebPage {
 }
 
 export interface ApiMessageForwardInfo {
+  date: number;
   isChannelPost: boolean;
   channelPostId?: number;
   isLinkedChannelPost?: boolean;
@@ -247,6 +248,7 @@ export interface ApiMessage {
   previousLocalId?: number;
   views?: number;
   isEdited?: boolean;
+  editDate?: number;
   isMentioned?: boolean;
   isMediaUnread?: boolean;
   groupedId?: string;

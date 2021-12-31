@@ -168,7 +168,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
-    ...(isEdited && { isEdited }),
+    ...(isEdited && { isEdited, editDate: mtpMessage.editDate }),
     ...(isMediaUnread && { isMediaUnread }),
     ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
     ...(mtpMessage.mentioned && { isMentioned: true }),
@@ -254,6 +254,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
   const fromId = fwdFrom.fromId && getApiChatIdFromMtpPeer(fwdFrom.fromId);
 
   return {
+    date: fwdFrom.date,
     isChannelPost: Boolean(fwdFrom.channelPost),
     channelPostId: fwdFrom.channelPost,
     isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),
@@ -897,6 +898,7 @@ export function buildLocalForwardedMessage(
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(senderId !== currentUserId && !isAudio && {
       forwardInfo: {
+        date: message.date,
         isChannelPost: false,
         fromChatId,
         fromMessageId,
