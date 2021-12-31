@@ -42,6 +42,7 @@ export type OwnProps = {
   dimensions?: IMediaDimensions;
   lastSyncTime?: number;
   isDownloading: boolean;
+  isProtected?: boolean;
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
@@ -59,6 +60,7 @@ const Video: FC<OwnProps> = ({
   onClick,
   onCancelUpload,
   isDownloading,
+  isProtected,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -173,6 +175,7 @@ const Video: FC<OwnProps> = ({
         // @ts-ignore teact feature
         style={`width: ${width}px; height: ${height}px;`}
         alt=""
+        draggable={!isProtected}
       />
       {isInline && (
         <video
@@ -186,11 +189,13 @@ const Video: FC<OwnProps> = ({
           playsInline
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
+          draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
         >
           <source src={fullMediaData} />
         </video>
       )}
+      {isProtected && <span className="protector" />}
       {shouldRenderPlayButton && <i className={buildClassName('icon-large-play', playButtonClassNames)} />}
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>

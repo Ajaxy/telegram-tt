@@ -27,6 +27,10 @@
     transform: translateX(-2.5rem) !important;
   }
 
+  &.is-protected {
+    user-select: none;
+  }
+
   > .Avatar,
   > .message-content-wrapper {
     opacity: 1;

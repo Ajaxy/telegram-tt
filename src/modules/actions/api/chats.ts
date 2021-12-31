@@ -993,6 +993,17 @@ addReducer('deleteChatMember', (global, actions, payload) => {
   })();
 });
 
+addReducer('toggleIsProtected', (global, actions, payload) => {
+  const { chatId, isProtected } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) {
+    return;
+  }
+
+  void callApi('toggleIsProtected', { chat, isProtected });
+});
+
 async function loadChats(listType: 'active' | 'archived', offsetId?: string, offsetDate?: number) {
   let global = getGlobal();
 

@@ -28,6 +28,7 @@ type OwnProps = {
   sender?: ApiUser | ApiChat;
   title?: string;
   customText?: string;
+  isProtected?: boolean;
   onClick: NoneToVoidFunction;
 };
 
@@ -39,6 +40,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   sender,
   title,
   customText,
+  isProtected,
   observeIntersection,
   onClick,
 }) => {
@@ -61,7 +63,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       className={buildClassName('EmbeddedMessage', className)}
       onClick={message ? onClick : undefined}
     >
-      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo)}
+      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected)}
       <div className="message-text">
         <p dir="auto">
           {!message ? (
@@ -83,18 +85,23 @@ function renderPictogram(
   thumbDataUri: string,
   blobUrl?: string,
   isRoundVideo?: boolean,
+  isProtected?: boolean,
 ) {
   const { width, height } = getPictogramDimensions();
 
   return (
-    <img
-      id={id}
-      src={blobUrl || thumbDataUri}
-      width={width}
-      height={height}
-      alt=""
-      className={isRoundVideo ? 'round' : ''}
-    />
+    <>
+      <img
+        id={id}
+        src={blobUrl || thumbDataUri}
+        width={width}
+        height={height}
+        alt=""
+        className={isRoundVideo ? 'round' : ''}
+        draggable={!isProtected}
+      />
+      {isProtected && <span className="protector" />}
+    </>
   );
 }
 

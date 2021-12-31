@@ -7,6 +7,7 @@ import windowSize from '../../../../util/windowSize';
 import { captureEvents, SwipeDirection } from '../../../../util/captureEvents';
 import useFlag from '../../../../hooks/useFlag';
 import { preventMessageInputBlur } from '../../helpers/preventMessageInputBlur';
+import stopEvent from '../../../../util/stopEvent';
 
 const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
 const SWIPE_ANIMATION_DURATION = 150;
@@ -18,6 +19,7 @@ export default function useOuterHandlers(
   isAlbum: boolean,
   isInSelectMode: boolean,
   canReply: boolean,
+  isProtected: boolean,
   onContextMenu: (e: React.MouseEvent) => void,
   handleBeforeContextMenu: (e: React.MouseEvent) => void,
 ) {
@@ -107,7 +109,7 @@ export default function useOuterHandlers(
   return {
     handleMouseDown: !isInSelectMode ? handleMouseDown : undefined,
     handleClick,
-    handleContextMenu: !isInSelectMode ? handleContextMenu : undefined,
+    handleContextMenu: !isInSelectMode ? handleContextMenu : (isProtected ? stopEvent : undefined),
     handleDoubleClick: !isInSelectMode ? handleContainerDoubleClick : undefined,
     handleContentDoubleClick: !IS_TOUCH_ENV ? stopPropagation : undefined,
     isSwiped,

@@ -1081,6 +1081,7 @@ messages.readDiscussion#f731a9f4 peer:InputPeer msg_id:int read_max_id:int = Boo
 messages.unpinAllMessages#f025bc8b peer:InputPeer = messages.AffectedHistory;
 messages.deleteChat#5bd0ee50 chat_id:long = Bool;
 messages.getMessageReadParticipants#2c6f97b7 peer:InputPeer msg_id:int = Vector<long>;
+messages.toggleNoForwards#b11eafa2 peer:InputPeer enabled:Bool = Updates;
 messages.saveDefaultSendAs#ccfddf96 peer:InputPeer send_as:InputPeer = Bool;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;

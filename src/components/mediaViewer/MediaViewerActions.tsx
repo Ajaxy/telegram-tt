@@ -12,7 +12,7 @@ import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaHash } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import { selectIsDownloading } from '../../modules/selectors';
+import { selectIsDownloading, selectIsMessageProtected } from '../../modules/selectors';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -23,6 +23,7 @@ import './MediaViewerActions.scss';
 
 type StateProps = {
   isDownloading: boolean;
+  isProtected?: boolean;
 };
 
 type OwnProps = {
@@ -45,6 +46,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   fileName,
   isAvatar,
   isDownloading,
+  isProtected,
   onCloseMediaViewer,
   onForward,
   onZoomToggle,
@@ -84,7 +86,44 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     );
   }, []);
 
+  function renderDownloadButton() {
+    if (isProtected) {
+      return undefined;
+    }
+
+    return isVideo ? (
+      <Button
+        round
+        size="smaller"
+        color="translucent-white"
+        ariaLabel={lang('AccActionDownload')}
+        onClick={handleDownloadClick}
+      >
+        {isDownloading ? (
+          <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
+        ) : (
+          <i className="icon-download" />
+        )}
+      </Button>
+    ) : (
+      <Button
+        href={mediaData}
+        download={fileName}
+        round
+        size="smaller"
+        color="translucent-white"
+        ariaLabel={lang('AccActionDownload')}
+      >
+        <i className="icon-download" />
+      </Button>
+    );
+  }
+
   if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isProtected) {
+      return undefined;
+    }
+
     return (
       <div className="MediaViewerActions-mobile">
         <DropdownMenu
@@ -123,7 +162,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="MediaViewerActions">
-      {!isAvatar && (
+      {!isAvatar && !isProtected && (
         <>
           <Button
             round
@@ -136,32 +175,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           </Button>
         </>
       )}
-      {isVideo ? (
-        <Button
-          round
-          size="smaller"
-          color="translucent-white"
-          ariaLabel={lang('AccActionDownload')}
-          onClick={handleDownloadClick}
-        >
-          {isDownloading ? (
-            <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
-          ) : (
-            <i className="icon-download" />
-          )}
-        </Button>
-      ) : (
-        <Button
-          href={mediaData}
-          download={fileName}
-          round
-          size="smaller"
-          color="translucent-white"
-          ariaLabel={lang('AccActionDownload')}
-        >
-          <i className="icon-download" />
-        </Button>
-      )}
+      {renderDownloadButton()}
       <Button
         round
         size="smaller"
@@ -187,9 +201,11 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const isDownloading = message ? selectIsDownloading(global, message) : false;
+    const isProtected = selectIsMessageProtected(global, message);
 
     return {
       isDownloading,
+      isProtected,
     };
   },
 )(MediaViewerActions));

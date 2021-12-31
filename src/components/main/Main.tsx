@@ -23,6 +23,7 @@ import buildClassName from '../../util/buildClassName';
 import { fastRaf } from '../../util/schedulers';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
+import stopEvent from '../../util/stopEvent';
 import windowSize from '../../util/windowSize';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
@@ -272,11 +273,6 @@ const Main: FC<StateProps> = ({
   useBeforeUnload(handleBlur);
 
   usePreventPinchZoomGesture(isMediaViewerOpen);
-
-  function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
 
   return (
     <div id="Main" className={className} onDrop={stopEvent} onDragOver={stopEvent}>

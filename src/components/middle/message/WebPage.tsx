@@ -27,6 +27,7 @@ type OwnProps = {
   inPreview?: boolean;
   lastSyncTime?: number;
   isDownloading?: boolean;
+  isProtected?: boolean;
   theme: ISettings['theme'];
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
@@ -41,6 +42,7 @@ const WebPage: FC<OwnProps> = ({
   inPreview,
   lastSyncTime,
   isDownloading = false,
+  isProtected,
   theme,
   onMediaClick,
   onCancelMediaTransfer,
@@ -97,6 +99,7 @@ const WebPage: FC<OwnProps> = ({
           onClick={isMediaInteractive ? handleMediaClick : undefined}
           onCancelUpload={onCancelMediaTransfer}
           isDownloading={isDownloading}
+          isProtected={isProtected}
           theme={theme}
         />
       )}
@@ -120,6 +123,7 @@ const WebPage: FC<OwnProps> = ({
           onClick={isMediaInteractive ? handleMediaClick : undefined}
           onCancelUpload={onCancelMediaTransfer}
           isDownloading={isDownloading}
+          isProtected={isProtected}
         />
       )}
     </div>

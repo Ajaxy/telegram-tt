@@ -49,6 +49,9 @@ function buildApiChatFieldsFromPeerEntity(
       ...(peerEntity.participantsCount && { membersCount: peerEntity.participantsCount }),
       joinDate: peerEntity.date,
     }),
+    ...((peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel) && {
+      isProtected: Boolean('noforwards' in peerEntity && peerEntity.noforwards),
+    }),
     ...(isSupport && { isSupport: true }),
     ...buildApiChatPermissions(peerEntity),
     ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),

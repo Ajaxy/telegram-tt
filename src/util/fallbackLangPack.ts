@@ -1821,4 +1821,28 @@ export default {
     key: 'AutoDownloadFilesTitle',
     value: 'Auto-download files and music',
   },
+  'ChannelVisibility.Forwarding.ChannelTitle': {
+    key: 'ChannelVisibility.Forwarding.ChannelTitle',
+    value: 'Forwarding From This Channel',
+  },
+  'ChannelVisibility.Forwarding.GroupTitle': {
+    key: 'ChannelVisibility.Forwarding.GroupTitle',
+    value: 'Forwarding From This Group',
+  },
+  'ChannelVisibility.Forwarding.ChannelInfo': {
+    key: 'ChannelVisibility.Forwarding.ChannelInfo',
+    value: 'Subscribers can forward messages from this channel and save media files.',
+  },
+  'ChannelVisibility.Forwarding.GroupInfo': {
+    key: 'ChannelVisibility.Forwarding.GroupInfo',
+    value: 'Members can forward messages from this group and save media files.',
+  },
+  'ChannelVisibility.Forwarding.Enabled': {
+    key: 'ChannelVisibility.Forwarding.Enabled',
+    value: 'Allow Forwarding',
+  },
+  'ChannelVisibility.Forwarding.Disabled': {
+    key: 'ChannelVisibility.Forwarding.Disabled',
+    value: 'Restrict Forwarding',
+  },
 } as ApiLangPack;

@@ -61,6 +61,9 @@ export function init(_onUpdate: OnApiUpdate) {
 
 const sentMessageIds = new Set();
 let serverTimeOffset = 0;
+// Workaround for a situation when an incorrect update comes with an undefined property `adminRights`
+let shouldIgnoreNextChannelUpdate = false;
+const IGNORE_NEXT_CHANNEL_UPDATE_TIMEOUT = 2000;
 
 function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
   entities
@@ -636,6 +639,16 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     ));
 
     if (channel instanceof GramJs.Channel) {
+      if (shouldIgnoreNextChannelUpdate) {
+        shouldIgnoreNextChannelUpdate = false;
+        return;
+      }
+
+      if (originRequest instanceof GramJs.messages.ToggleNoForwards) {
+        shouldIgnoreNextChannelUpdate = true;
+        setTimeout(() => { shouldIgnoreNextChannelUpdate = false; }, IGNORE_NEXT_CHANNEL_UPDATE_TIMEOUT);
+      }
+
       const chat = buildApiChatFromPreview(channel);
       if (chat) {
         onUpdate({

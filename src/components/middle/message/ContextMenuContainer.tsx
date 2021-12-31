@@ -11,6 +11,7 @@ import {
   selectAllowedMessageActions,
   selectChat,
   selectCurrentMessageList,
+  selectIsMessageProtected,
 } from '../../../modules/selectors';
 import { isChatGroup, isOwnMessage } from '../../../modules/helpers';
 import { SEEN_BY_MEMBERS_EXPIRE, SEEN_BY_MEMBERS_CHAT_MAX } from '../../../config';
@@ -366,6 +367,7 @@ export default memo(withGlobal<OwnProps>(
       && chat.membersCount
       && chat.membersCount < SEEN_BY_MEMBERS_CHAT_MAX
       && message.date > Date.now() / 1000 - SEEN_BY_MEMBERS_EXPIRE);
+    const isProtected = selectIsMessageProtected(global, message);
 
     return {
       noOptions,
@@ -377,13 +379,13 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canReport,
       canEdit: !isPinned && canEdit,
-      canForward: !isScheduled && canForward,
+      canForward: !isProtected && !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
       canUnfaveSticker: !isScheduled && canUnfaveSticker,
-      canCopy,
-      canCopyLink: !isScheduled && canCopyLink,
+      canCopy: !isProtected && canCopy,
+      canCopyLink: !isProtected && !isScheduled && canCopyLink,
       canSelect,
-      canDownload,
+      canDownload: !isProtected && canDownload,
       activeDownloads,
       canShowSeenBy,
     };

@@ -33,6 +33,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   foundIds,
   lastSyncTime,
+  isChatProtected,
 }) => {
   const {
     searchMessagesGlobal,
@@ -81,6 +82,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
             key={message.id}
             idPrefix="search-media"
             message={message}
+            isProtected={isChatProtected || message.isProtected}
             onClick={handleSelectMedia}
           />
         ))}

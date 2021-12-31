@@ -225,6 +225,15 @@ div[role="button"] {
   color: var(--color-text-secondary) !important;
 }
 
+.protector {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
 .for-ios-autocapitalization-fix {
   position: fixed;
   font-size: 16px;
