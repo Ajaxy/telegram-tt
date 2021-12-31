@@ -52,10 +52,15 @@ import {
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
-import { addMessageToLocalDb, deserializeBytes, resolveMessageApiChatId } from '../helpers';
+import {
+  addEntitiesWithPhotosToLocalDb,
+  addMessageToLocalDb,
+  deserializeBytes,
+  resolveMessageApiChatId,
+} from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
-import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -200,6 +205,7 @@ export function sendMessage(
     scheduledAt,
     groupedId,
     noWebPage,
+    sendAs,
     serverTimeOffset,
   }: {
     chat: ApiChat;
@@ -214,12 +220,14 @@ export function sendMessage(
     scheduledAt?: number;
     groupedId?: string;
     noWebPage?: boolean;
+    sendAs?: ApiUser | ApiChat;
     serverTimeOffset?: number;
   },
   onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId, scheduledAt, serverTimeOffset,
+    chat, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId, scheduledAt,
+    sendAs, serverTimeOffset,
   );
   onUpdate({
     '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
@@ -289,6 +297,7 @@ export function sendMessage(
       ...(replyingTo && { replyToMsgId: replyingTo }),
       ...(media && { media }),
       ...(noWebPage && { noWebpage: noWebPage }),
+      ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
     }), true);
   })();
 
@@ -310,6 +319,7 @@ function sendGroupedMedia(
     groupedId,
     isSilent,
     scheduledAt,
+    sendAs,
   }: {
     chat: ApiChat;
     text?: string;
@@ -319,6 +329,7 @@ function sendGroupedMedia(
     groupedId: string;
     isSilent?: boolean;
     scheduledAt?: number;
+    sendAs?: ApiUser | ApiChat;
   },
   randomId: GramJs.long,
   localMessage: ApiMessage,
@@ -391,6 +402,7 @@ function sendGroupedMedia(
       replyToMsgId: replyingTo,
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
+      ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
     }), true);
   })();
 
@@ -1052,6 +1064,7 @@ export async function forwardMessages({
   serverTimeOffset,
   isSilent,
   scheduledAt,
+  sendAs,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
@@ -1059,6 +1072,7 @@ export async function forwardMessages({
   serverTimeOffset: number;
   isSilent?: boolean;
   scheduledAt?: number;
+  sendAs?: ApiUser | ApiChat;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
@@ -1082,6 +1096,7 @@ export async function forwardMessages({
     id: messageIds,
     ...(isSilent && { sil2ent: isSilent }),
     ...(scheduledAt && { scheduleDate: scheduledAt }),
+    ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }), true);
 }
 
@@ -1206,6 +1221,43 @@ export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageI
   }));
 
   return result ? result.map(String) : undefined;
+}
+
+export async function fetchSendAs({
+  chat,
+}: {
+  chat: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.channels.GetSendAs({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesWithPhotosToLocalDb(result.chats);
+
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+
+  return {
+    users,
+    chats,
+    ids: result.peers.map(getApiChatIdFromMtpPeer),
+  };
+}
+
+export function saveDefaultSendAs({
+  sendAs, chat,
+}: {
+  sendAs: ApiChat | ApiUser; chat: ApiChat;
+}) {
+  return invokeRequest(new GramJs.messages.SaveDefaultSendAs({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    sendAs: buildInputPeer(sendAs.id, sendAs.accessHash),
+  }));
 }
 
 export async function fetchSponsoredMessages({ chat }: { chat: ApiChat }) {

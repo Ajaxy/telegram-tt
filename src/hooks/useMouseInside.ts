@@ -10,6 +10,10 @@ export default function useMouseInside(
 ) {
   const isMouseInside = useRef(false);
 
+  const markMouseInside = useCallback(() => {
+    isMouseInside.current = true;
+  }, []);
+
   useEffect(() => {
     if (closeTimeout) {
       clearTimeout(closeTimeout);
@@ -44,5 +48,5 @@ export default function useMouseInside(
     }, menuCloseTimeout);
   }, [menuCloseTimeout, onClose]);
 
-  return [handleMouseEnter, handleMouseLeave];
+  return [handleMouseEnter, handleMouseLeave, markMouseInside];
 }

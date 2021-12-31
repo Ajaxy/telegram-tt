@@ -1,0 +1,74 @@
+.SendAsMenu {
+  .send-as-title {
+    font-weight: 500;
+    line-height: 1.25rem;
+    word-break: break-word;
+    margin-inline-start: 1rem;
+    margin-block: 0.5rem;
+  }
+
+  .menu-container {
+    width: calc(100% - 4rem);
+    max-width: 20rem;
+    max-height: 40vh;
+    overflow: auto;
+    flex-direction: column;
+
+    @media (max-width: 600px) {
+      width: calc(100% - 3rem);
+    }
+  }
+
+  .is-pointer-env & {
+    > .backdrop {
+      z-index: 2;
+      position: absolute;
+      top: -1rem;
+      left: 0;
+      right: auto;
+      width: 3.5rem;
+      height: 4.5rem;
+    }
+  }
+}
+
+.SendAsItem {
+  margin: 0 !important;
+  $border-size: 2px;
+
+  .Avatar.selected {
+    margin-right: 0.75rem;
+    position: relative;
+    width: calc(2.125rem - #{$border-size * 2});
+    height: calc(2.125rem - #{$border-size * 2});
+
+    &::before {
+      display: block;
+      content: "";
+      position: absolute;
+      top: #{-$border-size * 2};
+      left: #{-$border-size * 2};
+      border: $border-size solid var(--color-primary);
+      width: calc(100% + #{$border-size * 4});
+      height: calc(100% + #{$border-size * 4});
+      border-radius: 50%;
+    }
+  }
+
+  .ListItem-button {
+    padding: 0.5625rem 1rem !important;
+    border-radius: 0;
+    align-items: center;
+  }
+
+  .info {
+    margin-inline-start: 0.5rem;
+  }
+
+
+  .subtitle {
+    font-size: .9375rem;
+    color: var(--color-text-secondary);
+    line-height: 1.3125;
+  }
+}
