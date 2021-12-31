@@ -104,7 +104,7 @@ export async function fetchStickers(
       : buildInputStickerSetShortName(stickerSetShortName!),
   }));
 
-  if (!result) {
+  if (!(result instanceof GramJs.messages.StickerSet)) {
     return undefined;
   }
 
@@ -120,7 +120,7 @@ export async function fetchAnimatedEmojis() {
     stickerset: new GramJs.InputStickerSetAnimatedEmoji(),
   }));
 
-  if (!result) {
+  if (!(result instanceof GramJs.messages.StickerSet)) {
     return undefined;
   }
 
