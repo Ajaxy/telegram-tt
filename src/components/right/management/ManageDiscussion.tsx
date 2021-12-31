@@ -1,15 +1,13 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
 import { selectChat } from '../../../modules/selectors';
-import { pick } from '../../../util/iteratees';
 import getAnimationData from '../../common/helpers/animatedAssets';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -39,9 +37,7 @@ type StateProps = {
   isChannel?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup'>;
-
-const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageDiscussion: FC<OwnProps & StateProps> = ({
   chat,
   onClose,
   isActive,
@@ -51,10 +47,13 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
   forDiscussionIds,
   isChannel,
   onScreenSelect,
-  loadGroupsForDiscussion,
-  linkDiscussionGroup,
-  unlinkDiscussionGroup,
 }) => {
+  const {
+    loadGroupsForDiscussion,
+    linkDiscussionGroup,
+    unlinkDiscussionGroup,
+  } = getDispatch();
+
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
   const [animationData, setAnimationData] = useState<Record<string, any>>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
@@ -107,6 +106,7 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
     );
   }
+
   function renderLinkGroupHeader() {
     const linkedGroup = chatsByIds[linkedGroupId];
 
@@ -210,7 +210,9 @@ const ManageDiscussion: FC<OwnProps & StateProps & DispatchProps> = ({
                 key={id}
                 teactOrderKey={i + 1}
                 className="chat-item-clickable scroll-item"
-                onClick={() => { onDiscussionClick(id); }}
+                onClick={() => {
+                  onDiscussionClick(id);
+                }}
               >
                 <GroupChatInfo chatId={id} />
               </ListItem>
@@ -273,7 +275,4 @@ export default memo(withGlobal<OwnProps>(
       isChannel: chat && isChatChannel(chat),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadGroupsForDiscussion', 'linkDiscussionGroup', 'unlinkDiscussionGroup',
-  ]),
 )(ManageDiscussion));

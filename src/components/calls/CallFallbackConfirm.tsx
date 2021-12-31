@@ -1,9 +1,5 @@
 import React, { FC, memo, useState } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-
-import { GlobalActions } from '../../global/types';
-
-import { pick } from '../../util/iteratees';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Checkbox from '../ui/Checkbox';
@@ -21,15 +17,16 @@ interface StateProps {
   channelTitle: string;
 }
 
-type DispatchProps = Pick<GlobalActions, 'closeCallFallbackConfirm' | 'inviteToCallFallback'>;
-
-const CallFallbackConfirm: FC<OwnProps & StateProps & DispatchProps> = ({
+const CallFallbackConfirm: FC<OwnProps & StateProps> = ({
   isOpen,
   channelTitle,
   userFullName,
-  closeCallFallbackConfirm,
-  inviteToCallFallback,
 }) => {
+  const {
+    closeCallFallbackConfirm,
+    inviteToCallFallback,
+  } = getDispatch();
+
   const [shouldRemove, setShouldRemove] = useState(true);
   const renderingUserFullName = useCurrentOrPrev(userFullName, true);
 
@@ -62,7 +59,4 @@ export default memo(withGlobal<OwnProps>(
       channelTitle: selectCallFallbackChannelTitle(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'closeCallFallbackConfirm', 'inviteToCallFallback',
-  ]),
 )(CallFallbackConfirm));

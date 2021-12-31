@@ -1,13 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../../global/types';
 import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { findIntersectionWithSet, pick } from '../../../../util/iteratees';
+import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { isUserId } from '../../../../modules/helpers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
 import {
@@ -45,8 +44,6 @@ type StateProps = {
   loadedArchivedChatIds?: string[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'editChatFolder' | 'addChatFolder' | 'loadMoreChats'>;
-
 const SUBMIT_TIMEOUT = 500;
 
 const INITIAL_CHATS_LIMIT = 5;
@@ -54,7 +51,7 @@ const INITIAL_CHATS_LIMIT = 5;
 const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
 
-const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   state,
   dispatch,
   onAddIncludedChats,
@@ -65,10 +62,13 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
   onBack,
   loadedActiveChatIds,
   loadedArchivedChatIds,
-  editChatFolder,
-  addChatFolder,
-  loadMoreChats,
 }) => {
+  const {
+    editChatFolder,
+    addChatFolder,
+    loadMoreChats,
+  } = getDispatch();
+
   const [animationData, setAnimationData] = useState<Record<string, any>>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
@@ -322,5 +322,4 @@ export default memo(withGlobal<OwnProps>(
       loadedArchivedChatIds: listIds.archived,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['editChatFolder', 'addChatFolder', 'loadMoreChats']),
 )(SettingsFoldersEdit));

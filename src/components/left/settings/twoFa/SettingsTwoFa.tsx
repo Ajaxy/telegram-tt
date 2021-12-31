@@ -1,12 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../../../global/types';
+import { GlobalState } from '../../../../global/types';
 import { SettingsScreens } from '../../../../types';
 
-import { pick } from '../../../../util/iteratees';
 import { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
 import useLang from '../../../../hooks/useLang';
 
@@ -29,12 +28,7 @@ export type OwnProps = {
 
 type StateProps = GlobalState['twoFaSettings'];
 
-type DispatchProps = Pick<GlobalActions, (
-  'updatePassword' | 'updateRecoveryEmail' | 'clearPassword' | 'provideTwoFaEmailCode' |
-  'checkPassword' | 'clearTwoFaError'
-)>;
-
-const SettingsTwoFa: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsTwoFa: FC<OwnProps & StateProps> = ({
   currentScreen,
   shownScreen,
   state,
@@ -46,13 +40,16 @@ const SettingsTwoFa: FC<OwnProps & StateProps & DispatchProps> = ({
   isActive,
   onScreenSelect,
   onReset,
-  updatePassword,
-  checkPassword,
-  clearTwoFaError,
-  updateRecoveryEmail,
-  provideTwoFaEmailCode,
-  clearPassword,
 }) => {
+  const {
+    updatePassword,
+    checkPassword,
+    clearTwoFaError,
+    updateRecoveryEmail,
+    provideTwoFaEmailCode,
+    clearPassword,
+  } = getDispatch();
+
   useEffect(() => {
     if (waitingEmailCodeLength) {
       if (currentScreen === SettingsScreens.TwoFaNewPasswordEmail) {
@@ -435,8 +432,4 @@ const SettingsTwoFa: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => ({ ...global.twoFaSettings }),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'updatePassword', 'updateRecoveryEmail', 'clearPassword', 'provideTwoFaEmailCode',
-    'checkPassword', 'clearTwoFaError',
-  ]),
 )(SettingsTwoFa));

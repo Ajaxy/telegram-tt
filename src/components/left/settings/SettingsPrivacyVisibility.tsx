@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ApiPrivacySettings, SettingsScreens } from '../../../types';
 
 import useLang from '../../../hooks/useLang';
-import { pick } from '../../../util/iteratees';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
@@ -22,14 +20,13 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = Partial<ApiPrivacySettings> & {
-  chatsById?: Record<string, ApiChat>;
-  usersById?: Record<string, ApiUser>;
-};
+type StateProps =
+  Partial<ApiPrivacySettings> & {
+    chatsById?: Record<string, ApiChat>;
+    usersById?: Record<string, ApiUser>;
+  };
 
-type DispatchProps = Pick<GlobalActions, 'setPrivacyVisibility'>;
-
-const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   screen,
   isActive,
   onScreenSelect,
@@ -40,8 +37,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
   blockUserIds,
   blockChatIds,
   chatsById,
-  setPrivacyVisibility,
 }) => {
+  const { setPrivacyVisibility } = getDispatch();
+
   const lang = useLang();
 
   const visibilityOptions = useMemo(() => {
@@ -178,7 +176,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
           <ListItem
             narrow
             icon="add-user"
-            onClick={() => { onScreenSelect(allowedContactsScreen); }}
+            onClick={() => {
+              onScreenSelect(allowedContactsScreen);
+            }}
           >
             <div className="multiline-menu-item full-size">
               {allowedCount > 0 && <span className="date" dir="auto">+{allowedCount}</span>}
@@ -191,7 +191,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps & DispatchProps> = ({
           <ListItem
             narrow
             icon="delete-user"
-            onClick={() => { onScreenSelect(deniedContactsScreen); }}
+            onClick={() => {
+              onScreenSelect(deniedContactsScreen);
+            }}
           >
             <div className="multiline-menu-item full-size">
               {blockCount > 0 && <span className="date" dir="auto">&minus;{blockCount}</span>}
@@ -245,5 +247,4 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setPrivacyVisibility']),
 )(SettingsPrivacyVisibility));

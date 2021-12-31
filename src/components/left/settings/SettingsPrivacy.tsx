@@ -1,10 +1,8 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { PrivacyVisibility, SettingsScreens } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -30,11 +28,7 @@ type StateProps = {
   visibilityPrivacyGroupChats?: PrivacyVisibility;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadBlockedContacts' | 'loadAuthorizations' | 'loadPrivacySettings' | 'loadContentSettings' | 'updateContentSettings'
-)>;
-
-const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -48,12 +42,16 @@ const SettingsPrivacy: FC<OwnProps & StateProps & DispatchProps> = ({
   visibilityPrivacyProfilePhoto,
   visibilityPrivacyForwarding,
   visibilityPrivacyGroupChats,
-  loadPrivacySettings,
-  loadBlockedContacts,
-  loadAuthorizations,
-  loadContentSettings,
-  updateContentSettings,
+
 }) => {
+  const {
+    loadPrivacySettings,
+    loadBlockedContacts,
+    loadAuthorizations,
+    loadContentSettings,
+    updateContentSettings,
+  } = getDispatch();
+
   useEffect(() => {
     loadBlockedContacts();
     loadAuthorizations();
@@ -234,7 +232,4 @@ export default memo(withGlobal<OwnProps>(
       visibilityPrivacyGroupChats: privacy.chatInvite?.visibility,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadBlockedContacts', 'loadAuthorizations', 'loadPrivacySettings', 'loadContentSettings', 'updateContentSettings',
-  ]),
 )(SettingsPrivacy));

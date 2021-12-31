@@ -1,9 +1,9 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState, MessageListType } from '../../../global/types';
+import { GlobalState, MessageListType } from '../../../global/types';
 import {
   ApiAttachment,
   ApiBotInlineResult,
@@ -52,7 +52,6 @@ import buildAttachment from './helpers/buildAttachment';
 import renderText from '../../common/helpers/renderText';
 import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
 import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharacterOutsideSelection';
-import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import windowSize from '../../../util/windowSize';
 import { isSelectionInsideInput } from './helpers/selection';
@@ -142,13 +141,6 @@ type StateProps =
   }
   & Pick<GlobalState, 'connectionState'>;
 
-type DispatchProps = Pick<GlobalActions, (
-  'sendMessage' | 'editMessage' | 'saveDraft' | 'forwardMessages' |
-  'clearDraft' | 'showDialog' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
-  'openPollModal' | 'closePollModal' | 'loadScheduledHistory' | 'openChat' |
-  'addRecentEmoji' | 'sendInlineBotResult'
-)>;
-
 enum MainButtonState {
   Send = 'send',
   Record = 'record',
@@ -167,7 +159,7 @@ const SENDING_ANIMATION_DURATION = 350;
 // eslint-disable-next-line max-len
 const APPENDIX = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" class="corner"/></g></svg>';
 
-const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
+const Composer: FC<OwnProps & StateProps> = ({
   dropAreaState,
   shouldSchedule,
   canScheduleUntilOnline,
@@ -205,21 +197,22 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
   isInlineBotLoading,
   botCommands,
   chatBotCommands,
-  sendMessage,
-  editMessage,
-  saveDraft,
-  clearDraft,
-  showDialog,
-  setStickerSearchQuery,
-  setGifSearchQuery,
-  forwardMessages,
-  openPollModal,
-  closePollModal,
-  loadScheduledHistory,
-  openChat,
-  addRecentEmoji,
-  sendInlineBotResult,
 }) => {
+  const {
+    sendMessage,
+    clearDraft,
+    showDialog,
+    setStickerSearchQuery,
+    setGifSearchQuery,
+    forwardMessages,
+    openPollModal,
+    closePollModal,
+    loadScheduledHistory,
+    openChat,
+    addRecentEmoji,
+    sendInlineBotResult,
+  } = getDispatch();
+
   const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
@@ -428,8 +421,8 @@ const Composer: FC<OwnProps & StateProps & DispatchProps> = ({
     };
   }, [chatId, resetComposer, stopRecordingVoiceRef]);
 
-  const handleEditComplete = useEditing(htmlRef, setHtml, editingMessage, resetComposer, openDeleteModal, editMessage);
-  useDraft(draft, chatId, threadId, html, htmlRef, setHtml, editingMessage, saveDraft, clearDraft);
+  const handleEditComplete = useEditing(htmlRef, setHtml, editingMessage, resetComposer, openDeleteModal);
+  useDraft(draft, chatId, threadId, html, htmlRef, setHtml, editingMessage);
   useClipboardPaste(insertTextAndUpdateCursor, setAttachments, editingMessage);
 
   const handleFileSelect = useCallback(async (files: File[], isQuick: boolean) => {
@@ -1111,20 +1104,4 @@ export default memo(withGlobal<OwnProps>(
       botCommands: chatBot && chatBot.fullInfo ? (chatBot.fullInfo.botCommands || false) : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'sendMessage',
-    'editMessage',
-    'saveDraft',
-    'clearDraft',
-    'showDialog',
-    'setStickerSearchQuery',
-    'setGifSearchQuery',
-    'forwardMessages',
-    'openPollModal',
-    'closePollModal',
-    'loadScheduledHistory',
-    'openChat',
-    'addRecentEmoji',
-    'sendInlineBotResult',
-  ]),
 )(Composer));

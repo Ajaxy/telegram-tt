@@ -1,9 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm } from '../../../api/types';
 import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import { LoadMoreDirection } from '../../../types';
@@ -13,7 +11,6 @@ import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { throttle } from '../../../util/schedulers';
-import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import usePrevious from '../../../hooks/usePrevious';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -26,6 +23,7 @@ import ListItem from '../../ui/ListItem';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 
 import './InlineBotTooltip.scss';
+import { getDispatch } from '../../../lib/teact/teactn';
 
 const INTERSECTION_DEBOUNCE_MS = 200;
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -42,9 +40,7 @@ export type OwnProps = {
   onClose: NoneToVoidFunction;
 };
 
-type DispatchProps = Pick<GlobalActions, ('startBot' | 'openChat' | 'sendInlineBotResult')>;
-
-const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
+const InlineBotTooltip: FC<OwnProps> = ({
   isOpen,
   botId,
   isGallery,
@@ -52,10 +48,13 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   switchPm,
   loadMore,
   onClose,
-  openChat,
-  startBot,
   onSelectResult,
 }) => {
+  const {
+    openChat,
+    startBot,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
@@ -196,9 +195,4 @@ const InlineBotTooltip: FC<OwnProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  undefined,
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'startBot', 'openChat', 'sendInlineBotResult',
-  ]),
-)(InlineBotTooltip));
+export default memo(InlineBotTooltip);

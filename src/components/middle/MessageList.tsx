@@ -1,12 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import {
   ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
 } from '../../api/types';
-import { GlobalActions, MessageListType } from '../../global/types';
+import { MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../config';
@@ -32,7 +32,7 @@ import {
   isChatWithRepliesBot,
   isChatGroup,
 } from '../../modules/helpers';
-import { orderBy, pick } from '../../util/iteratees';
+import { orderBy } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -91,8 +91,6 @@ type StateProps = {
   hasLinkedChat?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'setScrollOffset' | 'openHistoryCalendar'>;
-
 const BOTTOM_THRESHOLD = 20;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
@@ -104,7 +102,7 @@ const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
 
-const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
+const MessageList: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   type,
@@ -129,15 +127,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   restrictionReason,
   focusingId,
   isSelectModeActive,
-  loadViewportMessages,
-  setScrollOffset,
   lastMessage,
   botDescription,
   threadTopMessageId,
   hasLinkedChat,
   withBottomShift,
-  openHistoryCalendar,
 }) => {
+  const { loadViewportMessages, setScrollOffset } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -530,7 +527,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
           onFabToggle={onFabToggle}
           onNotchToggle={onNotchToggle}
-          openHistoryCalendar={openHistoryCalendar}
         />
       ) : (
         <Loading color="white" />
@@ -602,9 +598,4 @@ export default memo(withGlobal<OwnProps>(
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadViewportMessages',
-    'setScrollOffset',
-    'openHistoryCalendar',
-  ]),
 )(MessageList));

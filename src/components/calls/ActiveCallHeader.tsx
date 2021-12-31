@@ -2,13 +2,11 @@ import { GroupCallParticipant } from '../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiGroupCall } from '../../api/types';
 
 import { selectActiveGroupCall, selectGroupCallParticipant } from '../../modules/selectors/calls';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 
@@ -20,14 +18,13 @@ type StateProps = {
   groupCall?: ApiGroupCall;
 };
 
-type DispatchProps = Pick<GlobalActions, 'toggleGroupCallPanel'>;
-
-const ActiveCallHeader: FC<StateProps & DispatchProps> = ({
+const ActiveCallHeader: FC<StateProps> = ({
   groupCall,
   meParticipant,
   isGroupCallPanelHidden,
-  toggleGroupCallPanel,
 }) => {
+  const { toggleGroupCallPanel } = getDispatch();
+
   const lang = useLang();
 
   useEffect(() => {
@@ -61,7 +58,4 @@ export default memo(withGlobal(
       meParticipant: selectGroupCallParticipant(global, global.groupCalls.activeGroupCallId!, global.currentUserId!),
     };
   },
-  (setGlobal, actions) => pick(actions, [
-    'toggleGroupCallPanel',
-  ]),
 )(ActiveCallHeader));

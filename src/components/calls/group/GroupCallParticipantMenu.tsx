@@ -2,17 +2,15 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { IAnchorPosition } from '../../../types';
-import { GlobalActions } from '../../../global/types';
 
 import buildClassName from '../../../util/buildClassName';
 import useThrottle from '../../../hooks/useThrottle';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import { selectIsAdminInActiveGroupCall } from '../../../modules/selectors/calls';
-import { pick } from '../../../util/iteratees';
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 
 import Menu from '../../ui/Menu';
@@ -36,10 +34,6 @@ type StateProps = {
   isAdmin: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'toggleGroupCallMute' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' | 'openChat' | 'requestToSpeak'
-)>;
-
 const VOLUME_ZERO = 0;
 const VOLUME_LOW = 50;
 const VOLUME_MEDIUM = 100;
@@ -49,19 +43,21 @@ const VOLUME_CHANGE_THROTTLE = 500;
 
 const SPEAKER_ICON_SIZE = 24;
 
-const GroupCallParticipantMenu: FC<OwnProps & StateProps & DispatchProps> = ({
+const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
   participant,
   closeDropdown,
   isDropdownOpen,
   anchor,
-
   isAdmin,
-  toggleGroupCallMute,
-  setGroupCallParticipantVolume,
-  toggleGroupCallPanel,
-  openChat,
-  requestToSpeak,
 }) => {
+  const {
+    toggleGroupCallMute,
+    setGroupCallParticipantVolume,
+    toggleGroupCallPanel,
+    openChat,
+    requestToSpeak,
+  } = getDispatch();
+
   const lang = useLang();
   const [isDeleteUserModalOpen, openDeleteUserModal, closeDeleteUserModal] = useFlag();
 
@@ -229,11 +225,4 @@ export default memo(withGlobal<OwnProps>(
       isAdmin: selectIsAdminInActiveGroupCall(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setGroupCallParticipantVolume',
-    'toggleGroupCallMute',
-    'openChat',
-    'toggleGroupCallPanel',
-    'requestToSpeak',
-  ]),
 )(GroupCallParticipantMenu));

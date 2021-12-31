@@ -6,9 +6,9 @@ import monkeyPath from '../../assets/monkey.svg';
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';
 import { ApiCountryCode } from '../../api/types';
 
@@ -38,16 +38,12 @@ type StateProps = Pick<GlobalState, (
   language?: LangCode;
   phoneCodeList: ApiCountryCode[];
 };
-type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'loadCountryList' | 'clearAuthError' |
-  'goToAuthQrCode' | 'setSettingOption'
-)>;
 
 const MIN_NUMBER_LENGTH = 7;
 
 let isPreloadInitiated = false;
 
-const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
+const AuthPhoneNumber: FC<StateProps> = ({
   connectionState,
   authState,
   authPhoneNumber,
@@ -58,14 +54,17 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   authNearestCountry,
   phoneCodeList,
   language,
-  setAuthPhoneNumber,
-  setAuthRememberMe,
-  loadNearestCountry,
-  loadCountryList,
-  clearAuthError,
-  goToAuthQrCode,
-  setSettingOption,
 }) => {
+  const {
+    setAuthPhoneNumber,
+    setAuthRememberMe,
+    loadNearestCountry,
+    loadCountryList,
+    clearAuthError,
+    goToAuthQrCode,
+    setSettingOption,
+  } = getDispatch();
+
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -278,13 +277,4 @@ export default memo(withGlobal(
       phoneCodeList,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setAuthPhoneNumber',
-    'setAuthRememberMe',
-    'clearAuthError',
-    'loadNearestCountry',
-    'loadCountryList',
-    'goToAuthQrCode',
-    'setSettingOption',
-  ]),
 )(AuthPhoneNumber));

@@ -1,15 +1,13 @@
 import React, {
   FC, useEffect, memo, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiVideo } from '../../../api/types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -29,18 +27,17 @@ type StateProps = {
   savedGifs?: ApiVideo[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadSavedGifs'>;
-
 const INTERSECTION_DEBOUNCE = 300;
 
-const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
+const GifPicker: FC<OwnProps & StateProps> = ({
   className,
   loadAndPlay,
   canSendGifs,
   savedGifs,
   onGifSelect,
-  loadSavedGifs,
 }) => {
+  const { loadSavedGifs } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -88,5 +85,4 @@ export default memo(withGlobal<OwnProps>(
       savedGifs: global.gifs.saved.gifs,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadSavedGifs']),
 )(GifPicker));

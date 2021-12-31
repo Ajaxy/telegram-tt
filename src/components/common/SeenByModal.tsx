@@ -1,9 +1,6 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
-
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import { selectChatMessage } from '../../modules/selectors';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
@@ -21,16 +18,17 @@ export type StateProps = {
   memberIds?: string[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'closeSeenByModal'>;
-
 const CLOSE_ANIMATION_DURATION = 100;
 
-const SeenByModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const SeenByModal: FC<OwnProps & StateProps> = ({
   isOpen,
   memberIds,
-  openChat,
-  closeSeenByModal,
 }) => {
+  const {
+    openChat,
+    closeSeenByModal,
+  } = getDispatch();
+
   const lang = useLang();
 
   const handleClick = useCallback((userId: string) => {
@@ -83,5 +81,4 @@ export default memo(withGlobal<OwnProps>(
       memberIds: selectChatMessage(global, chatId, messageId)?.seenByUserIds,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['openChat', 'closeSeenByModal']),
 )(SeenByModal));

@@ -1,9 +1,7 @@
 import React, {
   FC, useCallback, memo, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-
-import { GlobalActions } from '../../global/types';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../modules/selectors';
 import {
@@ -14,7 +12,6 @@ import {
   isChatSuperGroup,
 } from '../../modules/helpers';
 import renderText from '../common/helpers/renderText';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 
@@ -35,9 +32,7 @@ type StateProps = {
   willDeleteForAll?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'deleteMessages' | 'exitMessageSelectMode' | 'deleteScheduledMessages'>;
-
-const DeleteSelectedMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
   isSchedule,
   selectedMessageIds,
@@ -46,10 +41,13 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
   onClose,
-  deleteMessages,
-  deleteScheduledMessages,
-  exitMessageSelectMode,
 }) => {
+  const {
+    deleteMessages,
+    deleteScheduledMessages,
+    exitMessageSelectMode,
+  } = getDispatch();
+
   const prevIsOpen = usePrevious(isOpen);
 
   const handleDeleteMessageForAll = useCallback(() => {
@@ -130,9 +128,4 @@ export default memo(withGlobal<OwnProps>(
       willDeleteForAll,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'deleteMessages',
-    'deleteScheduledMessages',
-    'exitMessageSelectMode',
-  ]),
 )(DeleteSelectedMessageModal));

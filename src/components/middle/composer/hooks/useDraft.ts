@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from '../../../../lib/teact/teact';
+import { getDispatch } from '../../../../lib/teact/teactn';
 
 import { ApiFormattedText, ApiMessage } from '../../../../api/types';
-import { GlobalActions } from '../../../../global/types';
 
 import { DRAFT_DEBOUNCE, EDITABLE_INPUT_ID } from '../../../../config';
 import usePrevious from '../../../../hooks/usePrevious';
@@ -25,9 +25,9 @@ export default (
   htmlRef: { current: string },
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
-  saveDraft: GlobalActions['saveDraft'],
-  clearDraft: GlobalActions['clearDraft'],
 ) => {
+  const { saveDraft, clearDraft } = getDispatch();
+
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     if (htmlRef.current.length && !editedMessage) {
       saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(htmlRef.current!) });

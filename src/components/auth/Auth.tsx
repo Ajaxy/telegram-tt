@@ -1,7 +1,7 @@
 import React, { FC, useEffect, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 
 import '../../modules/actions/initial';
 import { pick } from '../../util/iteratees';
@@ -19,11 +19,14 @@ import AuthQrCode from './AuthQrCode';
 import './Auth.scss';
 
 type StateProps = Pick<GlobalState, 'authState'>;
-type DispatchProps = Pick<GlobalActions, 'reset' | 'initApi' | 'returnToAuthPhoneNumber' | 'goToAuthQrCode'>;
 
-const Auth: FC<StateProps & DispatchProps> = ({
-  authState, reset, initApi, returnToAuthPhoneNumber, goToAuthQrCode,
+const Auth: FC<StateProps> = ({
+  authState,
 }) => {
+  const {
+    reset, initApi, returnToAuthPhoneNumber, goToAuthQrCode,
+  } = getDispatch();
+
   useEffect(() => {
     reset();
     initApi();
@@ -73,5 +76,4 @@ const Auth: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authState']),
-  (global, actions): DispatchProps => pick(actions, ['reset', 'initApi', 'returnToAuthPhoneNumber', 'goToAuthQrCode']),
 )(Auth));

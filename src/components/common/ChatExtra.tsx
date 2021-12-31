@@ -1,9 +1,9 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { ApiChat, ApiCountryCode, ApiUser } from '../../api/types';
 
 import {
@@ -13,7 +13,6 @@ import {
   getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isUserId, isUserRightBanned, selectIsChatMuted,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
-import { pick } from '../../util/iteratees';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import useLang from '../../hooks/useLang';
@@ -26,17 +25,17 @@ type OwnProps = {
   forceShowSelf?: boolean;
 };
 
-type StateProps = {
-  user?: ApiUser;
-  chat?: ApiChat;
-  canInviteUsers?: boolean;
-  isMuted?: boolean;
-  phoneCodeList: ApiCountryCode[];
-} & Pick<GlobalState, 'lastSyncTime'>;
+type StateProps =
+  {
+    user?: ApiUser;
+    chat?: ApiChat;
+    canInviteUsers?: boolean;
+    isMuted?: boolean;
+    phoneCodeList: ApiCountryCode[];
+  }
+  & Pick<GlobalState, 'lastSyncTime'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'updateChatMutedState' | 'showNotification'>;
-
-const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatExtra: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   user,
   chat,
@@ -44,10 +43,13 @@ const ChatExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   canInviteUsers,
   isMuted,
   phoneCodeList,
-  loadFullUser,
-  showNotification,
-  updateChatMutedState,
 }) => {
+  const {
+    loadFullUser,
+    showNotification,
+    updateChatMutedState,
+  } = getDispatch();
+
   const {
     id: userId,
     fullInfo,
@@ -152,7 +154,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime, phoneCodeList, chat, user, canInviteUsers, isMuted,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadFullUser', 'updateChatMutedState', 'showNotification',
-  ]),
 )(ChatExtra));

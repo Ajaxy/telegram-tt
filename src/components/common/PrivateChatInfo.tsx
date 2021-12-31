@@ -2,16 +2,15 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
 import renderText from './helpers/renderText';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
@@ -32,17 +31,17 @@ type OwnProps = {
   noRtl?: boolean;
 };
 
-type StateProps = {
-  user?: ApiUser;
-  userStatus?: ApiUserStatus;
-  isSavedMessages?: boolean;
-  areMessagesLoaded: boolean;
-  serverTimeOffset: number;
-} & Pick<GlobalState, 'lastSyncTime'>;
+type StateProps =
+  {
+    user?: ApiUser;
+    userStatus?: ApiUserStatus;
+    isSavedMessages?: boolean;
+    areMessagesLoaded: boolean;
+    serverTimeOffset: number;
+  }
+  & Pick<GlobalState, 'lastSyncTime'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
-
-const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   avatarSize = 'medium',
   status,
@@ -58,9 +57,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   areMessagesLoaded,
   lastSyncTime,
   serverTimeOffset,
-  loadFullUser,
-  openMediaViewer,
 }) => {
+  const {
+    loadFullUser,
+    openMediaViewer,
+  } = getDispatch();
+
   const { id: userId } = user || {};
   const fullName = getUserFullName(user);
 
@@ -153,5 +155,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime, user, userStatus, isSavedMessages, areMessagesLoaded, serverTimeOffset,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
 )(PrivateChatInfo));

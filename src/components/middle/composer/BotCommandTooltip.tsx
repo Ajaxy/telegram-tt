@@ -1,12 +1,10 @@
 import React, {
   FC, useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiBotCommand, ApiUser } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
-import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -29,17 +27,16 @@ type StateProps = {
   usersById: Record<string, ApiUser>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'sendBotCommand'>;
-
-const BotCommandTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
+const BotCommandTooltip: FC<OwnProps & StateProps> = ({
   usersById,
   isOpen,
   withUsername,
   botCommands,
   onClick,
   onClose,
-  sendBotCommand,
 }) => {
+  const { sendBotCommand } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
@@ -102,5 +99,4 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => ({
     usersById: global.users.byId,
   }),
-  (setGlobal, actions): DispatchProps => pick(actions, ['sendBotCommand']),
 )(BotCommandTooltip));

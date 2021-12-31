@@ -134,5 +134,4 @@ export default memo(withGlobal<OwnProps>(
       usersById,
     };
   },
-  // (setGlobal, actions): DispatchProps => pick(actions, ['togglePreHistoryHidden', 'updateChat']),
 )(ManageChatAdministrators));

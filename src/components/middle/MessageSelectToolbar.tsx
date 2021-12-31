@@ -1,9 +1,9 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, MessageListType } from '../../global/types';
+import { MessageListType } from '../../global/types';
 
 import {
   selectCanDeleteSelectedMessages,
@@ -12,7 +12,6 @@ import {
   selectCurrentMessageList,
   selectSelectedMessagesCount,
 } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import useFlag from '../../hooks/useFlag';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import buildClassName from '../../util/buildClassName';
@@ -41,11 +40,7 @@ type StateProps = {
   selectedMessageIds?: number[];
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'exitMessageSelectMode' | 'openForwardMenuForSelectedMessages' | 'downloadSelectedMessages'
-)>;
-
-const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
+const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   canPost,
   isActive,
   messageListType,
@@ -55,10 +50,13 @@ const MessageSelectToolbar: FC<OwnProps & StateProps & DispatchProps> = ({
   canReportMessages,
   canDownloadMessages,
   selectedMessageIds,
-  exitMessageSelectMode,
-  openForwardMenuForSelectedMessages,
-  downloadSelectedMessages,
 }) => {
+  const {
+    exitMessageSelectMode,
+    openForwardMenuForSelectedMessages,
+    downloadSelectedMessages,
+  } = getDispatch();
+
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
 
@@ -171,7 +169,4 @@ export default memo(withGlobal<OwnProps>(
       selectedMessageIds,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'exitMessageSelectMode', 'openForwardMenuForSelectedMessages', 'downloadSelectedMessages',
-  ]),
 )(MessageSelectToolbar));

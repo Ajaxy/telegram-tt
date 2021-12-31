@@ -1,15 +1,13 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { createMapStateToProps, StateProps } from './helpers/createMapStateToProps';
-import { pick } from '../../../util/iteratees';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
@@ -26,11 +24,9 @@ export type OwnProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, ('searchMessagesGlobal' | 'focusMessage' | 'openAudioPlayer')>;
-
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const AudioResults: FC<OwnProps & StateProps> = ({
   theme,
   isVoice,
   searchQuery,
@@ -42,10 +38,13 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
   foundIds,
   lastSyncTime,
   activeDownloads,
-  searchMessagesGlobal,
-  focusMessage,
-  openAudioPlayer,
 }) => {
+  const {
+    searchMessagesGlobal,
+    focusMessage,
+    openAudioPlayer,
+  } = getDispatch();
+
   const lang = useLang();
   const currentType = isVoice ? 'voice' : 'audio';
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
@@ -137,9 +136,4 @@ const AudioResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   createMapStateToProps('audio'),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'searchMessagesGlobal',
-    'focusMessage',
-    'openAudioPlayer',
-  ]),
 )(AudioResults));

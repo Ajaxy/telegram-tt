@@ -2,10 +2,10 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../global/types';
+import { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -15,7 +15,6 @@ import {
 } from '../../modules/helpers';
 import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../modules/selectors';
 import renderText from './helpers/renderText';
-import { pick } from '../../util/iteratees';
 import useLang, { LangFn } from '../../hooks/useLang';
 
 import Avatar from './Avatar';
@@ -34,15 +33,15 @@ type OwnProps = {
   noRtl?: boolean;
 };
 
-type StateProps = {
-  chat?: ApiChat;
-  onlineCount?: number;
-  areMessagesLoaded: boolean;
-} & Pick<GlobalState, 'lastSyncTime'>;
+type StateProps =
+  {
+    chat?: ApiChat;
+    onlineCount?: number;
+    areMessagesLoaded: boolean;
+  }
+  & Pick<GlobalState, 'lastSyncTime'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadFullChat' | 'openMediaViewer'>;
-
-const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
+const GroupChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   avatarSize = 'medium',
   withMediaViewer,
@@ -55,9 +54,12 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   onlineCount,
   areMessagesLoaded,
   lastSyncTime,
-  loadFullChat,
-  openMediaViewer,
 }) => {
+  const {
+    loadFullChat,
+    openMediaViewer,
+  } = getDispatch();
+
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const { id: chatId, isMin, isRestricted } = chat || {};
 
@@ -164,5 +166,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime, chat, onlineCount, areMessagesLoaded,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'openMediaViewer']),
 )(GroupChatInfo));

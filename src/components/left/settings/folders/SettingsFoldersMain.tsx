@@ -1,14 +1,13 @@
 import React, {
   FC, memo, useMemo, useCallback, useState, useEffect,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../../../global/types';
+import { GlobalState } from '../../../../global/types';
 import { ApiChatFolder, ApiChat, ApiUser } from '../../../../api/types';
 import { NotifyException, NotifySettings, SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { pick } from '../../../../util/iteratees';
 import { selectNotifyExceptions, selectNotifySettings } from '../../../../modules/selectors';
 import { throttle } from '../../../../util/schedulers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
@@ -40,13 +39,11 @@ type StateProps = {
   notifyExceptions?: Record<number, NotifyException>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadRecommendedChatFolders' | 'addChatFolder' | 'showDialog'>;
-
 const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
 
 const MAX_ALLOWED_FOLDERS = 10;
 
-const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isActive,
   allListIds,
   chatsById,
@@ -60,10 +57,13 @@ const SettingsFoldersMain: FC<OwnProps & StateProps & DispatchProps> = ({
   onEditFolder,
   onScreenSelect,
   onReset,
-  loadRecommendedChatFolders,
-  addChatFolder,
-  showDialog,
 }) => {
+  const {
+    loadRecommendedChatFolders,
+    addChatFolder,
+    showDialog,
+  } = getDispatch();
+
   const [animationData, setAnimationData] = useState<Record<string, any>>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
@@ -250,5 +250,4 @@ export default memo(withGlobal<OwnProps>(
       notifyExceptions: selectNotifyExceptions(global),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadRecommendedChatFolders', 'addChatFolder', 'showDialog']),
 )(SettingsFoldersMain));

@@ -1,9 +1,8 @@
 import React, {
   FC, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiVideo } from '../../api/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
@@ -14,7 +13,6 @@ import {
   selectCurrentMessageList,
 } from '../../modules/selectors';
 import { getAllowedAttachmentOptions } from '../../modules/helpers';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
@@ -38,22 +36,23 @@ type StateProps = {
   isChatWithBot?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'searchMoreGifs' | 'sendMessage' | 'setGifSearchQuery'>;
-
 const PRELOAD_BACKWARDS = 96; // GIF Search bot results are multiplied by 24
 const INTERSECTION_DEBOUNCE = 300;
 
-const GifSearch: FC<OwnProps & StateProps & DispatchProps> = ({
+const GifSearch: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
   query,
   results,
   chat,
   isChatWithBot,
-  searchMoreGifs,
-  sendMessage,
-  setGifSearchQuery,
 }) => {
+  const {
+    searchMoreGifs,
+    sendMessage,
+    setGifSearchQuery,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -138,5 +137,4 @@ export default memo(withGlobal(
       isChatWithBot,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['searchMoreGifs', 'sendMessage', 'setGifSearchQuery']),
 )(GifSearch));

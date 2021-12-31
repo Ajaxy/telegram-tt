@@ -1,12 +1,10 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 
-import { pick } from '../../util/iteratees';
 import { selectChat } from '../../modules/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
@@ -26,18 +24,19 @@ type StateProps = {
   connectionState?: ApiUpdateConnectionStateType;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadGreetingStickers' | 'sendMessage' | 'markMessageListRead'>;
-
 const INTERSECTION_DEBOUNCE_MS = 200;
 
-const ContactGreeting: FC<OwnProps & StateProps & DispatchProps> = ({
+const ContactGreeting: FC<OwnProps & StateProps> = ({
   sticker,
   connectionState,
   lastUnreadMessageId,
-  loadGreetingStickers,
-  sendMessage,
-  markMessageListRead,
 }) => {
+  const {
+    loadGreetingStickers,
+    sendMessage,
+    markMessageListRead,
+  } = getDispatch();
+
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -110,7 +109,4 @@ export default memo(withGlobal<OwnProps>(
       connectionState: global.connectionState,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadGreetingStickers', 'sendMessage', 'markMessageListRead',
-  ]),
 )(ContactGreeting));

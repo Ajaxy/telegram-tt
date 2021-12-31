@@ -4,9 +4,8 @@ import React, {
   useCallback,
   useMemo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
@@ -14,7 +13,6 @@ import { getMessageMediaHash } from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import { selectIsDownloading } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -39,9 +37,7 @@ type OwnProps = {
   onZoomToggle: NoneToVoidFunction;
 };
 
-type DispatchProps = Pick<GlobalActions, 'downloadMessageMedia' | 'cancelMessageMediaDownload'>;
-
-const MediaViewerActions: FC<OwnProps & StateProps & DispatchProps> = ({
+const MediaViewerActions: FC<OwnProps & StateProps> = ({
   mediaData,
   isVideo,
   isZoomed,
@@ -52,9 +48,12 @@ const MediaViewerActions: FC<OwnProps & StateProps & DispatchProps> = ({
   onCloseMediaViewer,
   onForward,
   onZoomToggle,
-  downloadMessageMedia,
-  cancelMessageMediaDownload,
 }) => {
+  const {
+    downloadMessageMedia,
+    cancelMessageMediaDownload,
+  } = getDispatch();
+
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     message && getMessageMediaHash(message, 'download'),
     !isDownloading,
@@ -193,8 +192,4 @@ export default memo(withGlobal<OwnProps>(
       isDownloading,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'downloadMessageMedia',
-    'cancelMessageMediaDownload',
-  ]),
 )(MediaViewerActions));

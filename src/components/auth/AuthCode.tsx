@@ -2,8 +2,8 @@ import { FormEvent } from 'react';
 import React, {
   FC, useState, useEffect, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-import { GlobalState, GlobalActions } from '../../global/types';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { GlobalState } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { pick } from '../../util/iteratees';
@@ -16,21 +16,21 @@ import Loading from '../ui/Loading';
 import TrackingMonkey from '../common/TrackingMonkey';
 
 type StateProps = Pick<GlobalState, 'authPhoneNumber' | 'authIsCodeViaApp' | 'authIsLoading' | 'authError'>;
-type DispatchProps = Pick<GlobalActions, (
-  'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'
-)>;
 
 const CODE_LENGTH = 5;
 
-const AuthCode: FC<StateProps & DispatchProps> = ({
+const AuthCode: FC<StateProps> = ({
   authPhoneNumber,
   authIsCodeViaApp,
   authIsLoading,
   authError,
-  setAuthCode,
-  returnToAuthPhoneNumber,
-  clearAuthError,
 }) => {
+  const {
+    setAuthCode,
+    returnToAuthPhoneNumber,
+    clearAuthError,
+  } = getDispatch();
+
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -120,9 +120,4 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authPhoneNumber', 'authIsCodeViaApp', 'authIsLoading', 'authError']),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setAuthCode',
-    'returnToAuthPhoneNumber',
-    'clearAuthError',
-  ]),
 )(AuthCode));

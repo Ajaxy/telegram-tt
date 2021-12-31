@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiMessage } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import { getMessageSummaryText } from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -34,11 +32,9 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, ('searchMessagesGlobal')>;
-
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatMessageResults: FC<OwnProps & StateProps> = ({
   searchQuery,
   currentUserId,
   dateSearchQuery,
@@ -47,9 +43,10 @@ const ChatMessageResults: FC<OwnProps & StateProps & DispatchProps> = ({
   chatsById,
   fetchingStatus,
   lastSyncTime,
-  searchMessagesGlobal,
   onSearchDateSelect,
 }) => {
+  const { searchMessagesGlobal } = getDispatch();
+
   const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
@@ -142,5 +139,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['searchMessagesGlobal']),
 )(ChatMessageResults));

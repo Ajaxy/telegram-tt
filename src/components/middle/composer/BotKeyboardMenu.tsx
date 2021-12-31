@@ -1,11 +1,9 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
-import { pick } from '../../../util/iteratees';
 import { selectChatMessage, selectCurrentMessageList } from '../../../modules/selectors';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useFlag from '../../../hooks/useFlag';
@@ -25,11 +23,11 @@ type StateProps = {
   message?: ApiMessage;
 };
 
-type DispatchProps = Pick<GlobalActions, ('clickInlineButton')>;
-
-const BotKeyboardMenu: FC<OwnProps & StateProps & DispatchProps> = ({
-  isOpen, message, onClose, clickInlineButton,
+const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
+  isOpen, message, onClose,
 }) => {
+  const { clickInlineButton } = getDispatch();
+
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};
   const [forceOpen, markForceOpen, unmarkForceOpen] = useFlag(true);
@@ -87,7 +85,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { message: selectChatMessage(global, chatId, messageId) };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'clickInlineButton',
-  ]),
 )(BotKeyboardMenu));

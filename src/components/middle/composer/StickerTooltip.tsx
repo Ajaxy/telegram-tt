@@ -1,16 +1,14 @@
 import React, {
   FC, memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiSticker } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { pick } from '../../../util/iteratees';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
@@ -29,16 +27,15 @@ type StateProps = {
   stickers?: ApiSticker[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'clearStickersForEmoji'>;
-
 const INTERSECTION_THROTTLE = 200;
 
-const StickerTooltip: FC<OwnProps & StateProps & DispatchProps> = ({
+const StickerTooltip: FC<OwnProps & StateProps> = ({
   isOpen,
   onStickerSelect,
   stickers,
-  clearStickersForEmoji,
 }) => {
+  const { clearStickersForEmoji } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
@@ -96,5 +93,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { stickers };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['clearStickersForEmoji']),
 )(StickerTooltip));

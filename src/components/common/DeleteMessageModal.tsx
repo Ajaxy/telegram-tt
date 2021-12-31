@@ -1,10 +1,8 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage } from '../../api/types';
 import { IAlbum } from '../../types';
-
-import { GlobalActions } from '../../global/types';
 
 import {
   selectAllowedMessageActions,
@@ -20,7 +18,6 @@ import {
   isChatSuperGroup,
 } from '../../modules/helpers';
 import renderText from './helpers/renderText';
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -41,9 +38,7 @@ type StateProps = {
   willDeleteForAll?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'deleteMessages' | 'deleteScheduledMessages'>;
-
-const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
   isSchedule,
   message,
@@ -53,9 +48,12 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
   onClose,
-  deleteMessages,
-  deleteScheduledMessages,
 }) => {
+  const {
+    deleteMessages,
+    deleteScheduledMessages,
+  } = getDispatch();
+
   const handleDeleteMessageForAll = useCallback(() => {
     const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
@@ -129,7 +127,4 @@ export default memo(withGlobal<OwnProps>(
       willDeleteForAll,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'deleteMessages', 'deleteScheduledMessages',
-  ]),
 )(DeleteMessageModal));

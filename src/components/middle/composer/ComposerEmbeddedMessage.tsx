@@ -1,9 +1,8 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 
 import {
@@ -19,7 +18,6 @@ import {
   selectEditingMessage,
 } from '../../../modules/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { pick } from '../../../util/iteratees';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
@@ -39,22 +37,23 @@ type StateProps = {
   forwardedMessagesCount?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setReplyingToId' | 'setEditingId' | 'focusMessage' | 'exitForwardMode'>;
-
 const FORWARD_RENDERING_DELAY = 300;
 
-const ComposerEmbeddedMessage: FC<StateProps & DispatchProps> = ({
+const ComposerEmbeddedMessage: FC<StateProps> = ({
   replyingToId,
   editingId,
   message,
   sender,
   shouldAnimate,
   forwardedMessagesCount,
-  setReplyingToId,
-  setEditingId,
-  focusMessage,
-  exitForwardMode,
 }) => {
+  const {
+    setReplyingToId,
+    setEditingId,
+    focusMessage,
+    exitForwardMode,
+  } = getDispatch();
+
   const isShown = Boolean(
     ((replyingToId || editingId) && message)
     || (sender && forwardedMessagesCount),
@@ -166,10 +165,4 @@ export default memo(withGlobal(
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setReplyingToId',
-    'setEditingId',
-    'focusMessage',
-    'exitForwardMode',
-  ]),
 )(ComposerEmbeddedMessage));

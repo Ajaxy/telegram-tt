@@ -1,15 +1,14 @@
 import React, {
   FC, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, MessageListType } from '../../global/types';
+import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList } from '../../modules/selectors';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
-import { pick } from '../../util/iteratees';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
 import useLang from '../../hooks/useLang';
 
@@ -28,18 +27,17 @@ type StateProps = {
   unreadCount?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusNextReply'>;
-
 const FOCUS_MARGIN = 20;
 
-const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
+const ScrollDownButton: FC<OwnProps & StateProps> = ({
   isShown,
   canPost,
   messageListType,
   unreadCount,
   withExtraShift,
-  focusNextReply,
 }) => {
+  const { focusNextReply } = getDispatch();
+
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const elementRef = useRef<HTMLDivElement>(null);
@@ -104,5 +102,4 @@ export default memo(withGlobal<OwnProps>(
       unreadCount: chat && threadId === MAIN_THREAD_ID && messageListType === 'thread' ? chat.unreadCount : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['focusNextReply']),
 )(ScrollDownButton));

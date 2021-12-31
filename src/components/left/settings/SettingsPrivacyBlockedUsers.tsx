@@ -1,15 +1,13 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
-import { pick } from '../../../util/iteratees';
 import {
   getChatTitle, getUserFullName, isUserId,
 } from '../../../modules/helpers';
@@ -38,9 +36,7 @@ type StateProps = {
   phoneCodeList: ApiCountryCode[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'unblockContact'>;
-
-const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -48,8 +44,9 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps & DispatchProps> = (
   usersByIds,
   blockedIds,
   phoneCodeList,
-  unblockContact,
 }) => {
+  const { unblockContact } = getDispatch();
+
   const lang = useLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const handleUnblockClick = useCallback((contactId: string) => {
@@ -158,5 +155,4 @@ export default memo(withGlobal<OwnProps>(
       phoneCodeList,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['unblockContact']),
 )(SettingsPrivacyBlockedUsers));

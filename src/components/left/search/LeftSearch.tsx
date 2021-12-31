@@ -1,12 +1,10 @@
 import React, {
   FC, memo, useCallback, useState, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { GlobalSearchContent } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import { parseDateString } from '../../../util/dateFormat';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
@@ -35,8 +33,6 @@ type StateProps = {
   chatId?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, ('setGlobalSearchContent' | 'setGlobalSearchDate')>;
-
 const TABS = [
   { type: GlobalSearchContent.ChatList, title: 'SearchAllChatsShort' },
   { type: GlobalSearchContent.Media, title: 'SharedMediaTab2' },
@@ -53,16 +49,19 @@ const CHAT_TABS = [
 
 const TRANSITION_RENDER_COUNT = Object.keys(GlobalSearchContent).length / 2;
 
-const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
+const LeftSearch: FC<OwnProps & StateProps> = ({
   searchQuery,
   searchDate,
   isActive,
   currentContent = GlobalSearchContent.ChatList,
   chatId,
-  setGlobalSearchContent,
-  setGlobalSearchDate,
   onReset,
 }) => {
+  const {
+    setGlobalSearchContent,
+    setGlobalSearchDate,
+  } = getDispatch();
+
   const lang = useLang();
   const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
@@ -149,5 +148,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { currentContent, chatId };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setGlobalSearchContent', 'setGlobalSearchDate']),
 )(LeftSearch));

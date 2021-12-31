@@ -1,12 +1,10 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 import { ApiUser } from '../../../api/types';
 
 import { selectUser } from '../../../modules/selectors';
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -25,16 +23,15 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadProfilePhotos'>;
-
-const SettingsMain: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsMain: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
-  loadProfilePhotos,
   currentUser,
   lastSyncTime,
 }) => {
+  const { loadProfilePhotos } = getDispatch();
+
   const lang = useLang();
   const profileId = currentUser?.id;
 
@@ -111,5 +108,4 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadProfilePhotos']),
 )(SettingsMain));

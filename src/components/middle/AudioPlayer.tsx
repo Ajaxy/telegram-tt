@@ -1,10 +1,9 @@
 import React, {
   FC, useCallback, useEffect, useMemo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { AudioOrigin } from '../../types';
-import { GlobalActions } from '../../global/types';
 import {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
@@ -16,7 +15,6 @@ import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
 } from '../../modules/helpers';
 import { selectChat, selectSender } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
 import { makeTrackId } from '../../util/audioPlayer';
 import { clearMediaSession } from '../../util/mediaSession';
@@ -47,17 +45,9 @@ type StateProps = {
   isMuted: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' |
-  'closeAudioPlayer' |
-  'setAudioPlayerVolume' |
-  'setAudioPlayerPlaybackRate' |
-  'setAudioPlayerMuted'
-)>;
-
 const FAST_PLAYBACK_RATE = 1.8;
 
-const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
+const AudioPlayer: FC<OwnProps & StateProps> = ({
   message,
   className,
   noUi,
@@ -66,12 +56,15 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   volume,
   playbackRate,
   isMuted,
-  setAudioPlayerVolume,
-  setAudioPlayerPlaybackRate,
-  setAudioPlayerMuted,
-  focusMessage,
-  closeAudioPlayer,
 }) => {
+  const {
+    setAudioPlayerVolume,
+    setAudioPlayerPlaybackRate,
+    setAudioPlayerMuted,
+    focusMessage,
+    closeAudioPlayer,
+  } = getDispatch();
+
   const lang = useLang();
   const { audio, voice, video } = getMessageContent(message);
   const isVoice = Boolean(voice || video);
@@ -293,8 +286,4 @@ export default withGlobal<OwnProps>(
       isMuted,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(
-    actions,
-    ['focusMessage', 'closeAudioPlayer', 'setAudioPlayerVolume', 'setAudioPlayerPlaybackRate', 'setAudioPlayerMuted'],
-  ),
 )(AudioPlayer);

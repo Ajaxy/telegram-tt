@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ISettings, LangCode, SettingsScreens } from '../../../types';
 import { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
-import { pick } from '../../../util/iteratees';
 
 import RadioGroup from '../../ui/RadioGroup';
 import Loading from '../../ui/Loading';
@@ -23,17 +21,18 @@ type OwnProps = {
 
 type StateProps = Pick<ISettings, 'languages' | 'language'>;
 
-type DispatchProps = Pick<GlobalActions, 'loadLanguages' | 'setSettingOption'>;
-
-const SettingsLanguage: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsLanguage: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
   languages,
   language,
-  loadLanguages,
-  setSettingOption,
 }) => {
+  const {
+    loadLanguages,
+    setSettingOption,
+  } = getDispatch();
+
   const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
 
@@ -96,7 +95,4 @@ export default memo(withGlobal<OwnProps>(
       language: global.settings.byKey.language,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadLanguages', 'setSettingOption',
-  ]),
 )(SettingsLanguage));

@@ -1,13 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatBannedRights } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
-import { GlobalActions } from '../../../global/types';
 
-import { pick } from '../../../util/iteratees';
 import { selectChat } from '../../../modules/selectors';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -34,17 +32,16 @@ type StateProps = {
   isFormFullyDisabled?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'updateChatMemberBannedRights'>;
-
-const ManageGroupUserPermissions: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   chat,
   selectedChatMemberId,
   onScreenSelect,
-  updateChatMemberBannedRights,
   isFormFullyDisabled,
   onClose,
   isActive,
 }) => {
+  const { updateChatMemberBannedRights } = getDispatch();
+
   const [permissions, setPermissions] = useState<ApiChatBannedRights>({});
   const [havePermissionChanged, setHavePermissionChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -266,5 +263,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { chat, isFormFullyDisabled };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['updateChatMemberBannedRights']),
 )(ManageGroupUserPermissions));

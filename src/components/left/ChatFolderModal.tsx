@@ -1,12 +1,10 @@
 import React, {
   FC, useCallback, memo, useMemo, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChatFolder } from '../../api/types';
 
-import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -25,17 +23,16 @@ type StateProps = {
   folderOrderedIds?: number[];
 };
 
-type DispatchProps = Pick<GlobalActions, 'editChatFolders'>;
-
-const ChatFolderModal: FC<OwnProps & StateProps & DispatchProps> = ({
+const ChatFolderModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chatId,
   foldersById,
   folderOrderedIds,
   onClose,
   onCloseAnimationEnd,
-  editChatFolders,
 }) => {
+  const { editChatFolders } = getDispatch();
+
   const lang = useLang();
 
   const initialSelectedFolderIds = useMemo(() => {
@@ -106,5 +103,4 @@ export default memo(withGlobal<OwnProps>(
       folderOrderedIds,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['editChatFolders']),
 )(ChatFolderModal));

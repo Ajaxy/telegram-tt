@@ -1,14 +1,13 @@
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../../global/types';
+import { GlobalState } from '../../../global/types';
 import { ApiChat } from '../../../api/types';
 import { ApiPrivacySettings, SettingsScreens } from '../../../types';
 
 import useLang from '../../../hooks/useLang';
-import { pick } from '../../../util/iteratees';
 import searchWords from '../../../util/searchWords';
 import { getPrivacyKey } from './helper/privacy';
 import {
@@ -37,9 +36,7 @@ type StateProps = {
   settings?: ApiPrivacySettings;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setPrivacySettings'>;
-
-const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   currentUserId,
   isAllowList,
   screen,
@@ -49,11 +46,12 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
   orderedPinnedIds,
   archivedListIds,
   archivedPinnedIds,
-  setPrivacySettings,
   isActive,
   onScreenSelect,
   onReset,
 }) => {
+  const { setPrivacySettings } = getDispatch();
+
   const lang = useLang();
 
   const selectedContactIds = useMemo(() => {
@@ -105,8 +103,8 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps & Dispatc
         ((isUserId(chat.id) && chat.id !== currentUserId) || isChatGroup(chat))
         && (
           !searchQuery
-        || searchWords(getChatTitle(lang, chat), searchQuery)
-        || selectedContactIds.includes(chat.id)
+          || searchWords(getChatTitle(lang, chat), searchQuery)
+          || selectedContactIds.includes(chat.id)
         )
       ))
       .map(({ id }) => id);
@@ -196,5 +194,4 @@ export default memo(withGlobal<OwnProps>(
       settings: getCurrentPrivacySettings(global, screen),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setPrivacySettings']),
 )(SettingsPrivacyVisibilityExceptionList));

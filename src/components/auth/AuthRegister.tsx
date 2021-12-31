@@ -1,8 +1,8 @@
 import { ChangeEvent } from 'react';
 import React, { FC, useState, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalState, GlobalActions } from '../../global/types';
+import { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
@@ -12,11 +12,12 @@ import InputText from '../ui/InputText';
 import AvatarEditable from '../ui/AvatarEditable';
 
 type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
-type DispatchProps = Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadProfilePhoto'>;
 
-const AuthRegister: FC<StateProps & DispatchProps> = ({
-  authIsLoading, authError, signUp, clearAuthError, uploadProfilePhoto,
+const AuthRegister: FC<StateProps> = ({
+  authIsLoading, authError,
 }) => {
+  const { signUp, clearAuthError, uploadProfilePhoto } = getDispatch();
+
   const lang = useLang();
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [croppedFile, setCroppedFile] = useState<File | undefined>();
@@ -83,5 +84,4 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => pick(global, ['authIsLoading', 'authError']),
-  (setGlobal, actions): DispatchProps => pick(actions, ['signUp', 'clearAuthError', 'uploadProfilePhoto']),
 )(AuthRegister));

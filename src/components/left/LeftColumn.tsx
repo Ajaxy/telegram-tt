@@ -1,14 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { pick } from '../../util/iteratees';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 
@@ -28,11 +26,6 @@ type StateProps = {
   leftColumnWidth?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'setGlobalSearchQuery' | 'setGlobalSearchChatId' | 'resetChatCreation' | 'setGlobalSearchDate' |
-  'loadPasswordInfo' | 'clearTwoFaError' | 'setLeftColumnWidth' | 'resetLeftColumnWidth'
-)>;
-
 enum ContentType {
   Main,
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -47,21 +40,24 @@ enum ContentType {
 const RENDER_COUNT = Object.keys(ContentType).length / 2;
 const RESET_TRANSITION_DELAY_MS = 250;
 
-const LeftColumn: FC<StateProps & DispatchProps> = ({
+const LeftColumn: FC<StateProps> = ({
   searchQuery,
   searchDate,
   activeChatFolder,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
-  setGlobalSearchQuery,
-  setGlobalSearchChatId,
-  resetChatCreation,
-  setGlobalSearchDate,
-  loadPasswordInfo,
-  clearTwoFaError,
-  setLeftColumnWidth,
-  resetLeftColumnWidth,
 }) => {
+  const {
+    setGlobalSearchQuery,
+    setGlobalSearchChatId,
+    resetChatCreation,
+    setGlobalSearchDate,
+    loadPasswordInfo,
+    clearTwoFaError,
+    setLeftColumnWidth,
+    resetLeftColumnWidth,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const resizeRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
@@ -374,8 +370,4 @@ export default memo(withGlobal(
       searchQuery: query, searchDate: date, activeChatFolder, shouldSkipHistoryAnimations, leftColumnWidth,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setGlobalSearchQuery', 'setGlobalSearchChatId', 'resetChatCreation', 'setGlobalSearchDate',
-    'loadPasswordInfo', 'clearTwoFaError', 'setLeftColumnWidth', 'resetLeftColumnWidth',
-  ]),
 )(LeftColumn));

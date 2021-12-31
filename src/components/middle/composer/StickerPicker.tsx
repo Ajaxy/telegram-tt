@@ -1,9 +1,8 @@
 import React, {
   FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
 
@@ -12,7 +11,6 @@ import { IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
-import { pick } from '../../../util/iteratees';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -43,18 +41,13 @@ type StateProps = {
   shouldPlay?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadStickerSets' | 'loadRecentStickers' | 'loadFavoriteStickers' |
-  'addRecentSticker' | 'loadAddedStickers' | 'unfaveSticker'
-)>;
-
 const SMOOTH_SCROLL_DISTANCE = 500;
 const HEADER_BUTTON_WIDTH = 52; // px (including margin)
 const STICKER_INTERSECTION_THROTTLE = 200;
 
 const stickerSetIntersections: boolean[] = [];
 
-const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
+const StickerPicker: FC<OwnProps & StateProps> = ({
   className,
   loadAndPlay,
   canSendStickers,
@@ -64,13 +57,16 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   stickerSetsById,
   shouldPlay,
   onStickerSelect,
-  loadStickerSets,
-  loadRecentStickers,
-  loadFavoriteStickers,
-  loadAddedStickers,
-  addRecentSticker,
-  unfaveSticker,
 }) => {
+  const {
+    loadStickerSets,
+    loadRecentStickers,
+    loadFavoriteStickers,
+    loadAddedStickers,
+    addRecentSticker,
+    unfaveSticker,
+  } = getDispatch();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -296,12 +292,4 @@ export default memo(withGlobal<OwnProps>(
       shouldPlay: global.settings.byKey.shouldLoopStickers,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadStickerSets',
-    'loadRecentStickers',
-    'loadFavoriteStickers',
-    'loadAddedStickers',
-    'addRecentSticker',
-    'unfaveSticker',
-  ]),
 )(StickerPicker));

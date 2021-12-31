@@ -2,14 +2,12 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, useState, useCallback, memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiMediaFormat } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 import { ProfileEditProgress, SettingsScreens } from '../../../types';
 
 import { throttle } from '../../../util/schedulers';
-import { pick } from '../../../util/iteratees';
 import { selectUser } from '../../../modules/selectors';
 import { getChatAvatarHash } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
@@ -39,10 +37,6 @@ type StateProps = {
   isUsernameAvailable?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadCurrentUser' | 'updateProfile' | 'checkUsername'
-)>;
-
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const MAX_BIO_LENGTH = 70;
@@ -50,7 +44,7 @@ const MAX_BIO_LENGTH = 70;
 const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
 const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
-const SettingsEditProfile: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -61,10 +55,13 @@ const SettingsEditProfile: FC<OwnProps & StateProps & DispatchProps> = ({
   currentUsername,
   progress,
   isUsernameAvailable,
-  loadCurrentUser,
-  updateProfile,
-  checkUsername,
 }) => {
+  const {
+    loadCurrentUser,
+    updateProfile,
+    checkUsername,
+  } = getDispatch();
+
   const lang = useLang();
 
   const [isUsernameTouched, setIsUsernameTouched] = useState(false);
@@ -286,9 +283,4 @@ export default memo(withGlobal<OwnProps>(
       isUsernameAvailable,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'loadCurrentUser',
-    'updateProfile',
-    'checkUsername',
-  ]),
 )(SettingsEditProfile));

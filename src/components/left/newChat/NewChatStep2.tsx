@@ -1,12 +1,10 @@
 import React, {
   FC, useState, useCallback, useEffect, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ChatCreationProgress } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -30,21 +28,22 @@ type StateProps = {
   creationError?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'createGroupChat' | 'createChannel'>;
-
 // TODO @implement
 const MAX_USERS_FOR_LEGACY_CHAT = 199; // Accounting for current user
 
-const NewChatStep2: FC<OwnProps & StateProps & DispatchProps> = ({
+const NewChatStep2: FC<OwnProps & StateProps > = ({
   isChannel,
   isActive,
   memberIds,
   onReset,
   creationProgress,
   creationError,
-  createGroupChat,
-  createChannel,
 }) => {
+  const {
+    createGroupChat,
+    createChannel,
+  } = getDispatch();
+
   const lang = useLang();
 
   useHistoryBack(isActive, onReset);
@@ -202,7 +201,4 @@ export default memo(withGlobal<OwnProps>(
       creationError,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'createGroupChat', 'createChannel',
-  ]),
 )(NewChatStep2));

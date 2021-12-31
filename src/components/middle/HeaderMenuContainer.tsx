@@ -1,9 +1,8 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 import { IAnchorPosition } from '../../types';
 
@@ -12,7 +11,6 @@ import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
   selectChat, selectNotifySettings, selectNotifyExceptions, selectUser,
 } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
 import {
   isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
 } from '../../modules/helpers';
@@ -25,11 +23,6 @@ import MenuItem from '../ui/MenuItem';
 import DeleteChatModal from '../common/DeleteChatModal';
 
 import './HeaderMenuContainer.scss';
-
-type DispatchProps = Pick<GlobalActions, (
-  'updateChatMutedState' | 'enterMessageSelectMode' | 'sendBotCommand' | 'restartBot' | 'openLinkedChat' |
-  'joinGroupCall' | 'createGroupCall' | 'addContact' | 'openCallFallbackConfirm'
-)>;
 
 export type OwnProps = {
   chatId: string;
@@ -62,7 +55,7 @@ type StateProps = {
   hasLinkedChat?: boolean;
 };
 
-const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
+const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   chatId,
   isOpen,
   withExtraActions,
@@ -87,16 +80,19 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   onSearchClick,
   onClose,
   onCloseAnimationEnd,
-  updateChatMutedState,
-  enterMessageSelectMode,
-  sendBotCommand,
-  restartBot,
-  joinGroupCall,
-  createGroupCall,
-  openLinkedChat,
-  addContact,
-  openCallFallbackConfirm,
 }) => {
+  const {
+    updateChatMutedState,
+    enterMessageSelectMode,
+    sendBotCommand,
+    restartBot,
+    joinGroupCall,
+    createGroupCall,
+    openLinkedChat,
+    addContact,
+    openCallFallbackConfirm,
+  } = getDispatch();
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { x, y } = anchor;
@@ -313,15 +309,4 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'updateChatMutedState',
-    'enterMessageSelectMode',
-    'sendBotCommand',
-    'restartBot',
-    'joinGroupCall',
-    'createGroupCall',
-    'openLinkedChat',
-    'addContact',
-    'openCallFallbackConfirm',
-  ]),
 )(HeaderMenuContainer));

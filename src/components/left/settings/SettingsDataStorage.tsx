@@ -1,7 +1,6 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { SettingsScreens, ISettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
@@ -36,11 +35,7 @@ type StateProps = Pick<ISettings, (
   'autoLoadFileMaxSizeMb'
 )>;
 
-type DispatchProps = Pick<GlobalActions, (
-  'setSettingOption'
-)>;
-
-const SettingsDataStorage: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -59,8 +54,9 @@ const SettingsDataStorage: FC<OwnProps & StateProps & DispatchProps> = ({
   canAutoPlayGifs,
   canAutoPlayVideos,
   autoLoadFileMaxSizeMb,
-  setSettingOption,
 }) => {
+  const { setSettingOption } = getDispatch();
+
   const lang = useLang();
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
@@ -193,7 +189,4 @@ export default memo(withGlobal<OwnProps>(
       'autoLoadFileMaxSizeMb',
     ]);
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'setSettingOption',
-  ]),
 )(SettingsDataStorage));

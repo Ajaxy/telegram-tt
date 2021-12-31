@@ -3,12 +3,10 @@ import useDebounce from '../../../hooks/useDebounce';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { playNotifySound } from '../../../util/notifications';
@@ -35,12 +33,7 @@ type StateProps = {
   notificationSoundVolume: number;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'loadNotificationSettings' | 'updateContactSignUpNotification' |
-  'updateNotificationSettings' | 'updateWebNotificationSettings'
-)>;
-
-const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
+const SettingsNotifications: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
@@ -54,11 +47,14 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
   hasPushNotifications,
   hasWebNotifications,
   notificationSoundVolume,
-  loadNotificationSettings,
-  updateContactSignUpNotification,
-  updateNotificationSettings,
-  updateWebNotificationSettings,
 }) => {
+  const {
+    loadNotificationSettings,
+    updateContactSignUpNotification,
+    updateNotificationSettings,
+    updateWebNotificationSettings,
+  } = getDispatch();
+
   useEffect(() => {
     loadNotificationSettings();
   }, [loadNotificationSettings]);
@@ -147,7 +143,9 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           // eslint-disable-next-line max-len
           subLabel={lang(hasPrivateChatsNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPrivateChatsNotifications}
-          onChange={(e) => { handleSettingsChange(e, 'contact', 'silent'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'contact', 'silent');
+          }}
         />
         <Checkbox
           label={lang('MessagePreview')}
@@ -155,7 +153,9 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           // eslint-disable-next-line max-len
           subLabel={lang(hasPrivateChatsMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPrivateChatsMessagePreview}
-          onChange={(e) => { handleSettingsChange(e, 'contact', 'showPreviews'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'contact', 'showPreviews');
+          }}
         />
       </div>
 
@@ -166,14 +166,18 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           label={lang('NotificationsForGroups')}
           subLabel={lang(hasGroupNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasGroupNotifications}
-          onChange={(e) => { handleSettingsChange(e, 'group', 'silent'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'group', 'silent');
+          }}
         />
         <Checkbox
           label={lang('MessagePreview')}
           disabled={!hasGroupNotifications}
           subLabel={lang(hasGroupMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasGroupMessagePreview}
-          onChange={(e) => { handleSettingsChange(e, 'group', 'showPreviews'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'group', 'showPreviews');
+          }}
         />
       </div>
 
@@ -185,7 +189,9 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           // eslint-disable-next-line max-len
           subLabel={lang(hasBroadcastNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasBroadcastNotifications}
-          onChange={(e) => { handleSettingsChange(e, 'broadcast', 'silent'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'broadcast', 'silent');
+          }}
         />
         <Checkbox
           label={lang('MessagePreview')}
@@ -193,7 +199,9 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
           // eslint-disable-next-line max-len
           subLabel={lang(hasBroadcastMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasBroadcastMessagePreview}
-          onChange={(e) => { handleSettingsChange(e, 'broadcast', 'showPreviews'); }}
+          onChange={(e) => {
+            handleSettingsChange(e, 'broadcast', 'showPreviews');
+          }}
         />
       </div>
 
@@ -210,23 +218,19 @@ const SettingsNotifications: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
-  return {
-    hasPrivateChatsNotifications: Boolean(global.settings.byKey.hasPrivateChatsNotifications),
-    hasPrivateChatsMessagePreview: Boolean(global.settings.byKey.hasPrivateChatsMessagePreview),
-    hasGroupNotifications: Boolean(global.settings.byKey.hasGroupNotifications),
-    hasGroupMessagePreview: Boolean(global.settings.byKey.hasGroupMessagePreview),
-    hasBroadcastNotifications: Boolean(global.settings.byKey.hasBroadcastNotifications),
-    hasBroadcastMessagePreview: Boolean(global.settings.byKey.hasBroadcastMessagePreview),
-    hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
-    hasWebNotifications: global.settings.byKey.hasWebNotifications,
-    hasPushNotifications: global.settings.byKey.hasPushNotifications,
-    notificationSoundVolume: global.settings.byKey.notificationSoundVolume,
-  };
-},
-(setGlobal, actions): DispatchProps => pick(actions, [
-  'loadNotificationSettings',
-  'updateContactSignUpNotification',
-  'updateNotificationSettings',
-  'updateWebNotificationSettings',
-]))(SettingsNotifications));
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      hasPrivateChatsNotifications: Boolean(global.settings.byKey.hasPrivateChatsNotifications),
+      hasPrivateChatsMessagePreview: Boolean(global.settings.byKey.hasPrivateChatsMessagePreview),
+      hasGroupNotifications: Boolean(global.settings.byKey.hasGroupNotifications),
+      hasGroupMessagePreview: Boolean(global.settings.byKey.hasGroupMessagePreview),
+      hasBroadcastNotifications: Boolean(global.settings.byKey.hasBroadcastNotifications),
+      hasBroadcastMessagePreview: Boolean(global.settings.byKey.hasBroadcastMessagePreview),
+      hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
+      hasWebNotifications: global.settings.byKey.hasWebNotifications,
+      hasPushNotifications: global.settings.byKey.hasPushNotifications,
+      notificationSoundVolume: global.settings.byKey.notificationSoundVolume,
+    };
+  },
+)(SettingsNotifications));

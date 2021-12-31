@@ -16,6 +16,7 @@ import useMessageObservers from './hooks/useMessageObservers';
 
 import Message from './message/Message';
 import ActionMessage from './ActionMessage';
+import { getDispatch } from '../../lib/teact/teactn';
 
 interface OwnProps {
   messageIds: number[];
@@ -39,7 +40,6 @@ interface OwnProps {
   noAppearanceAnimation: boolean;
   onFabToggle: AnyToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
-  openHistoryCalendar: Function;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
@@ -66,8 +66,9 @@ const MessageListContent: FC<OwnProps> = ({
   noAppearanceAnimation,
   onFabToggle,
   onNotchToggle,
-  openHistoryCalendar,
 }) => {
+  const { openHistoryCalendar } = getDispatch();
+
   const {
     observeIntersectionForMedia,
     observeIntersectionForReading,

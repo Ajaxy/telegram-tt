@@ -2,13 +2,11 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ManagementScreens, ManagementProgress } from '../../../types';
 import { ApiChat, ApiMediaFormat } from '../../../api/types';
 
-import { pick } from '../../../util/iteratees';
 import { getChatAvatarHash, getHasAdminRight } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
@@ -40,28 +38,27 @@ type StateProps = {
   canChangeInfo?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'toggleSignatures' | 'updateChat' | 'closeManagement' | 'leaveChannel' | 'deleteChannel' | 'openChat'
-)>;
-
 const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
 
-const ManageChannel: FC<OwnProps & StateProps & DispatchProps> = ({
+const ManageChannel: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   progress,
   isSignaturesShown,
   canChangeInfo,
   onScreenSelect,
-  updateChat,
-  toggleSignatures,
-  closeManagement,
-  leaveChannel,
-  deleteChannel,
-  openChat,
   onClose,
   isActive,
 }) => {
+  const {
+    updateChat,
+    toggleSignatures,
+    closeManagement,
+    leaveChannel,
+    deleteChannel,
+    openChat,
+  } = getDispatch();
+
   const currentTitle = chat ? (chat.title || '') : '';
   const currentAbout = chat?.fullInfo ? (chat.fullInfo.about || '') : '';
   const hasLinkedChat = chat?.fullInfo?.linkedChatId;
@@ -266,7 +263,4 @@ export default memo(withGlobal<OwnProps>(
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'toggleSignatures', 'updateChat', 'closeManagement', 'leaveChannel', 'deleteChannel', 'openChat',
-  ]),
 )(ManageChannel));

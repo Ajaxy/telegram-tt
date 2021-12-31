@@ -1,14 +1,12 @@
 import React, {
   FC, useEffect, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
 import { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { throttle } from '../../../util/schedulers';
-import { pick } from '../../../util/iteratees';
 import { filterUsersByName, sortUserIds } from '../../../modules/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -31,11 +29,9 @@ type StateProps = {
   serverTimeOffset: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadContactList' | 'openChat'>;
-
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
+const ContactList: FC<OwnProps & StateProps> = ({
   isActive,
   filter,
   usersById,
@@ -43,9 +39,12 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   contactIds,
   serverTimeOffset,
   onReset,
-  loadContactList,
-  openChat,
 }) => {
+  const {
+    loadContactList,
+    openChat,
+  } = getDispatch();
+
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
@@ -108,5 +107,4 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset: global.serverTimeOffset,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'openChat']),
 )(ContactList));

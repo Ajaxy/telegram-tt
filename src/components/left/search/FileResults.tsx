@@ -1,16 +1,14 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiMessage } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { createMapStateToProps, StateProps } from './helpers/createMapStateToProps';
-import { pick } from '../../../util/iteratees';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
@@ -27,12 +25,10 @@ export type OwnProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, ('searchMessagesGlobal' | 'focusMessage')>;
-
 const CURRENT_TYPE = 'documents';
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
+const FileResults: FC<OwnProps & StateProps> = ({
   searchQuery,
   searchChatId,
   isLoading,
@@ -42,9 +38,12 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
   foundIds,
   activeDownloads,
   lastSyncTime,
-  searchMessagesGlobal,
-  focusMessage,
 }) => {
+  const {
+    searchMessagesGlobal,
+    focusMessage,
+  } = getDispatch();
+
   const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
@@ -127,8 +126,4 @@ const FileResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   createMapStateToProps(CURRENT_TYPE),
-  (setGlobal, actions): DispatchProps => pick(actions, [
-    'searchMessagesGlobal',
-    'focusMessage',
-  ]),
 )(FileResults));
