@@ -396,6 +396,7 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     .map((thumb) => buildApiPhotoSize(thumb));
 
   return {
+    id: String(media.document.id),
     fileName: getFilenameFromDocument(media.document, 'audio'),
     thumbnailSizes,
     ...pick(media.document, ['size', 'mimeType']),
@@ -424,6 +425,7 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
   const { duration, waveform } = audioAttribute;
 
   return {
+    id: String(media.document.id),
     duration,
     waveform: waveform ? Array.from(waveform) : undefined,
   };
@@ -981,6 +983,7 @@ function buildUploadingMedia(
     const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
     return {
       voice: {
+        id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
         duration,
         waveform: inputWaveform,
       },
@@ -988,6 +991,7 @@ function buildUploadingMedia(
   } else if (mimeType.startsWith('audio/')) {
     return {
       audio: {
+        id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
         mimeType,
         fileName,
         size,

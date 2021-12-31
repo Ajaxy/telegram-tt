@@ -75,7 +75,7 @@ async function download(
 ) {
   const mediaMatch = url.startsWith('webDocument')
     ? url.match(/(webDocument):(.+)/)
-    : url.match(/(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(\?size=\w+)?/);
+    : url.match(/(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
   }

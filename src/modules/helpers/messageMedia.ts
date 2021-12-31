@@ -140,7 +140,8 @@ export function getMessageMediaHash(
     return undefined;
   }
 
-  const base = getMessageKey(message);
+  const mediaId = (messagePhoto || messageVideo || sticker || audio || voice || document)!.id;
+  const base = `${getMessageKey(message)}${mediaId ? `:${mediaId}` : ''}`;
 
   if (messageVideo) {
     switch (target) {

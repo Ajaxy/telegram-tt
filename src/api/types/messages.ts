@@ -63,6 +63,7 @@ export interface ApiVideo {
 }
 
 export interface ApiAudio {
+  id: string;
   size: number;
   mimeType: string;
   fileName: string;
@@ -73,6 +74,7 @@ export interface ApiAudio {
 }
 
 export interface ApiVoice {
+  id: string;
   duration: number;
   waveform?: number[];
 }
