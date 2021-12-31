@@ -9,6 +9,7 @@ import {
   ApiNewPoll,
   ApiOnProgress,
   ApiSticker,
+  ApiUser,
   ApiVideo,
   MAIN_THREAD_ID,
   MESSAGE_DELETED,
@@ -56,6 +57,8 @@ import {
   selectScheduledMessage,
   selectNoWebPage,
   selectFirstUnreadId,
+  selectUser,
+  selectSendAs,
   selectSponsoredMessage,
 } from '../../selectors';
 import { debounce, rafPromise } from '../../../util/schedulers';
@@ -204,6 +207,7 @@ addReducer('sendMessage', (global, actions, payload) => {
     chat,
     replyingTo: selectReplyingToId(global, chatId, threadId),
     noWebPage: selectNoWebPage(global, chatId, threadId),
+    sendAs: selectSendAs(global, chatId),
   };
 
   const isSingle = !payload.attachments || payload.attachments.length <= 1;
@@ -586,6 +590,7 @@ addReducer('forwardMessages', (global, action, payload) => {
   }
 
   const { isSilent, scheduledAt } = payload;
+  const sendAs = selectSendAs(global, toChatId!);
 
   const realMessages = messages.filter((m) => !isServiceNotificationMessage(m));
   if (realMessages.length) {
@@ -596,6 +601,7 @@ addReducer('forwardMessages', (global, action, payload) => {
       serverTimeOffset: getGlobal().serverTimeOffset,
       isSilent,
       scheduledAt,
+      sendAs,
     });
   }
 
@@ -613,6 +619,7 @@ addReducer('forwardMessages', (global, action, payload) => {
         poll,
         isSilent,
         scheduledAt,
+        sendAs,
       });
     });
 
@@ -853,6 +860,7 @@ async function sendMessage(params: {
   serverTimeOffset?: number;
   isSilent?: boolean;
   scheduledAt?: number;
+  sendAs?: ApiChat | ApiUser;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
@@ -964,6 +972,47 @@ addReducer('loadSeenBy', (global, actions, payload) => {
     setGlobal(updateChatMessage(getGlobal(), chatId, messageId, {
       seenByUserIds: result,
     }));
+  })();
+});
+
+addReducer('saveDefaultSendAs', (global, actions, payload) => {
+  const { chatId, sendAsId } = payload;
+  const chat = selectChat(global, chatId);
+  const sendAsChat = selectChat(global, sendAsId) || selectUser(global, sendAsId);
+  if (!chat || !sendAsChat) {
+    return undefined;
+  }
+
+  void callApi('saveDefaultSendAs', { sendAs: sendAsChat, chat });
+
+  return updateChat(global, chatId, {
+    fullInfo: {
+      ...chat.fullInfo,
+      sendAsId,
+    },
+  });
+});
+
+addReducer('loadSendAs', (global, actions, payload) => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('fetchSendAs', { chat });
+    if (!result) {
+      return;
+    }
+
+    global = getGlobal();
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+    global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+    global = updateChat(global, chatId, {
+      sendAsIds: result.ids,
+    });
+    setGlobal(global);
   })();
 });
 

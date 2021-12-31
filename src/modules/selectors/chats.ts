@@ -185,3 +185,13 @@ export function selectCountNotMutedUnread(global: GlobalState) {
 export function selectIsServiceChatReady(global: GlobalState) {
   return Boolean(selectChat(global, SERVICE_NOTIFICATIONS_USER_ID));
 }
+
+export function selectSendAs(global: GlobalState, chatId: string) {
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  const id = chat?.fullInfo?.sendAsId;
+  if (!id) return undefined;
+
+  return selectUser(global, id) || selectChat(global, id);
+}

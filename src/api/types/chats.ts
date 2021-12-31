@@ -55,6 +55,8 @@ export interface ApiChat {
   fullInfo?: ApiChatFullInfo;
   // Obtained with UpdateUserTyping or UpdateChatUserTyping updates
   typingStatus?: ApiTypingStatus;
+
+  sendAsIds?: string[];
 }
 
 export interface ApiTypingStatus {
@@ -83,6 +85,7 @@ export interface ApiChatFullInfo {
   };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
+  sendAsId?: string;
 }
 
 export interface ApiChatMember {

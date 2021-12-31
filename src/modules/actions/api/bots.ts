@@ -2,7 +2,7 @@ import {
   addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { ApiChat } from '../../../api/types';
+import { ApiChat, ApiUser } from '../../../api/types';
 import { InlineBotSettings } from '../../../types';
 
 import {
@@ -11,7 +11,7 @@ import {
 import { callApi } from '../../../api/gramjs';
 import {
   selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList,
-  selectReplyingToId, selectUser,
+  selectReplyingToId, selectSendAs, selectUser,
 } from '../../selectors';
 import { addChats, addUsers, removeBlockedContact } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -81,7 +81,9 @@ addReducer('sendBotCommand', (global, actions, payload) => {
   actions.setReplyingToId({ messageId: undefined });
   actions.clearWebPagePreview({ chatId: chat.id, threadId, value: false });
 
-  void sendBotCommand(chat, currentUserId, command, selectReplyingToId(global, chat.id, threadId));
+  void sendBotCommand(
+    chat, currentUserId, command, selectReplyingToId(global, chat.id, threadId), selectSendAs(global, chatId),
+  );
 });
 
 addReducer('restartBot', (global, actions, payload) => {
@@ -100,7 +102,7 @@ addReducer('restartBot', (global, actions, payload) => {
     }
 
     setGlobal(removeBlockedContact(getGlobal(), bot.id));
-    void sendBotCommand(chat, currentUserId, '/start');
+    void sendBotCommand(chat, currentUserId, '/start', undefined, selectSendAs(global, chatId));
   })();
 });
 
@@ -204,6 +206,7 @@ addReducer('sendInlineBotResult', (global, actions, payload) => {
     resultId: id,
     queryId,
     replyingTo: selectReplyingToId(global, chatId, threadId),
+    sendAs: selectSendAs(global, chatId),
   });
 });
 
@@ -305,11 +308,14 @@ async function searchInlineBot({
   setGlobal(global);
 }
 
-async function sendBotCommand(chat: ApiChat, currentUserId: string, command: string, replyingTo?: number) {
+async function sendBotCommand(
+  chat: ApiChat, currentUserId: string, command: string, replyingTo?: number, sendAs?: ApiChat | ApiUser,
+) {
   await callApi('sendMessage', {
     chat,
     text: command,
     replyingTo,
+    sendAs,
   });
 }
 

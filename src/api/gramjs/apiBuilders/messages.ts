@@ -22,6 +22,7 @@ import {
   ApiThreadInfo,
   ApiInvoice,
   ApiGroupCall,
+  ApiUser,
   ApiSponsoredMessage,
 } from '../../types';
 
@@ -857,6 +858,7 @@ export function buildLocalMessage(
   poll?: ApiNewPoll,
   groupedId?: string,
   scheduledAt?: number,
+  sendAs?: ApiChat | ApiUser,
   serverTimeOffset = 0,
 ): ApiMessage {
   const localId = localMessageCounter++;
@@ -880,7 +882,7 @@ export function buildLocalMessage(
     },
     date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !isChannel,
-    senderId: currentUserId,
+    senderId: sendAs?.id || currentUserId,
     ...(replyingTo && { replyToMessageId: replyingTo }),
     ...(groupedId && {
       groupedId,

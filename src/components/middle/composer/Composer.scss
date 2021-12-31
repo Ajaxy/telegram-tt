@@ -33,6 +33,22 @@
     --border-width: 0;
   }
 
+  @keyframes show-send-as-button {
+    from {
+      width: 1rem;
+      transform: scale(0);
+    }
+
+    to {
+      width: 3.5rem;
+      transform: scale(1);
+    }
+  }
+
+  body:not(.animation-level-0) & .send-as-button {
+    animation: 0.25s ease-in-out forwards show-send-as-button;
+  }
+
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
@@ -116,6 +132,10 @@
         animation-duration: 0ms !important;
       }
     }
+  }
+
+  .send-as-button {
+    z-index: 1;
   }
 
   .mobile-symbol-menu-button {

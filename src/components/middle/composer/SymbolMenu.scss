@@ -98,7 +98,7 @@
     }
   }
 
-  .Button.bot-commands ~ & {
+  .Button.bot-commands ~ &, .Button.send-as-button ~ & {
     .is-pointer-env & > .backdrop {
       left: 3rem;
       width: 3.25rem;
