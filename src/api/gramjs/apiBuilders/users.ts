@@ -4,12 +4,15 @@ import {
 } from '../../types';
 import { buildApiPeerId } from './peers';
 
-export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
+export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUser {
   const {
-    about, commonChatsCount, pinnedMsgId, botInfo, blocked,
+    fullUser: {
+      about, commonChatsCount, pinnedMsgId, botInfo, blocked,
+    },
+    users,
   } = mtpUserFull;
 
-  const user = buildApiUser(mtpUserFull.user)!;
+  const user = buildApiUser(users[0])!;
 
   return {
     ...user,

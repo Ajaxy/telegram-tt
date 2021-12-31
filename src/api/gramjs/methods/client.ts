@@ -253,11 +253,13 @@ export async function fetchCurrentUser() {
     id: new GramJs.InputUserSelf(),
   }));
 
-  if (!userFull || !(userFull.user instanceof GramJs.User)) {
+  if (!userFull || !(userFull.users[0] instanceof GramJs.User)) {
     return;
   }
 
-  localDb.users[buildApiPeerId(userFull.user.id, 'user')] = userFull.user;
+  const user = userFull.users[0];
+
+  localDb.users[buildApiPeerId(user.id, 'user')] = user;
   const currentUser = buildApiUserFromFull(userFull);
 
   setMessageBuilderCurrentUserId(currentUser.id);
