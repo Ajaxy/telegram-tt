@@ -194,6 +194,10 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.users.statusesById) {
     cached.users.statusesById = {};
   }
+
+  if (!cached.messages.sponsoredByChatId) {
+    cached.messages.sponsoredByChatId = {};
+  }
 }
 
 function updateCache() {
@@ -311,6 +315,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
   return {
     byChatId,
     messageLists: [],
+    sponsoredByChatId: {},
   };
 }
 

@@ -23,6 +23,7 @@ import {
   ApiCountryCode,
   ApiCountry,
   ApiGroupCall,
+  ApiSponsoredMessage,
 } from '../api/types';
 import {
   FocusDirection,
@@ -167,6 +168,7 @@ export type GlobalState = {
       poll?: ApiNewPoll;
       isSilent?: boolean;
     };
+    sponsoredByChatId: Record<string, ApiSponsoredMessage>;
   };
 
   groupCalls: {
@@ -503,6 +505,7 @@ export type ActionTypes = (
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
   'reportMessages' | 'sendMessageAction' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
+  'loadSponsoredMessages' | 'viewSponsoredMessage' |
   // downloads
   'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages

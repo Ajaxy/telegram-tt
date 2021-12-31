@@ -62,6 +62,8 @@ export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
 export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 export const ALL_CHATS_PRELOAD_DISABLED = false;
 
+export const SPONSORED_MESSAGE_CACHE_MS = 300000; // 5 min
+
 export const DEFAULT_VOLUME = 1;
 export const DEFAULT_PLAYBACK_RATE = 1;
 
