@@ -22,12 +22,14 @@ import {
   ApiThreadInfo,
   ApiInvoice,
   ApiGroupCall,
+  ApiSponsoredMessage,
 } from '../../types';
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
   LOCAL_MESSAGE_ID_BASE,
   SERVICE_NOTIFICATIONS_USER_ID,
+  SPONSORED_MESSAGE_CACHE_MS,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
@@ -37,8 +39,8 @@ import { buildStickerFromDocument } from './symbols';
 import { buildApiPhoto, buildApiPhotoSize, buildApiThumbnailFromStripped } from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
-import { addPhotoToLocalDb, resolveMessageApiChatId } from '../helpers';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
+import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -48,6 +50,30 @@ let currentUserId!: string;
 
 export function setMessageBuilderCurrentUserId(_currentUserId: string) {
   currentUserId = _currentUserId;
+}
+
+export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
+  const {
+    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId,
+  } = mtpMessage;
+  const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
+  const chatInviteTitle = chatInvite
+    ? (chatInvite instanceof GramJs.ChatInvite
+      ? chatInvite.title
+      : !(chatInvite.chat instanceof GramJs.ChatEmpty) ? chatInvite.chat.title : undefined)
+    : undefined;
+
+  return {
+    randomId: serializeBytes(randomId),
+    isBot: fromId ? isPeerUser(fromId) : false,
+    text: buildMessageTextContent(message, entities),
+    expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
+    ...(chatId && { chatId }),
+    ...(chatInviteHash && { chatInviteHash }),
+    ...(chatInvite && { chatInviteTitle }),
+    ...(startParam && { startParam }),
+    ...(channelPost && { channelPostId: channelPost }),
+  };
 }
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
@@ -493,7 +519,7 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
   const { id, answers: rawAnswers } = poll;
   const answers = rawAnswers.map((answer) => ({
     text: answer.text,
-    option: String.fromCharCode(...answer.option),
+    option: serializeBytes(answer.option),
   }));
 
   return {
@@ -539,7 +565,7 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
   }) => ({
     isChosen: chosen,
     isCorrect: correct,
-    option: String.fromCharCode(...option),
+    option: serializeBytes(option),
     votersCount: voters,
   }));
 
@@ -775,7 +801,7 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
         value = button.url;
       } else if (button instanceof GramJs.KeyboardButtonCallback) {
         type = 'callback';
-        value = String(button.data);
+        value = serializeBytes(button.data);
       } else if (button instanceof GramJs.KeyboardButtonRequestPoll) {
         type = 'requestPoll';
       } else if (button instanceof GramJs.KeyboardButtonBuy) {

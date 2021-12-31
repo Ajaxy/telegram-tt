@@ -36,6 +36,7 @@ import {
   addEntitiesWithPhotosToLocalDb,
   addPhotoToLocalDb,
   resolveMessageApiChatId,
+  serializeBytes,
 } from './helpers';
 import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
 import { buildApiPhoto } from './apiBuilders/common';
@@ -466,7 +467,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateMessagePollVote',
       pollId: String(update.pollId),
       userId: buildApiPeerId(update.userId, 'user'),
-      options: update.options.map((option) => String.fromCharCode(...option)),
+      options: update.options.map(serializeBytes),
     });
   } else if (update instanceof GramJs.UpdateChannelMessageViews) {
     onUpdate({

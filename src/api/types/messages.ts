@@ -280,6 +280,18 @@ export interface ApiThreadInfo {
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
+export type ApiSponsoredMessage = {
+  chatId?: string;
+  randomId: string;
+  isBot?: boolean;
+  channelPostId?: number;
+  startParam?: string;
+  chatInviteHash?: string;
+  chatInviteTitle?: string;
+  text: ApiFormattedText;
+  expiresAt: number;
+};
+
 export interface ApiKeyboardButton {
   type: 'command' | 'url' | 'callback' | 'requestPoll' | 'buy' | 'NOT_SUPPORTED';
   text: string;

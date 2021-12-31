@@ -34,6 +34,7 @@ import {
   updateThreadInfos,
   updateChat,
   updateThreadUnreadFromForwardedMessage,
+  updateSponsoredMessage,
 } from '../../reducers';
 import {
   selectChat,
@@ -55,6 +56,7 @@ import {
   selectScheduledMessage,
   selectNoWebPage,
   selectFirstUnreadId,
+  selectSponsoredMessage,
 } from '../../selectors';
 import { debounce, rafPromise } from '../../../util/schedulers';
 import { isServiceNotificationMessage } from '../../helpers';
@@ -1000,6 +1002,38 @@ async function loadScheduledHistory(chat: ApiChat) {
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   setGlobal(global);
 }
+
+addReducer('loadSponsoredMessages', (global, actions, payload) => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('fetchSponsoredMessages', { chat });
+    if (!result) {
+      return;
+    }
+
+    let newGlobal = updateSponsoredMessage(getGlobal(), chatId, result.messages[0]);
+    newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
+    newGlobal = addChats(newGlobal, buildCollectionByKey(result.chats, 'id'));
+
+    setGlobal(newGlobal);
+  })();
+});
+
+addReducer('viewSponsoredMessage', (global, actions, payload) => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectSponsoredMessage(global, chatId);
+  if (!chat || !message) {
+    return;
+  }
+
+  void callApi('viewSponsoredMessage', { chat, random: message.randomId });
+});
 
 function countSortedIds(ids: number[], from: number, to: number) {
   let count = 0;

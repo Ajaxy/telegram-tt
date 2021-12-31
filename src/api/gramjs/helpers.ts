@@ -65,3 +65,11 @@ export function addEntitiesWithPhotosToLocalDb(entities: (GramJs.TypeUser | Gram
     }
   });
 }
+
+export function serializeBytes(value: Buffer) {
+  return String.fromCharCode(...value);
+}
+
+export function deserializeBytes(value: string) {
+  return Buffer.from(value, 'binary');
+}

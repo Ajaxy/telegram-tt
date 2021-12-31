@@ -855,3 +855,10 @@ export function selectLastServiceNotification(global: GlobalState) {
 
   return serviceNotifications.find(({ id }) => id === maxId);
 }
+
+export function selectSponsoredMessage(global: GlobalState, chatId: string) {
+  const chat = selectChat(global, chatId);
+  const message = chat && isChatChannel(chat) ? global.messages.sponsoredByChatId[chatId] : undefined;
+
+  return message && message.expiresAt >= Math.round(Date.now() / 1000) ? message : undefined;
+}

@@ -9,7 +9,7 @@ import { buildInputPeer, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
 
 export function init() {
 }
@@ -24,7 +24,7 @@ export function answerCallbackButton(
   return invokeRequest(new GramJs.messages.GetBotCallbackAnswer({
     peer: buildInputPeer(chatId, accessHash),
     msgId: messageId,
-    data: Buffer.from(data),
+    data: deserializeBytes(data),
   }));
 }
 

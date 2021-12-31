@@ -16,6 +16,7 @@ import {
   MESSAGE_DELETED,
   ApiGlobalMessageSearchType,
   ApiReportReason,
+  ApiSponsoredMessage,
   ApiSendMessageAction,
 } from '../../types';
 
@@ -32,6 +33,7 @@ import {
   buildLocalMessage,
   buildWebPage,
   buildLocalForwardedMessage,
+  buildApiSponsoredMessage,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -50,7 +52,7 @@ import {
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
-import { addMessageToLocalDb, resolveMessageApiChatId } from '../helpers';
+import { addMessageToLocalDb, deserializeBytes, resolveMessageApiChatId } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
 import { buildApiPeerId } from '../apiBuilders/peers';
@@ -994,7 +996,7 @@ export async function sendPollVote({
   await invokeRequest(new GramJs.messages.SendVote({
     peer: buildInputPeer(id, accessHash),
     msgId: messageId,
-    options: options.map((option) => Buffer.from(option)),
+    options: options.map(deserializeBytes),
   }), true);
 }
 
@@ -1013,7 +1015,7 @@ export async function loadPollOptionResults({
   const result = await invokeRequest(new GramJs.messages.GetPollVotes({
     peer: buildInputPeer(id, accessHash),
     id: messageId,
-    ...(option && { option: Buffer.from(option) }),
+    ...(option && { option: deserializeBytes(option) }),
     ...(offset && { offset }),
     ...(limit && { limit }),
   }));
@@ -1143,7 +1145,7 @@ export async function sendScheduledMessages({ chat, ids }: { chat: ApiChat; ids:
 
 function updateLocalDb(result: (
   GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages |
-  GramJs.messages.DiscussionMessage
+  GramJs.messages.DiscussionMessage | GramJs.messages.SponsoredMessages
 )) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
@@ -1204,4 +1206,33 @@ export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageI
   }));
 
   return result ? result.map(String) : undefined;
+}
+
+export async function fetchSponsoredMessages({ chat }: { chat: ApiChat }) {
+  const result = await invokeRequest(new GramJs.channels.GetSponsoredMessages({
+    channel: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result || !result.messages.length) {
+    return undefined;
+  }
+
+  updateLocalDb(result);
+
+  const messages = result.messages.map(buildApiSponsoredMessage).filter<ApiSponsoredMessage>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+
+  return {
+    messages,
+    users,
+    chats,
+  };
+}
+
+export async function viewSponsoredMessage({ chat, random }: { chat: ApiChat; random: string }) {
+  await invokeRequest(new GramJs.channels.ViewSponsoredMessage({
+    channel: buildInputPeer(chat.id, chat.accessHash),
+    randomId: deserializeBytes(random),
+  }));
 }

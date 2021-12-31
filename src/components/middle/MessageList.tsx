@@ -89,6 +89,7 @@ type StateProps = {
   threadTopMessageId?: number;
   threadFirstMessageId?: number;
   hasLinkedChat?: boolean;
+  lastSyncTime?: number;
 };
 
 const BOTTOM_THRESHOLD = 20;
@@ -131,9 +132,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   botDescription,
   threadTopMessageId,
   hasLinkedChat,
+  lastSyncTime,
   withBottomShift,
 }) => {
-  const { loadViewportMessages, setScrollOffset } = getDispatch();
+  const { loadViewportMessages, setScrollOffset, loadSponsoredMessages } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -167,6 +169,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useOnChange(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
+
+  useOnChange(() => {
+    if (isChannelChat && isReady && lastSyncTime) {
+      loadSponsoredMessages({ chatId });
+    }
+  }, [chatId, isReady, isChannelChat, lastSyncTime]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useOnChange(() => {
@@ -506,6 +514,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         />
       ) : ((messageIds && messageGroups) || lastMessage) ? (
         <MessageListContent
+          chatId={chatId}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
           isViewportNewest={Boolean(isViewportNewest)}
@@ -595,6 +604,7 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: chat.fullInfo && ('linkedChatId' in chat.fullInfo)
         ? Boolean(chat.fullInfo.linkedChatId)
         : undefined,
+      lastSyncTime: global.lastSyncTime,
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },

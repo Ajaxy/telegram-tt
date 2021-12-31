@@ -1,7 +1,9 @@
 import {
   GlobalState, MessageList, MessageListType, Thread,
 } from '../../global/types';
-import { ApiMessage, ApiThreadInfo, MAIN_THREAD_ID } from '../../api/types';
+import {
+  ApiMessage, ApiSponsoredMessage, ApiThreadInfo, MAIN_THREAD_ID,
+} from '../../api/types';
 import { FocusDirection } from '../../types';
 
 import {
@@ -441,6 +443,21 @@ export function updateFocusedMessage(
       messageId,
       noHighlight,
       isResizingContainer,
+    },
+  };
+}
+
+export function updateSponsoredMessage(
+  global: GlobalState, chatId: string, message: ApiSponsoredMessage,
+): GlobalState {
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      sponsoredByChatId: {
+        ...global.messages.sponsoredByChatId,
+        [chatId]: message,
+      },
     },
   };
 }
