@@ -1,29 +1,26 @@
-**Telegram Web Z was updated to version 1.26**
+**Telegram Web Z was updated to version 1.27**
+
+🎄 **Happy New Year 2022!** 🎄
 
 👏 **Harder**
-• Added bot `start` parameter for t.me links.
-• Changed display of service notifications for errors.
+• Protected Content in Groups and Channels:
+  – Content creators can restrict the ability to forward messages from their groups and channels.
+  – When forwarding is restricted, users will also be unable to directly save media from the chat or take screenshots.
+  – Toggle this option on or off via Chat Info > Group / Channel Type.
+• Anonymous Posting in Public Groups
+  – Comment as one of your channels in public groups and channel comments.
+  – Tap the profile picture next to the message bar to choose which channel you will appear as when you send the message.
+• Your peers will now be notified when you are typing a message or selecting a sticker.
 
 🤩 **Better**
-• Fixed scroll jumps in message history.
-• Improved font for Arabic and Persian languages.
-• Various fixes for RTL languages.
-• Rotating your device will no longer refresh the page during video chats.
-• Various UI improvements.
+• Detailed info is now shown when moving cursor over message timestamp.
 
 🚀 **Faster**
-• Optimized rendering for context menus.
-• Optimized search in large lists.
+• Some optimizations for heavy calculations.
+• The UI is even more responsive now.
 
 💪 **Stronger**
-• Fixed echo cancellation in calls.
-• Fixed focusing from forwarded channel posts.
-• Fixed keyboard navigation, missing contacts, and auto-focus when forwarding.
-• Fixed markdown parsing inside code and links.
-• Fixed missing UI elements when going back in history stack.
-• Fixed flickering profile photos in Safari.
-• Fixed t.me message links to private chats.
-• Fixed duplicated folders.
-• Fixed missing media due to outdated auth key.
-• Fixed loading default language pack on auth screen.
-• Fixed missing profile pictures in comments.
+• Fixed updating edited media.
+• Fixed switching folders with the same name.
+• Fix frozen scroll and missing UI elements when animations are turned off.
+• Fixed completely turning off animations.
