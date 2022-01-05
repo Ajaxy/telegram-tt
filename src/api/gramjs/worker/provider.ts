@@ -90,7 +90,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
     } else if (data.type === 'methodCallback') {
       requestStates.get(data.messageId)?.callback?.(...data.callbackArgs);
     } else if (data.type === 'unhandledError') {
-      throw data.error;
+      throw new Error(data.error?.message);
     }
   });
 }
