@@ -5,8 +5,9 @@ import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { LAYERS_ANIMATION_NAME } from '../../util/environment';
+import { IS_MAC_OS, LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import getKeyFromEvent from '../../util/getKeyFromEvent';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 
@@ -252,6 +253,25 @@ const LeftColumn: FC<StateProps> = ({
       : undefined),
     [activeChatFolder, content, handleReset],
   );
+
+  useEffect(() => {
+    if (content === LeftColumnContent.GlobalSearch) {
+      return undefined;
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.shiftKey && getKeyFromEvent(e) === 'f') {
+        e.preventDefault();
+        setContent(LeftColumnContent.GlobalSearch);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, false);
+    };
+  }, [content]);
 
   useEffect(() => {
     clearTwoFaError();
