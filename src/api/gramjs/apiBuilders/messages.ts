@@ -744,6 +744,11 @@ function buildAction(
   } else if (action instanceof GramJs.MessageActionBotAllowed) {
     text = 'Chat.Service.BotPermissionAllowed';
     translationValues.push(action.domain);
+  } else if (action instanceof GramJs.MessageActionCustomAction) {
+    text = action.message;
+  } else if (action instanceof GramJs.MessageActionChatJoinedByRequest) {
+    text = 'ChatService.UserJoinedGroupByRequest';
+    translationValues.push('%action_origin%');
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
