@@ -64,10 +64,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   onStickerSelect,
 }) => {
   const {
-    loadStickerSets,
     loadRecentStickers,
-    loadFavoriteStickers,
-    loadAddedStickers,
     addRecentSticker,
     unfaveSticker,
   } = getDispatch();
@@ -138,18 +135,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (loadAndPlay) {
-      loadStickerSets();
       loadRecentStickers();
-      loadFavoriteStickers();
       sendMessageAction({ type: 'chooseSticker' });
     }
-  }, [loadAndPlay, loadFavoriteStickers, loadRecentStickers, loadStickerSets, sendMessageAction]);
-
-  useEffect(() => {
-    if (addedSetIds?.length) {
-      loadAddedStickers();
-    }
-  }, [addedSetIds, loadAddedStickers]);
+  }, [loadAndPlay, loadRecentStickers, sendMessageAction]);
 
   useHorizontalScroll(headerRef.current);
 

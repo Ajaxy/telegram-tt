@@ -15,8 +15,8 @@ import {
 import searchWords from '../../../util/searchWords';
 import { selectStickerSet } from '../../selectors';
 
-const ADDED_SETS_THROTTLE = 500;
-const ADDED_SETS_THROTTLE_CHUNK = 50;
+const ADDED_SETS_THROTTLE = 200;
+const ADDED_SETS_THROTTLE_CHUNK = 10;
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 

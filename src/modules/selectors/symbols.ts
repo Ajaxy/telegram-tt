@@ -25,6 +25,12 @@ export function selectStickerSetByShortName(global: GlobalState, shortName: stri
 export function selectStickersForEmoji(global: GlobalState, emoji: string) {
   const stickerSets = Object.values(global.stickers.setsById);
   let stickersForEmoji: ApiSticker[] = [];
+  // Favorites
+  global.stickers.favorite.stickers.forEach((sticker) => {
+    if (sticker.emoji === emoji) stickersForEmoji.push(sticker);
+  });
+
+  // Added sets
   stickerSets.forEach(({ packs }) => {
     if (!packs) {
       return;

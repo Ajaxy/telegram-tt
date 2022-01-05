@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, memo, useEffect, useRef, useState,
+  FC, useCallback, memo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
@@ -69,8 +69,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     setSettingOption,
-    loadStickerSets,
-    loadAddedStickers,
   } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
@@ -89,16 +87,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
       subLabel: 'New line by Enter',
     },
   ] : undefined;
-
-  useEffect(() => {
-    loadStickerSets();
-  }, [loadStickerSets]);
-
-  useEffect(() => {
-    if (stickerSetIds?.length) {
-      loadAddedStickers();
-    }
-  }, [stickerSetIds, loadAddedStickers]);
 
   const handleAnimationLevelChange = useCallback((newLevel: number) => {
     ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {

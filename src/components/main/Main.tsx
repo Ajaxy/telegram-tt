@@ -69,6 +69,7 @@ type StateProps = {
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
   isCallFallbackConfirmOpen: boolean;
+  addedSetIds?: string[];
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -97,6 +98,7 @@ const Main: FC<StateProps> = ({
   language,
   wasTimeFormatSetManually,
   isCallFallbackConfirmOpen,
+  addedSetIds,
 }) => {
   const {
     loadAnimatedEmojis,
@@ -106,10 +108,14 @@ const Main: FC<StateProps> = ({
     loadTopInlineBots,
     loadEmojiKeywords,
     loadCountryList,
+    loadStickerSets,
+    loadAddedStickers,
+    loadFavoriteStickers,
     ensureTimeFormat,
     openStickerSetShortName,
     checkVersionNotification,
   } = getDispatch();
+  const isSynced = Boolean(lastSyncTime);
 
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -142,6 +148,18 @@ const Main: FC<StateProps> = ({
       loadCountryList({ langCode: language });
     }
   }, [language, lastSyncTime, loadCountryList, loadEmojiKeywords]);
+
+  // Sticker sets
+  useEffect(() => {
+    if (isSynced) {
+      if (!addedSetIds) {
+        loadStickerSets();
+        loadFavoriteStickers();
+      } else {
+        loadAddedStickers();
+      }
+    }
+  }, [isSynced, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers]);
 
   // Check version when service chat is ready
   useEffect(() => {
@@ -351,6 +369,7 @@ export default memo(withGlobal(
       language,
       wasTimeFormatSetManually,
       isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
+      addedSetIds: global.stickers.added.setIds,
     };
   },
 )(Main));

@@ -26,7 +26,9 @@ export default function useStickerTooltip(
     if (isDisabled) return;
 
     if (isAllowed && isSingleEmoji) {
-      loadStickersForEmoji({ emoji: cleanHtml });
+      loadStickersForEmoji({
+        emoji: IS_EMOJI_SUPPORTED ? cleanHtml : cleanHtml.match(/alt="(.+)"/)?.[1],
+      });
     } else if (hasStickers || !isSingleEmoji) {
       clearStickersForEmoji();
     }
