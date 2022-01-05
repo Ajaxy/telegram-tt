@@ -1031,7 +1031,7 @@ function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEnti
     type,
     offset,
     length,
-    ...('userId' in entity && typeof entity.userId === 'number' && { userId: entity.userId }),
+    ...(entity instanceof GramJs.MessageEntityMentionName && { userId: buildApiPeerId(entity.userId, 'user') }),
     ...('url' in entity && { url: entity.url }),
   };
 }
