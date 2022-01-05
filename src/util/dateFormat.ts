@@ -136,7 +136,9 @@ function formatDate(lang: LangFn, date: Date, format: string) {
     .replace('MM', String(monthIndex + 1).padStart(2, '0'))
     .replace('dd', String(day).padStart(2, '0'))
     .replace('d', String(day))
-    .replace('yyyy', String(date.getFullYear()));
+    .replace('yyyy', String(date.getFullYear()))
+    // Workaround for https://bugs.telegram.org/c/5777
+    .replace(/'de'/g, 'de');
 }
 
 export function formatMediaDateTime(
