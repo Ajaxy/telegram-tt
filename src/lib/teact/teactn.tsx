@@ -221,7 +221,7 @@ if (DEBUG) {
 
   document.addEventListener('dblclick', () => {
     // eslint-disable-next-line no-console
-    console.log(
+    console.warn(
       'GLOBAL CONTAINERS',
       orderBy(
         Array.from(containers.values())
