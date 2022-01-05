@@ -250,7 +250,7 @@ const DEBUG_components: AnyLiteral = {};
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console
-  console.log('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
+  console.warn('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
 });
 
 export function renderComponent(componentInstance: ComponentInstance) {
