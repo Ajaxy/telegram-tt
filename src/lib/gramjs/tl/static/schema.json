@@ -1,0 +1,10 @@
+[
+    "req_pq",
+    "req_pq_multi",
+    "req_pq_multi_new",
+    "req_DH_params",
+    "set_client_DH_params",
+    "destroy_auth_key",
+    "ping",
+    "ping_delay_disconnect"
+]
