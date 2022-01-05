@@ -3,27 +3,56 @@ const path = require('path');
 
 require('./types-generator/generate');
 
+function generateSchema(input, output, reducedMethods) {
+    let apiTl = fs.readFileSync(
+        path.resolve(__dirname, input),
+        'utf-8',
+    );
+
+    if (reducedMethods) {
+        apiTl = stripTl(apiTl);
+        const methodList = JSON.parse(fs.readFileSync(
+            path.resolve(__dirname, reducedMethods),
+            'utf-8',
+        ));
+        let isFunction = false;
+        const reducedApiTl = [];
+
+        for (const line of apiTl.split('\n')) {
+            if (!line) {
+                continue;
+            }
+
+            const match = line.match(/---(\w+)---/);
+
+            if (match) {
+                const [, followingTypes] = match;
+                isFunction = followingTypes === 'functions';
+                reducedApiTl.push(line);
+                continue;
+            }
+
+            if (!isFunction) {
+                reducedApiTl.push(line);
+            } else if (methodList.includes(line.match(/([\w.]+)#/)[1])) {
+                reducedApiTl.push(line);
+            }
+        }
+        apiTl = reducedApiTl.join('\n');
+    }
+
+    fs.writeFileSync(
+        path.resolve(__dirname, output),
+        `module.exports = \`${stripTl(apiTl)}\`;`,
+    );
+}
+
 function main() {
     const args = process.argv.slice(2);
     const FULL_SCHEMA = args.length && args[0] === 'full';
 
-    const apiTl = fs.readFileSync(
-        path.resolve(__dirname, `./static/api${!FULL_SCHEMA ? '.reduced' : ''}.tl`),
-        'utf-8',
-    );
-    fs.writeFileSync(
-        path.resolve(__dirname, './apiTl.js'),
-        `module.exports = \`${stripTl(apiTl)}\`;`,
-    );
-
-    const schemaTl = fs.readFileSync(
-        path.resolve(__dirname, `./static/schema${!FULL_SCHEMA ? '.reduced' : ''}.tl`),
-        'utf-8',
-    );
-    fs.writeFileSync(
-        path.resolve(__dirname, './schemaTl.js'),
-        `module.exports = \`${stripTl(schemaTl)}\`;`,
-    );
+    generateSchema('./static/api.tl', './apiTl.js', !FULL_SCHEMA && './static/api.json');
+    generateSchema('./static/schema.tl', './schemaTl.js', !FULL_SCHEMA && './static/schema.json');
 }
 
 function stripTl(tl) {
