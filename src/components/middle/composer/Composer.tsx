@@ -44,6 +44,7 @@ import {
   getChatSlowModeOptions,
   isUserId,
   isChatAdmin,
+  isChatSuperGroup,
 } from '../../../modules/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
@@ -59,20 +60,21 @@ import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationF
 import { getServerTime } from '../../../util/serverTime';
 
 import useFlag from '../../../hooks/useFlag';
+import usePrevious from '../../../hooks/usePrevious';
+import useStickerTooltip from './hooks/useStickerTooltip';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useLang from '../../../hooks/useLang';
+import useSendMessageAction from '../../../hooks/useSendMessageAction';
+import useInterval from '../../../hooks/useInterval';
+import useOnChange from '../../../hooks/useOnChange';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
 import useDraft from './hooks/useDraft';
 import useEditing from './hooks/useEditing';
-import usePrevious from '../../../hooks/usePrevious';
-import useStickerTooltip from './hooks/useStickerTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useLang from '../../../hooks/useLang';
 import useInlineBotTooltip from './hooks/useInlineBotTooltip';
 import useBotCommandTooltip from './hooks/useBotCommandTooltip';
-import useSendMessageAction from '../../../hooks/useSendMessageAction';
-import useInterval from '../../../hooks/useInterval';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -255,10 +257,16 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
   useEffect(() => {
-    if (chatId && lastSyncTime && !sendAsIds && isReady) {
+    if (chatId && chat && lastSyncTime && !sendAsIds && isReady && isChatSuperGroup(chat)) {
       loadSendAs({ chatId });
     }
-  }, [chatId, isReady, lastSyncTime, loadSendAs, sendAsIds]);
+  }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsIds]);
+
+  const shouldAnimateSendAsButtonRef = useRef(false);
+  useOnChange(([prevChatId, prevSendAsIds]) => {
+    // We only animate send-as button if `sendAsIds` was missing when opening the chat
+    shouldAnimateSendAsButtonRef.current = Boolean(chatId === prevChatId && sendAsIds && !prevSendAsIds);
+  }, [chatId, sendAsIds]);
 
   useLayoutEffect(() => {
     if (!appendixRef.current) return;
@@ -722,6 +730,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
 
     if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
+      closeBotCommandMenu();
+      closeSymbolMenu();
       openSendAsMenu();
       return;
     }
@@ -921,13 +931,13 @@ const Composer: FC<OwnProps & StateProps> = ({
               <i className="icon-bot-commands-filled" />
             </ResponsiveHoverButton>
           )}
-          {sendAsIds && (sendAsUser || sendAsChat) && (
+          {!!sendAsIds?.length && (sendAsUser || sendAsChat) && (
             <Button
               round
               color="translucent"
               onClick={isSendAsMenuOpen ? closeSendAsMenu : handleSendAsMenuOpen}
               ariaLabel={lang('SendMessageAsTitle')}
-              className="send-as-button"
+              className={buildClassName('send-as-button', shouldAnimateSendAsButtonRef.current && 'appear-animation')}
             >
               <Avatar
                 user={sendAsUser}

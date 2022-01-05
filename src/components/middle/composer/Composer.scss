@@ -134,14 +134,8 @@
     z-index: 1;
   }
 
-  body:not(.animation-level-0) & .send-as-button {
+  body:not(.animation-level-0) & .send-as-button.appear-animation {
     animation: 0.25s ease-in-out forwards show-send-as-button;
-  }
-
-  @media (max-width: 600px) {
-    .send-as-button {
-      animation: none !important;
-    }
   }
 
   .mobile-symbol-menu-button {

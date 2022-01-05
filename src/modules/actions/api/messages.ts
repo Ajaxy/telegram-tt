@@ -1003,6 +1003,10 @@ addReducer('loadSendAs', (global, actions, payload) => {
   (async () => {
     const result = await callApi('fetchSendAs', { chat });
     if (!result) {
+      global = updateChat(global, chatId, {
+        sendAsIds: [],
+      });
+      setGlobal(global);
       return;
     }
 
