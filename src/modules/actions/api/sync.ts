@@ -5,7 +5,6 @@ import {
 import {
   ApiChat, ApiFormattedText, ApiMessage, ApiUser, MAIN_THREAD_ID,
 } from '../../../api/types';
-import { GlobalActions } from '../../../global/types';
 
 import {
   CHAT_LIST_LOAD_SLICE, DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
@@ -44,8 +43,8 @@ addReducer('sync', (global, actions) => {
   void sync(actions.afterSync);
 });
 
-addReducer('afterSync', (global, actions) => {
-  void afterSync(actions);
+addReducer('afterSync', () => {
+  void afterSync();
 });
 
 async function sync(afterSyncCallback: () => void) {
@@ -73,13 +72,11 @@ async function sync(afterSyncCallback: () => void) {
   afterSyncCallback();
 }
 
-async function afterSync(actions: GlobalActions) {
+async function afterSync() {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START AFTER-SYNC');
   }
-
-  actions.loadFavoriteStickers();
 
   await Promise.all([
     loadAndUpdateUsers(),
