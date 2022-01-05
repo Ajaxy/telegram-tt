@@ -10,6 +10,7 @@ import {
   selectCanDownloadSelectedMessages,
   selectCanReportSelectedMessages,
   selectCurrentMessageList,
+  selectHasProtectedMessage,
   selectSelectedMessagesCount,
 } from '../../modules/selectors';
 import useFlag from '../../hooks/useFlag';
@@ -37,6 +38,7 @@ type StateProps = {
   canDeleteMessages?: boolean;
   canReportMessages?: boolean;
   canDownloadMessages?: boolean;
+  hasProtectedMessage?: boolean;
   selectedMessageIds?: number[];
 };
 
@@ -49,6 +51,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   canDeleteMessages,
   canReportMessages,
   canDownloadMessages,
+  hasProtectedMessage,
   selectedMessageIds,
 }) => {
   const {
@@ -126,13 +129,15 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         {!!selectedMessagesCount && (
           <div className="MessageSelectToolbar-actions">
             {messageListType !== 'scheduled' && (
-              renderButton('forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages)
+              renderButton(
+                'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages, hasProtectedMessage,
+              )
             )}
             {canReportMessages && (
               renderButton('flag', lang('Conversation.ReportMessages'), openReportModal)
             )}
             {canDownloadMessages && (
-              renderButton('download', lang('lng_media_download'), handleDownload)
+              renderButton('download', lang('lng_media_download'), handleDownload, hasProtectedMessage)
             )}
             {renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, !canDeleteMessages, true)}
           </div>
@@ -154,11 +159,12 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { type: messageListType } = selectCurrentMessageList(global) || {};
+    const { type: messageListType, chatId } = selectCurrentMessageList(global) || {};
     const { canDelete } = selectCanDeleteSelectedMessages(global);
     const canReport = selectCanReportSelectedMessages(global);
     const canDownload = selectCanDownloadSelectedMessages(global);
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
+    const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
 
     return {
       isSchedule: messageListType === 'scheduled',
@@ -167,6 +173,7 @@ export default memo(withGlobal<OwnProps>(
       canReportMessages: canReport,
       canDownloadMessages: canDownload,
       selectedMessageIds,
+      hasProtectedMessage,
     };
   },
 )(MessageSelectToolbar));

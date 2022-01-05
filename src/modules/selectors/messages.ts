@@ -860,6 +860,20 @@ export function selectIsMessageProtected(global: GlobalState, message?: ApiMessa
   return message ? message.isProtected || selectChat(global, message.chatId)?.isProtected : false;
 }
 
+export function selectHasProtectedMessage(global: GlobalState, chatId: string, messageIds?: number[]) {
+  if (selectChat(global, chatId)?.isProtected) {
+    return true;
+  }
+
+  if (!messageIds) {
+    return false;
+  }
+
+  const messages = selectChatMessages(global, chatId);
+
+  return messageIds.some((messageId) => messages[messageId]?.isProtected);
+}
+
 export function selectSponsoredMessage(global: GlobalState, chatId: string) {
   const chat = selectChat(global, chatId);
   const message = chat && isChatChannel(chat) ? global.messages.sponsoredByChatId[chatId] : undefined;
