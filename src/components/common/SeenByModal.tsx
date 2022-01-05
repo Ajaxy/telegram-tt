@@ -46,7 +46,7 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       onClose={closeSeenByModal}
       className="narrow"
-      title={lang("MessageSeen")}
+      title={lang('General.MessageSeen')}
     >
       <div dir={lang.isRtl ? 'rtl' : undefined}>
         {renderingMemberIds && renderingMemberIds.map((userId) => (
