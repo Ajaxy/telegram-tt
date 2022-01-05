@@ -14,7 +14,7 @@
     "lint": "tsc && eslint . --ext .ts,.tsx --ignore-pattern src/lib/gramjs",
     "lint:fix": "npm run lint -- --fix",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
-    "gramjs:lint:fix": "eslint ./src/lib/gramjs --ignore-path=src/lib/gramjs/.eslintignore --fix",
+    "gramjs:lint:fix": "eslint ./src/lib/gramjs --fix",
     "test": "cross-env APP_ENV=test jest --verbose --forceExit",
     "prepare": "husky install"
   },
@@ -28,7 +28,7 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": "eslint --fix --ignore-path=src/lib/gramjs/.eslintignore"
+    "*.{ts,tsx,js}": "eslint --fix"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",

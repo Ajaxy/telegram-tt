@@ -130,7 +130,7 @@ export default class WorkerConnector {
         const requestState = requestStates.get(data.messageId);
         requestState?.callback?.(...data.callbackArgs);
       } else if (data.type === 'unhandledError') {
-        throw data.error;
+        throw new Error(data.error?.message);
       }
     });
   }
