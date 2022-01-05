@@ -304,7 +304,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   // Remember scroll position before repositioning it
   useOnChange(() => {
-    if (!messageIds || !listItemElementsRef.current || !isReady) {
+    if (!messageIds || !listItemElementsRef.current) {
       return;
     }
 
@@ -321,7 +321,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     anchorIdRef.current = anchor.id;
     anchorTopRef.current = anchor.getBoundingClientRect().top;
     // This should match deps for `useLayoutEffectWithPrevDeps` below
-  }, [messageIds, isViewportNewest, containerHeight, hasTools, isReady]);
+  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
 
   // Handles updated message list, takes care of scroll repositioning
   useLayoutEffectWithPrevDeps(([
