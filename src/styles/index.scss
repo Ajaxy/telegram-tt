@@ -84,9 +84,9 @@ body.cursor-ew-resize {
   display: none;
   position: absolute;
   top: 0;
-  right: -.1875rem;
+  right: -.25rem;
   bottom: 0;
-  width: .1875rem;
+  width: .25rem;
   z-index: var(--z-resize-handle);
   cursor: ew-resize;
 
