@@ -121,13 +121,9 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     isChannel,
     isSuperGroup,
     currentUserId,
-    chat.isCreator,
     chat.id,
     onClose,
-    deleteHistory,
-    deleteChatUser,
     leaveChannel,
-    deleteChannel,
   ]);
 
   function renderHeader() {
