@@ -8,6 +8,7 @@ import { EDITABLE_INPUT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import getKeyFromEvent from '../../../util/getKeyFromEvent';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 import useFlag from '../../../hooks/useFlag';
@@ -306,16 +307,16 @@ const TextFormatter: FC<OwnProps> = ({
   }
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const HANDLERS_BY_KEY_CODE: Record<string, AnyToVoidFunction> = {
-      KeyK: openLinkControl,
-      KeyB: handleBoldText,
-      KeyU: handleUnderlineText,
-      KeyI: handleItalicText,
-      KeyM: handleMonospaceText,
-      KeyS: handleStrikethroughText,
+    const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
+      k: openLinkControl,
+      b: handleBoldText,
+      u: handleUnderlineText,
+      i: handleItalicText,
+      m: handleMonospaceText,
+      s: handleStrikethroughText,
     };
 
-    const handler = HANDLERS_BY_KEY_CODE[e.code];
+    const handler = HANDLERS_BY_KEY[getKeyFromEvent(e)];
 
     if (
       e.altKey
