@@ -2,7 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
 import {
-  ApiChat, ApiMediaFormat, ApiUser, ApiUserStatus,
+  ApiChat, ApiMediaFormat, ApiPhoto, ApiUser, ApiUserStatus,
 } from '../../api/types';
 
 import { IS_TEST } from '../../config';
@@ -30,6 +30,7 @@ type OwnProps = {
   size?: 'micro' | 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   chat?: ApiChat;
   user?: ApiUser;
+  photo?: ApiPhoto;
   userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
@@ -42,6 +43,7 @@ const Avatar: FC<OwnProps> = ({
   size = 'large',
   chat,
   user,
+  photo,
   userStatus,
   text,
   isSavedMessages,
@@ -57,6 +59,8 @@ const Avatar: FC<OwnProps> = ({
       imageHash = getChatAvatarHash(user);
     } else if (chat) {
       imageHash = getChatAvatarHash(chat);
+    } else if (photo) {
+      imageHash = `photo${photo.id}?size=m`;
     }
   }
 

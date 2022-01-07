@@ -1,4 +1,4 @@
-import { ApiDocument } from './messages';
+import { ApiDocument, ApiPhoto } from './messages';
 
 export interface ApiInitialArgs {
   userAgent: string;
@@ -89,9 +89,12 @@ export type ApiFieldError = {
 
 export type ApiInviteInfo = {
   title: string;
+  about?: string;
   hash: string;
   isChannel?: boolean;
   participantsCount?: number;
+  isRequestNeeded?: true;
+  photo?: ApiPhoto;
 };
 
 export interface ApiCountry {

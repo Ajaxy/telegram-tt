@@ -1,7 +1,7 @@
 import React, { FC, memo } from '../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { ApiError, ApiInviteInfo } from '../../api/types';
+import { ApiError, ApiInviteInfo, ApiPhoto } from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
@@ -10,6 +10,7 @@ import renderText from '../common/helpers/renderText';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Avatar from '../common/Avatar';
 
 import './Dialogs.scss';
 
@@ -26,9 +27,23 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
     return undefined;
   }
 
+  function renderInviteHeader(title: string, photo?: ApiPhoto) {
+    return (
+      <div className="modal-header">
+        {photo && <Avatar size="small" photo={photo} />}
+        <div className="modal-title">
+          {renderText(title)}
+        </div>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={dismissDialog}>
+          <i className="icon-close" />
+        </Button>
+      </div>
+    );
+  }
+
   const renderInvite = (invite: ApiInviteInfo) => {
     const {
-      hash, title, participantsCount, isChannel,
+      hash, title, about, participantsCount, isChannel, photo, isRequestNeeded,
     } = invite;
 
     const handleJoinClick = () => {
@@ -43,16 +58,28 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
       : lang('Members', participantsCount, 'i');
 
     const joinText = isChannel ? lang('ChannelJoin') : lang('JoinGroup');
+    const requestToJoinText = isChannel
+      ? lang('MemberRequests.RequestToJoinChannel') : lang('MemberRequests.RequestToJoinGroup');
 
     return (
       <Modal
         isOpen
         onClose={dismissDialog}
         className="error"
-        title={title}
+        header={renderInviteHeader(title, photo)}
       >
+        {about && <p className="modal-about">{renderText(about)}</p>}
         {participantsCount !== undefined && <p>{participantsText}</p>}
-        <Button isText className="confirm-dialog-button" onClick={handleJoinClick}>{joinText}</Button>
+        {isRequestNeeded && (
+          <p className="modal-help">
+            {isChannel
+              ? lang('MemberRequests.RequestToJoinDescriptionChannel')
+              : lang('MemberRequests.RequestToJoinDescriptionGroup')}
+          </p>
+        )}
+        <Button isText className="confirm-dialog-button" onClick={handleJoinClick}>
+          {isRequestNeeded ? requestToJoinText : joinText}
+        </Button>
         <Button isText className="confirm-dialog-button" onClick={dismissDialog}>{lang('Cancel')}</Button>
       </Modal>
     );

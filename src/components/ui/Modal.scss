@@ -139,6 +139,16 @@
     text-align: initial;
   }
 
+  .modal-about {
+    font-weight: bold;
+  }
+
+  .modal-help {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+
   .dialog-buttons {
     display: flex;
     align-items: flex-end;
