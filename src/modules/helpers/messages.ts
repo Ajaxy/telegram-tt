@@ -3,13 +3,17 @@ import {
 } from '../../api/types';
 import { LangFn } from '../../hooks/useLang';
 
-import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID, RE_LINK_TEMPLATE } from '../../config';
+import {
+  LOCAL_MESSAGE_ID_BASE,
+  SERVICE_NOTIFICATIONS_USER_ID,
+  RE_LINK_TEMPLATE,
+  CONTENT_NOT_SUPPORTED,
+} from '../../config';
 import { getUserFullName } from './users';
 import { isWebpSupported, IS_OPUS_SUPPORTED } from '../../util/environment';
 import { getChatTitle, isUserId } from './chats';
 import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
 
-const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 const TRUNCATED_SUMMARY_LENGTH = 80;
 
