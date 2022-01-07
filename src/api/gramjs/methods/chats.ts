@@ -39,8 +39,9 @@ import {
   buildChatBannedRights,
   buildChatAdminRights,
 } from '../gramjsBuilders';
-import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import { buildApiPhoto } from '../apiBuilders/common';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 let onUpdate: OnApiUpdate;
@@ -1005,13 +1006,24 @@ export async function openChatByInvite(hash: string) {
   let chat: ApiChat | undefined;
 
   if (result instanceof GramJs.ChatInvite) {
+    const {
+      photo, participantsCount, title, channel, requestNeeded, about,
+    } = result;
+
+    if (photo instanceof GramJs.Photo) {
+      addPhotoToLocalDb(result.photo);
+    }
+
     onUpdate({
       '@type': 'showInvite',
       data: {
-        title: result.title,
+        title,
+        about,
         hash,
-        participantsCount: result.participantsCount,
-        isChannel: result.channel,
+        participantsCount,
+        isChannel: channel,
+        isRequestNeeded: requestNeeded,
+        ...(photo instanceof GramJs.Photo && { photo: buildApiPhoto(photo) }),
       },
     });
   } else {
