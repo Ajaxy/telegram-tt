@@ -1,26 +1,20 @@
-**Telegram Web Z was updated to version 1.27**
-
-🎄 **Happy New Year 2022!** 🎄
+**Telegram Web Z was updated to version 1.28**
 
 👏 **Harder**
-• Protected Content in Groups and Channels:
-  – Content creators can restrict the ability to forward messages from their groups and channels.
-  – When forwarding is restricted, users will also be unable to directly save media from the chat or take screenshots.
-  – Toggle this option on or off via Chat Info > Group / Channel Type.
-• Anonymous Posting in Public Groups
-  – Comment as one of your channels in public groups and channel comments.
-  – Tap the profile picture next to the message bar to choose which channel you will appear as when you send the message.
-• Your peers will now be notified when you are typing a message or selecting a sticker.
+• Support for join requests in groups and channels.
+• Support for more service messages.
 
 🤩 **Better**
-• Detailed info is now shown when moving cursor over message timestamp.
-
-🚀 **Faster**
-• Some optimizations for heavy calculations.
-• The UI is even more responsive now.
+• Easier to select and adjust left column width.
+• Redundant single quotes removed in Spanish and French translations.
+• Support for hotkeys on non-qwerty keyboards.
+• Use Ctrl+Shift+F or Ctrl+F (in PWA mode) to open global or local search.
+• Chat: "Add to folder..." only appears for users with folders.
+• Support for `start` parameter in `tg://resolve` links.
 
 💪 **Stronger**
-• Fixed updating edited media.
-• Fixed switching folders with the same name.
-• Fix frozen scroll and missing UI elements when animations are turned off.
-• Fixed completely turning off animations.
+• Fixed focusing on messages in a chat that was previously open.
+• Fixed missing stickers in sticker suggestions.
+• Fixed opening chats from user mentions.
+• Fixed various glitches when appearing as a channel in public groups.
+• Removed redundant download and forward options in chats with protected content.
