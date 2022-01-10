@@ -63,6 +63,11 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   USER_ALREADY_PARTICIPANT: 'You already in the group',
   SCHEDULE_DATE_INVALID: 'Invalid schedule date provided',
   WALLPAPER_DIMENSIONS_INVALID: 'The wallpaper dimensions are invalid, please select another file',
+  ADMINS_TOO_MUCH: 'There are too many admins',
+  ADMIN_RANK_EMOJI_NOT_ALLOWED: 'An admin rank cannot contain emojis',
+  ADMIN_RANK_INVALID: 'The specified admin rank is invalid',
+  FRESH_CHANGE_ADMINS_FORBIDDEN: 'You were just elected admin, you can\'t add or modify other admins yet',
+  INPUT_USER_DEACTIVATED: 'The specified user was deleted',
 };
 
 export const SHIPPING_ERRORS: Record<string, ApiFieldError> = {

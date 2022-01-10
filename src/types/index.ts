@@ -317,7 +317,9 @@ export enum ManagementScreens {
   ChatAdministrators,
   GroupRecentActions,
   ChatAdminRights,
+  ChatNewAdminRights,
   GroupMembers,
+  GroupAddAdmins,
 }
 
 export type ManagementType = 'user' | 'group' | 'channel';

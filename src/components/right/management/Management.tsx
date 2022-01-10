@@ -73,6 +73,7 @@ const Management: FC<OwnProps & StateProps> = ({
                 ManagementScreens.GroupUserPermissionsCreate,
                 ManagementScreens.GroupUserPermissions,
                 ManagementScreens.ChatAdminRights,
+                ManagementScreens.ChatNewAdminRights,
                 ManagementScreens.GroupRecentActions,
               ].includes(currentScreen)}
             />
@@ -90,6 +91,7 @@ const Management: FC<OwnProps & StateProps> = ({
                 ManagementScreens.Discussion,
                 ManagementScreens.ChatPrivacyType,
                 ManagementScreens.ChatAdminRights,
+                ManagementScreens.ChatNewAdminRights,
                 ManagementScreens.GroupRecentActions,
               ].includes(currentScreen)}
             />
@@ -175,6 +177,7 @@ const Management: FC<OwnProps & StateProps> = ({
           onChatMemberSelect={onChatMemberSelect}
           isActive={isActive || [
             ManagementScreens.ChatAdminRights,
+            ManagementScreens.ChatNewAdminRights,
             ManagementScreens.GroupRecentActions,
           ].includes(currentScreen)}
           onClose={onClose}
@@ -202,6 +205,19 @@ const Management: FC<OwnProps & StateProps> = ({
         />
       );
 
+    case ManagementScreens.ChatNewAdminRights:
+      return (
+        <ManageGroupAdminRights
+          chatId={chatId}
+          isNewAdmin
+          selectedChatMemberId={selectedChatMemberId}
+          isPromotedByCurrentUser={isPromotedByCurrentUser}
+          onScreenSelect={onScreenSelect}
+          isActive={isActive}
+          onClose={onClose}
+        />
+      );
+
     case ManagementScreens.ChannelSubscribers:
     case ManagementScreens.GroupMembers:
       return (
@@ -209,6 +225,18 @@ const Management: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           isActive={isActive}
           onClose={onClose}
+        />
+      );
+
+    case ManagementScreens.GroupAddAdmins:
+      return (
+        <ManageGroupMembers
+          chatId={chatId}
+          noAdmins
+          isActive={isActive}
+          onClose={onClose}
+          onScreenSelect={onScreenSelect}
+          onChatMemberSelect={onChatMemberSelect}
         />
       );
   }

@@ -24,6 +24,7 @@ type OwnProps = {
   chatId: string;
   selectedChatMemberId?: string;
   isPromotedByCurrentUser?: boolean;
+  isNewAdmin?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
   onClose: NoneToVoidFunction;
   isActive: boolean;
@@ -35,12 +36,15 @@ type StateProps = {
   currentUserId?: string;
   isChannel: boolean;
   isFormFullyDisabled: boolean;
+  defaultRights?: ApiChatAdminRights;
 };
 
 const CUSTOM_TITLE_MAX_LENGTH = 16;
 
 const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
+  isNewAdmin,
   selectedChatMemberId,
+  defaultRights,
   onScreenSelect,
   chat,
   usersById,
@@ -53,7 +57,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   const { updateChatAdmin } = getDispatch();
 
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
-  const [isTouched, setIsTouched] = useState(false);
+  const [isTouched, setIsTouched] = useState(isNewAdmin);
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
@@ -62,12 +66,18 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   useHistoryBack(isActive, onClose);
 
   const selectedChatMember = useMemo(() => {
-    if (!chat.fullInfo || !chat.fullInfo.adminMembers) {
-      return undefined;
+    const selectedAdminMember = chat.fullInfo?.adminMembers?.find(({ userId }) => userId === selectedChatMemberId);
+
+    if (isNewAdmin) {
+      // If selectedAdminMember is fullfilled, it means that we are editing an existing admin (after a user
+      // has been promoted as admin)
+      return selectedAdminMember
+        ? undefined
+        : chat.fullInfo?.members?.find(({ userId }) => userId === selectedChatMemberId);
     }
 
-    return chat.fullInfo.adminMembers.find(({ userId }) => userId === selectedChatMemberId);
-  }, [chat, selectedChatMemberId]);
+    return selectedAdminMember;
+  }, [chat.fullInfo, isNewAdmin, selectedChatMemberId]);
 
   useEffect(() => {
     if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
@@ -76,11 +86,11 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
 
   useEffect(() => {
-    setPermissions((selectedChatMember?.adminRights) || {});
-    setCustomTitle(((selectedChatMember?.customTitle) || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
-    setIsTouched(false);
+    setPermissions((isNewAdmin ? defaultRights : selectedChatMember?.adminRights) || {});
+    setCustomTitle(((isNewAdmin ? 'admin' : selectedChatMember?.customTitle) || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
+    setIsTouched(Boolean(isNewAdmin));
     setIsLoading(false);
-  }, [selectedChatMember]);
+  }, [defaultRights, isNewAdmin, selectedChatMember]);
 
   const handlePermissionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target;
@@ -108,7 +118,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
       adminRights: permissions,
       customTitle,
     });
-  }, [chat, selectedChatMemberId, permissions, customTitle, updateChatAdmin]);
+  }, [selectedChatMemberId, updateChatAdmin, chat.id, permissions, customTitle]);
 
   const handleDismissAdmin = useCallback(() => {
     if (!selectedChatMemberId) {
@@ -136,7 +146,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   }, [chat, isFormFullyDisabled]);
 
   const memberStatus = useMemo(() => {
-    if (!selectedChatMember) {
+    if (isNewAdmin || !selectedChatMember) {
       return undefined;
     }
 
@@ -153,7 +163,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
     }
 
     return lang('ChannelAdmin');
-  }, [selectedChatMember, usersById, lang]);
+  }, [isNewAdmin, selectedChatMember, usersById, lang]);
 
   const handleCustomTitleChange = useCallback((e) => {
     const { value } = e.target;
@@ -307,7 +317,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           )}
 
-          {currentUserId !== selectedChatMemberId && !isFormFullyDisabled && (
+          {currentUserId !== selectedChatMemberId && !isFormFullyDisabled && !isNewAdmin && (
             <ListItem icon="delete" ripple destructive onClick={openDismissConfirmationDialog}>
               {lang('EditAdminRemoveAdmin')}
             </ListItem>
@@ -328,14 +338,16 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
         )}
       </FloatingActionButton>
 
-      <ConfirmDialog
-        isOpen={isDismissConfirmationDialogOpen}
-        onClose={closeDismissConfirmationDialog}
-        text="Are you sure you want to dismiss this admin?"
-        confirmLabel="Dismiss"
-        confirmHandler={handleDismissAdmin}
-        confirmIsDestructive
-      />
+      {!isNewAdmin && (
+        <ConfirmDialog
+          isOpen={isDismissConfirmationDialogOpen}
+          onClose={closeDismissConfirmationDialog}
+          text="Are you sure you want to dismiss this admin?"
+          confirmLabel={lang('Channel.Admin.Dismiss')}
+          confirmHandler={handleDismissAdmin}
+          confirmIsDestructive
+        />
+      )}
     </div>
   );
 };
@@ -354,6 +366,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       isChannel,
       isFormFullyDisabled,
+      defaultRights: chat.adminRights,
     };
   },
 )(ManageGroupAdminRights));
