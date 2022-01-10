@@ -86,7 +86,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           return true;
         }
 
-        return user.canBeInvitedToGroup && !user.isSelf && !isUserBot(user);
+        return !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
       }),
       chatsById,
       false,
