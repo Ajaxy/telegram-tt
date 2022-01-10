@@ -18,7 +18,7 @@ export type EmojiData = {
 const EMOJI_EXCEPTIONS: [string | RegExp, string][] = [
   [/\u{1f3f3}\u200d\u{1f308}/gu, '\u{1f3f3}\ufe0f\u200d\u{1f308}'], // 🏳‍🌈
   [/\u{1f3f3}\u200d\u26a7\ufe0f/gu, '\u{1f3f3}\ufe0f\u200d\u26a7\ufe0f'], // 🏳️‍⚧️
-  [/\u{1f937}\u200d\u2642/gu, '\u{1f937}\u200d\u2642\ufe0f'], // 🤷‍♂️
+  [/\u{1f937}\u200d\u2642[^\ufe0f]/gu, '\u{1f937}\u200d\u2642\ufe0f'], // 🤷‍♂️
 ];
 
 function unifiedToNative(unified: string) {
