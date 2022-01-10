@@ -1,9 +1,11 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
+import { ApiChatMember, ApiUserStatus } from '../../../api/types';
+import { ManagementScreens } from '../../../types';
+
 import { selectChat } from '../../../modules/selectors';
 import { sortUserIds, isChatChannel } from '../../../modules/helpers';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -14,46 +16,62 @@ import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;
-  onClose: NoneToVoidFunction;
   isActive: boolean;
+  noAdmins?: boolean;
+  onClose: NoneToVoidFunction;
+  onScreenSelect?: (screen: ManagementScreens) => void;
+  onChatMemberSelect?: (memberId: string, isPromotedByCurrentUser?: boolean) => void;
 };
 
 type StateProps = {
-  usersById: Record<string, ApiUser>;
   userStatusesById: Record<string, ApiUserStatus>;
   members?: ApiChatMember[];
+  adminMembers?: ApiChatMember[];
   isChannel?: boolean;
   serverTimeOffset: number;
 };
 
 const ManageGroupMembers: FC<OwnProps & StateProps> = ({
+  noAdmins,
   members,
-  usersById,
+  adminMembers,
   userStatusesById,
   isChannel,
-  onClose,
   isActive,
   serverTimeOffset,
+  onClose,
+  onScreenSelect,
+  onChatMemberSelect,
 }) => {
   const { openUserInfo } = getDispatch();
 
   const memberIds = useMemo(() => {
+    // No need for expensive global updates on users, so we avoid them
+    const usersById = getGlobal().users.byId;
     if (!members || !usersById) {
       return undefined;
     }
+    const adminIds = noAdmins ? adminMembers?.map(({ userId }) => userId) || [] : [];
 
-    return sortUserIds(
+    const userIds = sortUserIds(
       members.map(({ userId }) => userId),
       usersById,
       userStatusesById,
       undefined,
       serverTimeOffset,
     );
-  }, [members, serverTimeOffset, usersById, userStatusesById]);
+
+    return noAdmins ? userIds.filter((userId) => !adminIds.includes(userId)) : userIds;
+  }, [members, noAdmins, adminMembers, userStatusesById, serverTimeOffset]);
 
   const handleMemberClick = useCallback((id: string) => {
-    openUserInfo({ id });
-  }, [openUserInfo]);
+    if (noAdmins) {
+      onChatMemberSelect!(id, false);
+      onScreenSelect!(ManagementScreens.ChatNewAdminRights);
+    } else {
+      openUserInfo({ id });
+    }
+  }, [noAdmins, onChatMemberSelect, onScreenSelect, openUserInfo]);
 
   useHistoryBack(isActive, onClose);
 
@@ -88,13 +106,14 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const { byId: usersById, statusesById: userStatusesById } = global.users;
+    const { statusesById: userStatusesById } = global.users;
     const members = chat?.fullInfo?.members;
+    const adminMembers = chat?.fullInfo?.adminMembers;
     const isChannel = chat && isChatChannel(chat);
 
     return {
       members,
-      usersById,
+      adminMembers,
       userStatusesById,
       isChannel,
       serverTimeOffset: global.serverTimeOffset,

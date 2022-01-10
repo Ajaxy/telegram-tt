@@ -77,7 +77,9 @@ enum HeaderContent {
   ManageGroupUserPermissions,
   ManageGroupRecentActions,
   ManageGroupAdminRights,
+  ManageGroupNewAdminRights,
   ManageGroupMembers,
+  ManageGroupAddAdmins,
   StickerSearch,
   GifSearch,
   PollResults,
@@ -187,8 +189,12 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.ManageGroupRecentActions
     ) : managementScreen === ManagementScreens.ChatAdminRights ? (
       HeaderContent.ManageGroupAdminRights
+    ) : managementScreen === ManagementScreens.ChatNewAdminRights ? (
+      HeaderContent.ManageGroupNewAdminRights
     ) : managementScreen === ManagementScreens.GroupMembers ? (
       HeaderContent.ManageGroupMembers
+    ) : managementScreen === ManagementScreens.GroupAddAdmins ? (
+      HeaderContent.ManageGroupAddAdmins
     ) : undefined // Never reached
   ) : undefined; // When column is closed
 
@@ -235,6 +241,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang('Group.Info.AdminLog')}</h3>;
       case HeaderContent.ManageGroupAdminRights:
         return <h3>{lang('EditAdminRights')}</h3>;
+      case HeaderContent.ManageGroupNewAdminRights:
+        return <h3>{lang('SetAsAdmin')}</h3>;
       case HeaderContent.ManageGroupPermissions:
         return <h3>{lang('ChannelPermissions')}</h3>;
       case HeaderContent.ManageGroupRemovedUsers:
@@ -243,6 +251,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang('ChannelAddException')}</h3>;
       case HeaderContent.ManageGroupUserPermissions:
         return <h3>{lang('UserRestrictions')}</h3>;
+      case HeaderContent.ManageGroupAddAdmins:
+        return <h3>{lang('Channel.Management.AddModerator')}</h3>;
       case HeaderContent.StickerSearch:
         return (
           <SearchInput

@@ -763,8 +763,8 @@ addReducer('updateChatAdmin', (global, actions, payload) => {
       chat, user, adminRights, customTitle,
     });
 
+    const chatAfterUpdate = await callApi('fetchFullChat', chat);
     const newGlobal = getGlobal();
-    const chatAfterUpdate = selectChat(newGlobal, chatId);
 
     if (!chatAfterUpdate || !chatAfterUpdate.fullInfo) {
       return;

@@ -133,6 +133,8 @@ const RightColumn: FC<StateProps> = ({
             setIsPromotedByCurrentUser(undefined);
             break;
           case ManagementScreens.ChatAdminRights:
+          case ManagementScreens.ChatNewAdminRights:
+          case ManagementScreens.GroupAddAdmins:
           case ManagementScreens.GroupRecentActions:
             setManagementScreen(ManagementScreens.ChatAdministrators);
             break;
