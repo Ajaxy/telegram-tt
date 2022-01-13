@@ -100,7 +100,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
     ? prevInlineBotResults
     : inlineBotResults;
 
-  if (!shouldRender || !renderedInlineBotResults || (!renderedInlineBotResults.length && !switchPm)) {
+  if (!shouldRender || !(renderedInlineBotResults?.length || switchPm)) {
     return undefined;
   }
 
@@ -153,6 +153,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
           );
 
         case 'video':
+        case 'file':
         case 'game':
           return (
             <MediaResult
@@ -190,7 +191,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
       sensitiveArea={160}
     >
       {switchPm && renderSwitchPm()}
-      {renderContent()}
+      {renderedInlineBotResults?.length && renderContent()}
     </InfiniteScroll>
   );
 };

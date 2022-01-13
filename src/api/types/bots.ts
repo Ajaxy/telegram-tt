@@ -4,7 +4,7 @@ import {
 
 export type ApiInlineResultType = (
   'article' | 'audio' | 'contact' | 'document' | 'game' | 'gif' | 'location' | 'mpeg4_gif' |
-  'photo' | 'sticker' | 'venue' | 'video' | 'voice'
+  'photo' | 'sticker' | 'venue' | 'video' | 'voice' | 'file'
 );
 
 export interface ApiWebDocument {
