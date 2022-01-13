@@ -1,12 +1,13 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, { FC, memo, useEffect } from '../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiError, ApiInviteInfo, ApiPhoto } from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
-import useLang from '../../hooks/useLang';
 import renderText from '../common/helpers/renderText';
+import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -20,8 +21,15 @@ type StateProps = {
 
 const Dialogs: FC<StateProps> = ({ dialogs }) => {
   const { dismissDialog, acceptInviteConfirmation } = getDispatch();
+  const [isModalOpen, openModal, closeModal] = useFlag();
 
   const lang = useLang();
+
+  useEffect(() => {
+    if (dialogs.length > 0) {
+      openModal();
+    }
+  }, [dialogs, openModal]);
 
   if (!dialogs.length) {
     return undefined;
@@ -34,7 +42,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
         <div className="modal-title">
           {renderText(title)}
         </div>
-        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={dismissDialog}>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={closeModal}>
           <i className="icon-close" />
         </Button>
       </div>
@@ -50,7 +58,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
       acceptInviteConfirmation({
         hash,
       });
-      dismissDialog();
+      closeModal();
     };
 
     const participantsText = isChannel
@@ -63,10 +71,11 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
 
     return (
       <Modal
-        isOpen
-        onClose={dismissDialog}
+        isOpen={isModalOpen}
+        onClose={closeModal}
         className="error"
         header={renderInviteHeader(title, photo)}
+        onCloseAnimationEnd={dismissDialog}
       >
         {about && <p className="modal-about">{renderText(about)}</p>}
         {participantsCount !== undefined && <p>{participantsText}</p>}
@@ -80,7 +89,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
         <Button isText className="confirm-dialog-button" onClick={handleJoinClick}>
           {isRequestNeeded ? requestToJoinText : joinText}
         </Button>
-        <Button isText className="confirm-dialog-button" onClick={dismissDialog}>{lang('Cancel')}</Button>
+        <Button isText className="confirm-dialog-button" onClick={closeModal}>{lang('Cancel')}</Button>
       </Modal>
     );
   };
@@ -88,14 +97,15 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
   const renderError = (error: ApiError) => {
     return (
       <Modal
-        isOpen
-        onClose={dismissDialog}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onCloseAnimationEnd={dismissDialog}
         className="error"
         title={getErrorHeader(error)}
       >
         {error.hasErrorKey ? getReadableErrorText(error) : renderText(error.message!, ['emoji', 'br'])}
         <div>
-          <Button isText onClick={dismissDialog}>{lang('OK')}</Button>
+          <Button isText onClick={closeModal}>{lang('OK')}</Button>
         </div>
       </Modal>
     );
@@ -111,7 +121,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
 
   return (
     <div id="Dialogs">
-      {dialogs.map(renderDialog)}
+      {Boolean(dialogs.length) && renderDialog(dialogs[dialogs.length - 1])}
     </div>
   );
 };
