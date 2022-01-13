@@ -8,6 +8,7 @@ import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
 import { selectTheme } from '../../selectors';
 import { startWebsync } from '../../../util/websync';
+import { ensurePermanentWebVersion } from '../../../util/permanentWebVersion';
 
 const HISTORY_ANIMATION_DURATION = 450;
 
@@ -28,7 +29,10 @@ addReducer('init', (global) => {
   document.body.classList.add('initial');
   document.body.classList.add(`animation-level-${animationLevel}`);
   document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
+
   switchTheme(theme, animationLevel === ANIMATION_LEVEL_MAX);
+
+  ensurePermanentWebVersion();
   startWebsync();
 
   if (IS_IOS) {

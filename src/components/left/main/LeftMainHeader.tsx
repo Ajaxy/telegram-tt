@@ -11,10 +11,11 @@ import {
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import { isChatArchived } from '../../../modules/helpers';
 import { formatDateToString } from '../../../util/dateFormat';
-import { selectTheme } from '../../../modules/selectors';
 import switchTheme from '../../../util/switchTheme';
+import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
+import { selectTheme } from '../../../modules/selectors';
+import { isChatArchived } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 import { disableHistoryBack } from '../../../hooks/useHistoryBack';
 
@@ -54,7 +55,6 @@ const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const PRODUCTION_HOSTNAME = 'web.telegram.org';
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
-const PERMANENT_VERSION_KEY = 'kz_version';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
   content,
@@ -158,7 +158,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [animationLevel, setSettingOption]);
 
   const handleSwitchToWebK = () => {
-    localStorage.setItem(PERMANENT_VERSION_KEY, JSON.stringify('K'));
+    setPermanentWebVersion('K');
     disableHistoryBack();
   };
 
