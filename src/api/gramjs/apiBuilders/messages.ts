@@ -820,6 +820,8 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
         value = serializeBytes(button.data);
       } else if (button instanceof GramJs.KeyboardButtonRequestPoll) {
         type = 'requestPoll';
+      } else if (button instanceof GramJs.KeyboardButtonRequestPhone) {
+        type = 'requestSelfContact';
       } else if (button instanceof GramJs.KeyboardButtonBuy) {
         if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
           text = 'PaymentReceipt';
@@ -871,6 +873,7 @@ export function buildLocalMessage(
   sticker?: ApiSticker,
   gif?: ApiVideo,
   poll?: ApiNewPoll,
+  contact?: ApiContact,
   groupedId?: string,
   scheduledAt?: number,
   sendAs?: ApiChat | ApiUser,
@@ -894,6 +897,7 @@ export function buildLocalMessage(
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
       ...(poll && buildNewPoll(poll, localId)),
+      ...(contact && { contact }),
     },
     date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !isChannel,

@@ -18,6 +18,7 @@ import {
   ApiReportReason,
   ApiSponsoredMessage,
   ApiSendMessageAction,
+  ApiContact,
 } from '../../types';
 
 import {
@@ -201,6 +202,7 @@ export function sendMessage(
     sticker,
     gif,
     poll,
+    contact,
     isSilent,
     scheduledAt,
     groupedId,
@@ -216,6 +218,7 @@ export function sendMessage(
     sticker?: ApiSticker;
     gif?: ApiVideo;
     poll?: ApiNewPoll;
+    contact?: ApiContact;
     isSilent?: boolean;
     scheduledAt?: number;
     groupedId?: string;
@@ -226,7 +229,7 @@ export function sendMessage(
   onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId, scheduledAt,
+    chat, text, entities, replyingTo, attachment, sticker, gif, poll, contact, groupedId, scheduledAt,
     sendAs, serverTimeOffset,
   );
   onUpdate({
@@ -280,6 +283,13 @@ export function sendMessage(
       media = buildInputMediaDocument(gif);
     } else if (poll) {
       media = buildInputPoll(poll, randomId);
+    } else if (contact) {
+      media = new GramJs.InputMediaContact({
+        phoneNumber: contact.phoneNumber,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        vcard: '',
+      });
     }
 
     await prevQueue;
