@@ -758,7 +758,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         .filter((e) => e instanceof GramJs.User && !e.contact)
         .forEach((user) => {
           onUpdate({
-            '@type': 'deleteUser',
+            '@type': 'deleteContact',
             id: buildApiPeerId(user.id, 'user'),
           });
         });

@@ -181,7 +181,7 @@ export function addContact({
   }), true);
 }
 
-export async function deleteUser({
+export async function deleteContact({
   id,
   accessHash,
 }: {
@@ -200,7 +200,7 @@ export async function deleteUser({
   }
 
   onUpdate({
-    '@type': 'deleteUser',
+    '@type': 'deleteContact',
     id,
   });
 }

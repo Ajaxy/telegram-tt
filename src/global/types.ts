@@ -529,7 +529,7 @@ export type ActionTypes = (
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
-  'deleteUser' | 'loadUser' | 'setUserSearchQuery' | 'loadCommonChats' |
+  'deleteContact' | 'loadUser' | 'setUserSearchQuery' | 'loadCommonChats' |
   // chat creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
