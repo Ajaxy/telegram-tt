@@ -274,20 +274,24 @@ const Message: FC<OwnProps & StateProps> = ({
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
+  const customShape = getMessageCustomShape(message);
   const { forwardInfo, viaBotId } = message;
   const asForwarded = (
-    forwardInfo && (!isChatWithSelf || isScheduled) && !isRepliesChat && !forwardInfo.isLinkedChannelPost
+    forwardInfo
+    && (!isChatWithSelf || isScheduled)
+    && !isRepliesChat
+    && !forwardInfo.isLinkedChannelPost
+    && !customShape
   );
   const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
   const isAlbum = Boolean(album) && album!.messages.length > 1;
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice,
   } = getMessageContent(message);
-  const customShape = getMessageCustomShape(message);
   const textParts = renderMessageText(message, highlight, isEmojiOnlyMessage(customShape));
   const isContextMenuShown = contextMenuPosition !== undefined;
   const signature = (
-    (isChannel && message.adminTitle) || (forwardInfo && !asForwarded && forwardInfo.adminTitle) || undefined
+    (isChannel && message.adminTitle) || (!asForwarded && forwardInfo?.adminTitle) || undefined
   );
   const metaSafeAuthorWidth = useMemo(() => {
     return signature ? calculateAuthorWidth(signature) : undefined;
@@ -473,7 +477,7 @@ const Message: FC<OwnProps & StateProps> = ({
   function renderContent() {
     const className = buildClassName(
       'content-inner',
-      asForwarded && !customShape && 'forwarded-message',
+      asForwarded && 'forwarded-message',
       hasReply && 'reply-message',
       noMediaCorners && 'no-media-corners',
     );
@@ -735,7 +739,7 @@ const Message: FC<OwnProps & StateProps> = ({
           style={style}
           dir="auto"
         >
-          {asForwarded && !customShape && (!isInDocumentGroup || isFirstInDocumentGroup) && (
+          {asForwarded && (!isInDocumentGroup || isFirstInDocumentGroup) && (
             <div className="message-title">{lang('ForwardedMessage')}</div>
           )}
           {renderContent()}

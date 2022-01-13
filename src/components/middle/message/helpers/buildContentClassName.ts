@@ -77,7 +77,7 @@ export function buildContentClassName(
     }
   }
 
-  if (asForwarded && !customShape) {
+  if (asForwarded) {
     classNames.push('is-forwarded');
   }
 
