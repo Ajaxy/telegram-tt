@@ -14,6 +14,7 @@ import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
+import { clearWebsync } from '../../../util/websync';
 import { selectTheme } from '../../../modules/selectors';
 import { isChatArchived } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
@@ -159,6 +160,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const handleSwitchToWebK = () => {
     setPermanentWebVersion('K');
+    clearWebsync();
     disableHistoryBack();
   };
 
