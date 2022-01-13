@@ -84,3 +84,7 @@ export function startWebsync() {
     forceWebsync(authed);
   }, Math.max(0, timeout * 1000));
 }
+
+export function clearWebsync() {
+  localStorage.removeItem(WEBSYNC_KEY);
+}
