@@ -199,9 +199,6 @@ addReducer('sendMessage', (global, actions, payload) => {
 
   const chat = selectChat(global, chatId)!;
 
-  actions.setReplyingToId({ messageId: undefined });
-  actions.clearWebPagePreview({ chatId, threadId, value: false });
-
   const params = {
     ...payload,
     chat,
@@ -209,6 +206,9 @@ addReducer('sendMessage', (global, actions, payload) => {
     noWebPage: selectNoWebPage(global, chatId, threadId),
     sendAs: selectSendAs(global, chatId),
   };
+
+  actions.setReplyingToId({ messageId: undefined });
+  actions.clearWebPagePreview({ chatId, threadId, value: false });
 
   const isSingle = !payload.attachments || payload.attachments.length <= 1;
   const isGrouped = !isSingle && payload.attachments && payload.attachments.length > 1;

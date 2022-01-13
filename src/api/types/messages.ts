@@ -296,7 +296,7 @@ export type ApiSponsoredMessage = {
 };
 
 export interface ApiKeyboardButton {
-  type: 'command' | 'url' | 'callback' | 'requestPoll' | 'buy' | 'NOT_SUPPORTED';
+  type: 'command' | 'url' | 'callback' | 'requestPoll' | 'requestSelfContact' | 'buy' | 'NOT_SUPPORTED';
   text: string;
   messageId: number;
   value?: string;

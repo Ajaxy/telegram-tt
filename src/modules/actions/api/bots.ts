@@ -2,7 +2,7 @@ import {
   addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiUser } from '../../../api/types';
+import { ApiChat, ApiContact, ApiUser } from '../../../api/types';
 import { InlineBotSettings } from '../../../types';
 
 import {
@@ -48,6 +48,21 @@ addReducer('clickInlineButton', (global, actions, payload) => {
     case 'requestPoll':
       actions.openPollModal();
       break;
+    case 'requestSelfContact': {
+      const user = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
+      if (!user) {
+        return;
+      }
+      actions.showDialog({
+        data: {
+          phoneNumber: user.phoneNumber,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          userId: user.id,
+        } as ApiContact,
+      });
+      break;
+    }
     case 'buy': {
       const chat = selectCurrentChat(global);
       const { messageId, value } = button;

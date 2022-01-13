@@ -1,7 +1,9 @@
 import React, { FC, memo, useEffect } from '../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
-import { ApiError, ApiInviteInfo, ApiPhoto } from '../../api/types';
+import {
+  ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
+} from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
@@ -20,7 +22,7 @@ type StateProps = {
 };
 
 const Dialogs: FC<StateProps> = ({ dialogs }) => {
-  const { dismissDialog, acceptInviteConfirmation } = getDispatch();
+  const { dismissDialog, acceptInviteConfirmation, sendMessage } = getDispatch();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const lang = useLang();
@@ -94,6 +96,31 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
     );
   };
 
+  const renderContactRequest = (contactRequest: ApiContact) => {
+    const handleConfirm = () => {
+      sendMessage({
+        contact: pick(contactRequest, ['firstName', 'lastName', 'phoneNumber']),
+      });
+      closeModal();
+    };
+
+    return (
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        className="confirm"
+        title={lang('ShareYouPhoneNumberTitle')}
+        onCloseAnimationEnd={dismissDialog}
+      >
+        {lang('AreYouSureShareMyContactInfoBot')}
+        <div>
+          <Button className="confirm-dialog-button" isText onClick={handleConfirm}>{lang('OK')}</Button>
+          <Button className="confirm-dialog-button" isText onClick={closeModal}>{lang('Cancel')}</Button>
+        </div>
+      </Modal>
+    );
+  };
+
   const renderError = (error: ApiError) => {
     return (
       <Modal
@@ -111,9 +138,13 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
     );
   };
 
-  const renderDialog = (dialog: ApiError | ApiInviteInfo) => {
+  const renderDialog = (dialog: ApiError | ApiInviteInfo | ApiContact) => {
     if ('hash' in dialog) {
       return renderInvite(dialog);
+    }
+
+    if ('phoneNumber' in dialog) {
+      return renderContactRequest(dialog);
     }
 
     return renderError(dialog);
