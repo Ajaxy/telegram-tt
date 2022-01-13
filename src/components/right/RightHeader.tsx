@@ -228,7 +228,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
           </>
         );
       case HeaderContent.AddingMembers:
-        return <h3>{lang('GroupAddMembers')}</h3>;
+        return <h3>{lang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
       case HeaderContent.ManageInitial:
         return <h3>{lang('Edit')}</h3>;
       case HeaderContent.ManageChatPrivacyType:
