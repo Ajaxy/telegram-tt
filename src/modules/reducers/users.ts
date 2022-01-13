@@ -136,10 +136,9 @@ export function updateSelectedUserId(global: GlobalState, selectedId?: string): 
   };
 }
 
-export function deleteUser(global: GlobalState, userId: string): GlobalState {
+export function deleteContact(global: GlobalState, userId: string): GlobalState {
   const { byId } = global.users;
   const { userIds } = global.contactList || {};
-  delete byId[userId];
 
   global = {
     ...global,
@@ -148,7 +147,13 @@ export function deleteUser(global: GlobalState, userId: string): GlobalState {
     },
   };
 
-  return replaceUsers(global, byId);
+  return replaceUsers(global, {
+    ...byId,
+    [userId]: {
+      ...byId[userId],
+      isContact: undefined,
+    },
+  });
 }
 
 export function updateUserSearch(

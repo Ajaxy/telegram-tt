@@ -114,10 +114,10 @@ addReducer('updateContact', (global, actions, payload) => {
   void updateContact(userId, isMuted, firstName, lastName);
 });
 
-addReducer('deleteUser', (global, actions, payload) => {
+addReducer('deleteContact', (global, actions, payload) => {
   const { userId } = payload!;
 
-  void deleteUser(userId);
+  void deleteContact(userId);
 });
 
 async function loadTopUsers() {
@@ -210,7 +210,7 @@ async function updateContact(
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.Complete));
 }
 
-async function deleteUser(userId: string) {
+async function deleteContact(userId: string) {
   const global = getGlobal();
   const user = selectUser(global, userId);
 
@@ -220,7 +220,7 @@ async function deleteUser(userId: string) {
 
   const { id, accessHash } = user;
 
-  await callApi('deleteUser', { id, accessHash });
+  await callApi('deleteContact', { id, accessHash });
 }
 
 addReducer('loadProfilePhotos', (global, actions, payload) => {

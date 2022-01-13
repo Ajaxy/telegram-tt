@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiUserStatus } from '../../../api/types';
 
-import { deleteUser, replaceUserStatuses, updateUser } from '../../reducers';
+import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
 
 const STATUS_UPDATE_THROTTLE = 3000;
@@ -29,8 +29,8 @@ function flushStatusUpdates() {
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
-    case 'deleteUser': {
-      return deleteUser(global, update.id);
+    case 'deleteContact': {
+      return deleteContact(global, update.id);
     }
 
     case 'updateUser': {

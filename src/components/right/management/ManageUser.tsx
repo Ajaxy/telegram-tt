@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiUser } from '../../../api/types';
+import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import {
@@ -33,7 +33,6 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
-  chat: ApiChat;
   progress?: ManagementProgress;
   isMuted?: boolean;
 };
@@ -43,7 +42,6 @@ const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
 const ManageUser: FC<OwnProps & StateProps> = ({
   userId,
   user,
-  chat,
   progress,
   isMuted,
   onClose,
@@ -51,10 +49,8 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     updateContact,
-    deleteUser,
-    deleteHistory,
+    deleteContact,
     closeManagement,
-    openChat,
   } = getDispatch();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -125,15 +121,10 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   }, [firstName, lastName, updateContact, userId, isNotificationsEnabled]);
 
   const handleDeleteContact = useCallback(() => {
-    deleteHistory({
-      chatId: chat.id,
-      shouldDeleteForAll: false,
-    });
-    deleteUser({ userId });
+    deleteContact({ userId });
     closeDeleteDialog();
     closeManagement();
-    openChat({ id: undefined });
-  }, [chat.id, closeDeleteDialog, closeManagement, deleteHistory, deleteUser, openChat, userId]);
+  }, [closeDeleteDialog, closeManagement, deleteContact, userId]);
 
   if (!user) {
     return undefined;
@@ -213,7 +204,7 @@ export default memo(withGlobal<OwnProps>(
     const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     return {
-      user, chat, progress, isMuted,
+      user, progress, isMuted,
     };
   },
 )(ManageUser));

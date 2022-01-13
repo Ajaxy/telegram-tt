@@ -28,7 +28,7 @@ export {
 
 export {
   fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
-  addContact, updateContact, deleteUser, fetchProfilePhotos, fetchCommonChats,
+  addContact, updateContact, deleteContact, fetchProfilePhotos, fetchCommonChats,
 } from './users';
 
 export {
