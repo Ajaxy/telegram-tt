@@ -1,20 +1,16 @@
-**Telegram Web Z was updated to version 1.28**
+**Telegram Web Z was updated to version 1.29**
 
 👏 **Harder**
-• Support for join requests in groups and channels.
-• Support for more service messages.
+• Add admins in groups and channels.
+• Use inline "Request Contact" button for bots.
+• See inline search results in chats with bots that support it.
 
 🤩 **Better**
-• Easier to select and adjust left column width.
-• Redundant single quotes removed in Spanish and French translations.
-• Support for hotkeys on non-qwerty keyboards.
-• Use Ctrl+Shift+F or Ctrl+F (in PWA mode) to open global or local search.
-• Chat: "Add to folder..." only appears for users with folders.
-• Support for `start` parameter in `tg://resolve` links.
+• Dialogs now have a closing animation.
+• Messages with spoilers will be hidden in chat until full support is added.
+• Various UI fixes.
 
 💪 **Stronger**
-• Fixed focusing on messages in a chat that was previously open.
-• Fixed missing stickers in sticker suggestions.
-• Fixed opening chats from user mentions.
-• Fixed various glitches when appearing as a channel in public groups.
-• Removed redundant download and forward options in chats with protected content.
+• Fixed missing user list when creating groups and channels.
+• Fixed chat history being deleted when deleting a contact.
+• Fixed missing text in messages containing specific emoji.
