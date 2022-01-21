@@ -59,6 +59,7 @@
     }
 
     .icon-send,
+    .icon-schedule,
     .icon-microphone-alt,
     .icon-check {
       position: absolute;
@@ -66,6 +67,7 @@
 
     &:not(:active):not(:focus):not(:hover) {
       .icon-send,
+      .icon-schedule,
       .icon-check {
         color: var(--color-primary);
       }
@@ -92,7 +94,20 @@
       }
 
       .icon-microphone-alt,
-      .icon-check {
+      .icon-check,
+      .icon-schedule {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.schedule {
+      .icon-schedule {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-microphone-alt,
+      .icon-check,
+      .icon-send {
         animation: hide-icon .4s forwards ease-out;
       }
     }
@@ -103,19 +118,21 @@
       }
 
       .icon-send,
-      .icon-check {
+      .icon-check,
+      .icon-schedule {
         animation: hide-icon .4s forwards ease-out;
       }
     }
 
     &.edit {
-      .icon-send,
-      .icon-microphone-alt {
-        animation: hide-icon .4s forwards ease-out;
-      }
-
       .icon-check {
         animation: grow-icon .4s ease-out;
+      }
+
+      .icon-send,
+      .icon-microphone-alt,
+      .icon-schedule {
+        animation: hide-icon .4s forwards ease-out;
       }
     }
 
@@ -124,7 +141,7 @@
     }
 
     body.animation-level-0 &, body.animation-level-1 & {
-      .icon-send, .icon-microphone-alt, .icon-check {
+      .icon-send, .icon-microphone-alt, .icon-check, .icon-schedule {
         animation-duration: 0ms !important;
       }
     }

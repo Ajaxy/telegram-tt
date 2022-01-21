@@ -154,6 +154,7 @@ enum MainButtonState {
   Send = 'send',
   Record = 'record',
   Edit = 'edit',
+  Schedule = 'schedule',
 }
 
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
@@ -312,10 +313,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [activeVoiceRecording, sendMessageAction]);
 
-  const mainButtonState = editingMessage
-    ? MainButtonState.Edit
-    : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length) || isForwarding
-      ? MainButtonState.Send
+  const mainButtonState = editingMessage ? MainButtonState.Edit
+    : (!IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length) || isForwarding)
+      ? (shouldSchedule ? MainButtonState.Schedule : MainButtonState.Send)
       : MainButtonState.Record;
   const canShowCustomSendMenu = !shouldSchedule;
 
@@ -769,14 +769,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
       case MainButtonState.Send:
-        if (shouldSchedule) {
-          if (activeVoiceRecording) {
-            pauseRecordingVoice();
-          }
-          openCalendar();
-        } else {
-          void handleSend();
-        }
+        handleSend();
         break;
       case MainButtonState.Record:
         void startRecordingVoice();
@@ -784,12 +777,18 @@ const Composer: FC<OwnProps & StateProps> = ({
       case MainButtonState.Edit:
         handleEditComplete();
         break;
+      case MainButtonState.Schedule:
+        if (activeVoiceRecording) {
+          pauseRecordingVoice();
+        }
+        openCalendar();
+        break;
       default:
         break;
     }
   }, [
-    mainButtonState, shouldSchedule, startRecordingVoice, handleEditComplete,
-    activeVoiceRecording, openCalendar, pauseRecordingVoice, handleSend,
+    mainButtonState, handleSend, startRecordingVoice, handleEditComplete,
+    activeVoiceRecording, openCalendar, pauseRecordingVoice,
   ]);
 
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
@@ -832,7 +831,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const onSend = mainButtonState === MainButtonState.Edit
     ? handleEditComplete
-    : (shouldSchedule ? openCalendar : handleSend);
+    : mainButtonState === MainButtonState.Schedule ? openCalendar
+      : handleSend;
 
   return (
     <div className={className}>
@@ -1103,6 +1103,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         }
       >
         <i className="icon-send" />
+        <i className="icon-schedule" />
         <i className="icon-microphone-alt" />
         <i className="icon-check" />
       </Button>
