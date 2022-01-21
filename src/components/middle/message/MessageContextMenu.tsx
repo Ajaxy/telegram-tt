@@ -11,6 +11,7 @@ import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -159,6 +160,13 @@ const MessageContextMenu: FC<OwnProps> = ({
     }, ANIMATION_DURATION);
   }, [isOpen, markIsReady, unmarkIsReady]);
 
+  const extraHeightAudioPlayer = (IS_SINGLE_COLUMN_LAYOUT
+    && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
+  const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessage-wrapper');
+  const extraHeightPinned = (((IS_SINGLE_COLUMN_LAYOUT && !extraHeightAudioPlayer)
+    || (!IS_SINGLE_COLUMN_LAYOUT && pinnedElement?.classList.contains('full-width')))
+    && pinnedElement?.offsetHeight) || 0;
+
   const {
     positionX, positionY, style, menuStyle, withScroll,
   } = useContextMenuPosition(
@@ -167,8 +175,9 @@ const MessageContextMenu: FC<OwnProps> = ({
     getRootElement,
     getMenuElement,
     SCROLLBAR_WIDTH,
-    (document.querySelector('.MiddleHeader') as HTMLElement).offsetHeight,
+    (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
     withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
+    extraHeightPinned + extraHeightAudioPlayer,
   );
 
   useEffect(() => {

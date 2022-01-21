@@ -1,4 +1,4 @@
-import { useState, useEffect } from '../lib/teact/teact';
+import { useState, useLayoutEffect } from '../lib/teact/teact';
 import { IAnchorPosition } from '../types';
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
@@ -12,6 +12,7 @@ export default (
   extraPaddingX = 0,
   extraTopPadding = 0,
   marginSides = 0,
+  extraMarginTop = 0,
 ) => {
   const [positionX, setPositionX] = useState<'right' | 'left'>('right');
   const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
@@ -19,7 +20,7 @@ export default (
   const [style, setStyle] = useState('');
   const [menuStyle, setMenuStyle] = useState('');
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const triggerEl = getTriggerElement();
     if (!anchor || !triggerEl) {
       return;
@@ -35,7 +36,7 @@ export default (
 
     const triggerRect = triggerEl.getBoundingClientRect();
 
-    const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) : undefined;
+    const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
 
     const menuRect = menuEl ? {
       width: menuEl.offsetWidth,
@@ -93,7 +94,7 @@ export default (
     setMenuStyle(`max-height: ${menuMaxHeight}px;`);
     setStyle(`left: ${left}px; top: ${top}px`);
   }, [
-    anchor, extraPaddingX, extraTopPadding,
+    anchor, extraPaddingX, extraTopPadding, extraMarginTop,
     getMenuElement, getRootElement, getTriggerElement, marginSides,
   ]);
 
