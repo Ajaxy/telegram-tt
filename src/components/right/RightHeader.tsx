@@ -52,6 +52,7 @@ type StateProps = {
   messageSearchQuery?: string;
   stickerSearchQuery?: string;
   gifSearchQuery?: string;
+  isEditingInvite?: boolean;
 };
 
 const COLUMN_CLOSE_DELAY_MS = 300;
@@ -81,6 +82,8 @@ enum HeaderContent {
   GifSearch,
   PollResults,
   AddingMembers,
+  ManageInvites,
+  ManageEditInvite,
   ManageReactions,
 }
 
@@ -104,6 +107,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   stickerSearchQuery,
   gifSearchQuery,
   shouldSkipAnimation,
+  isEditingInvite,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -191,6 +195,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.ManageGroupNewAdminRights
     ) : managementScreen === ManagementScreens.GroupMembers ? (
       HeaderContent.ManageGroupMembers
+    ) : managementScreen === ManagementScreens.Invites ? (
+      HeaderContent.ManageInvites
+    ) : managementScreen === ManagementScreens.EditInvite ? (
+      HeaderContent.ManageEditInvite
     ) : managementScreen === ManagementScreens.GroupAddAdmins ? (
       HeaderContent.ManageGroupAddAdmins
     ) : managementScreen === ManagementScreens.Reactions ? (
@@ -251,6 +259,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang('ChannelAddException')}</h3>;
       case HeaderContent.ManageGroupUserPermissions:
         return <h3>{lang('UserRestrictions')}</h3>;
+      case HeaderContent.ManageInvites:
+        return <h3>{lang('lng_group_invite_title')}</h3>;
+      case HeaderContent.ManageEditInvite:
+        return <h3>{isEditingInvite ? lang('EditLink') : lang('NewLink')}</h3>;
       case HeaderContent.ManageGroupAddAdmins:
         return <h3>{lang('Channel.Management.AddModerator')}</h3>;
       case HeaderContent.StickerSearch:
@@ -368,6 +380,7 @@ export default memo(withGlobal<OwnProps>(
       // chat.isCreator is for Basic Groups
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
+    const isEditingInvite = Boolean(chatId && global.management.byChatId[chatId]?.editingInvite);
 
     return {
       canManage,
@@ -377,6 +390,7 @@ export default memo(withGlobal<OwnProps>(
       messageSearchQuery,
       stickerSearchQuery,
       gifSearchQuery,
+      isEditingInvite,
     };
   },
 )(RightHeader));

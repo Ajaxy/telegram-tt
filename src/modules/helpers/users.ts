@@ -131,7 +131,7 @@ export function getUserStatus(
         }
 
         // other
-        return lang('LastSeen.TodayAt', formatTime(wasOnlineDate, lang));
+        return lang('LastSeen.TodayAt', formatTime(lang, wasOnlineDate));
       }
 
       // yesterday
@@ -140,7 +140,7 @@ export function getUserStatus(
       yesterday.setHours(0, 0, 0, 0);
       const serverYesterday = new Date(yesterday.getTime() + serverTimeOffset * 1000);
       if (wasOnlineDate > serverYesterday) {
-        return lang('LastSeen.YesterdayAt', formatTime(wasOnlineDate, lang));
+        return lang('LastSeen.YesterdayAt', formatTime(lang, wasOnlineDate));
       }
 
       return lang('LastSeen.AtDate', formatFullDate(lang, wasOnlineDate));

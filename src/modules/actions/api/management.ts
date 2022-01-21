@@ -76,3 +76,9 @@ addReducer('updatePrivateLink', (global) => {
 
   callApi('updatePrivateLink', { chat });
 });
+
+addReducer('setEditingExportedInvite', (global, actions, payload) => {
+  const { chatId, invite } = payload;
+
+  setGlobal(updateManagement(global, chatId, { editingInvite: invite }));
+});

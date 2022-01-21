@@ -1,11 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { ManagementProgress } from '../../types';
-
-interface ManagementState {
-  isActive: boolean;
-  isUsernameAvailable?: boolean;
-  error?: string;
-}
+import { ManagementProgress, ManagementState } from '../../types';
 
 export function updateManagementProgress(global: GlobalState, progress: ManagementProgress): GlobalState {
   return {

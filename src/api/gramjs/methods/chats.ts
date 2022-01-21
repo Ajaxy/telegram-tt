@@ -26,6 +26,7 @@ import {
   buildApiChatFolder,
   buildApiChatFolderFromSuggested,
   buildApiChatBotCommands,
+  buildApiExportedInvite,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
@@ -1136,6 +1137,84 @@ function updateLocalDb(result: (
       }
     });
   }
+}
+
+export async function fetchExportedChatInvites({
+  peer, admin, limit = 0, isRevoked,
+}: { peer: ApiChat; admin: ApiUser; limit: number; isRevoked?: boolean }) {
+  const exportedInvites = await invokeRequest(new GramJs.messages.GetExportedChatInvites({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    adminId: buildInputEntity(admin.id, admin.accessHash) as GramJs.InputUser,
+    limit,
+    revoked: isRevoked || undefined,
+  }));
+
+  if (!exportedInvites) return undefined;
+
+  return exportedInvites.invites.map(buildApiExportedInvite);
+}
+
+export async function editExportedChatInvite({
+  peer, isRevoked, link, expireDate, usageLimit, isRequestNeeded, title,
+}: {
+  peer: ApiChat;
+  isRevoked?: boolean;
+  link: string;
+  expireDate?: number;
+  usageLimit?: number;
+  isRequestNeeded?: boolean;
+  title?: string;
+}) {
+  const invite = await invokeRequest(new GramJs.messages.EditExportedChatInvite({
+    link,
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    expireDate,
+    usageLimit: !isRequestNeeded ? usageLimit : undefined,
+    requestNeeded: isRequestNeeded,
+    title,
+    revoked: isRevoked || undefined,
+  }));
+
+  if (!invite) return undefined;
+
+  if (invite instanceof GramJs.messages.ExportedChatInvite) {
+    const replaceInvite = buildApiExportedInvite(invite.invite);
+    return {
+      oldInvite: replaceInvite,
+      newInvite: replaceInvite,
+    };
+  }
+
+  if (invite instanceof GramJs.messages.ExportedChatInviteReplaced) {
+    const oldInvite = buildApiExportedInvite(invite.invite);
+    const newInvite = buildApiExportedInvite(invite.newInvite);
+    return {
+      oldInvite,
+      newInvite,
+    };
+  }
+  return undefined;
+}
+
+export async function exportChatInvite({
+  peer, expireDate, usageLimit, isRequestNeeded, title,
+}: {
+  peer: ApiChat;
+  expireDate?: number;
+  usageLimit?: number;
+  isRequestNeeded?: boolean;
+  title?: string;
+}) {
+  const invite = await invokeRequest(new GramJs.messages.ExportChatInvite({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    expireDate,
+    usageLimit: !isRequestNeeded ? usageLimit : undefined,
+    requestNeeded: isRequestNeeded || undefined,
+    title,
+  }));
+
+  if (!invite) return undefined;
+  return buildApiExportedInvite(invite);
 }
 
 export async function importChatInvite({ hash }: { hash: string }) {

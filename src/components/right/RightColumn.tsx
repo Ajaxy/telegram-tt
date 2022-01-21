@@ -69,6 +69,7 @@ const RightColumn: FC<StateProps> = ({
     closePollResults,
     addChatMembers,
     setNewChatMembersDialogState,
+    setEditingExportedInvite,
   } = getDispatch();
 
   const { width: windowWidth } = useWindowSize();
@@ -123,6 +124,7 @@ const RightColumn: FC<StateProps> = ({
           case ManagementScreens.ChatAdministrators:
           case ManagementScreens.ChannelSubscribers:
           case ManagementScreens.GroupMembers:
+          case ManagementScreens.Invites:
           case ManagementScreens.Reactions:
             setManagementScreen(ManagementScreens.Initial);
             break;
@@ -138,6 +140,10 @@ const RightColumn: FC<StateProps> = ({
           case ManagementScreens.GroupAddAdmins:
           case ManagementScreens.GroupRecentActions:
             setManagementScreen(ManagementScreens.ChatAdministrators);
+            break;
+          case ManagementScreens.EditInvite:
+            setManagementScreen(ManagementScreens.Invites);
+            setEditingExportedInvite({ chatId, invite: undefined });
             break;
         }
 
@@ -164,6 +170,7 @@ const RightColumn: FC<StateProps> = ({
   }, [
     contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
+    setEditingExportedInvite, chatId,
   ]);
 
   const handleSelectChatMember = useCallback((memberId, isPromoted) => {

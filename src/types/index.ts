@@ -1,5 +1,6 @@
 import {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
+  ApiExportedInvite,
   ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
 
@@ -279,6 +280,14 @@ export enum ManagementProgress {
   Error,
 }
 
+export interface ManagementState {
+  isActive: boolean;
+  isUsernameAvailable?: boolean;
+  error?: string;
+  invites?: ApiExportedInvite[];
+  editingInvite?: ApiExportedInvite;
+}
+
 export enum NewChatMembersProgress {
   Closed,
   InProgress,
@@ -321,6 +330,8 @@ export enum ManagementScreens {
   ChatNewAdminRights,
   GroupMembers,
   GroupAddAdmins,
+  Invites,
+  EditInvite,
   Reactions,
 }
 

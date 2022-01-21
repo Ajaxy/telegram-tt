@@ -1,4 +1,6 @@
-import { ChangeEvent, FormEvent, RefObject } from 'react';
+import {
+  ChangeEvent, FormEvent, RefObject,
+} from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
