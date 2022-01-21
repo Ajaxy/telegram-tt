@@ -18,6 +18,7 @@ const cropperResultOptions: Croppie.ResultOptions & { type: 'blob' } = {
   quality: 1,
   format: 'jpeg',
   circle: false,
+  size: { width: 1024, height: 1024 },
 };
 
 type ICroppie = typeof import('croppie');
