@@ -479,8 +479,11 @@ const Message: FC<OwnProps & StateProps> = ({
   if (areReactionsInMeta) {
     reactionsPosition = 'in-meta';
   } else if (reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions)) {
-    if (asForwarded || customShape || ((photo || video || hasAnimatedEmoji) && !textParts)) {
+    if (customShape || ((photo || video || hasAnimatedEmoji) && !textParts)) {
       reactionsPosition = 'outside';
+    } else if (asForwarded) {
+      metaPosition = 'standalone';
+      reactionsPosition = 'inside';
     } else {
       reactionsPosition = 'inside';
     }
