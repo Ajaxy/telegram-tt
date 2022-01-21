@@ -105,7 +105,9 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     ];
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundContactIds = filterUsersByName(contactIdsWithMe, usersById, searchQuery);
+    const foundContactIds = filterUsersByName(
+      contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
+    );
 
     return [
       ...sortChatIds(unique([
@@ -114,7 +116,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         ...(localUserIds || []),
       ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),
     ];
-  }, [searchQuery, localContactIds, currentUserId, localChatIds, localUserIds, chatsById]);
+  }, [searchQuery, currentUserId, localContactIds, lang, localChatIds, localUserIds, chatsById]);
 
   const globalResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {
