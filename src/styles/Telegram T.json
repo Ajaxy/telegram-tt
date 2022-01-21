@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Telegram T",
     "lastOpened": 0,
-    "created": 1639657599258
+    "created": 1642535370942
   },
   "iconSets": [
     {
@@ -2743,7 +2743,7 @@
           ],
           "grid": 24,
           "tags": [
-            "muted-chat"
+            "muted"
           ],
           "isMulticolor": false,
           "isMulticolor2": false,
@@ -3592,7 +3592,7 @@
         {
           "order": 571,
           "id": 4,
-          "name": "muted-chat",
+          "name": "muted",
           "prevSize": 32,
           "code": 59741,
           "tempChar": ""
