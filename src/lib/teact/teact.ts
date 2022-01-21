@@ -336,17 +336,26 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
 }
 
 export function unmountTree($element: VirtualElement) {
-  if (!isRealElement($element)) {
-    return;
-  }
-
   if (isComponentElement($element)) {
     unmountComponent($element.componentInstance);
-  } else if ($element.target) {
-    removeAllDelegatedListeners($element.target as HTMLElement);
-    // Trying to help GC
-    // eslint-disable-next-line no-null/no-null
-    $element.target = null as any;
+  } else {
+    if (isTagElement($element)) {
+      if ($element.target) {
+        removeAllDelegatedListeners($element.target as HTMLElement);
+      }
+
+      if ($element.props.ref) {
+        $element.props.ref.current = undefined; // Help GC
+      }
+    }
+
+    if ($element.target) {
+      $element.target = undefined; // Help GC
+    }
+
+    if (!isRealElement($element)) {
+      return;
+    }
   }
 
   $element.children.forEach(unmountTree);
@@ -363,9 +372,9 @@ function unmountComponent(componentInstance: ComponentInstance) {
     return;
   }
 
-  componentInstance.hooks.memos.byCursor.forEach((hook) => {
-    // eslint-disable-next-line no-null/no-null
-    hook.current = null;
+  // We need to clean refs before running effect cleanups
+  componentInstance.hooks.memos.byCursor.forEach((memoContainer) => {
+    memoContainer.current = undefined;
   });
 
   componentInstance.hooks.effects.byCursor.forEach(({ cleanup }) => {
@@ -383,35 +392,31 @@ function unmountComponent(componentInstance: ComponentInstance) {
   helpGc(componentInstance);
 }
 
-// We need to remove all references to DOM objects. We also clean all other references, just in case.
+// We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
-  /* eslint-disable no-null/no-null */
-
   componentInstance.hooks.effects.byCursor.forEach((hook) => {
-    hook.cleanup = null as any;
-    hook.effect = null as any;
-    hook.dependencies = null as any;
+    hook.cleanup = undefined;
+    hook.effect = undefined as any;
+    hook.dependencies = undefined;
   });
 
   componentInstance.hooks.state.byCursor.forEach((hook) => {
-    hook.value = null as any;
-    hook.nextValue = null as any;
-    hook.setter = null as any;
+    hook.value = undefined;
+    hook.nextValue = undefined;
+    hook.setter = undefined as any;
   });
 
   componentInstance.hooks.memos.byCursor.forEach((hook) => {
-    hook.dependencies = null as any;
+    hook.dependencies = undefined as any;
   });
 
-  componentInstance.hooks = null as any;
-  componentInstance.$element = null as any;
-  componentInstance.renderedValue = null as any;
-  componentInstance.Component = null as any;
-  componentInstance.props = null as any;
-  componentInstance.forceUpdate = null as any;
-  componentInstance.onUpdate = null as any;
-
-  /* eslint-enable no-null/no-null */
+  componentInstance.hooks = undefined as any;
+  componentInstance.$element = undefined as any;
+  componentInstance.renderedValue = undefined;
+  componentInstance.Component = undefined as any;
+  componentInstance.props = undefined as any;
+  componentInstance.forceUpdate = undefined;
+  componentInstance.onUpdate = undefined;
 }
 
 function prepareComponentForFrame(componentInstance: ComponentInstance) {
