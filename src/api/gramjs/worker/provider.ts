@@ -1,6 +1,7 @@
+import { Api } from '../../../lib/gramjs';
 import { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
+import { WorkerMessageEvent, OriginRequest } from './types';
 
 import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
@@ -53,11 +54,36 @@ export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<
     return undefined;
   }
 
-  return makeRequest({
+  const promise = makeRequest({
     type: 'callMethod',
     name: fnName,
     args,
-  }) as MethodResponse<T>;
+  });
+
+  // Some TypeScript magic to make sure `VirtualClass` is never returned from any method
+  if (DEBUG) {
+    (async () => {
+      try {
+        type ForbiddenTypes =
+          Api.VirtualClass<any>
+          | (Api.VirtualClass<any> | undefined)[];
+        type ForbiddenResponses =
+          ForbiddenTypes
+          | (AnyLiteral & { [k: string]: ForbiddenTypes });
+
+        // Unwrap all chained promises
+        const response = await promise;
+        // Make sure responses do not include `VirtualClass` instances
+        const allowedResponse: Exclude<typeof response, ForbiddenResponses> = response;
+        // Suppress "unused variable" constraint
+        void allowedResponse;
+      } catch (err) {
+        // Do noting
+      }
+    })();
+  }
+
+  return promise as MethodResponse<T>;
 }
 
 export function cancelApiProgress(progressCallback: ApiOnProgress) {
@@ -105,7 +131,7 @@ function makeRequest(message: OriginRequest) {
   const requestState = { messageId } as RequestStates;
 
   // Re-wrap type because of `postMessage`
-  const promise: Promise<ThenArg<MethodResponse<keyof Methods>>> = new Promise((resolve, reject) => {
+  const promise: Promise<MethodResponse<keyof Methods>> = new Promise((resolve, reject) => {
     Object.assign(requestState, { resolve, reject });
   });
 

@@ -10,19 +10,11 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function checkChatUsername(
-  { username }: { username: string },
-) {
-  try {
-    const result = await invokeRequest(new GramJs.channels.CheckUsername({
-      channel: new GramJs.InputChannelEmpty(),
-      username,
-    }), undefined, true);
-
-    return result!;
-  } catch (err) {
-    return false;
-  }
+export function checkChatUsername({ username }: { username: string }) {
+  return invokeRequest(new GramJs.channels.CheckUsername({
+    channel: new GramJs.InputChannelEmpty(),
+    username,
+  }));
 }
 
 export async function setChatUsername(

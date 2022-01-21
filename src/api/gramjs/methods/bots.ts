@@ -10,22 +10,23 @@ import { buildApiUser } from '../apiBuilders/users';
 import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
+import { omitVirtualClassFields } from '../apiBuilders/helpers';
 
 export function init() {
 }
 
-export function answerCallbackButton(
-  {
-    chatId, accessHash, messageId, data,
-  }: {
-    chatId: string; accessHash?: string; messageId: number; data: string;
-  },
-) {
-  return invokeRequest(new GramJs.messages.GetBotCallbackAnswer({
+export async function answerCallbackButton({
+  chatId, accessHash, messageId, data,
+}: {
+  chatId: string; accessHash?: string; messageId: number; data: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetBotCallbackAnswer({
     peer: buildInputPeer(chatId, accessHash),
     msgId: messageId,
     data: deserializeBytes(data),
   }));
+
+  return result ? omitVirtualClassFields(result) : undefined;
 }
 
 export async function fetchTopInlineBots() {

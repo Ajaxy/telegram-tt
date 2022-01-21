@@ -157,7 +157,7 @@ export function updateContact({
       firstName: firstName || '',
       lastName: lastName || '',
     })],
-  }));
+  }), true);
 }
 
 export function addContact({

@@ -164,7 +164,7 @@ export async function joinGroupCall({
       data: JSON.stringify(params),
     }),
     inviteHash,
-  }), true);
+  }));
 
   if (!result) return undefined;
 
@@ -187,7 +187,7 @@ export async function createGroupCall({
   const result = await invokeRequest(new GramJs.phone.CreateGroupCall({
     peer: buildInputPeer(peer.id, peer.accessHash),
     randomId,
-  }), true);
+  }));
 
   if (!result) return undefined;
 

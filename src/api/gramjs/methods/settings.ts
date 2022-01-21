@@ -48,7 +48,7 @@ export function updateProfile({
     firstName: firstName || '',
     lastName: lastName || '',
     about: about || '',
-  }));
+  }), true);
 }
 
 export function checkUsername(username: string) {
@@ -56,14 +56,14 @@ export function checkUsername(username: string) {
 }
 
 export function updateUsername(username: string) {
-  return invokeRequest(new GramJs.account.UpdateUsername({ username }));
+  return invokeRequest(new GramJs.account.UpdateUsername({ username }), true);
 }
 
 export async function updateProfilePhoto(file: File) {
   const inputFile = await uploadFile(file);
   return invokeRequest(new GramJs.photos.UploadProfilePhoto({
     file: inputFile,
-  }));
+  }), true);
 }
 
 export async function uploadProfilePhoto(file: File) {
@@ -311,7 +311,7 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: {
     return undefined;
   }
 
-  return { langPack: Object.assign({}, ...collections.reverse()) };
+  return { langPack: Object.assign({}, ...collections.reverse()) as typeof collections[0] };
 }
 
 export async function fetchLangStrings({ langPack, langCode, keys }: {

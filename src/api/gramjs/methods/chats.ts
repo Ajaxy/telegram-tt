@@ -508,7 +508,7 @@ export async function createChannel({
     broadcast: true,
     title,
     about,
-  }), true);
+  }));
 
   // `createChannel` can return a lot of different update types according to docs,
   // but currently channel creation returns only `Updates` type.
@@ -537,7 +537,7 @@ export async function createChannel({
       await invokeRequest(new GramJs.channels.InviteToChannel({
         channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
         users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-      }), true, noErrorUpdate);
+      }), undefined, noErrorUpdate);
     } catch (err) {
       // `noErrorUpdate` will cause an exception which we don't want either
     }
@@ -606,7 +606,7 @@ export async function createGroupChat({
   const result = await invokeRequest(new GramJs.messages.CreateChat({
     title,
     users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-  }), true, true);
+  }), undefined, true);
 
   // `createChat` can return a lot of different update types according to docs,
   // but currently chat creation returns only `Updates` type.
@@ -975,12 +975,12 @@ export function setDiscussionGroup({
   return invokeRequest(new GramJs.channels.SetDiscussionGroup({
     broadcast: buildInputPeer(channel.id, channel.accessHash),
     group: chat ? buildInputPeer(chat.id, chat.accessHash) : new GramJs.InputChannelEmpty(),
-  }));
+  }), true);
 }
 
 export async function migrateChat(chat: ApiChat) {
   const result = await invokeRequest(
-    new GramJs.messages.MigrateChat({ chatId: buildInputEntity(chat.id) as BigInt.BigInteger }), true,
+    new GramJs.messages.MigrateChat({ chatId: buildInputEntity(chat.id) as BigInt.BigInteger }),
   );
 
   // `migrateChat` can return a lot of different update types according to docs,
@@ -1049,16 +1049,16 @@ export async function openChatByInvite(hash: string) {
   return { chatId: chat.id };
 }
 
-export function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
+export async function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
   try {
     if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-      return invokeRequest(new GramJs.channels.InviteToChannel({
+      return await invokeRequest(new GramJs.channels.InviteToChannel({
         channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
         users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
       }), true, noErrorUpdate);
     }
 
-    return Promise.all(users.map((user) => {
+    return await Promise.all(users.map((user) => {
       return invokeRequest(new GramJs.messages.AddChatUser({
         chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
         userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
@@ -1139,7 +1139,7 @@ function updateLocalDb(result: (
 }
 
 export async function importChatInvite({ hash }: { hash: string }) {
-  const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }), true);
+  const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }));
   if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
     return undefined;
   }
