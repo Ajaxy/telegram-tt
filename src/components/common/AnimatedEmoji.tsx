@@ -5,11 +5,12 @@ import React, {
 import { ApiMediaFormat, ApiSticker } from '../../api/types';
 import { ActiveEmojiInteraction } from '../../global/types';
 
-import { LIKE_STICKER_ID } from './helpers/mediaDimensions';
+import buildClassName from '../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useAnimatedEmoji from './hooks/useAnimatedEmoji';
+import { LIKE_STICKER_ID } from './helpers/mediaDimensions';
 
 import AnimatedSticker from './AnimatedSticker';
 
@@ -73,13 +74,13 @@ const AnimatedEmoji: FC<OwnProps> = ({
   return (
     <div
       ref={ref}
-      className="AnimatedEmoji media-inner"
+      className={buildClassName('AnimatedEmoji media-inner', sticker.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
       // @ts-ignore teact feature
       style={style}
       onClick={handleClick}
     >
       {!isAnimationLoaded && thumbDataUri && (
-        <img src={thumbDataUri} className={sticker.id === LIKE_STICKER_ID ? 'like-sticker-thumb' : undefined} alt="" />
+        <img src={thumbDataUri} alt="" />
       )}
       {!isAnimationLoaded && previewBlobUrl && (
         <img src={previewBlobUrl} className={transitionClassNames} alt="" />
