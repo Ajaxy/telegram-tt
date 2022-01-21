@@ -15,6 +15,7 @@ import MenuItem from '../../ui/MenuItem';
 import Avatar from '../../common/Avatar';
 
 import './MessageContextMenu.scss';
+import { getUserFullName } from '../../../modules/helpers';
 
 type OwnProps = {
   isOpen: boolean;
@@ -154,17 +155,17 @@ const MessageContextMenu: FC<OwnProps> = ({
       )}
       {canReply && <MenuItem icon="reply" onClick={onReply}>{lang('Reply')}</MenuItem>}
       {canEdit && <MenuItem icon="edit" onClick={onEdit}>{lang('Edit')}</MenuItem>}
-      {canFaveSticker && (
+      {canFaveSticker && !canUnfaveSticker && (
         <MenuItem icon="favorite" onClick={onFaveSticker}>{lang('AddToFavorites')}</MenuItem>
       )}
-      {canUnfaveSticker && (
+      {canUnfaveSticker && !canFaveSticker && (
         <MenuItem icon="favorite" onClick={onUnfaveSticker}>{lang('Stickers.RemoveFromFavorites')}</MenuItem>
       )}
       {canCopy && copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{lang(options.label)}</MenuItem>
       ))}
-      {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
-      {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
+      {canPin && !canUnpin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
+      {canUnpin && !canPin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
       {canDownload && (
         <MenuItem icon="download" onClick={onDownload}>
           {isDownloading ? lang('lng_context_cancel_download') : lang('lng_media_download')}
@@ -175,9 +176,13 @@ const MessageContextMenu: FC<OwnProps> = ({
       {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
       {canShowSeenBy && (
         <MenuItem icon="group" onClick={onShowSeenBy} disabled={!message.seenByUserIds?.length}>
-          {message.seenByUserIds?.length
-            ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
-            : lang('Conversation.ContextMenuNoViews')}
+          {message.seenByUserIds?.length === 1 && (
+            getUserFullName(seenByRecentUsers[0])
+          )}
+          {message.seenByUserIds?.length !== 1 && (
+            message.seenByUserIds?.length
+            ? lang('Conversation.ContextMenuSeen', message.seenByUserIds?.length, 'i')
+            : lang('Conversation.ContextMenuNoViews'))}
           <div className="avatars">
             {seenByRecentUsers?.map((user) => (
               <Avatar

@@ -1,5 +1,5 @@
 export const PAGE_TITLE = 'Telegram';
-export const INACTIVE_MARKER = ' [Inactive]';
+export const INACTIVE_MARKER = '— Inactive';
 
 export const APP_NAME = process.env.APP_NAME || 'Telegram WebZ';
 export const APP_VERSION = process.env.APP_VERSION || 'dev';
@@ -176,7 +176,7 @@ export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0a0a0a8c';
 export const DEFAULT_PATTERN_COLOR = 'rgba(90, 110, 70, 0.6)';
 // TODO Get values from `getConfig` method once it's available
-export const SEEN_BY_MEMBERS_CHAT_MAX = 50;
+export const SEEN_BY_MEMBERS_CHAT_MAX = 100;
 export const SEEN_BY_MEMBERS_EXPIRE = 604680; // One week - 2 min
 
 // Group calls

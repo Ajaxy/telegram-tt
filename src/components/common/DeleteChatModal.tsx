@@ -108,6 +108,24 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteChannel,
   ]);
 
+  const handleLeaveChat = useCallback(() => {
+    if (isChannel || isSuperGroup) {
+      leaveChannel({ chatId: chat.id });
+    } else {
+      handleDeleteChat
+    }
+    onClose();
+  }, [
+    isPrivateChat,
+    isBasicGroup,
+    isChannel,
+    isSuperGroup,
+    currentUserId,
+    chat.id,
+    onClose,
+    leaveChannel,
+  ]);
+
   function renderHeader() {
     return (
       <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -183,7 +201,12 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
           {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
         </Button>
       )}
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
+      {!isPrivateChat && chat.isCreator && (
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
+          {lang('DeleteForAll')}
+        </Button>
+      )}
+      <Button color="danger" className="confirm-dialog-button" isText onClick={isPrivateChat ? handleDeleteChat : handleLeaveChat}>
         {lang(renderActionText())}
       </Button>
       <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
