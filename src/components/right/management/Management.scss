@@ -47,13 +47,13 @@
         height: 100%;
 
         &.hidden {
-          display: none
+          display: none;
         }
       }
     }
 
     .ListItem {
-      margin: 0 -.75rem;
+      margin: 0 -0.75rem;
 
       .Reaction {
         display: flex;
@@ -71,6 +71,9 @@
 
       .multiline-item .subtitle {
         line-height: 1.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       &:not(.picker-list-item) .Checkbox {
@@ -94,10 +97,10 @@
 
     .section-heading {
       font-weight: 500;
-      font-size: .9375rem;
+      font-size: 0.9375rem;
       color: var(--color-text-secondary);
 
-      &[dir=auto] {
+      &[dir="auto"] {
         text-align: initial;
       }
     }
@@ -106,17 +109,17 @@
       color: var(--color-text-secondary);
       line-height: 1.375rem;
 
-      &[dir=auto] {
+      &[dir="auto"] {
         text-align: initial;
       }
     }
 
     .section-info {
       color: var(--color-text-secondary);
-      font-size: .875rem;
+      font-size: 0.875rem;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       text-align: right;
     }
   }
@@ -137,20 +140,20 @@
       margin-bottom: 2rem;
 
       &:last-child {
-        margin-bottom: .625rem;
+        margin-bottom: 0.625rem;
       }
     }
 
     .Radio-main {
       &::before {
         left: 0.125rem;
-        top: .25rem;
+        top: 0.25rem;
         transform: none;
       }
 
       &::after {
         left: 0.4375rem;
-        top: .5625rem;
+        top: 0.5625rem;
         transform: none;
       }
     }
@@ -159,4 +162,55 @@
 
 .ManageGroupMembers {
   padding: 0.5rem 1rem;
+}
+
+.ManageInvites {
+  .primary-link {
+    position: relative;
+  }
+
+  .primary-link-input {
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+
+  .primary-link-more-menu {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translate(0, -50%);
+    z-index: 1;
+  }
+
+  .create-link {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.ManageInvite {
+  .link-name {
+    margin-bottom: 1rem;
+  }
+
+  .expire-limit {
+    margin-top: 1rem;
+  }
+
+  .usage-limit {
+    margin-top: 1rem;
+
+    -moz-appearance: textfield;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+}
+
+.ManageInvite, .ManageInvites {
+  .hint {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    margin-top: 0.5rem;
+  }
 }

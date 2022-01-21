@@ -349,6 +349,7 @@
   }
 
   .multiline-item {
+    flex-grow: 1;
     white-space: initial;
     overflow: hidden;
 
@@ -361,6 +362,7 @@
       line-height: 1.25rem;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .subtitle {

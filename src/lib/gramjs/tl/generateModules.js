@@ -56,9 +56,10 @@ function main() {
 }
 
 function stripTl(tl) {
-    return tl.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-        .replace(/\n\s*\n/g, '\n')
-        .replace(/`/g, '\\`');
+    return tl.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '') // Remove comments
+        .replace(/\n\s*\n/g, '\n') // Trim & add newline
+        .replace(/`/g, '\\`') // Escape backticks
+        .replace(/\r/g, ''); // Remove carriage return
 }
 
 main();

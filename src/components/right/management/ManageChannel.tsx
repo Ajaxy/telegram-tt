@@ -5,12 +5,15 @@ import React, {
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
-import { ApiChat, ApiMediaFormat } from '../../../api/types';
+import { ApiChat, ApiExportedInvite, ApiMediaFormat } from '../../../api/types';
 
 import { getChatAvatarHash, getHasAdminRight } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import { selectChat } from '../../../modules/selectors';
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import { formatInteger } from '../../../util/textFormat';
 
 import AvatarEditable from '../../ui/AvatarEditable';
 import InputText from '../../ui/InputText';
@@ -19,8 +22,6 @@ import Checkbox from '../../ui/Checkbox';
 import Spinner from '../../ui/Spinner';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
-import useFlag from '../../../hooks/useFlag';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import './Management.scss';
 
@@ -36,6 +37,9 @@ type StateProps = {
   progress?: ManagementProgress;
   isSignaturesShown: boolean;
   canChangeInfo?: boolean;
+  canInvite?: boolean;
+  exportedInvites?: ApiExportedInvite[];
+  lastSyncTime?: number;
   availableReactionsCount?: number;
 };
 
@@ -47,6 +51,9 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   progress,
   isSignaturesShown,
   canChangeInfo,
+  canInvite,
+  exportedInvites,
+  lastSyncTime,
   availableReactionsCount,
   onScreenSelect,
   onClose,
@@ -59,6 +66,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     leaveChannel,
     deleteChannel,
     openChat,
+    loadExportedChatInvites,
   } = getDispatch();
 
   const currentTitle = chat ? (chat.title || '') : '';
@@ -76,6 +84,12 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   useHistoryBack(isActive, onClose);
+
+  useEffect(() => {
+    if (lastSyncTime) {
+      loadExportedChatInvites({ chatId });
+    }
+  }, [chatId, loadExportedChatInvites, lastSyncTime]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -100,6 +114,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 
   const handleClickAdministrators = useCallback(() => {
     onScreenSelect(ManagementScreens.ChatAdministrators);
+  }, [onScreenSelect]);
+
+  const handleClickInvites = useCallback(() => {
+    onScreenSelect(ManagementScreens.Invites);
   }, [onScreenSelect]);
 
   const handleSetPhoto = useCallback((file: File) => {
@@ -210,6 +228,19 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('ChannelAdministrators')}</span>
             <span className="subtitle">{adminsCount}</span>
           </ListItem>
+          {canInvite && (
+            <ListItem
+              icon="link"
+              onClick={handleClickInvites}
+              multiline
+              disabled={!exportedInvites}
+            >
+              <span className="title">{lang('GroupInfo.InviteLinks')}</span>
+              <span className="subtitle">
+                {exportedInvites ? formatInteger(exportedInvites.length) : lang('Loading')}
+              </span>
+            </ListItem>
+          )}
           <ListItem
             icon="reactions"
             multiline
@@ -274,12 +305,16 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId)!;
     const { progress } = global.management;
     const isSignaturesShown = Boolean(chat?.isSignaturesShown);
+    const { invites } = global.management.byChatId[chatId] || {};
 
     return {
       chat,
       progress,
       isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
+      canInvite: getHasAdminRight(chat, 'inviteUsers'),
+      lastSyncTime: global.lastSyncTime,
+      exportedInvites: invites,
       availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
     };
   },

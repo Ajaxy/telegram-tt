@@ -9,3 +9,4 @@ src/lib/gramjs/tl/apiTl.js
 src/lib/gramjs/tl/schemaTl.js
 src/lib/gramjs/tl/apiTl.full.js
 src/lib/gramjs/tl/schemaTl.full.js
+src/lib/gramjs/tl/generateModules.js

@@ -84,7 +84,7 @@ const MessageMeta: FC<OwnProps> = ({
       )}
       <span className="message-time" title={title} onMouseEnter={markActivated}>
         {message.isEdited && `${lang('EditedMessage')} `}
-        {formatTime(message.date * 1000, lang)}
+        {formatTime(lang, message.date * 1000)}
       </span>
       {outgoingStatus && (
         <MessageOutgoingStatus status={outgoingStatus} />

@@ -117,7 +117,13 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         </ListItem>
       )}
       {(canInviteUsers || !username) && link && (
-        <ListItem icon="mention" multiline narrow ripple onClick={() => copy(link, lang('SetUrlPlaceholder'))}>
+        <ListItem
+          icon={chat.username ? 'mention' : 'link'}
+          multiline
+          narrow
+          ripple
+          onClick={() => copy(link, lang('SetUrlPlaceholder'))}
+        >
           <div className="title">{link}</div>
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>

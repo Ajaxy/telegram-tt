@@ -32,7 +32,7 @@ function toIsoString(date: Date) {
 }
 
 // @optimization `toLocaleTimeString` is avoided because of bad performance
-export function formatTime(datetime: number | Date, lang: LangFn) {
+export function formatTime(lang: LangFn, datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const timeFormat = lang.timeFormat || '24h';
 
@@ -51,7 +51,7 @@ export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
 
   const today = getDayStart(new Date());
   if (date >= today) {
-    return formatTime(date, lang);
+    return formatTime(lang, date);
   }
 
   const weekAgo = new Date(today);
@@ -80,6 +80,26 @@ export function formatMonthAndYear(lang: LangFn, date: Date, isShort = false) {
   const format = lang(isShort ? 'formatterMonthYear2' : 'formatterMonthYear') || 'MMM yyyy';
 
   return formatDate(lang, date, format);
+}
+
+export function formatCountdown(
+  lang: LangFn,
+  msLeft: number,
+) {
+  const days = Math.floor(msLeft / MILLISECONDS_IN_DAY);
+  if (msLeft < 0) {
+    return 0;
+  } else if (days < 1) {
+    return formatMediaDuration(msLeft / 1000);
+  } else if (days < 7) {
+    return lang('Days', days);
+  } else if (days < 30) {
+    return lang('Weeks', Math.floor(days / 7));
+  } else if (days < 365) {
+    return lang('Months', Math.floor(days / 30));
+  } else {
+    return lang('Years', Math.floor(days / 365));
+  }
 }
 
 export function formatHumanDate(
@@ -148,7 +168,7 @@ export function formatMediaDateTime(
 ) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  return `${formatHumanDate(lang, date, true, undefined, isUpperFirst)}, ${formatTime(date, lang)}`;
+  return `${formatHumanDate(lang, date, true, undefined, isUpperFirst)}, ${formatTime(lang, date)}`;
 }
 
 export function formatMediaDuration(duration: number, maxValue?: number) {

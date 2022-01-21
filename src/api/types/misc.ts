@@ -97,6 +97,20 @@ export type ApiInviteInfo = {
   photo?: ApiPhoto;
 };
 
+export type ApiExportedInvite = {
+  isRevoked?: boolean;
+  isPermanent?: boolean;
+  link: string;
+  date: number;
+  startDate?: number;
+  expireDate?: number;
+  usageLimit?: number;
+  usage?: number;
+  isRequestNeeded?: boolean;
+  requested?: number;
+  title?: string;
+};
+
 export interface ApiCountry {
   isHidden?: boolean;
   iso2: string;

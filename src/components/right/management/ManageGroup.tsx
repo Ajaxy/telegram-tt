@@ -5,7 +5,9 @@ import React, {
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
-import { ApiChat, ApiChatBannedRights, ApiMediaFormat } from '../../../api/types';
+import {
+  ApiChat, ApiChatBannedRights, ApiExportedInvite, ApiMediaFormat,
+} from '../../../api/types';
 
 import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
@@ -40,6 +42,9 @@ type StateProps = {
   hasLinkedChannel: boolean;
   canChangeInfo?: boolean;
   canBanUsers?: boolean;
+  canInvite?: boolean;
+  exportedInvites?: ApiExportedInvite[];
+  lastSyncTime?: number;
   availableReactionsCount?: number;
 };
 
@@ -57,9 +62,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   hasLinkedChannel,
   canChangeInfo,
   canBanUsers,
+  canInvite,
   onScreenSelect,
   onClose,
   isActive,
+  exportedInvites,
+  lastSyncTime,
   availableReactionsCount,
 }) => {
   const {
@@ -70,6 +78,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     deleteChannel,
     closeManagement,
     openChat,
+    loadExportedChatInvites,
   } = getDispatch();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -86,6 +95,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   useHistoryBack(isActive, onClose);
+
+  useEffect(() => {
+    if (lastSyncTime && canInvite) {
+      loadExportedChatInvites({ chatId });
+    }
+  }, [chatId, loadExportedChatInvites, lastSyncTime, canInvite]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -112,6 +127,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
   const handleClickAdministrators = useCallback(() => {
     onScreenSelect(ManagementScreens.ChatAdministrators);
+  }, [onScreenSelect]);
+
+  const handleClickInvites = useCallback(() => {
+    onScreenSelect(ManagementScreens.Invites);
   }, [onScreenSelect]);
 
   const handleSetPhoto = useCallback((file: File) => {
@@ -285,6 +304,19 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('ChannelAdministrators')}</span>
             <span className="subtitle">{formatInteger(adminsCount)}</span>
           </ListItem>
+          {canInvite && (
+            <ListItem
+              icon="link"
+              onClick={handleClickInvites}
+              multiline
+              disabled={!exportedInvites}
+            >
+              <span className="title">{lang('GroupInfo.InviteLinks')}</span>
+              <span className="subtitle">
+                {exportedInvites ? formatInteger(exportedInvites.length) : lang('Loading')}
+              </span>
+            </ListItem>
+          )}
         </div>
         <div className="section">
           <ListItem icon="group" multiline onClick={handleClickMembers}>
@@ -344,6 +376,7 @@ export default memo(withGlobal<OwnProps>(
     const { progress } = global.management;
     const hasLinkedChannel = Boolean(chat.fullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
+    const { invites } = global.management.byChatId[chatId] || {};
 
     return {
       chat,
@@ -352,6 +385,9 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChannel,
       canChangeInfo: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'changeInfo'),
       canBanUsers: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'banUsers'),
+      canInvite: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'inviteUsers'),
+      exportedInvites: invites,
+      lastSyncTime: global.lastSyncTime,
       availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
     };
   },

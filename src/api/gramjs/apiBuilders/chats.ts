@@ -8,6 +8,7 @@ import {
   ApiChatFolder,
   ApiChatMember,
   ApiRestrictionReason,
+  ApiExportedInvite,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -385,4 +386,33 @@ export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
 
     return botCommands;
   }, [] as ApiBotCommand[]);
+}
+
+export function buildApiExportedInvite(invite: GramJs.ChatInviteExported) : ApiExportedInvite {
+  const {
+    revoked,
+    date,
+    expireDate,
+    link,
+    permanent,
+    startDate,
+    usage,
+    usageLimit,
+    requested,
+    requestNeeded,
+    title,
+  } = invite;
+  return {
+    isRevoked: revoked,
+    date,
+    expireDate,
+    link,
+    isPermanent: permanent,
+    startDate,
+    usage,
+    usageLimit,
+    isRequestNeeded: requestNeeded,
+    requested,
+    title,
+  };
 }

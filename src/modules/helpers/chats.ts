@@ -203,7 +203,7 @@ export function getMessageSendingRestrictionReason(
         'Channel.Persmission.Denied.SendMessages.Until',
         lang(
           'formatDateAtTime',
-          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(untilDate * 1000, lang)],
+          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(lang, untilDate * 1000)],
         ),
       )
       : lang('Channel.Persmission.Denied.SendMessages.Forever');

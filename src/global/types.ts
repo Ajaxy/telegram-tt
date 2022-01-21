@@ -50,6 +50,7 @@ import {
   InlineBotSettings,
   NewChatMembersProgress,
   AudioOrigin,
+  ManagementState,
 } from '../types';
 
 export type MessageListType =
@@ -360,11 +361,7 @@ export type GlobalState = {
 
   management: {
     progress?: ManagementProgress;
-    byChatId: Record<string, {
-      isActive: boolean;
-      isUsernameAvailable?: boolean;
-      error?: string;
-    }>;
+    byChatId: Record<string, ManagementState>;
   };
 
   mediaViewer: {
@@ -557,6 +554,7 @@ export type ActionTypes = (
   'searchTextMessagesLocal' | 'searchMediaMessagesLocal' | 'searchMessagesByDate' |
   // management
   'toggleManagement' | 'closeManagement' | 'checkPublicLink' | 'updatePublicLink' | 'updatePrivateLink' |
+  'setEditingExportedInvite' | 'loadExportedChatInvites' | 'editExportedChatInvite' | 'exportChatInvite' |
   // groups
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |

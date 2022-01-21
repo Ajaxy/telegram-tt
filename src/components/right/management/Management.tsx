@@ -18,6 +18,8 @@ import ManageGroupRecentActions from './ManageGroupRecentActions';
 import ManageGroupAdminRights from './ManageGroupAdminRights';
 import ManageGroupMembers from './ManageGroupMembers';
 import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate';
+import ManageInvites from './ManageInvites';
+import ManageInvite from './ManageInvite';
 import ManageReactions from './ManageReactions';
 
 export type OwnProps = {
@@ -228,7 +230,24 @@ const Management: FC<OwnProps & StateProps> = ({
           onClose={onClose}
         />
       );
-
+    case ManagementScreens.Invites:
+      return (
+        <ManageInvites
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+          onScreenSelect={onScreenSelect}
+        />
+      );
+    case ManagementScreens.EditInvite:
+      return (
+        <ManageInvite
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+          onScreenSelect={onScreenSelect}
+        />
+      );
     case ManagementScreens.GroupAddAdmins:
       return (
         <ManageGroupMembers

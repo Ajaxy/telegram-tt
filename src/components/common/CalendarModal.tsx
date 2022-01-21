@@ -13,6 +13,8 @@ import Button from '../ui/Button';
 
 import './CalendarModal.scss';
 
+const MAX_SAFE_DATE = 2147483647 * 1000; // API has int for dates
+
 export type OwnProps = {
   selectedAt?: number;
   maxAt?: number;
@@ -53,7 +55,7 @@ const CalendarModal: FC<OwnProps> = ({
   const lang = useLang();
   const now = new Date();
   const defaultSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
-  const maxDate = maxAt ? new Date(maxAt) : undefined;
+  const maxDate = new Date(Math.min(maxAt || MAX_SAFE_DATE, MAX_SAFE_DATE));
   const prevIsOpen = usePrevious(isOpen);
   const [isTimeInputFocused, markTimeInputAsFocused, unmarkTimeInputAsFocused] = useFlag(false);
 
@@ -76,8 +78,12 @@ const CalendarModal: FC<OwnProps> = ({
     if (!prevIsOpen && isOpen) {
       setSelectedDate(defaultSelectedDate);
       setCurrentMonthAndYear(new Date(defaultSelectedDate.getFullYear(), defaultSelectedDate.getMonth(), 1));
+      if (withTimePicker) {
+        setSelectedHours(defaultSelectedDate.getHours().toString());
+        setSelectedMinutes(defaultSelectedDate.getMinutes().toString());
+      }
     }
-  }, [defaultSelectedDate, isOpen, prevIsOpen]);
+  }, [defaultSelectedDate, isOpen, prevIsOpen, withTimePicker]);
 
   useEffect(() => {
     if (isFutureMode && !isTimeInputFocused && selectedDate.getTime() < defaultSelectedDate.getTime()) {
@@ -277,7 +283,7 @@ const CalendarModal: FC<OwnProps> = ({
 
       <div className="footer">
         <Button onClick={handleSubmit}>
-          {withTimePicker ? formatSubmitLabel(lang, selectedDate) : submitButtonLabel}
+          {submitButtonLabel || formatSubmitLabel(lang, selectedDate)}
         </Button>
         {secondButtonLabel && (
           <Button onClick={onSecondButtonClick} isText>
@@ -348,10 +354,10 @@ function formatSubmitLabel(lang: LangFn, date: Date) {
   const today = formatDateToString(new Date(), lang.code);
 
   if (day === today) {
-    return lang('Conversation.ScheduleMessage.SendToday', formatTime(date, lang));
+    return lang('Conversation.ScheduleMessage.SendToday', formatTime(lang, date));
   }
 
-  return lang('Conversation.ScheduleMessage.SendOn', [day, formatTime(date, lang)]);
+  return lang('Conversation.ScheduleMessage.SendOn', [day, formatTime(lang, date)]);
 }
 
 export default memo(CalendarModal);
