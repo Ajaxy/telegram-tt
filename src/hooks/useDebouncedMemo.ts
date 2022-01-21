@@ -1,14 +1,14 @@
 import { useState } from '../lib/teact/teact';
 
-import useThrottle from './useThrottle';
+import useDebounce from './useDebounce';
 import useOnChange from './useOnChange';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
 import useFlag from './useFlag';
 
-export default function useThrottledMemo<R extends any, D extends any[]>(
+export default function useDebouncedMemo<R extends any, D extends any[]>(
   resolverFn: () => R, ms: number, dependencies: D,
 ): R | undefined {
-  const runThrottled = useThrottle(ms, true);
+  const runDebounced = useDebounce(ms, true);
   const [value, setValue] = useState<R>();
   const [isFrozen, freeze, unfreeze] = useFlag();
 
@@ -19,7 +19,7 @@ export default function useThrottledMemo<R extends any, D extends any[]>(
       return;
     }
 
-    runThrottled(() => {
+    runDebounced(() => {
       setValue(resolverFn());
     });
   }, [...dependencies, isFrozen]);

@@ -104,9 +104,9 @@ const MediaViewerSlides: FC<OwnProps> = ({
     forceUpdate();
   }, [forceUpdate]);
 
-  const debounceSetMessage = useDebounce(DEBOUNCE_MESSAGE, false);
-  const debounceSwipe = useDebounce(DEBOUNCE_SWIPE, false);
-  const debounceActive = useDebounce(DEBOUNCE_ACTIVE, false);
+  const debounceSetMessage = useDebounce(DEBOUNCE_MESSAGE, true);
+  const debounceSwipe = useDebounce(DEBOUNCE_SWIPE, true);
+  const debounceActive = useDebounce(DEBOUNCE_ACTIVE, true);
 
   const handleToggleFooterVisibility = useCallback(() => {
     if (IS_TOUCH_ENV && (isPhoto || isGif) && hasFooter) {
