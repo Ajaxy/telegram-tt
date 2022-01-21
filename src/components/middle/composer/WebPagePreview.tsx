@@ -1,6 +1,4 @@
-import React, {
-  FC, memo, useEffect, useMemo,
-} from '../../../lib/teact/teact';
+import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
@@ -12,6 +10,7 @@ import parseMessageInput from '../../../util/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useDebouncedMemo from '../../../hooks/useDebouncedMemo';
 import buildClassName from '../../../util/buildClassName';
 
 import WebPage from '../message/WebPage';
@@ -32,6 +31,7 @@ type StateProps = {
   theme: ISettings['theme'];
 };
 
+const DEBOUNCE_MS = 300;
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
 const WebPagePreview: FC<OwnProps & StateProps> = ({
@@ -49,7 +49,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     toggleMessageWebPage,
   } = getDispatch();
 
-  const link = useMemo(() => {
+  const link = useDebouncedMemo(() => {
     const { text, entities } = parseMessageInput(messageText);
 
     const linkEntity = entities && entities.find(({ type }) => type === ApiMessageEntityTypes.TextUrl);
@@ -63,7 +63,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     }
 
     return undefined;
-  }, [messageText]);
+  }, DEBOUNCE_MS, [messageText]);
 
   useEffect(() => {
     if (link) {

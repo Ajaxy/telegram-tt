@@ -13,7 +13,7 @@ export default function useStickyDates() {
   // so we will add `position: sticky` only after first scroll. There would be no animation on the first show though.
   const [isScrolled, markIsScrolled] = useFlag(false);
 
-  const runDebounced = useDebounce(DEBOUNCE, false);
+  const runDebounced = useDebounce(DEBOUNCE, true);
 
   const updateStickyDates = useCallback((container: HTMLDivElement, hasTools?: boolean) => {
     markIsScrolled();

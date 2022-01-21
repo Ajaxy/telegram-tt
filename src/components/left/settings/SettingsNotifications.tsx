@@ -59,7 +59,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     loadNotificationSettings();
   }, [loadNotificationSettings]);
 
-  const runDebounced = useDebounce(500, false, true);
+  const runDebounced = useDebounce(500, true);
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
