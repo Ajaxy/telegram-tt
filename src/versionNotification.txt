@@ -1,16 +1,29 @@
-**Telegram Web Z was updated to version 1.29**
+**Telegram Web Z was updated to version 1.30**
 
 👏 **Harder**
-• Add admins in groups and channels.
-• Use inline "Request Contact" button for bots.
-• See inline search results in chats with bots that support it.
+• Meet Message Reactions:
+  - React to a message with ❤️🔥🎉😁😱🤩😢👎💩🤮 in the context menu.
+  - Send a quick 👍 reaction by hovering over the bottom corner of a message.
+  - You can change your default reaction to another emoji in Settings > General.
+  - Group and Channel admins can enable and control reactions via their chat's Info Page > Edit > Reactions.
+
+• Interactive Emoji:
+  - Added support for all interactive emoji, including fullscreen animations and sound effects. Try 🔥, 🍆, 🍑 and more.
+  - Animations play simultaneously when both users have the chat open.
+  – The “is watching…” status will appear when your chat partner is also seeing the animations.
+
+• Manage invite links for Groups and Channels:
+  – Enable admin approval or limited duration and users.
 
 🤩 **Better**
-• Dialogs now have a closing animation.
-• Messages with spoilers will be hidden in chat until full support is added.
-• Various UI fixes.
+• Better quality for uploaded profile pictures.
+• Various UI improvements.
+
+🚀 **Faster**
+• Several optimizations for older devices – no more freezing while typing.
 
 💪 **Stronger**
-• Fixed missing user list when creating groups and channels.
-• Fixed chat history being deleted when deleting a contact.
-• Fixed missing text in messages containing specific emoji.
+• Saved Messages now correctly renders in search results.
+• Fixed missing icons for muted chats in the chat list.
+• The context menu no longer flickers on older devices.
+• Fix re-scheduling messages to a previous date.
