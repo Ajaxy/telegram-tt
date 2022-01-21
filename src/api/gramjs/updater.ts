@@ -13,6 +13,7 @@ import {
   buildPollResults,
   buildApiMessageFromNotification,
   buildMessageDraft,
+  buildMessageReactions,
 } from './apiBuilders/messages';
 import {
   buildChatMember,
@@ -46,6 +47,7 @@ import {
   getGroupCallId,
 } from './apiBuilders/calls';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
+import { buildApiEmojiInteraction } from './apiBuilders/symbols';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -291,6 +293,13 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       id: message.id,
       chatId: message.chatId,
       message,
+    });
+  } else if (update instanceof GramJs.UpdateMessageReactions) {
+    onUpdate({
+      '@type': 'updateMessageReactions',
+      id: update.msgId,
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      reactions: buildMessageReactions(update.reactions),
     });
   } else if (update instanceof GramJs.UpdateDeleteMessages) {
     onUpdate({
@@ -614,11 +623,21 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       ? buildApiPeerId(update.userId, 'user')
       : buildApiPeerId(update.chatId, 'chat');
 
-    onUpdate({
-      '@type': 'updateChatTypingStatus',
-      id,
-      typingStatus: buildChatTypingStatus(update, serverTimeOffset),
-    });
+    if (update.action instanceof GramJs.SendMessageEmojiInteraction) {
+      onUpdate({
+        '@type': 'updateStartEmojiInteraction',
+        id,
+        emoji: update.action.emoticon,
+        messageId: update.action.msgId,
+        interaction: buildApiEmojiInteraction(JSON.parse(update.action.interaction.data)),
+      });
+    } else {
+      onUpdate({
+        '@type': 'updateChatTypingStatus',
+        id,
+        typingStatus: buildChatTypingStatus(update, serverTimeOffset),
+      });
+    }
   } else if (update instanceof GramJs.UpdateChannelUserTyping) {
     const id = buildApiPeerId(update.channelId, 'channel');
 

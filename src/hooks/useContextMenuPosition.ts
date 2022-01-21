@@ -11,6 +11,7 @@ export default (
   getMenuElement: () => HTMLElement | null,
   extraPaddingX = 0,
   extraTopPadding = 0,
+  marginSides = 0,
 ) => {
   const [positionX, setPositionX] = useState<'right' | 'left'>('right');
   const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
@@ -33,7 +34,14 @@ export default (
     const rootEl = getRootElement();
 
     const triggerRect = triggerEl.getBoundingClientRect();
-    const menuRect = menuEl ? { width: menuEl.offsetWidth, height: menuEl.offsetHeight } : emptyRect;
+
+    const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) : undefined;
+
+    const menuRect = menuEl ? {
+      width: menuEl.offsetWidth,
+      height: menuEl.offsetHeight + marginTop!,
+    } : emptyRect;
+
     const rootRect = rootEl ? rootEl.getBoundingClientRect() : emptyRect;
 
     let horizontalPostition: 'left' | 'right';
@@ -49,6 +57,19 @@ export default (
     }
     setPositionX(horizontalPostition);
 
+    if (marginSides
+      && horizontalPostition === 'right' && (x + extraPaddingX + marginSides >= rootRect.width + rootRect.left)) {
+      x -= marginSides;
+    }
+
+    if (marginSides && horizontalPostition === 'left') {
+      if (x + extraPaddingX + marginSides + menuRect.width >= rootRect.width + rootRect.left) {
+        x -= marginSides;
+      } else if (x - marginSides <= 0) {
+        x += marginSides;
+      }
+    }
+
     if (y + menuRect.height < rootRect.height + rootRect.top) {
       setPositionY('top');
     } else {
@@ -63,17 +84,17 @@ export default (
       ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
       : Math.max((x - triggerRect.left), menuRect.width + MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
     const top = Math.min(
-      rootRect.height - triggerRect.top + triggerRect.height - MENU_POSITION_BOTTOM_MARGIN,
+      rootRect.height - triggerRect.top + triggerRect.height - MENU_POSITION_BOTTOM_MARGIN + (marginTop || 0),
       y - triggerRect.top,
     );
-    const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN;
+    const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
 
     setWithScroll(menuMaxHeight < menuRect.height);
     setMenuStyle(`max-height: ${menuMaxHeight}px;`);
     setStyle(`left: ${left}px; top: ${top}px`);
   }, [
     anchor, extraPaddingX, extraTopPadding,
-    getMenuElement, getRootElement, getTriggerElement,
+    getMenuElement, getRootElement, getTriggerElement, marginSides,
   ]);
 
   return {

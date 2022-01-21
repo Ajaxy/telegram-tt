@@ -23,6 +23,8 @@ import {
   ApiCountryCode,
   ApiCountry,
   ApiGroupCall,
+  ApiAvailableReaction,
+  ApiAppConfig,
   ApiSponsoredMessage,
 } from '../api/types';
 import {
@@ -61,6 +63,23 @@ export interface MessageList {
   type: MessageListType;
 }
 
+export interface ActiveEmojiInteraction {
+  x: number;
+  y: number;
+  messageId?: number;
+  endX?: number;
+  endY?: number;
+  startSize?: number;
+  reaction?: string;
+  animatedEffect?: string;
+  isReversed?: boolean;
+}
+
+export interface ActiveReaction {
+  messageId?: number;
+  reaction?: string;
+}
+
 export interface Thread {
   listedIds?: number[];
   outlyingIds?: number[];
@@ -86,6 +105,7 @@ export interface ServiceNotification {
 }
 
 export type GlobalState = {
+  appConfig?: ApiAppConfig;
   isChatInfoShown: boolean;
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
@@ -212,6 +232,11 @@ export type GlobalState = {
     messageId: number;
   };
 
+  reactorModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   fileUploads: {
     byMessageLocalId: Record<string, {
       progress: number;
@@ -254,6 +279,7 @@ export type GlobalState = {
   };
 
   animatedEmojis?: ApiStickerSet;
+  animatedEmojiEffects?: ApiStickerSet;
   emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
   gifs: {
@@ -304,6 +330,10 @@ export type GlobalState = {
     localUserIds?: string[];
     globalUserIds?: string[];
   };
+
+  availableReactions?: ApiAvailableReaction[];
+  activeEmojiInteraction?: ActiveEmojiInteraction;
+  activeReactions: Record<number, ActiveReaction>;
 
   localTextSearch: {
     byChatThreadKey: Record<string, {
@@ -483,7 +513,8 @@ export type ActionTypes = (
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
-  'openSeenByModal' | 'closeSeenByModal' |
+  'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' |
+  'openReactorListModal' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
@@ -495,7 +526,7 @@ export type ActionTypes = (
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
-  'loadProfilePhotos' | 'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' |
+  'loadProfilePhotos' | 'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' | 'setChatEnabledReactions' |
   'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' | 'editChatFolders' | 'toggleIsProtected' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
@@ -503,9 +534,12 @@ export type ActionTypes = (
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
-  'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
+  'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' | 'sendReaction' |
   'reportMessages' | 'sendMessageAction' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
-  'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' |
+  'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' | 'loadAvailableReactions' |
+  'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' | 'setDefaultReaction' |
+  'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
+  'stopActiveReaction' |
   // downloads
   'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages
@@ -541,7 +575,7 @@ export type ActionTypes = (
   'updateWebNotificationSettings' | 'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' |
   'setPrivacySettings' | 'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
   'loadContentSettings' | 'updateContentSettings' |
-  'loadCountryList' | 'ensureTimeFormat' |
+  'loadCountryList' | 'ensureTimeFormat' | 'loadAppConfig' |
   // stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
   'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |

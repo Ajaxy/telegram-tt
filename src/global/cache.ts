@@ -198,6 +198,10 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.messages.sponsoredByChatId) {
     cached.messages.sponsoredByChatId = {};
   }
+
+  if (!cached.activeReactions) {
+    cached.activeReactions = {};
+  }
 }
 
 function updateCache() {
@@ -243,6 +247,7 @@ function updateCache() {
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
+    availableReactions: reduceAvailableReactions(global),
   };
 
   const json = JSON.stringify(reducedGlobal);
@@ -345,4 +350,9 @@ function reduceGroupCalls(global: GlobalState): GlobalState['groupCalls'] {
     isGroupCallPanelHidden: undefined,
     isFallbackConfirmOpen: undefined,
   };
+}
+
+function reduceAvailableReactions(global: GlobalState): GlobalState['availableReactions'] {
+  return global.availableReactions
+    ?.map((r) => pick(r, ['reaction', 'staticIcon', 'title', 'isInactive']));
 }

@@ -43,14 +43,47 @@ export function selectStickersForEmoji(global: GlobalState, emoji: string) {
   return stickersForEmoji;
 }
 
+function cleanEmoji(emoji: string) {
+  // Some emojis (❤️ for example) with a service symbol 'VARIATION SELECTOR-16' are not recognized as animated
+  return emoji.replace('\ufe0f', '');
+}
+
 export function selectAnimatedEmoji(global: GlobalState, emoji: string) {
   const { animatedEmojis } = global;
   if (!animatedEmojis || !animatedEmojis.stickers) {
     return undefined;
   }
 
-  // Some emojis (❤️ for example) with a service symbol 'VARIATION SELECTOR-16' are not recognized as animated
-  const cleanedEmoji = emoji.replace('\ufe0f', '');
+  const cleanedEmoji = cleanEmoji(emoji);
 
   return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
+}
+
+export function selectAnimatedEmojiEffect(global: GlobalState, emoji: string) {
+  const { animatedEmojiEffects } = global;
+  if (!animatedEmojiEffects || !animatedEmojiEffects.stickers) {
+    return undefined;
+  }
+
+  const cleanedEmoji = cleanEmoji(emoji);
+
+  return animatedEmojiEffects.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
+}
+
+export function selectAnimatedEmojiSound(global: GlobalState, emoji: string) {
+  return global?.appConfig?.emojiSounds[cleanEmoji(emoji)];
+}
+
+export function selectLocalAnimatedEmoji(global: GlobalState, emoji: string) {
+  const cleanedEmoji = cleanEmoji(emoji);
+
+  return cleanedEmoji === '🍑' ? 'Peach' : (cleanedEmoji === '🍆' ? 'Eggplant' : undefined);
+}
+
+export function selectLocalAnimatedEmojiEffect(emoji: string) {
+  return emoji === 'Eggplant' ? 'Cumshot' : undefined;
+}
+
+export function selectLocalAnimatedEmojiEffectByName(name: string) {
+  return name === 'Cumshot' ? '🍆' : undefined;
 }

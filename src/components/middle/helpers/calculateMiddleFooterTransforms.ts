@@ -7,8 +7,8 @@ import {
 const REM = 16; // px
 const MAX_TOOLBAR_WIDTH = 32 * REM;
 const MAX_MESSAGES_LIST_WIDTH = 45.5 * REM;
-const SIDE_COLUMN_MAX_WIDTH = 26.5 * REM;
-const MIN_LEFT_COLUMN_WIDTH = 18 * REM;
+export const SIDE_COLUMN_MAX_WIDTH = 26.5 * REM;
+export const MIN_LEFT_COLUMN_WIDTH = 18 * REM;
 const UNPIN_BUTTON_WIDTH = 16.125 * REM;
 
 export default function calculateMiddleFooterTransforms(windowWidth: number, canPost?: boolean) {

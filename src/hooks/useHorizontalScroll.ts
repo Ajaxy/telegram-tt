@@ -2,7 +2,7 @@ import { useEffect } from '../lib/teact/teact';
 
 export default (container: HTMLElement | null, isDisabled?: boolean) => {
   useEffect(() => {
-    if (!container) {
+    if (!container || isDisabled) {
       return undefined;
     }
 

@@ -56,6 +56,11 @@ $color-user-6: #ee7aae;
 $color-user-7: #6ec9cb;
 $color-user-8: #faa774;
 
+$color-message-reaction: #ebf3fd;
+$color-message-reaction-hover: #c5def9;
+$color-message-reaction-own: #cef0ba;
+$color-message-reaction-own-hover: #b5e0a4;
+
 :root {
   --color-background: #{$color-white};
   --color-background-selected: #f4f4f5;
@@ -115,6 +120,11 @@ $color-user-8: #faa774;
 
   --color-accent-own: #{$color-text-green};
   --color-message-meta-own: #{$color-text-green};
+
+  --color-message-reaction: $color-message-reaction;
+  --color-message-reaction-hover: $color-message-reaction-hover;
+  --color-message-reaction-own: $color-message-reaction-own;
+  --color-message-reaction-hover-own: $color-message-reaction-own-hover;
 
   --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
   --color-reply-active: #{blend-normal(rgba($color-text-secondary, 0.16), $color-white)};

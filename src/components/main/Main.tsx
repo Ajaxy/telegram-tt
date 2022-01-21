@@ -108,12 +108,14 @@ const Main: FC<StateProps> = ({
     loadTopInlineBots,
     loadEmojiKeywords,
     loadCountryList,
+    loadAvailableReactions,
     loadStickerSets,
     loadAddedStickers,
     loadFavoriteStickers,
     ensureTimeFormat,
     openStickerSetShortName,
     checkVersionNotification,
+    loadAppConfig,
   } = getDispatch();
   const isSynced = Boolean(lastSyncTime);
 
@@ -127,6 +129,8 @@ const Main: FC<StateProps> = ({
   useEffect(() => {
     if (lastSyncTime) {
       updateIsOnline(true);
+      loadAppConfig();
+      loadAvailableReactions();
       loadAnimatedEmojis();
       loadNotificationSettings();
       loadNotificationExceptions();
@@ -135,7 +139,7 @@ const Main: FC<StateProps> = ({
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
-    loadTopInlineBots, updateIsOnline,
+    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig,
   ]);
 
   // Language-based API calls

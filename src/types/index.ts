@@ -201,6 +201,7 @@ export enum SettingsScreens {
   TwoFaRecoveryEmail,
   TwoFaRecoveryEmailCode,
   TwoFaCongratulations,
+  QuickReaction,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (
@@ -320,6 +321,7 @@ export enum ManagementScreens {
   ChatNewAdminRights,
   GroupMembers,
   GroupAddAdmins,
+  Reactions,
 }
 
 export type ManagementType = 'user' | 'group' | 'channel';

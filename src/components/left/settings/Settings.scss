@@ -301,3 +301,19 @@
 .username-link {
   color: var(--color-links);
 }
+
+.settings-quick-reaction {
+  .ReactionStaticEmoji {
+    margin-inline-end: 1rem;
+    width: 1.5rem
+  }
+}
+
+.SettingsDefaultReaction {
+  .ReactionStaticEmoji {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-end: 2rem;
+  }
+
+}

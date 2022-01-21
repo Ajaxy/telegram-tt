@@ -104,6 +104,40 @@
     }
   }
 
+  .MessageMeta.reactions-offset {
+    position: relative;
+    top: .375rem;
+    bottom: auto !important;
+    float: right;
+    line-height: 1;
+    height: calc(var(--message-meta-height, 1rem));
+    margin-left: auto;
+    margin-right: -.5rem;
+    align-self: flex-end;
+
+    .MessageOutgoingStatus .Transition {
+      max-height: calc(var(--message-meta-height, 1rem));
+      overflow: hidden;
+    }
+
+    html[data-message-text-size="12"] & {
+      top: .25rem;
+    }
+
+    html[data-message-text-size="17"] & {
+      top: .4375rem;
+    }
+
+    html[data-message-text-size="18"] &,
+    html[data-message-text-size="19"] & {
+      top: .5rem;
+    }
+
+    html[data-message-text-size="20"] & {
+      top: .5625rem;
+    }
+  }
+
   &.document:not(.text) {
     &::after {
       content: "";

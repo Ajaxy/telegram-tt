@@ -36,6 +36,7 @@ type StateProps = {
   progress?: ManagementProgress;
   isSignaturesShown: boolean;
   canChangeInfo?: boolean;
+  availableReactionsCount?: number;
 };
 
 const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
@@ -46,6 +47,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   progress,
   isSignaturesShown,
   canChangeInfo,
+  availableReactionsCount,
   onScreenSelect,
   onClose,
   isActive,
@@ -90,6 +92,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 
   const handleClickDiscussion = useCallback(() => {
     onScreenSelect(ManagementScreens.Discussion);
+  }, [onScreenSelect]);
+
+  const handleClickReactions = useCallback(() => {
+    onScreenSelect(ManagementScreens.Reactions);
   }, [onScreenSelect]);
 
   const handleClickAdministrators = useCallback(() => {
@@ -148,6 +154,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     openChat({ id: undefined });
   }, [chat.isCreator, chat.id, closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, openChat]);
 
+  const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
+
   if (chat.isRestricted) {
     return undefined;
   }
@@ -201,6 +209,17 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('ChannelAdministrators')}</span>
             <span className="subtitle">{adminsCount}</span>
+          </ListItem>
+          <ListItem
+            icon="reactions"
+            multiline
+            onClick={handleClickReactions}
+            disabled={!canChangeInfo}
+          >
+            <span className="title">{lang('Reactions')}</span>
+            <span className="subtitle" dir="auto">
+              {enabledReactionsCount}/{availableReactionsCount}
+            </span>
           </ListItem>
           <div className="ListItem no-selection narrow">
             <Checkbox
@@ -261,6 +280,7 @@ export default memo(withGlobal<OwnProps>(
       progress,
       isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
+      availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
     };
   },
 )(ManageChannel));

@@ -28,7 +28,7 @@ const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) =
         <span className="sender-name" dir="auto">{renderText(typingUserName)}</span>
       )}
       {/* fix for translation "username _is_ typing" */}
-      {lang(typingStatus.action).replace('{user}', '').trim()}
+      {lang(typingStatus.action).replace('{user}', '').replace('{emoji}', typingStatus.emoji).trim()}
       <span className="ellipsis" />
     </p>
   );

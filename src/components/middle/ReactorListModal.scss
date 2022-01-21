@@ -1,0 +1,38 @@
+.ReactorListModal {
+  --color-reaction: var(--color-message-reaction);
+  --hover-color-reaction: var(--color-message-reaction-hover);
+  --accent-color: var(--color-primary);
+
+  .modal-content {
+    overflow: hidden;
+  }
+
+  .Reactions {
+    margin-bottom: 0.5rem;
+  }
+
+  .reaction-filter-emoji {
+    margin-right: 0.25rem;
+  }
+
+  .reactor-list {
+    max-height: 400px;
+    overflow: auto;
+    overflow-x: hidden;
+  }
+
+  .reactors-list-item {
+    margin: 0;
+  }
+
+  .reactors-list-item .ListItem-button {
+    display: flex;
+    align-items: center;
+  }
+
+  .reactors-list-emoji {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-start: auto;
+  }
+}

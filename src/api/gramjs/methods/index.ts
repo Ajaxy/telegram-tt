@@ -10,7 +10,7 @@ export {
   fetchChats, fetchFullChat, searchChats, requestChatUpdate,
   saveDraft, clearDraft, fetchChat, updateChatMutedState,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
-  toggleChatPinned, toggleChatArchived, toggleDialogUnread,
+  toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
   fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
@@ -34,7 +34,7 @@ export {
 export {
   fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers,
   faveSticker, fetchStickers, fetchSavedGifs, searchStickers, installStickerSet, uninstallStickerSet,
-  searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords,
+  searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords, fetchAnimatedEmojiEffects,
 } from './symbols';
 
 export {
@@ -47,7 +47,7 @@ export {
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
-  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList,
+  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
 } from './settings';
 
 export {
@@ -67,3 +67,8 @@ export {
   editGroupCallTitle, editGroupCallParticipant, exportGroupCallInvite, fetchGroupCallParticipants,
   joinGroupCallPresentation, leaveGroupCall, leaveGroupCallPresentation, toggleGroupCallStartSubscription,
 } from './calls';
+
+export {
+  getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList,
+  setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction,
+} from './reactions';

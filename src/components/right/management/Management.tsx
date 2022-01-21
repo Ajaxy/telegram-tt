@@ -18,6 +18,7 @@ import ManageGroupRecentActions from './ManageGroupRecentActions';
 import ManageGroupAdminRights from './ManageGroupAdminRights';
 import ManageGroupMembers from './ManageGroupMembers';
 import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate';
+import ManageReactions from './ManageReactions';
 
 export type OwnProps = {
   chatId: string;
@@ -237,6 +238,15 @@ const Management: FC<OwnProps & StateProps> = ({
           onClose={onClose}
           onScreenSelect={onScreenSelect}
           onChatMemberSelect={onChatMemberSelect}
+        />
+      );
+
+    case ManagementScreens.Reactions:
+      return (
+        <ManageReactions
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
         />
       );
   }

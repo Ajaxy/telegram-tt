@@ -303,6 +303,7 @@ export function buildChatTypingStatus(
   serverTimeOffset: number,
 ) {
   let action: string = '';
+  let emoticon: string | undefined;
   if (update.action instanceof GramJs.SendMessageCancelAction) {
     return undefined;
   } else if (update.action instanceof GramJs.SendMessageTypingAction) {
@@ -333,10 +334,16 @@ export function buildChatTypingStatus(
     action = 'lng_send_action_choose_sticker';
   } else if (update.action instanceof GramJs.SpeakingInGroupCallAction) {
     return undefined;
+  } else if (update.action instanceof GramJs.SendMessageEmojiInteractionSeen) {
+    action = 'lng_user_action_watching_animations';
+    emoticon = update.action.emoticon;
+  } else if (update.action instanceof GramJs.SendMessageEmojiInteraction) {
+    return undefined;
   }
 
   return {
     action,
+    ...(emoticon && { emoji: emoticon }),
     ...(!(update instanceof GramJs.UpdateUserTyping) && { userId: getApiChatIdFromMtpPeer(update.fromId) }),
     timestamp: Date.now() + serverTimeOffset * 1000,
   };

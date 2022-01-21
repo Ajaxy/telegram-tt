@@ -1313,10 +1313,13 @@ messageUserReaction#932844fa user_id:long reaction:string = MessageUserReaction;
 
 messages.messageReactionsList#a366923c flags:# count:int reactions:Vector<MessageUserReaction> users:Vector<User> next_offset:flags.0?string = messages.MessageReactionsList;
 
-availableReaction#21d7c4b flags:# inactive:flags.0?true reaction:string title:string static_icon:Document appear_animation:Document select_animation:Document activate_animation:Document effect_animation:Document = AvailableReaction;
+availableReaction#c077ec01 flags:# inactive:flags.0?true reaction:string title:string static_icon:Document appear_animation:Document select_animation:Document activate_animation:Document effect_animation:Document around_animation:flags.1?Document center_icon:flags.1?Document = AvailableReaction;
 
 messages.availableReactionsNotModified#9f071957 = messages.AvailableReactions;
 messages.availableReactions#768e3aad hash:int reactions:Vector<AvailableReaction> = messages.AvailableReactions;
+
+messages.translateNoResult#67ca4737 = messages.TranslatedText;
+messages.translateResultText#a214f7d0 text:string = messages.TranslatedText;
 
 ---functions---
 
@@ -1602,6 +1605,7 @@ messages.getMessageReactionsList#e0ee6b77 flags:# peer:InputPeer id:int reaction
 messages.setChatAvailableReactions#14050ea6 peer:InputPeer available_reactions:Vector<string> = Updates;
 messages.getAvailableReactions#18dea0ac hash:int = messages.AvailableReactions;
 messages.setDefaultReaction#d960c4d4 reaction:string = Bool;
+messages.translateText#24ce6dee flags:# peer:flags.0?InputPeer msg_id:flags.0?int text:flags.1?string from_lang:flags.2?string to_lang:string = messages.TranslatedText;
 
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;
@@ -1750,4 +1754,4 @@ stats.getMegagroupStats#dcdf8607 flags:# dark:flags.0?true channel:InputChannel 
 stats.getMessagePublicForwards#5630281b channel:InputChannel msg_id:int offset_rate:int offset_peer:InputPeer offset_id:int limit:int = messages.Messages;
 stats.getMessageStats#b6e0a3f5 flags:# dark:flags.0?true channel:InputChannel msg_id:int = stats.MessageStats;
 
-// LAYER 136
+// LAYER 137

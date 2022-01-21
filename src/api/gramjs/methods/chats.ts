@@ -341,6 +341,7 @@ async function getFullChatInfo(chatId: string): Promise<{
     exportedInvite,
     botInfo,
     call,
+    availableReactions,
   } = result.fullChat;
 
   const members = buildChatMembers(participants);
@@ -358,6 +359,7 @@ async function getFullChatInfo(chatId: string): Promise<{
         inviteLink: exportedInvite.link,
       }),
       groupCallId: call?.id.toString(),
+      enabledReactions: availableReactions,
     },
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
     groupCall: call ? {
@@ -403,6 +405,7 @@ async function getFullChannelInfo(
     hiddenPrehistory,
     call,
     botInfo,
+    availableReactions,
     defaultSendAs,
   } = result.fullChat;
 
@@ -454,6 +457,7 @@ async function getFullChannelInfo(
       groupCallId: call ? String(call.id) : undefined,
       linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'chat') : undefined,
       botCommands,
+      enabledReactions: availableReactions,
       sendAsId: defaultSendAs ? getApiChatIdFromMtpPeer(defaultSendAs) : undefined,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
@@ -1141,6 +1145,17 @@ export async function importChatInvite({ hash }: { hash: string }) {
   }
 
   return buildApiChatFromPreview(updates.chats[0]);
+}
+
+export function setChatEnabledReactions({
+  chat, enabledReactions,
+}: {
+  chat: ApiChat; enabledReactions: string[];
+}) {
+  return invokeRequest(new GramJs.messages.SetChatAvailableReactions({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    availableReactions: enabledReactions,
+  }), true);
 }
 
 export function toggleIsProtected({

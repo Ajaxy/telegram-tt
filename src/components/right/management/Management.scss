@@ -55,6 +55,16 @@
     .ListItem {
       margin: 0 -.75rem;
 
+      .Reaction {
+        display: flex;
+        align-items: center;
+      }
+
+      .ReactionStaticEmoji {
+        width: 1.5rem;
+        margin-right: 1rem;
+      }
+
       &:last-child {
         margin-bottom: 0;
       }

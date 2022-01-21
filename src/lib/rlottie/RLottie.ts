@@ -90,6 +90,7 @@ class RLottie {
     private params: Params = {},
     private onLoad?: () => void,
     private customColor?: [number, number, number],
+    private onEnded?: (isDestroyed?: boolean) => void,
   ) {
     this.initContainer();
     this.initConfig();
@@ -359,6 +360,7 @@ class RLottie {
       if (delta > 0 && (frameIndex === this.framesCount! - 1 || expectedNextFrameIndex > this.framesCount! - 1)) {
         if (this.params.noLoop) {
           this.isAnimating = false;
+          this.onEnded?.();
           return false;
         }
 
@@ -368,6 +370,7 @@ class RLottie {
       } else if (delta < 0 && (frameIndex === 0 || expectedNextFrameIndex < 0)) {
         if (this.params.noLoop) {
           this.isAnimating = false;
+          this.onEnded?.();
           return false;
         }
 

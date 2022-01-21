@@ -1,5 +1,5 @@
 import {
-  ApiChat, ApiMessage, ApiMessageEntityTypes, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTypes, ApiReactions, ApiUser,
 } from '../../api/types';
 import { LangFn } from '../../hooks/useLang';
 
@@ -270,4 +270,8 @@ export function getMessageContentFilename(message: ApiMessage) {
   }
 
   return baseFilename;
+}
+
+export function areReactionsEmpty(reactions: ApiReactions) {
+  return !reactions.results.some((l) => l.count > 0);
 }

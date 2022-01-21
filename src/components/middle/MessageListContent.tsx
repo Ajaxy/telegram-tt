@@ -34,6 +34,7 @@ interface OwnProps {
   threadId: number;
   type: MessageListType;
   isReady: boolean;
+  areReactionsInMeta: boolean;
   isScrollingRef: { current: boolean | undefined };
   isScrollPatchNeededRef: { current: boolean | undefined };
   threadTopMessageId: number | undefined;
@@ -53,6 +54,7 @@ const MessageListContent: FC<OwnProps> = ({
   isViewportNewest,
   isUnread,
   withUsers,
+  areReactionsInMeta,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -188,6 +190,7 @@ const MessageListContent: FC<OwnProps> = ({
             noAvatars={noAvatars}
             withAvatar={position.isLastInGroup && withUsers && !isOwn && !(message.id === threadTopMessageId)}
             withSenderName={position.isFirstInGroup && withUsers && !isOwn}
+            areReactionsInMeta={areReactionsInMeta}
             threadId={threadId}
             messageListType={type}
             noComments={hasLinkedChat === false}

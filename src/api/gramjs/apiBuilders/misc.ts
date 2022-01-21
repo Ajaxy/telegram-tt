@@ -1,6 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiCountry, ApiSession, ApiWallpaper } from '../../types';
+import {
+  ApiCountry, ApiSession, ApiWallpaper,
+} from '../../types';
 import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument } from './messages';
@@ -154,4 +156,17 @@ export function buildApiCountryList(countries: GramJs.help.Country[]) {
     phoneCodes: listByCode,
     general: generalList,
   };
+}
+
+export function buildJson(json: GramJs.TypeJSONValue): any {
+  if (json instanceof GramJs.JsonNull) return undefined;
+  if (json instanceof GramJs.JsonString
+    || json instanceof GramJs.JsonBool
+    || json instanceof GramJs.JsonNumber) return json.value;
+  if (json instanceof GramJs.JsonArray) return json.value.map(buildJson);
+
+  return json.value.reduce((acc: Record<string, any>, el) => {
+    acc[el.key] = buildJson(el.value);
+    return acc;
+  }, {});
 }

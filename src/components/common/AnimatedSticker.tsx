@@ -20,6 +20,7 @@ type OwnProps = {
   isLowPriority?: boolean;
   onLoad?: NoneToVoidFunction;
   color?: [number, number, number];
+  onEnded?: NoneToVoidFunction;
 };
 
 type RLottieClass = typeof import('../../lib/rlottie/RLottie').default;
@@ -54,6 +55,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   isLowPriority,
   onLoad,
   color,
+  onEnded,
 }) => {
   const [animation, setAnimation] = useState<RLottieInstance>();
   // eslint-disable-next-line no-null/no-null
@@ -89,6 +91,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         },
         onLoad,
         color,
+        onEnded,
       );
 
       if (speed) {
@@ -109,7 +112,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         });
       });
     }
-  }, [color, animation, animationData, id, isLowPriority, noLoop, onLoad, quality, size, speed]);
+  }, [color, animation, animationData, id, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded]);
 
   useEffect(() => {
     if (!animation) return;

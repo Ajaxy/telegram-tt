@@ -2,11 +2,22 @@
   position: absolute;
   font-size: 1rem;
 
+  .scrollable-content {
+    overflow: auto;
+    overflow: overlay;
+    padding: 0.5rem 0;
+    overscroll-behavior: contain;
+  }
+
   .bubble {
     transform: scale(0.5);
     transition: opacity .15s cubic-bezier(0.2, 0, 0.2, 1), transform .15s cubic-bezier(0.2, 0, 0.2, 1) !important;
-    overflow: auto;
-    overflow: overlay;
+    overflow: initial;
+    padding: 0;
+  }
+
+  &.with-reactions .bubble {
+    margin-top: 3.5rem;
   }
 
   .backdrop {
