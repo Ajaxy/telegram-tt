@@ -4,7 +4,7 @@ import React, {
 import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import { MessageListType } from '../../../global/types';
-import { ApiMessage } from '../../../api/types';
+import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
 import { IAlbum, IAnchorPosition } from '../../../types';
 import {
   selectActiveDownloadIds,
@@ -13,18 +13,24 @@ import {
   selectCurrentMessageList,
   selectIsMessageProtected,
 } from '../../../modules/selectors';
-import { isChatGroup, isOwnMessage } from '../../../modules/helpers';
-import { SEEN_BY_MEMBERS_EXPIRE, SEEN_BY_MEMBERS_CHAT_MAX } from '../../../config';
+import {
+  isActionMessage, isChatChannel,
+  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId,
+} from '../../../modules/helpers';
+import { SEEN_BY_MEMBERS_EXPIRE, SEEN_BY_MEMBERS_CHAT_MAX, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
 import ReportMessageModal from '../../common/ReportMessageModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
+
+const START_SIZE = 2 * REM;
 
 export type OwnProps = {
   isOpen: boolean;
@@ -38,11 +44,15 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  availableReactions?: ApiAvailableReaction[];
   noOptions?: boolean;
   canSendNow?: boolean;
   canReschedule?: boolean;
   canReply?: boolean;
   canPin?: boolean;
+  canShowReactionsCount?: boolean;
+  canShowReactionList?: boolean;
+  canRemoveReaction?: boolean;
   canUnpin?: boolean;
   canDelete?: boolean;
   canReport?: boolean;
@@ -51,14 +61,18 @@ type StateProps = {
   canFaveSticker?: boolean;
   canUnfaveSticker?: boolean;
   canCopy?: boolean;
+  isPrivate?: boolean;
+  hasFullInfo?: boolean;
   canCopyLink?: boolean;
   canSelect?: boolean;
   canDownload?: boolean;
   activeDownloads: number[];
   canShowSeenBy?: boolean;
+  enabledReactions?: string[];
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
+  availableReactions,
   isOpen,
   messageListType,
   chatUsername,
@@ -69,13 +83,19 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   onCloseAnimationEnd,
   noOptions,
   canSendNow,
+  hasFullInfo,
   canReschedule,
   canReply,
   canPin,
   canUnpin,
   canDelete,
   canReport,
+  canShowReactionsCount,
+  canShowReactionList,
+  canRemoveReaction,
   canEdit,
+  enabledReactions,
+  isPrivate,
   canForward,
   canFaveSticker,
   canUnfaveSticker,
@@ -100,6 +120,10 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     cancelMessageMediaDownload,
     loadSeenBy,
     openSeenByModal,
+    sendReaction,
+    openReactorListModal,
+    loadFullChat,
+    loadReactors,
   } = getDispatch();
 
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
@@ -115,7 +139,26 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     }
   }, [loadSeenBy, isOpen, message.chatId, message.id, canShowSeenBy]);
 
+  useEffect(() => {
+    if (canShowReactionsCount && isOpen) {
+      loadReactors({ chatId: message.chatId, messageId: message.id });
+    }
+  }, [canShowReactionsCount, isOpen, loadReactors, message.chatId, message.id]);
+
+  useEffect(() => {
+    if (!hasFullInfo && !isPrivate && isOpen) {
+      loadFullChat({ chatId: message.chatId });
+    }
+  }, [hasFullInfo, isOpen, isPrivate, loadFullChat, message.chatId]);
+
   const seenByRecentUsers = useMemo(() => {
+    if (message.reactions?.recentReactions?.length) {
+      // No need for expensive global updates on users, so we avoid them
+      const usersById = getGlobal().users.byId;
+
+      return message.reactions?.recentReactions?.slice(0, 3).map(({ userId }) => usersById[userId]).filter(Boolean);
+    }
+
     if (!message.seenByUserIds) {
       return undefined;
     }
@@ -123,7 +166,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
     return message.seenByUserIds?.slice(0, 3).map((id) => usersById[id]).filter(Boolean);
-  }, [message.seenByUserIds]);
+  }, [message.reactions?.recentReactions, message.seenByUserIds]);
 
   const isDownloading = album ? album.messages.some((msg) => activeDownloads.includes(msg.id))
     : activeDownloads.includes(message.id);
@@ -231,6 +274,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openSeenByModal({ chatId: message.chatId, messageId: message.id });
   }, [closeMenu, message.chatId, message.id, openSeenByModal]);
 
+  const handleOpenReactorListModal = useCallback(() => {
+    closeMenu();
+    openReactorListModal({ chatId: message.chatId, messageId: message.id });
+  }, [closeMenu, openReactorListModal, message.chatId, message.id]);
+
   const handleRescheduleMessage = useCallback((date: Date) => {
     rescheduleMessage({
       chatId: message.chatId,
@@ -255,6 +303,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [album, message, closeMenu, isDownloading, cancelMessageMediaDownload, downloadMessageMedia]);
 
+  const handleSendReaction = useCallback((reaction: string | undefined, x: number, y: number) => {
+    sendReaction({
+      chatId: message.chatId, messageId: message.id, reaction, x, y, startSize: START_SIZE,
+    });
+    closeMenu();
+  }, [closeMenu, message.chatId, message.id, sendReaction]);
+
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
   if (noOptions) {
@@ -269,9 +324,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   return (
     <div className={['ContextMenuContainer', transitionClassNames].join(' ')}>
       <MessageContextMenu
+        availableReactions={availableReactions}
         message={message}
+        isPrivate={isPrivate}
         isOpen={isMenuOpen}
+        enabledReactions={enabledReactions}
         anchor={anchor}
+        canShowReactionsCount={canShowReactionsCount}
+        canShowReactionList={canShowReactionList}
+        canRemoveReaction={canRemoveReaction}
         canSendNow={canSendNow}
         canReschedule={canReschedule}
         canReply={canReply}
@@ -306,6 +367,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCopyLink={handleCopyLink}
         onDownload={handleDownloadClick}
         onShowSeenBy={handleOpenSeenByModal}
+        onSendReaction={handleSendReaction}
+        onShowReactors={handleOpenReactorListModal}
       />
       <DeleteMessageModal
         isOpen={isDeleteModalOpen}
@@ -361,15 +424,22 @@ export default memo(withGlobal<OwnProps>(
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
+    const isChannel = chat && isChatChannel(chat);
     const canShowSeenBy = Boolean(chat
       && isChatGroup(chat)
       && isOwnMessage(message)
       && chat.membersCount
       && chat.membersCount < SEEN_BY_MEMBERS_CHAT_MAX
       && message.date > Date.now() / 1000 - SEEN_BY_MEMBERS_EXPIRE);
+    const isPrivate = chat && isUserId(chat.id);
+    const isAction = isActionMessage(message);
+    const canShowReactionsCount = !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
+      && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
+    const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
 
     return {
+      availableReactions: global.availableReactions,
       noOptions,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
@@ -388,6 +458,12 @@ export default memo(withGlobal<OwnProps>(
       canDownload: !isProtected && canDownload,
       activeDownloads,
       canShowSeenBy,
+      enabledReactions: chat?.fullInfo?.enabledReactions,
+      isPrivate,
+      hasFullInfo: Boolean(chat?.fullInfo),
+      canShowReactionsCount,
+      canShowReactionList: !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
+      canRemoveReaction,
     };
   },
 )(ContextMenuContainer));

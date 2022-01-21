@@ -100,6 +100,7 @@ addReducer('loadStickers', (global, actions, payload) => {
 
 addReducer('loadAnimatedEmojis', () => {
   void loadAnimatedEmojis();
+  void loadAnimatedEmojiEffects();
 });
 
 addReducer('loadSavedGifs', (global) => {
@@ -289,6 +290,20 @@ async function loadAnimatedEmojis() {
   const { set, stickers } = stickerSet;
 
   setGlobal(replaceAnimatedEmojis(getGlobal(), { ...set, stickers }));
+}
+
+async function loadAnimatedEmojiEffects() {
+  const stickerSet = await callApi('fetchAnimatedEmojiEffects');
+  if (!stickerSet) {
+    return;
+  }
+
+  const { set, stickers } = stickerSet;
+
+  setGlobal({
+    ...getGlobal(),
+    animatedEmojiEffects: { ...set, stickers },
+  });
 }
 
 function unfaveSticker(sticker: ApiSticker) {

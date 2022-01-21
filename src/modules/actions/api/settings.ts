@@ -602,3 +602,16 @@ addReducer('ensureTimeFormat', (global, actions) => {
     }
   })();
 });
+
+addReducer('loadAppConfig', () => {
+  (async () => {
+    const appConfig = await callApi('fetchAppConfig');
+
+    if (!appConfig) return;
+
+    setGlobal({
+      ...getGlobal(),
+      appConfig,
+    });
+  })();
+});

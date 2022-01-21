@@ -1,5 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiSticker, ApiStickerSet } from '../../types';
+import {
+  ApiEmojiInteraction, ApiSticker, ApiStickerSet, GramJsEmojiInteraction,
+} from '../../types';
 import { MEMOJI_STICKER_ID } from '../../../config';
 
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
@@ -107,4 +109,10 @@ export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetC
   });
 
   return stickerSet;
+}
+
+export function buildApiEmojiInteraction(json: GramJsEmojiInteraction): ApiEmojiInteraction {
+  return {
+    timestamps: json.a.map((l) => l.t),
+  };
 }

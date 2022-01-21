@@ -87,6 +87,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('lng_settings_information')}</h3>;
       case SettingsScreens.General:
         return <h3>{lang('General')}</h3>;
+      case SettingsScreens.QuickReaction:
+        return <h3>{lang('DoubleTapSetting')}</h3>;
       case SettingsScreens.Notifications:
         return <h3>{lang('Notifications')}</h3>;
       case SettingsScreens.DataStorage:

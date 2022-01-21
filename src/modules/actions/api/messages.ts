@@ -16,7 +16,11 @@ import {
 } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { MAX_MEDIA_FILES_FOR_ALBUM, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import {
+  MAX_MEDIA_FILES_FOR_ALBUM,
+  MESSAGE_LIST_SLICE,
+  SERVICE_NOTIFICATIONS_USER_ID,
+} from '../../../config';
 import { IS_IOS } from '../../../util/environment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {

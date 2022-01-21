@@ -1,0 +1,84 @@
+.Reactions {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+  overflow: visible;
+
+  .Button {
+    --reaction-background: var(--color-reaction);
+    display: flex;
+    flex-direction: row;
+    height: 1.75rem;
+    white-space: nowrap;
+    width: auto;
+    margin: 0.125rem;
+    padding: 0 0.5rem;
+    border: 2px solid transparent;
+    background-color: var(--reaction-background) !important;
+    border-radius: 1.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    color: var(--accent-color);
+    overflow: visible;
+
+    .ReactionAnimatedEmoji, .icon-reaction-filled {
+      width: 1.125rem;
+      height: 1.125rem;
+      margin-right: 0.25rem;
+    }
+
+    .avatars {
+      display: flex;
+
+      .Avatar {
+        margin: 0 0 0 -0.25rem;
+        border: 0.0625rem solid var(--reaction-background);
+        width: 1.25rem;
+        height: 1.25rem;
+
+        &:first-child {
+          margin: 0;
+        }
+      }
+    }
+
+    &.chosen {
+      border-color: var(--accent-color);
+    }
+
+    &:hover {
+      --reaction-background: var(--hover-color-reaction);
+    }
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+
+  &.is-outside {
+    margin-top: 0.125rem;
+  }
+
+  &.is-outside .Button {
+    --reaction-background: var(--pattern-color);
+    color: white;
+    .theme-dark & {
+      color: var(--accent-color);
+    }
+
+    &.chosen {
+      border-color: white;
+
+      .theme-dark & {
+        border-color: var(--accent-color);
+      }
+    }
+  }
+}

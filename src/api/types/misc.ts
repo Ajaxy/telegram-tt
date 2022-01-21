@@ -109,3 +109,20 @@ export interface ApiCountryCode extends ApiCountry {
   prefixes?: string[];
   patterns?: string[];
 }
+
+export interface ApiAppConfig {
+  emojiSounds: Record<string, string>;
+  defaultReaction: string;
+}
+
+export interface GramJsEmojiInteraction {
+  v: number;
+  a: {
+    i: number;
+    t: number;
+  }[];
+}
+
+export interface ApiEmojiInteraction {
+  timestamps: number[];
+}

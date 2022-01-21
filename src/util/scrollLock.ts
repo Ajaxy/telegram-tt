@@ -1,4 +1,5 @@
 let scrollLockEl: HTMLElement | null | undefined;
+let excludedClosestSelector: string | undefined;
 
 const IGNORED_KEYS: Record<string, boolean> = {
   Down: true,
@@ -32,7 +33,9 @@ function isTextBox(target: EventTarget | null) {
   return inputTypes.indexOf(type.toLowerCase()) > -1;
 }
 
-const getTouchY = (e: WheelEvent | TouchEvent) => ('changedTouches' in e ? e.changedTouches[0].clientY : 0);
+export const getTouchY = (e: WheelEvent | TouchEvent | React.WheelEvent | React.TouchEvent) => {
+  return ('changedTouches' in e ? e.changedTouches[0].clientY : 0);
+};
 
 const preventDefault = (e: WheelEvent | TouchEvent) => {
   const deltaY = 'deltaY' in e ? e.deltaY : getTouchY(e);
@@ -46,6 +49,7 @@ const preventDefault = (e: WheelEvent | TouchEvent) => {
     // Prevent bottom overscroll
     || (scrollLockEl.scrollTop >= (scrollLockEl.scrollHeight - scrollLockEl.offsetHeight) && deltaY >= 0)
   ) {
+    if (excludedClosestSelector && (e.target as HTMLElement).closest(excludedClosestSelector)) return;
     e.preventDefault();
   }
 };
@@ -56,8 +60,9 @@ function preventDefaultForScrollKeys(e: KeyboardEvent) {
   }
 }
 
-export function disableScrolling(el?: HTMLElement | null) {
+export function disableScrolling(el?: HTMLElement | null, _excludedClosestSelector?: string) {
   scrollLockEl = el;
+  excludedClosestSelector = _excludedClosestSelector;
   // Disable scrolling in Chrome
   document.addEventListener('wheel', preventDefault, { passive: false });
   document.addEventListener('touchmove', preventDefault, { passive: false });
@@ -66,6 +71,7 @@ export function disableScrolling(el?: HTMLElement | null) {
 
 export function enableScrolling() {
   scrollLockEl = undefined;
+  excludedClosestSelector = undefined;
   document.removeEventListener('wheel', preventDefault); // Enable scrolling in Chrome
   document.removeEventListener('touchmove', preventDefault);
   // eslint-disable-next-line no-null/no-null

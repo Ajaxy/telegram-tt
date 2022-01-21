@@ -17,10 +17,7 @@ import {
   selectUser,
 } from '../../modules/selectors';
 import {
-  getCanAddContact,
-  isChatAdmin,
-  isChatChannel,
-  isUserId,
+  getCanAddContact, isChatAdmin, isChatChannel, isUserId,
 } from '../../modules/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -84,6 +81,7 @@ enum HeaderContent {
   GifSearch,
   PollResults,
   AddingMembers,
+  ManageReactions,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
@@ -195,6 +193,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.ManageGroupMembers
     ) : managementScreen === ManagementScreens.GroupAddAdmins ? (
       HeaderContent.ManageGroupAddAdmins
+    ) : managementScreen === ManagementScreens.Reactions ? (
+      HeaderContent.ManageReactions
     ) : undefined // Never reached
   ) : undefined; // When column is closed
 
@@ -278,6 +278,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       case HeaderContent.MemberList:
       case HeaderContent.ManageGroupMembers:
         return <h3>{lang('GroupMembers')}</h3>;
+      case HeaderContent.ManageReactions:
+        return <h3>{lang('Reactions')}</h3>;
       default:
         return (
           <>

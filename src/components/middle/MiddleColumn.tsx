@@ -4,7 +4,11 @@ import React, {
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
-import { MessageListType, MessageList as GlobalMessageList } from '../../global/types';
+import {
+  MessageListType,
+  MessageList as GlobalMessageList,
+  ActiveEmojiInteraction,
+} from '../../global/types';
 import { ThemeKey } from '../../types';
 
 import {
@@ -67,6 +71,8 @@ import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
 import SeenByModal from '../common/SeenByModal.async';
+import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
+import ReactorListModal from './ReactorListModal.async';
 
 import './MiddleColumn.scss';
 
@@ -94,6 +100,7 @@ type StateProps = {
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   isSeenByModalOpen: boolean;
+  isReactorListModalOpen: boolean;
   animationLevel?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -102,6 +109,7 @@ type StateProps = {
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
+  activeEmojiInteraction?: ActiveEmojiInteraction;
 };
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
@@ -134,6 +142,7 @@ const MiddleColumn: FC<StateProps> = ({
   isPaymentModalOpen,
   isReceiptModalOpen,
   isSeenByModalOpen,
+  isReactorListModalOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -141,6 +150,7 @@ const MiddleColumn: FC<StateProps> = ({
   canSubscribe,
   canStartBot,
   canRestartBot,
+  activeEmojiInteraction,
 }) => {
   const {
     openChat,
@@ -484,6 +494,7 @@ const MiddleColumn: FC<StateProps> = ({
                       onClose={clearReceipt}
                     />
                     <SeenByModal isOpen={isSeenByModalOpen} />
+                    <ReactorListModal isOpen={isReactorListModalOpen} />
                   </div>
                 </>
               )}
@@ -507,6 +518,9 @@ const MiddleColumn: FC<StateProps> = ({
           onUnpin={handleUnpinAllMessages}
         />
       )}
+      {activeEmojiInteraction && (
+        <EmojiInteractionAnimation emojiInteraction={activeEmojiInteraction} />
+      )}
     </div>
   );
 };
@@ -520,7 +534,7 @@ export default memo(withGlobal(
 
     const { messageLists } = global.messages;
     const currentMessageList = selectCurrentMessageList(global);
-    const { isLeftColumnShown, chats: { listIds } } = global;
+    const { isLeftColumnShown, chats: { listIds }, activeEmojiInteraction } = global;
 
     const state: StateProps = {
       theme,
@@ -535,8 +549,10 @@ export default memo(withGlobal(
       isPaymentModalOpen: global.payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(global.payment.receipt),
       isSeenByModalOpen: Boolean(global.seenByModal),
+      isReactorListModalOpen: Boolean(global.reactorModal),
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
+      activeEmojiInteraction,
     };
 
     if (!currentMessageList || !listIds.active) {

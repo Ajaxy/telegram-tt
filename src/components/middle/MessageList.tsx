@@ -47,6 +47,7 @@ import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useWindowSize from '../../hooks/useWindowSize';
+import useInterval from '../../hooks/useInterval';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -92,6 +93,7 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
+const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
 const BOTTOM_THRESHOLD = 20;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
@@ -135,7 +137,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   withBottomShift,
 }) => {
-  const { loadViewportMessages, setScrollOffset, loadSponsoredMessages } = getDispatch();
+  const {
+    loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions,
+  } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -203,6 +207,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
     const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
     return groupMessages(orderBy(listedMessages, ['date', 'id']), memoUnreadDividerBeforeIdRef.current);
   }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId]);
+
+  useInterval(() => {
+    if (!messageIds || !messagesById) {
+      return;
+    }
+    const ids = messageIds.filter((l) => messagesById[l]?.reactions);
+
+    if (!ids.length) return;
+
+    loadMessageReactions({ chatId, ids });
+  }, MESSAGE_REACTIONS_POLLING_INTERVAL);
 
   const loadMoreAround = useMemo(() => {
     if (type !== 'thread') {
@@ -520,6 +535,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isViewportNewest={Boolean(isViewportNewest)}
           isUnread={Boolean(firstUnreadId)}
           withUsers={withUsers}
+          areReactionsInMeta={isPrivate}
           noAvatars={noAvatars}
           containerRef={containerRef}
           anchorIdRef={anchorIdRef}

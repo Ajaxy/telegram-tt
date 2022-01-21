@@ -38,5 +38,9 @@
   "--color-code-own": ["#3c7940", "#FFFFFF"],
   "--color-code-bg": ["#70757914", "#ffffff26"],
   "--color-code-own-bg": ["#70757914", "#ffffff26"],
-  "--color-composer-button": ["#707579CC", "#AAAAAACC"]
+  "--color-composer-button": ["#707579CC", "#AAAAAACC"],
+  "--color-message-reaction": ["#ebf3fd", "#2b2a35"],
+  "--color-message-reaction-hover": ["#c5def9", "#343147"],
+  "--color-message-reaction-own": ["#cef0ba", "#7a68ca"],
+  "--color-message-reaction-hover-own": ["#b5e0a4", "#7567bc"]
 }

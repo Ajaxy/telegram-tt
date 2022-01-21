@@ -268,6 +268,39 @@ export interface ApiMessage {
   isFromScheduled?: boolean;
   seenByUserIds?: string[];
   isProtected?: boolean;
+  reactors?: {
+    nextOffset?: string;
+    count: number;
+    reactions: ApiUserReaction[];
+  };
+  reactions?: ApiReactions;
+}
+
+export interface ApiReactions {
+  canSeeList?: boolean;
+  results: ApiReactionCount[];
+  recentReactions?: ApiUserReaction[];
+}
+
+export interface ApiUserReaction {
+  userId: string;
+  reaction: string;
+}
+
+export interface ApiReactionCount {
+  isChosen?: boolean;
+  count: number;
+  reaction: string;
+}
+
+export interface ApiAvailableReaction {
+  selectAnimation?: ApiDocument;
+  staticIcon?: ApiDocument;
+  centerIcon?: ApiDocument;
+  aroundAnimation?: ApiDocument;
+  reaction: string;
+  title: string;
+  isInactive?: boolean;
 }
 
 export interface ApiThreadInfo {

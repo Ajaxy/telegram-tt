@@ -64,6 +64,7 @@ export interface ApiTypingStatus {
   userId?: string;
   action: string;
   timestamp: number;
+  emoji?: string;
 }
 
 export interface ApiChatFullInfo {
@@ -86,6 +87,7 @@ export interface ApiChatFullInfo {
   };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
+  enabledReactions?: string[];
   sendAsId?: string;
 }
 

@@ -1,0 +1,89 @@
+.EmojiInteractionAnimation {
+  --start-x: 0;
+  --start-y: 0;
+  --scale: 0;
+  --end-scale: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+
+  @keyframes hide-reaction-reversed {
+    from {
+      transform: translate(100%, -50%) scaleX(-1) scale(1);
+    }
+
+    to {
+      left: var(--end-x, var(--start-x));
+      top: var(--end-y, var(--start-y));
+      transform: translate(50%, 0) scale(var(--end-scale, 0));
+    }
+  }
+
+  @keyframes show-reaction-reversed {
+    from {
+      transform: translate(50%, 0) scaleX(-1) scale(var(--scale, 0));
+    }
+
+    to {
+      transform: translate(100%, -50%) scaleX(-1) scale(1);
+    }
+  }
+
+
+  @keyframes hide-reaction {
+    from {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    to {
+      left: var(--end-x, var(--start-x));
+      top: var(--end-y, var(--start-y));
+      transform: translate(0, 0) scale(var(--end-scale, 0));
+    }
+  }
+
+  @keyframes show-reaction {
+    from {
+      transform: translate(0, 0) scale(var(--scale, 0));
+    }
+
+    to {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .AnimatedSticker {
+    position: absolute;
+    top: var(--start-y);
+    left: var(--start-x);
+    transform: scale(var(--scale), 0);
+    transform-origin: left top;
+
+    transition: 0.25s cubic-bezier(.29,.81,.27,.99) opacity;
+  }
+
+  &.reversed .AnimatedSticker {
+    transform: scale(var(--scale), 0) scaleX(-1);
+  }
+
+  &.playing .AnimatedSticker {
+    animation: show-reaction forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+  }
+
+  &.reversed.playing .AnimatedSticker {
+    animation: show-reaction-reversed forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+  }
+
+  &.hiding .AnimatedSticker {
+    opacity: 0;
+    animation: hide-reaction forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+  }
+
+  &.reversed.hiding .AnimatedSticker {
+    animation: hide-reaction-reversed forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+  }
+}

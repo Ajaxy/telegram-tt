@@ -880,3 +880,27 @@ export function selectSponsoredMessage(global: GlobalState, chatId: string) {
 
   return message && message.expiresAt >= Math.round(Date.now() / 1000) ? message : undefined;
 }
+
+export function selectDefaultReaction(global: GlobalState, chatId: string) {
+  if (chatId === SERVICE_NOTIFICATIONS_USER_ID) return undefined;
+
+  const isPrivate = isUserId(chatId);
+  const defaultReaction = global.appConfig?.defaultReaction;
+  const { availableReactions } = global;
+  if (!defaultReaction || !availableReactions?.some(
+    (l) => l.reaction === defaultReaction && !l.isInactive,
+  )) {
+    return undefined;
+  }
+
+  if (isPrivate) {
+    return defaultReaction;
+  }
+
+  const enabledReactions = selectChat(global, chatId)?.fullInfo?.enabledReactions;
+  if (!enabledReactions?.includes(defaultReaction)) {
+    return undefined;
+  }
+
+  return defaultReaction;
+}

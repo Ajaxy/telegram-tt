@@ -7,10 +7,11 @@ import {
   ApiChatFolder,
 } from './chats';
 import {
-  ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiStickerSet, ApiThreadInfo,
+  ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiReactions, ApiStickerSet, ApiThreadInfo,
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 import {
+  ApiEmojiInteraction,
   ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
 import {
@@ -100,6 +101,14 @@ export type ApiUpdateChatTypingStatus = {
   '@type': 'updateChatTypingStatus';
   id: string;
   typingStatus: ApiTypingStatus | undefined;
+};
+
+export type ApiUpdateStartEmojiInteraction = {
+  '@type': 'updateStartEmojiInteraction';
+  id: string;
+  emoji: string;
+  messageId: number;
+  interaction: ApiEmojiInteraction;
 };
 
 export type ApiUpdateChatFullInfo = {
@@ -284,6 +293,13 @@ export type ApiUpdateDraftMessage = {
   replyingToId?: number;
 };
 
+export type ApiUpdateMessageReactions = {
+  '@type': 'updateMessageReactions';
+  id: number;
+  chatId: string;
+  reactions: ApiReactions;
+};
+
 export type ApiDeleteContact = {
   '@type': 'deleteContact';
   id: string;
@@ -435,13 +451,13 @@ export type ApiUpdate = (
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed | ApiUpdateServiceNotification |
   ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateDeleteProfilePhotos |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
-  ApiUpdateError | ApiUpdateResetContacts |
+  ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet |
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset | ApiUpdateShowInvite |
+  ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId
 );

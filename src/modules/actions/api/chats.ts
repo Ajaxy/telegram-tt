@@ -1004,6 +1004,22 @@ addReducer('toggleIsProtected', (global, actions, payload) => {
   void callApi('toggleIsProtected', { chat, isProtected });
 });
 
+addReducer('setChatEnabledReactions', (global, actions, payload) => {
+  const { chatId, enabledReactions } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) return;
+
+  (async () => {
+    await callApi('setChatEnabledReactions', {
+      chat,
+      enabledReactions,
+    });
+
+    await loadFullChat(chat);
+  })();
+});
+
 async function loadChats(listType: 'active' | 'archived', offsetId?: string, offsetDate?: number) {
   let global = getGlobal();
 

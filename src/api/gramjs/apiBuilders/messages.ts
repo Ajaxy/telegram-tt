@@ -22,8 +22,12 @@ import {
   ApiThreadInfo,
   ApiInvoice,
   ApiGroupCall,
-  ApiUser,
+  ApiReactions,
+  ApiReactionCount,
+  ApiUserReaction,
+  ApiAvailableReaction,
   ApiSponsoredMessage,
+  ApiUser,
 } from '../../types';
 
 import {
@@ -141,7 +145,7 @@ type UniversalMessage = (
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
-    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards'
+    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions'
   )>
 );
 
@@ -192,6 +196,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     senderId: fromId || (mtpMessage.out && mtpMessage.post && currentUserId) || chatId,
     views: mtpMessage.views,
     isFromScheduled: mtpMessage.fromScheduled,
+    reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
@@ -211,6 +216,54 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     ...(replies?.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { adminTitle: postAuthor }),
     ...(mtpMessage.noforwards && { isProtected: true }),
+  };
+}
+
+export function buildMessageReactions(reactions: GramJs.MessageReactions): ApiReactions {
+  const {
+    recentReactons, results, canSeeList,
+  } = reactions;
+
+  return {
+    canSeeList,
+    results: results.map(buildReactionCount),
+    recentReactions: recentReactons?.map(buildMessageUserReaction),
+  };
+}
+
+function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount {
+  const { chosen, count, reaction } = reactionCount;
+
+  return {
+    isChosen: chosen,
+    count,
+    reaction,
+  };
+}
+
+export function buildMessageUserReaction(userReaction: GramJs.MessageUserReaction): ApiUserReaction {
+  const { userId, reaction } = userReaction;
+
+  return {
+    userId: buildApiPeerId(userId, 'user'),
+    reaction,
+  };
+}
+
+export function buildApiAvailableReaction(availableReaction: GramJs.AvailableReaction): ApiAvailableReaction {
+  const {
+    selectAnimation, staticIcon, reaction, title,
+    inactive, aroundAnimation, centerIcon,
+  } = availableReaction;
+
+  return {
+    selectAnimation: buildApiDocument(selectAnimation),
+    staticIcon: buildApiDocument(staticIcon),
+    aroundAnimation: aroundAnimation ? buildApiDocument(aroundAnimation) : undefined,
+    centerIcon: centerIcon ? buildApiDocument(centerIcon) : undefined,
+    reaction,
+    title,
+    isInactive: inactive,
   };
 }
 

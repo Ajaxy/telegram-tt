@@ -2,30 +2,41 @@ import React, {
   FC, memo, useMemo,
 } from '../../../lib/teact/teact';
 
-import { ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
+import { ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
+import { ActiveReaction } from '../../../global/types';
 
 import { formatDateTimeToString, formatTime } from '../../../util/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
-import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
+import buildClassName from '../../../util/buildClassName';
+
+import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
+import ReactionAnimatedEmoji from './ReactionAnimatedEmoji';
 
 import './MessageMeta.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  withReactions?: boolean;
+  withReactionOffset?: boolean;
   outgoingStatus?: ApiMessageOutgoingStatus;
   signature?: string;
   onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  activeReaction?: ActiveReaction;
+  availableReactions?: ApiAvailableReaction[];
 };
 
 const MessageMeta: FC<OwnProps> = ({
-  message, outgoingStatus, signature, onClick,
+  message, outgoingStatus, signature, onClick, withReactions,
+  activeReaction, withReactionOffset, availableReactions,
 }) => {
   const lang = useLang();
   const [isActivated, markActivated] = useFlag();
+
+  const reactions = withReactions && message.reactions?.results.filter((l) => l.count > 0);
 
   const title = useMemo(() => {
     if (!isActivated) return undefined;
@@ -47,7 +58,19 @@ const MessageMeta: FC<OwnProps> = ({
   }, [isActivated, lang, message]);
 
   return (
-    <span className="MessageMeta" dir={lang.isRtl ? 'rtl' : 'ltr'} onClick={onClick}>
+    <span
+      className={buildClassName('MessageMeta', withReactionOffset && 'reactions-offset')}
+      dir={lang.isRtl ? 'rtl' : 'ltr'}
+      onClick={onClick}
+    >
+      {reactions && reactions.map((l) => (
+        <ReactionAnimatedEmoji
+          activeReaction={activeReaction}
+          reaction={l.reaction}
+          isInMeta
+          availableReactions={availableReactions}
+        />
+      ))}
       {Boolean(message.views) && (
         <>
           <span className="message-views">

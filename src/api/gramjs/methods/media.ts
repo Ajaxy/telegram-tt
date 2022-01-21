@@ -17,9 +17,10 @@ import { getEntityTypeById } from '../gramjsBuilders';
 import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = (
-  'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument'
+  'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument' |
+  'document'
 );
-const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument']);
+const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document']);
 
 export default async function downloadMedia(
   {
@@ -75,7 +76,9 @@ async function download(
 ) {
   const mediaMatch = url.startsWith('webDocument')
     ? url.match(/(webDocument):(.+)/)
-    : url.match(/(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/);
+    : url.match(
+      /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
+    );
   if (!mediaMatch) {
     return undefined;
   }
@@ -102,7 +105,8 @@ async function download(
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
     entityType = getEntityTypeById(entityId);
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument';
+    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument' |
+    'document';
   }
 
   switch (entityType) {
@@ -129,6 +133,9 @@ async function download(
       break;
     case 'webDocument':
       entity = localDb.webDocuments[entityId];
+      break;
+    case 'document':
+      entity = localDb.documents[entityId];
       break;
   }
 

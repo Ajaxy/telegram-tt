@@ -184,6 +184,7 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   twoFaSettings: {},
+  activeReactions: {},
 
   shouldShowContextMenuHint: true,
 

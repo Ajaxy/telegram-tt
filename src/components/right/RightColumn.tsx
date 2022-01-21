@@ -123,6 +123,7 @@ const RightColumn: FC<StateProps> = ({
           case ManagementScreens.ChatAdministrators:
           case ManagementScreens.ChannelSubscribers:
           case ManagementScreens.GroupMembers:
+          case ManagementScreens.Reactions:
             setManagementScreen(ManagementScreens.Initial);
             break;
           case ManagementScreens.GroupUserPermissionsCreate:

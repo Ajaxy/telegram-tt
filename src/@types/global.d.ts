@@ -18,6 +18,11 @@ declare namespace React {
   interface VideoHTMLAttributes {
     srcObject?: MediaStream;
   }
+
+  interface MouseEvent {
+    offsetX: number;
+    offsetY: number;
+  }
 }
 
 type AnyLiteral = Record<string, any>;

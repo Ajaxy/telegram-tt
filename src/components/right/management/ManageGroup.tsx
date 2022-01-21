@@ -40,6 +40,7 @@ type StateProps = {
   hasLinkedChannel: boolean;
   canChangeInfo?: boolean;
   canBanUsers?: boolean;
+  availableReactionsCount?: number;
 };
 
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
@@ -59,6 +60,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onClose,
   isActive,
+  availableReactionsCount,
 }) => {
   const {
     togglePreHistoryHidden,
@@ -98,6 +100,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
   const handleClickDiscussion = useCallback(() => {
     onScreenSelect(ManagementScreens.Discussion);
+  }, [onScreenSelect]);
+
+  const handleClickReactions = useCallback(() => {
+    onScreenSelect(ManagementScreens.Reactions);
   }, [onScreenSelect]);
 
   const handleClickPermissions = useCallback(() => {
@@ -153,6 +159,8 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
     togglePreHistoryHidden({ chatId: chat.id, isEnabled: !isPreHistoryHidden });
   }, [chat, togglePreHistoryHidden]);
+
+  const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
 
   const enabledPermissionsCount = useMemo(() => {
     if (!chat.defaultBannedRights) {
@@ -257,6 +265,18 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}
             </span>
           </ListItem>
+
+          <ListItem
+            icon="reactions"
+            multiline
+            onClick={handleClickReactions}
+            disabled={!canChangeInfo}
+          >
+            <span className="title">{lang('Reactions')}</span>
+            <span className="subtitle" dir="auto">
+              {enabledReactionsCount}/{availableReactionsCount}
+            </span>
+          </ListItem>
           <ListItem
             icon="admin"
             multiline
@@ -332,6 +352,7 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChannel,
       canChangeInfo: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'changeInfo'),
       canBanUsers: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'banUsers'),
+      availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
     };
   },
 )(ManageGroup));

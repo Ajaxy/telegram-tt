@@ -23,6 +23,7 @@ import SettingsPrivacyActiveSessions from './SettingsPrivacyActiveSessions';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
 import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
+import SettingsQuickReaction from './SettingsQuickReaction';
 
 import './Settings.scss';
 
@@ -180,9 +181,14 @@ const Settings: FC<OwnProps> = ({
             isActive={isScreenActive
             || screen === SettingsScreens.GeneralChatBackgroundColor
             || screen === SettingsScreens.GeneralChatBackground
+            || screen === SettingsScreens.QuickReaction
             || isPrivacyScreen || isFoldersScreen}
             onReset={handleReset}
           />
+        );
+      case SettingsScreens.QuickReaction:
+        return (
+          <SettingsQuickReaction onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Notifications:
         return (

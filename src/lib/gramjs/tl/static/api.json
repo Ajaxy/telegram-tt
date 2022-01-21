@@ -190,5 +190,12 @@
     "phone.exportGroupCallInvite",
     "phone.toggleGroupCallStartSubscription",
     "phone.joinGroupCallPresentation",
-    "phone.leaveGroupCallPresentation"
+    "phone.leaveGroupCallPresentation",
+    "messages.sendReaction",
+    "messages.getMessagesReactions",
+    "messages.getMessageReactionsList",
+    "messages.setChatAvailableReactions",
+    "messages.getAvailableReactions",
+    "messages.setDefaultReaction",
+    "help.getAppConfig"
 ]

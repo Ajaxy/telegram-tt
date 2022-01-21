@@ -122,6 +122,7 @@ const LeftColumn: FC<StateProps> = ({
           return;
 
         case SettingsScreens.GeneralChatBackground:
+        case SettingsScreens.QuickReaction:
           setSettingsScreen(SettingsScreens.General);
           return;
         case SettingsScreens.GeneralChatBackgroundColor:

@@ -642,6 +642,22 @@ addReducer('createServiceNotification', (global, actions, payload) => {
   });
 });
 
+addReducer('openReactorListModal', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+
+  return {
+    ...global,
+    reactorModal: { chatId, messageId },
+  };
+});
+
+addReducer('closeReactorListModal', (global) => {
+  return {
+    ...global,
+    reactorModal: undefined,
+  };
+});
+
 addReducer('openSeenByModal', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
 

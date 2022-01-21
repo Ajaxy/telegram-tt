@@ -2,24 +2,35 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import {
-  ApiChat, ApiLangString, ApiLanguage, ApiNotifyException, ApiUser, ApiWallpaper,
+  ApiAppConfig,
+  ApiChat,
+  ApiLangString,
+  ApiLanguage,
+  ApiNotifyException,
+  ApiUser,
+  ApiWallpaper,
 } from '../../types';
 import { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, LANG_PACKS } from '../../../config';
 import {
-  buildApiWallpaper, buildApiSession, buildPrivacyRules, buildApiNotifyException, buildApiCountryList,
+  buildApiCountryList,
+  buildApiNotifyException,
+  buildApiSession,
+  buildApiWallpaper,
+  buildPrivacyRules,
 } from '../apiBuilders/misc';
 
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildInputPrivacyKey, buildInputPeer, buildInputEntity } from '../gramjsBuilders';
-import { invokeRequest, uploadFile, getClient } from './client';
+import { buildInputEntity, buildInputPeer, buildInputPrivacyKey } from '../gramjsBuilders';
+import { getClient, invokeRequest, uploadFile } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import localDb from '../localDb';
+import { buildApiConfig } from '../apiBuilders/appConfig';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
@@ -427,6 +438,13 @@ export function updateContentSettings(isEnabled: boolean) {
   return invokeRequest(new GramJs.account.SetContentSettings({
     sensitiveEnabled: isEnabled || undefined,
   }));
+}
+
+export async function fetchAppConfig(): Promise<ApiAppConfig | undefined> {
+  const result = await invokeRequest(new GramJs.help.GetAppConfig());
+  if (!result) return undefined;
+
+  return buildApiConfig(result);
 }
 
 function updateLocalDb(
