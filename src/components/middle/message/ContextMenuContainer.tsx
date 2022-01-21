@@ -428,6 +428,7 @@ export default memo(withGlobal<OwnProps>(
     const canShowSeenBy = Boolean(chat
       && isChatGroup(chat)
       && isOwnMessage(message)
+      && !isScheduled
       && chat.membersCount
       && chat.membersCount < SEEN_BY_MEMBERS_CHAT_MAX
       && message.date > Date.now() / 1000 - SEEN_BY_MEMBERS_EXPIRE);
