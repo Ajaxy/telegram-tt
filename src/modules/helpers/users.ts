@@ -232,7 +232,13 @@ export function sortUserIds(
   }, 'desc');
 }
 
-export function filterUsersByName(userIds: string[], usersById: Record<string, ApiUser>, query?: string) {
+export function filterUsersByName(
+  userIds: string[],
+  usersById: Record<string, ApiUser>,
+  query?: string,
+  currentUserId?: string,
+  savedMessagesLang?: string,
+) {
   if (!query) {
     return userIds;
   }
@@ -245,7 +251,7 @@ export function filterUsersByName(userIds: string[], usersById: Record<string, A
       return false;
     }
 
-    const name = getUserFullName(user);
+    const name = id === currentUserId ? savedMessagesLang : getUserFullName(user);
     return (name && searchWords(name)) || searchWords(user.username);
   });
 }
