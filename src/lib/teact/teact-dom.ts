@@ -122,14 +122,20 @@ function renderWithVirtual(
       unmountTree($current);
     } else {
       const areComponents = isComponentElement($current) && isComponentElement($new);
+      const currentTarget = getTarget($current);
 
       if (!areComponents) {
-        setTarget($new, getTarget($current)!);
+        setTarget($new, currentTarget!);
+        setTarget($current, undefined as any); // Help GC
+
+        if ('props' in $current && 'props' in $new) {
+          $new.props.ref = $current.props.ref;
+        }
       }
 
       if (isRealElement($current) && isRealElement($new)) {
         if (moveDirection) {
-          const node = getTarget($current)!;
+          const node = currentTarget!;
           const nextSibling = parentEl.childNodes[moveDirection === 'up' ? index : index + 1];
 
           if (nextSibling) {
@@ -140,13 +146,13 @@ function renderWithVirtual(
         }
 
         if (!areComponents) {
-          updateAttributes($current, $new, getTarget($current) as HTMLElement);
+          updateAttributes($current, $new, currentTarget as HTMLElement);
         }
 
         $new.children = renderChildren(
           $current,
           $new,
-          areComponents ? parentEl : getTarget($current) as HTMLElement,
+          areComponents ? parentEl : currentTarget as HTMLElement,
         );
       }
     }
