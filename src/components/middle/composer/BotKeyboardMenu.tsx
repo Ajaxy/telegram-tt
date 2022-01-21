@@ -39,7 +39,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     markForceOpen();
-  }, [markForceOpen, message]);
+  }, [markForceOpen, message?.keyboardButtons]);
 
   if (!message || !message.keyboardButtons) {
     return undefined;
