@@ -303,6 +303,10 @@
 }
 
 .settings-quick-reaction {
+  .Radio-main .label {
+    display: flex;
+  }
+
   .ReactionStaticEmoji {
     margin-inline-end: 1rem;
     width: 1.5rem
