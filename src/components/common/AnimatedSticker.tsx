@@ -19,6 +19,7 @@ type OwnProps = {
   quality?: number;
   isLowPriority?: boolean;
   onLoad?: NoneToVoidFunction;
+  forceOnHeavyAnimation?: boolean;
   color?: [number, number, number];
   onEnded?: NoneToVoidFunction;
 };
@@ -53,8 +54,9 @@ const AnimatedSticker: FC<OwnProps> = ({
   size,
   quality,
   isLowPriority,
-  onLoad,
   color,
+  forceOnHeavyAnimation,
+  onLoad,
   onEnded,
 }) => {
   const [animation, setAnimation] = useState<RLottieInstance>();
@@ -207,7 +209,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, animationData]);
 
-  useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation);
+  useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation, forceOnHeavyAnimation);
   // Pausing frame may not happen in background
   // so we need to make sure it happens right after focusing,
   // then we can play again.
