@@ -2,6 +2,7 @@ import {
   DPR,
   IS_SINGLE_COLUMN_LAYOUT,
   IS_SAFARI,
+  IS_ANDROID,
 } from '../../util/environment';
 import WorkerConnector from '../../util/WorkerConnector';
 import { animate } from '../../util/animation';
@@ -21,7 +22,7 @@ type Chunks = (Frames | undefined)[];
 const CHUNK_SIZE = 1;
 const MAX_WORKERS = 4;
 const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
-const LOW_PRIORITY_QUALITY = 0.75;
+const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
 
