@@ -70,6 +70,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             animationData={mediaDataCenterIcon}
             play
             noLoop
+            forceOnHeavyAnimation
             onLoad={markAnimationLoaded}
             onEnded={unmarkAnimationLoaded}
           />
@@ -81,6 +82,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             animationData={mediaDataEffect}
             play
             noLoop
+            forceOnHeavyAnimation
             onEnded={handleEnded}
           />
         </>
