@@ -144,7 +144,7 @@ class TelegramClient {
         this._exportedSenderReleaseTimeouts = {};
         this._additionalDcsDisabled = args.additionalDcsDisabled;
         this._loopStarted = false;
-        this._reconnecting = false;
+        this._isSwitchingDc = false;
         this._destroyed = false;
     }
 
@@ -176,7 +176,7 @@ class TelegramClient {
         // set defaults vars
         this._sender.userDisconnected = false;
         this._sender._user_connected = false;
-        this._sender._reconnecting = false;
+        this._sender.isReconnecting = false;
         this._sender._disconnected = true;
 
         const connection = new this._connection(
@@ -202,7 +202,7 @@ class TelegramClient {
             this._updateLoop();
             this._loopStarted = true;
         }
-        this._reconnecting = false;
+        this._isSwitchingDc = false;
     }
 
     async _initSession() {
@@ -217,7 +217,7 @@ class TelegramClient {
     async _updateLoop() {
         while (!this._destroyed) {
             await Helpers.sleep(PING_INTERVAL);
-            if (this._reconnecting) {
+            if (this._sender.isReconnecting || this._isSwitchingDc) {
                 continue;
             }
 
@@ -231,7 +231,8 @@ class TelegramClient {
             } catch (err) {
                 // eslint-disable-next-line no-console
                 console.warn(err);
-                if (this._reconnecting) {
+
+                if (this._sender.isReconnecting || this._isSwitchingDc) {
                     continue;
                 }
 
@@ -304,7 +305,7 @@ class TelegramClient {
         // so it's not valid anymore. Set to None to force recreating it.
         await this._sender.authKey.setKey(undefined);
         this.session.setAuthKey(undefined);
-        this._reconnecting = true;
+        this._isSwitchingDc = true;
         await this.disconnect();
         return this.connect();
     }
@@ -1063,7 +1064,7 @@ async function attempts(cb, times, pause) {
     for (let i = 0; i < times; i++) {
         try {
             // We need to `return await` here so it can be caught locally
-            // eslint-disable-next-line no-return-await
+            // eslint-disable-next-line @typescript-eslint/return-await
             return await cb();
         } catch (err) {
             if (i === times - 1) {

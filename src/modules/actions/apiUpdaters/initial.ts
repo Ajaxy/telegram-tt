@@ -153,6 +153,10 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
   const { connectionState } = update;
   const global = getGlobal();
 
+  if (connectionState === global.connectionState) {
+    return;
+  }
+
   setGlobal({
     ...global,
     connectionState,
