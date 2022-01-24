@@ -2,6 +2,7 @@ import { getGlobal } from '../lib/teact/teactn';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';
+import { fastRaf } from './schedulers';
 
 const DEFAULT_DURATION = 300;
 
@@ -39,13 +40,15 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
 
   const startAt = Date.now();
 
-  animate(() => {
-    const t = Math.min((Date.now() - startAt) / duration, 1);
+  fastRaf(() => {
+    animate(() => {
+      const t = Math.min((Date.now() - startAt) / duration, 1);
 
-    const currentPath = path * (1 - transition(t));
-    container.scrollLeft = Math.round(target - currentPath);
+      const currentPath = path * (1 - transition(t));
+      container.scrollLeft = Math.round(target - currentPath);
 
-    return t < 1;
+      return t < 1;
+    });
   });
 }
 
