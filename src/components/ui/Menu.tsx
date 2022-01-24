@@ -80,7 +80,7 @@ const Menu: FC<OwnProps> = ({
   useHistoryBack(isOpen, onClose, undefined, undefined, autoClose);
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
-    if (prevIsOpen !== undefined) {
+    if (isOpen || (!isOpen && prevIsOpen === true)) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION);
     }
   }, [isOpen]);
