@@ -3,7 +3,6 @@ import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 
@@ -14,14 +13,15 @@ import './AttachMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  allowedAttachmentOptions: IAllowedAttachmentOptions;
+  canAttachMedia: boolean;
+  canAttachPolls: boolean;
   onFileSelect: (files: File[], isQuick: boolean) => void;
   onPollCreate: () => void;
   onClose: () => void;
 };
 
 const AttachMenu: FC<OwnProps> = ({
-  isOpen, allowedAttachmentOptions, onFileSelect, onPollCreate, onClose,
+  isOpen, canAttachMedia, canAttachPolls, onFileSelect, onPollCreate, onClose,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
 
@@ -45,8 +45,6 @@ const AttachMenu: FC<OwnProps> = ({
   }, [handleFileSelect]);
 
   const lang = useLang();
-
-  const { canAttachMedia, canAttachPolls } = allowedAttachmentOptions;
 
   return (
     <Menu

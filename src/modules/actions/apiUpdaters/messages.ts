@@ -5,6 +5,7 @@ import {
 } from '../../../api/types';
 
 import { unique } from '../../../util/iteratees';
+import { areDeepEqual } from '../../../util/areDeepEqual';
 import {
   updateChat,
   deleteChatMessages,
@@ -468,14 +469,17 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateMessageReactions': {
-      setGlobal(updateChatMessage(
-        global,
-        update.chatId,
-        update.id,
-        {
-          reactions: update.reactions,
-        },
-      ));
+      const { chatId, id, reactions } = update;
+      const message = selectChatMessage(global, chatId, id);
+      const currentReactions = message?.reactions;
+
+      // `updateMessageReactions` happens with an interval so we try to avoid redundant global state updates
+      if (currentReactions && areDeepEqual(reactions, currentReactions)) {
+        return;
+      }
+
+      setGlobal(updateChatMessage(global, chatId, id, { reactions: update.reactions }));
+
       break;
     }
   }

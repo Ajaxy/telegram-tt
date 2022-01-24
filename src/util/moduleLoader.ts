@@ -1,4 +1,5 @@
 import { DEBUG } from '../config';
+import { createCallbackManager } from './callbacks';
 
 export enum Bundles {
   Auth,
@@ -23,6 +24,8 @@ export type BundleModules<B extends keyof ImportedBundles> = keyof ImportedBundl
 const LOAD_PROMISES: Partial<BundlePromises> = {};
 const MEMORY_CACHE: Partial<ImportedBundles> = {};
 
+const { addCallback, runCallbacks } = createCallbackManager();
+
 export async function loadModule<B extends Bundles, M extends BundleModules<B>>(bundleName: B, moduleName: M) {
   if (!LOAD_PROMISES[bundleName]) {
     switch (bundleName) {
@@ -45,7 +48,7 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
         break;
     }
 
-    (LOAD_PROMISES[bundleName] as Promise<ImportedBundles[B]>).then(handleBundleLoad);
+    (LOAD_PROMISES[bundleName] as Promise<ImportedBundles[B]>).then(runCallbacks);
   }
 
   const bundle = (await LOAD_PROMISES[bundleName]) as unknown as ImportedBundles[B];
@@ -67,16 +70,4 @@ export function getModuleFromMemory<B extends Bundles, M extends BundleModules<B
   return bundle[moduleName];
 }
 
-const listeners: NoneToVoidFunction[] = [];
-
-export function addLoadListener(listener: NoneToVoidFunction) {
-  if (!listeners.includes(listener)) {
-    listeners.push(listener);
-  }
-}
-
-function handleBundleLoad() {
-  listeners.forEach((listener) => {
-    listener();
-  });
-}
+export const addLoadListener = addCallback;

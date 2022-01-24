@@ -3,7 +3,6 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm } from '../../../api/types';
-import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import { LoadMoreDirection } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -32,7 +31,6 @@ export type OwnProps = {
   isOpen: boolean;
   botId?: string;
   isGallery?: boolean;
-  allowedAttachmentOptions: IAllowedAttachmentOptions;
   inlineBotResults?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
   switchPm?: ApiBotInlineSwitchPm;
   onSelectResult: (inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult) => void;

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import useLang, { LangFn } from '../../../hooks/useLang';
 
@@ -68,7 +68,6 @@ type StateProps = {
   user?: ApiUser;
   userStatus?: ApiUserStatus;
   actionTargetUserIds?: string[];
-  usersById?: Record<string, ApiUser>;
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
   lastMessageSender?: ApiUser;
@@ -95,7 +94,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   actionTargetUserIds,
-  usersById,
   lastMessageSender,
   lastMessageOutgoingStatus,
   actionTargetMessage,
@@ -132,10 +130,14 @@ const Chat: FC<OwnProps & StateProps> = ({
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   const actionTargetUsers = useMemo(() => {
-    return actionTargetUserIds
-      ? actionTargetUserIds.map((userId) => usersById?.[userId]).filter<ApiUser>(Boolean as any)
-      : undefined;
-  }, [actionTargetUserIds, usersById]);
+    if (!actionTargetUserIds) {
+      return undefined;
+    }
+
+    // No need for expensive global updates on users, so we avoid them
+    const usersById = getGlobal().users.byId;
+    return actionTargetUserIds.map((userId) => usersById[userId]).filter<ApiUser>(Boolean as any);
+  }, [actionTargetUserIds]);
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
@@ -360,7 +362,6 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
-    const { byId: usersById } = global.users;
     const {
       chatId: currentChatId,
       threadId: currentThreadId,
@@ -386,7 +387,6 @@ export default memo(withGlobal<OwnProps>(
         user: selectUser(global, privateChatUserId),
         userStatus: selectUserStatus(global, privateChatUserId),
       }),
-      ...(actionTargetUserIds && { usersById }),
     };
   },
 )(Chat));

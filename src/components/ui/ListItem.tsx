@@ -45,29 +45,27 @@ interface OwnProps {
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const ListItem: FC<OwnProps> = (props) => {
-  const {
-    ref,
-    buttonRef,
-    icon,
-    secondaryIcon,
-    className,
-    style,
-    children,
-    disabled,
-    ripple,
-    narrow,
-    inactive,
-    focus,
-    destructive,
-    multiline,
-    isStatic,
-    contextActions,
-    onMouseDown,
-    onClick,
-    onSecondaryIconClick,
-  } = props;
-
+const ListItem: FC<OwnProps> = ({
+  ref,
+  buttonRef,
+  icon,
+  secondaryIcon,
+  className,
+  style,
+  children,
+  disabled,
+  ripple,
+  narrow,
+  inactive,
+  focus,
+  destructive,
+  multiline,
+  isStatic,
+  contextActions,
+  onMouseDown,
+  onClick,
+  onSecondaryIconClick,
+}) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
   if (ref) {
