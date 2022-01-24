@@ -145,6 +145,22 @@ const MessageContextMenu: FC<OwnProps> = ({
     [],
   );
 
+  const getLayout = useCallback(() => {
+    const extraHeightAudioPlayer = (IS_SINGLE_COLUMN_LAYOUT
+      && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
+    const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessage-wrapper');
+    const extraHeightPinned = (((IS_SINGLE_COLUMN_LAYOUT && !extraHeightAudioPlayer)
+      || (!IS_SINGLE_COLUMN_LAYOUT && pinnedElement?.classList.contains('full-width')))
+      && pinnedElement?.offsetHeight) || 0;
+
+    return {
+      extraPaddingX: SCROLLBAR_WIDTH,
+      extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
+      marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
+      extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
+    };
+  }, [withReactions]);
+
   const handleRemoveReaction = useCallback(() => {
     onSendReaction(undefined, 0, 0);
   }, [onSendReaction]);
@@ -160,25 +176,9 @@ const MessageContextMenu: FC<OwnProps> = ({
     }, ANIMATION_DURATION);
   }, [isOpen, markIsReady, unmarkIsReady]);
 
-  const extraHeightAudioPlayer = (IS_SINGLE_COLUMN_LAYOUT
-    && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
-  const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessage-wrapper');
-  const extraHeightPinned = (((IS_SINGLE_COLUMN_LAYOUT && !extraHeightAudioPlayer)
-    || (!IS_SINGLE_COLUMN_LAYOUT && pinnedElement?.classList.contains('full-width')))
-    && pinnedElement?.offsetHeight) || 0;
-
   const {
     positionX, positionY, style, menuStyle, withScroll,
-  } = useContextMenuPosition(
-    anchor,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    SCROLLBAR_WIDTH,
-    (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
-    withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
-    extraHeightPinned + extraHeightAudioPlayer,
-  );
+  } = useContextMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
   useEffect(() => {
     disableScrolling(withScroll ? scrollableRef.current : undefined, '.ReactionSelector');
@@ -195,7 +195,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       positionX={positionX}
       positionY={positionY}
       style={style}
-      menuStyle={menuStyle}
+      bubbleStyle={menuStyle}
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}
@@ -253,10 +253,12 @@ const MessageContextMenu: FC<OwnProps> = ({
             {canShowReactionsCount && message.reactors?.count ? (
               canShowSeenBy && message.seenByUserIds?.length
                 ? lang('Chat.OutgoingContextMixedReactionCount', [message.reactors.count, message.seenByUserIds.length])
-                : lang('Chat.ContextReactionCount', message.reactors.count, 'i'))
-              : (message.seenByUserIds?.length
+                : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
+            ) : (
+              message.seenByUserIds?.length
                 ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
-                : lang('Conversation.ContextMenuNoViews'))}
+                : lang('Conversation.ContextMenuNoViews')
+            )}
             <div className="avatars">
               {seenByRecentUsers?.map((user) => (
                 <Avatar
