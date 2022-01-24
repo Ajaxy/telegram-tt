@@ -101,7 +101,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
         size={EFFECT_SIZE}
         animationData={localEffectAnimationData || effectAnimationData}
         play={isPlaying}
-        isLowPriority={IS_ANDROID}
+        quality={IS_ANDROID ? 0.5 : undefined}
         forceOnHeavyAnimation
         noLoop
         onLoad={startPlaying}
