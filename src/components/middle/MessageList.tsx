@@ -290,10 +290,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const { height: windowHeight } = useWindowSize();
 
   useEffect(() => {
-    if (isReady) {
-      containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
-    }
-  }, [windowHeight, isReady, canPost]);
+    containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
+  }, [windowHeight, canPost]);
 
   // Initial message loading
   useEffect(() => {
