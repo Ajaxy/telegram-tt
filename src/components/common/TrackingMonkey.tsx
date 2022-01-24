@@ -29,8 +29,8 @@ const TrackingMonkey: FC<OwnProps> = ({
   isTracking,
   isBig,
 }) => {
-  const [idleMonkeyData, setIdleMonkeyData] = useState<Record<string, any>>();
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState<Record<string, any>>();
+  const [idleMonkeyData, setIdleMonkeyData] = useState<string>();
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState<string>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const TRACKING_FRAMES_PER_SYMBOL = (TRACKING_END_FRAME - TRACKING_START_FRAME) / codeLength;
 

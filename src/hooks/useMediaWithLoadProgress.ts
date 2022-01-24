@@ -22,7 +22,7 @@ export default function useMediaWithLoadProgress<T extends ApiMediaFormat = ApiM
   delay?: number | false,
   isHtmlAllowed = false,
 ) {
-  const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
+  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
   const isStreaming = mediaFormat === ApiMediaFormat.Stream || (
     IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive
   );

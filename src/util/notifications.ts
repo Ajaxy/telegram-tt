@@ -308,10 +308,10 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
 async function getAvatar(chat: ApiChat) {
   const imageHash = getChatAvatarHash(chat);
   if (!imageHash) return undefined;
-  let mediaData = mediaLoader.getFromMemory<ApiMediaFormat.BlobUrl>(imageHash);
+  let mediaData = mediaLoader.getFromMemory(imageHash);
   if (!mediaData) {
     await mediaLoader.fetch(imageHash, ApiMediaFormat.BlobUrl);
-    mediaData = mediaLoader.getFromMemory<ApiMediaFormat.BlobUrl>(imageHash);
+    mediaData = mediaLoader.getFromMemory(imageHash);
   }
   return mediaData;
 }

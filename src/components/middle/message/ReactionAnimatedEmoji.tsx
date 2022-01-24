@@ -67,7 +67,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             id={`reaction_emoji_${centerIconId}`}
             className={animationClassNames}
             size={CENTER_ICON_SIZE}
-            animationData={mediaDataCenterIcon as AnyLiteral}
+            animationData={mediaDataCenterIcon}
             play
             noLoop
             onLoad={markAnimationLoaded}
@@ -78,7 +78,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             id={`reaction_effect_${effectId}`}
             className={buildClassName('effect', animationClassNames)}
             size={EFFECT_SIZE}
-            animationData={mediaDataEffect as AnyLiteral}
+            animationData={mediaDataEffect}
             play
             noLoop
             onEnded={handleEnded}

@@ -22,8 +22,8 @@ const SEGMENT_COVER_EYE: [number, number] = [20, 0];
 const STICKER_SIZE = IS_SINGLE_COLUMN_LAYOUT ? STICKER_SIZE_AUTH_MOBILE : STICKER_SIZE_AUTH;
 
 const PasswordMonkey: FC<OwnProps> = ({ isPasswordVisible, isBig }) => {
-  const [closeMonkeyData, setCloseMonkeyData] = useState<Record<string, any>>();
-  const [peekMonkeyData, setPeekMonkeyData] = useState<Record<string, any>>();
+  const [closeMonkeyData, setCloseMonkeyData] = useState<string>();
+  const [peekMonkeyData, setPeekMonkeyData] = useState<string>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
 

@@ -1,6 +1,5 @@
 import {
   ApiMediaFormat,
-  ApiMediaFormatToPrepared,
   ApiOnProgress,
   ApiParsedMedia,
   ApiPreparedMedia,
@@ -18,7 +17,7 @@ import { webpToPng } from './webpToPng';
 
 const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
-  [ApiMediaFormat.Lottie]: cacheApi.Type.Json,
+  [ApiMediaFormat.Lottie]: cacheApi.Type.Blob,
   [ApiMediaFormat.Progressive]: undefined,
   [ApiMediaFormat.Stream]: undefined,
 };
@@ -36,13 +35,13 @@ export function fetch<T extends ApiMediaFormat>(
   isHtmlAllowed = false,
   onProgress?: ApiOnProgress,
   callbackUniqueId?: string,
-): Promise<ApiMediaFormatToPrepared<T>> {
+): Promise<ApiPreparedMedia> {
   if (mediaFormat === ApiMediaFormat.Progressive) {
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? getProgressive(url)
         : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
-    ) as Promise<ApiMediaFormatToPrepared<T>>;
+    ) as Promise<ApiPreparedMedia>;
   }
 
   if (!fetchPromises.has(url)) {
@@ -73,11 +72,11 @@ export function fetch<T extends ApiMediaFormat>(
     activeCallbacks.set(callbackUniqueId, onProgress);
   }
 
-  return fetchPromises.get(url) as Promise<ApiMediaFormatToPrepared<T>>;
+  return fetchPromises.get(url) as Promise<ApiPreparedMedia>;
 }
 
-export function getFromMemory<T extends ApiMediaFormat>(url: string) {
-  return memoryCache.get(url) as ApiMediaFormatToPrepared<T>;
+export function getFromMemory(url: string) {
+  return memoryCache.get(url) as ApiPreparedMedia;
 }
 
 export function cancelProgress(progressCallback: ApiOnProgress) {
@@ -214,7 +213,7 @@ function makeOnProgress(url: string, mediaSource?: MediaSource, sourceBuffer?: S
   return onProgress;
 }
 
-function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
+function prepareMedia(mediaData: Exclude<ApiParsedMedia, ArrayBuffer>): ApiPreparedMedia {
   if (mediaData instanceof Blob) {
     return URL.createObjectURL(mediaData);
   }

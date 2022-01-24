@@ -89,7 +89,7 @@ const AnimatedEmoji: FC<OwnProps> = ({
         <AnimatedSticker
           key={localMediaHash}
           id={localMediaHash}
-          animationData={mediaData as AnyLiteral}
+          animationData={mediaData!}
           size={width}
           quality={QUALITY}
           play={isIntersecting && playKey}

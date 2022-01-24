@@ -10,7 +10,7 @@ import useBackgroundMode from '../../hooks/useBackgroundMode';
 type OwnProps = {
   className?: string;
   id: string;
-  animationData: AnyLiteral;
+  animationData?: string;
   play?: boolean | string;
   playSegment?: [number, number];
   speed?: number;
@@ -202,7 +202,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (animation) {
       if (isFirstRender.current) {
         isFirstRender.current = false;
-      } else {
+      } else if (animationData) {
         animation.changeData(animationData);
         playAnimation();
       }

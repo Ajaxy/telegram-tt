@@ -1,3 +1,4 @@
+import { inflate } from 'pako/dist/pako_inflate';
 import createWorkerInterface from '../../util/createWorkerInterface';
 import { CancellableCallback } from '../../util/WorkerConnector';
 
@@ -27,6 +28,9 @@ const rLottieApiPromise = new Promise<void>((resolve) => {
   };
 });
 
+const HIGH_PRIORITY_MAX_FPS = 60;
+const LOW_PRIORITY_MAX_FPS = 30;
+
 const renderers = new Map<string, {
   imgSize: number;
   reduceFactor: number;
@@ -35,42 +39,70 @@ const renderers = new Map<string, {
 
 async function init(
   key: string,
-  animationData: AnyLiteral,
+  animationData: string,
   imgSize: number,
   isLowPriority: boolean,
-  reduceFactor: number,
   onInit: CancellableCallback,
 ) {
   if (!rLottieApi) {
     await rLottieApiPromise;
   }
 
-  const json = JSON.stringify(animationData);
+  const json = await extractJson(animationData);
   const stringOnWasmHeap = allocate(intArrayFromString(json), 'i8', 0);
   const handle = rLottieApi.init();
   const framesCount = rLottieApi.loadFromData(handle, stringOnWasmHeap);
   rLottieApi.resize(handle, imgSize, imgSize);
 
-  renderers.set(key, { imgSize, reduceFactor, handle });
+  const { reduceFactor, msPerFrame, reducedFramesCount } = calcParams(json, isLowPriority, framesCount);
 
-  onInit(Math.ceil(framesCount / reduceFactor));
+  renderers.set(key, { imgSize, reduceFactor, handle });
+  onInit(reduceFactor, msPerFrame, reducedFramesCount);
 }
 
 async function changeData(
   key: string,
-  animationData: AnyLiteral,
+  animationData: string,
+  isLowPriority: boolean,
   onInit: CancellableCallback,
 ) {
   if (!rLottieApi) {
     await rLottieApiPromise;
   }
 
-  const json = JSON.stringify(animationData);
-  const { reduceFactor, handle } = renderers.get(key)!;
-
+  const json = await extractJson(animationData);
   const stringOnWasmHeap = allocate(intArrayFromString(json), 'i8', 0);
+  const { handle } = renderers.get(key)!;
   const framesCount = rLottieApi.loadFromData(handle, stringOnWasmHeap);
-  onInit(Math.ceil(framesCount / reduceFactor));
+
+  const { reduceFactor, msPerFrame, reducedFramesCount } = calcParams(json, isLowPriority, framesCount);
+  onInit(reduceFactor, msPerFrame, reducedFramesCount);
+}
+
+async function extractJson(animationData: string) {
+  const response = await fetch(animationData);
+  const contentType = response.headers.get('Content-Type');
+
+  // Support deprecated JSON format cached locally
+  if (contentType?.startsWith('text/')) {
+    return response.text();
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return inflate(arrayBuffer, { to: 'string' });
+}
+
+function calcParams(json: string, isLowPriority: boolean, framesCount: number) {
+  const animationData = JSON.parse(json);
+  const maxFps = isLowPriority ? LOW_PRIORITY_MAX_FPS : HIGH_PRIORITY_MAX_FPS;
+  const sourceFps = animationData.fr || maxFps;
+  const reduceFactor = sourceFps % maxFps === 0 ? sourceFps / maxFps : 1;
+
+  return {
+    reduceFactor,
+    msPerFrame: 1000 / (sourceFps / reduceFactor),
+    reducedFramesCount: Math.ceil(framesCount / reduceFactor),
+  };
 }
 
 async function renderFrames(
