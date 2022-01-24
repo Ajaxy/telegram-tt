@@ -142,6 +142,7 @@ function makeRequest(message: OriginRequest) {
   }
 
   requestStates.set(messageId, requestState);
+
   promise
     .catch(() => undefined)
     .finally(() => {
@@ -161,19 +162,25 @@ const startedAt = Date.now();
 
 // Workaround for iOS sometimes stops interacting with worker
 function setupIosHealthCheck() {
-  window.addEventListener('focus', async () => {
-    try {
-      await Promise.race([
-        makeRequest({ type: 'ping' }),
-        pause(HEALTH_CHECK_TIMEOUT).then(() => Promise.reject(new Error('HEALTH_CHECK_TIMEOUT'))),
-      ]);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
-      if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
-        window.location.reload();
-      }
-    }
+  window.addEventListener('focus', () => {
+    void ensureWorkerPing();
+    // Sometimes a single check is not enough
+    setTimeout(() => ensureWorkerPing(), 1000);
   });
+}
+
+async function ensureWorkerPing() {
+  try {
+    await Promise.race([
+      makeRequest({ type: 'ping' }),
+      pause(HEALTH_CHECK_TIMEOUT).then(() => Promise.reject(new Error('HEALTH_CHECK_TIMEOUT'))),
+    ]);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+
+    if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
+      window.location.reload();
+    }
+  }
 }
