@@ -27,7 +27,7 @@ export default (
     setHasOpenClassName(false);
 
     if (!isClosed && !closeTimeoutRef.current) {
-      closeTimeoutRef.current = window.setTimeout(() => {
+      const exec = () => {
         setIsClosed(true);
 
         if (onCloseTransitionEnd) {
@@ -35,7 +35,13 @@ export default (
         }
 
         closeTimeoutRef.current = undefined;
-      }, noCloseTransition ? 0 : CLOSE_DURATION);
+      };
+
+      if (noCloseTransition) {
+        exec();
+      } else {
+        closeTimeoutRef.current = window.setTimeout(exec, CLOSE_DURATION);
+      }
     }
   }
 

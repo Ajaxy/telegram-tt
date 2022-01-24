@@ -7,6 +7,7 @@ import { ApiAvailableReaction, ApiMediaFormat } from '../../../api/types';
 import useMedia from '../../../hooks/useMedia';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useFlag from '../../../hooks/useFlag';
+import useShowTransition from '../../../hooks/useShowTransition';
 import { getTouchY } from '../../../util/scrollLock';
 
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
@@ -31,9 +32,17 @@ const AvailableReaction: FC<{
 }> = ({ reaction, onSendReaction, isReady }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isActivated, activate, deactivate] = useFlag();
+
   const mediaData = useMedia(`document${reaction.selectAnimation?.id}`, !isReady, ApiMediaFormat.Lottie);
+
+  const [isActivated, activate, deactivate] = useFlag();
   const [isAnimationLoaded, markAnimationLoaded] = useFlag();
+
+  const shouldRenderAnimated = Boolean(isReady && mediaData);
+  const { transitionClassNames: animatedClassNames } = useShowTransition(shouldRenderAnimated);
+  const { shouldRender: shouldRenderStatic, transitionClassNames: staticClassNames } = useShowTransition(
+    !isReady || !isAnimationLoaded, undefined, true,
+  );
 
   function handleClick() {
     if (!containerRef.current) return;
@@ -42,10 +51,6 @@ const AvailableReaction: FC<{
     onSendReaction(reaction.reaction, x, y);
   }
 
-  const shouldRenderPreview = !isAnimationLoaded;
-  const shouldRenderAnimated = mediaData;
-  const shouldPlay = isReady && isActivated;
-
   return (
     <div
       className="reaction"
@@ -53,16 +58,19 @@ const AvailableReaction: FC<{
       ref={containerRef}
       onMouseEnter={isReady ? activate : undefined}
     >
-      {shouldRenderPreview && <ReactionStaticEmoji reaction={reaction.reaction} />}
+      {shouldRenderStatic && (
+        <ReactionStaticEmoji className={isReady ? staticClassNames : undefined} reaction={reaction.reaction} />
+      )}
       {shouldRenderAnimated && (
         <AnimatedSticker
           id={`select_${reaction.reaction}`}
+          className={animatedClassNames}
           animationData={mediaData as AnyLiteral}
-          play={shouldPlay}
+          play={isActivated}
           noLoop
-          onEnded={deactivate}
           size={REACTION_SIZE}
           onLoad={markAnimationLoaded}
+          onEnded={deactivate}
         />
       )}
     </div>
