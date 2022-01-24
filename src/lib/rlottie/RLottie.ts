@@ -318,8 +318,6 @@ class RLottie {
         this.cleanupPrevChunk(chunkIndex);
       }
 
-      this.requestNextChunk(chunkIndex);
-
       if (frameIndex !== this.prevFrameIndex) {
         const frame = this.getFrame(frameIndex);
         if (!frame) {
