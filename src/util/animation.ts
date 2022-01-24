@@ -16,19 +16,19 @@ export function animateSingle(tick: Function, instance?: AnimationInstance) {
     currentInstance = instance;
   }
 
-  fastRaf(() => {
-    if (!instance!.isCancelled && tick()) {
+  if (!instance!.isCancelled && tick()) {
+    fastRaf(() => {
       animateSingle(tick, instance);
-    }
-  });
+    });
+  }
 }
 
 export function animate(tick: Function) {
-  fastRaf(() => {
-    if (tick()) {
+  if (tick()) {
+    fastRaf(() => {
       animate(tick);
-    }
-  });
+    });
+  }
 }
 
 export type TimingFn = (t: number) => number;

@@ -10,6 +10,7 @@ import {
 import { IS_ANDROID } from './environment';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { animateSingle } from './animation';
+import { fastRaf } from './schedulers';
 
 let isAnimating = false;
 
@@ -135,19 +136,21 @@ function scrollWithJs(
   const startAt = Date.now();
   const onHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
-  animateSingle(() => {
-    const t = Math.min((Date.now() - startAt) / duration, 1);
-    const currentPath = path * (1 - transition(t));
+  fastRaf(() => {
+    animateSingle(() => {
+      const t = Math.min((Date.now() - startAt) / duration, 1);
+      const currentPath = path * (1 - transition(t));
 
-    container.scrollTop = Math.round(target - currentPath);
+      container.scrollTop = Math.round(target - currentPath);
 
-    isAnimating = t < 1;
+      isAnimating = t < 1;
 
-    if (!isAnimating) {
-      onHeavyAnimationStop();
-    }
+      if (!isAnimating) {
+        onHeavyAnimationStop();
+      }
 
-    return isAnimating;
+      return isAnimating;
+    });
   });
 }
 
