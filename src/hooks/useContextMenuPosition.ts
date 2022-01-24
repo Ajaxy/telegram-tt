@@ -1,69 +1,78 @@
-import { useState, useLayoutEffect } from '../lib/teact/teact';
+import { useState, useEffect } from '../lib/teact/teact';
 import { IAnchorPosition } from '../types';
+
+interface Layout {
+  extraPaddingX?: number;
+  extraTopPadding?: number;
+  marginSides?: number;
+  extraMarginTop?: number;
+}
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
 const MENU_POSITION_BOTTOM_MARGIN = 12;
+const EMPTY_RECT = {
+  width: 0, left: 0, height: 0, top: 0,
+};
 
-export default (
+export default function useContextMenuPosition(
   anchor: IAnchorPosition | undefined,
   getTriggerElement: () => HTMLElement | null,
   getRootElement: () => HTMLElement | null,
   getMenuElement: () => HTMLElement | null,
-  extraPaddingX = 0,
-  extraTopPadding = 0,
-  marginSides = 0,
-  extraMarginTop = 0,
-) => {
+  getLayout?: () => Layout,
+) {
   const [positionX, setPositionX] = useState<'right' | 'left'>('right');
   const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
   const [withScroll, setWithScroll] = useState(false);
   const [style, setStyle] = useState('');
-  const [menuStyle, setMenuStyle] = useState('');
+  const [menuStyle, setMenuStyle] = useState('opacity: 0;');
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const triggerEl = getTriggerElement();
     if (!anchor || !triggerEl) {
       return;
     }
 
     let { x, y } = anchor;
-    const emptyRect = {
-      width: 0, left: 0, height: 0, top: 0,
-    };
 
     const menuEl = getMenuElement();
     const rootEl = getRootElement();
 
-    const triggerRect = triggerEl.getBoundingClientRect();
+    const {
+      extraPaddingX = 0,
+      extraTopPadding = 0,
+      marginSides = 0,
+      extraMarginTop = 0,
+    } = getLayout?.() || {};
 
     const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
 
     const menuRect = menuEl ? {
       width: menuEl.offsetWidth,
       height: menuEl.offsetHeight + marginTop!,
-    } : emptyRect;
+    } : EMPTY_RECT;
 
-    const rootRect = rootEl ? rootEl.getBoundingClientRect() : emptyRect;
+    const rootRect = rootEl ? rootEl.getBoundingClientRect() : EMPTY_RECT;
 
-    let horizontalPostition: 'left' | 'right';
+    let horizontalPosition: 'left' | 'right';
     if (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left) {
       x += 3;
-      horizontalPostition = 'left';
+      horizontalPosition = 'left';
     } else if (x - menuRect.width > 0) {
-      horizontalPostition = 'right';
+      horizontalPosition = 'right';
       x -= 3;
     } else {
-      horizontalPostition = 'left';
+      horizontalPosition = 'left';
       x = 16;
     }
-    setPositionX(horizontalPostition);
+    setPositionX(horizontalPosition);
 
     if (marginSides
-      && horizontalPostition === 'right' && (x + extraPaddingX + marginSides >= rootRect.width + rootRect.left)) {
+      && horizontalPosition === 'right' && (x + extraPaddingX + marginSides >= rootRect.width + rootRect.left)) {
       x -= marginSides;
     }
 
-    if (marginSides && horizontalPostition === 'left') {
+    if (marginSides && horizontalPosition === 'left') {
       if (x + extraPaddingX + marginSides + menuRect.width >= rootRect.width + rootRect.left) {
         x -= marginSides;
       } else if (x - marginSides <= 0) {
@@ -81,7 +90,8 @@ export default (
       }
     }
 
-    const left = horizontalPostition === 'left'
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const left = horizontalPosition === 'left'
       ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
       : Math.max((x - triggerRect.left), menuRect.width + MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
     const top = Math.min(
@@ -94,8 +104,7 @@ export default (
     setMenuStyle(`max-height: ${menuMaxHeight}px;`);
     setStyle(`left: ${left}px; top: ${top}px`);
   }, [
-    anchor, extraPaddingX, extraTopPadding, extraMarginTop,
-    getMenuElement, getRootElement, getTriggerElement, marginSides,
+    anchor, getMenuElement, getRootElement, getTriggerElement, getLayout,
   ]);
 
   return {
@@ -105,4 +114,4 @@ export default (
     menuStyle,
     withScroll,
   };
-};
+}
