@@ -1,19 +1,20 @@
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useState,
 } from '../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ActiveEmojiInteraction } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
+import { IS_ANDROID } from '../../util/environment';
 import useFlag from '../../hooks/useFlag';
 import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';
 import {
   selectAnimatedEmojiEffect,
 } from '../../modules/selectors';
-import { REM } from '../common/helpers/mediaDimensions';
 import getAnimationData, { ANIMATED_STICKERS_PATHS } from '../common/helpers/animatedAssets';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import AnimatedSticker from '../common/AnimatedSticker';
 
@@ -31,7 +32,6 @@ type StateProps = {
 
 const HIDE_ANIMATION_DURATION = 250;
 const PLAYING_DURATION = 3000;
-const END_SIZE = 1.125 * REM;
 const EFFECT_SIZE = 240;
 
 const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
@@ -66,8 +66,13 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     };
   }, [stop]);
 
-  useEffect(() => {
-    setTimeout(stop, PLAYING_DURATION);
+  useLayoutEffect(() => {
+    const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+
+    setTimeout(() => {
+      stop();
+      dispatchHeavyAnimationStop();
+    }, PLAYING_DURATION);
   }, [stop]);
 
   const mediaDataEffect = useMedia(`sticker${effectAnimationId}`, !effectAnimationId, ApiMediaFormat.Lottie);
@@ -82,7 +87,6 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
   }, [localEffectAnimation]);
 
   const scale = (emojiInteraction.startSize || 0) / EFFECT_SIZE;
-  const endScale = END_SIZE / EFFECT_SIZE;
 
   return (
     <div
@@ -90,16 +94,15 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
         'EmojiInteractionAnimation', isHiding && 'hiding', isPlaying && 'playing', isReversed && 'reversed',
       )}
       // @ts-ignore teact feature
-      style={`--end-scale: ${endScale}; --scale: ${scale}; --start-x: ${emojiInteraction.x}px;`
-      + `--start-y: ${emojiInteraction.y}px;${
-        emojiInteraction.endX
-        && emojiInteraction.endY ? `--end-x: ${emojiInteraction.endX}px; --end-y: ${emojiInteraction.endY}px;` : ''}`}
+      style={`--scale: ${scale}; --start-x: ${emojiInteraction.x}px; --start-y: ${emojiInteraction.y}px;`}
     >
       <AnimatedSticker
         id={`effect_${effectAnimationId}`}
         size={EFFECT_SIZE}
         animationData={(localEffectAnimationData || mediaDataEffect) as AnyLiteral}
         play={isPlaying}
+        isLowPriority={IS_ANDROID}
+        forceOnHeavyAnimation
         noLoop
         onLoad={startPlaying}
       />

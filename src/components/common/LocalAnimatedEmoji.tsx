@@ -74,6 +74,7 @@ const LocalAnimatedEmoji: FC<OwnProps> = ({
           size={width}
           quality={QUALITY}
           play={isIntersecting && playKey}
+          forceOnHeavyAnimation
           noLoop
           onLoad={markAnimationLoaded}
         />

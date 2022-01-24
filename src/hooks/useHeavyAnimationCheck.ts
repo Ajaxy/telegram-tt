@@ -12,8 +12,13 @@ const AUTO_END_TIMEOUT = 1000;
 export default (
   handleAnimationStart: AnyToVoidFunction,
   handleAnimationEnd: AnyToVoidFunction,
+  isDisabled = false,
 ) => {
   useEffect(() => {
+    if (isDisabled) {
+      return undefined;
+    }
+
     if (isAnimating) {
       handleAnimationStart();
     }
@@ -25,7 +30,7 @@ export default (
       document.removeEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
       document.removeEventListener(ANIMATION_START_EVENT, handleAnimationStart);
     };
-  }, [handleAnimationEnd, handleAnimationStart]);
+  }, [isDisabled, handleAnimationEnd, handleAnimationStart]);
 };
 
 export function isHeavyAnimating() {
