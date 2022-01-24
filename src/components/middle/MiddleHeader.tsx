@@ -85,7 +85,6 @@ type StateProps = {
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
-  chatsById?: Record<string, ApiChat>;
   messagesCount?: number;
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
@@ -110,7 +109,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isRightColumnShown,
   audioMessage,
   chat,
-  chatsById,
   messagesCount,
   isChatWithSelf,
   isChatWithBot,
@@ -229,12 +227,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   ]);
 
   const unreadCount = useMemo(() => {
-    if (!isLeftColumnHideable || !chatsById) {
+    if (!isLeftColumnHideable) {
       return undefined;
     }
 
     return selectCountNotMutedUnread(getGlobal()) || undefined;
-  }, [isLeftColumnHideable, chatsById]);
+  }, [isLeftColumnHideable]);
 
   const canToolsCollideWithChatInfo = (
     windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
@@ -445,7 +443,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, messageListType }): StateProps => {
     const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
-    const { byId: chatsById } = global.chats;
     const chat = selectChat(global, chatId);
 
     const { typingStatus } = chat || {};
@@ -474,7 +471,6 @@ export default memo(withGlobal<OwnProps>(
       isSelectModeActive: selectIsInSelectMode(global),
       audioMessage,
       chat,
-      chatsById,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),

@@ -8,6 +8,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
 
+import Portal from '../../ui/Portal';
 import DropTarget from './DropTarget';
 
 import './DropArea.scss';
@@ -84,10 +85,12 @@ const DropArea: FC<OwnProps> = ({
   );
 
   return (
-    <div className={className} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={onHide}>
-      <DropTarget onFileSelect={handleFilesDrop} />
-      {(withQuick || prevWithQuick) && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
-    </div>
+    <Portal containerId="#middle-column-portals">
+      <div className={className} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={onHide}>
+        <DropTarget onFileSelect={handleFilesDrop} />
+        {(withQuick || prevWithQuick) && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
+      </div>
+    </Portal>
   );
 };
 

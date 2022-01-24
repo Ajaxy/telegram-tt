@@ -21,7 +21,6 @@ export default (
   draft: ApiFormattedText | undefined,
   chatId: string,
   threadId: number,
-  html: string,
   htmlRef: { current: string },
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
@@ -29,8 +28,9 @@ export default (
   const { saveDraft, clearDraft } = getDispatch();
 
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
-    if (htmlRef.current.length && !editedMessage) {
-      saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(htmlRef.current!) });
+    const currentHtml = htmlRef.current;
+    if (currentHtml.length && !editedMessage) {
+      saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(currentHtml!) });
     } else {
       clearDraft({ chatId: draftChatId, threadId: draftThreadId });
     }
@@ -75,6 +75,7 @@ export default (
     }
   }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId]);
 
+  const html = htmlRef.current;
   // Update draft when input changes
   const prevHtml = usePrevious(html);
   useEffect(() => {

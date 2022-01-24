@@ -12,10 +12,13 @@ export default <B extends Bundles, M extends BundleModules<B>>(
   const module = getModuleFromMemory(bundleName, moduleName);
   const forceUpdate = useForceUpdate();
 
-  if (autoUpdate) {
-    // Use effect and cleanup for listener removal
-    addLoadListener(forceUpdate);
-  }
+  useEffect(() => {
+    if (!autoUpdate) {
+      return undefined;
+    }
+
+    return addLoadListener(forceUpdate);
+  }, [autoUpdate, forceUpdate]);
 
   useEffect(() => {
     if (!noLoad && !module) {

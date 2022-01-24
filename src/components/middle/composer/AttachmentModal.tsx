@@ -2,7 +2,7 @@ import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
-import { ApiAttachment, ApiChatMember, ApiUser } from '../../../api/types';
+import { ApiAttachment, ApiChatMember } from '../../../api/types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW,
@@ -17,6 +17,7 @@ import useMentionTooltip from './hooks/useMentionTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
+import { useStateRef } from '../../../hooks/useStateRef';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -35,7 +36,6 @@ export type OwnProps = {
   isReady?: boolean;
   currentUserId?: string;
   groupChatMembers?: ApiChatMember[];
-  usersById?: Record<string, ApiUser>;
   recentEmojis: string[];
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
@@ -56,7 +56,6 @@ const AttachmentModal: FC<OwnProps> = ({
   isReady,
   currentUserId,
   groupChatMembers,
-  usersById,
   recentEmojis,
   baseEmojiKeywords,
   emojiKeywords,
@@ -66,8 +65,8 @@ const AttachmentModal: FC<OwnProps> = ({
   onFileAppend,
   onClear,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const hideTimeoutRef = useRef<number>(null);
+  const captionRef = useStateRef(caption);
+  const hideTimeoutRef = useRef<number>();
   const prevAttachments = usePrevious(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
   const isOpen = Boolean(attachments.length);
@@ -79,7 +78,7 @@ const AttachmentModal: FC<OwnProps> = ({
     isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
   } = useMentionTooltip(
     isOpen,
-    caption,
+    captionRef,
     onCaptionUpdate,
     EDITABLE_INPUT_MODAL_ID,
     groupChatMembers,
@@ -90,7 +89,7 @@ const AttachmentModal: FC<OwnProps> = ({
     isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
   } = useEmojiTooltip(
     isOpen,
-    caption,
+    captionRef,
     recentEmojis,
     EDITABLE_INPUT_MODAL_ID,
     onCaptionUpdate,
@@ -150,6 +149,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = undefined;
     }
   }
 
@@ -238,7 +238,6 @@ const AttachmentModal: FC<OwnProps> = ({
             onClose={closeMentionTooltip}
             onInsertUserName={insertMention}
             filteredUsers={mentionFilteredUsers}
-            usersById={usersById}
           />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}

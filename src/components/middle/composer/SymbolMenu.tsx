@@ -5,7 +5,6 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
-import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
@@ -30,7 +29,8 @@ export type OwnProps = {
   chatId: string;
   threadId?: number;
   isOpen: boolean;
-  allowedAttachmentOptions: IAllowedAttachmentOptions;
+  canSendStickers: boolean;
+  canSendGifs: boolean;
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
@@ -51,7 +51,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   isOpen,
-  allowedAttachmentOptions,
+  canSendStickers,
+  canSendGifs,
   isLeftColumnShown,
   onLoad,
   onClose,
@@ -130,8 +131,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [onStickerSelect]);
 
   const lang = useLang();
-
-  const { canSendStickers, canSendGifs } = allowedAttachmentOptions;
 
   function renderContent(isActive: boolean, isFrom: boolean) {
     switch (activeTab) {

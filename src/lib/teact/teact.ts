@@ -100,6 +100,7 @@ const Fragment = Symbol('Fragment');
 
 const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
+const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
 
 let renderingInstance: ComponentInstance;
 
@@ -276,7 +277,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
       }
 
       if (DEBUG_MORE) {
-        if (componentName !== 'TeactMemoWrapper' && componentName !== 'TeactNContainer') {
+        if (!DEBUG_SILENT_RENDERS_FOR.has(componentName)) {
           // eslint-disable-next-line no-console
           console.log(`[Teact] Render ${componentName}`);
         }

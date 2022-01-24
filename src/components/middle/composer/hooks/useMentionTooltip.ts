@@ -24,7 +24,7 @@ try {
 
 export default function useMentionTooltip(
   canSuggestMembers: boolean | undefined,
-  html: string,
+  htmlRef: { current: string },
   onUpdateHtml: (html: string) => void,
   inputId: string = EDITABLE_INPUT_ID,
   groupChatMembers?: ApiChatMember[],
@@ -62,6 +62,7 @@ export default function useMentionTooltip(
     });
   }, [currentUserId, groupChatMembers, topInlineBotIds]);
 
+  const html = htmlRef.current;
   useEffect(() => {
     if (!canSuggestMembers || !html.length) {
       unmarkIsOpen();
@@ -76,7 +77,7 @@ export default function useMentionTooltip(
     } else {
       unmarkIsOpen();
     }
-  }, [canSuggestMembers, html, updateFilteredUsers, markIsOpen, unmarkIsOpen]);
+  }, [canSuggestMembers, updateFilteredUsers, markIsOpen, unmarkIsOpen, html]);
 
   useEffect(() => {
     if (usersToMention?.length) {
@@ -101,9 +102,10 @@ export default function useMentionTooltip(
           dir="auto"
         >${getUserFirstOrLastName(user)}</a>`;
 
-    const atIndex = html.lastIndexOf('@');
+    const currentHtml = htmlRef.current;
+    const atIndex = currentHtml.lastIndexOf('@');
     if (atIndex !== -1) {
-      onUpdateHtml(`${html.substr(0, atIndex)}${insertedHtml}&nbsp;`);
+      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${insertedHtml}&nbsp;`);
       const messageInput = document.getElementById(inputId)!;
       requestAnimationFrame(() => {
         focusEditableElement(messageInput, forceFocus);
@@ -111,7 +113,7 @@ export default function useMentionTooltip(
     }
 
     unmarkIsOpen();
-  }, [html, inputId, onUpdateHtml, unmarkIsOpen]);
+  }, [htmlRef, inputId, onUpdateHtml, unmarkIsOpen]);
 
   return {
     isMentionTooltipOpen: isOpen,
