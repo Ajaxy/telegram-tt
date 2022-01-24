@@ -49,7 +49,7 @@ const LocalAnimatedEmoji: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const [localStickerAnimationData, setLocalStickerAnimationData] = useState<AnyLiteral>();
+  const [localStickerAnimationData, setLocalStickerAnimationData] = useState<string>();
   useEffect(() => {
     if (localSticker) {
       getAnimationData(localSticker as keyof typeof ANIMATED_STICKERS_PATHS).then((data) => {

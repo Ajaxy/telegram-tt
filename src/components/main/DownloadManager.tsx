@@ -37,7 +37,7 @@ const DownloadManager: FC<StateProps> = ({
         }
 
         if (!startedDownloads.has(downloadHash)) {
-          const mediaData = mediaLoader.getFromMemory<ApiMediaFormat.BlobUrl>(downloadHash);
+          const mediaData = mediaLoader.getFromMemory(downloadHash);
           if (mediaData) {
             startedDownloads.delete(downloadHash);
             download(mediaData, getMessageContentFilename(message));

@@ -75,9 +75,9 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     }, PLAYING_DURATION);
   }, [stop]);
 
-  const mediaDataEffect = useMedia(`sticker${effectAnimationId}`, !effectAnimationId, ApiMediaFormat.Lottie);
+  const effectAnimationData = useMedia(`sticker${effectAnimationId}`, !effectAnimationId, ApiMediaFormat.Lottie);
 
-  const [localEffectAnimationData, setLocalEffectAnimationData] = useState<AnyLiteral>();
+  const [localEffectAnimationData, setLocalEffectAnimationData] = useState<string | undefined>();
   useEffect(() => {
     if (localEffectAnimation) {
       getAnimationData(localEffectAnimation as keyof typeof ANIMATED_STICKERS_PATHS).then((data) => {
@@ -99,7 +99,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
       <AnimatedSticker
         id={`effect_${effectAnimationId}`}
         size={EFFECT_SIZE}
-        animationData={(localEffectAnimationData || mediaDataEffect) as AnyLiteral}
+        animationData={localEffectAnimationData || effectAnimationData}
         play={isPlaying}
         isLowPriority={IS_ANDROID}
         forceOnHeavyAnimation

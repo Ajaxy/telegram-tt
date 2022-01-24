@@ -35,12 +35,6 @@ export async function fetch(
         }
 
         const blob = await response.blob();
-
-        // Safari does not return correct Content-Type header for webp images.
-        if (key.startsWith('sticker')) {
-          return new Blob([blob], { type: 'image/webp' });
-        }
-
         const shouldRecreate = !blob.type || (!isHtmlAllowed && blob.type.includes('html'));
         // iOS Safari fails to preserve `type` in cache
         let resolvedType = blob.type || contentType;

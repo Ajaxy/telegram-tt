@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getDispatch } from '../../lib/teact/teactn';
 
-import { ApiMediaFormat, ApiMessage } from '../../api/types';
+import { ApiMessage } from '../../api/types';
 
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
@@ -83,7 +83,7 @@ const Document: FC<OwnProps> = ({
   const shouldDownload = Boolean(isDownloading || (isLoadAllowed && wasIntersected));
 
   const documentHash = getMessageMediaHash(message, 'download');
-  const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress<ApiMediaFormat.BlobUrl>(
+  const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress(
     documentHash, !shouldDownload, undefined, undefined, undefined, true,
   );
   const isLoaded = Boolean(mediaData);

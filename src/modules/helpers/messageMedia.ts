@@ -245,10 +245,6 @@ export function getAudioHasCover(media: ApiAudio) {
 
 export function getMessageMediaFormat(
   message: ApiMessage, target: Target,
-): Exclude<ApiMediaFormat, ApiMediaFormat.Lottie>;
-export function getMessageMediaFormat(message: ApiMessage, target: Target, canBeLottie: true): ApiMediaFormat;
-export function getMessageMediaFormat(
-  message: ApiMessage, target: Target,
 ): ApiMediaFormat {
   const {
     sticker, video, audio, voice,

@@ -55,7 +55,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   } = getDispatch();
 
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
-  const [animationData, setAnimationData] = useState<Record<string, any>>();
+  const [animationData, setAnimationData] = useState<string>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
   const [isConfirmUnlinkGroupDialogOpen, openConfirmUnlinkGroupDialog, closeConfirmUnlinkGroupDialog] = useFlag();

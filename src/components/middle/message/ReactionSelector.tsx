@@ -65,7 +65,7 @@ const AvailableReaction: FC<{
         <AnimatedSticker
           id={`select_${reaction.reaction}`}
           className={animatedClassNames}
-          animationData={mediaData as AnyLiteral}
+          animationData={mediaData}
           play={isActivated}
           noLoop
           size={REACTION_SIZE}

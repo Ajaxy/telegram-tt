@@ -64,7 +64,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     showDialog,
   } = getDispatch();
 
-  const [animationData, setAnimationData] = useState<Record<string, any>>();
+  const [animationData, setAnimationData] = useState<string>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 

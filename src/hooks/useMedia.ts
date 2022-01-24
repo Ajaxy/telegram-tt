@@ -13,7 +13,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   cacheBuster?: number,
   delay?: number | false,
 ) => {
-  const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
+  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {

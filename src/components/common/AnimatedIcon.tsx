@@ -19,7 +19,7 @@ const AnimatedIcon: FC<OwnProps> = ({
   playSegment,
   color,
 }) => {
-  const [iconData, setIconData] = useState<Record<string, any>>();
+  const [iconData, setIconData] = useState<string>();
 
   useEffect(() => {
     getAnimationData(name).then(setIconData);

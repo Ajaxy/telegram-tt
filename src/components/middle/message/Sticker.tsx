@@ -45,7 +45,7 @@ const Sticker: FC<OwnProps> = ({
   const mediaData = useMedia(
     mediaHash,
     !shouldLoad,
-    getMessageMediaFormat(message, 'inline', true),
+    getMessageMediaFormat(message, 'inline'),
     lastSyncTime,
   );
 
@@ -89,7 +89,7 @@ const Sticker: FC<OwnProps> = ({
           key={mediaHash}
           className={buildClassName('full-media', transitionClassNames)}
           id={mediaHash}
-          animationData={mediaData as AnyLiteral}
+          animationData={mediaData}
           size={width}
           play={shouldPlay}
           noLoop={!shouldLoop}
