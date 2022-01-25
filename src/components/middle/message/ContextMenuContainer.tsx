@@ -29,6 +29,7 @@ import ReportMessageModal from '../../common/ReportMessageModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
+import buildClassName from '../../../util/buildClassName';
 
 const START_SIZE = 2 * REM;
 
@@ -322,7 +323,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   return (
-    <div className={['ContextMenuContainer', transitionClassNames].join(' ')}>
+    <div className={buildClassName('ContextMenuContainer', transitionClassNames)}>
       <MessageContextMenu
         availableReactions={availableReactions}
         message={message}
@@ -388,15 +389,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         chatId={message.chatId}
         onClose={closePinModal}
       />
-      <CalendarModal
-        isOpen={isCalendarOpen}
-        withTimePicker
-        selectedAt={message.date * 1000}
-        maxAt={getDayStartAt(scheduledMaxDate)}
-        isFutureMode
-        onClose={handleCloseCalendar}
-        onSubmit={handleRescheduleMessage}
-      />
+      {canReschedule && (
+        <CalendarModal
+          isOpen={isCalendarOpen}
+          withTimePicker
+          selectedAt={message.date * 1000}
+          maxAt={getDayStartAt(scheduledMaxDate)}
+          isFutureMode
+          onClose={handleCloseCalendar}
+          onSubmit={handleRescheduleMessage}
+        />
+      )}
     </div>
   );
 };

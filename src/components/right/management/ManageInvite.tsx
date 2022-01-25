@@ -16,9 +16,9 @@ import { getServerTime } from '../../../util/serverTime';
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
 import RadioGroup from '../../ui/RadioGroup';
-import CalendarModalAsync from '../../common/CalendarModal.async';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import CalendarModal from '../../common/CalendarModal';
 
 const DEFAULT_USAGE_LIMITS = [1, 10, 100];
 const DEFAULT_EXPIRE_DATE = {
@@ -243,7 +243,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
           <i className="icon-check" />
         </FloatingActionButton>
       </div>
-      <CalendarModalAsync
+      <CalendarModal
         isOpen={isCalendarOpened}
         isFutureMode
         withTimePicker
