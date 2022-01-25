@@ -1,0 +1,32 @@
+.DotAnimation {
+  display: inline-flex;
+  align-items: baseline;
+
+  .ellipsis {
+    display: flex;
+    width: 1rem;
+    overflow: hidden;
+
+    &::after {
+      content: '...';
+      animation: dot-animation 1s steps(4, start) infinite;
+
+      html[lang=ar] &,
+      html[lang=fa] & {
+        animation-name: dot-animation-rtl;
+      }
+    }
+  }
+}
+
+@keyframes dot-animation {
+  from {
+    transform: translateX(-1rem);
+  }
+}
+
+@keyframes dot-animation-rtl {
+  from {
+    transform: translateX(1rem);
+  }
+}

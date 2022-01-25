@@ -8,6 +8,8 @@ import { getUserFirstOrLastName } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 
+import DotAnimation from './DotAnimation';
+
 import './TypingStatus.scss';
 
 type OwnProps = {
@@ -21,15 +23,17 @@ type StateProps = {
 const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
   const lang = useLang();
   const typingUserName = typingUser && !typingUser.isSelf && getUserFirstOrLastName(typingUser);
+  const content = lang(typingStatus.action)
+    // Fix for translation "{user} is typing"
+    .replace('{user}', '')
+    .replace('{emoji}', typingStatus.emoji).trim();
 
   return (
     <p className="typing-status" dir={lang.isRtl ? 'rtl' : 'auto'}>
       {typingUserName && (
         <span className="sender-name" dir="auto">{renderText(typingUserName)}</span>
       )}
-      {/* fix for translation "username _is_ typing" */}
-      {lang(typingStatus.action).replace('{user}', '').replace('{emoji}', typingStatus.emoji).trim()}
-      <span className="ellipsis" />
+      <DotAnimation content={content} />
     </p>
   );
 };

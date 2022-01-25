@@ -20,11 +20,14 @@ import useLang, { LangFn } from '../../hooks/useLang';
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
+import DotAnimation from './DotAnimation';
 
 type OwnProps = {
   chatId: string;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
+  status?: string;
+  withDots?: boolean;
   withMediaViewer?: boolean;
   withUsername?: boolean;
   withFullInfo?: boolean;
@@ -44,6 +47,8 @@ type StateProps =
 const GroupChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   avatarSize = 'medium',
+  status,
+  withDots,
   withMediaViewer,
   withUsername,
   withFullInfo,
@@ -86,9 +91,17 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderStatusOrTyping() {
+    if (status) {
+      return withDots ? (
+        <DotAnimation className="status" content={status} />
+      ) : (
+        <span className="status" dir="auto">{status}</span>
+      );
+    }
+
     if (withUpdatingStatus && !areMessagesLoaded && !isRestricted) {
       return (
-        <span className="status" dir="auto">{lang('Updating')}</span>
+        <DotAnimation className="status" content={lang('Updating')} />
       );
     }
 

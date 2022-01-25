@@ -34,7 +34,14 @@
       bottom: -0.125rem;
       right: -0.125rem;
       border-radius: 50%;
-      background: rgba(0,0,0,0.25);
+    }
+
+    &.bg-dark::before {
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    &.bg-light::before {
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 
@@ -53,6 +60,7 @@
   &.blue {
     > div {
       background-image: var(--spinner-blue-data);
+
       .theme-dark & {
         background-image: var(--spinner-dark-blue-data);
       }
@@ -76,12 +84,19 @@
       background-image: var(--spinner-gray-data);
     }
   }
+
+  &.yellow {
+    > div {
+      background-image: var(--spinner-yellow-data);
+    }
+  }
 }
 
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

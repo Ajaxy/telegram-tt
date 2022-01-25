@@ -200,6 +200,20 @@
     }
   }
 
+  &.translucent-black {
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.8);
+    --ripple-color: rgba(0, 0, 0, 0.08);
+
+    @include active-styles() {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(0, 0, 0, 0.16);
+    }
+  }
+
   &.dark {
     background-color: rgba(0, 0, 0, 0.75);
     color: white;

@@ -55,7 +55,9 @@ declare module 'pako/dist/pako_inflate' {
   function inflate(...args: any[]): string;
 }
 
-type WindowWithPerf = typeof window & { perf: AnyLiteral };
+type WindowWithPerf =
+  typeof window
+  & { perf: AnyLiteral };
 
 interface TEncodedImage {
   result: Uint8ClampedArray;
@@ -70,10 +72,12 @@ interface IWebpWorker extends Worker {
 
 interface Window {
   ClipboardItem?: any;
-  requestIdleCallback: (cb: AnyToVoidFunction, options:{ timeout?: number }) => void;
+  requestIdleCallback: (cb: AnyToVoidFunction, options: { timeout?: number }) => void;
 }
 
-interface Clipboard { write?: any }
+interface Clipboard {
+  write?: any;
+}
 
 interface Document {
   mozFullScreenElement: any;

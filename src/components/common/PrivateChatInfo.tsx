@@ -16,6 +16,7 @@ import useLang from '../../hooks/useLang';
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
+import DotAnimation from './DotAnimation';
 
 type OwnProps = {
   userId: string;
@@ -23,6 +24,7 @@ type OwnProps = {
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   status?: string;
+  withDots?: boolean;
   withMediaViewer?: boolean;
   withUsername?: boolean;
   withFullInfo?: boolean;
@@ -45,6 +47,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   avatarSize = 'medium',
   status,
+  withDots,
   withMediaViewer,
   withUsername,
   withFullInfo,
@@ -90,14 +93,16 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
   function renderStatusOrTyping() {
     if (status) {
-      return (
+      return withDots ? (
+        <DotAnimation className="status" content={status} />
+      ) : (
         <span className="status" dir="auto">{status}</span>
       );
     }
 
     if (withUpdatingStatus && !areMessagesLoaded) {
       return (
-        <span className="status" dir="auto">{lang('Updating')}</span>
+        <DotAnimation className="status" content={lang('Updating')} />
       );
     }
 
