@@ -282,9 +282,15 @@
       }
     }
 
-    .status {
-      display: flex;
+    .status, .typing-status {
+      display: inline;
       unicode-bidi: plaintext;
+
+      @media (min-width: 1275px) {
+        #Main.right-column-open & {
+          max-width: calc(100% - var(--right-column-width));
+        }
+      }
     }
 
     .user-status {
