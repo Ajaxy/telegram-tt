@@ -16,7 +16,9 @@ export type OwnProps = {
   type?: 'button' | 'submit' | 'reset';
   children: any;
   size?: 'default' | 'smaller' | 'tiny';
-  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'dark';
+  color?: (
+    'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black' | 'dark'
+  );
   backgroundImage?: string;
   className?: string;
   round?: boolean;
@@ -159,7 +161,7 @@ const Button: FC<OwnProps> = ({
           <span dir={isRtl ? 'auto' : undefined}>Please wait...</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
-      ) : children }
+      ) : children}
       {!disabled && ripple && (
         <RippleEffect />
       )}

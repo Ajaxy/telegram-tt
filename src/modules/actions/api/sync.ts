@@ -53,6 +53,8 @@ async function sync(afterSyncCallback: () => void) {
     console.log('>>> START SYNC');
   }
 
+  setGlobal({ ...getGlobal(), isSyncing: true });
+
   await callApi('fetchCurrentUser');
 
   // This fetches only active chats and clears archived chats, which will be fetched in `afterSync`
@@ -62,6 +64,7 @@ async function sync(afterSyncCallback: () => void) {
   setGlobal({
     ...getGlobal(),
     lastSyncTime: Date.now(),
+    isSyncing: false,
   });
 
   if (DEBUG) {

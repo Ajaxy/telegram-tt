@@ -115,6 +115,7 @@ export type GlobalState = {
   shouldSkipHistoryAnimations?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
+  isSyncing?: boolean;
   lastSyncTime?: number;
   serverTimeOffset: number;
   leftColumnWidth?: number;

@@ -81,6 +81,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   canChangeSensitive?: boolean;
   timeFormat: TimeFormat;
   wasTimeFormatSetManually: boolean;
+  isConnectionStatusMinimized: boolean;
 }
 
 export interface ApiPrivacySettings {

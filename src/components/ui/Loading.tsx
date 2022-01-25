@@ -1,17 +1,20 @@
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import Spinner from './Spinner';
+import buildClassName from '../../util/buildClassName';
 
 import './Loading.scss';
 
 type OwnProps = {
-  color?: 'blue' | 'white' | 'black';
+  color?: 'blue' | 'white' | 'black' | 'yellow';
+  backgroundColor?: 'light' | 'dark';
+  onClick?: NoneToVoidFunction;
 };
 
-const Loading: FC<OwnProps> = ({ color = 'blue' }) => {
+const Loading: FC<OwnProps> = ({ color = 'blue', backgroundColor, onClick }) => {
   return (
-    <div className="Loading">
-      <Spinner color={color} withBackground={color === 'white'} />
+    <div className={buildClassName('Loading', onClick && 'interactive')} onClick={onClick}>
+      <Spinner color={color} backgroundColor={backgroundColor} />
     </div>
   );
 };

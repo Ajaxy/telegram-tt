@@ -552,7 +552,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           onNotchToggle={onNotchToggle}
         />
       ) : (
-        <Loading color="white" />
+        <Loading color="white" backgroundColor="dark" />
       )}
     </div>
   );

@@ -1,48 +1,41 @@
 import React, {
-  FC, useCallback, useMemo, memo, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 import cycleRestrict from '../../util/cycleRestrict';
 
-import { MessageListType } from '../../global/types';
+import { GlobalState, MessageListType } from '../../global/types';
 import {
-  ApiMessage,
-  ApiChat,
-  ApiUser,
-  ApiTypingStatus,
-  MAIN_THREAD_ID, ApiUpdateConnectionStateType,
+  ApiChat, ApiMessage, ApiTypingStatus, ApiUser, MAIN_THREAD_ID,
 } from '../../api/types';
 
 import {
-  MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
-  MOBILE_SCREEN_MAX_WIDTH,
   EDITABLE_INPUT_ID,
+  MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
-  SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  MOBILE_SCREEN_MAX_WIDTH,
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
+  SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
 } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
-  isUserId,
-  getMessageKey,
-  getChatTitle,
-  getSenderTitle,
+  getChatTitle, getMessageKey, getSenderTitle, isUserId,
 } from '../../modules/helpers';
 import {
+  selectAllowedMessageActions,
   selectChat,
   selectChatMessage,
-  selectAllowedMessageActions,
-  selectIsRightColumnShown,
-  selectThreadTopMessageId,
-  selectThreadInfo,
   selectChatMessages,
-  selectPinnedIds,
-  selectIsChatWithSelf,
-  selectForwardedSender,
-  selectScheduledIds,
-  selectIsInSelectMode,
-  selectIsChatWithBot,
   selectCountNotMutedUnread,
+  selectForwardedSender,
+  selectIsChatWithBot,
+  selectIsChatWithSelf,
+  selectIsInSelectMode,
+  selectIsRightColumnShown,
+  selectPinnedIds,
+  selectScheduledIds,
+  selectThreadInfo,
+  selectThreadTopMessageId,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
@@ -51,7 +44,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
-import useBrowserOnline from '../../hooks/useBrowserOnline';
+import useConnectionStatus from '../../hooks/useConnectionStatus';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -91,7 +84,8 @@ type StateProps = {
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
-  connectionState?: ApiUpdateConnectionStateType;
+  connectionState?: GlobalState['connectionState'];
+  isSyncing?: GlobalState['isSyncing'];
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -116,6 +110,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
+  isSyncing,
 }) => {
   const {
     openChatWithInfo,
@@ -296,21 +291,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }
   }, [shouldUseStackedToolsClass, canRevealTools, canToolsCollideWithChatInfo, isRightColumnShown]);
 
-  const isBrowserOnline = useBrowserOnline();
-  const isConnecting = (!isBrowserOnline || connectionState === 'connectionStateConnecting')
-    && (IS_SINGLE_COLUMN_LAYOUT || (IS_TABLET_COLUMN_LAYOUT && !shouldShowCloseButton));
+  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing, true);
 
   function renderInfo() {
-    if (isConnecting) {
-      return (
-        <>
-          {renderBackButton()}
-          <h3>
-            {lang('WaitingForNetwork')}
-          </h3>
-        </>
-      );
-    }
     return (
       messageListType === 'thread' && threadId === MAIN_THREAD_ID ? (
         renderMainThreadInfo()
@@ -348,6 +331,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             <PrivateChatInfo
               userId={chatId}
               typingStatus={typingStatus}
+              status={connectionStatusText}
+              withDots={Boolean(connectionStatusText)}
               withFullInfo={isChatWithBot}
               withMediaViewer
               withUpdatingStatus
@@ -357,10 +342,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             <GroupChatInfo
               chatId={chatId}
               typingStatus={typingStatus}
-              noRtl
+              status={connectionStatusText}
+              withDots={Boolean(connectionStatusText)}
               withMediaViewer
               withFullInfo
               withUpdatingStatus
+              noRtl
             />
           )}
         </div>
@@ -395,7 +382,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     <div className="MiddleHeader" ref={componentRef}>
       <Transition
         name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
-        activeKey={isConnecting ? Infinity : currentTransitionKey}
+        activeKey={currentTransitionKey}
       >
         {renderInfo}
       </Transition>
@@ -478,6 +465,7 @@ export default memo(withGlobal<OwnProps>(
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
       connectionState: global.connectionState,
+      isSyncing: global.isSyncing,
     };
 
     const messagesById = selectChatMessages(global, chatId);
