@@ -346,7 +346,10 @@ const MiddleColumn: FC<StateProps> = ({
   useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
   useHistoryBack(isSelectModeActive, exitMessageSelectMode);
 
-  const isMessagingDisabled = Boolean(!isPinnedMessageList && !renderingCanPost && messageSendingRestrictionReason);
+  const isMessagingDisabled = Boolean(
+    !isPinnedMessageList && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
+    && !renderingCanSubscribe && messageSendingRestrictionReason,
+  );
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingCanStartBot || isPinnedMessageList,
   );
