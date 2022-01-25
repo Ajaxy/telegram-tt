@@ -17,6 +17,7 @@ export function buildContentClassName(
     forceSenderName,
     hasComments,
     hasActionButton,
+    hasReactions,
   }: {
     hasReply?: boolean;
     customShape?: boolean | number;
@@ -26,6 +27,7 @@ export function buildContentClassName(
     forceSenderName?: boolean;
     hasComments?: boolean;
     hasActionButton?: boolean;
+    hasReactions?: boolean;
   } = {},
 ) {
   const {
@@ -87,6 +89,10 @@ export function buildContentClassName(
 
   if (hasThread) {
     classNames.push('has-replies');
+  }
+
+  if (hasReactions) {
+    classNames.push('has-reactions');
   }
 
   if (isViaBot) {

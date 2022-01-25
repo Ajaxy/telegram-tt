@@ -322,6 +322,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const customShape = getMessageCustomShape(message);
   const hasAnimatedEmoji = localSticker || animatedEmoji;
+  const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
     forwardInfo
     && (!isChatWithSelf || isScheduled)
@@ -457,6 +458,7 @@ const Message: FC<OwnProps & StateProps> = ({
     forceSenderName,
     hasComments: threadInfo && threadInfo?.messagesCount > 0,
     hasActionButton: canForward || canFocus,
+    hasReactions,
   });
 
   const withAppendix = contentClassName.includes('has-appendix');
@@ -478,7 +480,7 @@ const Message: FC<OwnProps & StateProps> = ({
   let reactionsPosition!: ReactionsPosition;
   if (areReactionsInMeta) {
     reactionsPosition = 'in-meta';
-  } else if (reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions)) {
+  } else if (hasReactions) {
     if (customShape || ((photo || video || hasAnimatedEmoji) && !textParts)) {
       reactionsPosition = 'outside';
     } else if (asForwarded) {
