@@ -19,8 +19,8 @@
     "prepare": "husky install"
   },
   "engines": {
-    "node": "^12.13",
-    "npm": "^6.12"
+    "node": "^16.13",
+    "npm": "^8.1"
   },
   "husky": {
     "hooks": {
