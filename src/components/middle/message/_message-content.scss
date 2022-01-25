@@ -44,7 +44,12 @@
 
   img {
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .emoji {
+    -webkit-user-drag: none;
+    user-select: text;
   }
 
   .text-content {
