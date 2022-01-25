@@ -14,6 +14,7 @@ import {
 } from '../../../../util/iteratees';
 import memoized from '../../../../util/memoized';
 import useFlag from '../../../../hooks/useFlag';
+import renderText from '../../../common/helpers/renderText';
 
 interface Library {
   keywords: string[];
@@ -115,10 +116,10 @@ export default function useEmojiTooltip(
     const currentHtml = htmlRef.current;
     const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
     if (atIndex !== -1) {
-      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${textEmoji}`);
+      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${renderText(textEmoji, ['emoji_html'])}`);
       const messageInput = document.getElementById(inputId)!;
       requestAnimationFrame(() => {
-        focusEditableElement(messageInput, true);
+        focusEditableElement(messageInput, true, true);
       });
     }
 
