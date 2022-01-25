@@ -169,12 +169,14 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
   shouldReturnTrue?: boolean,
   shouldThrow?: boolean,
+  shouldIgnoreUpdates?: boolean,
 ): Promise<T['__response'] | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
   shouldReturnTrue = false,
   shouldThrow = false,
+  shouldIgnoreUpdates = false,
 ) {
   if (!isConnected) {
     if (DEBUG) {
@@ -198,7 +200,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
     }
 
-    handleUpdatesFromRequest(request, result);
+    if (!shouldIgnoreUpdates) {
+      handleUpdatesFromRequest(request, result);
+    }
 
     return shouldReturnTrue ? result && true : result;
   } catch (err) {

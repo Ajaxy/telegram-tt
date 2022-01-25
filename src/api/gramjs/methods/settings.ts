@@ -28,9 +28,10 @@ import { getClient, invokeRequest, uploadFile } from './client';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import localDb from '../localDb';
 import { buildApiConfig } from '../apiBuilders/appConfig';
+import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
@@ -173,7 +174,9 @@ export function terminateAllAuthorizations() {
 export async function fetchNotificationExceptions({
   serverTimeOffset,
 }: { serverTimeOffset: number }) {
-  const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({ compareSound: true }));
+  const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({
+    compareSound: true,
+  }), undefined, undefined, true);
 
   if (!(result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined)) {
     return undefined;
@@ -453,17 +456,8 @@ function updateLocalDb(
     GramJs.Updates | GramJs.UpdatesCombined
   ),
 ) {
-  result.users.forEach((user) => {
-    if (user instanceof GramJs.User) {
-      localDb.users[buildApiPeerId(user.id, 'user')] = user;
-    }
-  });
-
-  result.chats.forEach((chat) => {
-    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-      localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
-    }
-  });
+  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesWithPhotosToLocalDb(result.chats);
 }
 
 export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCode }) {
