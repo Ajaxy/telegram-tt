@@ -116,20 +116,7 @@ export function buildApiMessageFromNotification(
   currentDate: number,
 ): ApiMessage {
   const localId = localMessageCounter++;
-  let content: ApiMessage['content'] = {};
-
-  if (notification.media) {
-    content = {
-      ...buildMessageMediaContent(notification.media),
-    };
-  }
-
-  if (notification.message && !content.sticker && !content.poll && !content.contact) {
-    content = {
-      ...content,
-      text: buildMessageTextContent(notification.message, notification.entities),
-    };
-  }
+  const content = buildMessageContent(notification);
 
   return {
     id: localId,
@@ -154,22 +141,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const peerId = mtpMessage.peerId ? getApiChatIdFromMtpPeer(mtpMessage.peerId) : undefined;
   const isChatWithSelf = !fromId && chatId === currentUserId;
   const isOutgoing = (mtpMessage.out && !mtpMessage.post) || (isChatWithSelf && !mtpMessage.fwdFrom);
-
-  let content: ApiMessage['content'] = {};
-
-  if (mtpMessage.media) {
-    content = {
-      ...buildMessageMediaContent(mtpMessage.media),
-    };
-  }
-
-  if (mtpMessage.message && !content.sticker && !content.poll && !content.contact) {
-    content = {
-      ...content,
-      text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
-    };
-  }
-
+  const content = buildMessageContent(mtpMessage);
   const action = mtpMessage.action
     && buildAction(mtpMessage.action, fromId, peerId, Boolean(mtpMessage.post), isOutgoing);
   if (action) {
@@ -265,6 +237,27 @@ export function buildApiAvailableReaction(availableReaction: GramJs.AvailableRea
     title,
     isInactive: inactive,
   };
+}
+
+export function buildMessageContent(
+  mtpMessage: UniversalMessage | GramJs.UpdateServiceNotification,
+) {
+  let content: ApiMessage['content'] = {};
+
+  if (mtpMessage.media) {
+    content = {
+      ...buildMessageMediaContent(mtpMessage.media),
+    };
+  }
+
+  if (mtpMessage.message && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
+    content = {
+      ...content,
+      text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
+    };
+  }
+
+  return content;
 }
 
 export function buildMessageTextContent(
