@@ -102,7 +102,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 
     if (withChatType) {
       return (
-        <div className="status" dir="auto">{lang(getChatTypeString(chat))}</div>
+        <span className="status" dir="auto">{lang(getChatTypeString(chat))}</span>
       );
     }
 
@@ -111,11 +111,11 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     const onlineStatus = onlineCount ? `, ${lang('OnlineCount', onlineCount, 'i')}` : undefined;
 
     return (
-      <div className="status">
+      <span className="status">
         {handle && <span className="handle">{handle}</span>}
         <span className="group-status">{groupStatus}</span>
         {onlineStatus && <span className="online-status">{onlineStatus}</span>}
-      </div>
+      </span>
     );
   }
 
