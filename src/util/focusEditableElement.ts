@@ -1,6 +1,6 @@
 import { IS_TOUCH_ENV } from './environment';
 
-export default function focusEditableElement(element: HTMLElement, force?: boolean) {
+export default function focusEditableElement(element: HTMLElement, force?: boolean, forcePlaceCaretAtEnd?: boolean) {
   if (!force && element === document.activeElement) {
     return;
   }
@@ -9,12 +9,12 @@ export default function focusEditableElement(element: HTMLElement, force?: boole
   const range = document.createRange();
   const lastChild = element.lastChild || element;
 
-  if (!IS_TOUCH_ENV && (!lastChild || !lastChild.nodeValue)) {
+  if (!IS_TOUCH_ENV && !forcePlaceCaretAtEnd && (!lastChild || !lastChild.nodeValue)) {
     element.focus();
     return;
   }
 
-  range.selectNodeContents(lastChild);
+  range.selectNodeContents(forcePlaceCaretAtEnd ? element : lastChild);
   // `false` means collapse to the end rather than the start
   range.collapse(false);
   selection.removeAllRanges();

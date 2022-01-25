@@ -5,6 +5,7 @@ import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import { fixNonStandardEmoji, nativeToUnified } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
+import { compact } from '../../../util/iteratees';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
@@ -26,7 +27,7 @@ export default function renderText(
     return [part];
   }
 
-  return filters.reduce((text, filter) => {
+  return compact(filters.reduce((text, filter) => {
     switch (filter) {
       case 'escape_html':
         return escapeHtml(text);
@@ -63,7 +64,7 @@ export default function renderText(
     }
 
     return text;
-  }, [part] as TextPart[]);
+  }, [part] as TextPart[]));
 }
 
 function escapeHtml(textParts: TextPart[]): TextPart[] {
