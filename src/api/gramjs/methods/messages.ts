@@ -61,7 +61,7 @@ import {
 } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -1172,17 +1172,8 @@ function updateLocalDb(result: (
   GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages |
   GramJs.messages.DiscussionMessage | GramJs.messages.SponsoredMessages
 )) {
-  result.users.forEach((user) => {
-    if (user instanceof GramJs.User) {
-      localDb.users[buildApiPeerId(user.id, 'user')] = user;
-    }
-  });
-
-  result.chats.forEach((chat) => {
-    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-      localDb.chats[buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel')] = chat;
-    }
-  });
+  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesWithPhotosToLocalDb(result.chats);
 
   result.messages.forEach((message) => {
     if ((message instanceof GramJs.Message && isMessageWithMedia(message))
