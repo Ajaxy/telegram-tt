@@ -225,6 +225,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     addRecentEmoji,
     sendInlineBotResult,
     loadSendAs,
+    loadFullChat,
   } = getDispatch();
   const lang = useLang();
 
@@ -240,6 +241,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   ] = useState<GlobalState['messages']['contentToBeScheduled'] | undefined>();
   const { width: windowWidth } = windowSize.get();
   const sendAsIds = chat?.sendAsIds;
+  const canShowSendAs = sendAsIds && (sendAsIds.length > 1 || !sendAsIds.includes(currentUserId!));
   const sendMessageAction = useSendMessageAction(chatId, threadId);
 
   useEffect(() => {
@@ -257,6 +259,12 @@ const Composer: FC<OwnProps & StateProps> = ({
       loadSendAs({ chatId });
     }
   }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsIds]);
+
+  useEffect(() => {
+    if (chatId && chat && lastSyncTime && !chat.fullInfo && isReady && isChatSuperGroup(chat)) {
+      loadFullChat({ chatId });
+    }
+  }, [chat, chatId, isReady, lastSyncTime, loadFullChat]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
   useOnChange(([prevChatId, prevSendAsIds]) => {
@@ -920,7 +928,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               <i className="icon-bot-commands-filled" />
             </ResponsiveHoverButton>
           )}
-          {!!sendAsIds?.length && (sendAsUser || sendAsChat) && (
+          {canShowSendAs && (sendAsUser || sendAsChat) && (
             <Button
               round
               color="translucent"
@@ -1137,7 +1145,10 @@ export default memo(withGlobal<OwnProps>(
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
     const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
     const { currentUserId } = global;
-    const sendAsId = chat?.fullInfo ? chat?.fullInfo?.sendAsId || currentUserId : undefined;
+    const defaultSendAsId = chat?.fullInfo ? chat?.fullInfo?.sendAsId || currentUserId : undefined;
+    const sendAsId = chat?.sendAsIds && defaultSendAsId && chat.sendAsIds.includes(defaultSendAsId)
+      ? defaultSendAsId
+      : (chat?.adminRights?.anonymous ? chat?.id : undefined);
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
 
