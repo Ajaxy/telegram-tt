@@ -49,12 +49,6 @@
     @media (max-height: 640px) {
       max-height: calc(100vh - 10rem);
     }
-    @at-root .has-footer #{&} {
-      max-height: calc(100vh - 15rem);
-      @media (max-height: 640px) {
-        max-height: calc(100vh - 10rem);
-      }
-    }
   }
 
   .play-button {

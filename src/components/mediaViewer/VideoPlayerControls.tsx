@@ -1,6 +1,7 @@
 import React, {
   FC, useState, useEffect, useRef, useCallback,
 } from '../../lib/teact/teact';
+import buildClassName from '../../util/buildClassName';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
@@ -117,12 +118,13 @@ const VideoPlayerControls: FC<IProps> = ({
     });
   }, [isVisible, handleStartSeek, handleSeek, handleStopSeek]);
 
-  if (!isVisible && !isForceVisible) {
-    return undefined;
-  }
+  const isActive = isVisible || isForceVisible;
 
   return (
-    <div className={`VideoPlayerControls ${isForceMobileVersion ? 'mobile' : ''}`} onClick={stopEvent}>
+    <div
+      className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isActive && 'active')}
+      onClick={stopEvent}
+    >
       {renderSeekLine(currentTime, duration, bufferedProgress, seekerRef)}
       <Button
         ariaLabel={lang('AccActionPlay')}

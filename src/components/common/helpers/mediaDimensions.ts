@@ -3,7 +3,7 @@ import {
 } from '../../../api/types';
 
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import { getPhotoInlineDimensions, getVideoDimensions } from '../../../modules/helpers';
 
@@ -110,10 +110,9 @@ export function getMediaViewerAvailableDimensions(withFooter: boolean, isVideo: 
   const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
   const { width: windowWidth, height: windowHeight } = windowSize.get();
   let occupiedHeightRem = isVideo && mql.matches ? 10 : 8.25;
-  if (withFooter) {
-    occupiedHeightRem = mql.matches ? 10 : 15;
+  if (withFooter && !IS_TOUCH_ENV) {
+    occupiedHeightRem = mql.matches ? 10 : 12.5;
   }
-
   return {
     width: windowWidth,
     height: windowHeight - occupiedHeightRem * REM,
