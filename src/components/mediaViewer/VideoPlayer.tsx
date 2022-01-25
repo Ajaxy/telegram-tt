@@ -129,10 +129,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const toggleControls = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsControlsVisible(!isControlsVisible);
-    if (!isControlsVisible) {
-      videoRef.current!.pause();
-      setIsPlayed(false);
-    }
   }, [isControlsVisible]);
 
   useEffect(() => {
@@ -210,7 +206,7 @@ const VideoPlayer: FC<OwnProps> = ({
           isFullscreenSupported={Boolean(setFullscreen)}
           isFullscreen={isFullscreen}
           fileSize={fileSize}
-          duration={videoRef.current ? videoRef.current.duration : 0}
+          duration={videoRef.current ? videoRef.current.duration || 0 : 0}
           isForceVisible={isControlsVisible}
           isForceMobileVersion={posterSize && posterSize.width < MOBILE_VERSION_CONTROL_WIDTH}
           onSeek={handleSeek}

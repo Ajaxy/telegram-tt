@@ -11,6 +11,7 @@ import {
 } from '../../common/helpers/mediaDimensions';
 import windowSize from '../../../util/windowSize';
 import stopEvent from '../../../util/stopEvent';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 const ANIMATION_DURATION = 200;
 
@@ -287,8 +288,8 @@ function isMessageImageFullyVisible(container: HTMLElement, imageEl: HTMLElement
 function getTopOffset(hasFooter: boolean) {
   const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
   let topOffsetRem = 4.125;
-  if (hasFooter) {
-    topOffsetRem += mql.matches ? 0.875 : 3.375;
+  if (hasFooter && !IS_TOUCH_ENV) {
+    topOffsetRem += mql.matches ? 0.875 : 2.125;
   }
 
   return topOffsetRem * REM;

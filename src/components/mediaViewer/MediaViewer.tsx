@@ -121,12 +121,13 @@ const MediaViewer: FC<StateProps> = ({
   const isAvatar = Boolean(avatarOwner);
 
   /* Navigation */
-  const isSingleSlide = Boolean(webPagePhoto || webPageVideo);
+  const singleMessageId = webPagePhoto || webPageVideo ? messageId : undefined;
+
   const messageIds = useMemo(() => {
-    return isSingleSlide && messageId
-      ? [messageId]
+    return singleMessageId
+      ? [singleMessageId]
       : getChatMediaMessageIds(chatMessages || {}, collectionIds || [], isFromSharedMedia);
-  }, [isSingleSlide, messageId, chatMessages, collectionIds, isFromSharedMedia]);
+  }, [singleMessageId, chatMessages, collectionIds, isFromSharedMedia]);
 
   const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
@@ -513,6 +514,7 @@ const MediaViewer: FC<StateProps> = ({
                   hasFooter={hasFooter}
                   isZoomed={isZoomed}
                   isActive={isActive}
+                  isVideo={isVideo}
                   animationLevel={animationLevel}
                   onClose={close}
                   selectMessage={selectMessage}

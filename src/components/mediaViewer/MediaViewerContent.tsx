@@ -176,6 +176,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   if (!message) return undefined;
   const textParts = renderMessageText(message);
   const hasFooter = Boolean(textParts);
+
   return (
     <div
       className={`MediaViewerContent ${hasFooter ? 'has-footer' : ''}`}
@@ -192,23 +193,23 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           url={localBlobUrl || fullMediaBlobUrl}
           isGif={isGif}
           posterData={bestImageData}
-          posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
+          posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, false)}
           loadProgress={loadProgress}
           fileSize={videoSize!}
-          isMediaViewerOpen={isOpen}
+          isMediaViewerOpen={isOpen && isActive}
           noPlay={!isActive}
           onClose={onClose}
         />
       ) : renderVideoPreview(
         bestImageData,
-        message && calculateMediaViewerDimensions(dimensions!, hasFooter, true),
+        message && calculateMediaViewerDimensions(dimensions!, hasFooter, false),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
       ))}
       {textParts && (
         <MediaViewerFooter
           text={textParts}
           onClick={onFooterClick}
-          isHidden={isFooterHidden && (!isVideo || isGif)}
+          isHidden={isFooterHidden}
           isForVideo={isVideo && !isGif}
         />
       )}

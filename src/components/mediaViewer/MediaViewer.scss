@@ -27,7 +27,7 @@
   }
 
   body.ghost-animating & {
-    > .pan-wrapper, > .Transition, > button {
+    > .pan-wrapper, > button, .MediaViewerContent img, .MediaViewerContent .VideoPlayer {
       display: none;
     }
   }

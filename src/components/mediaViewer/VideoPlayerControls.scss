@@ -8,6 +8,9 @@
   padding-top: .625rem;
   font-size: .875rem;
   background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
+  transition: opacity .15s;
+  opacity: 0;
+  pointer-events: none;
 
   #MediaViewer.zoomed & {
     display: none;
@@ -18,6 +21,11 @@
     padding: 1.25rem .5rem .75rem;
     background: none;
     z-index: var(--z-media-viewer);
+  }
+
+  &.active {
+    opacity: 1;
+    pointer-events: all;
   }
 
   &.mobile {
