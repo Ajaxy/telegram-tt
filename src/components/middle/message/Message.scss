@@ -586,6 +586,10 @@
   }
 
   .message-content {
+    &.has-replies:not(.custom-shape):not(.has-reactions) .WebPage.with-video .media-inner {
+      margin-bottom: 1.5rem !important;
+    }
+
     &.has-replies:not(.custom-shape),
     &.text {
       .media-inner,
