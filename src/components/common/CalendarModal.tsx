@@ -130,6 +130,10 @@ const CalendarModal: FC<OwnProps> = ({
     buildCalendarGrid(currentYear, currentMonth)
   ), [currentMonth, currentYear]);
 
+  const submitLabel = useMemo(() => {
+    return submitButtonLabel || formatSubmitLabel(lang, selectedDate);
+  }, [lang, selectedDate, submitButtonLabel]);
+
   function handlePrevMonth() {
     setCurrentMonthAndYear((d) => {
       const dateCopy = new Date(d);
@@ -312,7 +316,7 @@ const CalendarModal: FC<OwnProps> = ({
 
       <div className="footer">
         <Button onClick={handleSubmit}>
-          {submitButtonLabel || formatSubmitLabel(lang, selectedDate)}
+          {submitLabel}
         </Button>
         {secondButtonLabel && (
           <Button onClick={onSecondButtonClick} isText>
