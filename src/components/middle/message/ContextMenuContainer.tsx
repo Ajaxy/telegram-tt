@@ -17,7 +17,7 @@ import {
   isActionMessage, isChatChannel,
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId,
 } from '../../../modules/helpers';
-import { SEEN_BY_MEMBERS_EXPIRE, SEEN_BY_MEMBERS_CHAT_MAX, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -409,6 +409,7 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const activeDownloads = selectActiveDownloadIds(global, message.chatId);
     const chat = selectChat(global, message.chatId);
+    const { seenByExpiresAt, seenByMaxChatMembers } = global.appConfig || {};
     const {
       noOptions,
       canReply,
@@ -429,12 +430,14 @@ export default memo(withGlobal<OwnProps>(
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
     const canShowSeenBy = Boolean(chat
+      && seenByMaxChatMembers
+      && seenByExpiresAt
       && isChatGroup(chat)
       && isOwnMessage(message)
       && !isScheduled
       && chat.membersCount
-      && chat.membersCount < SEEN_BY_MEMBERS_CHAT_MAX
-      && message.date > Date.now() / 1000 - SEEN_BY_MEMBERS_EXPIRE);
+      && chat.membersCount < seenByMaxChatMembers
+      && message.date > Date.now() / 1000 - seenByExpiresAt);
     const isPrivate = chat && isUserId(chat.id);
     const isAction = isActionMessage(message);
     const canShowReactionsCount = !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
