@@ -48,7 +48,7 @@ const DEBOUNCE_ACTIVE = 800;
 const MAX_ZOOM = 4;
 const MIN_ZOOM = 0.6;
 const DOUBLE_TAP_ZOOM = 3;
-const CLICK_X_THRESHOLD = 120;
+const CLICK_X_THRESHOLD = 40;
 let cancelAnimation: Function | undefined;
 
 type Transform = {
@@ -106,8 +106,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
   const handleToggleFooterVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!IS_TOUCH_ENV || !hasFooter || (!isPhoto && !isGif)) return;
-    if (e.clientX < CLICK_X_THRESHOLD) return;
-    if (e.clientX > window.innerWidth - CLICK_X_THRESHOLD) return;
+    if (e.pageX < CLICK_X_THRESHOLD) return;
+    if (e.pageX > window.innerWidth - CLICK_X_THRESHOLD) return;
     setIsFooterHidden(!isFooterHidden);
   }, [hasFooter, isFooterHidden, isGif, isPhoto]);
 
@@ -140,9 +140,9 @@ const MediaViewerSlides: FC<OwnProps> = ({
     const changeSlide = (e: MouseEvent) => {
       if (transformRef.current.scale !== 1) return false;
       let direction = 0;
-      if ((e as MouseEvent).clientX < CLICK_X_THRESHOLD) {
+      if (e.pageX < CLICK_X_THRESHOLD) {
         direction = -1;
-      } else if ((e as MouseEvent).clientX > window.innerWidth - CLICK_X_THRESHOLD) {
+      } else if (e.pageX > window.innerWidth - CLICK_X_THRESHOLD) {
         direction = 1;
       }
       const mId = getMessageId(activeMessageId, direction);
@@ -174,14 +174,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     return captureEvents(containerRef.current, {
       isNotPassive: true,
       excludedClosestSelector: '.VideoPlayerControls, .MediaViewerFooter',
-      onCapture: (event) => {
-        // Avoid conflicts with swipe-to-back gestures
-        if (event.type === 'touchstart' && IS_IOS) {
-          const x = (event as RealTouchEvent).touches[0].pageX;
-          if (x <= IOS_SCREEN_EDGE_THRESHOLD || x >= window.innerWidth - IOS_SCREEN_EDGE_THRESHOLD) {
-            event.preventDefault();
-          }
-        }
+      onCapture: () => {
         lastGestureTime = Date.now();
         if (arePropsShallowEqual(transformRef.current, { x: 0, y: 0, scale: 1 })) {
           if (!activeSlideRef.current) return;
@@ -195,6 +188,13 @@ const MediaViewerSlides: FC<OwnProps> = ({
         dragOffsetX,
         dragOffsetY,
       }) => {
+        // Avoid conflicts with swipe-to-back gestures
+        if (IS_IOS) {
+          const { pageX } = (captureEvent as RealTouchEvent).touches[0];
+          if (pageX <= IOS_SCREEN_EDGE_THRESHOLD || pageX >= window.innerWidth - IOS_SCREEN_EDGE_THRESHOLD) {
+            return;
+          }
+        }
         if (cancelAnimation) {
           cancelAnimation();
           cancelAnimation = undefined;
