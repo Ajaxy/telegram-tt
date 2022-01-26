@@ -117,7 +117,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     if (!IS_TOUCH_ENV || !containerRef.current || isZoomed || !activeMessageId) {
       return undefined;
     }
-    let lastTransform = { ...transformRef.current };
+    let lastTransform = { x: 0, y: 0, scale: 1 };
     const lastDragOffset = {
       x: 0,
       y: 0,
