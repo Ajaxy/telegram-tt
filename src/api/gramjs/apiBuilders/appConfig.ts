@@ -15,6 +15,8 @@ type GramJsAppConfig = {
   groupcall_video_participants_max: number;
   reactions_default: string;
   reactions_uniq_max: number;
+  chat_read_mark_size_threshold: number;
+  chat_read_mark_expire_period: number;
 };
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -42,5 +44,7 @@ export function buildApiConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
   return {
     emojiSounds: buildEmojiSounds(appConfig),
     defaultReaction: appConfig.reactions_default,
+    seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
+    seenByExpiresAt: appConfig.chat_read_mark_expire_period,
   };
 }

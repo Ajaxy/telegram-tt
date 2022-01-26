@@ -127,6 +127,8 @@ export interface ApiCountryCode extends ApiCountry {
 export interface ApiAppConfig {
   emojiSounds: Record<string, string>;
   defaultReaction: string;
+  seenByMaxChatMembers: number;
+  seenByExpiresAt: number;
 }
 
 export interface GramJsEmojiInteraction {
