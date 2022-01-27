@@ -294,6 +294,8 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
         length,
         userId: new GramJs.InputUser({ userId: BigInt(userId!), accessHash: user!.accessHash! }),
       });
+    case ApiMessageEntityTypes.Spoiler:
+      return new GramJs.MessageEntitySpoiler({ offset, length });
     default:
       return new GramJs.MessageEntityUnknown({ offset, length });
   }
