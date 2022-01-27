@@ -8,10 +8,14 @@ import { LoadMoreDirection } from '../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { unique } from '../../../util/iteratees';
-import { getMessageSummaryText, sortChatIds, filterUsersByName } from '../../../modules/helpers';
+import {
+  sortChatIds,
+  filterUsersByName,
+} from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import LeftSearchResultChat from './LeftSearchResultChat';
@@ -154,7 +158,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   }, [shouldShowMoreGlobal]);
 
   function renderFoundMessage(message: ApiMessage) {
-    const text = getMessageSummaryText(lang, message);
+    const text = renderMessageSummary(lang, message);
     const chat = chatsById[message.chatId];
 
     if (!text || !chat) {

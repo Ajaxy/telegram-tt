@@ -4,15 +4,64 @@ import { getDispatch } from '../../../lib/teact/teactn';
 
 import { ApiMessageEntity, ApiMessageEntityTypes, ApiMessage } from '../../../api/types';
 
-import { getMessageText } from '../../../modules/helpers';
-import renderText from './renderText';
+import {
+  getMessageSummaryText,
+  getMessageSummaryDescription,
+  getMessageSummaryEmoji,
+  getMessageText,
+  TRUNCATED_SUMMARY_LENGTH,
+} from '../../../modules/helpers';
+import renderText, { TextFilter } from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
+import Spoiler from '../spoiler/Spoiler';
+import { LangFn } from '../../../hooks/useLang';
 
 export type TextPart = string | Element;
 
-export function renderMessageText(message: ApiMessage, highlight?: string, shouldRenderHqEmoji?: boolean) {
+export function renderMessageSummary(
+  lang: LangFn,
+  message: ApiMessage,
+  noEmoji = false,
+  highlight?: string,
+  truncateLength = TRUNCATED_SUMMARY_LENGTH,
+  shouldAddEllipsis?: boolean,
+): TextPart[] {
+  const hasSpoilers = message.content.text?.entities?.some((l) => l.type === ApiMessageEntityTypes.Spoiler);
+  if (!hasSpoilers) {
+    let text = getMessageSummaryText(lang, message, noEmoji, truncateLength);
+    if (shouldAddEllipsis) {
+      text += '...';
+    }
+
+    if (highlight) {
+      return renderText(text, ['emoji', 'highlight'], {
+        highlight,
+      });
+    } else {
+      return renderText(text);
+    }
+  }
+
+  const text = renderMessageText(message, highlight, undefined, true, truncateLength);
+  const emoji = !noEmoji && getMessageSummaryEmoji(message);
+  const emojiWithSpace = emoji ? `${emoji} ` : '';
+  const description = getMessageSummaryDescription(lang, message, text);
+  return [
+    emojiWithSpace,
+    ...(Array.isArray(description) ? description : [description]),
+    shouldAddEllipsis && '...',
+  ].filter(Boolean);
+}
+
+export function renderMessageText(
+  message: ApiMessage,
+  highlight?: string,
+  shouldRenderHqEmoji?: boolean,
+  isSimple?: boolean,
+  truncateLength?: number,
+) {
   const formattedText = message.content.text;
 
   if (!formattedText || !formattedText.text) {
@@ -21,7 +70,15 @@ export function renderMessageText(message: ApiMessage, highlight?: string, shoul
   }
   const { text, entities } = formattedText;
 
-  return renderTextWithEntities(text, entities, highlight, shouldRenderHqEmoji);
+  return renderTextWithEntities(
+    truncateLength ? text.substr(0, truncateLength) : text,
+    entities,
+    highlight,
+    shouldRenderHqEmoji,
+    undefined,
+    message.id,
+    isSimple,
+  );
 }
 
 interface IOrganizedEntity {
@@ -102,9 +159,11 @@ export function renderTextWithEntities(
   highlight?: string,
   shouldRenderHqEmoji?: boolean,
   shouldRenderAsHtml?: boolean,
+  messageId?: number,
+  isSimple?: boolean,
 ) {
   if (!entities || !entities.length) {
-    return renderMessagePart(text, highlight, shouldRenderHqEmoji, shouldRenderAsHtml);
+    return renderMessagePart(text, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple);
   }
 
   const result: TextPart[] = [];
@@ -133,7 +192,7 @@ export function renderTextWithEntities(
       }
       if (textBefore) {
         renderResult.push(...renderMessagePart(
-          textBefore, highlight, shouldRenderHqEmoji, shouldRenderAsHtml,
+          textBefore, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -176,7 +235,7 @@ export function renderTextWithEntities(
     // Render the entity itself
     const newEntity = shouldRenderAsHtml
       ? processEntityAsHtml(entity, entityContent, nestedEntityContent)
-      : processEntity(entity, entityContent, nestedEntityContent);
+      : processEntity(entity, entityContent, nestedEntityContent, highlight, messageId, isSimple);
 
     if (Array.isArray(newEntity)) {
       renderResult.push(...newEntity);
@@ -193,7 +252,7 @@ export function renderTextWithEntities(
       }
       if (textAfter) {
         renderResult.push(...renderMessagePart(
-          textAfter, highlight, shouldRenderHqEmoji, shouldRenderAsHtml,
+          textAfter, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -226,19 +285,36 @@ function processEntity(
   entity: ApiMessageEntity,
   entityContent: TextPart,
   nestedEntityContent: TextPart[],
+  highlight?: string,
+  messageId?: number,
+  isSimple?: boolean,
 ) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
 
+  function renderNestedMessagePart() {
+    return renderMessagePart(
+      renderedContent, highlight, undefined, undefined, isSimple,
+    );
+  }
+
   if (!entityText) {
-    return renderMessagePart(renderedContent);
+    return renderNestedMessagePart();
+  }
+
+  if (isSimple) {
+    const text = renderNestedMessagePart();
+    if (entity.type === ApiMessageEntityTypes.Spoiler) {
+      return <Spoiler isInactive>{text}</Spoiler>;
+    }
+    return text;
   }
 
   switch (entity.type) {
     case ApiMessageEntityTypes.Bold:
-      return <strong>{renderMessagePart(renderedContent)}</strong>;
+      return <strong>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
-      return <blockquote>{renderMessagePart(renderedContent)}</blockquote>;
+      return <blockquote>{renderNestedMessagePart()}</blockquote>;
     case ApiMessageEntityTypes.BotCommand:
       return (
         <a
@@ -246,7 +322,7 @@ function processEntity(
           className="text-entity-link"
           dir="auto"
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Hashtag:
@@ -256,7 +332,7 @@ function processEntity(
           className="text-entity-link"
           dir="auto"
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Cashtag:
@@ -266,11 +342,11 @@ function processEntity(
           className="text-entity-link"
           dir="auto"
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Code:
-      return <code className="text-entity-code">{renderMessagePart(renderedContent)}</code>;
+      return <code className="text-entity-code">{renderNestedMessagePart()}</code>;
     case ApiMessageEntityTypes.Email:
       return (
         <a
@@ -280,21 +356,21 @@ function processEntity(
           className="text-entity-link"
           dir="auto"
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Italic:
-      return <em>{renderMessagePart(renderedContent)}</em>;
+      return <em>{renderNestedMessagePart()}</em>;
     case ApiMessageEntityTypes.MentionName:
       return (
         <MentionLink userId={entity.userId}>
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </MentionLink>
       );
     case ApiMessageEntityTypes.Mention:
       return (
         <MentionLink username={entityText}>
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </MentionLink>
       );
     case ApiMessageEntityTypes.Phone:
@@ -304,13 +380,13 @@ function processEntity(
           className="text-entity-link"
           dir="auto"
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Pre:
-      return <pre className="text-entity-pre">{renderMessagePart(renderedContent)}</pre>;
+      return <pre className="text-entity-pre">{renderNestedMessagePart()}</pre>;
     case ApiMessageEntityTypes.Strike:
-      return <del>{renderMessagePart(renderedContent)}</del>;
+      return <del>{renderNestedMessagePart()}</del>;
     case ApiMessageEntityTypes.TextUrl:
     case ApiMessageEntityTypes.Url:
       return (
@@ -318,13 +394,15 @@ function processEntity(
           url={getLinkUrl(entityText, entity)}
           text={entityText}
         >
-          {renderMessagePart(renderedContent)}
+          {renderNestedMessagePart()}
         </SafeLink>
       );
     case ApiMessageEntityTypes.Underline:
-      return <ins>{renderMessagePart(renderedContent)}</ins>;
+      return <ins>{renderNestedMessagePart()}</ins>;
+    case ApiMessageEntityTypes.Spoiler:
+      return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
     default:
-      return renderMessagePart(renderedContent);
+      return renderNestedMessagePart();
   }
 }
 
@@ -333,12 +411,13 @@ function renderMessagePart(
   highlight?: string,
   shouldRenderHqEmoji?: boolean,
   shouldRenderAsHtml?: boolean,
+  isSimple?: boolean,
 ) {
   if (Array.isArray(content)) {
     const result: TextPart[] = [];
 
     content.forEach((c) => {
-      result.push(...renderMessagePart(c, highlight, shouldRenderHqEmoji, shouldRenderAsHtml));
+      result.push(...renderMessagePart(c, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple));
     });
 
     return result;
@@ -350,10 +429,15 @@ function renderMessagePart(
 
   const emojiFilter = shouldRenderHqEmoji ? 'hq_emoji' : 'emoji';
 
+  const filters: TextFilter[] = [emojiFilter];
+  if (!isSimple) {
+    filters.push('br');
+  }
+
   if (highlight) {
-    return renderText(content, [emojiFilter, 'br', 'highlight'], { highlight });
+    return renderText(content, filters.concat('highlight'), { highlight });
   } else {
-    return renderText(content, [emojiFilter, 'br']);
+    return renderText(content, filters);
   }
 }
 

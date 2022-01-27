@@ -1,0 +1,31 @@
+.Spoiler {
+  transition: color 250ms ease;
+
+  &:not(.is-revealed) {
+    cursor: pointer;
+    color: transparent;
+    background-image: url('../../../assets/spoiler-dots-black.png');
+    background-size: auto 100%;
+    border-radius: 0.5rem;
+
+    &.animate {
+      animation: pulse-opacity-light 1.75s linear infinite;
+    }
+  }
+
+  html.theme-dark &:not(.is-revealed), html.theme-light .ListItem.selected &:not(.is-revealed) {
+    background-image: url('../../../assets/spoiler-dots-white.png');
+  }
+}
+
+@keyframes pulse-opacity-light {
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  75% {
+    opacity: 1;
+  }
+}

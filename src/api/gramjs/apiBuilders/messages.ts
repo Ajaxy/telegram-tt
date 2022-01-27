@@ -31,7 +31,6 @@ import {
 } from '../../types';
 
 import {
-  CONTENT_NOT_SUPPORTED,
   DELETED_COMMENTS_CHANNEL_ID,
   LOCAL_MESSAGE_ID_BASE,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -264,12 +263,6 @@ export function buildMessageTextContent(
   message: string,
   entities?: GramJs.TypeMessageEntity[],
 ): ApiFormattedText {
-  if (entities?.some((e) => e instanceof GramJs.MessageEntitySpoiler)) {
-    return {
-      text: CONTENT_NOT_SUPPORTED,
-    };
-  }
-
   return {
     text: message,
     ...(entities && { entities: entities.map(buildApiMessageEntity) }),

@@ -12,7 +12,6 @@ import {
   selectCurrentTextSearch,
 } from '../../modules/selectors';
 import {
-  getMessageSummaryText,
   getChatTitle,
   getUserFullName,
   isChatChannel,
@@ -23,6 +22,7 @@ import { orderBy } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { renderMessageSummary } from '../common/helpers/renderMessageText';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
@@ -109,7 +109,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     message, senderUser, senderChat, onClick,
   }: Result) => {
     const title = senderChat ? getChatTitle(lang, senderChat) : getUserFullName(senderUser);
-    const text = getMessageSummaryText(lang, message);
+    const text = renderMessageSummary(lang, message, undefined, query);
 
     return (
       <ListItem
@@ -123,7 +123,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
             <LastMessageMeta message={message} />
           </div>
           <div className="subtitle" dir="auto">
-            {renderText(text, ['emoji', 'highlight'], { highlight: query })}
+            {text}
           </div>
         </div>
       </ListItem>

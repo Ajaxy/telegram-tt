@@ -4,18 +4,17 @@ import {
 import { LangFn } from '../../hooks/useLang';
 
 import {
-  LOCAL_MESSAGE_ID_BASE,
-  SERVICE_NOTIFICATIONS_USER_ID,
-  RE_LINK_TEMPLATE,
   CONTENT_NOT_SUPPORTED,
+  LOCAL_MESSAGE_ID_BASE,
+  RE_LINK_TEMPLATE,
+  SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getUserFullName } from './users';
-import { isWebpSupported, IS_OPUS_SUPPORTED } from '../../util/environment';
+import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/environment';
 import { getChatTitle, isUserId } from './chats';
 import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
-const TRUNCATED_SUMMARY_LENGTH = 80;
 
 export type MessageKey = `msg${string}-${number}`;
 
@@ -37,60 +36,6 @@ export function parseMessageKey(key: MessageKey) {
 
 export function getMessageOriginalId(message: ApiMessage) {
   return message.previousLocalId || message.id;
-}
-
-export function getMessageSummaryText(lang: LangFn, message: ApiMessage, noEmoji = false) {
-  const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
-  } = message.content;
-
-  const truncatedText = text && text.text.substr(0, TRUNCATED_SUMMARY_LENGTH);
-
-  if (message.groupedId) {
-    return `${noEmoji ? '' : '🖼 '}${truncatedText || lang('lng_in_dlg_album')}`;
-  }
-
-  if (photo) {
-    return `${noEmoji ? '' : '🖼 '}${truncatedText || lang('AttachPhoto')}`;
-  }
-
-  if (video) {
-    return `${noEmoji ? '' : '📹 '}${truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo')}`;
-  }
-
-  if (sticker) {
-    return `${sticker.emoji || ''} ${lang('AttachSticker')}`.trim();
-  }
-
-  if (audio) {
-    return `${noEmoji ? '' : '🎧 '}${getMessageAudioCaption(message) || lang('AttachMusic')}`;
-  }
-
-  if (voice) {
-    return `${noEmoji ? '' : '🎤 '}${truncatedText || lang('AttachAudio')}`;
-  }
-
-  if (document) {
-    return `${noEmoji ? '' : '📎 '}${truncatedText || document.fileName}`;
-  }
-
-  if (contact) {
-    return lang('AttachContact');
-  }
-
-  if (poll) {
-    return `${noEmoji ? '' : '📊 '}${poll.summary.question}`;
-  }
-
-  if (invoice) {
-    return 'Invoice';
-  }
-
-  if (text) {
-    return truncatedText;
-  }
-
-  return CONTENT_NOT_SUPPORTED;
 }
 
 export function getMessageText(message: ApiMessage) {
@@ -228,12 +173,6 @@ export function isMessageLocal(message: ApiMessage) {
 
 export function isHistoryClearMessage(message: ApiMessage) {
   return message.content.action && message.content.action.type === 'historyClear';
-}
-
-export function getMessageAudioCaption(message: ApiMessage) {
-  const { audio, text } = message.content;
-
-  return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text?.text);
 }
 
 export function getMessageContentFilename(message: ApiMessage) {

@@ -12,7 +12,6 @@ import {
   getChatTitle,
   getPrivateChatUserId,
   getMessageMediaHash,
-  getMessageSummaryText,
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageRoundVideo,
@@ -23,6 +22,7 @@ import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useLang, { LangFn } from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -98,7 +98,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           <div className="message" dir="auto">
-            {renderMessageSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
+            {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
           </div>
         </div>
       </div>
@@ -106,18 +106,18 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderMessageSummary(
+function renderSummary(
   lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
 ) {
   if (!blobUrl) {
-    return renderText(getMessageSummaryText(lang, message));
+    return renderMessageSummary(lang, message, undefined, searchQuery);
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" className={isRoundVideo ? 'round' : undefined} />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderText(getMessageSummaryText(lang, message, true), ['emoji', 'highlight'], { highlight: searchQuery })}
+      {renderMessageSummary(lang, message, true, searchQuery)}
     </span>
   );
 }
