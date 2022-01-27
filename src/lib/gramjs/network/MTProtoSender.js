@@ -21,7 +21,7 @@ const BinaryReader = require('../extensions/BinaryReader');
 const {
     UpdateConnectionState,
     UpdateServerTimeOffset,
-} = require('./index');
+} = require('./updates');
 const { BadMessageError } = require('../errors/Common');
 const {
     BadServerSalt,
@@ -169,6 +169,8 @@ class MTProtoSender {
      * @returns {Promise<boolean>}
      */
     async connect(connection, force) {
+        this.userDisconnected = false;
+
         if (this._user_connected && !force) {
             this._log.info('User is already connected!');
             return false;
@@ -315,13 +317,15 @@ class MTProtoSender {
     async _disconnect() {
         this._send_queue.rejectAll();
 
+        if (this._updateCallback) {
+            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
+        }
+
         if (this._connection === undefined) {
             this._log.info('Not disconnecting (already have no connection)');
             return;
         }
-        if (this._updateCallback) {
-            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
-        }
+
         this._log.info('Disconnecting from %s...'.replace('%s', this._connection.toString()));
         this._user_connected = false;
         this._log.debug('Closing current connection...');
