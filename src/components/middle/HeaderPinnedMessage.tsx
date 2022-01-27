@@ -3,8 +3,7 @@ import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 import { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
-import { getMessageMediaHash, getMessageSummaryText } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
+import { getMessageMediaHash } from '../../modules/helpers';
 import useMedia from '../../hooks/useMedia';
 import useWebpThumbnail from '../../hooks/useWebpThumbnail';
 
@@ -14,6 +13,7 @@ import RippleEffect from '../ui/RippleEffect';
 import buildClassName from '../../util/buildClassName';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import { renderMessageSummary } from '../common/helpers/renderMessageText';
 
 import PinnedMessageNavigation from './PinnedMessageNavigation';
 
@@ -35,7 +35,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   const mediaThumbnail = useWebpThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 
-  const text = getMessageSummaryText(lang, message, Boolean(mediaThumbnail));
+  const text = renderMessageSummary(lang, message, Boolean(mediaThumbnail));
   const [isUnpinDialogOpen, openUnpinDialog, closeUnpinDialog] = useFlag();
 
   const handleUnpinMessage = useCallback(() => {
@@ -89,7 +89,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           <div className="title" dir="auto">
             {customTitle || `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
           </div>
-          <p dir="auto">{renderText(text)}</p>
+          <p dir="auto">{text}</p>
         </div>
 
         <RippleEffect />

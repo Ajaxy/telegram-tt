@@ -2,12 +2,16 @@ import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../api/types';
 
-import { getFirstLinkInMessage, getMessageSummaryText, getMessageWebPage } from '../../modules/helpers';
+import {
+  getFirstLinkInMessage, getMessageText,
+  getMessageWebPage,
+} from '../../modules/helpers';
 import buildClassName from '../../util/buildClassName';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 import { formatPastTimeShort } from '../../util/dateFormat';
 import useLang from '../../hooks/useLang';
+import { renderMessageSummary, TextPart } from './helpers/renderMessageText';
 
 import Media from './Media';
 import Link from '../ui/Link';
@@ -24,24 +28,27 @@ type OwnProps = {
   onMessageClick: (messageId: number, chatId: string) => void;
 };
 
+type ApiWebPageWithFormatted = ApiWebPage & { formattedDescription?: TextPart[] };
+
 const WebLink: FC<OwnProps> = ({
   message, senderTitle, isProtected, onMessageClick,
 }) => {
   const lang = useLang();
 
-  let linkData: ApiWebPage | undefined = getMessageWebPage(message);
+  let linkData: ApiWebPageWithFormatted | undefined = getMessageWebPage(message);
 
   if (!linkData) {
     const link = getFirstLinkInMessage(message);
     if (link) {
       const { url, domain } = link;
-      const messageText = getMessageSummaryText(lang, message);
 
       linkData = {
         siteName: domain.replace(/^www./, ''),
         url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
-        description: messageText !== url ? messageText : undefined,
-      } as ApiWebPage;
+        formattedDescription: getMessageText(message) !== url
+          ? renderMessageSummary(lang, message, undefined, undefined, MAX_TEXT_LENGTH, true)
+          : undefined,
+      } as ApiWebPageWithFormatted;
     }
   }
 
@@ -59,11 +66,12 @@ const WebLink: FC<OwnProps> = ({
     displayUrl,
     title,
     description,
+    formattedDescription,
     photo,
     video,
   } = linkData;
 
-  const truncatedDescription = !senderTitle && trimText(description, MAX_TEXT_LENGTH);
+  const truncatedDescription = !senderTitle && description && trimText(description, MAX_TEXT_LENGTH);
 
   const className = buildClassName(
     'WebLink scroll-item',
@@ -83,9 +91,9 @@ const WebLink: FC<OwnProps> = ({
         <Link isRtl={lang.isRtl} className="site-title" onClick={handleMessageClick}>
           {renderText(title || siteName || displayUrl)}
         </Link>
-        {truncatedDescription && (
+        {(truncatedDescription || formattedDescription) && (
           <Link isRtl={lang.isRtl} className="site-description" onClick={handleMessageClick}>
-            {renderText(truncatedDescription)}
+            {formattedDescription || (truncatedDescription && renderText(truncatedDescription))}
           </Link>
         )}
         <SafeLink

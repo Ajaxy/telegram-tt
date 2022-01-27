@@ -11,16 +11,17 @@ import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 
 type TextPart = string | Element;
+export type TextFilter = (
+  'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
+  'simple_markdown' | 'simple_markdown_html'
+);
 
 const RE_LETTER_OR_DIGIT = /^[\d\wа-яё]$/i;
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
 
 export default function renderText(
   part: TextPart,
-  filters: Array<(
-    'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
-    'simple_markdown' | 'simple_markdown_html'
-  )> = ['emoji'],
+  filters: Array<TextFilter> = ['emoji'],
   params?: { highlight: string | undefined },
 ): TextPart[] {
   if (typeof part !== 'string') {

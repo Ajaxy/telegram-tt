@@ -20,7 +20,6 @@ import {
   getMessageSenderName,
   isChatChannel,
   getMessageMediaHash,
-  getMessageSummaryText,
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageSticker,
@@ -40,6 +39,7 @@ import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useMedia from '../../../hooks/useMedia';
 import { ChatAnimationTypes } from './hooks';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -241,15 +241,14 @@ const Chat: FC<OwnProps & StateProps> = ({
 
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          {renderText(renderActionMessageText(
+          {renderActionMessageText(
             lang,
             lastMessage,
             actionOrigin,
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,
-            { asPlain: true },
-          ) as string)}
+          )}
         </p>
       );
     }
@@ -264,7 +263,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             <span className="colon">:</span>
           </>
         )}
-        {renderMessageSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        {renderSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
   }
@@ -333,16 +332,16 @@ const Chat: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderMessageSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
+function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
   if (!blobUrl) {
-    return renderText(getMessageSummaryText(lang, message));
+    return renderMessageSummary(lang, message);
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" className={isRoundVideo ? 'round' : undefined} />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderText(getMessageSummaryText(lang, message, true))}
+      {renderMessageSummary(lang, message, true)}
     </span>
   );
 }

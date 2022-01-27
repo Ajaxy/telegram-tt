@@ -14,7 +14,6 @@ import {
 } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import buildClassName from '../../util/buildClassName';
-import renderText from '../common/helpers/renderText';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -96,7 +95,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     targetUsers,
     targetMessage,
     targetChatId,
-    isEmbedded ? { isEmbedded: true, asPlain: true } : undefined,
+    isEmbedded ? { isEmbedded: true } : undefined,
   );
   const {
     isContextMenuOpen, contextMenuPosition,
@@ -111,7 +110,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   };
 
   if (isEmbedded) {
-    return <span className="embedded-action-message">{renderText(content as string)}</span>;
+    return <span className="embedded-action-message">{content}</span>;
   }
 
   const className = buildClassName(

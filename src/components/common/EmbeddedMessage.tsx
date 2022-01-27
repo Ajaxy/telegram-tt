@@ -5,7 +5,6 @@ import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
 import {
   getMessageMediaHash,
   isActionMessage,
-  getMessageSummaryText,
   getSenderTitle,
   getMessageRoundVideo,
 } from '../../modules/helpers';
@@ -16,6 +15,7 @@ import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserve
 import useMedia from '../../hooks/useMedia';
 import useWebpThumbnail from '../../hooks/useWebpThumbnail';
 import useLang from '../../hooks/useLang';
+import { renderMessageSummary } from './helpers/renderMessageText';
 
 import ActionMessage from '../middle/ActionMessage';
 
@@ -71,7 +71,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
           ) : isActionMessage(message) ? (
             <ActionMessage message={message} isEmbedded />
           ) : (
-            renderText(getMessageSummaryText(lang, message, Boolean(mediaThumbnail)))
+            renderMessageSummary(lang, message, Boolean(mediaThumbnail))
           )}
         </p>
         <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>

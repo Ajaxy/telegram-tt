@@ -6,10 +6,10 @@ import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { getMessageSummaryText } from '../../../modules/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import ChatMessage from './ChatMessage';
@@ -76,7 +76,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   }, [foundIds, globalMessagesByChatId]);
 
   function renderFoundMessage(message: ApiMessage) {
-    const text = getMessageSummaryText(lang, message);
+    const text = renderMessageSummary(lang, message);
     const chat = chatsById[message.chatId];
 
     if (!text || !chat) {

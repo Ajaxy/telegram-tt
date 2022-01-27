@@ -6,14 +6,13 @@ import {
 import { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
-  getMessageContent,
-  getMessageSummaryText,
+  getMessageContent, getMessageSummaryText,
   getUserFullName,
   isUserId,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { TextPart } from './renderMessageText';
+import { renderMessageSummary, TextPart } from './renderMessageText';
 import renderText from './renderText';
 
 import UserLink from '../UserLink';
@@ -132,44 +131,46 @@ function renderProductContent(message: ApiMessage) {
 }
 
 function renderMessageContent(lang: LangFn, message: ApiMessage, options: ActionMessageTextOptions = {}) {
-  const text = getMessageSummaryText(lang, message);
+  const { maxTextLength, isEmbedded, asPlain } = options;
+
+  const text = asPlain
+    ? [trimText(getMessageSummaryText(lang, message), maxTextLength)]
+    : renderMessageSummary(lang, message, undefined, undefined, maxTextLength, true);
   const {
     photo, video, document, sticker,
   } = getMessageContent(message);
 
-  const { maxTextLength, isEmbedded, asPlain } = options;
-
   const showQuotes = isEmbedded && text && !photo && !video && !document && !sticker;
-  let messageText = trimText(text as string, maxTextLength)!;
+  let messageText = text;
 
   if (isEmbedded) {
     if (photo) {
-      messageText = 'a photo';
+      messageText = ['a photo'];
     } else if (video) {
-      messageText = video.isGif ? 'a GIF' : 'a video';
+      messageText = [video.isGif ? 'a GIF' : 'a video'];
     } else if (document) {
-      messageText = 'a document';
+      messageText = ['a document'];
     } else if (sticker) {
       messageText = text;
     }
   }
 
-  if (asPlain) {
-    return showQuotes ? `«${messageText}»` : messageText;
+  if (asPlain && messageText) {
+    return (showQuotes ? ['«', ...messageText, '»'] : messageText).join('');
   }
 
   if (showQuotes) {
     return (
       <span>
         &laquo;
-        <MessageLink className="action-link" message={message}>{renderText(messageText)}</MessageLink>
+        <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
         &raquo;
       </span>
     );
   }
 
   return (
-    <MessageLink className="action-link" message={message}>{renderText(messageText)}</MessageLink>
+    <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
   );
 }
 

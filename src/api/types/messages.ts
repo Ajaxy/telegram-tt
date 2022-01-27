@@ -213,6 +213,7 @@ export enum ApiMessageEntityTypes {
   TextUrl = 'MessageEntityTextUrl',
   Url = 'MessageEntityUrl',
   Underline = 'MessageEntityUnderline',
+  Spoiler = 'MessageEntitySpoiler',
   Unknown = 'MessageEntityUnknown',
 }
 
