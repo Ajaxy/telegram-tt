@@ -96,6 +96,10 @@ function parseMarkdown(html: string) {
     /(^|\s)(?!<code[^<]*|<\/)[~]{2}([^~\n]+)[~]{2}(?![^<]*<\/code>)(\s|$)/g,
     '$1<s>$2</s>$3',
   );
+  parsedHtml = parsedHtml.replace(
+    /(^|\s)(?!<code[^<]*|<\/)[|]{2}([^|\n]+)[|]{2}(?![^<]*<\/code>)(\s|$)/g,
+    `$1<span data-entity-type="${ApiMessageEntityTypes.Spoiler}">$2</span>$3`,
+  );
 
   return parsedHtml;
 }

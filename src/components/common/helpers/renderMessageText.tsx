@@ -499,6 +499,8 @@ function processEntityAsHtml(
         data-entity-type="${entity.type}"
         dir="auto"
       >${renderedContent}</a>`;
+    case ApiMessageEntityTypes.Spoiler:
+      return `||${renderedContent}||`;
     default:
       return renderedContent;
   }

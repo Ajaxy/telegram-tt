@@ -253,6 +253,12 @@ const TextFormatter: FC<OwnProps> = ({
     selectedRange, selectedTextFormats.strikethrough,
   ]);
 
+  const handleSpoilerText = useCallback(() => {
+    const text = getSelectedText();
+    document.execCommand('insertHTML', false, `||${text}||`);
+    onClose();
+  }, [getSelectedText, onClose]);
+
   const handleMonospaceText = useCallback(() => {
     if (selectedTextFormats.monospace) {
       const element = getSelectedElement();
@@ -314,6 +320,7 @@ const TextFormatter: FC<OwnProps> = ({
       i: handleItalicText,
       m: handleMonospaceText,
       s: handleStrikethroughText,
+      p: handleSpoilerText,
     };
 
     const handler = HANDLERS_BY_KEY[getKeyFromEvent(e)];
@@ -330,9 +337,8 @@ const TextFormatter: FC<OwnProps> = ({
     e.stopPropagation();
     handler();
   }, [
-    handleBoldText, handleItalicText, handleUnderlineText,
-    handleMonospaceText, handleStrikethroughText,
-    openLinkControl,
+    openLinkControl, handleBoldText, handleUnderlineText, handleItalicText, handleMonospaceText,
+    handleStrikethroughText, handleSpoilerText,
   ]);
 
   useEffect(() => {
@@ -380,6 +386,13 @@ const TextFormatter: FC<OwnProps> = ({
       onKeyDown={handleContainerKeyDown}
     >
       <div className="TextFormatter-buttons">
+        <Button
+          color="translucent"
+          ariaLabel="Spoiler text"
+          onClick={handleSpoilerText}
+        >
+          <i className="icon-eye-closed" />
+        </Button>
         <Button
           color="translucent"
           ariaLabel="Bold text"
