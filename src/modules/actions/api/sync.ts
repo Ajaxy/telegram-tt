@@ -47,13 +47,27 @@ addReducer('afterSync', () => {
   void afterSync();
 });
 
+const RELEASE_STATUS_TIMEOUT = 15000; // 10 sec;
+
+let releaseStatusTimeout: number | undefined;
+
 async function sync(afterSyncCallback: () => void) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START SYNC');
   }
 
+  if (releaseStatusTimeout) {
+    clearTimeout(releaseStatusTimeout);
+  }
+
   setGlobal({ ...getGlobal(), isSyncing: true });
+
+  // Workaround for `isSyncing = true` sometimes getting stuck for some reason
+  releaseStatusTimeout = window.setTimeout(() => {
+    setGlobal({ ...getGlobal(), isSyncing: false });
+    releaseStatusTimeout = undefined;
+  }, RELEASE_STATUS_TIMEOUT);
 
   await callApi('fetchCurrentUser');
 

@@ -11,8 +11,11 @@ const {
     constructors,
     requests,
 } = require('../tl');
-const MTProtoSender = require('../network/MTProtoSender');
-const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated');
+const {
+    ConnectionTCPObfuscated,
+    MTProtoSender,
+    UpdateConnectionState,
+} = require('../network');
 const {
     authFlow,
     checkAuthorization,
@@ -33,6 +36,14 @@ const PING_INTERVAL = 3000; // 3 sec
 const PING_TIMEOUT = 5000; // 5 sec
 const PING_FAIL_ATTEMPTS = 3;
 const PING_FAIL_INTERVAL = 100; // ms
+
+// An unusually long interval is a sign of returning from background mode...
+const PING_INTERVAL_TO_WAKE_UP = 5000; // 5 sec
+// ... so we send a quick "wake-up" ping to confirm than connection was dropped ASAP
+const PING_WAKE_UP_TIMEOUT = 3000; // 3 sec
+// We also send a warning to the user even a bit more quickly
+const PING_WAKE_UP_WARNING_TIMEOUT = 1000; // 1 sec
+
 const PING_DISCONNECT_DELAY = 60000; // 1 min
 
 // All types
@@ -215,22 +226,50 @@ class TelegramClient {
     }
 
     async _updateLoop() {
+        let lastPongAt;
+
         while (!this._destroyed) {
             await Helpers.sleep(PING_INTERVAL);
             if (this._sender.isReconnecting || this._isSwitchingDc) {
+                lastPongAt = undefined;
                 continue;
             }
 
             try {
-                await attempts(() => {
-                    return timeout(this._sender.send(new requests.PingDelayDisconnect({
+                const ping = () => {
+                    return this._sender.send(new requests.PingDelayDisconnect({
                         pingId: Helpers.getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
                         disconnectDelay: PING_DISCONNECT_DELAY,
-                    })), PING_TIMEOUT);
-                }, PING_FAIL_ATTEMPTS, PING_FAIL_INTERVAL);
+                    }));
+                };
+
+                const pingAt = Date.now();
+                const lastInterval = lastPongAt ? pingAt - lastPongAt : undefined;
+
+                if (!lastInterval || lastInterval < PING_INTERVAL_TO_WAKE_UP) {
+                    await attempts(() => timeout(ping, PING_TIMEOUT), PING_FAIL_ATTEMPTS, PING_FAIL_INTERVAL);
+                } else {
+                    let wakeUpWarningTimeout = setTimeout(() => {
+                        this._handleUpdate(new UpdateConnectionState(UpdateConnectionState.disconnected));
+                        wakeUpWarningTimeout = undefined;
+                    }, PING_WAKE_UP_WARNING_TIMEOUT);
+
+                    await timeout(ping, PING_WAKE_UP_TIMEOUT);
+
+                    if (wakeUpWarningTimeout) {
+                        clearTimeout(wakeUpWarningTimeout);
+                        wakeUpWarningTimeout = undefined;
+                    }
+
+                    this._handleUpdate(new UpdateConnectionState(UpdateConnectionState.connected));
+                }
+
+                lastPongAt = Date.now();
             } catch (err) {
                 // eslint-disable-next-line no-console
                 console.warn(err);
+
+                lastPongAt = undefined;
 
                 if (this._sender.isReconnecting || this._isSwitchingDc) {
                     continue;
@@ -251,6 +290,8 @@ class TelegramClient {
                 } catch (e) {
                     // we don't care about errors here
                 }
+
+                lastPongAt = undefined;
             }
         }
         await this.disconnect();
@@ -1052,9 +1093,9 @@ class TelegramClient {
     }
 }
 
-function timeout(promise, ms) {
+function timeout(cb, ms) {
     return Promise.race([
-        promise,
+        cb(),
         Helpers.sleep(ms)
             .then(() => Promise.reject(new Error('TIMEOUT'))),
     ]);

@@ -93,7 +93,9 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
       });
     } catch (err) {
-      // TODO Investigate which request causes this exception
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       if (err.message !== 'Disconnect') {
         onUpdate({
           '@type': 'updateConnectionState',
