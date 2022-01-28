@@ -3,7 +3,7 @@ import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
-import buildClassName from '../../../util/buildClassName';
+import { createClassNameBuilder } from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
 
 import './Spoiler.scss';
@@ -14,6 +14,8 @@ type OwnProps = {
 };
 
 const spoilersByMessageId: Map<number, VoidFunction[]> = new Map();
+
+const buildClassName = createClassNameBuilder('Spoiler');
 
 const Spoiler: FC<OwnProps> = ({
   children,
@@ -47,13 +49,13 @@ const Spoiler: FC<OwnProps> = ({
   return (
     <span
       className={buildClassName(
-        'Spoiler',
+        '&',
         !isRevealed && 'concealed',
         !isRevealed && Boolean(messageId) && 'animated',
       )}
       onClick={messageId && !isRevealed ? handleClick : undefined}
     >
-      <span>
+      <span className={buildClassName('content')}>
         {children}
       </span>
     </span>
