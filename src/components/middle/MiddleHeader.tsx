@@ -1,7 +1,7 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 import cycleRestrict from '../../util/cycleRestrict';
 
 import { GlobalState, MessageListType } from '../../global/types';
@@ -26,7 +26,6 @@ import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
-  selectCountNotMutedUnread,
   selectForwardedSender,
   selectIsChatWithBot,
   selectIsChatWithSelf,
@@ -41,7 +40,6 @@ import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
 import useShowTransition from '../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
@@ -54,6 +52,7 @@ import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 import AudioPlayer from './AudioPlayer';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
+import UnreadCount from './UnreadCount';
 
 import './MiddleHeader.scss';
 
@@ -221,14 +220,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive,
   ]);
 
-  const unreadCount = useMemo(() => {
-    if (!isLeftColumnHideable) {
-      return undefined;
-    }
-
-    return selectCountNotMutedUnread(getGlobal()) || undefined;
-  }, [isLeftColumnHideable]);
-
   const canToolsCollideWithChatInfo = (
     windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
     && windowWidth < SAFE_SCREEN_WIDTH_FOR_CHAT_INFO
@@ -367,11 +358,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         >
           <div className={buildClassName('animated-close-icon', !asClose && 'state-back')} />
         </Button>
-        {withUnreadCount && unreadCount && (
-          <div className="unread-count active">
-            {formatIntegerCompact(unreadCount)}
-          </div>
-        )}
+        {withUnreadCount && <UnreadCount />}
       </div>
     );
   }

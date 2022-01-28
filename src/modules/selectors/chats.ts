@@ -9,6 +9,7 @@ import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { selectNotifyExceptions, selectNotifySettings } from './settings';
+import memoized from '../../util/memoized';
 
 export function selectChat(global: GlobalState, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -153,19 +154,14 @@ export function selectChatByUsername(global: GlobalState, username: string) {
   );
 }
 
-// Slow, not to be used in `withGlobal`
-export function selectCountNotMutedUnread(global: GlobalState) {
-  const activeChatIds = global.chats.listIds.active;
-  if (!activeChatIds) {
-    return 0;
-  }
-
-  const chats = global.chats.byId;
-  const notifySettings = selectNotifySettings(global);
-  const notifyExceptions = selectNotifyExceptions(global);
-
-  return activeChatIds.reduce((acc, chatId) => {
-    const chat = chats[chatId];
+const selectCountNotMutedUnreadMemo = memoized((
+  activeChatIds: GlobalState['chats']['listIds']['active'],
+  chatsById: GlobalState['chats']['byId'],
+  notifySettings: GlobalState['settings']['byKey'],
+  notifyExceptions: GlobalState['settings']['notifyExceptions'],
+) => {
+  return activeChatIds?.reduce((acc, chatId) => {
+    const chat = chatsById[chatId];
 
     if (
       chat
@@ -179,7 +175,17 @@ export function selectCountNotMutedUnread(global: GlobalState) {
     }
 
     return acc;
-  }, 0);
+  }, 0) || 0;
+});
+
+// Still slow but at least memoized
+export function selectCountNotMutedUnreadOptimized(global: GlobalState) {
+  return selectCountNotMutedUnreadMemo(
+    global.chats.listIds.active,
+    global.chats.byId,
+    selectNotifySettings(global),
+    selectNotifyExceptions(global),
+  );
 }
 
 export function selectIsServiceChatReady(global: GlobalState) {
