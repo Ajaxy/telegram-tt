@@ -399,6 +399,18 @@
     }
   }
 
+  .spoiler {
+    background-image: url('../../../assets/spoiler-dots-black.png');
+    background-size: auto min(100%, 1.125rem);
+    border-radius: 0.5rem;
+    padding: 0 0.3125rem 0.125rem 0.3125rem;
+    text-shadow: -2px -2px 0 var(--color-background), 2px -2px 0 var(--color-background), -2px 2px 0 var(--color-background), 2px 2px 0 var(--color-background);
+  }
+
+  html.theme-dark & .spoiler {
+    background-image: url('../../../assets/spoiler-dots-white.png');
+  }
+
   .clone {
     position: absolute;
     top: 0;

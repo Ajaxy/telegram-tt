@@ -3,6 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { IAnchorPosition } from '../../../types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
@@ -32,6 +33,7 @@ interface ISelectedTextFormats {
   underline?: boolean;
   strikethrough?: boolean;
   monospace?: boolean;
+  spoiler?: boolean;
 }
 
 const TEXT_FORMAT_BY_TAG_NAME: Record<string, keyof ISelectedTextFormats> = {
@@ -42,6 +44,7 @@ const TEXT_FORMAT_BY_TAG_NAME: Record<string, keyof ISelectedTextFormats> = {
   U: 'underline',
   DEL: 'strikethrough',
   CODE: 'monospace',
+  SPAN: 'spoiler',
 };
 const fragmentEl = document.createElement('div');
 
@@ -188,6 +191,34 @@ const TextFormatter: FC<OwnProps> = ({
     return undefined;
   }
 
+  const handleSpoilerText = useCallback(() => {
+    if (selectedTextFormats.spoiler) {
+      const element = getSelectedElement();
+      if (
+        !selectedRange
+        || !element
+        || element.dataset.entityType !== ApiMessageEntityTypes.Spoiler
+        || !element.textContent
+      ) {
+        return;
+      }
+
+      element.replaceWith(element.textContent);
+      setSelectedTextFormats((selectedFormats) => ({
+        ...selectedFormats,
+        spoiler: false,
+      }));
+
+      return;
+    }
+
+    const text = getSelectedText();
+    document.execCommand(
+      'insertHTML', false, `<span class="spoiler" data-entity-type="${ApiMessageEntityTypes.Spoiler}">${text}</span>`,
+    );
+    onClose();
+  }, [getSelectedElement, getSelectedText, onClose, selectedRange, selectedTextFormats.spoiler]);
+
   const handleBoldText = useCallback(() => {
     setSelectedTextFormats((selectedFormats) => {
       // Somehow re-applying 'bold' command to already bold text doesn't work
@@ -249,15 +280,8 @@ const TextFormatter: FC<OwnProps> = ({
     document.execCommand('insertHTML', false, `<del>${text}</del>`);
     onClose();
   }, [
-    getSelectedElement, getSelectedText, onClose,
-    selectedRange, selectedTextFormats.strikethrough,
+    getSelectedElement, getSelectedText, onClose, selectedRange, selectedTextFormats.strikethrough,
   ]);
-
-  const handleSpoilerText = useCallback(() => {
-    const text = getSelectedText();
-    document.execCommand('insertHTML', false, `||${text}||`);
-    onClose();
-  }, [getSelectedText, onClose]);
 
   const handleMonospaceText = useCallback(() => {
     if (selectedTextFormats.monospace) {
@@ -276,6 +300,7 @@ const TextFormatter: FC<OwnProps> = ({
         ...selectedFormats,
         monospace: false,
       }));
+
       return;
     }
 
@@ -283,8 +308,7 @@ const TextFormatter: FC<OwnProps> = ({
     document.execCommand('insertHTML', false, `<code class="text-entity-code" dir="auto">${text}</code>`);
     onClose();
   }, [
-    getSelectedElement, getSelectedText, onClose,
-    selectedRange, selectedTextFormats.monospace,
+    getSelectedElement, getSelectedText, onClose, selectedRange, selectedTextFormats.monospace,
   ]);
 
   function handleLinkUrlConfirm() {
@@ -299,6 +323,7 @@ const TextFormatter: FC<OwnProps> = ({
       (element as HTMLAnchorElement).href = formattedLinkUrl;
 
       onClose();
+
       return;
     }
 
@@ -389,10 +414,12 @@ const TextFormatter: FC<OwnProps> = ({
         <Button
           color="translucent"
           ariaLabel="Spoiler text"
+          className={getFormatButtonClassName('spoiler')}
           onClick={handleSpoilerText}
         >
           <i className="icon-eye-closed" />
         </Button>
+        <div className="TextFormatter-divider" />
         <Button
           color="translucent"
           ariaLabel="Bold text"
