@@ -198,24 +198,13 @@ const Management: FC<OwnProps & StateProps> = ({
         />
       );
 
+    case ManagementScreens.ChatNewAdminRights:
     case ManagementScreens.ChatAdminRights:
       return (
         <ManageGroupAdminRights
           chatId={chatId}
-          selectedChatMemberId={selectedChatMemberId}
-          isPromotedByCurrentUser={isPromotedByCurrentUser}
-          onScreenSelect={onScreenSelect}
-          isActive={isActive}
-          onClose={onClose}
-        />
-      );
-
-    case ManagementScreens.ChatNewAdminRights:
-      return (
-        <ManageGroupAdminRights
-          chatId={chatId}
-          isNewAdmin
-          selectedChatMemberId={selectedChatMemberId}
+          isNewAdmin={currentScreen === ManagementScreens.ChatNewAdminRights}
+          selectedUserId={selectedChatMemberId}
           isPromotedByCurrentUser={isPromotedByCurrentUser}
           onScreenSelect={onScreenSelect}
           isActive={isActive}
