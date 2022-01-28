@@ -158,6 +158,31 @@
       }
     }
   }
+
+  &__filter {
+    padding: 0 1rem 0.25rem 0.75rem;
+    border-bottom: 1px solid var(--color-borders);
+    display: flex;
+    flex-flow: row wrap;
+    flex-shrink: 0;
+
+    overflow-y: auto;
+    max-height: 20rem;
+
+    .input-group {
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .form-control {
+      height: 2rem;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+  }
 }
 
 .ManageGroupMembers {

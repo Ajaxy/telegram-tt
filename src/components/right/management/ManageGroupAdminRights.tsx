@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiChatAdminRights, ApiUser } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -22,7 +22,7 @@ import InputText from '../../ui/InputText';
 
 type OwnProps = {
   chatId: string;
-  selectedChatMemberId?: string;
+  selectedUserId?: string;
   isPromotedByCurrentUser?: boolean;
   isNewAdmin?: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
@@ -43,7 +43,7 @@ const CUSTOM_TITLE_MAX_LENGTH = 16;
 
 const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   isNewAdmin,
-  selectedChatMemberId,
+  selectedUserId,
   defaultRights,
   onScreenSelect,
   chat,
@@ -66,28 +66,38 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   useHistoryBack(isActive, onClose);
 
   const selectedChatMember = useMemo(() => {
-    const selectedAdminMember = chat.fullInfo?.adminMembers?.find(({ userId }) => userId === selectedChatMemberId);
+    const selectedAdminMember = chat.fullInfo?.adminMembers?.find(({ userId }) => userId === selectedUserId);
+
+    // If `selectedAdminMember` variable is filled with a value, then we have already saved the administrator,
+    // so now we need to return to the list of administrators
+    if (isNewAdmin && (selectedAdminMember || !selectedUserId)) {
+      return undefined;
+    }
 
     if (isNewAdmin) {
-      // If selectedAdminMember is fullfilled, it means that we are editing an existing admin (after a user
-      // has been promoted as admin)
-      return selectedAdminMember
-        ? undefined
-        : chat.fullInfo?.members?.find(({ userId }) => userId === selectedChatMemberId);
+      const user = getGlobal().users.byId[selectedUserId!];
+
+      return user ? {
+        userId: user.id,
+        adminRights: defaultRights,
+        customTitle: lang('ChannelAdmin'),
+        isOwner: false,
+        promotedByUserId: undefined,
+      } : undefined;
     }
 
     return selectedAdminMember;
-  }, [chat.fullInfo, isNewAdmin, selectedChatMemberId]);
+  }, [chat.fullInfo?.adminMembers, defaultRights, isNewAdmin, lang, selectedUserId]);
 
   useEffect(() => {
-    if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
+    if (chat?.fullInfo && selectedUserId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.ChatAdministrators);
     }
-  }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
+  }, [chat, onScreenSelect, selectedChatMember, selectedUserId]);
 
   useEffect(() => {
-    setPermissions((isNewAdmin ? defaultRights : selectedChatMember?.adminRights) || {});
-    setCustomTitle(((isNewAdmin ? 'admin' : selectedChatMember?.customTitle) || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
+    setPermissions(selectedChatMember?.adminRights || {});
+    setCustomTitle((selectedChatMember?.customTitle || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
     setIsTouched(Boolean(isNewAdmin));
     setIsLoading(false);
   }, [defaultRights, isNewAdmin, selectedChatMember]);
@@ -107,31 +117,31 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleSavePermissions = useCallback(() => {
-    if (!selectedChatMemberId) {
+    if (!selectedUserId) {
       return;
     }
 
     setIsLoading(true);
     updateChatAdmin({
       chatId: chat.id,
-      userId: selectedChatMemberId,
+      userId: selectedUserId,
       adminRights: permissions,
       customTitle,
     });
-  }, [selectedChatMemberId, updateChatAdmin, chat.id, permissions, customTitle]);
+  }, [selectedUserId, updateChatAdmin, chat.id, permissions, customTitle]);
 
   const handleDismissAdmin = useCallback(() => {
-    if (!selectedChatMemberId) {
+    if (!selectedUserId) {
       return;
     }
 
     updateChatAdmin({
       chatId: chat.id,
-      userId: selectedChatMemberId,
+      userId: selectedUserId,
       adminRights: {},
     });
     closeDismissConfirmationDialog();
-  }, [chat.id, closeDismissConfirmationDialog, selectedChatMemberId, updateChatAdmin]);
+  }, [chat.id, closeDismissConfirmationDialog, selectedUserId, updateChatAdmin]);
 
   const getControlIsDisabled = useCallback((key: keyof ApiChatAdminRights) => {
     if (isChatBasicGroup(chat)) {
@@ -317,7 +327,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           )}
 
-          {currentUserId !== selectedChatMemberId && !isFormFullyDisabled && !isNewAdmin && (
+          {currentUserId !== selectedUserId && !isFormFullyDisabled && !isNewAdmin && (
             <ListItem icon="delete" ripple destructive onClick={openDismissConfirmationDialog}>
               {lang('EditAdminRemoveAdmin')}
             </ListItem>
