@@ -8,7 +8,6 @@ import {
   getChatTitle,
   getMessageContent, getMessageSummaryText,
   getUserFullName,
-  isUserId,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -31,7 +30,8 @@ const NBSP = '\u00A0';
 export function renderActionMessageText(
   lang: LangFn,
   message: ApiMessage,
-  actionOrigin?: ApiUser | ApiChat,
+  actionOriginUser?: ApiUser,
+  actionOriginChat?: ApiChat,
   targetUsers?: ApiUser[],
   targetMessage?: ApiMessage,
   targetChatId?: string,
@@ -65,9 +65,12 @@ export function renderActionMessageText(
   processed = processPlaceholder(
     unprocessed,
     '%action_origin%',
-    actionOrigin
-      ? (!options.isEmbedded && renderOriginContent(lang, actionOrigin, options.asPlain)) || NBSP
-      : 'User',
+    actionOriginUser ? (
+      (!options.isEmbedded && renderUserContent(actionOriginUser, options.asPlain)) || NBSP
+
+    ) : actionOriginChat ? (
+      (!options.isEmbedded && renderChatContent(lang, actionOriginChat, options.asPlain)) || NBSP
+    ) : 'User',
   );
 
   unprocessed = processed.pop() as string;
@@ -172,12 +175,6 @@ function renderMessageContent(lang: LangFn, message: ApiMessage, options: Action
   return (
     <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
   );
-}
-
-function renderOriginContent(lang: LangFn, origin: ApiUser | ApiChat, asPlain?: boolean) {
-  return isUserId(origin.id)
-    ? renderUserContent(origin as ApiUser, asPlain)
-    : renderChatContent(lang, origin as ApiChat, asPlain);
 }
 
 function renderGroupCallContent(groupCall: Partial<ApiGroupCall>, text: TextPart[]): string | TextPart | undefined {

@@ -235,16 +235,15 @@ const Chat: FC<OwnProps & StateProps> = ({
     }
 
     if (isAction) {
-      const actionOrigin = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId)
-        ? chat
-        : lastMessageSender;
+      const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
 
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
             lang,
             lastMessage,
-            actionOrigin,
+            !isChat ? lastMessageSender : undefined,
+            isChat ? chat : undefined,
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,

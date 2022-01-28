@@ -277,13 +277,13 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
   let body: string;
   if (selectShouldShowMessagePreview(chat, selectNotifySettings(global), selectNotifyExceptions(global))) {
     if (isActionMessage(message)) {
-      const actionOrigin = chat && (isChatChannel(chat) || message.senderId === message.chatId)
-        ? chat
-        : messageSender;
+      const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
+
       body = renderActionMessageText(
         getTranslation,
         message,
-        actionOrigin,
+        !isChat ? messageSender : undefined,
+        isChat ? chat : undefined,
         actionTargetUsers,
         actionTargetMessage,
         actionTargetChatId,
