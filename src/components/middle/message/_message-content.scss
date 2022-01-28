@@ -55,6 +55,7 @@
   .text-content {
     margin: 0;
     word-break: break-word;
+    white-space: pre-wrap;
     line-height: 1.3125;
     text-align: initial;
     display: flow-root;
