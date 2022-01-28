@@ -47,6 +47,8 @@
 
     &.chosen {
       border-color: var(--accent-color);
+      position: relative;
+      z-index: 1;
     }
 
     &:hover {

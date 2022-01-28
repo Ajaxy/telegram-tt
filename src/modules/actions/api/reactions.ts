@@ -63,7 +63,7 @@ addReducer('sendEmojiInteraction', (global, actions, payload) => {
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || (!emoji && !localEffect)) {
+  if (!chat || (!emoji && !localEffect) || chatId === global.currentUserId) {
     return undefined;
   }
 
@@ -255,7 +255,7 @@ addReducer('sendWatchingEmojiInteraction', (global, actions, payload) => {
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || !global.activeEmojiInteraction) {
+  if (!chat || !global.activeEmojiInteraction || chatId === global.currentUserId) {
     return undefined;
   }
 
