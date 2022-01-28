@@ -91,7 +91,9 @@ const ListItem: FC<OwnProps> = ({
     [],
   );
 
-  const { positionX, positionY, style: menuStyle } = useContextMenuPosition(
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useContextMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,
@@ -195,6 +197,8 @@ const ListItem: FC<OwnProps> = ({
       {contextActions && contextMenuPosition !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
+          transformOriginX={transformOriginX}
+          transformOriginY={transformOriginY}
           positionX={positionX}
           positionY={positionY}
           style={menuStyle}

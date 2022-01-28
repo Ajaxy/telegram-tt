@@ -177,7 +177,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   }, [isOpen, markIsReady, unmarkIsReady]);
 
   const {
-    positionX, positionY, style, menuStyle, withScroll,
+    positionX, positionY, transformOriginX, transformOriginY, style, menuStyle, withScroll,
   } = useContextMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
   useEffect(() => {
@@ -192,6 +192,8 @@ const MessageContextMenu: FC<OwnProps> = ({
     <Menu
       ref={menuRef}
       isOpen={isOpen}
+      transformOriginX={transformOriginX}
+      transformOriginY={transformOriginY}
       positionX={positionX}
       positionY={positionY}
       style={style}

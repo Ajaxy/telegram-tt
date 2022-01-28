@@ -20,6 +20,8 @@ type OwnProps = {
   className?: string;
   style?: string;
   bubbleStyle?: string;
+  transformOriginX?: number;
+  transformOriginY?: number;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;
@@ -44,6 +46,8 @@ const Menu: FC<OwnProps> = ({
   style,
   bubbleStyle,
   children,
+  transformOriginX,
+  transformOriginY,
   positionX = 'left',
   positionY = 'top',
   autoClose = false,
@@ -101,6 +105,9 @@ const Menu: FC<OwnProps> = ({
     transitionClassNames,
   );
 
+  const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
+  const transformOriginXStyle = transformOriginX !== undefined ? `${transformOriginX}px` : undefined;
+
   return (
     <div
       className={buildClassName('Menu no-selection', className)}
@@ -118,7 +125,8 @@ const Menu: FC<OwnProps> = ({
         ref={menuRef}
         className={bubbleClassName}
         // @ts-ignore teact feature
-        style={`transform-origin: ${positionY} ${positionX};${bubbleStyle || ''}`}
+        style={`transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY};${
+          bubbleStyle || ''}`}
         onClick={autoClose ? onClose : undefined}
       >
         {children}
