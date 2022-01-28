@@ -1,0 +1,70 @@
+.ReactionSelectorReaction {
+  margin-left: 0.5rem;
+  position: relative;
+  min-width: 2rem;
+  min-height: 2rem;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &__static {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: url('../../../assets/reaction-thumbs.png') no-repeat;
+    background-size: auto 100%;
+
+    &--reaction-👍 {
+      background-position-x: 0;
+    }
+
+    &--reaction-👎 {
+      background-position-x: -32px;
+    }
+
+    &--reaction-❤ {
+      background-position-x: -64px;
+    }
+
+    &--reaction-🔥 {
+      background-position-x: -96px;
+    }
+
+    &--reaction-🎉 {
+      background-position-x: -128px;
+    }
+
+    &--reaction-🤩 {
+      background-position-x: -160px;
+    }
+
+    &--reaction-😱 {
+      background-position-x: -192px;
+    }
+
+    &--reaction-😁 {
+      background-position-x: -224px;
+    }
+
+    &--reaction-😢 {
+      background-position-x: -256px;
+    }
+
+    &--reaction-💩 {
+      background-position-x: -288px;
+    }
+
+    &--reaction-🤮 {
+      background-position-x: -320px;
+    }
+  }
+
+  .AnimatedSticker {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
