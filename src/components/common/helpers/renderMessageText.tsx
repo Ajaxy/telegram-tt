@@ -18,7 +18,9 @@ import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
 import { LangFn } from '../../../hooks/useLang';
 
-export type TextPart = string | Element;
+export type TextPart =
+  string
+  | Element;
 
 export function renderMessageSummary(
   lang: LangFn,
@@ -500,7 +502,10 @@ function processEntityAsHtml(
         dir="auto"
       >${renderedContent}</a>`;
     case ApiMessageEntityTypes.Spoiler:
-      return `||${renderedContent}||`;
+      return `<span
+        class="spoiler"
+        data-entity-type="${ApiMessageEntityTypes.Spoiler}"
+        >${renderedContent}</span>`;
     default:
       return renderedContent;
   }

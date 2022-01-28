@@ -60,9 +60,6 @@ function parseMarkdown(html: string) {
     parsedHtml = parsedHtml.replace(/<img[^>]+alt="([^"]+)"[^>]*>/gm, '$1');
   }
 
-  // Strip redundant <span> tags
-  parsedHtml = parsedHtml.replace(/<\/?span([^>]*)?>/g, '');
-
   // Strip redundant nbsp's
   parsedHtml = parsedHtml.replace(/&nbsp;/g, ' ');
 
