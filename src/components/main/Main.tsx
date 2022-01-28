@@ -12,7 +12,7 @@ import {
 } from '../../config';
 import {
   selectChatMessage,
-  selectCountNotMutedUnread,
+  selectCountNotMutedUnreadOptimized,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
@@ -248,7 +248,7 @@ const Main: FC<StateProps> = ({
   const handleBlur = useCallback(() => {
     updateIsOnline(false);
 
-    const initialUnread = selectCountNotMutedUnread(getGlobal());
+    const initialUnread = selectCountNotMutedUnreadOptimized(getGlobal());
     let index = 0;
 
     clearInterval(notificationInterval);
@@ -259,7 +259,7 @@ const Main: FC<StateProps> = ({
       }
 
       if (index % 2 === 0) {
-        const newUnread = selectCountNotMutedUnread(getGlobal()) - initialUnread;
+        const newUnread = selectCountNotMutedUnreadOptimized(getGlobal()) - initialUnread;
         if (newUnread > 0) {
           updatePageTitle(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
           updateIcon(true);

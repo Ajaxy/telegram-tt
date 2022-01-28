@@ -19,7 +19,7 @@ import {
   selectIsChatListed,
   selectChatListType,
   selectCurrentMessageList,
-  selectCountNotMutedUnread,
+  selectCountNotMutedUnreadOptimized,
 } from '../../selectors';
 import { throttle } from '../../../util/schedulers';
 
@@ -40,7 +40,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const newGlobal = updateChat(global, update.id, update.chat, update.newProfilePhoto);
       setGlobal(newGlobal);
 
-      runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnread(getGlobal())));
+      runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnreadOptimized(getGlobal())));
 
       if (update.chat.id) {
         closeMessageNotifications({
@@ -77,7 +77,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateChatInbox': {
       setGlobal(updateChat(global, update.id, update.chat));
 
-      runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnread(getGlobal())));
+      runThrottledForUpdateAppBadge(() => updateAppBadge(selectCountNotMutedUnreadOptimized(getGlobal())));
 
       break;
     }
@@ -129,7 +129,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
 
-      updateAppBadge(selectCountNotMutedUnread(getGlobal()));
+      updateAppBadge(selectCountNotMutedUnreadOptimized(getGlobal()));
       notifyAboutNewMessage({
         chat,
         message,

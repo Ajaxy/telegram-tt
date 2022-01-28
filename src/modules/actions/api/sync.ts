@@ -34,7 +34,7 @@ import {
   selectDraft,
   selectChatMessage,
   selectThreadInfo,
-  selectCountNotMutedUnread,
+  selectCountNotMutedUnreadOptimized,
   selectLastServiceNotification,
 } from '../../selectors';
 import { isUserId } from '../../helpers';
@@ -102,7 +102,7 @@ async function afterSync() {
 
   await callApi('fetchCurrentUser');
 
-  updateAppBadge(selectCountNotMutedUnread(getGlobal()));
+  updateAppBadge(selectCountNotMutedUnreadOptimized(getGlobal()));
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
