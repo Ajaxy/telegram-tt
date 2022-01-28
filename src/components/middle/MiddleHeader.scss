@@ -540,6 +540,27 @@
         opacity: 1;
       }
     }
+
+    .badge-button {
+      position: relative;
+      overflow: visible;
+    }
+
+    .badge {
+      position: absolute;
+      min-width: 1rem;
+      height: 1rem;
+      background: var(--color-primary);
+      border-radius: 0.5rem;
+      color: white;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      font-weight: 500;
+      text-align: center;
+      flex-shrink: 0;
+      right: 0;
+      top: 0;
+    }
   }
 
   .HeaderPinnedMessage-wrapper, .HeaderActions {

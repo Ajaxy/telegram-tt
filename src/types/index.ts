@@ -1,5 +1,6 @@
 import {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
+  ApiChatInviteImporter,
   ApiExportedInvite,
   ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
@@ -283,10 +284,16 @@ export enum ManagementProgress {
 
 export interface ManagementState {
   isActive: boolean;
+  nextScreen?: ManagementScreens;
   isUsernameAvailable?: boolean;
   error?: string;
   invites?: ApiExportedInvite[];
+  revokedInvites?: ApiExportedInvite[];
   editingInvite?: ApiExportedInvite;
+  inviteInfo?: {
+    invite: ApiExportedInvite;
+    importers?: ApiChatInviteImporter[];
+  };
 }
 
 export enum NewChatMembersProgress {
@@ -334,6 +341,8 @@ export enum ManagementScreens {
   Invites,
   EditInvite,
   Reactions,
+  InviteInfo,
+  JoinRequests,
 }
 
 export type ManagementType = 'user' | 'group' | 'channel';

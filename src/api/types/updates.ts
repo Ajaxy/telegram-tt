@@ -420,6 +420,13 @@ export type ApiUpdateGroupCallParticipants = {
   nextOffset?: string;
 };
 
+export type ApiUpdatePendingJoinRequests = {
+  '@type': 'updatePendingJoinRequests';
+  chatId: string;
+  recentRequesterIds: string[];
+  requestsPending: number;
+};
+
 export type ApiUpdateGroupCallConnection = {
   '@type': 'updateGroupCallConnection';
   data: GroupCallConnectionData;
@@ -459,7 +466,8 @@ export type ApiUpdate = (
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
-  ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId
+  ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
+  ApiUpdatePendingJoinRequests
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

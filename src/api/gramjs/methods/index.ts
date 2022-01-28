@@ -15,7 +15,6 @@ export {
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
-  fetchExportedChatInvites, editExportedChatInvite, exportChatInvite,
 } from './chats';
 
 export {
@@ -40,6 +39,8 @@ export {
 
 export {
   checkChatUsername, setChatUsername, updatePrivateLink,
+  fetchExportedChatInvites, editExportedChatInvite, exportChatInvite, deleteExportedChatInvite,
+  deleteRevokedExportedChatInvites, fetchChatInviteImporters, hideChatJoinRequest, hideAllChatJoinRequests,
 } from './management';
 
 export {

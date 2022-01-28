@@ -879,6 +879,20 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       groupCallId: getGroupCallId(update.call),
       participants: update.participants.map(buildApiGroupCallParticipant),
     });
+  } else if (update instanceof GramJs.UpdatePendingJoinRequests) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
+    onUpdate({
+      '@type': 'updatePendingJoinRequests',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      recentRequesterIds: update.recentRequesters.map((id) => buildApiPeerId(id, 'user')),
+      requestsPending: update.requestsPending,
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     // eslint-disable-next-line no-console

@@ -4,6 +4,7 @@ import React, {
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ManagementScreens, ProfileState } from '../../types';
+import { ApiExportedInvite } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
@@ -42,6 +43,7 @@ type OwnProps = {
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: () => void;
+  onScreenSelect: (screen: ManagementScreens) => void;
 };
 
 type StateProps = {
@@ -53,6 +55,7 @@ type StateProps = {
   stickerSearchQuery?: string;
   gifSearchQuery?: string;
   isEditingInvite?: boolean;
+  currentInviteInfo?: ApiExportedInvite;
 };
 
 const COLUMN_CLOSE_DELAY_MS = 300;
@@ -85,9 +88,12 @@ enum HeaderContent {
   ManageInvites,
   ManageEditInvite,
   ManageReactions,
+  ManageInviteInfo,
+  ManageJoinRequests,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
+  chatId,
   isColumnOpen,
   isProfile,
   isSearch,
@@ -103,11 +109,13 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   canManage,
   isChannel,
   onClose,
+  onScreenSelect,
   messageSearchQuery,
   stickerSearchQuery,
   gifSearchQuery,
   shouldSkipAnimation,
   isEditingInvite,
+  currentInviteInfo,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -115,11 +123,24 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     setGifSearchQuery,
     searchTextMessagesLocal,
     toggleManagement,
-    openHistoryCalendar, addContact,
+    openHistoryCalendar,
+    addContact,
+    setEditingExportedInvite,
+    deleteExportedChatInvite,
   } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
+
+  const handleEditInviteClick = useCallback(() => {
+    setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
+    onScreenSelect(ManagementScreens.EditInvite);
+  }, [chatId, currentInviteInfo, onScreenSelect, setEditingExportedInvite]);
+
+  const handleDeleteInviteClick = useCallback(() => {
+    deleteExportedChatInvite({ chatId: chatId!, link: currentInviteInfo!.link });
+    onScreenSelect(ManagementScreens.Invites);
+  }, [chatId, currentInviteInfo, deleteExportedChatInvite, onScreenSelect]);
 
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setLocalTextSearchQuery({ query });
@@ -203,6 +224,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.ManageGroupAddAdmins
     ) : managementScreen === ManagementScreens.Reactions ? (
       HeaderContent.ManageReactions
+    ) : managementScreen === ManagementScreens.InviteInfo ? (
+      HeaderContent.ManageInviteInfo
+    ) : managementScreen === ManagementScreens.JoinRequests ? (
+      HeaderContent.ManageJoinRequests
     ) : undefined // Never reached
   ) : undefined; // When column is closed
 
@@ -263,6 +288,38 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang('lng_group_invite_title')}</h3>;
       case HeaderContent.ManageEditInvite:
         return <h3>{isEditingInvite ? lang('EditLink') : lang('NewLink')}</h3>;
+      case HeaderContent.ManageInviteInfo:
+        return (
+          <>
+            <h3>{lang('InviteLink')}</h3>
+            <section className="tools">
+              {currentInviteInfo && !currentInviteInfo.isRevoked && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('Edit')}
+                  onClick={handleEditInviteClick}
+                >
+                  <i className="icon-edit" />
+                </Button>
+              )}
+              {currentInviteInfo && currentInviteInfo.isRevoked && (
+                <Button
+                  round
+                  color="danger"
+                  size="smaller"
+                  ariaLabel={lang('Delete')}
+                  onClick={handleDeleteInviteClick}
+                >
+                  <i className="icon-delete" />
+                </Button>
+              )}
+            </section>
+          </>
+        );
+      case HeaderContent.ManageJoinRequests:
+        return <h3>{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</h3>;
       case HeaderContent.ManageGroupAddAdmins:
         return <h3>{lang('Channel.Management.AddModerator')}</h3>;
       case HeaderContent.StickerSearch:
@@ -381,6 +438,7 @@ export default memo(withGlobal<OwnProps>(
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
     const isEditingInvite = Boolean(chatId && global.management.byChatId[chatId]?.editingInvite);
+    const currentInviteInfo = chatId ? global.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
 
     return {
       canManage,
@@ -391,6 +449,7 @@ export default memo(withGlobal<OwnProps>(
       stickerSearchQuery,
       gifSearchQuery,
       isEditingInvite,
+      currentInviteInfo,
     };
   },
 )(RightHeader));

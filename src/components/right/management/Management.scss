@@ -207,6 +207,25 @@
   }
 }
 
+.ManageInviteInfo {
+  .copy-link {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.ManageJoinRequests {
+  .bulk-actions {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .bulk-action-button {
+    width: auto;
+    height: auto;
+  }
+}
+
 .ManageInvite, .ManageInvites {
   .hint {
     font-size: 0.875rem;

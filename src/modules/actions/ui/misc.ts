@@ -54,6 +54,29 @@ addReducer('toggleManagement', (global): GlobalState | undefined => {
   };
 });
 
+addReducer('requestNextManagementScreen', (global, actions, payload): GlobalState | undefined => {
+  const { screen } = payload || {};
+  const { chatId } = selectCurrentMessageList(global) || {};
+
+  if (!chatId) {
+    return undefined;
+  }
+
+  return {
+    ...global,
+    management: {
+      byChatId: {
+        ...global.management.byChatId,
+        [chatId]: {
+          ...global.management.byChatId[chatId],
+          isActive: true,
+          nextScreen: screen,
+        },
+      },
+    },
+  };
+});
+
 addReducer('closeManagement', (global): GlobalState | undefined => {
   const { chatId } = selectCurrentMessageList(global) || {};
 

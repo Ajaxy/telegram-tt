@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useState,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
@@ -18,6 +18,7 @@ import InputText from '../../ui/InputText';
 import RadioGroup from '../../ui/RadioGroup';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import useOnChange from '../../../hooks/useOnChange';
 import CalendarModal from '../../common/CalendarModal';
 
 const DEFAULT_USAGE_LIMITS = [1, 10, 100];
@@ -61,7 +62,8 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 
   useHistoryBack(isActive, onClose);
 
-  useEffect(() => {
+  useOnChange(([oldEditingInvite]) => {
+    if (oldEditingInvite === editingInvite) return;
     if (!editingInvite) {
       setTitle('');
       setSelectedExpireOption('unlimited');

@@ -9,6 +9,7 @@ import {
   ApiChatMember,
   ApiRestrictionReason,
   ApiExportedInvite,
+  ApiChatInviteImporter,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -388,7 +389,7 @@ export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
   }, [] as ApiBotCommand[]);
 }
 
-export function buildApiExportedInvite(invite: GramJs.ChatInviteExported) : ApiExportedInvite {
+export function buildApiExportedInvite(invite: GramJs.ChatInviteExported): ApiExportedInvite {
   const {
     revoked,
     date,
@@ -401,6 +402,7 @@ export function buildApiExportedInvite(invite: GramJs.ChatInviteExported) : ApiE
     requested,
     requestNeeded,
     title,
+    adminId,
   } = invite;
   return {
     isRevoked: revoked,
@@ -414,5 +416,21 @@ export function buildApiExportedInvite(invite: GramJs.ChatInviteExported) : ApiE
     isRequestNeeded: requestNeeded,
     requested,
     title,
+    adminId: buildApiPeerId(adminId, 'user'),
+  };
+}
+
+export function buildChatInviteImporter(importer: GramJs.ChatInviteImporter): ApiChatInviteImporter {
+  const {
+    userId,
+    date,
+    about,
+    requested,
+  } = importer;
+  return {
+    userId: buildApiPeerId(userId, 'user'),
+    date,
+    about,
+    isRequested: requested,
   };
 }
