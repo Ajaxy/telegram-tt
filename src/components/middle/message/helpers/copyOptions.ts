@@ -5,6 +5,7 @@ import {
   getMessageMediaHash,
   getMessagePhoto,
   getMessageText,
+  getMessageTextWithSpoilers,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   hasMessageLocalBlobUrl,
@@ -52,7 +53,7 @@ export function getMessageCopyOptions(
     options.push({
       label: getCopyLabel(hasSelection),
       handler: () => {
-        const clipboardText = hasSelection && selection ? selection.toString() : text;
+        const clipboardText = hasSelection && selection ? selection.toString() : getMessageTextWithSpoilers(message)!;
         copyTextToClipboard(clipboardText);
 
         if (afterEffect) {

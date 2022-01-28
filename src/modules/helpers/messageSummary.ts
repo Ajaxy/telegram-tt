@@ -15,28 +15,32 @@ export function getMessageSummaryText(
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-
-  let text = getMessageText(message);
-  if (text) {
-    const { entities } = message.content.text || {};
-    if (entities?.length) {
-      text = entities.reduce((accText, { type, offset, length }) => {
-        if (type !== ApiMessageEntityTypes.Spoiler) {
-          return accText;
-        }
-
-        const spoiler = generateBrailleSpoiler(length);
-
-        return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
-      }, text);
-    }
-
-    text = text.substr(0, truncateLength);
-  }
-
+  const text = getMessageTextWithSpoilers(message)?.substr(0, truncateLength);
   const description = getMessageSummaryDescription(lang, message, text);
 
   return `${emojiWithSpace}${description}`;
+}
+
+export function getMessageTextWithSpoilers(message: ApiMessage) {
+  const text = getMessageText(message);
+  if (!text) {
+    return undefined;
+  }
+
+  const { entities } = message.content.text || {};
+  if (!entities?.length) {
+    return text;
+  }
+
+  return entities.reduce((accText, { type, offset, length }) => {
+    if (type !== ApiMessageEntityTypes.Spoiler) {
+      return accText;
+    }
+
+    const spoiler = generateBrailleSpoiler(length);
+
+    return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
+  }, text);
 }
 
 export function getMessageSummaryEmoji(message: ApiMessage) {

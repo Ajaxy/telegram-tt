@@ -430,7 +430,7 @@ const MediaViewer: FC<StateProps> = ({
 
     return captureEvents(element, {
       // eslint-disable-next-line max-len
-      excludedClosestSelector: `.backdrop, .navigation, .media-viewer-head, .media-viewer-footer${!shouldCloseOnVideo ? ', .VideoPlayer' : ''}`,
+      excludedClosestSelector: `.backdrop, .navigation, .media-viewer-head, .Spoiler, .media-viewer-footer${!shouldCloseOnVideo ? ', .VideoPlayer' : ''}`,
       onClick: close,
     });
   }, [close, isGif, isZoomed, messageId]);
