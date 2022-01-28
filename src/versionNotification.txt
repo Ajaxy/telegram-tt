@@ -1,29 +1,25 @@
-**Telegram Web Z was updated to version 1.30**
+**Telegram Web Z was updated to version v1.31**
 
 👏 **Harder**
-• Meet Message Reactions:
-  - React to a message with ❤️🔥🎉😁😱🤩😢👎💩🤮 in the context menu.
-  - Send a quick 👍 reaction by hovering over the bottom corner of a message.
-  - You can change your default reaction to another emoji in Settings > General.
-  - Group and Channel admins can enable and control reactions via their chat's Info Page > Edit > Reactions.
-
-• Interactive Emoji:
-  - Added support for all interactive emoji, including fullscreen animations and sound effects. Try 🔥, 🍆, 🍑 and more.
-  - Animations play simultaneously when both users have the chat open.
-  – The “is watching…” status will appear when your chat partner is also seeing the animations.
-
-• Manage invite links for Groups and Channels:
-  – Enable admin approval or limited duration and users.
+• Hide text with an animation using the crossed-eye icon 👁 in the formatting menu.
+• Quickly add Spoiler formatting with Ctrl + P (⌘ + P on macOS), or || markdown around the text.
+• Admins can manage Join Requests and revoked invites.
+• Promote new admins in your groups and channels via Global Search.
 
 🤩 **Better**
-• Better quality for uploaded profile pictures.
-• Various UI improvements.
+• Network stability enhancements.
+• Various improvements and tuning for reactions and interactive emoji.
+• Media Viewer improved for mobile devices.
+• Numerous layout adjustments.
 
 🚀 **Faster**
-• Several optimizations for older devices – no more freezing while typing.
+• The app better renders multiple components.
 
 💪 **Stronger**
-• Saved Messages now correctly renders in search results.
-• Fixed missing icons for muted chats in the chat list.
-• The context menu no longer flickers on older devices.
-• Fix re-scheduling messages to a previous date.
+• Fixed inline playback for QuickTime videos.
+• Fixes for tooltips – including stickers, emoji, and mentions.
+• Unread counter now correctly reflects values on mobile devices.
+• Emoji now properly copy from message text.
+• Users’ display names now appear in service messages.
+• Fixed collapsing multiple spaces in messages.
+• Reactions and the “Send As” feature are now always available in Discussion Groups.
