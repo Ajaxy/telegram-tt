@@ -38,6 +38,7 @@ type StateProps = {
   currentProfileUserId?: string;
   isChatSelected: boolean;
   shouldSkipHistoryAnimations?: boolean;
+  nextManagementScreen?: ManagementScreens;
 };
 
 const COLUMN_CLOSE_DELAY_MS = 300;
@@ -58,6 +59,7 @@ const RightColumn: FC<StateProps> = ({
   currentProfileUserId,
   isChatSelected,
   shouldSkipHistoryAnimations,
+  nextManagementScreen,
 }) => {
   const {
     toggleChatInfo,
@@ -70,6 +72,8 @@ const RightColumn: FC<StateProps> = ({
     addChatMembers,
     setNewChatMembersDialogState,
     setEditingExportedInvite,
+    setOpenedInviteInfo,
+    requestNextManagementScreen,
   } = getDispatch();
 
   const { width: windowWidth } = useWindowSize();
@@ -126,6 +130,7 @@ const RightColumn: FC<StateProps> = ({
           case ManagementScreens.GroupMembers:
           case ManagementScreens.Invites:
           case ManagementScreens.Reactions:
+          case ManagementScreens.JoinRequests:
             setManagementScreen(ManagementScreens.Initial);
             break;
           case ManagementScreens.GroupUserPermissionsCreate:
@@ -142,7 +147,9 @@ const RightColumn: FC<StateProps> = ({
             setManagementScreen(ManagementScreens.ChatAdministrators);
             break;
           case ManagementScreens.EditInvite:
+          case ManagementScreens.InviteInfo:
             setManagementScreen(ManagementScreens.Invites);
+            setOpenedInviteInfo({ invite: undefined });
             setEditingExportedInvite({ chatId, invite: undefined });
             break;
         }
@@ -170,7 +177,7 @@ const RightColumn: FC<StateProps> = ({
   }, [
     contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
-    setEditingExportedInvite, chatId,
+    setEditingExportedInvite, chatId, setOpenedInviteInfo,
   ]);
 
   const handleSelectChatMember = useCallback((memberId, isPromoted) => {
@@ -189,6 +196,13 @@ const RightColumn: FC<StateProps> = ({
       setShouldSkipTransition(!isOpen);
     }, COLUMN_CLOSE_DELAY_MS);
   }, [isOpen]);
+
+  useEffect(() => {
+    if (nextManagementScreen) {
+      setManagementScreen(nextManagementScreen);
+      requestNextManagementScreen(undefined);
+    }
+  }, [nextManagementScreen, requestNextManagementScreen]);
 
   // Close Right Column when it transforms into overlayed state on screen resize
   useEffect(() => {
@@ -290,6 +304,7 @@ const RightColumn: FC<StateProps> = ({
           managementScreen={managementScreen}
           onClose={close}
           shouldSkipAnimation={shouldSkipTransition || shouldSkipHistoryAnimations}
+          onScreenSelect={setManagementScreen}
         />
         <Transition
           name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoom-fade'}
@@ -309,6 +324,7 @@ export default memo(withGlobal(
   (global): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
+    const nextManagementScreen = chatId ? global.management.byChatId[chatId]?.nextScreen : undefined;
 
     return {
       contentKey: selectRightColumnContentKey(global),
@@ -317,6 +333,7 @@ export default memo(withGlobal(
       currentProfileUserId: global.users.selectedId,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      nextManagementScreen,
     };
   },
 )(RightColumn));

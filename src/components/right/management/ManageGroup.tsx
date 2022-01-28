@@ -79,6 +79,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     closeManagement,
     openChat,
     loadExportedChatInvites,
+    loadChatJoinRequests,
   } = getDispatch();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -99,8 +100,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (lastSyncTime && canInvite) {
       loadExportedChatInvites({ chatId });
+      loadExportedChatInvites({ chatId, isRevoked: true });
+      loadChatJoinRequests({ chatId });
     }
-  }, [chatId, loadExportedChatInvites, lastSyncTime, canInvite]);
+  }, [chatId, loadExportedChatInvites, lastSyncTime, canInvite, loadChatJoinRequests]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -129,9 +132,13 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     onScreenSelect(ManagementScreens.ChatAdministrators);
   }, [onScreenSelect]);
 
-  const handleClickInvites = useCallback(() => {
+  const handleClickInvites = () => {
     onScreenSelect(ManagementScreens.Invites);
-  }, [onScreenSelect]);
+  };
+
+  const handleClickRequests = () => {
+    onScreenSelect(ManagementScreens.JoinRequests);
+  };
 
   const handleSetPhoto = useCallback((file: File) => {
     setPhoto(file);
@@ -314,6 +321,18 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               <span className="title">{lang('GroupInfo.InviteLinks')}</span>
               <span className="subtitle">
                 {exportedInvites ? formatInteger(exportedInvites.length) : lang('Loading')}
+              </span>
+            </ListItem>
+          )}
+          {Boolean(chat.joinRequests?.length) && (
+            <ListItem
+              icon="add-user-filled"
+              onClick={handleClickRequests}
+              multiline
+            >
+              <span className="title">{lang('MemberRequests')}</span>
+              <span className="subtitle">
+                {formatInteger(chat.joinRequests!.length)}
               </span>
             </ListItem>
           )}

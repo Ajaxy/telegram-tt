@@ -109,6 +109,14 @@ export type ApiExportedInvite = {
   isRequestNeeded?: boolean;
   requested?: number;
   title?: string;
+  adminId: string;
+};
+
+export type ApiChatInviteImporter = {
+  userId: string;
+  date: number;
+  isRequested?: boolean;
+  about?: string;
 };
 
 export interface ApiCountry {

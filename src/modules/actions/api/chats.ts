@@ -30,7 +30,6 @@ import {
   updateChatListSecondaryInfo,
   updateManagementProgress,
   leaveChat,
-  updateManagement,
 } from '../../reducers';
 import {
   selectChat,
@@ -608,82 +607,6 @@ addReducer('acceptInviteConfirmation', (global, actions, payload) => {
     }
 
     actions.openChat({ id: result.id });
-  })();
-});
-
-addReducer('loadExportedChatInvites', (global, actions, payload) => {
-  const {
-    chatId, adminId, isRevoked, limit,
-  } = payload!;
-  const peer = selectChat(global, chatId);
-  const admin = selectUser(global, adminId || global.currentUserId);
-  if (!peer || !admin) return;
-
-  (async () => {
-    const result = await callApi('fetchExportedChatInvites', {
-      peer, admin, isRevoked, limit,
-    });
-    if (!result) {
-      return;
-    }
-
-    setGlobal(updateManagement(getGlobal(), chatId, { invites: result }));
-  })();
-});
-
-addReducer('editExportedChatInvite', (global, actions, payload) => {
-  const {
-    chatId, link, isRevoked, expireDate, usageLimit, isRequestNeeded, title,
-  } = payload!;
-  const peer = selectChat(global, chatId);
-  if (!peer) return;
-
-  (async () => {
-    const result = await callApi('editExportedChatInvite', {
-      peer,
-      link,
-      isRevoked,
-      expireDate,
-      usageLimit,
-      isRequestNeeded,
-      title,
-    });
-    if (!result) {
-      return;
-    }
-    global = getGlobal();
-    let invites = global.management.byChatId[chatId].invites || [];
-    const { oldInvite, newInvite } = result;
-    invites = invites.filter((current) => current.link !== oldInvite.link);
-    setGlobal(updateManagement(global, chatId, {
-      invites: [...invites, newInvite],
-    }));
-  })();
-});
-
-addReducer('exportChatInvite', (global, actions, payload) => {
-  const {
-    chatId, expireDate, usageLimit, isRequestNeeded, title,
-  } = payload!;
-  const peer = selectChat(global, chatId);
-  if (!peer) return;
-
-  (async () => {
-    const result = await callApi('exportChatInvite', {
-      peer,
-      expireDate,
-      usageLimit,
-      isRequestNeeded,
-      title,
-    });
-    if (!result) {
-      return;
-    }
-    global = getGlobal();
-    const invites = global.management.byChatId[chatId].invites || [];
-    setGlobal(updateManagement(global, chatId, {
-      invites: [...invites, result],
-    }));
   })();
 });
 

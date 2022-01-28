@@ -382,5 +382,21 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       actions.showDialog({ data });
       break;
     }
+
+    case 'updatePendingJoinRequests': {
+      const { chatId, requestsPending, recentRequesterIds } = update;
+      const chat = global.chats.byId[chatId];
+      if (chat) {
+        global = updateChat(global, chatId, {
+          fullInfo: {
+            ...chat.fullInfo,
+            requestsPending,
+            recentRequesterIds,
+          },
+        });
+        setGlobal(global);
+        actions.loadChatJoinRequests({ chatId });
+      }
+    }
   }
 });

@@ -12,6 +12,10 @@ const MAX_DAY_IN_MONTH = 31;
 const MAX_MONTH_IN_YEAR = 12;
 export const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
 
+export function isToday(date: Date) {
+  return getDayStart(new Date()) === getDayStart(date);
+}
+
 export function getDayStart(datetime: number | Date) {
   const date = new Date(datetime);
   date.setHours(0, 0, 0, 0);

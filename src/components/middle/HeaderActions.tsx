@@ -10,7 +10,7 @@ import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { IAnchorPosition } from '../../types';
+import { IAnchorPosition, ManagementScreens } from '../../types';
 
 import {
   ARE_CALLS_SUPPORTED, IS_MAC_OS, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,
@@ -53,6 +53,7 @@ interface StateProps {
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
+  pendingJoinRequests?: number;
 }
 
 // Chrome breaks layout when focusing input during transition
@@ -72,6 +73,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canLeave,
   canEnterVoiceChat,
   canCreateVoiceChat,
+  pendingJoinRequests,
   isRightColumnShown,
   canExpandActions,
 }) => {
@@ -81,6 +83,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     openLocalTextSearch,
     restartBot,
     openCallFallbackConfirm,
+    requestNextManagementScreen,
   } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
@@ -113,6 +116,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const handleRestartBot = useCallback(() => {
     restartBot({ chatId });
   }, [chatId, restartBot]);
+
+  const handleJoinRequestsClick = useCallback(() => {
+    requestNextManagementScreen({ screen: ManagementScreens.JoinRequests });
+  }, [requestNextManagementScreen]);
 
   const handleSearchClick = useCallback(() => {
     openLocalTextSearch();
@@ -213,6 +220,20 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
         </>
       )}
+      {Boolean(pendingJoinRequests) && (
+        <Button
+          round
+          className="badge-button"
+          ripple={isRightColumnShown}
+          color="translucent"
+          size="smaller"
+          onClick={handleJoinRequestsClick}
+          ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
+        >
+          <i className="icon-user" />
+          <div className="badge">{pendingJoinRequests}</div>
+        </Button>
+      )}
       <Button
         ref={menuButtonRef}
         className={isMenuOpen ? 'active' : ''}
@@ -282,6 +303,7 @@ export default memo(withGlobal<OwnProps>(
     const canEnterVoiceChat = ARE_CALLS_SUPPORTED && chat.isCallActive;
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
+    const pendingJoinRequests = chat.fullInfo?.requestsPending;
 
     return {
       noMenu: false,
@@ -296,6 +318,7 @@ export default memo(withGlobal<OwnProps>(
       canLeave,
       canEnterVoiceChat,
       canCreateVoiceChat,
+      pendingJoinRequests,
     };
   },
 )(HeaderActions));

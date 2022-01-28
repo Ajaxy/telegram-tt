@@ -21,6 +21,8 @@ import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate
 import ManageInvites from './ManageInvites';
 import ManageInvite from './ManageInvite';
 import ManageReactions from './ManageReactions';
+import ManageInviteInfo from './ManageInviteInfo';
+import ManageJoinRequests from './ManageJoinRequests';
 
 export type OwnProps = {
   chatId: string;
@@ -263,6 +265,22 @@ const Management: FC<OwnProps & StateProps> = ({
     case ManagementScreens.Reactions:
       return (
         <ManageReactions
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+        />
+      );
+    case ManagementScreens.InviteInfo:
+      return (
+        <ManageInviteInfo
+          chatId={chatId}
+          isActive={isActive}
+          onClose={onClose}
+        />
+      );
+    case ManagementScreens.JoinRequests:
+      return (
+        <ManageJoinRequests
           chatId={chatId}
           isActive={isActive}
           onClose={onClose}
