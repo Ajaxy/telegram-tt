@@ -123,7 +123,7 @@ export default function useOuterHandlers(
 
   function handleContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (IS_ANDROID) {
-      if ((e.target as HTMLElement).matches('a[href]')) {
+      if ((e.target as HTMLElement).matches('a[href]') || isContextMenuShown) {
         return;
       }
 

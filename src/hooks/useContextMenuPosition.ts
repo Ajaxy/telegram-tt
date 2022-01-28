@@ -23,6 +23,8 @@ export default function useContextMenuPosition(
 ) {
   const [positionX, setPositionX] = useState<'right' | 'left'>('right');
   const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
+  const [transformOriginX, setTransformOriginX] = useState<number>();
+  const [transformOriginY, setTransformOriginY] = useState<number>();
   const [withScroll, setWithScroll] = useState(false);
   const [style, setStyle] = useState('');
   const [menuStyle, setMenuStyle] = useState('opacity: 0;');
@@ -34,6 +36,8 @@ export default function useContextMenuPosition(
     }
 
     let { x, y } = anchor;
+    const anchorX = x;
+    const anchorY = y;
 
     const menuEl = getMenuElement();
     const rootEl = getRootElement();
@@ -55,6 +59,7 @@ export default function useContextMenuPosition(
     const rootRect = rootEl ? rootEl.getBoundingClientRect() : EMPTY_RECT;
 
     let horizontalPosition: 'left' | 'right';
+    let verticalPosition: 'top' | 'bottom';
     if (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left) {
       x += 3;
       horizontalPosition = 'left';
@@ -81,14 +86,15 @@ export default function useContextMenuPosition(
     }
 
     if (y + menuRect.height < rootRect.height + rootRect.top) {
-      setPositionY('top');
+      verticalPosition = 'top';
     } else {
-      setPositionY('bottom');
+      verticalPosition = 'bottom';
 
       if (y - menuRect.height < rootRect.top + extraTopPadding) {
         y = rootRect.top + rootRect.height;
       }
     }
+    setPositionY(verticalPosition);
 
     const triggerRect = triggerEl.getBoundingClientRect();
     const left = horizontalPosition === 'left'
@@ -103,6 +109,10 @@ export default function useContextMenuPosition(
     setWithScroll(menuMaxHeight < menuRect.height);
     setMenuStyle(`max-height: ${menuMaxHeight}px;`);
     setStyle(`left: ${left}px; top: ${top}px`);
+    const offsetX = (anchorX - triggerRect.left) - left;
+    const offsetY = (anchorY - triggerRect.top) - top - (marginTop || 0);
+    setTransformOriginX(horizontalPosition === 'left' ? offsetX : menuRect.width + offsetX);
+    setTransformOriginY(verticalPosition === 'bottom' ? menuRect.height + offsetY : offsetY);
   }, [
     anchor, getMenuElement, getRootElement, getTriggerElement, getLayout,
   ]);
@@ -110,6 +120,8 @@ export default function useContextMenuPosition(
   return {
     positionX,
     positionY,
+    transformOriginX,
+    transformOriginY,
     style,
     menuStyle,
     withScroll,
