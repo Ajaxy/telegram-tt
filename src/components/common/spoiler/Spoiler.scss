@@ -1,5 +1,5 @@
 .Spoiler {
-  &.concealed {
+  &--concealed {
     cursor: pointer;
     background-image: url('../../../assets/spoiler-dots-black.png');
     background-size: auto min(100%, 1.125rem);
@@ -17,16 +17,16 @@
     }
   }
 
-  &.animated {
+  &--animated {
     animation: pulse-opacity-light 1.75s linear infinite;
   }
 
-  span {
+  &__content {
     opacity: 1;
     transition: opacity 250ms ease;
   }
 
-  &.concealed span {
+  &--concealed &__content {
     visibility: hidden;
     opacity: 0;
   }
