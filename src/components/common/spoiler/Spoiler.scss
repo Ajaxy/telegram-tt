@@ -1,31 +1,34 @@
 .Spoiler {
-  transition: color 250ms ease;
-
-  .text-entity-link {
-    transition: color 250ms ease;
-  }
-
-  &:not(.is-revealed) {
+  &.concealed {
     cursor: pointer;
-    color: transparent;
     background-image: url('../../../assets/spoiler-dots-black.png');
-    background-size: auto 100%;
+    background-size: auto min(100%, 1.125rem);
     border-radius: 0.5rem;
 
-    &.animate {
-      animation: pulse-opacity-light 1.75s linear infinite;
+    html.theme-dark &,
+    html.theme-light .ListItem.selected &,
+    .ActionMessage &,
+    .MediaViewerFooter & {
+      background-image: url('../../../assets/spoiler-dots-white.png');
     }
 
-    .text-entity-link {
-      color: transparent !important;
-      pointer-events: none;
+    .emoji-only & {
+      background-size: auto 1.125rem;
     }
   }
 
-  html.theme-dark &:not(.is-revealed),
-  html.theme-light .ListItem.selected &:not(.is-revealed),
-  html.theme-light .ActionMessage &:not(.is-revealed) {
-    background-image: url('../../../assets/spoiler-dots-white.png');
+  &.animated {
+    animation: pulse-opacity-light 1.75s linear infinite;
+  }
+
+  span {
+    opacity: 1;
+    transition: opacity 250ms ease;
+  }
+
+  &.concealed span {
+    visibility: hidden;
+    opacity: 0;
   }
 }
 

@@ -1,3 +1,4 @@
+import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
@@ -10,7 +11,6 @@ import './Spoiler.scss';
 type OwnProps = {
   children?: React.ReactNode;
   messageId?: number;
-  isInactive?: boolean;
 };
 
 const spoilersByMessageId: Map<number, VoidFunction[]> = new Map();
@@ -18,22 +18,17 @@ const spoilersByMessageId: Map<number, VoidFunction[]> = new Map();
 const Spoiler: FC<OwnProps> = ({
   children,
   messageId,
-  isInactive,
 }) => {
   const [isRevealed, reveal] = useFlag();
 
-  const handleClick = useCallback(() => {
-    if (!messageId) return;
+  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    spoilersByMessageId.get(messageId)?.forEach((_reveal) => _reveal());
+    spoilersByMessageId.get(messageId!)?.forEach((_reveal) => _reveal());
   }, [messageId]);
 
   useEffect(() => {
-    if (isRevealed && messageId) {
-      spoilersByMessageId.delete(messageId);
-      return undefined;
-    }
-
     if (!messageId) {
       return undefined;
     }
@@ -53,12 +48,14 @@ const Spoiler: FC<OwnProps> = ({
     <span
       className={buildClassName(
         'Spoiler',
-        isRevealed && 'is-revealed',
-        !isInactive && 'animate',
+        !isRevealed && 'concealed',
+        !isRevealed && Boolean(messageId) && 'animated',
       )}
-      onClick={!isInactive && !isRevealed ? handleClick : undefined}
+      onClick={messageId && !isRevealed ? handleClick : undefined}
     >
-      {children}
+      <span>
+        {children}
+      </span>
     </span>
   );
 };

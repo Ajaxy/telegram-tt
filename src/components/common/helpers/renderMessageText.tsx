@@ -305,7 +305,7 @@ function processEntity(
   if (isSimple) {
     const text = renderNestedMessagePart();
     if (entity.type === ApiMessageEntityTypes.Spoiler) {
-      return <Spoiler isInactive>{text}</Spoiler>;
+      return <Spoiler>{text}</Spoiler>;
     }
     return text;
   }
