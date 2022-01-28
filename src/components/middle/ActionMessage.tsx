@@ -36,7 +36,8 @@ type OwnProps = {
 
 type StateProps = {
   usersById: Record<string, ApiUser>;
-  sender?: ApiUser | ApiChat;
+  senderUser?: ApiUser;
+  senderChat?: ApiChat;
   targetUserIds?: string[];
   targetMessage?: ApiMessage;
   targetChatId?: string;
@@ -54,7 +55,8 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   appearanceOrder = 0,
   isLastInList,
   usersById,
-  sender,
+  senderUser,
+  senderChat,
   targetUserIds,
   targetMessage,
   targetChatId,
@@ -91,7 +93,8 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const content = renderActionMessageText(
     lang,
     message,
-    sender,
+    senderUser,
+    senderChat,
     targetUsers,
     targetMessage,
     targetChatId,
@@ -159,13 +162,14 @@ export default memo(withGlobal<OwnProps>(
     const { direction: focusDirection, noHighlight: noFocusHighlight } = (isFocused && global.focusedMessage) || {};
 
     const chat = selectChat(global, message.chatId);
-    const sender = chat && (isChatChannel(chat) || userId === message.chatId)
-      ? chat
-      : userId ? selectUser(global, userId) : undefined;
+    const isChat = chat && (isChatChannel(chat) || userId === message.chatId);
+    const senderUser = !isChat && userId ? selectUser(global, userId) : undefined;
+    const senderChat = isChat ? chat : undefined;
 
     return {
       usersById,
-      sender,
+      senderUser,
+      senderChat,
       targetChatId,
       targetUserIds,
       targetMessage,
