@@ -10,7 +10,7 @@
   right: -3rem;
   top: -3.5rem;
 
-  .bubble-big {
+  &__bubble-big {
     position: absolute;
     display: block;
     content: "";
@@ -23,7 +23,7 @@
     z-index: -1;
   }
 
-  .bubble-small {
+  &__bubble-small {
     position: absolute;
     display: block;
     content: "";
@@ -40,18 +40,19 @@
     box-shadow: 0 0.25rem 0.125rem var(--color-default-shadow);
   }
 
-  body.is-safari .bubble-small, body.is-safari .bubble-big {
+  body.is-safari &__bubble-small,
+  body.is-safari &__bubble-big {
     box-shadow: 0 0.25rem 0.125rem var(--color-default-shadow);
   }
 
-  .items-wrapper {
+  &__items-wrapper {
     width: 100%;
     height: 100%;
     overflow: hidden;
     border-radius: 3rem;
   }
 
-  .items {
+  &__items {
     padding: 0 1rem;
     width: 100%;
     height: 100%;
@@ -62,30 +63,5 @@
     cursor: pointer;
     align-items: center;
     border-radius: 3rem;
-  }
-
-  .reaction {
-    margin-left: 0.5rem;
-    position: relative;
-    min-width: 2rem;
-    min-height: 2rem;
-
-    &:first-child {
-      margin-left: 0;
-    }
-  }
-
-  .ReactionStaticEmoji {
-    width: 2rem;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: scale(0.9);
-  }
-
-  .AnimatedSticker {
-    position: absolute;
-    top: 0;
-    left: 0;
   }
 }
