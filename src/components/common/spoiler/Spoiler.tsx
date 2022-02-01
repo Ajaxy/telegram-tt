@@ -13,7 +13,12 @@ type OwnProps = {
   messageId?: number;
 };
 
-const spoilersByMessageId: Map<number, VoidFunction[]> = new Map();
+const AUTO_HIDE_TIMEOUT = 5000; // 5s
+
+const actionsByMessageId: Map<number, {
+  reveal: VoidFunction;
+  conceal: VoidFunction;
+}[]> = new Map();
 
 const buildClassName = createClassNameBuilder('Spoiler');
 
@@ -21,30 +26,35 @@ const Spoiler: FC<OwnProps> = ({
   children,
   messageId,
 }) => {
-  const [isRevealed, reveal] = useFlag();
+  const [isRevealed, reveal, conceal] = useFlag();
 
   const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    spoilersByMessageId.get(messageId!)?.forEach((_reveal) => _reveal());
-  }, [messageId]);
+    actionsByMessageId.get(messageId!)?.forEach((actions) => actions.reveal());
+
+    setTimeout(() => {
+      actionsByMessageId.get(messageId!)?.forEach((actions) => actions.conceal());
+      conceal();
+    }, AUTO_HIDE_TIMEOUT);
+  }, [conceal, messageId]);
 
   useEffect(() => {
     if (!messageId) {
       return undefined;
     }
 
-    if (spoilersByMessageId.has(messageId)) {
-      spoilersByMessageId.get(messageId)!.push(reveal);
+    if (actionsByMessageId.has(messageId)) {
+      actionsByMessageId.get(messageId)!.push({ reveal, conceal });
     } else {
-      spoilersByMessageId.set(messageId, [reveal]);
+      actionsByMessageId.set(messageId, [{ reveal, conceal }]);
     }
 
     return () => {
-      spoilersByMessageId.delete(messageId);
+      actionsByMessageId.delete(messageId);
     };
-  }, [handleClick, isRevealed, messageId, reveal]);
+  }, [conceal, handleClick, isRevealed, messageId, reveal]);
 
   return (
     <span
