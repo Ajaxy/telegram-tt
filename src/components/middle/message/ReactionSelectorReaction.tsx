@@ -17,13 +17,14 @@ const REACTION_SIZE = 32;
 
 type OwnProps = {
   reaction: ApiAvailableReaction;
+  previewIndex: number;
   isReady?: boolean;
   onSendReaction: (reaction: string, x: number, y: number) => void;
 };
 
 const cn = createClassNameBuilder('ReactionSelectorReaction');
 
-const ReactionSelectorReaction: FC<OwnProps> = ({ reaction, onSendReaction, isReady }) => {
+const ReactionSelectorReaction: FC<OwnProps> = ({ reaction, previewIndex, onSendReaction, isReady }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,9 +57,10 @@ const ReactionSelectorReaction: FC<OwnProps> = ({ reaction, onSendReaction, isRe
         <div
           className={cn(
             'static',
-            `reaction-${reaction.reaction}`,
             isReady ? [staticClassNames] : undefined,
           )}
+          // @ts-ignore
+          style={`background-position-x: ${previewIndex * -32}px;`}
         />
       )}
       {shouldRenderAnimated && (

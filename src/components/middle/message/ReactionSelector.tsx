@@ -55,12 +55,13 @@ const ReactionSelector: FC<OwnProps> = ({
       <div className={cn('bubble-small')} />
       <div className={cn('items-wrapper')}>
         <div className={cn('items', ['no-scrollbar'])} ref={itemsScrollRef}>
-          {availableReactions?.map((reaction) => {
+          {availableReactions?.map((reaction, i) => {
             if (reaction.isInactive
               || (!isPrivate && (!enabledReactions || !enabledReactions.includes(reaction.reaction)))) return undefined;
             return (
               <ReactionSelectorReaction
                 key={reaction.reaction}
+                previewIndex={i}
                 isReady={isReady}
                 onSendReaction={onSendReaction}
                 reaction={reaction}
