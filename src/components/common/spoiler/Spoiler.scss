@@ -27,7 +27,7 @@
   }
 
   &--concealed &__content {
-    visibility: hidden;
+    user-select: none;
     opacity: 0;
   }
 }
