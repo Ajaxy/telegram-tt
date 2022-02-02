@@ -337,7 +337,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               contextActions={prepareContextActions(invite)}
               key={invite.link}
             >
-              <span className="title">{invite.title || invite.link}</span>
+              <span className="title invite-title">{invite.title || invite.link}</span>
               <span className="subtitle" dir="auto">
                 {prepareUsageText(invite)}
               </span>
