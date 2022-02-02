@@ -6,12 +6,12 @@ import {
 import { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
-  getMessageContent, getMessageSummaryText,
+  getMessageSummaryText,
   getUserFullName,
 } from '../../../modules/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { renderMessageSummary, TextPart } from './renderMessageText';
+import { TextPart, renderMessageSummary } from './renderMessageText';
 import renderText from './renderText';
 
 import UserLink from '../UserLink';
@@ -19,12 +19,12 @@ import MessageLink from '../MessageLink';
 import ChatLink from '../ChatLink';
 import GroupCallLink from '../GroupCallLink';
 
-interface ActionMessageTextOptions {
-  maxTextLength?: number;
-  asPlain?: boolean;
-  isEmbedded?: boolean;
+interface RenderOptions {
+  asPlainText?: boolean;
+  asTextWithSpoilers?: boolean;
 }
 
+const MAX_LENGTH = 32;
 const NBSP = '\u00A0';
 
 export function renderActionMessageText(
@@ -35,21 +35,22 @@ export function renderActionMessageText(
   targetUsers?: ApiUser[],
   targetMessage?: ApiMessage,
   targetChatId?: string,
-  options: ActionMessageTextOptions = {},
+  options: RenderOptions = {},
 ) {
   if (!message.content.action) {
     return [];
   }
+
   const {
     text, translationValues, amount, currency, call,
   } = message.content.action;
   const content: TextPart[] = [];
-  const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 32 };
+  const noLinks = options.asPlainText || options.asTextWithSpoilers;
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
 
-  let unprocessed = lang(translationKey, translationValues && translationValues.length ? translationValues : undefined);
+  let unprocessed = lang(translationKey, translationValues?.length ? translationValues : undefined);
   let processed: TextPart[];
 
   if (unprocessed.includes('%payment_amount%')) {
@@ -66,10 +67,9 @@ export function renderActionMessageText(
     unprocessed,
     '%action_origin%',
     actionOriginUser ? (
-      (!options.isEmbedded && renderUserContent(actionOriginUser, options.asPlain)) || NBSP
-
+      renderUserContent(actionOriginUser, noLinks) || NBSP
     ) : actionOriginChat ? (
-      (!options.isEmbedded && renderChatContent(lang, actionOriginChat, options.asPlain)) || NBSP
+      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
     ) : 'User',
   );
 
@@ -80,7 +80,7 @@ export function renderActionMessageText(
     unprocessed,
     '%target_user%',
     targetUsers
-      ? targetUsers.map((user) => renderUserContent(user, options.asPlain)).filter<TextPart>(Boolean as any)
+      ? targetUsers.map((user) => renderUserContent(user, noLinks)).filter<TextPart>(Boolean as any)
       : 'User',
   );
 
@@ -91,7 +91,7 @@ export function renderActionMessageText(
     unprocessed,
     '%message%',
     targetMessage
-      ? renderMessageContent(lang, targetMessage, textOptions)
+      ? renderMessageContent(lang, targetMessage, options)
       : 'a message',
   );
   unprocessed = processed.pop() as string;
@@ -111,12 +111,12 @@ export function renderActionMessageText(
     unprocessed,
     '%target_chat%',
     targetChatId
-      ? renderMigratedContent(targetChatId, options.asPlain)
+      ? renderMigratedContent(targetChatId, noLinks)
       : 'another chat',
   );
   content.push(...processed);
 
-  if (options.asPlain) {
+  if (options.asPlainText) {
     return content.join('').trim();
   }
 
@@ -133,47 +133,23 @@ function renderProductContent(message: ApiMessage) {
     : 'a product';
 }
 
-function renderMessageContent(lang: LangFn, message: ApiMessage, options: ActionMessageTextOptions = {}) {
-  const { maxTextLength, isEmbedded, asPlain } = options;
+function renderMessageContent(lang: LangFn, message: ApiMessage, options: RenderOptions = {}) {
+  const { asPlainText, asTextWithSpoilers } = options;
 
-  const text = asPlain
-    ? [trimText(getMessageSummaryText(lang, message), maxTextLength)]
-    : renderMessageSummary(lang, message, undefined, undefined, maxTextLength, true);
-  const {
-    photo, video, document, sticker,
-  } = getMessageContent(message);
-
-  const showQuotes = isEmbedded && text && !photo && !video && !document && !sticker;
-  let messageText = text;
-
-  if (isEmbedded) {
-    if (photo) {
-      messageText = ['a photo'];
-    } else if (video) {
-      messageText = [video.isGif ? 'a GIF' : 'a video'];
-    } else if (document) {
-      messageText = ['a document'];
-    } else if (sticker) {
-      messageText = text;
-    }
+  if (asPlainText) {
+    return getMessageSummaryText(lang, message, undefined, MAX_LENGTH);
   }
 
-  if (asPlain && messageText) {
-    return (showQuotes ? ['«', ...messageText, '»'] : messageText).join('');
-  }
+  const messageSummary = renderMessageSummary(lang, message, undefined, undefined, MAX_LENGTH);
 
-  if (showQuotes) {
+  if (asTextWithSpoilers) {
     return (
-      <span>
-        &laquo;
-        <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
-        &raquo;
-      </span>
+      <span>{messageSummary}</span>
     );
   }
 
   return (
-    <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
+    <MessageLink className="action-link" message={message}>{messageSummary}</MessageLink>
   );
 }
 
@@ -185,30 +161,30 @@ function renderGroupCallContent(groupCall: Partial<ApiGroupCall>, text: TextPart
   );
 }
 
-function renderUserContent(sender: ApiUser, asPlain?: boolean): string | TextPart | undefined {
-  const text = trimText(getUserFullName(sender));
+function renderUserContent(sender: ApiUser, noLinks?: boolean): string | TextPart | undefined {
+  const text = trimText(getUserFullName(sender), MAX_LENGTH);
 
-  if (asPlain) {
+  if (noLinks) {
     return text;
   }
 
   return <UserLink className="action-link" sender={sender}>{sender && renderText(text!)}</UserLink>;
 }
 
-function renderChatContent(lang: LangFn, chat: ApiChat, asPlain?: boolean): string | TextPart | undefined {
-  const text = trimText(getChatTitle(lang, chat));
+function renderChatContent(lang: LangFn, chat: ApiChat, noLinks?: boolean): string | TextPart | undefined {
+  const text = trimText(getChatTitle(lang, chat), MAX_LENGTH);
 
-  if (asPlain) {
+  if (noLinks) {
     return text;
   }
 
   return <ChatLink className="action-link" chatId={chat.id}>{chat && renderText(text!)}</ChatLink>;
 }
 
-function renderMigratedContent(chatId: string, asPlain?: boolean): string | TextPart | undefined {
+function renderMigratedContent(chatId: string, noLinks?: boolean): string | TextPart | undefined {
   const text = 'another chat';
 
-  if (asPlain) {
+  if (noLinks) {
     return text;
   }
 

@@ -98,7 +98,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     targetUsers,
     targetMessage,
     targetChatId,
-    isEmbedded ? { isEmbedded: true } : undefined,
+    { asTextWithSpoilers: isEmbedded },
   );
   const {
     isContextMenuOpen, contextMenuPosition,

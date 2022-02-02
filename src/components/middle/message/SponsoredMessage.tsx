@@ -6,7 +6,7 @@ import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
-import { renderTextWithEntities } from '../../common/helpers/renderMessageText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectChat, selectSponsoredMessage, selectUser } from '../../../modules/selectors';
 import { getChatTitle, getUserFullName } from '../../../modules/helpers';
 import renderText from '../../common/helpers/renderText';

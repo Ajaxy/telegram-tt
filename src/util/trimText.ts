@@ -1,9 +1,7 @@
-const DEFAULT_MAX_TEXT_LENGTH = 30;
-
-export default function trimText(text: string | undefined, length = DEFAULT_MAX_TEXT_LENGTH) {
-  if (!text || text.length <= length) {
+export default function trimText<T extends string | undefined>(text: T, length?: number) {
+  if (!text || !length || text.length <= length) {
     return text;
   }
 
-  return `${text.substr(0, length)}...`;
+  return `${text.substring(0, length)}...`;
 }

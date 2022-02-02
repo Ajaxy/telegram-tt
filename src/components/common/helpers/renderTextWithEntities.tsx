@@ -2,157 +2,21 @@ import { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
 import { getDispatch } from '../../../lib/teact/teactn';
 
-import { ApiMessageEntity, ApiMessageEntityTypes, ApiMessage } from '../../../api/types';
-
-import {
-  getMessageSummaryText,
-  getMessageSummaryDescription,
-  getMessageSummaryEmoji,
-  getMessageText,
-  TRUNCATED_SUMMARY_LENGTH,
-} from '../../../modules/helpers';
+import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
 import renderText, { TextFilter } from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
-import { LangFn } from '../../../hooks/useLang';
 
 export type TextPart =
   string
   | Element;
 
-export function renderMessageSummary(
-  lang: LangFn,
-  message: ApiMessage,
-  noEmoji = false,
-  highlight?: string,
-  truncateLength = TRUNCATED_SUMMARY_LENGTH,
-  shouldAddEllipsis?: boolean,
-): TextPart[] {
-  const hasSpoilers = message.content.text?.entities?.some((l) => l.type === ApiMessageEntityTypes.Spoiler);
-  if (!hasSpoilers) {
-    let text = getMessageSummaryText(lang, message, noEmoji, truncateLength);
-    if (shouldAddEllipsis) {
-      text += '...';
-    }
-
-    if (highlight) {
-      return renderText(text, ['emoji', 'highlight'], {
-        highlight,
-      });
-    } else {
-      return renderText(text);
-    }
-  }
-
-  const text = renderMessageText(message, highlight, undefined, true, truncateLength);
-  const emoji = !noEmoji && getMessageSummaryEmoji(message);
-  const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const description = getMessageSummaryDescription(lang, message, text);
-  return [
-    emojiWithSpace,
-    ...(Array.isArray(description) ? description : [description]),
-    shouldAddEllipsis && '...',
-  ].filter<TextPart>(Boolean);
-}
-
-export function renderMessageText(
-  message: ApiMessage,
-  highlight?: string,
-  shouldRenderHqEmoji?: boolean,
-  isSimple?: boolean,
-  truncateLength?: number,
-) {
-  const formattedText = message.content.text;
-
-  if (!formattedText || !formattedText.text) {
-    const rawText = getMessageText(message);
-    return rawText ? [rawText] : undefined;
-  }
-  const { text, entities } = formattedText;
-
-  return renderTextWithEntities(
-    truncateLength ? text.substr(0, truncateLength) : text,
-    entities,
-    highlight,
-    shouldRenderHqEmoji,
-    undefined,
-    message.id,
-    isSimple,
-  );
-}
-
 interface IOrganizedEntity {
   entity: ApiMessageEntity;
   organizedIndexes: Set<number>;
   nestedEntities: IOrganizedEntity[];
-}
-
-function organizeEntity(
-  entity: ApiMessageEntity,
-  index: number,
-  entities: ApiMessageEntity[],
-  organizedEntityIndexes: Set<number>,
-): IOrganizedEntity | undefined {
-  const { offset, length } = entity;
-  const organizedIndexes = new Set([index]);
-
-  if (organizedEntityIndexes.has(index)) {
-    return undefined;
-  }
-
-  // Determine any nested entities inside current entity
-  const nestedEntities: IOrganizedEntity[] = [];
-  const parsedNestedEntities = entities
-    .filter((e, i) => i > index && e.offset >= offset && e.offset < offset + length)
-    .map((e) => organizeEntity(e, entities.indexOf(e), entities, organizedEntityIndexes))
-    .filter<IOrganizedEntity>(Boolean as any);
-
-  parsedNestedEntities.forEach((parsedEntity) => {
-    let isChanged = false;
-
-    parsedEntity.organizedIndexes.forEach((organizedIndex) => {
-      if (!isChanged && !organizedIndexes.has(organizedIndex)) {
-        isChanged = true;
-      }
-
-      organizedIndexes.add(organizedIndex);
-    });
-
-    if (isChanged) {
-      nestedEntities.push(parsedEntity);
-    }
-  });
-
-  return {
-    entity,
-    organizedIndexes,
-    nestedEntities,
-  };
-}
-
-// Organize entities in a tree-like structure to better represent how the text will be displayed
-function organizeEntities(entities: ApiMessageEntity[]) {
-  const organizedEntityIndexes: Set<number> = new Set();
-  const organizedEntities: IOrganizedEntity[] = [];
-
-  entities.forEach((entity, index) => {
-    if (organizedEntityIndexes.has(index)) {
-      return;
-    }
-
-    const organizedEntity = organizeEntity(entity, index, entities, organizedEntityIndexes);
-    if (organizedEntity) {
-      organizedEntity.organizedIndexes.forEach((organizedIndex) => {
-        organizedEntityIndexes.add(organizedIndex);
-      });
-
-      organizedEntities.push(organizedEntity);
-    }
-  });
-
-  return organizedEntities;
 }
 
 export function renderTextWithEntities(
@@ -283,6 +147,128 @@ export function renderTextWithEntities(
   return result;
 }
 
+export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
+  const { text, entities } = formattedText || {};
+  if (!text) {
+    return '';
+  }
+
+  const result = renderTextWithEntities(
+    text,
+    entities,
+    undefined,
+    undefined,
+    true,
+  );
+
+  if (Array.isArray(result)) {
+    return result.join('');
+  }
+
+  return result;
+}
+
+function renderMessagePart(
+  content: TextPart | TextPart[],
+  highlight?: string,
+  shouldRenderHqEmoji?: boolean,
+  shouldRenderAsHtml?: boolean,
+  isSimple?: boolean,
+) {
+  if (Array.isArray(content)) {
+    const result: TextPart[] = [];
+
+    content.forEach((c) => {
+      result.push(...renderMessagePart(c, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple));
+    });
+
+    return result;
+  }
+
+  if (shouldRenderAsHtml) {
+    return renderText(content, ['escape_html', 'emoji_html', 'br_html']);
+  }
+
+  const emojiFilter = shouldRenderHqEmoji ? 'hq_emoji' : 'emoji';
+
+  const filters: TextFilter[] = [emojiFilter];
+  if (!isSimple) {
+    filters.push('br');
+  }
+
+  if (highlight) {
+    return renderText(content, filters.concat('highlight'), { highlight });
+  } else {
+    return renderText(content, filters);
+  }
+}
+
+// Organize entities in a tree-like structure to better represent how the text will be displayed
+function organizeEntities(entities: ApiMessageEntity[]) {
+  const organizedEntityIndexes: Set<number> = new Set();
+  const organizedEntities: IOrganizedEntity[] = [];
+
+  entities.forEach((entity, index) => {
+    if (organizedEntityIndexes.has(index)) {
+      return;
+    }
+
+    const organizedEntity = organizeEntity(entity, index, entities, organizedEntityIndexes);
+    if (organizedEntity) {
+      organizedEntity.organizedIndexes.forEach((organizedIndex) => {
+        organizedEntityIndexes.add(organizedIndex);
+      });
+
+      organizedEntities.push(organizedEntity);
+    }
+  });
+
+  return organizedEntities;
+}
+
+function organizeEntity(
+  entity: ApiMessageEntity,
+  index: number,
+  entities: ApiMessageEntity[],
+  organizedEntityIndexes: Set<number>,
+): IOrganizedEntity | undefined {
+  const { offset, length } = entity;
+  const organizedIndexes = new Set([index]);
+
+  if (organizedEntityIndexes.has(index)) {
+    return undefined;
+  }
+
+  // Determine any nested entities inside current entity
+  const nestedEntities: IOrganizedEntity[] = [];
+  const parsedNestedEntities = entities
+    .filter((e, i) => i > index && e.offset >= offset && e.offset < offset + length)
+    .map((e) => organizeEntity(e, entities.indexOf(e), entities, organizedEntityIndexes))
+    .filter<IOrganizedEntity>(Boolean as any);
+
+  parsedNestedEntities.forEach((parsedEntity) => {
+    let isChanged = false;
+
+    parsedEntity.organizedIndexes.forEach((organizedIndex) => {
+      if (!isChanged && !organizedIndexes.has(organizedIndex)) {
+        isChanged = true;
+      }
+
+      organizedIndexes.add(organizedIndex);
+    });
+
+    if (isChanged) {
+      nestedEntities.push(parsedEntity);
+    }
+  });
+
+  return {
+    entity,
+    organizedIndexes,
+    nestedEntities,
+  };
+}
+
 function processEntity(
   entity: ApiMessageEntity,
   entityContent: TextPart,
@@ -408,55 +394,6 @@ function processEntity(
   }
 }
 
-function renderMessagePart(
-  content: TextPart | TextPart[],
-  highlight?: string,
-  shouldRenderHqEmoji?: boolean,
-  shouldRenderAsHtml?: boolean,
-  isSimple?: boolean,
-) {
-  if (Array.isArray(content)) {
-    const result: TextPart[] = [];
-
-    content.forEach((c) => {
-      result.push(...renderMessagePart(c, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple));
-    });
-
-    return result;
-  }
-
-  if (shouldRenderAsHtml) {
-    return renderText(content, ['escape_html', 'emoji_html', 'br_html']);
-  }
-
-  const emojiFilter = shouldRenderHqEmoji ? 'hq_emoji' : 'emoji';
-
-  const filters: TextFilter[] = [emojiFilter];
-  if (!isSimple) {
-    filters.push('br');
-  }
-
-  if (highlight) {
-    return renderText(content, filters.concat('highlight'), { highlight });
-  } else {
-    return renderText(content, filters);
-  }
-}
-
-function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
-  const { type, url } = entity;
-  return type === ApiMessageEntityTypes.TextUrl && url ? url : entityContent;
-}
-
-function handleBotCommandClick(e: MouseEvent<HTMLAnchorElement>) {
-  getDispatch().sendBotCommand({ command: e.currentTarget.innerText });
-}
-
-function handleHashtagClick(e: MouseEvent<HTMLAnchorElement>) {
-  getDispatch().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
-  getDispatch().searchTextMessagesLocal();
-}
-
 function processEntityAsHtml(
   entity: ApiMessageEntity,
   entityContent: TextPart,
@@ -509,4 +446,18 @@ function processEntityAsHtml(
     default:
       return renderedContent;
   }
+}
+
+function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
+  const { type, url } = entity;
+  return type === ApiMessageEntityTypes.TextUrl && url ? url : entityContent;
+}
+
+function handleBotCommandClick(e: MouseEvent<HTMLAnchorElement>) {
+  getDispatch().sendBotCommand({ command: e.currentTarget.innerText });
+}
+
+function handleHashtagClick(e: MouseEvent<HTMLAnchorElement>) {
+  getDispatch().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
+  getDispatch().searchTextMessagesLocal();
 }
