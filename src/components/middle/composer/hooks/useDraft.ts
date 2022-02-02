@@ -8,10 +8,10 @@ import usePrevious from '../../../../hooks/usePrevious';
 import { debounce } from '../../../../util/schedulers';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../../../../util/parseMessageInput';
-import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { IS_TOUCH_ENV } from '../../../../util/environment';
+import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
 // Used to avoid running debounced callbacks when chat changes.
 let currentChatId: string | undefined;
@@ -65,7 +65,7 @@ const useDraft = (
       return;
     }
 
-    setHtml(getMessageTextAsHtml(draft));
+    setHtml(getTextWithEntitiesAsHtml(draft));
 
     if (!IS_TOUCH_ENV) {
       requestAnimationFrame(() => {

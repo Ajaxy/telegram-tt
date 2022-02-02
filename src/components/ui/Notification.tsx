@@ -8,9 +8,9 @@ import React, {
 
 import { ANIMATION_END_DELAY } from '../../config';
 import useShowTransition from '../../hooks/useShowTransition';
-import { TextPart } from '../common/helpers/renderMessageText';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { TextPart } from '../common/helpers/renderMessageText';
 
 import Portal from './Portal';
 

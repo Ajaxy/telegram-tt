@@ -287,7 +287,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
         actionTargetUsers,
         actionTargetMessage,
         actionTargetChatId,
-        { asPlain: true },
+        { asPlainText: true },
       ) as string;
     } else {
       const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);

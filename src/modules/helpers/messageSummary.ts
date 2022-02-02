@@ -1,8 +1,10 @@
+import type { TextPart } from '../../components/common/helpers/renderTextWithEntities';
+
 import { LangFn } from '../../hooks/useLang';
 import { ApiMessage, ApiMessageEntityTypes } from '../../api/types';
-import type { TextPart } from '../../components/common/helpers/renderMessageText';
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 import { getMessageText } from './messages';
+import trimText from '../../util/trimText';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 80;
@@ -15,7 +17,7 @@ export function getMessageSummaryText(
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const text = getMessageTextWithSpoilers(message)?.substr(0, truncateLength);
+  const text = trimText(getMessageTextWithSpoilers(message), truncateLength);
   const description = getMessageSummaryDescription(lang, message, text);
 
   return `${emojiWithSpace}${description}`;
@@ -38,6 +40,7 @@ export function getMessageTextWithSpoilers(message: ApiMessage) {
     }
 
     const spoiler = generateBrailleSpoiler(length);
+
 
     return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
   }, text);

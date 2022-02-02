@@ -247,6 +247,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,
+            { asTextWithSpoilers: true },
           )}
         </p>
       );
