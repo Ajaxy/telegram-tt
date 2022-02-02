@@ -3,6 +3,8 @@ import React, {
   FC, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
 
+import { CHAT_HEIGHT_PX } from '../../config';
+import { IS_ANDROID } from '../../util/environment';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
@@ -27,10 +29,11 @@ export type OwnProps = {
   filterRef: RefObject<HTMLInputElement>;
   filterPlaceholder: string;
   filter: string;
-  onFilterChange: (filter: string) => void;
   loadMore: NoneToVoidFunction;
+  onFilterChange: (filter: string) => void;
   onSelectChatOrUser: (chatOrUserId: string) => void;
   onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
 };
 
 const ChatOrUserPicker: FC<OwnProps> = ({
@@ -40,10 +43,11 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   filterRef,
   filter,
   filterPlaceholder,
-  onFilterChange,
-  onClose,
   loadMore,
+  onFilterChange,
   onSelectChatOrUser,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
   const lang = useLang();
   const [viewportIds, getMore] = useInfiniteScroll(loadMore, chatOrUserIds, Boolean(filter));
@@ -85,35 +89,47 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     </div>
   );
 
+  const viewportOffset = chatOrUserIds!.indexOf(viewportIds![0]);
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
       className="ChatOrUserPicker"
       header={modalHeader}
+      onClose={onClose}
+      onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {viewportIds?.length ? (
         <InfiniteScroll
+          ref={containerRef}
           className="picker-list custom-scroll"
           items={viewportIds}
           onLoadMore={getMore}
-          noScrollRestore={Boolean(filter)}
-          ref={containerRef}
+          noFastList
+          noScrollRestore
           onKeyDown={handleKeyDown}
         >
-          {viewportIds.map((id) => (
-            <ListItem
-              key={id}
-              className="chat-item-clickable force-rounded-corners"
-              onClick={() => onSelectChatOrUser(id)}
-            >
-              {isUserId(id) ? (
-                <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
-              ) : (
-                <GroupChatInfo chatId={id} />
-              )}
-            </ListItem>
-          ))}
+          <div
+            className="scroll-container"
+            // @ts-ignore
+            style={IS_ANDROID ? `height: ${chatOrUserIds!.length * CHAT_HEIGHT_PX}px` : undefined}
+            teactFastList
+          >
+            {viewportIds.map((id, i) => (
+              <ListItem
+                key={id}
+                className="chat-item-clickable force-rounded-corners"
+                style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+                onClick={() => onSelectChatOrUser(id)}
+              >
+                {isUserId(id) ? (
+                  <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
+                ) : (
+                  <GroupChatInfo chatId={id} />
+                )}
+              </ListItem>
+            ))}
+          </div>
         </InfiniteScroll>
       ) : viewportIds && !viewportIds.length ? (
         <p className="no-results">{lang('lng_blocked_list_not_found')}</p>

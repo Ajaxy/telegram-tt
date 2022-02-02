@@ -1,5 +1,5 @@
 import React, {
-  FC, useMemo, useState, memo, useRef, useCallback,
+  FC, useMemo, useState, memo, useRef, useCallback, useEffect,
 } from '../../lib/teact/teact';
 import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
@@ -14,6 +14,7 @@ import {
 import { unique } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useFlag from '../../hooks/useFlag';
 
 import ChatOrUserPicker from '../common/ChatOrUserPicker';
 
@@ -50,6 +51,13 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const filterRef = useRef<HTMLInputElement>(null);
 
+  const [isShown, markIsShown, unmarkIsShown] = useFlag();
+  useEffect(() => {
+    if (isOpen) {
+      markIsShown();
+    }
+  }, [isOpen, markIsShown]);
+
   const chatAndContactIds = useMemo(() => {
     if (!isOpen) {
       return undefined;
@@ -82,7 +90,11 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
     setForwardChatId({ id: userId });
   }, [setForwardChatId]);
 
-  const renderingChatAndContactIds = useCurrentOrPrev(chatAndContactIds)!;
+  const renderingChatAndContactIds = useCurrentOrPrev(chatAndContactIds, true)!;
+
+  if (!isOpen && !isShown) {
+    return undefined;
+  }
 
   return (
     <ChatOrUserPicker
@@ -96,6 +108,7 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
       loadMore={loadMoreChats}
       onSelectChatOrUser={handleSelectUser}
       onClose={exitForwardMode}
+      onCloseAnimationEnd={unmarkIsShown}
     />
   );
 };

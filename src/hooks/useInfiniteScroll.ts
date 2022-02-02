@@ -34,6 +34,10 @@ const useInfiniteScroll = <ListId extends string | number>(
 
   const forceUpdate = useForceUpdate();
 
+  if (isDisabled) {
+    lastParamsRef.current = {};
+  }
+
   const prevListIds = usePrevious(listIds);
   const prevIsDisabled = usePrevious(isDisabled);
   if (listIds && !isDisabled && (listIds !== prevListIds || isDisabled !== prevIsDisabled)) {

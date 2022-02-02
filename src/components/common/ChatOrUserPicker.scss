@@ -46,7 +46,7 @@
       height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
-      padding: 0 1rem 1rem;
+      padding: 0 0.5rem;
     }
   }
 
@@ -58,6 +58,15 @@
     align-items: center;
     justify-content: center;
     color: var(--color-text-secondary);
+  }
+
+  .scroll-container {
+    position: relative;
+  }
+
+  .ListItem {
+    position: absolute;
+    width: 100%;
   }
 
   .ListItem.chat-item-clickable {
