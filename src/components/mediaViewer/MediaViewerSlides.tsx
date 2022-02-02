@@ -524,7 +524,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
             messageId={activeMessageId}
-            isActive={isActiveRef.current}
+            isActive={isActive && isActiveRef.current}
             isFooterHidden={isFooterHidden || isZoomed || scale !== 1}
           />
         </div>
