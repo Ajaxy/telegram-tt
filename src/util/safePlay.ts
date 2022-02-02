@@ -1,6 +1,6 @@
 import { DEBUG } from '../config';
 
-export default (mediaEl: HTMLMediaElement) => {
+const safePlay = (mediaEl: HTMLMediaElement) => {
   mediaEl.play().catch((err) => {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -8,3 +8,5 @@ export default (mediaEl: HTMLMediaElement) => {
     }
   });
 };
+
+export default safePlay;

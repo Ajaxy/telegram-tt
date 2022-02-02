@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // We don't care about this since Parcel runs Babel after TypeScript
+    // We don't care about this since Webpack runs Babel after TypeScript
     "target": "esnext",
     "lib": [
       "dom",

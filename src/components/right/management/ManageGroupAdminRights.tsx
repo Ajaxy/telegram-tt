@@ -202,7 +202,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
           <div className="ListItem no-selection">
             <Checkbox
               name="changeInfo"
-              checked={!!permissions.changeInfo}
+              checked={Boolean(permissions.changeInfo)}
               label={lang(isChannel ? 'EditAdminChangeChannelInfo' : 'EditAdminChangeGroupInfo')}
               blocking
               disabled={getControlIsDisabled('changeInfo')}
@@ -213,7 +213,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             <div className="ListItem no-selection">
               <Checkbox
                 name="postMessages"
-                checked={!!permissions.postMessages}
+                checked={Boolean(permissions.postMessages)}
                 label={lang('EditAdminPostMessages')}
                 blocking
                 disabled={getControlIsDisabled('postMessages')}
@@ -225,7 +225,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             <div className="ListItem no-selection">
               <Checkbox
                 name="editMessages"
-                checked={!!permissions.editMessages}
+                checked={Boolean(permissions.editMessages)}
                 label={lang('EditAdminEditMessages')}
                 blocking
                 disabled={getControlIsDisabled('editMessages')}
@@ -236,7 +236,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
           <div className="ListItem no-selection">
             <Checkbox
               name="deleteMessages"
-              checked={!!permissions.deleteMessages}
+              checked={Boolean(permissions.deleteMessages)}
               label={lang(isChannel ? 'EditAdminDeleteMessages' : 'EditAdminGroupDeleteMessages')}
               blocking
               disabled={getControlIsDisabled('deleteMessages')}
@@ -247,7 +247,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             <div className="ListItem no-selection">
               <Checkbox
                 name="banUsers"
-                checked={!!permissions.banUsers}
+                checked={Boolean(permissions.banUsers)}
                 label={lang('EditAdminBanUsers')}
                 blocking
                 disabled={getControlIsDisabled('banUsers')}
@@ -258,7 +258,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
           <div className="ListItem no-selection">
             <Checkbox
               name="inviteUsers"
-              checked={!!permissions.inviteUsers}
+              checked={Boolean(permissions.inviteUsers)}
               label={lang('EditAdminAddUsers')}
               blocking
               disabled={getControlIsDisabled('inviteUsers')}
@@ -269,7 +269,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             <div className="ListItem no-selection">
               <Checkbox
                 name="pinMessages"
-                checked={!!permissions.pinMessages}
+                checked={Boolean(permissions.pinMessages)}
                 label={lang('EditAdminPinMessages')}
                 blocking
                 disabled={getControlIsDisabled('pinMessages')}
@@ -280,7 +280,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
           <div className="ListItem no-selection">
             <Checkbox
               name="addAdmins"
-              checked={!!permissions.addAdmins}
+              checked={Boolean(permissions.addAdmins)}
               label={lang('EditAdminAddAdmins')}
               blocking
               disabled={getControlIsDisabled('addAdmins')}
@@ -290,7 +290,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
           <div className="ListItem no-selection">
             <Checkbox
               name="manageCall"
-              checked={!!permissions.manageCall}
+              checked={Boolean(permissions.manageCall)}
               label={lang('StartVoipChatPermission')}
               blocking
               disabled={getControlIsDisabled('manageCall')}
@@ -301,7 +301,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             <div className="ListItem no-selection">
               <Checkbox
                 name="anonymous"
-                checked={!!permissions.anonymous}
+                checked={Boolean(permissions.anonymous)}
                 label={lang('EditAdminSendAnonymously')}
                 blocking
                 disabled={getControlIsDisabled('anonymous')}

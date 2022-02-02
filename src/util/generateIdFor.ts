@@ -1,4 +1,4 @@
-export default (store: AnyLiteral) => {
+const generateIdFor = (store: AnyLiteral) => {
   let id;
 
   do {
@@ -7,3 +7,5 @@ export default (store: AnyLiteral) => {
 
   return id;
 };
+
+export default generateIdFor;

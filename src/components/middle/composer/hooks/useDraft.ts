@@ -17,7 +17,7 @@ import { IS_TOUCH_ENV } from '../../../../util/environment';
 let currentChatId: string | undefined;
 let currentThreadId: number | undefined;
 
-export default (
+const useDraft = (
   draft: ApiFormattedText | undefined,
   chatId: string,
   threadId: number,
@@ -105,3 +105,5 @@ export default (
   useBackgroundMode(handleBlur);
   useBeforeUnload(handleBlur);
 };
+
+export default useDraft;

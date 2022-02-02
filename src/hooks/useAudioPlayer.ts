@@ -15,7 +15,7 @@ type Handler = (e: Event) => void;
 
 const DEFAULT_SKIP_TIME = 10;
 
-export default (
+const useAudioPlayer = (
   trackId: TrackId,
   originalDuration: number, // Sometimes incorrect for voice messages
   trackType: Track['type'],
@@ -54,7 +54,7 @@ export default (
           registerMediaSession(metadata, makeMediaHandlers(controllerRef));
           setPlaybackState('playing');
           setVolume(getGlobal().audioPlayer.volume);
-          toggleMuted(!!getGlobal().audioPlayer.isMuted);
+          toggleMuted(Boolean(getGlobal().audioPlayer.isMuted));
           if (trackType === 'voice') {
             setPlaybackRate(getGlobal().audioPlayer.playbackRate);
           }
@@ -242,3 +242,5 @@ function makeMediaHandlers(controllerRef: React.RefObject<ReturnType<typeof regi
   }
   return mediaHandlers;
 }
+
+export default useAudioPlayer;

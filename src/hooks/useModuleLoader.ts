@@ -6,7 +6,7 @@ import {
 
 import useForceUpdate from './useForceUpdate';
 
-export default <B extends Bundles, M extends BundleModules<B>>(
+const useModuleLoader = <B extends Bundles, M extends BundleModules<B>>(
   bundleName: B, moduleName: M, noLoad = false, autoUpdate = false,
 ) => {
   const module = getModuleFromMemory(bundleName, moduleName);
@@ -28,3 +28,5 @@ export default <B extends Bundles, M extends BundleModules<B>>(
 
   return module;
 };
+
+export default useModuleLoader;

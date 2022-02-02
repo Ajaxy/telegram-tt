@@ -253,6 +253,6 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
   }
 }
 
-self.onsync = () => {
-  lastSyncAt = new Date().valueOf();
-};
+self.addEventListener('sync', () => {
+  lastSyncAt = Date.now();
+});

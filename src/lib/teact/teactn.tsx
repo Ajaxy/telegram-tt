@@ -99,7 +99,7 @@ function updateContainers() {
 
     try {
       newMappedProps = mapStateToProps(currentGlobal, ownProps);
-    } catch (err) {
+    } catch (err: any) {
       handleError(err);
 
       return;
@@ -205,7 +205,7 @@ export function withGlobal<OwnProps>(
 
         try {
           container.mappedProps = mapStateToProps(currentGlobal, props);
-        } catch (err) {
+        } catch (err: any) {
           handleError(err);
         }
       }

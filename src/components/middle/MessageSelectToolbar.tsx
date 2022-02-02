@@ -126,7 +126,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
           {formattedMessagesCount}
         </span>
 
-        {!!selectedMessagesCount && (
+        {Boolean(selectedMessagesCount) && (
           <div className="MessageSelectToolbar-actions">
             {messageListType !== 'scheduled' && (
               renderButton(

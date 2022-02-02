@@ -1,6 +1,6 @@
 import { useEffect } from '../lib/teact/teact';
 
-export default (container: HTMLElement | null, isDisabled?: boolean) => {
+const useHorizontalScroll = (container: HTMLElement | null, isDisabled?: boolean) => {
   useEffect(() => {
     if (!container || isDisabled) {
       return undefined;
@@ -20,3 +20,5 @@ export default (container: HTMLElement | null, isDisabled?: boolean) => {
     };
   }, [container, isDisabled]);
 };
+
+export default useHorizontalScroll;

@@ -8,7 +8,7 @@ const MIN_READY_STATE = 3;
 // Avoid flickering when re-mounting previously buffered video
 const DEBOUNCE = 200;
 
-export default (noInitiallyBuffered = false) => {
+const useBuffering = (noInitiallyBuffered = false) => {
   const [isBuffered, setIsBuffered] = useState(!noInitiallyBuffered);
   const [bufferedProgress, setBufferedProgress] = useState(0);
 
@@ -46,3 +46,5 @@ export default (noInitiallyBuffered = false) => {
     },
   };
 };
+
+export default useBuffering;

@@ -713,7 +713,7 @@ addReducer('updateChatMemberBannedRights', (global, actions, payload) => {
 
     const { members, kickedMembers } = chatAfterUpdate.fullInfo;
 
-    const isBanned = !!bannedRights.viewMessages;
+    const isBanned = Boolean(bannedRights.viewMessages);
     const isUnblocked = !Object.keys(bannedRights).length;
 
     setGlobal(updateChat(newGlobal, chatId, {
@@ -1184,7 +1184,7 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
         photo,
       });
     }
-  } catch (e) {
+  } catch (e: any) {
     if (e.message === 'USERS_TOO_FEW') {
       const global = getGlobal();
       setGlobal({

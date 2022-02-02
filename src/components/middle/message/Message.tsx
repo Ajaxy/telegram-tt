@@ -1041,7 +1041,9 @@ export default memo(withGlobal<OwnProps>(
       isInSelectMode: selectIsInSelectMode(global),
       isSelected,
       isGroupSelected: (
-        !!message.groupedId && !message.isInAlbum && selectIsDocumentGroupSelected(global, chatId, message.groupedId)
+        Boolean(message.groupedId)
+        && !message.isInAlbum
+        && selectIsDocumentGroupSelected(global, chatId, message.groupedId)
       ),
       threadId,
       isDownloading,

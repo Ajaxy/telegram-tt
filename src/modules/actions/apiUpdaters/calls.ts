@@ -44,7 +44,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       participants.forEach((participant) => {
         if (participant.id) {
           global = updateGroupCallParticipant(global, groupCallId, participant.id, participant,
-            !!nextOffset || currentUserId === participant.id);
+            Boolean(nextOffset) || currentUserId === participant.id);
         }
       });
       if (nextOffset) {

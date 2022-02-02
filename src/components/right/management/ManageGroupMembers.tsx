@@ -95,7 +95,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
     const chatsById = getGlobal().chats.byId;
-    const shouldUseSearchResults = !!searchQuery;
+    const shouldUseSearchResults = Boolean(searchQuery);
     const listedIds = !shouldUseSearchResults
       ? memberIds
       : (localContactIds ? filterUsersByName(localContactIds, usersById, searchQuery) : []);

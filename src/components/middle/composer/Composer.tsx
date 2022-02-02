@@ -682,7 +682,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       + (isWhenOnline ? 0 : serverTimeOffset);
 
     if (!scheduledMessageArgs || Object.keys(restArgs).length === 0) {
-      void handleSend(!!isSilent, scheduledAt);
+      void handleSend(Boolean(isSilent), scheduledAt);
     } else {
       sendMessage({
         ...scheduledMessageArgs,

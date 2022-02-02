@@ -594,7 +594,7 @@ Duplicate ?
 function isListLike(item) {
     return (
         Array.isArray(item) ||
-        (!!item &&
+        (Boolean(item) &&
             typeof item === 'object' &&
             typeof (item.length) === 'number' &&
             (item.length === 0 ||

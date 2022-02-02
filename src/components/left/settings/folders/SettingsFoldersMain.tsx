@@ -189,7 +189,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         ) : <Loading />}
       </div>
 
-      {(recommendedChatFolders && !!recommendedChatFolders.length) && (
+      {(recommendedChatFolders && Boolean(recommendedChatFolders.length)) && (
         <div className="settings-item pt-3">
           <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('FilterRecommended')}

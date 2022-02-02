@@ -4,7 +4,7 @@ import useOnChange from './useOnChange';
 
 export type LangFn = typeof langProvider.getTranslation;
 
-export default (): LangFn => {
+const useLang = (): LangFn => {
   const forceUpdate = useForceUpdate();
 
   useOnChange(() => {
@@ -13,3 +13,5 @@ export default (): LangFn => {
 
   return langProvider.getTranslation;
 };
+
+export default useLang;

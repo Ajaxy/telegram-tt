@@ -31,7 +31,7 @@ const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map
   colors: [hexToRgb(themeColors[property][0]), hexToRgb(themeColors[property][1])],
 }));
 
-export default (theme: ISettings['theme'], withAnimation: boolean) => {
+const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
   const isDarkTheme = theme === 'dark';
   const shouldAnimate = isInitialized && withAnimation;
   const startIndex = isDarkTheme ? 0 : 1;
@@ -102,3 +102,5 @@ function applyColorAnimationStep(startIndex: number, endIndex: number, interpola
     }
   });
 }
+
+export default switchTheme;

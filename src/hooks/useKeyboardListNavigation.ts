@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 import { useState, useCallback, useEffect } from '../lib/teact/teact';
 
-export default (
+const useKeyboardListNavigation = (
   elementRef: RefObject<HTMLElement>,
   isOpen: boolean,
   onSelectWithEnter?: (index: number) => void,
@@ -60,3 +60,5 @@ export default (
 
   return handleKeyDown;
 };
+
+export default useKeyboardListNavigation;

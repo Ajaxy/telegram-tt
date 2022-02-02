@@ -56,6 +56,8 @@ const twoFaReducer: StateReducer<TwoFaState, TwoFaActions> = (
   }
 };
 
-export default () => {
+const useTwoFaReducer = () => {
   return useReducer(twoFaReducer, INITIAL_STATE);
 };
+
+export default useTwoFaReducer;

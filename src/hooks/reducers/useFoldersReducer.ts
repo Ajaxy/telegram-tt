@@ -238,6 +238,8 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
   }
 };
 
-export default () => {
+const useFoldersReducer = () => {
   return useReducer(foldersReducer, INITIAL_STATE);
 };
+
+export default useFoldersReducer;

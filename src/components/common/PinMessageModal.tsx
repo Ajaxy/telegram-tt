@@ -102,9 +102,9 @@ export default memo(withGlobal<OwnProps>(
     const isPrivateChat = isUserId(chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const chat = selectChat(global, chatId);
-    const isChannel = !!chat && isChatChannel(chat);
-    const isGroup = !!chat && isChatBasicGroup(chat);
-    const isSuperGroup = !!chat && isChatSuperGroup(chat);
+    const isChannel = Boolean(chat) && isChatChannel(chat);
+    const isGroup = Boolean(chat) && isChatBasicGroup(chat);
+    const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
     const canPinForAll = (isPrivateChat && !isChatWithSelf) || isSuperGroup || isGroup;
     const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))

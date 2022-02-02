@@ -5,7 +5,7 @@ import { ApiMediaFormat } from '../api/types';
 import * as mediaLoader from '../util/mediaLoader';
 import useForceUpdate from './useForceUpdate';
 
-export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
+const useMedia =  <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaHash: string | false | undefined,
   noLoad = false,
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
@@ -33,3 +33,5 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
 
   return mediaData;
 };
+
+export default useMedia;

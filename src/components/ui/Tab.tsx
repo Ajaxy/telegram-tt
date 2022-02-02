@@ -79,7 +79,7 @@ const Tab: FC<OwnProps> = ({
     >
       <span>
         {renderText(title)}
-        {!!badgeCount && (
+        {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
         <i />

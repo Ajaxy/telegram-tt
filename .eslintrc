@@ -63,6 +63,7 @@
     ],
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/member-delimiter-style": "error",
+    "@typescript-eslint/default-param-last": "off",
     "teactn/prefer-separate-component-file": "off"
   },
   "settings": {

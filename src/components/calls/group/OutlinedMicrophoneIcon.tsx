@@ -16,7 +16,7 @@ const OutlinedMicrophoneIcon: FC<OwnProps> = ({
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
   const isRaiseHand = Boolean(participant.raiseHandRating);
   const prevIsRaiseHand = usePrevious(isRaiseHand);
-  const canSelfUnmute = !!participant?.canSelfUnmute;
+  const canSelfUnmute = Boolean(participant?.canSelfUnmute);
   const shouldRaiseHand = !canSelfUnmute && isMuted;
   const prevIsMuted = usePrevious(isMuted);
 

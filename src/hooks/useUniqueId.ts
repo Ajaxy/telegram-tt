@@ -3,7 +3,7 @@ import generateIdFor from '../util/generateIdFor';
 
 const store: Record<string, boolean> = {};
 
-export default () => {
+const useUniqueId = () => {
   const idRef = useRef<string>();
 
   if (!idRef.current) {
@@ -13,3 +13,5 @@ export default () => {
 
   return idRef.current;
 };
+
+export default useUniqueId;

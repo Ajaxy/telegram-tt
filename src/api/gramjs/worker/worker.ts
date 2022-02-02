@@ -58,7 +58,7 @@ onmessage = async (message: OriginMessageEvent) => {
             response,
           }, arrayBuffer);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (DEBUG) {
           // eslint-disable-next-line no-console
           console.error(error);

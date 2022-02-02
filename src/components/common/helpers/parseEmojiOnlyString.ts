@@ -5,7 +5,7 @@ const DETECT_UP_TO = 3;
 const MAX_LENGTH = DETECT_UP_TO * 8; // Maximum 8 per one emoji.
 const RE_EMOJI_ONLY = new RegExp(`^(?:${twemojiRegex.source})+$`, '');
 
-export default (text: string): number | false => {
+const parseEmojiOnlyString = (text: string): number | false => {
   if (text.length > MAX_LENGTH) {
     return false;
   }
@@ -27,3 +27,5 @@ export default (text: string): number | false => {
 
   return emojiCount;
 };
+
+export default parseEmojiOnlyString;

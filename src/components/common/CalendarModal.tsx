@@ -301,7 +301,7 @@ const CalendarModal: FC<OwnProps> = ({
                 selectedDay === formatDay(currentYear, currentMonth, gridDate) && 'selected',
               )}
             >
-              {!!gridDate && (
+              {Boolean(gridDate) && (
                 <span>{gridDate}</span>
               )}
             </div>

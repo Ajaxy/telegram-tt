@@ -19,18 +19,32 @@ module.exports = (env = {}, argv = {}) => {
     entry: './src/index.tsx',
     target: 'web',
     devServer: {
-      contentBase: [
-        path.resolve(__dirname, 'public'),
-        path.resolve(__dirname, 'node_modules/emoji-data-ios'),
-        path.resolve(__dirname, 'node_modules/opus-recorder/dist'),
-        path.resolve(__dirname, 'src/lib/webp'),
-        path.resolve(__dirname, 'src/lib/rlottie'),
-        path.resolve(__dirname, 'src/lib/secret-sauce'),
-      ],
       port: 1234,
       host: '0.0.0.0',
-      disableHostCheck: true,
-      stats: 'minimal'
+      allowedHosts: "all",
+      static: [
+        {
+          directory: path.resolve(__dirname, 'public'),
+        },
+        {
+          directory: path.resolve(__dirname, 'node_modules/emoji-data-ios'),
+        },
+        {
+          directory: path.resolve(__dirname, 'node_modules/opus-recorder/dist'),
+        },
+        {
+          directory: path.resolve(__dirname, 'src/lib/webp'),
+        },
+        {
+          directory: path.resolve(__dirname, 'src/lib/rlottie'),
+        },
+        {
+          directory: path.resolve(__dirname, 'src/lib/secret-sauce'),
+        },
+      ],
+      devMiddleware: {
+        stats: 'minimal',
+      },
     },
     output: {
       filename: '[name].[contenthash].js',

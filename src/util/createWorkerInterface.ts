@@ -43,7 +43,7 @@ export default function createInterface(api: Record<string, Function>) {
               arrayBuffers,
             );
           }
-        } catch (error) {
+        } catch (error: any) {
           if (DEBUG) {
             // eslint-disable-next-line no-console
             console.error(error);

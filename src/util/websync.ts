@@ -34,7 +34,7 @@ export const forceWebsync = (authed: boolean) => {
       return new Promise<void>((resolve, reject) => {
         const script = document.createElement('script');
 
-        const removeElement = () => !!document.body.removeChild(script);
+        const removeElement = () => Boolean(document.body.removeChild(script));
 
         script.src = url + new URLSearchParams({
           authed: Number(authed).toString(),

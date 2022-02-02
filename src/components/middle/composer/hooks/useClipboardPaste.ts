@@ -7,7 +7,7 @@ import { EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_MESSAGE_LENGTH = 4096;
 
-export default (
+const useClipboardPaste = (
   insertTextAndUpdateCursor: (text: string, inputId?: string) => void,
   setAttachments: StateHookSetter<ApiAttachment[]>,
   editedMessage: ApiMessage | undefined,
@@ -55,3 +55,5 @@ export default (
     };
   }, [insertTextAndUpdateCursor, editedMessage, setAttachments]);
 };
+
+export default useClipboardPaste;

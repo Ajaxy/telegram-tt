@@ -1,6 +1,6 @@
 import { useCallback, useState } from '../lib/teact/teact';
 
-export default (initial = false): [boolean, AnyToVoidFunction, AnyToVoidFunction] => {
+const useFlag = (initial = false): [boolean, AnyToVoidFunction, AnyToVoidFunction] => {
   const [value, setValue] = useState(initial);
 
   const setTrue = useCallback(() => {
@@ -13,3 +13,5 @@ export default (initial = false): [boolean, AnyToVoidFunction, AnyToVoidFunction
 
   return [value, setTrue, setFalse];
 };
+
+export default useFlag;

@@ -53,7 +53,7 @@ export async function checkPassword(currentPassword: string) {
     await updateTwoFaSettings({ isCheckPassword: true, currentPassword });
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     onError(err);
 
     return false;
@@ -65,7 +65,7 @@ export async function clearPassword(currentPassword: string) {
     await updateTwoFaSettings({ currentPassword });
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     onError(err);
 
     return false;
@@ -84,7 +84,7 @@ export async function updatePassword(currentPassword: string, password: string, 
     });
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     onError(err);
 
     return false;
@@ -102,7 +102,7 @@ export async function updateRecoveryEmail(currentPassword: string, email: string
     });
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     onError(err);
 
     return false;

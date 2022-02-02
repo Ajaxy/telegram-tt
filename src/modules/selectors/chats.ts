@@ -133,17 +133,17 @@ export function selectIsChatPinned(global: GlobalState, chatId: string, folderId
   const { active, archived } = global.chats.orderedPinnedIds;
 
   if (folderId === ALL_FOLDER_ID) {
-    return !!active && active.includes(chatId);
+    return Boolean(active?.includes(chatId));
   }
 
   if (folderId === ARCHIVED_FOLDER_ID) {
-    return !!archived && archived.includes(chatId);
+    return Boolean(archived?.includes(chatId));
   }
 
   const { byId: chatFoldersById } = global.chatFolders;
 
   const { pinnedChatIds } = chatFoldersById[folderId] || {};
-  return !!pinnedChatIds && pinnedChatIds.includes(chatId);
+  return Boolean(pinnedChatIds?.includes(chatId));
 }
 
 // Slow, not to be used in `withGlobal`

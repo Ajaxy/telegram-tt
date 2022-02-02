@@ -6,7 +6,7 @@ import { ApiDimensions } from '../api/types';
 
 const THROTTLE = 250;
 
-export default () => {
+const useWindowSize = () => {
   const [size, setSize] = useState<ApiDimensions>(windowSize.get());
 
   useEffect(() => {
@@ -23,3 +23,5 @@ export default () => {
 
   return size;
 };
+
+export default useWindowSize;

@@ -230,7 +230,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
         // eslint-disable-next-line no-underscore-dangle
         if (update._entities && update._entities.some((e): e is GramJs.User => (
-          e instanceof GramJs.User && !!e.self && e.id === action.userId
+          e instanceof GramJs.User && Boolean(e.self) && e.id === action.userId
         ))) {
           onUpdate({
             '@type': 'updateChat',
@@ -248,7 +248,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       } else if (action instanceof GramJs.MessageActionChatAddUser) {
         // eslint-disable-next-line no-underscore-dangle
         if (update._entities && update._entities.some((e): e is GramJs.User => (
-          e instanceof GramJs.User && !!e.self && action.users.includes(e.id)
+          e instanceof GramJs.User && Boolean(e.self) && action.users.includes(e.id)
         ))) {
           onUpdate({
             '@type': 'updateChatJoin',
