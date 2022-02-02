@@ -203,7 +203,10 @@ const MiddleColumn: FC<StateProps> = ({
   );
 
   const { isReady, handleOpenEnd, handleSlideStop } = useIsReady(
-    animationLevel, currentTransitionKey, prevTransitionKey, chatId,
+    !shouldSkipHistoryAnimations && animationLevel !== ANIMATION_LEVEL_MIN,
+    currentTransitionKey,
+    prevTransitionKey,
+    chatId,
   );
 
   useEffect(() => {
@@ -608,7 +611,7 @@ export default memo(withGlobal(
 )(MiddleColumn));
 
 function useIsReady(
-  animationLevel?: number,
+  withAnimations?: boolean,
   currentTransitionKey?: number,
   prevTransitionKey?: number,
   chatId?: string,
@@ -618,7 +621,7 @@ function useIsReady(
 
   const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
   if (willSwitchMessageList) {
-    if (animationLevel !== ANIMATION_LEVEL_MIN) {
+    if (withAnimations) {
       setIsReady(false);
     } else {
       forceUpdate();
@@ -626,10 +629,10 @@ function useIsReady(
   }
 
   useOnChange(() => {
-    if (animationLevel === ANIMATION_LEVEL_MIN) {
+    if (!withAnimations) {
       setIsReady(true);
     }
-  }, [animationLevel]);
+  }, [withAnimations]);
 
   function handleOpenEnd(e: React.TransitionEvent<HTMLDivElement>) {
     if (e.propertyName === 'transform' && e.target === e.currentTarget) {
@@ -643,7 +646,7 @@ function useIsReady(
 
   return {
     isReady: isReady && !willSwitchMessageList,
-    handleOpenEnd: animationLevel !== ANIMATION_LEVEL_MIN ? handleOpenEnd : undefined,
-    handleSlideStop: animationLevel !== ANIMATION_LEVEL_MIN ? handleSlideStop : undefined,
+    handleOpenEnd: withAnimations ? handleOpenEnd : undefined,
+    handleSlideStop: withAnimations ? handleSlideStop : undefined,
   };
 }
