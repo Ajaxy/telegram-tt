@@ -436,7 +436,9 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
     element.className = value;
     // An optimization attempt
   } else if (key === 'value') {
-    (element as HTMLInputElement).value = value;
+    if ((element as HTMLInputElement).value !== value) {
+      (element as HTMLInputElement).value = value;
+    }
   } else if (key === 'style') {
     element.style.cssText = value;
   } else if (key === 'dangerouslySetInnerHTML') {
