@@ -30,16 +30,18 @@ type StateProps = {
   user?: ApiUser;
   isPinned?: boolean;
   isMuted?: boolean;
+  canChangeFolder?: boolean;
 };
 
 const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   chatId,
+  withUsername,
+  onClick,
   chat,
   user,
   isPinned,
   isMuted,
-  withUsername,
-  onClick,
+  canChangeFolder,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
@@ -49,6 +51,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     user,
     isPinned,
     isMuted,
+    canChangeFolder,
     handleDelete: openDeleteModal,
     handleChatFolderChange: openChatFolderModal,
   }, true);
@@ -104,6 +107,7 @@ export default memo(withGlobal<OwnProps>(
       user,
       isPinned,
       isMuted,
+      canChangeFolder: Boolean(global.chatFolders.orderedIds?.length),
     };
   },
 )(LeftSearchResultChat));
