@@ -201,7 +201,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             <i className="icon-recent" />
           ) : stickerSet.id === 'favorite' ? (
             <i className="icon-favorite" />
-          ) : stickerSet.isAnimated ? (
+          ) : stickerSet.isLottie ? (
             <StickerSetCoverAnimated
               stickerSet={stickerSet as ApiStickerSet}
               observeIntersection={observeIntersectionForCovers}

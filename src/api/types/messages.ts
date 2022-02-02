@@ -25,7 +25,8 @@ export interface ApiSticker {
   stickerSetId: string;
   stickerSetAccessHash?: string;
   emoji?: string;
-  isAnimated: boolean;
+  isLottie: boolean;
+  isGif: boolean;
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
@@ -34,7 +35,8 @@ export interface ApiSticker {
 
 export interface ApiStickerSet {
   archived?: true;
-  isAnimated?: true;
+  isLottie?: true;
+  isGifs?: true;
   installedDate?: number;
   id: string;
   accessHash: string;

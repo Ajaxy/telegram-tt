@@ -22,6 +22,7 @@ module.exports = (env = {}, argv = {}) => {
       port: 1234,
       host: '0.0.0.0',
       allowedHosts: "all",
+      hot: false,
       static: [
         {
           directory: path.resolve(__dirname, 'public'),

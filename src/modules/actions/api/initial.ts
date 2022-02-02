@@ -13,7 +13,7 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
   IS_TEST,
 } from '../../../config';
-import { IS_MOV_SUPPORTED, PLATFORM_ENV } from '../../../util/environment';
+import { IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, PLATFORM_ENV } from '../../../util/environment';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 import { updateAppBadge } from '../../../util/appBadge';
@@ -39,6 +39,7 @@ addReducer('initApi', (global: GlobalState, actions) => {
       sessionData: loadStoredSession(),
       isTest: window.location.search.includes('test'),
       isMovSupported: IS_MOV_SUPPORTED,
+      isWebmSupported: IS_WEBM_SUPPORTED,
     });
   })();
 });

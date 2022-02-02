@@ -38,7 +38,7 @@
     margin: 0;
   }
 
-  .AnimatedSticker, img {
+  .AnimatedSticker, img, video {
     position: absolute;
     top: 0;
     left: 0;
@@ -46,7 +46,7 @@
     height: 100%;
   }
 
-  img {
+  img, video {
     object-fit: contain;
   }
 

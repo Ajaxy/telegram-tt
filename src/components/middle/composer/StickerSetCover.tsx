@@ -4,6 +4,7 @@ import React, {
 
 import { ApiStickerSet } from '../../../api/types';
 
+import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getFirstLetters } from '../../../util/textFormat';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
@@ -22,17 +23,20 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
 
   const mediaData = useMedia(stickerSet.hasThumbnail && `stickerSet${stickerSet.id}`, !isIntersecting);
   const transitionClassNames = useMediaTransition(mediaData);
+  const isGif = stickerSet.isGifs;
 
   const firstLetters = useMemo(() => {
-    if (mediaData) return undefined;
-
-    return getFirstLetters(stickerSet.title, 2);
-  }, [mediaData, stickerSet.title]);
+    if ((isGif && !IS_WEBM_SUPPORTED) || !mediaData) return getFirstLetters(stickerSet.title, 2);
+  }, [isGif, mediaData, stickerSet.title]);
 
   return (
     <div ref={ref} className="sticker-set-cover">
       {firstLetters}
-      <img src={mediaData} className={transitionClassNames} alt="" />
+      {isGif ? (
+        <video src={mediaData} className={transitionClassNames} loop autoPlay />
+      ) : (
+        <img src={mediaData} className={transitionClassNames} alt="" />
+      )}
     </div>
   );
 };

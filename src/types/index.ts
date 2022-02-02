@@ -208,7 +208,7 @@ export enum SettingsScreens {
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (
-  'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isAnimated'
+  'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isGifs'
 )>;
 
 export enum LeftColumnContent {

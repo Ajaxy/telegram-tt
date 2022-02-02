@@ -47,11 +47,24 @@ export function updateStickerSet(
   global: GlobalState, stickerSetId: string, update: Partial<ApiStickerSet>,
 ): GlobalState {
   const currentStickerSet = global.stickers.setsById[stickerSetId] || {};
+  const addedSets = global.stickers.added.setIds || [];
+  let setIds: string[] = addedSets;
+  if (update.installedDate && addedSets && !addedSets.includes(stickerSetId)) {
+    setIds = [stickerSetId, ...setIds];
+  }
+
+  if (!update.installedDate && addedSets?.includes(stickerSetId)) {
+    setIds = setIds.filter((id) => id !== stickerSetId);
+  }
 
   return {
     ...global,
     stickers: {
       ...global.stickers,
+      added: {
+        ...global.stickers.added,
+        setIds,
+      },
       setsById: {
         ...global.stickers.setsById,
         [stickerSetId]: {
