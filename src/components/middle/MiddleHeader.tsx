@@ -238,7 +238,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     transitionClassNames: audioPlayerClassNames,
   } = useShowTransition(Boolean(audioMessage));
 
-  const renderingAudioMessage = useCurrentOrPrev(audioMessage);
+  const renderingAudioMessage = useCurrentOrPrev(audioMessage, true);
 
   const {
     shouldRender: shouldRenderPinnedMessage,
