@@ -18,7 +18,7 @@ export const parseLocationHash = (value: string): MessageList | undefined => {
 
   return {
     chatId,
-    type: !!typeOrThreadId && isType ? (typeOrThreadId as MessageListType) : 'thread',
-    threadId: !!typeOrThreadId && !isType ? Number(typeOrThreadId) : MAIN_THREAD_ID,
+    type: Boolean(typeOrThreadId) && isType ? (typeOrThreadId as MessageListType) : 'thread',
+    threadId: Boolean(typeOrThreadId) && !isType ? Number(typeOrThreadId) : MAIN_THREAD_ID,
   };
 };

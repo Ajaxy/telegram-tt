@@ -14,7 +14,7 @@ type IDimensions = {
 const IS_LANDSCAPE = IS_SINGLE_COLUMN_LAYOUT && isLandscape();
 
 const initialHeight = window.innerHeight;
-let windowSize = updateSizes();
+let currentWindowSize = updateSizes();
 let isRefreshDisabled = false;
 
 function disableRefresh() {
@@ -26,7 +26,7 @@ function enableRefresh() {
 }
 
 const handleResize = throttle(() => {
-  windowSize = updateSizes();
+  currentWindowSize = updateSizes();
 
   if (!isRefreshDisabled && (
     isMobileScreen() !== IS_SINGLE_COLUMN_LAYOUT
@@ -61,8 +61,9 @@ export function updateSizes(): IDimensions {
 }
 
 function isMobileScreen() {
-  return windowSize.width <= MOBILE_SCREEN_MAX_WIDTH || (
-    windowSize.width <= MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH && windowSize.height <= MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT
+  return currentWindowSize.width <= MOBILE_SCREEN_MAX_WIDTH || (
+    currentWindowSize.width <= MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH
+    && currentWindowSize.height <= MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT
   );
 }
 
@@ -78,9 +79,11 @@ function isLandscape() {
   return window.matchMedia('screen and (min-device-aspect-ratio: 1/1) and (orientation: landscape)').matches;
 }
 
-export default {
-  get: () => windowSize,
-  getIsKeyboardVisible: () => initialHeight > windowSize.height,
+const windowSize = {
+  get: () => currentWindowSize,
+  getIsKeyboardVisible: () => initialHeight > currentWindowSize.height,
   disableRefresh,
   enableRefresh,
 };
+
+export default windowSize;

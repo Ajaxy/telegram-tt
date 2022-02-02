@@ -6,7 +6,7 @@ import { CUSTOM_BG_CACHE_NAME } from '../config';
 import * as cacheApi from '../util/cacheApi';
 import { preloadImage } from '../util/files';
 
-export default (theme: ThemeKey, settingValue?: string) => {
+const useCustomBackground = (theme: ThemeKey, settingValue?: string) => {
   const [value, setValue] = useState(settingValue);
 
   useEffect(() => {
@@ -30,3 +30,5 @@ export default (theme: ThemeKey, settingValue?: string) => {
 
   return settingValue ? value : undefined;
 };
+
+export default useCustomBackground;

@@ -51,8 +51,8 @@ async function copyBlobToClipboard(pngBlob: Blob | null) {
   }
 
   try {
-    await navigator.clipboard.write([
-      new window.ClipboardItem({
+    await navigator.clipboard.write?.([
+      new ClipboardItem({
         [pngBlob.type]: pngBlob,
       }),
     ]);

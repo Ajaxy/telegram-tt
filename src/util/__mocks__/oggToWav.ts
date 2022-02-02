@@ -1,4 +1,6 @@
-export default {
+const oggToWav = {
   oggToWav() {
   },
 };
+
+export default oggToWav;

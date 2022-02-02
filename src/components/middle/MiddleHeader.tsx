@@ -376,8 +376,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
       <GroupCallTopPane
         hasPinnedOffset={
-          (shouldRenderPinnedMessage && !!renderingPinnedMessage)
-          || (shouldRenderAudioPlayer && !!renderingAudioMessage)
+          (shouldRenderPinnedMessage && Boolean(renderingPinnedMessage))
+          || (shouldRenderAudioPlayer && Boolean(renderingAudioMessage))
         }
         chatId={chatId}
       />

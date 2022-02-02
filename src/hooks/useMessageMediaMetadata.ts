@@ -21,7 +21,9 @@ const LOGO_DIMENSIONS = { width: 200, height: 200 };
 const MINIMAL_SIZE = 115; // spec says 100, but on Chrome 93 it's not showing
 
 // TODO Add support for video in future
-export default (message: ApiMessage, sender?: ApiUser | ApiChat, chat?: ApiChat): MediaMetadata | undefined => {
+const useMessageMediaMetadata = (
+  message: ApiMessage, sender?: ApiUser | ApiChat, chat?: ApiChat,
+): MediaMetadata | undefined => {
   const { audio, voice } = getMessageContent(message);
   const title = audio ? (audio.title || audio.fileName) : voice ? 'Voice message' : '';
   const artist = (audio && audio.performer) || (sender && getSenderTitle(getTranslation, sender));
@@ -71,3 +73,5 @@ function getCoverSize(audio?: ApiAudio, voice?: ApiVoice, url?: string) {
 
   return undefined;
 }
+
+export default useMessageMediaMetadata;

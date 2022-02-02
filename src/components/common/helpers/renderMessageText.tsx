@@ -54,7 +54,7 @@ export function renderMessageSummary(
     emojiWithSpace,
     ...(Array.isArray(description) ? description : [description]),
     shouldAddEllipsis && '...',
-  ].filter(Boolean);
+  ].filter<TextPart>(Boolean);
 }
 
 export function renderMessageText(

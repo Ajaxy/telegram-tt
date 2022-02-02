@@ -180,7 +180,7 @@ const TextFormatter: FC<OwnProps> = ({
 
     if (key === 'monospace' || key === 'strikethrough') {
       if (Object.keys(selectedTextFormats).some(
-        (fKey) => fKey !== key && !!selectedTextFormats[fKey as keyof ISelectedTextFormats],
+        (fKey) => fKey !== key && Boolean(selectedTextFormats[fKey as keyof ISelectedTextFormats]),
       )) {
         return 'disabled';
       }
@@ -224,7 +224,7 @@ const TextFormatter: FC<OwnProps> = ({
       // Somehow re-applying 'bold' command to already bold text doesn't work
       document.execCommand(selectedFormats.bold ? 'removeFormat' : 'bold');
       Object.keys(selectedFormats).forEach((key) => {
-        if ((key === 'italic' || key === 'underline') && !!selectedFormats[key]) {
+        if ((key === 'italic' || key === 'underline') && Boolean(selectedFormats[key])) {
           document.execCommand(key);
         }
       });
@@ -395,7 +395,7 @@ const TextFormatter: FC<OwnProps> = ({
 
   const linkUrlConfirmClassName = buildClassName(
     'TextFormatter-link-url-confirm',
-    !!linkUrl.length && 'shown',
+    Boolean(linkUrl.length) && 'shown',
   );
 
   const style = anchorPosition

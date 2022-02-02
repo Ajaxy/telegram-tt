@@ -402,7 +402,7 @@ export default memo(withGlobal<OwnProps>(
       isSpeakerEnabled: !isSpeakerDisabled,
       participantsCount,
       meParticipant: selectGroupCallParticipant(global, groupCallId, global.currentUserId!),
-      isGroupCallPanelHidden: !!global.groupCalls.isGroupCallPanelHidden,
+      isGroupCallPanelHidden: Boolean(global.groupCalls.isGroupCallPanelHidden),
       isAdmin: selectIsAdminInActiveGroupCall(global),
       participants,
     };

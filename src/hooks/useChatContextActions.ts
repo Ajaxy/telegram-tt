@@ -9,7 +9,7 @@ import {
 import { compact } from '../util/iteratees';
 import useLang from './useLang';
 
-export default ({
+const useChatContextActions = ({
   chat,
   user,
   handleDelete,
@@ -107,3 +107,5 @@ export default ({
     chat, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, handleDelete, folderId, isSelf,
   ]);
 };
+
+export default useChatContextActions;

@@ -4,7 +4,10 @@ export function scaleImage(image: string | Blob, ratio: number, outputType: stri
   return new Promise((resolve) => {
     img.onload = () => {
       scale(img, img.width * ratio, img.height * ratio, outputType)
-        .then((blob) => URL.createObjectURL(blob))
+        .then((blob) => {
+          if (!blob) throw new Error('Image resize failed!');
+          return URL.createObjectURL(blob);
+        })
         .then(resolve)
         .finally(() => {
           if (image instanceof Blob) {
@@ -24,7 +27,10 @@ export function resizeImage(
   return new Promise((resolve) => {
     img.onload = () => {
       scale(img, width, height, outputType)
-        .then((blob) => URL.createObjectURL(blob))
+        .then((blob) => {
+          if (!blob) throw new Error('Image resize failed!');
+          return URL.createObjectURL(blob);
+        })
         .then(resolve)
         .finally(() => {
           if (image instanceof Blob) {
@@ -38,7 +44,7 @@ export function resizeImage(
 
 async function scale(
   img: HTMLImageElement, width: number, height: number, outputType: string = 'image/png',
-) {
+): Promise<Blob | null> {
   // Safari does not have built-in resize method with quality control
   if ('createImageBitmap' in window) {
     try {

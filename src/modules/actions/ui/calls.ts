@@ -158,7 +158,7 @@ addReducer('createGroupCallInviteLink', (global, actions) => {
     return;
   }
 
-  const canInvite = !!chat && !!chat.username;
+  const canInvite = Boolean(chat.username);
 
   (async () => {
     let { inviteLink } = chat.fullInfo!;

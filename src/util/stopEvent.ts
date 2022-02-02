@@ -1,6 +1,8 @@
 import React from '../lib/teact/teact';
 
-export default (e: React.UIEvent | Event) => {
+const stopEvent = (e: React.UIEvent | Event) => {
   e.stopPropagation();
   e.preventDefault();
 };
+
+export default stopEvent;

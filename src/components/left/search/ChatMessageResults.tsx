@@ -116,7 +116,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
             description={lang('ChatList.Search.NoResultsDescription')}
           />
         )}
-        {!!foundMessages.length && foundMessages.map(renderFoundMessage)}
+        {foundMessages.map(renderFoundMessage)}
       </InfiniteScroll>
     </div>
   );

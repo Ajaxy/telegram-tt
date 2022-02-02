@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 
-export default (
+const useSendWithEnter = (
   onSelect: NoneToVoidFunction,
 ) => {
   // eslint-disable-next-line no-null/no-null
@@ -23,3 +23,5 @@ export default (
 
   return buttonRef;
 };
+
+export default useSendWithEnter;

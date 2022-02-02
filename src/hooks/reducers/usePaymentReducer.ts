@@ -224,6 +224,8 @@ function getBillingCountry(countryCode: string) {
   return country ? country.name : '';
 }
 
-export default () => {
+const usePaymentReducer = () => {
   return useReducer(reducer, INITIAL_STATE);
 };
+
+export default usePaymentReducer;

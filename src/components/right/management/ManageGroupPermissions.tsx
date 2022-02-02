@@ -131,7 +131,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
       return [];
     }
 
-    return chat.fullInfo.members.filter(({ bannedRights }) => !!bannedRights);
+    return chat.fullInfo.members.filter(({ bannedRights }) => Boolean(bannedRights));
   }, [chat]);
 
   const getMemberExceptions = useCallback((member: ApiChatMember) => {

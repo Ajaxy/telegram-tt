@@ -3,7 +3,7 @@ import buildClassName from '../util/buildClassName';
 
 const CLOSE_DURATION = 350;
 
-export default (
+const useShowTransition = (
   isOpen = false,
   onCloseTransitionEnd?: () => void,
   noOpenTransition = false,
@@ -62,3 +62,5 @@ export default (
     transitionClassNames,
   };
 };
+
+export default useShowTransition;

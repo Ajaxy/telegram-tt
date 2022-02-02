@@ -298,7 +298,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
       </div>
 
       <FloatingActionButton
-        isShown={!!state.isTouched}
+        isShown={Boolean(state.isTouched)}
         disabled={state.isLoading}
         onClick={handleSubmit}
         ariaLabel={state.mode === 'edit' ? 'Save changes' : 'Create folder'}

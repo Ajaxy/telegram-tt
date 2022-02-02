@@ -1,7 +1,7 @@
 import { IS_IOS } from './environment';
 import forceReflow from './forceReflow';
 
-export default (container: HTMLDivElement, scrollTop?: number) => {
+const resetScroll = (container: HTMLDivElement, scrollTop?: number) => {
   if (IS_IOS) {
     container.style.overflow = 'hidden';
   }
@@ -21,3 +21,5 @@ export function patchChromiumScroll(element: HTMLElement) {
   forceReflow(element);
   element.style.display = '';
 }
+
+export default resetScroll;

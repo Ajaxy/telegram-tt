@@ -204,7 +204,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           description={lang('ChatList.Search.NoResultsDescription')}
         />
       )}
-      {!!localResults.length && (
+      {Boolean(localResults.length) && (
         <div className="chat-selection no-selection no-scrollbar" dir={lang.isRtl ? 'rtl' : undefined}>
           {localResults.map((id) => (
             <PickerSelectedItem
@@ -215,7 +215,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           ))}
         </div>
       )}
-      {!!localResults.length && (
+      {Boolean(localResults.length) && (
         <div className="search-section">
           <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
@@ -239,7 +239,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           })}
         </div>
       )}
-      {!!globalResults.length && (
+      {Boolean(globalResults.length) && (
         <div className="search-section">
           <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
@@ -264,7 +264,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           })}
         </div>
       )}
-      {!!foundMessages.length && (
+      {Boolean(foundMessages.length) && (
         <div className="search-section">
           <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>{lang('SearchMessages')}</h3>
           {foundMessages.map(renderFoundMessage)}

@@ -9,7 +9,7 @@ import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../modules/helpers';
 
-export default (
+const useEditing = (
   htmlRef: { current: string },
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
@@ -57,3 +57,5 @@ export default (
 
   return handleEditComplete;
 };
+
+export default useEditing;

@@ -71,7 +71,7 @@ const DropdownMenu: FC<OwnProps> = ({
       <Menu
         ref={menuRef}
         containerRef={dropdownRef}
-        isOpen={isOpen || !!forceOpen}
+        isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
         positionX={positionX}
         positionY={positionY}

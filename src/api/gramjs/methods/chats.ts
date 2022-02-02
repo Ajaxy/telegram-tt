@@ -191,7 +191,7 @@ export async function searchChats({ query }: { query: string }) {
   const allChats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter<ApiChat>(Boolean as any);
-  const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
+  const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
 
   return {
     localChats: allChats.filter((r) => localPeerIds.includes(r.id)),

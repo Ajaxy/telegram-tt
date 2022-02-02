@@ -92,7 +92,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         onError: onAuthError,
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
       });
-    } catch (err) {
+    } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error(err);
 
@@ -207,7 +207,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     }
 
     return shouldReturnTrue ? result && true : result;
-  } catch (err) {
+  } catch (err: any) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.log(`[GramJs/client] INVOKE ERROR ${request.className}`);
@@ -323,7 +323,7 @@ async function handleTerminatedSession() {
     await invokeRequest(new GramJs.users.GetFullUser({
       id: new GramJs.InputUserSelf(),
     }), undefined, true);
-  } catch (err) {
+  } catch (err: any) {
     if (err.message === 'AUTH_KEY_UNREGISTERED') {
       onUpdate({
         '@type': 'updateConnectionState',

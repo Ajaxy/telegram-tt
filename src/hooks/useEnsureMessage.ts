@@ -5,7 +5,7 @@ import { ApiMessage } from '../api/types';
 
 import { throttle } from '../util/schedulers';
 
-export default (
+const useEnsureMessage = (
   chatId: string,
   messageId?: number,
   message?: ApiMessage,
@@ -25,3 +25,5 @@ export default (
     }
   });
 };
+
+export default useEnsureMessage;

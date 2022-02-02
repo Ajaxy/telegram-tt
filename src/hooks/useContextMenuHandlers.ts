@@ -19,7 +19,7 @@ function stopEvent(e: Event) {
   e.stopPropagation();
 }
 
-export default (
+const useContextMenuHandlers = (
   elementRef: RefObject<HTMLElement>,
   isMenuDisabled?: boolean,
   shouldDisableOnLink?: boolean,
@@ -140,3 +140,5 @@ export default (
     handleContextMenuHide,
   };
 };
+
+export default useContextMenuHandlers;

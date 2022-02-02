@@ -85,7 +85,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="ChatExtra">
-      {formattedNumber && !!formattedNumber.length && (
+      {formattedNumber && Boolean(formattedNumber.length) && (
         <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
           <span className="title" dir="auto">{formattedNumber}</span>
           <span className="subtitle">{lang('Phone')}</span>
@@ -103,7 +103,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang('Username')}</span>
         </ListItem>
       )}
-      {description && !!description.length && (
+      {description && Boolean(description.length) && (
         <ListItem
           icon="info"
           multiline

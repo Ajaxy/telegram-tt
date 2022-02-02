@@ -213,7 +213,7 @@ export async function subscribe() {
     await callApi('registerDevice', deviceToken);
     getDispatch()
       .setDeviceToken(deviceToken);
-  } catch (error) {
+  } catch (error: any) {
     if (Notification.permission === 'denied' as NotificationPermission) {
       // The user denied the notification permission which
       // means we failed to subscribe and the user will need

@@ -112,7 +112,7 @@ export async function updateTwoFaSettings(
 
                     await client.invoke(new Api.account.ConfirmPasswordEmail({ code }));
                     break;
-                } catch (err) {
+                } catch (err: any) {
                     onEmailCodeError!(err);
                 }
             }

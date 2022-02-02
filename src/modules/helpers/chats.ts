@@ -360,9 +360,9 @@ function filterChatFolder(
       }
     }
   } else if (type === 'chatTypeChannel') {
-    return !!folder.channels;
+    return Boolean(folder.channels);
   } else if (type === 'chatTypeBasicGroup' || type === 'chatTypeSuperGroup') {
-    return !!folder.groups;
+    return Boolean(folder.groups);
   }
 
   return false;

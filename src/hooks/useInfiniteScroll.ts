@@ -10,7 +10,7 @@ type LoadMoreBackwards = (args: { offsetId?: string | number }) => void;
 
 const DEFAULT_LIST_SLICE = 30;
 
-export default <ListId extends string | number>(
+const useInfiniteScroll = <ListId extends string | number>(
   loadMoreBackwards?: LoadMoreBackwards,
   listIds?: ListId[],
   isDisabled = false,
@@ -120,3 +120,5 @@ function getViewportSlice<ListId extends string | number>(
 
   return { newViewportIds, areSomeLocal, areAllLocal };
 }
+
+export default useInfiniteScroll;

@@ -98,7 +98,7 @@ export async function fetchTopUsers() {
     return undefined;
   }
 
-  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
   const ids = users.map(({ id }) => id);
 
   return {

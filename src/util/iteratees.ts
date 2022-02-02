@@ -95,7 +95,7 @@ export function unique<T extends any>(array: T[]): T[] {
   return Array.from(new Set(array));
 }
 
-export function compact(array: any[]) {
+export function compact<T extends any>(array: T[]) {
   return array.filter(Boolean);
 }
 

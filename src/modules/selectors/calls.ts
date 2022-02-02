@@ -26,7 +26,7 @@ export function selectIsAdminInActiveGroupCall(global: GlobalState): boolean {
   const chat = selectChat(global, chatId);
   if (!chat) return false;
 
-  return (isChatBasicGroup(chat) && chat.isCreator) || !!chat.adminRights?.manageCall;
+  return (isChatBasicGroup(chat) && chat.isCreator) || Boolean(chat.adminRights?.manageCall);
 }
 
 export function selectActiveGroupCall(global: GlobalState) {

@@ -94,7 +94,7 @@ export async function fetchMessages({
       }),
       ...pagination,
     }), undefined, true);
-  } catch (err) {
+  } catch (err: any) {
     if (err.message === 'CHANNEL_PRIVATE') {
       onUpdate({
         '@type': 'updateChat',
@@ -146,7 +146,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
       undefined,
       true,
     );
-  } catch (err) {
+  } catch (err: any) {
     const { message } = err;
 
     // When fetching messages for the bot @replies, there may be situations when the user was banned

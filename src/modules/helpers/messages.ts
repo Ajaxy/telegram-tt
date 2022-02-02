@@ -144,7 +144,7 @@ export function isForwardedMessage(message: ApiMessage) {
 }
 
 export function isActionMessage(message: ApiMessage) {
-  return !!message.content.action;
+  return Boolean(message.content.action);
 }
 
 export function isServiceNotificationMessage(message: ApiMessage) {

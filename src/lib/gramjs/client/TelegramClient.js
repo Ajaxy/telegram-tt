@@ -369,7 +369,7 @@ class TelegramClient {
 
     async _connectSender(sender, dcId) {
         // if we don't already have an auth key we want to use normal DCs not -1
-        const dc = utils.getDC(dcId, !!sender.authKey.getKey());
+        const dc = utils.getDC(dcId, Boolean(sender.authKey.getKey()));
 
         while (true) {
             try {

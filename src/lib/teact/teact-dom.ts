@@ -480,4 +480,5 @@ function DEBUG_addToVirtualTreeSize($current: VirtualRealElement | VirtualDomHea
   });
 }
 
-export default { render };
+const TeactDOM = { render };
+export default TeactDOM;

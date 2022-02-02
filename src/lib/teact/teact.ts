@@ -298,7 +298,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
       DEBUG_components[componentName].renderTimes.push(duration);
       DEBUG_components[componentName].renderCount++;
     }
-  } catch (err) {
+  } catch (err: any) {
     handleError(err);
 
     newRenderedValue = componentInstance.renderedValue;
@@ -382,7 +382,7 @@ function unmountComponent(componentInstance: ComponentInstance) {
     if (typeof cleanup === 'function') {
       try {
         cleanup();
-      } catch (err) {
+      } catch (err: any) {
         handleError(err);
       }
     }
@@ -552,7 +552,7 @@ function useLayoutEffectBase(
             );
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         handleError(err);
       }
     }
@@ -698,7 +698,9 @@ export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual
 }
 
 // We need to keep it here for JSX.
-export default {
+const Teact = {
   createElement,
   Fragment,
 };
+
+export default Teact;

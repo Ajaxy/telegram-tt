@@ -1,7 +1,7 @@
 import * as langProvider from '../util/langProvider';
 import { useState } from '../lib/teact/teact';
 
-export default (langCode: string | undefined, key: string): string | undefined => {
+const useLangString = (langCode: string | undefined, key: string): string | undefined => {
   const [translation, setTranslation] = useState<string>();
 
   if (langCode) {
@@ -12,3 +12,5 @@ export default (langCode: string | undefined, key: string): string | undefined =
 
   return translation;
 };
+
+export default useLangString;
