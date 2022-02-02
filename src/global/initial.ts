@@ -168,7 +168,7 @@ export const INITIAL_STATE: GlobalState = {
       language: 'en',
       timeFormat: '24h',
       wasTimeFormatSetManually: false,
-      isConnectionStatusMinimized: false,
+      isConnectionStatusMinimized: true,
     },
     themes: {
       light: {
