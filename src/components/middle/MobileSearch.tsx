@@ -79,13 +79,13 @@ const MobileSearchFooter: FC<StateProps> = ({
 
   // Focus message
   useEffect(() => {
-    if (chat && foundIds && foundIds.length) {
-      focusMessage({ chatId: chat.id, messageId: foundIds[foundIds.length - 1] });
+    if (chat?.id && foundIds?.length) {
+      focusMessage({ chatId: chat.id, messageId: foundIds[0] });
       setFocusedIndex(0);
     } else {
       setFocusedIndex(-1);
     }
-  }, [chat, focusMessage, foundIds]);
+  }, [chat?.id, focusMessage, foundIds]);
 
   // Disable native up/down buttons on iOS
   useEffect(() => {
@@ -121,7 +121,7 @@ const MobileSearchFooter: FC<StateProps> = ({
   const handleUp = useCallback(() => {
     if (chat && foundIds) {
       const newFocusIndex = focusedIndex + 1;
-      focusMessage({ chatId: chat.id, messageId: foundIds[foundIds.length - 1 - newFocusIndex] });
+      focusMessage({ chatId: chat.id, messageId: foundIds[newFocusIndex] });
       setFocusedIndex(newFocusIndex);
     }
   }, [chat, focusedIndex, focusMessage, foundIds]);
@@ -129,7 +129,7 @@ const MobileSearchFooter: FC<StateProps> = ({
   const handleDown = useCallback(() => {
     if (chat && foundIds) {
       const newFocusIndex = focusedIndex - 1;
-      focusMessage({ chatId: chat.id, messageId: foundIds[foundIds.length - 1 - newFocusIndex] });
+      focusMessage({ chatId: chat.id, messageId: foundIds[newFocusIndex] });
       setFocusedIndex(newFocusIndex);
     }
   }, [chat, focusedIndex, focusMessage, foundIds]);
