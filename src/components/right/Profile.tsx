@@ -61,6 +61,7 @@ import DeleteMemberModal from './DeleteMemberModal';
 import GroupChatInfo from '../common/GroupChatInfo';
 
 import './Profile.scss';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
 type OwnProps = {
   chatId: string;
@@ -104,6 +105,7 @@ const TABS = [
 ];
 
 const HIDDEN_RENDER_DELAY = 1000;
+const INTERSECTION_THROTTLE = 500;
 
 const Profile: FC<OwnProps & StateProps> = ({
   chatId,
@@ -178,6 +180,11 @@ const Profile: FC<OwnProps & StateProps> = ({
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
 
   const [cacheBuster, resetCacheBuster] = useCacheBuster();
+
+  const { observe: observeIntersectionForMedia } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE,
+  });
 
   const handleTransitionStop = useCallback(() => {
     releaseTransitionFix();
@@ -325,6 +332,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               key={id}
               message={chatMessages[id]}
               isProtected={isChatProtected || chatMessages[id].isProtected}
+              observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
             />
           ))
@@ -336,8 +344,9 @@ const Profile: FC<OwnProps & StateProps> = ({
               withDate
               smaller
               className="scroll-item"
-              onDateClick={handleMessageFocus}
               isDownloading={activeDownloadIds.includes(id)}
+              observeIntersection={observeIntersectionForMedia}
+              onDateClick={handleMessageFocus}
             />
           ))
         ) : resultType === 'links' ? (
@@ -346,6 +355,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               key={id}
               message={chatMessages[id]}
               isProtected={isChatProtected || chatMessages[id].isProtected}
+              observeIntersection={observeIntersectionForMedia}
               onMessageClick={handleMessageFocus}
             />
           ))

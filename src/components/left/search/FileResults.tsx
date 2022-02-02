@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useMemo,
+  FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
@@ -15,6 +15,7 @@ import { throttle } from '../../../util/schedulers';
 import { getMessageDocument } from '../../../modules/helpers';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 import Document from '../../common/Document';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -26,6 +27,8 @@ export type OwnProps = {
 };
 
 const CURRENT_TYPE = 'documents';
+const INTERSECTION_THROTTLE = 500;
+
 const runThrottled = throttle((cb) => cb(), 500, true);
 
 const FileResults: FC<OwnProps & StateProps> = ({
@@ -44,7 +47,16 @@ const FileResults: FC<OwnProps & StateProps> = ({
     focusMessage,
   } = getDispatch();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const lang = useLang();
+
+  const { observe: observeIntersectionForMedia } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE,
+  });
+
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -93,8 +105,9 @@ const FileResults: FC<OwnProps & StateProps> = ({
             smaller
             sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
-            onDateClick={handleMessageFocus}
             isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
+            observeIntersection={observeIntersectionForMedia}
+            onDateClick={handleMessageFocus}
           />
         </div>
       );
@@ -104,7 +117,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
         items={foundMessages}

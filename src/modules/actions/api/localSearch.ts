@@ -126,11 +126,12 @@ async function searchSharedMedia(
   chatOrUser: ApiChat | ApiUser,
   type: SharedMediaType,
   offsetId?: number,
+  isBudgetPreload = false,
 ) {
   const result = await callApi('searchMessagesLocal', {
     chatOrUser,
     type,
-    limit: SHARED_MEDIA_SLICE,
+    limit: SHARED_MEDIA_SLICE * 2,
     offsetId,
   });
 
@@ -156,11 +157,12 @@ async function searchSharedMedia(
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = updateLocalMediaSearchResults(global, chatOrUser.id, type, newFoundIds, totalCount, nextOffsetId);
   setGlobal(global);
+
+  if (!isBudgetPreload) {
+    searchSharedMedia(chatOrUser, type, nextOffsetId, true);
+  }
 }
 
-/**
- * @param timestamp start of target date in seconds
- */
 async function searchMessagesByDate(chat: ApiChat, timestamp: number) {
   const messageId = await callApi('findFirstMessageIdAfterDate', {
     chat,

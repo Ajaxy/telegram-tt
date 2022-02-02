@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useMemo,
+  FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
@@ -13,6 +13,7 @@ import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import WebLink from '../../common/WebLink';
@@ -24,6 +25,8 @@ export type OwnProps = {
 };
 
 const CURRENT_TYPE = 'links';
+const INTERSECTION_THROTTLE = 500;
+
 const runThrottled = throttle((cb) => cb(), 500, true);
 
 const LinkResults: FC<OwnProps & StateProps> = ({
@@ -42,7 +45,16 @@ const LinkResults: FC<OwnProps & StateProps> = ({
     focusMessage,
   } = getDispatch();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const lang = useLang();
+
+  const { observe: observeIntersectionForMedia } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE,
+  });
+
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -91,6 +103,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
             message={message}
             senderTitle={getSenderName(lang, message, chatsById, usersById)}
             isProtected={isChatProtected || message.isProtected}
+            observeIntersection={observeIntersectionForMedia}
             onMessageClick={handleMessageFocus}
           />
         </div>
@@ -101,7 +114,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
         items={foundMessages}

@@ -1,6 +1,7 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../api/types';
+import { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   getFirstLinkInMessage, getMessageText,
@@ -25,13 +26,16 @@ type OwnProps = {
   message: ApiMessage;
   senderTitle?: string;
   isProtected?: boolean;
+  observeIntersection?: ObserveFn;
   onMessageClick: (messageId: number, chatId: string) => void;
 };
 
-type ApiWebPageWithFormatted = ApiWebPage & { formattedDescription?: TextPart[] };
+type ApiWebPageWithFormatted =
+  ApiWebPage
+  & { formattedDescription?: TextPart[] };
 
 const WebLink: FC<OwnProps> = ({
-  message, senderTitle, isProtected, onMessageClick,
+  message, senderTitle, isProtected, observeIntersection, onMessageClick,
 }) => {
   const lang = useLang();
 
@@ -85,7 +89,7 @@ const WebLink: FC<OwnProps> = ({
       dir={lang.isRtl ? 'rtl' : undefined}
     >
       {photo && (
-        <Media message={message} isProtected={isProtected} />
+        <Media message={message} isProtected={isProtected} observeIntersection={observeIntersection} />
       )}
       <div className="content">
         <Link isRtl={lang.isRtl} className="site-title" onClick={handleMessageClick}>
