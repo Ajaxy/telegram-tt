@@ -7,7 +7,6 @@ import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import { GlobalState } from '../../global/types';
 import { NotifyException, NotifySettings } from '../../types';
 import { LangFn } from '../../hooks/useLang';
 
@@ -270,207 +269,7 @@ export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
 
-export function prepareFolderListIds(
-  allListIds: GlobalState['chats']['listIds'],
-  chatsById: Record<string, ApiChat>,
-  usersById: Record<string, ApiUser>,
-  folder: ApiChatFolder,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
-) {
-  const excludedChatIds = folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined;
-  const includedChatIds = folder.excludedChatIds ? new Set(folder.includedChatIds) : undefined;
-  const pinnedChatIds = folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined;
-  const listIds = ([] as string[]).concat(allListIds.active || [], allListIds.archived || [])
-    .filter((id) => {
-      const chat = chatsById[id];
-      return chat && filterChatFolder(
-        chat,
-        folder,
-        usersById,
-        notifySettings,
-        notifyExceptions,
-        excludedChatIds,
-        includedChatIds,
-        pinnedChatIds,
-      );
-    });
-
-  return [listIds, folder.pinnedChatIds] as const;
-}
-
-// This function is the most expensive in the project, so any possible optimizations are welcome
-function filterChatFolder(
-  chat: ApiChat,
-  folder: ApiChatFolder,
-  usersById: Record<string, ApiUser>,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
-  excludedChatIds?: Set<string>,
-  includedChatIds?: Set<string>,
-  pinnedChatIds?: Set<string>,
-) {
-  if (!chat.isListed) {
-    return false;
-  }
-
-  const { id: chatId, type, unreadMentionsCount } = chat;
-
-  if (excludedChatIds?.has(chatId)) {
-    return false;
-  }
-
-  if (includedChatIds?.has(chatId)) {
-    return true;
-  }
-
-  if (pinnedChatIds?.has(chatId)) {
-    return true;
-  }
-
-  if (folder.excludeArchived && chat.folderId === ARCHIVED_FOLDER_ID) {
-    return false;
-  }
-
-  if (folder.excludeRead && !chat.unreadCount && !unreadMentionsCount && !chat.hasUnreadMark) {
-    return false;
-  }
-
-  if (folder.excludeMuted && !unreadMentionsCount && selectIsChatMuted(chat, notifySettings, notifyExceptions)) {
-    return false;
-  }
-
-  if (type === 'chatTypePrivate') {
-    const user = usersById[chatId];
-    if (user) {
-      const { type: userType, isContact } = user;
-
-      if (userType === 'userTypeBot') {
-        if (folder.bots) {
-          return true;
-        }
-      } else {
-        if (folder.contacts && isContact) {
-          return true;
-        }
-
-        if (folder.nonContacts && !isContact) {
-          return true;
-        }
-      }
-    }
-  } else if (type === 'chatTypeChannel') {
-    return Boolean(folder.channels);
-  } else if (type === 'chatTypeBasicGroup' || type === 'chatTypeSuperGroup') {
-    return Boolean(folder.groups);
-  }
-
-  return false;
-}
-
-export function prepareChatList(
-  chatsById: Record<string, ApiChat>,
-  listIds: string[],
-  orderedPinnedIds?: string[],
-  folderType: 'all' | 'archived' | 'folder' = 'all',
-  noOrder = false,
-) {
-  const listIdsSet = new Set(listIds);
-  const orderedPinnedIdsSet = orderedPinnedIds ? new Set(orderedPinnedIds) : undefined;
-
-  const pinnedChats = orderedPinnedIds?.reduce((acc, id) => {
-    const chat = chatsById[id];
-
-    if (chat && listIdsSet.has(chat.id) && checkChat(chat, folderType)) {
-      acc.push(chat);
-    }
-
-    return acc;
-  }, [] as ApiChat[]) || [];
-
-  const otherChats = listIds.reduce((acc, id) => {
-    const chat = chatsById[id];
-
-    if (chat && (!orderedPinnedIdsSet || !orderedPinnedIdsSet.has(chat.id)) && checkChat(chat, folderType)) {
-      acc.push(chat);
-    }
-
-    return acc;
-  }, [] as ApiChat[]);
-
-  return {
-    pinnedChats,
-    otherChats: noOrder ? otherChats : orderBy(otherChats, getChatOrder, 'desc'),
-  };
-}
-
-function checkChat(chat: ApiChat, folderType: 'all' | 'archived' | 'folder') {
-  return (
-    chat.lastMessage && !chat.migratedTo && !chat.isRestricted && !chat.isNotJoined
-    && !(folderType === 'all' && chat.folderId === ARCHIVED_FOLDER_ID)
-    && !(folderType === 'archived' && chat.folderId !== ARCHIVED_FOLDER_ID)
-  );
-}
-
-export function reduceChatList(
-  chatArrays: { pinnedChats: ApiChat[]; otherChats: ApiChat[] },
-  filteredIds: string[],
-) {
-  const filteredIdsSet = new Set(filteredIds);
-
-  return {
-    pinnedChats: chatArrays.pinnedChats.filter(({ id }) => filteredIdsSet.has(id)),
-    otherChats: chatArrays.otherChats.filter(({ id }) => filteredIdsSet.has(id)),
-  };
-}
-
-export function getFolderUnreadDialogs(
-  allListIds: GlobalState['chats']['listIds'],
-  chatsById: Record<string, ApiChat>,
-  usersById: Record<string, ApiUser>,
-  folder: ApiChatFolder,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
-) {
-  const [listIds] = prepareFolderListIds(allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions);
-
-  let hasActiveDialogs = false;
-  const unreadDialogsCount = listIds.reduce((acc, id) => {
-    const chat = chatsById[id];
-    if (!chat?.lastMessage || chat?.isRestricted || chat?.isNotJoined) {
-      return acc;
-    }
-
-    const isUnread = chat.unreadCount || chat.hasUnreadMark;
-
-    if (isUnread) {
-      acc++;
-    }
-
-    if (!hasActiveDialogs && (
-      chat.unreadMentionsCount || (isUnread && !selectIsChatMuted(chat, notifySettings, notifyExceptions))
-    )) {
-      hasActiveDialogs = true;
-    }
-
-    return acc;
-  }, 0);
-
-  return {
-    unreadDialogsCount,
-    hasActiveDialogs,
-  };
-}
-
-export function getFolderDescriptionText(
-  lang: LangFn,
-  allListIds: GlobalState['chats']['listIds'],
-  chatsById: Record<string, ApiChat>,
-  usersById: Record<string, ApiUser>,
-  folder: ApiChatFolder,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
-) {
+export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, chatsCount?: number) {
   const {
     id, title, emoticon, description, pinnedChatIds,
     excludedChatIds, includedChatIds,
@@ -481,12 +280,12 @@ export function getFolderDescriptionText(
   // If folder has multiple additive filters or uses include/exclude lists,
   // we display folder chats count
   if (
-    Object.values(filters).filter(Boolean).length > 1
-    || (excludedChatIds?.length)
-    || (includedChatIds?.length)
-  ) {
-    const length = getFolderChatsCount(allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions);
-    return lang('Chats', length);
+    chatsCount !== undefined && (
+      Object.values(filters).filter(Boolean).length > 1
+      || (excludedChatIds?.length)
+      || (includedChatIds?.length)
+    )) {
+    return lang('Chats', chatsCount);
   }
 
   // Otherwise, we return a short description of a single filter
@@ -503,21 +302,6 @@ export function getFolderDescriptionText(
   } else {
     return undefined;
   }
-}
-
-function getFolderChatsCount(
-  allListIds: GlobalState['chats']['listIds'],
-  chatsById: Record<string, ApiChat>,
-  usersById: Record<string, ApiUser>,
-  folder: ApiChatFolder,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<string, NotifyException>,
-) {
-  const [listIds, pinnedIds] = prepareFolderListIds(
-    allListIds, chatsById, usersById, folder, notifySettings, notifyExceptions,
-  );
-  const { pinnedChats, otherChats } = prepareChatList(chatsById, listIds, pinnedIds, 'folder', true);
-  return pinnedChats.length + otherChats.length;
 }
 
 export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiUser) {

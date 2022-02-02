@@ -1,26 +1,24 @@
 import React, {
   FC, memo, useMemo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../lib/teact/teactn';
 
-import { GlobalState } from '../../../global/types';
-import {
-  ApiChat, ApiChatFolder, ApiUser,
-} from '../../../api/types';
-import { NotifyException, NotifySettings, SettingsScreens } from '../../../types';
+import { SettingsScreens } from '../../../types';
 import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
-import { ALL_CHATS_PRELOAD_DISABLED, CHAT_HEIGHT_PX, CHAT_LIST_SLICE } from '../../../config';
+import {
+  ALL_CHATS_PRELOAD_DISABLED,
+  ALL_FOLDER_ID,
+  ARCHIVED_FOLDER_ID,
+  CHAT_HEIGHT_PX,
+  CHAT_LIST_SLICE,
+} from '../../../config';
 import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
-import usePrevious from '../../../hooks/usePrevious';
 import { mapValues } from '../../../util/iteratees';
-import {
-  getChatOrder, prepareChatList, prepareFolderListIds, reduceChatList,
-} from '../../../modules/helpers';
-import {
-  selectChatFolder, selectNotifyExceptions, selectNotifySettings,
-} from '../../../modules/selectors';
+import { getPinnedChatsCount } from '../../../util/folderManager';
+import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useChatAnimationType } from './hooks';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -32,40 +30,16 @@ type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
   isActive: boolean;
-  onScreenSelect?: (screen: SettingsScreens) => void;
-  foldersDispatch?: FolderEditDispatch;
-};
-
-type StateProps = {
-  allListIds: GlobalState['chats']['listIds'];
-  chatsById: Record<string, ApiChat>;
-  usersById: Record<string, ApiUser>;
-  listIds?: string[];
-  orderedPinnedIds?: string[];
-  chatFolder?: ApiChatFolder;
   lastSyncTime?: number;
-  notifySettings: NotifySettings;
-  notifyExceptions?: Record<number, NotifyException>;
+  foldersDispatch?: FolderEditDispatch;
+  onScreenSelect?: (screen: SettingsScreens) => void;
 };
 
-enum FolderTypeToListType {
-  'all' = 'active',
-  'archived' = 'archived',
-}
-
-const ChatList: FC<OwnProps & StateProps> = ({
+const ChatList: FC<OwnProps> = ({
   folderType,
   folderId,
   isActive,
-  allListIds,
-  chatsById,
-  usersById,
-  listIds,
-  orderedPinnedIds,
-  chatFolder,
   lastSyncTime,
-  notifySettings,
-  notifyExceptions,
   foldersDispatch,
   onScreenSelect,
 }) => {
@@ -77,30 +51,22 @@ const ChatList: FC<OwnProps & StateProps> = ({
     openNextChat,
   } = getDispatch();
 
-  const [currentListIds, currentPinnedIds] = useMemo(() => {
-    return folderType === 'folder' && chatFolder
-      ? prepareFolderListIds(allListIds, chatsById, usersById, chatFolder, notifySettings, notifyExceptions)
-      : [listIds, orderedPinnedIds];
-  }, [
-    folderType, chatFolder, allListIds, chatsById, usersById,
-    notifySettings, notifyExceptions, listIds, orderedPinnedIds,
-  ]);
+  const virtualFolderId = (
+    folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
+  );
 
-  const [orderById, orderedIds, chatArrays] = useMemo(() => {
-    if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
-      return [];
+  const orderedIds = useFolderManagerForOrderedIds(virtualFolderId);
+
+  const orderById = useMemo(() => {
+    if (!orderedIds) {
+      return undefined;
     }
 
-    const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, folderType);
-    const singleList = ([] as ApiChat[]).concat(newChatArrays.pinnedChats, newChatArrays.otherChats);
-    const newOrderedIds = singleList.map(({ id }) => id);
-    const newOrderById = singleList.reduce((acc, chat, i) => {
-      acc[chat.id] = i;
+    return orderedIds.reduce((acc, id, i) => {
+      acc[id] = i;
       return acc;
     }, {} as Record<string, number>);
-
-    return [newOrderById, newOrderedIds, newChatArrays];
-  }, [currentListIds, currentPinnedIds, folderType, chatFolder, chatsById]);
+  }, [orderedIds]);
 
   const prevOrderById = usePrevious(orderById);
 
@@ -125,14 +91,6 @@ const ChatList: FC<OwnProps & StateProps> = ({
     CHAT_LIST_SLICE,
     folderType === 'all' && !ALL_CHATS_PRELOAD_DISABLED,
   );
-
-  const viewportChatArrays = useMemo(() => {
-    if (!viewportIds || !chatArrays) {
-      return undefined;
-    }
-
-    return reduceChatList(chatArrays, viewportIds);
-  }, [chatArrays, viewportIds]);
 
   useEffect(() => {
     if (lastSyncTime && folderType === 'all') {
@@ -178,7 +136,7 @@ const ChatList: FC<OwnProps & StateProps> = ({
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    const pinnedOffset = viewportOffset + viewportChatArrays!.pinnedChats.length;
+    const pinnedCount = getPinnedChatsCount(virtualFolderId) || 0;
 
     return (
       <div
@@ -187,29 +145,17 @@ const ChatList: FC<OwnProps & StateProps> = ({
         style={IS_ANDROID ? `height: ${orderedIds!.length * CHAT_HEIGHT_PX}px` : undefined}
         teactFastList
       >
-        {viewportChatArrays!.pinnedChats.map(({ id }, i) => (
+        {viewportIds!.map((id, i) => (
           <Chat
             key={id}
             teactOrderKey={i}
             chatId={id}
-            isPinned
+            isPinned={viewportOffset + i < pinnedCount}
             folderId={folderId}
             animationType={getAnimationType(id)}
             orderDiff={orderDiffById[id]}
             // @ts-ignore
             style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
-          />
-        ))}
-        {viewportChatArrays!.otherChats.map((chat, i) => (
-          <Chat
-            key={chat.id}
-            teactOrderKey={getChatOrder(chat)}
-            chatId={chat.id}
-            folderId={folderId}
-            animationType={getAnimationType(chat.id)}
-            orderDiff={orderDiffById[chat.id]}
-            // @ts-ignore
-            style={`top: ${(pinnedOffset + i) * CHAT_HEIGHT_PX}px;`}
           />
         ))}
       </div>
@@ -225,7 +171,7 @@ const ChatList: FC<OwnProps & StateProps> = ({
       noFastList
       noScrollRestore
     >
-      {viewportIds?.length && viewportChatArrays ? (
+      {viewportIds?.length ? (
         renderChats()
       ) : viewportIds && !viewportIds.length ? (
         (
@@ -243,33 +189,4 @@ const ChatList: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global, { folderType, folderId }): StateProps => {
-    const {
-      chats: {
-        listIds,
-        byId: chatsById,
-        orderedPinnedIds,
-      },
-      users: { byId: usersById },
-      lastSyncTime,
-    } = global;
-    const listType = folderType !== 'folder' ? FolderTypeToListType[folderType] : undefined;
-    const chatFolder = folderId ? selectChatFolder(global, folderId) : undefined;
-
-    return {
-      allListIds: listIds,
-      chatsById,
-      usersById,
-      lastSyncTime,
-      notifySettings: selectNotifySettings(global),
-      notifyExceptions: selectNotifyExceptions(global),
-      ...(listType ? {
-        listIds: listIds[listType],
-        orderedPinnedIds: orderedPinnedIds[listType],
-      } : {
-        chatFolder,
-      }),
-    };
-  },
-)(ChatList));
+export default memo(ChatList);

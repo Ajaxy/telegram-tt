@@ -2,14 +2,12 @@ import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 import { GlobalState } from '../../global/types';
 
 import {
-  getPrivateChatUserId, isChatChannel, isUserId, isHistoryClearMessage, isUserBot, isUserOnline, selectIsChatMuted,
+  getPrivateChatUserId, isChatChannel, isUserId, isHistoryClearMessage, isUserBot, isUserOnline,
 } from '../helpers';
 import { selectUser } from './users';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
-import { selectNotifyExceptions, selectNotifySettings } from './settings';
-import memoized from '../../util/memoized';
 
 export function selectChat(global: GlobalState, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -151,40 +149,6 @@ export function selectChatByUsername(global: GlobalState, username: string) {
   const usernameLowered = username.toLowerCase();
   return Object.values(global.chats.byId).find(
     (chat) => chat.username && chat.username.toLowerCase() === usernameLowered,
-  );
-}
-
-const selectCountNotMutedUnreadMemo = memoized((
-  activeChatIds: GlobalState['chats']['listIds']['active'],
-  chatsById: GlobalState['chats']['byId'],
-  notifySettings: GlobalState['settings']['byKey'],
-  notifyExceptions: GlobalState['settings']['notifyExceptions'],
-) => {
-  return activeChatIds?.reduce((acc, chatId) => {
-    const chat = chatsById[chatId];
-
-    if (
-      chat
-      && chat.unreadCount
-      && chat.isListed
-      && !chat.isNotJoined
-      && !chat.isRestricted
-      && (chat.unreadMentionsCount || !selectIsChatMuted(chat, notifySettings, notifyExceptions))
-    ) {
-      return acc + chat.unreadCount;
-    }
-
-    return acc;
-  }, 0) || 0;
-});
-
-// Still slow but at least memoized
-export function selectCountNotMutedUnreadOptimized(global: GlobalState) {
-  return selectCountNotMutedUnreadMemo(
-    global.chats.listIds.active,
-    global.chats.byId,
-    selectNotifySettings(global),
-    selectNotifyExceptions(global),
   );
 }
 

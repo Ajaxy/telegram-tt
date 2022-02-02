@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { LangCode } from '../../types';
 import { ApiMessage } from '../../api/types';
@@ -12,7 +12,6 @@ import {
 } from '../../config';
 import {
   selectChatMessage,
-  selectCountNotMutedUnreadOptimized,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
@@ -25,6 +24,7 @@ import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import stopEvent from '../../util/stopEvent';
 import windowSize from '../../util/windowSize';
+import { getAllNotificationsCount } from '../../util/folderManager';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
@@ -32,6 +32,8 @@ import useOnChange from '../../hooks/useOnChange';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 
+import StickerSetModal from '../common/StickerSetModal.async';
+import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
 import MiddleColumn from '../middle/MiddleColumn';
 import RightColumn from '../right/RightColumn';
@@ -43,7 +45,6 @@ import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
-import StickerSetModal from '../common/StickerSetModal.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
@@ -248,7 +249,7 @@ const Main: FC<StateProps> = ({
   const handleBlur = useCallback(() => {
     updateIsOnline(false);
 
-    const initialUnread = selectCountNotMutedUnreadOptimized(getGlobal());
+    const initialUnread = getAllNotificationsCount();
     let index = 0;
 
     clearInterval(notificationInterval);
@@ -259,7 +260,7 @@ const Main: FC<StateProps> = ({
       }
 
       if (index % 2 === 0) {
-        const newUnread = selectCountNotMutedUnreadOptimized(getGlobal()) - initialUnread;
+        const newUnread = getAllNotificationsCount() - initialUnread;
         if (newUnread > 0) {
           updatePageTitle(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
           updateIcon(true);
@@ -321,6 +322,7 @@ const Main: FC<StateProps> = ({
       )}
       <DownloadManager />
       <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
+      <UnreadCount isForAppBadge />
     </div>
   );
 };

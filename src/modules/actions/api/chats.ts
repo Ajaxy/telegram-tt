@@ -16,7 +16,7 @@ import {
   LOCALIZED_TIPS,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
-  TMP_CHAT_ID,
+  TMP_CHAT_ID, ALL_FOLDER_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -46,11 +46,12 @@ import {
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
-  isChatSummaryOnly, isChatArchived, prepareChatList, isChatBasicGroup,
+  isChatSummaryOnly, isChatArchived, isChatBasicGroup,
 } from '../../helpers';
 import { processDeepLink } from '../../../util/deeplink';
 import { updateGroupCall } from '../../reducers/calls';
 import { selectGroupCall } from '../../selectors/calls';
+import { getOrderedIds } from '../../../util/folderManager';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const CHATS_PRELOAD_INTERVAL = 300;
@@ -61,31 +62,21 @@ const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
 addReducer('preloadTopChatMessages', (global, actions) => {
   (async () => {
-    const preloadedChatIds: string[] = [];
+    const preloadedChatIds = new Set<string>();
 
     for (let i = 0; i < TOP_CHAT_MESSAGES_PRELOAD_LIMIT; i++) {
       await pause(TOP_CHAT_MESSAGES_PRELOAD_INTERVAL);
 
-      const {
-        byId,
-        listIds: { active: listIds },
-        orderedPinnedIds: { active: orderedPinnedIds },
-      } = getGlobal().chats;
-      if (!listIds) {
-        return;
-      }
-
       const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
-      const { pinnedChats, otherChats } = prepareChatList(byId, listIds, orderedPinnedIds, 'all', true);
-      const topChats = [...pinnedChats, ...otherChats];
-      const chatToPreload = topChats.find(({ id }) => id !== currentChatId && !preloadedChatIds.includes(id));
-      if (!chatToPreload) {
+      const folderAllOrderedIds = getOrderedIds(ALL_FOLDER_ID);
+      const nextChatId = folderAllOrderedIds?.find((id) => id !== currentChatId && !preloadedChatIds.has(id));
+      if (!nextChatId) {
         return;
       }
 
-      preloadedChatIds.push(chatToPreload.id);
+      preloadedChatIds.add(nextChatId);
 
-      actions.loadViewportMessages({ chatId: chatToPreload.id, threadId: MAIN_THREAD_ID });
+      actions.loadViewportMessages({ chatId: nextChatId, threadId: MAIN_THREAD_ID });
     }
   })();
 });
