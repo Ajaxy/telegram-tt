@@ -57,7 +57,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   const { updateChatAdmin } = getDispatch();
 
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
-  const [isTouched, setIsTouched] = useState(isNewAdmin);
+  const [isTouched, setIsTouched] = useState(Boolean(isNewAdmin));
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
