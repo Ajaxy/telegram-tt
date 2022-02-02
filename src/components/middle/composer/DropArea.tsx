@@ -4,6 +4,7 @@ import React, {
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
+import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
@@ -38,13 +39,23 @@ const DropArea: FC<OwnProps> = ({
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
 
-  const handleFilesDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleFilesDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
+    let files: File[] = [];
+
+    if (dt.items && dt.items.length > 0) {
+      const folderFiles = await getFilesFromDataTransferItems(dt.items);
+      if (folderFiles.length) {
+        files = files.concat(folderFiles);
+      }
+    }
 
     if (dt.files && dt.files.length > 0) {
-      onHide();
-      onFileSelect(Array.from(dt.files), false);
+      files = files.concat(Array.from(dt.files));
     }
+
+    onHide();
+    onFileSelect(files, false);
   }, [onFileSelect, onHide]);
 
   const handleQuickFilesDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {

@@ -254,7 +254,7 @@ const MiddleColumn: FC<StateProps> = ({
     }
 
     const { items } = e.dataTransfer || {};
-    const shouldDrawQuick = items && Array.from(items)
+    const shouldDrawQuick = items && items.length > 0 && Array.from(items)
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
       .filter((item) => item.type !== 'text/uri-list')
