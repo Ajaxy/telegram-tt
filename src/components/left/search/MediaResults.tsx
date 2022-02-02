@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useMemo,
+  FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
@@ -12,6 +12,7 @@ import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Media from '../../common/Media';
@@ -24,6 +25,8 @@ export type OwnProps = {
 };
 
 const CURRENT_TYPE = 'media';
+const INTERSECTION_THROTTLE = 500;
+
 const runThrottled = throttle((cb) => cb(), 500, true);
 
 const MediaResults: FC<OwnProps & StateProps> = ({
@@ -40,7 +43,15 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     openMediaViewer,
   } = getDispatch();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const lang = useLang();
+
+  const { observe: observeIntersectionForMedia } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE,
+  });
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
@@ -83,6 +94,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
             idPrefix="search-media"
             message={message}
             isProtected={isChatProtected || message.isProtected}
+            observeIntersection={observeIntersectionForMedia}
             onClick={handleSelectMedia}
           />
         ))}
@@ -110,7 +122,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   );
 
   return (
-    <div className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch">
       <InfiniteScroll
         className={classNames}
         items={foundMessages}
