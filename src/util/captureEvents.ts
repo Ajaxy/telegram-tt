@@ -130,7 +130,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
   }
 
-  function onRelease(e: MouseEvent | TouchEvent) {
+  function onRelease(e?: MouseEvent | TouchEvent) {
     if (captureEvent) {
       if (options.withCursor) {
         document.body.classList.remove('cursor-grabbing');
@@ -149,20 +149,22 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
         });
       }
 
-      if (hasMoved) {
-        if (options.onRelease) {
-          options.onRelease(e);
+      if (e) {
+        if (hasMoved) {
+          if (options.onRelease) {
+            options.onRelease(e);
+          }
+        } else if (e.type === 'mouseup') {
+          if (options.onDoubleClick && Date.now() - lastClickTime < 300) {
+            options.onDoubleClick(e, {
+              centerX: captureEvent!.pageX!,
+              centerY: captureEvent!.pageY!,
+            });
+          } else if (options.onClick && (!('button' in e) || e.button === 0)) {
+            options.onClick(e);
+          }
+          lastClickTime = Date.now();
         }
-      } else if (e.type === 'mouseup') {
-        if (options.onDoubleClick && Date.now() - lastClickTime < 300) {
-          options.onDoubleClick(e, {
-            centerX: captureEvent!.pageX!,
-            centerY: captureEvent!.pageY!,
-          });
-        } else if (options.onClick && (!('button' in e) || e.button === 0)) {
-          options.onClick(e);
-        }
-        lastClickTime = Date.now();
       }
     }
 
@@ -276,8 +278,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   element.addEventListener('touchstart', onCapture, { passive: !options.isNotPassive });
 
   return () => {
-    element.removeEventListener('mousedown', onCapture);
+    onRelease();
+
     element.removeEventListener('touchstart', onCapture);
+    element.removeEventListener('mousedown', onCapture);
   };
 }
 
