@@ -7,6 +7,7 @@ import React, {
 
 import { debounce } from '../../util/schedulers';
 import resetScroll from '../../util/resetScroll';
+import { IS_ANDROID } from '../../util/environment';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -18,6 +19,8 @@ type OwnProps = {
   itemSelector?: string;
   preloadBackwards?: number;
   sensitiveArea?: number;
+  withAbsolutePositioning?: boolean;
+  maxHeight?: number;
   noScrollRestore?: boolean;
   noScrollRestoreOnTop?: boolean;
   noFastList?: boolean;
@@ -39,6 +42,8 @@ const InfiniteScroll: FC<OwnProps> = ({
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
+  withAbsolutePositioning,
+  maxHeight,
   // Used to turn off restoring scroll position (e.g. for frequently re-ordered chat or user lists)
   noScrollRestore = false,
   noScrollRestoreOnTop = false,
@@ -114,7 +119,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       }
     }
 
-    if (noScrollRestore) {
+    if (withAbsolutePositioning || noScrollRestore) {
       return;
     }
 
@@ -125,7 +130,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     resetScroll(container, newScrollTop);
 
     state.isScrollTopJustUpdated = true;
-  }, [items, itemSelector, noScrollRestore, noScrollRestoreOnTop, cacheBuster]);
+  }, [items, itemSelector, noScrollRestore, noScrollRestoreOnTop, cacheBuster, withAbsolutePositioning]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {
@@ -214,10 +219,18 @@ const InfiniteScroll: FC<OwnProps> = ({
       ref={containerRef}
       className={className}
       onScroll={handleScroll}
-      teactFastList={!noFastList}
+      teactFastList={!noFastList && !withAbsolutePositioning}
       onKeyDown={onKeyDown}
     >
-      {children}
+      {withAbsolutePositioning && items?.length ? (
+        <div
+          teactFastList={!noFastList}
+          // @ts-ignore
+          style={`position: relative;${IS_ANDROID ? ` height: ${maxHeight}px;` : undefined}`}
+        >
+          {children}
+        </div>
+      ) : children}
     </div>
   );
 };

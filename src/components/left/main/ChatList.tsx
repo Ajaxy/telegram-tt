@@ -13,7 +13,7 @@ import {
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
-import { IS_ANDROID, IS_MAC_OS, IS_PWA } from '../../../util/environment';
+import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import { mapValues } from '../../../util/iteratees';
 import { getPinnedChatsCount } from '../../../util/folderManager';
 import usePrevious from '../../../hooks/usePrevious';
@@ -138,38 +138,29 @@ const ChatList: FC<OwnProps> = ({
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
     const pinnedCount = getPinnedChatsCount(virtualFolderId) || 0;
 
-    return (
-      <div
-        className="scroll-container"
+    return viewportIds!.map((id, i) => (
+      <Chat
+        key={id}
+        teactOrderKey={i}
+        chatId={id}
+        isPinned={viewportOffset + i < pinnedCount}
+        folderId={folderId}
+        animationType={getAnimationType(id)}
+        orderDiff={orderDiffById[id]}
         // @ts-ignore
-        style={IS_ANDROID ? `height: ${orderedIds!.length * CHAT_HEIGHT_PX}px` : undefined}
-        teactFastList
-      >
-        {viewportIds!.map((id, i) => (
-          <Chat
-            key={id}
-            teactOrderKey={i}
-            chatId={id}
-            isPinned={viewportOffset + i < pinnedCount}
-            folderId={folderId}
-            animationType={getAnimationType(id)}
-            orderDiff={orderDiffById[id]}
-            // @ts-ignore
-            style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
-          />
-        ))}
-      </div>
-    );
+        style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+      />
+    ));
   }
 
   return (
     <InfiniteScroll
       className="chat-list custom-scroll"
       items={viewportIds}
-      onLoadMore={getMore}
       preloadBackwards={CHAT_LIST_SLICE}
-      noFastList
-      noScrollRestore
+      withAbsolutePositioning
+      maxHeight={(orderedIds?.length || 0) * CHAT_HEIGHT_PX}
+      onLoadMore={getMore}
     >
       {viewportIds?.length ? (
         renderChats()

@@ -4,7 +4,6 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { CHAT_HEIGHT_PX } from '../../config';
-import { IS_ANDROID } from '../../util/environment';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
@@ -105,31 +104,24 @@ const ChatOrUserPicker: FC<OwnProps> = ({
           className="picker-list custom-scroll"
           items={viewportIds}
           onLoadMore={getMore}
-          noFastList
-          noScrollRestore
+          withAbsolutePositioning
+          maxHeight={chatOrUserIds!.length * CHAT_HEIGHT_PX}
           onKeyDown={handleKeyDown}
         >
-          <div
-            className="scroll-container"
-            // @ts-ignore
-            style={IS_ANDROID ? `height: ${chatOrUserIds!.length * CHAT_HEIGHT_PX}px` : undefined}
-            teactFastList
-          >
-            {viewportIds.map((id, i) => (
-              <ListItem
-                key={id}
-                className="chat-item-clickable force-rounded-corners"
-                style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
-                onClick={() => onSelectChatOrUser(id)}
-              >
-                {isUserId(id) ? (
-                  <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
-              </ListItem>
-            ))}
-          </div>
+          {viewportIds.map((id, i) => (
+            <ListItem
+              key={id}
+              className="chat-item-clickable force-rounded-corners"
+              style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+              onClick={() => onSelectChatOrUser(id)}
+            >
+              {isUserId(id) ? (
+                <PrivateChatInfo status={id === currentUserId ? lang('SavedMessagesInfo') : undefined} userId={id} />
+              ) : (
+                <GroupChatInfo chatId={id} />
+              )}
+            </ListItem>
+          ))}
         </InfiniteScroll>
       ) : viewportIds && !viewportIds.length ? (
         <p className="no-results">{lang('lng_blocked_list_not_found')}</p>
