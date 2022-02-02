@@ -9,7 +9,7 @@ import {
 import { MediaViewerOrigin } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useBlurSync from '../../hooks/useBlurSync';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
@@ -49,7 +49,6 @@ import {
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { captureEvents } from '../../util/captureEvents';
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import windowSize from '../../util/windowSize';
 import { AVATAR_FULL_DIMENSIONS, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
@@ -101,6 +100,7 @@ const MediaViewer: FC<StateProps> = ({
     closeMediaViewer,
     openForwardMenu,
     focusMessage,
+    toggleChatInfo,
   } = getDispatch();
 
   const isOpen = Boolean(avatarOwner || messageId);
@@ -313,12 +313,16 @@ const MediaViewer: FC<StateProps> = ({
 
   const handleFooterClick = useCallback(() => {
     close();
-    focusMessage({
-      chatId,
-      threadId,
-      messageId,
-    });
-  }, [close, chatId, threadId, focusMessage, messageId]);
+
+    if (IS_SINGLE_COLUMN_LAYOUT) {
+      setTimeout(() => {
+        toggleChatInfo(false, { forceSyncOnIOs: true });
+        focusMessage({ chatId, threadId, messageId });
+      }, ANIMATION_DURATION);
+    } else {
+      focusMessage({ chatId, threadId, messageId });
+    }
+  }, [close, chatId, threadId, focusMessage, toggleChatInfo, messageId]);
 
   const handleForward = useCallback(() => {
     openForwardMenu({

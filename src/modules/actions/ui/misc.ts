@@ -10,10 +10,10 @@ import generateIdFor from '../../../util/generateIdFor';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
-addReducer('toggleChatInfo', (global) => {
+addReducer('toggleChatInfo', (global, action, payload) => {
   return {
     ...global,
-    isChatInfoShown: !global.isChatInfoShown,
+    isChatInfoShown: payload !== undefined ? payload : !global.isChatInfoShown,
   };
 });
 
