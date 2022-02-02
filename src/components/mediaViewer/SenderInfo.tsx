@@ -3,6 +3,7 @@ import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getSenderTitle, isUserId } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -29,6 +30,8 @@ type StateProps = {
   message?: ApiMessage;
 };
 
+const ANIMATION_DURATION = 350;
+
 const SenderInfo: FC<OwnProps & StateProps> = ({
   chatId,
   messageId,
@@ -39,12 +42,21 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   const {
     closeMediaViewer,
     focusMessage,
+    toggleChatInfo,
   } = getDispatch();
 
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();
-    focusMessage({ chatId, messageId });
-  }, [chatId, focusMessage, messageId, closeMediaViewer]);
+
+    if (IS_SINGLE_COLUMN_LAYOUT) {
+      setTimeout(() => {
+        toggleChatInfo(false, { forceSyncOnIOs: true });
+        focusMessage({ chatId, messageId });
+      }, ANIMATION_DURATION);
+    } else {
+      focusMessage({ chatId, messageId });
+    }
+  }, [chatId, focusMessage, toggleChatInfo, messageId, closeMediaViewer]);
 
   const lang = useLang();
 
