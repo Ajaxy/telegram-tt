@@ -11,7 +11,6 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { updateAppBadge } from '../../../util/appBadge';
 import {
   replaceChatListIds,
   replaceChats,
@@ -34,7 +33,6 @@ import {
   selectDraft,
   selectChatMessage,
   selectThreadInfo,
-  selectCountNotMutedUnreadOptimized,
   selectLastServiceNotification,
 } from '../../selectors';
 import { isUserId } from '../../helpers';
@@ -101,8 +99,6 @@ async function afterSync() {
   ]);
 
   await callApi('fetchCurrentUser');
-
-  updateAppBadge(selectCountNotMutedUnreadOptimized(getGlobal()));
 
   if (DEBUG) {
     // eslint-disable-next-line no-console

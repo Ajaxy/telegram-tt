@@ -46,13 +46,13 @@ import useConnectionStatus from '../../hooks/useConnectionStatus';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
+import UnreadCounter from '../common/UnreadCounter';
 import Transition from '../ui/Transition';
 import Button from '../ui/Button';
 import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 import AudioPlayer from './AudioPlayer';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
-import UnreadCount from './UnreadCount';
 
 import './MiddleHeader.scss';
 
@@ -346,7 +346,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     );
   }
 
-  function renderBackButton(asClose = false, withUnreadCount = false) {
+  function renderBackButton(asClose = false, withUnreadCounter = false) {
     return (
       <div className="back-button">
         <Button
@@ -358,7 +358,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         >
           <div className={buildClassName('animated-close-icon', !asClose && 'state-back')} />
         </Button>
-        {withUnreadCount && <UnreadCount />}
+        {withUnreadCounter && <UnreadCounter />}
       </div>
     );
   }

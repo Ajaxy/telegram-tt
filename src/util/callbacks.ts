@@ -22,9 +22,16 @@ export function createCallbackManager() {
     });
   }
 
+  function hasCallbacks() {
+    return Boolean(callbacks.length);
+  }
+
   return {
     runCallbacks,
     addCallback,
     removeCallback,
+    hasCallbacks,
   };
 }
+
+export type CallbackManager = ReturnType<typeof createCallbackManager>;
