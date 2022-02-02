@@ -31,6 +31,10 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     }
 
     worker = new Worker(new URL('./worker.ts', import.meta.url));
+
+    // Crazy fix for iOS https://www.youtube.com/watch?v=ViyTYEv9dM8&t=478s
+    (window as any)._workerlol = worker;
+
     subscribeToWorker(onUpdate);
 
     if (initialArgs.platform === 'iOS') {
