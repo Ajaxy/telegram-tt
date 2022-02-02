@@ -85,6 +85,10 @@ async function searchTextMessages(
   query?: string,
   offsetId?: number,
 ) {
+  if (!query) {
+    return;
+  }
+
   const result = await callApi('searchMessagesLocal', {
     chatOrUser,
     type: 'text',
@@ -108,7 +112,7 @@ async function searchTextMessages(
   let global = getGlobal();
 
   const currentSearch = selectCurrentTextSearch(global);
-  if (!currentSearch || (query && query !== currentSearch.query)) {
+  if (!currentSearch || query !== currentSearch.query) {
     return;
   }
 

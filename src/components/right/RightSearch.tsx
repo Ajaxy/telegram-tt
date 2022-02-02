@@ -5,6 +5,7 @@ import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
   selectUser,
   selectChatMessages,
@@ -16,13 +17,12 @@ import {
   getUserFullName,
   isChatChannel,
 } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
-import { orderBy } from '../../util/iteratees';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { renderMessageSummary } from '../common/helpers/renderMessageText';
+import renderText from '../common/helpers/renderText';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
@@ -46,13 +46,6 @@ type StateProps = {
   foundIds?: number[];
 };
 
-interface Result {
-  message: ApiMessage;
-  senderUser?: ApiUser;
-  senderChat?: ApiChat;
-  onClick: NoneToVoidFunction;
-}
-
 const RightSearch: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
@@ -69,14 +62,20 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     focusMessage,
   } = getDispatch();
 
-  const lang = useLang();
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const foundResults = useMemo(() => {
-    if (!query || !foundIds || !foundIds.length || !messagesById) {
+  const lang = useLang();
+  useHistoryBack(isActive, onClose);
+
+  const [viewportIds, getMore] = useInfiniteScroll(searchTextMessagesLocal, foundIds);
+
+  const viewportResults = useMemo(() => {
+    if (!query || !viewportIds?.length || !messagesById) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    const results = foundIds.map((id) => {
+    return viewportIds.map((id) => {
       const message = messagesById[id];
       if (!message) {
         return undefined;
@@ -100,19 +99,31 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         senderChat,
         onClick: () => focusMessage({ chatId, threadId, messageId: id }),
       };
-    }).filter(Boolean) as Result[];
+    }).filter(Boolean);
+  }, [query, viewportIds, messagesById, chat, focusMessage, chatId, threadId]);
 
-    return orderBy(results, ({ message }) => message.date, 'desc');
-  }, [chatId, threadId, focusMessage, foundIds, chat, messagesById, query]);
+  const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
+    const foundResult = viewportResults?.[index === -1 ? 0 : index];
+    if (foundResult) {
+      foundResult.onClick();
+    }
+  }, '.ListItem-button', true);
 
   const renderSearchResult = ({
     message, senderUser, senderChat, onClick,
-  }: Result) => {
+  }: {
+    message: ApiMessage;
+    senderUser?: ApiUser;
+    senderChat?: ApiChat;
+    onClick: NoneToVoidFunction;
+  }) => {
     const title = senderChat ? getChatTitle(lang, senderChat) : getUserFullName(senderUser);
     const text = renderMessageSummary(lang, message, undefined, query);
 
     return (
       <ListItem
+        key={message.id}
+        teactOrderKey={-message.date}
         className="chat-item-clickable search-result-message m-0"
         onClick={onClick}
       >
@@ -130,39 +141,31 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     );
   };
 
-  useHistoryBack(isActive, onClose);
-
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
-    const foundResult = foundResults?.[index === -1 ? 0 : index];
-    if (foundResult) {
-      foundResult.onClick();
-    }
-  }, '.ListItem-button', true);
+  const isOnTop = viewportIds?.[0] === foundIds?.[0];
 
   return (
     <InfiniteScroll
-      className="RightSearch custom-scroll"
-      items={foundResults}
-      preloadBackwards={0}
-      onLoadMore={searchTextMessagesLocal}
-      noFastList
-      onKeyDown={handleKeyDown}
       ref={containerRef}
+      className="RightSearch custom-scroll"
+      items={viewportResults}
+      preloadBackwards={0}
+      onLoadMore={getMore}
+      onKeyDown={handleKeyDown}
     >
-      <p className="helper-text" dir="auto">
-        {!query ? (
-          lang('lng_dlg_search_for_messages')
-        ) : (totalCount === 0 || !foundResults.length) ? (
-          lang('lng_search_no_results')
-        ) : totalCount === 1 ? (
-          '1 message found'
-        ) : (
-          `${(foundResults.length && (totalCount || foundResults.length))} messages found`
-        )}
-      </p>
-      {foundResults.map(renderSearchResult)}
+      {isOnTop && (
+        <p key="helper-text" className="helper-text" dir="auto">
+          {!query ? (
+            lang('lng_dlg_search_for_messages')
+          ) : (totalCount === 0 || !viewportResults.length) ? (
+            lang('lng_search_no_results')
+          ) : totalCount === 1 ? (
+            '1 message found'
+          ) : (
+            `${(viewportResults.length && (totalCount || viewportResults.length))} messages found`
+          )}
+        </p>
+      )}
+      {viewportResults.map(renderSearchResult)}
     </InfiniteScroll>
   );
 };
