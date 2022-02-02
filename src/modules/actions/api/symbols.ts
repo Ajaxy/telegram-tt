@@ -27,13 +27,18 @@ addReducer('loadStickerSets', (global) => {
 
 addReducer('loadAddedStickers', (global, actions) => {
   const { setIds: addedSetIds } = global.stickers.added;
+  const cached = global.stickers.setsById;
   if (!addedSetIds || !addedSetIds.length) {
     return;
   }
 
   (async () => {
     for (let i = 0; i < addedSetIds.length; i++) {
-      actions.loadStickers({ stickerSetId: addedSetIds[i] });
+      const id = addedSetIds[i];
+      if (cached[id].stickers) {
+        continue; // Already loaded
+      }
+      actions.loadStickers({ stickerSetId: id });
 
       if (i % ADDED_SETS_THROTTLE_CHUNK === 0 && i > 0) {
         await pause(ADDED_SETS_THROTTLE);

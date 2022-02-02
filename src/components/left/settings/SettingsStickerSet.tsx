@@ -47,7 +47,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
           color="translucent"
           isRtl={lang.isRtl}
         >
-          {stickerSet.isAnimated ? (
+          {stickerSet.isLottie ? (
             <StickerSetCoverAnimated
               size={STICKER_SIZE_GENERAL_SETTINGS}
               stickerSet={stickerSet}

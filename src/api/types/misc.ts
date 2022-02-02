@@ -6,6 +6,7 @@ export interface ApiInitialArgs {
   sessionData?: ApiSessionData;
   isTest?: boolean;
   isMovSupported?: boolean;
+  isWebmSupported?: boolean;
 }
 
 export interface ApiOnProgress {

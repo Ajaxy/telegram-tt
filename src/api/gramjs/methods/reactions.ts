@@ -3,7 +3,7 @@ import { invokeRequest } from './client';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { buildInputPeer } from '../gramjsBuilders';
 import localDb from '../localDb';
-import { buildApiAvailableReaction, buildMessageUserReaction } from '../apiBuilders/messages';
+import { buildApiAvailableReaction, buildMessagePeerReaction } from '../apiBuilders/messages';
 import { REACTION_LIST_LIMIT } from '../../../config';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildApiUser } from '../apiBuilders/users';
@@ -120,7 +120,7 @@ export async function fetchMessageReactionsList({
   return {
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
     nextOffset,
-    reactions: reactions.map(buildMessageUserReaction),
+    reactions: reactions.map(buildMessagePeerReaction),
     count,
   };
 }

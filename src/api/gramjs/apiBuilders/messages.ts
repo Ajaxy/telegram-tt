@@ -155,7 +155,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
   const { replies, mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
-  const isInAlbum = Boolean(groupedId) && !(content.document || content.audio);
+  const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
 
   return {
@@ -192,13 +192,13 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
 
 export function buildMessageReactions(reactions: GramJs.MessageReactions): ApiReactions {
   const {
-    recentReactons, results, canSeeList,
+    recentReactions, results, canSeeList,
   } = reactions;
 
   return {
     canSeeList,
     results: results.map(buildReactionCount),
-    recentReactions: recentReactons?.map(buildMessageUserReaction),
+    recentReactions: recentReactions?.map(buildMessagePeerReaction),
   };
 }
 
@@ -212,11 +212,11 @@ function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCou
   };
 }
 
-export function buildMessageUserReaction(userReaction: GramJs.MessageUserReaction): ApiUserReaction {
-  const { userId, reaction } = userReaction;
+export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction {
+  const { peerId, reaction } = userReaction;
 
   return {
-    userId: buildApiPeerId(userId, 'user'),
+    userId: getApiChatIdFromMtpPeer(peerId),
     reaction,
   };
 }

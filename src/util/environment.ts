@@ -73,10 +73,14 @@ export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.c
 export const ARE_CALLS_SUPPORTED = !navigator.userAgent.includes('Firefox');
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slide-fade' : IS_IOS ? 'slide-layers' : 'push-slide';
 
+const TEST_VIDEO = document.createElement('video');
 // `canPlayType(VIDEO_MOV_TYPE)` returns false negative at least for macOS Chrome and iOS Safari
 export const IS_MOV_SUPPORTED = true;
 
 if (IS_MOV_SUPPORTED) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
+
+export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''))
+  && !(IS_MAC_OS && IS_SAFARI); // Safari on MacOS has some issues with WebM
 
 export const DPR = window.devicePixelRatio || 1;
 

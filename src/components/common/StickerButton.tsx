@@ -11,6 +11,8 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useFlag from '../../hooks/useFlag';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+import safePlay from '../../util/safePlay';
+import { IS_WEBM_SUPPORTED } from '../../util/environment';
 
 import AnimatedSticker from './AnimatedSticker';
 import Button from '../ui/Button';
@@ -44,12 +46,15 @@ const StickerButton: FC<OwnProps> = ({
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !isIntersecting, ApiMediaFormat.BlobUrl);
 
   const shouldPlay = isIntersecting && !noAnimate;
-  const lottieData = useMedia(sticker.isAnimated && localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
-  const [isAnimationLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
-  const canAnimatedPlay = isAnimationLoaded && shouldPlay;
+  const lottieData = useMedia(sticker.isLottie && localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
+  const [isLottieLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
+  const canLottiePlay = isLottieLoaded && shouldPlay;
+  const isGif = sticker.isGif && IS_WEBM_SUPPORTED;
+  const gifBlobUrl = useMedia(isGif && localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
+  const canGifPlay = Boolean(isGif && gifBlobUrl && shouldPlay);
 
   const { transitionClassNames: previewTransitionClassNames } = useShowTransition(
-    Boolean(previewBlobUrl || canAnimatedPlay),
+    Boolean(previewBlobUrl || canLottiePlay),
     undefined,
     undefined,
     'slow',
@@ -61,6 +66,17 @@ const StickerButton: FC<OwnProps> = ({
       unmarkLoaded();
     }
   }, [unmarkLoaded, shouldPlay]);
+
+  useEffect(() => {
+    if (!isGif || !ref.current) return;
+    const video = ref.current.querySelector('video');
+    if (!video) return;
+    if (canGifPlay) {
+      safePlay(video);
+    } else {
+      video.pause();
+    }
+  }, [isGif, canGifPlay]);
 
   function handleClick() {
     if (onClick) {
@@ -78,12 +94,11 @@ const StickerButton: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'StickerButton',
     onClick && 'interactive',
-    sticker.isAnimated && 'animated',
     stickerSelector,
     className,
   );
 
-  const style = thumbDataUri && !canAnimatedPlay ? `background-image: url('${thumbDataUri}');` : '';
+  const style = (thumbDataUri && !canLottiePlay && !canGifPlay) ? `background-image: url('${thumbDataUri}');` : '';
 
   return (
     <div
@@ -96,9 +111,19 @@ const StickerButton: FC<OwnProps> = ({
       onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={handleClick}
     >
-      {!canAnimatedPlay && (
+      {!canLottiePlay && !canGifPlay && (
         // eslint-disable-next-line jsx-a11y/alt-text
         <img src={previewBlobUrl} className={previewTransitionClassNames} />
+      )}
+      {isGif && (
+        <video
+          className={previewTransitionClassNames}
+          src={gifBlobUrl}
+          autoPlay={canGifPlay}
+          loop
+          playsInline
+          muted
+        />
       )}
       {shouldPlay && lottieData && (
         <AnimatedSticker

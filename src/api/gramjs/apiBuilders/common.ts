@@ -50,7 +50,7 @@ export function buildApiThumbnailFromCached(photoSize: GramJs.PhotoCachedSize): 
 
 export function buildApiThumbnailFromPath(
   photoSize: GramJs.PhotoPathSize,
-  sizeAttribute: GramJs.DocumentAttributeImageSize,
+  sizeAttribute: GramJs.DocumentAttributeImageSize | GramJs.DocumentAttributeVideo,
 ): ApiThumbnail | undefined {
   const { w, h } = sizeAttribute;
   const dataUri = `data:image/svg+xml;utf8,${pathBytesToSvg(photoSize.bytes, w, h)}`;

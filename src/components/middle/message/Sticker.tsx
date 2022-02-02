@@ -1,8 +1,8 @@
-import React, { FC, useRef } from '../../../lib/teact/teact';
+import React, { FC, useEffect, useRef } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
-import { MEMOJI_STICKER_ID } from '../../../config';
+import { NO_STICKER_SET_ID } from '../../../config';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -11,6 +11,8 @@ import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useFlag from '../../../hooks/useFlag';
 import useWebpThumbnail from '../../../hooks/useWebpThumbnail';
+import safePlay from '../../../util/safePlay';
+import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 import StickerSetModal from '../../common/StickerSetModal.async';
@@ -34,14 +36,20 @@ const Sticker: FC<OwnProps> = ({
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const sticker = message.content.sticker!;
-  const { isAnimated, stickerSetId } = sticker;
-  const isMemojiSticker = stickerSetId === MEMOJI_STICKER_ID;
+  const { isLottie, stickerSetId, isGif } = sticker;
+  const canDisplayGif = IS_WEBM_SUPPORTED;
+  const isMemojiSticker = stickerSetId === NO_STICKER_SET_ID;
 
   const shouldLoad = useIsIntersecting(ref, observeIntersection);
   const shouldPlay = useIsIntersecting(ref, observeIntersectionForPlaying);
 
   const mediaHash = sticker.isPreloadedGlobally ? `sticker${sticker.id}` : getMessageMediaHash(message, 'inline')!;
+  const previewMediaHash = isGif && !canDisplayGif && (
+    sticker.isPreloadedGlobally ? `sticker${sticker.id}?size=m` : getMessageMediaHash(message, 'pictogram'));
+  const previewBlobUrl = useMedia(previewMediaHash);
   const thumbDataUri = useWebpThumbnail(message);
+  const previewUrl = previewBlobUrl || thumbDataUri;
+
   const mediaData = useMedia(
     mediaHash,
     !shouldLoad,
@@ -50,8 +58,8 @@ const Sticker: FC<OwnProps> = ({
   );
 
   const isMediaLoaded = Boolean(mediaData);
-  const [isAnimationLoaded, markAnimationLoaded] = useFlag(isMediaLoaded);
-  const isMediaReady = isAnimated ? isAnimationLoaded : isMediaLoaded;
+  const [isLottieLoaded, markLottieLoaded] = useFlag(isMediaLoaded);
+  const isMediaReady = isLottie ? isLottieLoaded : isMediaLoaded;
   const transitionClassNames = useMediaTransition(isMediaReady);
 
   const { width, height } = getStickerDimensions(sticker);
@@ -62,19 +70,30 @@ const Sticker: FC<OwnProps> = ({
     isMemojiSticker && 'inactive',
   );
 
+  useEffect(() => {
+    if (!isGif || !ref.current) return;
+    const video = ref.current.querySelector('video');
+    if (!video) return;
+    if (shouldPlay) {
+      safePlay(video);
+    } else {
+      video.pause();
+    }
+  }, [isGif, shouldPlay]);
+
   return (
     <div ref={ref} className={stickerClassName} onClick={!isMemojiSticker ? openModal : undefined}>
-      {!isMediaReady && (
+      {(!isMediaReady || (isGif && !canDisplayGif)) && (
         <img
           id={`sticker-thumb-${message.id}`}
-          src={thumbDataUri}
+          src={previewUrl}
           width={width}
           height={height}
           alt=""
           className={thumbClassName}
         />
       )}
-      {!isAnimated && (
+      {!isLottie && !isGif && (
         <img
           id={`sticker-${message.id}`}
           src={mediaData as string}
@@ -84,7 +103,19 @@ const Sticker: FC<OwnProps> = ({
           className={buildClassName('full-media', transitionClassNames)}
         />
       )}
-      {isAnimated && isMediaLoaded && (
+      {isGif && canDisplayGif && isMediaReady && (
+        <video
+          id={`sticker-${message.id}`}
+          src={mediaData as string}
+          width={width}
+          height={height}
+          autoPlay={shouldPlay}
+          playsInline
+          loop={shouldLoop}
+          muted
+        />
+      )}
+      {isLottie && isMediaLoaded && (
         <AnimatedSticker
           key={mediaHash}
           className={buildClassName('full-media', transitionClassNames)}
@@ -93,7 +124,7 @@ const Sticker: FC<OwnProps> = ({
           size={width}
           play={shouldPlay}
           noLoop={!shouldLoop}
-          onLoad={markAnimationLoaded}
+          onLoad={markLottieLoaded}
         />
       )}
       <StickerSetModal
