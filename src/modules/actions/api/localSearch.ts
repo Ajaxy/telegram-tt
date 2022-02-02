@@ -9,11 +9,15 @@ import { callApi } from '../../../api/gramjs';
 import {
   selectCurrentTextSearch,
   selectCurrentMediaSearchPeerId,
-  selectCurrentMediaSearch, selectCurrentMessageList, selectChat, selectThreadInfo,
+  selectCurrentMediaSearch,
+  selectCurrentMessageList,
+  selectChat,
+  selectThreadInfo,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
   addChatMessagesById,
+  addChats,
   addUsers,
   updateLocalMediaSearchResults,
   updateLocalTextSearchResults,
@@ -103,7 +107,7 @@ async function searchTextMessages(
   }
 
   const {
-    messages, users, totalCount, nextOffsetId,
+    chats, users, messages, totalCount, nextOffsetId,
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
@@ -116,8 +120,9 @@ async function searchTextMessages(
     return;
   }
 
-  global = addChatMessagesById(global, chatOrUser.id, byId);
+  global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addChatMessagesById(global, chatOrUser.id, byId);
   global = updateLocalTextSearchResults(global, chatOrUser.id, threadId, newFoundIds, totalCount, nextOffsetId);
   setGlobal(global);
 }
@@ -140,7 +145,7 @@ async function searchSharedMedia(
   }
 
   const {
-    messages, users, totalCount, nextOffsetId,
+    chats, users, messages, totalCount, nextOffsetId,
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
@@ -153,8 +158,9 @@ async function searchSharedMedia(
     return;
   }
 
-  global = addChatMessagesById(global, chatOrUser.id, byId);
+  global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addChatMessagesById(global, chatOrUser.id, byId);
   global = updateLocalMediaSearchResults(global, chatOrUser.id, type, newFoundIds, totalCount, nextOffsetId);
   setGlobal(global);
 

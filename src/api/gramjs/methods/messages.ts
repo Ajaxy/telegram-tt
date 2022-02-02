@@ -892,8 +892,9 @@ export async function searchMessagesLocal({
 
   updateLocalDb(result);
 
-  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
 
   let totalCount = messages.length;
   let nextOffsetId: number | undefined;
@@ -906,8 +907,9 @@ export async function searchMessagesLocal({
   }
 
   return {
-    messages,
+    chats,
     users,
+    messages,
     totalCount,
     nextOffsetId,
   };
@@ -975,7 +977,7 @@ export async function searchMessagesGlobal({
     messages: result.messages,
   } as GramJs.messages.Messages);
 
-  const chats = result.chats.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
   const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
 
@@ -1204,9 +1206,9 @@ export async function fetchPinnedMessages({ chat }: { chat: ApiChat }) {
 
   updateLocalDb(result);
 
-  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
-  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
 
   return {
     messages,
