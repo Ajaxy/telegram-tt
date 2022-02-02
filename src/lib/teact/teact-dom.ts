@@ -76,18 +76,20 @@ function renderWithVirtual(
     moveDirection?: 'up' | 'down';
   } = {},
 ) {
+  const isCurrentComponent = $current && isComponentElement($current);
+  const isNewComponent = $new && isComponentElement($new);
+
   if (
     !skipComponentUpdate
-    && $current && $new
-    && isComponentElement($current) && isComponentElement($new)
-    && !hasElementChanged($current, $new)
+    && isCurrentComponent && isNewComponent
+    && !hasElementChanged($current!, $new!)
   ) {
-    $new = updateComponent($current, $new);
+    $new = updateComponent($current as VirtualElementComponent, $new as VirtualElementComponent);
   }
 
   // Parent element may have changed, so we need to update the listener closure.
-  if (!skipComponentUpdate && $new && isComponentElement($new) && $new.componentInstance.isMounted) {
-    setupComponentUpdateListener($new, $parent, index, parentEl);
+  if (!skipComponentUpdate && isNewComponent && ($new as VirtualElementComponent).componentInstance.isMounted) {
+    setupComponentUpdateListener($new as VirtualElementComponent, $parent, index, parentEl);
   }
 
   if ($current === $new) {
@@ -95,8 +97,8 @@ function renderWithVirtual(
   }
 
   if (!$current && $new) {
-    if (isComponentElement($new)) {
-      $new = initComponent($new, $parent, index, parentEl);
+    if (isNewComponent) {
+      $new = initComponent($new as VirtualElementComponent, $parent, index, parentEl);
     }
 
     const node = createNode($new);
@@ -112,8 +114,8 @@ function renderWithVirtual(
     unmountTree($current);
   } else if ($current && $new) {
     if (hasElementChanged($current, $new)) {
-      if (isComponentElement($new)) {
-        $new = initComponent($new, $parent, index, parentEl);
+      if (isNewComponent) {
+        $new = initComponent($new as VirtualElementComponent, $parent, index, parentEl);
       }
 
       const node = createNode($new);
@@ -121,7 +123,7 @@ function renderWithVirtual(
       parentEl.replaceChild(node, getTarget($current)!);
       unmountTree($current);
     } else {
-      const areComponents = isComponentElement($current) && isComponentElement($new);
+      const areComponents = isCurrentComponent && isNewComponent;
       const currentTarget = getTarget($current);
 
       if (!areComponents) {
@@ -133,7 +135,7 @@ function renderWithVirtual(
         }
       }
 
-      if (isRealElement($current) && isRealElement($new)) {
+      if (isRealElement($new)) {
         if (moveDirection) {
           const node = currentTarget!;
           const nextSibling = parentEl.childNodes[moveDirection === 'up' ? index : index + 1];
@@ -146,11 +148,11 @@ function renderWithVirtual(
         }
 
         if (!areComponents) {
-          updateAttributes($current, $new, currentTarget as HTMLElement);
+          updateAttributes(($current as VirtualRealElement), $new, currentTarget as HTMLElement);
         }
 
         $new.children = renderChildren(
-          $current,
+          ($current as VirtualRealElement),
           $new,
           areComponents ? parentEl : currentTarget as HTMLElement,
         );
@@ -228,9 +230,9 @@ function createNode($element: VirtualElement): Node {
     props.ref.current = element;
   }
 
-  Object.keys(props).forEach((key) => {
+  Object.entries(props).forEach(([key, value]) => {
     if (props[key] !== undefined) {
-      setAttribute(element, key, props[key]);
+      setAttribute(element, key, value);
     }
   });
 
@@ -248,9 +250,11 @@ function renderChildren(
     return renderFastListChildren($current, $new, currentEl);
   }
 
-  const maxLength = Math.max($current.children.length, $new.children.length);
+  const currentChildrenLength = $current.children.length;
+  const newChildrenLength = $new.children.length;
+  const maxLength = Math.max(currentChildrenLength, newChildrenLength);
   const newChildren = [];
-  const fragment = $new.children.length > $current.children.length + 1 ? document.createDocumentFragment() : undefined;
+  const fragment = newChildrenLength > currentChildrenLength + 1 ? document.createDocumentFragment() : undefined;
 
   for (let i = 0; i < maxLength; i++) {
     const $newChild = renderWithVirtual(
@@ -259,7 +263,7 @@ function renderChildren(
       $new.children[i],
       $new,
       i,
-      i >= $current.children.length ? { fragment } : undefined,
+      i >= currentChildrenLength ? { fragment } : undefined,
     );
 
     if ($newChild) {
@@ -364,9 +368,7 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
     newChildren.push(
       renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, {
         forceIndex: true,
-        ...(shouldMoveNode && {
-          moveDirection: isMovingDown ? 'down' : 'up',
-        }),
+        moveDirection: shouldMoveNode ? (isMovingDown ? 'down' : 'up') : undefined,
       })!,
     );
   });
@@ -402,11 +404,10 @@ function flushFragmentQueue(
 }
 
 function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement, element: HTMLElement) {
-  const currentKeys = Object.keys($current.props);
-  const newKeys = Object.keys($new.props);
+  const currentEntries = Object.entries($current.props);
+  const newEntries = Object.entries($new.props);
 
-  currentKeys.forEach((key) => {
-    const currentValue = $current.props[key];
+  currentEntries.forEach(([key, currentValue]) => {
     const newValue = $new.props[key];
 
     if (
@@ -420,9 +421,8 @@ function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement
     }
   });
 
-  newKeys.forEach((key) => {
+  newEntries.forEach(([key, newValue]) => {
     const currentValue = $current.props[key];
-    const newValue = $new.props[key];
 
     if (newValue !== undefined && newValue !== currentValue) {
       setAttribute(element, key, newValue);
