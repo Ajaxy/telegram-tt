@@ -238,6 +238,11 @@
     opacity: 1;
     transition: opacity .3s ease;
 
+    @media (max-width: 600px) {
+      margin-top: .5rem;
+      margin-bottom: .75rem;
+    }
+
     body:not(.is-scrolling-messages) &.stuck {
       opacity: 0;
 
