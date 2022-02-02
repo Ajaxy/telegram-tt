@@ -293,6 +293,7 @@ export interface ManagementState {
   inviteInfo?: {
     invite: ApiExportedInvite;
     importers?: ApiChatInviteImporter[];
+    requesters?: ApiChatInviteImporter[];
   };
 }
 

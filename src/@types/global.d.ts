@@ -46,6 +46,7 @@ type EmojiWithSkins = Record<number, Emoji>;
 type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
 
 declare module '*.png';
+declare module '*.tgs';
 
 declare module 'pako/dist/pako_inflate' {
   function inflate(...args: any[]): string;

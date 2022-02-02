@@ -22,12 +22,15 @@ import {
 } from '../../modules/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import { getDayStartAt } from '../../util/dateFormat';
 
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
+import ConfirmDialog from '../ui/ConfirmDialog';
+
 import './RightHeader.scss';
-import { getDayStartAt } from '../../util/dateFormat';
 
 type OwnProps = {
   chatId?: string;
@@ -131,6 +134,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const backButtonRef = useRef<HTMLDivElement>(null);
+  const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
 
   const handleEditInviteClick = useCallback(() => {
     setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
@@ -140,7 +144,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const handleDeleteInviteClick = useCallback(() => {
     deleteExportedChatInvite({ chatId: chatId!, link: currentInviteInfo!.link });
     onScreenSelect(ManagementScreens.Invites);
-  }, [chatId, currentInviteInfo, deleteExportedChatInvite, onScreenSelect]);
+    closeDeleteDialog();
+  }, [chatId, closeDeleteDialog, currentInviteInfo, deleteExportedChatInvite, onScreenSelect]);
 
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setLocalTextSearchQuery({ query });
@@ -305,15 +310,26 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                 </Button>
               )}
               {currentInviteInfo && currentInviteInfo.isRevoked && (
-                <Button
-                  round
-                  color="danger"
-                  size="smaller"
-                  ariaLabel={lang('Delete')}
-                  onClick={handleDeleteInviteClick}
-                >
-                  <i className="icon-delete" />
-                </Button>
+                <>
+                  <Button
+                    round
+                    color="danger"
+                    size="smaller"
+                    ariaLabel={lang('Delete')}
+                    onClick={openDeleteDialog}
+                  >
+                    <i className="icon-delete" />
+                  </Button>
+                  <ConfirmDialog
+                    isOpen={isDeleteDialogOpen}
+                    onClose={closeDeleteDialog}
+                    title={lang('DeleteLink')}
+                    text={lang('DeleteLinkHelp')}
+                    confirmIsDestructive
+                    confirmLabel={lang('Delete')}
+                    confirmHandler={handleDeleteInviteClick}
+                  />
+                </>
               )}
             </section>
           </>

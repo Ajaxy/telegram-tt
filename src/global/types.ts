@@ -558,6 +558,7 @@ export type ActionTypes = (
   'setEditingExportedInvite' | 'loadExportedChatInvites' | 'editExportedChatInvite' | 'exportChatInvite' |
   'deleteExportedChatInvite' | 'deleteRevokedExportedChatInvites' | 'setOpenedInviteInfo' | 'loadChatInviteImporters' |
   'loadChatJoinRequests' | 'hideChatJoinRequest' | 'hideAllChatJoinRequests' | 'requestNextManagementScreen' |
+  'loadChatInviteRequesters' |
   // groups
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |

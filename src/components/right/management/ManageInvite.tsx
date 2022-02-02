@@ -59,6 +59,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   const [selectedExpireOption, setSelectedExpireOption] = useState('unlimited');
   const [customUsageLimit, setCustomUsageLimit] = useState<number | undefined>(10);
   const [selectedUsageOption, setSelectedUsageOption] = useState('0');
+  const [isSubmitBlocked, setIsSubmitBlocked] = useState(false);
 
   useHistoryBack(isActive, onClose);
 
@@ -81,8 +82,9 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         setCustomUsageLimit(usageLimit);
       }
       if (expireDate) {
+        const minSafeDate = getServerTime(serverTimeOffset) + DEFAULT_CUSTOM_EXPIRE_DATE;
         setSelectedExpireOption('custom');
-        setCustomExpireDate(expireDate * 1000);
+        setCustomExpireDate(Math.max(expireDate, minSafeDate) * 1000);
       }
       if (editingIsRequestNeeded) {
         setIsRequestNeeded(true);
@@ -108,6 +110,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   }, [closeCalendar]);
 
   const handleSaveClick = useCallback(() => {
+    setIsSubmitBlocked(true);
     const usageLimit = selectedUsageOption === 'custom' ? customUsageLimit : selectedUsageOption;
     let expireDate;
     switch (selectedExpireOption) {
@@ -240,6 +243,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown
           onClick={handleSaveClick}
+          disabled={isSubmitBlocked}
           ariaLabel={editingInvite ? lang('SaveLink') : lang('CreateLink')}
         >
           <i className="icon-check" />

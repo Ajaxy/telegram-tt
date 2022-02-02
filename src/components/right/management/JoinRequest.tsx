@@ -50,7 +50,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
     ? formatTime(lang, fixedDate) : formatHumanDate(lang, fixedDate, true, false, true);
 
   const handleUserClick = () => {
-    openUserInfo({ userId });
+    openUserInfo({ id: userId });
   };
 
   const handleAcceptRequest = useCallback(() => {

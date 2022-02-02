@@ -10,10 +10,13 @@ import useLang from '../../../hooks/useLang';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getServerTime } from '../../../util/serverTime';
 import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dateFormat';
+import { isChatChannel } from '../../../modules/helpers';
+import { selectChat } from '../../../modules/selectors';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
 import Button from '../../ui/Button';
+import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;
@@ -24,7 +27,9 @@ type OwnProps = {
 type StateProps = {
   invite?: ApiExportedInvite;
   importers?: ApiChatInviteImporter[];
+  requesters?: ApiChatInviteImporter[];
   admin?: ApiUser;
+  isChannel?: boolean;
   serverTimeOffset: number;
 };
 
@@ -32,6 +37,8 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   chatId,
   invite,
   importers,
+  requesters,
+  isChannel,
   isActive,
   serverTimeOffset,
   onClose,
@@ -39,6 +46,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   const {
     showNotification,
     loadChatInviteImporters,
+    loadChatInviteRequesters,
     openUserInfo,
   } = getDispatch();
 
@@ -50,8 +58,11 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   const isExpired = ((invite?.expireDate || 0) - getServerTime(serverTimeOffset)) < 0;
 
   useEffect(() => {
-    if (link) loadChatInviteImporters({ chatId, link });
-  }, [chatId, link, loadChatInviteImporters]);
+    if (link) {
+      loadChatInviteImporters({ chatId, link });
+      loadChatInviteRequesters({ chatId, link });
+    }
+  }, [chatId, link, loadChatInviteImporters, loadChatInviteRequesters]);
 
   const handleCopyClicked = useCallback(() => {
     copyTextToClipboard(invite!.link);
@@ -63,8 +74,8 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   useHistoryBack(isActive, onClose);
 
   const renderImporters = () => {
-    if (invite?.isRevoked) return undefined;
-    if (!importers) return <p className="text-muted">{lang('Loading')}</p>;
+    if (!importers?.length && requesters?.length) return undefined;
+    if (!importers) return <Spinner />;
     return (
       <div className="section">
         <p>{importers.length ? lang('PeopleJoined', usage) : lang('NoOneJoined')}</p>
@@ -89,6 +100,31 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     );
   };
 
+  const renderRequesters = () => {
+    if (invite?.isRevoked) return undefined;
+    if (!requesters && importers) return <Spinner />;
+    if (!requesters?.length) return undefined;
+    return (
+      <div className="section">
+        <p>{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</p>
+        <p className="text-muted">
+          {requesters.map((requester) => (
+            <ListItem
+              className="chat-item-clickable scroll-item small-icon"
+              onClick={() => openUserInfo({ id: requester.userId })}
+            >
+              <PrivateChatInfo
+                userId={requester.userId}
+                status={formatMediaDateTime(lang, requester.date * 1000, true)}
+                forceShowSelf
+              />
+            </ListItem>
+          ))}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="Management ManageInviteInfo">
       <div className="custom-scroll">
@@ -98,7 +134,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
         {invite && (
           <>
             <div className="section">
-              <h3>{invite.title || invite.link}</h3>
+              <h3 className="link-title">{invite.title || invite.link}</h3>
               <input
                 className="form-control"
                 value={invite.link}
@@ -130,6 +166,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
               </div>
             )}
             {renderImporters()}
+            {renderRequesters()}
           </>
         )}
       </div>
@@ -140,12 +177,15 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { inviteInfo } = global.management.byChatId[chatId];
-    const invite = inviteInfo?.invite;
-    const importers = inviteInfo?.importers;
+    const { invite, importers, requesters } = inviteInfo || {};
+    const chat = selectChat(global, chatId);
+    const isChannel = chat && isChatChannel(chat);
 
     return {
       invite,
       importers,
+      requesters,
+      isChannel,
       serverTimeOffset: global.serverTimeOffset,
     };
   },

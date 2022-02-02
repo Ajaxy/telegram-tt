@@ -21,17 +21,29 @@
   &__user {
     display: flex;
     flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
   }
 
   &__user-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow: hidden;
     margin-left: 1rem;
   }
 
   &__user-subtitle {
     color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__user-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__date {
