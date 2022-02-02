@@ -482,13 +482,17 @@
   &.is-reply .media-inner,
   &.force-sender-name .Album,
   &.is-reply .Album,
-  .message-title ~ .media-inner:not(.RoundVideo) {
+  .message-title ~ .media-inner {
     margin-top: 0.375rem;
     margin-bottom: -0.375rem;
 
     body.is-ios .Message.own & {
       margin-bottom: -0.4375rem;
     }
+  }
+
+  &:not(.text) .RoundVideo {
+    margin-bottom: 0;
   }
 
   // Moved below .is-reply to overwrite its styles
