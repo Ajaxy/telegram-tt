@@ -303,9 +303,7 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
 export function getChatMediaMessageIds(
   messages: Record<number, ApiMessage>, listedIds: number[], isFromSharedMedia = false,
 ) {
-  const ids = getMessageContentIds(messages, listedIds, isFromSharedMedia ? 'media' : 'inlineMedia');
-
-  return isFromSharedMedia ? ids.reverse() : ids;
+  return getMessageContentIds(messages, listedIds, isFromSharedMedia ? 'media' : 'inlineMedia');
 }
 
 export function getPhotoFullDimensions(photo: ApiPhoto): ApiDimensions | undefined {

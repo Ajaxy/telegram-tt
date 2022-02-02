@@ -15,13 +15,6 @@
     transition: none;
   }
 
-  // @optimization
-  &:not(:hover) {
-    .chat-item-clickable:not(.picker-list-item):nth-child(n + 18) {
-      display: none !important;
-    }
-  }
-
   @media (max-width: 1275px) {
     box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
     border-left: none;

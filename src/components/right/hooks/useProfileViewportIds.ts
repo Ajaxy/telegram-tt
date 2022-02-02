@@ -159,7 +159,7 @@ function useInfiniteScrollForSharedMedia(
         chatMessages,
         foundIds,
         forSharedMediaType,
-      ).reverse();
+      );
     }
   }, [chatMessages, foundIds, currentResultType, forSharedMediaType]);
 

@@ -158,5 +158,5 @@ export function updateLocalMediaSearchResults(
 }
 
 function orderFoundIds(listedIds: number[]) {
-  return listedIds.sort((a, b) => a - b);
+  return listedIds.sort((a, b) => b - a);
 }
