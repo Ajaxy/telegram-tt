@@ -6,7 +6,7 @@ import {
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useBlurSync from '../../hooks/useBlurSync';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
@@ -187,7 +187,11 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         message && calculateMediaViewerDimensions(dimensions!, hasFooter),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
       )}
-      {isVideo && (isActive ? (
+      {isVideo && ((!isActive && IS_TOUCH_ENV) ? renderVideoPreview(
+        bestImageData,
+        message && calculateMediaViewerDimensions(dimensions!, hasFooter, false),
+        !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+      ) : (
         <VideoPlayer
           key={messageId}
           url={localBlobUrl || fullMediaBlobUrl}
@@ -200,10 +204,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           noPlay={!isActive}
           onClose={onClose}
         />
-      ) : renderVideoPreview(
-        bestImageData,
-        message && calculateMediaViewerDimensions(dimensions!, hasFooter, false),
-        !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
       ))}
       {textParts && (
         <MediaViewerFooter
