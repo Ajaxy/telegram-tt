@@ -52,7 +52,7 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
     // No need for expensive global updates on chats, so we avoid them
     const chatsById = getGlobal().chats.byId;
 
-    const chatIds = [...folderAllOrderedIds, ...folderArchivedOrderedIds];
+    const chatIds = [...folderAllOrderedIds || [], ...folderArchivedOrderedIds || []];
     return unique([
       ...selectedChatIds,
       ...filterChatsByName(lang, chatIds, chatsById, chatFilter),

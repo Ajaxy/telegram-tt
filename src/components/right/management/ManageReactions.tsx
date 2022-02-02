@@ -38,7 +38,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [isTouched, setIsTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [localEnabledReactions, setLocalEnabledReactions] = useState(enabledReactions);
+  const [localEnabledReactions, setLocalEnabledReactions] = useState(enabledReactions || []);
 
   useHistoryBack(isActive, onClose);
 
@@ -53,9 +53,11 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   }, [chat, localEnabledReactions, setChatEnabledReactions]);
 
   useEffect(() => {
-    setIsLoading(false);
-    setIsTouched(false);
-    setLocalEnabledReactions(enabledReactions || []);
+    if (enabledReactions) {
+      setIsLoading(false);
+      setIsTouched(false);
+      setLocalEnabledReactions(enabledReactions);
+    }
   }, [enabledReactions]);
 
   const handleReactionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

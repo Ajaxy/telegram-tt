@@ -79,12 +79,12 @@ const prepared: {
 };
 
 const results: {
-  orderedIdsByFolderId: Record<string, string[]>;
-  chatsCountByFolderId: Record<string, number>;
+  orderedIdsByFolderId: Record<string, string[] | undefined>;
+  chatsCountByFolderId: Record<string, number | undefined>;
   unreadCountersByFolderId: Record<string, {
     chatsCount: number;
     notificationsCount: number;
-  }>;
+  } | undefined>;
 } = {
   orderedIdsByFolderId: {},
   chatsCountByFolderId: {},
@@ -596,7 +596,7 @@ function buildFolderUnreadCounters(folderId: number) {
     orderedIdsByFolderId: { [folderId]: orderedIds },
   } = results;
 
-  return orderedIds.reduce((newUnreadCounters, chatId) => {
+  return orderedIds!.reduce((newUnreadCounters, chatId) => {
     const chatSummary = chatSummariesById.get(chatId);
     if (!chatSummary) {
       return newUnreadCounters;

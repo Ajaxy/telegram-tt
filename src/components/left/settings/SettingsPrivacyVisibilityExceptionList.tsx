@@ -64,7 +64,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     // No need for expensive global updates on chats, so we avoid them
     const chatsById = getGlobal().chats.byId;
 
-    const chatIds = unique([...folderAllOrderedIds, ...folderArchivedOrderedIds])
+    const chatIds = unique([...folderAllOrderedIds || [], ...folderArchivedOrderedIds || []])
       .filter((chatId) => {
         const chat = chatsById[chatId];
         return chat && ((isUserId(chat.id) && chat.id !== currentUserId) || isChatGroup(chat));

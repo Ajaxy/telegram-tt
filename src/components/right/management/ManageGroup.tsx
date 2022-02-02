@@ -87,7 +87,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const currentAbout = chat.fullInfo ? (chat.fullInfo.about || '') : '';
 
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
-  const [title, setTitle] = useState(currentTitle);
+  const [title, setTitle] = useState(currentTitle || '');
   const [about, setAbout] = useState(currentAbout);
   const [photo, setPhoto] = useState<File | undefined>();
   const [error, setError] = useState<string | undefined>();
