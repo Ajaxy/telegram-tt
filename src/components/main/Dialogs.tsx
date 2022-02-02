@@ -22,7 +22,12 @@ type StateProps = {
 };
 
 const Dialogs: FC<StateProps> = ({ dialogs }) => {
-  const { dismissDialog, acceptInviteConfirmation, sendMessage } = getDispatch();
+  const {
+    dismissDialog,
+    acceptInviteConfirmation,
+    sendMessage,
+    showNotification,
+  } = getDispatch();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const lang = useLang();
@@ -60,6 +65,9 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
       acceptInviteConfirmation({
         hash,
       });
+      showNotification({
+        message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
+      });
       closeModal();
     };
 
@@ -79,8 +87,8 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
         header={renderInviteHeader(title, photo)}
         onCloseAnimationEnd={dismissDialog}
       >
-        {about && <p className="modal-about">{renderText(about)}</p>}
-        {participantsCount !== undefined && <p>{participantsText}</p>}
+        {participantsCount !== undefined && <p className="modal-help">{participantsText}</p>}
+        {about && <p className="modal-about">{renderText(about, ['br'])}</p>}
         {isRequestNeeded && (
           <p className="modal-help">
             {isChannel

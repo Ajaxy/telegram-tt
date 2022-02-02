@@ -111,8 +111,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           return true;
         }
 
-        return !user.isSelf
-          && (isChannel || user.canBeInvitedToGroup || !isUserBot(user))
+        return (isChannel || user.canBeInvitedToGroup || !isUserBot(user))
           && (!noAdmins || !adminIds.includes(contactId));
       }),
       chatsById,

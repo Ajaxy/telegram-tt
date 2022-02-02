@@ -1,19 +1,23 @@
 import React, {
-  FC, memo, useCallback, useEffect,
+  FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat } from '../../../api/types';
 
+import { STICKER_SIZE_JOIN_REQUESTS } from '../../../config';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { selectChat } from '../../../modules/selectors';
-import { isChatChannel } from '../../../modules/helpers';
+import { isChatChannel, isUserId } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
+import getAnimationData from '../../common/helpers/animatedAssets';
 
 import JoinRequest from './JoinRequest';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import AnimatedSticker from '../../common/AnimatedSticker';
+import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;
@@ -40,10 +44,20 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
+  const [animationData, setAnimationData] = useState<string>();
+  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+
+  useEffect(() => {
+    if (!animationData) {
+      getAnimationData('JoinRequest').then(setAnimationData);
+    }
+  }, [animationData]);
+
   useHistoryBack(isActive, onClose);
 
   useEffect(() => {
-    if (!chat?.joinRequests) {
+    if (!chat?.joinRequests && !isUserId(chatId)) {
       loadChatJoinRequests({ chatId });
     }
   }, [chat, chatId, loadChatJoinRequests]);
@@ -60,17 +74,34 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management ManageJoinRequests">
-      {Boolean(chat?.joinRequests?.length) && (
-        <div className="section bulk-actions">
-          <Button className="bulk-action-button" onClick={openAcceptAllDialog}>Accept all</Button>
-          <Button className="bulk-action-button" onClick={openRejectAllDialog} isText>Dismiss all</Button>
+      <div className="section">
+        <div className="section-icon">
+          {animationData && (
+            <AnimatedSticker
+              id="joinRequestDucks"
+              size={STICKER_SIZE_JOIN_REQUESTS}
+              animationData={animationData}
+              play={isAnimationLoaded}
+              onLoad={handleAnimationLoad}
+            />
+          )}
         </div>
-      )}
+        {Boolean(chat?.joinRequests?.length) && (
+          <div className="bulk-actions">
+            <Button className="bulk-action-button" onClick={openAcceptAllDialog}>Accept all</Button>
+            <Button className="bulk-action-button" onClick={openRejectAllDialog} isText>Dismiss all</Button>
+          </div>
+        )}
+      </div>
       <div className="section">
         <div className="custom-scroll" teactFastList>
           <p key="title">
-            {chat?.joinRequests?.length ? lang('JoinRequests', chat?.joinRequests?.length) : lang('NoMemberRequests')}
+            {!chat?.joinRequests ? lang('Loading') : chat.joinRequests.length
+              ? lang('JoinRequests', chat.joinRequests.length) : lang('NoMemberRequests')}
           </p>
+          {!chat?.joinRequests && (
+            <Spinner key="loading" />
+          )}
           {chat?.joinRequests?.length === 0 && (
             <p className="text-muted" key="empty">
               {isChannel ? lang('NoSubscribeRequestsDescription') : lang('NoMemberRequestsDescription')}

@@ -183,6 +183,10 @@
       box-shadow: none;
     }
   }
+
+  .Spinner {
+    margin: 2rem auto;
+  }
 }
 
 .ManageGroupMembers {
@@ -197,6 +201,7 @@
   .primary-link-input {
     cursor: pointer;
     margin-bottom: 1rem;
+    padding-right: 3rem;
   }
 
   .primary-link-more-menu {
@@ -230,12 +235,20 @@
       -webkit-appearance: none;
     }
   }
+
+  .custom-scroll {
+    padding-bottom: 4rem;
+  }
 }
 
 .ManageInviteInfo {
   .copy-link {
     margin-top: 1rem;
     margin-bottom: 1rem;
+  }
+
+  .link-title {
+    text-align: center;
   }
 }
 
@@ -251,7 +264,8 @@
   }
 }
 
-.ManageInvite, .ManageInvites {
+.ManageInvite,
+.ManageInvites {
   .hint {
     font-size: 0.875rem;
     margin-bottom: 0;

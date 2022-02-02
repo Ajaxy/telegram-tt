@@ -243,11 +243,43 @@ addReducer('loadChatInviteImporters', (global, actions, payload) => {
     }
     global = getGlobal();
     const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
-    if (!currentInviteInfo?.invite) return;
+    if (!currentInviteInfo?.invite || currentInviteInfo.invite.link !== link) return;
     setGlobal(updateManagement(global, chatId, {
       inviteInfo: {
         ...currentInviteInfo,
         importers: result,
+      },
+    }));
+  })();
+});
+
+addReducer('loadChatInviteRequesters', (global, actions, payload) => {
+  const {
+    chatId, link, offsetDate, offsetUserId, limit,
+  } = payload!;
+  const peer = selectChat(global, chatId);
+  const offsetUser = selectUser(global, offsetUserId);
+  if (!peer || (offsetUserId && !offsetUser)) return;
+
+  (async () => {
+    const result = await callApi('fetchChatInviteImporters', {
+      peer,
+      link,
+      offsetDate,
+      offsetUser,
+      limit,
+      isRequested: true,
+    });
+    if (!result) {
+      return;
+    }
+    global = getGlobal();
+    const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
+    if (!currentInviteInfo?.invite || currentInviteInfo.invite.link !== link) return;
+    setGlobal(updateManagement(global, chatId, {
+      inviteInfo: {
+        ...currentInviteInfo,
+        requesters: result,
       },
     }));
   })();

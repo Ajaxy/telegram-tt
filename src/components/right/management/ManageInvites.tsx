@@ -1,11 +1,13 @@
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
+import { STICKER_SIZE_INVITES } from '../../../config';
+import getAnimationData from '../../common/helpers/animatedAssets';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
@@ -16,6 +18,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { getServerTime } from '../../../util/serverTime';
 import useFlag from '../../../hooks/useFlag';
+import { isChatChannel } from '../../../modules/helpers';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
@@ -23,6 +26,7 @@ import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import AnimatedSticker from '../../common/AnimatedSticker';
 
 type OwnProps = {
   chatId: string;
@@ -33,6 +37,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  isChannel?: boolean;
   exportedInvites?: ApiExportedInvite[];
   revokedExportedInvites?: ApiExportedInvite[];
   serverTimeOffset: number;
@@ -54,6 +59,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   exportedInvites,
   revokedExportedInvites,
   isActive,
+  isChannel,
   serverTimeOffset,
   onClose,
   onScreenSelect,
@@ -66,14 +72,26 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     deleteRevokedExportedChatInvites,
     setOpenedInviteInfo,
   } = getDispatch();
+
+  const lang = useLang();
+
   const [isDeleteRevokeAllDialogOpen, openDeleteRevokeAllDialog, closeDeleteRevokeAllDialog] = useFlag();
   const [isRevokeDialogOpen, openRevokeDialog, closeRevokeDialog] = useFlag();
   const [revokingInvite, setRevokingInvite] = useState<ApiExportedInvite | undefined>();
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [deletingInvite, setDeletingInvite] = useState<ApiExportedInvite | undefined>();
 
+  const [animationData, setAnimationData] = useState<string>();
+  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+
+  useEffect(() => {
+    if (!animationData) {
+      getAnimationData('Invite').then(setAnimationData);
+    }
+  }, [animationData]);
+
   useHistoryBack(isActive, onClose);
-  const lang = useLang();
 
   const hasDetailedCountdown = useMemo(() => {
     if (!exportedInvites) return undefined;
@@ -265,6 +283,20 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management ManageInvites">
       <div className="custom-scroll">
+        <div className="section">
+          <div className="section-icon">
+            {animationData && (
+              <AnimatedSticker
+                id="inviteDuck"
+                size={STICKER_SIZE_INVITES}
+                animationData={animationData}
+                play={isAnimationLoaded}
+                onLoad={handleAnimationLoad}
+              />
+            )}
+          </div>
+          <p className='text-muted'>{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
+        </div>
         {primaryInviteLink && (
           <div className="section">
             <p className="text-muted">
@@ -347,6 +379,8 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         onClose={closeDeleteRevokeAllDialog}
         title={lang('DeleteAllRevokedLinks')}
         text={lang('DeleteAllRevokedLinkHelp')}
+        confirmIsDestructive
+        confirmLabel={lang('DeleteAll')}
         confirmHandler={handleDeleteAllRevoked}
       />
       <ConfirmDialog
@@ -354,6 +388,8 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         onClose={closeRevokeDialog}
         title={lang('RevokeLink')}
         text={lang('RevokeAlert')}
+        confirmIsDestructive
+        confirmLabel={lang('RevokeButton')}
         confirmHandler={handleRevoke}
       />
       <ConfirmDialog
@@ -361,6 +397,8 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         onClose={closeDeleteDialog}
         title={lang('DeleteLink')}
         text={lang('DeleteLinkHelp')}
+        confirmIsDestructive
+        confirmLabel={lang('Delete')}
         confirmHandler={handleDelete}
       />
     </div>
@@ -371,12 +409,14 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { invites, revokedInvites } = global.management.byChatId[chatId];
     const chat = selectChat(global, chatId);
+    const isChannel = chat && isChatChannel(chat);
 
     return {
       exportedInvites: invites,
       revokedExportedInvites: revokedInvites,
       chat,
       serverTimeOffset: global.serverTimeOffset,
+      isChannel,
     };
   },
 )(ManageInvites));

@@ -114,7 +114,6 @@ const ListItem: FC<OwnProps> = ({
 
   const handleSecondaryIconClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (disabled || e.button !== 0 || (!onSecondaryIconClick && !contextActions)) return;
-
     e.stopPropagation();
     if (onSecondaryIconClick) {
       onSecondaryIconClick(e);
@@ -188,7 +187,8 @@ const ListItem: FC<OwnProps> = ({
             round
             color="translucent"
             size="smaller"
-            onMouseDown={handleSecondaryIconClick}
+            onClick={IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
+            onMouseDown={!IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
           >
             <i className={`icon-${secondaryIcon}`} />
           </Button>
