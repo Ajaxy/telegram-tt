@@ -12,8 +12,8 @@ import useLang from '../../../hooks/useLang';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
-import ChatMessage from './ChatMessage';
 import NothingFound from '../../common/NothingFound';
+import ChatMessage from './ChatMessage';
 import DateSuggest from './DateSuggest';
 
 export type OwnProps = {
