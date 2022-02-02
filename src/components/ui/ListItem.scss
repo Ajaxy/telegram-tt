@@ -147,8 +147,6 @@
   }
 
   &.chat-item-clickable {
-    margin: 0 -0.5rem;
-
     body.is-ios &,
     body.is-macos & {
       --color-text-secondary: var(--color-text-secondary-apple);
