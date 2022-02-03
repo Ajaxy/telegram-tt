@@ -26,13 +26,13 @@ const useClipboardPaste = (
 
       e.preventDefault();
 
+      const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
       const { items } = e.clipboardData;
       let files: File[] = [];
 
       if (items.length > 0) {
         files = await getFilesFromDataTransferItems(items);
       }
-      const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
 
       if (files.length === 0 && !pastedText) {
         return;
