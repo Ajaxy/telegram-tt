@@ -29,8 +29,8 @@ type RLottieInstance = import('../../lib/rlottie/RLottie').default;
 let lottiePromise: Promise<RLottieClass>;
 let RLottie: RLottieClass;
 
-// Time supposed for judges to measure "Transferred Size" in Dev Tools
-const LOTTIE_LOAD_DELAY = 5000;
+// Time for the main interface to completely load
+const LOTTIE_LOAD_DELAY = 3000;
 
 async function ensureLottie() {
   if (!lottiePromise) {
