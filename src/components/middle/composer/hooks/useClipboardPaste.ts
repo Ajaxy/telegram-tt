@@ -24,12 +24,12 @@ const useClipboardPaste = (
         return;
       }
 
-      e.preventDefault();
 
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
       const { items } = e.clipboardData;
       let files: File[] = [];
 
+      e.preventDefault();
       if (items.length > 0) {
         files = await getFilesFromDataTransferItems(items);
       }
