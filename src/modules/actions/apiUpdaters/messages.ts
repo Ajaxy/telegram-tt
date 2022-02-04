@@ -43,7 +43,9 @@ import {
   selectLocalAnimatedEmojiEffect,
   selectLocalAnimatedEmoji,
 } from '../../selectors';
-import { getMessageContent, isUserId, isMessageLocal } from '../../helpers';
+import {
+  getMessageContent, isUserId, isMessageLocal, getMessageText,
+} from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
@@ -115,6 +117,12 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
 
       if (global.activeEmojiInteraction || currentChatId !== update.id) return;
+      const message = selectChatMessage(global, currentChatId, update.messageId);
+
+      if (!message) return;
+
+      // Workaround for a weird behavior when interaction is received after watching reaction
+      if (getMessageText(message) !== update.emoji) return;
 
       const localEmoji = selectLocalAnimatedEmoji(global, update.emoji);
 
