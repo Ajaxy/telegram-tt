@@ -153,6 +153,7 @@
 
   body:not(.animation-level-0) & .send-as-button.appear-animation {
     animation: 0.25s ease-in-out forwards show-send-as-button;
+    transform-origin: right;
   }
 
   .mobile-symbol-menu-button {
