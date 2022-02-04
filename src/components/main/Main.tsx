@@ -118,7 +118,6 @@ const Main: FC<StateProps> = ({
     checkVersionNotification,
     loadAppConfig,
   } = getDispatch();
-  const isSynced = Boolean(lastSyncTime);
 
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -156,7 +155,7 @@ const Main: FC<StateProps> = ({
 
   // Sticker sets
   useEffect(() => {
-    if (isSynced) {
+    if (lastSyncTime) {
       if (!addedSetIds) {
         loadStickerSets();
         loadFavoriteStickers();
@@ -164,7 +163,7 @@ const Main: FC<StateProps> = ({
         loadAddedStickers();
       }
     }
-  }, [isSynced, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers]);
+  }, [lastSyncTime, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers]);
 
   // Check version when service chat is ready
   useEffect(() => {
