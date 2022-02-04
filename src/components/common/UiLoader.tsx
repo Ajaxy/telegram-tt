@@ -19,6 +19,8 @@ import './UiLoader.scss';
 // @ts-ignore
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 // @ts-ignore
+import reactionThumbsPath from '../../assets/reaction-thumbs.png';
+// @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 import { selectIsRightColumnShown, selectTheme } from '../../modules/selectors';
 
@@ -66,6 +68,7 @@ const preloadTasks = {
     loadModule(Bundles.Main, 'Main')
       .then(preloadFonts),
     preloadAvatars(),
+    preloadImage(reactionThumbsPath),
   ]),
   authPhoneNumber: () => Promise.all([
     preloadFonts(),
