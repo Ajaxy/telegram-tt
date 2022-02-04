@@ -1,25 +1,29 @@
-**Telegram Web Z was updated to version v1.31**
+**Telegram Web Z was updated to version v1.32**
 
-👏 **Harder**
-• Hide text with an animation using the crossed-eye icon 👁 in the formatting menu.
-• Quickly add Spoiler formatting with Ctrl + P (⌘ + P on macOS), or || markdown around the text.
-• Admins can manage Join Requests and revoked invites.
-• Promote new admins in your groups and channels via Global Search.
+**Harder**
+• Create and share Video Stickers made from .webm files.
+• 5 new reactions and interactive emoji: 🥰🤯🤔🤬👏
+• Send entire folders as a file.
+• Directly add chats to chat folders from Global Search.
 
-🤩 **Better**
-• Network stability enhancements.
-• Various improvements and tuning for reactions and interactive emoji.
-• Media Viewer improved for mobile devices.
-• Numerous layout adjustments.
+**Better**
+• Redesigned group management pages with animated artwork.
+• ‘Forward To’ menu has smooth infinite scroll on mobile.
+• Spoiler animations re-hide text after a short period.
+• Numerous layout fixes and improvements.
 
-🚀 **Faster**
-• The app better renders multiple components.
+**Faster**
+• Media loads and scrolls faster in Shared Media and Global Search.
+• Optimized some heavy background calculations.
+• Memory usage optimizations.
 
-💪 **Stronger**
-• Fixed inline playback for QuickTime videos.
-• Fixes for tooltips – including stickers, emoji, and mentions.
-• Unread counter now correctly reflects values on mobile devices.
-• Emoji now properly copy from message text.
-• Users’ display names now appear in service messages.
-• Fixed collapsing multiple spaces in messages.
-• Reactions and the “Send As” feature are now always available in Discussion Groups.
+**Stronger**
+• Fixed missing sticker suggestions (e.g. for ❤️ emoji).
+• Fixed infinite spinning in Sticker panel.
+• Fixed scroll jumps and missing sender names in local search results.
+• Fixed highlight color when searching in dark mode.
+• Fixed pasting text and media from clipboard on Firefox and iOS browsers.
+• Media Viewer: Fixed navigating to the origin message on mobile.
+• Media Viewer: Fixed lingering audio after moving to the next item.
+• Reactions: Fixed unexpected interaction animations.
+• Fixed jumping cursor when typing in Safari.
