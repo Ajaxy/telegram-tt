@@ -35,10 +35,8 @@ export function selectStickersForEmoji(global: GlobalState, emoji: string) {
     if (!packs) {
       return;
     }
-    const stickers = packs[emoji];
-    if (stickers) {
-      stickersForEmoji = stickersForEmoji.concat(stickers);
-    }
+
+    stickersForEmoji = stickersForEmoji.concat(packs[emoji] || [], packs[cleanEmoji(emoji)] || []);
   });
   return stickersForEmoji;
 }
