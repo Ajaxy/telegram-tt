@@ -565,6 +565,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const meta = (
       <MessageMeta
         message={message}
+        reactionMessage={reactionMessage}
         outgoingStatus={outgoingStatus}
         signature={signature}
         withReactions={reactionsPosition === 'in-meta'}
@@ -1054,8 +1055,8 @@ export default memo(withGlobal<OwnProps>(
       shouldLoopStickers: selectShouldLoopStickers(global),
       threadInfo: actualThreadInfo,
       availableReactions: global.availableReactions,
-      defaultReaction: selectDefaultReaction(global, chatId),
-      activeReaction: global.activeReactions[id],
+      defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
+      activeReaction: reactionMessage && global.activeReactions[reactionMessage.id],
       activeEmojiInteraction: global.activeEmojiInteraction,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

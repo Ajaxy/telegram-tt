@@ -20,6 +20,7 @@ import './MessageMeta.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  reactionMessage?: ApiMessage;
   withReactions?: boolean;
   withReactionOffset?: boolean;
   outgoingStatus?: ApiMessageOutgoingStatus;
@@ -32,11 +33,12 @@ type OwnProps = {
 const MessageMeta: FC<OwnProps> = ({
   message, outgoingStatus, signature, onClick, withReactions,
   activeReaction, withReactionOffset, availableReactions,
+  reactionMessage,
 }) => {
   const lang = useLang();
   const [isActivated, markActivated] = useFlag();
 
-  const reactions = withReactions && message.reactions?.results.filter((l) => l.count > 0);
+  const reactions = withReactions && reactionMessage?.reactions?.results.filter((l) => l.count > 0);
 
   const title = useMemo(() => {
     if (!isActivated) return undefined;

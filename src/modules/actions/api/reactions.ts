@@ -7,11 +7,13 @@ import {
   selectChatMessage,
   selectDefaultReaction,
   selectLocalAnimatedEmojiEffectByName,
+  selectMessageIdsByGroupId,
 } from '../../selectors';
 import { addMessageReaction, subtractXForEmojiInteraction } from '../../reducers/reactions';
 import { addUsers, updateChatMessage } from '../../reducers';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { ANIMATION_LEVEL_MAX } from '../../../config';
+import { isMessageLocal } from '../../helpers';
 
 addReducer('loadAvailableReactions', () => {
   (async () => {
@@ -94,8 +96,9 @@ addReducer('sendDefaultReaction', (global, actions, payload) => {
     chatId, messageId, x, y,
   } = payload;
   const reaction = selectDefaultReaction(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
 
-  if (!reaction) return;
+  if (!reaction || !message || isMessageLocal(message)) return;
 
   actions.sendReaction({
     chatId,
@@ -108,17 +111,27 @@ addReducer('sendDefaultReaction', (global, actions, payload) => {
 
 addReducer('sendReaction', (global, actions, payload) => {
   const {
-    chatId, messageId,
-  }: { messageId: number; chatId: string } = payload;
+    chatId,
+  }: { chatId: string } = payload;
+  let { messageId } = payload;
 
   let { reaction } = payload;
 
   const chat = selectChat(global, chatId);
-  const message = selectChatMessage(global, chatId, messageId);
+  let message = selectChatMessage(global, chatId, messageId);
 
   if (!chat || !message) {
     return undefined;
   }
+
+  const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
+  const documentGroupFirstMessageId = isInDocumentGroup
+    ? selectMessageIdsByGroupId(global, chatId, message.groupedId!)![0]
+    : undefined;
+  message = isInDocumentGroup
+    ? selectChatMessage(global, chatId, documentGroupFirstMessageId!) || message
+    : message;
+  messageId = message?.id || messageId;
 
   if (message.reactions?.results?.some((l) => l.reaction === reaction && l.isChosen)) {
     reaction = undefined;
