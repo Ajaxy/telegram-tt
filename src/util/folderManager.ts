@@ -200,7 +200,8 @@ function updateFolderManager(global: GlobalState) {
   updateFolders(global, isAllFolderChanged, isArchivedFolderChanged, areFoldersChanged);
 
   affectedFolderIds = affectedFolderIds.concat(updateChats(
-    global, areFoldersChanged, areNotifySettingsChanged, areNotifyExceptionsChanged,
+    global, areFoldersChanged || isAllFolderChanged || isArchivedFolderChanged,
+    areNotifySettingsChanged, areNotifyExceptionsChanged,
     prevAllFolderListIds, prevArchivedFolderListIds,
   ));
 
