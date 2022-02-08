@@ -43,15 +43,13 @@ const DropArea: FC<OwnProps> = ({
     const { dataTransfer: dt } = e;
     let files: File[] = [];
 
-    if (dt.items && dt.items.length > 0) {
+    if (dt.files && dt.files.length > 0 && (!dt.items || !dt.items.length)) {
+      files = files.concat(Array.from(dt.files));
+    } else if (dt.items && dt.items.length > 0) {
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
       if (folderFiles.length) {
         files = files.concat(folderFiles);
       }
-    }
-
-    if (dt.files && dt.files.length > 0) {
-      files = files.concat(Array.from(dt.files));
     }
 
     onHide();
