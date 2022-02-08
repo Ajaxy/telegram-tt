@@ -109,7 +109,7 @@ async function searchMessagesGlobal(
 
   if (chat) {
     const localResult = await callApi('searchMessagesLocal', {
-      chatOrUser: chat,
+      chat,
       query,
       type,
       limit: GLOBAL_SEARCH_SLICE,

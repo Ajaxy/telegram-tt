@@ -152,8 +152,6 @@ export type GlobalState = {
   users: {
     byId: Record<string, ApiUser>;
     statusesById: Record<string, ApiUserStatus>;
-    // TODO Remove
-    selectedId?: string;
   };
 
   chats: {
@@ -563,7 +561,7 @@ export type ActionTypes = (
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  'loadFullUser' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
   'deleteContact' | 'loadUser' | 'setUserSearchQuery' | 'loadCommonChats' |
   // chat creation

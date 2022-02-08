@@ -4,8 +4,7 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
 import { selectCurrentTextSearch } from './localSearch';
-import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
-import { selectAreActiveChatsLoaded } from './chats';
+import { selectCurrentGifSearch, selectCurrentStickerSearch } from './symbols';
 import { selectCurrentManagement } from './management';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {
@@ -14,42 +13,19 @@ export function selectIsMediaViewerOpen(global: GlobalState) {
 }
 
 export function selectRightColumnContentKey(global: GlobalState) {
-  const {
-    users,
-    isChatInfoShown,
-    newChatMembersProgress,
-  } = global;
-
-  const isAddingChatMembersShown = newChatMembersProgress !== NewChatMembersProgress.Closed;
-  const isPollResults = selectIsPollResultsOpen(global);
-  const isSearch = Boolean(!IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global));
-  const isManagement = selectCurrentManagement(global);
-  const stickerSearch = selectCurrentStickerSearch(global);
-  const isStickerSearch = stickerSearch.query !== undefined;
-  const gifSearch = selectCurrentGifSearch(global);
-  const isGifSearch = gifSearch.query !== undefined;
-  const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
-  const currentProfileUserId = users.selectedId;
-  const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
-  const isUserInfo = Boolean(currentProfileUserId && areActiveChatsLoaded);
-  const isChatShown = Boolean(currentChatId && areActiveChatsLoaded);
-  const isChatInfo = isChatShown && isChatInfoShown;
-
-  return isPollResults ? (
+  return selectIsPollResultsOpen(global) ? (
     RightColumnContent.PollResults
-  ) : isSearch ? (
+  ) : !IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global) ? (
     RightColumnContent.Search
-  ) : isManagement ? (
+  ) : selectCurrentManagement(global) ? (
     RightColumnContent.Management
-  ) : isStickerSearch ? (
+  ) : selectCurrentStickerSearch(global).query !== undefined ? (
     RightColumnContent.StickerSearch
-  ) : isGifSearch ? (
+  ) : selectCurrentGifSearch(global).query !== undefined ? (
     RightColumnContent.GifSearch
-  ) : isAddingChatMembersShown ? (
+  ) : global.newChatMembersProgress !== NewChatMembersProgress.Closed ? (
     RightColumnContent.AddingMembers
-  ) : isUserInfo ? (
-    RightColumnContent.UserInfo
-  ) : isChatInfo ? (
+  ) : global.isChatInfoShown && selectCurrentMessageList(global) ? (
     RightColumnContent.ChatInfo
   ) : undefined;
 }

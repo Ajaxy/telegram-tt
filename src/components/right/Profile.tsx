@@ -65,7 +65,6 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
 type OwnProps = {
   chatId: string;
-  userId?: string;
   profileState: ProfileState;
   onProfileStateChange: (state: ProfileState) => void;
 };
@@ -143,7 +142,6 @@ const Profile: FC<OwnProps & StateProps> = ({
     searchMediaMessagesLocal,
     openMediaViewer,
     openAudioPlayer,
-    openUserInfo,
     focusMessage,
     loadProfilePhotos,
     setNewChatMembersDialogState,
@@ -222,8 +220,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [profileId, openAudioPlayer]);
 
   const handleMemberClick = useCallback((id: string) => {
-    openUserInfo({ id });
-  }, [openUserInfo]);
+    openChat({ id });
+  }, [openChat]);
 
   const handleMessageFocus = useCallback((messageId: number) => {
     focusMessage({ chatId: profileId, messageId });
@@ -492,10 +490,9 @@ function buildInfiniteScrollItemSelector(resultType: string) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, userId }): StateProps => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-
-    const chatMessages = selectChatMessages(global, userId || chatId);
+    const chatMessages = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
@@ -509,18 +506,13 @@ export default memo(withGlobal<OwnProps>(
     const areMembersHidden = hasMembersTab && chat && chat.fullInfo && !chat.fullInfo.canViewMembers;
     const canAddMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
-
     const activeDownloadIds = selectActiveDownloadIds(global, chatId);
 
     let hasCommonChatsTab;
     let resolvedUserId;
     let user;
-    if (userId) {
-      resolvedUserId = userId;
-    } else if (isUserId(chatId)) {
+    if (isUserId(chatId)) {
       resolvedUserId = chatId;
-    }
-    if (resolvedUserId) {
       user = selectUser(global, resolvedUserId);
       hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
     }

@@ -16,13 +16,13 @@ type OwnProps = {
 const UserLink: FC<OwnProps> = ({
   className, sender, children,
 }) => {
-  const { openUserInfo } = getDispatch();
+  const { openChat } = getDispatch();
 
   const handleClick = useCallback(() => {
     if (sender) {
-      openUserInfo({ id: sender.id });
+      openChat({ id: sender.id });
     }
-  }, [sender, openUserInfo]);
+  }, [sender, openChat]);
 
   if (!sender) {
     return children;

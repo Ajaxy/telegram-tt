@@ -38,7 +38,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   chatId,
 }) => {
-  const { openUserInfo, hideChatJoinRequest } = getDispatch();
+  const { openChat, hideChatJoinRequest } = getDispatch();
 
   const buildClassName = createClassNameBuilder('JoinRequest');
   const lang = useLang();
@@ -50,7 +50,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
     ? formatTime(lang, fixedDate) : formatHumanDate(lang, fixedDate, true, false, true);
 
   const handleUserClick = () => {
-    openUserInfo({ id: userId });
+    openChat({ id: userId });
   };
 
   const handleAcceptRequest = useCallback(() => {

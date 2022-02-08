@@ -62,7 +62,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onChatMemberSelect,
 }) => {
-  const { openUserInfo, setUserSearchQuery, loadContactList } = getDispatch();
+  const { openChat, setUserSearchQuery, loadContactList } = getDispatch();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -126,9 +126,9 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
       onChatMemberSelect!(id, false);
       onScreenSelect!(ManagementScreens.ChatNewAdminRights);
     } else {
-      openUserInfo({ id });
+      openChat({ id });
     }
-  }, [noAdmins, onChatMemberSelect, onScreenSelect, openUserInfo]);
+  }, [noAdmins, onChatMemberSelect, onScreenSelect, openChat]);
 
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setUserSearchQuery({ query: e.target.value });

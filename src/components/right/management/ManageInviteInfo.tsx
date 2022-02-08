@@ -47,7 +47,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     showNotification,
     loadChatInviteImporters,
     loadChatInviteRequesters,
-    openUserInfo,
+    openChat,
   } = getDispatch();
 
   const lang = useLang();
@@ -86,7 +86,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
           {importers.map((importer) => (
             <ListItem
               className="chat-item-clickable scroll-item small-icon"
-              onClick={() => openUserInfo({ id: importer.userId })}
+              onClick={() => openChat({ id: importer.userId })}
             >
               <PrivateChatInfo
                 userId={importer.userId}
@@ -111,7 +111,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
           {requesters.map((requester) => (
             <ListItem
               className="chat-item-clickable scroll-item small-icon"
-              onClick={() => openUserInfo({ id: requester.userId })}
+              onClick={() => openChat({ id: requester.userId })}
             >
               <PrivateChatInfo
                 userId={requester.userId}
@@ -155,7 +155,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
                 <p>{lang('LinkCreatedeBy')}</p>
                 <ListItem
                   className="chat-item-clickable scroll-item small-icon"
-                  onClick={() => openUserInfo({ id: adminId })}
+                  onClick={() => openChat({ id: adminId })}
                 >
                   <PrivateChatInfo
                     userId={adminId}
