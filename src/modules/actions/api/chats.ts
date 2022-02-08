@@ -1142,9 +1142,10 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
   });
 
   try {
-    const createdChat = await callApi('createGroupChat', {
+    const createdChat = await callApi('createChannel', {
       title,
       users,
+      type: 'group',
     });
 
     if (!createdChat) {
