@@ -1,4 +1,4 @@
-import { addCallback, getGlobal } from '../lib/teact/teactn';
+import { addCallback, addReducer, getGlobal } from '../lib/teact/teactn';
 
 import { GlobalState } from '../global/types';
 import { NotifyException, NotifySettings } from '../types';
@@ -46,7 +46,9 @@ interface ChatSummary {
 const UPDATE_THROTTLE = 500;
 const DEBUG_DURATION_LIMIT = 6;
 
-const prevGlobal: {
+const initials = buildInitials();
+
+let prevGlobal: {
   allFolderListIds?: GlobalState['chats']['listIds']['active'];
   allFolderPinnedIds?: GlobalState['chats']['orderedPinnedIds']['active'];
   archivedFolderListIds?: GlobalState['chats']['listIds']['archived'];
@@ -58,50 +60,30 @@ const prevGlobal: {
   usersById: Record<string, ApiUser>;
   notifySettings: NotifySettings;
   notifyExceptions?: Record<number, NotifyException>;
-} = {
-  foldersById: {},
-  chatsById: {},
-  usersById: {},
-  notifySettings: {} as NotifySettings,
-  notifyExceptions: {},
-};
+} = initials.prevGlobal;
 
-const prepared: {
+let prepared: {
   folderSummariesById: Record<string, FolderSummary>;
   chatSummariesById: Map<string, ChatSummary>;
   folderIdsByChatId: Record<string, number[]>;
-  chatIdsByFolderId: Record<number, Set<string>>;
+  chatIdsByFolderId: Record<number, Set<string> | undefined>;
   isOrderedListJustPatched: Record<number, boolean | undefined>;
-} = {
-  folderSummariesById: {},
-  chatSummariesById: new Map(),
-  folderIdsByChatId: {},
-  chatIdsByFolderId: {},
-  isOrderedListJustPatched: {},
-};
+} = initials.prepared;
 
-const results: {
+let results: {
   orderedIdsByFolderId: Record<string, string[] | undefined>;
   chatsCountByFolderId: Record<string, number | undefined>;
   unreadCountersByFolderId: Record<string, {
     chatsCount: number;
     notificationsCount: number;
   } | undefined>;
-} = {
-  orderedIdsByFolderId: {},
-  chatsCountByFolderId: {},
-  unreadCountersByFolderId: {},
-};
+} = initials.results;
 
-const callbacks: {
+let callbacks: {
   orderedIdsByFolderId: Record<number, CallbackManager>;
   chatsCountByFolderId: CallbackManager;
   unreadCountersByFolderId: CallbackManager;
-} = {
-  orderedIdsByFolderId: {},
-  chatsCountByFolderId: createCallbackManager(),
-  unreadCountersByFolderId: createCallbackManager(),
-};
+} = initials.callbacks;
 
 const updateFolderManagerThrottled = throttle(() => {
   onIdle(() => {
@@ -112,7 +94,11 @@ const updateFolderManagerThrottled = throttle(() => {
 let inited = false;
 
 function init() {
+  inited = true;
+
   addCallback(updateFolderManagerThrottled);
+  addReducer('reset', reset);
+
   updateFolderManager(getGlobal());
 }
 
@@ -529,7 +515,7 @@ function updateListsForChat(chatId: string, currentFolderIds: number[], newFolde
     let currentFolderOrderedIds = results.orderedIdsByFolderId[folderId];
 
     if (currentFolderIdsSet.has(folderId) && !newFolderIdsSet.has(folderId)) {
-      prepared.chatIdsByFolderId[folderId].delete(chatId);
+      prepared.chatIdsByFolderId[folderId]!.delete(chatId);
 
       deletedFolderIds.push(folderId);
 
@@ -542,7 +528,7 @@ function updateListsForChat(chatId: string, currentFolderIds: number[], newFolde
         prepared.chatIdsByFolderId[folderId] = new Set();
       }
 
-      prepared.chatIdsByFolderId[folderId].add(chatId);
+      prepared.chatIdsByFolderId[folderId]!.add(chatId);
 
       if (currentFolderOrderedIds) {
         currentFolderOrderedIds.push(chatId);
@@ -564,6 +550,10 @@ function updateResults(affectedFolderIds: number[]) {
 
   Array.from(affectedFolderIds).forEach((folderId) => {
     const newOrderedIds = buildFolderOrderedIds(folderId);
+    // When signed out
+    if (!newOrderedIds) {
+      return;
+    }
 
     const currentOrderedIds = results.orderedIdsByFolderId[folderId];
     const areOrderedIdsChanged = (
@@ -610,8 +600,13 @@ function updateResults(affectedFolderIds: number[]) {
 }
 
 function buildFolderOrderedIds(folderId: number) {
+  const folderSummary = prepared.folderSummariesById[folderId];
+  if (!folderSummary) {
+    return undefined;
+  }
+
+  const { orderedPinnedIds, pinnedChatIds } = folderSummary;
   const {
-    folderSummariesById: { [folderId]: { orderedPinnedIds, pinnedChatIds } },
     chatSummariesById,
     chatIdsByFolderId: { [folderId]: chatIds },
   } = prepared;
@@ -666,4 +661,45 @@ function buildFolderUnreadCounters(folderId: number) {
     chatsCount: 0,
     notificationsCount: 0,
   });
+}
+
+function buildInitials() {
+  return {
+    prevGlobal: {
+      foldersById: {},
+      chatsById: {},
+      usersById: {},
+      notifySettings: {} as NotifySettings,
+      notifyExceptions: {},
+    },
+
+    prepared: {
+      folderSummariesById: {},
+      chatSummariesById: new Map(),
+      folderIdsByChatId: {},
+      chatIdsByFolderId: {},
+      isOrderedListJustPatched: {},
+    },
+
+    results: {
+      orderedIdsByFolderId: {},
+      chatsCountByFolderId: {},
+      unreadCountersByFolderId: {},
+    },
+
+    callbacks: {
+      orderedIdsByFolderId: {},
+      chatsCountByFolderId: createCallbackManager(),
+      unreadCountersByFolderId: createCallbackManager(),
+    },
+  };
+}
+
+function reset() {
+  const newInitials = buildInitials();
+
+  prevGlobal = newInitials.prevGlobal;
+  prepared = newInitials.prepared;
+  results = newInitials.results;
+  callbacks = newInitials.callbacks;
 }
