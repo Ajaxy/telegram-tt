@@ -51,6 +51,8 @@ const prevGlobal: {
   allFolderPinnedIds?: GlobalState['chats']['orderedPinnedIds']['active'];
   archivedFolderListIds?: GlobalState['chats']['listIds']['archived'];
   archivedFolderPinnedIds?: GlobalState['chats']['orderedPinnedIds']['archived'];
+  isAllFolderFullyLoaded?: boolean;
+  isArchivedFolderFullyLoaded?: boolean;
   chatsById: Record<string, ApiChat>;
   foldersById: Record<string, ApiChatFolder>;
   usersById: Record<string, ApiUser>;
@@ -177,6 +179,8 @@ function updateFolderManager(global: GlobalState) {
     global.chats.listIds.archived
     && isMainFolderChanged(ARCHIVED_FOLDER_ID, global.chats.listIds.archived, global.chats.orderedPinnedIds.archived),
   );
+  const isAllFullyLoadedChanged = global.chats.isFullyLoaded.active !== prevGlobal.isAllFolderFullyLoaded;
+  const isArchivedFullyLoadedChanged = global.chats.isFullyLoaded.archived !== prevGlobal.isArchivedFolderFullyLoaded;
 
   const areFoldersChanged = global.chatFolders.byId !== prevGlobal.foldersById;
   const areChatsChanged = global.chats.byId !== prevGlobal.chatsById;
@@ -184,11 +188,23 @@ function updateFolderManager(global: GlobalState) {
   const areNotifySettingsChanged = selectNotifySettings(global) !== prevGlobal.notifySettings;
   const areNotifyExceptionsChanged = selectNotifyExceptions(global) !== prevGlobal.notifyExceptions;
 
+  let affectedFolderIds: number[] = [];
+
+  if (isAllFullyLoadedChanged || isArchivedFullyLoadedChanged) {
+    affectedFolderIds = affectedFolderIds.concat(
+      updateFullyLoaded(global, isArchivedFullyLoadedChanged),
+    );
+  }
+
   if (!(
     isAllFolderChanged || isArchivedFolderChanged || areFoldersChanged
     || areChatsChanged || areUsersChanged || areNotifySettingsChanged || areNotifyExceptionsChanged
   )
   ) {
+    if (affectedFolderIds.length) {
+      updateResults(affectedFolderIds);
+    }
+
     return;
   }
 
@@ -197,12 +213,12 @@ function updateFolderManager(global: GlobalState) {
 
   updateFolders(global, isAllFolderChanged, isArchivedFolderChanged, areFoldersChanged);
 
-  const affectedFolderIds = updateChats(
+  affectedFolderIds = affectedFolderIds.concat(updateChats(
     global, areFoldersChanged, areNotifySettingsChanged, areNotifyExceptionsChanged,
     prevAllFolderListIds, prevArchivedFolderListIds,
-  );
+  ));
 
-  updateResults(affectedFolderIds);
+  updateResults(unique(affectedFolderIds));
 
   if (DEBUG) {
     const duration = performance.now() - DEBUG_startedAt!;
@@ -222,6 +238,33 @@ function isMainFolderChanged(folderId: number, newListIds?: string[], newPinnedI
     : prevGlobal.archivedFolderPinnedIds;
 
   return currentListIds !== newListIds || currentPinnedIds !== newPinnedIds;
+}
+
+function updateFullyLoaded(
+  global: GlobalState,
+  isArchivedFullyLoadedChanged = false,
+) {
+  let affectedFolderIds = [];
+
+  if (isArchivedFullyLoadedChanged) {
+    affectedFolderIds.push(ARCHIVED_FOLDER_ID);
+  }
+
+  const isAllFolderFullyLoaded = global.chats.isFullyLoaded.active;
+  const isArchivedFolderFullyLoaded = global.chats.isFullyLoaded.archived;
+
+  if (isAllFolderFullyLoaded && isArchivedFolderFullyLoaded) {
+    const emptyFolderIds = Object.keys(prepared.folderSummariesById)
+      .filter((folderId) => !results.orderedIdsByFolderId[folderId])
+      .map(Number);
+
+    affectedFolderIds = affectedFolderIds.concat(emptyFolderIds);
+  }
+
+  prevGlobal.isAllFolderFullyLoaded = isAllFolderFullyLoaded;
+  prevGlobal.isArchivedFolderFullyLoaded = isArchivedFolderFullyLoaded;
+
+  return affectedFolderIds;
 }
 
 function updateFolders(
@@ -576,7 +619,7 @@ function buildFolderOrderedIds(folderId: number) {
     orderedIdsByFolderId: { [folderId]: prevOrderedIds },
   } = results;
 
-  const allListIds = prevOrderedIds || Array.from(chatIds);
+  const allListIds = prevOrderedIds || (chatIds && Array.from(chatIds)) || [];
   const notPinnedIds = pinnedChatIds ? allListIds.filter((id) => !pinnedChatIds.has(id)) : allListIds;
   const sortedNotPinnedIds = notPinnedIds.sort((chatId1: string, chatId2: string) => {
     return chatSummariesById.get(chatId2)!.order - chatSummariesById.get(chatId1)!.order;
