@@ -51,11 +51,11 @@ const ChatList: FC<OwnProps> = ({
     openNextChat,
   } = getDispatch();
 
-  const virtualFolderId = (
+  const resolvedFolderId = (
     folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
   );
 
-  const orderedIds = useFolderManagerForOrderedIds(virtualFolderId);
+  const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
 
   const orderById = useMemo(() => {
     if (!orderedIds) {
@@ -136,7 +136,7 @@ const ChatList: FC<OwnProps> = ({
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    const pinnedCount = getPinnedChatsCount(virtualFolderId) || 0;
+    const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
 
     return viewportIds!.map((id, i) => (
       <Chat
