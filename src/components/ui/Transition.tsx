@@ -36,8 +36,6 @@ export type TransitionProps = {
   children: ChildrenFn;
 };
 
-const CLEANED_UP = Symbol('CLEANED_UP');
-
 const classNames = {
   active: 'Transition__slide--active',
 };
@@ -67,7 +65,7 @@ const Transition: FC<TransitionProps> = ({
     containerRef = ref;
   }
 
-  const rendersRef = useRef<Record<number, ChildrenFn | typeof CLEANED_UP>>({});
+  const rendersRef = useRef<Record<number, ChildrenFn>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
   const forceUpdate = useForceUpdate();
 
@@ -81,11 +79,14 @@ const Transition: FC<TransitionProps> = ({
 
   useLayoutEffect(() => {
     function cleanup() {
-      if (!shouldCleanup || (cleanupExceptionKey !== undefined && cleanupExceptionKey === prevActiveKey)) {
+      if (!shouldCleanup) {
         return;
       }
 
-      rendersRef.current = { [prevActiveKey]: CLEANED_UP };
+      const preservedRender = cleanupExceptionKey !== undefined ? rendersRef.current[cleanupExceptionKey] : undefined;
+
+      rendersRef.current = preservedRender ? { [cleanupExceptionKey!]: preservedRender } : {};
+
       forceUpdate();
     }
 
@@ -251,11 +252,12 @@ const Transition: FC<TransitionProps> = ({
 
   const contents = collection.map((key) => {
     const render = renders[key];
+    if (!render) {
+      return undefined;
+    }
 
     return (
-      typeof render === 'function' ? (
-        <div key={key} teactOrderKey={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
-      ) : undefined
+      <div key={key} teactOrderKey={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
     );
   });
 

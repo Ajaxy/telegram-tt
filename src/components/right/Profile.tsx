@@ -277,8 +277,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   function renderSharedMedia() {
     if (!viewportIds || !canRenderContents || !chatMessages) {
-      // This is just a single-frame delay, so we do not show spinner
-      const noSpinner = isFirstTab && viewportIds && !canRenderContents;
+      const noSpinner = isFirstTab && !canRenderContents;
 
       return (
         <div className="content empty-list">
