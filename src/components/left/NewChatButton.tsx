@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useState, useEffect, memo,
+  FC, useState, useEffect, memo,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -10,9 +10,6 @@ import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 
 import './NewChatButton.scss';
-
-const MENU_CLOSE_DELAY_MS = 750;
-let closeTimeout: number | undefined;
 
 type OwnProps = {
   isShown: boolean;
@@ -51,30 +48,8 @@ const NewChatButton: FC<OwnProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleMouseEnter = useCallback(() => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      closeTimeout = undefined;
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      closeTimeout = undefined;
-    }
-
-    closeTimeout = window.setTimeout(() => {
-      setIsMenuOpen(false);
-    }, MENU_CLOSE_DELAY_MS);
-  }, []);
-
   return (
-    <div
-      className={fabClassName}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className={fabClassName}>
       <Button
         round
         color="primary"

@@ -27,29 +27,6 @@
     }
   }
 
-  &.menu-is-open {
-    &::before {
-      content: '';
-      display: block;
-      position: absolute;
-      top: -13rem;
-      left: -11rem;
-      right: -1rem;
-      bottom: -1rem;
-      z-index: -1;
-    }
-  }
-
-  .is-touch-env & {
-    .Menu > .backdrop {
-      position: absolute;
-      left: -100vw;
-      right: -100vw;
-      top: -100vh;
-      bottom: -100vh;
-    }
-  }
-
   > .Button {
     .icon-new-chat-filled,
     .icon-close {
