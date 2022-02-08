@@ -9,7 +9,7 @@ export {
 export {
   fetchChats, fetchFullChat, searchChats, requestChatUpdate,
   saveDraft, clearDraft, fetchChat, updateChatMutedState,
-  createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
+  createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
   fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
