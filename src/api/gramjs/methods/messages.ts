@@ -834,9 +834,9 @@ export async function requestThreadInfoUpdate({
 }
 
 export async function searchMessagesLocal({
-  chatOrUser, type, query, topMessageId, minDate, maxDate, ...pagination
+  chat, type, query, topMessageId, minDate, maxDate, ...pagination
 }: {
-  chatOrUser: ApiChat | ApiUser;
+  chat: ApiChat;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
   query?: string;
   topMessageId?: number;
@@ -873,7 +873,7 @@ export async function searchMessagesLocal({
   }
 
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: buildInputPeer(chatOrUser.id, chatOrUser.accessHash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     filter,
     q: query || '',
     topMsgId: topMessageId,

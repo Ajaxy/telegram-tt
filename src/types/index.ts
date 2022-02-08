@@ -234,7 +234,6 @@ export enum GlobalSearchContent {
 
 export enum RightColumnContent {
   ChatInfo,
-  UserInfo,
   Search,
   Management,
   StickerSearch,

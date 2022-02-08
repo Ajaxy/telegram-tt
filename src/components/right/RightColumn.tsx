@@ -35,7 +35,6 @@ type StateProps = {
   contentKey?: RightColumnContent;
   chatId?: string;
   threadId?: number;
-  currentProfileUserId?: string;
   isChatSelected: boolean;
   shouldSkipHistoryAnimations?: boolean;
   nextManagementScreen?: ManagementScreens;
@@ -56,7 +55,6 @@ const RightColumn: FC<StateProps> = ({
   contentKey,
   chatId,
   threadId,
-  currentProfileUserId,
   isChatSelected,
   shouldSkipHistoryAnimations,
   nextManagementScreen,
@@ -64,7 +62,6 @@ const RightColumn: FC<StateProps> = ({
   const {
     toggleChatInfo,
     toggleManagement,
-    openUserInfo,
     closeLocalTextSearch,
     setStickerSearchQuery,
     setGifSearchQuery,
@@ -84,7 +81,7 @@ const RightColumn: FC<StateProps> = ({
   const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
-  const isProfile = contentKey === RightColumnContent.ChatInfo || contentKey === RightColumnContent.UserInfo;
+  const isProfile = contentKey === RightColumnContent.ChatInfo;
   const isSearch = contentKey === RightColumnContent.Search;
   const isManagement = contentKey === RightColumnContent.Management;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
@@ -108,13 +105,6 @@ const RightColumn: FC<StateProps> = ({
           break;
         }
         toggleChatInfo(undefined, { forceSyncOnIOs: true });
-        break;
-      case RightColumnContent.UserInfo:
-        if (isScrolledDown && shouldScrollUp) {
-          setProfileState(ProfileState.Profile);
-          break;
-        }
-        openUserInfo({ id: undefined }, { forceSyncOnIOs: true });
         break;
       case RightColumnContent.Management: {
         switch (managementScreen) {
@@ -175,7 +165,7 @@ const RightColumn: FC<StateProps> = ({
         break;
     }
   }, [
-    contentKey, isScrolledDown, toggleChatInfo, openUserInfo, closePollResults, setNewChatMembersDialogState,
+    contentKey, isScrolledDown, toggleChatInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
     setEditingExportedInvite, chatId, setOpenedInviteInfo,
   ]);
@@ -213,21 +203,18 @@ const RightColumn: FC<StateProps> = ({
   }, [isOverlaying]);
 
   // We need to clear profile state and management screen state, when changing chats
-  useLayoutEffectWithPrevDeps(([prevContentKey, prevChatId]) => {
-    if (
-      (prevContentKey === RightColumnContent.ChatInfo && contentKey === RightColumnContent.UserInfo)
-      || (prevContentKey === RightColumnContent.UserInfo && contentKey === RightColumnContent.ChatInfo)
-      || (prevChatId !== chatId)
-    ) {
+  useLayoutEffectWithPrevDeps(([prevChatId]) => {
+    if (prevChatId !== chatId ) {
       setProfileState(ProfileState.Profile);
       setManagementScreen(ManagementScreens.Initial);
     }
-  }, [contentKey, chatId]);
+  }, [chatId]);
 
-  useHistoryBack(isChatSelected && (contentKey === RightColumnContent.ChatInfo
-    || contentKey === RightColumnContent.UserInfo || contentKey === RightColumnContent.Management
-    || contentKey === RightColumnContent.AddingMembers),
-  () => close(false), toggleChatInfo);
+  useHistoryBack(isChatSelected && (
+    contentKey === RightColumnContent.ChatInfo
+    || contentKey === RightColumnContent.Management
+    || contentKey === RightColumnContent.AddingMembers
+  ), () => close(false), toggleChatInfo);
 
   // eslint-disable-next-line consistent-return
   function renderContent(isActive: boolean) {
@@ -247,12 +234,10 @@ const RightColumn: FC<StateProps> = ({
           />
         );
       case RightColumnContent.ChatInfo:
-      case RightColumnContent.UserInfo:
         return (
           <Profile
-            key={currentProfileUserId || chatId!}
+            key={chatId!}
             chatId={chatId!}
-            userId={currentProfileUserId}
             profileState={profileState}
             onProfileStateChange={setProfileState}
           />
@@ -331,7 +316,6 @@ export default memo(withGlobal(
       contentKey: selectRightColumnContentKey(global),
       chatId,
       threadId,
-      currentProfileUserId: global.users.selectedId,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       nextManagementScreen,

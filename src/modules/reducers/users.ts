@@ -122,20 +122,6 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
   return updatedUser;
 }
 
-export function updateSelectedUserId(global: GlobalState, selectedId?: string): GlobalState {
-  if (global.users.selectedId === selectedId) {
-    return global;
-  }
-
-  return {
-    ...global,
-    users: {
-      ...global.users,
-      selectedId,
-    },
-  };
-}
-
 export function deleteContact(global: GlobalState, userId: string): GlobalState {
   const { byId } = global.users;
   const { userIds } = global.contactList || {};

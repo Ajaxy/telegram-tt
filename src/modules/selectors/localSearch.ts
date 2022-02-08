@@ -17,19 +17,11 @@ export function selectCurrentTextSearch(global: GlobalState) {
   return currentSearch;
 }
 
-export function selectCurrentMediaSearchPeerId(global: GlobalState) {
-  const { byChatId } = global.localMediaSearch;
-  const { chatId } = selectCurrentMessageList(global) || {};
-  const currentProfileUserId = global.users.selectedId;
-
-  return currentProfileUserId && byChatId[currentProfileUserId] ? currentProfileUserId : chatId;
-}
-
 export function selectCurrentMediaSearch(global: GlobalState) {
-  const peerId = selectCurrentMediaSearchPeerId(global);
-  if (!peerId) {
+  const { chatId } = selectCurrentMessageList(global) || {};
+  if (!chatId) {
     return undefined;
   }
 
-  return global.localMediaSearch.byChatId[peerId];
+  return global.localMediaSearch.byChatId[chatId];
 }

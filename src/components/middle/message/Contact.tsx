@@ -23,7 +23,7 @@ type StateProps = {
 const Contact: FC<OwnProps & StateProps> = ({
   contact, user, phoneCodeList,
 }) => {
-  const { openUserInfo } = getDispatch();
+  const { openChat } = getDispatch();
 
   const {
     firstName,
@@ -33,8 +33,8 @@ const Contact: FC<OwnProps & StateProps> = ({
   } = contact;
 
   const handleClick = useCallback(() => {
-    openUserInfo({ id: userId });
-  }, [openUserInfo, userId]);
+    openChat({ id: userId });
+  }, [openChat, userId]);
 
   return (
     <div

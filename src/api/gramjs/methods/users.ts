@@ -230,7 +230,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   }
 
   const result = await searchMessagesLocal({
-    chatOrUser: chat!,
+    chat: chat!,
     type: 'profilePhoto',
     limit: PROFILE_PHOTOS_LIMIT,
   });

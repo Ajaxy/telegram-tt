@@ -2,13 +2,12 @@ import {
   addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiUser, MAIN_THREAD_ID } from '../../../api/types';
+import { ApiChat, MAIN_THREAD_ID } from '../../../api/types';
 
 import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   selectCurrentTextSearch,
-  selectCurrentMediaSearchPeerId,
   selectCurrentMediaSearch,
   selectCurrentMessageList,
   selectChat,
@@ -45,13 +44,15 @@ addReducer('searchTextMessagesLocal', (global) => {
 });
 
 addReducer('searchMediaMessagesLocal', (global) => {
-  const peerId = selectCurrentMediaSearchPeerId(global);
-  const chatOrUser = peerId
-    ? global.users.byId[peerId] || global.chats.byId[peerId]
-    : undefined;
+  const { chatId } = selectCurrentMessageList(global) || {};
+  if (!chatId) {
+    return;
+  }
+
+  const chat = selectChat(global, chatId);
   const currentSearch = selectCurrentMediaSearch(global);
 
-  if (!chatOrUser || !currentSearch) {
+  if (!chat || !currentSearch) {
     return;
   }
 
@@ -63,7 +64,7 @@ addReducer('searchMediaMessagesLocal', (global) => {
     return;
   }
 
-  void searchSharedMedia(chatOrUser, type, offsetId);
+  void searchSharedMedia(chat, type, offsetId);
 });
 
 addReducer('searchMessagesByDate', (global, actions, payload) => {
@@ -83,7 +84,7 @@ addReducer('searchMessagesByDate', (global, actions, payload) => {
 });
 
 async function searchTextMessages(
-  chatOrUser: ApiChat,
+  chat: ApiChat,
   threadId: number,
   topMessageId?: number,
   query?: string,
@@ -94,7 +95,7 @@ async function searchTextMessages(
   }
 
   const result = await callApi('searchMessagesLocal', {
-    chatOrUser,
+    chat,
     type: 'text',
     query,
     topMessageId,
@@ -122,19 +123,19 @@ async function searchTextMessages(
 
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChatMessagesById(global, chatOrUser.id, byId);
-  global = updateLocalTextSearchResults(global, chatOrUser.id, threadId, newFoundIds, totalCount, nextOffsetId);
+  global = addChatMessagesById(global, chat.id, byId);
+  global = updateLocalTextSearchResults(global, chat.id, threadId, newFoundIds, totalCount, nextOffsetId);
   setGlobal(global);
 }
 
 async function searchSharedMedia(
-  chatOrUser: ApiChat | ApiUser,
+  chat: ApiChat,
   type: SharedMediaType,
   offsetId?: number,
   isBudgetPreload = false,
 ) {
   const result = await callApi('searchMessagesLocal', {
-    chatOrUser,
+    chat,
     type,
     limit: SHARED_MEDIA_SLICE * 2,
     offsetId,
@@ -160,12 +161,12 @@ async function searchSharedMedia(
 
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChatMessagesById(global, chatOrUser.id, byId);
-  global = updateLocalMediaSearchResults(global, chatOrUser.id, type, newFoundIds, totalCount, nextOffsetId);
+  global = addChatMessagesById(global, chat.id, byId);
+  global = updateLocalMediaSearchResults(global, chat.id, type, newFoundIds, totalCount, nextOffsetId);
   setGlobal(global);
 
   if (!isBudgetPreload) {
-    searchSharedMedia(chatOrUser, type, nextOffsetId, true);
+    searchSharedMedia(chat, type, nextOffsetId, true);
   }
 }
 

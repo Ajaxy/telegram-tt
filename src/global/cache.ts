@@ -263,7 +263,7 @@ function reduceShowChatInfo(global: GlobalState): boolean {
 }
 
 function reduceUsers(global: GlobalState): GlobalState['users'] {
-  const { users: { byId, statusesById, selectedId } } = global;
+  const { users: { byId, statusesById } } = global;
   const chatIds = (global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT).filter(isUserId);
   const userIds = Object.keys(byId);
   const idsToSave = chatIds.concat(userIds).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
@@ -271,7 +271,6 @@ function reduceUsers(global: GlobalState): GlobalState['users'] {
   return {
     byId: pick(byId, idsToSave),
     statusesById: pick(statusesById, idsToSave),
-    selectedId: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN ? selectedId : undefined,
   };
 }
 

@@ -1,7 +1,6 @@
 import React, { useCallback } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 
-import { isUserId } from '../../../../modules/helpers';
 import { IAlbum, MediaViewerOrigin } from '../../../../types';
 import {
   ApiChat, ApiMessage, ApiUser, MAIN_THREAD_ID,
@@ -24,7 +23,7 @@ export default function useInnerHandlers(
   botSender?: ApiUser,
 ) {
   const {
-    openUserInfo, openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
+    openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
   } = getDispatch();
 
@@ -37,12 +36,8 @@ export default function useInnerHandlers(
       return;
     }
 
-    if (isUserId(avatarPeer.id)) {
-      openUserInfo({ id: avatarPeer.id });
-    } else {
-      openChat({ id: avatarPeer.id });
-    }
-  }, [avatarPeer, openUserInfo, openChat]);
+    openChat({ id: avatarPeer.id });
+  }, [avatarPeer, openChat]);
 
   const handleSenderClick = useCallback(() => {
     if (!senderPeer) {
@@ -53,13 +48,11 @@ export default function useInnerHandlers(
 
     if (asForwarded && forwardInfo?.channelPostId) {
       focusMessage({ chatId: senderPeer.id, messageId: forwardInfo.channelPostId });
-    } else if (isUserId(senderPeer.id)) {
-      openUserInfo({ id: senderPeer.id });
     } else {
       openChat({ id: senderPeer.id });
     }
   }, [
-    asForwarded, focusMessage, forwardInfo, lang, openChat, openUserInfo, senderPeer, showNotification,
+    asForwarded, focusMessage, forwardInfo, lang, openChat, senderPeer, showNotification,
   ]);
 
   const handleViaBotClick = useCallback(() => {
@@ -67,8 +60,8 @@ export default function useInnerHandlers(
       return;
     }
 
-    openUserInfo({ id: botSender.id });
-  }, [botSender, openUserInfo]);
+    openChat({ id: botSender.id });
+  }, [botSender, openChat]);
 
   const handleReplyClick = useCallback((): void => {
     focusMessage({
