@@ -15,7 +15,7 @@ import {
 } from '../../../modules/selectors';
 import {
   isActionMessage, isChatChannel,
-  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId,
+  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal,
 } from '../../../modules/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
@@ -429,6 +429,7 @@ export default memo(withGlobal<OwnProps>(
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
+    const isLocal = isMessageLocal(message);
     const canShowSeenBy = Boolean(chat
       && seenByMaxChatMembers
       && seenByExpiresAt
@@ -440,7 +441,7 @@ export default memo(withGlobal<OwnProps>(
       && message.date > Date.now() / 1000 - seenByExpiresAt);
     const isPrivate = chat && isUserId(chat.id);
     const isAction = isActionMessage(message);
-    const canShowReactionsCount = !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
+    const canShowReactionsCount = !isLocal && !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
     const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
@@ -469,7 +470,7 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       hasFullInfo: Boolean(chat?.fullInfo),
       canShowReactionsCount,
-      canShowReactionList: !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
+      canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
       canRemoveReaction,
     };
   },
