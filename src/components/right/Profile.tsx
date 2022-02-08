@@ -263,7 +263,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   } else if (!viewportIds) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
-  const canRenderContents = useAsyncRendering([chatId, resultType], renderingDelay);
+  const canRenderContent = useAsyncRendering([chatId, resultType], renderingDelay);
 
   function getMemberContextAction(memberId: string) {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
@@ -275,9 +275,9 @@ const Profile: FC<OwnProps & StateProps> = ({
     }];
   }
 
-  function renderSharedMedia() {
-    if (!viewportIds || !canRenderContents || !chatMessages) {
-      const noSpinner = isFirstTab && !canRenderContents;
+  function renderContent() {
+    if (!viewportIds || !canRenderContent || !chatMessages) {
+      const noSpinner = isFirstTab && !canRenderContent;
 
       return (
         <div className="content empty-list">
@@ -422,10 +422,10 @@ const Profile: FC<OwnProps & StateProps> = ({
       ref={containerRef}
       className="Profile custom-scroll"
       itemSelector={buildInfiniteScrollItemSelector(resultType)}
-      items={canRenderContents ? viewportIds : undefined}
+      items={canRenderContent ? viewportIds : undefined}
       cacheBuster={cacheBuster}
       sensitiveArea={PROFILE_SENSITIVE_AREA}
-      preloadBackwards={canRenderContents ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
+      preloadBackwards={canRenderContent ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
       // To prevent scroll jumps caused by reordering member list
       noScrollRestoreOnTop
       noFastList
@@ -447,7 +447,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             onStart={applyTransitionFix}
             onStop={handleTransitionStop}
           >
-            {renderSharedMedia}
+            {renderContent}
           </Transition>
           <TabList big activeTab={activeTab} tabs={tabs} onSwitchTab={setActiveTab} />
         </div>

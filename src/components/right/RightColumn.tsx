@@ -16,8 +16,8 @@ import {
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 import RightHeader from './RightHeader';
 import Profile from './Profile';
@@ -41,7 +41,7 @@ type StateProps = {
   nextManagementScreen?: ManagementScreens;
 };
 
-const COLUMN_CLOSE_DELAY_MS = 300;
+const CLOSE_ANIMATION_DURATION = 300;
 const MAIN_SCREENS_COUNT = Object.keys(RightColumnContent).length / 2;
 const MANAGEMENT_SCREENS_COUNT = Object.keys(ManagementScreens).length / 2;
 
@@ -194,7 +194,7 @@ const RightColumn: FC<StateProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setShouldSkipTransition(!isOpen);
-    }, COLUMN_CLOSE_DELAY_MS);
+    }, CLOSE_ANIMATION_DURATION);
   }, [isOpen]);
 
   useEffect(() => {
@@ -239,9 +239,10 @@ const RightColumn: FC<StateProps> = ({
       case RightColumnContent.AddingMembers:
         return (
           <AddChatMembers
+            key={chatId!}
             chatId={chatId!}
-            onNextStep={handleAppendingChatMembers}
             isActive={isOpen && isActive}
+            onNextStep={handleAppendingChatMembers}
             onClose={close}
           />
         );
@@ -261,13 +262,14 @@ const RightColumn: FC<StateProps> = ({
       case RightColumnContent.Management:
         return (
           <Management
+            key={chatId!}
             chatId={chatId!}
             currentScreen={managementScreen}
             isPromotedByCurrentUser={isPromotedByCurrentUser}
             selectedChatMemberId={selectedChatMemberId}
+            isActive={isOpen && isActive}
             onScreenSelect={setManagementScreen}
             onChatMemberSelect={handleSelectChatMember}
-            isActive={isOpen && isActive}
             onClose={close}
           />
         );
