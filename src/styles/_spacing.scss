@@ -1,6 +1,8 @@
+@use "sass:map";
+
 $spacer: 1rem !default;
 $spacers: () !default;
-$spacers: map-merge(
+$spacers: map.merge(
   (
     0: 0,
     1: ($spacer * .25),

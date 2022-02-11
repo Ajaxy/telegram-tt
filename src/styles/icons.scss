@@ -9,6 +9,7 @@
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
+  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
   font-family: 'icomoon' !important;
   speak: none;
   font-style: normal;

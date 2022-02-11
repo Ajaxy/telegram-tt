@@ -36,11 +36,6 @@
 
   opacity: 1;
 
-  &-inner {
-    transform: scaleX(1);
-    transition: transform var(--select-transition), opacity var(--select-transition);
-  }
-
   & .MessageSelectToolbar-inner {
     transform: scaleX(1) translateX(0);
   }
@@ -90,6 +85,9 @@
     border-radius: var(--border-radius-messages);
     box-shadow: 0 1px 2px var(--color-default-shadow);
     font-weight: 500;
+
+    transform: scaleX(1);
+    transition: transform var(--select-transition), opacity var(--select-transition);
 
     @media (max-width: 600px) {
       padding: 0;

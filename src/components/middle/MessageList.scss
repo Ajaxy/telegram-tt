@@ -22,11 +22,11 @@
 
   @media (pointer: coarse) {
     user-select: none;
-    touch-callout: none;
+    -webkit-touch-callout: none;
 
     &.select-mode-active {
       user-select: auto;
-      touch-callout: default;
+      -webkit-touch-callout: default;
     }
   }
 
