@@ -1,29 +1,13 @@
-**Telegram Web Z was updated to version v1.32**
+**Telegram Web Z was updated to version v1.33**
 
-**Harder**
-• Create and share Video Stickers made from .webm files.
-• 5 new reactions and interactive emoji: 🥰🤯🤔🤬👏
-• Send entire folders as a file.
-• Directly add chats to chat folders from Global Search.
+🤩 **Better**
+• The chat list loads even faster.
+• More layout improvements.
 
-**Better**
-• Redesigned group management pages with animated artwork.
-• ‘Forward To’ menu has smooth infinite scroll on mobile.
-• Spoiler animations re-hide text after a short period.
-• Numerous layout fixes and improvements.
-
-**Faster**
-• Media loads and scrolls faster in Shared Media and Global Search.
-• Optimized some heavy background calculations.
-• Memory usage optimizations.
-
-**Stronger**
-• Fixed missing sticker suggestions (e.g. for ❤️ emoji).
-• Fixed infinite spinning in Sticker panel.
-• Fixed scroll jumps and missing sender names in local search results.
-• Fixed highlight color when searching in dark mode.
-• Fixed pasting text and media from clipboard on Firefox and iOS browsers.
-• Media Viewer: Fixed navigating to the origin message on mobile.
-• Media Viewer: Fixed lingering audio after moving to the next item.
-• Reactions: Fixed unexpected interaction animations.
-• Fixed jumping cursor when typing in Safari.
+💪 **Stronger**
+• Irrelevant ‘You must be an admin’ popups no longer appear.
+• The New Chat button works properly on Android devices.
+• Files sent in Firefox no longer duplicate.
+• Fixed media streaming after clearing browser cache.
+• Fixed glitches when reacting to media albums and local messages.
+• Webpage video preview in Safari now renders properly.
