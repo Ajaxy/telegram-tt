@@ -172,7 +172,7 @@ addReducer('loadAllChats', (global, actions, payload) => {
   let i = 0;
 
   (async () => {
-    while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
+    while (shouldReplace || !getGlobal().chats.isFullyLoaded[listType]) {
       if (i++ >= INFINITE_LOOP_MARKER) {
         if (DEBUG) {
           // eslint-disable-next-line no-console
