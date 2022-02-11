@@ -17,7 +17,7 @@ import * as cacheApi from '../../../util/cacheApi';
 type EntityType = (
   'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument' |
   'document'
-);
+  );
 
 const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document']);
 const TGS_MIME_TYPE = 'application/x-tgsticker';
@@ -105,8 +105,9 @@ async function download(
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
     entityType = getEntityTypeById(entityId);
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument' |
-    'document';
+    entityType = mediaMatch[1] as (
+      'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument' | 'document'
+    );
   }
 
   switch (entityType) {
@@ -216,6 +217,10 @@ function getMessageMediaMimeType(message: GramJs.Message, sizeType?: string) {
   if (message.media instanceof GramJs.MessageMediaWebPage
     && message.media.webpage instanceof GramJs.WebPage
     && message.media.webpage.document instanceof GramJs.Document) {
+    if (sizeType) {
+      return 'image/jpeg';
+    }
+
     return message.media.webpage.document.mimeType;
   }
 
