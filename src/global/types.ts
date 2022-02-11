@@ -503,7 +503,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system
-  'init' | 'reset' | 'disconnect' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' | 'afterSync' |
+  'init' | 'reset' | 'disconnect' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' |
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
@@ -515,8 +515,7 @@ export type ActionTypes = (
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
   // chats
-  'preloadTopChatMessages' | 'preloadArchivedChats' | 'loadChats' | 'loadMoreChats' | 'openChat' |
-  'openChatWithInfo' | 'openLinkedChat' |
+  'preloadTopChatMessages' | 'loadAllChats' | 'openChat' | 'openChatWithInfo' | 'openLinkedChat' |
   'openSupportChat' | 'openTipsChat' | 'focusMessageInComments' |
   'loadFullChat' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |

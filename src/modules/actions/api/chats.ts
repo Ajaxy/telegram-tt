@@ -20,28 +20,16 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
-  addChats,
-  addUsers,
-  addUserStatuses,
-  replaceThreadParam,
-  updateChatListIds,
-  updateChats,
-  updateChat,
-  updateChatListSecondaryInfo,
-  updateManagementProgress,
-  leaveChat,
+  addChats, addUsers, addUserStatuses, replaceThreadParam,
+  updateChatListIds, updateChats, updateChat, updateChatListSecondaryInfo,
+  updateManagementProgress, leaveChat, replaceUsers, replaceUserStatuses,
+  replaceChats, replaceChatListIds,
 } from '../../reducers';
 import {
-  selectChat,
-  selectUser,
-  selectChatListType,
-  selectIsChatPinned,
-  selectChatFolder,
-  selectSupportChat,
-  selectChatByUsername,
-  selectThreadTopMessageId,
-  selectCurrentMessageList,
-  selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
+  selectChat, selectUser, selectChatListType, selectIsChatPinned,
+  selectChatFolder, selectSupportChat, selectChatByUsername, selectThreadTopMessageId,
+  selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
+  selectThreadParam, selectChatMessage,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -54,9 +42,7 @@ import { selectGroupCall } from '../../selectors/calls';
 import { getOrderedIds } from '../../../util/folderManager';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
-const CHATS_PRELOAD_INTERVAL = 300;
 
-const runThrottledForLoadChats = throttle((cb) => cb(), CHATS_PRELOAD_INTERVAL, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
@@ -179,43 +165,30 @@ addReducer('openTipsChat', (global, actions, payload) => {
   actions.openChatByUsername({ username: `${TIPS_USERNAME}${usernamePostfix}` });
 });
 
-addReducer('loadMoreChats', (global, actions, payload) => {
-  const { listType = 'active' } = payload!;
-  const listIds = global.chats.listIds[listType as ('active' | 'archived')];
-  const isFullyLoaded = global.chats.isFullyLoaded[listType as ('active' | 'archived')];
+addReducer('loadAllChats', (global, actions, payload) => {
+  const listType = payload.listType as 'active' | 'archived';
+  let { shouldReplace, onReplace } = payload;
 
-  if (isFullyLoaded) {
-    return;
-  }
-
-  const oldestChat = listIds
-    ? listIds
-      .map((id) => global.chats.byId[id])
-      .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(global, chat.id))
-      .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
-    : undefined;
-
-  if (oldestChat) {
-    runThrottledForLoadChats(() => loadChats(listType, oldestChat.id, oldestChat.lastMessage!.date));
-  } else {
-    runThrottledForLoadChats(() => loadChats(listType));
-  }
-});
-
-addReducer('preloadArchivedChats', () => {
   (async () => {
-    while (!getGlobal().chats.isFullyLoaded.archived) {
-      const currentGlobal = getGlobal();
-      const listIds = currentGlobal.chats.listIds.archived;
+    while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
+      const listIds = !shouldReplace && global.chats.listIds[listType];
       const oldestChat = listIds
         ? listIds
-          .map((id) => currentGlobal.chats.byId[id])
-          .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(currentGlobal, chat.id))
+          /* eslint-disable @typescript-eslint/no-loop-func */
+          .map((id) => global.chats.byId[id])
+          .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(global, chat.id))
+          /* eslint-enable @typescript-eslint/no-loop-func */
           .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
         : undefined;
 
-      await loadChats('archived', oldestChat?.id, oldestChat?.lastMessage!.date);
-      await pause(CHATS_PRELOAD_INTERVAL);
+      await loadChats(listType, oldestChat?.id, oldestChat?.lastMessage!.date, shouldReplace);
+
+      if (shouldReplace) {
+        onReplace?.();
+      }
+
+      global = getGlobal();
+      shouldReplace = false;
     }
   })();
 });
@@ -1011,14 +984,16 @@ addReducer('setChatEnabledReactions', (global, actions, payload) => {
   })();
 });
 
-async function loadChats(listType: 'active' | 'archived', offsetId?: string, offsetDate?: number) {
+async function loadChats(
+  listType: 'active' | 'archived', offsetId?: string, offsetDate?: number, shouldReplace = false,
+) {
   let global = getGlobal();
 
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     archived: listType === 'archived',
-    withPinned: global.chats.orderedPinnedIds[listType] === undefined,
+    withPinned: shouldReplace,
     serverTimeOffset: global.serverTimeOffset,
     lastLocalServiceMessage: selectLastServiceNotification(global)?.message,
   });
@@ -1035,11 +1010,44 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: string, off
 
   global = getGlobal();
 
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addUserStatuses(global, result.userStatusesById);
+  if (shouldReplace && listType === 'active') {
+    const visibleChats = [];
+    const visibleUsers = [];
 
-  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChatListIds(global, listType, chatIds);
+    const currentChat = selectCurrentChat(global);
+    if (currentChat) {
+      const { threadId } = selectCurrentMessageList(global)!;
+      visibleChats.push(currentChat);
+      const messageIds = selectThreadParam(global, currentChat.id, threadId, 'viewportIds');
+      const messageSenders = messageIds ? messageIds
+        .map((messageId) => {
+          const { senderId } = selectChatMessage(global, currentChat.id, messageId) || {};
+          return senderId ? selectUser(global, senderId) : undefined;
+        })
+        .filter(Boolean) : [];
+      visibleUsers.push(...messageSenders);
+    }
+
+    if (global.currentUserId && global.users.byId[global.currentUserId]) {
+      visibleUsers.push(global.users.byId[global.currentUserId]);
+    }
+
+    global = replaceUsers(global, buildCollectionByKey(visibleUsers.concat(result.users), 'id'));
+    global = replaceUserStatuses(global, result.userStatusesById);
+    global = replaceChats(global, buildCollectionByKey(visibleChats.concat(result.chats), 'id'));
+    global = replaceChatListIds(global, listType, chatIds);
+  } else if (shouldReplace && listType === 'archived') {
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+    global = addUserStatuses(global, result.userStatusesById);
+    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+    global = replaceChatListIds(global, listType, chatIds);
+  } else {
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+    global = addUserStatuses(global, result.userStatusesById);
+    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+    global = updateChatListIds(global, listType, chatIds);
+  }
+
   global = updateChatListSecondaryInfo(global, listType, result);
 
   Object.keys(result.draftsById).forEach((chatId) => {

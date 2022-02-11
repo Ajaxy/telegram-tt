@@ -3,23 +3,17 @@ import {
 } from '../../../lib/teact/teactn';
 
 import {
-  ApiChat, ApiFormattedText, ApiMessage, ApiUser, MAIN_THREAD_ID,
+  ApiChat, ApiFormattedText, ApiMessage, MAIN_THREAD_ID,
 } from '../../../api/types';
 
 import {
-  CHAT_LIST_LOAD_SLICE, DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
+  DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  replaceChatListIds,
-  replaceChats,
-  replaceUsers,
-  replaceUserStatuses,
   updateUsers,
-  addUserStatuses,
   updateChats,
-  updateChatListSecondaryInfo,
   updateThreadInfos,
   replaceThreadParam,
   updateListedIds,
@@ -27,29 +21,18 @@ import {
   addChatMessagesById,
 } from '../../reducers';
 import {
-  selectUser,
-  selectChat,
   selectCurrentMessageList,
   selectDraft,
   selectChatMessage,
   selectThreadInfo,
-  selectLastServiceNotification,
 } from '../../selectors';
-import { isUserId } from '../../helpers';
-
-addReducer('sync', (global, actions) => {
-  void sync(actions.afterSync);
-});
-
-addReducer('afterSync', () => {
-  void afterSync();
-});
+import { init as initFolderManager } from '../../../util/folderManager';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 10 sec;
 
 let releaseStatusTimeout: number | undefined;
 
-async function sync(afterSyncCallback: () => void) {
+addReducer('sync', () => {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START SYNC');
@@ -67,149 +50,35 @@ async function sync(afterSyncCallback: () => void) {
     releaseStatusTimeout = undefined;
   }, RELEASE_STATUS_TIMEOUT);
 
-  await callApi('fetchCurrentUser');
+  const { loadAllChats, preloadTopChatMessages } = getDispatch();
 
-  // This fetches only active chats and clears archived chats, which will be fetched in `afterSync`
-  const savedUsers = await loadAndReplaceChats();
-  await loadAndReplaceMessages(savedUsers);
+  loadAllChats({
+    listType: 'active',
+    shouldReplace: true,
+    onReplace: async () => {
+      await loadAndReplaceMessages();
 
-  setGlobal({
-    ...getGlobal(),
-    lastSyncTime: Date.now(),
-    isSyncing: false,
-  });
+      setGlobal({
+        ...getGlobal(),
+        lastSyncTime: Date.now(),
+        isSyncing: false,
+      });
 
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('>>> FINISH SYNC');
-  }
-
-  afterSyncCallback();
-}
-
-async function afterSync() {
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('>>> START AFTER-SYNC');
-  }
-
-  await Promise.all([
-    loadAndUpdateUsers(),
-    loadAndReplaceArchivedChats(),
-  ]);
-
-  await callApi('fetchCurrentUser');
-
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('>>> FINISH AFTER-SYNC');
-  }
-}
-
-async function loadAndReplaceChats() {
-  let global = getGlobal();
-
-  const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_LOAD_SLICE,
-    withPinned: true,
-    serverTimeOffset: global.serverTimeOffset,
-    lastLocalServiceMessage: selectLastServiceNotification(global)?.message,
-  });
-
-  if (!result) {
-    return undefined;
-  }
-
-  global = getGlobal();
-
-  const { recentlyFoundChatIds } = global.globalSearch;
-  const { userIds: contactIds } = global.contactList || {};
-  const { currentUserId } = global;
-
-  const savedPrivateChatIds = [
-    ...(recentlyFoundChatIds || []),
-    ...(contactIds || []),
-    ...(currentUserId ? [currentUserId] : []),
-  ];
-
-  const savedUsers = savedPrivateChatIds
-    .map((id) => selectUser(global, id))
-    .filter<ApiUser>(Boolean as any);
-
-  const savedChats = savedPrivateChatIds
-    .map((id) => selectChat(global, id))
-    .filter<ApiChat>(Boolean as any);
-
-  const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
-  if (currentChatId) {
-    const selectedChat = selectChat(global, currentChatId);
-    if (selectedChat && !savedPrivateChatIds.includes(currentChatId)) {
-      savedChats.push(selectedChat);
-    }
-
-    if (isUserId(currentChatId)) {
-      const selectedChatUser = selectUser(global, currentChatId);
-      if (selectedChatUser && !savedPrivateChatIds.includes(currentChatId)) {
-        savedUsers.push(selectedChatUser);
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.log('>>> FINISH SYNC');
       }
-    }
-  }
 
-  savedUsers.push(...result.users);
-  savedChats.push(...result.chats);
-
-  global = replaceUserStatuses(global, result.userStatusesById);
-
-  global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
-  global = replaceChatListIds(global, 'active', result.chatIds);
-  global = updateChatListSecondaryInfo(global, 'active', result);
-
-  Object.keys(result.draftsById).forEach((chatId) => {
-    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId]);
+      initFolderManager();
+      loadAllChats({ listType: 'archived', shouldReplace: true });
+      void callApi('fetchCurrentUser');
+      preloadTopChatMessages();
+    },
   });
+});
 
-  Object.keys(result.replyingToById).forEach((chatId) => {
-    global = replaceThreadParam(
-      global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
-    );
-  });
-
-  setGlobal(global);
-
-  if (currentChatId && !global.chats.byId[currentChatId]) {
-    getDispatch().openChat({ id: undefined });
-  }
-
-  return savedUsers;
-}
-
-async function loadAndReplaceArchivedChats() {
-  const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_LOAD_SLICE,
-    archived: true,
-    withPinned: true,
-    serverTimeOffset: getGlobal().serverTimeOffset,
-  });
-
-  if (!result) {
-    return;
-  }
-
-  let global = getGlobal();
-
-  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addUserStatuses(global, result.userStatusesById);
-
-  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = replaceChatListIds(global, 'archived', result.chatIds);
-  global = updateChatListSecondaryInfo(global, 'archived', result);
-
-  setGlobal(global);
-}
-
-async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
+async function loadAndReplaceMessages() {
   let areMessagesLoaded = false;
-  let users = savedUsers || [];
 
   let global = getGlobal();
   const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
@@ -294,10 +163,10 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
       }
 
       global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+      global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
       global = updateThreadInfos(global, currentChatId, result.threadInfos);
 
       areMessagesLoaded = true;
-      users = Array.prototype.concat(users, result.users);
     }
   }
 
@@ -316,48 +185,12 @@ async function loadAndReplaceMessages(savedUsers?: ApiUser[]) {
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', draftsByChatId[chatId]);
   });
 
-  if (savedUsers) {
-    global = replaceUsers(global, buildCollectionByKey(users, 'id'));
-  } else if (users) {
-    // If `fetchChats` has failed for some reason, we don't have saved chats, thus we can not replace
-    global = updateUsers(global, buildCollectionByKey(users, 'id'));
-  }
-
   setGlobal(global);
 
   const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
   if (audioChatId && audioMessageId && !selectChatMessage(global, audioChatId, audioMessageId)) {
     getDispatch().closeAudioPlayer();
   }
-}
-
-async function loadAndUpdateUsers() {
-  let global = getGlobal();
-  const { recentlyFoundChatIds } = global.globalSearch;
-  const { userIds: contactIds } = global.contactList || {};
-  if (
-    (!contactIds || !contactIds.length)
-    && (!recentlyFoundChatIds || !recentlyFoundChatIds.length)
-  ) {
-    return;
-  }
-
-  const users = [
-    ...(recentlyFoundChatIds || []),
-    ...(contactIds || []),
-  ].map((id) => selectUser(global, id)).filter<ApiUser>(Boolean as any);
-
-  const result = await callApi('fetchUsers', { users });
-  if (!result) {
-    return;
-  }
-
-  const { users: updatedUsers, userStatusesById } = result;
-
-  global = getGlobal();
-  global = updateUsers(global, buildCollectionByKey(updatedUsers, 'id'));
-  global = addUserStatuses(global, userStatusesById);
-  setGlobal(global);
 }
 
 function loadTopMessages(chat: ApiChat) {

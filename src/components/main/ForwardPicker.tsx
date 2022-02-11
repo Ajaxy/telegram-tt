@@ -43,7 +43,6 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
   const {
     setForwardChatId,
     exitForwardMode,
-    loadMoreChats,
   } = getDispatch();
 
   const lang = useLang();
@@ -105,7 +104,6 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
       filterPlaceholder={lang('ForwardTo')}
       filter={filter}
       onFilterChange={setFilter}
-      loadMore={loadMoreChats}
       onSelectChatOrUser={handleSelectUser}
       onClose={exitForwardMode}
       onCloseAnimationEnd={unmarkIsShown}

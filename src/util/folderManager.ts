@@ -93,7 +93,9 @@ const updateFolderManagerThrottled = throttle(() => {
 
 let inited = false;
 
-function init() {
+/* Getters */
+
+export function init() {
   inited = true;
 
   addCallback(updateFolderManagerThrottled);
@@ -101,8 +103,6 @@ function init() {
 
   updateFolderManager(getGlobal());
 }
-
-/* Getters */
 
 export function getOrderedIds(folderId: number) {
   if (!inited) init();

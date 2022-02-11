@@ -66,7 +66,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   const {
     editChatFolder,
     addChatFolder,
-    loadMoreChats,
   } = getDispatch();
 
   const [animationData, setAnimationData] = useState<string>();
@@ -117,21 +116,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     excludedChatIds, includedChatIds, includedChatTypes, excludedChatTypes,
     isExcludedChatsListExpanded, isIncludedChatsListExpanded,
     loadedActiveChatIds, loadedArchivedChatIds,
-  ]);
-
-  useEffect(() => {
-    if (
-      visibleIncludedChatIds.length < includedChatIds.length
-      || visibleExcludedChatIds.length < excludedChatIds.length
-    ) {
-      loadMoreChats({ listType: 'active' });
-    }
-  }, [
-    loadMoreChats,
-    excludedChatIds.length,
-    includedChatIds.length,
-    visibleExcludedChatIds.length,
-    visibleIncludedChatIds.length,
   ]);
 
   const lang = useLang();

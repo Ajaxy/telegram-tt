@@ -32,7 +32,6 @@ type OwnProps = {
   onSelectedIdsChange: (ids: string[]) => void;
   onSelectedChatTypesChange: (types: string[]) => void;
   onFilterChange: (value: string) => void;
-  onLoadMore: () => void;
 };
 
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -51,7 +50,6 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
   onSelectedIdsChange,
   onSelectedChatTypesChange,
   onFilterChange,
-  onLoadMore,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -156,7 +154,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
     );
   }
 
-  const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, chatIds, Boolean(filterValue));
+  const [viewportIds, getMore] = useInfiniteScroll(undefined, chatIds, Boolean(filterValue));
 
   return (
     <div className="Picker SettingsFoldersChatsPicker">
