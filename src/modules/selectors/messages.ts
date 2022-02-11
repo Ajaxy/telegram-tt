@@ -904,3 +904,21 @@ export function selectDefaultReaction(global: GlobalState, chatId: string) {
 
   return defaultReaction;
 }
+
+// Slow, not to be used in `withGlobal`
+export function selectVisibleUsers(global: GlobalState) {
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
+    return undefined;
+  }
+
+  const messageIds = selectThreadParam(global, chatId, threadId, 'viewportIds');
+  if (!messageIds) {
+    return undefined;
+  }
+
+  return messageIds.map((messageId) => {
+    const { senderId } = selectChatMessage(global, chatId, messageId) || {};
+    return senderId ? selectUser(global, senderId) : undefined;
+  }).filter(Boolean);
+}

@@ -29,7 +29,7 @@ import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
   selectChatFolder, selectSupportChat, selectChatByUsername, selectThreadTopMessageId,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
-  selectThreadParam, selectChatMessage,
+  selectVisibleUsers,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -1011,23 +1011,10 @@ async function loadChats(
   global = getGlobal();
 
   if (shouldReplace && listType === 'active') {
-    const visibleChats = [];
-    const visibleUsers = [];
-
     const currentChat = selectCurrentChat(global);
-    if (currentChat) {
-      const { threadId } = selectCurrentMessageList(global)!;
-      visibleChats.push(currentChat);
-      const messageIds = selectThreadParam(global, currentChat.id, threadId, 'viewportIds');
-      const messageSenders = messageIds ? messageIds
-        .map((messageId) => {
-          const { senderId } = selectChatMessage(global, currentChat.id, messageId) || {};
-          return senderId ? selectUser(global, senderId) : undefined;
-        })
-        .filter(Boolean) : [];
-      visibleUsers.push(...messageSenders);
-    }
+    const visibleChats = currentChat ? [currentChat] : [];
 
+    const visibleUsers = selectVisibleUsers(global) || [];
     if (global.currentUserId && global.users.byId[global.currentUserId]) {
       visibleUsers.push(global.users.byId[global.currentUserId]);
     }
