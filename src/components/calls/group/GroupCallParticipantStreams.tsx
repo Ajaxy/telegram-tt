@@ -61,7 +61,6 @@ const GroupCallParticipantStreams: FC<OwnProps & StateProps> = ({
           'videos',
           shouldSpanLastVideo && 'span-last-video',
         )}
-        // @ts-ignore teact feature
         style={`--column-count: ${selectedVideo ? 1 : columnCount}`}
       >
         {selectedVideo && (

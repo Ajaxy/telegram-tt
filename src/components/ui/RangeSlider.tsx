@@ -63,7 +63,6 @@ const RangeSlider: FC<OwnProps> = ({
       <div className="slider-main">
         <div
           className="slider-fill-track"
-          // @ts-ignore
           style={`width: ${trackWidth}%`}
         />
         <input

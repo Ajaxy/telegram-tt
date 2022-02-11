@@ -827,7 +827,6 @@ const Message: FC<OwnProps & StateProps> = ({
       ref={ref}
       id={`message${messageId}`}
       className={containerClassName}
-      // @ts-ignore teact feature
       style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}
       onMouseDown={handleMouseDown}
@@ -867,7 +866,6 @@ const Message: FC<OwnProps & StateProps> = ({
         <div
           ref={contentRef}
           className={contentClassName}
-          // @ts-ignore
           style={style}
           dir="auto"
         >

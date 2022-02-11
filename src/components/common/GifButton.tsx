@@ -73,7 +73,6 @@ const GifButton: FC<OwnProps> = ({
           ref={thumbRef}
           className="thumbnail"
           // We need to always render to avoid blur re-calculation
-          // @ts-ignore
           style={isVideoReady ? 'display: none;' : undefined}
         />
       )}

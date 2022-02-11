@@ -10,9 +10,7 @@ import InputText from '../ui/InputText';
 
 import './CardInput.scss';
 
-// @ts-ignore
 import mastercardIconPath from '../../assets/mastercard.svg';
-// @ts-ignore
 import visaIconPath from '../../assets/visa.svg';
 
 const CARD_NUMBER_MAX_LENGTH = 23;

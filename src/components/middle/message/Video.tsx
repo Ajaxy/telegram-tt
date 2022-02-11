@@ -159,20 +159,17 @@ const Video: FC<OwnProps> = ({
       ref={ref}
       id={id}
       className={className}
-      // @ts-ignore teact feature
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
       <canvas
         ref={thumbRef}
         className="thumbnail"
-        // @ts-ignore teact feature
         style={`width: ${width}px; height: ${height}px;`}
       />
       <img
         src={previewBlobUrl}
         className={buildClassName('thumbnail', previewClassNames)}
-        // @ts-ignore teact feature
         style={`width: ${width}px; height: ${height}px;`}
         alt=""
         draggable={!isProtected}

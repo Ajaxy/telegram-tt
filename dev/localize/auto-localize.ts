@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-nocheck
 const replaceInFile = require('replace-in-file');
 const langPackIOs = require('./en-ios.json');
 const langPackExtra = require('./en-extra.json');

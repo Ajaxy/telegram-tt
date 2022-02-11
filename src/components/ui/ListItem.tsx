@@ -160,7 +160,6 @@ const ListItem: FC<OwnProps> = ({
       ref={containerRef}
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : undefined}
-      // @ts-ignore
       style={style}
       onMouseDown={onMouseDown}
     >

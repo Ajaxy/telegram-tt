@@ -1,6 +1,5 @@
 import { ChangeEvent } from 'react';
 
-// @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 
 import React, {

@@ -36,7 +36,6 @@ import {
 import { findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 
-// @ts-ignore
 import versionNotification from '../../../versionNotification.txt';
 import parseMessageInput from '../../../util/parseMessageInput';
 

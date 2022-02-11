@@ -16,11 +16,8 @@ import buildClassName from '../../util/buildClassName';
 
 import './UiLoader.scss';
 
-// @ts-ignore
 import telegramLogoPath from '../../assets/telegram-logo.svg';
-// @ts-ignore
 import reactionThumbsPath from '../../assets/reaction-thumbs.png';
-// @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 import { selectIsRightColumnShown, selectTheme } from '../../modules/selectors';
 
@@ -138,7 +135,6 @@ const UiLoader: FC<OwnProps & StateProps> = ({
             <>
               <div
                 className="left"
-                // @ts-ignore teact feature
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
               <div

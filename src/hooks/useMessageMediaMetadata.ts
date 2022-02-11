@@ -14,7 +14,6 @@ import { buildMediaMetadata } from '../util/mediaSession';
 import { scaleImage, resizeImage } from '../util/imageResize';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
 
-// @ts-ignore
 import telegramLogoPath from '../assets/telegram-logo-filled.svg';
 
 const LOGO_DIMENSIONS = { width: 200, height: 200 };

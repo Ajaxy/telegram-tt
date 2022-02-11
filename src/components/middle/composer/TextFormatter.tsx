@@ -406,7 +406,6 @@ const TextFormatter: FC<OwnProps> = ({
     <div
       ref={containerRef}
       className={className}
-      // @ts-ignore Teact feature
       style={style}
       onKeyDown={handleContainerKeyDown}
     >

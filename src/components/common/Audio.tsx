@@ -507,19 +507,16 @@ function renderSeekline(
     >
       <span className="seekline-buffered-progress">
         <i
-          // @ts-ignore
           style={`transform: translateX(${bufferedProgress * 100}%)`}
         />
       </span>
       <span className="seekline-play-progress">
         <i
-          // @ts-ignore
           style={`transform: translateX(${playProgress * 100}%)`}
         />
       </span>
       <span className="seekline-thumb">
         <i
-          // @ts-ignore
           style={`transform: translateX(${playProgress * 100}%)`}
         />
       </span>

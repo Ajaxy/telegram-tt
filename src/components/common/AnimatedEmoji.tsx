@@ -75,7 +75,6 @@ const AnimatedEmoji: FC<OwnProps> = ({
     <div
       ref={ref}
       className={buildClassName('AnimatedEmoji media-inner', sticker.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
-      // @ts-ignore teact feature
       style={style}
       onClick={handleClick}
     >

@@ -339,8 +339,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   // Handles updated message list, takes care of scroll repositioning
   useLayoutEffectWithPrevDeps(([
     prevMessageIds, prevIsViewportNewest, prevContainerHeight,
-  ]: [
-    typeof messageIds, typeof isViewportNewest, typeof containerHeight,
   ]) => {
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
@@ -463,7 +461,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       console.timeEnd('scrollTop');
     }
     // This should match deps for `useOnChange` above
-  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
+  }, [messageIds, isViewportNewest, containerHeight, hasTools] as const);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {

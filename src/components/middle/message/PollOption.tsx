@@ -89,7 +89,6 @@ const PollOption: FC<OwnProps> = ({
           <div className="poll-option-corner" ref={lineRef} />
           <div
             className="poll-option-line"
-            // @ts-ignore
             style={lineStyle}
           />
         </div>

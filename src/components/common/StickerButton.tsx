@@ -105,7 +105,6 @@ const StickerButton: FC<OwnProps> = ({
       ref={ref}
       className={fullClassName}
       title={title || (sticker?.emoji)}
-      // @ts-ignore
       style={style}
       data-sticker-id={sticker.id}
       onMouseDown={preventMessageInputBlurWithBubbling}

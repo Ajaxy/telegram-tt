@@ -69,7 +69,7 @@ interface ComponentInstance {
       cursor: number;
       byCursor: {
         effect: () => void;
-        dependencies?: any[];
+        dependencies?: readonly any[];
         cleanup?: Function;
       }[];
     };
@@ -522,7 +522,7 @@ function useLayoutEffectBase(
   schedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
   primarySchedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
   effect: () => Function | void,
-  dependencies?: any[],
+  dependencies?: readonly any[],
   debugKey?: string,
 ) {
   const { cursor, byCursor } = renderingInstance.hooks.effects;
@@ -621,11 +621,11 @@ function useLayoutEffectBase(
   renderingInstance.hooks.effects.cursor++;
 }
 
-export function useEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
+export function useEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {
   return useLayoutEffectBase(fastRaf, fastRafPrimary, effect, dependencies, debugKey);
 }
 
-export function useLayoutEffect(effect: () => Function | void, dependencies?: any[], debugKey?: string) {
+export function useLayoutEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {
   return useLayoutEffectBase(onTickEnd, onTickEndPrimary, effect, dependencies, debugKey);
 }
 

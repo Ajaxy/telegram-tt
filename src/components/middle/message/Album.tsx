@@ -122,7 +122,6 @@ const Album: FC<OwnProps & StateProps> = ({
   return (
     <div
       className="Album"
-      // @ts-ignore
       style={`width: ${containerWidth}px; height: ${containerHeight}px;`}
     >
       {album.messages.map(renderAlbumMessage)}

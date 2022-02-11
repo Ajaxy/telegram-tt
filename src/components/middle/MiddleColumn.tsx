@@ -363,7 +363,6 @@ const MiddleColumn: FC<StateProps> = ({
       id="MiddleColumn"
       className={className}
       onTransitionEnd={handleOpenEnd}
-      // @ts-ignore teact-feature
       style={`
         --composer-hidden-scale: ${composerHiddenScale};
         --toolbar-hidden-scale: ${toolbarHiddenScale};
@@ -379,7 +378,6 @@ const MiddleColumn: FC<StateProps> = ({
     >
       <div
         id="middle-column-bg"
-        // @ts-ignore
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
       />
       <div id="middle-column-portals" />

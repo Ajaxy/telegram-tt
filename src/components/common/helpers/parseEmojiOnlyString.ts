@@ -1,4 +1,3 @@
-// @ts-ignore
 import twemojiRegex from '../../../lib/twemojiRegex';
 
 const DETECT_UP_TO = 3;

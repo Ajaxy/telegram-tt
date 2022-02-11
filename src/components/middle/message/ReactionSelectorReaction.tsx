@@ -59,7 +59,6 @@ const ReactionSelectorReaction: FC<OwnProps> = ({ reaction, previewIndex, onSend
             'static',
             isReady ? [staticClassNames] : undefined,
           )}
-          // @ts-ignore
           style={`background-position-x: ${previewIndex * -32}px;`}
         />
       )}

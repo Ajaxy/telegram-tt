@@ -5,11 +5,10 @@ import { ApiMediaFormat } from '../api/types';
 import * as mediaLoader from '../util/mediaLoader';
 import useForceUpdate from './useForceUpdate';
 
-const useMedia =  <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
+const useMedia = (
   mediaHash: string | false | undefined,
   noLoad = false,
-  // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
-  mediaFormat: T = ApiMediaFormat.BlobUrl,
+  mediaFormat = ApiMediaFormat.BlobUrl,
   cacheBuster?: number,
   delay?: number | false,
 ) => {

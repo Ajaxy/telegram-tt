@@ -163,7 +163,6 @@ function buildArgConfig(name, argType) {
         // Note that 'flags' is NOT the flags name; this
         // is determined by a previous argument
         // However, we assume that the argument will always be called 'flags'
-        // @ts-ignore
         const flagMatch = currentConfig.type.match(/flags.(\d+)\?([\w<>.]+)/);
 
         if (flagMatch) {
@@ -174,7 +173,6 @@ function buildArgConfig(name, argType) {
         }
 
         // Then check if the type is a Vector<REAL_TYPE>
-        // @ts-ignore
         const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
 
         if (vectorMatch) {
@@ -182,7 +180,6 @@ function buildArgConfig(name, argType) {
 
             // If the type's first letter is not uppercase, then
             // it is a constructor and we use (read/write) its ID.
-            // @ts-ignore
             currentConfig.useVectorId = currentConfig.type.charAt(0) === 'V';
 
             // Update the type to match the one inside the vector
@@ -191,7 +188,6 @@ function buildArgConfig(name, argType) {
 
         // See use_vector_id. An example of such case is ipPort in
         // help.configSpecial
-        // @ts-ignore
         if (/^[a-z]$/.test(currentConfig.type.split('.')
             .pop()
             .charAt(0))

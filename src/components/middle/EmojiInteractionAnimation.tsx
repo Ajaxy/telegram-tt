@@ -93,7 +93,6 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         'EmojiInteractionAnimation', isHiding && 'hiding', isPlaying && 'playing', isReversed && 'reversed',
       )}
-      // @ts-ignore teact feature
       style={`--scale: ${scale}; --start-x: ${emojiInteraction.x}px; --start-y: ${emojiInteraction.y}px;`}
     >
       <AnimatedSticker
