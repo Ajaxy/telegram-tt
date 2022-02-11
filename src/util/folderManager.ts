@@ -72,6 +72,7 @@ let prepared: {
 
 let results: {
   orderedIdsByFolderId: Record<string, string[] | undefined>;
+  pinnedCountByFolderId: Record<string, number | undefined>; // Also watched by `callbacks.orderedIdsByFolderId`
   chatsCountByFolderId: Record<string, number | undefined>;
   unreadCountersByFolderId: Record<string, {
     chatsCount: number;
@@ -110,6 +111,12 @@ export function getOrderedIds(folderId: number) {
   return results.orderedIdsByFolderId[folderId];
 }
 
+export function getPinnedChatsCount(folderId: number) {
+  if (!inited) init();
+
+  return results.pinnedCountByFolderId[folderId] || 0;
+}
+
 export function getChatsCount() {
   if (!inited) init();
 
@@ -124,10 +131,6 @@ export function getUnreadCounters() {
 
 export function getAllNotificationsCount() {
   return getUnreadCounters()[ALL_FOLDER_ID]?.notificationsCount || 0;
-}
-
-export function getPinnedChatsCount(folderId: number) {
-  return prepared.folderSummariesById[folderId]?.pinnedChatIds?.size;
 }
 
 /* Callback managers */
@@ -550,21 +553,24 @@ function updateResults(affectedFolderIds: number[]) {
   let wasChatsCountChanged = false;
 
   Array.from(affectedFolderIds).forEach((folderId) => {
-    const newOrderedIds = buildFolderOrderedIds(folderId);
+    const { pinnedCount: newPinnedCount, orderedIds: newOrderedIds } = buildFolderOrderedIds(folderId);
     // When signed out
     if (!newOrderedIds) {
       return;
     }
 
     const currentOrderedIds = results.orderedIdsByFolderId[folderId];
+    const currentPinnedCount = results.pinnedCountByFolderId[folderId];
     const areOrderedIdsChanged = (
       !currentOrderedIds
+      || currentPinnedCount === undefined || currentPinnedCount !== newPinnedCount
       || prepared.isOrderedListJustPatched[folderId]
       || !areSortedArraysEqual(newOrderedIds, currentOrderedIds)
     );
     if (areOrderedIdsChanged) {
       prepared.isOrderedListJustPatched[folderId] = false;
       results.orderedIdsByFolderId[folderId] = newOrderedIds;
+      results.pinnedCountByFolderId[folderId] = newPinnedCount;
       callbacks.orderedIdsByFolderId[folderId]?.runCallbacks(newOrderedIds);
     }
 
@@ -603,7 +609,7 @@ function updateResults(affectedFolderIds: number[]) {
 function buildFolderOrderedIds(folderId: number) {
   const folderSummary = prepared.folderSummariesById[folderId];
   if (!folderSummary) {
-    return undefined;
+    return {};
   }
 
   const { orderedPinnedIds, pinnedChatIds } = folderSummary;
@@ -615,16 +621,20 @@ function buildFolderOrderedIds(folderId: number) {
     orderedIdsByFolderId: { [folderId]: prevOrderedIds },
   } = results;
 
+  const sortedPinnedIds = chatIds ? orderedPinnedIds?.filter((id) => chatIds.has(id)) : orderedPinnedIds;
   const allListIds = prevOrderedIds || (chatIds && Array.from(chatIds)) || [];
   const notPinnedIds = pinnedChatIds ? allListIds.filter((id) => !pinnedChatIds.has(id)) : allListIds;
   const sortedNotPinnedIds = notPinnedIds.sort((chatId1: string, chatId2: string) => {
     return chatSummariesById.get(chatId2)!.order - chatSummariesById.get(chatId1)!.order;
   });
 
-  return [
-    ...(orderedPinnedIds || []),
-    ...sortedNotPinnedIds,
-  ];
+  return {
+    pinnedCount: sortedPinnedIds?.length || 0,
+    orderedIds: [
+      ...(sortedPinnedIds || []),
+      ...sortedNotPinnedIds,
+    ],
+  };
 }
 
 function buildFolderUnreadCounters(folderId: number) {
@@ -684,6 +694,7 @@ function buildInitials() {
 
     results: {
       orderedIdsByFolderId: {},
+      pinnedCountByFolderId: {},
       chatsCountByFolderId: {},
       unreadCountersByFolderId: {},
     },
