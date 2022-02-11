@@ -4,12 +4,8 @@
 .media-inner {
   position: relative;
 
-  video,
-  img {
+  video, img {
     display: block;
-  }
-
-  img, video {
     object-fit: cover;
   }
 

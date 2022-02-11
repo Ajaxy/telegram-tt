@@ -10,8 +10,8 @@
     "build:production": "npm i && rm -rf dist/ && APP_VERSION=$(npm run inc_version --silent) APP_ENV=production npm run build && ./deploy/copy_to_dist.sh",
     "deploy:production": "npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
     "inc_version": "echo $((`cat .patch-version` + 1)) > .patch-version && echo \"$(node -p -e \"require('./package.json').version.match(/^\\d+\\.\\d+/)[0]\").$(cat .patch-version)\"",
-    "lint": "tsc && eslint . --ext .ts,.tsx --ignore-pattern src/lib/gramjs",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "tsc && stylelint \"**/*.{css,scss}\" && eslint . --ext .ts,.tsx --ignore-pattern src/lib/gramjs",
+    "lint:fix": "stylelint . && npm run lint -- --fix",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint:fix": "eslint ./src/lib/gramjs --fix",
     "test": "cross-env APP_ENV=test jest --verbose --forceExit",
@@ -27,7 +27,8 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": "eslint --fix"
+    "*.{ts,tsx,js}": "eslint --fix",
+    "*.{css,scss}": "stylelint --fix"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",
@@ -85,6 +86,8 @@
     "sass": "^1.49.7",
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
+    "stylelint": "^14.3.0",
+    "stylelint-config-recommended-scss": "^5.0.2",
     "typescript": "^4.5.5",
     "webpack": "^5.68.0",
     "webpack-bundle-analyzer": "^4.5.0",

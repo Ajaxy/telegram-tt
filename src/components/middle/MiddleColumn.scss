@@ -112,18 +112,6 @@
     }
   }
 
-  .messaging-disabled {
-    &-inner {
-      width: 100%;
-      padding: 1rem;
-      border-radius: var(--border-radius-messages);
-      background: var(--color-background);
-      color: var(--color-text-secondary);
-      text-align: center;
-      box-shadow: 0 1px 2px var(--color-default-shadow);
-    }
-  }
-
   .Composer {
     #message-compose {
       transform: scaleX(1) translateX(0);
@@ -221,6 +209,16 @@
       .messaging-disabled-inner span {
         opacity: 0;
       }
+    }
+
+    &-inner {
+      width: 100%;
+      padding: 1rem;
+      border-radius: var(--border-radius-messages);
+      background: var(--color-background);
+      color: var(--color-text-secondary);
+      text-align: center;
+      box-shadow: 0 1px 2px var(--color-default-shadow);
     }
   }
 

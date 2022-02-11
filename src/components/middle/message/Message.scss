@@ -1,3 +1,5 @@
+@import 'message-content';
+
 // General styles
 .Message {
   display: flex;
@@ -20,6 +22,11 @@
   --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width));
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
+
+  --border-top-left-radius: var(--border-radius-messages);
+  --border-top-right-radius: var(--border-radius-messages);
+  --border-bottom-left-radius: var(--border-radius-messages);
+  --border-bottom-right-radius: var(--border-radius-messages);
 
   @media (min-width: 1921px) {
     --max-width: calc(30vw - 1rem);
@@ -146,6 +153,27 @@
         padding-left: 0.25rem;
       }
     }
+
+    &.first-in-group:not(.last-in-group) {
+      --border-bottom-left-radius: var(--border-radius-messages-small);
+    }
+
+    &:not(.first-in-group):not(.last-in-group) {
+      --border-top-left-radius: var(--border-radius-messages-small);
+      --border-bottom-left-radius: var(--border-radius-messages-small);
+    }
+
+    &.last-in-group:not(.first-in-group) {
+      --border-top-left-radius: var(--border-radius-messages-small);
+    }
+
+    &.last-in-group {
+      --border-bottom-left-radius: var(--border-radius-messages-small);
+
+      .message-content.has-appendix {
+        --border-bottom-left-radius: 0;
+      }
+    }
   }
 
   &.own {
@@ -179,6 +207,28 @@
 
     @media (max-width: 600px) {
       padding-right: 0.25rem;
+    }
+
+    &.first-in-group:not(.last-in-group) {
+      --border-bottom-right-radius: var(--border-radius-messages-small);
+    }
+
+    &:not(.first-in-group):not(.last-in-group) {
+      --border-top-right-radius: var(--border-radius-messages-small);
+      --border-bottom-right-radius: var(--border-radius-messages-small);
+    }
+
+    &.last-in-group:not(.first-in-group) {
+      --border-top-right-radius: var(--border-radius-messages-small);
+    }
+
+    &.last-in-group {
+      --border-bottom-right-radius: var(--border-radius-messages-small);
+
+      .message-content.has-appendix {
+        --border-bottom-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
     }
   }
 
@@ -308,12 +358,14 @@
   }
 
   .album-item-select-wrapper {
+    position: absolute;
     .Message.own & {
       background: var(--color-background-own);
     }
 
     .message-select-control {
       position: absolute;
+      z-index: 2;
       top: 0.438rem;
       right: 0.438rem;
       left: unset;
@@ -346,6 +398,22 @@
   }
 
   &.is-in-document-group {
+    .message-content.document {
+      padding: .25rem .5rem !important;
+    }
+
+    &.last-in-document-group {
+      .message-content.document {
+        padding-bottom: .5rem !important
+      }
+    }
+
+    &.first-in-document-group {
+      .message-content.document {
+        padding-top: .5rem !important
+      }
+    }
+
     &:not(.first-in-document-group) {
       &::before {
         top: 0 !important;
@@ -448,15 +516,6 @@
     }
   }
 
-  .album-item-select-wrapper {
-    position: absolute;
-
-    .message-select-control {
-      position: absolute;
-      z-index: 2;
-    }
-  }
-
   .message-select-control {
     position: absolute;
     left: 0;
@@ -492,103 +551,6 @@
 
   .Avatar {
     margin-right: 0.3rem;
-  }
-
-  &.is-in-document-group {
-    .message-content.document {
-      padding: .25rem .5rem !important;
-    }
-
-    &.last-in-document-group {
-      .message-content.document {
-        padding-bottom: .5rem !important
-      }
-    }
-
-    &.first-in-document-group {
-      .message-content.document {
-        padding-top: .5rem !important
-      }
-    }
-  }
-}
-
-// Border-radius styles
-.message-content,
-.Album,
-.media-inner,
-.message-content.media .media-inner img,
-.message-content.media .media-inner video,
-.message-content.custom-shape .media-inner img {
-  border-top-left-radius: var(--border-top-left-radius);
-  border-top-right-radius: var(--border-top-right-radius);
-  border-bottom-left-radius: var(--border-bottom-left-radius);
-  border-bottom-right-radius: var(--border-bottom-right-radius);
-}
-
-.media-inner video.full-media {
-  background: transparent !important;
-}
-
-.media-inner {
-  overflow: hidden;
-
-  &.small-image img {
-    border-radius: 0 !important;
-  }
-}
-
-.Message {
-  --border-top-left-radius: var(--border-radius-messages);
-  --border-top-right-radius: var(--border-radius-messages);
-  --border-bottom-left-radius: var(--border-radius-messages);
-  --border-bottom-right-radius: var(--border-radius-messages);
-
-  &:not(.own) {
-    &.first-in-group:not(.last-in-group) {
-      --border-bottom-left-radius: var(--border-radius-messages-small);
-    }
-
-    &:not(.first-in-group):not(.last-in-group) {
-      --border-top-left-radius: var(--border-radius-messages-small);
-      --border-bottom-left-radius: var(--border-radius-messages-small);
-    }
-
-    &.last-in-group:not(.first-in-group) {
-      --border-top-left-radius: var(--border-radius-messages-small);
-    }
-
-    &.last-in-group {
-      --border-bottom-left-radius: var(--border-radius-messages-small);
-
-      .message-content.has-appendix {
-        --border-bottom-left-radius: 0;
-      }
-    }
-  }
-
-  &.own {
-    &.first-in-group:not(.last-in-group) {
-      --border-bottom-right-radius: var(--border-radius-messages-small);
-    }
-
-    &:not(.first-in-group):not(.last-in-group) {
-      --border-top-right-radius: var(--border-radius-messages-small);
-      --border-bottom-right-radius: var(--border-radius-messages-small);
-    }
-
-    &.last-in-group:not(.first-in-group) {
-      --border-top-right-radius: var(--border-radius-messages-small);
-    }
-
-    &.last-in-group {
-      --border-bottom-right-radius: var(--border-radius-messages-small);
-
-      .message-content.has-appendix {
-        --border-bottom-right-radius: 0;
-        border-bottom-right-radius: 0;
-      }
-    }
   }
 
   .message-content {
@@ -668,8 +630,31 @@
   }
 }
 
+// Border-radius styles
+.message-content,
+.Album,
+.media-inner,
+.message-content.media .media-inner img,
+.message-content.media .media-inner video,
+.message-content.custom-shape .media-inner img {
+  border-top-left-radius: var(--border-top-left-radius);
+  border-top-right-radius: var(--border-top-right-radius);
+  border-bottom-left-radius: var(--border-bottom-left-radius);
+  border-bottom-right-radius: var(--border-bottom-right-radius);
+}
+
+.media-inner video.full-media {
+  background: transparent !important;
+}
+
+.media-inner {
+  overflow: hidden;
+
+  &.small-image img {
+    border-radius: 0 !important;
+  }
+}
+
 .Message .custom-shape .message-action-button {
   bottom: .25rem;
 }
-
-@import 'message-content';

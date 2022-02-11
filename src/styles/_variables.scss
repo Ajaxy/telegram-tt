@@ -1,3 +1,5 @@
+@use "sass:color";
+
 @function toRGB($color) {
   @return red($color) + ", " + green($color) + ", " + blue($color);
 }
@@ -7,9 +9,9 @@
   $background-opacity: opacity($background);
 
   // calculate opacity
-  $bm-red: red($foreground) * $opacity + red($background) * $background-opacity * (1 - $opacity);
-  $bm-green: green($foreground) * $opacity + green($background) * $background-opacity * (1 - $opacity);
-  $bm-blue: blue($foreground) * $opacity + blue($background) * $background-opacity * (1 - $opacity);
+  $bm-red: color.red($foreground) * $opacity + color.red($background) * $background-opacity * (1 - $opacity);
+  $bm-green: color.green($foreground) * $opacity + color.green($background) * $background-opacity * (1 - $opacity);
+  $bm-blue: color.blue($foreground) * $opacity + color.blue($background) * $background-opacity * (1 - $opacity);
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
 
@@ -67,7 +69,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-background-secondary: #f4f4f5;
   --color-background-secondary-accent: #E4E4E5;
   --color-background-own: #{$color-light-green};
-  --color-background-own-selected: #{darken($color-light-green, 10%)};
+  --color-background-own-selected: color.adjust($color-light-green, -10%);
   --color-text: #{$color-black};
   --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
@@ -90,15 +92,15 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-composer-button: #{$color-text-secondary}CC;
 
   --color-primary: #{$color-primary};
-  --color-primary-shade: #{mix($color-primary, $color-black, 92%)};
-  --color-primary-shade-darker: #{mix($color-primary, $color-black, 84%)};
-  --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
+  --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
+  --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
+  --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
   --color-primary-opacity: rgba(var(--color-primary), 0.50);
   --color-green: #{$color-green};
-  --color-green-darker: #{mix($color-green, $color-black, 84%)};
+  --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
 
   --color-error: #{$color-error};
-  --color-error-shade: #{mix($color-error, $color-black, 92%)};
+  --color-error-shade: #{color.mix($color-error, $color-black, 92%)};
   --color-error-rgb: #{toRGB($color-error)};
 
   --color-warning: #{$color-warning};

@@ -46,8 +46,7 @@
 
       .sender-name {
         color: var(--color-text);
-      }
-      .sender-name {
+
         &::after {
           content: ': ';
         }
