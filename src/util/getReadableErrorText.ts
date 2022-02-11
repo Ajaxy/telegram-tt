@@ -43,7 +43,8 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   MESSAGE_TOO_LONG: 'Message is too long',
 
   // Non-API errors
-  SERVICE_WORKER_DISABLED: 'Service Worker is disabled. Please reload the page without holding <Shift> key.',
+  // eslint-disable-next-line max-len
+  SERVICE_WORKER_DISABLED: 'Service Worker is disabled. Streaming media may not be supported. Try reloading the page without holding <Shift> key',
   // eslint-disable-next-line max-len
   MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS: 'The provided message is too long. Please remove {EXTRA_CHARS_COUNT} character{PLURAL_S}.',
   // eslint-disable-next-line max-len
