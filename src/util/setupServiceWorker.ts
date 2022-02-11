@@ -38,6 +38,17 @@ function subscribeToWorker() {
 if (IS_SERVICE_WORKER_SUPPORTED) {
   window.addEventListener('load', async () => {
     try {
+      if (!navigator.serviceWorker.controller) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        if (registrations.length) {
+          if (DEBUG) {
+            // eslint-disable-next-line no-console
+            console.log('[SW] Hard reload detected, re-enabling Service Worker');
+          }
+          await Promise.all(registrations.map(r => r.unregister()));
+        }
+      }
+
       await navigator.serviceWorker.register(new URL('../serviceWorker.ts', import.meta.url));
 
       if (DEBUG) {
