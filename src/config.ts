@@ -134,6 +134,7 @@ export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
 export const VIDEO_MOV_TYPE = 'video/quicktime';
+export const VIDEO_WEBM_TYPE = 'video/webm';
 
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
   'image/png', 'image/gif', 'image/jpeg',

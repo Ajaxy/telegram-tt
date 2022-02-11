@@ -38,6 +38,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
+  VIDEO_WEBM_TYPE,
 } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { buildStickerFromDocument } from './symbols';
@@ -368,6 +369,11 @@ export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | un
   const {
     id, mimeType, thumbs, size, attributes,
   } = document;
+
+  // eslint-disable-next-line no-restricted-globals
+  if (mimeType === VIDEO_WEBM_TYPE && !(self as any).isWebmSupported) {
+    return undefined;
+  }
 
   // eslint-disable-next-line no-restricted-globals
   if (mimeType === VIDEO_MOV_TYPE && !(self as any).isMovSupported) {
