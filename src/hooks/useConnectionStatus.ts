@@ -21,6 +21,7 @@ export default function useConnectionStatus(
   isSyncing: GlobalState['isSyncing'],
   hasMiddleHeader: boolean,
   isMinimized?: boolean,
+  isDisabled?: boolean,
 ) {
   let status: ConnectionStatus;
   const isBrowserOnline = useBrowserOnline();
@@ -33,7 +34,7 @@ export default function useConnectionStatus(
   }
 
   let position: ConnectionStatusPosition;
-  if (status === ConnectionStatus.online) {
+  if (status === ConnectionStatus.online || isDisabled) {
     position = 'none';
   } else if (hasMiddleHeader) {
     position = 'middleHeader';

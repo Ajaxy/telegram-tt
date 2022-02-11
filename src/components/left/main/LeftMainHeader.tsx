@@ -54,8 +54,9 @@ type StateProps =
     theme: ISettings['theme'];
     animationLevel: 0 | 1 | 2;
     chatsById?: Record<string, ApiChat>;
-    isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     isMessageListOpen: boolean;
+    isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
+    areChatsLoaded?: boolean;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing'>;
 
@@ -84,14 +85,16 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   chatsById,
   connectionState,
   isSyncing,
-  isConnectionStatusMinimized,
   isMessageListOpen,
+  isConnectionStatusMinimized,
+  areChatsLoaded,
 }) => {
   const {
     openChat,
     openTipsChat,
     setGlobalSearchDate,
-    setSettingOption, setGlobalSearchChatId,
+    setSettingOption,
+    setGlobalSearchChatId,
   } = getDispatch();
 
   const lang = useLang();
@@ -118,7 +121,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [hasMenu, chatsById]);
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
-    lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized,
+    lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
   );
 
   const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME;
@@ -361,8 +364,9 @@ export default memo(withGlobal<OwnProps>(
       animationLevel,
       connectionState,
       isSyncing,
-      isConnectionStatusMinimized,
       isMessageListOpen: Boolean(selectCurrentMessageList(global)),
+      isConnectionStatusMinimized,
+      areChatsLoaded: Boolean(global.chats.listIds.active),
     };
   },
 )(LeftMainHeader));
