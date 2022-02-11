@@ -16,7 +16,7 @@ import {
   LOCALIZED_TIPS,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
-  TMP_CHAT_ID, ALL_FOLDER_ID,
+  TMP_CHAT_ID, ALL_FOLDER_ID, DEBUG,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -42,6 +42,7 @@ import { selectGroupCall } from '../../selectors/calls';
 import { getOrderedIds } from '../../../util/folderManager';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
+const INFINITE_LOOP_MARKER = 100;
 
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
@@ -168,9 +169,25 @@ addReducer('openTipsChat', (global, actions, payload) => {
 addReducer('loadAllChats', (global, actions, payload) => {
   const listType = payload.listType as 'active' | 'archived';
   let { shouldReplace, onReplace } = payload;
+  let i = 0;
 
   (async () => {
     while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
+      if (i++ >= INFINITE_LOOP_MARKER) {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.error('`actions/loadAllChats`: Infinite loop detected');
+        }
+
+        return;
+      }
+
+      global = getGlobal();
+
+      if (global.connectionState !== 'connectionStateReady' || global.authState !== 'authorizationStateReady') {
+        return;
+      }
+
       const listIds = !shouldReplace && global.chats.listIds[listType];
       const oldestChat = listIds
         ? listIds
@@ -185,10 +202,8 @@ addReducer('loadAllChats', (global, actions, payload) => {
 
       if (shouldReplace) {
         onReplace?.();
+        shouldReplace = false;
       }
-
-      global = getGlobal();
-      shouldReplace = false;
     }
   })();
 });
