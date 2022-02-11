@@ -62,7 +62,6 @@ const LocalAnimatedEmoji: FC<OwnProps> = ({
     <div
       ref={ref}
       className="AnimatedEmoji media-inner"
-      // @ts-ignore teact feature
       style={style}
       onClick={handleClick}
     >

@@ -26,7 +26,6 @@ const TestPortal: FC = () => {
       </div>
       <Portal>
         <div
-          // @ts-ignore
           style={`position: absolute; top: ${position}px; left: ${position}px; width: 250px;`}
         >
           <h2>

@@ -6,6 +6,9 @@ declare namespace React {
     teactFastList?: boolean;
   }
 
+  // Teact feature
+  interface CSSProperties extends String {}
+
   interface Attributes {
     // Optimization for DOM nodes reordering. Requires `teactFastList` for parent
     teactOrderKey?: number;
@@ -45,11 +48,33 @@ type EmojiWithSkins = Record<number, Emoji>;
 
 type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
 
+// Declare supported for import formats as modules
 declare module '*.png';
+declare module '*.svg';
 declare module '*.tgs';
+
+declare module '*.txt' {
+  const content: string;
+  export default content;
+}
 
 declare module 'pako/dist/pako_inflate' {
   function inflate(...args: any[]): string;
+}
+
+declare module 'opus-recorder' {
+  export interface IOpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
+    new(options: AnyLiteral): IOpusRecorder;
+
+    start(stream?: MediaStreamAudioSourceNode): void;
+
+    sourceNode: MediaStreamAudioSourceNode;
+
+    ondataavailable: (typedArray: Uint8Array) => void;
+  }
+
+  const recorder: IOpusRecorder;
+  export default recorder;
 }
 
 interface TEncodedImage {

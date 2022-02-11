@@ -13,11 +13,10 @@ const STREAMING_PROGRESS = 0.75;
 const STREAMING_TIMEOUT = 1500;
 const PROGRESS_THROTTLE = 500;
 
-export default function useMediaWithLoadProgress<T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
+export default function useMediaWithLoadProgress(
   mediaHash: string | undefined,
   noLoad = false,
-  // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
-  mediaFormat: T = ApiMediaFormat.BlobUrl,
+  mediaFormat = ApiMediaFormat.BlobUrl,
   cacheBuster?: number,
   delay?: number | false,
   isHtmlAllowed = false,

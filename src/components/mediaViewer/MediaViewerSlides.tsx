@@ -506,7 +506,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
   return (
     <div className="MediaViewerSlides" ref={containerRef}>
-      {previousMessageId && scale === 1 && /* @ts-ignore */ (
+      {previousMessageId && scale === 1 && (
         <div className="MediaViewerSlide" style={getAnimationStyle(-window.innerWidth + offsetX - SLIDES_GAP)}>
           {/* eslint-disable-next-line react/jsx-props-no-spreading */}
           <MediaViewerContent {...rest} messageId={previousMessageId} isFooterHidden={isFooterHidden} />
@@ -517,7 +517,6 @@ const MediaViewerSlides: FC<OwnProps> = ({
           className={`MediaViewerSlide ${isActive ? 'MediaViewerSlide--active' : ''}`}
           onClick={handleToggleFooterVisibility}
           ref={activeSlideRef}
-          /* @ts-ignore */
           style={getAnimationStyle(offsetX, offsetY, scale)}
         >
           <MediaViewerContent
@@ -529,7 +528,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           />
         </div>
       )}
-      {nextMessageId && scale === 1 && /* @ts-ignore */ (
+      {nextMessageId && scale === 1 && (
         <div className="MediaViewerSlide" style={getAnimationStyle(window.innerWidth + offsetX + SLIDES_GAP)}>
           {/* eslint-disable-next-line react/jsx-props-no-spreading */}
           <MediaViewerContent {...rest} messageId={nextMessageId} isFooterHidden={isFooterHidden} />

@@ -153,14 +153,12 @@ const Photo: FC<OwnProps> = ({
       id={id}
       ref={ref}
       className={className}
-      // @ts-ignore teact feature
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
       <canvas
         ref={thumbRef}
         className="thumbnail"
-        // @ts-ignore teact feature
         style={`width: ${width}px; height: ${height}px`}
       />
       <img

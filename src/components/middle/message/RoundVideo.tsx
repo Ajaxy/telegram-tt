@@ -207,7 +207,6 @@ const RoundVideo: FC<OwnProps> = ({
         <canvas
           ref={thumbRef}
           className="thumbnail"
-          // @ts-ignore teact feature
           style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
         />
       </div>

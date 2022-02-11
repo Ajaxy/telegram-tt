@@ -57,7 +57,6 @@ export default function withSelectControl(WrappedComponent: FC) {
     return (
       <div
         className={buildClassName('album-item-select-wrapper', isSelected && 'is-selected')}
-        // @ts-ignore
         style={dimensions ? `left: ${dimensions.x}px; top: ${dimensions.y}px;` : ''}
         onClick={isInSelectMode ? handleMessageSelect : undefined}
       >

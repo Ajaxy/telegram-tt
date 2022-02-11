@@ -56,7 +56,6 @@ const StickerSet: FC<OwnProps> = ({
       <p className="symbol-set-name">{stickerSet.title}</p>
       <div
         className={buildClassName('symbol-set-container', transitionClassNames)}
-        // @ts-ignore
         style={`height: ${height}px;`}
       >
         {shouldRender && stickerSet.stickers && stickerSet.stickers.map((sticker) => (

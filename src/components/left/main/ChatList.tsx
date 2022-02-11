@@ -122,7 +122,6 @@ const ChatList: FC<OwnProps> = ({
         folderId={folderId}
         animationType={getAnimationType(id)}
         orderDiff={orderDiffById[id]}
-        // @ts-ignore
         style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
       />
     ));

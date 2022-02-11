@@ -8,7 +8,6 @@ const {
 const HtmlPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const TerserJSPlugin = require('terser-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 dotenv.config();
@@ -87,24 +86,12 @@ module.exports = (env = {}, argv = {}) => {
           type: 'asset/resource',
         },
         {
-          test: /-extra\.json$/,
-          loader: 'file-loader',
-          type: 'javascript/auto',
-          options: {
-            name: '[name].[contenthash].[ext]',
-          },
-        },
-        {
           test: /\.wasm$/,
-          loader: 'file-loader',
-          type: 'javascript/auto',
-          options: {
-            name: '[name].[contenthash].[ext]',
-          },
+          type: 'asset/resource',
         },
         {
           test: /\.(txt|tl)$/i,
-          loader: 'raw-loader',
+          type: 'asset/source',
         },
       ],
     },
@@ -153,7 +140,6 @@ module.exports = (env = {}, argv = {}) => {
       optimization: {
         minimize: !env.noMinify,
         minimizer: [
-          new TerserJSPlugin({ sourceMap: true }),
           new CssMinimizerPlugin(),
         ],
       },

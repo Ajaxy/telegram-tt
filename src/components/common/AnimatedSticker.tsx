@@ -223,7 +223,6 @@ const AnimatedSticker: FC<OwnProps> = ({
     <div
       ref={container}
       className={fullClassName}
-      // @ts-ignore
       style={style}
     />
   );

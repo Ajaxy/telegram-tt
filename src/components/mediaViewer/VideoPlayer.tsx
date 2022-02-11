@@ -157,7 +157,6 @@ const VideoPlayer: FC<OwnProps> = ({
       onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
       <div
-        // @ts-ignore
         style={wrapperStyle}
       >
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -169,7 +168,6 @@ const VideoPlayer: FC<OwnProps> = ({
           // This is to force auto playing on mobiles
           muted={isGif}
           id="media-viewer-video"
-          // @ts-ignore
           style={videoStyle}
           onPlay={IS_IOS ? () => setIsPlayed(true) : undefined}
           onEnded={handleEnded}

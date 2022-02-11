@@ -94,13 +94,11 @@ export function setPositionState(state?: MediaPositionState) {
 
 export function setMicrophoneActive(active: boolean) {
   const { mediaSession } = window.navigator;
-  // @ts-ignore typings not updated yet
   mediaSession?.setMicrophoneActive?.(active);
 }
 
 export function setCameraActive(active: boolean) {
   const { mediaSession } = window.navigator;
-  // @ts-ignore typings not updated yet
   mediaSession?.setCameraActive?.(active);
 }
 

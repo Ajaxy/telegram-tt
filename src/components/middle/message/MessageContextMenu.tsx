@@ -216,7 +216,6 @@ const MessageContextMenu: FC<OwnProps> = ({
 
       <div
         className="scrollable-content custom-scroll"
-        // @ts-ignore teact feature
         style={menuStyle}
         ref={scrollableRef}
       >

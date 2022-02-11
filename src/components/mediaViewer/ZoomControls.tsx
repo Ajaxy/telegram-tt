@@ -102,7 +102,6 @@ const ZoomControls: FC<OwnProps> = ({ isShown, onChangeZoom }) => {
         <div className="seekline-track">
           <div
             className="seekline-played"
-            // @ts-ignore teact feature
             style={`width: ${(zoomLevel - 1) * ONE_STEP_PERCENT}%`}
           />
           <input

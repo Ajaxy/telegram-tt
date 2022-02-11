@@ -1,18 +1,8 @@
-// @ts-ignore
-import encoderPath from 'file-loader!opus-recorder/dist/encoderWorker.min';
+import { IOpusRecorder } from 'opus-recorder';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 
-interface IOpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
-  new(options: AnyLiteral): IOpusRecorder;
-
-  start(stream?: MediaStreamAudioSourceNode): void;
-
-  sourceNode: MediaStreamAudioSourceNode;
-
-  ondataavailable: (typedArray: Uint8Array) => void;
-}
-
+const encoderPath = new URL('opus-recorder/dist/encoderWorker.min', import.meta.url).href;
 const MIN_RECORDING_TIME = 1000;
 const POLYFILL_OPTIONS = { encoderPath, reuseWorker: true };
 const BLOB_PARAMS = { type: 'audio/ogg' };
@@ -25,7 +15,6 @@ let mediaRecorder: IOpusRecorder;
 
 export async function init() {
   if (!opusRecorderPromise) {
-    // @ts-ignore
     opusRecorderPromise = import('opus-recorder');
     OpusRecorder = (await opusRecorderPromise).default;
     mediaRecorder = new OpusRecorder(POLYFILL_OPTIONS);

@@ -52,7 +52,6 @@ const EmojiCategory: FC<OwnProps> = ({
       </p>
       <div
         className={buildClassName('symbol-set-container', transitionClassNames)}
-        // @ts-ignore
         style={`height: ${height}px;`}
         dir={lang.isRtl ? 'rtl' : undefined}
       >

@@ -214,7 +214,6 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           <canvas />
           <div
             className="handle"
-            // @ts-ignore
             style={`transform: translate(${colorPosition[0]}px, ${colorPosition[1]}px); background-color: #${hex};`}
           />
         </div>
@@ -222,7 +221,6 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           <canvas />
           <div
             className="handle"
-            // @ts-ignore
             style={`transform: translateX(${huePosition}px); background-color: #${hueHex};`}
           />
         </div>
@@ -236,7 +234,6 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           <div
             className={color === `#${hex}` ? 'active' : undefined}
             data-color={color}
-            // @ts-ignore
             style={`background-color: ${color};`}
             onClick={handlePredefinedColorClick}
           />

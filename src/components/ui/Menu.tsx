@@ -114,7 +114,6 @@ const Menu: FC<OwnProps> = ({
       onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
-      // @ts-ignore teact feature
       style={style}
     >
       {isOpen && (
@@ -124,7 +123,6 @@ const Menu: FC<OwnProps> = ({
       <div
         ref={menuRef}
         className={bubbleClassName}
-        // @ts-ignore teact feature
         style={`transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY};${
           bubbleStyle || ''}`}
         onClick={autoClose ? onClose : undefined}

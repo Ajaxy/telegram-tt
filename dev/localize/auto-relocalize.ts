@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-nocheck
 const replaceInFile = require('replace-in-file');
 const langPackAndroid = require('./en-android.json');
 const langPackIOs = require('./en-ios.json');

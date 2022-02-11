@@ -180,12 +180,10 @@ function renderSeekLine(
       <div className="player-seekline-track">
         <div
           className="player-seekline-buffered"
-          // @ts-ignore teact feature
           style={`width: ${percentageBuffered || 0}%`}
         />
         <div
           className="player-seekline-played"
-          // @ts-ignore teact feature
           style={`width: ${percentagePlayed || 0}%`}
         />
       </div>

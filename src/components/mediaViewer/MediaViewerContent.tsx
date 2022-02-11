@@ -293,7 +293,6 @@ function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: bool
       <img
         src={blobUrl}
         alt=""
-        // @ts-ignore teact feature
         style={imageSize ? `width: ${imageSize.width}px` : ''}
         draggable={Boolean(canDrag)}
       />
@@ -301,7 +300,6 @@ function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: bool
     : (
       <div
         className="spinner-wrapper"
-        // @ts-ignore teact feature
         style={imageSize ? `width: ${imageSize.width}px` : ''}
       >
         <Spinner color="white" />
@@ -318,12 +316,10 @@ function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag
         className="VideoPlayer"
       >
         <div
-          // @ts-ignore
           style={wrapperStyle}
         >
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
-            // @ts-ignore
             style={videoStyle}
             draggable={Boolean(canDrag)}
           />
@@ -333,7 +329,6 @@ function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag
     : (
       <div
         className="spinner-wrapper"
-        // @ts-ignore teact feature
         style={imageSize ? `width: ${imageSize.width}px` : ''}
       >
         <Spinner color="white" />

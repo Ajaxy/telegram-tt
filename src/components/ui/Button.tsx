@@ -153,7 +153,6 @@ const Button: FC<OwnProps> = ({
       title={ariaLabel}
       tabIndex={tabIndex}
       dir={isRtl ? 'rtl' : undefined}
-      // @ts-ignore
       style={backgroundImage ? `background-image: url(${backgroundImage})` : undefined}
     >
       {isLoading ? (
