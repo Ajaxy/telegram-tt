@@ -4,7 +4,7 @@ import React, {
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
 import { LangCode } from '../../types';
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType } from '../../api/types';
 
 import '../../modules/actions/all';
 import {
@@ -52,6 +52,8 @@ import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
 import './Main.scss';
 
 type StateProps = {
+  connectionState?: ApiUpdateConnectionStateType;
+  authState?: ApiUpdateAuthorizationStateType;
   lastSyncTime?: number;
   isLeftColumnShown: boolean;
   isRightColumnShown: boolean;
@@ -81,6 +83,8 @@ let notificationInterval: number | undefined;
 let DEBUG_isLogged = false;
 
 const Main: FC<StateProps> = ({
+  connectionState,
+  authState,
   lastSyncTime,
   isLeftColumnShown,
   isRightColumnShown,
@@ -102,6 +106,7 @@ const Main: FC<StateProps> = ({
   addedSetIds,
 }) => {
   const {
+    sync,
     loadAnimatedEmojis,
     loadNotificationSettings,
     loadNotificationExceptions,
@@ -124,6 +129,12 @@ const Main: FC<StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  useEffect(() => {
+    if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
+      sync();
+    }
+  }, [connectionState, authState, sync]);
 
   // Initial API calls
   useEffect(() => {
@@ -356,6 +367,8 @@ export default memo(withGlobal(
       : undefined;
 
     return {
+      connectionState: global.connectionState,
+      authState: global.authState,
       lastSyncTime: global.lastSyncTime,
       isLeftColumnShown: global.isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),

@@ -134,7 +134,6 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       setGlobal({
         ...global,
         isLoggingOut: false,
-        lastSyncTime: Date.now(),
       });
 
       break;
@@ -162,9 +161,7 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
     connectionState,
   });
 
-  if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
-    getDispatch().sync();
-  } else if (connectionState === 'connectionStateBroken') {
+  if (connectionState === 'connectionStateBroken') {
     getDispatch().signOut();
   }
 }

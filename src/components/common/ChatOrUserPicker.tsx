@@ -28,7 +28,7 @@ export type OwnProps = {
   filterRef: RefObject<HTMLInputElement>;
   filterPlaceholder: string;
   filter: string;
-  loadMore: NoneToVoidFunction;
+  loadMore?: NoneToVoidFunction;
   onFilterChange: (filter: string) => void;
   onSelectChatOrUser: (chatOrUserId: string) => void;
   onClose: NoneToVoidFunction;

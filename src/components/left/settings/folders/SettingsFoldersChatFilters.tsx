@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useMemo, useCallback,
 } from '../../../../lib/teact/teact';
-import { getDispatch, getGlobal } from '../../../../lib/teact/teactn';
+import { getGlobal } from '../../../../lib/teact/teactn';
 
 import { SettingsScreens } from '../../../../types';
 
@@ -38,8 +38,6 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   onScreenSelect,
   onReset,
 }) => {
-  const { loadMoreChats } = getDispatch();
-
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
 
@@ -124,7 +122,6 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
       onSelectedIdsChange={handleSelectedIdsChange}
       onSelectedChatTypesChange={handleSelectedChatTypesChange}
       onFilterChange={handleFilterChange}
-      onLoadMore={loadMoreChats}
     />
   );
 };
