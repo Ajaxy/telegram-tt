@@ -30,7 +30,6 @@ import {
 import { hasStoredSession } from '../util/sessions';
 import { INITIAL_STATE } from './initial';
 import { parseLocationHash } from '../util/routing';
-import { LOCATION_HASH } from '../hooks/useHistoryBack';
 import { isUserId } from '../modules/helpers';
 import { getOrderedIds } from '../util/folderManager';
 
@@ -120,7 +119,7 @@ function readCache(initialState: GlobalState): GlobalState {
     ...cached,
   };
 
-  const parsedMessageList = !IS_SINGLE_COLUMN_LAYOUT ? parseLocationHash(LOCATION_HASH) : undefined;
+  const parsedMessageList = !IS_SINGLE_COLUMN_LAYOUT ? parseLocationHash() : undefined;
 
   return {
     ...newState,

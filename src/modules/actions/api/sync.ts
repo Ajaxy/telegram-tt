@@ -81,7 +81,6 @@ async function loadAndReplaceMessages() {
   let areMessagesLoaded = false;
 
   let global = getGlobal();
-  const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId);
@@ -94,8 +93,10 @@ async function loadAndReplaceMessages() {
     return acc;
   }, {});
 
-  if (currentChatId) {
-    const result = await loadTopMessages(global.chats.byId[currentChatId]);
+  const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
+  const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
+  if (currentChatId && currentChat) {
+    const result = await loadTopMessages(currentChat);
     global = getGlobal();
     const { chatId: newCurrentChatId } = selectCurrentMessageList(global) || {};
     const threadInfo = currentThreadId && selectThreadInfo(global, currentChatId, currentThreadId);

@@ -1,18 +1,23 @@
 import { MessageList, MessageListType } from '../global/types';
 import { MAIN_THREAD_ID } from '../api/types';
 
-export const createMessageHash = (messageList: MessageList): string => (
-  messageList.chatId.toString()
-  + (messageList.type !== 'thread' ? `_${messageList.type}`
-    : (messageList.threadId !== -1 ? `_${messageList.threadId}` : ''))
-);
+import { LOCATION_HASH } from '../hooks/useHistoryBack';
 
-export const parseLocationHash = (value: string): MessageList | undefined => {
-  if (!value) return undefined;
+export function createMessageHash(messageList: MessageList) {
+  const typeOrThreadId = messageList.type !== 'thread' ? (
+    `_${messageList.type}`
+  ) : messageList.threadId !== -1 ? (
+    `_${messageList.threadId}`
+  ) : '';
 
-  const [chatId, typeOrThreadId] = value.replace(/^#/, '').split('_');
+  return `${messageList.chatId}${typeOrThreadId}`;
+}
 
-  if (!chatId) return undefined;
+export function parseLocationHash() {
+  if (!LOCATION_HASH) return undefined;
+
+  const [chatId, typeOrThreadId] = LOCATION_HASH.replace(/^#/, '').split('_');
+  if (!chatId?.match(/^-?\d+$/)) return undefined;
 
   const isType = ['thread', 'pinned', 'scheduled'].includes(typeOrThreadId);
 
@@ -21,4 +26,4 @@ export const parseLocationHash = (value: string): MessageList | undefined => {
     type: Boolean(typeOrThreadId) && isType ? (typeOrThreadId as MessageListType) : 'thread',
     threadId: Boolean(typeOrThreadId) && !isType ? Number(typeOrThreadId) : MAIN_THREAD_ID,
   };
-};
+}
