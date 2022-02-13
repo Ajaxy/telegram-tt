@@ -38,17 +38,7 @@ type OwnProps = {
   isDownloading?: boolean;
 };
 
-let currentOnRelease: NoneToVoidFunction;
-
-function createCapture(onRelease: NoneToVoidFunction) {
-  return () => {
-    if (currentOnRelease) {
-      currentOnRelease();
-    }
-
-    currentOnRelease = onRelease;
-  };
-}
+let stopPrevious: NoneToVoidFunction;
 
 const RoundVideo: FC<OwnProps> = ({
   message,
@@ -130,17 +120,24 @@ const RoundVideo: FC<OwnProps> = ({
 
   const shouldPlay = Boolean(mediaData && isIntersecting);
 
-  const stopPlaying = () => {
+  const stopPlaying = useCallback(() => {
+    if (!playerRef.current) {
+      return;
+    }
+
     setIsActivated(false);
     setProgress(0);
-    safePlay(playerRef.current!);
+    safePlay(playerRef.current);
 
     fastRaf(() => {
       playingProgressRef.current!.innerHTML = '';
     });
-  };
+  }, []);
 
-  const capturePlaying = createCapture(stopPlaying);
+  const capturePlaying = useCallback(() => {
+    stopPrevious?.();
+    stopPrevious = stopPlaying;
+  }, [stopPlaying]);
 
   useEffect(() => {
     if (!playerRef.current) {
