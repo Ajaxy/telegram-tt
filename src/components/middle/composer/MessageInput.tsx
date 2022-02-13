@@ -132,6 +132,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;
   const focusInput = useCallback(() => {
+    if (!inputRef.current) {
+      return;
+    }
+
     if (isHeavyAnimating()) {
       setTimeout(focusInput, FOCUS_DELAY_MS);
       return;
