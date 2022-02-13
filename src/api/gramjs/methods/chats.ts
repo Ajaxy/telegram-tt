@@ -508,15 +508,14 @@ export async function updateChatMutedState({
 }
 
 export async function createChannel({
-  title, about = '', users, type = 'channel',
+  title, about = '', users,
 }: {
-  title: string; about?: string; users?: ApiUser[]; type?: 'channel' | 'group';
+  title: string; about?: string; users?: ApiUser[];
 }, noErrorUpdate = false): Promise<ApiChat | undefined> {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
+    broadcast: true,
     title,
     about,
-    ...(type === 'channel' && { broadcast: true }),
-    ...(type === 'group' && { megagroup: true }),
   }));
 
   // `createChannel` can return a lot of different update types according to docs,
@@ -605,6 +604,39 @@ export function deleteChannel({
   return invokeRequest(new GramJs.channels.DeleteChannel({
     channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
   }), true);
+}
+
+export async function createGroupChat({
+  title, users,
+}: {
+  title: string; users: ApiUser[];
+}): Promise<ApiChat | undefined> {
+  const result = await invokeRequest(new GramJs.messages.CreateChat({
+    title,
+    users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
+  }), undefined, true);
+
+  // `createChat` can return a lot of different update types according to docs,
+  // but currently chat creation returns only `Updates` type.
+  // Errors are added to catch unexpected cases in future testing
+  if (!(result instanceof GramJs.Updates)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Unexpected chat creation update', result);
+    }
+    return undefined;
+  }
+
+  const newChat = result.chats[0];
+  if (!newChat || !(newChat instanceof GramJs.Chat)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Created chat not found', result);
+    }
+    return undefined;
+  }
+
+  return buildApiChatFromPreview(newChat);
 }
 
 export async function editChatPhoto({
