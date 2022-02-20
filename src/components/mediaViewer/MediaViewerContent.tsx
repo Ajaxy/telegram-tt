@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import {
@@ -50,6 +50,7 @@ type OwnProps = {
   animationLevel: 0 | 1 | 2;
   onClose: () => void;
   onFooterClick: () => void;
+  setIsFooterHidden?: (isHidden: boolean) => void;
   isFooterHidden?: boolean;
 };
 
@@ -81,6 +82,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     onFooterClick,
     isFooterHidden,
     isProtected,
+    setIsFooterHidden,
   } = props;
   /* Content */
   const photo = message ? getMessagePhoto(message) : undefined;
@@ -139,6 +141,10 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     isGhostAnimation && ANIMATION_DURATION,
   );
 
+  const toggleControls = useCallback((isVisible) => {
+    setIsFooterHidden?.(!isVisible);
+  }, [setIsFooterHidden]);
+
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
   let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
   const thumbDataUri = useBlurSync(!bestImageData && message && getMessageMediaThumbDataUri(message));
@@ -189,7 +195,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       )}
       {isVideo && ((!isActive && IS_TOUCH_ENV) ? renderVideoPreview(
         bestImageData,
-        message && calculateMediaViewerDimensions(dimensions!, hasFooter, false),
+        message && calculateMediaViewerDimensions(dimensions!, hasFooter, true),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
       ) : (
         <VideoPlayer
@@ -197,10 +203,12 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           url={localBlobUrl || fullMediaBlobUrl}
           isGif={isGif}
           posterData={bestImageData}
-          posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, false)}
+          posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
           loadProgress={loadProgress}
           fileSize={videoSize!}
           isMediaViewerOpen={isOpen && isActive}
+          areControlsVisible={!isFooterHidden}
+          toggleControls={toggleControls}
           noPlay={!isActive}
           onClose={onClose}
         />
@@ -209,7 +217,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         <MediaViewerFooter
           text={textParts}
           onClick={onFooterClick}
-          isHidden={isFooterHidden}
+          isHidden={isFooterHidden && IS_TOUCH_ENV}
           isForVideo={isVideo && !isGif}
         />
       )}

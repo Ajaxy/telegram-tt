@@ -49,6 +49,11 @@
     @media (max-height: 640px) {
       max-height: calc(100vh - 10rem);
     }
+
+    // Disable fullscreen on double tap on mobile devices
+    .is-touch-env & {
+      pointer-events: none;
+    }
   }
 
   .play-button {

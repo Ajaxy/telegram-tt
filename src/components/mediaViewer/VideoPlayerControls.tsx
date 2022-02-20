@@ -1,5 +1,5 @@
 import React, {
-  FC, useState, useEffect, useRef, useCallback,
+  FC, useEffect, useRef, useCallback,
 } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 
@@ -18,13 +18,14 @@ type IProps = {
   currentTime: number;
   duration: number;
   fileSize: number;
-  isForceVisible: boolean;
   isForceMobileVersion?: boolean;
   isPlayed: boolean;
   isFullscreenSupported: boolean;
   isFullscreen: boolean;
   onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  isVisible: boolean;
+  setVisibility: (isVisible: boolean) => void;
   onSeek: (position: number) => void;
 };
 
@@ -32,68 +33,61 @@ const stopEvent = (e: React.MouseEvent<HTMLElement>) => {
   e.stopPropagation();
 };
 
-const HIDE_CONTROLS_TIMEOUT_MS = 800;
+const HIDE_CONTROLS_TIMEOUT_MS = 1500;
 
 const VideoPlayerControls: FC<IProps> = ({
   bufferedProgress,
   currentTime,
   duration,
   fileSize,
-  isForceVisible,
   isForceMobileVersion,
   isPlayed,
   isFullscreenSupported,
   isFullscreen,
   onChangeFullscreen,
   onPlayPause,
+  isVisible,
+  setVisibility,
   onSeek,
 }) => {
-  const [isVisible, setVisibility] = useState(true);
   // eslint-disable-next-line no-null/no-null
   const seekerRef = useRef<HTMLDivElement>(null);
   const isSeeking = useRef<boolean>(false);
 
-  useEffect(() => {
-    if (isForceVisible) {
-      setVisibility(isForceVisible);
-    }
-  }, [isForceVisible]);
 
   useEffect(() => {
     let timeout: number | undefined;
-
-    if (!isForceVisible) {
-      if (IS_SINGLE_COLUMN_LAYOUT) {
-        setVisibility(false);
-      } else {
-        timeout = window.setTimeout(() => {
-          setVisibility(false);
-        }, HIDE_CONTROLS_TIMEOUT_MS);
-      }
+    if (!isVisible || !isPlayed) {
+      if (timeout) window.clearTimeout(timeout);
+      return;
     }
-
+    timeout = window.setTimeout(() => {
+      setVisibility(false);
+    }, HIDE_CONTROLS_TIMEOUT_MS);
     return () => {
-      if (timeout) {
-        window.clearTimeout(timeout);
-      }
+      if (timeout) window.clearTimeout(timeout);
     };
-  }, [isForceVisible]);
+  }, [isPlayed, isVisible, setVisibility]);
 
   useEffect(() => {
-    if (isVisible || isForceVisible) {
+    if (isVisible) {
       document.body.classList.add('video-controls-visible');
+    } else {
+      document.body.classList.remove('video-controls-visible');
     }
-
     return () => {
       document.body.classList.remove('video-controls-visible');
     };
-  }, [isForceVisible, isVisible]);
+  }, [isVisible]);
 
   const lang = useLang();
 
   const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
     if (isSeeking.current && seekerRef.current) {
-      const { width, left } = seekerRef.current.getBoundingClientRect();
+      const {
+        width,
+        left,
+      } = seekerRef.current.getBoundingClientRect();
       const clientX = e instanceof MouseEvent ? e.clientX : e.targetTouches[0].clientX;
       onSeek(Math.max(Math.min(duration * ((clientX - left) / width), duration), 0));
     }
@@ -118,11 +112,10 @@ const VideoPlayerControls: FC<IProps> = ({
     });
   }, [isVisible, handleStartSeek, handleSeek, handleStopSeek]);
 
-  const isActive = isVisible || isForceVisible;
 
   return (
     <div
-      className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isActive && 'active')}
+      className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isVisible && 'active')}
       onClick={stopEvent}
     >
       {renderSeekLine(currentTime, duration, bufferedProgress, seekerRef)}

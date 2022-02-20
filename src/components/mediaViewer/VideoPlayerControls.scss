@@ -5,10 +5,10 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  padding-top: 0.625rem;
+  padding: 1rem 0.5rem 0.5rem;
   font-size: 0.875rem;
   background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
-  transition: opacity 0.15s;
+  transition: opacity 0.3s;
   opacity: 0;
   pointer-events: none;
 
