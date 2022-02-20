@@ -16,10 +16,17 @@ function handleWorkerMessage(e: MessageEvent) {
   }
   if (!action.type) return;
   const dispatch = getDispatch();
+  const payload = action.payload;
   switch (action.type) {
     case 'focusMessage':
       if (dispatch.focusMessage) {
-        dispatch.focusMessage(action.payload);
+        dispatch.focusMessage(payload);
+      }
+      if (dispatch.startActiveReaction && payload.reaction) {
+        dispatch.startActiveReaction({
+          messageId: payload.messageId,
+          reaction: payload.reaction,
+        });
       }
       break;
     case 'playNotificationSound':

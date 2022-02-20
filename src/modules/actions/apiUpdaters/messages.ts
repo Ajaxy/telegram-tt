@@ -6,6 +6,8 @@ import {
 
 import { unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
+import { notifyAboutMessage } from '../../../util/notifications';
+import { checkIfReactionAdded } from '../../helpers/reactions';
 import {
   updateChat,
   deleteChatMessages,
@@ -479,6 +481,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateMessageReactions': {
       const { chatId, id, reactions } = update;
       const message = selectChatMessage(global, chatId, id);
+      const chat = selectChat(global, update.chatId);
       const currentReactions = message?.reactions;
 
       // `updateMessageReactions` happens with an interval so we try to avoid redundant global state updates
@@ -486,8 +489,21 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         return;
       }
 
-      setGlobal(updateChatMessage(global, chatId, id, { reactions: update.reactions }));
+      // Only notify about added reactions, not removed ones
+      const shouldNotify = checkIfReactionAdded(currentReactions, reactions);
 
+      global = updateChatMessage(global, chatId, id, { reactions: update.reactions });
+
+      if (shouldNotify) {
+        const newMessage = selectChatMessage(global, chatId, id);
+        if (!chat || !newMessage) return;
+        notifyAboutMessage({
+          chat,
+          message: newMessage,
+        });
+      }
+
+      setGlobal(global);
       break;
     }
   }

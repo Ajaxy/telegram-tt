@@ -1,7 +1,5 @@
 import { callApi } from '../api/gramjs';
-import {
-  ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
-} from '../api/types';
+import { ApiChat, ApiMediaFormat, ApiMessage, ApiUser, ApiUserReaction } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
@@ -9,19 +7,25 @@ import {
   getChatAvatarHash,
   getChatTitle,
   getMessageAction,
+  getMessageRecentReaction,
   getMessageSenderName,
   getMessageSummaryText,
   getPrivateChatUserId,
   isActionMessage,
   isChatChannel,
-  selectIsChatMuted, selectShouldShowMessagePreview,
+  selectIsChatMuted,
+  selectShouldShowMessagePreview,
 } from '../modules/helpers';
-import { getTranslation } from './langProvider';
 import { addNotifyExceptions, replaceSettings } from '../modules/reducers';
 import {
-  selectChatMessage, selectNotifyExceptions, selectNotifySettings, selectUser,
+  selectChatMessage,
+  selectCurrentMessageList,
+  selectNotifyExceptions,
+  selectNotifySettings,
+  selectUser,
 } from '../modules/selectors';
-import { IS_SERVICE_WORKER_SUPPORTED } from './environment';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './environment';
+import { getTranslation } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
 
@@ -246,16 +250,25 @@ function checkIfShouldNotify(chat: ApiChat) {
   if (isMuted || chat.isNotJoined || !chat.isListed) {
     return false;
   }
-
+  // On touch devices show notifications when chat is not active
+  if (IS_TOUCH_ENV) {
+    const {
+      chatId,
+      type,
+    } = selectCurrentMessageList(global) || {};
+    return !(chatId === chat.id && type === 'thread');
+  }
+  // On desktop show notifications when window is not focused
   return !document.hasFocus();
 }
 
-function getNotificationContent(chat: ApiChat, message: ApiMessage) {
+function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: ApiUserReaction) {
   const global = getGlobal();
-  const {
+  let {
     senderId,
     replyToMessageId,
   } = message;
+  if (reaction) senderId = reaction.userId;
 
   const messageSender = senderId ? selectUser(global, senderId) : undefined;
   const messageAction = getMessageAction(message as ApiMessage);
@@ -291,7 +304,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage) {
       ) as string;
     } else {
       const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
-      const summary = getMessageSummaryText(getTranslation, message);
+      const summary = getMessageSummaryText(getTranslation, message, false, 60, false);
 
       body = senderName ? `${senderName}: ${summary}` : summary;
     }
@@ -316,7 +329,7 @@ async function getAvatar(chat: ApiChat) {
   return mediaData;
 }
 
-export async function notifyAboutNewMessage({
+export async function notifyAboutMessage({
   chat,
   message,
 }: { chat: ApiChat; message: Partial<ApiMessage> }) {
@@ -329,26 +342,29 @@ export async function notifyAboutNewMessage({
     return;
   }
   if (!areNotificationsSupported) return;
+
   if (!message.id) return;
+
+  const activeReaction = getMessageRecentReaction(message);
+  const icon = await getAvatar(chat);
 
   const {
     title,
     body,
-  } = getNotificationContent(chat, message as ApiMessage);
-
-  const icon = await getAvatar(chat);
+  } = getNotificationContent(chat, message as ApiMessage, activeReaction);
 
   if (checkIfPushSupported()) {
     if (navigator.serviceWorker?.controller) {
       // notify service worker about new message notification
       navigator.serviceWorker.controller.postMessage({
-        type: 'newMessageNotification',
+        type: 'showMessageNotification',
         payload: {
           title,
           body,
           icon,
           chatId: chat.id,
           messageId: message.id,
+          reaction: activeReaction ? activeReaction.reaction : undefined,
         },
       });
     }
@@ -373,6 +389,12 @@ export async function notifyAboutNewMessage({
         chatId: chat.id,
         messageId: message.id,
       });
+      if (activeReaction) {
+        dispatch.startActiveReaction({
+          messageId: message.id,
+          reaction: activeReaction.reaction,
+        });
+      }
       if (window.focus) {
         window.focus();
       }
