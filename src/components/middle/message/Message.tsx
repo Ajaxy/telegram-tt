@@ -346,7 +346,7 @@ const Message: FC<OwnProps & StateProps> = ({
     ));
 
   const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
-  const withQuickReactionButton = !IS_TOUCH_ENV && defaultReaction && !isInDocumentGroupNotLast;
+  const withQuickReactionButton = !IS_TOUCH_ENV && !isInSelectMode && defaultReaction && !isInDocumentGroupNotLast;
 
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
