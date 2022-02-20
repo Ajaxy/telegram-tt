@@ -3,6 +3,7 @@ import { getDispatch } from '../lib/teact/teactn';
 
 import { ApiChat, ApiUser } from '../api/types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel,
 } from '../modules/helpers';
@@ -31,6 +32,7 @@ const useChatContextActions = ({
   const lang = useLang();
 
   const { isSelf } = user || {};
+  const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
 
   return useMemo(() => {
     if (!chat) {
@@ -100,11 +102,12 @@ const useChatContextActions = ({
       actionUnreadMark,
       actionPin,
       !isSelf && actionMute,
-      !isSelf && !isInFolder && actionArchive,
+      !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       actionDelete,
     ]);
   }, [
     chat, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, handleDelete, folderId, isSelf,
+    isServiceNotifications,
   ]);
 };
 
