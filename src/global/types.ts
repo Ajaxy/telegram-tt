@@ -65,13 +65,11 @@ export interface MessageList {
 }
 
 export interface ActiveEmojiInteraction {
+  id: number;
   x: number;
   y: number;
   messageId?: number;
-  endX?: number;
-  endY?: number;
   startSize?: number;
-  reaction?: string;
   animatedEffect?: string;
   isReversed?: boolean;
 }
@@ -332,7 +330,7 @@ export type GlobalState = {
   };
 
   availableReactions?: ApiAvailableReaction[];
-  activeEmojiInteraction?: ActiveEmojiInteraction;
+  activeEmojiInteractions?: ActiveEmojiInteraction[];
   activeReactions: Record<number, ActiveReaction>;
 
   localTextSearch: {

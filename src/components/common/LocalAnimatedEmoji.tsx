@@ -23,7 +23,7 @@ type OwnProps = {
   forceLoadPreview?: boolean;
   messageId?: number;
   chatId?: string;
-  activeEmojiInteraction?: ActiveEmojiInteraction;
+  activeEmojiInteractions?: ActiveEmojiInteraction[];
 };
 
 const LocalAnimatedEmoji: FC<OwnProps> = ({
@@ -35,7 +35,7 @@ const LocalAnimatedEmoji: FC<OwnProps> = ({
   observeIntersection,
   messageId,
   chatId,
-  activeEmojiInteraction,
+  activeEmojiInteractions,
 }) => {
   const {
     playKey,
@@ -44,7 +44,7 @@ const LocalAnimatedEmoji: FC<OwnProps> = ({
     width,
     handleClick,
     markAnimationLoaded,
-  } = useAnimatedEmoji(size, chatId, messageId, soundId, activeEmojiInteraction, isOwn, localEffect);
+  } = useAnimatedEmoji(size, chatId, messageId, soundId, activeEmojiInteractions, isOwn, localEffect);
   const id = `local_emoji_${localSticker}`;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);

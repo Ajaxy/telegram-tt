@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getDispatch, withGlobal } from '../../lib/teact/teactn';
 
@@ -21,13 +21,12 @@ import AnimatedSticker from '../common/AnimatedSticker';
 import './EmojiInteractionAnimation.scss';
 
 export type OwnProps = {
-  emojiInteraction: ActiveEmojiInteraction;
+  activeEmojiInteraction: ActiveEmojiInteraction;
 };
 
 type StateProps = {
   effectAnimationId?: string;
   localEffectAnimation?: string;
-  isReversed?: boolean;
 };
 
 const HIDE_ANIMATION_DURATION = 250;
@@ -35,41 +34,50 @@ const PLAYING_DURATION = 3000;
 const EFFECT_SIZE = 240;
 
 const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
-  emojiInteraction,
   effectAnimationId,
   localEffectAnimation,
-  isReversed,
+  activeEmojiInteraction,
 }) => {
   const { stopActiveEmojiInteraction } = getDispatch();
 
   const [isHiding, startHiding] = useFlag(false);
   const [isPlaying, startPlaying] = useFlag(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   const stop = useCallback(() => {
     startHiding();
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     setTimeout(() => {
-      stopActiveEmojiInteraction();
+      stopActiveEmojiInteraction({ id: activeEmojiInteraction.id });
     }, HIDE_ANIMATION_DURATION);
-  }, [startHiding, stopActiveEmojiInteraction]);
+  }, [activeEmojiInteraction.id, startHiding, stopActiveEmojiInteraction]);
+
+  const handleCancelAnimation = useCallback((e: UIEvent) => {
+    if (!(e.target as HTMLElement)?.closest('.AnimatedEmoji')) {
+      stop();
+    }
+  }, [stop]);
 
   useEffect(() => {
-    document.addEventListener('touchstart', stop);
-    document.addEventListener('touchmove', stop);
-    document.addEventListener('mousedown', stop);
-    document.addEventListener('wheel', stop);
+    document.addEventListener('touchstart', handleCancelAnimation);
+    document.addEventListener('touchmove', handleCancelAnimation);
+    document.addEventListener('mousedown', handleCancelAnimation);
+    document.addEventListener('wheel', handleCancelAnimation);
 
     return () => {
-      document.removeEventListener('touchstart', stop);
-      document.removeEventListener('touchmove', stop);
-      document.removeEventListener('mousedown', stop);
-      document.removeEventListener('wheel', stop);
+      document.removeEventListener('touchstart', handleCancelAnimation);
+      document.removeEventListener('touchmove', handleCancelAnimation);
+      document.removeEventListener('mousedown', handleCancelAnimation);
+      document.removeEventListener('wheel', handleCancelAnimation);
     };
-  }, [stop]);
+  }, [handleCancelAnimation]);
 
   useLayoutEffect(() => {
     const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       stop();
       dispatchHeavyAnimationStop();
     }, PLAYING_DURATION);
@@ -86,16 +94,24 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     }
   }, [localEffectAnimation]);
 
-  const scale = (emojiInteraction.startSize || 0) / EFFECT_SIZE;
+  if (!activeEmojiInteraction.startSize) {
+    return undefined;
+  }
+
+  const scale = (activeEmojiInteraction.startSize || 0) / EFFECT_SIZE;
 
   return (
     <div
       className={buildClassName(
-        'EmojiInteractionAnimation', isHiding && 'hiding', isPlaying && 'playing', isReversed && 'reversed',
+        'EmojiInteractionAnimation',
+        isHiding && 'hiding',
+        isPlaying && 'playing',
+        activeEmojiInteraction.isReversed && 'reversed',
       )}
-      style={`--scale: ${scale}; --start-x: ${emojiInteraction.x}px; --start-y: ${emojiInteraction.y}px;`}
+      style={`--scale: ${scale}; --start-x: ${activeEmojiInteraction.x}px; --start-y: ${activeEmojiInteraction.y}px;`}
     >
       <AnimatedSticker
+        key={`effect_${effectAnimationId}`}
         id={`effect_${effectAnimationId}`}
         size={EFFECT_SIZE}
         animationData={localEffectAnimationData || effectAnimationData}
@@ -110,15 +126,14 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { emojiInteraction }): StateProps => {
-    const animatedEffect = emojiInteraction.animatedEffect !== undefined
-      && selectAnimatedEmojiEffect(global, emojiInteraction.animatedEffect);
+  (global, { activeEmojiInteraction }): StateProps => {
+    const animatedEffect = activeEmojiInteraction.animatedEffect !== undefined
+      && selectAnimatedEmojiEffect(global, activeEmojiInteraction.animatedEffect);
     return {
       effectAnimationId: animatedEffect ? animatedEffect.id : undefined,
-      localEffectAnimation: !animatedEffect && emojiInteraction.animatedEffect
-      && Object.keys(ANIMATED_STICKERS_PATHS).includes(emojiInteraction.animatedEffect)
-        ? emojiInteraction.animatedEffect : undefined,
-      isReversed: emojiInteraction.isReversed,
+      localEffectAnimation: !animatedEffect && activeEmojiInteraction.animatedEffect
+      && Object.keys(ANIMATED_STICKERS_PATHS).includes(activeEmojiInteraction.animatedEffect)
+        ? activeEmojiInteraction.animatedEffect : undefined,
     };
   },
 )(EmojiInteractionAnimation));

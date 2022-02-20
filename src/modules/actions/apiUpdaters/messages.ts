@@ -118,7 +118,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateStartEmojiInteraction': {
       const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
 
-      if (global.activeEmojiInteraction || currentChatId !== update.id) return;
+      if (currentChatId !== update.id) return;
       const message = selectChatMessage(global, currentChatId, update.messageId);
 
       if (!message) return;
@@ -130,10 +130,11 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       global = {
         ...global,
-        activeEmojiInteraction: {
+        activeEmojiInteractions: [...(global.activeEmojiInteractions || []), {
+          id: global.activeEmojiInteractions?.length || 0,
           animatedEffect: localEmoji ? selectLocalAnimatedEmojiEffect(localEmoji) : update.emoji,
           messageId: update.messageId,
-        } as ActiveEmojiInteraction,
+        } as ActiveEmojiInteraction],
       };
 
       setGlobal(global);

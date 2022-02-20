@@ -15,6 +15,10 @@ import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import { isMessageLocal } from '../../helpers';
 
+const INTERACTION_RANDOM_OFFSET = 40;
+
+let interactionLocalId = 0;
+
 addReducer('loadAvailableReactions', () => {
   (async () => {
     const result = await callApi('getAvailableReactions');
@@ -45,28 +49,31 @@ addReducer('interactWithAnimatedEmoji', (global, actions, payload) => {
     emoji, x, y, localEffect, startSize, isReversed,
   } = payload!;
 
+  const activeEmojiInteraction = {
+    id: interactionLocalId++,
+    animatedEffect: emoji || localEffect,
+    x: subtractXForEmojiInteraction(global, x) + Math.random()
+      * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
+    y: y + Math.random() * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
+    startSize,
+    isReversed,
+  };
+
   return {
     ...global,
-    activeEmojiInteraction: {
-      animatedEffect: emoji || localEffect,
-      x: subtractXForEmojiInteraction(global, x),
-      y,
-      startSize,
-      isReversed,
-    },
+    activeEmojiInteractions: [...(global.activeEmojiInteractions || []), activeEmojiInteraction],
   };
 });
 
 addReducer('sendEmojiInteraction', (global, actions, payload) => {
   const {
     messageId, chatId, emoji, interactions, localEffect,
-    x, y, startX, startY, startSize,
   } = payload!;
 
   const chat = selectChat(global, chatId);
 
   if (!chat || (!emoji && !localEffect) || chatId === global.currentUserId) {
-    return undefined;
+    return;
   }
 
   void callApi('sendEmojiInteraction', {
@@ -75,20 +82,6 @@ addReducer('sendEmojiInteraction', (global, actions, payload) => {
     emoticon: emoji || selectLocalAnimatedEmojiEffectByName(localEffect),
     timestamps: interactions,
   });
-
-  if (!global.activeEmojiInteraction) return undefined;
-
-  return {
-    ...global,
-    activeEmojiInteraction: {
-      ...global.activeEmojiInteraction,
-      endX: subtractXForEmojiInteraction(global, x),
-      endY: y,
-      ...(startX && { x: subtractXForEmojiInteraction(global, startX) }),
-      ...(startY && { y: startY }),
-      ...(startSize && { startSize }),
-    },
-  };
 });
 
 addReducer('sendDefaultReaction', (global, actions, payload) => {
@@ -224,10 +217,12 @@ addReducer('setDefaultReaction', (global, actions, payload) => {
   })();
 });
 
-addReducer('stopActiveEmojiInteraction', (global) => {
+addReducer('stopActiveEmojiInteraction', (global, actions, payload) => {
+  const { id } = payload;
+
   return {
     ...global,
-    activeEmojiInteraction: undefined,
+    activeEmojiInteractions: global.activeEmojiInteractions?.filter((l) => l.id !== id),
   };
 });
 
@@ -287,12 +282,12 @@ addReducer('loadMessageReactions', (global, actions, payload) => {
 
 addReducer('sendWatchingEmojiInteraction', (global, actions, payload) => {
   const {
-    chatId, emoticon, x, y, startSize, isReversed,
+    chatId, emoticon, x, y, startSize, isReversed, id,
   } = payload;
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || !global.activeEmojiInteraction || chatId === global.currentUserId) {
+  if (!chat || !global.activeEmojiInteractions?.some((l) => l.id === id) || chatId === global.currentUserId) {
     return undefined;
   }
 
@@ -300,12 +295,17 @@ addReducer('sendWatchingEmojiInteraction', (global, actions, payload) => {
 
   return {
     ...global,
-    activeEmojiInteraction: {
-      ...global.activeEmojiInteraction,
-      x: subtractXForEmojiInteraction(global, x),
-      y,
-      startSize,
-      isReversed,
-    },
+    activeEmojiInteractions: global.activeEmojiInteractions.map((activeEmojiInteraction) => {
+      if (activeEmojiInteraction.id === id) {
+        return {
+          ...activeEmojiInteraction,
+          x: subtractXForEmojiInteraction(global, x),
+          y,
+          startSize,
+          isReversed,
+        };
+      }
+      return activeEmojiInteraction;
+    }),
   };
 });
