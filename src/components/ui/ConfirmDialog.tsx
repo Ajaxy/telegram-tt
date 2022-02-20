@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, { FC, memo, useCallback, useRef } from '../../lib/teact/teact';
 
 import useLang from '../../hooks/useLang';
 import { TextPart } from '../common/helpers/renderMessageText';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 
 import Modal from './Modal';
 import Button from './Button';
@@ -37,6 +38,15 @@ const ConfirmDialog: FC<OwnProps> = ({
 }) => {
   const lang = useLang();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleSelectWithEnter = useCallback((index: number) => {
+    if (index === -1) confirmHandler();
+  }, [confirmHandler]);
+
+  const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, handleSelectWithEnter, '.Button');
+
   return (
     <Modal
       className="confirm"
@@ -45,13 +55,12 @@ const ConfirmDialog: FC<OwnProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
-      onEnter={confirmHandler}
     >
       {text && text.split('\\n').map((textPart) => (
         <p>{textPart}</p>
       ))}
       {textParts || children}
-      <div className={isButtonsInOneRow ? 'dialog-buttons mt-2' : ''}>
+      <div className={isButtonsInOneRow ? 'dialog-buttons mt-2' : ''} ref={containerRef} onKeyDown={handleKeyDown}>
         <Button
           className="confirm-dialog-button"
           isText
