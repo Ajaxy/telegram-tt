@@ -1,21 +1,18 @@
-import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
-} from '../../lib/teact/teact';
-
 import { ApiDimensions } from '../../api/types';
-
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
-import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreenStatus from '../../hooks/useFullscreen';
+import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
-import safePlay from '../../util/safePlay';
+import React, { FC, memo, useCallback, useEffect, useRef, useState } from '../../lib/teact/teact';
 
-import VideoPlayerControls from './VideoPlayerControls';
-import ProgressSpinner from '../ui/ProgressSpinner';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import safePlay from '../../util/safePlay';
 import Button from '../ui/Button';
+import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './VideoPlayer.scss';
+
+import VideoPlayerControls from './VideoPlayerControls';
 
 type OwnProps = {
   url?: string;
@@ -26,6 +23,8 @@ type OwnProps = {
   fileSize: number;
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
+  areControlsVisible: boolean;
+  toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
@@ -41,12 +40,13 @@ const VideoPlayer: FC<OwnProps> = ({
   isMediaViewerOpen,
   noPlay,
   onClose,
+  toggleControls,
+  areControlsVisible,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlayed, setIsPlayed] = useState(!IS_TOUCH_ENV || !IS_IOS);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isControlsVisible, setIsControlsVisible] = useState(true);
 
   const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlayed);
 
@@ -88,21 +88,20 @@ const VideoPlayer: FC<OwnProps> = ({
     } else {
       safePlay(videoRef.current!);
       setIsPlayed(true);
-      if (IS_SINGLE_COLUMN_LAYOUT) {
-        setIsControlsVisible(false);
-      }
     }
   }, [isPlayed]);
 
   useVideoCleanup(videoRef, []);
 
-  const handleMouseOver = useCallback(() => {
-    setIsControlsVisible(true);
-  }, []);
+  const handleMouseMove = useCallback(() => {
+    toggleControls(true);
+  }, [toggleControls]);
 
-  const handleMouseOut = useCallback(() => {
-    setIsControlsVisible(false);
-  }, []);
+  const handleMouseOut = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (e.target === videoRef.current) {
+      toggleControls(false);
+    }
+  }, [toggleControls]);
 
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     setCurrentTime(e.currentTarget.currentTime);
@@ -111,8 +110,8 @@ const VideoPlayer: FC<OwnProps> = ({
   const handleEnded = useCallback(() => {
     setCurrentTime(0);
     setIsPlayed(false);
-    setIsControlsVisible(true);
-  }, []);
+    toggleControls(true);
+  }, [toggleControls]);
 
   const handleFullscreenChange = useCallback(() => {
     if (isFullscreen && exitFullscreen) {
@@ -125,11 +124,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const handleSeek = useCallback((position: number) => {
     videoRef.current!.currentTime = position;
   }, []);
-
-  const toggleControls = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    setIsControlsVisible(!isControlsVisible);
-  }, [isControlsVisible]);
 
   useEffect(() => {
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
@@ -152,8 +146,7 @@ const VideoPlayer: FC<OwnProps> = ({
   return (
     <div
       className="VideoPlayer"
-      onClick={!isGif && IS_SINGLE_COLUMN_LAYOUT ? toggleControls : undefined}
-      onMouseOver={!isGif && !IS_TOUCH_ENV ? handleMouseOver : undefined}
+      onMouseMove={!isGif && !IS_TOUCH_ENV ? handleMouseMove : undefined}
       onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
       <div
@@ -172,7 +165,7 @@ const VideoPlayer: FC<OwnProps> = ({
           onPlay={IS_IOS ? () => setIsPlayed(true) : undefined}
           onEnded={handleEnded}
           onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
-          onDoubleClick={handleFullscreenChange}
+          onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
           onTimeUpdate={handleTimeUpdate}
@@ -205,7 +198,8 @@ const VideoPlayer: FC<OwnProps> = ({
           isFullscreen={isFullscreen}
           fileSize={fileSize}
           duration={videoRef.current ? videoRef.current.duration || 0 : 0}
-          isForceVisible={isControlsVisible}
+          isVisible={areControlsVisible}
+          setVisibility={toggleControls}
           isForceMobileVersion={posterSize && posterSize.width < MOBILE_VERSION_CONTROL_WIDTH}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}
