@@ -166,6 +166,30 @@ addReducer('openChat', (global) => {
   };
 });
 
+addReducer('startActiveReaction', (global, actions, payload) => {
+  const { messageId, reaction } = payload;
+  const { animationLevel } = global.settings.byKey;
+
+  if (animationLevel !== ANIMATION_LEVEL_MAX) return global;
+
+  if (global.activeReactions[messageId]?.reaction === reaction) {
+    return global;
+  }
+
+  return {
+    ...global,
+    activeReactions: {
+      ...(reaction ? global.activeReactions : omit(global.activeReactions, [messageId])),
+      ...(reaction && {
+        [messageId]: {
+          reaction,
+          messageId,
+        },
+      }),
+    },
+  };
+});
+
 addReducer('stopActiveReaction', (global, actions, payload) => {
   const { messageId, reaction } = payload;
 

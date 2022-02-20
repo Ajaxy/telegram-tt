@@ -1,10 +1,11 @@
+import { ApiMessage, ApiMessageEntityTypes } from '../../api/types';
 import type { TextPart } from '../../components/common/helpers/renderTextWithEntities';
+import { CONTENT_NOT_SUPPORTED } from '../../config';
 
 import { LangFn } from '../../hooks/useLang';
-import { ApiMessage, ApiMessageEntityTypes } from '../../api/types';
-import { CONTENT_NOT_SUPPORTED } from '../../config';
-import { getMessageText } from './messages';
 import trimText from '../../util/trimText';
+import { getMessageText } from './messages';
+import { getMessageRecentReaction } from './reactions';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 80;
@@ -14,11 +15,12 @@ export function getMessageSummaryText(
   message: ApiMessage,
   noEmoji = false,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
+  noReactions = true,
 ) {
-  const emoji = !noEmoji && getMessageSummaryEmoji(message);
+  const emoji = !noEmoji && getMessageSummaryEmoji(message, noReactions);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
   const text = trimText(getMessageTextWithSpoilers(message), truncateLength);
-  const description = getMessageSummaryDescription(lang, message, text);
+  const description = getMessageSummaryDescription(lang, message, text, noReactions);
 
   return `${emojiWithSpace}${description}`;
 }
@@ -34,7 +36,11 @@ export function getMessageTextWithSpoilers(message: ApiMessage) {
     return text;
   }
 
-  return entities.reduce((accText, { type, offset, length }) => {
+  return entities.reduce((accText, {
+    type,
+    offset,
+    length,
+  }) => {
     if (type !== ApiMessageEntityTypes.Spoiler) {
       return accText;
     }
@@ -46,9 +52,15 @@ export function getMessageTextWithSpoilers(message: ApiMessage) {
   }, text);
 }
 
-export function getMessageSummaryEmoji(message: ApiMessage) {
+export function getMessageSummaryEmoji(message: ApiMessage, noReactions = true) {
   const {
-    photo, video, audio, voice, document, sticker, poll,
+    photo,
+    video,
+    audio,
+    voice,
+    document,
+    sticker,
+    poll,
   } = message.content;
 
   if (message.groupedId || photo) {
@@ -79,59 +91,86 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
     return '📊';
   }
 
+  const reaction = !noReactions && getMessageRecentReaction(message);
+  if (reaction) {
+    return reaction.reaction;
+  }
+
   return undefined;
 }
 
-export function getMessageSummaryDescription(lang: LangFn, message: ApiMessage, truncatedText?: string | TextPart[]) {
+export function getMessageSummaryDescription(
+  lang: LangFn,
+  message: ApiMessage,
+  truncatedText?: string | TextPart[],
+  noReactions = true,
+) {
   const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, invoice,
+    text,
+    photo,
+    video,
+    audio,
+    voice,
+    document,
+    sticker,
+    contact,
+    poll,
+    invoice,
   } = message.content;
 
+  let summary: string | TextPart[] | undefined;
+
   if (message.groupedId) {
-    return truncatedText || lang('lng_in_dlg_album');
+    summary = truncatedText || lang('lng_in_dlg_album');
   }
 
   if (photo) {
-    return truncatedText || lang('AttachPhoto');
+    summary = truncatedText || lang('AttachPhoto');
   }
 
   if (video) {
-    return truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo');
+    summary = truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo');
   }
 
   if (sticker) {
-    return lang('AttachSticker').trim();
+    summary = lang('AttachSticker')
+      .trim();
   }
 
   if (audio) {
-    return getMessageAudioCaption(message) || lang('AttachMusic');
+    summary = getMessageAudioCaption(message) || lang('AttachMusic');
   }
 
   if (voice) {
-    return truncatedText || lang('AttachAudio');
+    summary = truncatedText || lang('AttachAudio');
   }
 
   if (document) {
-    return truncatedText || document.fileName;
+    summary = truncatedText || document.fileName;
   }
 
   if (contact) {
-    return lang('AttachContact');
+    summary = lang('AttachContact');
   }
 
   if (poll) {
-    return poll.summary.question;
+    summary = poll.summary.question;
   }
 
   if (invoice) {
-    return 'Invoice';
+    summary = 'Invoice';
   }
 
   if (text) {
-    return truncatedText;
+    summary = truncatedText;
   }
 
-  return CONTENT_NOT_SUPPORTED;
+  const reaction = !noReactions && getMessageRecentReaction(message);
+  if (summary && reaction) {
+    summary = `to your "${summary}"`;
+  }
+
+  return summary || CONTENT_NOT_SUPPORTED;
 }
 
 export function generateBrailleSpoiler(length: number) {
@@ -142,7 +181,11 @@ export function generateBrailleSpoiler(length: number) {
 }
 
 function getMessageAudioCaption(message: ApiMessage) {
-  const { audio, text } = message.content;
+  const {
+    audio,
+    text,
+  } = message.content;
 
-  return (audio && [audio.title, audio.performer].filter(Boolean).join(' — ')) || (text?.text);
+  return (audio && [audio.title, audio.performer].filter(Boolean)
+    .join(' — ')) || (text?.text);
 }

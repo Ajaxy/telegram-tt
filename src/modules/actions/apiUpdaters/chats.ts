@@ -4,7 +4,8 @@ import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { closeMessageNotifications, notifyAboutNewMessage } from '../../../util/notifications';
+import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
+import { getMessageRecentReaction } from '../../helpers';
 import {
   updateChat,
   updateChatListIds,
@@ -120,11 +121,27 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         }));
       }
 
-      notifyAboutNewMessage({
+      notifyAboutMessage({
         chat,
         message,
       });
 
+      break;
+    }
+
+    case 'updateMessage': {
+      const { message } = update;
+      const chat = selectChat(global, update.chatId);
+      if (!chat) {
+        return;
+      }
+
+      if (getMessageRecentReaction(message)) {
+        notifyAboutMessage({
+          chat,
+          message,
+        });
+      }
       break;
     }
 
