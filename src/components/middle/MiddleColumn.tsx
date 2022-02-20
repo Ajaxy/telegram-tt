@@ -109,7 +109,7 @@ type StateProps = {
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
-  activeEmojiInteraction?: ActiveEmojiInteraction;
+  activeEmojiInteractions?: ActiveEmojiInteraction[];
 };
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
@@ -150,7 +150,7 @@ const MiddleColumn: FC<StateProps> = ({
   canSubscribe,
   canStartBot,
   canRestartBot,
-  activeEmojiInteraction,
+  activeEmojiInteractions,
 }) => {
   const {
     openChat,
@@ -522,9 +522,15 @@ const MiddleColumn: FC<StateProps> = ({
           onUnpin={handleUnpinAllMessages}
         />
       )}
-      {activeEmojiInteraction && (
-        <EmojiInteractionAnimation emojiInteraction={activeEmojiInteraction} />
-      )}
+      <div teactFastList>
+        {activeEmojiInteractions?.map((activeEmojiInteraction, i) => (
+          <EmojiInteractionAnimation
+            teactOrderKey={i}
+            key={activeEmojiInteraction.id}
+            activeEmojiInteraction={activeEmojiInteraction}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -538,7 +544,7 @@ export default memo(withGlobal(
 
     const { messageLists } = global.messages;
     const currentMessageList = selectCurrentMessageList(global);
-    const { isLeftColumnShown, chats: { listIds }, activeEmojiInteraction } = global;
+    const { isLeftColumnShown, chats: { listIds }, activeEmojiInteractions } = global;
 
     const state: StateProps = {
       theme,
@@ -556,7 +562,7 @@ export default memo(withGlobal(
       isReactorListModalOpen: Boolean(global.reactorModal),
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
-      activeEmojiInteraction,
+      activeEmojiInteractions,
     };
 
     if (!currentMessageList || !listIds.active) {

@@ -185,7 +185,7 @@ type StateProps = {
   availableReactions?: ApiAvailableReaction[];
   defaultReaction?: string;
   activeReaction?: ActiveReaction;
-  activeEmojiInteraction?: ActiveEmojiInteraction;
+  activeEmojiInteractions?: ActiveEmojiInteraction[];
 };
 
 type MetaPosition =
@@ -261,7 +261,7 @@ const Message: FC<OwnProps & StateProps> = ({
   availableReactions,
   defaultReaction,
   activeReaction,
-  activeEmojiInteraction,
+  activeEmojiInteractions,
   messageListType,
   isPinnedList,
   isDownloading,
@@ -637,7 +637,7 @@ const Message: FC<OwnProps & StateProps> = ({
             forceLoadPreview={isLocal}
             messageId={messageId}
             chatId={chatId}
-            activeEmojiInteraction={activeEmojiInteraction}
+            activeEmojiInteractions={activeEmojiInteractions}
           />
         )}
         {localSticker && (
@@ -652,7 +652,7 @@ const Message: FC<OwnProps & StateProps> = ({
             forceLoadPreview={isLocal}
             messageId={messageId}
             chatId={chatId}
-            activeEmojiInteraction={activeEmojiInteraction}
+            activeEmojiInteractions={activeEmojiInteractions}
           />
         )}
         {isAlbum && (
@@ -1055,7 +1055,7 @@ export default memo(withGlobal<OwnProps>(
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
       activeReaction: reactionMessage && global.activeReactions[reactionMessage.id],
-      activeEmojiInteraction: global.activeEmojiInteraction,
+      activeEmojiInteractions: global.activeEmojiInteractions,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),

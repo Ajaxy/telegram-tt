@@ -22,7 +22,7 @@ export default function useAnimatedEmoji(
   chatId?: string,
   messageId?: number,
   soundId?: string,
-  activeEmojiInteraction?: ActiveEmojiInteraction,
+  activeEmojiInteractions?: ActiveEmojiInteraction[],
   isOwn?: boolean,
   localEffect?: string,
   emoji?: string,
@@ -120,16 +120,21 @@ export default function useAnimatedEmoji(
   useEffect(() => {
     const container = ref.current;
 
-    if (!container || !activeEmojiInteraction) return;
+    if (!container || !activeEmojiInteractions) return;
 
-    const {
-      messageId: selectedMessageId, endX, endY,
-    } = activeEmojiInteraction;
+    activeEmojiInteractions.forEach(({
+      id,
+      startSize,
+      messageId: interactionMessageId,
+    }) => {
+      if (startSize || messageId !== interactionMessageId) {
+        return;
+      }
 
-    if (!endX && !endY && selectedMessageId === messageId) {
       const { x, y } = container.getBoundingClientRect();
 
       sendWatchingEmojiInteraction({
+        id,
         chatId,
         emoticon: localEffect ? selectLocalAnimatedEmojiEffectByName(localEffect) : emoji,
         startSize: width,
@@ -138,9 +143,9 @@ export default function useAnimatedEmoji(
         isReversed: !isOwn,
       });
       play();
-    }
+    });
   }, [
-    activeEmojiInteraction, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction, width,
+    activeEmojiInteractions, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction, width,
   ]);
 
   return {
