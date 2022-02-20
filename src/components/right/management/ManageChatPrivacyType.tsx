@@ -170,7 +170,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
           </h3>
           <RadioGroup
             selected={isProtected ? 'protected' : 'allowed'}
-            name="channel-type"
+            name="forwarding-type"
             options={forwardingOptions}
             onChange={handleForwardingOptionChange}
           />

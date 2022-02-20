@@ -93,6 +93,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const imageHash = getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
+  const isPublicGroup = chat.username || hasLinkedChannel;
   const lang = useLang();
 
   useHistoryBack(isActive, onClose);
@@ -343,7 +344,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             <span className="subtitle">{formatInteger(chat.membersCount ?? 0)}</span>
           </ListItem>
 
-          {chat.fullInfo && (
+          {!isPublicGroup && chat.fullInfo && (
             <div className="ListItem narrow no-selection">
               <Checkbox
                 checked={!chat.fullInfo.isPreHistoryHidden}
