@@ -120,6 +120,7 @@ module.exports = (env = {}, argv = {}) => {
       }),
       new EnvironmentPlugin({
         APP_ENV: 'production',
+        APP_NAME: null,
         APP_VERSION: undefined,
         APP_REVISION: appRevision,
         TELEGRAM_T_API_ID: undefined,
