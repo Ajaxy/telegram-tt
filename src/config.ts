@@ -1,8 +1,6 @@
-export const PAGE_TITLE = 'Telegram';
-export const INACTIVE_MARKER = ' [Inactive]';
-
-export const APP_NAME = process.env.APP_NAME || 'Telegram WebZ';
-export const APP_VERSION = process.env.APP_VERSION || 'dev';
+export const APP_NAME = 'Telegram WebZ';
+export const APP_VERSION = process.env.APP_VERSION!;
+export const APP_REVISION = process.env.APP_REVISION;
 
 export const DEBUG = (
   process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf' && process.env.APP_ENV !== 'test'
@@ -14,6 +12,9 @@ export const IS_PERF = process.env.APP_ENV === 'perf';
 
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;
+
+export const PAGE_TITLE = 'Telegram';
+export const INACTIVE_MARKER = ' [Inactive]';
 
 export const SESSION_USER_KEY = 'user_auth';
 export const LEGACY_SESSION_KEY = 'GramJs:sessionId';

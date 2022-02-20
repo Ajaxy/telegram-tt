@@ -8,7 +8,7 @@ import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
 import {
-  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, FEEDBACK_URL,
+  ANIMATION_LEVEL_MAX, APP_NAME, APP_REVISION, APP_VERSION, DEBUG, FEEDBACK_URL,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
@@ -206,7 +206,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
-          footer={`${APP_NAME} ${APP_VERSION}`}
+          footer={`${APP_NAME} ${DEBUG ? APP_REVISION : APP_VERSION}`}
         >
           <MenuItem
             icon="saved-messages"

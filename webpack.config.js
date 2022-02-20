@@ -9,6 +9,11 @@ const HtmlPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
+
+const gitRevisionPlugin = new GitRevisionPlugin();
+const branch = process.env.HEAD || gitRevisionPlugin.branch();
+const appRevision = (!branch || branch === 'HEAD') ? gitRevisionPlugin.commithash().substring(0, 7) : branch;
 
 dotenv.config();
 
@@ -114,12 +119,12 @@ module.exports = (env = {}, argv = {}) => {
         ignoreOrder: true,
       }),
       new EnvironmentPlugin({
-        APP_NAME: 'Telegram WebZ',
-        APP_VERSION: 'dev',
         APP_ENV: 'production',
-        TELEGRAM_T_API_ID: '',
-        TELEGRAM_T_API_HASH: '',
-        TEST_SESSION: '',
+        APP_VERSION: undefined,
+        APP_REVISION: appRevision,
+        TELEGRAM_T_API_ID: undefined,
+        TELEGRAM_T_API_HASH: undefined,
+        TEST_SESSION: null,
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
