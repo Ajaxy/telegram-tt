@@ -8,13 +8,13 @@
 
   .modal-dialog {
     max-height: calc(100% - 4rem);
-    background: #181F27;
+    background: #181f27;
   }
 
   .Menu .bubble {
-    --color-background: #232A34;
-    --color-chat-hover: #2F363E;
-    --color-item-active: #2F363E;
+    --color-background: #232a34;
+    --color-chat-hover: #2f363e;
+    --color-item-active: #2f363e;
     --color-text: #fff;
     box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
   }
@@ -34,7 +34,7 @@
       margin-top: auto;
       margin-bottom: 0;
       transform: translate3d(0, 100%, 0);
-      transition: transform .3s ease, opacity .3s ease;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
     .modal-backdrop {
@@ -75,7 +75,7 @@
 
   .participants {
     margin-top: 0.75rem;
-    background: #222B34;
+    background: #222b34;
     border-radius: 0.75rem;
 
     .Loading {
@@ -87,12 +87,12 @@
       display: flex;
       align-items: center;
       border-radius: 0.75rem;
-      transition: .15s ease-out background-color;
+      transition: 0.15s ease-out background-color;
       cursor: pointer;
       color: var(--color-text-secondary);
 
       &:hover {
-        background: #2F363E;
+        background: #2f363e;
       }
 
       .text {
@@ -139,7 +139,7 @@
       content: "";
       width: 100%;
       height: 2rem;
-      background: linear-gradient(0deg, #181F27, rgba(24, 31, 39, 0));
+      background: linear-gradient(0deg, #181f27, rgba(24, 31, 39, 0));
       z-index: 0;
       top: -2rem;
     }
@@ -182,7 +182,8 @@
       align-items: center;
     }
 
-    .small-button, .smaller-button {
+    .small-button,
+    .smaller-button {
       outline: none;
       border: 0;
       background: #15415b;
@@ -210,7 +211,7 @@
     }
 
     .small-button.speaker {
-      background: #2B3A51;
+      background: #2b3a51;
 
       &.active {
         background: #496092;
@@ -218,7 +219,7 @@
     }
 
     .small-button.leave {
-      background: #5A2824;
+      background: #5a2824;
 
       &:hover {
         background: #49201d;
@@ -232,7 +233,6 @@
       padding: 0;
     }
   }
-
 
   &.landscape .scrollable {
     display: flex;
@@ -293,7 +293,8 @@
       }
     }
 
-    .MicrophoneButton, .microphone-wrapper {
+    .MicrophoneButton,
+    .microphone-wrapper {
       width: 3rem;
       height: 3rem;
 

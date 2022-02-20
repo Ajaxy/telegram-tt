@@ -1,15 +1,16 @@
 .ChatMessage {
   &:first-child {
-    margin-top: .5rem;
+    margin-top: 0.5rem;
   }
-  &:hover, &.selected {
+  &:hover,
+  &.selected {
     .Avatar.online::after {
       border-color: var(--color-chat-hover);
     }
   }
 
   .ListItem-button {
-    padding: .25rem .5rem;
+    padding: 0.25rem 0.5rem;
   }
 
   .info {
@@ -27,7 +28,7 @@
 
       .matching-text-highlight {
         color: var(--color-text);
-        background: #CAE3F7;
+        background: #cae3f7;
         border-radius: 0.25rem;
         padding: 0 0.125rem;
         display: inline-block;
@@ -48,7 +49,7 @@
         color: var(--color-text);
 
         &::after {
-          content: ': ';
+          content: ": ";
         }
       }
 
@@ -56,15 +57,15 @@
         width: 1.25rem;
         height: 1.25rem;
         object-fit: cover;
-        border-radius: .125rem;
-        vertical-align: -.25rem;
-        margin-right: .25rem;
+        border-radius: 0.125rem;
+        vertical-align: -0.25rem;
+        margin-right: 0.25rem;
       }
 
       .icon-play {
         position: relative;
         display: inline-block;
-        font-size: .75rem;
+        font-size: 0.75rem;
         color: #fff;
         margin-inline-start: -1.25rem;
         margin-inline-end: 0.5rem;
@@ -78,7 +79,7 @@
     justify-content: space-between;
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .subtitle {
       text-align: right;
     }

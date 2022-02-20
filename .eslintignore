@@ -7,6 +7,7 @@ src/lib/gramjs/tl/types-generator/template.js
 src/lib/gramjs/tl/api.d.ts
 src/lib/gramjs/tl/apiTl.js
 src/lib/gramjs/tl/schemaTl.js
-src/lib/gramjs/tl/apiTl.full.js
-src/lib/gramjs/tl/schemaTl.full.js
-src/lib/gramjs/tl/generateModules.js
+
+webpack.config.js
+jest.config.js
+src/lib/secret-sauce/

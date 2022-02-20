@@ -1,9 +1,11 @@
 @mixin active-styles() {
   &:not(.disabled):not(:disabled) {
-    &:active, &.active, &:focus {
+    &:active,
+    &.active,
+    &:focus {
       @content;
     }
-    @media (hover:hover) {
+    @media (hover: hover) {
       &:hover {
         @content;
       }
@@ -40,11 +42,13 @@
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  transition: background-color .15s, color .15s;
+  transition: background-color 0.15s, color 0.15s;
   text-decoration: none !important;
 
   // @optimization
-  &:active, &.clicked, body.animation-level-0 & {
+  &:active,
+  &.clicked,
+  body.animation-level-0 & {
     transition: none !important;
   }
 
@@ -66,7 +70,7 @@
   &.primary {
     background-color: var(--color-primary);
     color: var(--color-white);
-    --ripple-color: rgba(0, 0, 0, .08);
+    --ripple-color: rgba(0, 0, 0, 0.08);
 
     @include active-styles() {
       background-color: var(--color-primary-shade);
@@ -80,7 +84,7 @@
   &.secondary {
     background-color: var(--color-background);
     color: rgba(var(--color-text-secondary-rgb), 0.75);
-    --ripple-color: rgba(0, 0, 0, .08);
+    --ripple-color: rgba(0, 0, 0, 0.08);
 
     @include active-styles() {
       background-color: var(--color-primary);
@@ -95,7 +99,7 @@
   &.gray {
     background-color: var(--color-background);
     color: var(--color-text-secondary);
-    --ripple-color: rgba(0, 0, 0, .08);
+    --ripple-color: rgba(0, 0, 0, 0.08);
 
     @include active-styles() {
       color: var(--color-primary);
@@ -109,7 +113,7 @@
   &.danger {
     background-color: var(--color-background);
     color: var(--color-error);
-    --ripple-color: rgba(var(--color-error-rgb), .16);
+    --ripple-color: rgba(var(--color-error-rgb), 0.16);
 
     @include active-styles() {
       background-color: var(--color-error);
@@ -129,11 +133,11 @@
       background-color: transparent;
 
       @include active-styles() {
-        background-color: rgba(var(--color-primary-shade-rgb), .08);
+        background-color: rgba(var(--color-primary-shade-rgb), 0.08);
       }
 
       @include no-ripple-styles() {
-        background-color: rgba(var(--color-primary-shade-rgb), .16);
+        background-color: rgba(var(--color-primary-shade-rgb), 0.16);
       }
     }
 
@@ -144,12 +148,12 @@
 
     &.danger {
       @include active-styles() {
-        background-color: rgba(var(--color-error-rgb), .08);
+        background-color: rgba(var(--color-error-rgb), 0.08);
         color: var(--color-error);
       }
 
       @include no-ripple-styles() {
-        background-color: rgba(var(--color-error-rgb), .16);
+        background-color: rgba(var(--color-error-rgb), 0.16);
       }
     }
   }
@@ -252,7 +256,7 @@
         margin-right: 0.5rem;
       }
 
-      &[dir=rtl] {
+      &[dir="rtl"] {
         padding-left: 1.25rem;
         padding-right: 0.75rem;
 
@@ -274,9 +278,9 @@
 
   &.tiny {
     height: 2.25rem;
-    padding: .4375rem;
+    padding: 0.4375rem;
     border-radius: var(--border-radius-default-small);
-    font-size: .875rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     &.round {
@@ -324,7 +328,7 @@
       right: 0.875rem;
       top: 0.875rem;
 
-      --spinner-size: 1.8rem;
+      --spinner-size: 1.8125rem;
     }
   }
 

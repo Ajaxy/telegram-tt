@@ -8,7 +8,7 @@
   .content {
     display: flex;
     flex-direction: column;
-    padding: .1875rem .625rem;
+    padding: 0.1875rem 0.625rem;
     max-height: 80vh;
     overflow: auto;
 
@@ -22,7 +22,7 @@
     }
 
     .row + .row {
-      margin-top: .375rem;
+      margin-top: 0.375rem;
     }
 
     .Button {
@@ -45,7 +45,7 @@
     }
 
     .Button + .Button {
-      margin-left: .375rem;
+      margin-left: 0.375rem;
     }
   }
 }

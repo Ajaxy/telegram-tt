@@ -1,5 +1,4 @@
 .CountryCodeInput {
-
   .input-group {
     cursor: pointer;
 
@@ -18,13 +17,13 @@
       position: absolute;
       top: 1.125rem;
       right: 1rem;
-      width: .75rem;
-      height: .75rem;
+      width: 0.75rem;
+      height: 0.75rem;
       border: 2px solid var(--color-text-secondary);
       border-top: 0;
       border-left: 0;
       transform: scaleY(1) rotate(45deg);
-      transition: color .2s ease, transform .2s ease, top .2s ease;
+      transition: color 0.2s ease, transform 0.2s ease, top 0.2s ease;
 
       &.open {
         border-color: var(--color-primary);
@@ -54,7 +53,7 @@
 
     &.no-results button {
       justify-content: center;
-      padding: .5rem 1rem;
+      padding: 0.5rem 1rem;
 
       span {
         font-size: 0.875rem;
@@ -71,7 +70,7 @@
       height: 2rem;
       display: inline-block;
       vertical-align: 4px;
-      margin: -.5rem .125rem;
+      margin: -0.5rem 0.125rem;
     }
   }
 

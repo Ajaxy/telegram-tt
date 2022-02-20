@@ -19,7 +19,7 @@
     display: flex;
     align-items: center;
     padding-right: 0.625rem;
-    padding-top:  0.1875rem;
+    padding-top: 0.1875rem;
   }
 
   --accent-color: var(--color-primary);
@@ -48,11 +48,11 @@
     max-width: calc(100% - 3.375rem);
 
     &::before {
-      top: .1rem;
-      bottom: .05rem;
+      top: 0.125rem;
+      bottom: 0.0625rem;
     }
 
-    &.with-video .media-inner { // TODO add support for video in previews in composer
+    &.with-video .media-inner {
       display: none;
     }
 
@@ -64,7 +64,7 @@
     }
 
     .site-title {
-      margin-top: .125rem;
+      margin-top: 0.125rem;
       margin-bottom: 0.1875rem;
     }
 

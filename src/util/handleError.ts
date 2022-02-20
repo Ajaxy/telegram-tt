@@ -8,9 +8,14 @@ window.addEventListener('unhandledrejection', handleErrorEvent);
 const APP_ENV = process.env.APP_ENV;
 
 function handleErrorEvent(e: ErrorEvent | PromiseRejectionEvent) {
+  // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+  if (e instanceof ErrorEvent && e.message === 'ResizeObserver loop limit exceeded') {
+    return;
+  }
+
   e.preventDefault();
 
-  handleError(e instanceof ErrorEvent ? e.error : e.reason);
+  handleError(e instanceof ErrorEvent ? (e.error || e.message) : e.reason);
 }
 
 const throttledAlert = throttle(window.alert, 1000);

@@ -8,11 +8,11 @@
     overflow: hidden;
 
     &::after {
-      content: '...';
+      content: "...";
       animation: dot-animation 1s steps(4, start) infinite;
 
-      html[lang=ar] &,
-      html[lang=fa] & {
+      html[lang="ar"] &,
+      html[lang="fa"] & {
         animation-name: dot-animation-rtl;
       }
     }

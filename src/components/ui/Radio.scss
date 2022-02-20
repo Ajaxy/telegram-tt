@@ -15,7 +15,8 @@
   &.hidden-widget {
     cursor: default;
     .Radio-main {
-      &::before, &::after {
+      &::before,
+      &::after {
         visibility: hidden;
       }
     }
@@ -28,8 +29,9 @@
   }
 
   .Radio-main {
-    &::before, &::after {
-      content: '';
+    &::before,
+    &::after {
+      content: "";
       display: block;
       position: absolute;
       left: 1.0625rem;
@@ -44,7 +46,7 @@
       border-radius: 50%;
       background-color: var(--color-background);
       opacity: 1;
-      transition: border-color .1s ease, opacity .1s ease;
+      transition: border-color 0.1s ease, opacity 0.1s ease;
     }
 
     &::after {
@@ -54,7 +56,7 @@
       border-radius: 50%;
       background: var(--color-primary);
       opacity: 0;
-      transition: opacity .1s ease;
+      transition: opacity 0.1s ease;
     }
 
     .label {
@@ -95,12 +97,12 @@
       top: 50%;
       transform: translateY(-50%);
       opacity: 0;
-      animation: fade-in .2s ease forwards;
+      animation: fade-in 0.2s ease forwards;
       --spinner-size: 1.25rem;
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     padding-left: 0;
     padding-right: 4.5rem;
 
@@ -123,7 +125,7 @@
       text-align: right;
     }
 
-      &.loading .Spinner {
+    &.loading .Spinner {
       left: auto;
       right: 1.0625rem;
     }

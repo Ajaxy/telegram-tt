@@ -6,11 +6,11 @@
   color: #fff;
   padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
-  transition: .15s ease-out background-color;
+  transition: 0.15s ease-out background-color;
   cursor: pointer;
 
   &:hover {
-    background: #2F363E;
+    background: #2f363e;
   }
 
   audio {
@@ -36,19 +36,19 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
-      color: #848D94;
+      color: #848d94;
       font-size: 0.75rem;
 
       &.blue {
-        color: #4DA6E0;
+        color: #4da6e0;
       }
 
       &.green {
-        color: #57BC6C;
+        color: #57bc6c;
       }
 
       &.red {
-        color: #FF706F;
+        color: #ff706f;
       }
     }
   }
@@ -62,12 +62,12 @@
     height: 2.75rem;
     margin-left: auto;
     font-size: 1.5rem;
-    color: #FF706F;
+    color: #ff706f;
   }
 
   &.can-self-unmute {
     .microphone {
-      color: #848D94;
+      color: #848d94;
     }
   }
 

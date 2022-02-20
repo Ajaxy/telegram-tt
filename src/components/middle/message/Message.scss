@@ -1,4 +1,4 @@
-@import 'message-content';
+@import "message-content";
 
 // General styles
 .Message {
@@ -19,7 +19,9 @@
   --meta-safe-area-base: 2.25rem;
   --meta-safe-author-width: 0px;
   --meta-safe-area-extra-width: 0px;
-  --meta-safe-area-size: calc(var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width));
+  --meta-safe-area-size: calc(
+    var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width)
+  );
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
 
@@ -32,7 +34,7 @@
     --max-width: calc(30vw - 1rem);
   }
   @media (max-width: 600px) {
-    margin-bottom: .25rem;
+    margin-bottom: 0.25rem;
   }
 
   &.is-swiped {
@@ -104,7 +106,7 @@
   &.last-in-group {
     margin-bottom: 0.625rem;
     @media (max-width: 600px) {
-      margin-bottom: .4375rem;
+      margin-bottom: 0.4375rem;
     }
   }
 
@@ -142,14 +144,16 @@
   &:not(.own) {
     padding-left: 2.5rem;
 
-    .no-avatars &, &.is-thread-top {
+    .no-avatars &,
+    &.is-thread-top {
       padding-left: 0;
     }
 
     @media (max-width: 600px) {
       padding-left: 2.875rem;
 
-      .no-avatars &, &.is-thread-top {
+      .no-avatars &,
+      &.is-thread-top {
         padding-left: 0.25rem;
       }
     }
@@ -235,7 +239,7 @@
   &.is-deleting {
     > .Avatar,
     > .message-content-wrapper {
-      transition: opacity .2s ease, transform .2s ease-in;
+      transition: opacity 0.2s ease, transform 0.2s ease-in;
       opacity: 0;
       transform: scale(0.3) translateX(var(--deleting-translate-x));
       transform-origin: bottom;
@@ -253,7 +257,7 @@
       --meta-safe-area-extra-width: 7.5rem;
     }
 
-    html[lang=ru] & {
+    html[lang="ru"] & {
       --meta-safe-area-extra-width: 3.5rem;
 
       &.has-views {
@@ -345,7 +349,6 @@
     }
   }
 
-
   .File {
     position: relative;
 
@@ -366,12 +369,13 @@
     .message-select-control {
       position: absolute;
       z-index: 2;
-      top: 0.438rem;
-      right: 0.438rem;
+      top: 0.4375rem;
+      right: 0.4375rem;
       left: unset;
     }
 
-    img, video {
+    img,
+    video {
       transition: transform var(--select-transition), opacity ease 300ms;
     }
 
@@ -380,14 +384,15 @@
         background: var(--color-green);
       }
 
-      img, video {
+      img,
+      video {
         transform: scale(var(--select-message-scale));
       }
     }
-
   }
 
-  &.is-selected, &.is-forwarding {
+  &.is-selected,
+  &.is-forwarding {
     .message-select-control {
       background: var(--color-green);
     }
@@ -399,18 +404,18 @@
 
   &.is-in-document-group {
     .message-content.document {
-      padding: .25rem .5rem !important;
+      padding: 0.25rem 0.5rem !important;
     }
 
     &.last-in-document-group {
       .message-content.document {
-        padding-bottom: .5rem !important
+        padding-bottom: 0.5rem !important;
       }
     }
 
     &.first-in-document-group {
       .message-content.document {
-        padding-top: .5rem !important
+        padding-top: 0.5rem !important;
       }
     }
 
@@ -450,10 +455,10 @@
           background: white;
 
           &::after {
-            content: '';
+            content: "";
             width: 1.25rem;
             height: 1.25rem;
-            border-radius: 0.688rem;
+            border-radius: 0.6875rem;
             background: white;
             border: 0.125rem rgba(0, 0, 0, 0.2) solid;
             position: absolute;
@@ -477,7 +482,6 @@
           }
         }
       }
-
     }
 
     &.focused,
@@ -550,7 +554,7 @@
   }
 
   .Avatar {
-    margin-right: 0.3rem;
+    margin-right: 0.3125rem;
   }
 
   .message-content {
@@ -571,7 +575,7 @@
       & + .Album,
       & + .Audio,
       & + .File {
-        margin-top: .375rem;
+        margin-top: 0.375rem;
       }
     }
 
@@ -592,10 +596,10 @@
     position: absolute;
     bottom: 0;
     color: white;
-    background-color: rgba(0, 0, 0, .2);
+    background-color: rgba(0, 0, 0, 0.2);
 
     opacity: 0;
-    transition: opacity .2s ease;
+    transition: opacity 0.2s ease;
 
     @media (pointer: coarse) {
       opacity: 1 !important;
@@ -604,7 +608,7 @@
     &:hover,
     &:active,
     &:focus {
-      background-color: rgba(0, 0, 0, .28) !important;
+      background-color: rgba(0, 0, 0, 0.28) !important;
     }
   }
 
@@ -656,5 +660,5 @@
 }
 
 .Message .custom-shape .message-action-button {
-  bottom: .25rem;
+  bottom: 0.25rem;
 }

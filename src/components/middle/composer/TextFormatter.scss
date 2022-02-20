@@ -1,7 +1,8 @@
 .TextFormatter {
   transform: translate(-50%, -3.25rem);
 
-  &, &-link-control {
+  &,
+  &-link-control {
     position: absolute;
     background: var(--color-background);
     border-radius: var(--border-radius-messages);
@@ -14,7 +15,7 @@
     top: 0;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .3s ease;
+    transition: opacity 0.3s ease;
 
     .Modal & {
       max-width: 100%;
@@ -33,7 +34,8 @@
     }
   }
 
-  &-buttons, &-link-url-confirm {
+  &-buttons,
+  &-link-url-confirm {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
@@ -55,7 +57,8 @@
       max-width: 90vw;
     }
 
-    &::before, &::after {
+    &::before,
+    &::after {
       content: "";
       display: block;
       position: absolute;
@@ -64,17 +67,17 @@
       width: 1rem;
       z-index: 2;
       opacity: 0;
-      transition: opacity .2s ease;
+      transition: opacity 0.2s ease;
     }
 
     &::before {
       left: 0;
-      background: linear-gradient(to right, var(--color-background) .25rem, transparent 1rem)
+      background: linear-gradient(to right, var(--color-background) 0.25rem, transparent 1rem);
     }
 
     &::after {
       right: 0;
-      background: linear-gradient(to left, var(--color-background) .25rem, transparent 1rem)
+      background: linear-gradient(to left, var(--color-background) 0.25rem, transparent 1rem);
     }
 
     &.mask-left {
@@ -93,7 +96,7 @@
   &-link-url-confirm {
     flex-shrink: 0;
     opacity: 0;
-    transition: opacity .3s ease;
+    transition: opacity 0.3s ease;
 
     &.shown {
       opacity: 1;
@@ -123,7 +126,7 @@
     }
 
     &.disabled {
-      opacity: .5;
+      opacity: 0.5;
       pointer-events: none;
     }
   }

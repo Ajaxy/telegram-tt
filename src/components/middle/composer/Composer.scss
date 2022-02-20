@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@import "../../../styles/mixins";
 
 .Composer {
   align-items: flex-end;
@@ -6,11 +6,7 @@
   .select-mode-active + .middle-column-footer & {
     position: absolute;
     padding-right: 2rem;
-    bottom: 0;
-
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      bottom: env(safe-area-inset-bottom);
-    }
+    bottom: env(safe-area-inset-bottom);
 
     @media (max-width: 600px) {
       padding-right: 1rem;
@@ -47,7 +43,7 @@
 
   > .Button {
     flex-shrink: 0;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
 
     &:not(.danger) {
       color: var(--color-composer-button);
@@ -77,7 +73,8 @@
       position: relative;
       z-index: 1;
 
-      &:hover, &.active {
+      &:hover,
+      &.active {
         background: var(--color-chat-hover);
       }
     }
@@ -85,54 +82,54 @@
     &.recording {
       position: relative;
       z-index: 0;
-      transition: box-shadow .1s;
+      transition: box-shadow 0.1s;
     }
 
     &.send {
       .icon-send {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
       .icon-microphone-alt,
       .icon-check,
       .icon-schedule {
-        animation: hide-icon .4s forwards ease-out;
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.schedule {
       .icon-schedule {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
       .icon-microphone-alt,
       .icon-check,
       .icon-send {
-        animation: hide-icon .4s forwards ease-out;
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.record {
       .icon-microphone-alt {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
       .icon-send,
       .icon-check,
       .icon-schedule {
-        animation: hide-icon .4s forwards ease-out;
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.edit {
       .icon-check {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
       .icon-send,
       .icon-microphone-alt,
       .icon-schedule {
-        animation: hide-icon .4s forwards ease-out;
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
@@ -140,8 +137,12 @@
       animation-duration: 0ms !important;
     }
 
-    body.animation-level-0 &, body.animation-level-1 & {
-      .icon-send, .icon-microphone-alt, .icon-check, .icon-schedule {
+    body.animation-level-0 &,
+    body.animation-level-1 & {
+      .icon-send,
+      .icon-microphone-alt,
+      .icon-check,
+      .icon-schedule {
         animation-duration: 0ms !important;
       }
     }
@@ -172,11 +173,12 @@
     }
 
     .icon-smile {
-      animation: grow-icon .4s ease-out;
+      animation: grow-icon 0.4s ease-out;
     }
 
-    .icon-keyboard, .Spinner {
-      animation: hide-icon .4s forwards ease-out;
+    .icon-keyboard,
+    .Spinner {
+      animation: hide-icon 0.4s forwards ease-out;
     }
 
     &.not-ready > i {
@@ -185,21 +187,23 @@
 
     &.is-loading {
       .Spinner {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-keyboard, .icon-smile {
-        animation: hide-icon .4s forwards ease-out;
+      .icon-keyboard,
+      .icon-smile {
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.menu-opened {
       .icon-keyboard {
-        animation: grow-icon .4s ease-out;
+        animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-smile, .Spinner {
-        animation: hide-icon .4s forwards ease-out;
+      .icon-smile,
+      .Spinner {
+        animation: hide-icon 0.4s forwards ease-out;
       }
     }
   }
@@ -217,9 +221,10 @@
 
   .svg-appendix {
     position: absolute;
-    bottom: -.1875rem;
-    right: -.551rem; // This value is correct. Safari fix
-    width: .5625rem;
+    bottom: -0.1875rem;
+    /* stylelint-disable-next-line plugin/whole-pixel */
+    right: -0.551rem; // This value is correct. Safari fix
+    width: 0.5625rem;
     height: 1.25rem;
     transition: opacity 200ms;
     font-size: 1rem !important;
@@ -240,7 +245,7 @@
   > .Spinner {
     align-self: center;
     --spinner-size: 1.5rem;
-    margin-right: -.5rem;
+    margin-right: -0.5rem;
   }
 
   > .Button {
@@ -279,20 +284,20 @@
     }
 
     &.scheduled-button i::after {
-      content: '';
+      content: "";
       position: absolute;
-      top: .75rem;
-      right: .875rem;
-      border: .1875rem solid var(--color-background);
+      top: 0.75rem;
+      right: 0.875rem;
+      border: 0.1875rem solid var(--color-background);
       box-sizing: content-box;
-      width: .5rem;
-      height: .5rem;
+      width: 0.5rem;
+      height: 0.5rem;
       border-radius: 50%;
       background: var(--color-green-darker);
-      box-shadow: -.375rem -.25rem 0 -.1875rem var(--color-background);
+      box-shadow: -0.375rem -0.25rem 0 -0.1875rem var(--color-background);
       @media (max-width: 600px) {
-        top: .5rem;
-        right: .5rem;
+        top: 0.5rem;
+        right: 0.5rem;
       }
     }
   }
@@ -311,14 +316,14 @@
     font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
 
     &::after {
-      content: '';
-      width: .75rem;
-      height: .75rem;
+      content: "";
+      width: 0.75rem;
+      height: 0.75rem;
       background: var(--color-error);
-      border-radius: .375rem;
+      border-radius: 0.375rem;
       position: absolute;
       top: 50%;
-      margin-top: -.375rem;
+      margin-top: -0.375rem;
       right: 1.3125rem;
       animation: recording-blink-like-macos 1.5s infinite;
     }
@@ -335,7 +340,8 @@
   position: relative;
 
   .form-control {
-    padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2) calc(.9rem - var(--border-width));
+    padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
+      calc(0.9rem - var(--border-width));
     overflow: hidden;
     line-height: 1.375;
     font-family: Roboto, -apple-system, "Apple Color Emoji", "Helvetica Neue", sans-serif;
@@ -345,7 +351,8 @@
 
     body.is-ios &,
     body.is-macos & {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
+        sans-serif;
     }
 
     &.overflown {
@@ -353,7 +360,8 @@
       overflow-x: hidden;
     }
 
-    &.touched, &:focus {
+    &.touched,
+    &:focus {
       & + .placeholder-text {
         display: none;
       }
@@ -386,7 +394,7 @@
     left: 0;
   }
 
-  &[dir=rtl] .placeholder-text {
+  &[dir="rtl"] .placeholder-text {
     right: 0;
   }
 
@@ -395,21 +403,24 @@
     cursor: default;
     text-decoration: none;
 
-    &:hover, &:active, &:visited {
+    &:hover,
+    &:active,
+    &:visited {
       text-decoration: underline !important;
     }
   }
 
   .spoiler {
-    background-image: url('../../../assets/spoiler-dots-black.png');
+    background-image: url("../../../assets/spoiler-dots-black.png");
     background-size: auto min(100%, 1.125rem);
     border-radius: 0.5rem;
     padding: 0 0.3125rem 0.125rem 0.3125rem;
-    text-shadow: -2px -2px 0 var(--color-background), 2px -2px 0 var(--color-background), -2px 2px 0 var(--color-background), 2px 2px 0 var(--color-background);
+    text-shadow: -2px -2px 0 var(--color-background), 2px -2px 0 var(--color-background),
+      -2px 2px 0 var(--color-background), 2px 2px 0 var(--color-background);
   }
 
   html.theme-dark & .spoiler {
-    background-image: url('../../../assets/spoiler-dots-white.png');
+    background-image: url("../../../assets/spoiler-dots-white.png");
   }
 
   .clone {
@@ -495,14 +506,14 @@
   }
 
   .placeholder-text {
-    bottom: .8125rem;
-    left: .90625rem;
+    bottom: 0.8125rem;
+    left: 0.9375rem;
   }
 }
 
 .composer-tooltip {
   position: absolute;
-  bottom: calc(100% + .5rem);
+  bottom: calc(100% + 0.5rem);
   left: 0;
   width: 100%;
   background: var(--color-background);
@@ -540,6 +551,6 @@
     opacity: 1;
   }
   to {
-    opacity: .3;
+    opacity: 0.3;
   }
 }

@@ -3,41 +3,21 @@
   max-width: var(--max-width);
 
   @media (max-width: 600px) {
-    max-width: calc(100vw - 6.25rem);
-
-    .Message.own &,
+    max-width: min(29rem, calc(100vw - 6.25rem));
     .MessageList.no-avatars & {
-      max-width: calc(100vw - 3.75rem);
+      max-width: min(29rem, calc(100vw - 3.75rem));
     }
-
-    // Workaround for sass function override - we should use CSS min() here
-    @supports (max-width: #{"min(29rem, 100vw - 6.25rem)"}) {
-      max-width: #{"min(29rem, 100vw - 6.25rem)"};
-      .MessageList.no-avatars & {
-        max-width: #{"min(29rem, 100vw - 3.75rem)"};
-      }
-      .Message.own & {
-        max-width: #{"min(30rem, 100vw - 3.75rem)"};
-      }
+    .Message.own & {
+      max-width: min(30rem, calc(100vw - 3.75rem));
     }
 
     &.has-action-button {
-      max-width: calc(100vw - 7rem);
-
-      .Message.own &,
+      max-width: min(29rem, calc(100vw - 7rem));
       .MessageList.no-avatars & {
-        max-width: calc(100vw - 4.5rem);
+        max-width: min(29rem, calc(100vw - 4.5rem));
       }
-
-      // Workaround for sass function override - we should use CSS min() here
-      @supports (max-width: #{"min(29rem, 100vw - 5.5rem)"}) {
-        max-width: #{"min(29rem, 100vw - 7rem)"};
-        .MessageList.no-avatars & {
-          max-width: #{"min(29rem, 100vw - 4.5rem)"};
-        }
-        .Message.own & {
-          max-width: #{"min(30rem, 100vw - 4.5rem)"};
-        }
+      .Message.own & {
+        max-width: min(30rem, calc(100vw - 4.5rem));
       }
     }
   }
@@ -70,13 +50,13 @@
   &.document {
     & > .MessageMeta {
       position: relative;
-      top: .375rem;
+      top: 0.375rem;
       bottom: auto !important;
       float: right;
       line-height: 1.35;
       height: calc(var(--message-meta-height, 1rem));
-      margin-left: .4375rem;
-      margin-right: -.5rem;
+      margin-left: 0.4375rem;
+      margin-right: -0.5rem;
 
       .MessageOutgoingStatus .Transition {
         max-height: calc(var(--message-meta-height, 1rem));
@@ -84,41 +64,41 @@
       }
 
       html[data-message-text-size="12"] & {
-        top: .25rem;
+        top: 0.25rem;
       }
 
       html[data-message-text-size="17"] & {
-        top: .4375rem;
+        top: 0.4375rem;
       }
 
       html[data-message-text-size="18"] &,
       html[data-message-text-size="19"] & {
-        top: .5rem;
+        top: 0.5rem;
       }
 
       html[data-message-text-size="20"] & {
-        top: .5625rem;
+        top: 0.5625rem;
       }
     }
 
     &:dir(rtl) {
       & > .MessageMeta {
         float: left;
-        margin-left: -.25rem;
-        margin-right: .4375rem;
+        margin-left: -0.25rem;
+        margin-right: 0.4375rem;
       }
     }
   }
 
   .MessageMeta.reactions-offset {
     position: relative;
-    top: .375rem;
+    top: 0.375rem;
     bottom: auto !important;
     float: right;
     line-height: 1;
     height: calc(var(--message-meta-height, 1rem));
     margin-left: auto;
-    margin-right: -.5rem;
+    margin-right: -0.5rem;
     align-self: flex-end;
 
     .MessageOutgoingStatus .Transition {
@@ -127,20 +107,20 @@
     }
 
     html[data-message-text-size="12"] & {
-      top: .25rem;
+      top: 0.25rem;
     }
 
     html[data-message-text-size="17"] & {
-      top: .4375rem;
+      top: 0.4375rem;
     }
 
     html[data-message-text-size="18"] &,
     html[data-message-text-size="19"] & {
-      top: .5rem;
+      top: 0.5rem;
     }
 
     html[data-message-text-size="20"] & {
-      top: .5625rem;
+      top: 0.5625rem;
     }
   }
 
@@ -153,10 +133,10 @@
 
     & > .MessageMeta {
       top: auto !important;
-      bottom: -.5rem !important;
-      margin-top: -.25rem;
+      bottom: -0.5rem !important;
+      margin-top: -0.25rem;
 
-      &:not([dir=rtl]) {
+      &:not([dir="rtl"]) {
         margin-top: -1.25rem;
       }
     }
@@ -186,7 +166,7 @@
 
   .matching-text-highlight {
     color: var(--color-text);
-    background: #CAE3F7;
+    background: #cae3f7;
     border-radius: 0.25rem;
     padding: 0 0.125rem;
 
@@ -199,7 +179,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: calc(var(--message-text-size, 1rem) - .125rem);
+    font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
@@ -211,7 +191,8 @@
       text-overflow: ellipsis;
     }
 
-    &.interactive, & > .interactive {
+    &.interactive,
+    & > .interactive {
       cursor: pointer;
 
       &:hover {
@@ -252,16 +233,16 @@
     }
 
     & + .File {
-      margin-top: .25rem;
+      margin-top: 0.25rem;
     }
 
     .via {
-      padding-right: .25rem;
+      padding-right: 0.25rem;
       font-weight: 400;
     }
 
     span + .via {
-      padding-left: .25rem;
+      padding-left: 0.25rem;
     }
 
     .admin-title {
@@ -270,7 +251,7 @@
       text-align: right;
       font-weight: 400;
       font-size: 0.75rem;
-      margin-top: -0.1rem;
+      margin-top: -0.125rem;
       color: rgba(var(--color-text-meta-rgb), 0.75);
 
       .Message.own & {
@@ -283,15 +264,17 @@
     box-shadow: 0 1px 2px var(--color-default-shadow);
   }
 
-  &.has-solid-background, &.has-background, .is-album & {
+  &.has-solid-background,
+  &.has-background,
+  .is-album & {
     background: var(--background-color);
   }
 
   &.has-solid-background {
-    padding: .3125rem .5rem .375rem;
+    padding: 0.3125rem 0.5rem 0.375rem;
 
     .forwarded-message > .text-content:not(.with-meta):last-child::after {
-      content: '';
+      content: "";
       display: inline-block;
       width: var(--meta-safe-area-size);
       height: 1rem;
@@ -313,8 +296,8 @@
   .svg-appendix {
     overflow: hidden;
     position: absolute;
-    bottom: -.0625rem;
-    width: .5625rem;
+    bottom: -0.0625rem;
+    width: 0.5625rem;
     height: 1.125rem;
     font-size: 1rem !important;
 
@@ -323,11 +306,13 @@
     }
 
     .Message.own & {
-      right: -.551rem; // This value is correct. Safari fix
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      right: -0.551rem; // This value is correct. Safari fix
     }
 
     .Message:not(.own) & {
-      left: -.562rem; // This value is correct. Safari fix
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      left: -0.562rem; // This value is correct. Safari fix
     }
   }
 
@@ -348,7 +333,7 @@
   }
 
   &.document {
-    padding: .5rem !important;
+    padding: 0.5rem !important;
 
     .File {
       .theme-dark & {
@@ -357,7 +342,7 @@
     }
 
     .File + .text-content {
-      margin-top: .3125rem;
+      margin-top: 0.3125rem;
     }
   }
 
@@ -365,29 +350,29 @@
   &.audio {
     .message-title,
     .Embedded {
-      margin-top: -.1875rem;
-      margin-bottom: .1875rem;
+      margin-top: -0.1875rem;
+      margin-bottom: 0.1875rem;
     }
   }
 
   &.voice {
-    padding: .5rem !important;
+    padding: 0.5rem !important;
 
     .Voice + .text-content {
-      margin-top: .5rem;
+      margin-top: 0.5rem;
     }
   }
 
   &.audio {
     min-width: 20rem;
-    padding: .5rem .5rem .8125rem !important;
+    padding: 0.5rem 0.5rem 0.8125rem !important;
 
     @media (max-width: 600px) {
       min-width: 17rem;
     }
 
     .Audio + .text-content {
-      margin-top: .25rem;
+      margin-top: 0.25rem;
     }
 
     &:not(.has-replies) {
@@ -428,10 +413,10 @@
     .content-inner > .message-title {
       display: inline-flex;
       position: relative;
-      top: .125rem;
+      top: 0.125rem;
       max-width: calc(100% - 3rem);
       margin-left: calc(100% - 3rem);
-      padding: 0 .5rem;
+      padding: 0 0.5rem;
       background-color: var(--background-color);
       border-radius: var(--border-radius-messages);
 
@@ -444,10 +429,10 @@
       margin-top: 0.375rem;
     }
   }
-
 }
 
-.message-content.media, .WebPage {
+.message-content.media,
+.WebPage {
   .media-inner {
     display: flex;
     justify-content: center;
@@ -518,11 +503,12 @@
     &:not(.open) {
       opacity: 0.5;
       transform: scale(0);
-      transition: opacity .3s ease, transform .3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
   }
 
-  .icon-large-play, .icon-download {
+  .icon-large-play,
+  .icon-download {
     position: absolute;
     display: flex;
     align-items: center;
@@ -546,7 +532,7 @@
     }
 
     &.opacity-transition {
-      transition: opacity .15s ease;
+      transition: opacity 0.15s ease;
 
       &:not(.open) {
         opacity: 0;
@@ -564,22 +550,22 @@
 
   .message-media-duration,
   .message-transfer-progress {
-    background: rgba(0, 0, 0, .25);
+    background: rgba(0, 0, 0, 0.25);
     color: #fff;
     font-size: 0.75rem;
     position: absolute;
-    left: .1875rem;
-    top: .1875rem;
+    left: 0.1875rem;
+    top: 0.1875rem;
     z-index: 1;
-    padding: 0 .375rem;
-    border-radius: .75rem;
+    padding: 0 0.375rem;
+    border-radius: 0.75rem;
     line-height: 1.125rem;
     user-select: none;
   }
 
   .message-media-duration .icon-muted {
-    vertical-align: -.1875rem;
-    margin-left: .375rem;
+    vertical-align: -0.1875rem;
+    margin-left: 0.375rem;
     font-size: 1.0625rem;
   }
 }
@@ -661,7 +647,8 @@
       margin-bottom: 0;
       text-shadow: 1px 1px 0 white, -1px -1px 0 white, -1px 1px 0 white, 1px -1px 0 white;
       img.emoji {
-        filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px -1px 0 white);
+        filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px -1px 0 white)
+          drop-shadow(-1px -1px 0 white);
       }
 
       .MessageMeta {
@@ -695,10 +682,10 @@
 
   &.emoji-only-2 {
     font-size: 4rem;
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     min-width: 10rem;
     @media (max-width: 600px) {
-      margin-top: .375rem;
+      margin-top: 0.375rem;
     }
 
     &.has-comments {
@@ -775,12 +762,12 @@
     padding-left: 0.625rem;
 
     &::before {
-      content: '';
+      content: "";
       display: block;
       position: absolute;
       top: 0;
       bottom: 0;
-      left: 0.05rem;
+      left: 0.0625rem;
       width: 2px;
       background: var(--accent-color);
       border-radius: 2px;
@@ -791,7 +778,7 @@
 
       &::before {
         left: auto;
-        right: 0.05rem;
+        right: 0.0625rem;
       }
     }
   }
@@ -818,12 +805,15 @@
   cursor: pointer;
   unicode-bidi: initial;
 
-  &:hover, &:active, &:visited {
+  &:hover,
+  &:active,
+  &:visited {
     text-decoration: underline !important;
   }
 }
 
-.text-entity-code, .text-entity-pre {
+.text-entity-code,
+.text-entity-pre {
   color: var(--color-code);
   background: var(--color-code-bg);
   white-space: pre-wrap;

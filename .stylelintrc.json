@@ -1,6 +1,27 @@
 {
-  "extends": "stylelint-config-recommended-scss",
+  "extends": [
+    "stylelint-config-recommended-scss"
+  ],
+  "plugins": [
+    "stylelint-declaration-block-no-ignored-properties",
+    "stylelint-high-performance-animation",
+    "stylelint-group-selectors",
+    "./plugins/wholePixel.js"
+  ],
   "rules": {
-    "no-descending-specificity": null
+    "number-leading-zero": "always",
+    "selector-attribute-quotes": "always",
+    "scss/operator-no-unspaced": null,
+    "no-descending-specificity": null,
+    "plugin/declaration-block-no-ignored-properties": true,
+    "plugin/no-low-performance-animation-properties": [
+      true,
+      {
+        "severity": "warning",
+        "ignore": "paint-properties"
+      }
+    ],
+    "plugin/stylelint-group-selectors": [true, { "severity": "warning" }],
+    "plugin/whole-pixel": [true, { "ignoreList": ["letter-spacing"] }]
   }
 }

@@ -11,12 +11,13 @@
   line-height: 1.5rem;
   white-space: nowrap;
   color: var(--color-text);
-  --ripple-color: rgba(0, 0, 0, .08);
+  --ripple-color: rgba(0, 0, 0, 0.08);
   cursor: pointer;
   unicode-bidi: plaintext;
 
   @media (hover: hover) {
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       background-color: var(--color-chat-hover);
       text-decoration: none;
       color: inherit;
@@ -24,7 +25,9 @@
   }
 
   @media (max-width: 600px) {
-    &:focus, &:hover, &:active {
+    &:focus,
+    &:hover,
+    &:active {
       text-decoration: none;
       color: inherit;
     }
@@ -70,7 +73,7 @@
     margin-left: auto;
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     i {
       margin-left: 2rem;
       margin-right: 0;

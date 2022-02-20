@@ -6,8 +6,12 @@
     margin: -0.3125rem -0.5rem 0.3125rem;
   }
 
+  body.is-ios .Message.own .message-content.has-solid-background & {
+    margin: -0.3125rem -0.5rem 0.3125rem -0.625rem;
+  }
+
   .forwarded-message & {
-    margin-bottom: .125rem;
+    margin-bottom: 0.125rem;
 
     .message-content.media.text & {
       margin: 0 0 0.3125rem;
@@ -24,7 +28,9 @@
   }
 
   > .album-item-select-wrapper .media-inner {
-    &, & img, & video {
+    &,
+    & img,
+    & video {
       border-radius: 0 !important;
       object-fit: cover;
     }

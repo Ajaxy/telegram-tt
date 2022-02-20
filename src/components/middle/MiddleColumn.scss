@@ -21,7 +21,7 @@
     background-size: cover;
 
     body:not(.animation-level-0) #root & {
-      transition: transform var(--layer-transition), background .2s !important;
+      transition: transform var(--layer-transition), background 0.2s !important;
     }
 
     body.animation-level-0 & {
@@ -29,10 +29,10 @@
     }
 
     .theme-light & {
-      background-image: url('../../assets/chat-bg.jpg');
+      background-image: url("../../assets/chat-bg.jpg");
 
       @media (max-width: 600px) {
-        background-image: url('../../assets/chat-bg-mobile.jpg');
+        background-image: url("../../assets/chat-bg-mobile.jpg");
       }
     }
   }
@@ -123,13 +123,15 @@
       }
 
       body.animation-level-0 & {
-        &, &::before {
+        &,
+        &::before {
           transition: none !important;
         }
       }
     }
 
-    .message-input-wrapper, &::before {
+    .message-input-wrapper,
+    &::before {
       opacity: 1;
       transition: opacity var(--select-transition);
 
@@ -141,14 +143,16 @@
     > .Button {
       opacity: 1;
       transform: scale(1);
-      transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s, color 0.15s;
+      transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
+        color 0.15s;
 
       body.animation-level-0 & {
         transition: none !important;
       }
     }
 
-    &.hover-disabled, &:not(.shown) {
+    &.hover-disabled,
+    &:not(.shown) {
       pointer-events: none;
     }
 
@@ -174,7 +178,8 @@
         }
       }
 
-      .message-input-wrapper, &::before {
+      .message-input-wrapper,
+      &::before {
         opacity: 0;
       }
 
@@ -254,25 +259,29 @@
       }
     }
 
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      &:not(.no-composer) {
-        padding-bottom: env(safe-area-inset-bottom);
-        top: 0;
+    &:not(.no-composer) {
+      padding-bottom: env(safe-area-inset-bottom);
+      top: 0;
 
-        body.keyboard-visible & {
-          top: env(safe-area-inset-bottom);
-        }
+      body.keyboard-visible & {
+        top: env(safe-area-inset-bottom);
       }
     }
 
     &::before {
       content: "";
       position: absolute;
-      top: -.5625rem;
+      top: -0.5625rem;
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 2%, rgba(255, 255, 255, 0.4) 98%, rgba(255, 255, 255, 0) 100%);
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 2%,
+        rgba(255, 255, 255, 0.4) 98%,
+        rgba(255, 255, 255, 0) 100%
+      );
       opacity: 0;
       transition: opacity 350ms ease;
 
@@ -287,7 +296,13 @@
     }
 
     html.theme-dark &::before {
-      background: linear-gradient(90deg, rgba(127, 127, 127, 0) 0%, rgba(127, 127, 127, 0.4) 2%, rgba(127, 127, 127, 0.4) 98%, rgba(127, 127, 127, 0) 100%);
+      background: linear-gradient(
+        90deg,
+        rgba(127, 127, 127, 0) 0%,
+        rgba(127, 127, 127, 0.4) 2%,
+        rgba(127, 127, 127, 0.4) 98%,
+        rgba(127, 127, 127, 0) 100%
+      );
     }
   }
 }
@@ -319,7 +334,7 @@
 .join-subscribe-button,
 .messaging-disabled {
   .mask-image-disabled & {
-    box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-messages);
   }
 }
@@ -344,7 +359,8 @@
     }
 
     @media (max-width: 600px) {
-      &:active, &:focus {
+      &:active,
+      &:focus {
         .icon-unpin {
           color: var(--color-white);
         }
@@ -353,10 +369,10 @@
 
     .icon-unpin {
       margin-inline-start: -0.4375rem;
-      margin-inline-end: .75rem;
+      margin-inline-end: 0.75rem;
       color: var(--color-text-secondary);
       font-size: 1.5rem;
-      transition: color .15s
+      transition: color 0.15s;
     }
   }
 
@@ -364,7 +380,7 @@
   .unpin-all-button {
     height: 3.5rem;
     transform: scaleX(1);
-    transition: transform var(--select-transition), background-color .15s, color .15s;
+    transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
 
     .select-mode-active + .middle-column-footer & {
       box-shadow: none;
@@ -377,11 +393,7 @@
   }
 
   @media (max-width: 600px) {
-    padding-bottom: 0.75rem;
-
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      padding-bottom: calc(.75rem + env(safe-area-inset-bottom));
-    }
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 
   .mask-image-disabled &::before {

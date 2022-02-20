@@ -1,22 +1,22 @@
 .WebPage {
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
-  padding-left: .625rem;
-  font-size: calc(var(--message-text-size, 1rem) - .125rem);
+  padding-left: 0.625rem;
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   line-height: 1.125rem;
   max-width: 29rem;
   position: relative;
 
   &::before {
-    content: '';
+    content: "";
     display: block;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
-    width: .125rem;
+    width: 0.125rem;
     background: var(--accent-color);
-    border-radius: .125rem;
+    border-radius: 0.125rem;
   }
 
   &-text {
@@ -29,7 +29,9 @@
     margin: 0 !important;
     margin-bottom: 0.375rem !important;
 
-    &, & img, &.small-image img {
+    &,
+    & img,
+    &.small-image img {
       border-radius: var(--border-radius-messages-small) !important;
     }
 
@@ -77,7 +79,7 @@
     .site-title,
     .site-description {
       &:last-child::after {
-        content: '';
+        content: "";
         display: inline-block;
         width: var(--meta-safe-area-size);
         height: 0.75rem;
@@ -114,7 +116,7 @@
   }
 
   &:dir(rtl) {
-    padding-inline-start: .625rem;
+    padding-inline-start: 0.625rem;
 
     &::before {
       left: auto;
@@ -122,5 +124,3 @@
     }
   }
 }
-
-

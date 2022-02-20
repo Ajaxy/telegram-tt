@@ -36,7 +36,7 @@
     left: var(--start-x);
     transform: scale(var(--scale), 0);
     transform-origin: left top;
-    transition: 0.25s cubic-bezier(.29,.81,.27,.99) opacity;
+    transition: 0.25s cubic-bezier(0.29, 0.81, 0.27, 0.99) opacity;
   }
 
   &.reversed .AnimatedSticker {
@@ -44,11 +44,11 @@
   }
 
   &.playing .AnimatedSticker {
-    animation: show-interaction forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+    animation: show-interaction forwards 0.25s cubic-bezier(0.29, 0.81, 0.27, 0.99);
   }
 
   &.reversed.playing .AnimatedSticker {
-    animation: show-interaction-reversed forwards 0.25s cubic-bezier(.29,.81,.27,.99);
+    animation: show-interaction-reversed forwards 0.25s cubic-bezier(0.29, 0.81, 0.27, 0.99);
   }
 
   &.hiding .AnimatedSticker {

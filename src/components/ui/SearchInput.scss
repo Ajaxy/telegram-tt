@@ -15,12 +15,12 @@
     }
 
     input {
-      padding-left: .5rem;
+      padding-left: 0.5rem;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       input {
-        padding-right: .5rem;
+        padding-right: 0.5rem;
         padding-left: 0;
       }
     }
@@ -45,7 +45,8 @@
     border-radius: 1.375rem;
     background-color: transparent !important;
     box-shadow: none !important;
-    padding: calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width)) calc(0.5rem - var(--border-width)) calc(2.75rem - var(--border-width));
+    padding: calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width))
+      calc(0.5rem - var(--border-width)) calc(2.75rem - var(--border-width));
 
     &::placeholder {
       color: var(--color-placeholders);
@@ -54,8 +55,8 @@
 
   > i {
     position: absolute;
-    top: .5rem;
-    left: .75rem;
+    top: 0.5rem;
+    left: 0.75rem;
     font-size: 1.375rem;
   }
 
@@ -73,8 +74,8 @@
 
   .Button {
     position: absolute;
-    top: .125rem;
-    right: .125rem;
+    top: 0.125rem;
+    right: 0.125rem;
     font-size: 1rem;
   }
 
@@ -90,23 +91,23 @@
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     input {
       direction: rtl;
     }
 
     > i {
       left: auto;
-      right: .75rem;
+      right: 0.75rem;
     }
 
     .Loading {
-      left: .5rem;
+      left: 0.5rem;
       right: auto;
     }
 
     .Button {
-      left: .125rem;
+      left: 0.125rem;
       right: auto;
     }
   }

@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 @mixin mobile-header-styles() {
   .HeaderPinnedMessage-wrapper,
@@ -8,33 +8,30 @@
     left: 0;
     right: 0;
     height: 2.875rem;
-    box-shadow: 0 .125rem .125rem var(--color-light-shadow);
+    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
 
     display: flex;
     flex-direction: row-reverse;
-    padding: 0.375rem 0.5rem;
-    padding-left: 0.75rem;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
     background: var(--color-background);
 
     &::before {
       content: "";
       display: block;
       position: absolute;
-      top: -.1875rem;
+      top: -0.1875rem;
       left: 0;
       right: 0;
-      height: .125rem;
-      box-shadow: 0 .125rem .125rem var(--color-light-shadow);
+      height: 0.125rem;
+      box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
     }
 
     .HeaderPinnedMessage {
       max-width: unset;
       margin-top: -0.1875rem;
-    }
-
-    @supports (padding-left: env(safe-area-inset-left)) {
-      padding-left: #{"max(0.75rem, env(safe-area-inset-left))"};
-      padding-right: #{"max(0.5rem, env(safe-area-inset-right))"};
     }
   }
 
@@ -45,11 +42,11 @@
 
     &-content {
       padding: 0 0.5rem;
-      flex-grow: 1
+      flex-grow: 1;
     }
 
     > .Button {
-      margin: -.0625rem 0 0;
+      margin: -0.0625rem 0 0;
     }
 
     > .player-close {
@@ -83,23 +80,18 @@
   width: 100%;
   box-shadow: 0 2px 2px var(--color-light-shadow);
   background: var(--color-background);
-  padding: .5rem .8125rem .5rem 1.5rem;
   position: relative;
   z-index: var(--z-middle-header);
-
-  @supports (padding-left: env(safe-area-inset-left)) {
-    padding-left: #{"max(1.5rem, env(safe-area-inset-left))"};
-    padding-right: #{"max(.8125rem, env(safe-area-inset-right))"};
-  }
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(0.8125rem, env(safe-area-inset-right));
 
   @media (max-width: 600px) {
-    padding: 0.5rem;
     position: relative;
 
-    @supports (padding-left: env(safe-area-inset-left)) {
-      padding-left: #{"max(.5rem, env(safe-area-inset-left))"};
-      padding-right: #{"max(.5rem, env(safe-area-inset-right))"};
-    }
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
   }
 
   .Transition {
@@ -278,11 +270,12 @@
         width: 1.25rem;
         height: 1.25rem;
         margin-left: 0.25rem;
-        margin-top: 0.05rem;
+        margin-top: 0.0625rem;
       }
     }
 
-    .status, .typing-status {
+    .status,
+    .typing-status {
       display: inline;
       unicode-bidi: plaintext;
 
@@ -307,14 +300,15 @@
   }
 
   .Avatar {
-    margin-right: .625rem;
+    margin-right: 0.625rem;
     // TODO For some reason webpack imports `Audio.scss` second time when loading calls bundle
     width: 2.5rem !important;
     height: 2.5rem !important;
     font-size: 1.0625rem;
   }
 
-  .status, .typing-status {
+  .status,
+  .typing-status {
     font-size: 0.875rem;
     line-height: 1.125rem;
     margin: 0;
@@ -365,7 +359,6 @@
       }
     }
 
-
     .HeaderPinnedMessage {
       min-width: 16rem;
     }
@@ -380,8 +373,8 @@
       right: 0;
       top: 100%;
       background: var(--color-background);
-      padding: .25rem .8125rem .25rem 1rem;
-      box-shadow: 0 .125rem .125rem var(--color-light-shadow);
+      padding: 0.25rem 0.8125rem 0.25rem 1rem;
+      box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
       transform: translate3d(0, 0, 0);
       transition: opacity 0.15s ease, transform var(--layer-transition);
 
@@ -389,11 +382,11 @@
         content: "";
         display: block;
         position: absolute;
-        top: -.1875rem;
+        top: -0.1875rem;
         left: 0;
         right: 0;
-        height: .125rem;
-        box-shadow: 0 .125rem .125rem var(--color-light-shadow);
+        height: 0.125rem;
+        box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
       }
 
       .HeaderPinnedMessage {
@@ -411,7 +404,7 @@
         transition: opacity 0.15s ease, transform var(--layer-transition);
 
         #Main.right-column-open & {
-            padding-left: calc(var(--right-column-width) + 1rem);
+          padding-left: calc(var(--right-column-width) + 1rem);
         }
       }
     }
@@ -452,7 +445,7 @@
         background-color: var(--color-primary-opacity);
         position: relative;
         will-change: transform;
-        transition: transform .25s ease-in-out;
+        transition: transform 0.25s ease-in-out;
       }
 
       .pinned-message-border-mark {
@@ -463,7 +456,7 @@
         background: var(--color-primary);
         border-radius: 0.0625rem;
         will-change: transform;
-        transition: transform .25s ease-in-out;
+        transition: transform 0.25s ease-in-out;
       }
     }
 
@@ -488,7 +481,7 @@
         text-align: initial;
 
         body.is-ios & {
-          font-size: .9375rem;
+          font-size: 0.9375rem;
         }
       }
 
@@ -502,7 +495,7 @@
         margin: 0;
 
         body.is-ios & {
-          font-size: .9375rem;
+          font-size: 0.9375rem;
         }
       }
     }
@@ -563,12 +556,13 @@
     }
   }
 
-  .HeaderPinnedMessage-wrapper, .HeaderActions {
+  .HeaderPinnedMessage-wrapper,
+  .HeaderActions {
     .Button {
       margin-left: 0.25rem;
 
       &.tiny {
-        margin-right: .625rem;
+        margin-right: 0.625rem;
       }
     }
   }

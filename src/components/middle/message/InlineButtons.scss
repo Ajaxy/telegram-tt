@@ -17,7 +17,7 @@
     text-transform: none;
 
     &::before {
-      content: '';
+      content: "";
       background-color: var(--color-white);
       opacity: 0;
 
@@ -35,7 +35,7 @@
       background: var(--pattern-color) !important;
 
       &::before {
-        opacity: .4;
+        opacity: 0.4;
       }
     }
 
@@ -48,16 +48,16 @@
     }
 
     i {
-      font-size: .875rem;
+      font-size: 0.875rem;
       position: absolute;
-      right: .1875rem;
-      top: .1875rem;
+      right: 0.1875rem;
+      top: 0.1875rem;
       display: block;
 
       &.icon-arrow-right {
-        font-size: .75rem;
-        top: .125rem;
-        right: .125rem;
+        font-size: 0.75rem;
+        top: 0.125rem;
+        right: 0.125rem;
         transform: rotate(-45deg);
       }
     }

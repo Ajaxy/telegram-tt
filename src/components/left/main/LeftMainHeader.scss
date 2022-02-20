@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@import "../../../styles/mixins";
 
 #LeftMainHeader {
   position: relative;
@@ -6,19 +6,22 @@
   .animated-menu-icon {
     position: absolute;
 
-    &, &::before, &::after {
+    &,
+    &::before,
+    &::after {
       width: 1.125rem;
       height: 0.125rem;
       border-radius: 0.125rem;
       background-color: var(--color-text-secondary);
-      transition: transform .25s;
+      transition: transform 0.25s;
       transform: rotate(0);
     }
 
-    &::before, &::after {
+    &::before,
+    &::after {
       position: absolute;
       left: 0;
-      content: '';
+      content: "";
     }
 
     &::before {
@@ -44,7 +47,8 @@
     &.no-animation {
       transition: none;
 
-      &::before, &::after {
+      &::before,
+      &::after {
         transition: none;
       }
     }
@@ -56,7 +60,7 @@
     margin-left: auto;
     background: var(--color-gray);
     border-radius: 0.75rem;
-    padding: 0 .45rem;
+    padding: 0 0.4375rem;
     color: white;
     font-size: 0.875rem;
     line-height: 1.5rem;
@@ -65,7 +69,7 @@
     flex-shrink: 0;
   }
 
-  [dir=rtl] .archived-badge {
+  [dir="rtl"] .archived-badge {
     margin-left: 0;
     margin-right: auto;
   }

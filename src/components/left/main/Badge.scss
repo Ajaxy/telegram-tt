@@ -1,6 +1,6 @@
 .Badge-transition {
   opacity: 1;
-  transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:not(.open) {
     transform: scale(0);
@@ -12,7 +12,7 @@
   }
 
   &.closing {
-    transition: transform .2s ease-out, opacity .2s ease-out;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
   }
 }
 
@@ -20,7 +20,7 @@
   display: flex;
 
   .Badge {
-    margin-inline-start: .5rem;
+    margin-inline-start: 0.5rem;
   }
 }
 
@@ -29,7 +29,7 @@
   height: 1.5rem;
   background: var(--color-gray);
   border-radius: 0.75rem;
-  padding: 0 .4375rem;
+  padding: 0 0.4375rem;
   color: white;
   font-size: 0.875rem;
   line-height: 1.5625rem;
@@ -45,10 +45,11 @@
     line-height: 1.375rem;
     min-width: 1.375rem;
     height: 1.375rem;
-    padding: 0 .375rem;
+    padding: 0 0.375rem;
   }
 
-  &.mention, &.unread:not(.muted) {
+  &.mention,
+  &.unread:not(.muted) {
     background: var(--color-green);
     color: var(--color-white);
   }
@@ -78,10 +79,8 @@
       padding: 0.25rem;
 
       i {
-        font-size: .875rem;
+        font-size: 0.875rem;
       }
     }
   }
 }
-
-

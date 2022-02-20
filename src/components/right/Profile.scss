@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 .Profile {
   height: 100%;
@@ -18,9 +18,9 @@
   }
 
   > .profile-info > .ChatExtra {
-    padding: .875rem .5rem .5rem;
-    box-shadow: inset 0 -.0625rem 0 0 var(--color-background-secondary-accent);
-    border-bottom: .625rem solid var(--color-background-secondary);
+    padding: 0.875rem 0.5rem 0.5rem;
+    box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+    border-bottom: 0.625rem solid var(--color-background-secondary);
 
     .narrow {
       margin-bottom: 0;
@@ -34,7 +34,7 @@
     .Switcher {
       margin-left: auto;
     }
-    [dir=rtl] {
+    [dir="rtl"] {
       .Switcher {
         margin-left: 0;
         margin-right: auto;
@@ -57,7 +57,7 @@
     z-index: 1;
 
     .Tab {
-      padding: 1rem .75rem;
+      padding: 1rem 0.75rem;
 
       span {
         white-space: nowrap;
@@ -90,7 +90,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;
-      grid-gap: .0625rem;
+      grid-gap: 0.0625rem;
     }
 
     &.documents-list {
@@ -134,7 +134,7 @@
       padding: 0.5rem 1rem;
 
       @media (max-width: 600px) {
-        padding: .5rem 0;
+        padding: 0.5rem 0;
         .ListItem.chat-item-clickable {
           margin: 0;
         }

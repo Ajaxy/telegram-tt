@@ -19,7 +19,7 @@
     display: inline-flex;
     align-content: center;
     justify-content: center;
-    margin-inline-end: .5rem;
+    margin-inline-end: 0.5rem;
     overflow: hidden;
     font-size: 1.5rem;
 
@@ -31,7 +31,7 @@
     img.emoji {
       width: 1.5rem;
       height: 1.5rem;
-      margin: .75rem 0 0;
+      margin: 0.75rem 0 0;
     }
   }
 
@@ -55,8 +55,8 @@
     text-align: left;
     unicode-bidi: plaintext;
   }
-  &[dir=rtl] .title,
-  &[dir=rtl] .description {
+  &[dir="rtl"] .title,
+  &[dir="rtl"] .description {
     text-align: right;
   }
 }

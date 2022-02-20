@@ -7,13 +7,13 @@
   max-width: 43.75rem;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: .3125rem;
+  margin-bottom: 0.3125rem;
   display: flex;
-  color: #A4ACB3;
+  color: #a4acb3;
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
   @media (max-height: 350px) {
-    padding: .75rem;
+    padding: 0.75rem;
   }
 
   &.hovered .target-content {
@@ -22,7 +22,7 @@
   }
 
   & + & {
-    margin-top: .3125rem;
+    margin-top: 0.3125rem;
   }
 
   &:last-child {
@@ -32,13 +32,13 @@
   .target-content {
     pointer-events: none;
     background-image: var(--drag-target-border);
-    border-radius: .5rem;
+    border-radius: 0.5rem;
     flex: 1 1 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: .2s color, .2s background;
+    transition: 0.2s color, 0.2s background;
   }
 
   .icon {
@@ -55,15 +55,15 @@
     @media (max-height: 450px) {
       font-size: 2rem;
       line-height: 1rem;
-      margin-bottom: .5rem;
-      margin-top: .25rem;
+      margin-bottom: 0.5rem;
+      margin-top: 0.25rem;
     }
   }
 
   .title {
     font-size: 1.3125rem;
     font-weight: 500;
-    letter-spacing: -.18px;
+    letter-spacing: -0.18px;
 
     @media (max-height: 450px) {
       font-size: 1rem;
@@ -72,10 +72,10 @@
 
   .description {
     font-size: 1rem;
-    letter-spacing: .3px;
+    letter-spacing: 0.3px;
 
     @media (max-height: 450px) {
-      font-size: .875rem;
+      font-size: 0.875rem;
     }
   }
 }

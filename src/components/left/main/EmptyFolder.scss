@@ -17,11 +17,11 @@
 
   .title {
     font-size: 1.25rem;
-    margin-bottom: .125rem;
+    margin-bottom: 0.125rem;
   }
 
   .description {
-    font-size: .875rem;
+    font-size: 0.875rem;
     color: var(--color-text-secondary);
 
     body.is-ios &,
@@ -31,13 +31,13 @@
   }
 
   .Button.pill {
-    margin-top: .625rem;
+    margin-top: 0.625rem;
     font-weight: 500;
-    padding-inline-start: .75rem;
+    padding-inline-start: 0.75rem;
     unicode-bidi: plaintext;
 
     i {
-      margin-inline-end: .625rem;
+      margin-inline-end: 0.625rem;
       font-size: 1.5rem;
     }
   }

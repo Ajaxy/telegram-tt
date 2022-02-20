@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 @mixin thumb-styles() {
   background: var(--slider-color);
@@ -8,7 +8,7 @@
   border-radius: 50%;
   cursor: pointer;
   transform: scale(1);
-  transition: transform .25s ease-in-out;
+  transition: transform 0.25s ease-in-out;
 
   &:hover {
     transform: scale(1.2);
@@ -36,7 +36,7 @@
       color: var(--color-text-secondary);
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .value {
         margin-left: 0;
         margin-right: 1rem;
@@ -49,7 +49,7 @@
     z-index: 1;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       width: 100%;
       left: 0;
@@ -101,13 +101,14 @@
   }
 
   .slider-option {
-    font-size: 0.825rem;
+    font-size: 0.8125rem;
     text-align: center;
     cursor: pointer;
     color: var(--color-text-secondary);
-    transition: color .2s ease;
+    transition: color 0.2s ease;
 
-    &:hover, &.active {
+    &:hover,
+    &.active {
       color: var(--color-text);
     }
 

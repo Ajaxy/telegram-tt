@@ -71,10 +71,5 @@
   },
   "parserOptions": {
     "project": "./tsconfig.json"
-  },
-  "ignorePatterns": [
-    "webpack.config.js",
-    "jest.config.js",
-    "src/lib/secret-sauce"
-  ]
+  }
 }

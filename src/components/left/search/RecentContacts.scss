@@ -4,7 +4,7 @@
   }
 
   .top-peers-section {
-    padding: .5rem 1rem;
+    padding: 0.5rem 1rem;
   }
 
   .top-peers {
@@ -78,7 +78,7 @@
       margin-left: auto;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .Button {
         margin-left: 0;
         margin-right: auto;

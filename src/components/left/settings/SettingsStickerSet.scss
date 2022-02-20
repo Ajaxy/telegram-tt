@@ -1,13 +1,13 @@
 .SettingsStickerSet {
   .settings-item &.ListItem {
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
   }
 
   .StickerButton,
   .Button {
     width: 3rem;
     height: 3rem;
-    margin: 0 .5rem 0 0;
+    margin: 0 0.5rem 0 0;
     padding: 0;
     flex: 0 0 3rem;
   }
@@ -23,10 +23,10 @@
     justify-content: center;
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .StickerButton,
     .Button {
-      margin: 0 0 0 .5rem;
+      margin: 0 0 0 0.5rem;
     }
   }
 }
