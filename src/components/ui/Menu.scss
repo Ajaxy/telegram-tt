@@ -21,26 +21,26 @@
     margin: 0;
     position: absolute;
     background-color: var(--color-background);
-    box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     min-width: 13.5rem;
     z-index: var(--z-menu-bubble);
     overscroll-behavior: contain;
 
     transform: scale(0.5);
-    transition: opacity .2s cubic-bezier(0.2, 0, 0.2, 1), transform .2s cubic-bezier(0.2, 0, 0.2, 1) !important;
+    transition: opacity 0.2s cubic-bezier(0.2, 0, 0.2, 1), transform 0.2s cubic-bezier(0.2, 0, 0.2, 1) !important;
 
     &.open {
       transform: scale(1);
     }
 
     &.closing {
-      transition: opacity .2s ease-in, transform .2s ease-in !important;
+      transition: opacity 0.2s ease-in, transform 0.2s ease-in !important;
     }
 
     body.animation-level-0 & {
       transform: none !important;
-      transition: opacity .15s !important;
+      transition: opacity 0.15s !important;
     }
 
     body.has-open-dialog & {

@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 .AvatarEditable {
   label {
@@ -33,13 +33,15 @@
 
     i {
       transform: scale(1);
-      transition: transform .15s linear;
+      transition: transform 0.15s linear;
       z-index: var(--z-register-add-avatar);
     }
 
     // @optimization The weirdest workaround for screen animation lag
     @include while-transition() {
-      input, i, &::after {
+      input,
+      i,
+      &::after {
         display: none !important;
       }
 
@@ -58,7 +60,7 @@
       background-color: var(--color-background);
 
       &::after {
-        content: '';
+        content: "";
         display: block;
         position: absolute;
         left: 0;

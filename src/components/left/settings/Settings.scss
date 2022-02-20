@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@import "../../../styles/mixins";
 
 #Settings {
   height: 100%;
@@ -10,7 +10,7 @@
   }
 
   .left-header {
-    padding-right: .8125rem;
+    padding-right: 0.8125rem;
   }
 }
 
@@ -50,12 +50,12 @@
   }
 
   #monkey {
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     margin-bottom: 1rem;
   }
 
   .AnimatedEmoji {
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     margin-bottom: 1.5rem;
   }
 }
@@ -86,22 +86,22 @@
     height: 100%;
 
     &.hidden {
-      display: none
+      display: none;
     }
   }
 }
 
 .settings-main-menu {
-  padding: 0 0.5rem .75rem;
+  padding: 0 0.5rem 0.75rem;
 
   > .ChatExtra {
-    padding: 0 .5rem .3125rem;
-    margin: 0 -.5rem .625rem;
-    box-shadow: inset 0 -.0625rem 0 0 var(--color-background-secondary-accent);
-    border-bottom: .625rem solid var(--color-background-secondary);
+    padding: 0 0.5rem 0.3125rem;
+    margin: 0 -0.5rem 0.625rem;
+    box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+    border-bottom: 0.625rem solid var(--color-background-secondary);
 
     .ListItem.narrow {
-      margin-bottom: .25rem;
+      margin-bottom: 0.25rem;
     }
   }
 }
@@ -120,7 +120,7 @@
     margin-bottom: 2rem;
     position: relative;
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       text-align: right;
     }
   }
@@ -139,7 +139,7 @@
       font-size: 1rem;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       text-align: right;
       unicode-bidi: plaintext;
     }
@@ -152,7 +152,7 @@
     margin-top: 2rem;
     margin-bottom: 0.75rem;
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       text-align: right;
     }
   }
@@ -178,7 +178,8 @@
         color: var(--color-text-secondary);
       }
 
-      .title, .subtitle {
+      .title,
+      .subtitle {
         display: block;
         text-align: left;
       }
@@ -202,7 +203,7 @@
 
         &.tight {
           line-height: 1.3125rem;
-          margin-bottom: .1875rem;
+          margin-bottom: 0.1875rem;
         }
       }
     }
@@ -246,9 +247,10 @@
       }
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .multiline-menu-item {
-        .title, .subtitle {
+        .title,
+        .subtitle {
           text-align: right;
         }
 
@@ -265,7 +267,8 @@
     margin-bottom: 1.0625rem;
   }
 
-  .Checkbox, .radio-group {
+  .Checkbox,
+  .radio-group {
     margin: 0 -1rem 0.5rem;
   }
 
@@ -275,7 +278,8 @@
     }
   }
 
-  .Radio + .Radio, .Checkbox + .Checkbox {
+  .Radio + .Radio,
+  .Checkbox + .Checkbox {
     margin-top: 2rem;
   }
 }
@@ -309,7 +313,7 @@
 
   .ReactionStaticEmoji {
     margin-inline-end: 1rem;
-    width: 1.5rem
+    width: 1.5rem;
   }
 }
 
@@ -319,5 +323,4 @@
     height: 1.5rem;
     margin-inline-end: 2rem;
   }
-
 }

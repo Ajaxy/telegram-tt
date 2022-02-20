@@ -6,7 +6,7 @@
   border-radius: var(--border-radius-messages-small);
   background: transparent no-repeat center;
   background-size: contain;
-  transition: background-color .15s ease, opacity .3s ease !important;
+  transition: background-color 0.15s ease, opacity 0.3s ease !important;
   position: relative;
 
   &.interactive {
@@ -19,7 +19,6 @@
         opacity: 1;
       }
     }
-
   }
 
   @media (max-width: 600px) {
@@ -38,7 +37,9 @@
     margin: 0;
   }
 
-  .AnimatedSticker, img, video {
+  .AnimatedSticker,
+  img,
+  video {
     position: absolute;
     top: 0;
     left: 0;
@@ -46,7 +47,8 @@
     height: 100%;
   }
 
-  img, video {
+  img,
+  video {
     object-fit: contain;
   }
 

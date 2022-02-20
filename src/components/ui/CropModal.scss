@@ -2,7 +2,7 @@
   background: var(--color-primary);
   cursor: pointer;
   transform: scale(1);
-  transition: transform .25s ease-in-out;
+  transition: transform 0.25s ease-in-out;
 
   &:hover {
     transform: scale(1.2);
@@ -18,7 +18,8 @@
     position: relative;
   }
 
-  .modal-content, #avatar-crop {
+  .modal-content,
+  #avatar-crop {
     overflow: hidden;
   }
 
@@ -35,7 +36,7 @@
     position: relative;
 
     &::before {
-      content: '';
+      content: "";
       display: block;
       padding-top: 100%;
     }

@@ -24,7 +24,7 @@
   .file-preview {
     width: 3.375rem;
     height: 3.375rem;
-    margin-inline-end: .75rem;
+    margin-inline-end: 0.75rem;
     border-radius: var(--border-radius-messages-small);
     background: var(--color-primary);
     display: flex;
@@ -39,7 +39,7 @@
   }
 
   .file-icon {
-    padding: 1rem .75rem .5rem;
+    padding: 1rem 0.75rem 0.5rem;
     align-items: flex-end;
     flex-shrink: 0;
     position: relative;
@@ -48,7 +48,7 @@
     .file-ext {
       font-size: 1rem;
       font-weight: 500;
-      transition: opacity .15s;
+      transition: opacity 0.15s;
     }
 
     &::after {
@@ -62,7 +62,7 @@
       border-color: transparent var(--background-color) transparent var(--background-color);
       border-width: 0 1.125rem 1.125rem 0;
       border-style: solid;
-      transition: border-width .15s ease-in;
+      transition: border-width 0.15s ease-in;
     }
   }
 
@@ -92,7 +92,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity .25s;
+    transition: opacity 0.25s;
   }
 
   &.interactive .file-icon-container {
@@ -118,14 +118,14 @@
   }
 
   .file-info {
-    margin-top: .1875rem;
-    margin-right: .125rem;
+    margin-top: 0.1875rem;
+    margin-right: 0.125rem;
     white-space: nowrap;
     overflow: hidden;
     flex-grow: 1;
 
     & + .Link {
-      font-size: .75rem;
+      font-size: 0.75rem;
       color: var(--color-text-secondary);
       padding-left: 1rem;
       white-space: nowrap;
@@ -145,8 +145,8 @@
   }
 
   .file-subtitle {
-    font-size: .875rem;
-    line-height: .9375rem;
+    font-size: 0.875rem;
+    line-height: 0.9375rem;
     color: var(--secondary-color);
     max-width: 100%;
     overflow: hidden;
@@ -154,14 +154,14 @@
 
     span + span {
       &::before {
-        content: '\00a0\2022\00a0';
+        content: "\00a0\2022\00a0";
       }
     }
   }
 
   &.smaller {
     --background-color: var(--color-background);
-    --border-radius-messages-small: .3125rem;
+    --border-radius-messages-small: 0.3125rem;
 
     .action-icon,
     .file-progress,
@@ -172,7 +172,7 @@
     }
 
     .file-icon {
-      padding-bottom: .375rem;
+      padding-bottom: 0.375rem;
 
       &::after {
         border-width: 0 1rem 1rem 0;
@@ -180,7 +180,7 @@
     }
 
     .file-info {
-      margin-top: -.125rem;
+      margin-top: -0.125rem;
     }
 
     .file-title {
@@ -193,11 +193,11 @@
   }
 
   &:dir(rtl),
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .file-progress,
     .file-icon,
     .file-preview {
-      margin-left: .75rem;
+      margin-left: 0.75rem;
       margin-right: 0;
     }
 

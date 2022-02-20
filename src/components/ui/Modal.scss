@@ -2,7 +2,11 @@
   position: relative;
   z-index: var(--z-modal);
 
-  &.delete, &.error, &.confirm, &.pin, &.unpin-all {
+  &.delete,
+  &.error,
+  &.confirm,
+  &.pin,
+  &.unpin-all {
     .modal-dialog {
       max-width: 23rem;
     }
@@ -44,7 +48,7 @@
     bottom: 0;
     left: 0;
     z-index: -1;
-    background-color: rgba(0, 0, 0, .25);
+    background-color: rgba(0, 0, 0, 0.25);
   }
 
   &.transparent-backdrop .modal-backdrop {
@@ -60,11 +64,11 @@
     min-width: 17.5rem;
     margin: 2rem auto;
     background-color: var(--color-background);
-    box-shadow: 0 .25rem .5rem .125rem var(--color-default-shadow);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     transform: translate3d(0, -1rem, 0);
 
-    transition: transform .2s ease, opacity .2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 
     body.animation-level-0 & {
       transition: none;
@@ -84,7 +88,8 @@
     transform: translate3d(0, 1rem, 0);
   }
 
-  .modal-header, %modal-header {
+  .modal-header,
+  %modal-header {
     padding: 1rem 1rem 0;
     display: flex;
     align-items: center;
@@ -105,7 +110,7 @@
 
   .modal-header-condensed {
     @extend %modal-header;
-    padding: .5rem 1.25rem 0 .9375rem !important;
+    padding: 0.5rem 1.25rem 0 0.9375rem !important;
 
     .modal-action-button {
       font-size: 0.875rem;

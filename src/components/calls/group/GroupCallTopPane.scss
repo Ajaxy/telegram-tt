@@ -19,11 +19,11 @@
     content: "";
     display: block;
     position: absolute;
-    top: -.1875rem;
+    top: -0.1875rem;
     left: 0;
     right: 0;
-    height: .125rem;
-    box-shadow: 0 .125rem .125rem var(--color-light-shadow);
+    height: 0.125rem;
+    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
   }
 
   &.is-hidden {
@@ -80,7 +80,6 @@
     width: auto;
   }
 }
-
 
 @media (min-width: 1440px) {
   #Main.right-column-open .MiddleHeader .GroupCallTopPane {

@@ -1,10 +1,10 @@
 .SettingsGeneralBackground {
   .settings-wallpapers {
     display: grid;
-    padding: .5rem;
+    padding: 0.5rem;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
-    grid-gap: .25rem;
+    grid-gap: 0.25rem;
   }
 
   .Loading {

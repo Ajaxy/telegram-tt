@@ -5,7 +5,7 @@
   }
 
   .modal-content {
-    padding: .5rem 1.25rem 1.875rem;
+    padding: 0.5rem 1.25rem 1.875rem;
     min-height: 4.875rem;
   }
 
@@ -28,14 +28,15 @@
     overflow: auto;
 
     &.overflown {
-      padding: 0 0.4rem 0.5rem 0.75rem;
+      padding: 0 0.4375rem 0.5rem 0.75rem;
     }
 
     @media (max-width: 600px) {
       overflow: hidden;
       max-height: none;
 
-      &, &.overflown {
+      &,
+      &.overflown {
         padding: 0 0.75rem;
       }
     }
@@ -69,13 +70,13 @@
 
   .note {
     font-size: smaller;
-    color: var(--color-text-secondary)
+    color: var(--color-text-secondary);
   }
 
   .error {
     font-size: smaller;
     color: var(--color-error);
-    margin: -1rem 0 1rem .25rem;
+    margin: -1rem 0 1rem 0.25rem;
   }
 
   .input-group:last-child {

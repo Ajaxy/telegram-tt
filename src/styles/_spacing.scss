@@ -5,12 +5,22 @@ $spacers: () !default;
 $spacers: map.merge(
   (
     0: 0,
-    1: ($spacer * .25),
-    2: ($spacer * .5),
+    1: (
+      $spacer * 0.25,
+    ),
+    2: (
+      $spacer * 0.5,
+    ),
     3: $spacer,
-    4: ($spacer * 1.5),
-    5: ($spacer * 2),
-    6: ($spacer * 3),
+    4: (
+      $spacer * 1.5,
+    ),
+    5: (
+      $spacer * 2,
+    ),
+    6: (
+      $spacer * 3,
+    ),
   ),
   $spacers
 );
@@ -19,8 +29,9 @@ $spacers: map.merge(
 
 @each $prop, $abbrev in (margin: m, padding: p) {
   @each $size, $length in $spacers {
-
-    .#{$abbrev}-#{$size} { #{$prop}: $length !important; }
+    .#{$abbrev}-#{$size} {
+      #{$prop}: $length !important;
+    }
     .#{$abbrev}t-#{$size},
     .#{$abbrev}y-#{$size} {
       #{$prop}-top: $length !important;

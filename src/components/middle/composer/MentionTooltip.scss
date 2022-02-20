@@ -21,7 +21,7 @@
     }
 
     .title {
-      margin-inline-end: .625rem;
+      margin-inline-end: 0.625rem;
       max-width: 70%;
     }
 
@@ -29,7 +29,7 @@
       font-size: 1rem;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .status {
         width: auto;
       }
@@ -47,7 +47,7 @@
 
     .handle {
       &::before {
-        content: '@';
+        content: "@";
       }
     }
 

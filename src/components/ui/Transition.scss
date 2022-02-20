@@ -5,9 +5,10 @@
     width: 100%;
     height: 100%;
     animation-fill-mode: forwards !important;
-    transition: background-color .2s;
+    transition: background-color 0.2s;
 
-    &.from, &.to {
+    &.from,
+    &.to {
       position: absolute;
       top: 0;
       left: 0;
@@ -76,7 +77,6 @@
     }
   }
 
-
   &.slide-rtl {
     > .to {
       transform: translateX(-100%);
@@ -124,11 +124,11 @@
 
     &.animating {
       > .from > div {
-        animation: mv-slide-out .4s ease;
+        animation: mv-slide-out 0.4s ease;
       }
 
       > .to > div {
-        animation: mv-slide-in .4s ease;
+        animation: mv-slide-in 0.4s ease;
       }
     }
   }
@@ -140,11 +140,11 @@
 
     &.animating {
       > .from > div {
-        animation: mv-slide-in-backwards .4s ease;
+        animation: mv-slide-in-backwards 0.4s ease;
       }
 
       > .to > div {
-        animation: mv-slide-out-backwards .4s ease;
+        animation: mv-slide-out-backwards 0.4s ease;
       }
     }
   }
@@ -189,11 +189,13 @@
 
     &.animating {
       > .from {
-        animation: fade-in-backwards-opacity var(--slide-transition), slide-fade-in-backwards-move var(--slide-transition);
+        animation: fade-in-backwards-opacity var(--slide-transition),
+          slide-fade-in-backwards-move var(--slide-transition);
       }
 
       > .to {
-        animation: fade-out-backwards-opacity var(--slide-transition), slide-fade-out-backwards-move var(--slide-transition);
+        animation: fade-out-backwards-opacity var(--slide-transition),
+          slide-fade-out-backwards-move var(--slide-transition);
       }
     }
   }
@@ -217,11 +219,11 @@
 
     &.animating {
       > .from {
-        animation: fade-out-opacity .15s ease;
+        animation: fade-out-opacity 0.15s ease;
       }
 
       > .to {
-        animation: fade-in-opacity .15s ease, zoom-fade-in-move .15s ease;
+        animation: fade-in-opacity 0.15s ease, zoom-fade-in-move 0.15s ease;
       }
     }
   }
@@ -237,11 +239,11 @@
 
     &.animating {
       > .from {
-        animation: fade-in-backwards-opacity .1s ease, zoom-fade-in-backwards-move .15s ease;
+        animation: fade-in-backwards-opacity 0.1s ease, zoom-fade-in-backwards-move 0.15s ease;
       }
 
       > .to {
-        animation: fade-out-backwards-opacity .15s ease, zoom-fade-out-backwards-move .15s ease;
+        animation: fade-out-backwards-opacity 0.15s ease, zoom-fade-out-backwards-move 0.15s ease;
       }
     }
   }
@@ -260,11 +262,11 @@
 
     &.animating {
       > .from {
-        animation: fade-out-opacity .15s ease;
+        animation: fade-out-opacity 0.15s ease;
       }
 
       > .to {
-        animation: fade-in-opacity .15s ease;
+        animation: fade-in-opacity 0.15s ease;
       }
     }
   }
@@ -342,11 +344,11 @@
 
     &.animating {
       > .from {
-        animation: push-out .3s ease-in-out;
+        animation: push-out 0.3s ease-in-out;
       }
 
       > .to {
-        animation: slide-in-200 .3s ease-in-out;
+        animation: slide-in-200 0.3s ease-in-out;
       }
     }
   }
@@ -358,11 +360,11 @@
 
     &.animating {
       > .from {
-        animation: slide-in-200-backwards .3s ease-in-out;
+        animation: slide-in-200-backwards 0.3s ease-in-out;
       }
 
       > .to {
-        animation: push-out-backwards .3s ease-in-out;
+        animation: push-out-backwards 0.3s ease-in-out;
       }
     }
   }

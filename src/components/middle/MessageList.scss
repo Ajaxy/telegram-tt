@@ -1,9 +1,9 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 .MessageList {
   flex: 1;
   width: 100%;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 
   overflow: scroll;
   overflow-x: hidden;
@@ -30,15 +30,13 @@
     }
   }
 
-  @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    transition: bottom 150ms ease-out, transform var(--layer-transition);
-    body.keyboard-visible & {
-      position: relative;
-      bottom: calc(0px - env(safe-area-inset-bottom));
+  transition: bottom 150ms ease-out, transform var(--layer-transition);
+  body.keyboard-visible & {
+    position: relative;
+    bottom: calc(0px - env(safe-area-inset-bottom));
 
-      body.keyboard-visible.animation-level-0 & {
-        transition: none !important;
-      }
+    body.keyboard-visible.animation-level-0 & {
+      transition: none !important;
     }
   }
 
@@ -76,7 +74,8 @@
     }
   }
 
-  &.select-mode-active, &.type-pinned {
+  &.select-mode-active,
+  &.type-pinned {
     margin-bottom: 0;
 
     .last-in-list {
@@ -98,10 +97,8 @@
       .last-in-list {
         margin-bottom: 4.25rem;
 
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-          body:not(.keyboard-visible) & {
-            margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
-          }
+        body:not(.keyboard-visible) & {
+          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
         }
       }
     }
@@ -113,7 +110,7 @@
 
     opacity: 1;
     transform: scale(1);
-    transition: opacity .2s ease, transform .2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 
     &:not(.open) {
       transform: scale(0.8);
@@ -169,7 +166,7 @@
         opacity: 0.1;
 
         .theme-dark & {
-          opacity: .6;
+          opacity: 0.6;
         }
       }
     }
@@ -191,7 +188,8 @@
       color: inherit !important;
       text-decoration: underline;
 
-      &:hover, &:focus {
+      &:hover,
+      &:focus {
         text-decoration: none;
       }
     }
@@ -208,17 +206,17 @@
       display: inline-block;
       background: var(--pattern-color);
       color: white;
-      font-size: calc(var(--message-text-size, 1rem) - .0625rem);
+      font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
       font-weight: 500;
       line-height: 1.75;
-      padding: 0 .5rem;
+      padding: 0 0.5rem;
       border-radius: var(--border-radius-messages);
       word-break: break-word;
 
       body.is-ios &,
       body.is-macos & {
-        font-size: calc(var(--message-text-size, 1rem) - .125rem);
-        line-height: calc(var(--message-text-size, 1rem) + .5rem);
+        font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+        line-height: calc(var(--message-text-size, 1rem) + 0.5rem);
       }
 
       .emoji-small {
@@ -236,11 +234,11 @@
     z-index: var(--z-sticky-date);
     pointer-events: none;
     opacity: 1;
-    transition: opacity .3s ease;
+    transition: opacity 0.3s ease;
 
     @media (max-width: 600px) {
-      margin-top: .5rem;
-      margin-bottom: .75rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     body:not(.is-scrolling-messages) &.stuck {
@@ -348,7 +346,7 @@
 
     /* Styles for Firefox */
     @supports (scrollbar-width: none) {
-      padding-right: .6875rem;
+      padding-right: 0.6875rem;
       scrollbar-width: none;
     }
   }

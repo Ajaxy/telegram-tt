@@ -1,20 +1,22 @@
-@import 'reboot';
-@import 'variables';
-@import 'mixins';
-@import 'spacing';
-@import 'forms';
-@import 'icons';
-@import 'common';
-@import '../assets/fonts/roboto.css';
+@import "reboot";
+@import "variables";
+@import "mixins";
+@import "spacing";
+@import "forms";
+@import "icons";
+@import "common";
+@import "../assets/fonts/roboto.css";
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   background: var(--color-background);
   margin: 0;
   padding: 0;
   font-size: 16px;
-  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell,
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   color: var(--color-text);
   font-weight: 400;
   line-height: 1.5;
@@ -33,13 +35,15 @@ body.is-macos {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
 }
 
-html[lang=fa],
-html[lang=fa] body {
-  font-family: "Vazir", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+html[lang="fa"],
+html[lang="fa"] body {
+  font-family: "Vazir", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
+    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 
   &.is-ios,
   &.is-macos {
-    font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
+      Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
 }
 
@@ -48,7 +52,8 @@ body.is-ios {
   --border-radius-messages-small: 0.5rem;
 }
 
-body.cursor-grabbing, body.cursor-grabbing * {
+body.cursor-grabbing,
+body.cursor-grabbing * {
   cursor: grabbing !important;
 }
 
@@ -84,9 +89,9 @@ body.cursor-ew-resize {
   display: none;
   position: absolute;
   top: 0;
-  right: -.25rem;
+  right: -0.25rem;
   bottom: 0;
-  width: .25rem;
+  width: 0.25rem;
   z-index: var(--z-resize-handle);
   cursor: ew-resize;
 
@@ -111,7 +116,8 @@ body.cursor-ew-resize {
 .not-implemented {
   opacity: 0.5;
 
-  &, & * {
+  &,
+  & * {
     cursor: not-allowed !important;
   }
 }
@@ -130,7 +136,7 @@ body.cursor-ew-resize {
 .custom-scroll-x {
   scrollbar-width: thin;
   scrollbar-color: rgba(90, 90, 90, 0) transparent;
-  transition: scrollbar-color .3s ease;
+  transition: scrollbar-color 0.3s ease;
 
   -webkit-overflow-scrolling: touch;
   // Fix scroll lock on iOS
@@ -140,10 +146,12 @@ body.cursor-ew-resize {
     background-color: rgba(90, 90, 90, 0);
     border-radius: 0.375rem;
     // `box-shadow` prevents repaint on macOS when hovering out of scrollable container
-    box-shadow: 0 0 1px rgba(255, 255, 255, .01);
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
   }
 
-  &:hover, &:focus, &:focus-within {
+  &:hover,
+  &:focus,
+  &:focus-within {
     scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
 
     &::-webkit-scrollbar-thumb {
@@ -155,13 +163,13 @@ body.cursor-ew-resize {
 body:not(.is-ios) {
   .custom-scroll {
     &::-webkit-scrollbar {
-      width: .375rem;
+      width: 0.375rem;
     }
   }
 
   .custom-scroll-x {
     &::-webkit-scrollbar {
-      height: .35rem;
+      height: 0.375rem;
     }
   }
 }
@@ -198,7 +206,7 @@ div[role="button"] {
 
 .opacity-transition {
   opacity: 1;
-  transition: opacity .15s ease;
+  transition: opacity 0.15s ease;
 
   &:not(.open) {
     opacity: 0;
@@ -209,7 +217,7 @@ div[role="button"] {
   }
 
   &.slow {
-    transition-duration: .3s;
+    transition-duration: 0.3s;
   }
 }
 
@@ -245,7 +253,7 @@ div[role="button"] {
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);
-    opacity: .8;
+    opacity: 0.8;
   }
   50% {
     transform: scale(1.1);
@@ -259,10 +267,10 @@ div[role="button"] {
 @keyframes hide-icon {
   from {
     transform: scale(1);
-    opacity: .4;
+    opacity: 0.4;
   }
   to {
-    transform: scale(.5);
+    transform: scale(0.5);
     opacity: 0;
   }
 }

@@ -6,8 +6,8 @@
   display: flex;
   align-items: center;
   background: rgba(#999999, 0.6);
-  border-radius: .625rem;
-  padding: 0 .25rem;
+  border-radius: 0.625rem;
+  padding: 0 0.25rem;
   color: white;
   cursor: pointer;
   max-width: 100%;
@@ -22,22 +22,22 @@
   .message-time,
   .message-signature,
   .message-views {
-    font-size: .75rem;
+    font-size: 0.75rem;
     white-space: nowrap;
   }
 
   .message-time {
-    margin-right: .1875rem;
+    margin-right: 0.1875rem;
   }
 
   body.is-ios & {
     .message-time {
-      margin-right: .25rem;
+      margin-right: 0.25rem;
     }
   }
 
   .message-views {
-    margin-inline-start: .1875rem;
+    margin-inline-start: 0.1875rem;
   }
 
   .message-signature {
@@ -66,11 +66,11 @@
     --color-accent: white;
     color: white !important;
     opacity: 1;
-    bottom: .25rem;
-    right: .25rem;
+    bottom: 0.25rem;
+    right: 0.25rem;
     left: auto;
     height: 1.125rem;
-    padding: 0 .3125rem 0 .375rem;
+    padding: 0 0.3125rem 0 0.375rem;
 
     .MessageOutgoingStatus i {
       background: transparent;
@@ -80,17 +80,17 @@
   .media:not(.text):dir(rtl) &,
   .Message .custom-shape:dir(rtl) & {
     right: auto !important;
-    left: .25rem;
-    padding: 0 .375rem 0 .3125rem;
+    left: 0.25rem;
+    padding: 0 0.375rem 0 0.3125rem;
   }
 
   .is-forwarded.media:not(.text):dir(rtl) &,
   .Message .is-forwarded.custom-shape:dir(rtl) & {
-    left: .8125rem;
+    left: 0.8125rem;
   }
 
   .is-forwarded.media:not(.text) & {
-    bottom: 0.935rem;
+    bottom: 0.9375rem;
     right: 0.8125rem;
   }
 
@@ -103,9 +103,9 @@
   }
 
   .MessageOutgoingStatus {
-    margin-left: -.1875rem;
+    margin-left: -0.1875rem;
     font-size: 1.1875rem;
-    border-radius: .625rem;
+    border-radius: 0.625rem;
 
     .Message.own & {
       color: var(--color-accent-own);
@@ -133,7 +133,7 @@
 .Message:not(.own) {
   .custom-shape .reply-message + .MessageMeta {
     right: auto;
-    left: 13.2rem;
+    left: 13.25rem;
     bottom: 0.25rem;
   }
 

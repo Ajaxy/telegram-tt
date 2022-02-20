@@ -16,9 +16,10 @@
   .media-inner {
     overflow: hidden;
     transform: scale(1);
-    transition: transform .15s ease;
+    transition: transform 0.15s ease;
 
-    img, canvas {
+    img,
+    canvas {
       position: absolute;
       left: 0;
       top: 0;
@@ -33,7 +34,7 @@
     display: block;
     border: 2px solid var(--color-primary);
     opacity: 0;
-    transition: opacity .15s ease;
+    transition: opacity 0.15s ease;
   }
 
   &.selected {

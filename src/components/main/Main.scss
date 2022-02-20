@@ -112,13 +112,9 @@
 
   @media (max-width: 600px) {
     max-width: none;
-    width: 100vw !important;
     transform: translate3d(-20vw, 0, 0);
-
-    @supports (left: env(safe-area-inset-left)) {
-      left: env(safe-area-inset-left) !important;
-      width: calc(100vw - env(safe-area-inset-left));
-    }
+    left: env(safe-area-inset-left) !important;
+    width: calc(100vw - env(safe-area-inset-left)) !important;
   }
 }
 

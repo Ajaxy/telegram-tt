@@ -40,7 +40,7 @@
   span {
     position: absolute;
     display: block;
-    background-color: var(--ripple-color, rgba(0, 0, 0, .08));
+    background-color: var(--ripple-color, rgba(0, 0, 0, 0.08));
     border-radius: 50%;
     transform: scale(0);
     animation: ripple-animation 700ms;

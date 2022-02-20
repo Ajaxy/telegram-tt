@@ -7,7 +7,7 @@
   width: auto;
   margin: 0;
   border: none;
-  padding: .625rem .25rem;
+  padding: 0.625rem 0.25rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -29,7 +29,7 @@
     }
   }
 
-  @media (hover:hover) {
+  @media (hover: hover) {
     &:not(&--active):hover {
       background: var(--color-interactive-element-hover);
     }
@@ -54,7 +54,7 @@
     margin-inline-start: 0.5rem;
     background: var(--color-gray);
     border-radius: 0.75rem;
-    padding: 0 .3125rem;
+    padding: 0 0.3125rem;
     color: white;
     font-size: 0.875rem;
     line-height: 1.3125rem;
@@ -74,13 +74,13 @@
 
   i {
     position: absolute;
-    bottom: calc(-.625rem - 1px);
+    bottom: calc(-0.625rem - 1px);
     left: 0;
     opacity: 0;
     background-color: var(--color-primary);
-    height: .1875rem;
+    height: 0.1875rem;
     width: 100%;
-    border-radius: .1875rem .1875rem 0 0;
+    border-radius: 0.1875rem 0.1875rem 0 0;
     pointer-events: none;
     box-sizing: content-box;
     transform-origin: left;

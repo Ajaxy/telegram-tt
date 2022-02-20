@@ -27,7 +27,7 @@
   }
 
   .poll-voters-count {
-    margin: .4375rem 0 1.125rem;
+    margin: 0.4375rem 0 1.125rem;
     text-align: center;
   }
 
@@ -41,7 +41,7 @@
     padding-left: 2.25rem;
 
     &:last-child {
-      margin-bottom: .75rem;
+      margin-bottom: 0.75rem;
     }
 
     &.disabled {
@@ -116,17 +116,17 @@
     display: inline-flex;
     align-items: center;
     vertical-align: text-bottom;
-    margin-left: .875rem;
-    margin-right: .5rem;
+    margin-left: 0.875rem;
+    margin-right: 0.5rem;
     margin-top: -2px;
 
     .Avatar {
-      border: .0625rem solid var(--color-white);
+      border: 0.0625rem solid var(--color-white);
       margin-right: 0;
       box-sizing: content-box;
 
       .Message.own & {
-        border: .0625rem solid var(--secondary-color);
+        border: 0.0625rem solid var(--secondary-color);
       }
 
       &:not(:first-child) {
@@ -137,8 +137,8 @@
 
   .poll-countdown {
     margin-left: auto;
-    font-size: .75rem;
-    transition: color .2s;
+    font-size: 0.75rem;
+    transition: color 0.2s;
 
     &.hurry-up {
       color: var(--color-error);
@@ -158,11 +158,11 @@
     fill: transparent;
     stroke-width: 2;
     stroke-linecap: round;
-    transition: stroke-dashoffset 2s, stroke .2s;
+    transition: stroke-dashoffset 2s, stroke 0.2s;
   }
 
   .poll-quiz-help {
-    margin: -.625rem 0 -.625rem auto;
+    margin: -0.625rem 0 -0.625rem auto;
     .Message:not(.own) & {
       color: var(--color-primary);
     }
@@ -185,6 +185,6 @@
   }
 
   > .Button {
-    margin-bottom: .625rem;
+    margin-bottom: 0.625rem;
   }
 }

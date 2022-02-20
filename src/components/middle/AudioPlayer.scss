@@ -1,8 +1,8 @@
 .AudioPlayer {
   display: flex;
   margin-left: auto;
-  margin-top: -.25rem;
-  margin-bottom: -.25rem;
+  margin-top: -0.25rem;
+  margin-bottom: -0.25rem;
 
   body.animation-level-0 & {
     transition: none !important;
@@ -10,7 +10,7 @@
 
   > .Button {
     flex-shrink: 0;
-    margin: .125rem;
+    margin: 0.125rem;
   }
 
   > .player-button {
@@ -27,24 +27,25 @@
 
       i {
         font-size: 1.625rem;
-        margin-top: -.025rem;
+        margin-top: -0.0625rem;
       }
     }
 
     i {
       position: absolute;
       font-size: 1.9375rem;
-      margin-top: -.05rem;
+      margin-top: -0.0625rem;
 
       &.icon-play {
-        margin-left: .1rem;
+        margin-left: 0.125rem;
       }
     }
 
-    .icon-play, .icon-pause {
+    .icon-play,
+    .icon-pause {
       opacity: 1;
       transform: scale(1);
-      transition: opacity .4s, transform .6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.4s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     &.play .icon-pause,
@@ -52,7 +53,7 @@
     &.loading .icon-play,
     &.loading .icon-pause {
       opacity: 0;
-      transform: scale(.5);
+      transform: scale(0.5);
     }
   }
 
@@ -70,7 +71,8 @@
       visibility: hidden;
     }
 
-    &:hover .volume-slider-spacer, .volume-slider-spacer:hover {
+    &:hover .volume-slider-spacer,
+    .volume-slider-spacer:hover {
       visibility: visible;
     }
 
@@ -91,7 +93,7 @@
 
       .RangeSlider {
         margin-bottom: 0;
-        input[type=range] {
+        input[type="range"] {
           margin-bottom: 0;
         }
       }
@@ -116,7 +118,7 @@
       font-weight: bold;
       border: 2px solid;
       border-radius: 0.375rem;
-      padding: 0.15rem 0.25rem;
+      padding: 0.125rem 0.25rem;
       font-variant-numeric: tabular-nums;
     }
   }
@@ -126,7 +128,7 @@
     justify-content: center;
     flex-direction: column;
     flex-shrink: 1;
-    padding: 0 .5rem;
+    padding: 0 0.5rem;
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -150,22 +152,22 @@
       text-overflow: ellipsis;
 
       body.is-ios & {
-        font-size: .9375rem !important;
+        font-size: 0.9375rem !important;
         line-height: 1.125rem;
       }
     }
 
     .subtitle {
-      font-size: 0.85rem !important;
+      font-size: 0.8125rem !important;
       color: var(--color-text-secondary);
-      line-height: 0.85rem;
+      line-height: 0.8125rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin: .125rem 0 0;
+      margin: 0.125rem 0 0;
 
       body.is-ios & {
-        font-size: .9375rem !important;
+        font-size: 0.9375rem !important;
         line-height: 1.125rem;
       }
     }

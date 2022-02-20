@@ -2,7 +2,7 @@
   .modal-dialog {
     max-width: 26.25rem;
     .modal-content {
-      padding: .375rem 1rem 1rem;
+      padding: 0.375rem 1rem 1rem;
     }
   }
 
@@ -34,7 +34,7 @@
       text-transform: none;
 
       + .Button {
-        margin-top: .5rem;
+        margin-top: 0.5rem;
       }
     }
   }
@@ -49,11 +49,11 @@
       font-size: 1.25rem;
 
       @media (max-width: 600px) {
-        margin-left: .75rem;
+        margin-left: 0.75rem;
       }
 
       & ~ .Button {
-        color: var(--color-primary)
+        color: var(--color-primary);
       }
     }
 
@@ -68,10 +68,10 @@
     border-radius: 4rem;
     outline: none !important;
     font-weight: 500;
-    margin: .125rem .625rem;
+    margin: 0.125rem 0.625rem;
 
     @media (max-width: 600px) {
-      margin: .25rem .375rem;
+      margin: 0.25rem 0.375rem;
     }
 
     &.weekday {

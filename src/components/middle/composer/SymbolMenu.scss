@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@import "../../../styles/mixins";
 
 .SymbolMenu {
   &.mobile-menu {
@@ -7,16 +7,17 @@
     right: 0;
     bottom: 0;
     background: var(--color-background);
-    transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
     z-index: 1;
 
     transition: transform var(--layer-transition);
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height) + env(safe-area-inset-bottom)), 0);
-    }
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    transform: translate3d(
+      0,
+      calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height) + env(safe-area-inset-bottom)),
+      0
+    );
 
     &.open {
       transform: translate3d(0, 0, 0);
@@ -37,10 +38,7 @@
 
   &-main {
     height: var(--symbol-menu-height);
-    max-height: calc(100vh - var(--symbol-menu-footer-height));
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
-    }
+    max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
   }
 
   &-footer {
@@ -56,7 +54,7 @@
       flex-shrink: 0;
       width: 2.125rem !important;
       height: 2.125rem;
-      margin: 0 .25rem;
+      margin: 0 0.25rem;
       padding: 0;
 
       &.activated {
@@ -98,7 +96,8 @@
     }
   }
 
-  .Button.bot-commands ~ &, .Button.send-as-button ~ & {
+  .Button.bot-commands ~ &,
+  .Button.send-as-button ~ & {
     .is-pointer-env & > .backdrop {
       left: 3rem;
       width: 3.25rem;
@@ -106,7 +105,7 @@
   }
 
   .bubble {
-    width: calc(var(--symbol-menu-width) + .25rem); // Reserve width for scrollbar
+    width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
     padding: 0;
     overflow: hidden;
 
@@ -126,13 +125,8 @@
   .symbol-close-button {
     display: none;
     position: absolute;
-    right: .25rem;
-    top: .25rem;
-
-    @supports (right: env(safe-area-inset-right)) {
-      right: #{"max(.25rem, env(safe-area-inset-right))"};
-      top: #{"max(.25rem, env(safe-area-inset-top))"};
-    }
+    right: max(calc(0.25rem), env(safe-area-inset-right));
+    top: max(calc(0.25rem), env(safe-area-inset-top));
   }
 
   @media (orientation: landscape) {

@@ -10,7 +10,7 @@
   }
 
   .bubble {
-    transition: opacity .15s cubic-bezier(0.2, 0, 0.2, 1), transform .15s cubic-bezier(0.2, 0, 0.2, 1) !important;
+    transition: opacity 0.15s cubic-bezier(0.2, 0, 0.2, 1), transform 0.15s cubic-bezier(0.2, 0, 0.2, 1) !important;
     transform: scale(0.7);
     overflow: initial;
     padding: 0;
@@ -31,7 +31,7 @@
     padding-left: 1rem;
 
     .Avatar {
-      border: .0625rem solid var(--color-background);
+      border: 0.0625rem solid var(--color-background);
       margin-right: 0;
       box-sizing: content-box;
 

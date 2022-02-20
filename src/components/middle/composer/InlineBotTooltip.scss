@@ -35,7 +35,9 @@
       padding-bottom: 100%;
       border-radius: 0;
 
-      .AnimatedSticker, img, canvas {
+      .AnimatedSticker,
+      img,
+      canvas {
         position: absolute;
         top: 0;
         left: 0;
@@ -43,10 +45,10 @@
         height: 100% !important;
 
         @media (min-width: 600px) {
-          top: .25rem;
-          left: .25rem;
-          width: calc(100% - .5rem) !important;
-          height: calc(100% - .5rem) !important;
+          top: 0.25rem;
+          left: 0.25rem;
+          width: calc(100% - 0.5rem) !important;
+          height: calc(100% - 0.5rem) !important;
         }
       }
     }

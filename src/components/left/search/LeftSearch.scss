@@ -26,24 +26,24 @@
     position: relative;
     padding-top: 1.25rem;
     padding-left: 1.25rem;
-    margin: 0  0 1rem -1.25rem !important;
+    margin: 0 0 1rem -1.25rem !important;
 
     font-weight: 500;
-    font-size: .9375rem;
+    font-size: 0.9375rem;
     color: var(--color-text-secondary);
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       width: 100%;
       height: 1px;
       background: var(--color-borders);
-      left: .625rem;
+      left: 0.625rem;
       top: -1px;
     }
 
-    &[dir=rtl],
-    &[dir=auto] {
+    &[dir="rtl"],
+    &[dir="auto"] {
       padding-left: 0;
       padding-right: 1.25rem;
       margin: 0 -1.25rem 0 1rem !important;
@@ -51,7 +51,7 @@
 
       &::before {
         left: auto;
-        right: .625rem;
+        right: 0.625rem;
       }
     }
   }
@@ -81,7 +81,7 @@
   }
 
   .message-date {
-    font-size: .75rem;
+    font-size: 0.75rem;
     color: var(--color-text-secondary);
     padding-left: 1rem;
     white-space: nowrap;
@@ -89,15 +89,15 @@
 
   .media-list {
     display: grid;
-    padding: .5rem;
+    padding: 0.5rem;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
-    grid-gap: .25rem;
+    grid-gap: 0.25rem;
   }
 
   .Audio {
     .ProgressSpinner {
-      margin: -.1875rem 0 0 -.1875rem;
+      margin: -0.1875rem 0 0 -0.1875rem;
     }
   }
 
@@ -108,24 +108,24 @@
         color: var(--color-primary);
 
         &::before {
-          content: '@';
-          html[lang=ar] & {
-            content: ' ،@';
-            margin-inline-end: .25rem;
+          content: "@";
+          html[lang="ar"] & {
+            content: " ،@";
+            margin-inline-end: 0.25rem;
           }
         }
 
         &::after {
-          content: ', ';
+          content: ", ";
           color: var(--color-text-secondary);
 
-          html[lang=ar] & {
-            content: '';
+          html[lang="ar"] & {
+            content: "";
           }
         }
       }
 
-      &[dir=rtl] {
+      &[dir="rtl"] {
         .status {
           text-align: right;
 
@@ -142,7 +142,7 @@
       color: var(--color-text);
 
       &::after {
-        content: ': ';
+        content: ": ";
         white-space: pre;
       }
     }
@@ -159,10 +159,10 @@
 
     .section-heading {
       color: var(--color-text-secondary);
-      font-size: .9375rem;
+      font-size: 0.9375rem;
       font-weight: 500;
       margin-bottom: 0 !important;
-      padding-top: .875rem;
+      padding-top: 0.875rem;
 
       .Link {
         float: right;
@@ -176,8 +176,8 @@
         }
       }
 
-      &[dir=rtl],
-      &[dir=auto] {
+      &[dir="rtl"],
+      &[dir="auto"] {
         .Link {
           float: left;
           margin-left: 1rem;
@@ -193,7 +193,7 @@
   }
 
   .chat-selection {
-    padding-top: .5rem;
+    padding-top: 0.5rem;
     display: flex;
     flex-shrink: 0;
     flex-wrap: nowrap;
@@ -215,7 +215,7 @@
       }
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       > .PickerSelectedItem:last-child {
         margin-left: auto;
         margin-right: 0;
@@ -227,7 +227,7 @@
     height: 100%;
   }
 
-  [dir=rtl] {
+  [dir="rtl"] {
     .message-date {
       padding-left: 0;
       padding-right: 1rem;

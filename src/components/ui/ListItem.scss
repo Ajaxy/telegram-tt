@@ -1,14 +1,16 @@
 .ListItem {
   position: relative;
 
-  body.is-ios &, body.is-android & {
+  body.is-ios &,
+  body.is-android & {
     &:not(:last-of-type)::after {
       content: "";
       position: absolute;
       bottom: 0;
       left: 4.5rem;
       right: 0;
-      height: 0.03125rem;
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      height: 0.5px;
       background: var(--color-dividers);
     }
 
@@ -43,7 +45,7 @@
     white-space: nowrap;
     color: var(--color-text);
     border-radius: var(--border-radius-default);
-    --ripple-color: rgba(0, 0, 0, .08);
+    --ripple-color: rgba(0, 0, 0, 0.08);
 
     > i {
       font-size: 1.5rem;
@@ -52,7 +54,10 @@
     }
   }
 
-  .user-status, .group-status, .title, .subtitle {
+  .user-status,
+  .group-status,
+  .title,
+  .subtitle {
     text-align: initial;
     unicode-bidi: plaintext;
   }
@@ -60,7 +65,7 @@
   &.multiline {
     .ListItem-button > i {
       position: relative;
-      top: .25rem;
+      top: 0.25rem;
     }
   }
 
@@ -81,7 +86,8 @@
       }
 
       @media (hover: hover) {
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           --background-color: var(--color-chat-hover);
         }
       }
@@ -153,7 +159,7 @@
     }
 
     .ListItem-button {
-      padding: .5625rem;
+      padding: 0.5625rem;
     }
 
     .Avatar {
@@ -166,14 +172,18 @@
       overflow: hidden;
     }
 
-    .title, .subtitle {
+    .title,
+    .subtitle {
       overflow: hidden;
       display: flex;
       justify-content: flex-start;
       align-items: center;
     }
 
-    h3, .last-message, .status, .typing-status {
+    h3,
+    .last-message,
+    .status,
+    .typing-status {
       font-size: 1rem;
       line-height: 1.6875rem;
       margin: 0;
@@ -214,7 +224,8 @@
       flex-grow: 1;
       overflow: hidden;
 
-      .status, .typing-status {
+      .status,
+      .typing-status {
         font-size: 0.875rem;
         line-height: 1.25rem;
         color: var(--color-text-secondary);
@@ -224,8 +235,8 @@
           color: var(--color-primary);
         }
 
-        &[dir=rtl],
-        &[dir=auto] {
+        &[dir="rtl"],
+        &[dir="auto"] {
           text-align: initial;
           width: 100%;
         }
@@ -239,7 +250,10 @@
 
     .contact-phone,
     .contact-username,
-    h3, .last-message, .status, .typing-status {
+    h3,
+    .last-message,
+    .status,
+    .typing-status {
       text-align: initial;
       unicode-bidi: plaintext;
     }
@@ -249,13 +263,13 @@
     .typing-status {
       body.is-ios &,
       body.is-macos & {
-        font-size: .9375rem;
+        font-size: 0.9375rem;
       }
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .ListItem-button {
-        padding: .5625rem .5625rem .5625rem .6975rem;
+        padding: 0.5625rem 0.5625rem 0.5625rem 0.6875rem;
       }
 
       .Avatar {
@@ -271,14 +285,15 @@
 
   &.search-result-message {
     .title {
-      padding-right: .15rem;
+      padding-right: 0.125rem;
     }
 
     h3 {
       max-width: 80%;
     }
 
-    h3, .subtitle {
+    h3,
+    .subtitle {
       font-size: 1rem;
       line-height: 1.5rem;
       overflow: hidden;
@@ -298,7 +313,7 @@
 
       .matching-text-highlight {
         color: var(--color-text);
-        background: #CAE3F7;
+        background: #cae3f7;
         border-radius: 0.25rem;
         padding: 0 0.125rem;
         display: inline-block;
@@ -309,7 +324,7 @@
       }
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .LastMessageMeta {
         margin-left: 0;
         margin-right: auto;
@@ -343,7 +358,7 @@
       padding-left: 4rem;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .Checkbox {
         padding-left: 0;
         padding-right: 4rem;
@@ -356,7 +371,8 @@
     white-space: initial;
     overflow: hidden;
 
-    .title, .subtitle {
+    .title,
+    .subtitle {
       display: block;
       text-align: initial;
     }
@@ -382,7 +398,7 @@
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .ListItem-button > i {
       margin-left: 2rem;
       margin-right: 0;

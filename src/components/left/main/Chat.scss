@@ -14,15 +14,16 @@
 
   &.animate-opacity {
     will-change: opacity;
-    transition: opacity .2s ease-out;
+    transition: opacity 0.2s ease-out;
   }
 
   &.animate-transform {
     will-change: transform;
-    transition: transform .2s ease-out;
+    transition: transform 0.2s ease-out;
   }
 
-  &:hover, &.ListItem.has-menu-open {
+  &:hover,
+  &.ListItem.has-menu-open {
     .Avatar.online::after {
       border-color: var(--color-chat-hover);
     }
@@ -82,7 +83,7 @@
 
   .info {
     .subtitle {
-      margin-top: -.125rem;
+      margin-top: -0.125rem;
     }
 
     h3 {
@@ -93,12 +94,12 @@
     .icon-muted {
       font-size: 1.25rem;
       margin-left: 0.25rem;
-      margin-top: -.0625rem;
-      color: #C6C8CA;
+      margin-top: -0.0625rem;
+      color: #c6c8ca;
 
       body.is-ios & {
         margin-top: 0;
-        margin-right: .5rem;
+        margin-right: 0.5rem;
       }
     }
 
@@ -106,18 +107,19 @@
       margin-left: auto;
 
       body.is-ios & {
-        font-size: .875rem;
+        font-size: 0.875rem;
         margin-right: 0;
       }
     }
 
-    .last-message, .typing-status {
+    .last-message,
+    .typing-status {
       padding-right: 0.25rem;
       flex-grow: 1;
       color: var(--color-text-secondary);
       unicode-bidi: plaintext;
 
-      &[dir=ltr] {
+      &[dir="ltr"] {
         text-align: left;
       }
 
@@ -133,43 +135,43 @@
     .last-message {
       .draft {
         &::after {
-          content: ': ';
+          content: ": ";
         }
       }
 
       .colon {
-        margin-inline-end: .25rem;
+        margin-inline-end: 0.25rem;
       }
 
       img {
         width: 1.25rem;
         height: 1.25rem;
         object-fit: cover;
-        border-radius: .125rem;
-        vertical-align: -.25rem;
-        margin-inline-end: .25rem;
+        border-radius: 0.125rem;
+        vertical-align: -0.25rem;
+        margin-inline-end: 0.25rem;
 
         body.is-ios & {
           width: 1.125rem;
           height: 1.125rem;
-          vertical-align: -.1875rem;
+          vertical-align: -0.1875rem;
         }
 
         &.round {
-          border-radius: .625rem;
+          border-radius: 0.625rem;
         }
       }
 
       .emoji-small {
         width: 1rem;
         height: 1rem;
-        vertical-align: -.125rem;
+        vertical-align: -0.125rem;
       }
 
       .icon-play {
         position: relative;
         display: inline-block;
-        font-size: .75rem;
+        font-size: 0.75rem;
         color: #fff;
         margin-inline-start: -1.25rem;
         margin-inline-end: 0.5rem;
@@ -183,15 +185,16 @@
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .info {
       .LastMessageMeta {
         margin-left: 0;
         margin-right: auto;
       }
 
-      .title, .subtitle {
-        padding-left: .15rem;
+      .title,
+      .subtitle {
+        padding-left: 0.125rem;
         padding-right: 0;
       }
 
@@ -200,7 +203,8 @@
         margin-right: 0.25rem;
       }
 
-      .last-message, .typing-status {
+      .last-message,
+      .typing-status {
         padding-left: 0.5rem;
         padding-right: 0;
         text-align: right;

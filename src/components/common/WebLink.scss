@@ -1,6 +1,6 @@
 .WebLink {
   min-height: 3rem;
-  padding: .25rem 0 0 3.75rem;
+  padding: 0.25rem 0 0 3.75rem;
   font-size: 0.875rem;
   line-height: 1.125rem;
   position: relative;
@@ -57,7 +57,7 @@
   .site-title {
     font-size: 1rem;
     font-weight: 400;
-    margin-bottom: .0625rem;
+    margin-bottom: 0.0625rem;
     line-height: 1.3125rem;
   }
 
@@ -74,7 +74,7 @@
   }
 
   .sender-name {
-    margin-top: .25rem;
+    margin-top: 0.25rem;
   }
 
   .site-description .emoji {
@@ -82,8 +82,8 @@
     height: 1rem !important;
   }
 
-  &[dir=rtl] {
-    padding: .25rem 3.75rem 0 0;
+  &[dir="rtl"] {
+    padding: 0.25rem 3.75rem 0 0;
 
     .Media,
     &.without-media::before {

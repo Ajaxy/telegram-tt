@@ -44,7 +44,8 @@
           background: var(--color-chat-hover);
           color: var(--color-text-secondary);
 
-          &:hover, &:active {
+          &:hover,
+          &:active {
             background: var(--color-item-active) !important;
           }
         }
@@ -57,7 +58,7 @@
       overflow: hidden;
     }
 
-    &[dir=rtl] {
+    &[dir="rtl"] {
       .title-wrapper {
         text-align: right;
       }

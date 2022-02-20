@@ -5,19 +5,19 @@
   display: flex;
   width: 100%;
   align-items: center;
-  padding: .5625rem .25rem .5625rem .625rem;
-  padding-inline-start: .625rem;
-  padding-inline-end: .25rem;
+  padding: 0.5625rem 0.25rem 0.5625rem 0.625rem;
+  padding-inline-start: 0.625rem;
+  padding-inline-end: 0.25rem;
   background: var(--background-color);
   border-bottom-right-radius: var(--border-bottom-right-radius);
   border-bottom-left-radius: var(--border-bottom-left-radius);
-  font-size: .9375rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   line-height: 2rem;
   color: var(--accent-color);
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color .15s, color .15s;
+  transition: background-color 0.15s, color 0.15s;
   user-select: none;
 
   body.animation-level-0 & {
@@ -25,20 +25,20 @@
   }
 
   .Message .has-appendix &::before {
-    content: '';
+    content: "";
     display: block;
     position: absolute;
-    bottom: -.1875rem;
-    left: -.5625rem;
-    width: .5625rem;
+    bottom: -0.1875rem;
+    left: -0.5625rem;
+    width: 0.5625rem;
     height: 1.25rem;
     background-position: bottom left;
     background-image: url('data:image/svg+xml,%3Csvg width="9" height="20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"%3E%3Cdefs%3E%3Cfilter x="-50%25" y="-14.7%25" width="200%25" height="141.2%25" filterUnits="objectBoundingBox" id="a"%3E%3CfeOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/%3E%3CfeGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/%3E%3CfeColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/%3E%3C/filter%3E%3Cpath d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" id="b"/%3E%3C/defs%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cuse fill="%23000" filter="url(%23a)" xlink:href="%23b"/%3E%3Cuse fill="%23FFF" xlink:href="%23b"/%3E%3C/g%3E%3C/svg%3E');
     opacity: 0;
-    transition: opacity .15s, filter .15s;
+    transition: opacity 0.15s, filter 0.15s;
 
     .theme-dark #root & {
-      filter: invert(.83);
+      filter: invert(0.83);
     }
 
     body.animation-level-0 & {
@@ -53,20 +53,20 @@
     bottom: 3rem;
     height: 3.375rem;
     border-radius: 1.375rem;
-    padding: 0.375rem .3125rem .25rem;
+    padding: 0.375rem 0.3125rem 0.25rem;
     align-items: flex-start;
     color: white;
-    background-color: rgba(0, 0, 0, .2);
+    background-color: rgba(0, 0, 0, 0.2);
 
     opacity: 0;
-    transition: opacity .2s ease;
+    transition: opacity 0.2s ease;
 
     @media (pointer: coarse) {
       opacity: 1 !important;
     }
 
     &:hover {
-      background-color: rgba(0, 0, 0, .28);
+      background-color: rgba(0, 0, 0, 0.28);
     }
 
     .Message:hover & {
@@ -76,7 +76,7 @@
     &::after {
       content: attr(data-cnt);
       position: absolute;
-      bottom: -.0625rem;
+      bottom: -0.0625rem;
       left: 0;
       width: 100%;
       text-align: center;
@@ -126,15 +126,15 @@
   }
 
   .message-content.has-solid-background & {
-    margin: .375rem -.5rem -.375rem;
+    margin: 0.375rem -0.5rem -0.375rem;
   }
 
   .message-content.voice & {
-    margin-bottom: -.5rem;
+    margin-bottom: -0.5rem;
   }
 
   .message-content.audio & {
-    margin-bottom: -.8125rem;
+    margin-bottom: -0.8125rem;
   }
 
   .message-content.audio &,
@@ -152,7 +152,7 @@
   .icon-comments {
     font-size: 1.5625rem;
     line-height: 2rem;
-    margin-inline-end: .875rem;
+    margin-inline-end: 0.875rem;
   }
 
   .icon-next {
@@ -163,11 +163,11 @@
   .recent-repliers {
     display: inline-flex;
     align-items: center;
-    margin-inline-end: .5rem;
-    margin-inline-start: -.125rem;
+    margin-inline-end: 0.5rem;
+    margin-inline-start: -0.125rem;
 
     .Avatar {
-      transition: border .15s;
+      transition: border 0.15s;
       border: 2px solid var(--color-background);
       margin-inline-end: 0;
       z-index: 3;
@@ -187,7 +187,7 @@
       }
 
       &:not(:first-child) {
-        margin-inline-start: -.75rem;
+        margin-inline-start: -0.75rem;
       }
     }
   }
@@ -196,13 +196,13 @@
     position: relative;
 
     &::after {
-      content: '';
+      content: "";
       display: inline-block;
-      width: .5rem;
-      height: .5rem;
+      width: 0.5rem;
+      height: 0.5rem;
       border-radius: 50%;
       background: var(--accent-color);
-      margin-inline-start: 	.75rem;
+      margin-inline-start: 0.75rem;
     }
   }
 

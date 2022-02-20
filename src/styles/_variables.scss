@@ -4,7 +4,7 @@
   @return red($color) + ", " + green($color) + ", " + blue($color);
 }
 
-@function blend-normal ($foreground, $background) {
+@function blend-normal($foreground, $background) {
   $opacity: opacity($foreground);
   $background-opacity: opacity($background);
 
@@ -15,42 +15,42 @@
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
 
-$color-primary: #3390EC;
+$color-primary: #3390ec;
 
-$color-links: #3390EC;
+$color-links: #3390ec;
 
-$color-placeholders: #A2ACB4;
+$color-placeholders: #a2acb4;
 
-$color-text-green: #4FAE4E;
-$color-green: #00C73E;
-$color-light-green: #EEFFDE;
+$color-text-green: #4fae4e;
+$color-green: #00c73e;
+$color-light-green: #eeffde;
 
 $color-error: #e53935;
 
 $color-warning: #fb8c00;
 
-$color-yellow: #FDD764;
+$color-yellow: #fdd764;
 
 $color-white: #ffffff;
 $color-black: #000000;
 $color-dark-gray: #2e3939;
 $color-gray: #c4c9cc;
 $color-text-secondary: #707579;
-$color-text-secondary-apple: #8A8A90;
+$color-text-secondary-apple: #8a8a90;
 $color-text-meta: #686c72;
-$color-text-meta-apple: #8C8C91;
-$color-borders: #DADCE0;
-$color-dividers: #C8C6CC;
+$color-text-meta-apple: #8c8c91;
+$color-borders: #dadce0;
+$color-dividers: #c8c6cc;
 $color-item-active: #ededed;
 $color-chat-hover: #f4f4f5;
-$color-chat-active: #3390EC;
+$color-chat-active: #3390ec;
 $color-selection: #3993fb;
 
 // https://github.com/telegramdesktop/tdesktop/wiki/Theme-Reference#user-content-standard-color-constants
 // Colors borrowed from https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/Resources/day-blue.tdesktop-theme
 // historyPeer[1-8]UserpicBg
-$color-user-1: #E17076;
-$color-user-2: #7BC862;
+$color-user-1: #e17076;
+$color-user-2: #7bc862;
 //$color-user-3: #E5CA77;
 $color-user-4: #65aadd;
 $color-user-5: #a695e7;
@@ -67,7 +67,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-background: #{$color-white};
   --color-background-selected: #f4f4f5;
   --color-background-secondary: #f4f4f5;
-  --color-background-secondary-accent: #E4E4E5;
+  --color-background-secondary-accent: #e4e4e5;
   --color-background-own: #{$color-light-green};
   --color-background-own-selected: color.adjust($color-light-green, -10%);
   --color-text: #{$color-black};
@@ -95,7 +95,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
   --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
   --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
-  --color-primary-opacity: rgba(var(--color-primary), 0.50);
+  --color-primary-opacity: rgba(var(--color-primary), 0.5);
   --color-green: #{$color-green};
   --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
 
@@ -116,9 +116,9 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-pinned: #{$color-white};
 
   --color-code: #4a729a;
-  --color-code-bg: #{rgba($color-text-secondary, .08)};
+  --color-code-bg: #{rgba($color-text-secondary, 0.08)};
   --color-code-own: #3c7940;
-  --color-code-own-bg: #{rgba($color-text-secondary, .08)};
+  --color-code-own-bg: #{rgba($color-text-secondary, 0.08)};
 
   --color-accent-own: #{$color-text-green};
   --color-message-meta-own: #{$color-text-green};
@@ -133,7 +133,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
   --color-reply-own-active: #{blend-normal(rgba($color-text-green, 0.24), $color-light-green)};
 
-  --color-background-own-apple: #DCF8C5;
+  --color-background-own-apple: #dcf8c5;
   --color-reply-own-hover-apple: #cbefb7;
   --color-reply-own-active-apple: #bae6a8;
 
@@ -145,7 +145,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-item-active: #{$color-item-active};
 
   --color-selection-highlight: #{$color-selection};
-  --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, .7);
+  --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, 0.7);
 
   --color-user-1: #{$color-user-1};
   --color-user-2: #{$color-user-2};
@@ -156,7 +156,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-user-8: #{$color-user-8};
 
   --color-default-shadow: #72727240;
-  --color-light-shadow: #7272722B;
+  --color-light-shadow: #7272722b;
 
   --vh: 1vh;
 

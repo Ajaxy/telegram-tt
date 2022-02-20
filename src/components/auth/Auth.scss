@@ -6,14 +6,15 @@
   text-align: center;
 
   @media (min-width: 600px) and (min-height: 450px) {
-    padding: 6.8rem 1.5rem 1.5rem;
+    padding: 6.8125rem 1.5rem 1.5rem;
 
     &.qr {
       padding-top: 4rem;
     }
   }
 
-  #logo, .AvatarEditable label {
+  #logo,
+  .AvatarEditable label {
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -29,7 +30,7 @@
   }
 
   #logo {
-    background: url('../../assets/telegram-logo.svg') center no-repeat;
+    background: url("../../assets/telegram-logo.svg") center no-repeat;
     background-size: 100%;
   }
 
@@ -100,13 +101,15 @@
   justify-content: center;
   cursor: pointer;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     opacity: 1;
   }
 }
 
 #auth-qr-form {
-  .qr-container, .qr-loading {
+  .qr-container,
+  .qr-loading {
     height: 280px;
   }
 
@@ -121,10 +124,10 @@
     }
 
     canvas {
-      padding: .625rem;
+      padding: 0.625rem;
       border-radius: var(--border-radius-default);
       background: var(--color-white);
-      margin-top: -.625rem;
+      margin-top: -0.625rem;
     }
   }
 
@@ -148,8 +151,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        min-width: 1.4rem;
-        height: 1.4rem;
+        min-width: 1.375rem;
+        height: 1.375rem;
         padding: 0;
         margin: 0 0.75rem 0 0;
         background: var(--color-primary);

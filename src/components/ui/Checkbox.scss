@@ -19,8 +19,9 @@
       }
 
       &::after {
-        /* stylelint-disable-next-line scss/operator-no-unspaced */
-        background: var(--color-primary) url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiLz48L3N2Zz4=) no-repeat 50% 50%;
+        background: var(--color-primary)
+          url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiLz48L3N2Zz4=)
+          no-repeat 50% 50%;
         background-size: 12px;
         border-radius: 50%;
       }
@@ -38,7 +39,7 @@
       left: 0.375rem;
       top: 0.125rem;
       opacity: 0;
-      animation: fade-in .2s ease forwards;
+      animation: fade-in 0.2s ease forwards;
       --spinner-size: 1.25rem;
     }
   }
@@ -67,8 +68,9 @@
   }
 
   .Checkbox-main {
-    &::before, &::after {
-      content: '';
+    &::before,
+    &::after {
+      content: "";
       display: block;
       position: absolute;
       left: 1.1875rem;
@@ -79,17 +81,18 @@
 
     &::before {
       border: 2px solid var(--color-borders-input);
-      border-radius: .25rem;
+      border-radius: 0.25rem;
       background-color: var(--color-background);
-      transition: border-color .1s ease, background-color .1s ease;
+      transition: border-color 0.1s ease, background-color 0.1s ease;
     }
 
     &::after {
       /* stylelint-disable-next-line scss/operator-no-unspaced */
-      background: center no-repeat url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvc3ZnPg==);
-      background-size: .875rem;
+      background: center no-repeat
+        url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvc3ZnPg==);
+      background-size: 0.875rem;
       opacity: 0;
-      transition: opacity .1s ease;
+      transition: opacity 0.1s ease;
     }
 
     .label {
@@ -116,7 +119,7 @@
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     padding-left: 0;
     padding-right: 4.5rem;
 
@@ -133,7 +136,8 @@
     }
 
     .Checkbox-main {
-      &::before, &::after {
+      &::before,
+      &::after {
         left: auto;
         right: 1.1875rem;
       }

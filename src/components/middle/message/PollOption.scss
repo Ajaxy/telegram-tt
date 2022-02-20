@@ -13,18 +13,18 @@
 
   .poll-option-share {
     position: relative;
-    margin-top: .125rem;
+    margin-top: 0.125rem;
     width: 1.75rem;
-    margin-inline-end: .5rem;
+    margin-inline-end: 0.5rem;
     flex-shrink: 0;
     font-weight: 500;
-    font-size: .875rem;
+    font-size: 0.875rem;
     text-align: right;
 
     &.limit-width {
       display: inline-flex;
       justify-content: center;
-      font-size: .75rem;
+      font-size: 0.75rem;
     }
   }
 
@@ -36,8 +36,8 @@
     height: 1rem;
     background: var(--accent-color);
     color: var(--background-color);
-    border-radius: .5rem;
-    font-size: .75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
     text-align: center;
 
     &.wrong {
@@ -51,8 +51,8 @@
     &.animate {
       opacity: 0;
       animation-name: PollOptionIconAnimate;
-      animation-delay: .09s;
-      animation-duration: .3s;
+      animation-delay: 0.09s;
+      animation-duration: 0.3s;
       animation-fill-mode: forwards;
     }
   }
@@ -76,9 +76,8 @@
     background: var(--accent-color);
 
     transform-origin: 0 0;
-    transition: transform .3s;
-    transition-delay: .09s;
-
+    transition: transform 0.3s;
+    transition-delay: 0.09s;
   }
 
   .poll-line {
@@ -87,16 +86,16 @@
     position: absolute;
     left: -27px;
     bottom: -5px;
-    transition: stroke-dashoffset .3s, stroke-dasharray .3s;
+    transition: stroke-dashoffset 0.3s, stroke-dasharray 0.3s;
     stroke-dashoffset: 0;
-    stroke-dasharray: 0, 200%
+    stroke-dasharray: 0, 200%;
   }
 
   .poll-line path {
     stroke-width: 4px;
     stroke-linecap: round;
     stroke: var(--accent-color);
-    fill:none
+    fill: none;
   }
 
   .wrong {
@@ -111,6 +110,10 @@
 }
 
 @keyframes PollOptionIconAnimate {
-  0% { opacity: 0 }
-  100% { opacity: 1 }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

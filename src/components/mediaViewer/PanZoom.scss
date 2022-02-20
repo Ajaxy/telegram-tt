@@ -11,7 +11,7 @@
 }
 
 .pan-container {
-  transition: transform .2s ease-in;
+  transition: transform 0.2s ease-in;
 
   .pan-wrapper.move & {
     transition: none;

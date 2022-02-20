@@ -36,8 +36,8 @@
       display: none;
     }
 
-    &[dir=rtl] {
-      .title h3{
+    &[dir="rtl"] {
+      .title h3 {
         text-align: right;
       }
     }
@@ -58,7 +58,7 @@
     }
   }
 
-  &[dir=rtl] {
+  &[dir="rtl"] {
     .Avatar {
       margin-left: 1.5rem;
       margin-right: -0.25rem;

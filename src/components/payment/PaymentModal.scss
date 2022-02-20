@@ -8,7 +8,7 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     width: 100%;
-    padding: .25rem 1rem;
+    padding: 0.25rem 1rem;
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -52,7 +52,7 @@
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     width: 100%;
-    padding: .75rem 1rem;
+    padding: 0.75rem 1rem;
     background: var(--color-background);
     border-top: 1px var(--color-borders) solid;
 
@@ -67,15 +67,12 @@
   }
 
   .modal-content {
-    padding:0;
+    padding: 0;
     overflow: hidden;
   }
 }
 
-@media screen
-  and (max-device-width: 640px)
-  and (max-height: 640px)
-  and (orientation: landscape) {
+@media screen and (max-device-width: 640px) and (max-height: 640px) and (orientation: landscape) {
   .PaymentModal {
     .modal-dialog {
       max-height: 100%;
