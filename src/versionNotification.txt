@@ -1,11 +1,14 @@
-**Telegram Web Z was updated to version 1.34**
+**Telegram Web Z was updated to version 1.35**
+
+👏 **Harder**
+• Admins can now manage removed users list in channels.
+• Copy text feature of multiple messages preserves sender’s name.
+• Added support for subscription bots such as @donate.
 
 🤩 **Better**
-• Reactions to your messages are now shown in notifications.
-• Multiple improvements for Media Viewer.
-• Better keyboard support in modal dialogs.
+• Fully redesigned context menu on desktops – featuring stunning blur effect.
+• Print or export as PDF chat history with Ctrl + P (⌘ + P on macOS).
 • Various layout improvements.
 
-💪 **Stronger**
-• Video messages always play now.
-• Fixed playing multiple emoji interactions.
+🚀 **Faster**
+• More performance optimizations.
