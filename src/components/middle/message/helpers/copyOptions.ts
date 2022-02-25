@@ -11,6 +11,7 @@ import {
   hasMessageLocalBlobUrl,
 } from '../../../../modules/helpers';
 import { CLIPBOARD_ITEM_SUPPORTED, copyImageToClipboard, copyTextToClipboard } from '../../../../util/clipboard';
+import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 
 type ICopyOptions = {
   label: string;
@@ -18,7 +19,10 @@ type ICopyOptions = {
 }[];
 
 export function getMessageCopyOptions(
-  message: ApiMessage, afterEffect?: () => void, onCopyLink?: () => void,
+  message: ApiMessage,
+  afterEffect?: () => void,
+  onCopyLink?: () => void,
+  onCopyMessages?: (messageIds: number[]) => void,
 ): ICopyOptions {
   const options: ICopyOptions = [];
   const text = getMessageText(message);
@@ -53,8 +57,13 @@ export function getMessageCopyOptions(
     options.push({
       label: getCopyLabel(hasSelection),
       handler: () => {
-        const clipboardText = hasSelection && selection ? selection.toString() : getMessageTextWithSpoilers(message)!;
-        copyTextToClipboard(clipboardText);
+        const messageIds = getMessageIdsForSelectedText();
+        if (messageIds?.length && onCopyMessages) {
+          onCopyMessages(messageIds);
+        } else {
+          const clipboardText = hasSelection && selection ? selection.toString() : getMessageTextWithSpoilers(message)!;
+          copyTextToClipboard(clipboardText);
+        }
 
         if (afterEffect) {
           afterEffect();

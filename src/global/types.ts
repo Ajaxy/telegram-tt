@@ -533,7 +533,7 @@ export type ActionTypes = (
   'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' | 'loadAvailableReactions' |
   'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' | 'setDefaultReaction' |
   'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
-  'stopActiveReaction' | 'startActiveReaction' |
+  'stopActiveReaction' | 'startActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
   // downloads
   'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages

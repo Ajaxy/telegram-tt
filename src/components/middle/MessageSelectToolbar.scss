@@ -64,7 +64,7 @@
 
   &::before {
     z-index: -1;
-    max-width: 32rem;
+    max-width: calc(100% * var(--composer-hidden-scale));
     width: 100%;
     left: auto;
     right: auto;
@@ -72,7 +72,7 @@
 
   &-inner {
     width: 100%;
-    max-width: 32rem;
+    max-width: calc(100% * var(--composer-hidden-scale));
     display: flex;
     align-items: center;
     padding: 0.25rem;
