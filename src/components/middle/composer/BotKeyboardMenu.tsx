@@ -56,6 +56,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
       onCloseAnimationEnd={handleClose}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCompact
     >
       <div className="content">
         {message.keyboardButtons.map((row) => (

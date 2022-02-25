@@ -69,6 +69,16 @@
     flex-shrink: 0;
   }
 
+  .MenuItem.compact .archived-badge {
+    background: none;
+    padding: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .MenuItem.compact .Switcher {
+    transform: scale(0.75);
+  }
+
   [dir="rtl"] .archived-badge {
     margin-left: 0;
     margin-right: auto;

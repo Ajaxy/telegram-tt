@@ -2,6 +2,7 @@ import React, { FC, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
+import { IS_COMPACT_MENU } from '../../util/environment';
 
 import './MenuItem.scss';
 
@@ -64,6 +65,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     className,
     disabled && 'disabled',
     destructive && 'destructive',
+    IS_COMPACT_MENU && 'compact',
   );
 
   const content = (

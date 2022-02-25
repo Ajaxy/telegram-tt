@@ -11,17 +11,13 @@
     background: #181f27;
   }
 
-  .Menu .bubble {
-    --color-background: #232a34;
-    --color-chat-hover: #2f363e;
-    --color-item-active: #2f363e;
-    --color-text: #fff;
-    box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
-  }
-
-  // Compact menu items
-  .MenuItem {
-    padding: 0.75rem 1rem !important;
+  .Menu {
+    --color-text: white;
+    --color-background-compact-menu: #212121DD;
+    --color-background-compact-menu-hover: #00000066;
+    .bubble {
+      box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
+    }
   }
 
   &.single-column {

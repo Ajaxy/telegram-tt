@@ -64,7 +64,7 @@
     }
   }
 
-  &:not(.has-ripple):not(.disabled):active {
+  &:not(.has-ripple):not(.disabled):not(.compact):active {
     background-color: var(--color-item-active);
     transition: none !important;
   }
@@ -87,6 +87,37 @@
     > .Switcher {
       margin-left: 0;
       margin-right: auto;
+    }
+  }
+
+  &.compact {
+    align-items: center;
+    font-size: 0.875rem;
+    margin: 0.125rem 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    width: auto;
+    font-weight: 500;
+    transform: scale(1);
+    transition: 0.15s ease-in-out transform;
+
+    i {
+      font-size: 1.25rem;
+      margin-left: 0.5rem;
+      margin-right: 1.25rem;
+    }
+
+    @media (hover: hover) {
+      &:hover,
+      &:focus,
+      &:active {
+        background: var(--color-background-compact-menu-hover);
+        text-decoration: none;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
     }
   }
 }
