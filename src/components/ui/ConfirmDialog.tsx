@@ -19,7 +19,7 @@ type OwnProps = {
   confirmHandler: () => void;
   confirmIsDestructive?: boolean;
   isButtonsInOneRow?: boolean;
-  children?: any;
+  children?: React.ReactNode;
 };
 
 const ConfirmDialog: FC<OwnProps> = ({

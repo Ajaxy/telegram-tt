@@ -20,7 +20,7 @@ export interface IDragData {
 }
 
 export interface OwnProps {
-  children: any;
+  children: React.ReactNode;
   className?: string;
   noWrap: boolean;
   canPan: boolean;

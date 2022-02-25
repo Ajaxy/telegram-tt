@@ -10,7 +10,7 @@ import { getDispatch } from '../../lib/teact/teactn';
 type OwnProps = {
   className?: string;
   sender?: ApiUser | ApiChat;
-  children: any;
+  children: React.ReactNode;
 };
 
 const UserLink: FC<OwnProps> = ({

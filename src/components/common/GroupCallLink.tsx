@@ -10,7 +10,7 @@ import { getDispatch } from '../../lib/teact/teactn';
 type OwnProps = {
   className?: string;
   groupCall?: Partial<ApiGroupCall>;
-  children: any;
+  children: React.ReactNode;
 };
 
 const GroupCallLink: FC<OwnProps> = ({

@@ -33,7 +33,7 @@ type OwnProps = {
   onClose?: () => void;
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  children: any;
+  children: React.ReactNode;
 };
 
 const ANIMATION_DURATION = 200;

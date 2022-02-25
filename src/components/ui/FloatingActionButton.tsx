@@ -13,7 +13,7 @@ type OwnProps = {
   ariaLabel?: ButtonProps['ariaLabel'];
   disabled?: boolean;
   onClick: () => void;
-  children: any;
+  children: React.ReactNode;
 };
 
 const FloatingActionButton: FC<OwnProps> = ({

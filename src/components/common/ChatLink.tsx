@@ -8,7 +8,7 @@ import Link from '../ui/Link';
 type OwnProps = {
   className?: string;
   chatId?: string;
-  children: any;
+  children: React.ReactNode;
 };
 
 const ChatLink: FC<OwnProps> = ({

@@ -28,7 +28,7 @@ type OwnProps = {
   header?: any;
   hasCloseButton?: boolean;
   noBackdrop?: boolean;
-  children: any;
+  children: React.ReactNode;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;

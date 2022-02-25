@@ -25,7 +25,7 @@ type OwnProps = {
   noScrollRestoreOnTop?: boolean;
   noFastList?: boolean;
   cacheBuster?: any;
-  children: any;
+  children: React.ReactNode;
 };
 
 const DEFAULT_LIST_SELECTOR = '.ListItem';

@@ -30,7 +30,7 @@ interface OwnProps {
   secondaryIcon?: string;
   className?: string;
   style?: string;
-  children: any;
+  children: React.ReactNode;
   disabled?: boolean;
   ripple?: boolean;
   narrow?: boolean;

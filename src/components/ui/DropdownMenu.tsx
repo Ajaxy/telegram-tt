@@ -13,7 +13,7 @@ type OwnProps = {
   forceOpen?: boolean;
   onOpen?: NoneToVoidFunction;
   onClose?: NoneToVoidFunction;
-  children: any;
+  children: React.ReactNode;
 };
 
 const DropdownMenu: FC<OwnProps> = ({
