@@ -32,12 +32,17 @@ import {
   selectIsViewportNewest,
   selectReplyingToId,
   selectReplyStack,
+  selectSender,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 
 import versionNotification from '../../../versionNotification.txt';
 import parseMessageInput from '../../../util/parseMessageInput';
+import { getMessageSummaryText, getSenderTitle } from '../../helpers';
+import * as langProvider from '../../../util/langProvider';
+import { copyTextToClipboard } from '../../../util/clipboard';
+import { GlobalState } from '../../../global/types';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
@@ -672,3 +677,45 @@ addReducer('closeSeenByModal', (global) => {
     seenByModal: undefined,
   };
 });
+
+addReducer('copySelectedMessages', (global) => {
+  if (!global.selectedMessages) {
+    return;
+  }
+
+  const { chatId, messageIds } = global.selectedMessages;
+  copyTextForMessages(global, chatId, messageIds);
+});
+
+addReducer('copyMessagesByIds', (global, actions, payload: { messageIds?: number[] } ) => {
+  const { messageIds } = payload;
+  const chat = selectCurrentChat(global);
+  if (!messageIds || messageIds.length === 0 || !chat) {
+    return;
+  }
+
+  copyTextForMessages(global, chat.id, messageIds);
+});
+
+
+function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
+  const { threadId } = selectCurrentMessageList(global) || {};
+  const lang = langProvider.getTranslation;
+
+  const chatMessages = selectChatMessages(global, chatId);
+  if (!chatMessages || !threadId) return;
+  const messages = messageIds
+    .map((id) => chatMessages[id])
+    .filter((message) => selectAllowedMessageActions(global, message, threadId).canCopy)
+    .sort((message1, message2) => message1.id - message2.id);
+
+  const result = messages.reduce((acc, message) => {
+    const sender = selectSender(global, message);
+    acc.push(`> ${sender ? getSenderTitle(lang, sender) : ''}:`);
+    acc.push(getMessageSummaryText(lang, message, false, 0, undefined, true) + '\n');
+
+    return acc;
+  }, [] as string[]);
+
+  copyTextToClipboard(result.join('\n'));
+}

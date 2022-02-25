@@ -48,6 +48,7 @@ import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useWindowSize from '../../hooks/useWindowSize';
 import useInterval from '../../hooks/useInterval';
+import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -138,7 +139,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   withBottomShift,
 }) => {
   const {
-    loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions,
+    loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
   } = getDispatch();
 
   // eslint-disable-next-line no-null/no-null
@@ -190,6 +191,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useOnChange(() => {
     memoFocusingIdRef.current = focusingId;
   }, [focusingId]);
+
+  useNativeCopySelectedMessages(copyMessagesByIds);
 
   const messageGroups = useMemo(() => {
     if (!messageIds || !messagesById) {

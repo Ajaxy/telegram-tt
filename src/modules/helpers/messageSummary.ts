@@ -16,11 +16,12 @@ export function getMessageSummaryText(
   noEmoji = false,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
   noReactions = true,
+  isExtended = false,
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message, noReactions);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
   const text = trimText(getMessageTextWithSpoilers(message), truncateLength);
-  const description = getMessageSummaryDescription(lang, message, text, noReactions);
+  const description = getMessageSummaryDescription(lang, message, text, noReactions, isExtended);
 
   return `${emojiWithSpace}${description}`;
 }
@@ -104,6 +105,7 @@ export function getMessageSummaryDescription(
   message: ApiMessage,
   truncatedText?: string | TextPart[],
   noReactions = true,
+  isExtended = false,
 ) {
   const {
     text,
@@ -133,8 +135,7 @@ export function getMessageSummaryDescription(
   }
 
   if (sticker) {
-    summary = lang('AttachSticker')
-      .trim();
+    summary = lang('AttachSticker').trim();
   }
 
   if (audio) {
@@ -146,7 +147,7 @@ export function getMessageSummaryDescription(
   }
 
   if (document) {
-    summary = truncatedText || document.fileName;
+    summary = isExtended ? document.fileName : (truncatedText || document.fileName);
   }
 
   if (contact) {
@@ -158,11 +159,15 @@ export function getMessageSummaryDescription(
   }
 
   if (invoice) {
-    summary = 'Invoice';
+    summary = lang('PaymentInvoice') + ': ' + invoice.text;
   }
 
   if (text) {
-    summary = truncatedText;
+    if (isExtended && summary) {
+      summary += '\n' + truncatedText;
+    } else {
+      summary = truncatedText;
+    }
   }
 
   const reaction = !noReactions && getMessageRecentReaction(message);

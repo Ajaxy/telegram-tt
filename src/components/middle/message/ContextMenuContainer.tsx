@@ -125,6 +125,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openReactorListModal,
     loadFullChat,
     loadReactors,
+    copyMessagesByIds,
   } = getDispatch();
 
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
@@ -288,6 +289,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     });
   }, [message.chatId, message.id, rescheduleMessage]);
 
+  const handleCopyMessages = useCallback((messageIds: number[]) => {
+    copyMessagesByIds({ messageIds });
+    closeMenu();
+  }, [closeMenu, copyMessagesByIds]);
+
   const handleCopyLink = useCallback(() => {
     copyTextToClipboard(`https://t.me/${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
     closeMenu();
@@ -366,6 +372,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onReschedule={handleOpenCalendar}
         onClose={closeMenu}
         onCopyLink={handleCopyLink}
+        onCopyMessages={handleCopyMessages}
         onDownload={handleDownloadClick}
         onShowSeenBy={handleOpenSeenByModal}
         onSendReaction={handleSendReaction}

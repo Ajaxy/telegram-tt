@@ -63,6 +63,7 @@ type OwnProps = {
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onCopyLink?: () => void;
+  onCopyMessages?: (messageIds: number[]) => void;
   onDownload?: () => void;
   onShowSeenBy?: () => void;
   onShowReactors?: () => void;
@@ -120,12 +121,13 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowSeenBy,
   onShowReactors,
   onSendReaction,
+  onCopyMessages,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const scrollableRef = useRef<HTMLDivElement>(null);
-  const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined);
+  const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined, onCopyMessages);
   const noReactions = !isPrivate && !enabledReactions?.length;
   const withReactions = canShowReactionList && !noReactions;
 
