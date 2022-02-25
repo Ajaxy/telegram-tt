@@ -23,7 +23,7 @@ import { selectIsRightColumnShown, selectTheme } from '../../modules/selectors';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
-  children: any;
+  children: React.ReactNode;
 };
 
 type StateProps =

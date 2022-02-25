@@ -12,7 +12,7 @@ type OwnProps = {
   hasArrow?: boolean;
   placeholder?: string;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
-  children: any;
+  children: React.ReactNode;
 };
 
 const Select: FC<OwnProps> = (props) => {

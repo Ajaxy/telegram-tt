@@ -12,7 +12,7 @@ type OwnProps = {
   url?: string;
   text: string;
   className?: string;
-  children?: any;
+  children?: React.ReactNode;
   isRtl?: boolean;
 };
 

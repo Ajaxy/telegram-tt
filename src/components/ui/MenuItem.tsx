@@ -10,7 +10,7 @@ type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElemen
 type OwnProps = {
   icon?: string;
   className?: string;
-  children: any;
+  children: React.ReactNode;
   onClick?: OnClickHandler;
   href?: string;
   download?: string;

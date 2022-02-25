@@ -10,7 +10,7 @@ import Link from '../ui/Link';
 type OwnProps = {
   className?: string;
   message?: ApiMessage;
-  children: any;
+  children: React.ReactNode;
 };
 
 const MessageLink: FC<OwnProps> = ({

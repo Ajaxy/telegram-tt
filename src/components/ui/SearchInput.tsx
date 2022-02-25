@@ -16,7 +16,7 @@ import './SearchInput.scss';
 
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
-  children?: any;
+  children?: React.ReactNode;
   parentContainerClassName?: string;
   className?: string;
   inputId?: string;

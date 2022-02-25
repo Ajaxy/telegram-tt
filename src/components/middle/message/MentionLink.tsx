@@ -8,7 +8,7 @@ import { selectUser } from '../../../modules/selectors';
 type OwnProps = {
   userId?: string;
   username?: string;
-  children: any;
+  children: React.ReactNode;
 };
 
 type StateProps = {
