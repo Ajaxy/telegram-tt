@@ -6,7 +6,7 @@ import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
 import { selectChat } from '../../../modules/selectors';
-import { getHasAdminRight, getUserFullName } from '../../../modules/helpers';
+import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../modules/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useFlag from '../../../hooks/useFlag';
@@ -26,12 +26,14 @@ type StateProps = {
   chat?: ApiChat;
   usersById: Record<string, ApiUser>;
   canDeleteMembers?: boolean;
+  isChannel?: boolean;
 };
 
-const ManageGroupRemovedUsers: FC<OwnProps & StateProps> = ({
+const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
   chat,
   usersById,
   canDeleteMembers,
+  isChannel,
   onClose,
   isActive,
 }) => {
@@ -84,7 +86,7 @@ const ManageGroupRemovedUsers: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <p className="text-muted">{lang('NoBlockedGroup2')}</p>
+          <p className="text-muted">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
 
           {removedMembers.map((member) => (
             <ListItem
@@ -127,6 +129,11 @@ export default memo(withGlobal<OwnProps>(
     const { byId: usersById } = global.users;
     const canDeleteMembers = chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
 
-    return { chat, usersById, canDeleteMembers };
+    return {
+      chat,
+      usersById,
+      canDeleteMembers,
+      isChannel: chat && isChatChannel(chat),
+    };
   },
-)(ManageGroupRemovedUsers));
+)(ManageChatRemovedUsers));
