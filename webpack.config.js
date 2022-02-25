@@ -14,6 +14,7 @@ const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
 const gitRevisionPlugin = new GitRevisionPlugin();
 const branch = process.env.HEAD || gitRevisionPlugin.branch();
 const appRevision = (!branch || branch === 'HEAD') ? gitRevisionPlugin.commithash().substring(0, 7) : branch;
+const appVersion = require('./package.json').version;
 
 dotenv.config();
 
@@ -121,7 +122,7 @@ module.exports = (env = {}, argv = {}) => {
       new EnvironmentPlugin({
         APP_ENV: 'production',
         APP_NAME: null,
-        APP_VERSION: undefined,
+        APP_VERSION: appVersion,
         APP_REVISION: appRevision,
         TELEGRAM_T_API_ID: undefined,
         TELEGRAM_T_API_HASH: undefined,
