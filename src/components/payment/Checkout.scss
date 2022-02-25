@@ -63,11 +63,19 @@
         width: 1.5rem;
       }
 
-      i.stripe-provider {
-        background: url("../../assets/stripe-logo.png") no-repeat center;
+      i.provider {
+        background: no-repeat center;
         background-size: 2rem;
         border-radius: 1rem;
         height: 1.5rem;
+      }
+
+      i.provider.stripe {
+        background-image: url("../../assets/stripe-logo.png");
+      }
+
+      i.provider.smartglocal {
+        background-image: url("../../assets/smartglocal-logo.png");
       }
 
       .info {

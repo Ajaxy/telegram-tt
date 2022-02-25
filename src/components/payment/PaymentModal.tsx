@@ -19,10 +19,13 @@ import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Transition from '../ui/Transition';
 import Spinner from '../ui/Spinner';
+import ConfirmPayment from './ConfirmPayment';
 
 import './PaymentModal.scss';
 
 const DEFAULT_PROVIDER = 'stripe';
+const DONATE_PROVIDER = 'smartglocal';
+const SUPPORTED_PROVIDERS = new Set([DEFAULT_PROVIDER, DONATE_PROVIDER]);
 
 export type OwnProps = {
   isOpen: boolean;
@@ -43,6 +46,7 @@ type StateProps = {
   needCardholderName?: boolean;
   needCountry?: boolean;
   needZip?: boolean;
+  confirmPaymentUrl?: string;
 };
 
 type GlobalStateProps = Pick<GlobalState['payment'], (
@@ -73,6 +77,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
   needCardholderName,
   needCountry,
   needZip,
+  confirmPaymentUrl,
   error,
 }) => {
   const {
@@ -86,6 +91,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
+  const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
   useEffect(() => {
     if (step || error) {
@@ -210,6 +216,12 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             currency={currency}
           />
         );
+      case PaymentStep.ConfirmPayment:
+        return (
+          <ConfirmPayment
+            url={confirmPaymentUrl!}
+          />
+        );
       default:
         return undefined;
     }
@@ -266,6 +278,8 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
         return lang('PaymentCardInfo');
       case PaymentStep.Checkout:
         return lang('PaymentCheckout');
+      case PaymentStep.ConfirmPayment:
+        return lang('Checkout.WebConfirmation.Title');
       default:
         return '';
     }
@@ -331,16 +345,18 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <Spinner color="gray" />
         </div>
       )}
-      <div className="footer">
-        <Button
-          type="submit"
-          onClick={handleButtonClick}
-          disabled={isLoading}
-          isLoading={isLoading}
-        >
-          {buttonText}
-        </Button>
-      </div>
+      {canRenderFooter && (
+        <div className="footer">
+          <Button
+            type="submit"
+            onClick={handleButtonClick}
+            disabled={isLoading}
+            isLoading={isLoading}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      )}
       {error && !error.field && renderError()}
     </Modal>
   );
@@ -359,9 +375,10 @@ export default memo(withGlobal<OwnProps>(
       nativeParams,
       passwordMissing,
       error,
+      confirmPaymentUrl,
     } = global.payment;
 
-    const isProviderError = Boolean(invoice && (!nativeProvider || nativeProvider !== DEFAULT_PROVIDER));
+    const isProviderError = Boolean(invoice && (!nativeProvider || !SUPPORTED_PROVIDERS.has(nativeProvider)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const {
       nameRequested,
@@ -397,6 +414,7 @@ export default memo(withGlobal<OwnProps>(
       needCountry,
       needZip,
       error,
+      confirmPaymentUrl,
     };
   },
 )(Invoice));

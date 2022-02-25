@@ -116,6 +116,7 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
       needCountry: nativeData.need_country,
       needZip: nativeData.need_zip,
       publishableKey: nativeData.publishable_key,
+      publicToken: nativeData?.public_token,
     },
   };
 }

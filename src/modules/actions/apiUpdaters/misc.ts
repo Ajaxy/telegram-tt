@@ -1,11 +1,11 @@
-import {
-  addReducer, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
-import { ApiPrivacyKey } from '../../../types';
+import { ApiPrivacyKey, PaymentStep } from '../../../types';
 
-import { addBlockedContact, removeBlockedContact } from '../../reducers';
+import {
+  addBlockedContact, removeBlockedContact, setConfirmPaymentUrl, setPaymentStep,
+} from '../../reducers';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
@@ -31,6 +31,12 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'updatePrivacy':
       global.settings.privacy[update.key as ApiPrivacyKey] = update.rules;
+      break;
+
+    case 'updatePaymentVerificationNeeded':
+      global = setConfirmPaymentUrl(getGlobal(), update.url);
+      global = setPaymentStep(global, PaymentStep.ConfirmPayment);
+      setGlobal(global);
       break;
   }
 

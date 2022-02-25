@@ -318,6 +318,7 @@ export enum PaymentStep {
   Shipping,
   PaymentInfo,
   Checkout,
+  ConfirmPayment,
 }
 
 export const UPLOADING_WALLPAPER_SLUG = 'UPLOADING_WALLPAPER_SLUG';

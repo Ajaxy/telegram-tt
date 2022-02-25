@@ -381,6 +381,15 @@ export type ApiUpdatePeerBlocked = {
   isBlocked: boolean;
 };
 
+export type ApiUpdatePaymentVerificationNeeded = {
+  '@type': 'updatePaymentVerificationNeeded';
+  url: string;
+};
+
+export type ApiUpdatePaymentStateCompleted = {
+  '@type': 'updatePaymentStateCompleted';
+};
+
 export type ApiUpdatePrivacy = {
   '@type': 'updatePrivacy';
   key: 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'forwards' | 'chatInvite';
@@ -467,7 +476,7 @@ export type ApiUpdate = (
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
-  ApiUpdatePendingJoinRequests
+  ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -26,6 +26,7 @@ import {
   ApiAvailableReaction,
   ApiAppConfig,
   ApiSponsoredMessage,
+  ApiPaymentFormNativeParams,
 } from '../api/types';
 import {
   FocusDirection,
@@ -426,15 +427,14 @@ export type GlobalState = {
     };
     nativeProvider?: string;
     providerId?: string;
-    nativeParams?: {
-      needCardholderName: boolean;
-      needCountry: boolean;
-      needZip: boolean;
-      publishableKey: string;
-    };
+    nativeParams?: ApiPaymentFormNativeParams;
     stripeCredentials?: {
       type: string;
       id: string;
+    };
+    smartGlocalCredentials?: {
+      type: string;
+      token: string;
     };
     passwordMissing?: boolean;
     savedCredentials?: {
@@ -448,6 +448,7 @@ export type GlobalState = {
       description: string;
     };
     isPaymentModalOpen?: boolean;
+    confirmPaymentUrl?: string;
   };
 
   chatCreation?: {

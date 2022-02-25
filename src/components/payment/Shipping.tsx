@@ -47,7 +47,7 @@ const Shipping: FC<OwnProps> = ({
   return (
     <div className="Shipping">
       <form>
-        <p>Select shipping method</p>
+        <p>{lang('PaymentShippingMethod')}</p>
         <RadioGroup
           name="shipping-options"
           options={options}

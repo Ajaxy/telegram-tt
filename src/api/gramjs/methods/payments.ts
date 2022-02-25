@@ -3,7 +3,13 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { invokeRequest } from './client';
 import { buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
 import { buildShippingOptions, buildPaymentForm, buildReceipt } from '../apiBuilders/payments';
-import { ApiChat } from '../../types';
+import { ApiChat, OnApiUpdate } from '../../types';
+
+let onUpdate: OnApiUpdate;
+
+export function init(_onUpdate: OnApiUpdate) {
+  onUpdate = _onUpdate;
+}
 
 export async function validateRequestedInfo({
   chat,
@@ -40,7 +46,7 @@ export async function validateRequestedInfo({
   };
 }
 
-export function sendPaymentForm({
+export async function sendPaymentForm({
   chat,
   messageId,
   formId,
@@ -55,7 +61,7 @@ export function sendPaymentForm({
   requestedInfoId?: string;
   shippingOptionId?: string;
 }) {
-  return invokeRequest(new GramJs.payments.SendPaymentForm({
+  const result = await invokeRequest(new GramJs.payments.SendPaymentForm({
     formId: BigInt(formId),
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
@@ -65,7 +71,18 @@ export function sendPaymentForm({
       save: credentials.save,
       data: new GramJs.DataJSON({ data: JSON.stringify(credentials.data) }),
     }),
-  }), true);
+  }));
+
+  if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
+    onUpdate({
+      '@type': 'updatePaymentVerificationNeeded',
+      url: result.url,
+    });
+
+    return undefined;
+  }
+
+  return Boolean(result);
 }
 
 export async function getPaymentForm({

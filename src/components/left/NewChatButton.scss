@@ -22,7 +22,7 @@
 
     @media (max-width: 600px) {
       // Force rendering in the composite layer to fix the z-index rendering issue
-      transform: translate3d(0, 0, 10px);
+      transform: translate3d(0, 0, 0.625rem);
       transform-style: preserve-3d;
     }
   }

@@ -75,12 +75,37 @@ export function setStripeCardInfo(global: GlobalState, cardInfo: { type: string;
   };
 }
 
+export function setSmartGlocalCardInfo(
+  global: GlobalState,
+  cardInfo: { type: string; token: string },
+): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      smartGlocalCredentials: {
+        ...cardInfo,
+      },
+    },
+  };
+}
+
 export function setPaymentForm(global: GlobalState, form: ApiPaymentForm): GlobalState {
   return {
     ...global,
     payment: {
       ...global.payment,
       ...form,
+    },
+  };
+}
+
+export function setConfirmPaymentUrl(global: GlobalState, url?: string): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      confirmPaymentUrl: url,
     },
   };
 }

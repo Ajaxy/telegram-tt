@@ -188,7 +188,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     if (update.message instanceof GramJs.MessageService) {
       const { action } = update.message;
 
-      if (action instanceof GramJs.MessageActionChatEditTitle) {
+      if (action instanceof GramJs.MessageActionPaymentSent) {
+        onUpdate({
+          '@type': 'updatePaymentStateCompleted',
+        });
+      } else if (action instanceof GramJs.MessageActionChatEditTitle) {
         onUpdate({
           '@type': 'updateChat',
           id: message.chatId,
