@@ -1,0 +1,60 @@
+@media print {
+  body,
+  html,
+  .messages-layout {
+    background: #fff;
+  }
+
+  #LeftColumn,
+  #RightColumn-wrapper,
+  .ChatOrUserPicker,
+  #Notifications,
+  .Modal,
+  .ActiveCallHeader,
+  .unread-count,
+  #middle-column-bg,
+  #middle-column-portals,
+  .header-tools,
+  .ScrollDownButton,
+  .middle-column-footer {
+    display: none !important;
+  }
+
+  #MiddleColumn {
+    border-left: none !important;
+  }
+
+  html,
+  body,
+  #root,
+  #UiLoader,
+  #Main,
+  #MiddleColumn,
+  .MessageList,
+  .messages-layout,
+  .Transition,
+  .Transition > * {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
+  }
+
+  .messages-container {
+    max-width: 100rem !important;
+    width: 100% !important;
+  }
+
+  .MessageList .sticky-date > span,
+  .MessageList .local-action-message > span,
+  .MessageList .ActionMessage > span,
+  .MessageList .empty > span {
+    background: var(--color-background-own) !important;
+    color: var(--color-text) !important;
+  }
+}
