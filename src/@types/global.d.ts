@@ -1,5 +1,7 @@
 declare const process: NodeJS.Process;
 
+declare var APP_REVISION: string;
+
 declare namespace React {
   interface HTMLAttributes {
     // Optimization for DOM nodes prepends and inserts

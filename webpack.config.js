@@ -2,6 +2,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 const {
+  DefinePlugin,
   EnvironmentPlugin,
   ProvidePlugin,
 } = require('webpack');
@@ -128,6 +129,12 @@ module.exports = (env = {}, argv = {}) => {
         TELEGRAM_T_API_HASH: undefined,
         TEST_SESSION: null,
       }),
+      new DefinePlugin({
+        APP_REVISION: DefinePlugin.runtimeValue(() => {
+          const { branch, commit } = getGitMetadata();
+          return JSON.stringify((!branch || branch === 'HEAD') ? commit : branch);
+        }, argv.mode === 'development' ? true : []),
+      }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),
@@ -153,3 +160,10 @@ module.exports = (env = {}, argv = {}) => {
     }),
   };
 };
+
+function getGitMetadata() {
+  const gitRevisionPlugin = new GitRevisionPlugin();
+  const branch = process.env.HEAD || gitRevisionPlugin.branch();
+  const commit = gitRevisionPlugin.commithash().substring(0, 7);
+  return { branch, commit };
+}
