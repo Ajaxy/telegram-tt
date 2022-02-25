@@ -43,6 +43,7 @@ const BotCommandMenu: FC<OwnProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
+      noCompact
     >
       {botCommands.map((botCommand) => (
         <BotCommand

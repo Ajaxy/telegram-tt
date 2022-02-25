@@ -2,14 +2,18 @@
 
 .participant-menu {
   position: absolute;
+  --color-text: white;
+  --color-background-compact-menu: #212121DD;
+  --color-background-compact-menu-hover: #00000066;
+
   .bubble {
-    background: none;
+    background: none !important;
     border-radius: 0;
     padding: 0;
     border: none !important;
     box-shadow: none !important;
     overflow: visible;
-    color: #ffffff;
+    color: var(--color-text);
 
     .group {
       box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
@@ -17,6 +21,12 @@
       background: var(--color-background);
       border-radius: var(--border-radius-default);
       margin-bottom: 0.5rem;
+    }
+  }
+
+  &.compact {
+    .group {
+      background: var(--color-background-compact-menu);
     }
   }
 

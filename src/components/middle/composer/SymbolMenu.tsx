@@ -232,6 +232,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
+      noCompact
     >
       {content}
     </Menu>

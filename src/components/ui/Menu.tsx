@@ -10,6 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+import { IS_COMPACT_MENU } from '../../util/environment';
 
 import './Menu.scss';
 
@@ -28,6 +29,7 @@ type OwnProps = {
   shouldSkipTransition?: boolean;
   footer?: string;
   noCloseOnBackdrop?: boolean;
+  noCompact?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
   onClose?: () => void;
@@ -53,6 +55,7 @@ const Menu: FC<OwnProps> = ({
   autoClose = false,
   footer,
   noCloseOnBackdrop = false,
+  noCompact,
   onCloseAnimationEnd,
   onClose,
   onMouseEnter,
@@ -110,7 +113,7 @@ const Menu: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('Menu no-selection', className)}
+      className={buildClassName('Menu no-selection', !noCompact && IS_COMPACT_MENU && 'compact', className)}
       onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}

@@ -11,6 +11,7 @@
   top: -3.5rem;
 
   &__bubble-big {
+    border: 0.5rem solid var(--color-background);
     position: absolute;
     display: block;
     content: "";
@@ -18,8 +19,10 @@
     bottom: -0.5rem;
     width: 1rem;
     height: 1rem;
-    border-radius: 50%;
-    background: var(--color-background);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0 0 50% 50%;
     z-index: -1;
   }
 
@@ -63,5 +66,23 @@
     cursor: pointer;
     align-items: center;
     border-radius: 3rem;
+  }
+
+  &--compact {
+    background: var(--color-background-compact-menu-reactions);
+    height: 2rem;
+    top: -2.5rem;
+  }
+
+  &--compact &__items {
+    padding: 0 0.5rem;
+  }
+
+  &--compact &__bubble-big {
+    border-color: var(--color-background-compact-menu-reactions);
+  }
+
+  &--compact &__bubble-small {
+    background: var(--color-background-compact-menu-reactions);
   }
 }

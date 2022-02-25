@@ -86,6 +86,7 @@ const SendAsMenu: FC<OwnProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
+      noCompact
     >
       <div className="send-as-title" dir="auto">{lang('SendMessageAsTitle')}</div>
       {usersById && chatsById && sendAsIds?.map((id, index) => {

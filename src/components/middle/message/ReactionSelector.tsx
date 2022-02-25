@@ -8,6 +8,8 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useFlag from '../../../hooks/useFlag';
 import { getTouchY } from '../../../util/scrollLock';
 import { createClassNameBuilder } from '../../../util/buildClassName';
+import { IS_COMPACT_MENU } from '../../../util/environment';
+
 import ReactionSelectorReaction from './ReactionSelectorReaction';
 
 import './ReactionSelector.scss';
@@ -50,7 +52,7 @@ const ReactionSelector: FC<OwnProps> = ({
   if ((!isPrivate && !enabledReactions?.length) || !availableReactions) return undefined;
 
   return (
-    <div className={cn('&')} onWheelCapture={handleWheel} onTouchMove={handleWheel}>
+    <div className={cn('&', IS_COMPACT_MENU && 'compact')} onWheelCapture={handleWheel} onTouchMove={handleWheel}>
       <div className={cn('bubble-big')} />
       <div className={cn('bubble-small')} />
       <div className={cn('items-wrapper')}>

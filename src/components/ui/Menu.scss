@@ -78,4 +78,16 @@
     font-size: 0.8125rem;
     text-align: center;
   }
+
+  &.compact {
+    .bubble {
+      background: var(--color-background-compact-menu);
+      backdrop-filter: blur(10px);
+      padding: 0.25rem 0;
+    }
+
+    .footer {
+      background: none;
+    }
+  }
 }
