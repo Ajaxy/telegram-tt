@@ -1,6 +1,5 @@
 export const APP_NAME = process.env.APP_NAME || 'Telegram WebZ';
 export const APP_VERSION = process.env.APP_VERSION!;
-export const APP_REVISION = process.env.APP_REVISION;
 
 export const DEBUG = (
   process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf' && process.env.APP_ENV !== 'test'

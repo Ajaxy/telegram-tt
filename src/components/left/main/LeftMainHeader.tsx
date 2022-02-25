@@ -8,7 +8,7 @@ import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
 import {
-  ANIMATION_LEVEL_MAX, APP_NAME, APP_REVISION, APP_VERSION, DEBUG, FEEDBACK_URL,
+  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, DEBUG, FEEDBACK_URL,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';

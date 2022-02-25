@@ -71,5 +71,8 @@
   },
   "parserOptions": {
     "project": "./tsconfig.json"
+  },
+  "globals": {
+    "APP_REVISION": "readonly"
   }
 }
