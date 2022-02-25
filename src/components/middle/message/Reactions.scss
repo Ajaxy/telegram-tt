@@ -68,6 +68,10 @@
     margin-top: 0.125rem;
   }
 
+  .own &.is-outside {
+    flex-direction: row-reverse;
+  }
+
   &.is-outside .Button {
     --reaction-background: var(--pattern-color);
     color: white;
