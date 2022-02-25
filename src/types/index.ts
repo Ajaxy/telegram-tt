@@ -331,6 +331,7 @@ export enum ManagementScreens {
   GroupType,
   GroupPermissions,
   GroupRemovedUsers,
+  ChannelRemovedUsers,
   GroupUserPermissionsCreate,
   GroupUserPermissions,
   ChatAdministrators,

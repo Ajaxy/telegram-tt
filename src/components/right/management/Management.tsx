@@ -8,7 +8,7 @@ import { selectCurrentManagementType } from '../../../modules/selectors';
 import ManageUser from './ManageUser';
 import ManageGroup from './ManageGroup';
 import ManageGroupPermissions from './ManageGroupPermissions';
-import ManageGroupRemovedUsers from './ManageGroupRemovedUsers';
+import ManageChatRemovedUsers from './ManageChatRemovedUsers';
 import ManageChannel from './ManageChannel';
 import ManageChatPrivacyType from './ManageChatPrivacyType';
 import ManageDiscussion from './ManageDiscussion';
@@ -93,6 +93,7 @@ const Management: FC<OwnProps & StateProps> = ({
               isActive={isActive || [
                 ManagementScreens.ChannelSubscribers,
                 ManagementScreens.ChatAdministrators,
+                ManagementScreens.ChannelRemovedUsers,
                 ManagementScreens.Discussion,
                 ManagementScreens.ChatPrivacyType,
                 ManagementScreens.ChatAdminRights,
@@ -140,9 +141,10 @@ const Management: FC<OwnProps & StateProps> = ({
         />
       );
 
+    case ManagementScreens.ChannelRemovedUsers:
     case ManagementScreens.GroupRemovedUsers:
       return (
-        <ManageGroupRemovedUsers
+        <ManageChatRemovedUsers
           chatId={chatId}
           isActive={isActive}
           onClose={onClose}

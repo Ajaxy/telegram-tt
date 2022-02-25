@@ -102,6 +102,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   }, [progress]);
 
   const adminsCount = (chat?.fullInfo?.adminMembers?.length) || 0;
+  const removedUsersCount = (chat?.fullInfo?.kickedMembers?.length) || 0;
 
   const handleClickEditType = useCallback(() => {
     onScreenSelect(ManagementScreens.ChatPrivacyType);
@@ -167,6 +168,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     onScreenSelect(ManagementScreens.ChannelSubscribers);
   }, [onScreenSelect]);
 
+  const handleRemovedUsersClick = useCallback(() => {
+    onScreenSelect(ManagementScreens.ChannelRemovedUsers);
+  }, [onScreenSelect]);
+
   const handleDeleteChannel = useCallback(() => {
     if (chat.isCreator) {
       deleteChannel({ chatId: chat.id });
@@ -227,14 +232,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('Discussion')}</span>
             <span className="subtitle">{hasLinkedChat ? lang('DiscussionUnlink') : lang('Add')}</span>
           </ListItem>
-          <ListItem
-            icon="admin"
-            multiline
-            onClick={handleClickAdministrators}
-          >
-            <span className="title">{lang('ChannelAdministrators')}</span>
-            <span className="subtitle">{adminsCount}</span>
-          </ListItem>
           {canInvite && (
             <ListItem
               icon="link"
@@ -281,12 +278,29 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
         </div>
         <div className="section">
           <ListItem
+            icon="admin"
+            multiline
+            onClick={handleClickAdministrators}
+          >
+            <span className="title">{lang('ChannelAdministrators')}</span>
+            <span className="subtitle">{adminsCount}</span>
+          </ListItem>
+          <ListItem
             icon="group"
             multiline
             onClick={handleClickSubscribers}
           >
             <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
             <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount ?? 0, 'i')}</span>
+          </ListItem>
+          <ListItem
+            icon="delete-user"
+            multiline
+            narrow
+            onClick={handleRemovedUsersClick}
+          >
+            <span className="title">{lang('ChannelBlockedUsers')}</span>
+            <span className="subtitle">{removedUsersCount}</span>
           </ListItem>
         </div>
         <div className="section">
