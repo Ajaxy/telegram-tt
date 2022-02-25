@@ -134,9 +134,7 @@ const SearchInput: FC<OwnProps> = ({
       />
       <i className="icon-search" />
       <ShowTransition isOpen={Boolean(isLoading)} className="slow">
-        {() => (
-          <Loading color={spinnerColor} backgroundColor={spinnerBackgroundColor} onClick={onSpinnerClick} />
-        )}
+        <Loading color={spinnerColor} backgroundColor={spinnerBackgroundColor} onClick={onSpinnerClick} />
       </ShowTransition>
       {!isLoading && (value || canClose) && onReset && (
         <Button

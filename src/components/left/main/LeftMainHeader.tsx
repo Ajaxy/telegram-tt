@@ -331,13 +331,11 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           isCustom
           className="connection-state-wrapper"
         >
-          {() => (
-            <ConnectionStatusOverlay
-              connectionStatus={connectionStatus}
-              connectionStatusText={connectionStatusText!}
-              onClick={toggleConnectionStatus}
-            />
-          )}
+          <ConnectionStatusOverlay
+            connectionStatus={connectionStatus}
+            connectionStatusText={connectionStatusText!}
+            onClick={toggleConnectionStatus}
+          />
         </ShowTransition>
       </div>
     </div>

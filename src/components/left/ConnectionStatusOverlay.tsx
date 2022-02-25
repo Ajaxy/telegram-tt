@@ -27,7 +27,7 @@ const ConnectionStatusOverlay: FC<OwnProps> = ({
       <Spinner color="black" />
       <div className="state-text">
         <Transition activeKey={connectionStatus} name="slide-fade">
-          {() => connectionStatusText}
+          {connectionStatusText}
         </Transition>
       </div>
       <Button

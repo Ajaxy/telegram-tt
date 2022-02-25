@@ -397,111 +397,107 @@ const MiddleColumn: FC<StateProps> = ({
               cleanupExceptionKey={cleanupExceptionKey}
               onStop={handleSlideStop}
             >
-              {() => (
-                <>
-                  <MessageList
-                    key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
+              <MessageList
+                key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
+                chatId={renderingChatId}
+                threadId={renderingThreadId}
+                type={renderingMessageListType}
+                canPost={renderingCanPost}
+                hasTools={renderingHasTools}
+                onFabToggle={setIsFabShown}
+                onNotchToggle={setIsNotchShown}
+                isReady={isReady}
+                withBottomShift={withMessageListBottomShift}
+              />
+              <div className={footerClassName}>
+                {renderingCanPost && (
+                  <Composer
                     chatId={renderingChatId}
                     threadId={renderingThreadId}
-                    type={renderingMessageListType}
-                    canPost={renderingCanPost}
-                    hasTools={renderingHasTools}
-                    onFabToggle={setIsFabShown}
-                    onNotchToggle={setIsNotchShown}
+                    messageListType={renderingMessageListType}
+                    dropAreaState={dropAreaState}
+                    onDropHide={handleHideDropArea}
                     isReady={isReady}
-                    withBottomShift={withMessageListBottomShift}
                   />
-                  <div className={footerClassName}>
-                    {renderingCanPost && (
-                      <Composer
-                        chatId={renderingChatId}
-                        threadId={renderingThreadId}
-                        messageListType={renderingMessageListType}
-                        dropAreaState={dropAreaState}
-                        onDropHide={handleHideDropArea}
-                        isReady={isReady}
-                      />
-                    )}
-                    {isPinnedMessageList && (
-                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
-                        <Button
-                          size="tiny"
-                          fluid
-                          color="secondary"
-                          className="unpin-all-button"
-                          onClick={handleOpenUnpinModal}
-                        >
-                          <i className="icon-unpin" />
-                          <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
-                        </Button>
-                      </div>
-                    )}
-                    {isMessagingDisabled && (
-                      <div className={messagingDisabledClassName}>
-                        <div className="messaging-disabled-inner">
-                          <span>
-                            {messageSendingRestrictionReason}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanSubscribe && (
-                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
-                        <Button
-                          size="tiny"
-                          fluid
-                          ripple
-                          className="join-subscribe-button"
-                          onClick={handleSubscribeClick}
-                        >
-                          {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
-                        </Button>
-                      </div>
-                    )}
-                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanStartBot && (
-                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
-                        <Button
-                          size="tiny"
-                          fluid
-                          ripple
-                          className="join-subscribe-button"
-                          onClick={handleStartBot}
-                        >
-                          {lang('BotStart')}
-                        </Button>
-                      </div>
-                    )}
-                    {IS_SINGLE_COLUMN_LAYOUT && renderingCanRestartBot && (
-                      <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
-                        <Button
-                          size="tiny"
-                          fluid
-                          ripple
-                          className="join-subscribe-button"
-                          onClick={handleRestartBot}
-                        >
-                          {lang('BotRestart')}
-                        </Button>
-                      </div>
-                    )}
-                    <MessageSelectToolbar
-                      messageListType={renderingMessageListType}
-                      isActive={isSelectModeActive}
-                      canPost={renderingCanPost}
-                    />
-                    <PaymentModal
-                      isOpen={Boolean(isPaymentModalOpen)}
-                      onClose={closePaymentModal}
-                    />
-                    <ReceiptModal
-                      isOpen={Boolean(isReceiptModalOpen)}
-                      onClose={clearReceipt}
-                    />
-                    <SeenByModal isOpen={isSeenByModalOpen} />
-                    <ReactorListModal isOpen={isReactorListModalOpen} />
+                )}
+                {isPinnedMessageList && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      color="secondary"
+                      className="unpin-all-button"
+                      onClick={handleOpenUnpinModal}
+                    >
+                      <i className="icon-unpin" />
+                      <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
+                    </Button>
                   </div>
-                </>
-              )}
+                )}
+                {isMessagingDisabled && (
+                  <div className={messagingDisabledClassName}>
+                    <div className="messaging-disabled-inner">
+                      <span>
+                        {messageSendingRestrictionReason}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {IS_SINGLE_COLUMN_LAYOUT && renderingCanSubscribe && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      ripple
+                      className="join-subscribe-button"
+                      onClick={handleSubscribeClick}
+                    >
+                      {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
+                    </Button>
+                  </div>
+                )}
+                {IS_SINGLE_COLUMN_LAYOUT && renderingCanStartBot && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      ripple
+                      className="join-subscribe-button"
+                      onClick={handleStartBot}
+                    >
+                      {lang('BotStart')}
+                    </Button>
+                  </div>
+                )}
+                {IS_SINGLE_COLUMN_LAYOUT && renderingCanRestartBot && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      ripple
+                      className="join-subscribe-button"
+                      onClick={handleRestartBot}
+                    >
+                      {lang('BotRestart')}
+                    </Button>
+                  </div>
+                )}
+                <MessageSelectToolbar
+                  messageListType={renderingMessageListType}
+                  isActive={isSelectModeActive}
+                  canPost={renderingCanPost}
+                />
+                <PaymentModal
+                  isOpen={Boolean(isPaymentModalOpen)}
+                  onClose={closePaymentModal}
+                />
+                <ReceiptModal
+                  isOpen={Boolean(isReceiptModalOpen)}
+                  onClose={clearReceipt}
+                />
+                <SeenByModal isOpen={isSeenByModalOpen} />
+                <ReactorListModal isOpen={isReactorListModalOpen} />
+              </div>
             </Transition>
 
             <ScrollDownButton

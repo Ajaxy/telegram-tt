@@ -371,7 +371,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
         activeKey={currentTransitionKey}
       >
-        {renderInfo}
+        {renderInfo()}
       </Transition>
 
       <GroupCallTopPane

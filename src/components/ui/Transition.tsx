@@ -15,7 +15,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 
 import './Transition.scss';
 
-type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => any;
+export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => React.ReactNode;
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
@@ -33,7 +33,7 @@ export type TransitionProps = {
   className?: string;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
-  children: ChildrenFn;
+  children: React.ReactNode | ChildrenFn;
 };
 
 const classNames = {
@@ -65,7 +65,7 @@ const Transition: FC<TransitionProps> = ({
     containerRef = ref;
   }
 
-  const rendersRef = useRef<Record<number, ChildrenFn>>({});
+  const rendersRef = useRef<Record<number, React.ReactNode | ChildrenFn>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
   const forceUpdate = useForceUpdate();
 
@@ -257,7 +257,11 @@ const Transition: FC<TransitionProps> = ({
     }
 
     return (
-      <div key={key} teactOrderKey={key}>{render(key === activeKey, key === prevActiveKey, activeKey)}</div>
+      <div key={key} teactOrderKey={key}>{
+        typeof render === 'function'
+          ? render(key === activeKey, key === prevActiveKey, activeKey)
+          : render
+      }</div>
     );
   });
 

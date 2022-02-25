@@ -428,7 +428,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         name={(shouldSkipTransition || shouldSkipAnimation) ? 'none' : 'slide-fade'}
         activeKey={renderingContentKey}
       >
-        {renderHeaderContent}
+        {renderHeaderContent()}
       </Transition>
     </div>
   );
