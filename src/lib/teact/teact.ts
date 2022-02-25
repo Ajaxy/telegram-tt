@@ -3,7 +3,7 @@ import {
   fastRaf, fastRafPrimary, onTickEnd, onTickEndPrimary, throttleWithPrimaryRaf, throttleWithRaf,
 } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
-import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
+import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
 import { removeAllDelegatedListeners } from './dom-events';
 
@@ -676,26 +676,10 @@ export function useRef<T>(initial?: T | null) {
   }), []);
 }
 
-export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual, debugKey?: string) {
+export function memo<T extends FC>(Component: T, debugKey?: string) {
   return function TeactMemoWrapper(props: Props) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const propsRef = useRef(props);
-    const renderedRef = useRef();
-
-    if (!renderedRef.current || (propsRef.current && !areEqual(propsRef.current, props))) {
-      if (DEBUG && debugKey) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[Teact.memo] ${Component.name} (${debugKey}): Update is caused by:`,
-          getUnequalProps(propsRef.current!, props).join(', '),
-        );
-      }
-
-      propsRef.current = props;
-      renderedRef.current = createElement(Component, props) as VirtualElementComponent;
-    }
-
-    return renderedRef.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return useMemo(() => createElement(Component, props), Object.values(props), debugKey);
   } as T;
 }
 
