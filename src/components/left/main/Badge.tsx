@@ -61,7 +61,7 @@ const Badge: FC<OwnProps> = ({ chat, isPinned, isMuted }) => {
 
   return (
     <ShowTransition isCustom className="Badge-transition" isOpen={isShown}>
-      {renderContent}
+      {renderContent()}
     </ShowTransition>
   );
 };

@@ -461,96 +461,92 @@ const MediaViewer: FC<StateProps> = ({
       className={isZoomed ? 'zoomed' : ''}
       isOpen={isOpen}
     >
-      {() => (
-        <>
-          <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-            {IS_SINGLE_COLUMN_LAYOUT && (
-              <Button
-                className="media-viewer-close"
-                round
-                size="smaller"
-                color="translucent-white"
-                ariaLabel={lang('Close')}
-                onClick={close}
-              >
-                <i className="icon-close" />
-              </Button>
-            )}
-            <Transition activeKey={animationKey.current!} name={headerAnimation}>
-              {renderSenderInfo}
-            </Transition>
-            <MediaViewerActions
-              mediaData={fullMediaBlobUrl || previewBlobUrl}
-              isVideo={isVideo}
-              isZoomed={isZoomed}
-              message={message}
-              fileName={fileName}
-              onCloseMediaViewer={close}
-              onForward={handleForward}
-              onZoomToggle={handleZoomToggle}
-              isAvatar={isAvatar}
-            />
-          </div>
-          <PanZoom
-            noWrap={!canPanZoomWrap}
-            canPan={isZoomed}
-            panDeltaX={panDelta.x}
-            panDeltaY={panDelta.y}
-            zoomLevel={zoomLevel}
-            onPan={handlePan}
+      <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
+        {IS_SINGLE_COLUMN_LAYOUT && (
+          <Button
+            className="media-viewer-close"
+            round
+            size="smaller"
+            color="translucent-white"
+            ariaLabel={lang('Close')}
+            onClick={close}
           >
-            <SlideTransition
-              activeKey={selectedMediaMessageIndex}
-              name={slideAnimation}
-            >
-              {(isActive: boolean) => (
-                <MediaViewerSlides
-                  messageId={messageId}
-                  getMessageId={getMessageId}
-                  chatId={chatId}
-                  isPhoto={isPhoto}
-                  isGif={isGif}
-                  threadId={threadId}
-                  avatarOwnerId={avatarOwner && avatarOwner.id}
-                  profilePhotoIndex={profilePhotoIndex}
-                  origin={origin}
-                  isOpen={isOpen}
-                  hasFooter={hasFooter}
-                  isZoomed={isZoomed}
-                  isActive={isActive}
-                  isVideo={isVideo}
-                  animationLevel={animationLevel}
-                  onClose={close}
-                  selectMessage={selectMessage}
-                  onFooterClick={handleFooterClick}
-                />
-              )}
-            </SlideTransition>
-          </PanZoom>
-          {!isFirst && !IS_TOUCH_ENV && (
-            <button
-              type="button"
-              className={`navigation prev ${isVideo && !isGif && 'inline'}`}
-              aria-label={lang('AccDescrPrevious')}
-              dir={lang.isRtl ? 'rtl' : undefined}
-              onClick={() => selectMessage(previousMessageId)}
+            <i className="icon-close" />
+          </Button>
+        )}
+        <Transition activeKey={animationKey.current!} name={headerAnimation}>
+          {renderSenderInfo()}
+        </Transition>
+        <MediaViewerActions
+          mediaData={fullMediaBlobUrl || previewBlobUrl}
+          isVideo={isVideo}
+          isZoomed={isZoomed}
+          message={message}
+          fileName={fileName}
+          onCloseMediaViewer={close}
+          onForward={handleForward}
+          onZoomToggle={handleZoomToggle}
+          isAvatar={isAvatar}
+        />
+      </div>
+      <PanZoom
+        noWrap={!canPanZoomWrap}
+        canPan={isZoomed}
+        panDeltaX={panDelta.x}
+        panDeltaY={panDelta.y}
+        zoomLevel={zoomLevel}
+        onPan={handlePan}
+      >
+        <SlideTransition
+          activeKey={selectedMediaMessageIndex}
+          name={slideAnimation}
+        >
+          {(isActive: boolean) => (
+            <MediaViewerSlides
+              messageId={messageId}
+              getMessageId={getMessageId}
+              chatId={chatId}
+              isPhoto={isPhoto}
+              isGif={isGif}
+              threadId={threadId}
+              avatarOwnerId={avatarOwner && avatarOwner.id}
+              profilePhotoIndex={profilePhotoIndex}
+              origin={origin}
+              isOpen={isOpen}
+              hasFooter={hasFooter}
+              isZoomed={isZoomed}
+              isActive={isActive}
+              isVideo={isVideo}
+              animationLevel={animationLevel}
+              onClose={close}
+              selectMessage={selectMessage}
+              onFooterClick={handleFooterClick}
             />
           )}
-          {!isLast && !IS_TOUCH_ENV && (
-            <button
-              type="button"
-              className={`navigation next ${isVideo && !isGif && 'inline'}`}
-              aria-label={lang('Next')}
-              dir={lang.isRtl ? 'rtl' : undefined}
-              onClick={() => selectMessage(nextMessageId)}
-            />
-          )}
-          <ZoomControls
-            isShown={isZoomed}
-            onChangeZoom={handleZoomValue}
-          />
-        </>
+        </SlideTransition>
+      </PanZoom>
+      {!isFirst && !IS_TOUCH_ENV && (
+        <button
+          type="button"
+          className={`navigation prev ${isVideo && !isGif && 'inline'}`}
+          aria-label={lang('AccDescrPrevious')}
+          dir={lang.isRtl ? 'rtl' : undefined}
+          onClick={() => selectMessage(previousMessageId)}
+        />
       )}
+      {!isLast && !IS_TOUCH_ENV && (
+        <button
+          type="button"
+          className={`navigation next ${isVideo && !isGif && 'inline'}`}
+          aria-label={lang('Next')}
+          dir={lang.isRtl ? 'rtl' : undefined}
+          onClick={() => selectMessage(nextMessageId)}
+        />
+      )}
+      <ZoomControls
+        isShown={isZoomed}
+        onChangeZoom={handleZoomValue}
+      />
     </ShowTransition>
   );
 };

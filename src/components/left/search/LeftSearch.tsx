@@ -90,7 +90,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
         renderCount={TRANSITION_RENDER_COUNT}
         activeKey={currentContent}
       >
-        {() => {
+        {(() => {
           switch (currentContent) {
             case GlobalSearchContent.ChatList:
               if (chatId) {
@@ -136,7 +136,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
             default:
               return undefined;
           }
-        }}
+        })()}
       </Transition>
     </div>
   );

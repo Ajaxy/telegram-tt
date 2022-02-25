@@ -322,11 +322,9 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
       </div>
       {step !== undefined ? (
         <Transition name="slide" activeKey={step}>
-          {() => (
-            <div className="content custom-scroll">
-              {renderModalContent(step)}
-            </div>
-          )}
+          <div className="content custom-scroll">
+            {renderModalContent(step)}
+          </div>
         </Transition>
       ) : (
         <div className="empty-content">

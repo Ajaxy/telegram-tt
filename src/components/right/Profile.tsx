@@ -445,7 +445,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             onStart={applyTransitionFix}
             onStop={handleTransitionStop}
           >
-            {renderContent}
+            {renderContent()}
           </Transition>
           <TabList big activeTab={activeTab} tabs={tabs} onSwitchTab={setActiveTab} />
         </div>

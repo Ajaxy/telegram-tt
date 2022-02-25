@@ -191,7 +191,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
       <div className="photo-wrapper">
         {renderPhotoTabs()}
         <Transition activeKey={currentPhotoIndex} name={slideAnimation} className="profile-slide-container">
-          {renderPhoto}
+          {renderPhoto()}
         </Transition>
 
         {!isFirst && (

@@ -4,7 +4,6 @@ import useShowTransition from '../../hooks/useShowTransition';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
 
-type ChildrenFn = () => any;
 
 type OwnProps = {
   isOpen: boolean;
@@ -12,7 +11,7 @@ type OwnProps = {
   id?: string;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-  children: ChildrenFn;
+  children: React.ReactNode;
 };
 
 const ShowTransition: FC<OwnProps> = ({
@@ -23,7 +22,7 @@ const ShowTransition: FC<OwnProps> = ({
   );
   const prevIsOpen = usePrevious(isOpen);
   const prevChildren = usePrevious(children);
-  const fromChildrenRef = useRef<ChildrenFn>();
+  const fromChildrenRef = useRef<React.ReactNode>();
 
   if (prevIsOpen && !isOpen) {
     fromChildrenRef.current = prevChildren;
@@ -32,7 +31,7 @@ const ShowTransition: FC<OwnProps> = ({
   return (
     shouldRender && (
       <div id={id} className={buildClassName(className, transitionClassNames)} onClick={onClick}>
-        {isOpen ? children() : fromChildrenRef.current!()}
+        {isOpen ? children : fromChildrenRef.current!}
       </div>
     )
   );

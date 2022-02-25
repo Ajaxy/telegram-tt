@@ -18,9 +18,7 @@ const MessageOutgoingStatus: FC<OwnProps> = ({ status }) => {
   return (
     <div className="MessageOutgoingStatus">
       <Transition name="reveal" activeKey={Keys[status]}>
-        {() => (
-          <i className={`icon-message-${status}`} />
-        )}
+        <i className={`icon-message-${status}`} />
       </Transition>
     </div>
   );
