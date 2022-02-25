@@ -32,12 +32,15 @@ export interface ApiPaymentForm {
     currency?: string;
     prices?: ApiLabeledPrice[];
   };
-  nativeParams: {
-    needCardholderName: boolean;
-    needCountry: boolean;
-    needZip: boolean;
-    publishableKey: string;
-  };
+  nativeParams: ApiPaymentFormNativeParams;
+}
+
+export interface ApiPaymentFormNativeParams {
+  needCardholderName?: boolean;
+  needCountry?: boolean;
+  needZip?: boolean;
+  publishableKey?: string;
+  publicToken?: string;
 }
 
 export interface ApiLabeledPrice {

@@ -5,6 +5,7 @@ import React, {
 import { formatCardExpiry } from '../middle/helpers/inputFormatters';
 
 import InputText from '../ui/InputText';
+import useLang from '../../hooks/useLang';
 
 const MAX_FIELD_LENGTH = 5;
 
@@ -15,6 +16,7 @@ export type OwnProps = {
 };
 
 const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const expiryInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +35,7 @@ const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
 
   return (
     <InputText
-      label="Expiry date"
+      label={lang('PaymentCardExpireDate')}
       ref={expiryInputRef}
       onChange={handleChange}
       onKeyDown={handleKeyDown}

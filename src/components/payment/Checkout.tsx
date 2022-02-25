@@ -5,6 +5,7 @@ import React, {
 import { LangCode, Price } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
+import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 
 import './Checkout.scss';
@@ -70,12 +71,16 @@ const Checkout: FC<OwnProps> = ({
         ) }
       </div>
       <div className="invoice-info">
-        {paymentMethod && renderCheckoutItem('icon-card', paymentMethod, 'Payment method')}
-        {paymentProvider && renderCheckoutItem('stripe-provider', paymentProvider, 'Payment provider')}
-        {shippingAddress && renderCheckoutItem('icon-location', shippingAddress, 'Shipping address')}
-        {name && renderCheckoutItem('icon-user', name, 'Name')}
-        {phone && renderCheckoutItem('icon-phone', phone, 'Phone number')}
-        {shippingMethod && renderCheckoutItem('icon-truck', shippingMethod, 'Shipping method')}
+        {paymentMethod && renderCheckoutItem('icon-card', paymentMethod, lang('PaymentCheckoutMethod'))}
+        {paymentProvider && renderCheckoutItem(
+          buildClassName('provider', paymentProvider.toLowerCase()),
+          paymentProvider,
+          lang('PaymentCheckoutProvider'),
+        )}
+        {shippingAddress && renderCheckoutItem('icon-location', shippingAddress, lang('PaymentShippingAddress'))}
+        {name && renderCheckoutItem('icon-user', name, lang('PaymentCheckoutName'))}
+        {phone && renderCheckoutItem('icon-phone', phone, lang('PaymentCheckoutPhoneNumber'))}
+        {shippingMethod && renderCheckoutItem('icon-truck', shippingMethod, lang('PaymentCheckoutShippingMethod'))}
       </div>
     </div>
   );

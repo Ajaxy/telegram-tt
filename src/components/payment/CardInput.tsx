@@ -2,9 +2,10 @@ import React, {
   FC, memo, useCallback, useState, useRef, useEffect,
 } from '../../lib/teact/teact';
 
-import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import { formatCardNumber } from '../middle/helpers/inputFormatters';
 import { detectCardType, CardType } from '../common/helpers/detectCardType';
+import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
+import useLang from '../../hooks/useLang';
 
 import InputText from '../ui/InputText';
 
@@ -22,6 +23,7 @@ export type OwnProps = {
 };
 
 const CardInput : FC<OwnProps> = ({ value, error, onChange }) => {
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const cardNumberRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +53,7 @@ const CardInput : FC<OwnProps> = ({ value, error, onChange }) => {
       <span className="left-addon">{cardIcon}</span>
       <InputText
         ref={cardNumberRef}
-        label="Card number"
+        label={lang('PaymentCardNumber')}
         onChange={handleChange}
         value={value}
         inputMode="numeric"

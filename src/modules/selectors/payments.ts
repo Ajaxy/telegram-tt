@@ -17,9 +17,17 @@ export function selectPaymentRequestId(global: GlobalState) {
 }
 
 export function selectProviderPublishableKey(global: GlobalState) {
-  return global.payment.nativeParams ? global.payment.nativeParams.publishableKey : undefined;
+  return global.payment.nativeParams?.publishableKey;
+}
+
+export function selectProviderPublicToken(global: GlobalState) {
+  return global.payment.nativeParams?.publicToken;
 }
 
 export function selectStripeCredentials(global: GlobalState) {
   return global.payment.stripeCredentials;
+}
+
+export function selectSmartGlocalCredentials(global: GlobalState) {
+  return global.payment.smartGlocalCredentials;
 }

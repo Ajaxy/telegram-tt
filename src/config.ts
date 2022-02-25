@@ -16,6 +16,8 @@ export const DEBUG_GRAMJS = false;
 export const PAGE_TITLE = 'Telegram';
 export const INACTIVE_MARKER = ' [Inactive]';
 
+export const DEBUG_PAYMENT_SMART_GLOCAL = false;
+
 export const SESSION_USER_KEY = 'user_auth';
 export const LEGACY_SESSION_KEY = 'GramJs:sessionId';
 

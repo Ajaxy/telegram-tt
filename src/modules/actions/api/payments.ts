@@ -12,10 +12,13 @@ import {
   selectPaymentChatId,
   selectChat,
   selectPaymentFormId,
+  selectProviderPublicToken,
+  selectSmartGlocalCredentials,
 } from '../../selectors';
 import { callApi } from '../../../api/gramjs';
 import { getStripeError } from '../../helpers';
 import { buildQueryString } from '../../../util/requestQuery';
+import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 
 import {
   updateShippingOptions,
@@ -27,6 +30,7 @@ import {
   setReceipt,
   clearPayment,
   closeInvoice,
+  setSmartGlocalCardInfo,
 } from '../../reducers';
 
 addReducer('validateRequestedInfo', (global, actions, payload) => {
@@ -132,13 +136,23 @@ addReducer('clearReceipt', (global) => {
 });
 
 addReducer('sendCredentialsInfo', (global, actions, payload) => {
-  const publishableKey = selectProviderPublishableKey(global);
-  if (!publishableKey) {
-    return;
-  }
+  const { nativeProvider } = global.payment;
   const { credentials } = payload;
   const { data } = credentials;
-  void sendStripeCredentials(data, publishableKey);
+
+  if (nativeProvider === 'stripe') {
+    const publishableKey = selectProviderPublishableKey(global);
+    if (!publishableKey) {
+      return;
+    }
+    void sendStripeCredentials(data, publishableKey);
+  } else if (nativeProvider === 'smartglocal') {
+    const publicToken = selectProviderPublicToken(global);
+    if (!publicToken) {
+      return;
+    }
+    void sendSmartGlocalCredentials(data, publicToken);
+  }
 });
 
 addReducer('sendPaymentForm', (global, actions, payload) => {
@@ -148,15 +162,16 @@ addReducer('sendPaymentForm', (global, actions, payload) => {
   const messageId = selectPaymentMessageId(global);
   const formId = selectPaymentFormId(global);
   const requestInfoId = selectPaymentRequestId(global);
-  const publishableKey = selectProviderPublishableKey(global);
-  const stripeCredentials = selectStripeCredentials(global);
-  if (!chat || !messageId || !publishableKey || !formId) {
+  const { nativeProvider } = global.payment;
+  const publishableKey = nativeProvider === 'stripe'
+    ? selectProviderPublishableKey(global) : selectProviderPublicToken(global);
+  if (!chat || !messageId || !publishableKey || !formId || !nativeProvider) {
     return;
   }
 
-  void sendPaymentForm(chat, messageId, formId, {
+  void sendPaymentForm(chat, messageId, nativeProvider, formId, {
     save: saveCredentials,
-    data: stripeCredentials,
+    data: nativeProvider === 'stripe' ? selectStripeCredentials(global) : selectSmartGlocalCredentials(global),
   }, requestInfoId, shippingOptionId);
 });
 
@@ -212,9 +227,67 @@ async function sendStripeCredentials(
   setGlobal(global);
 }
 
+async function sendSmartGlocalCredentials(
+  data: {
+    cardNumber: string;
+    cardholder?: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cvv: string;
+  },
+  publicToken: string,
+) {
+  const params = {
+    card: {
+      number: data.cardNumber.replace(/[^\d]+/g, ''),
+      expiration_month: data.expiryMonth,
+      expiration_year: data.expiryYear,
+      security_code: data.cvv.replace(/[^\d]+/g, ''),
+    },
+  };
+  const url = DEBUG_PAYMENT_SMART_GLOCAL
+    ? 'https://tgb-playground.smart-glocal.com/cds/v1/tokenize/card'
+    : 'https://tgb.smart-glocal.com/cds/v1/tokenize/card';
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-PUBLIC-TOKEN': publicToken,
+    },
+    body: JSON.stringify(params),
+  });
+  const result = await response.json();
+
+  if (result.status !== 'ok') {
+    // TODO после получения документации сделать аналог getStripeError(result.error);
+    const error = { description: 'payment error' };
+    const global = getGlobal();
+    setGlobal({
+      ...global,
+      payment: {
+        ...global.payment,
+        error: {
+          ...error,
+        },
+      },
+    });
+    return;
+  }
+
+  let global = setSmartGlocalCardInfo(getGlobal(), {
+    type: 'card',
+    token: result.data.token,
+  });
+  global = setPaymentStep(global, PaymentStep.Checkout);
+  setGlobal(global);
+}
+
 async function sendPaymentForm(
   chat: ApiChat,
   messageId: number,
+  nativeProvider: string,
   formId: string,
   credentials: any,
   requestedInfoId?: string,
@@ -223,7 +296,8 @@ async function sendPaymentForm(
   const result = await callApi('sendPaymentForm', {
     chat, messageId, formId, credentials, requestedInfoId, shippingOptionId,
   });
-  if (result) {
+
+  if (result === true) {
     const global = clearPayment(getGlobal());
     setGlobal(closeInvoice(global));
   }

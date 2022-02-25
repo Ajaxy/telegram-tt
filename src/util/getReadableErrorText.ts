@@ -69,6 +69,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   ADMIN_RANK_INVALID: 'The specified admin rank is invalid',
   FRESH_CHANGE_ADMINS_FORBIDDEN: 'You were just elected admin, you can\'t add or modify other admins yet',
   INPUT_USER_DEACTIVATED: 'The specified user was deleted',
+  BOT_PRECHECKOUT_TIMEOUT: 'The request for payment has expired',
 };
 
 export const SHIPPING_ERRORS: Record<string, ApiFieldError> = {
