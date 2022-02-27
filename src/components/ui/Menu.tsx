@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import { IS_COMPACT_MENU } from '../../util/environment';
+import { IS_BACKDROP_BLUR_SUPPORTED, IS_COMPACT_MENU } from '../../util/environment';
 
 import './Menu.scss';
 
@@ -113,7 +113,12 @@ const Menu: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('Menu no-selection', !noCompact && IS_COMPACT_MENU && 'compact', className)}
+      className={buildClassName(
+        'Menu no-selection',
+        !noCompact && IS_COMPACT_MENU && 'compact',
+        !IS_BACKDROP_BLUR_SUPPORTED && 'no-blur',
+        className,
+      )}
       onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}

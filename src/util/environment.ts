@@ -86,6 +86,8 @@ export const DPR = window.devicePixelRatio || 1;
 
 export const MASK_IMAGE_DISABLED = true;
 
+export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()')
+  || CSS.supports('-webkit-backdrop-filter: blur()');
 export const IS_COMPACT_MENU = !IS_TOUCH_ENV;
 export const IS_SCROLL_PATCH_NEEDED = !IS_MAC_OS && !IS_IOS && !IS_ANDROID;
 

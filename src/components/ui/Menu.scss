@@ -89,5 +89,9 @@
     .footer {
       background: none;
     }
+
+    &.no-blur .bubble {
+      background: var(--color-background);
+    }
   }
 }
