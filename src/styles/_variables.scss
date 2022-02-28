@@ -76,6 +76,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-text: #{$color-black};
   --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
+  --color-icon-secondary: #{$color-text-secondary};
   --color-text-secondary-rgb: #{toRGB($color-text-secondary)};
   --color-text-secondary-apple: #{$color-text-secondary-apple};
   --color-text-meta: #{$color-text-meta};
