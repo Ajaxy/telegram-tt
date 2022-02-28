@@ -234,8 +234,8 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canUnfaveSticker && (
           <MenuItem icon="favorite" onClick={onUnfaveSticker}>{lang('Stickers.RemoveFromFavorites')}</MenuItem>
         )}
-        {canCopy && copyOptions.map((options) => (
-          <MenuItem key={options.label} icon="copy" onClick={options.handler}>{lang(options.label)}</MenuItem>
+        {canCopy && copyOptions.map((option) => (
+          <MenuItem key={option.label} icon={option.icon} onClick={option.handler}>{lang(option.label)}</MenuItem>
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
