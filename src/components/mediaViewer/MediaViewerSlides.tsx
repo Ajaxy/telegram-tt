@@ -178,8 +178,9 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
     return captureEvents(containerRef.current, {
       isNotPassive: true,
-      excludedClosestSelector: '.VideoPlayerControls, .MediaViewerFooter',
-      onCapture: () => {
+      excludedClosestSelector: '.MediaViewerFooter',
+      onCapture: (e) => {
+        if (checkIfControlTarget(e)) return;
         lastGestureTime = Date.now();
         if (arePropsShallowEqual(transformRef.current, { x: 0, y: 0, scale: 1 })) {
           if (!activeSlideRef.current) return;
@@ -193,6 +194,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         dragOffsetX,
         dragOffsetY,
       }) => {
+        if (checkIfControlTarget(event)) return;
         // Avoid conflicts with swipe-to-back gestures
         if (IS_IOS) {
           const { pageX } = (captureEvent as RealTouchEvent).touches[0];
@@ -552,4 +554,21 @@ export default memo(MediaViewerSlides);
 
 function getAnimationStyle(x = 0, y = 0, scale = 1) {
   return `transform: translate3d(${x.toFixed(3)}px, ${y.toFixed(3)}px, 0px) scale(${scale.toFixed(3)});`;
+}
+
+function checkIfInsideSelector(element: HTMLElement, selector: string) {
+  if (!element) return false;
+  if (element.matches(selector)) return true;
+  return Boolean(element.closest(selector));
+}
+
+function checkIfControlTarget(e: TouchEvent | MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (checkIfInsideSelector(target, '.VideoPlayerControls')) {
+    if (checkIfInsideSelector(target, '.play, .fullscreen')) {
+      return true;
+    }
+    e.preventDefault();
+    return true;
+  }
 }
