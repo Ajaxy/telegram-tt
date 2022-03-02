@@ -6,7 +6,7 @@
     margin: -0.3125rem -0.5rem 0.3125rem;
   }
 
-  body.is-ios .Message.own .message-content.has-solid-background & {
+  body.is-ios .Message.own .message-content.has-solid-background :not(.forwarded-message) & {
     margin: -0.3125rem -0.5rem 0.3125rem -0.625rem;
   }
 
