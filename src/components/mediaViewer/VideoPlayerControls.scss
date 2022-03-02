@@ -18,7 +18,7 @@
 
   @media (max-width: 600px) {
     position: fixed;
-    padding: 1.25rem 0.5rem 0.75rem;
+    padding: 2.25rem 0.5rem 0.75rem;
     background: none;
     z-index: var(--z-media-viewer);
   }
@@ -109,6 +109,10 @@
     height: 1rem;
     touch-action: none;
     cursor: pointer;
+
+    @media (max-width: 600px) {
+      top: 1rem;
+    }
 
     &-track {
       position: absolute;

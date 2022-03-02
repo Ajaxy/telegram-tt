@@ -52,12 +52,13 @@ const VideoPlayerControls: FC<IProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const seekerRef = useRef<HTMLDivElement>(null);
-  const isSeeking = useRef<boolean>(false);
+  const isSeekingRef = useRef<boolean>(false);
+  const isSeeking = isSeekingRef.current;
 
 
   useEffect(() => {
     let timeout: number | undefined;
-    if (!isVisible || !isPlayed) {
+    if (!isVisible || !isPlayed || isSeeking) {
       if (timeout) window.clearTimeout(timeout);
       return;
     }
@@ -67,7 +68,7 @@ const VideoPlayerControls: FC<IProps> = ({
     return () => {
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [isPlayed, isVisible, setVisibility]);
+  }, [isPlayed, isVisible, isSeeking, setVisibility]);
 
   useEffect(() => {
     if (isVisible) {
@@ -83,7 +84,7 @@ const VideoPlayerControls: FC<IProps> = ({
   const lang = useLang();
 
   const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
-    if (isSeeking.current && seekerRef.current) {
+    if (isSeekingRef.current && seekerRef.current) {
       const {
         width,
         left,
@@ -94,12 +95,12 @@ const VideoPlayerControls: FC<IProps> = ({
   }, [duration, onSeek]);
 
   const handleStartSeek = useCallback((e: MouseEvent | TouchEvent) => {
-    isSeeking.current = true;
+    isSeekingRef.current = true;
     handleSeek(e);
   }, [handleSeek]);
 
   const handleStopSeek = useCallback(() => {
-    isSeeking.current = false;
+    isSeekingRef.current = false;
   }, []);
 
   useEffect(() => {
