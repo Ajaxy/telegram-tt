@@ -7,6 +7,7 @@ import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
+import { getUserFullName } from '../../../modules/helpers';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
@@ -259,9 +260,12 @@ const MessageContextMenu: FC<OwnProps> = ({
                 ? lang('Chat.OutgoingContextMixedReactionCount', [message.reactors.count, message.seenByUserIds.length])
                 : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
             ) : (
-              message.seenByUserIds?.length
-                ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
-                : lang('Conversation.ContextMenuNoViews')
+              message.seenByUserIds?.length === 1 && seenByRecentUsers
+                ? getUserFullName(seenByRecentUsers[0])
+                : (message.seenByUserIds?.length
+                  ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
+                  : lang('Conversation.ContextMenuNoViews')
+                )
             )}
             <div className="avatars">
               {seenByRecentUsers?.map((user) => (
