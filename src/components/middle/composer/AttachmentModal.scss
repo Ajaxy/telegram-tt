@@ -128,4 +128,19 @@
       border-radius: var(--border-radius-default);
     }
   }
+
+  &--send-wrapper {
+    position: relative;
+  }
+
+  .CustomSendMenu {
+    bottom: auto;
+
+    .is-pointer-env & > .backdrop {
+      width: 100%;
+      top: -2.25rem;
+      bottom: auto;
+      height: 2.75rem;
+    }
+  }
 }
