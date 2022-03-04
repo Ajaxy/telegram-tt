@@ -61,6 +61,8 @@
     bottom: 0;
     left: 0;
 
+    margin-right: 0.3125rem;
+
     @media (max-width: 600px) {
       width: 2.5rem;
       height: 2.5rem;
@@ -551,10 +553,6 @@
     .theme-dark & {
       border-color: #ffffff80;
     }
-  }
-
-  .Avatar {
-    margin-right: 0.3125rem;
   }
 
   .message-content {

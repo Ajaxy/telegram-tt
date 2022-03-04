@@ -18,6 +18,7 @@ export function buildContentClassName(
     hasComments,
     hasActionButton,
     hasReactions,
+    isGeoLiveActive,
   }: {
     hasReply?: boolean;
     customShape?: boolean | number;
@@ -28,20 +29,22 @@ export function buildContentClassName(
     hasComments?: boolean;
     hasActionButton?: boolean;
     hasReactions?: boolean;
+    isGeoLiveActive?: boolean;
   } = {},
 ) {
   const {
-    text, photo, video, audio, voice, document, poll, webPage, contact,
+    text, photo, video, audio, voice, document, poll, webPage, contact, location,
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
-  const isMedia = photo || video;
-  const isMediaWithNoText = isMedia && !text;
+  const isMedia = photo || video || location;
+  const hasText = text || location?.type === 'venue' || isGeoLiveActive;
+  const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
 
   if (isEmojiOnlyMessage(customShape)) {
     classNames.push(`emoji-only emoji-only-${customShape}`);
-  } else if (text) {
+  } else if (hasText) {
     classNames.push('text');
   }
 
@@ -59,7 +62,7 @@ export function buildContentClassName(
       classNames.push('has-comments');
     }
   }
-  if (photo || video) {
+  if (isMedia) {
     classNames.push('media');
   } else if (audio) {
     classNames.push('audio');
@@ -114,7 +117,7 @@ export function buildContentClassName(
       classNames.push('has-solid-background');
     }
 
-    if (isLastInGroup && (photo || !isMediaWithNoText)) {
+    if (isLastInGroup && (photo || (location && !hasText) || !isMediaWithNoText)) {
       classNames.push('has-appendix');
     }
   }

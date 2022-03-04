@@ -6,6 +6,7 @@ import { ApiMessage } from '../../../api/types';
 import { ISettings } from '../../../types';
 import { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
+import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
 import {
   getMessagePhoto,
   getMessageWebPagePhoto,
@@ -44,8 +45,6 @@ export type OwnProps = {
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
-
-const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 
 const Photo: FC<OwnProps> = ({
   id,

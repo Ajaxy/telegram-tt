@@ -368,7 +368,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
       || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
-      || (content.video?.isRound)
+      || (content.video?.isRound) || content.location
     )
     && !isForwardedMessage(message)
     && !message.viaBotId

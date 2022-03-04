@@ -1,0 +1,196 @@
+.Location {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 0 !important;
+
+  .location-accuracy {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+
+    @keyframes accuracy-wave {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        background-color: var(--color-primary);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        background-color: transparent;
+      }
+    }
+
+    animation: accuracy-wave 5s ease-out infinite forwards;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .map-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .map {
+    animation: fade-in 0.3s forwards;
+  }
+
+  .pin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    animation: fade-in 0.3s forwards;
+
+    --pin-color: var(--color-primary);
+  }
+
+  .geoLive {
+    &::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 50%);
+
+      width: 1rem;
+      height: 1rem;
+
+      background: var(--color-primary);
+      border: 2px solid white;
+      border-radius: 50%;
+      z-index: 3;
+    }
+
+    .round-pin {
+      bottom: 0.5rem;
+    }
+  }
+
+  .direction {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transition: transform 0.3s ease-out;
+    transform: translate(-50%, 0.3125rem) rotate(var(--direction));
+    transform-origin: bottom;
+    width: 1.5rem;
+    height: 2rem;
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+    background: radial-gradient(circle, var(--color-primary) -100%, transparent 100%);
+    border-radius: 40%;
+    z-index: 2;
+  }
+
+  .location-avatar {
+    position: relative;
+    overflow: hidden;
+    margin-right: 0;
+    margin-bottom: 1.3125rem;
+
+    z-index: 5;
+  }
+
+  .venue-icon {
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+    height: 3rem;
+
+    z-index: 5;
+  }
+
+  .geo {
+    height: 2.5rem;
+  }
+
+  .geoLive,
+  .venue {
+    filter: drop-shadow(0 0 2px var(--color-default-shadow));
+  }
+
+  .expired {
+    --pin-color: white;
+
+    .location-avatar::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .round-pin {
+    fill: var(--pin-color);
+
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 0);
+    width: 5rem;
+
+    z-index: 4;
+  }
+
+  .location-info {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 1fr 1fr;
+    width: 100%;
+    padding: 0.3125rem 0.5rem 0.375rem;
+
+    &-title {
+      font-weight: 500;
+      grid-area: 1 / 1 / 2 / 2;
+    }
+
+    &-subtitle {
+      color: var(--color-text-secondary);
+      line-height: 1;
+      font-size: 0.875rem;
+      grid-area: 2 / 1 / 2 / 2;
+
+      .Message.own & {
+        color: var(--color-message-meta-own);
+      }
+    }
+  }
+
+  .geo-countdown {
+    grid-area: 1 / 2 / 3 / 3;
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .geo-countdown-text {
+    color: var(--accent-color);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .geo-countdown-progress {
+    stroke: var(--accent-color);
+    fill: transparent;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 2s, stroke 0.2s;
+  }
+}

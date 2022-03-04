@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from '../lib/teact/teact';
 
-function useTimeout(callback: () => void, delay: number | null) {
+function useTimeout(callback: () => void, delay?: number) {
   const savedCallback = useRef(callback);
 
   useLayoutEffect(() => {

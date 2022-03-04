@@ -186,6 +186,7 @@ class TelegramClient {
         }
         // set defaults vars
         this._sender.userDisconnected = false;
+        // eslint-disable-next-line camelcase
         this._sender._user_connected = false;
         this._sender.isReconnecting = false;
         this._sender._disconnected = true;
@@ -678,7 +679,6 @@ class TelegramClient {
         throw new Error('not implemented');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async _downloadWebDocument(media) {
         try {
             const buff = [];
@@ -702,6 +702,59 @@ class TelegramClient {
                     }
                 } else {
                     break;
+                }
+            }
+            return Buffer.concat(buff);
+        } catch (e) {
+            // the file is no longer saved in telegram's cache.
+            if (e.message === 'WEBFILE_NOT_AVAILABLE') {
+                return Buffer.alloc(0);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    async downloadStaticMap(accessHash, long, lat, w, h, zoom, scale, accuracyRadius) {
+        try {
+            const buff = [];
+            let offset = 0;
+            while (true) {
+                try {
+                    const downloaded = new requests.upload.GetWebFile({
+                        location: new constructors.InputWebFileGeoPointLocation({
+                            geoPoint: new constructors.InputGeoPoint({
+                                lat,
+                                long,
+                                accuracyRadius,
+                            }),
+                            accessHash,
+                            w,
+                            h,
+                            zoom,
+                            scale,
+                        }),
+                        offset,
+                        limit: WEBDOCUMENT_REQUEST_PART_SIZE,
+                    });
+                    const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+                    const res = await sender.send(downloaded);
+                    offset += 131072;
+                    if (res.bytes.length) {
+                        buff.push(res.bytes);
+                        if (res.bytes.length < WEBDOCUMENT_REQUEST_PART_SIZE) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                } catch (err) {
+                    if (err instanceof errors.FloodWaitError) {
+                        // eslint-disable-next-line no-console
+                        console.warn(`getWebFile: sleeping for ${err.seconds}s on flood wait`);
+                        await sleep(err.seconds * 1000);
+                        continue;
+                    }
                 }
             }
             return Buffer.concat(buff);

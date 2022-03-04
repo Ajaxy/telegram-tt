@@ -106,6 +106,29 @@ export function formatCountdown(
   }
 }
 
+export function formatCountdownShort(lang: LangFn, msLeft: number) {
+  if (msLeft < 60 * 1000) {
+    return Math.ceil(msLeft / 1000);
+  } else if (msLeft < 60 * 60 * 1000) {
+    return Math.ceil(msLeft / (60 * 1000));
+  } else if (msLeft < MILLISECONDS_IN_DAY) {
+    return lang('MessageTimer.ShortHours', Math.ceil(msLeft / (60 * 60 * 1000)));
+  } else {
+    return lang('MessageTimer.ShortDays', Math.ceil(msLeft / MILLISECONDS_IN_DAY));
+  }
+}
+
+export function formatLastUpdated(lang: LangFn, currentTime: number, lastUpdated = currentTime) {
+  const seconds = currentTime - lastUpdated;
+  if (seconds < 60) {
+    return lang('LiveLocationUpdated.JustNow');
+  } else if (seconds < 60 * 60) {
+    return lang('LiveLocationUpdated.MinutesAgo', Math.floor(seconds / 60));
+  } else {
+    return lang('LiveLocationUpdated.TodayAt', formatTime(lang, lastUpdated));
+  }
+}
+
 export function formatHumanDate(
   lang: LangFn,
   datetime: number | Date,

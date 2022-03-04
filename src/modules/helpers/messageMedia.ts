@@ -1,5 +1,5 @@
 import {
-  ApiAudio, ApiMediaFormat, ApiMessage, ApiMessageSearchType, ApiPhoto, ApiVideo, ApiDimensions,
+  ApiAudio, ApiMediaFormat, ApiMessage, ApiMessageSearchType, ApiPhoto, ApiVideo, ApiDimensions, ApiLocation,
 } from '../../api/types';
 
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, IS_SAFARI } from '../../util/environment';
@@ -88,6 +88,10 @@ export function getMessageInvoice(message: ApiMessage) {
   return message.content.invoice;
 }
 
+export function getMessageLocation(message: ApiMessage) {
+  return message.content.location;
+}
+
 export function getMessageWebPage(message: ApiMessage) {
   return message.content.webPage;
 }
@@ -123,6 +127,19 @@ export function getMessageMediaThumbDataUri(message: ApiMessage) {
   return getMessageMediaThumbnail(message)?.dataUri;
 }
 
+export function buildStaticMapHash(
+  geo: ApiLocation['geo'],
+  width: number,
+  height: number,
+  zoom: number,
+  scale: number,
+) {
+  const { long, lat, accessHash, accuracyRadius } = geo;
+
+  // eslint-disable-next-line max-len
+  return `staticMap:${accessHash}?lat=${lat}&long=${long}&w=${width}&h=${height}&zoom=${zoom}&scale=${scale}&accuracyRadius=${accuracyRadius}`;
+}
+
 export function getMessageMediaHash(
   message: ApiMessage,
   target: Target,
@@ -136,11 +153,13 @@ export function getMessageMediaHash(
   const messageVideo = video || webPageVideo;
   const messagePhoto = photo || webPagePhoto;
 
-  if (!(messagePhoto || messageVideo || sticker || audio || voice || document)) {
+  const content = messagePhoto || messageVideo || sticker || audio || voice || document;
+
+  if (!content) {
     return undefined;
   }
 
-  const mediaId = (messagePhoto || messageVideo || sticker || audio || voice || document)!.id;
+  const mediaId = content.id;
   const base = `${getMessageKey(message)}${mediaId ? `:${mediaId}` : ''}`;
 
   if (messageVideo) {
