@@ -5,7 +5,7 @@ import { ApiMessage } from '../../../api/types';
 import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
-import { getMessageContent } from '../../../modules/helpers';
+import { getMessageContent, getMessageHtmlId } from '../../../modules/helpers';
 import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -80,7 +80,7 @@ const Album: FC<OwnProps & StateProps> = ({
 
       return (
         <PhotoWithSelect
-          id={`album-media-${message.id}`}
+          id={`album-media-${getMessageHtmlId(message.id)}`}
           message={message}
           observeIntersection={observeIntersection}
           canAutoLoad={canAutoLoad}
@@ -97,7 +97,7 @@ const Album: FC<OwnProps & StateProps> = ({
     } else if (video) {
       return (
         <VideoWithSelect
-          id={`album-media-${message.id}`}
+          id={`album-media-${getMessageHtmlId(message.id)}`}
           message={message}
           observeIntersection={observeIntersection}
           canAutoLoad={canAutoLoad}

@@ -5,6 +5,7 @@ import { ApiMessage } from '../../api/types';
 import { formatMediaDuration } from '../../util/dateFormat';
 import stopEvent from '../../util/stopEvent';
 import {
+  getMessageHtmlId,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessageVideo,
@@ -48,7 +49,7 @@ const Media: FC<OwnProps> = ({
   return (
     <div
       ref={ref}
-      id={`${idPrefix}${message.id}`}
+      id={`${idPrefix}${getMessageHtmlId(message.id)}`}
       className="Media scroll-item"
       onClick={onClick ? handleClick : undefined}
     >

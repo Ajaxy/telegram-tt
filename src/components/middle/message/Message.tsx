@@ -68,6 +68,7 @@ import {
   getSenderTitle,
   getUserColorKey,
   areReactionsEmpty,
+  getMessageHtmlId,
   isGeoLiveExpired,
 } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -848,7 +849,7 @@ const Message: FC<OwnProps & StateProps> = ({
   return (
     <div
       ref={ref}
-      id={`message${messageId}`}
+      id={getMessageHtmlId(message.id)}
       className={containerClassName}
       style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}

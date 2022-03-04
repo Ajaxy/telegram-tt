@@ -18,6 +18,10 @@ const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
 export type MessageKey = `msg${string}-${number}`;
 
+export function getMessageHtmlId(messageId: number) {
+  return `message${messageId.toString().replace('.', '-')}`;
+}
+
 export function getMessageKey(message: ApiMessage): MessageKey {
   const { chatId, id } = message;
 
