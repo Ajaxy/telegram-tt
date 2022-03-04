@@ -796,11 +796,23 @@ export async function toggleDialogUnread({
   }
 }
 
+export async function getChatByPhoneNumber(phoneNumber: string) {
+  const result = await invokeRequest(new GramJs.contacts.ResolvePhone({
+    phone: phoneNumber,
+  }));
+
+  return processResolvedPeer(result);
+}
+
 export async function getChatByUsername(username: string) {
   const result = await invokeRequest(new GramJs.contacts.ResolveUsername({
     username,
   }));
 
+  return processResolvedPeer(result);
+}
+
+function processResolvedPeer(result?: GramJs.contacts.TypeResolvedPeer) {
   if (!result) {
     return undefined;
   }

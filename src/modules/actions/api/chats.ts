@@ -29,7 +29,7 @@ import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
   selectChatFolder, selectSupportChat, selectChatByUsername, selectThreadTopMessageId,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
-  selectVisibleUsers,
+  selectVisibleUsers, selectUserByPhoneNumber,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -40,6 +40,7 @@ import { processDeepLink } from '../../../util/deeplink';
 import { updateGroupCall } from '../../reducers/calls';
 import { selectGroupCall } from '../../selectors/calls';
 import { getOrderedIds } from '../../../util/folderManager';
+import * as langProvider from '../../../util/langProvider';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;
@@ -514,6 +515,26 @@ addReducer('openChatByInvite', (global, actions, payload) => {
   })();
 });
 
+addReducer('openChatByPhoneNumber', (global, actions, payload) => {
+  const { phoneNumber } = payload!;
+
+  (async () => {
+    // Open temporary empty chat to make the click response feel faster
+    actions.openChat({ id: TMP_CHAT_ID });
+
+    const chat = await fetchChatByPhoneNumber(phoneNumber);
+    if (!chat) {
+      actions.openPreviousChat();
+      actions.showNotification({
+        message: langProvider.getTranslation('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
+      });
+      return;
+    }
+
+    actions.openChat({ id: chat.id });
+  })();
+});
+
 addReducer('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
   if (url.match(RE_TG_LINK)) {
@@ -528,6 +549,11 @@ addReducer('openTelegramLink', (global, actions, payload) => {
   let hash: string | undefined;
   if (part1 === 'joinchat') {
     hash = part2;
+  }
+
+  if (part1.match(/^\+([0-9]+)(\?|$)/)) {
+    actions.openChatByPhoneNumber({ phoneNumber: part1.substr(1, part1.length - 1) });
+    return;
   }
 
   if (part1.startsWith(' ') || part1.startsWith('+')) {
@@ -1276,6 +1302,23 @@ export async function fetchChatByUsername(
   }
 
   const chat = await callApi('getChatByUsername', username);
+  if (!chat) {
+    return undefined;
+  }
+
+  setGlobal(updateChat(getGlobal(), chat.id, chat));
+
+  return chat;
+}
+
+export async function fetchChatByPhoneNumber(phoneNumber: string) {
+  const global = getGlobal();
+  const localUser = selectUserByPhoneNumber(global, phoneNumber);
+  if (localUser && !localUser.isMin) {
+    return selectChat(global, localUser.id);
+  }
+
+  const chat = await callApi('getChatByPhoneNumber', phoneNumber);
   if (!chat) {
     return undefined;
   }

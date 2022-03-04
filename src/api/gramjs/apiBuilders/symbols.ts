@@ -8,19 +8,20 @@ import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common
 import localDb from '../localDb';
 
 const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
-const GIF_STICKER_MIME_TYPE = 'video/webm';
+const VIDEO_STICKER_MIME_TYPE = 'video/webm';
 
 export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
 
+  const { mimeType } = document;
   const stickerAttribute = document.attributes
     .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
       attr instanceof GramJs.DocumentAttributeSticker
     ));
 
-  const fileAttribute = (document.mimeType === LOTTIE_STICKER_MIME_TYPE || document.mimeType === GIF_STICKER_MIME_TYPE)
+  const fileAttribute = (mimeType === LOTTIE_STICKER_MIME_TYPE || mimeType === VIDEO_STICKER_MIME_TYPE)
     && document.attributes
       .find((attr: any): attr is GramJs.DocumentAttributeFilename => (
         attr instanceof GramJs.DocumentAttributeFilename
@@ -30,8 +31,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
     return undefined;
   }
 
-  const isLottie = document.mimeType === LOTTIE_STICKER_MIME_TYPE;
-  const isGif = document.mimeType === GIF_STICKER_MIME_TYPE;
+  const isLottie = mimeType === LOTTIE_STICKER_MIME_TYPE;
+  const isVideo = mimeType === VIDEO_STICKER_MIME_TYPE;
 
   const imageSizeAttribute = document.attributes
     .find((attr: any): attr is GramJs.DocumentAttributeImageSize => (
@@ -55,7 +56,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
   );
 
   // eslint-disable-next-line no-restricted-globals
-  if (document.mimeType === GIF_STICKER_MIME_TYPE && !(self as any).isWebmSupported && !cachedThumb) {
+  if (mimeType === VIDEO_STICKER_MIME_TYPE && !(self as any).isWebmSupported && !cachedThumb) {
     const staticThumb = document.thumbs && document.thumbs.find(
       (s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize,
     );
@@ -83,7 +84,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
     stickerSetAccessHash: stickerSetInfo && String(stickerSetInfo.accessHash),
     emoji,
     isLottie,
-    isGif,
+    isVideo,
     width,
     height,
     thumbnail,
@@ -95,7 +96,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     archived,
     animated,
     installedDate,
-    gifs,
+    videos,
     id,
     accessHash,
     title,
@@ -107,7 +108,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
   return {
     archived,
     isLottie: animated,
-    isGifs: gifs,
+    isVideos: videos,
     installedDate,
     id: String(id),
     accessHash: String(accessHash),

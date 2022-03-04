@@ -14,6 +14,7 @@ export const processDeepLink = (url: string) => {
   const {
     openChatByInvite,
     openChatByUsername,
+    openChatByPhoneNumber,
     openStickerSetShortName,
     focusMessage,
     joinVoiceChatByLink,
@@ -29,7 +30,7 @@ export const processDeepLink = (url: string) => {
   switch (method) {
     case 'resolve': {
       const {
-        domain, post, comment, voicechat, livestream, start,
+        domain, phone, post, comment, voicechat, livestream, start,
       } = params;
 
       if (domain !== 'telegrampassport') {
@@ -38,6 +39,8 @@ export const processDeepLink = (url: string) => {
             username: domain,
             inviteHash: voicechat || livestream,
           });
+        } else if (phone) {
+          openChatByPhoneNumber({ phone });
         } else {
           openChatByUsername({
             username: domain,
