@@ -28,11 +28,15 @@
     touch-action: none;
   }
 
+  &--seen-by {
+    min-width: 14rem;
+  }
+
   .avatars {
     display: flex;
     align-self: center;
-    margin-left: auto;
-    padding-left: 1rem;
+    margin-inline-start: auto;
+    padding-inline-start: 1rem;
 
     .Avatar {
       border: 0.0625rem solid var(--color-background);

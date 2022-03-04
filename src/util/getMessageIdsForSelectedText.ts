@@ -1,7 +1,8 @@
 const ELEMENT_NODE = 1;
 
 export default function getMessageIdsForSelectedText() {
-  let selectedFragments = window.getSelection()?.getRangeAt(0).cloneContents();
+  const selection = window.getSelection();
+  let selectedFragments = selection && selection.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
   if (!selectedFragments || selectedFragments.childElementCount === 0) {
     return;
   }
