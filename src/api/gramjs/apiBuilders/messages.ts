@@ -28,6 +28,7 @@ import {
   ApiAvailableReaction,
   ApiSponsoredMessage,
   ApiUser,
+  ApiLocation,
 } from '../../types';
 
 import {
@@ -173,7 +174,8 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
-    ...(isEdited && { isEdited, editDate: mtpMessage.editDate }),
+    ...(isEdited && { isEdited }),
+    ...(mtpMessage.editDate && { editDate: mtpMessage.editDate }),
     ...(isMediaUnread && { isMediaUnread }),
     ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
     ...(mtpMessage.mentioned && { isMentioned: true }),
@@ -320,6 +322,9 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
 
   const invoice = buildInvoiceFromMedia(media);
   if (invoice) return { invoice };
+
+  const location = buildLocationFromMedia(media);
+  if (location) return { location };
 
   return undefined;
 }
@@ -569,6 +574,63 @@ function buildInvoiceFromMedia(media: GramJs.TypeMessageMedia): ApiInvoice | und
   }
 
   return buildInvoice(media);
+}
+
+function buildLocationFromMedia(media: GramJs.TypeMessageMedia): ApiLocation | undefined {
+  if (media instanceof GramJs.MessageMediaGeo) {
+    return buildGeo(media);
+  }
+
+  if (media instanceof GramJs.MessageMediaVenue) {
+    return buildVenue(media);
+  }
+
+  if (media instanceof GramJs.MessageMediaGeoLive) {
+    return buildGeoLive(media);
+  }
+
+  return undefined;
+}
+
+function buildGeo(media: GramJs.MessageMediaGeo): ApiLocation | undefined {
+  const point = buildGeoPoint(media.geo);
+  return point && { type: 'geo', geo: point };
+}
+
+function buildVenue(media: GramJs.MessageMediaVenue): ApiLocation | undefined {
+  const { geo, title, provider, address, venueId, venueType } = media;
+  const point = buildGeoPoint(geo);
+  return point && {
+    type: 'venue',
+    geo: point,
+    title,
+    provider,
+    address,
+    venueId,
+    venueType,
+  };
+}
+
+function buildGeoLive(media: GramJs.MessageMediaGeoLive): ApiLocation | undefined {
+  const { geo, period, heading } = media;
+  const point = buildGeoPoint(geo);
+  return point && {
+    type: 'geoLive',
+    geo: point,
+    period,
+    heading,
+  };
+}
+
+function buildGeoPoint(geo: GramJs.TypeGeoPoint): ApiLocation['geo'] | undefined {
+  if (geo instanceof GramJs.GeoPointEmpty) return undefined;
+  const { long, lat, accuracyRadius, accessHash } = geo;
+  return {
+    long,
+    lat,
+    accessHash: accessHash.toString(),
+    accuracyRadius,
+  };
 }
 
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {

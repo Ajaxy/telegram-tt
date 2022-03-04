@@ -118,6 +118,7 @@ export function getMessageSummaryDescription(
     contact,
     poll,
     invoice,
+    location,
   } = message.content;
 
   let summary: string | TextPart[] | undefined;
@@ -168,6 +169,14 @@ export function getMessageSummaryDescription(
     } else {
       summary = truncatedText;
     }
+  }
+
+  if (location?.type === 'geo' || location?.type === 'venue') {
+    summary = lang('Message.Location');
+  }
+
+  if (location?.type === 'geoLive') {
+    summary = lang('Message.LiveLocation');
   }
 
   const reaction = !noReactions && getMessageRecentReaction(message);

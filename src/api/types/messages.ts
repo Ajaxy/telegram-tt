@@ -143,6 +143,37 @@ export interface ApiInvoice {
   isTest?: boolean;
 }
 
+interface ApiGeoPoint {
+  long: number;
+  lat: number;
+  accessHash: string;
+  accuracyRadius?: number;
+}
+
+interface ApiGeo {
+  type: 'geo';
+  geo: ApiGeoPoint;
+}
+
+interface ApiVenue {
+  type: 'venue';
+  geo: ApiGeoPoint;
+  title: string;
+  address: string;
+  provider: string;
+  venueId: string;
+  venueType: string;
+}
+
+interface ApiGeoLive {
+  type: 'geoLive';
+  geo: ApiGeoPoint;
+  heading?: number;
+  period: number;
+}
+
+export type ApiLocation = ApiGeo | ApiVenue | ApiGeoLive;
+
 export type ApiNewPoll = {
   summary: ApiPoll['summary'];
   quiz?: {
@@ -240,6 +271,7 @@ export interface ApiMessage {
     audio?: ApiAudio;
     voice?: ApiVoice;
     invoice?: ApiInvoice;
+    location?: ApiLocation;
   };
   date: number;
   isOutgoing: boolean;

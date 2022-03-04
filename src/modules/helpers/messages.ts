@@ -40,14 +40,15 @@ export function getMessageOriginalId(message: ApiMessage) {
 
 export function getMessageText(message: ApiMessage) {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice,
+    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
   } = message.content;
 
   if (text) {
     return text.text;
   }
 
-  if (sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice) {
+  if (sticker || photo || video || audio || voice || document
+    || contact || poll || webPage || invoice || location) {
     return undefined;
   }
 
@@ -214,4 +215,10 @@ export function getMessageContentFilename(message: ApiMessage) {
 
 export function areReactionsEmpty(reactions: ApiReactions) {
   return !reactions.results.some((l) => l.count > 0);
+}
+
+export function isGeoLiveExpired(message: ApiMessage, timestamp = Date.now() / 1000) {
+  const { location } = message.content;
+  if (location?.type !== 'geoLive') return false;
+  return (timestamp - (message.date || 0) >= location.period);
 }

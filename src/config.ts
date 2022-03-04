@@ -85,6 +85,8 @@ export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 
+export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
+
 // Screen width where Pinned Message / Audio Player in the Middle Header can be safely displayed
 export const SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1440; // px
 // Screen width where Pinned Message / Audio Player in the Middle Header shouldn't collapse with ChatInfo

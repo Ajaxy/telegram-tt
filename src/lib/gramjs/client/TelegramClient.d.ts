@@ -6,7 +6,7 @@ import { downloadFile, DownloadFileParams } from './downloadFile';
 import { TwoFaParams, updateTwoFaSettings } from './2fa';
 
 declare class TelegramClient {
-    constructor(...args: any)
+    constructor(...args: any);
 
     async start(authParams: UserAuthParams | BotAuthParams);
 

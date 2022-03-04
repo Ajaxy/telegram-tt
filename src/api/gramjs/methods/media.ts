@@ -17,7 +17,7 @@ import * as cacheApi from '../../../util/cacheApi';
 type EntityType = (
   'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument' |
   'document'
-  );
+);
 
 const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document']);
 const TGS_MIME_TYPE = 'application/x-tgsticker';
@@ -74,11 +74,13 @@ async function download(
   mediaFormat?: ApiMediaFormat,
   isHtmlAllowed?: boolean,
 ) {
-  const mediaMatch = url.startsWith('webDocument')
-    ? url.match(/(webDocument):(.+)/)
-    : url.match(
-      /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
-    );
+  const mediaMatch = url.startsWith('staticMap')
+    ? url.match(/(staticMap):([0-9-]+)(\?.+)/)
+    : url.startsWith('webDocument')
+      ? url.match(/(webDocument):(.+)/)
+      : url.match(
+        /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
+      );
   if (!mediaMatch) {
     return undefined;
   }
@@ -101,6 +103,25 @@ async function download(
     GramJs.Message | GramJs.MessageService |
     GramJs.Document | GramJs.StickerSet | GramJs.TypeWebDocument | undefined
   );
+
+  if (mediaMatch[1] === 'staticMap') {
+    const accessHash = mediaMatch[2];
+    const params = mediaMatch[3];
+    const parsedParams = new URLSearchParams(params);
+    const long = parsedParams.get('long');
+    const lat = parsedParams.get('lat');
+    const w = parsedParams.get('w');
+    const h = parsedParams.get('h');
+    const zoom = parsedParams.get('zoom');
+    const scale = parsedParams.get('scale');
+    const accuracyRadius = parsedParams.get('accuracy_radius');
+
+    const data = await client.downloadStaticMap(accessHash, long, lat, w, h, zoom, scale, accuracyRadius);
+    return {
+      mimeType: 'image/png',
+      data,
+    };
+  }
 
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
     entityType = getEntityTypeById(entityId);
@@ -202,6 +223,12 @@ function getMessageMediaMimeType(message: GramJs.Message, sizeType?: string) {
 
   if (message.media instanceof GramJs.MessageMediaPhoto) {
     return 'image/jpeg';
+  }
+
+  if (message.media instanceof GramJs.MessageMediaGeo
+    || message.media instanceof GramJs.MessageMediaVenue
+    || message.media instanceof GramJs.MessageMediaGeoLive) {
+    return 'image/png';
   }
 
   if (message.media instanceof GramJs.MessageMediaDocument && message.media.document instanceof GramJs.Document) {
