@@ -249,6 +249,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
         {(canShowSeenBy || canShowReactionsCount) && (
           <MenuItem
+            className="MessageContextMenu--seen-by"
             icon={canShowReactionsCount ? 'reactions' : 'group'}
             onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
             disabled={!canShowReactionsCount && !message.seenByUserIds?.length}
