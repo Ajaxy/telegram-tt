@@ -43,10 +43,6 @@
       transition: opacity 0.15s !important;
     }
 
-    body.has-open-dialog & {
-      transition: none !important;
-    }
-
     --offset-y: calc(100% + 0.5rem);
     --offset-x: 0;
 
@@ -69,6 +65,10 @@
     &.with-footer {
       padding-bottom: 0;
     }
+  }
+
+  body.has-open-dialog &:not(.CustomSendMenu) .bubble {
+    transition: none !important;
   }
 
   .footer {

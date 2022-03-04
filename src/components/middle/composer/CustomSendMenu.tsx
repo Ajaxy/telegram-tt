@@ -11,6 +11,7 @@ import './CustomSendMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  isOpenToBottom?: boolean;
   onSilentSend?: NoneToVoidFunction;
   onScheduleSend?: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
@@ -18,7 +19,7 @@ export type OwnProps = {
 };
 
 const CustomSendMenu: FC<OwnProps> = ({
-  isOpen, onSilentSend, onScheduleSend, onClose, onCloseAnimationEnd,
+  isOpen, isOpenToBottom = false, onSilentSend, onScheduleSend, onClose, onCloseAnimationEnd,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
 
@@ -29,7 +30,7 @@ const CustomSendMenu: FC<OwnProps> = ({
       isOpen={isOpen}
       autoClose
       positionX="right"
-      positionY="bottom"
+      positionY={isOpenToBottom ? 'top' : 'bottom'}
       className="CustomSendMenu"
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
