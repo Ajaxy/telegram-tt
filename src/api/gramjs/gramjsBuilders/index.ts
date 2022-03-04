@@ -420,6 +420,10 @@ export function buildInputReportReason(reason: ApiReportReason) {
       return new GramJs.InputReportReasonFake();
     case 'geoIrrelevant':
       return new GramJs.InputReportReasonGeoIrrelevant();
+    case 'illegalDrugs':
+      return new GramJs.InputReportReasonIllegalDrugs();
+    case 'personalDetails':
+      return new GramJs.InputReportReasonPersonalDetails();
     case 'other':
       return new GramJs.InputReportReasonOther();
   }

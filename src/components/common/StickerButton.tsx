@@ -49,9 +49,9 @@ const StickerButton: FC<OwnProps> = ({
   const lottieData = useMedia(sticker.isLottie && localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
   const [isLottieLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
   const canLottiePlay = isLottieLoaded && shouldPlay;
-  const isGif = sticker.isGif && IS_WEBM_SUPPORTED;
-  const gifBlobUrl = useMedia(isGif && localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
-  const canGifPlay = Boolean(isGif && gifBlobUrl && shouldPlay);
+  const isVideo = sticker.isVideo && IS_WEBM_SUPPORTED;
+  const videoBlobUrl = useMedia(isVideo && localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
+  const canVideoPlay = Boolean(isVideo && videoBlobUrl && shouldPlay);
 
   const { transitionClassNames: previewTransitionClassNames } = useShowTransition(
     Boolean(previewBlobUrl || canLottiePlay),
@@ -68,15 +68,15 @@ const StickerButton: FC<OwnProps> = ({
   }, [unmarkLoaded, shouldPlay]);
 
   useEffect(() => {
-    if (!isGif || !ref.current) return;
+    if (!isVideo || !ref.current) return;
     const video = ref.current.querySelector('video');
     if (!video) return;
-    if (canGifPlay) {
+    if (canVideoPlay) {
       safePlay(video);
     } else {
       video.pause();
     }
-  }, [isGif, canGifPlay]);
+  }, [isVideo, canVideoPlay]);
 
   function handleClick() {
     if (onClick) {
@@ -98,7 +98,7 @@ const StickerButton: FC<OwnProps> = ({
     className,
   );
 
-  const style = (thumbDataUri && !canLottiePlay && !canGifPlay) ? `background-image: url('${thumbDataUri}');` : '';
+  const style = (thumbDataUri && !canLottiePlay && !canVideoPlay) ? `background-image: url('${thumbDataUri}');` : '';
 
   return (
     <div
@@ -110,15 +110,15 @@ const StickerButton: FC<OwnProps> = ({
       onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={handleClick}
     >
-      {!canLottiePlay && !canGifPlay && (
+      {!canLottiePlay && !canVideoPlay && (
         // eslint-disable-next-line jsx-a11y/alt-text
         <img src={previewBlobUrl} className={previewTransitionClassNames} />
       )}
-      {isGif && (
+      {isVideo && (
         <video
           className={previewTransitionClassNames}
-          src={gifBlobUrl}
-          autoPlay={canGifPlay}
+          src={videoBlobUrl}
+          autoPlay={canVideoPlay}
           loop
           playsInline
           muted

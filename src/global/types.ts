@@ -515,7 +515,7 @@ export type ActionTypes = (
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
   // chats
   'preloadTopChatMessages' | 'loadAllChats' | 'openChat' | 'openChatWithInfo' | 'openLinkedChat' |
-  'openSupportChat' | 'openTipsChat' | 'focusMessageInComments' |
+  'openSupportChat' | 'openTipsChat' | 'focusMessageInComments' | 'openChatByPhoneNumber' |
   'loadFullChat' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |

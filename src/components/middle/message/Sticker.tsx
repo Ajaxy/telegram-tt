@@ -36,15 +36,15 @@ const Sticker: FC<OwnProps> = ({
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const sticker = message.content.sticker!;
-  const { isLottie, stickerSetId, isGif } = sticker;
-  const canDisplayGif = IS_WEBM_SUPPORTED;
+  const { isLottie, stickerSetId, isVideo } = sticker;
+  const canDisplayVideo = IS_WEBM_SUPPORTED;
   const isMemojiSticker = stickerSetId === NO_STICKER_SET_ID;
 
   const shouldLoad = useIsIntersecting(ref, observeIntersection);
   const shouldPlay = useIsIntersecting(ref, observeIntersectionForPlaying);
 
   const mediaHash = sticker.isPreloadedGlobally ? `sticker${sticker.id}` : getMessageMediaHash(message, 'inline')!;
-  const previewMediaHash = isGif && !canDisplayGif && (
+  const previewMediaHash = isVideo && !canDisplayVideo && (
     sticker.isPreloadedGlobally ? `sticker${sticker.id}?size=m` : getMessageMediaHash(message, 'pictogram'));
   const previewBlobUrl = useMedia(previewMediaHash);
   const thumbDataUri = useWebpThumbnail(message);
@@ -71,7 +71,7 @@ const Sticker: FC<OwnProps> = ({
   );
 
   useEffect(() => {
-    if (!isGif || !ref.current) return;
+    if (!isVideo || !ref.current) return;
     const video = ref.current.querySelector('video');
     if (!video) return;
     if (shouldPlay) {
@@ -79,11 +79,11 @@ const Sticker: FC<OwnProps> = ({
     } else {
       video.pause();
     }
-  }, [isGif, shouldPlay]);
+  }, [isVideo, shouldPlay]);
 
   return (
     <div ref={ref} className={stickerClassName} onClick={!isMemojiSticker ? openModal : undefined}>
-      {(!isMediaReady || (isGif && !canDisplayGif)) && (
+      {(!isMediaReady || (isVideo && !canDisplayVideo)) && (
         <img
           id={`sticker-thumb-${message.id}`}
           src={previewUrl}
@@ -93,7 +93,7 @@ const Sticker: FC<OwnProps> = ({
           className={thumbClassName}
         />
       )}
-      {!isLottie && !isGif && (
+      {!isLottie && !isVideo && (
         <img
           id={`sticker-${message.id}`}
           src={mediaData as string}
@@ -103,7 +103,7 @@ const Sticker: FC<OwnProps> = ({
           className={buildClassName('full-media', transitionClassNames)}
         />
       )}
-      {isGif && canDisplayGif && isMediaReady && (
+      {isVideo && canDisplayVideo && isMediaReady && (
         <video
           id={`sticker-${message.id}`}
           src={mediaData as string}

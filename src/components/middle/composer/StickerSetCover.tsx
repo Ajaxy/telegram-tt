@@ -23,16 +23,16 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
 
   const mediaData = useMedia(stickerSet.hasThumbnail && `stickerSet${stickerSet.id}`, !isIntersecting);
   const transitionClassNames = useMediaTransition(mediaData);
-  const isGif = stickerSet.isGifs;
+  const isVideo = stickerSet.isVideos;
 
   const firstLetters = useMemo(() => {
-    if ((isGif && !IS_WEBM_SUPPORTED) || !mediaData) return getFirstLetters(stickerSet.title, 2);
-  }, [isGif, mediaData, stickerSet.title]);
+    if ((isVideo && !IS_WEBM_SUPPORTED) || !mediaData) return getFirstLetters(stickerSet.title, 2);
+  }, [isVideo, mediaData, stickerSet.title]);
 
   return (
     <div ref={ref} className="sticker-set-cover">
       {firstLetters}
-      {isGif ? (
+      {isVideo ? (
         <video src={mediaData} className={transitionClassNames} loop autoPlay />
       ) : (
         <img src={mediaData} className={transitionClassNames} alt="" />

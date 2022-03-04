@@ -26,7 +26,7 @@ export interface ApiSticker {
   stickerSetAccessHash?: string;
   emoji?: string;
   isLottie: boolean;
-  isGif: boolean;
+  isVideo: boolean;
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
@@ -36,7 +36,7 @@ export interface ApiSticker {
 export interface ApiStickerSet {
   archived?: true;
   isLottie?: true;
-  isGifs?: true;
+  isVideos?: true;
   installedDate?: number;
   id: string;
   accessHash: string;
@@ -382,7 +382,7 @@ export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'a
 export type ApiGlobalMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
-| 'copyright' | 'geoIrrelevant' | 'fake' | 'other';
+| 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';
 
 export type ApiSendMessageAction = {
   type: 'cancel' | 'typing' | 'recordAudio' | 'chooseSticker';

@@ -55,6 +55,7 @@
     "contacts.resolveUsername",
     "contacts.getTopPeers",
     "contacts.addContact",
+    "contacts.resolvePhone",
     "messages.getMessages",
     "messages.getDialogs",
     "messages.getHistory",

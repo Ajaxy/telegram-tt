@@ -191,7 +191,7 @@ export function getMessageContentFilename(message: ApiMessage) {
   }
 
   if (content.sticker) {
-    const extension = content.sticker.isLottie ? 'tgs' : content.sticker.isGif
+    const extension = content.sticker.isLottie ? 'tgs' : content.sticker.isVideo
       ? 'webm' : isWebpSupported() ? 'webp' : 'png';
     return `${content.sticker.id}.${extension}`;
   }

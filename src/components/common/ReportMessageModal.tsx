@@ -55,6 +55,8 @@ const ReportMessageModal: FC<OwnProps> = ({
     { value: 'pornography', label: lang('lng_report_reason_pornography') },
     { value: 'childAbuse', label: lang('lng_report_reason_child_abuse') },
     { value: 'copyright', label: lang('ReportPeer.ReasonCopyright') },
+    { value: 'illegalDrugs', label: 'Illegal Drugs' },
+    { value: 'personalDetails', label: 'Personal Details' },
     { value: 'other', label: lang('lng_report_reason_other') },
   ];
 

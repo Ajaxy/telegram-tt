@@ -23,6 +23,13 @@ export function selectUserByUsername(global: GlobalState, username: string) {
   );
 }
 
+// Slow, not to be used in `withGlobal`
+export function selectUserByPhoneNumber(global: GlobalState, phoneNumber: string) {
+  const phoneNumberCleaned = phoneNumber.replace(/[^0-9]/g, '');
+
+  return Object.values(global.users.byId).find((user) => user?.phoneNumber === phoneNumberCleaned);
+}
+
 export function selectIsUserOrChatContact(global: GlobalState, userOrChat: ApiUser | ApiChat) {
   return global.contactList && global.contactList.userIds.includes(userOrChat.id);
 }
