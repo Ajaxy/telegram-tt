@@ -38,7 +38,7 @@ export default function useBotCommandTooltip(
 
   useEffect(() => {
     if (!isAllowed || !html.length) {
-      unmarkIsOpen();
+      setFilteredBotCommands(undefined);
       return;
     }
 
@@ -48,7 +48,7 @@ export default function useBotCommandTooltip(
       const filter = prepareForRegExp(html.substr(1)).match(RE_COMMAND);
       getFilteredCommands(filter ? filter[0] : '');
     } else {
-      unmarkIsOpen();
+      setFilteredBotCommands(undefined);
     }
   }, [getFilteredCommands, html, isAllowed, unmarkIsOpen]);
 
