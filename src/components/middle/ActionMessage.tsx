@@ -12,7 +12,7 @@ import {
   selectIsMessageFocused,
   selectChat,
 } from '../../modules/selectors';
-import { isChatChannel } from '../../modules/helpers';
+import { getMessageHtmlId, isChatChannel } from '../../modules/helpers';
 import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
@@ -127,7 +127,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   return (
     <div
       ref={ref}
-      id={`message${message.id}`}
+      id={getMessageHtmlId(message.id)}
       className={className}
       data-message-id={message.id}
       onMouseDown={handleMouseDown}

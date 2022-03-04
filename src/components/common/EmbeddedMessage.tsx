@@ -49,7 +49,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
-  const pictogramId = message && `sticker-reply-thumb${message.id}`;
   const mediaThumbnail = useWebpThumbnail(message);
   const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
 
@@ -63,7 +62,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       className={buildClassName('EmbeddedMessage', className)}
       onClick={message ? onClick : undefined}
     >
-      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected)}
+      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected)}
       <div className="message-text">
         <p dir="auto">
           {!message ? (
@@ -81,7 +80,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
 };
 
 function renderPictogram(
-  id: string | undefined,
   thumbDataUri: string,
   blobUrl?: string,
   isRoundVideo?: boolean,
@@ -92,7 +90,6 @@ function renderPictogram(
   return (
     <>
       <img
-        id={id}
         src={blobUrl || thumbDataUri}
         width={width}
         height={height}

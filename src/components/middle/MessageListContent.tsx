@@ -7,7 +7,9 @@ import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { compact, flatten } from '../../util/iteratees';
 import { formatHumanDate } from '../../util/dateFormat';
-import { getMessageOriginalId, isActionMessage, isOwnMessage } from '../../modules/helpers';
+import {
+  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage,
+} from '../../modules/helpers';
 import useLang from '../../hooks/useLang';
 import { isAlbum, MessageDateGroup } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -151,8 +153,8 @@ const MessageListContent: FC<OwnProps> = ({
         const isMessageAlbum = isAlbum(messageOrAlbum);
         const nextMessage = senderGroup[messageIndex + 1];
 
-        if (message.previousLocalId && anchorIdRef.current === `message${message.previousLocalId}`) {
-          anchorIdRef.current = `message${message.id}`;
+        if (message.previousLocalId && anchorIdRef.current === getMessageHtmlId(message.previousLocalId)) {
+          anchorIdRef.current = getMessageHtmlId(message.id);
         }
 
         const documentGroupId = !isMessageAlbum && message.groupedId ? message.groupedId : undefined;
