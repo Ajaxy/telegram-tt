@@ -51,6 +51,7 @@ export async function fetchFullUser({
     '@type': 'updateUser',
     id,
     user: {
+      settings: userWithFullInfo.settings,
       fullInfo: userWithFullInfo.fullInfo,
     },
   });
@@ -245,6 +246,14 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
     photos: messages.map((message) => message.content.action!.photo).filter<ApiPhoto>(Boolean as any),
     users,
   };
+}
+
+export function reportSpam(user: ApiUser) {
+  const { id, accessHash } = user;
+
+  return invokeRequest(new GramJs.messages.ReportSpam({
+    peer: buildInputPeer(id, accessHash),
+  }), true);
 }
 
 function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {

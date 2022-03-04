@@ -19,7 +19,7 @@ import {
 } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
-  getChatTitle, getMessageKey, getSenderTitle, isUserId,
+  getChatTitle, getMessageKey, getPrivateChatUserId, getSenderTitle, isUserId,
 } from '../../modules/helpers';
 import {
   selectAllowedMessageActions,
@@ -35,6 +35,7 @@ import {
   selectScheduledIds,
   selectThreadInfo,
   selectThreadTopMessageId,
+  selectUser,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
@@ -53,6 +54,7 @@ import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 import AudioPlayer from './AudioPlayer';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
+import UserReportPanel from './UserReportPanel';
 
 import './MiddleHeader.scss';
 
@@ -81,6 +83,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
   lastSyncTime?: number;
+  shouldShowUserReportPanel?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
@@ -106,6 +109,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isChatWithSelf,
   isChatWithBot,
   lastSyncTime,
+  shouldShowUserReportPanel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
@@ -395,6 +399,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           onAllPinnedClick={handleAllPinnedClick}
         />
       )}
+
+      {shouldShowUserReportPanel && <UserReportPanel key={chatId} userId={chatId} />}
+
       <div className="header-tools">
         {isAudioPlayerRendered && (
           <AudioPlayer
@@ -418,6 +425,8 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, messageListType }): StateProps => {
     const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
     const chat = selectChat(global, chatId);
+    const userId = chat && getPrivateChatUserId(chat);
+    const user = userId ? selectUser(global, userId) : undefined;
 
     const { typingStatus } = chat || {};
 
@@ -446,6 +455,7 @@ export default memo(withGlobal<OwnProps>(
       audioMessage,
       chat,
       messagesCount,
+      shouldShowUserReportPanel: Boolean(user?.settings?.canAddContact || user?.settings?.canBlockContact),
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),
       lastSyncTime,

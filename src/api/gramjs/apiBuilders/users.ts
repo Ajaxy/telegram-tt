@@ -1,13 +1,13 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiBotCommand, ApiUser, ApiUserStatus, ApiUserType,
+  ApiBotCommand, ApiUser, ApiUserSettings, ApiUserStatus, ApiUserType,
 } from '../../types';
 import { buildApiPeerId } from './peers';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUser {
   const {
     fullUser: {
-      about, commonChatsCount, pinnedMsgId, botInfo, blocked,
+      about, commonChatsCount, pinnedMsgId, botInfo, blocked, settings,
     },
     users,
   } = mtpUserFull;
@@ -16,6 +16,7 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUse
 
   return {
     ...user,
+    settings: buildApiUserSettings(settings),
     fullInfo: {
       bio: about,
       commonChatsCount,
@@ -110,4 +111,18 @@ export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
   });
 
   return { users, userStatusesById };
+}
+
+export function buildApiUserSettings({
+  autoarchived,
+  reportSpam,
+  addContact,
+  blockContact,
+}: GramJs.PeerSettings): ApiUserSettings {
+  return {
+    isAutoArchived: Boolean(autoarchived),
+    canReportSpam: Boolean(reportSpam),
+    canAddContact: Boolean(addContact),
+    canBlockContact: Boolean(blockContact),
+  };
 }
