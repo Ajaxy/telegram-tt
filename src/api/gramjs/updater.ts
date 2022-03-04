@@ -23,7 +23,7 @@ import {
   buildApiChatFromPreview,
   buildApiChatFolder,
 } from './apiBuilders/chats';
-import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
+import { buildApiUser, buildApiUserSettings, buildApiUserStatus } from './apiBuilders/users';
 import {
   buildMessageFromUpdate,
   isMessageWithMedia,
@@ -771,10 +771,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   } else if (update instanceof GramJs.UpdatePeerSettings) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { _entities } = update;
+    const { _entities, settings } = update;
     if (!_entities) {
       return;
     }
+
 
     if (_entities?.length) {
       _entities
@@ -797,7 +798,10 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
           onUpdate({
             '@type': 'updateUser',
             id: user.id,
-            user,
+            user: {
+              ...user,
+              ...(settings && { settings: buildApiUserSettings(settings) }),
+            },
           });
         });
     }

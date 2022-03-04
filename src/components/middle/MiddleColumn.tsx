@@ -42,6 +42,7 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectTheme,
+  selectUser,
 } from '../../modules/selectors';
 import {
   getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
@@ -106,10 +107,12 @@ type StateProps = {
   currentTransitionKey: number;
   messageLists?: GlobalMessageList[];
   isChannel?: boolean;
+  isUserFull?: boolean;
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
+  lastSyncTime?: number;
 };
 
 const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
@@ -147,15 +150,18 @@ const MiddleColumn: FC<StateProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   isChannel,
+  isUserFull,
   canSubscribe,
   canStartBot,
   canRestartBot,
   activeEmojiInteractions,
+  lastSyncTime,
 }) => {
   const {
     openChat,
     unpinAllMessages,
     loadUser,
+    loadFullUser,
     closeLocalTextSearch,
     exitMessageSelectMode,
     closePaymentModal,
@@ -250,6 +256,12 @@ const MiddleColumn: FC<StateProps> = ({
       loadUser({ userId: chatId });
     }
   }, [chatId, isPrivate, loadUser]);
+
+  useEffect(() => {
+    if (isPrivate && !isUserFull && lastSyncTime) {
+      loadFullUser({ userId: chatId });
+    }
+  }, [chatId, isPrivate, isUserFull, lastSyncTime, loadFullUser]);
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     if (IS_TOUCH_ENV) {
@@ -540,7 +552,9 @@ export default memo(withGlobal(
 
     const { messageLists } = global.messages;
     const currentMessageList = selectCurrentMessageList(global);
-    const { isLeftColumnShown, chats: { listIds }, activeEmojiInteractions } = global;
+    const {
+      isLeftColumnShown, chats: { listIds }, activeEmojiInteractions, lastSyncTime,
+    } = global;
 
     const state: StateProps = {
       theme,
@@ -559,6 +573,7 @@ export default memo(withGlobal(
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
       activeEmojiInteractions,
+      lastSyncTime,
     };
 
     if (!currentMessageList || !listIds.active) {
@@ -566,8 +581,10 @@ export default memo(withGlobal(
     }
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
+    const isPrivate = isUserId(chatId);
     const chat = selectChat(global, chatId);
     const bot = selectChatBot(global, chatId);
+    const user = isPrivate ? selectUser(global, chatId) : undefined;
     const pinnedIds = selectPinnedIds(global, chatId);
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
 
@@ -588,7 +605,8 @@ export default memo(withGlobal(
       chatId,
       threadId,
       messageListType,
-      isPrivate: isUserId(chatId),
+      isPrivate,
+      isUserFull: Boolean(user?.settings),
       canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
       isScheduledMessageList,

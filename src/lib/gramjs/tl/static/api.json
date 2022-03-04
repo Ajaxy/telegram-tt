@@ -67,6 +67,7 @@
     "messages.sendMessage",
     "messages.sendMedia",
     "messages.forwardMessages",
+    "messages.reportSpam",
     "messages.report",
     "messages.getChats",
     "messages.getFullChat",

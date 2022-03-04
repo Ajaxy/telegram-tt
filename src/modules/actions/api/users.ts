@@ -271,6 +271,16 @@ addReducer('addContact', (global, actions, payload) => {
   void callApi('addContact', pick(user, ['id', 'accessHash', 'firstName', 'lastName', 'phoneNumber']));
 });
 
+addReducer('reportSpam', (global, actions, payload) => {
+  const { userId } = payload!;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  void callApi('reportSpam', user);
+});
+
 async function searchUsers(query: string) {
   const result = await callApi('searchChats', { query });
 
