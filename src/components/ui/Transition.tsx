@@ -248,9 +248,8 @@ const Transition: FC<TransitionProps> = ({
   }, [shouldRestoreHeight, children]);
 
   const renders = rendersRef.current;
-  const collection = Object.keys(renderCount ? new Array(renderCount).fill(undefined) : renders).map(Number);
-
-  const contents = collection.map((key) => {
+  const renderKeys = Object.keys(renderCount ? new Array(renderCount).fill(undefined) : renders).map(Number);
+  const contents = renderKeys.map((key) => {
     const render = renders[key];
     if (!render) {
       return undefined;
@@ -270,7 +269,7 @@ const Transition: FC<TransitionProps> = ({
       ref={containerRef}
       id={id}
       className={buildClassName('Transition', className, name)}
-      teactFastList={!renderCount && !shouldCleanup}
+      teactFastList={!renderCount}
     >
       {contents}
     </div>
