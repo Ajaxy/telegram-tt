@@ -98,6 +98,13 @@ function renderWithVirtual(
     return $new;
   }
 
+  if (DEBUG && $new) {
+    const newTarget = getTarget($new);
+    if (newTarget && (!$current || newTarget !== getTarget($current))) {
+      throw new Error('[Teact] Cached virtual element was moved within tree');
+    }
+  }
+
   if (!$current && $new) {
     if (isNewComponent) {
       $new = initComponent($new as VirtualElementComponent, $parent, index, parentEl);

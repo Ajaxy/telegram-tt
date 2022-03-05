@@ -449,7 +449,8 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 
 export function getTarget($element: VirtualElement): Node | undefined {
   if (isComponentElement($element)) {
-    return getTarget($element.children[0]);
+    const componentElement = $element.children[0];
+    return componentElement ? getTarget(componentElement) : undefined;
   } else {
     return $element.target;
   }
