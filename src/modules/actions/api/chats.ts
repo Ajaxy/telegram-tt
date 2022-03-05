@@ -23,7 +23,7 @@ import {
   addChats, addUsers, addUserStatuses, replaceThreadParam,
   updateChatListIds, updateChats, updateChat, updateChatListSecondaryInfo,
   updateManagementProgress, leaveChat, replaceUsers, replaceUserStatuses,
-  replaceChats, replaceChatListIds,
+  replaceChats, replaceChatListIds, addChatMembers,
 } from '../../reducers';
 import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
@@ -953,19 +953,7 @@ addReducer('loadMoreMembers', (global) => {
 
     global = getGlobal();
     global = addUsers(global, buildCollectionByKey(users, 'id'));
-
-    const newMemberIds = new Set(members.map(m => m.userId));
-    const preservedMembers = chat.fullInfo?.members?.filter((m) => !newMemberIds.has(m.userId)) || [];
-
-    global = updateChat(global, chat.id, {
-      fullInfo: {
-        ...chat.fullInfo,
-        members: [
-          ...preservedMembers,
-          ...members,
-        ],
-      },
-    });
+    global = addChatMembers(global, chat, members);
     setGlobal(global);
   })();
 });

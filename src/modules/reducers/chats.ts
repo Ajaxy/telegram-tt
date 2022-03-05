@@ -1,8 +1,8 @@
 import { GlobalState } from '../../global/types';
-import { ApiChat, ApiPhoto } from '../../api/types';
+import { ApiChat, ApiChatMember, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
-import { omit } from '../../util/iteratees';
+import { areSortedArraysEqual, omit } from '../../util/iteratees';
 import { selectChatListType } from '../selectors';
 
 export function replaceChatListIds(
@@ -215,4 +215,26 @@ export function leaveChat(global: GlobalState, leftChatId: string): GlobalState 
   global = updateChat(global, leftChatId, { isNotJoined: true });
 
   return global;
+}
+
+export function addChatMembers(global: GlobalState, chat: ApiChat, membersToAdd: ApiChatMember[]): GlobalState {
+  const currentMembers = chat.fullInfo?.members;
+  const newMemberIds = new Set(membersToAdd.map(m => m.userId));
+  const updatedMembers = [
+    ...currentMembers?.filter((m) => !newMemberIds.has(m.userId)) || [],
+    ...membersToAdd,
+  ];
+  const currentIds = currentMembers?.map(({ userId }) => userId) || [];
+  const updatedIds = updatedMembers.map(({ userId }) => userId);
+
+  if (areSortedArraysEqual(currentIds, updatedIds)) {
+    return global;
+  }
+
+  return updateChat(global, chat.id, {
+    fullInfo: {
+      ...chat.fullInfo,
+      members: updatedMembers,
+    },
+  });
 }
