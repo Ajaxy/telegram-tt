@@ -953,12 +953,16 @@ addReducer('loadMoreMembers', (global) => {
 
     global = getGlobal();
     global = addUsers(global, buildCollectionByKey(users, 'id'));
+
+    const newMemberIds = new Set(members.map(m => m.userId));
+    const preservedMembers = chat.fullInfo?.members?.filter((m) => !newMemberIds.has(m.userId)) || [];
+
     global = updateChat(global, chat.id, {
       fullInfo: {
         ...chat.fullInfo,
         members: [
-          ...((chat.fullInfo || {}).members || []),
-          ...(members || []),
+          ...preservedMembers,
+          ...members,
         ],
       },
     });
