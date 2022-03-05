@@ -12,10 +12,12 @@ import {
   VirtualElement,
   VirtualElementComponent,
   VirtualRealElement,
+  VirtualElementChildren,
 } from './teact';
 import generateIdFor from '../../util/generateIdFor';
 import { DEBUG } from '../../config';
 import { addEventListener, removeEventListener } from './dom-events';
+import { unique } from '../../util/iteratees';
 
 type VirtualDomHead = {
   children: [VirtualElement] | [];
@@ -246,6 +248,10 @@ function createNode($element: VirtualElement): Node {
 function renderChildren(
   $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
 ) {
+  if (DEBUG) {
+    DEBUG_checkKeyUniqueness($new.children);
+  }
+
   if ($new.props.teactFastList) {
     return renderFastListChildren($current, $new, currentEl);
   }
@@ -480,6 +486,24 @@ function DEBUG_addToVirtualTreeSize($current: VirtualRealElement | VirtualDomHea
       DEBUG_addToVirtualTreeSize($child);
     }
   });
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+function DEBUG_checkKeyUniqueness(children: VirtualElementChildren) {
+  const firstChild = children[0];
+  if (firstChild && 'props' in firstChild && firstChild.props.key !== undefined) {
+    const keys = children.reduce((acc: any[], child) => {
+      if ('props' in child && child.props.key) {
+        acc.push(child.props.key);
+      }
+
+      return acc;
+    }, []);
+
+    if (keys.length !== unique(keys).length) {
+      throw new Error('[Teact] Children keys are not unique');
+    }
+  }
 }
 
 const TeactDOM = { render };
