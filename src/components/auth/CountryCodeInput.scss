@@ -63,7 +63,7 @@
 
   .country-flag {
     font-size: 2rem;
-    margin-right: 2rem;
+    margin-right: 1rem;
 
     .emoji {
       width: 2rem;
@@ -85,5 +85,6 @@
   .country-code {
     margin-left: auto;
     opacity: 0.5;
+    padding-right: 0.25rem;
   }
 }

@@ -136,13 +136,13 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
       {filteredList
         .map((country: ApiCountryCode) => (
           <MenuItem
-            key={country.iso2}
+            key={`${country.iso2}-${country.countryCode}`}
             className={value && country.iso2 === value.iso2 ? 'selected' : ''}
             onClick={() => handleChange(country)}
           >
             <span className="country-flag">{renderText(isoToEmoji(country.iso2), ['hq_emoji'])}</span>
             <span className="country-name">{country.name || country.defaultName}</span>
-            <span className="country-code">{country.countryCode}</span>
+            <span className="country-code">+{country.countryCode}</span>
           </MenuItem>
         ))}
       {!filteredList.length && (

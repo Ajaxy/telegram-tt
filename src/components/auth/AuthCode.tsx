@@ -109,7 +109,7 @@ const AuthCode: FC<StateProps> = ({
           onInput={onCodeChange}
           value={code}
           error={authError && lang(authError)}
-          autoComplete="one-time-code"
+          autoComplete="off"
           inputMode="numeric"
         />
         {authIsLoading && <Loading />}
