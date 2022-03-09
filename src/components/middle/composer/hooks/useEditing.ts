@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { useCallback } from '../../../../lib/teact/teact';
 import { getDispatch } from '../../../../lib/teact/teactn';
 
 import { ApiMessage } from '../../../../api/types';
@@ -8,6 +8,7 @@ import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../modules/helpers';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
+import useOnChange from '../../../../hooks/useOnChange';
 
 const useEditing = (
   htmlRef: { current: string },
@@ -18,21 +19,21 @@ const useEditing = (
 ) => {
   const { editMessage } = getDispatch();
 
-  // TODO useOnChange
-  // Handle editing message
-  useEffect(() => {
+  useOnChange(([prevEditedMessage]) => {
     if (!editedMessage) {
       setHtml('');
       return;
     }
-
+    if (prevEditedMessage?.id === editedMessage.id) {
+      return;
+    }
     setHtml(getTextWithEntitiesAsHtml(editedMessage.content.text));
 
     requestAnimationFrame(() => {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
       focusEditableElement(messageInput, true);
     });
-  }, [editedMessage, setHtml]);
+  }, [editedMessage, setHtml] as const);
 
   const handleEditComplete = useCallback(() => {
     const { text, entities } = parseMessageInput(htmlRef.current!);
