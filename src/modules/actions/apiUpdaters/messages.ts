@@ -491,7 +491,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       // Only notify about added reactions, not removed ones
-      const shouldNotify = checkIfReactionAdded(currentReactions, reactions);
+      const shouldNotify = checkIfReactionAdded(currentReactions, reactions, global.currentUserId);
 
       global = updateChatMessage(global, chatId, id, { reactions: update.reactions });
 
