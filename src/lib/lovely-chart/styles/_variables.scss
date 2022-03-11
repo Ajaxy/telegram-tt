@@ -1,0 +1,21 @@
+.lovely-chart--container {
+  --background-color: #ffffff;
+  --text-color: #222222;
+  --minimap-mask: #{rgba(#E2EEF9, 0.6)};
+  --minimap-slider: #C0D1E1;
+  --grid-lines: #{rgba(#182D3B, 0.1)};
+  --zoom-out-text: #108BE3;
+  --tooltip-background: #ffffff;
+  --tooltip-arrow: #D2D5D7;
+}
+
+html.theme-dark .lovely-chart--container {
+  --background-color: #242F3E;
+  --text-color: #ffffff;
+  --minimap-mask: #{rgba(#304259, 0.6)};
+  --minimap-slider: #56626D;
+  --grid-lines: #{rgba(#FFFFFF, 0.1)};
+  --zoom-out-text: #48AAF0;
+  --tooltip-background: #1c2533;
+  --tooltip-arrow: #D2D5D7;
+}

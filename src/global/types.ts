@@ -26,6 +26,7 @@ import {
   ApiAvailableReaction,
   ApiAppConfig,
   ApiSponsoredMessage,
+  ApiStatistics,
   ApiPaymentFormNativeParams,
 } from '../api/types';
 import {
@@ -107,6 +108,7 @@ export interface ServiceNotification {
 export type GlobalState = {
   appConfig?: ApiAppConfig;
   isChatInfoShown: boolean;
+  isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
   isPollModalOpen?: boolean;
   newChatMembersProgress?: NewChatMembersProgress;
@@ -498,6 +500,10 @@ export type GlobalState = {
   shouldShowContextMenuHint?: boolean;
 
   serviceNotifications: ServiceNotification[];
+
+  statistics: {
+    byChatId: Record<string, ApiStatistics>;
+  };
 };
 
 export type ActionTypes = (
@@ -508,8 +514,8 @@ export type ActionTypes = (
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
-  'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' |
-  'openReactorListModal' |
+  'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
+  'toggleStatistics' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
@@ -601,7 +607,9 @@ export type ActionTypes = (
   'toggleGroupCallVideo' | 'requestToSpeak' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' |
   'createGroupCall' | 'joinVoiceChatByLink' | 'subscribeToGroupCallUpdates' | 'createGroupCallInviteLink' |
   'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' | 'playGroupCallSound' |
-  'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback'
+  'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback' |
+  // stats
+  'loadStatistics' | 'loadStatisticsAsyncGraph'
 );
 
 export interface DispatchOptions {

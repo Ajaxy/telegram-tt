@@ -1,0 +1,59 @@
+.StatisticsRecentMessage {
+  position: relative;
+  padding-left: 3rem;
+
+  &--summary {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-right: 0.75rem;
+
+    .media-preview--image {
+      width: 2.5rem;
+      height: 2.5rem;
+      position: absolute;
+      left: 0;
+      top: 0;
+      object-fit: cover;
+      border-radius: 0.25rem;
+      margin-inline-end: 0.25rem;
+
+      &.round {
+        border-radius: 0.625rem;
+      }
+    }
+
+    .icon-play {
+      position: relative;
+      display: inline-block;
+      font-size: 0.75rem;
+      color: #fff;
+      margin-inline-start: -1.25rem;
+      margin-inline-end: 0.5rem;
+      bottom: 0.0625rem;
+    }
+  }
+
+  &--title {
+    display: flex;
+    align-items: center;
+    line-height: 1.25rem;
+  }
+
+  &--info {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: var(--color-text-meta);
+  }
+
+  &--meta {
+    font-size: 0.75rem;
+  }
+
+  &--date {
+    flex: 1;
+    font-size: 0.8125rem;
+  }
+}

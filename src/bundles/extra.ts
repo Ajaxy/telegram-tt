@@ -46,6 +46,7 @@ export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu'
 export { default as RightSearch } from '../components/right/RightSearch';
 export { default as StickerSearch } from '../components/right/StickerSearch';
 export { default as GifSearch } from '../components/right/GifSearch';
+export { default as Statistics } from '../components/right/statistics/Statistics';
 export { default as PollResults } from '../components/right/PollResults';
 
 export { default as Management } from '../components/right/management/Management';

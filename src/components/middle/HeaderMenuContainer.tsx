@@ -37,6 +37,7 @@ export type OwnProps = {
   canSearch?: boolean;
   canCall?: boolean;
   canMute?: boolean;
+  canViewStatistics?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
@@ -67,6 +68,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canSearch,
   canCall,
   canMute,
+  canViewStatistics,
   canLeave,
   canEnterVoiceChat,
   canCreateVoiceChat,
@@ -91,6 +93,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openLinkedChat,
     addContact,
     openCallFallbackConfirm,
+    toggleStatistics,
   } = getDispatch();
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -165,6 +168,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     onSearchClick();
     closeMenu();
   }, [closeMenu, onSearchClick]);
+
+  const handleStatisticsClick = useCallback(() => {
+    toggleStatistics();
+    closeMenu();
+  }, [closeMenu, toggleStatistics]);
 
   const handleSelectMessages = useCallback(() => {
     enterMessageSelectMode();
@@ -266,6 +274,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           >
             {lang('ReportSelectMessages')}
           </MenuItem>
+          {canViewStatistics && (
+            <MenuItem
+              icon="stats"
+              onClick={handleStatisticsClick}
+            >
+              {lang('Statistics')}
+            </MenuItem>
+          )}
           {canLeave && (
             <MenuItem
               destructive

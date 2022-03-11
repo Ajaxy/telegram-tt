@@ -236,6 +236,7 @@ export enum RightColumnContent {
   ChatInfo,
   Search,
   Management,
+  Statistics,
   StickerSearch,
   GifSearch,
   PollResults,

@@ -50,6 +50,7 @@ interface StateProps {
   canSearch?: boolean;
   canCall?: boolean;
   canMute?: boolean;
+  canViewStatistics?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
@@ -70,6 +71,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canSearch,
   canCall,
   canMute,
+  canViewStatistics,
   canLeave,
   canEnterVoiceChat,
   canCreateVoiceChat,
@@ -261,6 +263,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           canSearch={canSearch}
           canCall={canCall}
           canMute={canMute}
+          canViewStatistics={canViewStatistics}
           canLeave={canLeave}
           canEnterVoiceChat={canEnterVoiceChat}
           canCreateVoiceChat={canCreateVoiceChat}
@@ -303,6 +306,7 @@ export default memo(withGlobal<OwnProps>(
     const canEnterVoiceChat = ARE_CALLS_SUPPORTED && chat.isCallActive;
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
+    const canViewStatistics = chat.fullInfo?.canViewStatistics;
     const pendingJoinRequests = chat.fullInfo?.requestsPending;
 
     return {
@@ -315,6 +319,7 @@ export default memo(withGlobal<OwnProps>(
       canSearch,
       canCall,
       canMute,
+      canViewStatistics,
       canLeave,
       canEnterVoiceChat,
       canCreateVoiceChat,

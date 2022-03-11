@@ -91,8 +91,10 @@ export interface ApiChatFullInfo {
   botCommands?: ApiBotCommand[];
   enabledReactions?: string[];
   sendAsId?: string;
+  canViewStatistics?: boolean;
   recentRequesterIds?: string[];
   requestsPending?: number;
+  statisticsDcId?: number;
 }
 
 export interface ApiChatMember {

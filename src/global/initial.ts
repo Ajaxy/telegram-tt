@@ -194,4 +194,8 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   serviceNotifications: [],
+
+  statistics: {
+    byChatId: {},
+  },
 };

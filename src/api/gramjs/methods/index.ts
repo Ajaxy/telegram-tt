@@ -75,3 +75,5 @@ export {
   getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList,
   setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction,
 } from './reactions';
+
+export { fetchStatistics, fetchStatisticsAsyncGraph } from './statistics';

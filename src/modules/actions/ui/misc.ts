@@ -109,6 +109,13 @@ addReducer('openChat', (global) => {
   };
 });
 
+addReducer('toggleStatistics', (global) => {
+  return {
+    ...global,
+    isStatisticsShown: !global.isStatisticsShown,
+  };
+});
+
 addReducer('toggleLeftColumn', (global) => {
   return {
     ...global,
