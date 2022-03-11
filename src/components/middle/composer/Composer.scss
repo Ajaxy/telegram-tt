@@ -31,11 +31,13 @@
 
   @keyframes show-send-as-button {
     from {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       width: 1rem;
       transform: scale(0);
     }
 
     to {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       width: 3.5rem;
       transform: scale(1);
     }
@@ -459,6 +461,7 @@
       overflow: auto;
     }
 
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
     transition: height 100ms ease;
 
     body.animation-level-0 & {

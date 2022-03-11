@@ -62,6 +62,7 @@
       border-color: transparent var(--background-color) transparent var(--background-color);
       border-width: 0 1.125rem 1.125rem 0;
       border-style: solid;
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: border-width 0.15s ease-in;
     }
   }

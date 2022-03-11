@@ -167,6 +167,7 @@
     margin-inline-start: -0.125rem;
 
     .Avatar {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: border 0.15s;
       border: 2px solid var(--color-background);
       margin-inline-end: 0;

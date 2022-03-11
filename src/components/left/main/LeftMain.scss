@@ -19,6 +19,7 @@
 
     .tabs-placeholder {
       height: 2.625rem;
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: height 150ms ease;
 
       &:not(.open) {

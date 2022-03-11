@@ -39,11 +39,11 @@
     text-indent: -999px;
     width: 2.125rem;
     height: 0.875rem;
-    background: var(--color-gray);
+    background-color: var(--color-gray);
     display: inline-block;
     border-radius: 0.5rem;
     position: relative;
-    transition: background 0.2s ease-in;
+    transition: background-color 0.2s ease-in;
   }
 
   .widget:after {
@@ -53,9 +53,10 @@
     left: 0;
     width: 1.125rem;
     height: 1.125rem;
-    background: var(--color-background);
+    background-color: var(--color-background);
     border-radius: 0.75rem;
-    transition: 0.2s ease-out;
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+    transition: border-color 0.2s ease-out;
     border: 0.125rem solid var(--color-gray);
   }
 

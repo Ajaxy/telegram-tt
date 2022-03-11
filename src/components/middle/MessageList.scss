@@ -30,6 +30,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: bottom 150ms ease-out, transform var(--layer-transition);
   body.keyboard-visible & {
     position: relative;

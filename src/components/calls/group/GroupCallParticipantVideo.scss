@@ -4,6 +4,7 @@
   position: relative;
   max-height: 12.875rem;
   width: calc(50% - 0.25rem);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: 0.25s ease-out width;
   cursor: pointer;
 
