@@ -255,18 +255,23 @@ const MessageContextMenu: FC<OwnProps> = ({
             onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
             disabled={!canShowReactionsCount && !message.seenByUserIds?.length}
           >
-            {canShowReactionsCount && message.reactors?.count ? (
-              canShowSeenBy && message.seenByUserIds?.length
-                ? lang('Chat.OutgoingContextMixedReactionCount', [message.reactors.count, message.seenByUserIds.length])
-                : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
-            ) : (
-              message.seenByUserIds?.length === 1 && seenByRecentUsers
-                ? getUserFullName(seenByRecentUsers[0])
-                : (message.seenByUserIds?.length
-                  ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
-                  : lang('Conversation.ContextMenuNoViews')
-                )
-            )}
+            <span className="MessageContextMenu--seen-by-label">
+              {canShowReactionsCount && message.reactors?.count ? (
+                canShowSeenBy && message.seenByUserIds?.length
+                  ? lang(
+                    'Chat.OutgoingContextMixedReactionCount',
+                    [message.reactors.count, message.seenByUserIds.length],
+                  )
+                  : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
+              ) : (
+                message.seenByUserIds?.length === 1 && seenByRecentUsers
+                  ? getUserFullName(seenByRecentUsers[0])
+                  : (message.seenByUserIds?.length
+                    ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
+                    : lang('Conversation.ContextMenuNoViews')
+                  )
+              )}
+            </span>
             <div className="avatars">
               {seenByRecentUsers?.map((user) => (
                 <Avatar
