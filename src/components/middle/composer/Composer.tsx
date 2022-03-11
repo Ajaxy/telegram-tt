@@ -84,8 +84,8 @@ import Button from '../../ui/Button';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Spinner from '../../ui/Spinner';
 import CalendarModal from '../../common/CalendarModal.async';
+import AttachMenu from './AttachMenu';
 import Avatar from '../../common/Avatar';
-import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
 import InlineBotTooltip from './InlineBotTooltip.async';
 import MentionTooltip from './MentionTooltip.async';
@@ -289,7 +289,6 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
-  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [isSendAsMenuOpen, openSendAsMenu, closeSendAsMenu] = useFlag();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
@@ -1014,17 +1013,6 @@ const Composer: FC<OwnProps & StateProps> = ({
               <i className="icon-bot-command" />
             </ResponsiveHoverButton>
           )}
-          {!activeVoiceRecording && !editingMessage && (
-            <ResponsiveHoverButton
-              className={isAttachMenuOpen ? 'activated' : ''}
-              round
-              color="translucent"
-              onActivate={openAttachMenu}
-              ariaLabel="Add an attachment"
-            >
-              <i className="icon-attach" />
-            </ResponsiveHoverButton>
-          )}
           {activeVoiceRecording && currentRecordTime && (
             <span className="recording-state">
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
@@ -1044,12 +1032,11 @@ const Composer: FC<OwnProps & StateProps> = ({
             addRecentEmoji={addRecentEmoji}
           />
           <AttachMenu
-            isOpen={isAttachMenuOpen}
+            isButtonVisible={!activeVoiceRecording && !editingMessage}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
-            onClose={closeAttachMenu}
           />
           {botKeyboardMessageId && (
             <BotKeyboardMenu

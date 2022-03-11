@@ -1,18 +1,31 @@
 .AttachMenu {
-  position: relative;
-
-  .is-pointer-env & {
-    > .backdrop {
-      position: absolute;
-      top: -1rem;
-      left: auto;
-      right: 0;
-      width: 3.5rem;
+  &--button {
+    &:focus {
+      color: var(--color-primary);
     }
   }
 
+  &--menu {
+    position: relative;
+    top: -3.5rem;
 
-  .media-disabled > button {
-    white-space: normal;
+    @media (max-width: 600px) {
+      top: -2.875rem;
+    }
+
+    .is-pointer-env & {
+      > .backdrop {
+        position: absolute;
+        top: -1rem;
+        left: auto;
+        right: 0;
+        width: 3.5rem;
+      }
+    }
+
+
+    .media-disabled > button {
+      white-space: normal;
+    }
   }
 }

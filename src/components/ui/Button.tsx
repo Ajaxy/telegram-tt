@@ -20,6 +20,7 @@ export type OwnProps = {
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black' | 'dark'
   );
   backgroundImage?: string;
+  id?: string;
   className?: string;
   round?: boolean;
   pill?: boolean;
@@ -27,6 +28,8 @@ export type OwnProps = {
   isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
+  ariaControls?: string;
+  hasPopup?: boolean;
   href?: string;
   download?: string;
   disabled?: boolean;
@@ -49,6 +52,7 @@ const CLICKED_TIMEOUT = 400;
 const Button: FC<OwnProps> = ({
   ref,
   type = 'button',
+  id,
   onClick,
   onContextMenu,
   onMouseDown,
@@ -66,6 +70,8 @@ const Button: FC<OwnProps> = ({
   isText,
   isLoading,
   ariaLabel,
+  ariaControls,
+  hasPopup,
   href,
   download,
   disabled,
@@ -122,12 +128,16 @@ const Button: FC<OwnProps> = ({
     return (
       <a
         ref={elementRef as RefObject<HTMLAnchorElement>}
+        id={id}
         className={fullClassName}
         href={href}
         title={ariaLabel}
         download={download}
         tabIndex={tabIndex}
         dir={isRtl ? 'rtl' : undefined}
+        aria-label={ariaLabel}
+        aria-controls={ariaControls}
+        aria-haspopup={hasPopup}
       >
         {children}
         {!disabled && ripple && (
@@ -141,6 +151,7 @@ const Button: FC<OwnProps> = ({
     // eslint-disable-next-line react/button-has-type
     <button
       ref={elementRef as RefObject<HTMLButtonElement>}
+      id={id}
       type={type}
       className={fullClassName}
       onClick={handleClick}
@@ -150,6 +161,8 @@ const Button: FC<OwnProps> = ({
       onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
       onFocus={onFocus && !disabled ? onFocus : undefined}
       aria-label={ariaLabel}
+      aria-controls={ariaControls}
+      aria-haspopup={hasPopup}
       title={ariaLabel}
       tabIndex={tabIndex}
       dir={isRtl ? 'rtl' : undefined}

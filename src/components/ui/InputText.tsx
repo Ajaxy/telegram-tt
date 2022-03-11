@@ -82,6 +82,7 @@ const InputText: FC<OwnProps> = ({
         onKeyDown={onKeyDown}
         onBlur={onBlur}
         onPaste={onPaste}
+        aria-label={labelText}
       />
       {labelText && (
         <label htmlFor={id}>{labelText}</label>
