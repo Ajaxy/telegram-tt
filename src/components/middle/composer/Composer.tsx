@@ -47,6 +47,7 @@ import {
   isUserId,
   isChatAdmin,
   isChatSuperGroup,
+  isChatChannel,
 } from '../../../modules/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
@@ -121,6 +122,7 @@ type StateProps =
     draft?: ApiFormattedText;
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
+    isChannel?: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
     isForwarding?: boolean;
@@ -185,6 +187,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   connectionState,
   isChatWithBot,
   isChatWithSelf,
+  isChannel,
   isRightColumnShown,
   isSelectModeActive,
   isForwarding,
@@ -868,6 +871,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       />
       <PollModal
         isOpen={Boolean(isPollModalOpen)}
+        shouldBeAnonimous={isChannel}
         onClear={closePollModal}
         onSend={handlePollSend}
       />
@@ -1150,6 +1154,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isChatWithBot,
       isChatWithSelf,
+      isChannel: chat ? isChatChannel(chat) : undefined,
       canScheduleUntilOnline: Boolean(
         !isChatWithSelf && !isChatWithBot && chat && chatUser
         && isUserId(chatId) && selectUserStatus(global, chatId)?.wasOnline,
