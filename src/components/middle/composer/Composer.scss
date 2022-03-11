@@ -250,6 +250,7 @@
     margin-right: -0.5rem;
   }
 
+  > .AttachMenu > .Button,
   > .Button {
     flex-shrink: 0;
     background: none !important;
@@ -263,7 +264,7 @@
       color: var(--color-composer-button);
     }
 
-    + .Button {
+    + .Button, + .AttachMenu {
       margin-left: -1rem;
     }
 
@@ -271,7 +272,7 @@
       width: 2.875rem;
       height: 2.875rem;
 
-      + .Button {
+      + .Button, + .AttachMenu {
         margin-left: -0.6875rem;
       }
     }

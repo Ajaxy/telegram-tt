@@ -402,6 +402,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         onMouseDown={handleMouseDown}
         onContextMenu={IS_ANDROID ? stopEvent : undefined}
         onTouchCancel={IS_ANDROID ? processSelection : undefined}
+        aria-label={placeholder}
       />
       <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
       {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}

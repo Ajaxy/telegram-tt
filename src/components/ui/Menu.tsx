@@ -18,9 +18,11 @@ type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   containerRef?: RefObject<HTMLElement>;
   isOpen: boolean;
+  id?: string;
   className?: string;
   style?: string;
   bubbleStyle?: string;
+  ariaLabelledBy?: string;
   transformOriginX?: number;
   transformOriginY?: number;
   positionX?: 'left' | 'right';
@@ -44,9 +46,11 @@ const Menu: FC<OwnProps> = ({
   ref,
   containerRef,
   isOpen,
+  id,
   className,
   style,
   bubbleStyle,
+  ariaLabelledBy,
   children,
   transformOriginX,
   transformOriginY,
@@ -113,16 +117,19 @@ const Menu: FC<OwnProps> = ({
 
   return (
     <div
+      id={id}
       className={buildClassName(
         'Menu no-selection',
         !noCompact && IS_COMPACT_MENU && 'compact',
         !IS_BACKDROP_BLUR_SUPPORTED && 'no-blur',
         className,
       )}
+      style={style}
+      aria-labelledby={ariaLabelledBy}
+      role={ariaLabelledBy ? 'menu' : undefined}
       onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
-      style={style}
     >
       {isOpen && (
         // This only prevents click events triggering on underlying elements
