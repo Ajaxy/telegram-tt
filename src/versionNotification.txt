@@ -1,16 +1,14 @@
-**Telegram Web Z was updated to version 1.36**
+**Telegram Web Z was updated to version 1.37**
 
 👏 **Harder**
-• ‘Add Contact’ and ‘Block User’ buttons appear in the chat header of new chats.
-• Send media without sound or schedule it for later. Right-click the Send button on desktop, or press and hold on mobile.
-• Added support for viewing shared geo, live locations and venues.
-• Chat owners can leave their own groups without deleting them.
-• Choose from more categories when reporting specific messages.
+• Access detailed interactive statistics for channels you manage.
+• Accessibility: screen readers properly detect the attachment menu.
 
 🤩 **Better**
+• Enhanced colors for dark mode with higher contrast.
 • Even more UX improvements.
 
 💪 **Stronger**
-• Fixed flickering menu for bot commands.
-• Copying message text on mobile devices now works as expected.
-• Fixed frozen UI when moving between chats and comments.
+• Fixed issues when creating polls in channels.
+• Drafts no longer overwrite original text when editing messages.
+• Reacting to your own message no longer sends a notification.
