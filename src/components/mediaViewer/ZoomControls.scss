@@ -66,6 +66,7 @@
 
     &-played {
       background: #fff;
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: width 200ms;
 
       &::after {

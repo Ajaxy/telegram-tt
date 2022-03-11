@@ -17,7 +17,6 @@
     "plugin/no-low-performance-animation-properties": [
       true,
       {
-        "severity": "warning",
         "ignore": "paint-properties"
       }
     ],

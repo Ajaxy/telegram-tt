@@ -8,6 +8,10 @@
   z-index: -1;
   background-color: var(--theme-background-color);
 
+  body:not(.animation-level-0) #root & {
+    transition: background-color 0.2s;
+  }
+
   &::after {
     content: "";
     position: absolute;
@@ -21,7 +25,7 @@
     background-size: cover;
 
     body:not(.animation-level-0) #root & {
-      transition: transform var(--layer-transition), background 0.2s !important;
+      transition: transform var(--layer-transition), background-image 0.2s;
     }
 
     body.animation-level-0 & {
@@ -237,6 +241,7 @@
     z-index: var(--z-middle-footer);
 
     transform: translate3d(0, 0, 0);
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
     transition: top 200ms, transform var(--layer-transition);
 
     body.animation-level-0 & {

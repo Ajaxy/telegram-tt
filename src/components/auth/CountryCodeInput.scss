@@ -23,6 +23,7 @@
       border-top: 0;
       border-left: 0;
       transform: scaleY(1) rotate(45deg);
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: color 0.2s ease, transform 0.2s ease, top 0.2s ease;
 
       &.open {
