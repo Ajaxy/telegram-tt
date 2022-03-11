@@ -206,5 +206,7 @@
     "messages.setChatAvailableReactions",
     "messages.getAvailableReactions",
     "messages.setDefaultReaction",
-    "help.getAppConfig"
+    "help.getAppConfig",
+    "stats.getBroadcastStats",
+    "stats.loadAsyncGraph"
 ]

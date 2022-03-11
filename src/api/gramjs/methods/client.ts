@@ -167,6 +167,8 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
   shouldReturnTrue: true,
   shouldThrow?: boolean,
+  shouldIgnoreUpdates?: undefined,
+  dcId?: number,
 ): Promise<true | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
@@ -174,6 +176,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   shouldReturnTrue?: boolean,
   shouldThrow?: boolean,
   shouldIgnoreUpdates?: boolean,
+  dcId?: number,
 ): Promise<T['__response'] | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
@@ -181,6 +184,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   shouldReturnTrue = false,
   shouldThrow = false,
   shouldIgnoreUpdates = false,
+  dcId?: number,
 ) {
   if (!isConnected) {
     if (DEBUG) {
@@ -197,7 +201,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       console.log(`[GramJs/client] INVOKE ${request.className}`);
     }
 
-    const result = await client.invoke(request);
+    const result = await client.invoke(request, dcId);
 
     if (DEBUG) {
       // eslint-disable-next-line no-console

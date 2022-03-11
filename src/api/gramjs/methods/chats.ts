@@ -405,6 +405,7 @@ async function getFullChannelInfo(
     migratedFromChatId,
     migratedFromMaxId,
     canViewParticipants,
+    canViewStats,
     linkedChatId,
     hiddenPrehistory,
     call,
@@ -413,6 +414,7 @@ async function getFullChannelInfo(
     defaultSendAs,
     requestsPending,
     recentRequesters,
+    statsDc,
   } = result.fullChat;
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -456,6 +458,7 @@ async function getFullChannelInfo(
         maxMessageId: migratedFromMaxId,
       } : undefined,
       canViewMembers: canViewParticipants,
+      canViewStatistics: canViewStats,
       isPreHistoryHidden: hiddenPrehistory,
       members,
       kickedMembers,
@@ -467,6 +470,7 @@ async function getFullChannelInfo(
       sendAsId: defaultSendAs ? getApiChatIdFromMtpPeer(defaultSendAs) : undefined,
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
+      statisticsDcId: statsDc,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
     groupCall: call ? {

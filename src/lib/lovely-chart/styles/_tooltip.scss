@@ -1,0 +1,100 @@
+.lovely-chart--tooltip {
+  position: absolute;
+  top: 30px;
+  left: 0;
+}
+
+.lovely-chart--tooltip-balloon {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  min-width: 130px;
+  max-height: 320px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  background: var(--tooltip-background);
+  color: var(--text-color);
+  box-shadow: 0 1px 2px 1px rgba(211, 211, 211, 0.8);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+  cursor: pointer;
+  pointer-events: none;
+
+  &.lovely-chart--state-shown {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &.lovely-chart--state-inactive {
+    cursor: default;
+
+    .lovely-chart--tooltip-title::after {
+      display: none;
+    }
+  }
+
+  &.lovely-chart--state-loading {
+    .lovely-chart--spinner {
+      display: block;
+    }
+  }
+
+  .lovely-chart--spinner {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    display: none;
+  }
+}
+
+.lovely-chart--tooltip-title {
+  font-size: 12px;
+  font-weight: bold;
+  position: relative;
+  padding-bottom: 5px;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Capa_1' x='0px' y='0px' width='512px' height='512px' viewBox='0 0 451.846 451.847' style='enable-background:new 0 0 451.846 451.847;' xml:space='preserve' class=''%3E%3Cg%3E%3Cg%3E%3Cpath d='M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744 L278.318,225.92L106.409,54.017c-12.354-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284 c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z' data-original='%23000000' class='active-path' data-old_color='%23757B84' fill='%23D2D5D7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
+  }
+}
+
+.lovely-chart--tooltip-dataset {
+  height: 20px;
+  line-height: 20px;
+  color: var(--text-color);
+
+  .lovely-chart--tooltip-dataset-value {
+    float: right;
+    font-weight: bold;
+    margin-left: 5px;
+  }
+}
+
+.lovely-chart--percentage-title {
+  display: inline-block;
+  font-weight: bold;
+  width: 35px;
+  margin-right: 5px;
+  text-align: right;
+
+  &.lovely-chart--transition ~ .lovely-chart--dataset-title {
+    padding-left: 30px;
+  }
+}
+
+html.theme-dark .lovely-chart--tooltip-balloon {
+  box-shadow: none;
+}

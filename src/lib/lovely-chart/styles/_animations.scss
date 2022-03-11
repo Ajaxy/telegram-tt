@@ -1,0 +1,124 @@
+@keyframes lovely-chart--animation-shake {
+  0% {
+    transform: translateX(-3px);
+  }
+
+  16.66% {
+    transform: translateX(3px);
+  }
+
+  33.33% {
+    transform: translateX(-2px);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+
+  66.66% {
+    transform: translateX(-1px);
+  }
+
+  83.33% {
+    transform: translateX(1px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes lovely-chart--animation-fadeIn {
+  from {
+    opacity: 0;
+    transform: scale3d(.5, .5, 1);
+  }
+
+  40% {
+    transform: scale3d(.75, .75, 1);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes lovely-chart--animation-fadeOut {
+  from {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+
+  60% {
+    transform: scale3d(.75, .75, 1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale3d(.5, .5, 1);
+  }
+}
+
+@keyframes lovely-chart--animation-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg)
+  }
+}
+
+.lovely-chart--transition-container {
+  position: relative;
+}
+
+.lovely-chart--transition {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  &.lovely-chart--position-top {
+    transform-origin: top left;
+
+    &.lovely-chart--position-right {
+      transform-origin: top right;
+    }
+  }
+
+  &.lovely-chart--position-bottom {
+    transform-origin: bottom left;
+
+    &.lovely-chart--position-right {
+      transform-origin: bottom right;
+    }
+  }
+
+  &.lovely-chart--position-left {
+    left: 0;
+  }
+
+  &.lovely-chart--position-right {
+    right: 0;
+  }
+
+  &.lovely-chart--state-hidden {
+    opacity: 0;
+  }
+}
+
+.lovely-chart--state-animated {
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  animation-duration: 200ms;
+
+  &.lovely-chart--state-hidden {
+    animation-name: lovely-chart--animation-fadeOut;
+    animation-duration: 300ms;
+  }
+
+  &:not(.lovely-chart--state-hidden) {
+    animation-name: lovely-chart--animation-fadeIn;
+  }
+}

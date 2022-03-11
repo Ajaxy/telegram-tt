@@ -772,20 +772,20 @@ class TelegramClient {
     /**
      * Invokes a MTProtoRequest (sends and receives it) and returns its result
      * @param request
+     * @param dcId Optional dcId to use when sending the request
      * @returns {Promise}
      */
 
-    async invoke(request) {
+    async invoke(request, dcId) {
         if (request.classType !== 'request') {
             throw new Error('You can only invoke MTProtoRequests');
         }
-        // This causes issues for now because not enough utils
-        // await request.resolve(this, utils)
 
+        const sender = dcId === undefined ? this._sender : await this.getSender(dcId);
         this._lastRequest = new Date().getTime();
         let attempt = 0;
         for (attempt = 0; attempt < this._requestRetries; attempt++) {
-            const promise = this._sender.sendWithInvokeSupport(request);
+            const promise = sender.sendWithInvokeSupport(request);
             try {
                 const result = await promise.promise;
                 return result;

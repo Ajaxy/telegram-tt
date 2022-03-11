@@ -4,7 +4,8 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
 import { selectCurrentTextSearch } from './localSearch';
-import { selectCurrentGifSearch, selectCurrentStickerSearch } from './symbols';
+import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
+import { selectIsStatisticsShown } from './statistics';
 import { selectCurrentManagement } from './management';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {
@@ -19,6 +20,8 @@ export function selectRightColumnContentKey(global: GlobalState) {
     RightColumnContent.Search
   ) : selectCurrentManagement(global) ? (
     RightColumnContent.Management
+  ) : selectIsStatisticsShown(global) ? (
+    RightColumnContent.Statistics
   ) : selectCurrentStickerSearch(global).query !== undefined ? (
     RightColumnContent.StickerSearch
   ) : selectCurrentGifSearch(global).query !== undefined ? (

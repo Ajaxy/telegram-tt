@@ -38,6 +38,7 @@ type OwnProps = {
   isProfile?: boolean;
   isSearch?: boolean;
   isManagement?: boolean;
+  isStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
@@ -52,6 +53,7 @@ type OwnProps = {
 type StateProps = {
   canAddContact?: boolean;
   canManage?: boolean;
+  canViewStatistics?: boolean;
   isChannel?: boolean;
   userId?: string;
   messageSearchQuery?: string;
@@ -69,6 +71,7 @@ enum HeaderContent {
   MemberList,
   SharedMedia,
   Search,
+  Statistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -102,6 +105,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isProfile,
   isSearch,
   isManagement,
+  isStatistics,
   isStickerSearch,
   isGifSearch,
   isPollResults,
@@ -119,6 +123,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   gifSearchQuery,
   shouldSkipAnimation,
   isEditingInvite,
+  canViewStatistics,
   currentInviteInfo,
 }) => {
   const {
@@ -129,6 +134,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     toggleManagement,
     openHistoryCalendar,
     addContact,
+    toggleStatistics,
     setEditingExportedInvite,
     deleteExportedChatInvite,
   } = getDispatch();
@@ -237,6 +243,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     ) : managementScreen === ManagementScreens.JoinRequests ? (
       HeaderContent.ManageJoinRequests
     ) : undefined // Never reached
+  ) : isStatistics ? (
+    HeaderContent.Statistics
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -361,6 +369,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
             onChange={handleGifSearchQueryChange}
           />
         );
+      case HeaderContent.Statistics:
+        return <h3>{lang('Statistics')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3>{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
@@ -395,6 +405,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   onClick={toggleManagement}
                 >
                   <i className="icon-edit" />
+                </Button>
+              )}
+              {canViewStatistics && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('Statistics')}
+                  onClick={toggleStatistics}
+                >
+                  <i className="icon-stats" />
                 </Button>
               )}
             </section>
@@ -459,11 +480,13 @@ export default memo(withGlobal<OwnProps>(
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
     const isEditingInvite = Boolean(chatId && global.management.byChatId[chatId]?.editingInvite);
+    const canViewStatistics = chat?.fullInfo?.canViewStatistics;
     const currentInviteInfo = chatId ? global.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
 
     return {
       canManage,
       canAddContact,
+      canViewStatistics,
       isChannel,
       userId: user?.id,
       messageSearchQuery,
