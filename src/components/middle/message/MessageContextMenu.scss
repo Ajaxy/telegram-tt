@@ -29,7 +29,13 @@
   }
 
   &--seen-by {
-    min-width: 14rem;
+    max-width: 14rem;
+  }
+
+  &--seen-by-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .avatars {
