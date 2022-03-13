@@ -332,12 +332,15 @@ async function getAvatar(chat: ApiChat) {
 export async function notifyAboutMessage({
   chat,
   message,
-}: { chat: ApiChat; message: Partial<ApiMessage> }) {
+  isReaction = false,
+}: { chat: ApiChat; message: Partial<ApiMessage>; isReaction?: boolean }) {
   const { hasWebNotifications } = await loadNotificationSettings();
   if (!checkIfShouldNotify(chat)) return;
   const areNotificationsSupported = checkIfNotificationsSupported();
   if (!hasWebNotifications || !areNotificationsSupported) {
-    // only play sound if web notifications are disabled
+    // Do not play notification sound for reactions if web notifications are disabled
+    if (isReaction) return;
+    // Only play sound if web notifications are disabled
     playNotifySoundDebounced(String(message.id) || chat.id);
     return;
   }
@@ -364,7 +367,7 @@ export async function notifyAboutMessage({
           icon,
           chatId: chat.id,
           messageId: message.id,
-          reaction: activeReaction ? activeReaction.reaction : undefined,
+          reaction: activeReaction?.reaction,
         },
       });
     }
