@@ -485,7 +485,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const chat = selectChat(global, update.chatId);
       const currentReactions = message?.reactions;
 
-      // `updateMessageReactions` happens with an interval so we try to avoid redundant global state updates
+      // `updateMessageReactions` happens with an interval, so we try to avoid redundant global state updates
       if (currentReactions && areDeepEqual(reactions, currentReactions)) {
         return;
       }
@@ -501,6 +501,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         notifyAboutMessage({
           chat,
           message: newMessage,
+          isReaction: true,
         });
       }
 
