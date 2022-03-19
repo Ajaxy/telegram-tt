@@ -9,7 +9,7 @@ import Menu from '../../ui/Menu';
 import BotCommand from './BotCommand';
 
 import './BotCommandMenu.scss';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 export type OwnProps = {
   isOpen: boolean;

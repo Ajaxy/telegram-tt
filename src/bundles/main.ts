@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal } from '../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../modules';
 
 import { DEBUG } from '../config';
 

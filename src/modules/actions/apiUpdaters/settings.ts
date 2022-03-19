@@ -1,4 +1,4 @@
-import { addReducer, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, setGlobal } from '../..';
 
 import { ApiUpdate } from '../../../api/types';
 import { GlobalState } from '../../../global/types';

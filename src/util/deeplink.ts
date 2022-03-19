@@ -1,4 +1,4 @@
-import { getDispatch } from '../lib/teact/teactn';
+import { getDispatch } from '../modules';
 import { IS_SAFARI } from './environment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'setlanguage' |

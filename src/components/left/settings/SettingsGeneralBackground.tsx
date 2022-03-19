@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useCallback, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { ApiWallpaper } from '../../../api/types';

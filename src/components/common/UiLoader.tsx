@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../modules';
 
 import { ApiMediaFormat } from '../../api/types';
 import { GlobalState } from '../../global/types';

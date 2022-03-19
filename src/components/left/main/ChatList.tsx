@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useMemo, useEffect,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';

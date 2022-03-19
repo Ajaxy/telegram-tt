@@ -2,7 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
 import { GlobalState } from '../../global/types';

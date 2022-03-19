@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 import { ActiveReaction } from '../../../global/types';
 import { ApiAvailableReaction, ApiMediaFormat } from '../../../api/types';

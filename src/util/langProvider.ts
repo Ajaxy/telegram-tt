@@ -1,4 +1,4 @@
-import { getGlobal } from '../lib/teact/teactn';
+import { getGlobal } from '../modules';
 
 import { ApiLangPack, ApiLangString } from '../api/types';
 import { LangCode, TimeFormat } from '../types';

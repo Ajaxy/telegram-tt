@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
-import { getGlobal } from '../../../../lib/teact/teactn';
+import { getGlobal } from '../../../../modules';
 
 import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/types';
 import { EDITABLE_INPUT_ID } from '../../../../config';

@@ -1,4 +1,4 @@
-import { addReducer } from '../../../lib/teact/teactn';
+import { addReducer } from '../..';
 
 addReducer('setStickerSearchQuery', (global, actions, payload) => {
   const { query } = payload!;

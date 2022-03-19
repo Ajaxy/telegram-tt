@@ -2,7 +2,7 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { IAnchorPosition } from '../../../types';
 

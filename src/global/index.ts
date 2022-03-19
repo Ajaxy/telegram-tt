@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/teact/teactn';
+import { addReducer } from '../modules';
 
 import { INITIAL_STATE } from './initial';
 import { initCache, loadCache } from './cache';

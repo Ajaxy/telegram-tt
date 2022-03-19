@@ -2,7 +2,7 @@ import { ChangeEvent, MutableRefObject, RefObject } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ThemeKey } from '../../../types';
 

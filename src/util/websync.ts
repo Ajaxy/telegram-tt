@@ -1,5 +1,5 @@
 import { APP_VERSION, DEBUG } from '../config';
-import { getGlobal } from '../lib/teact/teactn';
+import { getGlobal } from '../modules';
 import { hasStoredSession } from './sessions';
 
 const WEBSYNC_URLS = [

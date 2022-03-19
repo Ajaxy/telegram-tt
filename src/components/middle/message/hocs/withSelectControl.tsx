@@ -5,7 +5,7 @@ import React, {
   useMemo,
   memo,
 } from '../../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../../modules';
 
 import { OwnProps as PhotoProps } from '../Photo';
 import { OwnProps as VideoProps } from '../Video';

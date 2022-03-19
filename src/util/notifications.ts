@@ -4,7 +4,7 @@ import {
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
-import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../modules';
 import {
   getChatAvatarHash,
   getChatTitle,

@@ -1,4 +1,5 @@
-import { addCallback, addReducer, getGlobal } from '../lib/teact/teactn';
+import { addCallback } from '../lib/teact/teactn';
+import { addReducer, getGlobal } from '../modules';
 
 import { GlobalState } from '../global/types';
 import { NotifyException, NotifySettings } from '../types';

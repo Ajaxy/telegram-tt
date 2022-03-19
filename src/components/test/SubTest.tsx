@@ -1,5 +1,4 @@
-import { FC, useState } from '../../lib/teact/teact';
-import React from '../../lib/teact/teactn';
+import React, { FC, useState } from '../../lib/teact/teact';
 import { ApiUpdateAuthorizationStateType } from '../../api/types';
 
 type OwnProps = {

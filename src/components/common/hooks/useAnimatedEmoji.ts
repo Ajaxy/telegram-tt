@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import safePlay from '../../../util/safePlay';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 import useMedia from '../../../hooks/useMedia';
 import { ActiveEmojiInteraction } from '../../../global/types';
 import useFlag from '../../../hooks/useFlag';

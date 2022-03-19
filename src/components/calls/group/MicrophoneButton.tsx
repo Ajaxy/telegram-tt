@@ -2,7 +2,7 @@ import { GroupCallConnectionState } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';

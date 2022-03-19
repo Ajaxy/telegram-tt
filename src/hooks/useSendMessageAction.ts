@@ -1,5 +1,5 @@
 import { useMemo } from '../lib/teact/teact';
-import { getDispatch } from '../lib/teact/teactn';
+import { getDispatch } from '../modules';
 
 import { ApiSendMessageAction } from '../api/types';
 

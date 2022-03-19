@@ -1,6 +1,6 @@
-import {
-  addCallback, addReducer, getGlobal, removeCallback,
-} from '../lib/teact/teactn';
+import { addCallback, removeCallback } from '../lib/teact/teactn';
+
+import { addReducer, getGlobal } from '../modules';
 
 import { GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';

@@ -6,7 +6,7 @@ import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
 import { getMessageContent, getMessageHtmlId } from '../../../modules/helpers';
-import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../modules';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import {

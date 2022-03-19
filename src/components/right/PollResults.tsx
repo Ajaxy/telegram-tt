@@ -1,5 +1,5 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import { withGlobal } from '../../modules';
 
 import { ApiMessage, ApiChat } from '../../api/types';
 import { selectChat, selectChatMessage } from '../../modules/selectors';

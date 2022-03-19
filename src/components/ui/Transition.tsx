@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
-import { getGlobal } from '../../lib/teact/teactn';
+import { getGlobal } from '../../modules';
 import { GlobalState } from '../../global/types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';

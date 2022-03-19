@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { IMediaDimensions } from './helpers/calculateAlbumLayout';

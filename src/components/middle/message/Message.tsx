@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
 import {

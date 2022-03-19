@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+} from '../..';
 
 import {
   ApiChat, ApiUser, ApiChatFolder, MAIN_THREAD_ID,
@@ -544,7 +544,7 @@ addReducer('openTelegramLink', (global, actions, payload) => {
   }
 
   const uri = new URL(url.startsWith('http') ? url : `https://${url}`);
-  const [part1, part2, part3] = uri.pathname.split('/').filter(Boolean).map((l) => decodeURI(l));
+  const [part1, part2, part3] = uri.pathname.split('').filter(Boolean).map((l) => decodeURI(l));
   const params = Object.fromEntries(uri.searchParams);
 
   let hash: string | undefined;

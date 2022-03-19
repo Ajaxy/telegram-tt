@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+} from '../..';
 
 import { ApiChat, ApiContact, ApiUser } from '../../../api/types';
 import { InlineBotSettings } from '../../../types';

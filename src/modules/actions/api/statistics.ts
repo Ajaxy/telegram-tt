@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../..';
 
 import { callApi } from '../../../api/gramjs';
 import { updateStatistics, updateStatisticsGraph } from '../../reducers';

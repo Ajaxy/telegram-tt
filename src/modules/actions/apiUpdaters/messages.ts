@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../..';
 
 import {
   ApiUpdate, ApiMessage, ApiPollResult, ApiThreadInfo, MAIN_THREAD_ID,

@@ -1,11 +1,10 @@
-import { addReducer, getGlobal } from '../../../lib/teact/teactn';
-import { ApiUpdate } from '../../../api/types';
+import { addReducer, getGlobal } from '../..';
 import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { omit } from '../../../util/iteratees';
 import { selectChat } from '../../selectors';
 import { updateChat } from '../../reducers';
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+addReducer('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'updateGroupCall': {
       if (update.call.connectionState === 'discarded') {

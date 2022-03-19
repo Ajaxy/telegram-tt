@@ -10,7 +10,7 @@ import { getUserFullName, isUserId } from '../../../modules/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
-import { getDispatch, getGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../../../modules';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';

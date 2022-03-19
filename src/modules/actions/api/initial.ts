@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+} from '../..';
 
 import { initApi, callApi } from '../../../api/gramjs';
 import { GlobalState } from '../../../global/types';
