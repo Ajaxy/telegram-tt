@@ -80,15 +80,15 @@ const Audio: FC<OwnProps> = ({
   onCancelUpload,
   onDateClick,
 }) => {
+  const { cancelMessageMediaDownload, downloadMessageMedia } = getActions();
+
   const { content: { audio, voice, video }, isMediaUnread } = message;
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
-  const playStateBeforeSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
   const seekerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
   const { isRtl } = lang;
-  const dispatch = getActions();
 
   const [isActivated, setIsActivated] = useState(false);
   const shouldLoad = (isActivated || PRELOAD) && lastSyncTime;
@@ -120,7 +120,7 @@ const Audio: FC<OwnProps> = ({
   } = useBuffering();
 
   const {
-    isPlaying, playProgress, playPause, play, pause, setCurrentTime, duration,
+    isPlaying, playProgress, playPause, setCurrentTime, duration,
   } = useAudioPlayer(
     makeTrackId(message),
     getMediaDuration(message)!,
@@ -184,11 +184,11 @@ const Audio: FC<OwnProps> = ({
 
   const handleDownloadClick = useCallback(() => {
     if (isDownloading) {
-      dispatch.cancelMessageMediaDownload({ message });
+      cancelMessageMediaDownload({ message });
     } else {
-      dispatch.downloadMessageMedia({ message });
+      downloadMessageMedia({ message });
     }
-  }, [dispatch, isDownloading, message]);
+  }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
 
   const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
     if (isSeeking.current && seekerRef.current) {
@@ -203,15 +203,12 @@ const Audio: FC<OwnProps> = ({
   const handleStartSeek = useCallback((e: MouseEvent | TouchEvent) => {
     if (e instanceof MouseEvent && e.button === 2) return;
     isSeeking.current = true;
-    playStateBeforeSeeking.current = isPlaying;
-    pause();
     handleSeek(e);
-  }, [handleSeek, pause, isPlaying]);
+  }, [handleSeek]);
 
   const handleStopSeek = useCallback(() => {
     isSeeking.current = false;
-    if (playStateBeforeSeeking.current) play();
-  }, [play]);
+  }, []);
 
   const handleDateClick = useCallback(() => {
     onDateClick!(message.id, message.chatId);
@@ -270,10 +267,8 @@ const Audio: FC<OwnProps> = ({
   const buttonClassNames = ['toggle-play'];
   if (shouldRenderCross) {
     buttonClassNames.push('loading');
-  } else if (isPlaying) {
-    buttonClassNames.push('pause');
-  } else if (!isPlaying) {
-    buttonClassNames.push('play');
+  } else {
+    buttonClassNames.push(isPlaying ? 'pause' : 'play');
   }
 
   const contentClassName = buildClassName('content', withSeekline && 'with-seekline');
