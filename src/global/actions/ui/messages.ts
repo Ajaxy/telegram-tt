@@ -81,6 +81,16 @@ addActionHandler('setEditingId', (global, actions, payload) => {
   return replaceThreadParam(global, chatId, threadId, paramName, messageId);
 });
 
+addActionHandler('setEditingDraft', (global, actions, payload) => {
+  const {
+    text, chatId, threadId, type,
+  } = payload;
+
+  const paramName = type === 'scheduled' ? 'editingScheduledDraft' : 'editingDraft';
+
+  return replaceThreadParam(global, chatId, threadId, paramName, text);
+});
+
 addActionHandler('editLastMessage', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
   if (!chatId || !threadId) {

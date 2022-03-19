@@ -3,8 +3,9 @@ import {
 } from '../../index';
 
 import {
-  ApiChat, ApiFormattedText, ApiMessage, MAIN_THREAD_ID,
+  ApiChat, ApiMessage, MAIN_THREAD_ID,
 } from '../../../api/types';
+import { Thread } from '../../types';
 
 import {
   DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
@@ -15,16 +16,18 @@ import {
   updateUsers,
   updateChats,
   updateThreadInfos,
-  replaceThreadParam,
   updateListedIds,
   safeReplaceViewportIds,
   addChatMessagesById,
+  updateThread,
 } from '../../reducers';
 import {
   selectCurrentMessageList,
   selectDraft,
   selectChatMessage,
   selectThreadInfo,
+  selectEditingId,
+  selectEditingDraft,
 } from '../../selectors';
 import { init as initFolderManager } from '../../../util/folderManager';
 
@@ -84,11 +87,11 @@ async function loadAndReplaceMessages() {
 
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId);
-  const draftsByChatId = draftChatIds.reduce<Record<string, ApiFormattedText>>((acc, chatId) => {
-    const draft = selectDraft(global, chatId, MAIN_THREAD_ID);
-    if (draft) {
-      acc[chatId] = draft;
-    }
+  const draftsByChatId = draftChatIds.reduce<Record<string, Partial<Thread>>>((acc, chatId) => {
+    acc[chatId] = {};
+    acc[chatId].draft = selectDraft(global, chatId, MAIN_THREAD_ID);
+    acc[chatId].editingId = selectEditingId(global, chatId, MAIN_THREAD_ID);
+    acc[chatId].editingDraft = selectEditingDraft(global, chatId, MAIN_THREAD_ID);
 
     return acc;
   }, {});
@@ -183,7 +186,7 @@ async function loadAndReplaceMessages() {
 
   // Restore drafts
   Object.keys(draftsByChatId).forEach((chatId) => {
-    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'draft', draftsByChatId[chatId]);
+    global = updateThread(global, chatId, MAIN_THREAD_ID, draftsByChatId[chatId]);
   });
 
   setGlobal(global);

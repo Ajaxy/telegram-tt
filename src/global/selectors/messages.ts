@@ -133,8 +133,16 @@ export function selectEditingId(global: GlobalState, chatId: string, threadId: n
   return selectThreadParam(global, chatId, threadId, 'editingId');
 }
 
+export function selectEditingDraft(global: GlobalState, chatId: string, threadId: number) {
+  return selectThreadParam(global, chatId, threadId, 'editingDraft');
+}
+
 export function selectEditingScheduledId(global: GlobalState, chatId: string) {
   return selectThreadParam(global, chatId, MAIN_THREAD_ID, 'editingScheduledId');
+}
+
+export function selectEditingScheduledDraft(global: GlobalState, chatId: string) {
+  return selectThreadParam(global, chatId, MAIN_THREAD_ID, 'editingScheduledDraft');
 }
 
 export function selectDraft(global: GlobalState, chatId: string, threadId: number) {
