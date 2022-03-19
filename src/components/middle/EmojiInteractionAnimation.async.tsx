@@ -6,8 +6,9 @@ import useModuleLoader from '../../hooks/useModuleLoader';
 
 const EmojiInteractionAnimationAsync: FC<OwnProps> = (props) => {
   const { activeEmojiInteraction } = props;
-  const EmojiInteractionAnimation = useModuleLoader(Bundles.Extra, 'EmojiInteractionAnimation',
-    !activeEmojiInteraction);
+  const EmojiInteractionAnimation = useModuleLoader(
+    Bundles.Extra, 'EmojiInteractionAnimation', !activeEmojiInteraction,
+  );
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return EmojiInteractionAnimation ? <EmojiInteractionAnimation {...props} /> : undefined;

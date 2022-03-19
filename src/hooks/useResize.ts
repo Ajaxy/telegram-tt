@@ -39,7 +39,7 @@ export const useResize = (
   }
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) return undefined;
 
     const handleMouseMove = (event: MouseEvent) => {
       const newWidth = Math.ceil(initialElementWidth + event.clientX - initialMouseX);

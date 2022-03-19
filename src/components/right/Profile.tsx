@@ -167,8 +167,21 @@ const Profile: FC<OwnProps & StateProps> = ({
   const tabType = tabs[activeTab].type as ProfileTabType;
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
-    isRightColumnShown, loadMoreMembers, loadCommonChats, searchMediaMessagesLocal, tabType, mediaSearchType, members,
-    commonChatIds, usersById, userStatusesById, chatsById, chatMessages, foundIds, chatId, lastSyncTime,
+    isRightColumnShown,
+    loadMoreMembers,
+    loadCommonChats,
+    searchMediaMessagesLocal,
+    tabType,
+    mediaSearchType,
+    members,
+    commonChatIds,
+    usersById,
+    userStatusesById,
+    chatsById,
+    chatMessages,
+    foundIds,
+    chatId,
+    lastSyncTime,
     serverTimeOffset,
   );
   const activeKey = tabs.findIndex(({ type }) => type === resultType);

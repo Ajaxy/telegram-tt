@@ -16,10 +16,10 @@ const runThrottled = throttle((cb) => cb(), 500, true);
 let RE_USERNAME_SEARCH: RegExp;
 
 try {
-  RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[-_\\p{L}\\p{M}\\p{N}]*$', 'gui');
+  RE_USERNAME_SEARCH = /(^|\s)@[-_\p{L}\p{M}\p{N}]*$/gui;
 } catch (e) {
   // Support for older versions of firefox
-  RE_USERNAME_SEARCH = new RegExp('(^|\\s)@[-_\\d\\wа-яё]*$', 'gi');
+  RE_USERNAME_SEARCH = /(^|\s)@[-_\d\wа-яё]*$/gi;
 }
 
 export default function useMentionTooltip(

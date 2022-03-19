@@ -19,7 +19,9 @@ import { formatCountdownShort, formatLastUpdated } from '../../../util/dateForma
 import useLang from '../../../hooks/useLang';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useTimeout from '../../../hooks/useTimeout';
-import { getMetersPerPixel, getVenueColor, getVenueIconUrl, prepareMapUrl } from '../../../util/map';
+import {
+  getMetersPerPixel, getVenueColor, getVenueIconUrl, prepareMapUrl,
+} from '../../../util/map';
 import buildClassName from '../../../util/buildClassName';
 import usePrevious from '../../../hooks/usePrevious';
 import useInterval from '../../../hooks/useInterval';
@@ -28,7 +30,7 @@ import { getServerTime } from '../../../util/serverTime';
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/Skeleton';
 
-import mapPin from '/src/assets/map-pin.svg';
+import mapPin from '../../../assets/map-pin.svg';
 import './Location.scss';
 
 const MOVE_THRESHOLD = 0.0001; // ~11m
@@ -79,7 +81,9 @@ const Location: FC<OwnProps> = ({
   const [point, setPoint] = useState(geo);
 
   const shouldRenderText = type === 'venue' || (type === 'geoLive' && !isExpired);
-  const { width, height, zoom, scale } = DEFAULT_MAP_CONFIG;
+  const {
+    width, height, zoom, scale,
+  } = DEFAULT_MAP_CONFIG;
 
   const mediaHash = Boolean(lastSyncTime) && buildStaticMapHash(point, width, height, zoom, scale);
   const mediaBlobUrl = useMedia(mediaHash);
@@ -206,13 +210,15 @@ const Location: FC<OwnProps> = ({
 
   function renderMap() {
     if (!mapBlobUrl) return <Skeleton width={width} height={height} />;
-    return <img
-      className="full-media map"
-      src={mapBlobUrl}
-      alt="Location on a map"
-      width={DEFAULT_MAP_CONFIG.width}
-      height={DEFAULT_MAP_CONFIG.height}
-    />;
+    return (
+      <img
+        className="full-media map"
+        src={mapBlobUrl}
+        alt="Location on a map"
+        width={DEFAULT_MAP_CONFIG.width}
+        height={DEFAULT_MAP_CONFIG.height}
+      />
+    );
   }
 
   function renderPin() {
@@ -279,4 +285,3 @@ const Location: FC<OwnProps> = ({
 };
 
 export default memo(Location);
-

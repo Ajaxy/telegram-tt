@@ -1,6 +1,6 @@
 import { DEBUG } from '../config';
 
-export const CLIPBOARD_ITEM_SUPPORTED = navigator.clipboard && window.ClipboardItem;
+export const CLIPBOARD_ITEM_SUPPORTED = window.navigator.clipboard && window.ClipboardItem;
 
 const textCopyEl = document.createElement('textarea');
 textCopyEl.setAttribute('readonly', '');
@@ -51,7 +51,7 @@ async function copyBlobToClipboard(pngBlob: Blob | null) {
   }
 
   try {
-    await navigator.clipboard.write?.([
+    await window.navigator.clipboard.write?.([
       new ClipboardItem({
         [pngBlob.type]: pngBlob,
       }),

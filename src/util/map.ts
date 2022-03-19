@@ -5,23 +5,23 @@ const PROVIDER = 'http://maps.google.com/maps';
 const VENUE_COLORS = new Map(Object.entries({
   'building/medical': '#43b3f4',
   'building/gym': '#43b3f4',
-  'arts_entertainment': '#e56dd6',
+  'education/cafeteria': '#f7943f',
   'travel/bedandbreakfast': '#9987ff',
   'travel/hotel': '#9987ff',
   'travel/hostel': '#9987ff',
   'travel/resort': '#9987ff',
-  'building': '#6e81b2',
-  'education': '#a57348',
-  'event': '#959595',
-  'food': '#f7943f',
-  'education/cafeteria': '#f7943f',
-  'nightlife': '#e56dd6',
   'travel/hotel_bar': '#e56dd6',
-  'parks_outdoors': '#6cc039',
-  'shops': '#ffb300',
-  'travel': '#1c9fff',
-  'work': '#ad7854',
-  'home': '#00aeef',
+  arts_entertainment: '#e56dd6',
+  building: '#6e81b2',
+  education: '#a57348',
+  event: '#959595',
+  food: '#f7943f',
+  home: '#00aeef',
+  nightlife: '#e56dd6',
+  parks_outdoors: '#6cc039',
+  shops: '#ffb300',
+  travel: '#1c9fff',
+  work: '#ad7854',
 }));
 
 const RANDOM_COLORS = [
@@ -34,7 +34,7 @@ export function prepareMapUrl(lat: number, long: number, zoom: number) {
 
 export function getMetersPerPixel(lat: number, zoom: number) {
   // https://groups.google.com/g/google-maps-js-api-v3/c/hDRO4oHVSeM/m/osOYQYXg2oUJ
-  return 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+  return (156543.03392 * Math.cos(lat * (Math.PI / 180))) / 2 ** zoom;
 }
 
 export function getVenueIconUrl(type?: string) {
@@ -52,6 +52,7 @@ export function getVenueColor(type?: string) {
 }
 
 function stringToNumber(str: string) {
-  return str.split('').reduce((prevHash, currVal) =>
-    (((prevHash << 5) - prevHash) + currVal.charCodeAt(0)) | 0, 0);
+  return str.split('').reduce((prevHash, currVal) => (
+    // eslint-disable-next-line no-bitwise
+    (((prevHash << 5) - prevHash) + currVal.charCodeAt(0)) | 0), 0);
 }

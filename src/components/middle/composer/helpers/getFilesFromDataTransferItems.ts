@@ -2,7 +2,7 @@ export default async function getFilesFromDataTransferItems(dataTransferItems: D
   const files: File[] = [];
 
   function traverseFileTreePromise(entry: FileSystemEntry | File, item: DataTransferItem) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (entry instanceof File) {
         files.push(entry);
         resolve(entry);
@@ -20,11 +20,11 @@ export default async function getFilesFromDataTransferItems(dataTransferItems: D
           resolve(itemFile);
         });
       } else if (entry.isDirectory) {
-        let dirReader = (entry as FileSystemDirectoryEntry).createReader();
+        const dirReader = (entry as FileSystemDirectoryEntry).createReader();
         dirReader.readEntries((entries) => {
-          let entriesPromises = [];
-          for (let entr of entries) {
-            entriesPromises.push(traverseFileTreePromise(entr, item));
+          const entriesPromises = [];
+          for (let i = 0; i < entries.length; i++) {
+            entriesPromises.push(traverseFileTreePromise(entries[i], item));
           }
           resolve(Promise.all(entriesPromises));
         });
@@ -32,8 +32,9 @@ export default async function getFilesFromDataTransferItems(dataTransferItems: D
     });
   }
 
-  let entriesPromises = [];
-  for (let item of dataTransferItems) {
+  const entriesPromises = [];
+  for (let i = 0; i < dataTransferItems.length; i++) {
+    const item = dataTransferItems[i];
     if (item.kind === 'file') {
       const entry = item.webkitGetAsEntry() || item.getAsFile();
       if (entry) {
@@ -46,4 +47,3 @@ export default async function getFilesFromDataTransferItems(dataTransferItems: D
 
   return files;
 }
-

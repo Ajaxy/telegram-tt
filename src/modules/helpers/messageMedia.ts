@@ -134,7 +134,9 @@ export function buildStaticMapHash(
   zoom: number,
   scale: number,
 ) {
-  const { long, lat, accessHash, accuracyRadius } = geo;
+  const {
+    long, lat, accessHash, accuracyRadius,
+  } = geo;
 
   // eslint-disable-next-line max-len
   return `staticMap:${accessHash}?lat=${lat}&long=${long}&w=${width}&h=${height}&zoom=${zoom}&scale=${scale}&accuracyRadius=${accuracyRadius}`;

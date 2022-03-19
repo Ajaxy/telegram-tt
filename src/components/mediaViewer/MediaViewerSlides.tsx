@@ -518,7 +518,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
           <MediaViewerContent
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
-            messageId={previousMessageId} />
+            messageId={previousMessageId}
+          />
         </div>
       )}
       {activeMessageId && (
@@ -543,7 +544,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
           <MediaViewerContent
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
-            messageId={nextMessageId}/>
+            messageId={nextMessageId}
+          />
         </div>
       )}
     </div>
@@ -571,4 +573,5 @@ function checkIfControlTarget(e: TouchEvent | MouseEvent) {
     e.preventDefault();
     return true;
   }
+  return false;
 }

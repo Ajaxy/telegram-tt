@@ -169,7 +169,8 @@ addReducer('openTipsChat', (global, actions, payload) => {
 
 addReducer('loadAllChats', (global, actions, payload) => {
   const listType = payload.listType as 'active' | 'archived';
-  let { shouldReplace, onReplace } = payload;
+  const { onReplace } = payload;
+  let { shouldReplace } = payload;
   let i = 0;
 
   (async () => {

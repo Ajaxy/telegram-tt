@@ -4,7 +4,7 @@ export default function getMessageIdsForSelectedText() {
   const selection = window.getSelection();
   let selectedFragments = selection && selection.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
   if (!selectedFragments || selectedFragments.childElementCount === 0) {
-    return;
+    return undefined;
   }
 
   const messageIds = Array.from(selectedFragments.children)
@@ -18,7 +18,6 @@ export default function getMessageIdsForSelectedText() {
 
       return result;
     }, [] as number[]);
-
 
   // Cleanup a document fragment because it is playing media content in the background
   while (selectedFragments.firstChild) {

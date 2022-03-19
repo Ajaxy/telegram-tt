@@ -1,6 +1,6 @@
 declare const process: NodeJS.Process;
 
-declare var APP_REVISION: string;
+declare const APP_REVISION: string;
 
 declare namespace React {
   interface HTMLAttributes {

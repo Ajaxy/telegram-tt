@@ -2,6 +2,7 @@
   "extends": [
     "react-app",
     "plugin:teactn/recommended",
+    "airbnb",
     "airbnb-typescript"
   ],
   "plugins": [
@@ -34,11 +35,31 @@
     "no-else-return": "off",
     "no-plusplus": "off",
     "no-void": "off",
+    "no-continue": "off",
     "default-case": "off",
     "no-param-reassign": "off",
     "no-prototype-builtins": "off",
     "no-await-in-loop": "off",
     "no-nested-ternary": "off",
+    "function-paren-newline": ["error", "consistent"],
+    "prefer-destructuring": "off",
+    // Allow for...of. Edited from:
+    // https://github.com/airbnb/javascript/blob/b4377fb03089dd7f08955242695860d47f9caab4/packages/eslint-config-airbnb-base/rules/style.js#L333
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ],
     "import/no-extraneous-dependencies": "off",
     "import/prefer-default-export": "off",
     "import/named": "off",
@@ -47,13 +68,22 @@
     "react/jsx-one-expression-per-line": "off",
     "react/button-has-type": "off",
     "react/require-default-props": "off",
+    "react/function-component-definition": "off",
     // Teact feature
     "react/style-prop-object": "off",
+    "react/jsx-no-bind": ["error", {
+      "ignoreRefs": true,
+      "allowArrowFunctions": true,
+      "allowFunctions": true,
+      "allowBind": false,
+      "ignoreDOMComponents": true
+    }],
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/no-static-element-interactions": "off",
     "jsx-a11y/label-has-associated-control": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "jsx-a11y/no-noninteractive-element-to-interactive-role": "off",
+    "jsx-a11y/media-has-caption": "off",
     "no-async-without-await/no-async-without-await": 1,
     "@typescript-eslint/no-use-before-define": [
       "error",
@@ -64,6 +94,7 @@
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/member-delimiter-style": "error",
     "@typescript-eslint/default-param-last": "off",
+    "@typescript-eslint/return-await": ["error", "in-try-catch"],
     "teactn/prefer-separate-component-file": "off"
   },
   "settings": {
@@ -71,8 +102,5 @@
   },
   "parserOptions": {
     "project": "./tsconfig.json"
-  },
-  "globals": {
-    "APP_REVISION": "readonly"
   }
 }

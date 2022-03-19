@@ -186,7 +186,6 @@ class TelegramClient {
         }
         // set defaults vars
         this._sender.userDisconnected = false;
-        // eslint-disable-next-line camelcase
         this._sender._user_connected = false;
         this._sender.isReconnecting = false;
         this._sender._disconnected = true;

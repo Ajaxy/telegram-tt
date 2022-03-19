@@ -211,7 +211,7 @@ const RightColumn: FC<StateProps> = ({
 
   // We need to clear profile state and management screen state, when changing chats
   useLayoutEffectWithPrevDeps(([prevChatId]) => {
-    if (prevChatId !== chatId ) {
+    if (prevChatId !== chatId) {
       setProfileState(ProfileState.Profile);
       setManagementScreen(ManagementScreens.Initial);
     }

@@ -295,7 +295,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               />
             )}
           </div>
-          <p className='text-muted'>{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
+          <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (
           <div className="section">

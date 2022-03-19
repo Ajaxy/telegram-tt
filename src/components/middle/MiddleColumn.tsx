@@ -354,7 +354,10 @@ const MiddleColumn: FC<StateProps> = ({
 
   useHistoryBack(
     renderingChatId && renderingThreadId,
-    closeChat, undefined, undefined, undefined,
+    closeChat,
+    undefined,
+    undefined,
+    undefined,
     messageLists?.map(createMessageHash) || [],
   );
 

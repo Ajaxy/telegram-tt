@@ -964,7 +964,9 @@ const Message: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {
-    const { focusedMessage, forwardMessages, lastSyncTime, serverTimeOffset } = global;
+    const {
+      focusedMessage, forwardMessages, lastSyncTime, serverTimeOffset,
+    } = global;
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup,
     } = ownProps;

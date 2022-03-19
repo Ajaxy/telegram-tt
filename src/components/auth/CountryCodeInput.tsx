@@ -81,7 +81,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
     updateFilter(target.value);
   }, [filter, updateFilter, value]);
 
-  const CodeInput: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => {
+  const CodeInput: FC<{ onTrigger: () => void; isOpen?: boolean }> = useCallback(({ onTrigger, isOpen }) => {
     const handleTrigger = () => {
       if (isOpen) {
         return;
@@ -126,7 +126,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
         )}
       </div>
     );
-  };
+  }, [filter, handleInput, handleInputKeyDown, id, isLoading, lang, value]);
 
   return (
     <DropdownMenu

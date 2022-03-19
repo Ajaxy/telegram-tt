@@ -229,8 +229,19 @@ export function sendMessage(
   onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat, text, entities, replyingTo, attachment, sticker, gif, poll, contact, groupedId, scheduledAt,
-    sendAs, serverTimeOffset,
+    chat,
+    text,
+    entities,
+    replyingTo,
+    attachment,
+    sticker,
+    gif,
+    poll,
+    contact,
+    groupedId,
+    scheduledAt,
+    sendAs,
+    serverTimeOffset,
   );
   onUpdate({
     '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',

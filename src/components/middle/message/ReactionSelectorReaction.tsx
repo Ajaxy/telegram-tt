@@ -25,7 +25,9 @@ type OwnProps = {
 
 const cn = createClassNameBuilder('ReactionSelectorReaction');
 
-const ReactionSelectorReaction: FC<OwnProps> = ({ reaction, previewIndex, onSendReaction, isReady }) => {
+const ReactionSelectorReaction: FC<OwnProps> = ({
+  reaction, previewIndex, onSendReaction, isReady,
+}) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 

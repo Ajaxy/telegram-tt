@@ -1,6 +1,5 @@
 .lovely-chart--button {
   border: 1px solid #E6ECF0;
-  background-color: transparent;
   padding: 7px 7px;
   display: inline-block;
   border-radius: 18px;
@@ -11,7 +10,7 @@
   position: relative;
 
   border-color: var(--text-color);
-  background: transparent;
+  background-color: transparent;
   color: var(--text-color);
 
   &.lovely-chart--state-checked {

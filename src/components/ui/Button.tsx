@@ -137,7 +137,6 @@ const Button: FC<OwnProps> = ({
         dir={isRtl ? 'rtl' : undefined}
         aria-label={ariaLabel}
         aria-controls={ariaControls}
-        aria-haspopup={hasPopup}
       >
         {children}
         {!disabled && ripple && (
@@ -148,7 +147,6 @@ const Button: FC<OwnProps> = ({
   }
 
   return (
-    // eslint-disable-next-line react/button-has-type
     <button
       ref={elementRef as RefObject<HTMLButtonElement>}
       id={id}

@@ -27,6 +27,7 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
 
   const firstLetters = useMemo(() => {
     if ((isVideo && !IS_WEBM_SUPPORTED) || !mediaData) return getFirstLetters(stickerSet.title, 2);
+    return undefined;
   }, [isVideo, mediaData, stickerSet.title]);
 
   return (

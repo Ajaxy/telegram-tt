@@ -148,7 +148,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
         ))}
       </div>
 
-      {Boolean(statistics.recentTopMessages?.length) &&
+      {Boolean(statistics.recentTopMessages?.length) && (
         <div className="Statistics--messages">
           <h2 className="Statistics--messages-title">{lang('ChannelStats.Recent.Header')}</h2>
 
@@ -156,7 +156,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
             <StatisticsRecentMessage message={message as ApiMessage & StatisticsRecentMessageType} />
           ))}
         </div>
-      }
+      )}
     </div>
   );
 };

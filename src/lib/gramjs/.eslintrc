@@ -1,29 +1,34 @@
 {
-    "rules": {
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "@typescript-eslint/indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "max-len": [
-            "error",
-            120
-        ],
-        "no-bitwise": "off",
-        "no-underscore-dangle": "off",
-        "no-continue": "off",
-        "no-restricted-syntax": "off",
-        "class-methods-use-this": "off",
-        "max-classes-per-file": "off",
-        "camelcase": "error"
-    }
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "indent": [
+      "error",
+      4,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "@typescript-eslint/indent": [
+      "error",
+      4,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "max-len": [
+      "error",
+      120
+    ],
+    "no-bitwise": "off",
+    "no-underscore-dangle": "off",
+    "no-continue": "off",
+    "no-restricted-syntax": "off",
+    "class-methods-use-this": "off",
+    "max-classes-per-file": "off",
+    "camelcase": "off"
+  }
 }
