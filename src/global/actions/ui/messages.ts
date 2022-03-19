@@ -156,36 +156,10 @@ addActionHandler('replyToNextMessage', (global, actions, payload) => {
   });
 });
 
-addActionHandler('openMediaViewer', (global, actions, payload) => {
-  const {
-    chatId, threadId, messageId, avatarOwnerId, profilePhotoIndex, origin,
-  } = payload!;
-
-  return {
-    ...global,
-    mediaViewer: {
-      chatId,
-      threadId,
-      messageId,
-      avatarOwnerId,
-      profilePhotoIndex,
-      origin,
-    },
-    forwardMessages: {},
-  };
-});
-
-addActionHandler('closeMediaViewer', (global) => {
-  return {
-    ...global,
-    mediaViewer: {},
-  };
-});
-
 addActionHandler('openAudioPlayer', (global, actions, payload) => {
   const {
     chatId, threadId, messageId, origin, volume, playbackRate, isMuted,
-  } = payload!;
+  } = payload;
 
   return {
     ...global,
@@ -204,7 +178,7 @@ addActionHandler('openAudioPlayer', (global, actions, payload) => {
 addActionHandler('setAudioPlayerVolume', (global, actions, payload) => {
   const {
     volume,
-  } = payload!;
+  } = payload;
 
   return {
     ...global,
@@ -218,7 +192,7 @@ addActionHandler('setAudioPlayerVolume', (global, actions, payload) => {
 addActionHandler('setAudioPlayerPlaybackRate', (global, actions, payload) => {
   const {
     playbackRate,
-  } = payload!;
+  } = payload;
 
   return {
     ...global,
@@ -232,7 +206,7 @@ addActionHandler('setAudioPlayerPlaybackRate', (global, actions, payload) => {
 addActionHandler('setAudioPlayerMuted', (global, actions, payload) => {
   const {
     isMuted,
-  } = payload!;
+  } = payload;
 
   return {
     ...global,
@@ -246,7 +220,7 @@ addActionHandler('setAudioPlayerMuted', (global, actions, payload) => {
 addActionHandler('setAudioPlayerOrigin', (global, actions, payload) => {
   const {
     origin,
-  } = payload!;
+  } = payload;
 
   return {
     ...global,

@@ -216,7 +216,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
           <>
             <div className="volume-slider-spacer" />
             <div className="volume-slider">
-              <RangeSlider value={isMuted ? 0 : volume * 100} onChange={handleVolumeChange} />
+              <RangeSlider bold value={isMuted ? 0 : volume * 100} onChange={handleVolumeChange} />
             </div>
           </>
         )}

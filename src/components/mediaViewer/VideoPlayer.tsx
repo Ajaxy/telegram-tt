@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
+import { getActions } from '../../global';
 
 import { ApiDimensions } from '../../api/types';
 
@@ -28,6 +29,9 @@ type OwnProps = {
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
   areControlsVisible: boolean;
+  volume: number;
+  isMuted: boolean;
+  playbackRate: number;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
@@ -43,10 +47,18 @@ const VideoPlayer: FC<OwnProps> = ({
   fileSize,
   isMediaViewerOpen,
   noPlay,
+  volume,
+  isMuted,
+  playbackRate,
   onClose,
   toggleControls,
   areControlsVisible,
 }) => {
+  const {
+    setMediaViewerVolume,
+    setMediaViewerMuted,
+    setMediaViewerPlaybackRate,
+  } = getActions();
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlayed, setIsPlayed] = useState(!IS_TOUCH_ENV || !IS_IOS);
@@ -83,6 +95,14 @@ const VideoPlayer: FC<OwnProps> = ({
       setCurrentTime(videoRef.current!.currentTime);
     }
   }, [currentTime]);
+
+  useEffect(() => {
+    videoRef.current!.volume = volume;
+  }, [volume]);
+
+  useEffect(() => {
+    videoRef.current!.playbackRate = playbackRate;
+  }, [playbackRate]);
 
   const togglePlayState = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent> | KeyboardEvent) => {
     e.stopPropagation();
@@ -129,6 +149,18 @@ const VideoPlayer: FC<OwnProps> = ({
     videoRef.current!.currentTime = position;
   }, []);
 
+  const handleVolumeChange = useCallback((newVolume: number) => {
+    setMediaViewerVolume({ volume: newVolume / 100 });
+  }, [setMediaViewerVolume]);
+
+  const handleVolumeMuted = useCallback(() => {
+    setMediaViewerMuted({ isMuted: !isMuted });
+  }, [isMuted, setMediaViewerMuted]);
+
+  const handlePlaybackRateChange = useCallback((newPlaybackRate: number) => {
+    setMediaViewerPlaybackRate({ playbackRate: newPlaybackRate });
+  }, [setMediaViewerPlaybackRate]);
+
   useEffect(() => {
     if (!isMediaViewerOpen) return undefined;
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
@@ -164,7 +196,7 @@ const VideoPlayer: FC<OwnProps> = ({
           playsInline
           loop={isGif}
           // This is to force auto playing on mobiles
-          muted={isGif}
+          muted={isGif || isMuted}
           id="media-viewer-video"
           style={videoStyle}
           onPlay={IS_IOS ? () => setIsPlayed(true) : undefined}
@@ -198,6 +230,7 @@ const VideoPlayer: FC<OwnProps> = ({
         <VideoPlayerControls
           isPlayed={isPlayed}
           bufferedProgress={bufferedProgress}
+          isBuffered={isBuffered}
           currentTime={currentTime}
           isFullscreenSupported={Boolean(setFullscreen)}
           isFullscreen={isFullscreen}
@@ -209,6 +242,12 @@ const VideoPlayer: FC<OwnProps> = ({
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}
           onPlayPause={togglePlayState}
+          volume={volume}
+          playbackRate={playbackRate}
+          isMuted={isMuted}
+          onVolumeClick={handleVolumeMuted}
+          onVolumeChange={handleVolumeChange}
+          onPlaybackRateChange={handlePlaybackRateChange}
         />
       )}
     </div>

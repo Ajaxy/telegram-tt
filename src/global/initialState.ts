@@ -116,7 +116,11 @@ export const INITIAL_STATE: GlobalState = {
 
   topInlineBots: {},
 
-  mediaViewer: {},
+  mediaViewer: {
+    volume: DEFAULT_VOLUME,
+    playbackRate: DEFAULT_PLAYBACK_RATE,
+    isMuted: false,
+  },
 
   audioPlayer: {
     volume: DEFAULT_VOLUME,
