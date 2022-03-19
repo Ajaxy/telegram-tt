@@ -122,7 +122,7 @@ addActionHandler('saveSession', (global, actions, payload) => {
   }
 });
 
-addActionHandler('signOut', async () => {
+addActionHandler('signOut', async (_global, _actions, payload) => {
   try {
     await unsubscribe();
     await callApi('destroy');
@@ -132,6 +132,10 @@ addActionHandler('signOut', async () => {
   }
 
   getActions().reset();
+
+  if (payload?.forceInitApi) {
+    getActions().initApi();
+  }
 });
 
 addActionHandler('reset', () => {

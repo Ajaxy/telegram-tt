@@ -510,7 +510,11 @@ export type GlobalState = {
 };
 
 export interface ActionPayloads {
+  // Initial
+  signOut: { forceInitApi?: boolean } | undefined;
   apiUpdate: ApiUpdate;
+
+  // Chats
   openChat: {
     id: string | undefined;
     threadId?: number;
@@ -536,7 +540,7 @@ export type NonTypedActionNames = (
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
   'toggleStatistics' |
   // auth
-  'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
+  'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
   // chats
   'preloadTopChatMessages' | 'loadAllChats' | 'openChatWithInfo' | 'openLinkedChat' |
