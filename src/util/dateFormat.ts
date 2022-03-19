@@ -1,4 +1,5 @@
 import { LangFn } from '../hooks/useLang';
+import withCache from './withCache';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS_FULL = [
@@ -246,18 +247,8 @@ export function formatVoiceRecordDuration(durationInMs: number) {
   return `${parts.join(':')},${String(milliseconds).padStart(2, '0')}`;
 }
 
-// `toLocaleString` is slow so we use cache
-const dateFormatCache = new Map<string, string>();
-
-export function formatDateToString(datetime: Date | number, locale = 'en-US') {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const cacheKey = `${locale}_${getDayStartAt(date)}`;
-  const cached = dateFormatCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  const newValue = date.toLocaleString(
+const formatDayToStringWithCache = withCache((dayStartAt: number, locale: string) => {
+  return new Date(dayStartAt).toLocaleString(
     locale,
     {
       year: 'numeric',
@@ -265,10 +256,13 @@ export function formatDateToString(datetime: Date | number, locale = 'en-US') {
       day: 'numeric',
     },
   );
+});
 
-  dateFormatCache.set(cacheKey, newValue);
+export function formatDateToString(datetime: Date | number, locale = 'en-US') {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+  const dayStartAt = getDayStartAt(date);
 
-  return newValue;
+  return formatDayToStringWithCache(dayStartAt, locale);
 }
 
 export function formatDateTimeToString(datetime: Date | number, locale = 'en-US') {
