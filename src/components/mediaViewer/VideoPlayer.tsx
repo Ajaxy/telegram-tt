@@ -130,6 +130,7 @@ const VideoPlayer: FC<OwnProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!isMediaViewerOpen) return;
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -142,7 +143,7 @@ const VideoPlayer: FC<OwnProps> = ({
     return () => {
       document.removeEventListener('keydown', togglePayingStateBySpace, false);
     };
-  }, [togglePlayState]);
+  }, [togglePlayState, isMediaViewerOpen]);
 
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;
