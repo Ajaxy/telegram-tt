@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { LangCode } from '../../types';
 import { ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType } from '../../api/types';
@@ -122,7 +122,7 @@ const Main: FC<StateProps> = ({
     openStickerSetShortName,
     checkVersionNotification,
     loadAppConfig,
-  } = getDispatch();
+  } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;

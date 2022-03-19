@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../modules/selectors';
 import {
@@ -44,7 +44,7 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
   contactName,
   onClose,
 }) => {
-  const { pinMessage } = getDispatch();
+  const { pinMessage } = getActions();
 
   const handlePinMessageForAll = useCallback(() => {
     pinMessage({

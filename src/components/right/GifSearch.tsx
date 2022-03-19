@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChat, ApiVideo } from '../../api/types';
 
@@ -51,7 +51,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     searchMoreGifs,
     sendMessage,
     setGifSearchQuery,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

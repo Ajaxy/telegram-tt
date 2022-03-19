@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiAvailableReaction, ApiChat } from '../../../api/types';
 
@@ -33,7 +33,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   isActive,
   onClose,
 }) => {
-  const { setChatEnabledReactions } = getDispatch();
+  const { setChatEnabledReactions } = getActions();
 
   const lang = useLang();
   const [isTouched, setIsTouched] = useState(false);

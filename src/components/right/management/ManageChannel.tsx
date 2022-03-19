@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
 import { ApiChat, ApiExportedInvite, ApiMediaFormat } from '../../../api/types';
@@ -68,7 +68,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     openChat,
     loadExportedChatInvites,
     loadChatJoinRequests,
-  } = getDispatch();
+  } = getActions();
 
   const currentTitle = chat ? (chat.title || '') : '';
   const currentAbout = chat?.fullInfo ? (chat.fullInfo.about || '') : '';

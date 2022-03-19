@@ -1,5 +1,5 @@
 import {
-  addReducer, getGlobal, setGlobal, getDispatch,
+  addActionHandler, getGlobal, setGlobal, getActions,
 } from '../..';
 
 import {
@@ -32,7 +32,7 @@ const RELEASE_STATUS_TIMEOUT = 15000; // 10 sec;
 
 let releaseStatusTimeout: number | undefined;
 
-addReducer('sync', () => {
+addActionHandler('sync', () => {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START SYNC');
@@ -50,7 +50,7 @@ addReducer('sync', () => {
     releaseStatusTimeout = undefined;
   }, RELEASE_STATUS_TIMEOUT);
 
-  const { loadAllChats, preloadTopChatMessages } = getDispatch();
+  const { loadAllChats, preloadTopChatMessages } = getActions();
 
   loadAllChats({
     listType: 'active',
@@ -190,7 +190,7 @@ async function loadAndReplaceMessages() {
 
   const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
   if (audioChatId && audioMessageId && !selectChatMessage(global, audioChatId, audioMessageId)) {
-    getDispatch().closeAudioPlayer();
+    getActions().closeAudioPlayer();
   }
 }
 

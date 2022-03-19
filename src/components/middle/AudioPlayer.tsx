@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { AudioOrigin } from '../../types';
 import {
@@ -63,7 +63,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     setAudioPlayerMuted,
     focusMessage,
     closeAudioPlayer,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const { audio, voice, video } = getMessageContent(message);

@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import React, {
   FC, memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
@@ -43,7 +43,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     openChatByInvite,
     startBot,
     focusMessage,
-  } = getDispatch();
+  } = getActions();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);

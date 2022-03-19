@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import useLang from '../../hooks/useLang';
 
@@ -16,7 +16,7 @@ type StateProps = {
 const HistoryCalendar: FC<OwnProps & StateProps> = ({
   isOpen, selectedAt,
 }) => {
-  const { searchMessagesByDate, closeHistoryCalendar } = getDispatch();
+  const { searchMessagesByDate, closeHistoryCalendar } = getActions();
 
   const handleJumpToDate = useCallback((date: Date) => {
     searchMessagesByDate({ timestamp: date.valueOf() / 1000 });

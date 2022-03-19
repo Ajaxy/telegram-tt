@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import useLang, { LangFn } from '../../../hooks/useLang';
 
@@ -108,7 +108,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   const {
     openChat,
     focusLastMessage,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

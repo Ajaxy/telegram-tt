@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import {
@@ -48,7 +48,7 @@ const INFINITE_LOOP_MARKER = 100;
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
 
-addReducer('preloadTopChatMessages', (global, actions) => {
+addActionHandler('preloadTopChatMessages', (global, actions) => {
   (async () => {
     const preloadedChatIds = new Set<string>();
 
@@ -69,7 +69,7 @@ addReducer('preloadTopChatMessages', (global, actions) => {
   })();
 });
 
-addReducer('openChat', (global, actions, payload) => {
+addActionHandler('openChat', (global, actions, payload) => {
   const { id, threadId } = payload!;
   const { currentUserId } = global;
   const chat = selectChat(global, id);
@@ -107,7 +107,7 @@ addReducer('openChat', (global, actions, payload) => {
   }
 });
 
-addReducer('openLinkedChat', (global, actions, payload) => {
+addActionHandler('openLinkedChat', (global, actions, payload) => {
   const { id } = payload!;
   const chat = selectChat(global, id);
   if (!chat) {
@@ -123,7 +123,7 @@ addReducer('openLinkedChat', (global, actions, payload) => {
   })();
 });
 
-addReducer('focusMessageInComments', (global, actions, payload) => {
+addActionHandler('focusMessageInComments', (global, actions, payload) => {
   const { chatId, threadId, messageId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -140,7 +140,7 @@ addReducer('focusMessageInComments', (global, actions, payload) => {
   })();
 });
 
-addReducer('openSupportChat', (global, actions) => {
+addActionHandler('openSupportChat', (global, actions) => {
   const chat = selectSupportChat(global);
   if (chat) {
     actions.openChat({ id: chat.id, shouldReplaceHistory: true });
@@ -157,7 +157,7 @@ addReducer('openSupportChat', (global, actions) => {
   })();
 });
 
-addReducer('openTipsChat', (global, actions, payload) => {
+addActionHandler('openTipsChat', (global, actions, payload) => {
   const { langCode } = payload;
 
   const usernamePostfix = langCode === 'pt-br'
@@ -167,7 +167,7 @@ addReducer('openTipsChat', (global, actions, payload) => {
   actions.openChatByUsername({ username: `${TIPS_USERNAME}${usernamePostfix}` });
 });
 
-addReducer('loadAllChats', (global, actions, payload) => {
+addActionHandler('loadAllChats', (global, actions, payload) => {
   const listType = payload.listType as 'active' | 'archived';
   const { onReplace } = payload;
   let { shouldReplace } = payload;
@@ -210,7 +210,7 @@ addReducer('loadAllChats', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadFullChat', (global, actions, payload) => {
+addActionHandler('loadFullChat', (global, actions, payload) => {
   const { chatId, force } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -224,11 +224,11 @@ addReducer('loadFullChat', (global, actions, payload) => {
   }
 });
 
-addReducer('loadTopChats', () => {
+addActionHandler('loadTopChats', () => {
   runThrottledForLoadTopChats(() => loadChats('active'));
 });
 
-addReducer('requestChatUpdate', (global, actions, payload) => {
+addActionHandler('requestChatUpdate', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
@@ -245,7 +245,7 @@ addReducer('requestChatUpdate', (global, actions, payload) => {
   });
 });
 
-addReducer('updateChatMutedState', (global, actions, payload) => {
+addActionHandler('updateChatMutedState', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const { chatId, isMuted } = payload!;
   const chat = selectChat(global, chatId);
@@ -257,7 +257,7 @@ addReducer('updateChatMutedState', (global, actions, payload) => {
   void callApi('updateChatMutedState', { chat, isMuted, serverTimeOffset });
 });
 
-addReducer('createChannel', (global, actions, payload) => {
+addActionHandler('createChannel', (global, actions, payload) => {
   const {
     title, about, photo, memberIds,
   } = payload!;
@@ -269,7 +269,7 @@ addReducer('createChannel', (global, actions, payload) => {
   void createChannel(title, members, about, photo);
 });
 
-addReducer('joinChannel', (global, actions, payload) => {
+addActionHandler('joinChannel', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -283,7 +283,7 @@ addReducer('joinChannel', (global, actions, payload) => {
   }
 });
 
-addReducer('deleteChatUser', (global, actions, payload) => {
+addActionHandler('deleteChatUser', (global, actions, payload) => {
   const { chatId, userId }: { chatId: string; userId: string } = payload!;
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
@@ -301,7 +301,7 @@ addReducer('deleteChatUser', (global, actions, payload) => {
   void callApi('deleteChatUser', { chat, user });
 });
 
-addReducer('deleteChat', (global, actions, payload) => {
+addActionHandler('deleteChat', (global, actions, payload) => {
   const { chatId }: { chatId: string } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -318,7 +318,7 @@ addReducer('deleteChat', (global, actions, payload) => {
   void callApi('deleteChat', { chatId: chat.id });
 });
 
-addReducer('leaveChannel', (global, actions, payload) => {
+addActionHandler('leaveChannel', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -338,7 +338,7 @@ addReducer('leaveChannel', (global, actions, payload) => {
   }
 });
 
-addReducer('deleteChannel', (global, actions, payload) => {
+addActionHandler('deleteChannel', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -358,7 +358,7 @@ addReducer('deleteChannel', (global, actions, payload) => {
   }
 });
 
-addReducer('createGroupChat', (global, actions, payload) => {
+addActionHandler('createGroupChat', (global, actions, payload) => {
   const { title, memberIds, photo } = payload!;
   const members = (memberIds as string[])
     .map((id) => selectUser(global, id))
@@ -367,7 +367,7 @@ addReducer('createGroupChat', (global, actions, payload) => {
   void createGroupChat(title, members, photo);
 });
 
-addReducer('toggleChatPinned', (global, actions, payload) => {
+addActionHandler('toggleChatPinned', (global, actions, payload) => {
   const { id, folderId } = payload!;
   const chat = selectChat(global, id);
   if (!chat) {
@@ -403,7 +403,7 @@ addReducer('toggleChatPinned', (global, actions, payload) => {
   }
 });
 
-addReducer('toggleChatArchived', (global, actions, payload) => {
+addActionHandler('toggleChatArchived', (global, actions, payload) => {
   const { id } = payload!;
   const chat = selectChat(global, id);
   if (chat) {
@@ -414,15 +414,15 @@ addReducer('toggleChatArchived', (global, actions, payload) => {
   }
 });
 
-addReducer('loadChatFolders', () => {
+addActionHandler('loadChatFolders', () => {
   void loadChatFolders();
 });
 
-addReducer('loadRecommendedChatFolders', () => {
+addActionHandler('loadRecommendedChatFolders', () => {
   void loadRecommendedChatFolders();
 });
 
-addReducer('editChatFolders', (global, actions, payload) => {
+addActionHandler('editChatFolders', (global, actions, payload) => {
   const { chatId, idsToRemove, idsToAdd } = payload!;
 
   (idsToRemove as number[]).forEach(async (id) => {
@@ -453,7 +453,7 @@ addReducer('editChatFolders', (global, actions, payload) => {
   });
 });
 
-addReducer('editChatFolder', (global, actions, payload) => {
+addActionHandler('editChatFolder', (global, actions, payload) => {
   const { id, folderUpdate } = payload!;
   const folder = selectChatFolder(global, id);
 
@@ -470,7 +470,7 @@ addReducer('editChatFolder', (global, actions, payload) => {
   }
 });
 
-addReducer('addChatFolder', (global, actions, payload) => {
+addActionHandler('addChatFolder', (global, actions, payload) => {
   const { folder } = payload!;
   const { orderedIds } = global.chatFolders;
   const maxId = orderedIds?.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
@@ -478,7 +478,7 @@ addReducer('addChatFolder', (global, actions, payload) => {
   void createChatFolder(folder, maxId);
 });
 
-addReducer('deleteChatFolder', (global, actions, payload) => {
+addActionHandler('deleteChatFolder', (global, actions, payload) => {
   const { id } = payload!;
   const folder = selectChatFolder(global, id);
 
@@ -487,7 +487,7 @@ addReducer('deleteChatFolder', (global, actions, payload) => {
   }
 });
 
-addReducer('toggleChatUnread', (global, actions, payload) => {
+addActionHandler('toggleChatUnread', (global, actions, payload) => {
   const { id } = payload!;
   const { serverTimeOffset } = global;
   const chat = selectChat(global, id);
@@ -503,7 +503,7 @@ addReducer('toggleChatUnread', (global, actions, payload) => {
   }
 });
 
-addReducer('openChatByInvite', (global, actions, payload) => {
+addActionHandler('openChatByInvite', (global, actions, payload) => {
   const { hash } = payload!;
 
   (async () => {
@@ -516,7 +516,7 @@ addReducer('openChatByInvite', (global, actions, payload) => {
   })();
 });
 
-addReducer('openChatByPhoneNumber', (global, actions, payload) => {
+addActionHandler('openChatByPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
   (async () => {
@@ -536,7 +536,7 @@ addReducer('openChatByPhoneNumber', (global, actions, payload) => {
   })();
 });
 
-addReducer('openTelegramLink', (global, actions, payload) => {
+addActionHandler('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
   if (url.match(RE_TG_LINK)) {
     processDeepLink(url.match(RE_TG_LINK)[0]);
@@ -604,7 +604,7 @@ addReducer('openTelegramLink', (global, actions, payload) => {
   }
 });
 
-addReducer('acceptInviteConfirmation', (global, actions, payload) => {
+addActionHandler('acceptInviteConfirmation', (global, actions, payload) => {
   const { hash } = payload!;
   (async () => {
     const result = await callApi('importChatInvite', { hash });
@@ -616,7 +616,7 @@ addReducer('acceptInviteConfirmation', (global, actions, payload) => {
   })();
 });
 
-addReducer('openChatByUsername', (global, actions, payload) => {
+addActionHandler('openChatByUsername', (global, actions, payload) => {
   const {
     username, messageId, commentId, startParam,
   } = payload!;
@@ -654,7 +654,7 @@ addReducer('openChatByUsername', (global, actions, payload) => {
   })();
 });
 
-addReducer('togglePreHistoryHidden', (global, actions, payload) => {
+addActionHandler('togglePreHistoryHidden', (global, actions, payload) => {
   const { chatId, isEnabled } = payload!;
   let chat = selectChat(global, chatId);
 
@@ -677,7 +677,7 @@ addReducer('togglePreHistoryHidden', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateChatDefaultBannedRights', (global, actions, payload) => {
+addActionHandler('updateChatDefaultBannedRights', (global, actions, payload) => {
   const { chatId, bannedRights } = payload!;
   const chat = selectChat(global, chatId);
 
@@ -688,7 +688,7 @@ addReducer('updateChatDefaultBannedRights', (global, actions, payload) => {
   void callApi('updateChatDefaultBannedRights', { chat, bannedRights });
 });
 
-addReducer('updateChatMemberBannedRights', (global, actions, payload) => {
+addActionHandler('updateChatMemberBannedRights', (global, actions, payload) => {
   const { chatId, userId, bannedRights } = payload!;
   let chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
@@ -743,7 +743,7 @@ addReducer('updateChatMemberBannedRights', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateChatAdmin', (global, actions, payload) => {
+addActionHandler('updateChatAdmin', (global, actions, payload) => {
   const {
     chatId, userId, adminRights, customTitle,
   } = payload!;
@@ -798,7 +798,7 @@ addReducer('updateChatAdmin', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateChat', (global, actions, payload) => {
+addActionHandler('updateChat', (global, actions, payload) => {
   const {
     chatId, title, about, photo,
   } = payload!;
@@ -827,7 +827,7 @@ addReducer('updateChat', (global, actions, payload) => {
   })();
 });
 
-addReducer('toggleSignatures', (global, actions, payload) => {
+addActionHandler('toggleSignatures', (global, actions, payload) => {
   const { chatId, isEnabled } = payload!;
   const chat = selectChat(global, chatId);
 
@@ -838,7 +838,7 @@ addReducer('toggleSignatures', (global, actions, payload) => {
   void callApi('toggleSignatures', { chat, isEnabled });
 });
 
-addReducer('loadGroupsForDiscussion', () => {
+addActionHandler('loadGroupsForDiscussion', () => {
   (async () => {
     const groups = await callApi('fetchGroupsForDiscussion');
     if (!groups) {
@@ -864,7 +864,7 @@ addReducer('loadGroupsForDiscussion', () => {
   })();
 });
 
-addReducer('linkDiscussionGroup', (global, actions, payload) => {
+addActionHandler('linkDiscussionGroup', (global, actions, payload) => {
   const { channelId, chatId } = payload!;
 
   const channel = selectChat(global, channelId);
@@ -902,7 +902,7 @@ addReducer('linkDiscussionGroup', (global, actions, payload) => {
   })();
 });
 
-addReducer('unlinkDiscussionGroup', (global, actions, payload) => {
+addActionHandler('unlinkDiscussionGroup', (global, actions, payload) => {
   const { channelId } = payload!;
 
   const channel = selectChat(global, channelId);
@@ -923,7 +923,7 @@ addReducer('unlinkDiscussionGroup', (global, actions, payload) => {
   })();
 });
 
-addReducer('setActiveChatFolder', (global, actions, payload) => {
+addActionHandler('setActiveChatFolder', (global, actions, payload) => {
   return {
     ...global,
     chatFolders: {
@@ -933,7 +933,7 @@ addReducer('setActiveChatFolder', (global, actions, payload) => {
   };
 });
 
-addReducer('loadMoreMembers', (global) => {
+addActionHandler('loadMoreMembers', (global) => {
   (async () => {
     const { chatId } = selectCurrentMessageList(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
@@ -959,7 +959,7 @@ addReducer('loadMoreMembers', (global) => {
   })();
 });
 
-addReducer('addChatMembers', (global, actions, payload) => {
+addActionHandler('addChatMembers', (global, actions, payload) => {
   const { chatId, memberIds } = payload;
   const chat = selectChat(global, chatId);
   const users = (memberIds as string[]).map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any);
@@ -976,7 +976,7 @@ addReducer('addChatMembers', (global, actions, payload) => {
   })();
 });
 
-addReducer('deleteChatMember', (global, actions, payload) => {
+addActionHandler('deleteChatMember', (global, actions, payload) => {
   const { chatId, userId } = payload;
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
@@ -991,7 +991,7 @@ addReducer('deleteChatMember', (global, actions, payload) => {
   })();
 });
 
-addReducer('toggleIsProtected', (global, actions, payload) => {
+addActionHandler('toggleIsProtected', (global, actions, payload) => {
   const { chatId, isProtected } = payload;
   const chat = selectChat(global, chatId);
 
@@ -1002,7 +1002,7 @@ addReducer('toggleIsProtected', (global, actions, payload) => {
   void callApi('toggleIsProtected', { chat, isProtected });
 });
 
-addReducer('setChatEnabledReactions', (global, actions, payload) => {
+addActionHandler('setChatEnabledReactions', (global, actions, payload) => {
   const { chatId, enabledReactions } = payload;
   const chat = selectChat(global, chatId);
 
@@ -1155,7 +1155,7 @@ async function createChannel(title: string, users: ApiUser[], about?: string, ph
     },
   };
   setGlobal(global);
-  getDispatch().openChat({ id: channelId, shouldReplaceHistory: true });
+  getActions().openChat({ id: channelId, shouldReplaceHistory: true });
 
   if (channelId && accessHash && photo) {
     await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
@@ -1192,7 +1192,7 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
       },
     };
     setGlobal(global);
-    getDispatch()
+    getActions()
       .openChat({
         id: chatId,
         shouldReplaceHistory: true,

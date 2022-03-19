@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChat } from '../../api/types';
 
@@ -63,7 +63,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteChannel,
     deleteChatUser,
     blockContact,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);

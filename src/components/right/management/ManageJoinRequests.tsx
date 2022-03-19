@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat } from '../../../api/types';
 
@@ -38,7 +38,7 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
   isChannel,
   onClose,
 }) => {
-  const { hideAllChatJoinRequests, loadChatJoinRequests } = getDispatch();
+  const { hideAllChatJoinRequests, loadChatJoinRequests } = getActions();
   const [isAcceptAllDialogOpen, openAcceptAllDialog, closeAcceptAllDialog] = useFlag();
   const [isRejectAllDialogOpen, openRejectAllDialog, closeRejectAllDialog] = useFlag();
 

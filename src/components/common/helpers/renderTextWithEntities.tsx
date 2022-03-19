@@ -1,6 +1,6 @@
 import { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
 import renderText, { TextFilter } from './renderText';
@@ -454,10 +454,10 @@ function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
 }
 
 function handleBotCommandClick(e: MouseEvent<HTMLAnchorElement>) {
-  getDispatch().sendBotCommand({ command: e.currentTarget.innerText });
+  getActions().sendBotCommand({ command: e.currentTarget.innerText });
 }
 
 function handleHashtagClick(e: MouseEvent<HTMLAnchorElement>) {
-  getDispatch().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
-  getDispatch().searchTextMessagesLocal();
+  getActions().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
+  getActions().searchTextMessagesLocal();
 }

@@ -9,7 +9,7 @@ import Menu from '../../ui/Menu';
 import BotCommand from './BotCommand';
 
 import './BotCommandMenu.scss';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export type OwnProps = {
 const BotCommandMenu: FC<OwnProps> = ({
   isOpen, botCommands, onClose,
 }) => {
-  const { sendBotCommand } = getDispatch();
+  const { sendBotCommand } = getActions();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_SINGLE_COLUMN_LAYOUT);
 

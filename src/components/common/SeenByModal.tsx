@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import useLang from '../../hooks/useLang';
 import { selectChatMessage } from '../../modules/selectors';
@@ -27,7 +27,7 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
   const {
     openChat,
     closeSeenByModal,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

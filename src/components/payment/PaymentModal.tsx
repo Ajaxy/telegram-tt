@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 import { PaymentStep, ShippingOption, Price } from '../../types';
@@ -86,7 +86,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
     setPaymentStep,
     sendCredentialsInfo,
     clearPaymentError,
-  } = getDispatch();
+  } = getActions();
 
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);

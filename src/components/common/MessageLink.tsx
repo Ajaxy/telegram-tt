@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 import { ApiMessage } from '../../api/types';
 
@@ -16,7 +16,7 @@ type OwnProps = {
 const MessageLink: FC<OwnProps> = ({
   className, message, children,
 }) => {
-  const { focusMessage } = getDispatch();
+  const { focusMessage } = getActions();
 
   const handleMessageClick = useCallback((): void => {
     if (message) {

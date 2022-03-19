@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { throttle } from '../../util/schedulers';
 import { selectCurrentStickerSearch } from '../../modules/selectors';
@@ -36,7 +36,7 @@ const StickerSearch: FC<OwnProps & StateProps> = ({
   featuredIds,
   resultIds,
 }) => {
-  const { loadFeaturedStickers } = getDispatch();
+  const { loadFeaturedStickers } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

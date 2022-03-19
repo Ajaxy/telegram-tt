@@ -1,9 +1,9 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { callApi } from '../../../api/gramjs';
 import { replaceSettings, updateTwoFaSettings } from '../../reducers';
 
-addReducer('loadPasswordInfo', () => {
+addActionHandler('loadPasswordInfo', () => {
   (async () => {
     const result = await callApi('getPasswordInfo');
     if (!result) {
@@ -17,7 +17,7 @@ addReducer('loadPasswordInfo', () => {
   })();
 });
 
-addReducer('checkPassword', (global, actions, payload) => {
+addActionHandler('checkPassword', (global, actions, payload) => {
   const { currentPassword, onSuccess } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
@@ -33,7 +33,7 @@ addReducer('checkPassword', (global, actions, payload) => {
   })();
 });
 
-addReducer('clearPassword', (global, actions, payload) => {
+addActionHandler('clearPassword', (global, actions, payload) => {
   const { currentPassword, onSuccess } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
@@ -49,7 +49,7 @@ addReducer('clearPassword', (global, actions, payload) => {
   })();
 });
 
-addReducer('updatePassword', (global, actions, payload) => {
+addActionHandler('updatePassword', (global, actions, payload) => {
   const {
     currentPassword, password, hint, email, onSuccess,
   } = payload;
@@ -67,7 +67,7 @@ addReducer('updatePassword', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateRecoveryEmail', (global, actions, payload) => {
+addActionHandler('updateRecoveryEmail', (global, actions, payload) => {
   const {
     currentPassword, email, onSuccess,
   } = payload;
@@ -85,12 +85,12 @@ addReducer('updateRecoveryEmail', (global, actions, payload) => {
   })();
 });
 
-addReducer('provideTwoFaEmailCode', (global, actions, payload) => {
+addActionHandler('provideTwoFaEmailCode', (global, actions, payload) => {
   const { code } = payload;
 
   void callApi('provideRecoveryEmailCode', code);
 });
 
-addReducer('clearTwoFaError', (global) => {
+addActionHandler('clearTwoFaError', (global) => {
   return updateTwoFaSettings(global, { error: undefined });
 });

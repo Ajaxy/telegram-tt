@@ -1,6 +1,6 @@
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import { addReducer, getGlobal } from '../modules';
+import { addActionHandler, getGlobal } from '../modules';
 
 import { GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
@@ -45,7 +45,7 @@ export function initCache() {
     return;
   }
 
-  addReducer('saveSession', () => {
+  addActionHandler('saveSession', () => {
     if (isCaching) {
       return;
     }
@@ -53,7 +53,7 @@ export function initCache() {
     setupCaching();
   });
 
-  addReducer('reset', () => {
+  addActionHandler('reset', () => {
     localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
 
     if (!isCaching) {

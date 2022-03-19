@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, memo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiVideo } from '../../../api/types';
 
@@ -36,7 +36,7 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   savedGifs,
   onGifSelect,
 }) => {
-  const { loadSavedGifs } = getDispatch();
+  const { loadSavedGifs } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

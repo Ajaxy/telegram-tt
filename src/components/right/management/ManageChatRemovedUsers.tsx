@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
@@ -37,7 +37,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const { updateChatMemberBannedRights } = getDispatch();
+  const { updateChatMemberBannedRights } = getActions();
 
   const lang = useLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();

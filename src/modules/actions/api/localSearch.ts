@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import { ApiChat, MAIN_THREAD_ID } from '../../../api/types';
@@ -23,7 +23,7 @@ import {
 } from '../../reducers';
 import { SharedMediaType } from '../../../types';
 
-addReducer('searchTextMessagesLocal', (global) => {
+addActionHandler('searchTextMessagesLocal', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
   const chat = chatId ? selectChat(global, chatId) : undefined;
   const currentSearch = selectCurrentTextSearch(global);
@@ -43,7 +43,7 @@ addReducer('searchTextMessagesLocal', (global) => {
   void searchTextMessages(chat, threadId, topMessageId, query, offsetId);
 });
 
-addReducer('searchMediaMessagesLocal', (global) => {
+addActionHandler('searchMediaMessagesLocal', (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   if (!chatId) {
     return;
@@ -67,7 +67,7 @@ addReducer('searchMediaMessagesLocal', (global) => {
   void searchSharedMedia(chat, type, offsetId);
 });
 
-addReducer('searchMessagesByDate', (global, actions, payload) => {
+addActionHandler('searchMessagesByDate', (global, actions, payload) => {
   const { timestamp } = payload!;
 
   const { chatId } = selectCurrentMessageList(global) || {};
@@ -180,7 +180,7 @@ async function searchMessagesByDate(chat: ApiChat, timestamp: number) {
     return;
   }
 
-  getDispatch().focusMessage({
+  getActions().focusMessage({
     chatId: chat.id,
     messageId,
   });

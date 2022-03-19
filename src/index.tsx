@@ -4,7 +4,7 @@ import './util/setupServiceWorker';
 import React from './lib/teact/teact';
 import TeactDOM from './lib/teact/teact-dom';
 
-import { getDispatch, getGlobal } from './modules';
+import { getActions, getGlobal } from './modules';
 import './global';
 
 import { DEBUG } from './config';
@@ -18,7 +18,7 @@ if (DEBUG) {
   console.log('>>> INIT');
 }
 
-getDispatch().init();
+getActions().init();
 
 if (DEBUG) {
   // eslint-disable-next-line no-console

@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
 
@@ -23,7 +23,7 @@ type StateProps = {
 const Contact: FC<OwnProps & StateProps> = ({
   contact, user, phoneCodeList,
 }) => {
-  const { openChat } = getDispatch();
+  const { openChat } = getActions();
 
   const {
     firstName,

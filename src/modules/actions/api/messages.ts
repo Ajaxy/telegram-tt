@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { GlobalActions } from '../../../global/types';
 import {
@@ -72,7 +72,7 @@ const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
 const runDebouncedForMarkRead = debounce((cb) => cb(), 500, false);
 
-addReducer('loadViewportMessages', (global, actions, payload) => {
+addActionHandler('loadViewportMessages', (global, actions, payload) => {
   const {
     direction = LoadMoreDirection.Around,
     isBudgetPreload = false,
@@ -157,7 +157,7 @@ async function loadWithBudget(
   }
 }
 
-addReducer('loadMessage', (global, actions, payload) => {
+addActionHandler('loadMessage', (global, actions, payload) => {
   const {
     chatId, messageId, replyOriginForId, threadUpdate,
   } = payload!;
@@ -183,7 +183,7 @@ addReducer('loadMessage', (global, actions, payload) => {
   })();
 });
 
-addReducer('sendMessage', (global, actions, payload) => {
+addActionHandler('sendMessage', (global, actions, payload) => {
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return undefined;
@@ -273,7 +273,7 @@ addReducer('sendMessage', (global, actions, payload) => {
   return undefined;
 });
 
-addReducer('editMessage', (global, actions, payload) => {
+addActionHandler('editMessage', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const { text, entities } = payload!;
 
@@ -296,7 +296,7 @@ addReducer('editMessage', (global, actions, payload) => {
   actions.setEditingId({ messageId: undefined });
 });
 
-addReducer('cancelSendingMessage', (global, actions, payload) => {
+addActionHandler('cancelSendingMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
   const message = selectChatMessage(global, chatId, messageId);
   const progressCallback = message && uploadProgressCallbacks.get(message.previousLocalId || message.id);
@@ -311,7 +311,7 @@ addReducer('cancelSendingMessage', (global, actions, payload) => {
   });
 });
 
-addReducer('saveDraft', (global, actions, payload) => {
+addActionHandler('saveDraft', (global, actions, payload) => {
   const { chatId, threadId, draft } = payload!;
   if (!draft) {
     return undefined;
@@ -335,7 +335,7 @@ addReducer('saveDraft', (global, actions, payload) => {
   return global;
 });
 
-addReducer('clearDraft', (global, actions, payload) => {
+addActionHandler('clearDraft', (global, actions, payload) => {
   const { chatId, threadId, localOnly } = payload!;
   if (!selectDraft(global, chatId, threadId)) {
     return undefined;
@@ -353,13 +353,13 @@ addReducer('clearDraft', (global, actions, payload) => {
   return global;
 });
 
-addReducer('toggleMessageWebPage', (global, actions, payload) => {
+addActionHandler('toggleMessageWebPage', (global, actions, payload) => {
   const { chatId, threadId, noWebPage } = payload!;
 
   return replaceThreadParam(global, chatId, threadId, 'noWebPage', noWebPage);
 });
 
-addReducer('pinMessage', (global, actions, payload) => {
+addActionHandler('pinMessage', (global, actions, payload) => {
   const chat = selectCurrentChat(global);
   if (!chat) {
     return;
@@ -374,7 +374,7 @@ addReducer('pinMessage', (global, actions, payload) => {
   });
 });
 
-addReducer('unpinAllMessages', (global, actions, payload) => {
+addActionHandler('unpinAllMessages', (global, actions, payload) => {
   const chat = selectChat(global, payload.chatId);
   if (!chat) {
     return;
@@ -390,7 +390,7 @@ async function unpinAllMessages(chat: ApiChat) {
   setGlobal(global);
 }
 
-addReducer('deleteMessages', (global, actions, payload) => {
+addActionHandler('deleteMessages', (global, actions, payload) => {
   const { messageIds, shouldDeleteForAll } = payload!;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
@@ -407,7 +407,7 @@ addReducer('deleteMessages', (global, actions, payload) => {
   }
 });
 
-addReducer('deleteScheduledMessages', (global, actions, payload) => {
+addActionHandler('deleteScheduledMessages', (global, actions, payload) => {
   const { messageIds } = payload!;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
@@ -425,7 +425,7 @@ addReducer('deleteScheduledMessages', (global, actions, payload) => {
   }
 });
 
-addReducer('deleteHistory', (global, actions, payload) => {
+addActionHandler('deleteHistory', (global, actions, payload) => {
   (async () => {
     const { chatId, shouldDeleteForAll } = payload!;
     const chat = selectChat(global, chatId);
@@ -444,7 +444,7 @@ addReducer('deleteHistory', (global, actions, payload) => {
   })();
 });
 
-addReducer('reportMessages', (global, actions, payload) => {
+addActionHandler('reportMessages', (global, actions, payload) => {
   (async () => {
     const {
       messageIds, reason, description,
@@ -469,7 +469,7 @@ addReducer('reportMessages', (global, actions, payload) => {
   })();
 });
 
-addReducer('sendMessageAction', (global, actions, payload) => {
+addActionHandler('sendMessageAction', (global, actions, payload) => {
   (async () => {
     const { action, chatId, threadId } = payload!;
     if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
@@ -483,7 +483,7 @@ addReducer('sendMessageAction', (global, actions, payload) => {
   })();
 });
 
-addReducer('markMessageListRead', (global, actions, payload) => {
+addActionHandler('markMessageListRead', (global, actions, payload) => {
   const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
@@ -535,7 +535,7 @@ addReducer('markMessageListRead', (global, actions, payload) => {
   });
 });
 
-addReducer('markMessagesRead', (global, actions, payload) => {
+addActionHandler('markMessagesRead', (global, actions, payload) => {
   const chat = selectCurrentChat(global);
   if (!chat) {
     return;
@@ -546,12 +546,12 @@ addReducer('markMessagesRead', (global, actions, payload) => {
   void callApi('markMessagesRead', { chat, messageIds });
 });
 
-addReducer('loadWebPagePreview', (global, actions, payload) => {
+addActionHandler('loadWebPagePreview', (global, actions, payload) => {
   const { text } = payload!;
   void loadWebPagePreview(text);
 });
 
-addReducer('clearWebPagePreview', (global) => {
+addActionHandler('clearWebPagePreview', (global) => {
   if (!global.webPagePreview) {
     return undefined;
   }
@@ -562,7 +562,7 @@ addReducer('clearWebPagePreview', (global) => {
   };
 });
 
-addReducer('sendPollVote', (global, actions, payload) => {
+addActionHandler('sendPollVote', (global, actions, payload) => {
   const { chatId, messageId, options } = payload!;
   const chat = selectChat(global, chatId);
 
@@ -571,7 +571,7 @@ addReducer('sendPollVote', (global, actions, payload) => {
   }
 });
 
-addReducer('loadPollOptionResults', (global, actions, payload) => {
+addActionHandler('loadPollOptionResults', (global, actions, payload) => {
   const {
     chat, messageId, option, offset, limit, shouldResetVoters,
   } = payload!;
@@ -579,7 +579,7 @@ addReducer('loadPollOptionResults', (global, actions, payload) => {
   void loadPollOptionResults(chat, messageId, option, offset, limit, shouldResetVoters);
 });
 
-addReducer('forwardMessages', (global, action, payload) => {
+addActionHandler('forwardMessages', (global, action, payload) => {
   const { fromChatId, messageIds, toChatId } = global.forwardMessages;
   const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
@@ -633,7 +633,7 @@ addReducer('forwardMessages', (global, action, payload) => {
   });
 });
 
-addReducer('loadScheduledHistory', (global, actions, payload) => {
+addActionHandler('loadScheduledHistory', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -643,7 +643,7 @@ addReducer('loadScheduledHistory', (global, actions, payload) => {
   void loadScheduledHistory(chat);
 });
 
-addReducer('sendScheduledMessages', (global, actions, payload) => {
+addActionHandler('sendScheduledMessages', (global, actions, payload) => {
   const {
     chatId, id,
   } = payload!;
@@ -660,7 +660,7 @@ addReducer('sendScheduledMessages', (global, actions, payload) => {
   });
 });
 
-addReducer('rescheduleMessage', (global, actions, payload) => {
+addActionHandler('rescheduleMessage', (global, actions, payload) => {
   const {
     chatId, messageId, scheduledAt,
   } = payload!;
@@ -678,7 +678,7 @@ addReducer('rescheduleMessage', (global, actions, payload) => {
   });
 });
 
-addReducer('requestThreadInfoUpdate', (global, actions, payload) => {
+addActionHandler('requestThreadInfoUpdate', (global, actions, payload) => {
   const { chatId, threadId } = payload;
   const chat = selectThreadOriginChat(global, chatId, threadId);
   if (!chat) {
@@ -950,7 +950,7 @@ async function loadPollOptionResults(
   });
 }
 
-addReducer('loadPinnedMessages', (global, actions, payload) => {
+addActionHandler('loadPinnedMessages', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -960,7 +960,7 @@ addReducer('loadPinnedMessages', (global, actions, payload) => {
   void loadPinnedMessages(chat);
 });
 
-addReducer('loadSeenBy', (global, actions, payload) => {
+addActionHandler('loadSeenBy', (global, actions, payload) => {
   const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -979,7 +979,7 @@ addReducer('loadSeenBy', (global, actions, payload) => {
   })();
 });
 
-addReducer('saveDefaultSendAs', (global, actions, payload) => {
+addActionHandler('saveDefaultSendAs', (global, actions, payload) => {
   const { chatId, sendAsId } = payload;
   const chat = selectChat(global, chatId);
   const sendAsChat = selectChat(global, sendAsId) || selectUser(global, sendAsId);
@@ -997,7 +997,7 @@ addReducer('saveDefaultSendAs', (global, actions, payload) => {
   });
 });
 
-addReducer('loadSendAs', (global, actions, payload) => {
+addActionHandler('loadSendAs', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -1060,7 +1060,7 @@ async function loadScheduledHistory(chat: ApiChat) {
   setGlobal(global);
 }
 
-addReducer('loadSponsoredMessages', (global, actions, payload) => {
+addActionHandler('loadSponsoredMessages', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -1081,7 +1081,7 @@ addReducer('loadSponsoredMessages', (global, actions, payload) => {
   })();
 });
 
-addReducer('viewSponsoredMessage', (global, actions, payload) => {
+addActionHandler('viewSponsoredMessage', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   const message = selectSponsoredMessage(global, chatId);

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
@@ -45,7 +45,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   blockedIds,
   phoneCodeList,
 }) => {
-  const { unblockContact } = getDispatch();
+  const { unblockContact } = getActions();
 
   const lang = useLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();

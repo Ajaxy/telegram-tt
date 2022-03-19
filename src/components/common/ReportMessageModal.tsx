@@ -3,7 +3,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useState,
 } from '../../lib/teact/teact';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 import { ApiReportReason } from '../../api/types';
 
@@ -28,7 +28,7 @@ const ReportMessageModal: FC<OwnProps> = ({
   const {
     reportMessages,
     exitMessageSelectMode,
-  } = getDispatch();
+  } = getActions();
 
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
   const [description, setDescription] = useState('');

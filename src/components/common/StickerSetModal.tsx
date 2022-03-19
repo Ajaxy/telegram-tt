@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiSticker, ApiStickerSet } from '../../api/types';
 
@@ -47,7 +47,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     loadStickers,
     toggleStickerSet,
     sendMessage,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 import React, { useEffect, useRef } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../modules';
+import { getActions } from '../../../../modules';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/environment';
 import windowSize from '../../../../util/windowSize';
@@ -33,7 +33,7 @@ export default function useOuterHandlers(
   isOwn: boolean,
   shouldHandleMouseLeave: boolean,
 ) {
-  const { setReplyingToId, sendDefaultReaction } = getDispatch();
+  const { setReplyingToId, sendDefaultReaction } = getActions();
 
   const [isQuickReactionVisible, markQuickReactionVisible, unmarkQuickReactionVisible] = useFlag();
   const [isSwiped, markSwiped, unmarkSwiped] = useFlag();

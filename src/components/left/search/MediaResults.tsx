@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
@@ -41,7 +41,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   const {
     searchMessagesGlobal,
     openMediaViewer,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

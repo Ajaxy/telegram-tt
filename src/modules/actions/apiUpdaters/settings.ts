@@ -1,10 +1,10 @@
-import { addReducer, setGlobal } from '../..';
+import { addActionHandler, setGlobal } from '../..';
 
 import { ApiUpdate } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 import { addNotifyException, updateChat, updateNotifySettings } from '../../reducers';
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate): GlobalState | undefined => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate): GlobalState | undefined => {
   switch (update['@type']) {
     case 'updateNotifySettings': {
       return updateNotifySettings(global, update.peerType, update.isSilent, update.shouldShowPreviews);

@@ -1,4 +1,4 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
 import { GlobalState } from '../../../global/types';
 import { ApiError } from '../../../api/types';
@@ -10,14 +10,14 @@ import generateIdFor from '../../../util/generateIdFor';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
-addReducer('toggleChatInfo', (global, action, payload) => {
+addActionHandler('toggleChatInfo', (global, action, payload) => {
   return {
     ...global,
     isChatInfoShown: payload !== undefined ? payload : !global.isChatInfoShown,
   };
 });
 
-addReducer('setLeftColumnWidth', (global, actions, payload) => {
+addActionHandler('setLeftColumnWidth', (global, actions, payload) => {
   const leftColumnWidth = payload;
 
   return {
@@ -26,14 +26,14 @@ addReducer('setLeftColumnWidth', (global, actions, payload) => {
   };
 });
 
-addReducer('resetLeftColumnWidth', (global) => {
+addActionHandler('resetLeftColumnWidth', (global) => {
   return {
     ...global,
     leftColumnWidth: undefined,
   };
 });
 
-addReducer('toggleManagement', (global): GlobalState | undefined => {
+addActionHandler('toggleManagement', (global): GlobalState | undefined => {
   const { chatId } = selectCurrentMessageList(global) || {};
 
   if (!chatId) {
@@ -54,7 +54,7 @@ addReducer('toggleManagement', (global): GlobalState | undefined => {
   };
 });
 
-addReducer('requestNextManagementScreen', (global, actions, payload): GlobalState | undefined => {
+addActionHandler('requestNextManagementScreen', (global, actions, payload): GlobalState | undefined => {
   const { screen } = payload || {};
   const { chatId } = selectCurrentMessageList(global) || {};
 
@@ -77,7 +77,7 @@ addReducer('requestNextManagementScreen', (global, actions, payload): GlobalStat
   };
 });
 
-addReducer('closeManagement', (global): GlobalState | undefined => {
+addActionHandler('closeManagement', (global): GlobalState | undefined => {
   const { chatId } = selectCurrentMessageList(global) || {};
 
   if (!chatId) {
@@ -98,7 +98,7 @@ addReducer('closeManagement', (global): GlobalState | undefined => {
   };
 });
 
-addReducer('openChat', (global) => {
+addActionHandler('openChat', (global) => {
   if (!IS_SINGLE_COLUMN_LAYOUT && !IS_TABLET_COLUMN_LAYOUT) {
     return undefined;
   }
@@ -109,21 +109,21 @@ addReducer('openChat', (global) => {
   };
 });
 
-addReducer('toggleStatistics', (global) => {
+addActionHandler('toggleStatistics', (global) => {
   return {
     ...global,
     isStatisticsShown: !global.isStatisticsShown,
   };
 });
 
-addReducer('toggleLeftColumn', (global) => {
+addActionHandler('toggleLeftColumn', (global) => {
   return {
     ...global,
     isLeftColumnShown: !global.isLeftColumnShown,
   };
 });
 
-addReducer('addRecentEmoji', (global, action, payload) => {
+addActionHandler('addRecentEmoji', (global, action, payload) => {
   const { emoji } = payload!;
   const { recentEmojis } = global;
   if (!recentEmojis) {
@@ -145,7 +145,7 @@ addReducer('addRecentEmoji', (global, action, payload) => {
   };
 });
 
-addReducer('addRecentSticker', (global, action, payload) => {
+addActionHandler('addRecentSticker', (global, action, payload) => {
   const { sticker } = payload!;
   const { recent } = global.stickers;
   if (!recent) {
@@ -176,7 +176,7 @@ addReducer('addRecentSticker', (global, action, payload) => {
   };
 });
 
-addReducer('showNotification', (global, actions, payload) => {
+addActionHandler('showNotification', (global, actions, payload) => {
   const notification = payload!;
   notification.localId = generateIdFor({});
 
@@ -194,7 +194,7 @@ addReducer('showNotification', (global, actions, payload) => {
   };
 });
 
-addReducer('dismissNotification', (global, actions, payload) => {
+addActionHandler('dismissNotification', (global, actions, payload) => {
   const newNotifications = global.notifications.filter(({ localId }) => localId !== payload.localId);
 
   return {
@@ -203,7 +203,7 @@ addReducer('dismissNotification', (global, actions, payload) => {
   };
 });
 
-addReducer('showDialog', (global, actions, payload) => {
+addActionHandler('showDialog', (global, actions, payload) => {
   const { data } = payload!;
 
   // Filter out errors that we don't want to show to the user
@@ -227,7 +227,7 @@ addReducer('showDialog', (global, actions, payload) => {
   };
 });
 
-addReducer('dismissDialog', (global) => {
+addActionHandler('dismissDialog', (global) => {
   const newDialogs = [...global.dialogs];
 
   newDialogs.pop();
@@ -238,7 +238,7 @@ addReducer('dismissDialog', (global) => {
   };
 });
 
-addReducer('toggleSafeLinkModal', (global, actions, payload) => {
+addActionHandler('toggleSafeLinkModal', (global, actions, payload) => {
   const { url: safeLinkModalUrl } = payload;
 
   return {
@@ -247,7 +247,7 @@ addReducer('toggleSafeLinkModal', (global, actions, payload) => {
   };
 });
 
-addReducer('openHistoryCalendar', (global, actions, payload) => {
+addActionHandler('openHistoryCalendar', (global, actions, payload) => {
   const { selectedAt } = payload;
 
   return {
@@ -256,7 +256,7 @@ addReducer('openHistoryCalendar', (global, actions, payload) => {
   };
 });
 
-addReducer('closeHistoryCalendar', (global) => {
+addActionHandler('closeHistoryCalendar', (global) => {
   return {
     ...global,
     historyCalendarSelectedAt: undefined,

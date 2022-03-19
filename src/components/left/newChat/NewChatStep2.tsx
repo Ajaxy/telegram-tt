@@ -1,7 +1,7 @@
 import React, {
   FC, useState, useCallback, useEffect, memo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ChatCreationProgress } from '../../../types';
 
@@ -42,7 +42,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
   const {
     createGroupChat,
     createChannel,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

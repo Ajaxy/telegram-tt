@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
@@ -45,7 +45,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   onSearchDateSelect,
 }) => {
-  const { searchMessagesGlobal } = getDispatch();
+  const { searchMessagesGlobal } = getActions();
 
   const lang = useLang();
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {

@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import { initApi, callApi } from '../../../api/gramjs';
@@ -26,7 +26,7 @@ import {
 } from '../../../util/sessions';
 import { forceWebsync } from '../../../util/websync';
 
-addReducer('initApi', (global: GlobalState, actions) => {
+addActionHandler('initApi', (global: GlobalState, actions) => {
   (async () => {
     if (!IS_TEST) {
       await importLegacySession();
@@ -44,7 +44,7 @@ addReducer('initApi', (global: GlobalState, actions) => {
   })();
 });
 
-addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+addActionHandler('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
   void callApi('provideAuthPhoneNumber', phoneNumber.replace(/[^\d]/g, ''));
@@ -56,7 +56,7 @@ addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   };
 });
 
-addReducer('setAuthCode', (global, actions, payload) => {
+addActionHandler('setAuthCode', (global, actions, payload) => {
   const { code } = payload!;
 
   void callApi('provideAuthCode', code);
@@ -68,7 +68,7 @@ addReducer('setAuthCode', (global, actions, payload) => {
   };
 });
 
-addReducer('setAuthPassword', (global, actions, payload) => {
+addActionHandler('setAuthPassword', (global, actions, payload) => {
   const { password } = payload!;
 
   void callApi('provideAuthPassword', password);
@@ -80,13 +80,13 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   };
 });
 
-addReducer('uploadProfilePhoto', (global, actions, payload) => {
+addActionHandler('uploadProfilePhoto', (global, actions, payload) => {
   const { file } = payload!;
 
   void callApi('uploadProfilePhoto', file);
 });
 
-addReducer('signUp', (global, actions, payload) => {
+addActionHandler('signUp', (global, actions, payload) => {
   const { firstName, lastName } = payload!;
 
   void callApi('provideAuthRegistration', { firstName, lastName });
@@ -98,7 +98,7 @@ addReducer('signUp', (global, actions, payload) => {
   };
 });
 
-addReducer('returnToAuthPhoneNumber', (global) => {
+addActionHandler('returnToAuthPhoneNumber', (global) => {
   void callApi('restartAuth');
 
   return {
@@ -107,7 +107,7 @@ addReducer('returnToAuthPhoneNumber', (global) => {
   };
 });
 
-addReducer('goToAuthQrCode', (global) => {
+addActionHandler('goToAuthQrCode', (global) => {
   void callApi('restartAuthWithQr');
 
   return {
@@ -117,7 +117,7 @@ addReducer('goToAuthQrCode', (global) => {
   };
 });
 
-addReducer('saveSession', (global, actions, payload) => {
+addActionHandler('saveSession', (global, actions, payload) => {
   const { sessionData } = payload;
 
   if (sessionData) {
@@ -127,7 +127,7 @@ addReducer('saveSession', (global, actions, payload) => {
   }
 });
 
-addReducer('signOut', () => {
+addActionHandler('signOut', () => {
   (async () => {
     try {
       await unsubscribe();
@@ -137,11 +137,11 @@ addReducer('signOut', () => {
       // Do nothing
     }
 
-    getDispatch().reset();
+    getActions().reset();
   })();
 });
 
-addReducer('reset', () => {
+addActionHandler('reset', () => {
   clearStoredSession();
 
   void cacheApi.clear(MEDIA_CACHE_NAME);
@@ -159,16 +159,16 @@ addReducer('reset', () => {
 
   updateAppBadge(0);
 
-  getDispatch().init();
+  getActions().init();
 });
 
-addReducer('disconnect', () => {
+addActionHandler('disconnect', () => {
   (async () => {
     await callApi('disconnect');
   })();
 });
 
-addReducer('loadNearestCountry', (global) => {
+addActionHandler('loadNearestCountry', (global) => {
   if (global.connectionState !== 'connectionStateReady') {
     return;
   }
@@ -183,7 +183,7 @@ addReducer('loadNearestCountry', (global) => {
   })();
 });
 
-addReducer('setDeviceToken', (global, actions, deviceToken) => {
+addActionHandler('setDeviceToken', (global, actions, deviceToken) => {
   setGlobal({
     ...global,
     push: {
@@ -193,7 +193,7 @@ addReducer('setDeviceToken', (global, actions, deviceToken) => {
   });
 });
 
-addReducer('deleteDeviceToken', (global) => {
+addActionHandler('deleteDeviceToken', (global) => {
   const newGlobal = { ...global };
   delete newGlobal.push;
   setGlobal(newGlobal);

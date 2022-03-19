@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useMemo, memo, useState, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../modules';
 
 import {
   ApiChat, ApiChatMember, ApiUpdateConnectionStateType,
@@ -60,7 +60,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const { setUserSearchQuery, loadContactList } = getDispatch();
+  const { setUserSearchQuery, loadContactList } = getActions();
 
   const lang = useLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);

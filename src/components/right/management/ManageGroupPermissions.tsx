@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ManagementScreens } from '../../../types';
 import { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/types';
@@ -62,7 +62,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const { updateChatDefaultBannedRights } = getDispatch();
+  const { updateChatDefaultBannedRights } = getActions();
 
   const [permissions, setPermissions] = useState<ApiChatBannedRights>({});
   const [havePermissionChanged, setHavePermissionChanged] = useState(false);

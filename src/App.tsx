@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from './lib/teact/teact';
-import { getDispatch, withGlobal } from './modules';
+import { getActions, withGlobal } from './modules';
 
 import { GlobalState } from './global/types';
 
@@ -19,7 +19,7 @@ import { hasStoredSession } from './util/sessions';
 type StateProps = Pick<GlobalState, 'authState'>;
 
 const App: FC<StateProps> = ({ authState }) => {
-  const { disconnect } = getDispatch();
+  const { disconnect } = getActions();
 
   const [isInactive, markInactive] = useFlag(false);
 

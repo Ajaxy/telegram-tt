@@ -6,7 +6,7 @@ import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
 import { getMessageContent, getMessageHtmlId } from '../../../modules/helpers';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import {
@@ -54,7 +54,7 @@ const Album: FC<OwnProps & StateProps> = ({
   activeDownloadIds,
   theme,
 }) => {
-  const { cancelSendingMessage } = getDispatch();
+  const { cancelSendingMessage } = getActions();
 
   const mediaCount = album.messages.length;
 

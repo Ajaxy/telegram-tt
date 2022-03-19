@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
@@ -51,7 +51,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     updatePublicLink,
     updatePrivateLink,
     toggleIsProtected,
-  } = getDispatch();
+  } = getActions();
 
   const isPublic = Boolean(chat.username);
   const privateLink = chat.fullInfo?.inviteLink;

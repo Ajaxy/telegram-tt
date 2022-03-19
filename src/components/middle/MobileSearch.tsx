@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChat } from '../../api/types';
 
@@ -43,7 +43,7 @@ const MobileSearchFooter: FC<StateProps> = ({
     focusMessage,
     closeLocalTextSearch,
     openHistoryCalendar,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);

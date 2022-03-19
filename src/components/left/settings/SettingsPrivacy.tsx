@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { PrivacyVisibility, SettingsScreens } from '../../../types';
 
@@ -50,7 +50,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadAuthorizations,
     loadContentSettings,
     updateContentSettings,
-  } = getDispatch();
+  } = getActions();
 
   useEffect(() => {
     loadBlockedContacts();

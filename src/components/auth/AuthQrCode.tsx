@@ -2,7 +2,7 @@ import QrCreator from 'qr-creator';
 import React, {
   FC, useEffect, useRef, memo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';
@@ -35,7 +35,7 @@ const AuthCode: FC<StateProps> = ({
   const {
     returnToAuthPhoneNumber,
     setSettingOption,
-  } = getDispatch();
+  } = getActions();
 
   const suggestedLanguage = getSuggestedLanguage();
   const lang = useLang();

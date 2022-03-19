@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
@@ -88,7 +88,7 @@ const Audio: FC<OwnProps> = ({
   const seekerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
   const { isRtl } = lang;
-  const dispatch = getDispatch();
+  const dispatch = getActions();
 
   const [isActivated, setIsActivated] = useState(false);
   const shouldLoad = (isActivated || PRELOAD) && lastSyncTime;
@@ -171,7 +171,7 @@ const Audio: FC<OwnProps> = ({
       onPlay(message.id, message.chatId);
     }
 
-    getDispatch().setAudioPlayerOrigin({ origin });
+    getActions().setAudioPlayerOrigin({ origin });
     setIsActivated(!isActivated);
     playPause();
   }, [isUploading, isPlaying, isActivated, playPause, onCancelUpload, onPlay, message.id, message.chatId, origin]);

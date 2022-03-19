@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useMemo, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChatFolder } from '../../api/types';
 
@@ -31,7 +31,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const { editChatFolders } = getDispatch();
+  const { editChatFolders } = getActions();
 
   const lang = useLang();
 

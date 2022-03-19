@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
@@ -57,7 +57,7 @@ const LeftColumn: FC<StateProps> = ({
     clearTwoFaError,
     setLeftColumnWidth,
     resetLeftColumnWidth,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const resizeRef = useRef<HTMLDivElement>(null);

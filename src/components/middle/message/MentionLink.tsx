@@ -1,5 +1,5 @@
 import React, { FC } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 
@@ -23,7 +23,7 @@ const MentionLink: FC<OwnProps & StateProps> = ({
   const {
     openChat,
     openChatByUsername,
-  } = getDispatch();
+  } = getActions();
 
   const handleClick = () => {
     if (userOrChat) {

@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, useCallback, memo, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
 import { GlobalState } from '../../global/types';
@@ -53,7 +53,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullUser,
     openMediaViewer,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

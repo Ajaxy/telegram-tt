@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ISettings, LeftColumnContent } from '../../../types';
 import { ApiChat } from '../../../api/types';
@@ -95,7 +95,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setGlobalSearchDate,
     setSettingOption,
     setGlobalSearchChatId,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const hasMenu = content === LeftColumnContent.ChatList;

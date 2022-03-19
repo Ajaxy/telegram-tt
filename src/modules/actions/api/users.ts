@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import { ApiUser } from '../../../api/types';
@@ -20,7 +20,7 @@ const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
-addReducer('loadFullUser', (global, actions, payload) => {
+addActionHandler('loadFullUser', (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
@@ -32,7 +32,7 @@ addReducer('loadFullUser', (global, actions, payload) => {
   runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
 });
 
-addReducer('loadUser', (global, actions, payload) => {
+addActionHandler('loadUser', (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
@@ -59,7 +59,7 @@ addReducer('loadUser', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadTopUsers', (global) => {
+addActionHandler('loadTopUsers', (global) => {
   const { topPeers: { lastRequestedAt } } = global;
 
   if (!lastRequestedAt || getServerTime(global.serverTimeOffset) - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
@@ -67,15 +67,15 @@ addReducer('loadTopUsers', (global) => {
   }
 });
 
-addReducer('loadContactList', () => {
+addActionHandler('loadContactList', () => {
   void loadContactList();
 });
 
-addReducer('loadCurrentUser', () => {
+addActionHandler('loadCurrentUser', () => {
   void callApi('fetchCurrentUser');
 });
 
-addReducer('loadCommonChats', (global) => {
+addActionHandler('loadCommonChats', (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const user = chatId ? selectUser(global, chatId) : undefined;
   if (!user || isUserBot(user) || user.commonChats?.isFullyLoaded) {
@@ -106,7 +106,7 @@ addReducer('loadCommonChats', (global) => {
   })();
 });
 
-addReducer('updateContact', (global, actions, payload) => {
+addActionHandler('updateContact', (global, actions, payload) => {
   const {
     userId, isMuted, firstName, lastName,
   } = payload!;
@@ -114,7 +114,7 @@ addReducer('updateContact', (global, actions, payload) => {
   void updateContact(userId, isMuted, firstName, lastName);
 });
 
-addReducer('deleteContact', (global, actions, payload) => {
+addActionHandler('deleteContact', (global, actions, payload) => {
   const { userId } = payload!;
 
   void deleteContact(userId);
@@ -178,7 +178,7 @@ async function updateContact(
     return;
   }
 
-  getDispatch().updateChatMutedState({ chatId: userId, isMuted });
+  getActions().updateChatMutedState({ chatId: userId, isMuted });
 
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.InProgress));
 
@@ -223,7 +223,7 @@ async function deleteContact(userId: string) {
   await callApi('deleteContact', { id, accessHash });
 }
 
-addReducer('loadProfilePhotos', (global, actions, payload) => {
+addActionHandler('loadProfilePhotos', (global, actions, payload) => {
   const { profileId } = payload!;
   const isPrivate = isUserId(profileId);
   const user = isPrivate ? selectUser(global, profileId) : undefined;
@@ -251,7 +251,7 @@ addReducer('loadProfilePhotos', (global, actions, payload) => {
   })();
 });
 
-addReducer('setUserSearchQuery', (global, actions, payload) => {
+addActionHandler('setUserSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   if (!query) return;
@@ -261,7 +261,7 @@ addReducer('setUserSearchQuery', (global, actions, payload) => {
   });
 });
 
-addReducer('addContact', (global, actions, payload) => {
+addActionHandler('addContact', (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
@@ -271,7 +271,7 @@ addReducer('addContact', (global, actions, payload) => {
   void callApi('addContact', pick(user, ['id', 'accessHash', 'firstName', 'lastName', 'phoneNumber']));
 });
 
-addReducer('reportSpam', (global, actions, payload) => {
+addActionHandler('reportSpam', (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {

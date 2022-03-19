@@ -1,5 +1,5 @@
 import { useMemo } from '../lib/teact/teact';
-import { getDispatch } from '../modules';
+import { getActions } from '../modules';
 
 import { ApiChat, ApiUser } from '../api/types';
 
@@ -44,7 +44,7 @@ const useChatContextActions = ({
       updateChatMutedState,
       toggleChatArchived,
       toggleChatUnread,
-    } = getDispatch();
+    } = getActions();
 
     const actionAddToFolder = canChangeFolder ? {
       title: lang('ChatList.Filter.AddToFolder'),

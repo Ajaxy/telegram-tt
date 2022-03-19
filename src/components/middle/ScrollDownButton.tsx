@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -36,7 +36,7 @@ const ScrollDownButton: FC<OwnProps & StateProps> = ({
   unreadCount,
   withExtraShift,
 }) => {
-  const { focusNextReply } = getDispatch();
+  const { focusNextReply } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null

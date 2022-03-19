@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { ApiUpdate, MAIN_THREAD_ID } from '../../../api/types';
 
@@ -25,7 +25,7 @@ const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 // Enough to animate and mark as read in Message List
 const CURRENT_CHAT_UNREAD_DELAY = 1500;
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
       if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)) {

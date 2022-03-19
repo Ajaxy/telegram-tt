@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 
@@ -16,7 +16,7 @@ type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authHint'>;
 const AuthPassword: FC<StateProps> = ({
   authIsLoading, authError, authHint,
 }) => {
-  const { setAuthPassword, clearAuthError } = getDispatch();
+  const { setAuthPassword, clearAuthError } = getActions();
 
   const lang = useLang();
   const [showPassword, setShowPassword] = useState(false);

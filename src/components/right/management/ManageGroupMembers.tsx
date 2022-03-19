@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { ApiChatMember, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -62,7 +62,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onChatMemberSelect,
 }) => {
-  const { openChat, setUserSearchQuery, loadContactList } = getDispatch();
+  const { openChat, setUserSearchQuery, loadContactList } = getActions();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);

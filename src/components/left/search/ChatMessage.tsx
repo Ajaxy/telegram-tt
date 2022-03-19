@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
@@ -52,7 +52,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   privateChatUser,
   lastSyncTime,
 }) => {
-  const { focusMessage } = getDispatch();
+  const { focusMessage } = getActions();
 
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));

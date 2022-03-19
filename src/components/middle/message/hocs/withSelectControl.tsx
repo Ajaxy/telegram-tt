@@ -5,7 +5,7 @@ import React, {
   useMemo,
   memo,
 } from '../../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../../modules';
+import { getActions, withGlobal } from '../../../../modules';
 
 import { OwnProps as PhotoProps } from '../Photo';
 import { OwnProps as VideoProps } from '../Video';
@@ -33,7 +33,7 @@ export default function withSelectControl(WrappedComponent: FC) {
       message,
       dimensions,
     } = props;
-    const { toggleMessageSelection } = getDispatch();
+    const { toggleMessageSelection } = getActions();
 
     const handleMessageSelect = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();

@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 import { callApi } from '../../../api/gramjs';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { ApiAppConfig, ApiMediaFormat } from '../../../api/types';
@@ -19,7 +19,7 @@ const INTERACTION_RANDOM_OFFSET = 40;
 
 let interactionLocalId = 0;
 
-addReducer('loadAvailableReactions', () => {
+addActionHandler('loadAvailableReactions', () => {
   (async () => {
     const result = await callApi('getAvailableReactions');
 
@@ -44,7 +44,7 @@ addReducer('loadAvailableReactions', () => {
   })();
 });
 
-addReducer('interactWithAnimatedEmoji', (global, actions, payload) => {
+addActionHandler('interactWithAnimatedEmoji', (global, actions, payload) => {
   const {
     emoji, x, y, localEffect, startSize, isReversed,
   } = payload!;
@@ -65,7 +65,7 @@ addReducer('interactWithAnimatedEmoji', (global, actions, payload) => {
   };
 });
 
-addReducer('sendEmojiInteraction', (global, actions, payload) => {
+addActionHandler('sendEmojiInteraction', (global, actions, payload) => {
   const {
     messageId, chatId, emoji, interactions, localEffect,
   } = payload!;
@@ -84,7 +84,7 @@ addReducer('sendEmojiInteraction', (global, actions, payload) => {
   });
 });
 
-addReducer('sendDefaultReaction', (global, actions, payload) => {
+addActionHandler('sendDefaultReaction', (global, actions, payload) => {
   const {
     chatId, messageId, x, y,
   } = payload;
@@ -102,7 +102,7 @@ addReducer('sendDefaultReaction', (global, actions, payload) => {
   });
 });
 
-addReducer('sendReaction', (global, actions, payload) => {
+addActionHandler('sendReaction', (global, actions, payload) => {
   const {
     chatId,
   }: { chatId: string } = payload;
@@ -152,14 +152,14 @@ addReducer('sendReaction', (global, actions, payload) => {
   return addMessageReaction(global, chatId, messageId, reaction);
 });
 
-addReducer('openChat', (global) => {
+addActionHandler('openChat', (global) => {
   return {
     ...global,
     activeReactions: {},
   };
 });
 
-addReducer('startActiveReaction', (global, actions, payload) => {
+addActionHandler('startActiveReaction', (global, actions, payload) => {
   const { messageId, reaction } = payload;
   const { animationLevel } = global.settings.byKey;
 
@@ -183,7 +183,7 @@ addReducer('startActiveReaction', (global, actions, payload) => {
   };
 });
 
-addReducer('stopActiveReaction', (global, actions, payload) => {
+addActionHandler('stopActiveReaction', (global, actions, payload) => {
   const { messageId, reaction } = payload;
 
   if (global.activeReactions[messageId]?.reaction !== reaction) {
@@ -196,7 +196,7 @@ addReducer('stopActiveReaction', (global, actions, payload) => {
   };
 });
 
-addReducer('setDefaultReaction', (global, actions, payload) => {
+addActionHandler('setDefaultReaction', (global, actions, payload) => {
   const { reaction } = payload;
 
   (async () => {
@@ -217,7 +217,7 @@ addReducer('setDefaultReaction', (global, actions, payload) => {
   })();
 });
 
-addReducer('stopActiveEmojiInteraction', (global, actions, payload) => {
+addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
   const { id } = payload;
 
   return {
@@ -226,7 +226,7 @@ addReducer('stopActiveEmojiInteraction', (global, actions, payload) => {
   };
 });
 
-addReducer('loadReactors', (global, actions, payload) => {
+addActionHandler('loadReactors', (global, actions, payload) => {
   const { chatId, messageId, reaction } = payload;
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
@@ -268,7 +268,7 @@ addReducer('loadReactors', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadMessageReactions', (global, actions, payload) => {
+addActionHandler('loadMessageReactions', (global, actions, payload) => {
   const { ids, chatId } = payload;
 
   const chat = selectChat(global, chatId);
@@ -280,7 +280,7 @@ addReducer('loadMessageReactions', (global, actions, payload) => {
   callApi('fetchMessageReactions', { ids, chat });
 });
 
-addReducer('sendWatchingEmojiInteraction', (global, actions, payload) => {
+addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload) => {
   const {
     chatId, emoticon, x, y, startSize, isReversed, id,
   } = payload;

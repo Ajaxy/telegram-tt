@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import { LoadMoreDirection } from '../../../types';
@@ -27,7 +27,7 @@ export default function useScrollHooks(
   isScrollingRef: { current: boolean | undefined },
   isScrollPatchNeededRef: { current: boolean | undefined },
 ) {
-  const { loadViewportMessages } = getDispatch();
+  const { loadViewportMessages } = getActions();
 
   const [loadMoreBackwards, loadMoreForwards] = useMemo(
     () => (type === 'thread' ? [

@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { GlobalState } from '../../../global/types';
 import {
@@ -18,7 +18,7 @@ import {
 } from '../../reducers';
 import { isUserId } from '../../helpers';
 
-addReducer('updateProfile', (global, actions, payload) => {
+addActionHandler('updateProfile', (global, actions, payload) => {
   const {
     photo, firstName, lastName, bio: about, username,
   } = payload!;
@@ -79,7 +79,7 @@ addReducer('updateProfile', (global, actions, payload) => {
   })();
 });
 
-addReducer('checkUsername', (global, actions, payload) => {
+addActionHandler('checkUsername', (global, actions, payload) => {
   const { username } = payload!;
 
   (async () => {
@@ -109,7 +109,7 @@ addReducer('checkUsername', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadWallpapers', () => {
+addActionHandler('loadWallpapers', () => {
   (async () => {
     const result = await callApi('fetchWallpapers');
     if (!result) {
@@ -127,7 +127,7 @@ addReducer('loadWallpapers', () => {
   })();
 });
 
-addReducer('uploadWallpaper', (global, actions, payload) => {
+addActionHandler('uploadWallpaper', (global, actions, payload) => {
   const file = payload;
   const previewBlobUrl = URL.createObjectURL(file);
 
@@ -189,7 +189,7 @@ addReducer('uploadWallpaper', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadBlockedContacts', () => {
+addActionHandler('loadBlockedContacts', () => {
   (async () => {
     const result = await callApi('fetchBlockedContacts');
 
@@ -219,7 +219,7 @@ addReducer('loadBlockedContacts', () => {
   })();
 });
 
-addReducer('blockContact', (global, actions, payload) => {
+addActionHandler('blockContact', (global, actions, payload) => {
   const { contactId, accessHash } = payload!;
 
   (async () => {
@@ -234,7 +234,7 @@ addReducer('blockContact', (global, actions, payload) => {
   })();
 });
 
-addReducer('unblockContact', (global, actions, payload) => {
+addActionHandler('unblockContact', (global, actions, payload) => {
   const { contactId } = payload!;
   let accessHash: string | undefined;
   const isPrivate = isUserId(contactId);
@@ -260,7 +260,7 @@ addReducer('unblockContact', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadAuthorizations', () => {
+addActionHandler('loadAuthorizations', () => {
   (async () => {
     const result = await callApi('fetchAuthorizations');
     if (!result) {
@@ -274,7 +274,7 @@ addReducer('loadAuthorizations', () => {
   })();
 });
 
-addReducer('terminateAuthorization', (global, actions, payload) => {
+addActionHandler('terminateAuthorization', (global, actions, payload) => {
   const { hash } = payload!;
 
   (async () => {
@@ -292,7 +292,7 @@ addReducer('terminateAuthorization', (global, actions, payload) => {
   })();
 });
 
-addReducer('terminateAllAuthorizations', () => {
+addActionHandler('terminateAllAuthorizations', () => {
   (async () => {
     const result = await callApi('terminateAllAuthorizations');
     if (!result) {
@@ -308,7 +308,7 @@ addReducer('terminateAllAuthorizations', () => {
   })();
 });
 
-addReducer('loadNotificationExceptions', (global) => {
+addActionHandler('loadNotificationExceptions', (global) => {
   const { serverTimeOffset } = global;
 
   (async () => {
@@ -321,7 +321,7 @@ addReducer('loadNotificationExceptions', (global) => {
   })();
 });
 
-addReducer('loadNotificationSettings', (global) => {
+addActionHandler('loadNotificationSettings', (global) => {
   const { serverTimeOffset } = global;
   (async () => {
     const result = await callApi('fetchNotificationSettings', {
@@ -335,7 +335,7 @@ addReducer('loadNotificationSettings', (global) => {
   })();
 });
 
-addReducer('updateNotificationSettings', (global, actions, payload) => {
+addActionHandler('updateNotificationSettings', (global, actions, payload) => {
   const { peerType, isSilent, shouldShowPreviews } = payload!;
 
   (async () => {
@@ -349,7 +349,7 @@ addReducer('updateNotificationSettings', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateWebNotificationSettings', (global, actions, payload) => {
+addActionHandler('updateWebNotificationSettings', (global, actions, payload) => {
   (async () => {
     setGlobal(replaceSettings(getGlobal(), payload));
     const newGlobal = getGlobal();
@@ -362,7 +362,7 @@ addReducer('updateWebNotificationSettings', (global, actions, payload) => {
   })();
 });
 
-addReducer('updateContactSignUpNotification', (global, actions, payload) => {
+addActionHandler('updateContactSignUpNotification', (global, actions, payload) => {
   const { isSilent } = payload!;
 
   (async () => {
@@ -375,7 +375,7 @@ addReducer('updateContactSignUpNotification', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadLanguages', () => {
+addActionHandler('loadLanguages', () => {
   (async () => {
     const result = await callApi('fetchLanguages');
     if (!result) {
@@ -386,7 +386,7 @@ addReducer('loadLanguages', () => {
   })();
 });
 
-addReducer('loadPrivacySettings', () => {
+addActionHandler('loadPrivacySettings', () => {
   (async () => {
     const [
       phoneNumberSettings, lastSeenSettings, profilePhotoSettings, forwardsSettings, chatInviteSettings,
@@ -416,7 +416,7 @@ addReducer('loadPrivacySettings', () => {
   })();
 });
 
-addReducer('setPrivacyVisibility', (global, actions, payload) => {
+addActionHandler('setPrivacyVisibility', (global, actions, payload) => {
   const { privacyKey, visibility } = payload!;
 
   const {
@@ -446,7 +446,7 @@ addReducer('setPrivacyVisibility', (global, actions, payload) => {
   })();
 });
 
-addReducer('setPrivacySettings', (global, actions, payload) => {
+addActionHandler('setPrivacySettings', (global, actions, payload) => {
   const { privacyKey, isAllowList, contactsIds } = payload!;
   const {
     privacy: { [privacyKey as ApiPrivacyKey]: settings },
@@ -543,11 +543,11 @@ function buildInputPrivacyRules(global: GlobalState, {
   return rules;
 }
 
-addReducer('updateIsOnline', (global, actions, payload) => {
+addActionHandler('updateIsOnline', (global, actions, payload) => {
   callApi('updateIsOnline', payload);
 });
 
-addReducer('loadContentSettings', () => {
+addActionHandler('loadContentSettings', () => {
   (async () => {
     const result = await callApi('fetchContentSettings');
     if (!result) return;
@@ -556,7 +556,7 @@ addReducer('loadContentSettings', () => {
   })();
 });
 
-addReducer('updateContentSettings', (global, actions, payload) => {
+addActionHandler('updateContentSettings', (global, actions, payload) => {
   (async () => {
     setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: payload }));
 
@@ -567,7 +567,7 @@ addReducer('updateContentSettings', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadCountryList', (global, actions, payload = {}) => {
+addActionHandler('loadCountryList', (global, actions, payload = {}) => {
   let { langCode } = payload;
   if (!langCode) langCode = global.settings.byKey.language;
 
@@ -582,7 +582,7 @@ addReducer('loadCountryList', (global, actions, payload = {}) => {
   })();
 });
 
-addReducer('ensureTimeFormat', (global, actions) => {
+addActionHandler('ensureTimeFormat', (global, actions) => {
   if (global.authNearestCountry) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
     actions.setSettingOption({ timeFormat });
@@ -603,7 +603,7 @@ addReducer('ensureTimeFormat', (global, actions) => {
   })();
 });
 
-addReducer('loadAppConfig', () => {
+addActionHandler('loadAppConfig', () => {
   (async () => {
     const appConfig = await callApi('fetchAppConfig');
 

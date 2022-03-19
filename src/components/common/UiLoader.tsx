@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../modules';
 
 import { ApiMediaFormat } from '../../api/types';
 import { GlobalState } from '../../global/types';
@@ -85,7 +85,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   leftColumnWidth,
 }) => {
-  const { setIsUiReady } = getDispatch();
+  const { setIsUiReady } = getActions();
 
   const [isReady, markReady] = useFlag();
   const {

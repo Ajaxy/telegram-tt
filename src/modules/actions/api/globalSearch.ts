@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { callApi } from '../../../api/gramjs';
 import { ApiChat, ApiGlobalMessageSearchType } from '../../../api/types';
@@ -19,7 +19,7 @@ import { timestampPlusDay } from '../../../util/dateFormat';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
-addReducer('setGlobalSearchQuery', (global, actions, payload) => {
+addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
   const { chatId } = global.globalSearch;
   const { query } = payload!;
 
@@ -30,7 +30,7 @@ addReducer('setGlobalSearchQuery', (global, actions, payload) => {
   }
 });
 
-addReducer('setGlobalSearchDate', (global, actions, payload) => {
+addActionHandler('setGlobalSearchDate', (global, actions, payload) => {
   const { date } = payload!;
   const maxDate = date ? timestampPlusDay(date) : date;
   const newGlobal = updateGlobalSearch(global, {
@@ -51,7 +51,7 @@ addReducer('setGlobalSearchDate', (global, actions, payload) => {
   searchMessagesGlobal('', 'text', undefined, chat, maxDate, date);
 });
 
-addReducer('searchMessagesGlobal', (global, actions, payload) => {
+addActionHandler('searchMessagesGlobal', (global, actions, payload) => {
   const {
     query, resultsByType, chatId, date,
   } = global.globalSearch;

@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiStickerSet } from '../../api/types';
 import { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -35,7 +35,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
   stickerSetId, observeIntersection, set, shouldPlay,
   isSomeModalOpen, onModalToggle,
 }) => {
-  const { loadStickers, toggleStickerSet } = getDispatch();
+  const { loadStickers, toggleStickerSet } = getActions();
 
   const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);

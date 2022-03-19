@@ -5,7 +5,7 @@ import monkeyPath from '../../assets/monkey.svg';
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';
@@ -62,7 +62,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
     clearAuthError,
     goToAuthQrCode,
     setSettingOption,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null

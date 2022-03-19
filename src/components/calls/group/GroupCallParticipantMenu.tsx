@@ -2,7 +2,7 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { IAnchorPosition } from '../../../types';
 
@@ -56,7 +56,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     toggleGroupCallPanel,
     openChat,
     requestToSpeak,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const [isDeleteUserModalOpen, openDeleteUserModal, closeDeleteUserModal] = useFlag();

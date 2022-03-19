@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
 import { ISettings } from '../../../types';
@@ -47,7 +47,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     loadWebPagePreview,
     clearWebPagePreview,
     toggleMessageWebPage,
-  } = getDispatch();
+  } = getActions();
 
   const link = useDebouncedMemo(() => {
     const { text, entities } = parseMessageInput(messageText);

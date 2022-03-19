@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useCallback, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { ApiWallpaper } from '../../../api/types';
@@ -51,7 +51,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     loadWallpapers,
     uploadWallpaper,
     setThemeSettings,
-  } = getDispatch();
+  } = getActions();
 
   const themeRef = useRef<string>();
   themeRef.current = theme;

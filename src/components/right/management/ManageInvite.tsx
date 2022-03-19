@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -49,7 +49,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   onClose,
   onScreenSelect,
 }) => {
-  const { editExportedChatInvite, exportChatInvite } = getDispatch();
+  const { editExportedChatInvite, exportChatInvite } = getActions();
 
   const lang = useLang();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
 import {
@@ -283,7 +283,7 @@ const Message: FC<OwnProps & StateProps> = ({
     toggleMessageSelection,
     clickInlineButton,
     disableContextMenuHint,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

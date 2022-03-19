@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../modules';
 
 import {
   ApiChat, ApiThreadInfo, ApiUser,
@@ -25,7 +25,7 @@ const CommentButton: FC<OwnProps> = ({
   threadInfo,
   disabled,
 }) => {
-  const { openChat } = getDispatch();
+  const { openChat } = getActions();
 
   const lang = useLang();
   const {

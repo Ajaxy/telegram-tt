@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useState, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { GlobalSearchContent } from '../../../types';
 
@@ -60,7 +60,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   const {
     setGlobalSearchContent,
     setGlobalSearchDate,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const [activeTab, setActiveTab] = useState(currentContent);

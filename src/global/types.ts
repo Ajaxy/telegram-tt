@@ -618,4 +618,4 @@ export type NonTypedActionNames = (
   );
 
 const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();
-export type GlobalActions = ReturnType<typeof typed.getDispatch>;
+export type GlobalActions = ReturnType<typeof typed.getActions>;

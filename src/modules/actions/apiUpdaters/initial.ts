@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import { GlobalState } from '../../../global/types';
@@ -20,7 +20,7 @@ import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
 import { getShippingError } from '../../../util/getReadableErrorText';
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
     if (update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
       // eslint-disable-next-line no-console
@@ -162,7 +162,7 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
   });
 
   if (connectionState === 'connectionStateBroken') {
-    getDispatch().signOut();
+    getActions().signOut();
   }
 }
 
@@ -175,7 +175,7 @@ function onUpdateSession(update: ApiUpdateSession) {
     return;
   }
 
-  getDispatch().saveSession({ sessionData });
+  getActions().saveSession({ sessionData });
 }
 
 function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {

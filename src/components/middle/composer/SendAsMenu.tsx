@@ -10,7 +10,7 @@ import { getUserFullName, isUserId } from '../../../modules/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
-import { getDispatch, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../modules';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
@@ -33,7 +33,7 @@ const SendAsMenu: FC<OwnProps> = ({
   selectedSendAsId,
   sendAsIds,
 }) => {
-  const { saveDefaultSendAs } = getDispatch();
+  const { saveDefaultSendAs } = getActions();
 
   // No need for expensive global updates on users and chats, so we avoid them
   const usersById = getGlobal().users.byId;

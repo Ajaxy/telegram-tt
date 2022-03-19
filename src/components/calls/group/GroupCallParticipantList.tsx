@@ -1,6 +1,6 @@
 import { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import useLang from '../../../hooks/useLang';
 import { selectActiveGroupCall } from '../../../modules/selectors/calls';
@@ -27,7 +27,7 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
   const {
     createGroupCallInviteLink,
     loadMoreGroupCallParticipants,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

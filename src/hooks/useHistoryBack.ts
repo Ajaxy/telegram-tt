@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 
 import { IS_IOS } from '../util/environment';
 import usePrevious from './usePrevious';
-import { getDispatch } from '../modules';
+import { getActions } from '../modules';
 import { areSortedArraysEqual } from '../util/iteratees';
 
 type HistoryState = {
@@ -213,7 +213,7 @@ export default function useHistoryBack(
 
           if (onBack) {
             if (historyState.isEdge) {
-              getDispatch()
+              getActions()
                 .disableHistoryAnimations();
             }
             onBack(!historyState.isEdge);
@@ -222,7 +222,7 @@ export default function useHistoryBack(
         } else if (index === currIndex && isClosed.current && onForward && !hashes) {
           isForward.current = true;
           if (historyState.isEdge) {
-            getDispatch()
+            getActions()
               .disableHistoryAnimations();
           }
           onForward(event.state.state);

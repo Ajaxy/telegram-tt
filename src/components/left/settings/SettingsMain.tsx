@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 import { ApiUser } from '../../../api/types';
@@ -30,7 +30,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   currentUser,
   lastSyncTime,
 }) => {
-  const { loadProfilePhotos } = getDispatch();
+  const { loadProfilePhotos } = getActions();
 
   const lang = useLang();
   const profileId = currentUser?.id;

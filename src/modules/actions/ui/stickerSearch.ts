@@ -1,6 +1,6 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
-addReducer('setStickerSearchQuery', (global, actions, payload) => {
+addActionHandler('setStickerSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   return {
@@ -15,7 +15,7 @@ addReducer('setStickerSearchQuery', (global, actions, payload) => {
   };
 });
 
-addReducer('setGifSearchQuery', (global, actions, payload) => {
+addActionHandler('setGifSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   return {

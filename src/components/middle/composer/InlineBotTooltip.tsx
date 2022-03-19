@@ -22,7 +22,7 @@ import ListItem from '../../ui/ListItem';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 
 import './InlineBotTooltip.scss';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 const INTERSECTION_DEBOUNCE_MS = 200;
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -51,7 +51,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
   const {
     openChat,
     startBot,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useState, memo, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import {
   ApiChat,
@@ -48,7 +48,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
     loadPollOptionResults,
     openChat,
     closePollResults,
-  } = getDispatch();
+  } = getActions();
 
   const prevVotersCount = usePrevious<number>(answerVote.votersCount);
   const [isLoading, setIsLoading] = useState<boolean>(true);

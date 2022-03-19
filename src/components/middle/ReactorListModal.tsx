@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useMemo, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../modules';
 
 import { ApiMessage } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
@@ -49,7 +49,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
     loadReactors,
     closeReactorListModal,
     openChat,
-  } = getDispatch();
+  } = getActions();
 
   // No need for expensive global updates on users, so we avoid them
   const usersById = getGlobal().users.byId;

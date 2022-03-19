@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 import { ApiAvailableReaction } from '../../../api/types';
@@ -27,7 +27,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
   availableReactions,
   selectedReaction,
 }) => {
-  const { setDefaultReaction } = getDispatch();
+  const { setDefaultReaction } = getActions();
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
 
   const options = availableReactions?.filter((l) => !l.isInactive).map((l) => {

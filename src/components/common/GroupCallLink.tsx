@@ -5,7 +5,7 @@ import { ApiGroupCall } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 
 import Link from '../ui/Link';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 type OwnProps = {
   className?: string;
@@ -16,7 +16,7 @@ type OwnProps = {
 const GroupCallLink: FC<OwnProps> = ({
   className, groupCall, children,
 }) => {
-  const { joinGroupCall } = getDispatch();
+  const { joinGroupCall } = getActions();
 
   const handleClick = useCallback(() => {
     if (groupCall) {

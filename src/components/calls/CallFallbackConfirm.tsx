@@ -1,5 +1,5 @@
 import React, { FC, memo, useState } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Checkbox from '../ui/Checkbox';
@@ -25,7 +25,7 @@ const CallFallbackConfirm: FC<OwnProps & StateProps> = ({
   const {
     closeCallFallbackConfirm,
     inviteToCallFallback,
-  } = getDispatch();
+  } = getActions();
 
   const [shouldRemove, setShouldRemove] = useState(true);
   const renderingUserFullName = useCurrentOrPrev(userFullName, true);
