@@ -1,0 +1,38 @@
+.NewContactModal {
+  .modal-dialog {
+    max-width: 28rem;
+  }
+
+  &__new-contact {
+    display: flex;
+
+    &-fieldset {
+      flex: 1;
+      margin-inline-start: 1rem;
+    }
+  }
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    &-info {
+      margin-inline-start: 1rem;
+    }
+  }
+
+  &__user-status {
+    color: var(--color-text-secondary);
+  }
+
+  &__phone-number {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  &__help-text {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+  }
+}

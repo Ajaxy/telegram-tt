@@ -17,8 +17,7 @@ import {
 import { buildApiUser, buildApiUserFromFull, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
-import localDb from '../localDb';
-import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
 
 let onUpdate: OnApiUpdate;
@@ -115,7 +114,7 @@ export async function fetchContactList() {
 
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
-      localDb.users[buildApiPeerId(user.id, 'user')] = user;
+      addUserToLocalDb(user, true);
     }
   });
 
@@ -135,14 +134,14 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
 
   result.forEach((user) => {
     if (user instanceof GramJs.User) {
-      localDb.users[buildApiPeerId(user.id, 'user')] = user;
+      addUserToLocalDb(user, true);
     }
   });
 
   return buildApiUsersAndStatuses(result);
 }
 
-export function updateContact({
+export async function importContact({
   phone,
   firstName,
   lastName,
@@ -151,33 +150,42 @@ export function updateContact({
   firstName?: string;
   lastName?: string;
 }) {
-  return invokeRequest(new GramJs.contacts.ImportContacts({
+  const result = await invokeRequest(new GramJs.contacts.ImportContacts({
     contacts: [buildInputContact({
       phone: phone || '',
       firstName: firstName || '',
       lastName: lastName || '',
     })],
-  }), true);
+  }));
+
+  if (result instanceof GramJs.contacts.ImportedContacts && result.users.length) {
+    addUserToLocalDb(result.users[0]);
+  }
+
+  return result?.imported.length ? buildApiPeerId(result.imported[0].userId, 'user') : undefined;
 }
 
-export function addContact({
+export function updateContact({
   id,
   accessHash,
   phoneNumber = '',
   firstName = '',
   lastName = '',
+  shouldSharePhoneNumber = false,
 }: {
   id: string;
   accessHash?: string;
   phoneNumber?: string;
   firstName?: string;
   lastName?: string;
+  shouldSharePhoneNumber?: boolean;
 }) {
   return invokeRequest(new GramJs.contacts.AddContact({
     id: buildInputEntity(id, accessHash) as GramJs.InputUser,
     firstName,
     lastName,
     phone: phoneNumber,
+    ...(shouldSharePhoneNumber && { addPhonePrivacyException: shouldSharePhoneNumber }),
   }), true);
 }
 

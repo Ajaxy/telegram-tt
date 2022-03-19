@@ -510,6 +510,11 @@ export type GlobalState = {
   statistics: {
     byChatId: Record<string, ApiStatistics>;
   };
+
+  newContact?: {
+    userId?: string;
+    isByPhoneNumber?: boolean;
+  };
 };
 
 export interface ActionPayloads {
@@ -578,6 +583,25 @@ export interface ActionPayloads {
   setAudioPlayerOrigin: {
     origin: AudioOrigin;
   };
+
+  // Users
+  openAddContactDialog: {
+    userId?: string;
+  };
+  openNewContactDialog: undefined;
+  closeNewContactDialog: undefined;
+  importContact: {
+    phoneNumber: string;
+    firstName: string;
+    lastName?: string;
+  };
+  updateContact: {
+    userId: string;
+    firstName: string;
+    lastName?: string;
+    isMuted?: boolean;
+    shouldSharePhoneNumber?: boolean;
+  };
 }
 
 export type NonTypedActionNames = (
@@ -641,7 +665,7 @@ export type NonTypedActionNames = (
   'acceptInviteConfirmation' |
   // users
   'loadFullUser' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
-  'loadCurrentUser' | 'updateProfile' | 'checkUsername' | 'addContact' | 'updateContact' |
+  'loadCurrentUser' | 'updateProfile' | 'checkUsername' |
   'deleteContact' | 'loadUser' | 'setUserSearchQuery' | 'loadCommonChats' | 'reportSpam' |
   // chat creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |

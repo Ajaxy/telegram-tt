@@ -48,6 +48,7 @@ import HistoryCalendar from './HistoryCalendar.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
+import NewContactModal from './NewContactModal.async';
 
 import './Main.scss';
 
@@ -73,6 +74,8 @@ type StateProps = {
   wasTimeFormatSetManually?: boolean;
   isCallFallbackConfirmOpen: boolean;
   addedSetIds?: string[];
+  newContactUserId?: string;
+  newContactByPhoneNumber?: boolean;
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -104,6 +107,8 @@ const Main: FC<StateProps> = ({
   wasTimeFormatSetManually,
   isCallFallbackConfirmOpen,
   addedSetIds,
+  newContactUserId,
+  newContactByPhoneNumber,
 }) => {
   const {
     sync,
@@ -330,6 +335,11 @@ const Main: FC<StateProps> = ({
           <ActiveCallHeader groupCallId={activeGroupCallId} />
         </>
       )}
+      <NewContactModal
+        isOpen={Boolean(newContactUserId || newContactByPhoneNumber)}
+        userId={newContactUserId}
+        isByPhoneNumber={newContactByPhoneNumber}
+      />
       <DownloadManager />
       <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
       <UnreadCount isForAppBadge />
@@ -388,6 +398,8 @@ export default memo(withGlobal(
       wasTimeFormatSetManually,
       isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
       addedSetIds: global.stickers.added.setIds,
+      newContactUserId: global.newContact?.userId,
+      newContactByPhoneNumber: global.newContact?.isByPhoneNumber,
     };
   },
 )(Main));

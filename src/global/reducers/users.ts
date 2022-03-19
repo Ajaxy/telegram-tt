@@ -210,3 +210,10 @@ export function addUserStatuses(global: GlobalState, newById: Record<string, Api
 
   return global;
 }
+
+export function closeNewContactDialog(global: GlobalState): GlobalState {
+  return {
+    ...global,
+    newContact: undefined,
+  };
+}

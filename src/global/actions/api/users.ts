@@ -6,15 +6,16 @@ import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { debounce, throttle } from '../../../util/schedulers';
-import { buildCollectionByKey, pick, unique } from '../../../util/iteratees';
+import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import { isUserBot, isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import {
-  addChats, addUsers, replaceUserStatuses, updateChat, updateManagementProgress, updateUser, updateUsers,
-  updateUserSearch, updateUserSearchFetchingStatus,
+  addChats, addUsers, closeNewContactDialog, replaceUserStatuses, updateChat, updateManagementProgress, updateUser,
+  updateUsers, updateUserSearch, updateUserSearchFetchingStatus,
 } from '../../reducers';
 import { getServerTime } from '../../../util/serverTime';
+import * as langProvider from '../../../util/langProvider';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
@@ -105,10 +106,10 @@ addActionHandler('loadCommonChats', async (global) => {
 
 addActionHandler('updateContact', (global, actions, payload) => {
   const {
-    userId, isMuted, firstName, lastName,
-  } = payload!;
+    userId, isMuted = false, firstName, lastName, shouldSharePhoneNumber,
+  } = payload;
 
-  void updateContact(userId, isMuted, firstName, lastName);
+  void updateContact(userId, isMuted, firstName, lastName, shouldSharePhoneNumber);
 });
 
 addActionHandler('deleteContact', (global, actions, payload) => {
@@ -168,8 +169,9 @@ async function updateContact(
   isMuted: boolean,
   firstName: string,
   lastName?: string,
+  shouldSharePhoneNumber?: boolean,
 ) {
-  const global = getGlobal();
+  let global = getGlobal();
   const user = selectUser(global, userId);
   if (!user) {
     return;
@@ -180,22 +182,24 @@ async function updateContact(
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.InProgress));
 
   let result;
-  if (user.phoneNumber) {
-    result = await callApi('updateContact', { phone: user.phoneNumber, firstName, lastName });
+  if (!user.isContact && user.phoneNumber) {
+    result = await callApi('importContact', { phone: user.phoneNumber, firstName, lastName });
   } else {
     const { id, accessHash } = user;
-    result = await callApi('addContact', {
+    result = await callApi('updateContact', {
       id,
       accessHash,
       phoneNumber: '',
       firstName,
       lastName,
+      shouldSharePhoneNumber,
     });
   }
 
+  global = getGlobal();
   if (result) {
     setGlobal(updateUser(
-      getGlobal(),
+      global,
       user.id,
       {
         firstName,
@@ -204,7 +208,9 @@ async function updateContact(
     ));
   }
 
-  setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.Complete));
+  global = updateManagementProgress(global, ManagementProgress.Complete);
+  global = closeNewContactDialog(global);
+  setGlobal(global);
 }
 
 async function deleteContact(userId: string) {
@@ -257,14 +263,22 @@ addActionHandler('setUserSearchQuery', (global, actions, payload) => {
   });
 });
 
-addActionHandler('addContact', (global, actions, payload) => {
-  const { userId } = payload!;
-  const user = selectUser(global, userId);
-  if (!user) {
-    return;
+addActionHandler('importContact', async (global, actions, payload) => {
+  const { phoneNumber: phone, firstName, lastName } = payload!;
+
+  const result = await callApi('importContact', { phone, firstName, lastName });
+
+  if (result) {
+    actions.openChat({ id: result });
+
+    return closeNewContactDialog(getGlobal());
   }
 
-  void callApi('addContact', pick(user, ['id', 'accessHash', 'firstName', 'lastName', 'phoneNumber']));
+  actions.showNotification({
+    message: langProvider.getTranslation('Contacts.PhoneNumber.NotRegistred'),
+  });
+
+  return undefined;
 });
 
 addActionHandler('reportSpam', (global, actions, payload) => {

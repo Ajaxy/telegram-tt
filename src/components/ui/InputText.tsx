@@ -19,6 +19,7 @@ type OwnProps = {
   placeholder?: string;
   autoComplete?: string;
   maxLength?: number;
+  tabIndex?: number;
   inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
@@ -42,6 +43,7 @@ const InputText: FC<OwnProps> = ({
   autoComplete,
   inputMode,
   maxLength,
+  tabIndex,
   onChange,
   onInput,
   onKeyPress,
@@ -70,6 +72,7 @@ const InputText: FC<OwnProps> = ({
         id={id}
         dir="auto"
         value={value || ''}
+        tabIndex={tabIndex}
         placeholder={placeholder}
         maxLength={maxLength}
         autoComplete={autoComplete}
