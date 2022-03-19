@@ -1,12 +1,14 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiStatistics,
+  ApiChannelStatistics,
+  ApiGroupStatistics,
   StatisticsGraph,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
+  StatisticsOverviewPeriod,
 } from '../../types';
 
-export function buildStatistics(stats: GramJs.stats.BroadcastStats): ApiStatistics {
+export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {
     // Graphs
     growthGraph: buildGraph(stats.growthGraph),
@@ -31,6 +33,27 @@ export function buildStatistics(stats: GramJs.stats.BroadcastStats): ApiStatisti
   };
 }
 
+export function buildGroupStatistics(stats: GramJs.stats.MegagroupStats): ApiGroupStatistics {
+  return {
+    // Graphs
+    growthGraph: buildGraph(stats.growthGraph),
+    membersGraph: buildGraph(stats.membersGraph),
+    topHoursGraph: buildGraph(stats.topHoursGraph),
+
+    // Async graphs
+    languagesGraph: (stats.languagesGraph as GramJs.StatsGraphAsync).token,
+    messagesGraph: (stats.messagesGraph as GramJs.StatsGraphAsync).token,
+    actionsGraph: (stats.actionsGraph as GramJs.StatsGraphAsync).token,
+
+    // Statistics overview
+    period: getOverviewPeriod(stats.period),
+    members: buildStatisticsOverview(stats.members),
+    viewers: buildStatisticsOverview(stats.viewers),
+    messages: buildStatisticsOverview(stats.messages),
+    posters: buildStatisticsOverview(stats.posters),
+  };
+}
+
 export function buildGraph(result: GramJs.TypeStatsGraph, isPercentage?: boolean): StatisticsGraph {
   if ((result as GramJs.StatsGraphError).error) {
     throw new Error((result as GramJs.StatsGraphError).error);
@@ -41,7 +64,7 @@ export function buildGraph(result: GramJs.TypeStatsGraph, isPercentage?: boolean
   const hasSecondYAxis = data.y_scaled;
 
   return {
-    type: getGraphType(data.types.y0, isPercentage),
+    type: isPercentage ? 'area' : data.types.y0,
     zoomToken: (result as GramJs.StatsGraph).zoomToken,
     labelFormatter: data.xTickFormatter,
     tooltipFormatter: data.xTooltipFormatter,
@@ -61,15 +84,6 @@ export function buildGraph(result: GramJs.TypeStatsGraph, isPercentage?: boolean
     }),
     ...calculateMinimapRange(data.subchart.defaultZoom, x.slice(1)),
   };
-}
-
-function getGraphType(apiType: string, isPercentage?: boolean): string {
-  switch (apiType) {
-    case 'step':
-      return 'bar';
-    default:
-      return isPercentage ? 'area' : apiType;
-  }
 }
 
 function extractColor(color: string): string {
@@ -111,5 +125,12 @@ function buildStatisticsOverview({ current, previous }: GramJs.StatsAbsValueAndP
 function buildStatisticsPercentage(data: GramJs.StatsPercentValue): StatisticsOverviewPercentage {
   return {
     percentage: ((data.part / data.total) * 100).toFixed(2),
+  };
+}
+
+function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewPeriod {
+  return {
+    maxDate: data.maxDate,
+    minDate: data.minDate,
   };
 }

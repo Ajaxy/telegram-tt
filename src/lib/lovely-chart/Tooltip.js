@@ -408,7 +408,7 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
       }
     });
 
-    if (data.isBars && data.isStacked) {
+    if ((data.isBars || data.isSteps) && data.isStacked) {
       _renderTotal(dataSetContainer, formatInteger(totalValue));
     }
 

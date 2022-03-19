@@ -26,7 +26,8 @@ import {
   ApiAvailableReaction,
   ApiAppConfig,
   ApiSponsoredMessage,
-  ApiStatistics,
+  ApiChannelStatistics,
+  ApiGroupStatistics,
   ApiPaymentFormNativeParams, ApiUpdate,
 } from '../api/types';
 import {
@@ -508,7 +509,7 @@ export type GlobalState = {
   serviceNotifications: ServiceNotification[];
 
   statistics: {
-    byChatId: Record<string, ApiStatistics>;
+    byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
   };
 
   newContact?: {

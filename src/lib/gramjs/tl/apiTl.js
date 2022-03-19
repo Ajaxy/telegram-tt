@@ -1170,4 +1170,5 @@ langpack.getStrings#efea3803 lang_pack:string lang_code:string keys:Vector<strin
 langpack.getLanguages#42c6978f lang_pack:string = Vector<LangPackLanguage>;
 folders.editPeerFolders#6847d0ab folder_peers:Vector<InputFolderPeer> = Updates;
 stats.getBroadcastStats#ab42441a flags:# dark:flags.0?true channel:InputChannel = stats.BroadcastStats;
-stats.loadAsyncGraph#621d5fa0 flags:# token:string x:flags.0?long = StatsGraph;`;
+stats.loadAsyncGraph#621d5fa0 flags:# token:string x:flags.0?long = StatsGraph;
+stats.getMegagroupStats#dcdf8607 flags:# dark:flags.0?true channel:InputChannel = stats.MegagroupStats;`;

@@ -2,14 +2,14 @@
   position: relative;
   padding-left: 3rem;
 
-  &--summary {
+  &__summary {
     flex: 1;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     margin-right: 0.75rem;
 
-    .media-preview--image {
+    .media-preview__image {
       width: 2.5rem;
       height: 2.5rem;
       position: absolute;
@@ -35,24 +35,24 @@
     }
   }
 
-  &--title {
+  &__title {
     display: flex;
     align-items: center;
     line-height: 1.25rem;
   }
 
-  &--info {
+  &__info {
     display: flex;
     align-items: center;
     width: 100%;
     color: var(--color-text-meta);
   }
 
-  &--meta {
+  &__meta {
     font-size: 0.75rem;
   }
 
-  &--date {
+  &__date {
     flex: 1;
     font-size: 0.8125rem;
   }

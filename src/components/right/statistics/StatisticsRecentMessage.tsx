@@ -30,20 +30,20 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
 
   return (
     <p className="StatisticsRecentMessage">
-      <div className="StatisticsRecentMessage--title">
-        <div className="StatisticsRecentMessage--summary">
+      <div className="StatisticsRecentMessage__title">
+        <div className="StatisticsRecentMessage__summary">
           {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
         </div>
-        <div className="StatisticsRecentMessage--meta">
+        <div className="StatisticsRecentMessage__meta">
           {lang('ChannelStats.ViewsCount', message.views)}
         </div>
       </div>
 
-      <div className="StatisticsRecentMessage--info">
-        <div className="StatisticsRecentMessage--date">
+      <div className="StatisticsRecentMessage__info">
+        <div className="StatisticsRecentMessage__date">
           {formatDateTimeToString(message.date * 1000, lang.code)}
         </div>
-        <div className="StatisticsRecentMessage--meta">
+        <div className="StatisticsRecentMessage__meta">
           {message.forwards ? lang('ChannelStats.SharesCount', message.forwards) : 'No shares'}
         </div>
       </div>
@@ -58,7 +58,7 @@ function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRo
 
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
+      <img src={blobUrl} alt="" className={buildClassName('media-preview__image', isRoundVideo && 'round')} />
       {getMessageVideo(message) && <i className="icon-play" />}
       {renderMessageSummary(lang, message, true)}
     </span>

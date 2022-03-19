@@ -1,8 +1,8 @@
 import { GlobalState } from '../types';
-import { ApiStatistics, StatisticsGraph } from '../../api/types';
+import { ApiChannelStatistics, ApiGroupStatistics, StatisticsGraph } from '../../api/types';
 
 export function updateStatistics(
-  global: GlobalState, chatId: string, statistics: ApiStatistics,
+  global: GlobalState, chatId: string, statistics: ApiChannelStatistics | ApiGroupStatistics,
 ): GlobalState {
   return {
     ...global,

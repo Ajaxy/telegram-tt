@@ -1,11 +1,14 @@
 import React, {
-  FC, memo, useState, useEffect, useRef,
+  FC, memo, useState, useEffect, useRef, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { callApi } from '../../../api/gramjs';
 import {
-  ApiMessage, ApiStatistics, StatisticsRecentMessage as StatisticsRecentMessageType, StatisticsGraph,
+  ApiMessage,
+  ApiChannelStatistics,
+  ApiGroupStatistics,
+  StatisticsRecentMessage as StatisticsRecentMessageType,
 } from '../../../api/types';
 import { selectChat, selectStatistics } from '../../../global/selectors';
 
@@ -31,7 +34,7 @@ async function ensureLovelyChart() {
   return lovelyChartPromise;
 }
 
-const GRAPHS_TITLES = {
+const CHANNEL_GRAPHS_TITLES = {
   growthGraph: 'ChannelStats.Graph.Growth',
   followersGraph: 'ChannelStats.Graph.Followers',
   muteGraph: 'ChannelStats.Graph.Notifications',
@@ -41,7 +44,17 @@ const GRAPHS_TITLES = {
   languagesGraph: 'ChannelStats.Graph.Language',
   interactionsGraph: 'ChannelStats.Graph.Interactions',
 };
-const GRAPHS = Object.keys(GRAPHS_TITLES) as (keyof ApiStatistics)[];
+const CHANNEL_GRAPHS = Object.keys(CHANNEL_GRAPHS_TITLES) as (keyof ApiChannelStatistics)[];
+
+const GROUP_GRAPHS_TITLES = {
+  growthGraph: 'Stats.GroupGrowthTitle',
+  membersGraph: 'Stats.GroupMembersTitle',
+  languagesGraph: 'Stats.GroupLanguagesTitle',
+  messagesGraph: 'Stats.GroupMessagesTitle',
+  actionsGraph: 'Stats.GroupActionsTitle',
+  topHoursGraph: 'Stats.GroupTopHoursTitle',
+};
+const GROUP_GRAPHS = Object.keys(GROUP_GRAPHS_TITLES) as (keyof ApiGroupStatistics)[];
 
 export type OwnProps = {
   chatId: string;
@@ -49,12 +62,17 @@ export type OwnProps = {
 };
 
 export type StateProps = {
-  statistics: ApiStatistics;
+  statistics: ApiChannelStatistics | ApiGroupStatistics;
   dcId?: number;
+  isGroup: boolean;
 };
 
 const Statistics: FC<OwnProps & StateProps> = ({
-  chatId, isActive, statistics, dcId,
+  chatId,
+  isActive,
+  statistics,
+  dcId,
+  isGroup,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -65,8 +83,8 @@ const Statistics: FC<OwnProps & StateProps> = ({
   const { loadStatistics, loadStatisticsAsyncGraph } = getActions();
 
   useEffect(() => {
-    loadStatistics({ chatId });
-  }, [chatId, loadStatistics]);
+    loadStatistics({ chatId, isGroup });
+  }, [chatId, loadStatistics, isGroup]);
 
   useEffect(() => {
     if (!isActive) {
@@ -74,25 +92,35 @@ const Statistics: FC<OwnProps & StateProps> = ({
     }
   }, [isActive]);
 
+  const graphs = useMemo(() => {
+    return isGroup ? GROUP_GRAPHS : CHANNEL_GRAPHS;
+  }, [isGroup]);
+
+  const graphTitles = useMemo(() => {
+    return isGroup ? GROUP_GRAPHS_TITLES : CHANNEL_GRAPHS_TITLES;
+  }, [isGroup]);
+
   // Load async graphs
   useEffect(() => {
     if (!statistics) {
       return;
     }
 
-    GRAPHS.forEach((graph) => {
-      const isAsync = typeof statistics?.[graph] === 'string';
+    graphs.forEach((name) => {
+      const graph = statistics[name as keyof typeof statistics];
+      const isAsync = typeof graph === 'string';
+
       if (isAsync) {
         loadStatisticsAsyncGraph({
-          name: graph,
+          name,
           chatId,
-          token: statistics[graph],
+          token: graph,
           // Hardcode percentage for languages graph, since API does not return `percentage` flag
-          isPercentage: graph === 'languagesGraph',
+          isPercentage: name === 'languagesGraph',
         });
       }
     });
-  }, [chatId, statistics, loadStatisticsAsyncGraph]);
+  }, [graphs, chatId, statistics, loadStatisticsAsyncGraph]);
 
   useEffect(() => {
     (async () => {
@@ -107,30 +135,32 @@ const Statistics: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      GRAPHS.forEach((graph, index: number) => {
-        const isAsync = typeof statistics?.[graph] === 'string';
-        if (isAsync || loadedCharts.current.includes(graph)) {
+      graphs.forEach((name, index: number) => {
+        const graph = statistics[name as keyof typeof statistics];
+        const isAsync = typeof graph === 'string';
+
+        if (isAsync || loadedCharts.current.includes(name)) {
           return;
         }
 
-        const { zoomToken } = (statistics[graph] as StatisticsGraph);
+        const { zoomToken } = graph;
 
         LovelyChart.create(
           containerRef.current!.children[index],
           {
-            title: lang((GRAPHS_TITLES as Record<string, string>)[graph]),
+            title: lang((graphTitles as Record<string, string>)[name]),
             ...zoomToken && {
               onZoom: (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId }),
               zoomOutLabel: lang('Graph.ZoomOut'),
             },
-            ...(statistics[graph] as StatisticsGraph),
+            ...graph,
           },
         );
 
-        loadedCharts.current.push(graph);
+        loadedCharts.current.push(name);
       });
     })();
-  }, [isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId]);
+  }, [graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId]);
 
   if (!isReady || !statistics) {
     return <Loading />;
@@ -138,21 +168,21 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={buildClassName('Statistics custom-scroll', isReady && 'ready')}>
-      <StatisticsOverview statistics={statistics} />
+      <StatisticsOverview statistics={statistics} isGroup={isGroup} />
 
       {!loadedCharts.current.length && <Loading />}
 
       <div ref={containerRef}>
-        {GRAPHS.map((graph) => (
-          <div className={buildClassName('chat-container', !loadedCharts.current.includes(graph) && 'hidden')} />
+        {graphs.map((graph) => (
+          <div className={buildClassName('Statistics__graph', !loadedCharts.current.includes(graph) && 'hidden')} />
         ))}
       </div>
 
-      {Boolean(statistics.recentTopMessages?.length) && (
-        <div className="Statistics--messages">
-          <h2 className="Statistics--messages-title">{lang('ChannelStats.Recent.Header')}</h2>
+      {Boolean((statistics as ApiChannelStatistics).recentTopMessages?.length) && (
+        <div className="Statistics__messages">
+          <h2 className="Statistics__messages-title">{lang('ChannelStats.Recent.Header')}</h2>
 
-          {statistics.recentTopMessages.map((message) => (
+          {(statistics as ApiChannelStatistics).recentTopMessages.map((message) => (
             <StatisticsRecentMessage message={message as ApiMessage & StatisticsRecentMessageType} />
           ))}
         </div>
@@ -164,8 +194,10 @@ const Statistics: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const statistics = selectStatistics(global, chatId);
-    const dcId = selectChat(global, chatId)?.fullInfo?.statisticsDcId;
+    const chat = selectChat(global, chatId);
+    const dcId = chat?.fullInfo?.statisticsDcId;
+    const isGroup = chat?.type === 'chatTypeSuperGroup';
 
-    return { statistics, dcId };
+    return { statistics, dcId, isGroup };
   },
 )(Statistics));

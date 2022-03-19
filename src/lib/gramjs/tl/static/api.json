@@ -211,5 +211,6 @@
     "messages.setDefaultReaction",
     "help.getAppConfig",
     "stats.getBroadcastStats",
+    "stats.getMegagroupStats",
     "stats.loadAsyncGraph"
 ]

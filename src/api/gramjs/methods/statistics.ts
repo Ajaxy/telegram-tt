@@ -1,13 +1,17 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiChat, ApiStatistics, StatisticsGraph } from '../../types';
+import {
+  ApiChat, ApiChannelStatistics, ApiGroupStatistics, StatisticsGraph,
+} from '../../types';
 
 import { invokeRequest } from './client';
 import { buildInputEntity } from '../gramjsBuilders';
-import { buildStatistics, buildGraph } from '../apiBuilders/statistics';
+import { buildChannelStatistics, buildGroupStatistics, buildGraph } from '../apiBuilders/statistics';
 
-export async function fetchStatistics({ chat }: { chat: ApiChat }): Promise<ApiStatistics | undefined> {
+export async function fetchChannelStatistics({
+  chat,
+}: { chat: ApiChat }): Promise<ApiChannelStatistics | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetBroadcastStats({
     channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
   }), undefined, undefined, undefined, chat.fullInfo!.statisticsDcId);
@@ -16,7 +20,21 @@ export async function fetchStatistics({ chat }: { chat: ApiChat }): Promise<ApiS
     return undefined;
   }
 
-  return buildStatistics(result);
+  return buildChannelStatistics(result);
+}
+
+export async function fetchGroupStatistics({
+  chat,
+}: { chat: ApiChat }): Promise<ApiGroupStatistics | undefined> {
+  const result = await invokeRequest(new GramJs.stats.GetMegagroupStats({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+  }), undefined, undefined, undefined, chat.fullInfo!.statisticsDcId);
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildGroupStatistics(result);
 }
 
 export async function fetchStatisticsAsyncGraph({

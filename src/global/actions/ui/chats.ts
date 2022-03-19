@@ -33,6 +33,7 @@ addActionHandler('openChat', (global, actions, payload) => {
 
     global = {
       ...global,
+      isStatisticsShown: false,
       messages: {
         ...global.messages,
         contentToBeScheduled: undefined,

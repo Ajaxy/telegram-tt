@@ -77,4 +77,4 @@ export {
   setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction,
 } from './reactions';
 
-export { fetchStatistics, fetchStatisticsAsyncGraph } from './statistics';
+export { fetchChannelStatistics, fetchGroupStatistics, fetchStatisticsAsyncGraph } from './statistics';

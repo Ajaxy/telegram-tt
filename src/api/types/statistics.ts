@@ -1,6 +1,6 @@
 import { ApiMessage } from './messages';
 
-export interface ApiStatistics {
+export interface ApiChannelStatistics {
   growthGraph: StatisticsGraph;
   followersGraph: StatisticsGraph;
   muteGraph: StatisticsGraph;
@@ -14,6 +14,20 @@ export interface ApiStatistics {
   sharesPerPost: StatisticsOverviewItem;
   enabledNotifications: StatisticsOverviewPercentage;
   recentTopMessages: Array<StatisticsRecentMessage | StatisticsRecentMessage & ApiMessage>;
+}
+
+export interface ApiGroupStatistics {
+  growthGraph: StatisticsGraph;
+  membersGraph: StatisticsGraph;
+  topHoursGraph: StatisticsGraph;
+  languagesGraph: StatisticsGraph | string;
+  messagesGraph: StatisticsGraph | string;
+  actionsGraph: StatisticsGraph | string;
+  period: StatisticsOverviewPeriod;
+  members: StatisticsOverviewItem;
+  viewers: StatisticsOverviewItem;
+  messages: StatisticsOverviewItem;
+  posters: StatisticsOverviewItem;
 }
 
 export interface StatisticsGraph {
@@ -47,6 +61,11 @@ export interface StatisticsOverviewItem {
 
 export interface StatisticsOverviewPercentage {
   percentage: string;
+}
+
+export interface StatisticsOverviewPeriod {
+  maxDate: number;
+  minDate: number;
 }
 
 export interface StatisticsRecentMessage {
