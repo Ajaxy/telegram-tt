@@ -29,7 +29,7 @@ export {
 
 export {
   fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
-  addContact, updateContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam,
+  updateContact, importContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam,
 } from './users';
 
 export {

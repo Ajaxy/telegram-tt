@@ -133,7 +133,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     searchTextMessagesLocal,
     toggleManagement,
     openHistoryCalendar,
-    addContact,
+    openAddContactDialog,
     toggleStatistics,
     setEditingExportedInvite,
     deleteExportedChatInvite,
@@ -171,8 +171,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   }, [setGifSearchQuery]);
 
   const handleAddContact = useCallback(() => {
-    addContact({ userId });
-  }, [addContact, userId]);
+    openAddContactDialog({ userId });
+  }, [openAddContactDialog, userId]);
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
 

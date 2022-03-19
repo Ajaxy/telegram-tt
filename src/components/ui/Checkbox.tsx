@@ -17,6 +17,7 @@ type OwnProps = {
   subLabel?: string;
   checked: boolean;
   disabled?: boolean;
+  tabIndex?: number;
   round?: boolean;
   blocking?: boolean;
   isLoading?: boolean;
@@ -32,6 +33,7 @@ const Checkbox: FC<OwnProps> = ({
   label,
   subLabel,
   checked,
+  tabIndex,
   disabled,
   round,
   blocking,
@@ -67,6 +69,7 @@ const Checkbox: FC<OwnProps> = ({
         value={value}
         checked={checked}
         disabled={disabled}
+        tabIndex={tabIndex}
         onChange={handleChange}
       />
       <div className="Checkbox-main">

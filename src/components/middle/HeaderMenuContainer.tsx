@@ -91,7 +91,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     joinGroupCall,
     createGroupCall,
     openLinkedChat,
-    addContact,
+    openAddContactDialog,
     openCallFallbackConfirm,
     toggleStatistics,
   } = getActions();
@@ -150,9 +150,9 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   }, [chatId, closeMenu, openLinkedChat]);
 
   const handleAddContactClick = useCallback(() => {
-    addContact({ userId: chatId });
+    openAddContactDialog({ userId: chatId });
     closeMenu();
-  }, [addContact, chatId, closeMenu]);
+  }, [openAddContactDialog, chatId, closeMenu]);
 
   const handleSubscribe = useCallback(() => {
     onSubscribeChannel();

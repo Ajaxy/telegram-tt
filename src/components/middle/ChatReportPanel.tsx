@@ -35,7 +35,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   chatId, className, chat, user, settings, currentUserId,
 }) => {
   const {
-    addContact,
+    openAddContactDialog,
     blockContact,
     reportSpam,
     deleteChat,
@@ -57,11 +57,11 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   const isBasicGroup = chat && isChatBasicGroup(chat);
 
   const handleAddContact = useCallback(() => {
-    addContact({ chatId });
+    openAddContactDialog({ userId: chatId });
     if (isAutoArchived) {
       toggleChatArchived({ chatId });
     }
-  }, [addContact, isAutoArchived, toggleChatArchived, chatId]);
+  }, [openAddContactDialog, isAutoArchived, toggleChatArchived, chatId]);
 
   const handleConfirmBlock = useCallback(() => {
     closeBlockUserModal();
@@ -103,7 +103,6 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
       {canAddContact && (
         <Button
           isText
-          ripple
           fluid
           size="tiny"
           className="UserReportPanel--Button"
