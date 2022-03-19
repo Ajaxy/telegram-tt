@@ -15,7 +15,7 @@ import {
 } from '../../../global/selectors';
 import {
   isActionMessage, isChatChannel,
-  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal,
+  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
@@ -67,6 +67,7 @@ type StateProps = {
   canCopyLink?: boolean;
   canSelect?: boolean;
   canDownload?: boolean;
+  canSaveGif?: boolean;
   activeDownloads: number[];
   canShowSeenBy?: boolean;
   enabledReactions?: string[];
@@ -104,6 +105,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canCopyLink,
   canSelect,
   canDownload,
+  canSaveGif,
   activeDownloads,
   canShowSeenBy,
 }) => {
@@ -126,6 +128,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadFullChat,
     loadReactors,
     copyMessagesByIds,
+    saveGif,
   } = getActions();
 
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
@@ -310,6 +313,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [album, message, closeMenu, isDownloading, cancelMessageMediaDownload, downloadMessageMedia]);
 
+  const handleSaveGif = useCallback(() => {
+    const video = getMessageVideo(message);
+    saveGif({ gif: video });
+    closeMenu();
+  }, [closeMenu, message, saveGif]);
+
   const handleSendReaction = useCallback((reaction: string | undefined, x: number, y: number) => {
     sendReaction({
       chatId: message.chatId, messageId: message.id, reaction, x, y, startSize: START_SIZE,
@@ -355,6 +364,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canCopyLink={canCopyLink}
         canSelect={canSelect}
         canDownload={canDownload}
+        canSaveGif={canSaveGif}
         canShowSeenBy={canShowSeenBy}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
@@ -374,6 +384,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCopyLink={handleCopyLink}
         onCopyMessages={handleCopyMessages}
         onDownload={handleDownloadClick}
+        onSaveGif={handleSaveGif}
         onShowSeenBy={handleOpenSeenByModal}
         onSendReaction={handleSendReaction}
         onShowReactors={handleOpenReactorListModal}
@@ -432,6 +443,7 @@ export default memo(withGlobal<OwnProps>(
       canCopyLink,
       canSelect,
       canDownload,
+      canSaveGif,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
@@ -471,6 +483,7 @@ export default memo(withGlobal<OwnProps>(
       canCopyLink: !isProtected && !isScheduled && canCopyLink,
       canSelect,
       canDownload: !isProtected && canDownload,
+      canSaveGif: !isProtected && canSaveGif,
       activeDownloads,
       canShowSeenBy,
       enabledReactions: chat?.fullInfo?.enabledReactions,

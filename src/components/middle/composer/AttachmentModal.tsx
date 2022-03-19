@@ -12,6 +12,7 @@ import {
 } from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
@@ -43,13 +44,14 @@ export type OwnProps = {
   recentEmojis: string[];
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
+  shouldSchedule?: boolean;
   addRecentEmoji: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onFileAppend: (files: File[], isQuick: boolean) => void;
   onClear: () => void;
-  onSilentSend: () => void;
-  openCalendar: () => void;
+  onSendSilent: () => void;
+  onSendScheduled: () => void;
 };
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
@@ -67,13 +69,14 @@ const AttachmentModal: FC<OwnProps> = ({
   recentEmojis,
   baseEmojiKeywords,
   emojiKeywords,
+  shouldSchedule,
   addRecentEmoji,
   onCaptionUpdate,
   onSend,
   onFileAppend,
   onClear,
-  onSilentSend,
-  openCalendar,
+  onSendSilent,
+  onSendScheduled,
 }) => {
   const captionRef = useStateRef(caption);
   // eslint-disable-next-line no-null/no-null
@@ -121,9 +124,13 @@ const AttachmentModal: FC<OwnProps> = ({
 
   const sendAttachments = useCallback(() => {
     if (isOpen) {
-      onSend();
+      if (shouldSchedule) {
+        onSendScheduled();
+      } else {
+        onSend();
+      }
     }
-  }, [isOpen, onSend]);
+  }, [isOpen, onSendScheduled, onSend, shouldSchedule]);
 
   const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
     const { relatedTarget: toTarget, target: fromTarget } = e;
@@ -217,10 +224,11 @@ const AttachmentModal: FC<OwnProps> = ({
             <CustomSendMenu
               isOpen={isCustomSendMenuOpen}
               isOpenToBottom
-              onSilentSend={!isChatWithSelf ? onSilentSend : undefined}
-              onScheduleSend={openCalendar}
+              onSendSilent={!isChatWithSelf ? onSendSilent : undefined}
+              onSendSchedule={onSendScheduled}
               onClose={handleContextMenuClose}
               onCloseAnimationEnd={handleContextMenuHide}
+              isSavedMessages={isChatWithSelf}
             />
           )}
         </div>
@@ -288,7 +296,7 @@ const AttachmentModal: FC<OwnProps> = ({
             editableInputId={EDITABLE_INPUT_MODAL_ID}
             placeholder={lang('Caption')}
             onUpdate={onCaptionUpdate}
-            onSend={onSend}
+            onSend={sendAttachments}
             canAutoFocus={Boolean(isReady && attachments.length)}
           />
         </div>

@@ -1,4 +1,6 @@
-import React, { FC, memo, useRef } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useMemo, useRef,
+} from '../../../lib/teact/teact';
 
 import { ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
@@ -7,18 +9,23 @@ import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserve
 import { STICKER_SIZE_PICKER } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
-import StickerButton from '../../common/StickerButton';
-import useMediaTransition from '../../../hooks/useMediaTransition';
 import buildClassName from '../../../util/buildClassName';
+
+import useMediaTransition from '../../../hooks/useMediaTransition';
+
+import StickerButton from '../../common/StickerButton';
 
 type OwnProps = {
   stickerSet: StickerSetOrRecent;
   loadAndPlay: boolean;
   index: number;
-  observeIntersection: ObserveFn;
   shouldRender: boolean;
-  onStickerSelect: (sticker: ApiSticker) => void;
+  favoriteStickers?: ApiSticker[];
+  isSavedMessages?: boolean;
+  observeIntersection: ObserveFn;
+  onStickerSelect: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onStickerUnfave: (sticker: ApiSticker) => void;
+  onStickerFave: (sticker: ApiSticker) => void;
 };
 
 const STICKERS_PER_ROW_ON_DESKTOP = 5;
@@ -29,10 +36,13 @@ const StickerSet: FC<OwnProps> = ({
   stickerSet,
   loadAndPlay,
   index,
-  observeIntersection,
   shouldRender,
+  favoriteStickers,
+  isSavedMessages,
+  observeIntersection,
   onStickerSelect,
   onStickerUnfave,
+  onStickerFave,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -45,6 +55,10 @@ const StickerSet: FC<OwnProps> = ({
     ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (STICKER_SIZE_PICKER + STICKER_MARGIN))
     : STICKERS_PER_ROW_ON_DESKTOP;
   const height = Math.ceil(stickerSet.count / stickersPerRow) * (STICKER_SIZE_PICKER + STICKER_MARGIN);
+
+  const favoriteStickerIdsSet = useMemo(() => (
+    favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
+  ), [favoriteStickers]);
 
   return (
     <div
@@ -67,7 +81,9 @@ const StickerSet: FC<OwnProps> = ({
             noAnimate={!loadAndPlay}
             onClick={onStickerSelect}
             clickArg={sticker}
-            onUnfaveClick={stickerSet.id === 'favorite' ? onStickerUnfave : undefined}
+            onUnfaveClick={favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
+            onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
+            isSavedMessages={isSavedMessages}
           />
         ))}
       </div>

@@ -50,6 +50,8 @@
   img,
   video {
     object-fit: contain;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   .sticker-unfave-button {
@@ -65,5 +67,13 @@
     }
 
     opacity: 0;
+  }
+
+  .sticker-context-menu {
+    position: absolute;
+
+    .bubble {
+      width: auto;
+    }
   }
 }

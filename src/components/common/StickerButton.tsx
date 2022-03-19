@@ -1,41 +1,62 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
-  FC, memo, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
-import { ApiMediaFormat, ApiSticker } from '../../api/types';
+import { ApiBotInlineMediaResult, ApiMediaFormat, ApiSticker } from '../../api/types';
+
+import buildClassName from '../../util/buildClassName';
+import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+import safePlay from '../../util/safePlay';
+import { IS_TOUCH_ENV, IS_WEBM_SUPPORTED } from '../../util/environment';
 
 import { useIsIntersecting, ObserveFn } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useShowTransition from '../../hooks/useShowTransition';
 import useFlag from '../../hooks/useFlag';
-import buildClassName from '../../util/buildClassName';
-import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import safePlay from '../../util/safePlay';
-import { IS_WEBM_SUPPORTED } from '../../util/environment';
+import useLang from '../../hooks/useLang';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useContextMenuPosition from '../../hooks/useContextMenuPosition';
 
 import AnimatedSticker from './AnimatedSticker';
 import Button from '../ui/Button';
+import Menu from '../ui/Menu';
+import MenuItem from '../ui/MenuItem';
 
 import './StickerButton.scss';
 
-type OwnProps = {
+type OwnProps<T> = {
   sticker: ApiSticker;
   size: number;
-  observeIntersection: ObserveFn;
   noAnimate?: boolean;
   title?: string;
   className?: string;
-  onClick?: (arg: any) => void;
-  clickArg?: any;
+  clickArg: T;
+  noContextMenu?: boolean;
+  isSavedMessages?: boolean;
+  observeIntersection: ObserveFn;
+  onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onFaveClick?: (sticker: ApiSticker) => void;
   onUnfaveClick?: (sticker: ApiSticker) => void;
 };
 
-const StickerButton: FC<OwnProps> = ({
-  sticker, size, observeIntersection, noAnimate, title, className, onClick, clickArg, onUnfaveClick,
-}) => {
+const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult | undefined = undefined>({
+  sticker,
+  size,
+  noAnimate,
+  title,
+  className,
+  clickArg,
+  noContextMenu,
+  isSavedMessages,
+  observeIntersection,
+  onClick,
+  onFaveClick,
+  onUnfaveClick,
+}: OwnProps<T>) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+  const lang = useLang();
 
   const localMediaHash = `sticker${sticker.id}`;
   const stickerSelector = `sticker-button-${sticker.id}`;
@@ -60,6 +81,33 @@ const StickerButton: FC<OwnProps> = ({
     'slow',
   );
 
+  const {
+    isContextMenuOpen, contextMenuPosition,
+    handleBeforeContextMenu, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(ref);
+
+  const getTriggerElement = useCallback(() => ref.current, []);
+
+  const getRootElement = useCallback(
+    () => ref.current!.closest('.custom-scroll, .no-scrollbar'),
+    [],
+  );
+
+  const getMenuElement = useCallback(
+    () => ref.current!.querySelector('.sticker-context-menu .bubble'),
+    [],
+  );
+
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useContextMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+  );
+
   // To avoid flickering
   useEffect(() => {
     if (!shouldPlay) {
@@ -78,18 +126,42 @@ const StickerButton: FC<OwnProps> = ({
     }
   }, [isVideo, canVideoPlay]);
 
-  function handleClick() {
-    if (onClick) {
-      onClick(clickArg);
-    }
-  }
+  useEffect(() => {
+    if (!isIntersecting) handleContextMenuClose();
+  }, [handleContextMenuClose, isIntersecting]);
 
-  function handleUnfaveClick(e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) {
+  const handleClick = () => {
+    if (isContextMenuOpen) return;
+    onClick?.(clickArg);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    preventMessageInputBlurWithBubbling(e);
+    handleBeforeContextMenu(e);
+  };
+
+  const handleUnfaveClick = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
 
     onUnfaveClick!(sticker);
-  }
+  };
+
+  const handleContextUnfave = () => {
+    onUnfaveClick!(sticker);
+  };
+
+  const handleContextFave = () => {
+    onFaveClick!(sticker);
+  };
+
+  const handleSendQuiet = () => {
+    onClick?.(clickArg, true);
+  };
+
+  const handleSendScheduled = () => {
+    onClick?.(clickArg, undefined, true);
+  };
 
   const fullClassName = buildClassName(
     'StickerButton',
@@ -107,8 +179,9 @@ const StickerButton: FC<OwnProps> = ({
       title={title || (sticker?.emoji)}
       style={style}
       data-sticker-id={sticker.id}
-      onMouseDown={preventMessageInputBlurWithBubbling}
+      onMouseDown={handleMouseDown}
       onClick={handleClick}
+      onContextMenu={handleContextMenu}
     >
       {!canLottiePlay && !canVideoPlay && (
         // eslint-disable-next-line jsx-a11y/alt-text
@@ -134,7 +207,7 @@ const StickerButton: FC<OwnProps> = ({
           onLoad={markLoaded}
         />
       )}
-      {onUnfaveClick && (
+      {!IS_TOUCH_ENV && onUnfaveClick && (
         <Button
           className="sticker-unfave-button"
           color="dark"
@@ -143,6 +216,35 @@ const StickerButton: FC<OwnProps> = ({
         >
           <i className="icon-close" />
         </Button>
+      )}
+      {!noContextMenu && onClick && contextMenuPosition !== undefined && (
+        <Menu
+          isOpen={isContextMenuOpen}
+          transformOriginX={transformOriginX}
+          transformOriginY={transformOriginY}
+          positionX={positionX}
+          positionY={positionY}
+          style={menuStyle}
+          className="sticker-context-menu"
+          autoClose
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+        >
+          {onUnfaveClick && (
+            <MenuItem icon="favorite" onClick={handleContextUnfave}>
+              {lang('Stickers.RemoveFromFavorites')}
+            </MenuItem>
+          )}
+          {onFaveClick && (
+            <MenuItem icon="favorite" onClick={handleContextFave}>
+              {lang('AddToFavorites')}
+            </MenuItem>
+          )}
+          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="muted">{lang('SendWithoutSound')}</MenuItem>}
+          <MenuItem onClick={handleSendScheduled} icon="calendar">
+            {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+          </MenuItem>
+        </Menu>
       )}
     </div>
   );

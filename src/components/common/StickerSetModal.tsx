@@ -7,12 +7,19 @@ import { ApiSticker, ApiStickerSet } from '../../api/types';
 
 import { STICKER_SIZE_MODAL } from '../../config';
 import {
-  selectChat, selectCurrentMessageList, selectStickerSet, selectStickerSetByShortName,
+  selectCanScheduleUntilOnline,
+  selectChat,
+  selectCurrentMessageList,
+  selectIsChatWithSelf,
+  selectShouldSchedule,
+  selectStickerSet,
+  selectStickerSetByShortName,
 } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
+import useSchedule from '../../hooks/useSchedule';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -31,6 +38,9 @@ export type OwnProps = {
 type StateProps = {
   canSendStickers?: boolean;
   stickerSet?: ApiStickerSet;
+  canScheduleUntilOnline?: boolean;
+  shouldSchedule?: boolean;
+  isSavedMessages?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -41,6 +51,9 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   stickerSetShortName,
   stickerSet,
   canSendStickers,
+  canScheduleUntilOnline,
+  shouldSchedule,
+  isSavedMessages,
   onClose,
 }) => {
   const {
@@ -52,6 +65,8 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
+
+  const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);
 
   const {
     observe: observeIntersection,
@@ -73,15 +88,22 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     }
   }, [isOpen, fromSticker, loadStickers, stickerSetShortName]);
 
-  const handleSelect = useCallback((sticker: ApiSticker) => {
+  const handleSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean) => {
     sticker = {
       ...sticker,
       isPreloadedGlobally: true,
     };
 
-    sendMessage({ sticker });
-    onClose();
-  }, [onClose, sendMessage]);
+    if (shouldSchedule || isScheduleRequested) {
+      requestCalendar((scheduledAt) => {
+        sendMessage({ sticker, isSilent, scheduledAt });
+        onClose();
+      });
+    } else {
+      sendMessage({ sticker, isSilent });
+      onClose();
+    }
+  }, [onClose, requestCalendar, sendMessage, shouldSchedule]);
 
   const handleButtonClick = useCallback(() => {
     if (stickerSet) {
@@ -108,6 +130,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
                 observeIntersection={observeIntersection}
                 onClick={canSendStickers ? handleSelect : undefined}
                 clickArg={sticker}
+                isSavedMessages={isSavedMessages}
               />
             ))}
           </div>
@@ -129,6 +152,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
       ) : (
         <Loading />
       )}
+      {calendar}
     </Modal>
   );
 };
@@ -142,9 +166,13 @@ export default memo(withGlobal<OwnProps>(
     const canSendStickers = Boolean(
       chat && threadId && getCanPostInChat(chat, threadId) && sendOptions?.canSendStickers,
     );
+    const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 
     return {
+      canScheduleUntilOnline: Boolean(chatId) && selectCanScheduleUntilOnline(global, chatId),
       canSendStickers,
+      isSavedMessages,
+      shouldSchedule: selectShouldSchedule(global),
       stickerSet: fromSticker
         ? selectStickerSet(global, fromSticker.stickerSetId)
         : stickerSetShortName

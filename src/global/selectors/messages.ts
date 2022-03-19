@@ -7,11 +7,11 @@ import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { LOCAL_MESSAGE_ID_BASE, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import {
-  selectChat, selectIsChatWithBot, selectIsChatWithSelf,
+  selectChat, selectChatBot, selectIsChatWithBot, selectIsChatWithSelf,
 } from './chats';
-import { selectIsUserOrChatContact, selectUser } from './users';
+import { selectIsUserOrChatContact, selectUser, selectUserStatus } from './users';
 import {
   getSendingState,
   isChatChannel,
@@ -427,6 +427,8 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
   const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
     || content.audio || content.voice || content.photo || content.video || content.document || content.sticker);
 
+  const canSaveGif = message.content.video?.isGif;
+
   const noOptions = [
     canReply,
     canEdit,
@@ -442,6 +444,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canCopyLink,
     canSelect,
     canDownload,
+    canSaveGif,
   ].every((ability) => !ability);
 
   return {
@@ -460,6 +463,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canCopyLink,
     canSelect,
     canDownload,
+    canSaveGif,
   };
 }
 
@@ -921,4 +925,16 @@ export function selectVisibleUsers(global: GlobalState) {
     const { senderId } = selectChatMessage(global, chatId, messageId) || {};
     return senderId ? selectUser(global, senderId) : undefined;
   }).filter(Boolean);
+}
+
+export function selectShouldSchedule(global: GlobalState) {
+  return selectCurrentMessageList(global)?.type === 'scheduled';
+}
+
+export function selectCanScheduleUntilOnline(global: GlobalState, id: string) {
+  const isChatWithSelf = selectIsChatWithSelf(global, id);
+  const chatBot = id === REPLIES_USER_ID && selectChatBot(global, id);
+  return Boolean(
+    !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
+  );
 }

@@ -9,11 +9,17 @@ import StickerButton from '../../../common/StickerButton';
 
 type OwnProps = {
   inlineResult: ApiBotInlineMediaResult;
+  isSavedMessages?: boolean;
   observeIntersection: ObserveFn;
-  onClick: (result: ApiBotInlineResult) => void;
+  onClick: (result: ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
 };
 
-const StickerResult: FC<OwnProps> = ({ inlineResult, observeIntersection, onClick }) => {
+const StickerResult: FC<OwnProps> = ({
+  inlineResult,
+  isSavedMessages,
+  observeIntersection,
+  onClick,
+}) => {
   const { sticker } = inlineResult;
 
   if (!sticker) {
@@ -29,6 +35,7 @@ const StickerResult: FC<OwnProps> = ({ inlineResult, observeIntersection, onClic
       className="chat-item-clickable"
       onClick={onClick}
       clickArg={inlineResult}
+      isSavedMessages={isSavedMessages}
     />
   );
 };

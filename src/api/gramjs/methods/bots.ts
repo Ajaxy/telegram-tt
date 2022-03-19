@@ -98,13 +98,15 @@ export async function fetchInlineBotResults({
 }
 
 export async function sendInlineBotResult({
-  chat, resultId, queryId, replyingTo, sendAs,
+  chat, resultId, queryId, replyingTo, sendAs, isSilent, scheduleDate,
 }: {
   chat: ApiChat;
   resultId: string;
   queryId: string;
   replyingTo?: number;
   sendAs?: ApiUser | ApiChat;
+  isSilent?: boolean;
+  scheduleDate?: number;
 }) {
   const randomId = generateRandomBigInt();
 
@@ -114,6 +116,8 @@ export async function sendInlineBotResult({
     queryId: BigInt(queryId),
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: resultId,
+    scheduleDate,
+    ...(isSilent && { silent: true }),
     ...(replyingTo && { replyToMsgId: replyingTo }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }), true);

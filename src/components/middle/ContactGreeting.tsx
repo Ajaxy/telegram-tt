@@ -83,6 +83,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
               observeIntersection={observeIntersection}
               size={160}
               className="large"
+              noContextMenu
             />
           )}
         </div>

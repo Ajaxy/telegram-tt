@@ -12,14 +12,21 @@ import './CustomSendMenu.scss';
 export type OwnProps = {
   isOpen: boolean;
   isOpenToBottom?: boolean;
-  onSilentSend?: NoneToVoidFunction;
-  onScheduleSend?: NoneToVoidFunction;
+  isSavedMessages?: boolean;
+  onSendSilent?: NoneToVoidFunction;
+  onSendSchedule?: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
 
 const CustomSendMenu: FC<OwnProps> = ({
-  isOpen, isOpenToBottom = false, onSilentSend, onScheduleSend, onClose, onCloseAnimationEnd,
+  isOpen,
+  isOpenToBottom = false,
+  isSavedMessages,
+  onSendSilent,
+  onSendSchedule,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
 
@@ -38,8 +45,12 @@ const CustomSendMenu: FC<OwnProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
-      {onSilentSend && <MenuItem icon="mute" onClick={onSilentSend}>{lang('SendWithoutSound')}</MenuItem>}
-      {onScheduleSend && <MenuItem icon="schedule" onClick={onScheduleSend}>{lang('ScheduleMessage')}</MenuItem>}
+      {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{lang('SendWithoutSound')}</MenuItem>}
+      {onSendSchedule && (
+        <MenuItem icon="schedule" onClick={onSendSchedule}>
+          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+        </MenuItem>
+      )}
     </Menu>
   );
 };

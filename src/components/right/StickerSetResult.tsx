@@ -101,7 +101,9 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
             size={STICKER_SIZE_SEARCH}
             observeIntersection={observeIntersection}
             noAnimate={!shouldPlay || isModalOpen || isSomeModalOpen}
+            clickArg={undefined}
             onClick={openModal}
+            noContextMenu
           />
         ))}
       </div>

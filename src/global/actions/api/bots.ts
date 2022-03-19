@@ -194,7 +194,9 @@ addActionHandler('queryInlineBot', async (global, actions, payload) => {
 });
 
 addActionHandler('sendInlineBotResult', (global, actions, payload) => {
-  const { id, queryId } = payload;
+  const {
+    id, queryId, isSilent, scheduledAt,
+  } = payload;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList || !id) {
     return;
@@ -213,6 +215,8 @@ addActionHandler('sendInlineBotResult', (global, actions, payload) => {
     queryId,
     replyingTo: selectReplyingToId(global, chatId, threadId),
     sendAs: selectSendAs(global, chatId),
+    isSilent,
+    scheduleDate: scheduledAt,
   });
 });
 
