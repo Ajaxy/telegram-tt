@@ -509,6 +509,12 @@ export type GlobalState = {
 
 export interface ActionPayloads {
   apiUpdate: ApiUpdate;
+  openChat: {
+    id: string | undefined;
+    threadId?: number;
+    type?: MessageListType;
+    shouldReplaceHistory?: boolean;
+  };
 }
 
 export type NonTypedActionNames = (
@@ -525,7 +531,7 @@ export type NonTypedActionNames = (
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
   // chats
-  'preloadTopChatMessages' | 'loadAllChats' | 'openChat' | 'openChatWithInfo' | 'openLinkedChat' |
+  'preloadTopChatMessages' | 'loadAllChats' | 'openChatWithInfo' | 'openLinkedChat' |
   'openSupportChat' | 'openTipsChat' | 'focusMessageInComments' | 'openChatByPhoneNumber' |
   'loadFullChat' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
