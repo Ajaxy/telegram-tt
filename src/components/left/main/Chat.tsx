@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../modules';
 
 import useLang, { LangFn } from '../../../hooks/useLang';
 

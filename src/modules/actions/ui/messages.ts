@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../..';
 
 import { ApiMessage, MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';

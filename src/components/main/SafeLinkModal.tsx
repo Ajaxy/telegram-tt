@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
-import { getDispatch } from '../../lib/teact/teactn';
+import { getDispatch } from '../../modules';
 
 import { ensureProtocol } from '../../util/ensureProtocol';
 import renderText from '../common/helpers/renderText';

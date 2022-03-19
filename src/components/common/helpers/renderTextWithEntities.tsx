@@ -1,6 +1,6 @@
 import { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
 import renderText, { TextFilter } from './renderText';

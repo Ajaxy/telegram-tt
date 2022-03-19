@@ -1,5 +1,5 @@
 import { FC, memo, useEffect } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { Thread } from '../../global/types';
 import { ApiMediaFormat, ApiMessage } from '../../api/types';

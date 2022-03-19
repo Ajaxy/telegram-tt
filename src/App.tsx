@@ -1,5 +1,5 @@
-import { FC, useEffect } from './lib/teact/teact';
-import React, { getDispatch, withGlobal } from './lib/teact/teactn';
+import React, { FC, useEffect } from './lib/teact/teact';
+import { getDispatch, withGlobal } from './modules';
 
 import { GlobalState } from './global/types';
 

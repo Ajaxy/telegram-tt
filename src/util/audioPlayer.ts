@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal } from '../lib/teact/teactn';
+import { getDispatch, getGlobal } from '../modules';
 
 import { AudioOrigin, GlobalSearchContent } from '../types';
 import { ApiMessage } from '../api/types';

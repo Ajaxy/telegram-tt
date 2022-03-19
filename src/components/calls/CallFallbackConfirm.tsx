@@ -1,5 +1,5 @@
 import React, { FC, memo, useState } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Checkbox from '../ui/Checkbox';

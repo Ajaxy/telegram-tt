@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { getDispatch } from '../../../lib/teact/teactn';
+import { getDispatch } from '../../../modules';
 
 import { MessageListType } from '../../../global/types';
 

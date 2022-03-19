@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';

@@ -1,7 +1,7 @@
 import React, {
   FC, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { withGlobal } from '../../../modules';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 

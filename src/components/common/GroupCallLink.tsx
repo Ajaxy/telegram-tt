@@ -5,7 +5,7 @@ import { ApiGroupCall } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 
 import Link from '../ui/Link';
-import { getDispatch } from '../../lib/teact/teactn';
+import { getDispatch } from '../../modules';
 
 type OwnProps = {
   className?: string;

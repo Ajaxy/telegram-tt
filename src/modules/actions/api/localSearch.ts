@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+} from '../..';
 
 import { ApiChat, MAIN_THREAD_ID } from '../../../api/types';
 

@@ -1,4 +1,4 @@
-import { getGlobal } from '../lib/teact/teactn';
+import { getGlobal } from '../modules';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';

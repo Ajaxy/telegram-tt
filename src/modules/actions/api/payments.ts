@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../..';
 
 import { PaymentStep } from '../../../types';
 import { ApiChat } from '../../../api/types';

@@ -19,7 +19,7 @@ import useMessageObservers from './hooks/useMessageObservers';
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
 import ActionMessage from './ActionMessage';
-import { getDispatch } from '../../lib/teact/teactn';
+import { getDispatch } from '../../modules';
 
 interface OwnProps {
   chatId: string;

@@ -2,7 +2,7 @@ import QrCreator from 'qr-creator';
 import React, {
   FC, useEffect, useRef, memo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';

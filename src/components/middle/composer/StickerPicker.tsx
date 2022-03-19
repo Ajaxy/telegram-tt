@@ -1,7 +1,7 @@
 import React, {
   FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';

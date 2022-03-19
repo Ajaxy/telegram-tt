@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../../modules';
 
 import { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';

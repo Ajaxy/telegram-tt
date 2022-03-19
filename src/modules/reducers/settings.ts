@@ -62,6 +62,7 @@ export function addNotifyException(
   };
 }
 
+// eslint-disable-next-line consistent-return
 export function updateNotifySettings(
   global: GlobalState, peerType: 'contact' | 'group' | 'broadcast', isSilent?: boolean, shouldShowPreviews?: boolean,
 ) {
@@ -81,9 +82,6 @@ export function updateNotifySettings(
         ...(typeof isSilent !== 'undefined' && { hasBroadcastNotifications: !isSilent }),
         ...(typeof shouldShowPreviews !== 'undefined' && { hasBroadcastMessagePreview: shouldShowPreviews }),
       });
-
-    default:
-      return undefined;
   }
 }
 

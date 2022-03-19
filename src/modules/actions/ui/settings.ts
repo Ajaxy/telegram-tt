@@ -1,4 +1,4 @@
-import { addReducer } from '../../../lib/teact/teactn';
+import { addReducer } from '../..';
 import { ISettings, IThemeSettings, ThemeKey } from '../../../types';
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
 

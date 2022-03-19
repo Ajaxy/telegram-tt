@@ -1,5 +1,5 @@
 import React, { FC, useEffect, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 

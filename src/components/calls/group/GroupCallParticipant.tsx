@@ -2,7 +2,7 @@ import { GroupCallParticipant as TypeGroupCallParticipant, THRESHOLD } from '../
 import React, {
   FC, memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { withGlobal } from '../../../modules';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 

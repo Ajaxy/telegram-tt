@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../lib/teact/teactn';
+import { getDispatch } from '../../../../modules';
 import { InlineBotSettings } from '../../../../types';
 import useFlag from '../../../../hooks/useFlag';
 import usePrevious from '../../../../hooks/usePrevious';

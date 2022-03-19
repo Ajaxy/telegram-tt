@@ -27,7 +27,7 @@ import {
   ApiAppConfig,
   ApiSponsoredMessage,
   ApiStatistics,
-  ApiPaymentFormNativeParams,
+  ApiPaymentFormNativeParams, ApiUpdate,
 } from '../api/types';
 import {
   FocusDirection,
@@ -54,6 +54,7 @@ import {
   AudioOrigin,
   ManagementState,
 } from '../types';
+import { typify } from '../lib/teact/teactn';
 
 export type MessageListType =
   'thread'
@@ -506,9 +507,13 @@ export type GlobalState = {
   };
 };
 
-export type ActionTypes = (
+export interface ActionPayloads {
+  apiUpdate: ApiUpdate;
+}
+
+export type NonTypedActionNames = (
   // system
-  'init' | 'reset' | 'disconnect' | 'initApi' | 'apiUpdate' | 'sync' | 'saveSession' |
+  'init' | 'reset' | 'disconnect' | 'initApi' | 'sync' | 'saveSession' |
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
@@ -610,12 +615,7 @@ export type ActionTypes = (
   'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback' |
   // stats
   'loadStatistics' | 'loadStatisticsAsyncGraph'
-);
+  );
 
-export interface DispatchOptions {
-  forceOnHeavyAnimation?: boolean;
-  // Workaround for iOS gesture history navigation
-  forceSyncOnIOs?: boolean;
-}
-
-export type GlobalActions = Record<ActionTypes, (payload?: any, options?: DispatchOptions) => void>;
+const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();
+export type GlobalActions = ReturnType<typeof typed.getDispatch>;

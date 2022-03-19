@@ -1,4 +1,4 @@
-import { addReducer } from '../../../lib/teact/teactn';
+import { addReducer } from '../..';
 
 import { clearPayment, closeInvoice } from '../../reducers';
 

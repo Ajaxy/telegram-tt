@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../..';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
 import { callApi } from '../../../api/gramjs';
 import { selectChat } from '../../selectors';

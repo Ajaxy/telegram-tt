@@ -8,19 +8,26 @@ import generateIdFor from '../../util/generateIdFor';
 import { fastRaf, throttleWithTickEnd } from '../../util/schedulers';
 import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
-import {
-  GlobalState, GlobalActions, ActionTypes, DispatchOptions,
-} from '../../global/types';
 import { handleError } from '../../util/handleError';
 import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
 export default React;
 
-type ActionPayload = AnyLiteral;
+type GlobalState = AnyLiteral;
+type ActionNames = string;
+type ActionPayload = any;
+
+export interface DispatchOptions {
+  forceOnHeavyAnimation?: boolean;
+  // Workaround for iOS gesture history navigation
+  forceSyncOnIOs?: boolean;
+}
+
+type Actions = Record<ActionNames, (payload?: ActionPayload, options?: DispatchOptions) => void>;
 
 type Reducer = (
   global: GlobalState,
-  actions: GlobalActions,
+  actions: Actions,
   payload: any,
 ) => GlobalState | void;
 
@@ -30,7 +37,7 @@ let currentGlobal = {} as GlobalState;
 
 const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
-const actions = {} as GlobalActions;
+const actions = {} as Actions;
 const containers = new Map<string, {
   mapStateToProps: MapStateToProps<any>;
   ownProps: Props;
@@ -143,7 +150,7 @@ function updateContainers() {
   }
 }
 
-export function addReducer(name: ActionTypes, reducer: Reducer) {
+export function addReducer(name: ActionNames, reducer: Reducer) {
   if (!reducers[name]) {
     reducers[name] = [];
 
@@ -213,6 +220,46 @@ export function withGlobal<OwnProps>(
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...container.mappedProps} {...props} />;
     };
+  };
+}
+
+export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames extends string = never>() {
+  type NonTypedActionPayloads = {
+    [ActionName in NonTypedActionNames]: ActionPayload;
+  };
+
+  type ProjectActionTypes =
+    ActionPayloads
+    & NonTypedActionPayloads;
+
+  type ProjectActionNames = keyof ProjectActionTypes;
+
+  type ProjectActions = {
+    [ActionName in ProjectActionNames]: (
+      payload?: ProjectActionTypes[ActionName],
+      options?: DispatchOptions,
+    ) => void;
+  };
+
+  type ActionHandlers = {
+    [ActionName in keyof ProjectActionTypes]: (
+      global: ProjectGlobalState,
+      actions: ProjectActions,
+      payload: ProjectActionTypes[ActionName],
+    ) => ProjectGlobalState | void;
+  };
+
+  return {
+    getGlobal: getGlobal as () => ProjectGlobalState,
+    setGlobal: setGlobal as (state: ProjectGlobalState, options?: DispatchOptions) => void,
+    getDispatch: getDispatch as () => ProjectActions,
+    addReducer: addReducer as <ActionName extends ProjectActionNames>(
+      name: ActionName,
+      handler: ActionHandlers[ActionName],
+    ) => void,
+    withGlobal: withGlobal as <OwnProps>(
+      mapStateToProps: ((global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral),
+    ) => (Component: FC) => FC,
   };
 }
 

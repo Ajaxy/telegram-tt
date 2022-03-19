@@ -2,7 +2,7 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import { withGlobal } from '../../../modules';
 import GroupCallParticipantVideo from './GroupCallParticipantVideo';
 import { selectActiveGroupCall } from '../../../modules/selectors/calls';
 import buildClassName from '../../../util/buildClassName';

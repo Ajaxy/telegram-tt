@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch } from '../../lib/teact/teactn';
+import { getDispatch } from '../../modules';
 
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,

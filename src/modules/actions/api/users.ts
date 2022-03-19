@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+} from '../..';
 
 import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';

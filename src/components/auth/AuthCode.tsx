@@ -2,7 +2,7 @@ import { FormEvent } from 'react';
 import React, {
   FC, useState, useEffect, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 import { GlobalState } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';

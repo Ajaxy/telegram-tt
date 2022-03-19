@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../lib/teact/teactn';
+import { getDispatch, withGlobal } from '../../modules';
 
 import { ApiChat } from '../../api/types';
 
