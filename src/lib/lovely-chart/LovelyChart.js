@@ -152,7 +152,7 @@ function create(container, originalData) {
   }
 
   function _onFocus(focusOn) {
-    if (_data.isBars || _data.isPie) {
+    if (_data.isBars || _data.isPie || _data.isSteps) {
       // TODO animate
       _stateManager.update({ focusOn });
     }

@@ -48,6 +48,7 @@ export function analyzeData(data) {
     onZoom,
     isLines: data.type === 'line',
     isBars: data.type === 'bar',
+    isSteps: data.type === 'step',
     isAreas: data.type === 'area',
     isPie: data.type === 'pie',
     yMin: totalYMin,

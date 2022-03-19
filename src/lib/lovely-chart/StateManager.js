@@ -143,7 +143,6 @@ function calculateYRanges(data, filter, labelFromIndex, labelToIndex, prevState)
   const yRanges = calculateYRangesForGroup(data, labelFromIndex, labelToIndex, prevState, filteredDatasets);
 
   if (secondaryYAxisDataset) {
-    const group = filter[secondaryYAxisDataset.key] ? [secondaryYAxisDataset] : [];
     const {
       yMinViewport: yMinViewportSecond,
       yMaxViewport: yMaxViewportSecond,

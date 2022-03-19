@@ -58,14 +58,14 @@ export function drawDatasets(
     drawDataset(datasetType, context, datasetPoints, datasetProjection, options);
   });
 
-  if (state.focusOn && data.isBars) {
+  if (state.focusOn && (data.isBars || data.isSteps)) {
     const [x0] = toPixels(projection, 0, 0);
     const [x1] = toPixels(projection, 1, 0);
 
     drawBarsMask(context, projection, {
       focusOn: state.focusOn,
       color: getCssColor(colors, 'mask'),
-      lineWidth: x1 - x0,
+      lineWidth: data.isSteps ? x1 - x0 + lineWidth : x1 - x0,
     });
   }
 }
@@ -76,6 +76,8 @@ function drawDataset(type, ...args) {
       return drawDatasetLine(...args);
     case 'bar':
       return drawDatasetBars(...args);
+    case 'step':
+      return drawDatasetSteps(...args);
     case 'area':
       return drawDatasetArea(...args);
     case 'pie':
@@ -135,6 +137,31 @@ function drawDatasetBars(context, points, projection, options) {
     context.fillRect(rectX, rectY, rectW, rectH);
   }
 
+  context.restore();
+}
+
+function drawDatasetSteps(context, points, projection, options) {
+  context.beginPath();
+
+  let pixels = [];
+
+  for (let j = 0, l = points.length; j < l; j++) {
+    const { labelIndex, stackValue } = points[j];
+    pixels.push(
+      toPixels(projection, labelIndex - PLOT_BARS_WIDTH_SHIFT, stackValue),
+      toPixels(projection, labelIndex + PLOT_BARS_WIDTH_SHIFT, stackValue),
+    );
+  }
+
+  pixels.forEach(([x, y]) => {
+    context.lineTo(x, y);
+  });
+
+  context.save();
+  context.strokeStyle = options.color;
+  context.lineWidth = options.lineWidth;
+  context.globalAlpha = options.opacity;
+  context.stroke();
   context.restore();
 }
 

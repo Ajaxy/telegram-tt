@@ -3,8 +3,9 @@
   overflow-x: hidden;
   overflow-y: hidden;
 
-  &--messages {
+  &__messages {
     padding: 1rem 0.75rem;
+    border-top: 1px solid var(--color-borders);
 
     &-title {
       padding-left: 0.25rem;
@@ -23,12 +24,17 @@
     overflow-y: scroll !important;
   }
 
-  .chat-container {
+  &__graph {
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--color-borders);
 
     opacity: 1;
     transition: opacity 0.3s ease;
+
+    &:last-of-type {
+      margin-bottom: 0;
+      border-bottom: none;
+    }
 
     &.hidden {
       opacity: 0;
