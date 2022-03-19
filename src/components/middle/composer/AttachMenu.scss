@@ -1,4 +1,6 @@
 .AttachMenu {
+  align-self: flex-end;
+
   &--button {
     &:focus {
       color: var(--color-primary);
