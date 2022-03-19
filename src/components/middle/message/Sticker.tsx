@@ -4,7 +4,7 @@ import { ApiMessage } from '../../../api/types';
 
 import { NO_STICKER_SET_ID } from '../../../config';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
-import { getMessageHtmlId, getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
+import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
@@ -85,7 +85,6 @@ const Sticker: FC<OwnProps> = ({
     <div ref={ref} className={stickerClassName} onClick={!isMemojiSticker ? openModal : undefined}>
       {(!isMediaReady || (isVideo && !canDisplayVideo)) && (
         <img
-          id={`sticker-thumb-${getMessageHtmlId(message.id)}`}
           src={previewUrl}
           width={width}
           height={height}
@@ -95,7 +94,6 @@ const Sticker: FC<OwnProps> = ({
       )}
       {!isLottie && !isVideo && (
         <img
-          id={`sticker-${getMessageHtmlId(message.id)}`}
           src={mediaData as string}
           width={width}
           height={height}
@@ -105,7 +103,6 @@ const Sticker: FC<OwnProps> = ({
       )}
       {isVideo && canDisplayVideo && isMediaReady && (
         <video
-          id={`sticker-${getMessageHtmlId(message.id)}`}
           src={mediaData as string}
           width={width}
           height={height}
