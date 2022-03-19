@@ -1773,6 +1773,10 @@ export default {
     key: 'Login.QR.Help2',
     value: 'Go to **Settings** > **Devices** > **Link Desktop Device**',
   },
+  'Login.QR2.Help2': {
+    key: 'Login.QR.Help2',
+    value: 'Go to **Settings** → **Devices** → **Link Desktop Device**',
+  },
   'Login.QR.Help3': {
     key: 'Login.QR.Help3',
     value: 'Point your phone at this screen to confirm login',

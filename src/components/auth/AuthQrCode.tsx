@@ -92,7 +92,7 @@ const AuthCode: FC<StateProps> = ({
         <h3>{lang('Login.QR.Title')}</h3>
         <ol>
           <li><span>{lang('Login.QR.Help1')}</span></li>
-          <li><span>{renderText(lang('Login.QR.Help2'), ['simple_markdown'])}</span></li>
+          <li><span>{renderText(lang('Login.QR2.Help2'), ['simple_markdown'])}</span></li>
           <li><span>{lang('Login.QR.Help3')}</span></li>
         </ol>
         {isAuthReady && (
