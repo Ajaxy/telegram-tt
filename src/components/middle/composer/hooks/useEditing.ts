@@ -1,39 +1,78 @@
-import { useCallback } from '../../../../lib/teact/teact';
+import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { ApiMessage } from '../../../../api/types';
+import { ApiFormattedText, ApiMessage } from '../../../../api/types';
+import { MessageListType } from '../../../../global/types';
 
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../global/helpers';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
-import useOnChange from '../../../../hooks/useOnChange';
+import { fastRaf } from '../../../../util/schedulers';
+import useBackgroundMode from '../../../../hooks/useBackgroundMode';
+import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 
 const useEditing = (
   htmlRef: { current: string },
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
-  resetComposer: () => void,
+  resetComposer: (shouldPreserveInput?: boolean) => void,
   openDeleteModal: () => void,
+  chatId: string,
+  threadId: number,
+  type: MessageListType,
+  draft?: ApiFormattedText,
+  editingDraft?: ApiFormattedText,
 ) => {
-  const { editMessage } = getActions();
+  const { editMessage, setEditingDraft } = getActions();
 
-  useOnChange(([prevEditedMessage]) => {
+  useEffectWithPrevDeps(([prevEditedMessage]) => {
     if (!editedMessage) {
-      setHtml('');
       return;
     }
     if (prevEditedMessage?.id === editedMessage.id) {
       return;
     }
-    setHtml(getTextWithEntitiesAsHtml(editedMessage.content.text));
 
+    const html = getTextWithEntitiesAsHtml(editingDraft?.text.length ? editingDraft : editedMessage.content.text);
+    setHtml(html);
+    // `fastRaf` would execute syncronously in this case
     requestAnimationFrame(() => {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
       focusEditableElement(messageInput, true);
     });
   }, [editedMessage, setHtml] as const);
+
+  useEffect(() => {
+    if (!editedMessage) return undefined;
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const edited = parseMessageInput(htmlRef.current!);
+      const update = edited.text.length ? edited : undefined;
+      setEditingDraft({
+        chatId, threadId, type, text: update,
+      });
+    };
+  }, [chatId, editedMessage, htmlRef, setEditingDraft, threadId, type]);
+
+  const restoreNewDraftAfterEditing = useCallback(() => {
+    if (!draft) return;
+    // Run 1 frame after editing draft reset
+    fastRaf(() => {
+      setHtml(getTextWithEntitiesAsHtml(draft));
+      const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput, true);
+      });
+    });
+  }, [draft, setHtml]);
+
+  const handleEditCancel = useCallback(() => {
+    resetComposer();
+    restoreNewDraftAfterEditing();
+  }, [resetComposer, restoreNewDraftAfterEditing]);
 
   const handleEditComplete = useCallback(() => {
     const { text, entities } = parseMessageInput(htmlRef.current!);
@@ -54,9 +93,22 @@ const useEditing = (
     });
 
     resetComposer();
-  }, [editMessage, editedMessage, htmlRef, openDeleteModal, resetComposer]);
+    restoreNewDraftAfterEditing();
+  }, [editMessage, editedMessage, htmlRef, openDeleteModal, resetComposer, restoreNewDraftAfterEditing]);
 
-  return handleEditComplete;
+  const handleBlur = useCallback(() => {
+    if (!editedMessage) return;
+    const edited = parseMessageInput(htmlRef.current!);
+    const update = edited.text.length ? edited : undefined;
+    setEditingDraft({
+      chatId, threadId, type, text: update,
+    });
+  }, [chatId, editedMessage, htmlRef, setEditingDraft, threadId, type]);
+
+  useBackgroundMode(handleBlur);
+  useBeforeUnload(handleBlur);
+
+  return [handleEditComplete, handleEditCancel];
 };
 
 export default useEditing;

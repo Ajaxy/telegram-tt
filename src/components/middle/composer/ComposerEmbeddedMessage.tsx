@@ -38,15 +38,20 @@ type StateProps = {
   forwardedMessagesCount?: number;
 };
 
+type OwnProps = {
+  onClear?: () => void;
+};
+
 const FORWARD_RENDERING_DELAY = 300;
 
-const ComposerEmbeddedMessage: FC<StateProps> = ({
+const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   replyingToId,
   editingId,
   message,
   sender,
   shouldAnimate,
   forwardedMessagesCount,
+  onClear,
 }) => {
   const {
     setReplyingToId,
@@ -76,7 +81,8 @@ const ComposerEmbeddedMessage: FC<StateProps> = ({
     } else if (forwardedMessagesCount) {
       exitForwardMode();
     }
-  }, [replyingToId, editingId, forwardedMessagesCount, setReplyingToId, setEditingId, exitForwardMode]);
+    onClear?.();
+  }, [replyingToId, editingId, forwardedMessagesCount, onClear, setReplyingToId, setEditingId, exitForwardMode]);
 
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
@@ -113,7 +119,7 @@ const ComposerEmbeddedMessage: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { chatId, threadId, type: messageListType } = selectCurrentMessageList(global) || {};
     if (!chatId || !threadId || !messageListType) {

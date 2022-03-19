@@ -29,9 +29,10 @@ const useDraft = (
 
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     const currentHtml = htmlRef.current;
-    if (currentHtml.length && !editedMessage) {
+    if (editedMessage) return;
+    if (currentHtml.length) {
       saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(currentHtml!) });
-    } else {
+    } else if (currentHtml !== undefined) {
       clearDraft({ chatId: draftChatId, threadId: draftThreadId });
     }
   }, [clearDraft, editedMessage, htmlRef, saveDraft]);
@@ -61,7 +62,7 @@ const useDraft = (
       return;
     }
 
-    if (!draft) {
+    if (editedMessage || !draft) {
       return;
     }
 
@@ -73,7 +74,7 @@ const useDraft = (
         focusEditableElement(messageInput, true);
       });
     }
-  }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId]);
+  }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId, editedMessage]);
 
   const html = htmlRef.current;
   // Update draft when input changes

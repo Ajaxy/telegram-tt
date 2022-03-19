@@ -71,7 +71,7 @@ function replaceChatMessages(global: GlobalState, chatId: string, newById: Recor
   });
 }
 
-function updateThread(
+export function updateThread(
   global: GlobalState, chatId: string, threadId: number, threadUpdate: Partial<Thread>,
 ): GlobalState {
   const current = global.messages.byChatId[chatId];

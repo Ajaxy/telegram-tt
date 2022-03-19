@@ -92,6 +92,8 @@ export interface Thread {
   replyingToId?: number;
   editingId?: number;
   editingScheduledId?: number;
+  editingDraft?: ApiFormattedText;
+  editingScheduledDraft?: ApiFormattedText;
   draft?: ApiFormattedText;
   noWebPage?: boolean;
   threadInfo?: ApiThreadInfo;
@@ -515,6 +517,12 @@ export interface ActionPayloads {
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
   };
+  setEditingDraft: {
+    text?: ApiFormattedText;
+    chatId: string;
+    threadId: number;
+    type: MessageListType;
+  };
 }
 
 export type NonTypedActionNames = (
@@ -544,13 +552,14 @@ export type NonTypedActionNames = (
   'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' |
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
-  'setReplyingToId' | 'setEditingId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
+  'setReplyingToId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' | 'sendReaction' |
   'reportMessages' | 'sendMessageAction' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
   'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' | 'loadAvailableReactions' |
   'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' | 'setDefaultReaction' |
   'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
   'stopActiveReaction' | 'startActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
+  'setEditingId' |
   // downloads
   'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages

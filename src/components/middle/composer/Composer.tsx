@@ -39,6 +39,8 @@ import {
   selectChatMessage,
   selectUser,
   selectCanScheduleUntilOnline,
+  selectEditingScheduledDraft,
+  selectEditingDraft,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -147,6 +149,7 @@ type StateProps =
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
     sendAsId?: string;
+    editingDraft?: ApiFormattedText;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -213,6 +216,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsUser,
   sendAsChat,
   sendAsId,
+  editingDraft,
 }) => {
   const {
     sendMessage,
@@ -457,9 +461,26 @@ const Composer: FC<OwnProps & StateProps> = ({
     };
   }, [chatId, resetComposer, stopRecordingVoiceRef]);
 
-  const handleEditComplete = useEditing(htmlRef, setHtml, editingMessage, resetComposer, openDeleteModal);
+  const [handleEditComplete, handleEditCancel] = useEditing(
+    htmlRef,
+    setHtml,
+    editingMessage,
+    resetComposer,
+    openDeleteModal,
+    chatId,
+    threadId,
+    messageListType,
+    draft,
+    editingDraft,
+  );
   useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage);
   useClipboardPaste(insertTextAndUpdateCursor, setAttachments, editingMessage);
+
+  const handleEmbeddedClear = useCallback(() => {
+    if (editingMessage) {
+      handleEditCancel();
+    }
+  }, [editingMessage, handleEditCancel]);
 
   const handleFileSelect = useCallback(async (files: File[], isQuick: boolean) => {
     setAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
@@ -965,7 +986,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       />
       <div id="message-compose">
         <div className="svg-appendix" ref={appendixRef} />
-        <ComposerEmbeddedMessage />
+        <ComposerEmbeddedMessage onClear={handleEmbeddedClear} />
         <WebPagePreview
           chatId={chatId}
           threadId={threadId}
@@ -1187,6 +1208,10 @@ export default memo(withGlobal<OwnProps>(
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
 
+    const editingDraft = messageListType === 'scheduled'
+      ? selectEditingScheduledDraft(global, chatId)
+      : selectEditingDraft(global, chatId, threadId);
+
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       connectionState: global.connectionState,
@@ -1225,6 +1250,7 @@ export default memo(withGlobal<OwnProps>(
       sendAsUser,
       sendAsChat,
       sendAsId,
+      editingDraft,
     };
   },
 )(Composer));
