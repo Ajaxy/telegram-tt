@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiMessage } from '../../../api/types';
 
@@ -26,7 +26,7 @@ type StateProps = {
 const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
   isOpen, message, onClose,
 }) => {
-  const { clickInlineButton } = getDispatch();
+  const { clickInlineButton } = getActions();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};

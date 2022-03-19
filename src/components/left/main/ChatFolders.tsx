@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChatFolder } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
@@ -51,7 +51,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     loadChatFolders,
     setActiveChatFolder,
     openChat,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);

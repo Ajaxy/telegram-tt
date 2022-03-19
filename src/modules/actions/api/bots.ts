@@ -1,5 +1,5 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../..';
 
 import { ApiChat, ApiContact, ApiUser } from '../../../api/types';
@@ -22,7 +22,7 @@ import { getServerTime } from '../../../util/serverTime';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 
-addReducer('clickInlineButton', (global, actions, payload) => {
+addActionHandler('clickInlineButton', (global, actions, payload) => {
   const { button } = payload;
 
   switch (button.type) {
@@ -82,7 +82,7 @@ addReducer('clickInlineButton', (global, actions, payload) => {
   }
 });
 
-addReducer('sendBotCommand', (global, actions, payload) => {
+addActionHandler('sendBotCommand', (global, actions, payload) => {
   const { command, chatId } = payload;
   const { currentUserId } = global;
   const chat = chatId ? selectChat(global, chatId) : selectCurrentChat(global);
@@ -101,7 +101,7 @@ addReducer('sendBotCommand', (global, actions, payload) => {
   );
 });
 
-addReducer('restartBot', (global, actions, payload) => {
+addActionHandler('restartBot', (global, actions, payload) => {
   const { chatId } = payload;
   const { currentUserId } = global;
   const chat = selectCurrentChat(global);
@@ -121,7 +121,7 @@ addReducer('restartBot', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadTopInlineBots', (global) => {
+addActionHandler('loadTopInlineBots', (global) => {
   const { lastRequestedAt } = global.topInlineBots;
 
   if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
@@ -150,7 +150,7 @@ addReducer('loadTopInlineBots', (global) => {
   })();
 });
 
-addReducer('queryInlineBot', ((global, actions, payload) => {
+addActionHandler('queryInlineBot', ((global, actions, payload) => {
   const {
     chatId, username, query, offset,
   } = payload;
@@ -201,7 +201,7 @@ addReducer('queryInlineBot', ((global, actions, payload) => {
   })();
 }));
 
-addReducer('sendInlineBotResult', (global, actions, payload) => {
+addActionHandler('sendInlineBotResult', (global, actions, payload) => {
   const { id, queryId } = payload;
   const currentMessageList = selectCurrentMessageList(global);
 
@@ -225,7 +225,7 @@ addReducer('sendInlineBotResult', (global, actions, payload) => {
   });
 });
 
-addReducer('resetInlineBot', (global, actions, payload) => {
+addActionHandler('resetInlineBot', (global, actions, payload) => {
   const { username } = payload;
 
   let inlineBotData = global.inlineBots.byUsername[username];
@@ -246,7 +246,7 @@ addReducer('resetInlineBot', (global, actions, payload) => {
   setGlobal(replaceInlineBotSettings(global, username, inlineBotData));
 });
 
-addReducer('startBot', (global, actions, payload) => {
+addActionHandler('startBot', (global, actions, payload) => {
   const { botId, param } = payload;
 
   const bot = selectUser(global, botId);
@@ -346,7 +346,7 @@ async function answerCallbackButton(chat: ApiChat, messageId: number, data: stri
     return;
   }
 
-  const { showDialog, showNotification, toggleSafeLinkModal } = getDispatch();
+  const { showDialog, showNotification, toggleSafeLinkModal } = getActions();
   const { message, alert: isError, url } = result;
 
   if (isError) {

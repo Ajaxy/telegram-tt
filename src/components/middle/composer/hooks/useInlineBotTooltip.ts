@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../modules';
+import { getActions } from '../../../../modules';
 import { InlineBotSettings } from '../../../../types';
 import useFlag from '../../../../hooks/useFlag';
 import usePrevious from '../../../../hooks/usePrevious';
@@ -23,7 +23,7 @@ export default function useInlineBotTooltip(
   html: string,
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {
-  const { queryInlineBot, resetInlineBot } = getDispatch();
+  const { queryInlineBot, resetInlineBot } = getActions();
 
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const {

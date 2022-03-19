@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { ApiChat } from '../../../api/types';
 
@@ -52,7 +52,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   const {
     loadContactList,
     setGlobalSearchQuery,
-  } = getDispatch();
+  } = getActions();
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.

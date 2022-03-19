@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import {
   MAIN_THREAD_ID,
@@ -145,7 +145,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     focusMessage,
     loadProfilePhotos,
     setNewChatMembersDialogState,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

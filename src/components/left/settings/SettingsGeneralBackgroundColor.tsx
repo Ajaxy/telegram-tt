@@ -2,7 +2,7 @@ import { ChangeEvent, MutableRefObject, RefObject } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ThemeKey } from '../../../types';
 
@@ -57,7 +57,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   theme,
   backgroundColor,
 }) => {
-  const { setThemeSettings } = getDispatch();
+  const { setThemeSettings } = getActions();
 
   const themeRef = useRef<string>();
   themeRef.current = theme;

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { MessageListType } from '../../../global/types';
 import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
@@ -126,7 +126,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadFullChat,
     loadReactors,
     copyMessagesByIds,
-  } = getDispatch();
+  } = getActions();
 
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);

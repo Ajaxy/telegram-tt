@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiSticker } from '../../../api/types';
 
@@ -38,7 +38,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   onStickerSelect,
   stickers,
 }) => {
-  const { clearStickersForEmoji } = getDispatch();
+  const { clearStickersForEmoji } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

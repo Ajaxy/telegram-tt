@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
@@ -43,7 +43,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
     searchMessagesGlobal,
     focusMessage,
     openAudioPlayer,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const currentType = isVoice ? 'voice' : 'audio';

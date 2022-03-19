@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../../modules';
+import { getActions, withGlobal } from '../../../../modules';
 
 import { SettingsScreens } from '../../../../types';
 
@@ -66,7 +66,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   const {
     editChatFolder,
     addChatFolder,
-  } = getDispatch();
+  } = getActions();
 
   const [animationData, setAnimationData] = useState<string>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);

@@ -1,4 +1,4 @@
-import { getDispatch } from '../modules';
+import { getActions } from '../modules';
 import { IS_SAFARI } from './environment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'setlanguage' |
@@ -18,7 +18,7 @@ export const processDeepLink = (url: string) => {
     openStickerSetShortName,
     focusMessage,
     joinVoiceChatByLink,
-  } = getDispatch();
+  } = getActions();
 
   // Safari thinks the path in tg://path links is hostname for some reason
   const method = (IS_SAFARI ? hostname : pathname).replace(/^\/\//, '') as DeepLinkMethod;

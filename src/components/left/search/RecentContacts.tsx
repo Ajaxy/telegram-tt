@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, useCallback, useRef, memo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiUser } from '../../../api/types';
 
@@ -39,7 +39,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
   const {
     loadTopUsers, loadContactList, openChat,
     addRecentlyFoundChatId, clearRecentlyFoundChats,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const topUsersRef = useRef<HTMLDivElement>(null);

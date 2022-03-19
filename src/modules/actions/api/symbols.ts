@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { ApiSticker } from '../../../api/types';
 import { LangCode } from '../../../types';
@@ -20,12 +20,12 @@ const ADDED_SETS_THROTTLE_CHUNK = 10;
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
-addReducer('loadStickerSets', (global) => {
+addActionHandler('loadStickerSets', (global) => {
   const { hash } = global.stickers.added || {};
   void loadStickerSets(hash);
 });
 
-addReducer('loadAddedStickers', (global, actions) => {
+addActionHandler('loadAddedStickers', (global, actions) => {
   const { setIds: addedSetIds } = global.stickers.added;
   const cached = global.stickers.setsById;
   if (!addedSetIds || !addedSetIds.length) {
@@ -47,17 +47,17 @@ addReducer('loadAddedStickers', (global, actions) => {
   })();
 });
 
-addReducer('loadRecentStickers', (global) => {
+addActionHandler('loadRecentStickers', (global) => {
   const { hash } = global.stickers.recent || {};
   void loadRecentStickers(hash);
 });
 
-addReducer('loadFavoriteStickers', (global) => {
+addActionHandler('loadFavoriteStickers', (global) => {
   const { hash } = global.stickers.favorite || {};
   void loadFavoriteStickers(hash);
 });
 
-addReducer('loadGreetingStickers', (global) => {
+addActionHandler('loadGreetingStickers', (global) => {
   const { hash } = global.stickers.greeting || {};
 
   (async () => {
@@ -82,12 +82,12 @@ addReducer('loadGreetingStickers', (global) => {
   })();
 });
 
-addReducer('loadFeaturedStickers', (global) => {
+addActionHandler('loadFeaturedStickers', (global) => {
   const { hash } = global.stickers.featured || {};
   void loadFeaturedStickers(hash);
 });
 
-addReducer('loadStickers', (global, actions, payload) => {
+addActionHandler('loadStickers', (global, actions, payload) => {
   const { stickerSetId, stickerSetShortName } = payload!;
   let { stickerSetAccessHash } = payload!;
 
@@ -103,17 +103,17 @@ addReducer('loadStickers', (global, actions, payload) => {
   void loadStickers(stickerSetId, stickerSetAccessHash, stickerSetShortName);
 });
 
-addReducer('loadAnimatedEmojis', () => {
+addActionHandler('loadAnimatedEmojis', () => {
   void loadAnimatedEmojis();
   void loadAnimatedEmojiEffects();
 });
 
-addReducer('loadSavedGifs', (global) => {
+addActionHandler('loadSavedGifs', (global) => {
   const { hash } = global.gifs.saved;
   void loadSavedGifs(hash);
 });
 
-addReducer('faveSticker', (global, actions, payload) => {
+addActionHandler('faveSticker', (global, actions, payload) => {
   const { sticker } = payload!;
 
   if (sticker) {
@@ -121,7 +121,7 @@ addReducer('faveSticker', (global, actions, payload) => {
   }
 });
 
-addReducer('unfaveSticker', (global, actions, payload) => {
+addActionHandler('unfaveSticker', (global, actions, payload) => {
   const { sticker } = payload!;
 
   if (sticker) {
@@ -129,7 +129,7 @@ addReducer('unfaveSticker', (global, actions, payload) => {
   }
 });
 
-addReducer('toggleStickerSet', (global, actions, payload) => {
+addActionHandler('toggleStickerSet', (global, actions, payload) => {
   const { stickerSetId } = payload!;
   const stickerSet = selectStickerSet(global, stickerSetId);
   if (!stickerSet) {
@@ -141,7 +141,7 @@ addReducer('toggleStickerSet', (global, actions, payload) => {
   void callApi(!installedDate ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
 });
 
-addReducer('loadEmojiKeywords', (global, actions, payload: { language: LangCode }) => {
+addActionHandler('loadEmojiKeywords', (global, actions, payload: { language: LangCode }) => {
   const { language } = payload;
 
   let currentEmojiKeywords = global.emojiKeywords[language];
@@ -330,7 +330,7 @@ function unfaveSticker(sticker: ApiSticker) {
   void callApi('faveSticker', { sticker, unfave: true });
 }
 
-addReducer('setStickerSearchQuery', (global, actions, payload) => {
+addActionHandler('setStickerSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   if (query) {
@@ -340,7 +340,7 @@ addReducer('setStickerSearchQuery', (global, actions, payload) => {
   }
 });
 
-addReducer('setGifSearchQuery', (global, actions, payload) => {
+addActionHandler('setGifSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   if (typeof query === 'string') {
@@ -350,7 +350,7 @@ addReducer('setGifSearchQuery', (global, actions, payload) => {
   }
 });
 
-addReducer('searchMoreGifs', (global) => {
+addActionHandler('searchMoreGifs', (global) => {
   const { query, offset } = global.gifs.search;
 
   if (typeof query === 'string') {
@@ -360,7 +360,7 @@ addReducer('searchMoreGifs', (global) => {
   }
 });
 
-addReducer('loadStickersForEmoji', (global, actions, payload) => {
+addActionHandler('loadStickersForEmoji', (global, actions, payload) => {
   const { emoji } = payload!;
   const { hash } = global.stickers.forEmoji;
 
@@ -369,7 +369,7 @@ addReducer('loadStickersForEmoji', (global, actions, payload) => {
   });
 });
 
-addReducer('clearStickersForEmoji', (global) => {
+addActionHandler('clearStickersForEmoji', (global) => {
   return {
     ...global,
     stickers: {
@@ -379,7 +379,7 @@ addReducer('clearStickersForEmoji', (global) => {
   };
 });
 
-addReducer('openStickerSetShortName', (global, actions, payload) => {
+addActionHandler('openStickerSetShortName', (global, actions, payload) => {
   const { stickerSetShortName } = payload!;
   return {
     ...global,

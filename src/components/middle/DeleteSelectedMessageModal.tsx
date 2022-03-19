@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../modules/selectors';
 import {
@@ -46,7 +46,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     deleteMessages,
     deleteScheduledMessages,
     exitMessageSelectMode,
-  } = getDispatch();
+  } = getActions();
 
   const prevIsOpen = usePrevious(isOpen);
 

@@ -1,7 +1,7 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../modules';
 
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
@@ -43,7 +43,7 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
   const {
     setForwardChatId,
     exitForwardMode,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const [filter, setFilter] = useState('');

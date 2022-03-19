@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 
@@ -35,7 +35,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     loadGreetingStickers,
     sendMessage,
     markMessageListRead,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null

@@ -1,5 +1,5 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiNotification } from '../../api/types';
 
@@ -13,7 +13,7 @@ type StateProps = {
 };
 
 const Notifications: FC<StateProps> = ({ notifications }) => {
-  const { dismissNotification } = getDispatch();
+  const { dismissNotification } = getActions();
 
   if (!notifications.length) {
     return undefined;

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useState, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { callApi } from '../../../api/gramjs';
 import {
@@ -62,7 +62,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   const [isReady, setIsReady] = useState(false);
   const loadedCharts = useRef<string[]>([]);
 
-  const { loadStatistics, loadStatisticsAsyncGraph } = getDispatch();
+  const { loadStatistics, loadStatisticsAsyncGraph } = getActions();
 
   useEffect(() => {
     loadStatistics({ chatId });

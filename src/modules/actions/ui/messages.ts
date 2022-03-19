@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { ApiMessage, MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
@@ -51,13 +51,13 @@ const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
 
-addReducer('setScrollOffset', (global, actions, payload) => {
+addActionHandler('setScrollOffset', (global, actions, payload) => {
   const { chatId, threadId, scrollOffset } = payload!;
 
   return replaceThreadParam(global, chatId, threadId, 'scrollOffset', scrollOffset);
 });
 
-addReducer('setReplyingToId', (global, actions, payload) => {
+addActionHandler('setReplyingToId', (global, actions, payload) => {
   const { messageId } = payload!;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
@@ -68,7 +68,7 @@ addReducer('setReplyingToId', (global, actions, payload) => {
   return replaceThreadParam(global, chatId, threadId, 'replyingToId', messageId);
 });
 
-addReducer('setEditingId', (global, actions, payload) => {
+addActionHandler('setEditingId', (global, actions, payload) => {
   const { messageId } = payload!;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
@@ -81,7 +81,7 @@ addReducer('setEditingId', (global, actions, payload) => {
   return replaceThreadParam(global, chatId, threadId, paramName, messageId);
 });
 
-addReducer('editLastMessage', (global) => {
+addActionHandler('editLastMessage', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
   if (!chatId || !threadId) {
     return undefined;
@@ -104,7 +104,7 @@ addReducer('editLastMessage', (global) => {
   return replaceThreadParam(global, chatId, threadId, 'editingId', lastOwnEditableMessageId);
 });
 
-addReducer('replyToNextMessage', (global, actions, payload) => {
+addActionHandler('replyToNextMessage', (global, actions, payload) => {
   const { targetIndexDelta } = payload;
   const { chatId, threadId } = selectCurrentMessageList(global) || {};
   if (!chatId || !threadId) {
@@ -146,7 +146,7 @@ addReducer('replyToNextMessage', (global, actions, payload) => {
   });
 });
 
-addReducer('openMediaViewer', (global, actions, payload) => {
+addActionHandler('openMediaViewer', (global, actions, payload) => {
   const {
     chatId, threadId, messageId, avatarOwnerId, profilePhotoIndex, origin,
   } = payload!;
@@ -165,14 +165,14 @@ addReducer('openMediaViewer', (global, actions, payload) => {
   };
 });
 
-addReducer('closeMediaViewer', (global) => {
+addActionHandler('closeMediaViewer', (global) => {
   return {
     ...global,
     mediaViewer: {},
   };
 });
 
-addReducer('openAudioPlayer', (global, actions, payload) => {
+addActionHandler('openAudioPlayer', (global, actions, payload) => {
   const {
     chatId, threadId, messageId, origin, volume, playbackRate, isMuted,
   } = payload!;
@@ -191,7 +191,7 @@ addReducer('openAudioPlayer', (global, actions, payload) => {
   };
 });
 
-addReducer('setAudioPlayerVolume', (global, actions, payload) => {
+addActionHandler('setAudioPlayerVolume', (global, actions, payload) => {
   const {
     volume,
   } = payload!;
@@ -205,7 +205,7 @@ addReducer('setAudioPlayerVolume', (global, actions, payload) => {
   };
 });
 
-addReducer('setAudioPlayerPlaybackRate', (global, actions, payload) => {
+addActionHandler('setAudioPlayerPlaybackRate', (global, actions, payload) => {
   const {
     playbackRate,
   } = payload!;
@@ -219,7 +219,7 @@ addReducer('setAudioPlayerPlaybackRate', (global, actions, payload) => {
   };
 });
 
-addReducer('setAudioPlayerMuted', (global, actions, payload) => {
+addActionHandler('setAudioPlayerMuted', (global, actions, payload) => {
   const {
     isMuted,
   } = payload!;
@@ -233,7 +233,7 @@ addReducer('setAudioPlayerMuted', (global, actions, payload) => {
   };
 });
 
-addReducer('setAudioPlayerOrigin', (global, actions, payload) => {
+addActionHandler('setAudioPlayerOrigin', (global, actions, payload) => {
   const {
     origin,
   } = payload!;
@@ -247,7 +247,7 @@ addReducer('setAudioPlayerOrigin', (global, actions, payload) => {
   };
 });
 
-addReducer('closeAudioPlayer', (global) => {
+addActionHandler('closeAudioPlayer', (global) => {
   return {
     ...global,
     audioPlayer: {
@@ -258,7 +258,7 @@ addReducer('closeAudioPlayer', (global) => {
   };
 });
 
-addReducer('openPollResults', (global, actions, payload) => {
+addActionHandler('openPollResults', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
 
   const shouldOpenInstantly = selectIsRightColumnShown(global);
@@ -288,14 +288,14 @@ addReducer('openPollResults', (global, actions, payload) => {
   }
 });
 
-addReducer('closePollResults', (global) => {
+addActionHandler('closePollResults', (global) => {
   setGlobal({
     ...global,
     pollResults: {},
   });
 });
 
-addReducer('focusLastMessage', (global, actions) => {
+addActionHandler('focusLastMessage', (global, actions) => {
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return;
@@ -323,7 +323,7 @@ addReducer('focusLastMessage', (global, actions) => {
   });
 });
 
-addReducer('focusNextReply', (global, actions) => {
+addActionHandler('focusNextReply', (global, actions) => {
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return undefined;
@@ -352,7 +352,7 @@ addReducer('focusNextReply', (global, actions) => {
   return undefined;
 });
 
-addReducer('focusMessage', (global, actions, payload) => {
+addActionHandler('focusMessage', (global, actions, payload) => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
     replyMessageId, isResizingContainer,
@@ -422,7 +422,7 @@ addReducer('focusMessage', (global, actions, payload) => {
   return undefined;
 });
 
-addReducer('openForwardMenu', (global, actions, payload) => {
+addActionHandler('openForwardMenu', (global, actions, payload) => {
   const { fromChatId, messageIds, groupedId } = payload!;
   let groupedMessageIds;
   if (groupedId) {
@@ -438,14 +438,14 @@ addReducer('openForwardMenu', (global, actions, payload) => {
   };
 });
 
-addReducer('exitForwardMode', (global) => {
+addActionHandler('exitForwardMode', (global) => {
   setGlobal({
     ...global,
     forwardMessages: {},
   });
 });
 
-addReducer('setForwardChatId', (global, actions, payload) => {
+addActionHandler('setForwardChatId', (global, actions, payload) => {
   const { id } = payload!;
 
   setGlobal({
@@ -462,7 +462,7 @@ addReducer('setForwardChatId', (global, actions, payload) => {
   actions.exitMessageSelectMode();
 });
 
-addReducer('openForwardMenuForSelectedMessages', (global, actions) => {
+addActionHandler('openForwardMenuForSelectedMessages', (global, actions) => {
   if (!global.selectedMessages) {
     return;
   }
@@ -472,7 +472,7 @@ addReducer('openForwardMenuForSelectedMessages', (global, actions) => {
   actions.openForwardMenu({ fromChatId, messageIds });
 });
 
-addReducer('cancelMessageMediaDownload', (global, actions, payload) => {
+addActionHandler('cancelMessageMediaDownload', (global, actions, payload) => {
   const { message } = payload!;
 
   const byChatId = global.activeDownloads.byChatId[message.chatId];
@@ -489,7 +489,7 @@ addReducer('cancelMessageMediaDownload', (global, actions, payload) => {
   });
 });
 
-addReducer('downloadMessageMedia', (global, actions, payload) => {
+addActionHandler('downloadMessageMedia', (global, actions, payload) => {
   const { message } = payload!;
   if (!message) return;
 
@@ -504,7 +504,7 @@ addReducer('downloadMessageMedia', (global, actions, payload) => {
   });
 });
 
-addReducer('downloadSelectedMessages', (global, actions) => {
+addActionHandler('downloadSelectedMessages', (global, actions) => {
   if (!global.selectedMessages) {
     return;
   }
@@ -519,7 +519,7 @@ addReducer('downloadSelectedMessages', (global, actions) => {
   messages.forEach((message) => actions.downloadMessageMedia({ message }));
 });
 
-addReducer('enterMessageSelectMode', (global, actions, payload) => {
+addActionHandler('enterMessageSelectMode', (global, actions, payload) => {
   const { messageId } = payload || {};
   const openChat = selectCurrentChat(global);
   if (!openChat) {
@@ -529,7 +529,7 @@ addReducer('enterMessageSelectMode', (global, actions, payload) => {
   return enterMessageSelectMode(global, openChat.id, messageId);
 });
 
-addReducer('toggleMessageSelection', (global, actions, payload) => {
+addActionHandler('toggleMessageSelection', (global, actions, payload) => {
   const {
     messageId,
     groupedId,
@@ -558,7 +558,7 @@ addReducer('toggleMessageSelection', (global, actions, payload) => {
   }
 });
 
-addReducer('disableContextMenuHint', (global) => {
+addActionHandler('disableContextMenuHint', (global) => {
   if (!global.shouldShowContextMenuHint) {
     return undefined;
   }
@@ -569,23 +569,23 @@ addReducer('disableContextMenuHint', (global) => {
   };
 });
 
-addReducer('exitMessageSelectMode', exitMessageSelectMode);
+addActionHandler('exitMessageSelectMode', exitMessageSelectMode);
 
-addReducer('openPollModal', (global) => {
+addActionHandler('openPollModal', (global) => {
   return {
     ...global,
     isPollModalOpen: true,
   };
 });
 
-addReducer('closePollModal', (global) => {
+addActionHandler('closePollModal', (global) => {
   return {
     ...global,
     isPollModalOpen: false,
   };
 });
 
-addReducer('checkVersionNotification', (global, actions) => {
+addActionHandler('checkVersionNotification', (global, actions) => {
   const currentVersion = APP_VERSION.split('.').slice(0, 2).join('.');
   const { serviceNotifications } = global;
 
@@ -608,7 +608,7 @@ addReducer('checkVersionNotification', (global, actions) => {
   });
 });
 
-addReducer('createServiceNotification', (global, actions, payload) => {
+addActionHandler('createServiceNotification', (global, actions, payload) => {
   const { message, version } = payload;
   const { serviceNotifications } = global;
   const serviceChat = selectChat(global, SERVICE_NOTIFICATIONS_USER_ID)!;
@@ -646,7 +646,7 @@ addReducer('createServiceNotification', (global, actions, payload) => {
   });
 });
 
-addReducer('openReactorListModal', (global, actions, payload) => {
+addActionHandler('openReactorListModal', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
 
   return {
@@ -655,14 +655,14 @@ addReducer('openReactorListModal', (global, actions, payload) => {
   };
 });
 
-addReducer('closeReactorListModal', (global) => {
+addActionHandler('closeReactorListModal', (global) => {
   return {
     ...global,
     reactorModal: undefined,
   };
 });
 
-addReducer('openSeenByModal', (global, actions, payload) => {
+addActionHandler('openSeenByModal', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
 
   return {
@@ -671,14 +671,14 @@ addReducer('openSeenByModal', (global, actions, payload) => {
   };
 });
 
-addReducer('closeSeenByModal', (global) => {
+addActionHandler('closeSeenByModal', (global) => {
   return {
     ...global,
     seenByModal: undefined,
   };
 });
 
-addReducer('copySelectedMessages', (global) => {
+addActionHandler('copySelectedMessages', (global) => {
   if (!global.selectedMessages) {
     return;
   }
@@ -687,7 +687,7 @@ addReducer('copySelectedMessages', (global) => {
   copyTextForMessages(global, chatId, messageIds);
 });
 
-addReducer('copyMessagesByIds', (global, actions, payload: { messageIds?: number[] }) => {
+addActionHandler('copyMessagesByIds', (global, actions, payload: { messageIds?: number[] }) => {
   const { messageIds } = payload;
   const chat = selectCurrentChat(global);
   if (!messageIds || messageIds.length === 0 || !chat) {

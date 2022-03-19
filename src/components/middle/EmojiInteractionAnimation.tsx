@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ActiveEmojiInteraction } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
@@ -38,7 +38,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
   localEffectAnimation,
   activeEmojiInteraction,
 }) => {
-  const { stopActiveEmojiInteraction } = getDispatch();
+  const { stopActiveEmojiInteraction } = getActions();
 
   const [isHiding, startHiding] = useFlag(false);
   const [isPlaying, startPlaying] = useFlag(false);

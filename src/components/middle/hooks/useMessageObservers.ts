@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { MessageListType } from '../../../global/types';
 
@@ -16,7 +16,7 @@ export default function useMessageObservers(
   containerRef: RefObject<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
 ) {
-  const { markMessageListRead, markMessagesRead } = getDispatch();
+  const { markMessageListRead, markMessagesRead } = getActions();
 
   const {
     observe: observeIntersectionForMedia,

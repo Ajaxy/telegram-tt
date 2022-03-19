@@ -1,8 +1,8 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
 import { clearPayment, closeInvoice } from '../../reducers';
 
-addReducer('openPaymentModal', (global, actions, payload) => {
+addActionHandler('openPaymentModal', (global, actions, payload) => {
   const { chatId, messageId } = payload;
   return {
     ...global,
@@ -15,12 +15,12 @@ addReducer('openPaymentModal', (global, actions, payload) => {
   };
 });
 
-addReducer('closePaymentModal', (global) => {
+addActionHandler('closePaymentModal', (global) => {
   const newGlobal = clearPayment(global);
   return closeInvoice(newGlobal);
 });
 
-addReducer('addPaymentError', (global, actions, payload) => {
+addActionHandler('addPaymentError', (global, actions, payload) => {
   const { error } = payload!;
 
   return {

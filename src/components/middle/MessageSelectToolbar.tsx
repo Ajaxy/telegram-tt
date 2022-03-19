@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { MessageListType } from '../../global/types';
 
@@ -60,7 +60,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     openForwardMenuForSelectedMessages,
     downloadSelectedMessages,
     copySelectedMessages,
-  } = getDispatch();
+  } = getActions();
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();

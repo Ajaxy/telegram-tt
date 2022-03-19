@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import safePlay from '../../../util/safePlay';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 import useMedia from '../../../hooks/useMedia';
 import { ActiveEmojiInteraction } from '../../../global/types';
 import useFlag from '../../../hooks/useFlag';
@@ -29,7 +29,7 @@ export default function useAnimatedEmoji(
 ) {
   const {
     interactWithAnimatedEmoji, sendEmojiInteraction, sendWatchingEmojiInteraction,
-  } = getDispatch();
+  } = getActions();
 
   const hasEffect = localEffect || emoji;
   const [isAnimationLoaded, markAnimationLoaded] = useFlag();

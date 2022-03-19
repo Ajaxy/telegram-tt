@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -14,7 +14,7 @@ type OwnProps = {
 const ChatLink: FC<OwnProps> = ({
   className, chatId, children,
 }) => {
-  const { openChat } = getDispatch();
+  const { openChat } = getActions();
 
   const handleClick = useCallback(() => {
     if (chatId) {

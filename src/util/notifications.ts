@@ -4,7 +4,7 @@ import {
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
-import { getDispatch, getGlobal, setGlobal } from '../modules';
+import { getActions, getGlobal, setGlobal } from '../modules';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -143,7 +143,7 @@ async function requestPermission() {
 
 async function unsubscribeFromPush(subscription: PushSubscription | null) {
   const global = getGlobal();
-  const dispatch = getDispatch();
+  const dispatch = getActions();
   if (subscription) {
     try {
       const deviceToken = getDeviceToken(subscription);
@@ -217,7 +217,7 @@ export async function subscribe() {
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
     await callApi('registerDevice', deviceToken);
-    getDispatch()
+    getActions()
       .setDeviceToken(deviceToken);
   } catch (error: any) {
     if (Notification.permission === 'denied' as NotificationPermission) {
@@ -376,7 +376,7 @@ export async function notifyAboutMessage({
       });
     }
   } else {
-    const dispatch = getDispatch();
+    const dispatch = getActions();
     const options: NotificationOptions = {
       body,
       icon,

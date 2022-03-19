@@ -5,6 +5,6 @@ const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();
 
 export const getGlobal = typed.getGlobal;
 export const setGlobal = typed.setGlobal;
-export const getDispatch = typed.getDispatch;
-export const addReducer = typed.addReducer;
+export const getActions = typed.getActions;
+export const addActionHandler = typed.addActionHandler;
 export const withGlobal = typed.withGlobal;

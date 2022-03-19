@@ -3,7 +3,7 @@ import useDebounce from '../../../hooks/useDebounce';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 
@@ -53,7 +53,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     updateContactSignUpNotification,
     updateNotificationSettings,
     updateWebNotificationSettings,
-  } = getDispatch();
+  } = getActions();
 
   useEffect(() => {
     loadNotificationSettings();

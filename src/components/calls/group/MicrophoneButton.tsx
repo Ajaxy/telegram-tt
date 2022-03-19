@@ -2,7 +2,7 @@ import { GroupCallConnectionState } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
@@ -39,7 +39,7 @@ const MicrophoneButton: FC<StateProps> = ({
     toggleGroupCallMute,
     requestToSpeak,
     playGroupCallSound,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const muteMouseDownState = useRef('up');

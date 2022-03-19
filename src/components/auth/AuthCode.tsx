@@ -2,7 +2,7 @@ import { FormEvent } from 'react';
 import React, {
   FC, useState, useEffect, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 import { GlobalState } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
@@ -29,7 +29,7 @@ const AuthCode: FC<StateProps> = ({
     setAuthCode,
     returnToAuthPhoneNumber,
     clearAuthError,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null

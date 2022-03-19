@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
 import {
@@ -169,7 +169,7 @@ const MiddleColumn: FC<StateProps> = ({
     joinChannel,
     sendBotCommand,
     restartBot,
-  } = getDispatch();
+  } = getActions();
 
   const { width: windowWidth } = useWindowSize();
 

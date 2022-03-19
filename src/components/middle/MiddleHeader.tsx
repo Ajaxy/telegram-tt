@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 import cycleRestrict from '../../util/cycleRestrict';
 
 import { GlobalState, MessageListType } from '../../global/types';
@@ -124,7 +124,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     loadPinnedMessages,
     toggleLeftColumn,
     exitMessageSelectMode,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
   const isBackButtonActive = useRef(true);

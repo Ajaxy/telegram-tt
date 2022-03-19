@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useMemo, useEffect,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
@@ -41,7 +41,7 @@ const ChatList: FC<OwnProps> = ({
   foldersDispatch,
   onScreenSelect,
 }) => {
-  const { openChat, openNextChat } = getDispatch();
+  const { openChat, openNextChat } = getActions();
 
   const resolvedFolderId = (
     folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!

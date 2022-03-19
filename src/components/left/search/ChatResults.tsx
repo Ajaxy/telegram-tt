@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
@@ -61,7 +61,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

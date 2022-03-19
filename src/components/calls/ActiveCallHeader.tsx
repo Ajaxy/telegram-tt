@@ -2,7 +2,7 @@ import { GroupCallParticipant } from '../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiGroupCall } from '../../api/types';
 
@@ -23,7 +23,7 @@ const ActiveCallHeader: FC<StateProps> = ({
   meParticipant,
   isGroupCallPanelHidden,
 }) => {
-  const { toggleGroupCallPanel } = getDispatch();
+  const { toggleGroupCallPanel } = getActions();
 
   const lang = useLang();
 

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useMemo, useCallback, useState, useEffect,
 } from '../../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../../modules';
+import { getActions, withGlobal } from '../../../../modules';
 
 import { ApiChatFolder } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
@@ -51,7 +51,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     loadRecommendedChatFolders,
     addChatFolder,
     showDialog,
-  } = getDispatch();
+  } = getActions();
 
   const [animationData, setAnimationData] = useState<string>();
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);

@@ -4,7 +4,7 @@ import React, {
   useCallback,
   useMemo,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiMessage } from '../../api/types';
 
@@ -54,7 +54,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   const {
     downloadMessageMedia,
     cancelMessageMediaDownload,
-  } = getDispatch();
+  } = getActions();
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     message && getMessageMediaHash(message, 'download'),

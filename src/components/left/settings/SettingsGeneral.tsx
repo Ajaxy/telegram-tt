@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ISettings, TimeFormat } from '../../../types';
 import { ApiSticker, ApiStickerSet } from '../../../api/types';
@@ -72,7 +72,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     setSettingOption,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const stickerSettingsRef = useRef<HTMLDivElement>(null);

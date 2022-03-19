@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, useState, useCallback, memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress, SettingsScreens } from '../../../types';
@@ -60,7 +60,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     loadCurrentUser,
     updateProfile,
     checkUsername,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

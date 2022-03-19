@@ -1,5 +1,5 @@
 import { FC, memo, useEffect } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { Thread } from '../../global/types';
 import { ApiMediaFormat, ApiMessage } from '../../api/types';
@@ -24,7 +24,7 @@ const DownloadManager: FC<StateProps> = ({
   activeDownloads,
   messages,
 }) => {
-  const { cancelMessageMediaDownload } = getDispatch();
+  const { cancelMessageMediaDownload } = getActions();
 
   useEffect(() => {
     Object.entries(activeDownloads).forEach(([chatId, messageIds]) => {

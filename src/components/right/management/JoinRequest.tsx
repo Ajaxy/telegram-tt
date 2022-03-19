@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiUser } from '../../../api/types';
 
@@ -38,7 +38,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   chatId,
 }) => {
-  const { openChat, hideChatJoinRequest } = getDispatch();
+  const { openChat, hideChatJoinRequest } = getActions();
 
   const buildClassName = createClassNameBuilder('JoinRequest');
   const lang = useLang();

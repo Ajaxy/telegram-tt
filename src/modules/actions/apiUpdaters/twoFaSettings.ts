@@ -1,9 +1,9 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
 import { ApiUpdate } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate): GlobalState | undefined => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate): GlobalState | undefined => {
   switch (update['@type']) {
     case 'updateTwoFaStateWaitCode': {
       return {

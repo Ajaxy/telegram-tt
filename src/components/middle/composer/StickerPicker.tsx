@@ -1,7 +1,7 @@
 import React, {
   FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
@@ -67,7 +67,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     loadRecentStickers,
     addRecentSticker,
     unfaveSticker,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

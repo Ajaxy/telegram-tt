@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
 import { callApi } from '../../../api/gramjs';
 import { selectChat } from '../../selectors';
@@ -92,7 +92,7 @@ async function fetchGroupCallParticipants(groupCall: Partial<ApiGroupCall>, next
   setGlobal(global);
 }
 
-addReducer('toggleGroupCallPanel', (global) => {
+addActionHandler('toggleGroupCallPanel', (global) => {
   return {
     ...global,
     groupCalls: {
@@ -102,7 +102,7 @@ addReducer('toggleGroupCallPanel', (global) => {
   };
 });
 
-addReducer('subscribeToGroupCallUpdates', (global, actions, payload) => {
+addActionHandler('subscribeToGroupCallUpdates', (global, actions, payload) => {
   const { subscribed, id } = payload!;
   const groupCall = selectGroupCall(global, id);
 
@@ -121,7 +121,7 @@ addReducer('subscribeToGroupCallUpdates', (global, actions, payload) => {
   })();
 });
 
-addReducer('createGroupCall', (global, actions, payload) => {
+addActionHandler('createGroupCall', (global, actions, payload) => {
   const { chatId } = payload;
 
   const chat = selectChat(global, chatId);
@@ -146,7 +146,7 @@ addReducer('createGroupCall', (global, actions, payload) => {
   })();
 });
 
-addReducer('createGroupCallInviteLink', (global, actions) => {
+addActionHandler('createGroupCallInviteLink', (global, actions) => {
   const groupCall = selectActiveGroupCall(global);
 
   if (!groupCall || !groupCall.chatId) {
@@ -180,7 +180,7 @@ addReducer('createGroupCallInviteLink', (global, actions) => {
   })();
 });
 
-addReducer('joinVoiceChatByLink', (global, actions, payload) => {
+addActionHandler('joinVoiceChatByLink', (global, actions, payload) => {
   const { username, inviteHash } = payload!;
 
   (async () => {
@@ -199,7 +199,7 @@ addReducer('joinVoiceChatByLink', (global, actions, payload) => {
   })();
 });
 
-addReducer('joinGroupCall', (global, actions, payload) => {
+addActionHandler('joinGroupCall', (global, actions, payload) => {
   if (!ARE_CALLS_SUPPORTED) return;
 
   const {
@@ -263,7 +263,7 @@ addReducer('joinGroupCall', (global, actions, payload) => {
   })();
 });
 
-addReducer('playGroupCallSound', (global, actions, payload) => {
+addActionHandler('playGroupCallSound', (global, actions, payload) => {
   const { sound } = payload!;
 
   if (!sounds[sound]) {
@@ -282,7 +282,7 @@ addReducer('playGroupCallSound', (global, actions, payload) => {
   }
 });
 
-addReducer('loadMoreGroupCallParticipants', (global) => {
+addActionHandler('loadMoreGroupCallParticipants', (global) => {
   const groupCall = selectActiveGroupCall(global);
   if (!groupCall) {
     return;
@@ -324,7 +324,7 @@ export function removeGroupCallAudioElement() {
   audioElement = undefined;
 }
 
-addReducer('openCallFallbackConfirm', (global) => {
+addActionHandler('openCallFallbackConfirm', (global) => {
   return {
     ...global,
     groupCalls: {
@@ -334,7 +334,7 @@ addReducer('openCallFallbackConfirm', (global) => {
   };
 });
 
-addReducer('closeCallFallbackConfirm', (global) => {
+addActionHandler('closeCallFallbackConfirm', (global) => {
   return {
     ...global,
     groupCalls: {

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiChatAdminRights, ApiUser } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -54,7 +54,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const { updateChatAdmin } = getDispatch();
+  const { updateChatAdmin } = getActions();
 
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
   const [isTouched, setIsTouched] = useState(Boolean(isNewAdmin));

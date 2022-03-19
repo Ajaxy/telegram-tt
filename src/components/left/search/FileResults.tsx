@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
@@ -45,7 +45,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   const {
     searchMessagesGlobal,
     focusMessage,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

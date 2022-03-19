@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 import {
   joinGroupCall,
   startSharingScreen,
@@ -35,7 +35,7 @@ import callFallbackAvatarPath from '../../../assets/call-fallback-avatar.png';
 
 const FALLBACK_INVITE_EXPIRE_SECONDS = 1800; // 30 min
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
   const { activeGroupCallId } = global.groupCalls;
 
   switch (update['@type']) {
@@ -88,7 +88,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   return undefined;
 });
 
-addReducer('leaveGroupCall', (global, actions, payload) => {
+addActionHandler('leaveGroupCall', (global, actions, payload) => {
   const {
     isFromLibrary, shouldDiscard, shouldRemove, rejoin,
   } = payload || {};
@@ -151,7 +151,7 @@ addReducer('leaveGroupCall', (global, actions, payload) => {
   })();
 });
 
-addReducer('toggleGroupCallVideo', (global) => {
+addActionHandler('toggleGroupCallVideo', (global) => {
   const groupCall = selectActiveGroupCall(global);
   const user = selectUser(global, global.currentUserId!);
   if (!user || !groupCall) {
@@ -169,7 +169,7 @@ addReducer('toggleGroupCallVideo', (global) => {
   })();
 });
 
-addReducer('requestToSpeak', (global, actions, payload) => {
+addActionHandler('requestToSpeak', (global, actions, payload) => {
   const { value } = payload || { value: true };
   const groupCall = selectActiveGroupCall(global);
   const user = selectUser(global, global.currentUserId!);
@@ -184,7 +184,7 @@ addReducer('requestToSpeak', (global, actions, payload) => {
   });
 });
 
-addReducer('setGroupCallParticipantVolume', (global, actions, payload) => {
+addActionHandler('setGroupCallParticipantVolume', (global, actions, payload) => {
   const { participantId, volume } = payload!;
 
   const groupCall = selectActiveGroupCall(global);
@@ -202,7 +202,7 @@ addReducer('setGroupCallParticipantVolume', (global, actions, payload) => {
   });
 });
 
-addReducer('toggleGroupCallMute', (global, actions, payload) => {
+addActionHandler('toggleGroupCallMute', (global, actions, payload) => {
   const { participantId, value } = payload || {};
   const groupCall = selectActiveGroupCall(global);
   const user = selectUser(global, participantId || global.currentUserId!);
@@ -227,7 +227,7 @@ addReducer('toggleGroupCallMute', (global, actions, payload) => {
   })();
 });
 
-addReducer('toggleGroupCallPresentation', (global, actions, payload) => {
+addActionHandler('toggleGroupCallPresentation', (global, actions, payload) => {
   const groupCall = selectActiveGroupCall(global);
   const user = selectUser(global, global.currentUserId!);
   if (!user || !groupCall) {
@@ -261,7 +261,7 @@ addReducer('toggleGroupCallPresentation', (global, actions, payload) => {
   })();
 });
 
-addReducer('connectToActiveGroupCall', (global, actions) => {
+addActionHandler('connectToActiveGroupCall', (global, actions) => {
   const groupCall = selectActiveGroupCall(global);
   if (!groupCall) return;
 
@@ -304,7 +304,7 @@ addReducer('connectToActiveGroupCall', (global, actions) => {
   })();
 });
 
-addReducer('inviteToCallFallback', (global, actions, payload) => {
+addActionHandler('inviteToCallFallback', (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   if (!chatId) {
     return;

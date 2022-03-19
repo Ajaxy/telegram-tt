@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
@@ -73,7 +73,7 @@ const RightColumn: FC<StateProps> = ({
     toggleStatistics,
     setOpenedInviteInfo,
     requestNextManagementScreen,
-  } = getDispatch();
+  } = getActions();
 
   const { width: windowWidth } = useWindowSize();
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);

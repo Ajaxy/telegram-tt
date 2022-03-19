@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../modules';
 
 import { DEBUG } from '../config';
 
@@ -10,5 +10,5 @@ if (DEBUG) {
 }
 
 if (!getGlobal().connectionState) {
-  getDispatch().initApi();
+  getActions().initApi();
 }

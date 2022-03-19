@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { SettingsScreens, ISettings } from '../../../types';
 
@@ -55,7 +55,7 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   canAutoPlayVideos,
   autoLoadFileMaxSizeMb,
 }) => {
-  const { setSettingOption } = getDispatch();
+  const { setSettingOption } = getActions();
 
   const lang = useLang();
 

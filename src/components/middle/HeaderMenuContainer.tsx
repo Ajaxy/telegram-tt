@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChat } from '../../api/types';
 import { IAnchorPosition } from '../../types';
@@ -94,7 +94,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     addContact,
     openCallFallbackConfirm,
     toggleStatistics,
-  } = getDispatch();
+  } = getActions();
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

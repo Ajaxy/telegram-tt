@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from '../lib/teact/teact';
-import { getDispatch } from '../modules';
+import { getActions } from '../modules';
 
 import { ApiMessage } from '../api/types';
 
@@ -11,7 +11,7 @@ const useEnsureMessage = (
   message?: ApiMessage,
   replyOriginForId?: number,
 ) => {
-  const { loadMessage } = getDispatch();
+  const { loadMessage } = getActions();
   const loadMessageThrottled = useMemo(() => {
     const throttled = throttle(loadMessage, 500, true);
     return () => {

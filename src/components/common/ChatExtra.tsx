@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 import { ApiChat, ApiCountryCode, ApiUser } from '../../api/types';
@@ -48,7 +48,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     loadFullUser,
     showNotification,
     updateChatMutedState,
-  } = getDispatch();
+  } = getActions();
 
   const {
     id: userId,

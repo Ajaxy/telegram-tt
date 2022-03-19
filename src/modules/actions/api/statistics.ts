@@ -1,10 +1,10 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { callApi } from '../../../api/gramjs';
 import { updateStatistics, updateStatisticsGraph } from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';
 
-addReducer('loadStatistics', (global, actions, payload) => {
+addActionHandler('loadStatistics', (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
@@ -33,7 +33,7 @@ addReducer('loadStatistics', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadStatisticsAsyncGraph', (global, actions, payload) => {
+addActionHandler('loadStatisticsAsyncGraph', (global, actions, payload) => {
   const {
     chatId, token, name, isPercentage,
   } = payload;

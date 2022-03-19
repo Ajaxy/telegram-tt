@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useRef, useState,
 } from '../lib/teact/teact';
-import { getDispatch, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../modules';
 
 import { register, Track, TrackId } from '../util/audioPlayer';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
@@ -212,7 +212,7 @@ function makeMediaHandlers(controllerRef: React.RefObject<ReturnType<typeof regi
       stop: () => {
         pause();
         setCurrentTime(0);
-        getDispatch().closeAudioPlayer();
+        getActions().closeAudioPlayer();
       },
       seekbackward: (event) => {
         const skipTime = event.seekOffset || DEFAULT_SKIP_TIME;

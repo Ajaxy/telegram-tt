@@ -1,4 +1,4 @@
-import { addReducer, setGlobal } from '../..';
+import { addActionHandler, setGlobal } from '../..';
 
 import {
   exitMessageSelectMode, replaceThreadParam, updateCurrentMessageList,
@@ -6,7 +6,7 @@ import {
 import { selectCurrentMessageList } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
 
-addReducer('openChat', (global, actions, payload) => {
+addActionHandler('openChat', (global, actions, payload) => {
   const {
     id, threadId = -1, type = 'thread', shouldReplaceHistory = false,
   } = payload!;
@@ -40,11 +40,11 @@ addReducer('openChat', (global, actions, payload) => {
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory);
 });
 
-addReducer('openPreviousChat', (global) => {
+addActionHandler('openPreviousChat', (global) => {
   return updateCurrentMessageList(global, undefined);
 });
 
-addReducer('openChatWithInfo', (global, actions, payload) => {
+addActionHandler('openChatWithInfo', (global, actions, payload) => {
   setGlobal({
     ...global,
     isChatInfoShown: true,
@@ -53,21 +53,21 @@ addReducer('openChatWithInfo', (global, actions, payload) => {
   actions.openChat(payload);
 });
 
-addReducer('resetChatCreation', (global) => {
+addActionHandler('resetChatCreation', (global) => {
   return {
     ...global,
     chatCreation: undefined,
   };
 });
 
-addReducer('setNewChatMembersDialogState', (global, actions, payload) => {
+addActionHandler('setNewChatMembersDialogState', (global, actions, payload) => {
   return {
     ...global,
     newChatMembersProgress: payload,
   };
 });
 
-addReducer('openNextChat', (global, actions, payload) => {
+addActionHandler('openNextChat', (global, actions, payload) => {
   const { targetIndexDelta, orderedIds } = payload;
 
   const { chatId } = selectCurrentMessageList(global) || {};

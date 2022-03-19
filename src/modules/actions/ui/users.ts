@@ -1,8 +1,8 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
 import { updateUserSearch } from '../../reducers';
 
-addReducer('setUserSearchQuery', (global, actions, payload) => {
+addActionHandler('setUserSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
 
   return updateUserSearch(global, {

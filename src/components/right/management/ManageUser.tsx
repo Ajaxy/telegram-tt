@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
@@ -51,7 +51,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     updateContact,
     deleteContact,
     closeManagement,
-  } = getDispatch();
+  } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);

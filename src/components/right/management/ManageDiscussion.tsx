@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -52,7 +52,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     loadGroupsForDiscussion,
     linkDiscussionGroup,
     unlinkDiscussionGroup,
-  } = getDispatch();
+  } = getActions();
 
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
   const [animationData, setAnimationData] = useState<string>();

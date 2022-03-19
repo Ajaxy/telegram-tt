@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ApiPrivacySettings, SettingsScreens } from '../../../types';
@@ -38,7 +38,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   blockChatIds,
   chatsById,
 }) => {
-  const { setPrivacyVisibility } = getDispatch();
+  const { setPrivacyVisibility } = getActions();
 
   const lang = useLang();
 

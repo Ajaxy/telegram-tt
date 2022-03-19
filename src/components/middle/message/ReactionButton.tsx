@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../modules';
 
 import {
   ApiAvailableReaction, ApiMessage, ApiReactionCount, ApiUser,
@@ -30,7 +30,7 @@ const ReactionButton: FC<{
   activeReaction,
   availableReactions,
 }) => {
-  const { sendReaction } = getDispatch();
+  const { sendReaction } = getActions();
 
   const { recentReactions } = message.reactions!;
 

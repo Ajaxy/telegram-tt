@@ -6,7 +6,7 @@ import React, {
   useState,
   useEffect,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -86,7 +86,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     restartBot,
     openCallFallbackConfirm,
     requestNextManagementScreen,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);

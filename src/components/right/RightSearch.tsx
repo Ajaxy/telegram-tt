@@ -1,7 +1,7 @@
 import React, {
   FC, useMemo, memo, useRef,
 } from '../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../modules';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 
@@ -60,7 +60,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   const {
     searchTextMessagesLocal,
     focusMessage,
-  } = getDispatch();
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

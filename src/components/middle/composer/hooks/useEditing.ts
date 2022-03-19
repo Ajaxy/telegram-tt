@@ -1,5 +1,5 @@
 import { useCallback } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../modules';
+import { getActions } from '../../../../modules';
 
 import { ApiMessage } from '../../../../api/types';
 
@@ -17,7 +17,7 @@ const useEditing = (
   resetComposer: () => void,
   openDeleteModal: () => void,
 ) => {
-  const { editMessage } = getDispatch();
+  const { editMessage } = getActions();
 
   useOnChange(([prevEditedMessage]) => {
     if (!editedMessage) {

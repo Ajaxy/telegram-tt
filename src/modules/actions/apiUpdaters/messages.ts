@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import {
   ApiUpdate, ApiMessage, ApiPollResult, ApiThreadInfo, MAIN_THREAD_ID,
@@ -51,7 +51,7 @@ import {
 
 const ANIMATION_DELAY = 350;
 
-addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'newMessage': {
       const {

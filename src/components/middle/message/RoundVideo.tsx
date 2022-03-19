@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
@@ -162,7 +162,7 @@ const RoundVideo: FC<OwnProps> = ({
     }
 
     if (isDownloading) {
-      getDispatch().cancelMessageMediaDownload({ message });
+      getActions().cancelMessageMediaDownload({ message });
       return;
     }
 

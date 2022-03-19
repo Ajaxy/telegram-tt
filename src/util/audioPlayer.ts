@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../modules';
 
 import { AudioOrigin, GlobalSearchContent } from '../types';
 import { ApiMessage } from '../api/types';
@@ -99,7 +99,7 @@ function playNext(trackId: TrackId, isReverseOrder?: boolean) {
 
   if (!tracks.has(nextTrackId)) {
     // A bit hacky way to continue playlist when switching chat
-    getDispatch().openAudioPlayer(parseMessageKey(splitTrackId(nextTrackId).messageKey));
+    getActions().openAudioPlayer(parseMessageKey(splitTrackId(nextTrackId).messageKey));
 
     return;
   }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../modules';
+import { getActions } from '../../../../modules';
 
 import { ApiFormattedText, ApiMessage } from '../../../../api/types';
 
@@ -25,7 +25,7 @@ const useDraft = (
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
 ) => {
-  const { saveDraft, clearDraft } = getDispatch();
+  const { saveDraft, clearDraft } = getActions();
 
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     const currentHtml = htmlRef.current;

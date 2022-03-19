@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { PaymentStep } from '../../../types';
 import { ApiChat } from '../../../api/types';
@@ -33,7 +33,7 @@ import {
   setSmartGlocalCardInfo,
 } from '../../reducers';
 
-addReducer('validateRequestedInfo', (global, actions, payload) => {
+addActionHandler('validateRequestedInfo', (global, actions, payload) => {
   const { requestInfo, saveInfo } = payload;
   const chatId = selectPaymentChatId(global);
   const chat = chatId && selectChat(global, chatId);
@@ -67,7 +67,7 @@ async function validateRequestedInfo(chat: ApiChat, messageId: number, requestIn
   setGlobal(global);
 }
 
-addReducer('getPaymentForm', (global, actions, payload) => {
+addActionHandler('getPaymentForm', (global, actions, payload) => {
   const { chat, messageId } = payload;
   if (!chat || !messageId) {
     return;
@@ -93,7 +93,7 @@ async function getPaymentForm(chat: ApiChat, messageId: number) {
   setGlobal(global);
 }
 
-addReducer('getReceipt', (global, actions, payload) => {
+addActionHandler('getReceipt', (global, actions, payload) => {
   const { receiptMessageId, chatId, messageId } = payload;
   const chat = chatId && selectChat(global, chatId);
   if (!messageId || !receiptMessageId || !chat) {
@@ -115,7 +115,7 @@ async function getReceipt(chat: ApiChat, messageId: number, receiptMessageId: nu
   setGlobal(global);
 }
 
-addReducer('clearPaymentError', (global) => {
+addActionHandler('clearPaymentError', (global) => {
   setGlobal({
     ...global,
     payment: {
@@ -125,7 +125,7 @@ addReducer('clearPaymentError', (global) => {
   });
 });
 
-addReducer('clearReceipt', (global) => {
+addActionHandler('clearReceipt', (global) => {
   setGlobal({
     ...global,
     payment: {
@@ -135,7 +135,7 @@ addReducer('clearReceipt', (global) => {
   });
 });
 
-addReducer('sendCredentialsInfo', (global, actions, payload) => {
+addActionHandler('sendCredentialsInfo', (global, actions, payload) => {
   const { nativeProvider } = global.payment;
   const { credentials } = payload;
   const { data } = credentials;
@@ -155,7 +155,7 @@ addReducer('sendCredentialsInfo', (global, actions, payload) => {
   }
 });
 
-addReducer('sendPaymentForm', (global, actions, payload) => {
+addActionHandler('sendPaymentForm', (global, actions, payload) => {
   const { shippingOptionId, saveCredentials } = payload;
   const chatId = selectPaymentChatId(global);
   const chat = chatId && selectChat(global, chatId);
@@ -303,10 +303,10 @@ async function sendPaymentForm(
   }
 }
 
-addReducer('setPaymentStep', (global, actions, payload = {}) => {
+addActionHandler('setPaymentStep', (global, actions, payload = {}) => {
   return setPaymentStep(global, payload.step || PaymentStep.ShippingInfo);
 });
 
-addReducer('setInvoiceMessageInfo', (global, actions, payload) => {
+addActionHandler('setInvoiceMessageInfo', (global, actions, payload) => {
   return setInvoiceMessageInfo(global, payload);
 });

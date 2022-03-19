@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
@@ -14,7 +14,7 @@ const HISTORY_ANIMATION_DURATION = 450;
 
 subscribeToSystemThemeChange();
 
-addReducer('init', (global) => {
+addActionHandler('init', (global) => {
   const { animationLevel, messageTextSize, language } = global.settings.byKey;
   const theme = selectTheme(global);
 
@@ -47,7 +47,7 @@ addReducer('init', (global) => {
   }
 });
 
-addReducer('setIsUiReady', (global, actions, payload) => {
+addActionHandler('setIsUiReady', (global, actions, payload) => {
   const { uiReadyState } = payload!;
 
   if (uiReadyState === 2) {
@@ -60,7 +60,7 @@ addReducer('setIsUiReady', (global, actions, payload) => {
   };
 });
 
-addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+addActionHandler('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
   return {
@@ -69,21 +69,21 @@ addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   };
 });
 
-addReducer('setAuthRememberMe', (global, actions, payload) => {
+addActionHandler('setAuthRememberMe', (global, actions, payload) => {
   return {
     ...global,
     authRememberMe: Boolean(payload),
   };
 });
 
-addReducer('clearAuthError', (global) => {
+addActionHandler('clearAuthError', (global) => {
   return {
     ...global,
     authError: undefined,
   };
 });
 
-addReducer('disableHistoryAnimations', () => {
+addActionHandler('disableHistoryAnimations', () => {
   setTimeout(() => {
     setGlobal({
       ...getGlobal(),

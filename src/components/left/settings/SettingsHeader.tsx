@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { SettingsScreens } from '../../../types';
 
@@ -31,7 +31,7 @@ const SettingsHeader: FC<OwnProps> = ({
   const {
     signOut,
     deleteChatFolder,
-  } = getDispatch();
+  } = getActions();
 
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
@@ -43,7 +43,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     closeMediaViewer,
     focusMessage,
     toggleChatInfo,
-  } = getDispatch();
+  } = getActions();
 
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();

@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import {
   ApiMessage, ApiPoll, ApiUser, ApiPollAnswer,
@@ -51,7 +51,7 @@ const Poll: FC<OwnProps & StateProps> = ({
   onSendVote,
   serverTimeOffset,
 }) => {
-  const { loadMessage, openPollResults } = getDispatch();
+  const { loadMessage, openPollResults } = getActions();
 
   const { id: messageId, chatId } = message;
   const { summary, results } = poll;

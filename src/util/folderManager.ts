@@ -1,5 +1,5 @@
 import { addCallback } from '../lib/teact/teactn';
-import { addReducer, getGlobal } from '../modules';
+import { addActionHandler, getGlobal } from '../modules';
 
 import { GlobalState } from '../global/types';
 import { NotifyException, NotifySettings } from '../types';
@@ -101,7 +101,7 @@ export function init() {
   inited = true;
 
   addCallback(updateFolderManagerThrottled);
-  addReducer('reset', reset);
+  addActionHandler('reset', reset);
 
   updateFolderManager(getGlobal());
 }

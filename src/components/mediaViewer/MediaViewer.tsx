@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
@@ -101,7 +101,7 @@ const MediaViewer: FC<StateProps> = ({
     openForwardMenu,
     focusMessage,
     toggleChatInfo,
-  } = getDispatch();
+  } = getActions();
 
   const isOpen = Boolean(avatarOwner || messageId);
 

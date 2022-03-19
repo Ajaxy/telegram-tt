@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch } from '../../../modules';
+import { getActions } from '../../../modules';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { IMediaDimensions } from './helpers/calculateAlbumLayout';
@@ -138,7 +138,7 @@ const Video: FC<OwnProps> = ({
         onCancelUpload(message);
       }
     } else if (isDownloading) {
-      getDispatch().cancelMessageMediaDownload({ message });
+      getActions().cancelMessageMediaDownload({ message });
     } else if (!fullMediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
     } else if (fullMediaData && !isPlayAllowed) {

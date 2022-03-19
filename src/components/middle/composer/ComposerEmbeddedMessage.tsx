@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 
@@ -52,7 +52,7 @@ const ComposerEmbeddedMessage: FC<StateProps> = ({
     setEditingId,
     focusMessage,
     exitForwardMode,
-  } = getDispatch();
+  } = getActions();
 
   const isShown = Boolean(
     ((replyingToId || editingId) && message)

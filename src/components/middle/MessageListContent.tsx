@@ -19,7 +19,7 @@ import useMessageObservers from './hooks/useMessageObservers';
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
 import ActionMessage from './ActionMessage';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 interface OwnProps {
   chatId: string;
@@ -74,7 +74,7 @@ const MessageListContent: FC<OwnProps> = ({
   onFabToggle,
   onNotchToggle,
 }) => {
-  const { openHistoryCalendar } = getDispatch();
+  const { openHistoryCalendar } = getActions();
 
   const {
     observeIntersectionForMedia,

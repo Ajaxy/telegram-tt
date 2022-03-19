@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, { FC, useState, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 
@@ -16,7 +16,7 @@ type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
 const AuthRegister: FC<StateProps> = ({
   authIsLoading, authError,
 }) => {
-  const { signUp, clearAuthError, uploadProfilePhoto } = getDispatch();
+  const { signUp, clearAuthError, uploadProfilePhoto } = getActions();
 
   const lang = useLang();
   const [isButtonShown, setIsButtonShown] = useState(false);

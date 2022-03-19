@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
 
@@ -38,7 +38,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   const {
     joinGroupCall,
     subscribeToGroupCallUpdates,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

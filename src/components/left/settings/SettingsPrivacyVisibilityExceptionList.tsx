@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../modules';
 
 import { GlobalState } from '../../../global/types';
 import { ApiPrivacySettings, SettingsScreens } from '../../../types';
@@ -39,7 +39,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   currentUserId,
   settings,
 }) => {
-  const { setPrivacySettings } = getDispatch();
+  const { setPrivacySettings } = getActions();
 
   const lang = useLang();
 

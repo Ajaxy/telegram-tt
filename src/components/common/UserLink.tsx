@@ -5,7 +5,7 @@ import { ApiChat, ApiUser } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 
 import Link from '../ui/Link';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 type OwnProps = {
   className?: string;
@@ -16,7 +16,7 @@ type OwnProps = {
 const UserLink: FC<OwnProps> = ({
   className, sender, children,
 }) => {
-  const { openChat } = getDispatch();
+  const { openChat } = getActions();
 
   const handleClick = useCallback(() => {
     if (sender) {

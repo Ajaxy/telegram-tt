@@ -1,10 +1,10 @@
-import { addReducer, getGlobal } from '../..';
+import { addActionHandler, getGlobal } from '../..';
 import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { omit } from '../../../util/iteratees';
 import { selectChat } from '../../selectors';
 import { updateChat } from '../../reducers';
 
-addReducer('apiUpdate', (global, actions, update) => {
+addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'updateGroupCall': {
       if (update.call.connectionState === 'discarded') {

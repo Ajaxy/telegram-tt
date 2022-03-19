@@ -1,5 +1,5 @@
 import React, { FC, useEffect, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { GlobalState } from '../../global/types';
 
@@ -25,7 +25,7 @@ const Auth: FC<StateProps> = ({
 }) => {
   const {
     reset, initApi, returnToAuthPhoneNumber, goToAuthQrCode,
-  } = getDispatch();
+  } = getActions();
 
   useEffect(() => {
     reset();

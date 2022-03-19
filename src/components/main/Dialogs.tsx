@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import {
   ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
@@ -27,7 +27,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
     acceptInviteConfirmation,
     sendMessage,
     showNotification,
-  } = getDispatch();
+  } = getActions();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const lang = useLang();

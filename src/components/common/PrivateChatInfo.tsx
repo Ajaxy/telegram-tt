@@ -2,7 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
 import { GlobalState } from '../../global/types';
@@ -64,7 +64,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullUser,
     openMediaViewer,
-  } = getDispatch();
+  } = getActions();
 
   const { id: userId } = user || {};
   const fullName = getUserFullName(user);

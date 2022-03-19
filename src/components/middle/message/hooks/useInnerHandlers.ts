@@ -1,5 +1,5 @@
 import React, { useCallback } from '../../../../lib/teact/teact';
-import { getDispatch } from '../../../../modules';
+import { getActions } from '../../../../modules';
 
 import { IAlbum, MediaViewerOrigin } from '../../../../types';
 import {
@@ -25,7 +25,7 @@ export default function useInnerHandlers(
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
-  } = getDispatch();
+  } = getActions();
 
   const {
     id: messageId, forwardInfo, replyToMessageId, replyToChatId, replyToTopMessageId, groupedId,

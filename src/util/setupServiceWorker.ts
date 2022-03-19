@@ -1,5 +1,5 @@
 import { DEBUG, DEBUG_MORE } from '../config';
-import { getDispatch } from '../modules';
+import { getActions } from '../modules';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
 
@@ -15,7 +15,7 @@ function handleWorkerMessage(e: MessageEvent) {
     console.log('[SW] Message from worker', action);
   }
   if (!action.type) return;
-  const dispatch = getDispatch();
+  const dispatch = getActions();
   const payload = action.payload;
   switch (action.type) {
     case 'focusMessage':
@@ -78,7 +78,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         }
 
         if (!IS_IOS && !IS_ANDROID) {
-          getDispatch().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
+          getActions().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
         }
       }
     } catch (err) {

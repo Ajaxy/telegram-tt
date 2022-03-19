@@ -1,10 +1,10 @@
-import { addReducer } from '../..';
+import { addActionHandler } from '../..';
 
 import { updateGlobalSearch, updateGlobalSearchContent } from '../../reducers';
 
 const MAX_RECENTLY_FOUND_IDS = 10;
 
-addReducer('setGlobalSearchQuery', (global, actions, payload) => {
+addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
   const { chatId } = global.globalSearch;
 
@@ -17,7 +17,7 @@ addReducer('setGlobalSearchQuery', (global, actions, payload) => {
   });
 });
 
-addReducer('addRecentlyFoundChatId', (global, actions, payload) => {
+addActionHandler('addRecentlyFoundChatId', (global, actions, payload) => {
   const { id } = payload!;
   const { recentlyFoundChatIds } = global.globalSearch;
 
@@ -34,17 +34,17 @@ addReducer('addRecentlyFoundChatId', (global, actions, payload) => {
   return updateGlobalSearch(global, { recentlyFoundChatIds: newRecentIds });
 });
 
-addReducer('clearRecentlyFoundChats', (global) => {
+addActionHandler('clearRecentlyFoundChats', (global) => {
   return updateGlobalSearch(global, { recentlyFoundChatIds: undefined });
 });
 
-addReducer('setGlobalSearchContent', (global, actions, payload) => {
+addActionHandler('setGlobalSearchContent', (global, actions, payload) => {
   const { content } = payload!;
 
   return updateGlobalSearchContent(global, content);
 });
 
-addReducer('setGlobalSearchChatId', (global, actions, payload) => {
+addActionHandler('setGlobalSearchChatId', (global, actions, payload) => {
   const { id } = payload!;
 
   return updateGlobalSearch(global, { chatId: id, query: undefined, resultsByType: undefined });

@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getDispatch } from '../../modules';
+import { getActions } from '../../modules';
 
 import { ApiMessage } from '../../api/types';
 
@@ -58,7 +58,7 @@ const Document: FC<OwnProps> = ({
   onDateClick,
   isDownloading,
 }) => {
-  const dispatch = getDispatch();
+  const dispatch = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

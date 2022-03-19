@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../..';
+import { addActionHandler, getGlobal, setGlobal } from '../..';
 
 import { ManagementProgress } from '../../../types';
 import { callApi } from '../../../api/gramjs';
@@ -6,7 +6,7 @@ import { updateChat, updateManagement, updateManagementProgress } from '../../re
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import { isChatBasicGroup } from '../../helpers';
 
-addReducer('checkPublicLink', (global, actions, payload) => {
+addActionHandler('checkPublicLink', (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   if (!chatId) {
     return;
@@ -35,7 +35,7 @@ addReducer('checkPublicLink', (global, actions, payload) => {
   })();
 });
 
-addReducer('updatePublicLink', (global, actions, payload) => {
+addActionHandler('updatePublicLink', (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   let chat = chatId && selectChat(global, chatId);
   if (!chatId || !chat) {
@@ -67,7 +67,7 @@ addReducer('updatePublicLink', (global, actions, payload) => {
   })();
 });
 
-addReducer('updatePrivateLink', (global) => {
+addActionHandler('updatePrivateLink', (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const chat = chatId && selectChat(global, chatId);
   if (!chatId || !chat) {
@@ -77,13 +77,13 @@ addReducer('updatePrivateLink', (global) => {
   callApi('updatePrivateLink', { chat });
 });
 
-addReducer('setEditingExportedInvite', (global, actions, payload) => {
+addActionHandler('setEditingExportedInvite', (global, actions, payload) => {
   const { chatId, invite } = payload;
 
   setGlobal(updateManagement(global, chatId, { editingInvite: invite }));
 });
 
-addReducer('setOpenedInviteInfo', (global, actions, payload) => {
+addActionHandler('setOpenedInviteInfo', (global, actions, payload) => {
   const { chatId, invite } = payload;
 
   const update = invite ? { inviteInfo: { invite } } : { inviteInfo: undefined };
@@ -91,7 +91,7 @@ addReducer('setOpenedInviteInfo', (global, actions, payload) => {
   setGlobal(updateManagement(global, chatId, update));
 });
 
-addReducer('loadExportedChatInvites', (global, actions, payload) => {
+addActionHandler('loadExportedChatInvites', (global, actions, payload) => {
   const {
     chatId, adminId, isRevoked, limit,
   } = payload!;
@@ -112,7 +112,7 @@ addReducer('loadExportedChatInvites', (global, actions, payload) => {
   })();
 });
 
-addReducer('editExportedChatInvite', (global, actions, payload) => {
+addActionHandler('editExportedChatInvite', (global, actions, payload) => {
   const {
     chatId, link, isRevoked, expireDate, usageLimit, isRequestNeeded, title,
   } = payload!;
@@ -149,7 +149,7 @@ addReducer('editExportedChatInvite', (global, actions, payload) => {
   })();
 });
 
-addReducer('exportChatInvite', (global, actions, payload) => {
+addActionHandler('exportChatInvite', (global, actions, payload) => {
   const {
     chatId, expireDate, usageLimit, isRequestNeeded, title,
   } = payload!;
@@ -175,7 +175,7 @@ addReducer('exportChatInvite', (global, actions, payload) => {
   })();
 });
 
-addReducer('deleteExportedChatInvite', (global, actions, payload) => {
+addActionHandler('deleteExportedChatInvite', (global, actions, payload) => {
   const {
     chatId, link,
   } = payload!;
@@ -199,7 +199,7 @@ addReducer('deleteExportedChatInvite', (global, actions, payload) => {
   })();
 });
 
-addReducer('deleteRevokedExportedChatInvites', (global, actions, payload) => {
+addActionHandler('deleteRevokedExportedChatInvites', (global, actions, payload) => {
   const {
     chatId, adminId,
   } = payload!;
@@ -222,7 +222,7 @@ addReducer('deleteRevokedExportedChatInvites', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadChatInviteImporters', (global, actions, payload) => {
+addActionHandler('loadChatInviteImporters', (global, actions, payload) => {
   const {
     chatId, link, offsetDate, offsetUserId, limit,
   } = payload!;
@@ -253,7 +253,7 @@ addReducer('loadChatInviteImporters', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadChatInviteRequesters', (global, actions, payload) => {
+addActionHandler('loadChatInviteRequesters', (global, actions, payload) => {
   const {
     chatId, link, offsetDate, offsetUserId, limit,
   } = payload!;
@@ -285,7 +285,7 @@ addReducer('loadChatInviteRequesters', (global, actions, payload) => {
   })();
 });
 
-addReducer('loadChatJoinRequests', (global, actions, payload) => {
+addActionHandler('loadChatJoinRequests', (global, actions, payload) => {
   const {
     chatId, offsetDate, offsetUserId, limit,
   } = payload!;
@@ -309,7 +309,7 @@ addReducer('loadChatJoinRequests', (global, actions, payload) => {
   })();
 });
 
-addReducer('hideChatJoinRequest', (global, actions, payload) => {
+addActionHandler('hideChatJoinRequest', (global, actions, payload) => {
   const {
     chatId, userId, isApproved,
   } = payload!;
@@ -334,7 +334,7 @@ addReducer('hideChatJoinRequest', (global, actions, payload) => {
   })();
 });
 
-addReducer('hideAllChatJoinRequests', (global, actions, payload) => {
+addActionHandler('hideAllChatJoinRequests', (global, actions, payload) => {
   const {
     chatId, isApproved, link,
   } = payload!;

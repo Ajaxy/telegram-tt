@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../modules';
 
 import { ApiMessage } from '../../api/types';
 import { IAlbum } from '../../types';
@@ -52,7 +52,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const {
     deleteMessages,
     deleteScheduledMessages,
-  } = getDispatch();
+  } = getActions();
 
   const handleDeleteMessageForAll = useCallback(() => {
     const messageIds = album?.messages

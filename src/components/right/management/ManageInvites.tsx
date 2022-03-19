@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -71,7 +71,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     deleteExportedChatInvite,
     deleteRevokedExportedChatInvites,
     setOpenedInviteInfo,
-  } = getDispatch();
+  } = getActions();
 
   const lang = useLang();
 

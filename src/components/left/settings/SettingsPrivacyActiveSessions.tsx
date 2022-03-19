@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ApiSession } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
@@ -34,7 +34,7 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps> = ({
     loadAuthorizations,
     terminateAuthorization,
     terminateAllAuthorizations,
-  } = getDispatch();
+  } = getActions();
 
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   useEffect(() => {

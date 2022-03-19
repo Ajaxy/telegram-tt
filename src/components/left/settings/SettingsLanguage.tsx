@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../modules';
 
 import { ISettings, LangCode, SettingsScreens } from '../../../types';
 import { ApiLanguage } from '../../../api/types';
@@ -31,7 +31,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   const {
     loadLanguages,
     setSettingOption,
-  } = getDispatch();
+  } = getActions();
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
