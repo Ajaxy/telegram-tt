@@ -1,5 +1,7 @@
 import { callApi } from '../api/gramjs';
-import { ApiChat, ApiMediaFormat, ApiMessage, ApiUser, ApiUserReaction } from '../api/types';
+import {
+  ApiChat, ApiMediaFormat, ApiMessage, ApiUser, ApiUserReaction,
+} from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
 import { getDispatch, getGlobal, setGlobal } from '../lib/teact/teactn';
@@ -264,9 +266,11 @@ function checkIfShouldNotify(chat: ApiChat) {
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: ApiUserReaction) {
   const global = getGlobal();
+  const {
+    replyToMessageId,
+  } = message;
   let {
     senderId,
-    replyToMessageId,
   } = message;
   if (reaction) senderId = reaction.userId;
 

@@ -219,7 +219,7 @@ export function leaveChat(global: GlobalState, leftChatId: string): GlobalState 
 
 export function addChatMembers(global: GlobalState, chat: ApiChat, membersToAdd: ApiChatMember[]): GlobalState {
   const currentMembers = chat.fullInfo?.members;
-  const newMemberIds = new Set(membersToAdd.map(m => m.userId));
+  const newMemberIds = new Set(membersToAdd.map((m) => m.userId));
   const updatedMembers = [
     ...currentMembers?.filter((m) => !newMemberIds.has(m.userId)) || [],
     ...membersToAdd,

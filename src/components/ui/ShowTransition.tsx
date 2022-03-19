@@ -4,7 +4,6 @@ import useShowTransition from '../../hooks/useShowTransition';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
 
-
 type OwnProps = {
   isOpen: boolean;
   isCustom?: boolean;

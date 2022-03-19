@@ -55,7 +55,7 @@ export const IS_TABLET_COLUMN_LAYOUT = !IS_SINGLE_COLUMN_LAYOUT && (
   window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
 );
 export const IS_VOICE_RECORDING_SUPPORTED = Boolean(
-  navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
+  window.navigator.mediaDevices && 'getUserMedia' in window.navigator.mediaDevices && (
     window.AudioContext || (window as any).webkitAudioContext
   ),
 );

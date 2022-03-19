@@ -45,7 +45,7 @@ export function renderMessageSummary(
   highlight?: string,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
 ): TextPart[] {
-  let { entities } = message.content.text || {};
+  const { entities } = message.content.text || {};
 
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   if (!hasSpoilers) {

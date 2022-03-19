@@ -36,10 +36,10 @@ const prepareLibraryMemo = memoized(prepareLibrary);
 const searchInLibraryMemo = memoized(searchInLibrary);
 
 try {
-  RE_EMOJI_SEARCH = new RegExp('(^|\\s):[-+_:\\p{L}\\p{N}]*$', 'gui');
+  RE_EMOJI_SEARCH = /(^|\s):[-+_:\p{L}\p{N}]*$/gui;
 } catch (e) {
   // Support for older versions of firefox
-  RE_EMOJI_SEARCH = new RegExp('(^|\\s):[-+_:\\d\\wа-яё]*$', 'gi');
+  RE_EMOJI_SEARCH = /(^|\s):[-+_:\d\wа-яё]*$/gi;
 }
 
 export default function useEmojiTooltip(

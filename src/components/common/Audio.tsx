@@ -280,34 +280,32 @@ const Audio: FC<OwnProps> = ({
 
   function renderWithTitle() {
     return (
-      <>
-        <div className={contentClassName}>
-          <div className="content-row">
-            <p className="title" dir="auto" title={renderFirstLine()}>{renderText(renderFirstLine())}</p>
+      <div className={contentClassName}>
+        <div className="content-row">
+          <p className="title" dir="auto" title={renderFirstLine()}>{renderText(renderFirstLine())}</p>
 
-            <div className="message-date">
-              {date && (
-                <Link
-                  className="date"
-                  onClick={handleDateClick}
-                >
-                  {formatPastTimeShort(lang, date * 1000)}
-                </Link>
-              )}
-            </div>
+          <div className="message-date">
+            {date && (
+              <Link
+                className="date"
+                onClick={handleDateClick}
+              >
+                {formatPastTimeShort(lang, date * 1000)}
+              </Link>
+            )}
           </div>
-
-          {withSeekline && (
-            <div className="meta search-result" dir={isRtl ? 'rtl' : undefined}>
-              <span className="duration with-seekline" dir="auto">
-                {playProgress < 1 && `${formatMediaDuration(duration * playProgress, duration)}`}
-              </span>
-              {renderSeekline(playProgress, bufferedProgress, seekerRef)}
-            </div>
-          )}
-          {!withSeekline && renderSecondLine()}
         </div>
-      </>
+
+        {withSeekline && (
+          <div className="meta search-result" dir={isRtl ? 'rtl' : undefined}>
+            <span className="duration with-seekline" dir="auto">
+              {playProgress < 1 && `${formatMediaDuration(duration * playProgress, duration)}`}
+            </span>
+            {renderSeekline(playProgress, bufferedProgress, seekerRef)}
+          </div>
+        )}
+        {!withSeekline && renderSecondLine()}
+      </div>
     );
   }
 
@@ -356,8 +354,17 @@ const Audio: FC<OwnProps> = ({
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
       {origin !== AudioOrigin.Search && audio && renderAudio(
-        lang, audio, duration, isPlaying, playProgress, bufferedProgress, seekerRef,
-        (isDownloading || isUploading), date, transferProgress, onDateClick ? handleDateClick : undefined,
+        lang,
+        audio,
+        duration,
+        isPlaying,
+        playProgress,
+        bufferedProgress,
+        seekerRef,
+        (isDownloading || isUploading),
+        date,
+        transferProgress,
+        onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
       {origin === AudioOrigin.Inline && voice && (

@@ -52,7 +52,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
             // eslint-disable-next-line no-console
             console.log('[SW] Hard reload detected, re-enabling Service Worker');
           }
-          await Promise.all(registrations.map(r => r.unregister()));
+          await Promise.all(registrations.map((r) => r.unregister()));
         }
       }
 

@@ -203,9 +203,12 @@ function updateFolderManager(global: GlobalState) {
   updateFolders(global, isAllFolderChanged, isArchivedFolderChanged, areFoldersChanged);
 
   affectedFolderIds = affectedFolderIds.concat(updateChats(
-    global, areFoldersChanged || isAllFolderChanged || isArchivedFolderChanged,
-    areNotifySettingsChanged, areNotifyExceptionsChanged,
-    prevAllFolderListIds, prevArchivedFolderListIds,
+    global,
+    areFoldersChanged || isAllFolderChanged || isArchivedFolderChanged,
+    areNotifySettingsChanged,
+    areNotifyExceptionsChanged,
+    prevAllFolderListIds,
+    prevArchivedFolderListIds,
   ));
 
   updateResults(unique(affectedFolderIds));
@@ -315,7 +318,7 @@ function buildFolderSummaryFromMainList(
   return {
     id: folderId,
     listIds: new Set(listIds),
-    orderedPinnedIds: orderedPinnedIds,
+    orderedPinnedIds,
     pinnedChatIds: new Set(orderedPinnedIds),
   };
 }

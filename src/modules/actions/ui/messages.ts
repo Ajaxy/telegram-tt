@@ -687,7 +687,7 @@ addReducer('copySelectedMessages', (global) => {
   copyTextForMessages(global, chatId, messageIds);
 });
 
-addReducer('copyMessagesByIds', (global, actions, payload: { messageIds?: number[] } ) => {
+addReducer('copyMessagesByIds', (global, actions, payload: { messageIds?: number[] }) => {
   const { messageIds } = payload;
   const chat = selectCurrentChat(global);
   if (!messageIds || messageIds.length === 0 || !chat) {
@@ -696,7 +696,6 @@ addReducer('copyMessagesByIds', (global, actions, payload: { messageIds?: number
 
   copyTextForMessages(global, chat.id, messageIds);
 });
-
 
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { threadId } = selectCurrentMessageList(global) || {};
@@ -712,7 +711,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   const result = messages.reduce((acc, message) => {
     const sender = selectSender(global, message);
     acc.push(`> ${sender ? getSenderTitle(lang, sender) : ''}:`);
-    acc.push(getMessageSummaryText(lang, message, false, 0, undefined, true) + '\n');
+    acc.push(`${getMessageSummaryText(lang, message, false, 0, undefined, true)}\n`);
 
     return acc;
   }, [] as string[]);

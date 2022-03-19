@@ -104,7 +104,9 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   }, [mode, selectedChatIds, dispatch]);
 
   useHistoryBack(
-    isActive, onReset, onScreenSelect,
+    isActive,
+    onReset,
+    onScreenSelect,
     mode === 'included' ? SettingsScreens.FoldersIncludedChats : SettingsScreens.FoldersExcludedChats,
   );
 

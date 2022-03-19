@@ -48,7 +48,6 @@ export function getMessageTextWithSpoilers(message: ApiMessage) {
 
     const spoiler = generateBrailleSpoiler(length);
 
-
     return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
   }, text);
 }
@@ -160,12 +159,12 @@ export function getMessageSummaryDescription(
   }
 
   if (invoice) {
-    summary = lang('PaymentInvoice') + ': ' + invoice.text;
+    summary = `${lang('PaymentInvoice')}: ${invoice.text}`;
   }
 
   if (text) {
     if (isExtended && summary) {
-      summary += '\n' + truncatedText;
+      summary += `\n${truncatedText}`;
     } else {
       summary = truncatedText;
     }

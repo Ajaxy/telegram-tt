@@ -598,7 +598,9 @@ function buildGeo(media: GramJs.MessageMediaGeo): ApiLocation | undefined {
 }
 
 function buildVenue(media: GramJs.MessageMediaVenue): ApiLocation | undefined {
-  const { geo, title, provider, address, venueId, venueType } = media;
+  const {
+    geo, title, provider, address, venueId, venueType,
+  } = media;
   const point = buildGeoPoint(geo);
   return point && {
     type: 'venue',
@@ -624,7 +626,9 @@ function buildGeoLive(media: GramJs.MessageMediaGeoLive): ApiLocation | undefine
 
 function buildGeoPoint(geo: GramJs.TypeGeoPoint): ApiLocation['geo'] | undefined {
   if (geo instanceof GramJs.GeoPointEmpty) return undefined;
-  const { long, lat, accuracyRadius, accessHash } = geo;
+  const {
+    long, lat, accuracyRadius, accessHash,
+  } = geo;
   return {
     long,
     lat,

@@ -12,7 +12,9 @@ type OwnProps = {
   className?: string;
 };
 
-const Skeleton: FC<OwnProps> = ({ variant = 'rectangular', animation = 'wave', width, height, className }) => {
+const Skeleton: FC<OwnProps> = ({
+  variant = 'rectangular', animation = 'wave', width, height, className,
+}) => {
   const classNames = buildClassName('Skeleton', variant, animation, className);
   const style = (width ? `width: ${width}px;` : '') + (height ? `height: ${height}px;` : '');
   return (

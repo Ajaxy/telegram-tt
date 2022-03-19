@@ -24,7 +24,6 @@ const useClipboardPaste = (
         return;
       }
 
-
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
       const { items } = e.clipboardData;
       let files: File[] = [];

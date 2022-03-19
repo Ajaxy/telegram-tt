@@ -1,4 +1,6 @@
-import React, { FC, memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useRef,
+} from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
 

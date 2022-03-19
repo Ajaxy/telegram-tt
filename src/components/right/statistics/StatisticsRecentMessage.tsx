@@ -44,7 +44,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
           {formatDateTimeToString(message.date * 1000, lang.code)}
         </div>
         <div className="StatisticsRecentMessage--meta">
-          {Boolean(message.forwards) ? lang('ChannelStats.SharesCount', message.forwards) : 'No shares'}
+          {message.forwards ? lang('ChannelStats.SharesCount', message.forwards) : 'No shares'}
         </div>
       </div>
     </p>

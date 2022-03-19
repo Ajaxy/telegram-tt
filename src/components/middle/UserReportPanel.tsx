@@ -1,4 +1,6 @@
-import React, { FC, memo, useCallback, useState } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useState,
+} from '../../lib/teact/teact';
 import { withGlobal, getDispatch } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
@@ -61,9 +63,8 @@ const UserReportPanel: FC<OwnProps & StateProps> = ({ userId, user }) => {
   ]);
 
   if (!settings) {
-    return;
+    return undefined;
   }
-
 
   return (
     <div className="UserReportPanel">

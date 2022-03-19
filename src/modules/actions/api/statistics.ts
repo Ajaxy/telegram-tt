@@ -34,7 +34,9 @@ addReducer('loadStatistics', (global, actions, payload) => {
 });
 
 addReducer('loadStatisticsAsyncGraph', (global, actions, payload) => {
-  const { chatId, token, name, isPercentage } = payload;
+  const {
+    chatId, token, name, isPercentage,
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
     return;

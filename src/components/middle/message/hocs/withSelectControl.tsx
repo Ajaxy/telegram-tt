@@ -41,16 +41,17 @@ export default function withSelectControl(WrappedComponent: FC) {
     }, [toggleMessageSelection, message]);
 
     const newProps = useMemo(() => {
+      const { dimensions: dims, onClick } = props;
       return {
         ...props,
         isInSelectMode,
         isSelected,
         dimensions: {
-          ...props.dimensions,
+          ...dims,
           x: 0,
           y: 0,
         },
-        onClick: isInSelectMode ? undefined : props.onClick,
+        onClick: isInSelectMode ? undefined : onClick,
       };
     }, [props, isInSelectMode, isSelected]);
 

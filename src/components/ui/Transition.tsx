@@ -260,7 +260,8 @@ const Transition: FC<TransitionProps> = ({
         typeof render === 'function'
           ? render(key === activeKey, key === prevActiveKey, activeKey)
           : render
-      }</div>
+      }
+      </div>
     );
   });
 

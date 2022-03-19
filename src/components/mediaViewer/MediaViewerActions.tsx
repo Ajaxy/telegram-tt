@@ -163,17 +163,15 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   return (
     <div className="MediaViewerActions">
       {!isAvatar && !isProtected && (
-        <>
-          <Button
-            round
-            size="smaller"
-            color="translucent-white"
-            ariaLabel={lang('Forward')}
-            onClick={onForward}
-          >
-            <i className="icon-forward" />
-          </Button>
-        </>
+        <Button
+          round
+          size="smaller"
+          color="translucent-white"
+          ariaLabel={lang('Forward')}
+          onClick={onForward}
+        >
+          <i className="icon-forward" />
+        </Button>
       )}
       {renderDownloadButton()}
       <Button

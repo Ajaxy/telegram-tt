@@ -1,4 +1,6 @@
-import React, { FC, memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useRef,
+} from '../../lib/teact/teact';
 
 import useLang from '../../hooks/useLang';
 import { TextPart } from '../common/helpers/renderMessageText';

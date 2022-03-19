@@ -1,12 +1,16 @@
+import React, {
+  FC, memo, useCallback, useEffect, useRef, useState,
+} from '../../lib/teact/teact';
+
 import { ApiDimensions } from '../../api/types';
+
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreenStatus from '../../hooks/useFullscreen';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
-import React, { FC, memo, useCallback, useEffect, useRef, useState } from '../../lib/teact/teact';
-
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import safePlay from '../../util/safePlay';
+
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
 

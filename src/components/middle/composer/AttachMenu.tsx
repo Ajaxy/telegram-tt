@@ -57,7 +57,7 @@ const AttachMenu: FC<OwnProps> = ({
   const lang = useLang();
 
   if (!isButtonVisible) {
-    return;
+    return undefined;
   }
 
   return (

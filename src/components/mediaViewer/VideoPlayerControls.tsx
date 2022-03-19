@@ -55,12 +55,11 @@ const VideoPlayerControls: FC<IProps> = ({
   const isSeekingRef = useRef<boolean>(false);
   const isSeeking = isSeekingRef.current;
 
-
   useEffect(() => {
     let timeout: number | undefined;
     if (!isVisible || !isPlayed || isSeeking) {
       if (timeout) window.clearTimeout(timeout);
-      return;
+      return undefined;
     }
     timeout = window.setTimeout(() => {
       setVisibility(false);
@@ -112,7 +111,6 @@ const VideoPlayerControls: FC<IProps> = ({
       onDrag: handleSeek,
     });
   }, [isVisible, handleStartSeek, handleSeek, handleStopSeek]);
-
 
   return (
     <div

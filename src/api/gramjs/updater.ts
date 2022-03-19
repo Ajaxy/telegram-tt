@@ -776,7 +776,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       return;
     }
 
-
     if (_entities?.length) {
       _entities
         .filter((e) => e instanceof GramJs.User && !e.contact)
