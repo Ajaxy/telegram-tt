@@ -1,7 +1,7 @@
 import { ApiMessage } from '../../../api/types';
 import { IAlbum } from '../../../types';
 
-import { getDayStart } from '../../../util/dateFormat';
+import { getDayStartAt } from '../../../util/dateFormat';
 import { isActionMessage } from '../../../modules/helpers';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
@@ -22,7 +22,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
   let currentSenderGroup: SenderGroup = [];
   let currentDateGroup = {
     originalDate: messages[0].date,
-    datetime: Number(getDayStart(messages[0].date * 1000)),
+    datetime: getDayStartAt(messages[0].date * 1000),
     senderGroups: [currentSenderGroup],
   };
   let currentAlbum: IAlbum | undefined;
@@ -57,7 +57,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
       currentAlbum = undefined;
     }
     if (nextMessage) {
-      const nextMessageDayStartsAt = Number(getDayStart(nextMessage.date * 1000));
+      const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);
       if (currentDateGroup.datetime !== nextMessageDayStartsAt) {
         currentDateGroup = {
           originalDate: nextMessage.date,
