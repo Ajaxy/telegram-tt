@@ -2,12 +2,12 @@ import { RefObject } from 'react';
 import { useState, useEffect } from '../lib/teact/teact';
 import useFlag from './useFlag';
 
-export const useResize = (
+export function useResize(
   elementRef: RefObject<HTMLElement>,
   onResize: (width: number) => void,
   onReset: NoneToVoidFunction,
   initialWidth?: number,
-) => {
+) {
   const [isActive, markIsActive, unmarkIsActive] = useFlag();
   const [initialMouseX, setInitialMouseX] = useState<number>();
   const [initialElementWidth, setInitialElementWidth] = useState<number>();
@@ -21,19 +21,21 @@ export const useResize = (
   }, [elementRef, initialWidth]);
 
   function handleMouseUp() {
-    document.body.classList.remove('no-selection', 'cursor-ew-resize');
+    document.body.classList.remove('cursor-ew-resize');
   }
 
-  function initResize(event: React.MouseEvent<HTMLElement, MouseEvent>) {
-    document.body.classList.add('no-selection', 'cursor-ew-resize');
+  function initResize(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+    e.preventDefault();
 
-    setInitialMouseX(event.clientX);
+    document.body.classList.add('cursor-ew-resize');
+
+    setInitialMouseX(e.clientX);
     setInitialElementWidth(elementRef.current!.offsetWidth);
     markIsActive();
   }
 
-  function resetResize(event: React.MouseEvent<HTMLElement, MouseEvent>) {
-    event.preventDefault();
+  function resetResize(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+    e.preventDefault();
     elementRef.current!.style.width = '';
     onReset();
   }
@@ -41,8 +43,8 @@ export const useResize = (
   useEffect(() => {
     if (!isActive) return undefined;
 
-    const handleMouseMove = (event: MouseEvent) => {
-      const newWidth = Math.ceil(initialElementWidth + event.clientX - initialMouseX);
+    const handleMouseMove = (e: MouseEvent) => {
+      const newWidth = Math.ceil(initialElementWidth + e.clientX - initialMouseX);
       elementRef.current!.style.width = `${newWidth}px`;
     };
 
@@ -67,4 +69,4 @@ export const useResize = (
   }, [initialElementWidth, initialMouseX, elementRef, onResize, isActive, unmarkIsActive]);
 
   return { initResize, resetResize, handleMouseUp };
-};
+}

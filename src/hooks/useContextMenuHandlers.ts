@@ -56,10 +56,9 @@ const useContextMenuHandlers = (
 
   const handleContextMenuHide = useCallback(() => {
     setContextMenuPosition(undefined);
-    document.body.classList.remove('no-selection');
   }, []);
 
-  // Support context menu on touch-devices
+  // Support context menu on touch devices
   useEffect(() => {
     if (isMenuDisabled || !IS_TOUCH_ENV || shouldDisableOnLongTap) {
       return undefined;
@@ -102,7 +101,6 @@ const useContextMenuHandlers = (
         }, true);
       }
 
-      document.body.classList.add('no-selection');
       setIsContextMenuOpen(true);
       setContextMenuPosition({ x: clientX, y: clientY });
     };

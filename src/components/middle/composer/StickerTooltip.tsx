@@ -6,7 +6,6 @@ import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
 import { ApiSticker } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -54,16 +53,8 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
 
   useEffect(() => (isOpen ? captureEscKeyListener(clearStickersForEmoji) : undefined), [isOpen, clearStickersForEmoji]);
 
-  const handleMouseEnter = () => {
-    document.body.classList.add('no-select');
-  };
-
   const handleMouseMove = () => {
     sendMessageAction({ type: 'chooseSticker' });
-  };
-
-  const handleMouseLeave = () => {
-    document.body.classList.remove('no-select');
   };
 
   const className = buildClassName(
@@ -76,8 +67,6 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
     <div
       ref={containerRef}
       className={className}
-      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       onMouseMove={handleMouseMove}
     >
       {shouldRender && displayedStickers ? (

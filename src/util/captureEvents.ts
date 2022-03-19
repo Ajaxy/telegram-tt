@@ -94,6 +94,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     captureEvent = e;
 
     if (e.type === 'mousedown') {
+      if (options.onDrag) {
+        e.preventDefault();
+      }
+
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onRelease);
     } else if (e.type === 'touchstart') {
@@ -120,7 +124,6 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       }
     }
 
-    document.body.classList.add('no-selection');
     if (options.withCursor) {
       document.body.classList.add('cursor-grabbing');
     }
@@ -135,7 +138,6 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       if (options.withCursor) {
         document.body.classList.remove('cursor-grabbing');
       }
-      document.body.classList.remove('no-selection');
 
       document.removeEventListener('mouseup', onRelease);
       document.removeEventListener('mousemove', onMove);
