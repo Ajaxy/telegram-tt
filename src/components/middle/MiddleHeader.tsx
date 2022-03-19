@@ -19,7 +19,7 @@ import {
 } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
-  getChatTitle, getMessageKey, getPrivateChatUserId, getSenderTitle, isUserId,
+  getChatTitle, getMessageKey, getSenderTitle, isUserId,
 } from '../../global/helpers';
 import {
   selectAllowedMessageActions,
@@ -35,7 +35,6 @@ import {
   selectScheduledIds,
   selectThreadInfo,
   selectThreadTopMessageId,
-  selectUser,
 } from '../../global/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
@@ -54,7 +53,7 @@ import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 import AudioPlayer from './AudioPlayer';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
-import UserReportPanel from './UserReportPanel';
+import ChatReportPanel from './ChatReportPanel';
 
 import './MiddleHeader.scss';
 
@@ -83,7 +82,6 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
   lastSyncTime?: number;
-  shouldShowUserReportPanel?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
@@ -109,7 +107,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isChatWithSelf,
   isChatWithBot,
   lastSyncTime,
-  shouldShowUserReportPanel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
@@ -136,6 +133,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : undefined);
   const chatTitleLength = chat && getChatTitle(lang, chat).length;
   const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
+  const { settings } = chat || {};
 
   useEffect(() => {
     if (threadId === MAIN_THREAD_ID && lastSyncTime && isReady) {
@@ -236,6 +234,13 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
     && windowWidth < SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
   );
+
+  const hasChatSettings = Boolean(settings?.canAddContact || settings?.canBlockContact || settings?.canReportSpam);
+  const {
+    shouldRender: shouldShowChatReportPanel,
+    transitionClassNames: chatReportPanelClassNames,
+  } = useShowTransition(hasChatSettings);
+  const renderingChatSettings = useCurrentOrPrev(hasChatSettings ? settings : undefined, true);
 
   const {
     shouldRender: shouldRenderAudioPlayer,
@@ -400,7 +405,14 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         />
       )}
 
-      {shouldShowUserReportPanel && <UserReportPanel key={chatId} userId={chatId} />}
+      {shouldShowChatReportPanel && (
+        <ChatReportPanel
+          key={chatId}
+          chatId={chatId}
+          settings={renderingChatSettings}
+          className={chatReportPanelClassNames}
+        />
+      )}
 
       <div className="header-tools">
         {isAudioPlayerRendered && (
@@ -425,9 +437,6 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, messageListType }): StateProps => {
     const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
     const chat = selectChat(global, chatId);
-    const userId = chat && getPrivateChatUserId(chat);
-    const user = userId ? selectUser(global, userId) : undefined;
-
     const { typingStatus } = chat || {};
 
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
@@ -455,7 +464,6 @@ export default memo(withGlobal<OwnProps>(
       audioMessage,
       chat,
       messagesCount,
-      shouldShowUserReportPanel: Boolean(user?.settings?.canAddContact || user?.settings?.canBlockContact),
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isChatWithBot: chat && selectIsChatWithBot(global, chat),
       lastSyncTime,

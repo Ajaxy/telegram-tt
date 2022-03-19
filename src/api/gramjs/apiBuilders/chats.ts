@@ -10,6 +10,7 @@ import {
   ApiRestrictionReason,
   ApiExportedInvite,
   ApiChatInviteImporter,
+  ApiChatSettings,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -432,5 +433,19 @@ export function buildChatInviteImporter(importer: GramJs.ChatInviteImporter): Ap
     date,
     about,
     isRequested: requested,
+  };
+}
+
+export function buildApiChatSettings({
+  autoarchived,
+  reportSpam,
+  addContact,
+  blockContact,
+}: GramJs.PeerSettings): ApiChatSettings {
+  return {
+    isAutoArchived: Boolean(autoarchived),
+    canReportSpam: Boolean(reportSpam),
+    canAddContact: Boolean(addContact),
+    canBlockContact: Boolean(blockContact),
   };
 }

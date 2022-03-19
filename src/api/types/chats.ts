@@ -53,6 +53,8 @@ export interface ApiChat {
     accessHash?: string;
   };
 
+  // Obtained from GetChatSettings
+  settings?: ApiChatSettings;
   // Obtained from GetFullChat / GetFullChannel
   fullInfo?: ApiChatFullInfo;
   // Obtained with UpdateUserTyping or UpdateChatUserTyping updates
@@ -160,4 +162,11 @@ export interface ApiChatFolder {
   pinnedChatIds?: string[];
   includedChatIds: string[];
   excludedChatIds: string[];
+}
+
+export interface ApiChatSettings {
+  isAutoArchived?: boolean;
+  canReportSpam?: boolean;
+  canAddContact?: boolean;
+  canBlockContact?: boolean;
 }

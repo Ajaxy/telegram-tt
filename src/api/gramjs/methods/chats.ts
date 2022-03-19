@@ -26,6 +26,7 @@ import {
   buildApiChatFolder,
   buildApiChatFolderFromSuggested,
   buildApiChatBotCommands,
+  buildApiChatSettings,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
@@ -177,6 +178,20 @@ export function fetchFullChat(chat: ApiChat) {
   return input instanceof GramJs.InputChannel
     ? getFullChannelInfo(id, accessHash!, adminRights)
     : getFullChatInfo(id);
+}
+
+export async function fetchChatSettings(chat: ApiChat) {
+  const { id, accessHash } = chat;
+
+  const result = await invokeRequest(new GramJs.messages.GetPeerSettings({
+    peer: buildInputPeer(id, accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiChatSettings(result.settings);
 }
 
 export async function searchChats({ query }: { query: string }) {

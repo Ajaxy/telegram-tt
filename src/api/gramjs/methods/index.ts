@@ -7,7 +7,7 @@ export {
 } from './auth';
 
 export {
-  fetchChats, fetchFullChat, searchChats, requestChatUpdate,
+  fetchChats, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
   saveDraft, clearDraft, fetchChat, updateChatMutedState,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
@@ -42,6 +42,7 @@ export {
   checkChatUsername, setChatUsername, updatePrivateLink,
   fetchExportedChatInvites, editExportedChatInvite, exportChatInvite, deleteExportedChatInvite,
   deleteRevokedExportedChatInvites, fetchChatInviteImporters, hideChatJoinRequest, hideAllChatJoinRequests,
+  hideChatReportPanel,
 } from './management';
 
 export {

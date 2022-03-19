@@ -981,6 +981,17 @@ addActionHandler('setChatEnabledReactions', async (global, actions, payload) => 
   void loadFullChat(chat);
 });
 
+addActionHandler('loadChatSettings', async (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  const settings = await callApi('fetchChatSettings', chat);
+  if (!settings) return undefined;
+
+  return updateChat(getGlobal(), chat.id, { settings });
+});
+
 async function loadChats(
   listType: 'active' | 'archived', offsetId?: string, offsetDate?: number, shouldReplace = false,
 ) {

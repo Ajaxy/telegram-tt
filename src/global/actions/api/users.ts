@@ -268,13 +268,13 @@ addActionHandler('addContact', (global, actions, payload) => {
 });
 
 addActionHandler('reportSpam', (global, actions, payload) => {
-  const { userId } = payload!;
-  const user = selectUser(global, userId);
-  if (!user) {
+  const { chatId } = payload!;
+  const userOrChat = isUserId(chatId) ? selectUser(global, chatId) : selectChat(global, chatId);
+  if (!userOrChat) {
     return;
   }
 
-  void callApi('reportSpam', user);
+  void callApi('reportSpam', userOrChat);
 });
 
 async function searchUsers(query: string) {
