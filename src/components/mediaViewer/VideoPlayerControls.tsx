@@ -8,6 +8,7 @@ import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import formatFileSize from './helpers/formatFileSize';
 import useLang from '../../hooks/useLang';
+import { BufferedRange } from '../../hooks/useBuffering';
 import { captureEvents } from '../../util/captureEvents';
 
 import Button from '../ui/Button';
@@ -18,6 +19,7 @@ import MenuItem from '../ui/MenuItem';
 import './VideoPlayerControls.scss';
 
 type OwnProps = {
+  bufferedRanges: BufferedRange[];
   bufferedProgress: number;
   currentTime: number;
   duration: number;
@@ -54,6 +56,7 @@ const PLAYBACK_RATES = [
 const HIDE_CONTROLS_TIMEOUT_MS = 1500;
 
 const VideoPlayerControls: FC<OwnProps> = ({
+  bufferedRanges,
   bufferedProgress,
   currentTime,
   duration,
@@ -156,7 +159,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
       className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isVisible && 'active')}
       onClick={stopEvent}
     >
-      {renderSeekLine(currentTime, duration, bufferedProgress, seekerRef)}
+      {renderSeekLine(currentTime, duration, bufferedRanges, seekerRef)}
       <div className="buttons">
         <Button
           ariaLabel={lang('AccActionPlay')}
@@ -243,18 +246,19 @@ function renderFileSize(loadedPercent: number, totalSize: number) {
 }
 
 function renderSeekLine(
-  currentTime: number, duration: number, bufferedProgress: number, seekerRef: React.RefObject<HTMLDivElement>,
+  currentTime: number, duration: number, bufferedRanges: BufferedRange[], seekerRef: React.RefObject<HTMLDivElement>,
 ) {
   const percentagePlayed = (currentTime / duration) * 100;
-  const percentageBuffered = bufferedProgress * 100;
 
   return (
     <div className="player-seekline" ref={seekerRef}>
       <div className="player-seekline-track">
-        <div
-          className="player-seekline-buffered"
-          style={`width: ${percentageBuffered || 0}%`}
-        />
+        {bufferedRanges.map(({ start, end }) => (
+          <div
+            className="player-seekline-buffered"
+            style={`left: ${start * 100}%; right: ${100 - end * 100}%`}
+          />
+        ))}
         <div
           className="player-seekline-played"
           style={`width: ${percentagePlayed || 0}%`}

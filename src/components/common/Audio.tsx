@@ -25,7 +25,7 @@ import { getFileSizeString } from './helpers/documentInfo';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
-import useBuffering from '../../hooks/useBuffering';
+import useBuffering, { BufferedRange } from '../../hooks/useBuffering';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import useLang, { LangFn } from '../../hooks/useLang';
 import { captureEvents } from '../../util/captureEvents';
@@ -116,7 +116,7 @@ const Audio: FC<OwnProps> = ({
   }, []);
 
   const {
-    isBuffered, bufferedProgress, bufferingHandlers, checkBuffering,
+    isBuffered, bufferedRanges, bufferingHandlers, checkBuffering,
   } = useBuffering();
 
   const {
@@ -296,7 +296,7 @@ const Audio: FC<OwnProps> = ({
             <span className="duration with-seekline" dir="auto">
               {playProgress < 1 && `${formatMediaDuration(duration * playProgress, duration)}`}
             </span>
-            {renderSeekline(playProgress, bufferedProgress, seekerRef)}
+            {renderSeekline(playProgress, bufferedRanges, seekerRef)}
           </div>
         )}
         {!withSeekline && renderSecondLine()}
@@ -354,7 +354,7 @@ const Audio: FC<OwnProps> = ({
         duration,
         isPlaying,
         playProgress,
-        bufferedProgress,
+        bufferedRanges,
         seekerRef,
         (isDownloading || isUploading),
         date,
@@ -375,7 +375,7 @@ function renderAudio(
   duration: number,
   isPlaying: boolean,
   playProgress: number,
-  bufferedProgress: number,
+  bufferedRanges: BufferedRange[],
   seekerRef: React.Ref<HTMLElement>,
   showProgress?: boolean,
   date?: number,
@@ -396,7 +396,7 @@ function renderAudio(
           <span className="duration with-seekline" dir="auto">
             {formatMediaDuration(duration * playProgress, duration)}
           </span>
-          {renderSeekline(playProgress, bufferedProgress, seekerRef)}
+          {renderSeekline(playProgress, bufferedRanges, seekerRef)}
         </div>
       )}
       {!showSeekline && showProgress && (
@@ -499,7 +499,7 @@ function useWaveformCanvas(
 
 function renderSeekline(
   playProgress: number,
-  bufferedProgress: number,
+  bufferedRanges: BufferedRange[],
   seekerRef: React.Ref<HTMLElement>,
 ) {
   return (
@@ -507,11 +507,12 @@ function renderSeekline(
       className="seekline no-selection"
       ref={seekerRef as React.Ref<HTMLDivElement>}
     >
-      <span className="seekline-buffered-progress">
-        <i
-          style={`transform: translateX(${bufferedProgress * 100}%)`}
+      {bufferedRanges.map(({ start, end }) => (
+        <div
+          className="seekline-buffered-progress"
+          style={`left: ${start * 100}%; right: ${100 - end * 100}%`}
         />
-      </span>
+      ))}
       <span className="seekline-play-progress">
         <i
           style={`transform: translateX(${playProgress * 100}%)`}

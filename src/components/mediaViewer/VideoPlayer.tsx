@@ -66,7 +66,9 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlayed);
 
-  const { isBuffered, bufferedProgress, bufferingHandlers } = useBuffering();
+  const {
+    isBuffered, bufferedRanges, bufferingHandlers, bufferedProgress,
+  } = useBuffering();
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
@@ -229,6 +231,7 @@ const VideoPlayer: FC<OwnProps> = ({
       {!isGif && !shouldRenderSpinner && (
         <VideoPlayerControls
           isPlayed={isPlayed}
+          bufferedRanges={bufferedRanges}
           bufferedProgress={bufferedProgress}
           isBuffered={isBuffered}
           currentTime={currentTime}
