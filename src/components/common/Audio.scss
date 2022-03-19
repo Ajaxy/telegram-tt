@@ -233,7 +233,6 @@
     }
   }
 
-  .seekline-buffered-progress,
   .seekline-play-progress {
     position: absolute;
     height: 2px;
@@ -252,8 +251,14 @@
     }
   }
 
-  .seekline-buffered-progress i {
-    background-color: var(--color-interactive-buffered) !important;
+  .seekline-buffered-progress {
+    height: 2px;
+    border-radius: 2px;
+
+    position: absolute;
+    top: 6px;
+
+    background-color: var(--color-interactive-buffered);
   }
 
   .seekline-thumb {
@@ -352,6 +357,9 @@
   }
 }
 
-.has-replies .Audio[dir="rtl"] {
-  margin-bottom: 1.625rem;
+.has-replies .Audio {
+  margin-bottom: 1rem;
+  [dir="rtl"] {
+    margin-bottom: 1.625rem;
+  }
 }
