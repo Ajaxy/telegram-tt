@@ -68,7 +68,11 @@ addActionHandler('preloadTopChatMessages', async (global, actions) => {
 });
 
 addActionHandler('openChat', (global, actions, payload) => {
-  const { id, threadId } = payload!;
+  const { id, threadId = MAIN_THREAD_ID } = payload;
+  if (!id) {
+    return;
+  }
+
   const { currentUserId } = global;
   const chat = selectChat(global, id);
 

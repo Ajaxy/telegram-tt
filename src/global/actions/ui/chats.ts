@@ -1,5 +1,7 @@
 import { addActionHandler, setGlobal } from '../../index';
 
+import { MAIN_THREAD_ID } from '../../../api/types';
+
 import {
   exitMessageSelectMode, replaceThreadParam, updateCurrentMessageList,
 } from '../../reducers';
@@ -8,8 +10,11 @@ import { closeLocalTextSearch } from './localSearch';
 
 addActionHandler('openChat', (global, actions, payload) => {
   const {
-    id, threadId = -1, type = 'thread', shouldReplaceHistory = false,
-  } = payload!;
+    id,
+    threadId = MAIN_THREAD_ID,
+    type = 'thread',
+    shouldReplaceHistory = false,
+  } = payload;
 
   const currentMessageList = selectCurrentMessageList(global);
 
@@ -19,7 +24,10 @@ addActionHandler('openChat', (global, actions, payload) => {
       || currentMessageList.threadId !== threadId
       || currentMessageList.type !== type
     )) {
-    global = replaceThreadParam(global, id, threadId, 'replyStack', []);
+    if (id) {
+      global = replaceThreadParam(global, id, threadId, 'replyStack', []);
+    }
+
     global = exitMessageSelectMode(global);
     global = closeLocalTextSearch(global);
 
