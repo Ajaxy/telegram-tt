@@ -339,6 +339,7 @@ async function getFullChatInfo(chatId: string): Promise<{
   fullInfo: ApiChatFullInfo;
   users?: ApiUser[];
   groupCall?: Partial<ApiGroupCall>;
+  membersCount?: number;
 } | undefined> {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({
     chatId: buildInputEntity(chatId) as BigInt.BigInteger,
@@ -391,6 +392,7 @@ async function getFullChatInfo(chatId: string): Promise<{
       version: 0,
       participants: {},
     } : undefined,
+    membersCount: members?.length,
   };
 }
 
@@ -402,6 +404,7 @@ async function getFullChannelInfo(
     fullInfo: ApiChatFullInfo;
     users?: ApiUser[];
     groupCall?: Partial<ApiGroupCall>;
+    membersCount?: number;
   } | undefined> {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({
     channel: buildInputEntity(id, accessHash) as GramJs.InputChannel,
@@ -430,6 +433,7 @@ async function getFullChannelInfo(
     requestsPending,
     recentRequesters,
     statsDc,
+    participantsCount,
   } = result.fullChat;
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -498,6 +502,7 @@ async function getFullChannelInfo(
       participantsCount: 0,
       connectionState: 'disconnected',
     } : undefined,
+    membersCount: participantsCount,
   };
 }
 

@@ -1079,7 +1079,9 @@ export async function loadFullChat(chat: ApiChat) {
     return undefined;
   }
 
-  const { users, fullInfo, groupCall } = result;
+  const {
+    users, fullInfo, groupCall, membersCount,
+  } = result;
 
   let global = getGlobal();
   if (users) {
@@ -1097,7 +1099,10 @@ export async function loadFullChat(chat: ApiChat) {
     );
   }
 
-  global = updateChat(global, chat.id, { fullInfo });
+  global = updateChat(global, chat.id, {
+    fullInfo,
+    ...(membersCount && { membersCount }),
+  });
 
   setGlobal(global);
 
