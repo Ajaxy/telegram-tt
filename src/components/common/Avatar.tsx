@@ -17,13 +17,17 @@ import {
   isUserOnline,
 } from '../../global/helpers';
 import { getFirstLetters } from '../../util/textFormat';
-import buildClassName from '../../util/buildClassName';
+import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import useMedia from '../../hooks/useMedia';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 
 import './Avatar.scss';
+
+const cn = createClassNameBuilder('Avatar');
+cn.img = cn('img');
+cn.icon = cn('icon');
 
 type OwnProps = {
   className?: string;
@@ -73,14 +77,19 @@ const Avatar: FC<OwnProps> = ({
   let content: string | undefined = '';
 
   if (isSavedMessages) {
-    content = <i className="icon-avatar-saved-messages" />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} />;
   } else if (isDeleted) {
-    content = <i className="icon-avatar-deleted-account" />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} />;
   } else if (isReplies) {
-    content = <i className="icon-reply-filled" />;
+    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} />;
   } else if (blobUrl) {
     content = (
-      <img src={blobUrl} className={buildClassName('avatar-media', transitionClassNames)} alt="" decoding="async" />
+      <img
+        src={blobUrl}
+        className={buildClassName(cn.img, 'avatar-media', transitionClassNames)}
+        alt=""
+        decoding="async"
+      />
     );
   } else if (user) {
     const userFullName = getUserFullName(user);

@@ -13,7 +13,7 @@
   white-space: nowrap;
   user-select: none;
 
-  img:not(.emoji) {
+  &__img {
     border-radius: 50%;
     width: 100%;
     height: 100%;
@@ -24,7 +24,7 @@
     height: 1rem;
   }
 
-  i {
+  &__icon {
     font-size: 2.5rem;
 
     &.icon-reply-filled {
@@ -94,7 +94,7 @@
     height: 7.5rem;
     font-size: 3.5rem;
 
-    i {
+    &__i {
       font-size: 6rem;
     }
 

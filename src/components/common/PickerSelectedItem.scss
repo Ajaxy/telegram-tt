@@ -68,7 +68,7 @@
     flex-shrink: 0;
     transition: opacity 0.15s ease;
 
-    i {
+    .Avatar__icon, i {
       font-size: 2rem;
     }
   }
