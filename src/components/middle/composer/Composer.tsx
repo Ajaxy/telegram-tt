@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getDispatch, withGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalState, MessageListType } from '../../../global/types';
 import {
@@ -141,7 +141,6 @@ type StateProps =
     shouldSuggestStickers?: boolean;
     baseEmojiKeywords?: Record<string, string[]>;
     emojiKeywords?: Record<string, string[]>;
-    serverTimeOffset: number;
     topInlineBotIds?: string[];
     isInlineBotLoading: boolean;
     inlineBots?: Record<string, false | InlineBotSettings>;
@@ -204,7 +203,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   shouldSuggestStickers,
   baseEmojiKeywords,
   emojiKeywords,
-  serverTimeOffset,
   recentEmojis,
   inlineBots,
   isInlineBotLoading,
@@ -508,6 +506,9 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    // No need to subscribe on updates in `mapStateToProps`
+    const { serverTimeOffset } = getGlobal();
+
     const maxLength = currentAttachments.length ? CAPTION_MAX_LENGTH : MESSAGE_MAX_LENGTH;
     if (text?.length > maxLength) {
       const extraLength = text.length - maxLength;
@@ -584,7 +585,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       resetComposer();
     });
   }, [
-    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId, serverTimeOffset,
+    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId,
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang, htmlRef,
   ]);
 
@@ -679,6 +680,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleMessageSchedule = useCallback((date: Date, isWhenOnline = false) => {
     const { isSilent, ...restArgs } = scheduledMessageArgs || {};
 
+    // No need to subscribe on updates in `mapStateToProps`
+    const { serverTimeOffset } = getGlobal();
+
     // Scheduled time can not be less than 10 seconds in future
     const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
       + (isWhenOnline ? 0 : serverTimeOffset);
@@ -695,7 +699,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       });
     }
     closeCalendar();
-  }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage, serverTimeOffset]);
+  }, [closeCalendar, handleSend, resetComposer, scheduledMessageArgs, sendMessage]);
 
   const handleMessageScheduleUntilOnline = useCallback(() => {
     handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
@@ -1181,7 +1185,6 @@ export default memo(withGlobal<OwnProps>(
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,
-      serverTimeOffset: global.serverTimeOffset,
       inlineBots: global.inlineBots.byUsername,
       isInlineBotLoading: global.inlineBots.isLoading,
       chatBotCommands: chat && chat.fullInfo && chat.fullInfo.botCommands,
