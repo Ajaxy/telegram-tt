@@ -17,8 +17,6 @@ import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
-import useBlurSync from '../../hooks/useBlurSync';
-import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 
 import Spinner from '../ui/Spinner';
@@ -68,9 +66,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const photoBlobUrl = useMedia(getMediaHash('big'), false, ApiMediaFormat.BlobUrl, lastSyncTime);
   const avatarMediaHash = isFirstPhoto && !photoBlobUrl ? getMediaHash('normal', true) : undefined;
   const avatarBlobUrl = useMedia(avatarMediaHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const thumbDataUri = useBlurSync(!photoBlobUrl && photo && photo.thumbnail && photo.thumbnail.dataUri);
-  const imageSrc = photoBlobUrl || avatarBlobUrl || thumbDataUri;
-  const prevImageSrc = usePrevious(imageSrc);
+  const imageSrc = photoBlobUrl || avatarBlobUrl || photo?.thumbnail?.dataUri;
 
   let content: string | undefined = '';
 
@@ -81,11 +77,11 @@ const ProfilePhoto: FC<OwnProps> = ({
   } else if (isRepliesChat) {
     content = <i className="icon-reply-filled" />;
   } else if (imageSrc) {
-    content = <img src={imageSrc} className="avatar-media" alt="" decoding="async" />;
-  } else if (!imageSrc && user) {
+    content = <img src={imageSrc} className="avatar-media" alt="" />;
+  } else if (user) {
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
-  } else if (!imageSrc && chat) {
+  } else if (chat) {
     const title = getChatTitle(lang, chat);
     content = title && getFirstLetters(title, isUserId(chat.id) ? 2 : 1);
   } else {
@@ -107,9 +103,6 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   return (
     <div className={fullClassName} onClick={imageSrc ? onClick : undefined}>
-      {prevImageSrc && imageSrc && prevImageSrc !== imageSrc && (
-        <img src={prevImageSrc} className="prev-avatar-media" alt="" decoding="async" />
-      )}
       {typeof content === 'string' ? renderText(content, ['hq_emoji']) : content}
     </div>
   );

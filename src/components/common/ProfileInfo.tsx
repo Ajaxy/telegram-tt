@@ -108,7 +108,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     setCurrentPhotoIndex(currentPhotoIndex + 1);
   }, [currentPhotoIndex, isLast]);
 
-  // Support for swipe gestures and closing on click
+  // Swipe gestures
   useEffect(() => {
     const element = document.querySelector<HTMLDivElement>('.photo-wrapper');
     if (!element) {
