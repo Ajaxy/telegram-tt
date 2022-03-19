@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import { ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
@@ -22,7 +23,6 @@ import ListItem from '../../ui/ListItem';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 
 import './InlineBotTooltip.scss';
-import { getActions } from '../../../global';
 
 const INTERSECTION_DEBOUNCE_MS = 200;
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -33,7 +33,11 @@ export type OwnProps = {
   isGallery?: boolean;
   inlineBotResults?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
   switchPm?: ApiBotInlineSwitchPm;
-  onSelectResult: (inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult) => void;
+  isSavedMessages?: boolean;
+  canSendGifs?: boolean;
+  onSelectResult: (
+    inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean
+  ) => void;
   loadMore: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
 };
@@ -44,6 +48,8 @@ const InlineBotTooltip: FC<OwnProps> = ({
   isGallery,
   inlineBotResults,
   switchPm,
+  isSavedMessages,
+  canSendGifs,
   loadMore,
   onClose,
   onSelectResult,
@@ -127,6 +133,8 @@ const InlineBotTooltip: FC<OwnProps> = ({
               inlineResult={inlineBotResult}
               observeIntersection={observeIntersection}
               onClick={onSelectResult}
+              isSavedMessages={isSavedMessages}
+              canSendGifs={canSendGifs}
             />
           );
 
@@ -147,6 +155,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
               inlineResult={inlineBotResult}
               observeIntersection={observeIntersection}
               onClick={onSelectResult}
+              isSavedMessages={isSavedMessages}
             />
           );
 

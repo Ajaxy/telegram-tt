@@ -174,6 +174,15 @@ export async function fetchSavedGifs({ hash = '0' }: { hash?: string }) {
   };
 }
 
+export function saveGif({ gif, shouldUnsave }: { gif: ApiVideo; shouldUnsave?: boolean }) {
+  const request = new GramJs.messages.SaveGif({
+    id: buildInputDocument(gif),
+    unsave: shouldUnsave,
+  });
+
+  return invokeRequest(request, true);
+}
+
 export async function installStickerSet({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {
   const result = await invokeRequest(new GramJs.messages.InstallStickerSet({
     stickerset: buildInputStickerSet(stickerSetId, accessHash),

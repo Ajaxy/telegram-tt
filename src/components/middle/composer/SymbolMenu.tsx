@@ -34,8 +34,10 @@ export type OwnProps = {
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
-  onStickerSelect: (sticker: ApiSticker, shouldPreserveInput?: boolean) => void;
-  onGifSelect: (gif: ApiVideo) => void;
+  onStickerSelect: (
+    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldPreserveInput?: boolean
+  ) => void;
+  onGifSelect: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
   addRecentEmoji: AnyToVoidFunction;
@@ -126,8 +128,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     onSearchOpen(type);
   }, [onClose, onSearchOpen]);
 
-  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
-    onStickerSelect(sticker, true);
+  const handleStickerSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
+    onStickerSelect(sticker, isSilent, shouldSchedule, true);
   }, [onStickerSelect]);
 
   const lang = useLang();

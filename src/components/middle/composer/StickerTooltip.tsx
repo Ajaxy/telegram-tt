@@ -12,6 +12,7 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
+import { selectIsChatWithSelf } from '../../../global/selectors';
 
 import Loading from '../../ui/Loading';
 import StickerButton from '../../common/StickerButton';
@@ -22,11 +23,12 @@ export type OwnProps = {
   chatId: string;
   threadId?: number;
   isOpen: boolean;
-  onStickerSelect: (sticker: ApiSticker) => void;
+  onStickerSelect: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
 };
 
 type StateProps = {
   stickers?: ApiSticker[];
+  isSavedMessages?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -35,8 +37,9 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   isOpen,
-  onStickerSelect,
   stickers,
+  isSavedMessages,
+  onStickerSelect,
 }) => {
   const { clearStickersForEmoji } = getActions();
 
@@ -78,6 +81,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersection}
             onClick={onStickerSelect}
             clickArg={sticker}
+            isSavedMessages={isSavedMessages}
           />
         ))
       ) : shouldRender ? (
@@ -88,9 +92,10 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { chatId }): StateProps => {
     const { stickers } = global.stickers.forEmoji;
+    const isSavedMessages = selectIsChatWithSelf(global, chatId);
 
-    return { stickers };
+    return { stickers, isSavedMessages };
   },
 )(StickerTooltip));

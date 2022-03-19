@@ -4,8 +4,6 @@
     font-weight: 500;
   }
 
-  --border-radius-default: 0;
-
   &.gallery {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

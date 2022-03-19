@@ -99,11 +99,9 @@ export default function useContextMenuPosition(
     const triggerRect = triggerEl.getBoundingClientRect();
     const left = horizontalPosition === 'left'
       ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
-      : Math.max((x - triggerRect.left), menuRect.width + MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
-    const top = Math.min(
-      rootRect.height - triggerRect.top + triggerRect.height - MENU_POSITION_BOTTOM_MARGIN + (marginTop || 0),
-      y - triggerRect.top,
-    );
+      : (x - triggerRect.left);
+    const top = y - triggerRect.top;
+
     const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
 
     setWithScroll(menuMaxHeight < menuRect.height);

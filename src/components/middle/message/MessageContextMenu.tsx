@@ -46,6 +46,7 @@ type OwnProps = {
   canSelect?: boolean;
   isPrivate?: boolean;
   canDownload?: boolean;
+  canSaveGif?: boolean;
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
   seenByRecentUsers?: ApiUser[];
@@ -66,6 +67,7 @@ type OwnProps = {
   onCopyLink?: () => void;
   onCopyMessages?: (messageIds: number[]) => void;
   onDownload?: () => void;
+  onSaveGif?: () => void;
   onShowSeenBy?: () => void;
   onShowReactors?: () => void;
   onSendReaction: (reaction: string | undefined, x: number, y: number) => void;
@@ -97,6 +99,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canCopyLink,
   canSelect,
   canDownload,
+  canSaveGif,
   isDownloading,
   canShowSeenBy,
   canShowReactionsCount,
@@ -119,6 +122,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
   onCopyLink,
   onDownload,
+  onSaveGif,
   onShowSeenBy,
   onShowReactors,
   onSendReaction,
@@ -240,6 +244,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
+        {canSaveGif && <MenuItem icon="gifs" onClick={onSaveGif}>{lang('lng_context_save_gif')}</MenuItem>}
         {canDownload && (
           <MenuItem icon="download" onClick={onDownload}>
             {isDownloading ? lang('lng_context_cancel_download') : lang('lng_media_download')}

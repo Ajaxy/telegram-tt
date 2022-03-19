@@ -108,6 +108,29 @@ addActionHandler('loadSavedGifs', (global) => {
   void loadSavedGifs(hash);
 });
 
+addActionHandler('saveGif', async (global, actions, payload) => {
+  const { gif, shouldUnsave } = payload!;
+  const result = await callApi('saveGif', { gif, shouldUnsave });
+  if (!result) {
+    return undefined;
+  }
+
+  global = getGlobal();
+  const gifs = global.gifs.saved.gifs?.filter(({ id }) => id !== gif.id) || [];
+  const newGifs = shouldUnsave ? gifs : [gif, ...gifs];
+
+  return {
+    ...global,
+    gifs: {
+      ...global.gifs,
+      saved: {
+        ...global.gifs.saved,
+        gifs: newGifs,
+      },
+    },
+  };
+});
+
 addActionHandler('faveSticker', (global, actions, payload) => {
   const { sticker } = payload!;
 

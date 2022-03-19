@@ -18,10 +18,11 @@ import {
   selectEditingMessage,
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../global/helpers';
+
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';

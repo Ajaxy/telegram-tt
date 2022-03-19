@@ -593,7 +593,7 @@ export type NonTypedActionNames = (
   'loadCountryList' | 'ensureTimeFormat' | 'loadAppConfig' |
   // stickers & GIFs
   'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
-  'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
   'openStickerSetShortName' |

@@ -15,20 +15,25 @@ export { default as SeenByModal } from '../components/common/SeenByModal';
 export { default as ReactorListModal } from '../components/middle/ReactorListModal';
 export { default as EmojiInteractionAnimation } from '../components/middle/EmojiInteractionAnimation';
 
+// eslint-disable-next-line import/no-cycle
 export { default as LeftSearch } from '../components/left/search/LeftSearch';
+// eslint-disable-next-line import/no-cycle
 export { default as Settings } from '../components/left/settings/Settings';
 export { default as ContactList } from '../components/left/main/ContactList';
 export { default as NewChat } from '../components/left/newChat/NewChat';
 export { default as NewChatStep1 } from '../components/left/newChat/NewChatStep1';
 export { default as NewChatStep2 } from '../components/left/newChat/NewChatStep2';
+// eslint-disable-next-line import/no-cycle
 export { default as ArchivedChats } from '../components/left/ArchivedChats';
 export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
+// eslint-disable-next-line import/no-cycle
 export { default as StickerSetModal } from '../components/common/StickerSetModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 export { default as MobileSearch } from '../components/middle/MobileSearch';
 
+// eslint-disable-next-line import/no-cycle
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';
 export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu';
@@ -44,7 +49,9 @@ export { default as InlineBotTooltip } from '../components/middle/composer/Inlin
 export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu';
 
 export { default as RightSearch } from '../components/right/RightSearch';
+// eslint-disable-next-line import/no-cycle
 export { default as StickerSearch } from '../components/right/StickerSearch';
+// eslint-disable-next-line import/no-cycle
 export { default as GifSearch } from '../components/right/GifSearch';
 export { default as Statistics } from '../components/right/statistics/Statistics';
 export { default as PollResults } from '../components/right/PollResults';

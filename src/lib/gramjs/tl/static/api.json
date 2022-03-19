@@ -98,6 +98,7 @@
     "messages.searchGlobal",
     "messages.getDocumentByHash",
     "messages.getSavedGifs",
+    "messages.saveGif",
     "messages.getInlineBotResults",
     "messages.sendInlineBotResult",
     "messages.editMessage",

@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, memo, useRef,
+  FC, useEffect, memo, useRef, useCallback,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -8,6 +8,8 @@ import { ApiVideo } from '../../../api/types';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
+import { selectCurrentMessageList, selectIsChatWithSelf } from '../../../global/selectors';
+
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -20,11 +22,12 @@ type OwnProps = {
   className: string;
   loadAndPlay: boolean;
   canSendGifs: boolean;
-  onGifSelect: (gif: ApiVideo) => void;
+  onGifSelect: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
 };
 
 type StateProps = {
   savedGifs?: ApiVideo[];
+  isSavedMessages?: boolean;
 };
 
 const INTERSECTION_DEBOUNCE = 300;
@@ -34,9 +37,10 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   loadAndPlay,
   canSendGifs,
   savedGifs,
+  isSavedMessages,
   onGifSelect,
 }) => {
-  const { loadSavedGifs } = getActions();
+  const { loadSavedGifs, saveGif } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +54,10 @@ const GifPicker: FC<OwnProps & StateProps> = ({
       loadSavedGifs();
     }
   }, [loadAndPlay, loadSavedGifs]);
+
+  const handleUnsaveClick = useCallback((gif: ApiVideo) => {
+    saveGif({ gif, shouldUnsave: true });
+  }, [saveGif]);
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
@@ -67,7 +75,9 @@ const GifPicker: FC<OwnProps & StateProps> = ({
             gif={gif}
             observeIntersection={observeIntersection}
             isDisabled={!loadAndPlay}
-            onClick={onGifSelect}
+            onClick={canSendGifs ? onGifSelect : undefined}
+            onUnsaveClick={handleUnsaveClick}
+            isSavedMessages={isSavedMessages}
           />
         ))
       ) : canRenderContents && savedGifs ? (
@@ -81,8 +91,11 @@ const GifPicker: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const { chatId } = selectCurrentMessageList(global) || {};
+    const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
     return {
       savedGifs: global.gifs.saved.gifs,
+      isSavedMessages,
     };
   },
 )(GifPicker));
