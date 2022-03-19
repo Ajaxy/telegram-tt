@@ -12,7 +12,7 @@ import {
 import windowSize from '../../../util/windowSize';
 import stopEvent from '../../../util/stopEvent';
 import { IS_TOUCH_ENV } from '../../../util/environment';
-import { getMessageHtmlId } from '../../../modules/helpers';
+import { getMessageHtmlId } from '../../../global/helpers';
 
 const ANIMATION_DURATION = 200;
 

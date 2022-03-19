@@ -2,15 +2,15 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
-} from '../../../modules/selectors';
-import { selectIsChatMuted } from '../../../modules/helpers';
+} from '../../../global/selectors';
+import { selectIsChatMuted } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';

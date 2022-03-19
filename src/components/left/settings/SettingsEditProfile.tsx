@@ -2,14 +2,14 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, useState, useCallback, memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress, SettingsScreens } from '../../../types';
 
 import { throttle } from '../../../util/schedulers';
-import { selectUser } from '../../../modules/selectors';
-import { getChatAvatarHash } from '../../../modules/helpers';
+import { selectUser } from '../../../global/selectors';
+import { getChatAvatarHash } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 

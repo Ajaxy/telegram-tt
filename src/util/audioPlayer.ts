@@ -1,4 +1,4 @@
-import { getActions, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../global';
 
 import { AudioOrigin, GlobalSearchContent } from '../types';
 import { ApiMessage } from '../api/types';
@@ -6,9 +6,9 @@ import { ApiMessage } from '../api/types';
 import { IS_SAFARI } from './environment';
 import safePlay from './safePlay';
 import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSafariProgressiveAudio';
-import { getMessageKey, MessageKey, parseMessageKey } from '../modules/helpers';
+import { getMessageKey, MessageKey, parseMessageKey } from '../global/helpers';
 import { fastRaf } from './schedulers';
-import { selectCurrentMessageList } from '../modules/selectors';
+import { selectCurrentMessageList } from '../global/selectors';
 
 type Handler = (eventName: string, e: Event) => void;
 export type TrackId = `${MessageKey}-${number}`;

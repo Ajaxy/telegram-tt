@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { selectChat, selectManagement } from '../../../modules/selectors';
-import { isChatChannel } from '../../../modules/helpers';
+import { selectChat, selectManagement } from '../../../global/selectors';
+import { isChatChannel } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';

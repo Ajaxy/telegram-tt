@@ -2,11 +2,11 @@ import { GroupCallParticipant } from '../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiGroupCall } from '../../api/types';
 
-import { selectActiveGroupCall, selectGroupCallParticipant } from '../../modules/selectors/calls';
+import { selectActiveGroupCall, selectGroupCallParticipant } from '../../global/selectors/calls';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 

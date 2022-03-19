@@ -1,10 +1,10 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import { ApiMessage, ApiChat } from '../../api/types';
-import { selectChat, selectChatMessage } from '../../modules/selectors';
+import { selectChat, selectChatMessage } from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
-import { getMessagePoll } from '../../modules/helpers';
+import { getMessagePoll } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';

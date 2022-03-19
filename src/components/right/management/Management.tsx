@@ -1,9 +1,9 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../modules';
+import { withGlobal } from '../../../global';
 
 import { ManagementScreens, ManagementType } from '../../../types';
 
-import { selectCurrentManagementType } from '../../../modules/selectors';
+import { selectCurrentManagementType } from '../../../global/selectors';
 
 import ManageUser from './ManageUser';
 import ManageGroup from './ManageGroup';

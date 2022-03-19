@@ -1,9 +1,9 @@
 import { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import useLang from '../../../hooks/useLang';
-import { selectActiveGroupCall } from '../../../modules/selectors/calls';
+import { selectActiveGroupCall } from '../../../global/selectors/calls';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import GroupCallParticipant from './GroupCallParticipant';

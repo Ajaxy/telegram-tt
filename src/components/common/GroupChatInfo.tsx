@@ -2,7 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
 import { GlobalState } from '../../global/types';
@@ -12,8 +12,8 @@ import {
   getChatTypeString,
   getChatTitle,
   isChatSuperGroup,
-} from '../../modules/helpers';
-import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../modules/selectors';
+} from '../../global/helpers';
+import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../global/selectors';
 import renderText from './helpers/renderText';
 import useLang, { LangFn } from '../../hooks/useLang';
 

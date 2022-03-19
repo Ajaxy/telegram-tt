@@ -4,7 +4,7 @@ import {
   getSenderTitle,
   isUserId,
   isChatGroup,
-} from '../../../../modules/helpers';
+} from '../../../../global/helpers';
 import { LangFn } from '../../../../hooks/useLang';
 
 export function getSenderName(

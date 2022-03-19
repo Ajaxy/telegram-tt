@@ -1,16 +1,16 @@
 import React, {
   FC, memo,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../modules';
+import { withGlobal } from '../../../global';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
-import { isUserId, getPrivateChatUserId, selectIsChatMuted } from '../../../modules/helpers';
+import { isUserId, getPrivateChatUserId, selectIsChatMuted } from '../../../global/helpers';
 import {
   selectChat, selectUser, selectIsChatPinned, selectNotifySettings, selectNotifyExceptions,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';

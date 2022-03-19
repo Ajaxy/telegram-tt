@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../global';
 
 import {
   ApiAvailableReaction, ApiMessage, ApiReactionCount, ApiUser,

@@ -1,10 +1,10 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
 import { GlobalState } from '../../global/types';
 
-import { getChatAvatarHash } from '../../modules/helpers/chats'; // Direct import for better module splitting
+import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
 import { pause } from '../../util/schedulers';
@@ -19,7 +19,7 @@ import './UiLoader.scss';
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 import reactionThumbsPath from '../../assets/reaction-thumbs.png';
 import monkeyPath from '../../assets/monkey.svg';
-import { selectIsRightColumnShown, selectTheme } from '../../modules/selectors';
+import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';

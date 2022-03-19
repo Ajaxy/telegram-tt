@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import {
   ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
@@ -25,13 +25,13 @@ import {
   selectFirstMessageId,
   selectScheduledMessages,
   selectCurrentMessageIds,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   isChatChannel,
   isUserId,
   isChatWithRepliesBot,
   isChatGroup,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';

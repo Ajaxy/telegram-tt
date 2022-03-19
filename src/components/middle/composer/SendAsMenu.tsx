@@ -6,11 +6,11 @@ import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import renderText from '../../common/helpers/renderText';
-import { getUserFullName, isUserId } from '../../../modules/helpers';
+import { getUserFullName, isUserId } from '../../../global/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
-import { getActions, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../global';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';

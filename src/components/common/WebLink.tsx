@@ -6,7 +6,7 @@ import { ObserveFn } from '../../hooks/useIntersectionObserver';
 import {
   getFirstLinkInMessage, getMessageText,
   getMessageWebPage,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';

@@ -1,15 +1,15 @@
 import React, {
   FC, useCallback, memo, useMemo, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMessage } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
 import useLang from '../../hooks/useLang';
-import { selectChatMessage } from '../../modules/selectors';
+import { selectChatMessage } from '../../global/selectors';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import { getUserFullName } from '../../modules/helpers';
+import { getUserFullName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 import useFlag from '../../hooks/useFlag';
 import buildClassName from '../../util/buildClassName';

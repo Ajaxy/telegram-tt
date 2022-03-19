@@ -5,12 +5,12 @@ import React, {
   useRef,
   useState,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
-import { getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
+import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { stopCurrentAudio } from '../../../util/audioPlayer';

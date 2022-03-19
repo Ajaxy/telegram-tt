@@ -2,12 +2,12 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, useEffect, useRef, memo, useState, useCallback,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { selectReplyingToId } from '../../../modules/selectors';
+import { selectReplyingToId } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';

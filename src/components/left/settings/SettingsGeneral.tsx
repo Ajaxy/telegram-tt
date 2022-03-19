@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens, ISettings, TimeFormat } from '../../../types';
 import { ApiSticker, ApiStickerSet } from '../../../api/types';

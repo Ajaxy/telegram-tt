@@ -1,5 +1,5 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiNotification } from '../../api/types';
 

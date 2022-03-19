@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
@@ -25,10 +25,10 @@ import {
   getVideoDimensions,
   isMessageDocumentPhoto,
   isMessageDocumentVideo,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import {
   selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import { AVATAR_FULL_DIMENSIONS, calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import stopEvent from '../../util/stopEvent';

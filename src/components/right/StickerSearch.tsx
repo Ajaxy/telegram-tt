@@ -1,10 +1,10 @@
 import React, {
   FC, memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { throttle } from '../../util/schedulers';
-import { selectCurrentStickerSearch } from '../../modules/selectors';
+import { selectCurrentStickerSearch } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';

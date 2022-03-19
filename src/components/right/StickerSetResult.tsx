@@ -1,13 +1,13 @@
 import React, {
   FC, useEffect, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiStickerSet } from '../../api/types';
 import { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_SEARCH } from '../../config';
-import { selectShouldLoopStickers, selectStickerSet } from '../../modules/selectors';
+import { selectShouldLoopStickers, selectStickerSet } from '../../global/selectors';
 import useFlag from '../../hooks/useFlag';
 import useOnChange from '../../hooks/useOnChange';
 import useLang from '../../hooks/useLang';

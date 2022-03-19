@@ -1,9 +1,9 @@
 import React, { FC, useEffect, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
 
-import '../../modules/actions/initial';
+import '../../global/actions/initial';
 import { pick } from '../../util/iteratees';
 import { PLATFORM_ENV } from '../../util/environment';
 import windowSize from '../../util/windowSize';

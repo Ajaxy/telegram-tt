@@ -5,7 +5,7 @@ import {
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
-import { getPhotoInlineDimensions, getVideoDimensions } from '../../../modules/helpers';
+import { getPhotoInlineDimensions, getVideoDimensions } from '../../../global/helpers';
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);

@@ -2,7 +2,7 @@ import React, {
   FC, useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
 
-import { isUserId } from '../../modules/helpers';
+import { isUserId } from '../../global/helpers';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Checkbox from '../ui/Checkbox';

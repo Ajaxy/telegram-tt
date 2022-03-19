@@ -4,8 +4,8 @@ import './util/setupServiceWorker';
 import React from './lib/teact/teact';
 import TeactDOM from './lib/teact/teact-dom';
 
-import { getActions, getGlobal } from './modules';
-import './global';
+import { getActions, getGlobal } from './global';
+import './global/init';
 
 import { DEBUG } from './config';
 

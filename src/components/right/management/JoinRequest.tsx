@@ -1,11 +1,11 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser } from '../../../api/types';
 
 import useLang from '../../../hooks/useLang';
-import { getUserFullName } from '../../../modules/helpers';
-import { selectUser } from '../../../modules/selectors';
+import { getUserFullName } from '../../../global/helpers';
+import { selectUser } from '../../../global/selectors';
 import { formatHumanDate, formatTime, isToday } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { createClassNameBuilder } from '../../../util/buildClassName';

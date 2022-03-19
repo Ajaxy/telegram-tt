@@ -8,7 +8,7 @@ import {
   getChatTitle,
   getMessageSummaryText,
   getUserFullName,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { TextPart, renderMessageSummary } from './renderMessageText';

@@ -1,7 +1,7 @@
 import React, {
   FC, useState, useCallback, useEffect, memo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ChatCreationProgress } from '../../../types';
 

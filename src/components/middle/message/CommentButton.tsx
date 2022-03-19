@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../modules';
+import { getActions, getGlobal } from '../../../global';
 
 import {
   ApiChat, ApiThreadInfo, ApiUser,
 } from '../../../api/types';
 
-import { isUserId } from '../../../modules/helpers';
+import { isUserId } from '../../../global/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';

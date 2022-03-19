@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import {
   MAIN_THREAD_ID,
@@ -24,7 +24,7 @@ import {
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
   getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import {
   selectChatMessages,
   selectChat,
@@ -33,7 +33,7 @@ import {
   selectTheme,
   selectActiveDownloadIds,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 import useCacheBuster from '../../hooks/useCacheBuster';

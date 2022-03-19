@@ -7,7 +7,7 @@ import {
   isActionMessage,
   getSenderTitle,
   getMessageRoundVideo,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';

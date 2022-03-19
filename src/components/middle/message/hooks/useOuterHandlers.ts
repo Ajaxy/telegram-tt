@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 import React, { useEffect, useRef } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../modules';
+import { getActions } from '../../../../global';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/environment';
 import windowSize from '../../../../util/windowSize';

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
 import {
@@ -53,7 +53,7 @@ import {
   selectIsMessageProtected,
   selectLocalAnimatedEmojiEffect,
   selectDefaultReaction,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import {
   getMessageContent,
   isOwnMessage,
@@ -70,7 +70,7 @@ import {
   areReactionsEmpty,
   getMessageHtmlId,
   isGeoLiveExpired,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';

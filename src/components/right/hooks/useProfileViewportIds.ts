@@ -6,7 +6,7 @@ import {
 import { ProfileTabType, SharedMediaType } from '../../../types';
 
 import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
-import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../modules/helpers';
+import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../global/helpers';
 import useOnChange from '../../../hooks/useOnChange';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 

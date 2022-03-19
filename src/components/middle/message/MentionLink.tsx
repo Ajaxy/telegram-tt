@@ -1,9 +1,9 @@
 import React, { FC } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 
-import { selectUser } from '../../../modules/selectors';
+import { selectUser } from '../../../global/selectors';
 
 type OwnProps = {
   userId?: string;

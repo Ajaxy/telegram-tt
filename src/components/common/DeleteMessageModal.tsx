@@ -1,5 +1,5 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiMessage } from '../../api/types';
 import { IAlbum } from '../../types';
@@ -9,14 +9,14 @@ import {
   selectChat,
   selectCurrentMessageList,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   isUserId,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 

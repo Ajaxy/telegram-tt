@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
-import { withGlobal } from '../../../../modules';
+import { withGlobal } from '../../../../global';
 
 import { ApiSticker } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../../util/environment';
-import { selectAnimatedEmoji } from '../../../../modules/selectors';
+import { selectAnimatedEmoji } from '../../../../global/selectors';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';

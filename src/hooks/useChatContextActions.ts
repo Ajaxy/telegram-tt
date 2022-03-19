@@ -1,12 +1,12 @@
 import { useMemo } from '../lib/teact/teact';
-import { getActions } from '../modules';
+import { getActions } from '../global';
 
 import { ApiChat, ApiUser } from '../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel,
-} from '../modules/helpers';
+} from '../global/helpers';
 import { compact } from '../util/iteratees';
 import useLang from './useLang';
 

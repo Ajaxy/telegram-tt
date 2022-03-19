@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
 
-import { selectChatGroupCall } from '../../../modules/selectors/calls';
+import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
-import { selectChat } from '../../../modules/selectors';
+import { selectChat } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';

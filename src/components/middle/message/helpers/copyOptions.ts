@@ -9,7 +9,7 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   hasMessageLocalBlobUrl,
-} from '../../../../modules/helpers';
+} from '../../../../global/helpers';
 import { CLIPBOARD_ITEM_SUPPORTED, copyImageToClipboard, copyTextToClipboard } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 

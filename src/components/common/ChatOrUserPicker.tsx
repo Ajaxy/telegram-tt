@@ -8,7 +8,7 @@ import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import { isUserId } from '../../modules/helpers';
+import { isUserId } from '../../global/helpers';
 
 import Loading from '../ui/Loading';
 import Modal from '../ui/Modal';

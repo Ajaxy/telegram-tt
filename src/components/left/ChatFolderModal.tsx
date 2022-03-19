@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useMemo, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChatFolder } from '../../api/types';
 

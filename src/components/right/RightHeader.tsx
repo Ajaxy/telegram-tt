@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ManagementScreens, ProfileState } from '../../types';
 import { ApiExportedInvite } from '../../api/types';
@@ -16,10 +16,10 @@ import {
   selectCurrentTextSearch,
   selectIsChatWithSelf,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   getCanAddContact, isChatAdmin, isChatChannel, isUserId,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';

@@ -3,7 +3,7 @@ import useDebounce from '../../../hooks/useDebounce';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
 

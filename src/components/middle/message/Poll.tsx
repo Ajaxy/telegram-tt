@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import {
   ApiMessage, ApiPoll, ApiUser, ApiPollAnswer,

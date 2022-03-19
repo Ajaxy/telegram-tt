@@ -5,7 +5,7 @@ import monkeyPath from '../../assets/monkey.svg';
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
 import { LangCode } from '../../types';

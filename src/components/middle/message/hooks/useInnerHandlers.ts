@@ -1,5 +1,5 @@
 import React, { useCallback } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../modules';
+import { getActions } from '../../../../global';
 
 import { IAlbum, MediaViewerOrigin } from '../../../../types';
 import {

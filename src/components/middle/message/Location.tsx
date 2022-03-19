@@ -12,7 +12,7 @@ import {
   isGeoLiveExpired,
   isOwnMessage,
   isUserId,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';

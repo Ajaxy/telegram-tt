@@ -2,12 +2,12 @@ import { GroupCallParticipant as TypeGroupCallParticipant, THRESHOLD } from '../
 import React, {
   FC, memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../modules';
+import { withGlobal } from '../../../global';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectUser } from '../../../modules/selectors';
+import { selectChat, selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 

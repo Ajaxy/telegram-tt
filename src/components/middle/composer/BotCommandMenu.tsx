@@ -9,7 +9,7 @@ import Menu from '../../ui/Menu';
 import BotCommand from './BotCommand';
 
 import './BotCommandMenu.scss';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 
 export type OwnProps = {
   isOpen: boolean;

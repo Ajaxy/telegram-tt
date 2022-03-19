@@ -7,7 +7,7 @@ import {
   isForwardedMessage,
   isOwnMessage,
   getMessageVideo,
-} from '../../../../modules/helpers';
+} from '../../../../global/helpers';
 
 const MIN_MEDIA_WIDTH = 100;
 const MIN_MEDIA_WIDTH_WITH_COMMENTS = 238;

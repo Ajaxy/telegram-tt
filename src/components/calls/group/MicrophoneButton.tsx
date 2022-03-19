@@ -2,12 +2,12 @@ import { GroupCallConnectionState } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
 import usePrevious from '../../../hooks/usePrevious';
-import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../modules/selectors/calls';
+import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../global/selectors/calls';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';

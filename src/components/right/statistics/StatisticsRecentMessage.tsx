@@ -11,7 +11,7 @@ import {
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageRoundVideo,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 import useMedia from '../../../hooks/useMedia';
 

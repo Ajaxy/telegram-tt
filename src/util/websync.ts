@@ -1,5 +1,5 @@
 import { APP_VERSION, DEBUG } from '../config';
-import { getGlobal } from '../modules';
+import { getGlobal } from '../global';
 import { hasStoredSession } from './sessions';
 
 const WEBSYNC_URLS = [

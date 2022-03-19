@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useRef, useCallback,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat, ApiVideo } from '../../api/types';
 
@@ -11,8 +11,8 @@ import {
   selectChat,
   selectIsChatWithBot,
   selectCurrentMessageList,
-} from '../../modules/selectors';
-import { getAllowedAttachmentOptions } from '../../modules/helpers';
+} from '../../global/selectors';
+import { getAllowedAttachmentOptions } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';

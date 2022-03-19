@@ -1,13 +1,13 @@
 import React, {
   FC, useEffect, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { throttle } from '../../../util/schedulers';
-import { filterUsersByName, sortUserIds } from '../../../modules/helpers';
+import { filterUsersByName, sortUserIds } from '../../../global/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

@@ -15,7 +15,7 @@ import {
   isChatWithRepliesBot,
   isDeletedUser,
   isUserOnline,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';

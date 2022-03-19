@@ -3,7 +3,7 @@ import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 import { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
-import { getMessageMediaHash } from '../../modules/helpers';
+import { getMessageMediaHash } from '../../global/helpers';
 import useMedia from '../../hooks/useMedia';
 import useWebpThumbnail from '../../hooks/useWebpThumbnail';
 

@@ -6,7 +6,7 @@ import React, {
   useState,
   useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -18,7 +18,7 @@ import {
 import getKeyFromEvent from '../../util/getKeyFromEvent';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import {
   selectChat,
   selectChatBot,
@@ -27,7 +27,7 @@ import {
   selectIsChatWithSelf,
   selectIsInSelectMode,
   selectIsRightColumnShown,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';

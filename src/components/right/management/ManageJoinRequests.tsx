@@ -1,14 +1,14 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat } from '../../../api/types';
 
 import { STICKER_SIZE_JOIN_REQUESTS } from '../../../config';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import { selectChat } from '../../../modules/selectors';
-import { isChatChannel, isUserId } from '../../../modules/helpers';
+import { selectChat } from '../../../global/selectors';
+import { isChatChannel, isUserId } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import getAnimationData from '../../common/helpers/animatedAssets';

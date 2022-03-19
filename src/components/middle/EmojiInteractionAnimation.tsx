@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ActiveEmojiInteraction } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
@@ -12,7 +12,7 @@ import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';
 import {
   selectAnimatedEmojiEffect,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import getAnimationData, { ANIMATED_STICKERS_PATHS } from '../common/helpers/animatedAssets';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 

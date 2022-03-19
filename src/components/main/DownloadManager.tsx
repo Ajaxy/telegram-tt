@@ -1,5 +1,5 @@
 import { FC, memo, useEffect } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { Thread } from '../../global/types';
 import { ApiMediaFormat, ApiMessage } from '../../api/types';
@@ -8,7 +8,7 @@ import * as mediaLoader from '../../util/mediaLoader';
 import download from '../../util/download';
 import {
   getMessageContentFilename, getMessageMediaHash,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 
 type StateProps = {
   activeDownloads: Record<number, number[]>;

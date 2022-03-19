@@ -2,9 +2,9 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../modules';
+import { withGlobal } from '../../../global';
 import GroupCallParticipantVideo from './GroupCallParticipantVideo';
-import { selectActiveGroupCall } from '../../../modules/selectors/calls';
+import { selectActiveGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 
 type OwnProps = {

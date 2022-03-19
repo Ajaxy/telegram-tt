@@ -1,6 +1,6 @@
 import { ApiMessage } from '../../../../api/types';
 
-import { getMessageContent } from '../../../../modules/helpers';
+import { getMessageContent } from '../../../../global/helpers';
 
 export function isEmojiOnlyMessage(customShape?: boolean | number) {
   return typeof customShape === 'number';

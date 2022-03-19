@@ -11,7 +11,7 @@ import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessageVideo,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';

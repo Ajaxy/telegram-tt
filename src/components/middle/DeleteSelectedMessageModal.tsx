@@ -1,16 +1,16 @@
 import React, {
   FC, useCallback, memo, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
-import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../modules/selectors';
+import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../global/selectors';
 import {
   isUserId,
   getUserFirstOrLastName,
   getPrivateChatUserId,
   isChatBasicGroup,
   isChatSuperGroup,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';

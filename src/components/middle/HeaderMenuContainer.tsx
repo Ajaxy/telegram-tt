@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat } from '../../api/types';
 import { IAnchorPosition } from '../../types';
@@ -10,10 +10,10 @@ import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
   selectChat, selectNotifySettings, selectNotifyExceptions, selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 

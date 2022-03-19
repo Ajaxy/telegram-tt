@@ -1,12 +1,12 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat } from '../../api/types';
 
 import { debounce } from '../../util/schedulers';
-import { selectCurrentTextSearch, selectCurrentChat } from '../../modules/selectors';
+import { selectCurrentTextSearch, selectCurrentChat } from '../../global/selectors';
 import { getDayStartAt } from '../../util/dateFormat';
 
 import Button from '../ui/Button';

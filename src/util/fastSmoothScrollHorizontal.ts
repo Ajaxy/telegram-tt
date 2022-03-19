@@ -1,4 +1,4 @@
-import { getGlobal } from '../modules';
+import { getGlobal } from '../global';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';

@@ -1,5 +1,5 @@
 import React, { FC } from '../../lib/teact/teact';
-import { getGlobal, setGlobal, withGlobal } from '../../modules';
+import { getGlobal, setGlobal, withGlobal } from '../../global';
 import { GlobalState } from '../../global/types';
 
 document.ondblclick = () => {

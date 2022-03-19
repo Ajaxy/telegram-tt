@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useEffect, useMemo,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { AudioOrigin } from '../../types';
 import {
@@ -13,8 +13,8 @@ import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/enviro
 import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
-} from '../../modules/helpers';
-import { selectChat, selectSender } from '../../modules/selectors';
+} from '../../global/helpers';
+import { selectChat, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { makeTrackId } from '../../util/audioPlayer';
 import { clearMediaSession } from '../../util/mediaSession';

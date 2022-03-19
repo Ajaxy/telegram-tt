@@ -1,10 +1,10 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
 import { ApiUser } from '../../../api/types';
 
-import { selectUser } from '../../../modules/selectors';
+import { selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

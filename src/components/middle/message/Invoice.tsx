@@ -2,7 +2,7 @@ import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
-import { getMessageInvoice } from '../../../modules/helpers';
+import { getMessageInvoice } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';

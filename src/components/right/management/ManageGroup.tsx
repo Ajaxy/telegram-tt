@@ -2,18 +2,18 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
 import {
   ApiChat, ApiChatBannedRights, ApiExportedInvite, ApiMediaFormat,
 } from '../../../api/types';
 
-import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../modules/helpers';
+import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
-import { selectChat } from '../../../modules/selectors';
+import { selectChat } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';

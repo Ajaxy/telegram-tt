@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useMemo, memo, useState, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import {
   ApiChat, ApiChatMember, ApiUpdateConnectionStateType,
@@ -9,10 +9,10 @@ import {
 import { NewChatMembersProgress } from '../../types';
 
 import { unique } from '../../util/iteratees';
-import { selectChat } from '../../modules/selectors';
+import { selectChat } from '../../global/selectors';
 import {
   filterUsersByName, isChatChannel, isUserBot, sortChatIds,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import useHistoryBack from '../../hooks/useHistoryBack';

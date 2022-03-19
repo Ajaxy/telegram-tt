@@ -1,11 +1,11 @@
 import { getUserStreams, GroupCallParticipant as TypeGroupCallParticipant, THRESHOLD } from '../../../lib/secret-sauce';
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../modules';
+import { withGlobal } from '../../../global';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectUser } from '../../../modules/selectors';
+import { selectChat, selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import { ENABLE_THUMBNAIL_VIDEO } from '../../../config';
 

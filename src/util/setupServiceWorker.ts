@@ -1,5 +1,5 @@
 import { DEBUG, DEBUG_MORE } from '../config';
-import { getActions } from '../modules';
+import { getActions } from '../global';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
 

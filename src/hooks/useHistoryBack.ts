@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 
 import { IS_IOS } from '../util/environment';
 import usePrevious from './usePrevious';
-import { getActions } from '../modules';
+import { getActions } from '../global';
 import { areSortedArraysEqual } from '../util/iteratees';
 
 type HistoryState = {

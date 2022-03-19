@@ -1,12 +1,10 @@
-import { addActionHandler } from '../modules';
+import { typify } from '../lib/teact/teactn';
+import { GlobalState, ActionPayloads, NonTypedActionNames } from './types';
 
-import { INITIAL_STATE } from './initial';
-import { initCache, loadCache } from './cache';
-import { cloneDeep } from '../util/iteratees';
+const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();
 
-initCache();
-
-addActionHandler('init', () => {
-  const initial = cloneDeep(INITIAL_STATE);
-  return loadCache(initial) || initial;
-});
+export const getGlobal = typed.getGlobal;
+export const setGlobal = typed.setGlobal;
+export const getActions = typed.getActions;
+export const addActionHandler = typed.addActionHandler;
+export const withGlobal = typed.withGlobal;

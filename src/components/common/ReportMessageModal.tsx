@@ -3,7 +3,7 @@ import { ChangeEvent } from 'react';
 import React, {
   FC, memo, useCallback, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 
 import { ApiReportReason } from '../../api/types';
 

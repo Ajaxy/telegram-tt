@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
@@ -17,7 +17,7 @@ import {
   getMessageMediaHash,
   isMessageLocal,
   isOwnMessage,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
