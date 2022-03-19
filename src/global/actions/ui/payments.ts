@@ -16,8 +16,9 @@ addActionHandler('openPaymentModal', (global, actions, payload) => {
 });
 
 addActionHandler('closePaymentModal', (global) => {
-  const newGlobal = clearPayment(global);
-  return closeInvoice(newGlobal);
+  global = clearPayment(global);
+  global = closeInvoice(global);
+  return global;
 });
 
 addActionHandler('addPaymentError', (global, actions, payload) => {

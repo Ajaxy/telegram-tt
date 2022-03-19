@@ -102,26 +102,24 @@ addActionHandler('toggleGroupCallPanel', (global) => {
   };
 });
 
-addActionHandler('subscribeToGroupCallUpdates', (global, actions, payload) => {
+addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload) => {
   const { subscribed, id } = payload!;
   const groupCall = selectGroupCall(global, id);
 
   if (!groupCall) return;
 
-  (async () => {
-    if (subscribed) {
-      await fetchGroupCall(groupCall);
-      await fetchGroupCallParticipants(groupCall);
-    }
+  if (subscribed) {
+    await fetchGroupCall(groupCall);
+    await fetchGroupCallParticipants(groupCall);
+  }
 
-    await callApi('toggleGroupCallStartSubscription', {
-      subscribed,
-      call: groupCall,
-    });
-  })();
+  await callApi('toggleGroupCallStartSubscription', {
+    subscribed,
+    call: groupCall,
+  });
 });
 
-addActionHandler('createGroupCall', (global, actions, payload) => {
+addActionHandler('createGroupCall', async (global, actions, payload) => {
   const { chatId } = payload;
 
   const chat = selectChat(global, chatId);
@@ -129,24 +127,22 @@ addActionHandler('createGroupCall', (global, actions, payload) => {
     return;
   }
 
-  (async () => {
-    const result = await callApi('createGroupCall', {
-      peer: chat,
-    });
+  const result = await callApi('createGroupCall', {
+    peer: chat,
+  });
 
-    if (!result) return;
+  if (!result) return;
 
-    global = getGlobal();
-    setGlobal(updateGroupCall(global, result.id, {
-      ...result,
-      chatId,
-    }));
+  global = getGlobal();
+  setGlobal(updateGroupCall(global, result.id, {
+    ...result,
+    chatId,
+  }));
 
-    actions.joinGroupCall({ id: result.id, accessHash: result.accessHash });
-  })();
+  actions.joinGroupCall({ id: result.id, accessHash: result.accessHash });
 });
 
-addActionHandler('createGroupCallInviteLink', (global, actions) => {
+addActionHandler('createGroupCallInviteLink', async (global, actions) => {
   const groupCall = selectActiveGroupCall(global);
 
   if (!groupCall || !groupCall.chatId) {
@@ -160,47 +156,43 @@ addActionHandler('createGroupCallInviteLink', (global, actions) => {
 
   const canInvite = Boolean(chat.username);
 
-  (async () => {
-    let { inviteLink } = chat.fullInfo!;
-    if (canInvite) {
-      inviteLink = await callApi('exportGroupCallInvite', {
-        call: groupCall,
-        canSelfUnmute: false,
-      });
-    }
-
-    if (!inviteLink) {
-      return;
-    }
-
-    copyTextToClipboard(inviteLink);
-    actions.showNotification({
-      message: 'Link copied to clipboard',
+  let { inviteLink } = chat.fullInfo!;
+  if (canInvite) {
+    inviteLink = await callApi('exportGroupCallInvite', {
+      call: groupCall,
+      canSelfUnmute: false,
     });
-  })();
+  }
+
+  if (!inviteLink) {
+    return;
+  }
+
+  copyTextToClipboard(inviteLink);
+  actions.showNotification({
+    message: 'Link copied to clipboard',
+  });
 });
 
-addActionHandler('joinVoiceChatByLink', (global, actions, payload) => {
+addActionHandler('joinVoiceChatByLink', async (global, actions, payload) => {
   const { username, inviteHash } = payload!;
 
-  (async () => {
-    const chat = await fetchChatByUsername(username);
+  const chat = await fetchChatByUsername(username);
 
-    if (!chat) {
-      actions.showNotification({ message: langProvider.getTranslation('NoUsernameFound') });
-      return;
-    }
+  if (!chat) {
+    actions.showNotification({ message: langProvider.getTranslation('NoUsernameFound') });
+    return;
+  }
 
-    const full = await loadFullChat(chat);
+  const full = await loadFullChat(chat);
 
-    if (full?.groupCall) {
-      actions.joinGroupCall({ id: full.groupCall.id, accessHash: full.groupCall.accessHash, inviteHash });
-    }
-  })();
+  if (full?.groupCall) {
+    actions.joinGroupCall({ id: full.groupCall.id, accessHash: full.groupCall.accessHash, inviteHash });
+  }
 });
 
-addActionHandler('joinGroupCall', (global, actions, payload) => {
-  if (!ARE_CALLS_SUPPORTED) return;
+addActionHandler('joinGroupCall', async (global, actions, payload) => {
+  if (!ARE_CALLS_SUPPORTED) return undefined;
 
   const {
     chatId, id, accessHash, inviteHash,
@@ -208,59 +200,56 @@ addActionHandler('joinGroupCall', (global, actions, payload) => {
 
   createAudioElement();
 
-  (async () => {
-    await initializeSoundsForSafari();
-    const { groupCalls: { activeGroupCallId } } = global;
-    let groupCall = id ? selectGroupCall(global, id) : selectChatGroupCall(global, chatId);
+  await initializeSoundsForSafari();
+  const { groupCalls: { activeGroupCallId } } = global;
+  let groupCall = id ? selectGroupCall(global, id) : selectChatGroupCall(global, chatId);
 
-    if (groupCall?.id === activeGroupCallId) {
-      actions.toggleGroupCallPanel();
-      return;
-    }
+  if (groupCall?.id === activeGroupCallId) {
+    actions.toggleGroupCallPanel();
+    return undefined;
+  }
 
-    if (activeGroupCallId) {
-      actions.leaveGroupCall({
-        rejoin: payload,
-      });
-      return;
-    }
-
-    if (groupCall && activeGroupCallId === groupCall.id) {
-      actions.toggleGroupCallPanel();
-      return;
-    }
-
-    if (!groupCall && (!id || !accessHash)) {
-      groupCall = await fetchGroupCall({
-        id,
-        accessHash,
-      });
-    }
-
-    if (!groupCall) return;
-
-    global = getGlobal();
-
-    global = updateGroupCall(
-      global,
-      groupCall.id,
-      {
-        ...groupCall,
-        inviteHash,
-      },
-      undefined,
-      groupCall.participantsCount + 1,
-    );
-
-    setGlobal({
-      ...global,
-      groupCalls: {
-        ...global.groupCalls,
-        activeGroupCallId: groupCall.id,
-        isGroupCallPanelHidden: false,
-      },
+  if (activeGroupCallId) {
+    actions.leaveGroupCall({
+      rejoin: payload,
     });
-  })();
+    return undefined;
+  }
+
+  if (groupCall && activeGroupCallId === groupCall.id) {
+    actions.toggleGroupCallPanel();
+    return undefined;
+  }
+
+  if (!groupCall && (!id || !accessHash)) {
+    groupCall = await fetchGroupCall({
+      id,
+      accessHash,
+    });
+  }
+
+  if (!groupCall) return undefined;
+
+  global = getGlobal();
+  global = updateGroupCall(
+    global,
+    groupCall.id,
+    {
+      ...groupCall,
+      inviteHash,
+    },
+    undefined,
+    groupCall.participantsCount + 1,
+  );
+  global = {
+    ...global,
+    groupCalls: {
+      ...global.groupCalls,
+      activeGroupCallId: groupCall.id,
+      isGroupCallPanelHidden: false,
+    },
+  };
+  return global;
 });
 
 addActionHandler('playGroupCallSound', (global, actions, payload) => {

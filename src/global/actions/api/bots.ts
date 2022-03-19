@@ -101,7 +101,7 @@ addActionHandler('sendBotCommand', (global, actions, payload) => {
   );
 });
 
-addActionHandler('restartBot', (global, actions, payload) => {
+addActionHandler('restartBot', async (global, actions, payload) => {
   const { chatId } = payload;
   const { currentUserId } = global;
   const chat = selectCurrentChat(global);
@@ -110,101 +110,92 @@ addActionHandler('restartBot', (global, actions, payload) => {
     return;
   }
 
-  (async () => {
-    const result = await callApi('unblockContact', bot.id, bot.accessHash);
-    if (!result) {
-      return;
-    }
-
-    setGlobal(removeBlockedContact(getGlobal(), bot.id));
-    void sendBotCommand(chat, currentUserId, '/start', undefined, selectSendAs(global, chatId));
-  })();
-});
-
-addActionHandler('loadTopInlineBots', (global) => {
-  const { lastRequestedAt } = global.topInlineBots;
-
-  if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+  const result = await callApi('unblockContact', bot.id, bot.accessHash);
+  if (!result) {
     return;
   }
 
-  (async () => {
-    const result = await callApi('fetchTopInlineBots');
-    if (!result) {
-      return;
-    }
-
-    const { ids, users } = result;
-
-    let newGlobal = getGlobal();
-    newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
-    newGlobal = {
-      ...newGlobal,
-      topInlineBots: {
-        ...newGlobal.topInlineBots,
-        userIds: ids,
-        lastRequestedAt: getServerTime(global.serverTimeOffset),
-      },
-    };
-    setGlobal(newGlobal);
-  })();
+  setGlobal(removeBlockedContact(getGlobal(), bot.id));
+  void sendBotCommand(chat, currentUserId, '/start', undefined, selectSendAs(global, chatId));
 });
 
-addActionHandler('queryInlineBot', ((global, actions, payload) => {
+addActionHandler('loadTopInlineBots', async (global) => {
+  const { lastRequestedAt } = global.topInlineBots;
+  if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+    return undefined;
+  }
+
+  const result = await callApi('fetchTopInlineBots');
+  if (!result) {
+    return undefined;
+  }
+
+  const { ids, users } = result;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = {
+    ...global,
+    topInlineBots: {
+      ...global.topInlineBots,
+      userIds: ids,
+      lastRequestedAt: getServerTime(global.serverTimeOffset),
+    },
+  };
+  return global;
+});
+
+addActionHandler('queryInlineBot', async (global, actions, payload) => {
   const {
     chatId, username, query, offset,
   } = payload;
 
-  (async () => {
-    let inlineBotData = global.inlineBots.byUsername[username];
+  let inlineBotData = global.inlineBots.byUsername[username];
+  if (inlineBotData === false) {
+    return;
+  }
 
-    if (inlineBotData === false) {
+  if (inlineBotData === undefined) {
+    const { user: inlineBot, chat } = await callApi('fetchInlineBot', { username }) || {};
+    global = getGlobal();
+    if (!inlineBot || !chat) {
+      setGlobal(replaceInlineBotSettings(global, username, false));
       return;
     }
 
-    if (inlineBotData === undefined) {
-      const { user: inlineBot, chat } = await callApi('fetchInlineBot', { username }) || {};
-      global = getGlobal();
-      if (!inlineBot || !chat) {
-        setGlobal(replaceInlineBotSettings(global, username, false));
-        return;
-      }
+    global = addUsers(global, { [inlineBot.id]: inlineBot });
+    global = addChats(global, { [chat.id]: chat });
+    inlineBotData = {
+      id: inlineBot.id,
+      query: '',
+      offset: '',
+      switchPm: undefined,
+      canLoadMore: true,
+      results: [],
+    };
 
-      global = addUsers(global, { [inlineBot.id]: inlineBot });
-      global = addChats(global, { [chat.id]: chat });
-      inlineBotData = {
-        id: inlineBot.id,
-        query: '',
-        offset: '',
-        switchPm: undefined,
-        canLoadMore: true,
-        results: [],
-      };
+    global = replaceInlineBotSettings(global, username, inlineBotData);
+    setGlobal(global);
+  }
 
-      global = replaceInlineBotSettings(global, username, inlineBotData);
-      setGlobal(global);
-    }
+  if (query === inlineBotData.query && !inlineBotData.canLoadMore) {
+    return;
+  }
 
-    if (query === inlineBotData.query && !inlineBotData.canLoadMore) {
-      return;
-    }
-
-    void runDebouncedForSearch(() => {
-      searchInlineBot({
-        username,
-        inlineBotData: inlineBotData as InlineBotSettings,
-        chatId,
-        query,
-        offset,
-      });
+  void runDebouncedForSearch(() => {
+    searchInlineBot({
+      username,
+      inlineBotData: inlineBotData as InlineBotSettings,
+      chatId,
+      query,
+      offset,
     });
-  })();
-}));
+  });
+});
 
 addActionHandler('sendInlineBotResult', (global, actions, payload) => {
   const { id, queryId } = payload;
   const currentMessageList = selectCurrentMessageList(global);
-
   if (!currentMessageList || !id) {
     return;
   }
@@ -246,7 +237,7 @@ addActionHandler('resetInlineBot', (global, actions, payload) => {
   setGlobal(replaceInlineBotSettings(global, username, inlineBotData));
 });
 
-addActionHandler('startBot', (global, actions, payload) => {
+addActionHandler('startBot', async (global, actions, payload) => {
   const { botId, param } = payload;
 
   const bot = selectUser(global, botId);
@@ -254,12 +245,10 @@ addActionHandler('startBot', (global, actions, payload) => {
     return;
   }
 
-  (async () => {
-    await callApi('startBot', {
-      bot,
-      startParam: param,
-    });
-  })();
+  await callApi('startBot', {
+    bot,
+    startParam: param,
+  });
 });
 
 async function searchInlineBot({

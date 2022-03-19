@@ -265,10 +265,10 @@ addActionHandler('openPollResults', (global, actions, payload) => {
 
   if (!shouldOpenInstantly) {
     window.setTimeout(() => {
-      const newGlobal = getGlobal();
+      global = getGlobal();
 
       setGlobal({
-        ...newGlobal,
+        ...global,
         pollResults: {
           chatId,
           messageId,
@@ -277,22 +277,24 @@ addActionHandler('openPollResults', (global, actions, payload) => {
       });
     }, POLL_RESULT_OPEN_DELAY_MS);
   } else if (chatId !== global.pollResults.chatId || messageId !== global.pollResults.messageId) {
-    setGlobal({
+    return {
       ...global,
       pollResults: {
         chatId,
         messageId,
         voters: {},
       },
-    });
+    };
   }
+
+  return undefined;
 });
 
 addActionHandler('closePollResults', (global) => {
-  setGlobal({
+  return {
     ...global,
     pollResults: {},
-  });
+  };
 });
 
 addActionHandler('focusLastMessage', (global, actions) => {

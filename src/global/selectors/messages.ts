@@ -202,7 +202,7 @@ export function selectThreadByMessage(global: GlobalState, chatId: string, messa
   });
 }
 
-export function isMessageInCurrentMessageList(global: GlobalState, chatId: string, message: ApiMessage) {
+export function selectIsMessageInCurrentMessageList(global: GlobalState, chatId: string, message: ApiMessage) {
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return false;

@@ -1,4 +1,4 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addActionHandler, getGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { ApiAppConfig, ApiMediaFormat } from '../../../api/types';
@@ -19,29 +19,26 @@ const INTERACTION_RANDOM_OFFSET = 40;
 
 let interactionLocalId = 0;
 
-addActionHandler('loadAvailableReactions', () => {
-  (async () => {
-    const result = await callApi('getAvailableReactions');
+addActionHandler('loadAvailableReactions', async () => {
+  const result = await callApi('getAvailableReactions');
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
+  // Preload animations
+  result.forEach((availableReaction) => {
+    if (availableReaction.aroundAnimation) {
+      mediaLoader.fetch(`sticker${availableReaction.aroundAnimation.id}`, ApiMediaFormat.Lottie);
     }
+    if (availableReaction.centerIcon) {
+      mediaLoader.fetch(`sticker${availableReaction.centerIcon.id}`, ApiMediaFormat.Lottie);
+    }
+  });
 
-    // Preload animations
-    result.forEach((availableReaction) => {
-      if (availableReaction.aroundAnimation) {
-        mediaLoader.fetch(`sticker${availableReaction.aroundAnimation.id}`, ApiMediaFormat.Lottie);
-      }
-      if (availableReaction.centerIcon) {
-        mediaLoader.fetch(`sticker${availableReaction.centerIcon.id}`, ApiMediaFormat.Lottie);
-      }
-    });
-
-    setGlobal({
-      ...getGlobal(),
-      availableReactions: result,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    availableReactions: result,
+  };
 });
 
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload) => {
@@ -196,25 +193,21 @@ addActionHandler('stopActiveReaction', (global, actions, payload) => {
   };
 });
 
-addActionHandler('setDefaultReaction', (global, actions, payload) => {
+addActionHandler('setDefaultReaction', async (global, actions, payload) => {
   const { reaction } = payload;
 
-  (async () => {
-    const result = await callApi('setDefaultReaction', { reaction });
+  const result = await callApi('setDefaultReaction', { reaction });
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
-    }
-
-    global = getGlobal();
-    setGlobal({
-      ...global,
-      appConfig: {
-        ...global.appConfig,
-        defaultReaction: reaction,
-      } as ApiAppConfig,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    appConfig: {
+      ...global.appConfig,
+      defaultReaction: reaction,
+    } as ApiAppConfig,
+  };
 });
 
 addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
@@ -226,46 +219,44 @@ addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
   };
 });
 
-addActionHandler('loadReactors', (global, actions, payload) => {
+addActionHandler('loadReactors', async (global, actions, payload) => {
   const { chatId, messageId, reaction } = payload;
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
   if (!chat || !message) {
-    return;
+    return undefined;
   }
 
   const offset = message.reactors?.nextOffset;
+  const result = await callApi('fetchMessageReactionsList', {
+    reaction,
+    chat,
+    messageId,
+    offset,
+  });
 
-  (async () => {
-    const result = await callApi('fetchMessageReactionsList', {
-      reaction,
-      chat,
-      messageId,
-      offset,
-    });
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
-    }
+  global = getGlobal();
 
-    global = getGlobal();
-    if (result.users?.length) {
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    }
+  if (result.users?.length) {
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  }
 
-    const { nextOffset, count, reactions } = result;
+  const { nextOffset, count, reactions } = result;
 
-    setGlobal(updateChatMessage(global, chatId, messageId, {
-      reactors: {
-        nextOffset,
-        count,
-        reactions: [
-          ...(message.reactors?.reactions || []),
-          ...reactions,
-        ],
-      },
-    }));
-  })();
+  return updateChatMessage(global, chatId, messageId, {
+    reactors: {
+      nextOffset,
+      count,
+      reactions: [
+        ...(message.reactors?.reactions || []),
+        ...reactions,
+      ],
+    },
+  });
 });
 
 addActionHandler('loadMessageReactions', (global, actions, payload) => {
