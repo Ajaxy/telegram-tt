@@ -2,7 +2,6 @@ import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
@@ -90,14 +89,6 @@ const EmojiTooltip: FC<OwnProps> = ({
     setItemVisible(selectedIndex, containerRef);
   }, [selectedIndex]);
 
-  const handleMouseEnter = () => {
-    document.body.classList.add('no-select');
-  };
-
-  const handleMouseLeave = () => {
-    document.body.classList.remove('no-select');
-  };
-
   const className = buildClassName(
     'EmojiTooltip composer-tooltip custom-scroll-x',
     transitionClassNames,
@@ -107,8 +98,6 @@ const EmojiTooltip: FC<OwnProps> = ({
     <div
       ref={containerRef}
       className={className}
-      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
       {shouldRender && listEmojis ? (
         listEmojis.map((emoji, index) => (
