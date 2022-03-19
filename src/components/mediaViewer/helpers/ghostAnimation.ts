@@ -323,17 +323,17 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
 
     case MediaViewerOrigin.MiddleHeaderAvatar:
       containerSelector = '.MiddleHeader .Transition__slide--active .ChatInfo .Avatar';
-      mediaSelector = 'img.avatar-media';
+      mediaSelector = '.avatar-media';
       break;
 
     case MediaViewerOrigin.SettingsAvatar:
       containerSelector = '#Settings .ProfileInfo .Transition__slide--active .ProfilePhoto';
-      mediaSelector = 'img.avatar-media';
+      mediaSelector = '.avatar-media';
       break;
 
     case MediaViewerOrigin.ProfileAvatar:
       containerSelector = '#RightColumn .ProfileInfo .Transition__slide--active .ProfilePhoto';
-      mediaSelector = 'img.avatar-media';
+      mediaSelector = '.avatar-media';
       break;
 
     case MediaViewerOrigin.ScheduledInline:
