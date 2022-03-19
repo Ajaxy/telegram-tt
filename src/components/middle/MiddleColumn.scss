@@ -39,6 +39,13 @@
         background-image: url("../../assets/chat-bg-mobile.jpg");
       }
     }
+
+    .theme-dark & {
+      background-image: url('../../assets/chat-bg-dark.png');
+      background-position: top left;
+      background-size: 650px;
+      background-repeat: repeat;
+    }
   }
 
   .custom-bg-color:not(.custom-bg-image) &::after {
@@ -64,12 +71,12 @@
       transition: transform var(--layer-transition);
     }
 
-    body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
+    html.theme-light body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
       transform: scale(0.67) !important;
     }
   }
 
-  body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
+  html.theme-light body.animation-level-2 #Main.right-column-open #MiddleColumn:not(.custom-bg-image) &::after {
     @media screen and (min-width: 1921px) {
       transform: scale(0.8) !important;
     }
@@ -148,7 +155,7 @@
       opacity: 1;
       transform: scale(1);
       transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
-        color 0.15s;
+      color 0.15s;
 
       body.animation-level-0 & {
         transition: none !important;
@@ -281,11 +288,11 @@
       right: 0;
       height: 1px;
       background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.4) 2%,
-        rgba(255, 255, 255, 0.4) 98%,
-        rgba(255, 255, 255, 0) 100%
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.4) 2%,
+          rgba(255, 255, 255, 0.4) 98%,
+          rgba(255, 255, 255, 0) 100%
       );
       opacity: 0;
       transition: opacity 350ms ease;
@@ -302,11 +309,11 @@
 
     html.theme-dark &::before {
       background: linear-gradient(
-        90deg,
-        rgba(127, 127, 127, 0) 0%,
-        rgba(127, 127, 127, 0.4) 2%,
-        rgba(127, 127, 127, 0.4) 98%,
-        rgba(127, 127, 127, 0) 100%
+          90deg,
+          rgba(127, 127, 127, 0) 0%,
+          rgba(127, 127, 127, 0.4) 2%,
+          rgba(127, 127, 127, 0.4) 98%,
+          rgba(127, 127, 127, 0) 100%
       );
     }
   }

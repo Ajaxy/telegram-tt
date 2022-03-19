@@ -81,9 +81,16 @@
         body:not(.initial) & {
           background-image: url('../../assets/chat-bg.jpg');
         }
+
+        .theme-dark body.initial & {
+          background-image: url('../../assets/chat-bg-dark.png');
+          background-position: top left;
+          background-size: 650px;
+          background-repeat: repeat;
+        }
       }
 
-      &.with-right-column::before {
+      html.theme-light body.animation-level-2 &.with-right-column::before {
         transform: scale(0.67);
       }
 
