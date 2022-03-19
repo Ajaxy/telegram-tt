@@ -2,13 +2,13 @@ import { RefObject } from 'react';
 import React, {
   FC, memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
-import { selectChat, selectSponsoredMessage, selectUser } from '../../../modules/selectors';
-import { getChatTitle, getUserFullName } from '../../../modules/helpers';
+import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
+import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';

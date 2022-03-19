@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
-import { selectChat } from '../../../modules/selectors';
+import { selectChat } from '../../../global/selectors';
 import getAnimationData from '../../common/helpers/animatedAssets';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -20,7 +20,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import useFlag from '../../../hooks/useFlag';
 import renderText from '../../common/helpers/renderText';
 import Avatar from '../../common/Avatar';
-import { isChatChannel } from '../../../modules/helpers';
+import { isChatChannel } from '../../../global/helpers';
 
 type OwnProps = {
   chatId: string;

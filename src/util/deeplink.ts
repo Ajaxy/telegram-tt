@@ -1,4 +1,4 @@
-import { getActions } from '../modules';
+import { getActions } from '../global';
 import { IS_SAFARI } from './environment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'setlanguage' |

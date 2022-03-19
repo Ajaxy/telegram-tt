@@ -1,10 +1,10 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiMessage } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
-import { selectChatMessage, selectCurrentMessageList } from '../../../modules/selectors';
+import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useFlag from '../../../hooks/useFlag';
 

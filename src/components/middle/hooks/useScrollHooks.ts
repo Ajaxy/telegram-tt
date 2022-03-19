@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import { LoadMoreDirection } from '../../../types';

@@ -4,7 +4,7 @@ import {
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
-import { getActions, getGlobal, setGlobal } from '../modules';
+import { getActions, getGlobal, setGlobal } from '../global';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -17,15 +17,15 @@ import {
   isChatChannel,
   selectIsChatMuted,
   selectShouldShowMessagePreview,
-} from '../modules/helpers';
-import { addNotifyExceptions, replaceSettings } from '../modules/reducers';
+} from '../global/helpers';
+import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
   selectChatMessage,
   selectCurrentMessageList,
   selectNotifyExceptions,
   selectNotifySettings,
   selectUser,
-} from '../modules/selectors';
+} from '../global/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './environment';
 import { getTranslation } from './langProvider';
 import * as mediaLoader from './mediaLoader';

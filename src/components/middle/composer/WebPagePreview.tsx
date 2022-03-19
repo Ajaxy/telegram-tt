@@ -1,11 +1,11 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
 import { ISettings } from '../../../types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
-import { selectNoWebPage, selectTheme } from '../../../modules/selectors';
+import { selectNoWebPage, selectTheme } from '../../../global/selectors';
 import parseMessageInput from '../../../util/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';

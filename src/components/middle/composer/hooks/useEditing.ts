@@ -1,12 +1,12 @@
 import { useCallback } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../modules';
+import { getActions } from '../../../../global';
 
 import { ApiMessage } from '../../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import { hasMessageMedia } from '../../../../modules/helpers';
+import { hasMessageMedia } from '../../../../global/helpers';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 import useOnChange from '../../../../hooks/useOnChange';
 

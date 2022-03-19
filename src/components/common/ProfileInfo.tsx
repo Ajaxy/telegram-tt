@@ -1,17 +1,17 @@
 import React, {
   FC, useEffect, useCallback, memo, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
 import { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
-import { selectChat, selectUser, selectUserStatus } from '../../modules/selectors';
+import { selectChat, selectUser, selectUserStatus } from '../../global/selectors';
 import {
   getUserFullName, getUserStatus, isChatChannel, isUserOnline,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';

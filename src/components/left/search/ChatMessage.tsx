@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
@@ -15,8 +15,8 @@ import {
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageRoundVideo,
-} from '../../../modules/helpers';
-import { selectChat, selectUser } from '../../../modules/selectors';
+} from '../../../global/helpers';
+import { selectChat, selectUser } from '../../../global/selectors';
 import renderText from '../../common/helpers/renderText';
 import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';

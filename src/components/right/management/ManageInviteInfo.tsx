@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChatInviteImporter, ApiExportedInvite, ApiUser } from '../../../api/types';
 
@@ -10,8 +10,8 @@ import useLang from '../../../hooks/useLang';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getServerTime } from '../../../util/serverTime';
 import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dateFormat';
-import { isChatChannel } from '../../../modules/helpers';
-import { selectChat } from '../../../modules/selectors';
+import { isChatChannel } from '../../../global/helpers';
+import { selectChat } from '../../../global/selectors';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';

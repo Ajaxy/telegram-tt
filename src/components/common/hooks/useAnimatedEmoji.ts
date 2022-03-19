@@ -2,11 +2,11 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import safePlay from '../../../util/safePlay';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 import useMedia from '../../../hooks/useMedia';
 import { ActiveEmojiInteraction } from '../../../global/types';
 import useFlag from '../../../hooks/useFlag';
-import { selectLocalAnimatedEmojiEffectByName } from '../../../modules/selectors';
+import { selectLocalAnimatedEmojiEffectByName } from '../../../global/selectors';
 
 const WIDTH = {
   large: 160,

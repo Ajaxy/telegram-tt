@@ -1,17 +1,17 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
 import { ApiChat, ApiCountryCode, ApiUser } from '../../api/types';
 
 import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   getChatDescription, getChatLink, getHasAdminRight, isChatChannel, isUserId, isUserRightBanned, selectIsChatMuted,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';

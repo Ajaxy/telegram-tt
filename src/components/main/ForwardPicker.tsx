@@ -1,7 +1,7 @@
 import React, {
   FC, useMemo, useState, memo, useRef, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
 
@@ -10,7 +10,7 @@ import {
   filterUsersByName,
   getCanPostInChat,
   sortChatIds,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import { unique } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';

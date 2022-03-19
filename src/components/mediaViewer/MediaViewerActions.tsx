@@ -4,15 +4,15 @@ import React, {
   useCallback,
   useMemo,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiMessage } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import { getMessageMediaHash } from '../../modules/helpers';
+import { getMessageMediaHash } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import { selectIsDownloading, selectIsMessageProtected } from '../../modules/selectors';
+import { selectIsDownloading, selectIsMessageProtected } from '../../global/selectors';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';

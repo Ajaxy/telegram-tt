@@ -1,5 +1,5 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { PrivacyVisibility, SettingsScreens } from '../../../types';
 

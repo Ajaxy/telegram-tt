@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useState, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { GlobalSearchContent } from '../../../types';
 

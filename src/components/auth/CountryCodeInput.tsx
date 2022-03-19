@@ -1,7 +1,7 @@
 import React, {
   FC, useState, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import { ApiCountryCode } from '../../api/types';
 

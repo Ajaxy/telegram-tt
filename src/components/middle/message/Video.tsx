@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { IMediaDimensions } from './helpers/calculateAlbumLayout';
@@ -17,7 +17,7 @@ import {
   getMessageWebPageVideo,
   isForwardedMessage,
   isOwnMessage,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../../hooks/useMedia';

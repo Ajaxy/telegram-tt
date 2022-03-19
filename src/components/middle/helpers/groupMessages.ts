@@ -2,7 +2,7 @@ import { ApiMessage } from '../../../api/types';
 import { IAlbum } from '../../../types';
 
 import { getDayStartAt } from '../../../util/dateFormat';
-import { isActionMessage } from '../../../modules/helpers';
+import { isActionMessage } from '../../../global/helpers';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
 

@@ -1,8 +1,8 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import useLang from '../../hooks/useLang';
-import { selectChatMessage } from '../../modules/selectors';
+import { selectChatMessage } from '../../global/selectors';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 import Modal from '../ui/Modal';

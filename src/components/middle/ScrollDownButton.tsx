@@ -1,12 +1,12 @@
 import React, {
   FC, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { selectChat, selectCurrentMessageList } from '../../modules/selectors';
+import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import fastSmoothScroll from '../../util/fastSmoothScroll';

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import { GlobalState, MessageListType } from '../../../global/types';
 import {
@@ -40,7 +40,7 @@ import {
   selectChatMessage,
   selectUser,
   selectUserStatus,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
   getChatSlowModeOptions,
@@ -48,7 +48,7 @@ import {
   isChatAdmin,
   isChatSuperGroup,
   isChatChannel,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration, getDayStartAt } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from '../../../util/parseMessageInput';

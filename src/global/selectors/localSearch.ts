@@ -1,0 +1,27 @@
+import { GlobalState } from '../types';
+import { selectCurrentMessageList } from './messages';
+import { buildChatThreadKey } from '../helpers';
+
+export function selectCurrentTextSearch(global: GlobalState) {
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
+    return undefined;
+  }
+
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+  const currentSearch = global.localTextSearch.byChatThreadKey[chatThreadKey];
+  if (!currentSearch || !currentSearch.isActive) {
+    return undefined;
+  }
+
+  return currentSearch;
+}
+
+export function selectCurrentMediaSearch(global: GlobalState) {
+  const { chatId } = selectCurrentMessageList(global) || {};
+  if (!chatId) {
+    return undefined;
+  }
+
+  return global.localMediaSearch.byChatId[chatId];
+}

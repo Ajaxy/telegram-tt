@@ -2,7 +2,7 @@ import { ChangeEvent, MutableRefObject, RefObject } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens, ThemeKey } from '../../../types';
 
@@ -11,7 +11,7 @@ import {
   getPatternColor, hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
 } from '../../../util/colors';
 import { captureEvents, RealTouchEvent } from '../../../util/captureEvents';
-import { selectTheme } from '../../../modules/selectors';
+import { selectTheme } from '../../../global/selectors';
 import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';
 import useHistoryBack from '../../../hooks/useHistoryBack';

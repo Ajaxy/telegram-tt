@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useMemo,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import { Price } from '../../types';
 import { ApiShippingAddress } from '../../api/types';

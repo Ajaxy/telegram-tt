@@ -1,11 +1,11 @@
 import React, { FC, memo, useState } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Checkbox from '../ui/Checkbox';
-import { selectCallFallbackChannelTitle } from '../../modules/selectors/calls';
-import { getUserFullName } from '../../modules/helpers';
-import { selectCurrentMessageList, selectUser } from '../../modules/selectors';
+import { selectCallFallbackChannelTitle } from '../../global/selectors/calls';
+import { getUserFullName } from '../../global/helpers';
+import { selectCurrentMessageList, selectUser } from '../../global/selectors';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 export type OwnProps = {

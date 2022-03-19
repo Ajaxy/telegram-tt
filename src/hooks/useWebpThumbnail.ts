@@ -5,7 +5,7 @@ import { ApiMessage } from '../api/types';
 import { DEBUG } from '../config';
 import { isWebpSupported } from '../util/environment';
 import { EMPTY_IMAGE_DATA_URI, webpToPngBase64 } from '../util/webpToPng';
-import { getMessageMediaThumbDataUri } from '../modules/helpers';
+import { getMessageMediaThumbDataUri } from '../global/helpers';
 
 export default function useWebpThumbnail(message?: ApiMessage) {
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);

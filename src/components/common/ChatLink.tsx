@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 
 import buildClassName from '../../util/buildClassName';
 

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { MessageListType } from '../../global/types';
 
@@ -12,7 +12,7 @@ import {
   selectCurrentMessageList,
   selectHasProtectedMessage,
   selectSelectedMessagesCount,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import useFlag from '../../hooks/useFlag';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import buildClassName from '../../util/buildClassName';

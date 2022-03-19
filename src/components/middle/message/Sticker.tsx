@@ -4,7 +4,7 @@ import { ApiMessage } from '../../../api/types';
 
 import { NO_STICKER_SET_ID } from '../../../config';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
-import { getMessageHtmlId, getMessageMediaFormat, getMessageMediaHash } from '../../../modules/helpers';
+import { getMessageHtmlId, getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';

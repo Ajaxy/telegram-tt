@@ -1,9 +1,9 @@
 import React, { FC, useCallback } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
 
-import { selectUser } from '../../../modules/selectors';
+import { selectUser } from '../../../global/selectors';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import buildClassName from '../../../util/buildClassName';
 

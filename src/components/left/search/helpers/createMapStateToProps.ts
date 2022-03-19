@@ -4,7 +4,7 @@ import {
 } from '../../../../api/types';
 import { ISettings } from '../../../../types';
 
-import { selectChat, selectTheme } from '../../../../modules/selectors';
+import { selectChat, selectTheme } from '../../../../global/selectors';
 
 export type StateProps = {
   theme: ISettings['theme'];

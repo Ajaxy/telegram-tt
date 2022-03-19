@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import useLang, { LangFn } from '../../../hooks/useLang';
 
@@ -25,11 +25,11 @@ import {
   getMessageSticker,
   selectIsChatMuted,
   getMessageRoundVideo,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
   selectNotifySettings, selectNotifyExceptions, selectUserStatus,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
 import renderText from '../../common/helpers/renderText';
 import { fastRaf } from '../../../util/schedulers';

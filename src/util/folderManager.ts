@@ -1,13 +1,13 @@
 import { addCallback } from '../lib/teact/teactn';
-import { addActionHandler, getGlobal } from '../modules';
+import { addActionHandler, getGlobal } from '../global';
 
 import { GlobalState } from '../global/types';
 import { NotifyException, NotifySettings } from '../types';
 import { ApiChat, ApiChatFolder, ApiUser } from '../api/types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG } from '../config';
-import { selectNotifySettings, selectNotifyExceptions } from '../modules/selectors';
-import { selectIsChatMuted } from '../modules/helpers';
+import { selectNotifySettings, selectNotifyExceptions } from '../global/selectors';
+import { selectIsChatMuted } from '../global/helpers';
 import { onIdle, throttle } from './schedulers';
 import { areSortedArraysEqual, unique } from './iteratees';
 import arePropsShallowEqual from './arePropsShallowEqual';

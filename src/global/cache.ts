@@ -1,6 +1,6 @@
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import { addActionHandler, getGlobal } from '../modules';
+import { addActionHandler, getGlobal } from './index';
 
 import { GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
@@ -26,11 +26,11 @@ import {
   selectCurrentChat,
   selectCurrentMessageList,
   selectVisibleUsers,
-} from '../modules/selectors';
+} from './selectors';
 import { hasStoredSession } from '../util/sessions';
-import { INITIAL_STATE } from './initial';
+import { INITIAL_STATE } from './initialState';
 import { parseLocationHash } from '../util/routing';
-import { isUserId } from '../modules/helpers';
+import { isUserId } from './helpers';
 import { getOrderedIds } from '../util/folderManager';
 
 const UPDATE_THROTTLE = 5000;

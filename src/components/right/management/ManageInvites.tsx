@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
@@ -13,12 +13,12 @@ import useLang from '../../../hooks/useLang';
 import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
 import useInterval from '../../../hooks/useInterval';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import { selectChat } from '../../../modules/selectors';
+import { selectChat } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { getServerTime } from '../../../util/serverTime';
 import useFlag from '../../../hooks/useFlag';
-import { isChatChannel } from '../../../modules/helpers';
+import { isChatChannel } from '../../../global/helpers';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';

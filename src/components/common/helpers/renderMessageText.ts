@@ -5,7 +5,7 @@ import {
   getMessageSummaryText,
   getMessageText,
   TRUNCATED_SUMMARY_LENGTH,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { LangFn } from '../../../hooks/useLang';
 import renderText from './renderText';
 import { renderTextWithEntities, TextPart } from './renderTextWithEntities';

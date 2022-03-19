@@ -1,13 +1,13 @@
 import React, {
   FC, useCallback, useEffect, useMemo, memo,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import { ApiChat } from '../../../api/types';
 
 import { unique } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
-import { filterUsersByName, isUserBot, sortChatIds } from '../../../modules/helpers';
+import { filterUsersByName, isUserBot, sortChatIds } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

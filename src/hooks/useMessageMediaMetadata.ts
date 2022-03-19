@@ -8,7 +8,7 @@ import useMedia from './useMedia';
 import { useAsync } from './useAsync';
 import {
   getAudioHasCover, getChatAvatarHash, getChatTitle, getMessageContent, getMessageMediaHash, getSenderTitle,
-} from '../modules/helpers';
+} from '../global/helpers';
 import { getTranslation } from '../util/langProvider';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { scaleImage, resizeImage } from '../util/imageResize';

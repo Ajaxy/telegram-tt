@@ -1,11 +1,11 @@
 import React, {
   FC, useEffect, useCallback, useRef, memo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser } from '../../../api/types';
 
-import { getUserFirstOrLastName } from '../../../modules/helpers';
+import { getUserFirstOrLastName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
 import { throttle } from '../../../util/schedulers';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';

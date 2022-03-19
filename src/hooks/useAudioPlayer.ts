@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useRef, useState,
 } from '../lib/teact/teact';
-import { getActions, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../global';
 
 import { register, Track, TrackId } from '../util/audioPlayer';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';

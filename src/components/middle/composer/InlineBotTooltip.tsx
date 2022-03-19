@@ -22,7 +22,7 @@ import ListItem from '../../ui/ListItem';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 
 import './InlineBotTooltip.scss';
-import { getActions } from '../../../modules';
+import { getActions } from '../../../global';
 
 const INTERSECTION_DEBOUNCE_MS = 200;
 const runThrottled = throttle((cb) => cb(), 500, true);

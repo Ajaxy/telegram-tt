@@ -1,7 +1,7 @@
 import React, {
   FC, useMemo, memo, useRef,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../modules';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 
@@ -11,12 +11,12 @@ import {
   selectChatMessages,
   selectChat,
   selectCurrentTextSearch,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   getChatTitle,
   getUserFullName,
   isChatChannel,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useHistoryBack from '../../hooks/useHistoryBack';

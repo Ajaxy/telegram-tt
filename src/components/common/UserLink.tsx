@@ -5,7 +5,7 @@ import { ApiChat, ApiUser } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 
 import Link from '../ui/Link';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 
 type OwnProps = {
   className?: string;

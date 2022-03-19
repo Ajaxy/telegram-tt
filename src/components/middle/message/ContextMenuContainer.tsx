@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../modules';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import { MessageListType } from '../../../global/types';
 import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
@@ -12,11 +12,11 @@ import {
   selectChat,
   selectCurrentMessageList,
   selectIsMessageProtected,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import {
   isActionMessage, isChatChannel,
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
 import { copyTextToClipboard } from '../../../util/clipboard';

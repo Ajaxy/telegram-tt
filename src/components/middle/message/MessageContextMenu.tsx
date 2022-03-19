@@ -7,7 +7,7 @@ import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
-import { getUserFullName } from '../../../modules/helpers';
+import { getUserFullName } from '../../../global/helpers';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';

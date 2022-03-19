@@ -1,11 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiAvailableReaction, ApiChat } from '../../../api/types';
 
-import { selectChat } from '../../../modules/selectors';
+import { selectChat } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

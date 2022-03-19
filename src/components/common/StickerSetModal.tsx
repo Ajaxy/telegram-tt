@@ -1,18 +1,18 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiSticker, ApiStickerSet } from '../../api/types';
 
 import { STICKER_SIZE_MODAL } from '../../config';
 import {
   selectChat, selectCurrentMessageList, selectStickerSet, selectStickerSetByShortName,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
-import { getAllowedAttachmentOptions, getCanPostInChat } from '../../modules/helpers';
+import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';

@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 import convertPunycode from '../../lib/punycode';
 
 import {

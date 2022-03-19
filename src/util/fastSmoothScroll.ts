@@ -1,4 +1,4 @@
-import { getGlobal } from '../modules';
+import { getGlobal } from '../global';
 
 import { FocusDirection } from '../types';
 

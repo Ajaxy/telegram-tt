@@ -1,4 +1,4 @@
-import { getActions, getGlobal } from '../modules';
+import { getActions, getGlobal } from '../global';
 
 import { DEBUG } from '../config';
 

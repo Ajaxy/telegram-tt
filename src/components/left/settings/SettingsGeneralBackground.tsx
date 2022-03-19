@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useCallback, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens, ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import { ApiWallpaper } from '../../../api/types';
@@ -10,7 +10,7 @@ import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
-import { selectTheme } from '../../../modules/selectors';
+import { selectTheme } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

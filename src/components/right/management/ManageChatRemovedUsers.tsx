@@ -1,12 +1,12 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
-import { selectChat } from '../../../modules/selectors';
-import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../modules/helpers';
+import { selectChat } from '../../../global/selectors';
+import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useFlag from '../../../hooks/useFlag';

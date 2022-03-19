@@ -5,7 +5,7 @@ import React, {
   useMemo,
   memo,
 } from '../../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../../modules';
+import { getActions, withGlobal } from '../../../../global';
 
 import { OwnProps as PhotoProps } from '../Photo';
 import { OwnProps as VideoProps } from '../Video';
@@ -14,7 +14,7 @@ import buildClassName from '../../../../util/buildClassName';
 import {
   selectIsInSelectMode,
   selectIsMessageSelected,
-} from '../../../../modules/selectors';
+} from '../../../../global/selectors';
 
 type OwnProps =
   PhotoProps

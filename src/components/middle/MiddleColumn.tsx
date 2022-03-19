@@ -1,7 +1,7 @@
 import React, {
   FC, useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
 import {
@@ -43,10 +43,10 @@ import {
   selectPinnedIds,
   selectTheme,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import {
   getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import { createMessageHash } from '../../util/routing';

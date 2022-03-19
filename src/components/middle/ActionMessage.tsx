@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
 import { FocusDirection } from '../../types';
@@ -11,8 +11,8 @@ import {
   selectChatMessage,
   selectIsMessageFocused,
   selectChat,
-} from '../../modules/selectors';
-import { getMessageHtmlId, isChatChannel } from '../../modules/helpers';
+} from '../../global/selectors';
+import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';

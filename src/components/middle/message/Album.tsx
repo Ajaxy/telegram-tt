@@ -5,8 +5,8 @@ import { ApiMessage } from '../../../api/types';
 import { IAlbum, ISettings } from '../../../types';
 import { AlbumRectPart, IAlbumLayout } from './helpers/calculateAlbumLayout';
 
-import { getMessageContent, getMessageHtmlId } from '../../../modules/helpers';
-import { getActions, getGlobal, withGlobal } from '../../../modules';
+import { getMessageContent, getMessageHtmlId } from '../../../global/helpers';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 import withSelectControl from './hocs/withSelectControl';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import {
@@ -14,7 +14,7 @@ import {
   selectCanAutoLoadMedia,
   selectCanAutoPlayMedia,
   selectTheme,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 
 import Photo from './Photo';
 import Video from './Video';

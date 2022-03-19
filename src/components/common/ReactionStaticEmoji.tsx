@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
-import { getGlobal } from '../../modules';
+import { getGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
 

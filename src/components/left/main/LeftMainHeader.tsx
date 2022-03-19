@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ISettings, LeftColumnContent } from '../../../types';
 import { ApiChat } from '../../../api/types';
@@ -16,8 +16,8 @@ import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
-import { selectCurrentMessageList, selectTheme } from '../../../modules/selectors';
-import { isChatArchived } from '../../../modules/helpers';
+import { selectCurrentMessageList, selectTheme } from '../../../global/selectors';
+import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import { disableHistoryBack } from '../../../hooks/useHistoryBack';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';

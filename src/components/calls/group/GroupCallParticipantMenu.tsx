@@ -2,7 +2,7 @@ import { GroupCallParticipant } from '../../../lib/secret-sauce';
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { IAnchorPosition } from '../../../types';
 
@@ -10,7 +10,7 @@ import buildClassName from '../../../util/buildClassName';
 import useThrottle from '../../../hooks/useThrottle';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import { selectIsAdminInActiveGroupCall } from '../../../modules/selectors/calls';
+import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 
 import Menu from '../../ui/Menu';

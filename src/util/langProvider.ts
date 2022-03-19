@@ -1,4 +1,4 @@
-import { getGlobal } from '../modules';
+import { getGlobal } from '../global';
 
 import { ApiLangPack, ApiLangString } from '../api/types';
 import { LangCode, TimeFormat } from '../types';

@@ -1,9 +1,9 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat } from '../../api/types';
 
-import { selectIsChatWithSelf, selectUser } from '../../modules/selectors';
+import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import {
   isUserId,
   isUserBot,
@@ -13,7 +13,7 @@ import {
   isChatSuperGroup,
   isChatChannel,
   getChatTitle,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
 

@@ -1,13 +1,13 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../../modules';
+import { getActions, withGlobal } from '../../../../global';
 
 import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
-import { isUserId } from '../../../../modules/helpers';
+import { isUserId } from '../../../../global/helpers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
 import {
   EXCLUDED_CHAT_TYPES,

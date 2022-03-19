@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
@@ -12,7 +12,7 @@ import { createMapStateToProps, StateProps } from './helpers/createMapStateToPro
 import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
-import { getMessageDocument } from '../../../modules/helpers';
+import { getMessageDocument } from '../../../global/helpers';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';

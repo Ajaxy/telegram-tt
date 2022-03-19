@@ -1,10 +1,10 @@
 import React, { FC, memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../modules';
+import { withGlobal } from '../../global';
 
 import { ApiUser, ApiTypingStatus } from '../../api/types';
 
-import { selectUser } from '../../modules/selectors';
-import { getUserFirstOrLastName } from '../../modules/helpers';
+import { selectUser } from '../../global/selectors';
+import { getUserFirstOrLastName } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 

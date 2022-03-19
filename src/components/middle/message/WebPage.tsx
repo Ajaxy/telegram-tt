@@ -4,7 +4,7 @@ import { ApiMessage } from '../../../api/types';
 import { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ISettings } from '../../../types';
 
-import { getMessageWebPage } from '../../../modules/helpers';
+import { getMessageWebPage } from '../../../global/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import trimText from '../../../util/trimText';

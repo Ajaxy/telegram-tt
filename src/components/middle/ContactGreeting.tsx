@@ -1,14 +1,14 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 
-import { selectChat } from '../../modules/selectors';
+import { selectChat } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import { getUserIdDividend } from '../../modules/helpers';
+import { getUserIdDividend } from '../../global/helpers';
 
 import StickerButton from '../common/StickerButton';
 

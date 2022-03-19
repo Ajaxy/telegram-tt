@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 
@@ -16,12 +16,12 @@ import {
   selectEditingId,
   selectEditingScheduledId,
   selectEditingMessage,
-} from '../../../modules/selectors';
+} from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
-import { isUserId } from '../../../modules/helpers';
+import { isUserId } from '../../../global/helpers';
 
 import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';

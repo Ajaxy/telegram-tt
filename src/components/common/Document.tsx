@@ -1,7 +1,7 @@
 import React, {
   FC, useCallback, memo, useRef, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../modules';
+import { getActions } from '../../global';
 
 import { ApiMessage } from '../../api/types';
 
@@ -11,7 +11,7 @@ import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   isMessageDocumentVideo,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../hooks/useMedia';

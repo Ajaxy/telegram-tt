@@ -1,12 +1,12 @@
 import React, {
   FC, memo, useCallback, useState,
 } from '../../lib/teact/teact';
-import { withGlobal, getActions } from '../../modules';
+import { withGlobal, getActions } from '../../global';
 
 import { ApiUser } from '../../api/types';
 
-import { selectUser } from '../../modules/selectors';
-import { getUserFirstOrLastName, getUserFullName } from '../../modules/helpers';
+import { selectUser } from '../../global/selectors';
+import { getUserFirstOrLastName, getUserFullName } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 

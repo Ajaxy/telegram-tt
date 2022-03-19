@@ -12,7 +12,7 @@ import {
   isUserId,
   isChatWithRepliesBot,
   isDeletedUser,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';

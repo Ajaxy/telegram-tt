@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../modules';
+import { getActions } from '../../../../global';
 
 import { ApiFormattedText, ApiMessage } from '../../../../api/types';
 

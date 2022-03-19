@@ -13,7 +13,7 @@ import {
   getMessageMediaHash,
   getMediaTransferState,
   isOwnMessage,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 import cycleRestrict from '../../util/cycleRestrict';
 
 import { GlobalState, MessageListType } from '../../global/types';
@@ -20,7 +20,7 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
   getChatTitle, getMessageKey, getPrivateChatUserId, getSenderTitle, isUserId,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import {
   selectAllowedMessageActions,
   selectChat,
@@ -36,7 +36,7 @@ import {
   selectThreadInfo,
   selectThreadTopMessageId,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
 import useShowTransition from '../../hooks/useShowTransition';

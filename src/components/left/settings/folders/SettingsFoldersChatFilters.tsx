@@ -1,14 +1,14 @@
 import React, {
   FC, memo, useMemo, useCallback,
 } from '../../../../lib/teact/teact';
-import { getGlobal } from '../../../../modules';
+import { getGlobal } from '../../../../global';
 
 import { SettingsScreens } from '../../../../types';
 
 import { unique } from '../../../../util/iteratees';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
-import { filterChatsByName } from '../../../../modules/helpers';
+import { filterChatsByName } from '../../../../global/helpers';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';

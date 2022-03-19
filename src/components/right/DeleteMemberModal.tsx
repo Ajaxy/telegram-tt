@@ -1,10 +1,10 @@
 import React, { FC, useCallback, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { ApiChat } from '../../api/types';
 
-import { selectCurrentChat, selectUser } from '../../modules/selectors';
-import { getUserFirstOrLastName } from '../../modules/helpers';
+import { selectCurrentChat, selectUser } from '../../global/selectors';
+import { getUserFirstOrLastName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 

@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import {
   ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
@@ -34,7 +34,7 @@ import {
   getVideoDimensions,
   isMessageDocumentPhoto,
   isMessageDocumentVideo,
-} from '../../modules/helpers';
+} from '../../global/helpers';
 import {
   selectChat,
   selectChatMessage,
@@ -45,7 +45,7 @@ import {
   selectScheduledMessage,
   selectScheduledMessages,
   selectUser,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { captureEvents } from '../../util/captureEvents';

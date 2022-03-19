@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, { FC, useState, memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
 

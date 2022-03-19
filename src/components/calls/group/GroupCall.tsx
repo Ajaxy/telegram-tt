@@ -5,8 +5,8 @@ import {
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
-import '../../../modules/actions/calls';
+import { getActions, withGlobal } from '../../../global';
+import '../../../global/actions/calls';
 
 import { IAnchorPosition } from '../../../types';
 
@@ -21,7 +21,7 @@ import {
   selectGroupCall,
   selectGroupCallParticipant,
   selectIsAdminInActiveGroupCall,
-} from '../../../modules/selectors/calls';
+} from '../../../global/selectors/calls';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 

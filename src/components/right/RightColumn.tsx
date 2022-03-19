@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../modules';
+import { getActions, withGlobal } from '../../global';
 
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
@@ -13,7 +13,7 @@ import {
   selectAreActiveChatsLoaded,
   selectCurrentMessageList,
   selectRightColumnContentKey,
-} from '../../modules/selectors';
+} from '../../global/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';

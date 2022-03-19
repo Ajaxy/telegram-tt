@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../modules';
+import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
@@ -10,7 +10,7 @@ import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import {
   getChatTitle, getUserFullName, isUserId,
-} from '../../../modules/helpers';
+} from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
