@@ -218,3 +218,11 @@ export function hideAllChatJoinRequests({
     link,
   }), true);
 }
+
+export function hideChatReportPanel(chat: ApiChat) {
+  const { id, accessHash } = chat;
+
+  return invokeRequest(new GramJs.messages.HidePeerSettingsBar({
+    peer: buildInputPeer(id, accessHash),
+  }));
+}

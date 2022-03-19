@@ -130,7 +130,7 @@ const VideoPlayer: FC<OwnProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!isMediaViewerOpen) return;
+    if (!isMediaViewerOpen) return undefined;
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();

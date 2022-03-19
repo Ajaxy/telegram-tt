@@ -3,6 +3,7 @@ import { ApiUser, ApiUserStatus } from '../../api/types';
 
 import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { updateChat } from './chats';
 
 export function replaceUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
   return {
@@ -133,12 +134,16 @@ export function deleteContact(global: GlobalState, userId: string): GlobalState 
     },
   };
 
-  return replaceUsers(global, {
+  global = replaceUsers(global, {
     ...byId,
     [userId]: {
       ...byId[userId],
       isContact: undefined,
     },
+  });
+
+  return updateChat(global, userId, {
+    settings: undefined,
   });
 }
 

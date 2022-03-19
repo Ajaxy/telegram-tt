@@ -51,7 +51,6 @@ export async function fetchFullUser({
     '@type': 'updateUser',
     id,
     user: {
-      settings: userWithFullInfo.settings,
       fullInfo: userWithFullInfo.fullInfo,
     },
   });
@@ -248,8 +247,8 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   };
 }
 
-export function reportSpam(user: ApiUser) {
-  const { id, accessHash } = user;
+export function reportSpam(userOrChat: ApiUser | ApiChat) {
+  const { id, accessHash } = userOrChat;
 
   return invokeRequest(new GramJs.messages.ReportSpam({
     peer: buildInputPeer(id, accessHash),

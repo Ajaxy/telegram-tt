@@ -357,3 +357,16 @@ addActionHandler('hideAllChatJoinRequests', async (global, actions, payload) => 
     },
   });
 });
+
+addActionHandler('hideChatReportPanel', async (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  const result = await callApi('hideChatReportPanel', chat);
+  if (!result) return undefined;
+
+  return updateChat(getGlobal(), chatId, {
+    settings: undefined,
+  });
+});

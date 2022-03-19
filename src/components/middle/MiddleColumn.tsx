@@ -42,7 +42,6 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectTheme,
-  selectUser,
 } from '../../global/selectors';
 import {
   getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
@@ -107,7 +106,7 @@ type StateProps = {
   currentTransitionKey: number;
   messageLists?: GlobalMessageList[];
   isChannel?: boolean;
-  isUserFull?: boolean;
+  areChatSettingsLoaded?: boolean;
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
@@ -150,7 +149,7 @@ const MiddleColumn: FC<StateProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   isChannel,
-  isUserFull,
+  areChatSettingsLoaded,
   canSubscribe,
   canStartBot,
   canRestartBot,
@@ -161,7 +160,7 @@ const MiddleColumn: FC<StateProps> = ({
     openChat,
     unpinAllMessages,
     loadUser,
-    loadFullUser,
+    loadChatSettings,
     closeLocalTextSearch,
     exitMessageSelectMode,
     closePaymentModal,
@@ -258,10 +257,10 @@ const MiddleColumn: FC<StateProps> = ({
   }, [chatId, isPrivate, loadUser]);
 
   useEffect(() => {
-    if (isPrivate && !isUserFull && lastSyncTime) {
-      loadFullUser({ userId: chatId });
+    if (!areChatSettingsLoaded && lastSyncTime) {
+      loadChatSettings({ chatId });
     }
-  }, [chatId, isPrivate, isUserFull, lastSyncTime, loadFullUser]);
+  }, [chatId, isPrivate, areChatSettingsLoaded, lastSyncTime, loadChatSettings]);
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     if (IS_TOUCH_ENV) {
@@ -587,7 +586,6 @@ export default memo(withGlobal(
     const isPrivate = isUserId(chatId);
     const chat = selectChat(global, chatId);
     const bot = selectChatBot(global, chatId);
-    const user = isPrivate ? selectUser(global, chatId) : undefined;
     const pinnedIds = selectPinnedIds(global, chatId);
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
 
@@ -609,7 +607,7 @@ export default memo(withGlobal(
       threadId,
       messageListType,
       isPrivate,
-      isUserFull: Boolean(user?.settings),
+      areChatSettingsLoaded: Boolean(chat?.settings),
       canPost: !isPinnedMessageList && (!chat || canPost) && !isBotNotStarted,
       isPinnedMessageList,
       isScheduledMessageList,

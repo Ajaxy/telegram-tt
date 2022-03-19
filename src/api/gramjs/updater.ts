@@ -22,8 +22,9 @@ import {
   buildAvatarHash,
   buildApiChatFromPreview,
   buildApiChatFolder,
+  buildApiChatSettings,
 } from './apiBuilders/chats';
-import { buildApiUser, buildApiUserSettings, buildApiUserStatus } from './apiBuilders/users';
+import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import {
   buildMessageFromUpdate,
   isMessageWithMedia,
@@ -799,7 +800,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
             id: user.id,
             user: {
               ...user,
-              ...(settings && { settings: buildApiUserSettings(settings) }),
+              ...(settings && { settings: buildApiChatSettings(settings) }),
             },
           });
         });

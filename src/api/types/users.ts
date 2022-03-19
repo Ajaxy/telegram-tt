@@ -26,14 +26,6 @@ export interface ApiUser {
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;
-  settings?: ApiUserSettings;
-}
-
-export interface ApiUserSettings {
-  isAutoArchived?: boolean;
-  canReportSpam?: boolean;
-  canAddContact?: boolean;
-  canBlockContact?: boolean;
 }
 
 export interface ApiUserFullInfo {
