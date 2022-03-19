@@ -64,6 +64,9 @@ type StateProps = {
   message?: ApiMessage;
   origin?: MediaViewerOrigin;
   isProtected?: boolean;
+  volume: number;
+  isMuted: boolean;
+  playbackRate: number;
 };
 
 const ANIMATION_DURATION = 350;
@@ -78,10 +81,13 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     profilePhotoIndex,
     origin,
     animationLevel,
-    onClose,
-    onFooterClick,
     isFooterHidden,
     isProtected,
+    volume,
+    playbackRate,
+    isMuted,
+    onClose,
+    onFooterClick,
     setIsFooterHidden,
   } = props;
   /* Content */
@@ -211,6 +217,9 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           toggleControls={toggleControls}
           noPlay={!isActive}
           onClose={onClose}
+          isMuted={isMuted}
+          volume={volume}
+          playbackRate={playbackRate}
         />
       ))}
       {textParts && (
@@ -236,14 +245,20 @@ export default memo(withGlobal<OwnProps>(
       origin,
     } = ownProps;
 
+    const {
+      volume,
+      isMuted,
+      playbackRate,
+    } = global.mediaViewer;
+
     if (origin === MediaViewerOrigin.SearchResult) {
       if (!(chatId && messageId)) {
-        return {};
+        return { volume, isMuted, playbackRate };
       }
 
       const message = selectChatMessage(global, chatId, messageId);
       if (!message) {
-        return {};
+        return { volume, isMuted, playbackRate };
       }
 
       return {
@@ -253,6 +268,9 @@ export default memo(withGlobal<OwnProps>(
         origin,
         message,
         isProtected: selectIsMessageProtected(global, message),
+        volume,
+        isMuted,
+        playbackRate,
       };
     }
 
@@ -265,11 +283,14 @@ export default memo(withGlobal<OwnProps>(
         avatarOwner: sender,
         profilePhotoIndex: profilePhotoIndex || 0,
         origin,
+        volume,
+        isMuted,
+        playbackRate,
       };
     }
 
     if (!(chatId && threadId && messageId)) {
-      return {};
+      return { volume, isMuted, playbackRate };
     }
 
     let message: ApiMessage | undefined;
@@ -280,7 +301,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     if (!message) {
-      return {};
+      return { volume, isMuted, playbackRate };
     }
 
     return {
@@ -291,6 +312,9 @@ export default memo(withGlobal<OwnProps>(
       origin,
       message,
       isProtected: selectIsMessageProtected(global, message),
+      volume,
+      isMuted,
+      playbackRate,
     };
   },
 )(MediaViewerContent));

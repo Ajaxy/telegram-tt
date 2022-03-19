@@ -567,7 +567,10 @@ function checkIfInsideSelector(element: HTMLElement, selector: string) {
 function checkIfControlTarget(e: TouchEvent | MouseEvent) {
   const target = e.target as HTMLElement;
   if (checkIfInsideSelector(target, '.VideoPlayerControls')) {
-    if (checkIfInsideSelector(target, '.play, .fullscreen')) {
+    if (checkIfInsideSelector(
+      target,
+      '.play, .fullscreen, .volume, .volume-slider, .playback-rate, .playback-rate-menu',
+    )) {
       return true;
     }
     e.preventDefault();

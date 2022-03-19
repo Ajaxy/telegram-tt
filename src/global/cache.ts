@@ -196,6 +196,14 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.audioPlayer.playbackRate = DEFAULT_PLAYBACK_RATE;
   }
 
+  if (cached.mediaViewer.volume === undefined) {
+    cached.mediaViewer.volume = DEFAULT_VOLUME;
+  }
+
+  if (cached.mediaViewer.playbackRate === undefined) {
+    cached.mediaViewer.playbackRate = DEFAULT_PLAYBACK_RATE;
+  }
+
   if (!cached.groupCalls) {
     cached.groupCalls = initialState.groupCalls;
   }
@@ -245,6 +253,11 @@ function updateCache() {
       volume: global.audioPlayer.volume,
       playbackRate: global.audioPlayer.playbackRate,
       isMuted: global.audioPlayer.isMuted,
+    },
+    mediaViewer: {
+      volume: global.mediaViewer.volume,
+      playbackRate: global.mediaViewer.playbackRate,
+      isMuted: global.mediaViewer.isMuted,
     },
     isChatInfoShown: reduceShowChatInfo(global),
     users: reduceUsers(global),

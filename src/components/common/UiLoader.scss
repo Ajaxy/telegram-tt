@@ -75,18 +75,15 @@
 
         .theme-dark body.initial & {
           background-color: #0f0f0f;
+          background-image: url('../../assets/chat-bg-dark.png');
+          background-position: top left;
+          background-size: 650px;
+          background-repeat: repeat;
         }
 
         .theme-light body.initial &,
         body:not(.initial) & {
           background-image: url('../../assets/chat-bg.jpg');
-        }
-
-        .theme-dark body.initial & {
-          background-image: url('../../assets/chat-bg-dark.png');
-          background-position: top left;
-          background-size: 650px;
-          background-repeat: repeat;
         }
       }
 

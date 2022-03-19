@@ -28,77 +28,67 @@
     pointer-events: all;
   }
 
-  &.mobile {
-    .player-file-size {
-      position: static;
-      transform: none;
-      margin-left: auto;
-    }
-
-    .fullscreen {
-      margin-left: 1rem;
-    }
-
-    .player-time + .fullscreen {
-      margin-left: auto;
-    }
+  .buttons {
+    display: flex;
+    align-items: center;
+    width: 100%;
   }
 
-  .Button {
-    width: 2.25rem;
+  .spacer {
+    flex-grow: 1;
+  }
+
+  .Button.round {
+    width: 2rem;
     padding: 0;
     margin: 0.25rem;
-    height: 1.75rem;
-    @media (max-width: 600px) {
-      height: 2.25rem;
+    height: 2rem;
+  }
+
+  .volume-slider {
+    margin-bottom: 0;
+    margin-left: -0.75rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    width: 0;
+
+    --volume-slider-width: 4rem;
+    --slider-color: #fff;
+    --color-borders: rgba(255, 255, 255, 0.5);
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+    transition: width 0.2s ease-in-out;
+
+    &:hover{
+      overflow: hidden;
+      width: var(--volume-slider-width);
+      .RangeSlider__input {
+        opacity: 1;
+      }
+    }
+
+    .RangeSlider__input {
+      margin-bottom: 0;
+      opacity: 0;
+      transition: opacity 0.15s ease-in-out;
     }
   }
 
-  .play i {
-    line-height: 1.5rem;
+  .volume:hover + .volume-slider {
+    overflow: hidden;
+    width: var(--volume-slider-width);
+    .RangeSlider__input {
+      opacity: 1;
+    }
   }
 
   .player-time {
-    margin: 0 1rem;
     white-space: nowrap;
-  }
-
-  .fullscreen {
-    margin-left: auto;
-    @media (max-width: 600px) {
-      margin-left: 1rem;
-    }
-    i {
-      line-height: 1.75rem;
-      @media (max-width: 600px) {
-        font-size: 1.5rem;
-      }
-    }
-  }
-
-  @media (max-width: 600px) {
-    .player-time + .fullscreen {
-      margin-left: auto;
-    }
   }
 
   .player-file-size {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    @media (max-width: 600px) {
-      position: static;
-      transform: none;
-      margin-left: auto;
-      margin-right: 1rem;
-      & + .fullscreen {
-        margin-left: 0;
-      }
-    }
+    margin-left: 0.5rem;
   }
 
   .player-seekline {
@@ -154,5 +144,10 @@
         transform: translate(0.325rem, -50%);
       }
     }
+  }
+
+  .playback-rate-menu .bubble {
+    min-width: 4rem;
+    margin-right: 4rem;
   }
 }

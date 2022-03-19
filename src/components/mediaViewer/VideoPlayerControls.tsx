@@ -1,19 +1,23 @@
 import React, {
-  FC, useEffect, useRef, useCallback,
+  FC, useEffect, useRef, useCallback, useMemo,
 } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import useFlag from '../../hooks/useFlag';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import formatFileSize from './helpers/formatFileSize';
 import useLang from '../../hooks/useLang';
 import { captureEvents } from '../../util/captureEvents';
 
 import Button from '../ui/Button';
+import RangeSlider from '../ui/RangeSlider';
+import Menu from '../ui/Menu';
+import MenuItem from '../ui/MenuItem';
 
 import './VideoPlayerControls.scss';
 
-type IProps = {
+type OwnProps = {
   bufferedProgress: number;
   currentTime: number;
   duration: number;
@@ -22,9 +26,16 @@ type IProps = {
   isPlayed: boolean;
   isFullscreenSupported: boolean;
   isFullscreen: boolean;
-  onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isVisible: boolean;
+  isBuffered: boolean;
+  volume: number;
+  isMuted: boolean;
+  playbackRate: number;
+  onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onVolumeClick: () => void;
+  onVolumeChange: (volume: number) => void;
+  onPlaybackRateChange: (playbackRate: number) => void;
+  onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setVisibility: (isVisible: boolean) => void;
   onSeek: (position: number) => void;
 };
@@ -33,9 +44,16 @@ const stopEvent = (e: React.MouseEvent<HTMLElement>) => {
   e.stopPropagation();
 };
 
+const PLAYBACK_RATES = [
+  0.5,
+  1,
+  1.5,
+  2,
+];
+
 const HIDE_CONTROLS_TIMEOUT_MS = 1500;
 
-const VideoPlayerControls: FC<IProps> = ({
+const VideoPlayerControls: FC<OwnProps> = ({
   bufferedProgress,
   currentTime,
   duration,
@@ -44,12 +62,20 @@ const VideoPlayerControls: FC<IProps> = ({
   isPlayed,
   isFullscreenSupported,
   isFullscreen,
-  onChangeFullscreen,
-  onPlayPause,
   isVisible,
+  isBuffered,
+  volume,
+  isMuted,
+  playbackRate,
+  onChangeFullscreen,
+  onVolumeClick,
+  onVolumeChange,
+  onPlaybackRateChange,
+  onPlayPause,
   setVisibility,
   onSeek,
 }) => {
+  const [isPlaybackMenuOpen, openPlaybackMenu, closePlaybackMenu] = useFlag();
   // eslint-disable-next-line no-null/no-null
   const seekerRef = useRef<HTMLDivElement>(null);
   const isSeekingRef = useRef<boolean>(false);
@@ -57,7 +83,7 @@ const VideoPlayerControls: FC<IProps> = ({
 
   useEffect(() => {
     let timeout: number | undefined;
-    if (!isVisible || !isPlayed || isSeeking) {
+    if (!isVisible || !isPlayed || isSeeking || isPlaybackMenuOpen) {
       if (timeout) window.clearTimeout(timeout);
       return undefined;
     }
@@ -67,7 +93,7 @@ const VideoPlayerControls: FC<IProps> = ({
     return () => {
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [isPlayed, isVisible, isSeeking, setVisibility]);
+  }, [isPlayed, isVisible, isSeeking, setVisibility, isPlaybackMenuOpen]);
 
   useEffect(() => {
     if (isVisible) {
@@ -79,6 +105,12 @@ const VideoPlayerControls: FC<IProps> = ({
       document.body.classList.remove('video-controls-visible');
     };
   }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible) {
+      closePlaybackMenu();
+    }
+  }, [closePlaybackMenu, isVisible]);
 
   const lang = useLang();
 
@@ -112,35 +144,84 @@ const VideoPlayerControls: FC<IProps> = ({
     });
   }, [isVisible, handleStartSeek, handleSeek, handleStopSeek]);
 
+  const volumeIcon = useMemo(() => {
+    if (volume === 0 || isMuted) return 'icon-muted';
+    if (volume < 0.3) return 'icon-volume-1';
+    if (volume < 0.6) return 'icon-volume-2';
+    return 'icon-volume-3';
+  }, [volume, isMuted]);
+
   return (
     <div
       className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isVisible && 'active')}
       onClick={stopEvent}
     >
       {renderSeekLine(currentTime, duration, bufferedProgress, seekerRef)}
-      <Button
-        ariaLabel={lang('AccActionPlay')}
-        size="tiny"
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
-        color="translucent-white"
-        className="play"
-        onClick={onPlayPause}
-      >
-        <i className={isPlayed ? 'icon-pause' : 'icon-play'} />
-      </Button>
-      {renderTime(currentTime, duration)}
-      {bufferedProgress < 1 && renderFileSize(bufferedProgress, fileSize)}
-      {isFullscreenSupported && (
+      <div className="buttons">
         <Button
-          ariaLabel="Fullscreen"
+          ariaLabel={lang('AccActionPlay')}
+          size="tiny"
+          ripple={!IS_SINGLE_COLUMN_LAYOUT}
+          color="translucent-white"
+          className="play"
+          round
+          onClick={onPlayPause}
+        >
+          <i className={isPlayed ? 'icon-pause' : 'icon-play'} />
+        </Button>
+        <Button
+          ariaLabel="Volume"
           size="tiny"
           color="translucent-white"
-          className="fullscreen"
-          onClick={onChangeFullscreen}
+          className="volume"
+          round
+          onClick={onVolumeClick}
         >
-          <i className={`${isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'}`} />
+          <i className={volumeIcon} />
         </Button>
-      )}
+        {!IS_IOS && (
+          <RangeSlider bold className="volume-slider" value={isMuted ? 0 : volume * 100} onChange={onVolumeChange} />
+        )}
+        {renderTime(currentTime, duration)}
+        {!isBuffered && renderFileSize(bufferedProgress, fileSize)}
+        <div className="spacer" />
+        <Button
+          ariaLabel="Playback rate"
+          size="tiny"
+          color="translucent-white"
+          className="playback-rate"
+          round
+          onClick={openPlaybackMenu}
+        >
+          {`${playbackRate}x`}
+        </Button>
+        {isFullscreenSupported && (
+          <Button
+            ariaLabel="Fullscreen"
+            size="tiny"
+            color="translucent-white"
+            className="fullscreen"
+            round
+            onClick={onChangeFullscreen}
+          >
+            <i className={isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'} />
+          </Button>
+        )}
+      </div>
+      <Menu
+        isOpen={isPlaybackMenuOpen}
+        className="playback-rate-menu"
+        positionX="right"
+        positionY="bottom"
+        autoClose
+        onClose={closePlaybackMenu}
+      >
+        {PLAYBACK_RATES.map((rate) => (
+          <MenuItem disabled={playbackRate === rate} onClick={() => onPlaybackRateChange(rate)}>
+            {`${rate}x`}
+          </MenuItem>
+        ))}
+      </Menu>
     </div>
   );
 };

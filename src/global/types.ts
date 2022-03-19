@@ -374,6 +374,9 @@ export type GlobalState = {
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
     origin?: MediaViewerOrigin;
+    volume: number;
+    playbackRate: number;
+    isMuted: boolean;
   };
 
   audioPlayer: {
@@ -521,11 +524,59 @@ export interface ActionPayloads {
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
   };
+
+  // Messages
   setEditingDraft: {
     text?: ApiFormattedText;
     chatId: string;
     threadId: number;
     type: MessageListType;
+  };
+
+  // Media Viewer & Audio Player
+  openMediaViewer: {
+    chatId?: string;
+    threadId?: number;
+    messageId?: number;
+    avatarOwnerId?: string;
+    profilePhotoIndex?: number;
+    origin?: MediaViewerOrigin;
+    volume?: number;
+    playbackRate?: number;
+    isMuted?: boolean;
+  };
+  closeMediaViewer: {};
+  setMediaViewerVolume: {
+    volume: number;
+  };
+  setMediaViewerPlaybackRate: {
+    playbackRate: number;
+  };
+  setMediaViewerMuted: {
+    isMuted: boolean;
+  };
+
+  openAudioPlayer: {
+    chatId: string;
+    threadId?: number;
+    messageId: number;
+    origin?: AudioOrigin;
+    volume?: number;
+    playbackRate?: number;
+    isMuted?: boolean;
+  };
+  closeAudioPlayer: {};
+  setAudioPlayerVolume: {
+    volume: number;
+  };
+  setAudioPlayerPlaybackRate: {
+    playbackRate: number;
+  };
+  setAudioPlayerMuted: {
+    isMuted: boolean;
+  };
+  setAudioPlayerOrigin: {
+    origin: AudioOrigin;
   };
 }
 
@@ -613,10 +664,6 @@ export type NonTypedActionNames = (
   // bots
   'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
-  // media viewer & audio player
-  'openMediaViewer' | 'closeMediaViewer' |
-  'openAudioPlayer' | 'setAudioPlayerVolume' | 'setAudioPlayerPlaybackRate' |
-  'setAudioPlayerMuted' | 'setAudioPlayerOrigin' | 'closeAudioPlayer' |
   // misc
   'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |

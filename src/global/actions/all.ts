@@ -9,6 +9,7 @@ import './ui/settings';
 import './ui/misc';
 import './ui/payments';
 import './ui/calls';
+import './ui/mediaViewer';
 
 import './api/initial';
 import './api/chats';

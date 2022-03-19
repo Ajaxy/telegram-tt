@@ -73,6 +73,18 @@
     pointer-events: none;
   }
 
+  &.bold {
+    .slider-main::before {
+      top: 0.25rem;
+      height: 0.25rem;
+    }
+
+    .slider-fill-track {
+      top: 0.25rem;
+      height: 0.25rem;
+    }
+  }
+
   // Reset range input browser styles
   @include reset-range();
 
