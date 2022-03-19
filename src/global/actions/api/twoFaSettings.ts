@@ -3,86 +3,76 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import { replaceSettings, updateTwoFaSettings } from '../../reducers';
 
-addActionHandler('loadPasswordInfo', () => {
-  (async () => {
-    const result = await callApi('getPasswordInfo');
-    if (!result) {
-      return;
-    }
+addActionHandler('loadPasswordInfo', async (global) => {
+  const result = await callApi('getPasswordInfo');
+  if (!result) {
+    return undefined;
+  }
 
-    let global = getGlobal();
-    global = replaceSettings(global, { hasPassword: result.hasPassword });
-    global = updateTwoFaSettings(global, { hint: result.hint });
-    setGlobal(global);
-  })();
+  global = getGlobal();
+  global = replaceSettings(global, { hasPassword: result.hasPassword });
+  global = updateTwoFaSettings(global, { hint: result.hint });
+  return global;
 });
 
-addActionHandler('checkPassword', (global, actions, payload) => {
+addActionHandler('checkPassword', async (global, actions, payload) => {
   const { currentPassword, onSuccess } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
 
-  (async () => {
-    const isSuccess = await callApi('checkPassword', currentPassword);
+  const isSuccess = await callApi('checkPassword', currentPassword);
 
-    setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
+  setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
 
-    if (isSuccess) {
-      onSuccess();
-    }
-  })();
+  if (isSuccess) {
+    onSuccess();
+  }
 });
 
-addActionHandler('clearPassword', (global, actions, payload) => {
+addActionHandler('clearPassword', async (global, actions, payload) => {
   const { currentPassword, onSuccess } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
 
-  (async () => {
-    const isSuccess = await callApi('clearPassword', currentPassword);
+  const isSuccess = await callApi('clearPassword', currentPassword);
 
-    setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
+  setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
 
-    if (isSuccess) {
-      onSuccess();
-    }
-  })();
+  if (isSuccess) {
+    onSuccess();
+  }
 });
 
-addActionHandler('updatePassword', (global, actions, payload) => {
+addActionHandler('updatePassword', async (global, actions, payload) => {
   const {
     currentPassword, password, hint, email, onSuccess,
   } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
 
-  (async () => {
-    const isSuccess = await callApi('updatePassword', currentPassword, password, hint, email);
+  const isSuccess = await callApi('updatePassword', currentPassword, password, hint, email);
 
-    setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
+  setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false }));
 
-    if (isSuccess) {
-      onSuccess();
-    }
-  })();
+  if (isSuccess) {
+    onSuccess();
+  }
 });
 
-addActionHandler('updateRecoveryEmail', (global, actions, payload) => {
+addActionHandler('updateRecoveryEmail', async (global, actions, payload) => {
   const {
     currentPassword, email, onSuccess,
   } = payload;
 
   setGlobal(updateTwoFaSettings(global, { isLoading: true, error: undefined }));
 
-  (async () => {
-    const isSuccess = await callApi('updateRecoveryEmail', currentPassword, email);
+  const isSuccess = await callApi('updateRecoveryEmail', currentPassword, email);
 
-    setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false, waitingEmailCodeLength: undefined }));
+  setGlobal(updateTwoFaSettings(getGlobal(), { isLoading: false, waitingEmailCodeLength: undefined }));
 
-    if (isSuccess) {
-      onSuccess();
-    }
-  })();
+  if (isSuccess) {
+    onSuccess();
+  }
 });
 
 addActionHandler('provideTwoFaEmailCode', (global, actions, payload) => {

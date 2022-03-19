@@ -1,55 +1,50 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addActionHandler, getGlobal } from '../../index';
 
 import { callApi } from '../../../api/gramjs';
 import { updateStatistics, updateStatisticsGraph } from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';
 
-addActionHandler('loadStatistics', (global, actions, payload) => {
+addActionHandler('loadStatistics', async (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchStatistics', { chat });
+  const result = await callApi('fetchStatistics', { chat });
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
-    }
+  global = getGlobal();
 
-    global = getGlobal();
+  if (result?.recentTopMessages.length) {
+    const messages = selectChatMessages(global, chatId);
 
-    if (result?.recentTopMessages.length) {
-      const messages = selectChatMessages(global, chatId);
+    result.recentTopMessages = result.recentTopMessages
+      .map((message) => ({ ...message, ...messages[message.msgId] }));
+  }
 
-      result.recentTopMessages = result.recentTopMessages
-        .map((message) => ({ ...message, ...messages[message.msgId] }));
-    }
+  global = updateStatistics(global, chatId, result);
 
-    global = updateStatistics(global, chatId, result);
-
-    setGlobal(global);
-  })();
+  return global;
 });
 
-addActionHandler('loadStatisticsAsyncGraph', (global, actions, payload) => {
+addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload) => {
   const {
     chatId, token, name, isPercentage,
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const dcId = chat.fullInfo!.statisticsDcId;
-    const result = await callApi('fetchStatisticsAsyncGraph', { token, dcId, isPercentage });
+  const dcId = chat.fullInfo!.statisticsDcId;
+  const result = await callApi('fetchStatisticsAsyncGraph', { token, dcId, isPercentage });
 
-    if (!result) {
-      return;
-    }
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(updateStatisticsGraph(getGlobal(), chatId, name, result));
-  })();
+  return updateStatisticsGraph(getGlobal(), chatId, name, result);
 });

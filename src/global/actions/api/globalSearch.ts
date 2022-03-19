@@ -33,7 +33,8 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
 addActionHandler('setGlobalSearchDate', (global, actions, payload) => {
   const { date } = payload!;
   const maxDate = date ? timestampPlusDay(date) : date;
-  const newGlobal = updateGlobalSearch(global, {
+
+  global = updateGlobalSearch(global, {
     date,
     query: '',
     resultsByType: {
@@ -45,7 +46,8 @@ addActionHandler('setGlobalSearchDate', (global, actions, payload) => {
       },
     },
   });
-  setGlobal(newGlobal);
+  setGlobal(global);
+
   const { chatId } = global.globalSearch;
   const chat = chatId ? selectChat(global, chatId) : undefined;
   searchMessagesGlobal('', 'text', undefined, chat, maxDate, date);

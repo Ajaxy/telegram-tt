@@ -157,30 +157,30 @@ async function loadWithBudget(
   }
 }
 
-addActionHandler('loadMessage', (global, actions, payload) => {
+addActionHandler('loadMessage', async (global, actions, payload) => {
   const {
     chatId, messageId, replyOriginForId, threadUpdate,
   } = payload!;
-  const chat = selectChat(global, chatId);
 
+  const chat = selectChat(global, chatId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const message = await loadMessage(chat, messageId, replyOriginForId);
-    if (message && threadUpdate) {
-      const { lastMessageId, isDeleting } = threadUpdate;
+  const message = await loadMessage(chat, messageId, replyOriginForId);
+  if (message && threadUpdate) {
+    const { lastMessageId, isDeleting } = threadUpdate;
 
-      setGlobal(updateThreadUnreadFromForwardedMessage(
-        getGlobal(),
-        message,
-        chatId,
-        lastMessageId,
-        isDeleting,
-      ));
-    }
-  })();
+    return updateThreadUnreadFromForwardedMessage(
+      getGlobal(),
+      message,
+      chatId,
+      lastMessageId,
+      isDeleting,
+    );
+  }
+
+  return undefined;
 });
 
 addActionHandler('sendMessage', (global, actions, payload) => {
@@ -425,62 +425,56 @@ addActionHandler('deleteScheduledMessages', (global, actions, payload) => {
   }
 });
 
-addActionHandler('deleteHistory', (global, actions, payload) => {
-  (async () => {
-    const { chatId, shouldDeleteForAll } = payload!;
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return;
-    }
+addActionHandler('deleteHistory', async (global, actions, payload) => {
+  const { chatId, shouldDeleteForAll } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
 
-    const maxId = chat.lastMessage?.id;
+  const maxId = chat.lastMessage?.id;
 
-    await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+  await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
 
-    const activeChat = selectCurrentMessageList(global);
-    if (activeChat && activeChat.chatId === chatId) {
-      actions.openChat({ id: undefined });
-    }
-  })();
+  const activeChat = selectCurrentMessageList(global);
+  if (activeChat && activeChat.chatId === chatId) {
+    actions.openChat({ id: undefined });
+  }
 });
 
-addActionHandler('reportMessages', (global, actions, payload) => {
-  (async () => {
-    const {
-      messageIds, reason, description,
-    } = payload!;
-    const currentMessageList = selectCurrentMessageList(global);
-    if (!currentMessageList) {
-      return;
-    }
+addActionHandler('reportMessages', async (global, actions, payload) => {
+  const {
+    messageIds, reason, description,
+  } = payload!;
+  const currentMessageList = selectCurrentMessageList(global);
+  if (!currentMessageList) {
+    return;
+  }
 
-    const { chatId } = currentMessageList;
-    const chat = selectChat(global, chatId)!;
+  const { chatId } = currentMessageList;
+  const chat = selectChat(global, chatId)!;
 
-    const result = await callApi('reportMessages', {
-      peer: chat, messageIds, reason, description,
-    });
+  const result = await callApi('reportMessages', {
+    peer: chat, messageIds, reason, description,
+  });
 
-    actions.showNotification({
-      message: result
-        ? 'Thank you! Your report will be reviewed by our team.'
-        : 'Error occured while submiting report. Please, try again later.',
-    });
-  })();
+  actions.showNotification({
+    message: result
+      ? 'Thank you! Your report will be reviewed by our team.'
+      : 'Error occured while submiting report. Please, try again later.',
+  });
 });
 
-addActionHandler('sendMessageAction', (global, actions, payload) => {
-  (async () => {
-    const { action, chatId, threadId } = payload!;
-    if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
+addActionHandler('sendMessageAction', async (global, actions, payload) => {
+  const { action, chatId, threadId } = payload!;
+  if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
 
-    const chat = selectChat(global, chatId)!;
-    if (!chat) return;
+  const chat = selectChat(global, chatId)!;
+  if (!chat) return;
 
-    await callApi('sendMessageAction', {
-      peer: chat, threadId, action,
-    });
-  })();
+  await callApi('sendMessageAction', {
+    peer: chat, threadId, action,
+  });
 });
 
 addActionHandler('markMessageListRead', (global, actions, payload) => {
@@ -960,23 +954,21 @@ addActionHandler('loadPinnedMessages', (global, actions, payload) => {
   void loadPinnedMessages(chat);
 });
 
-addActionHandler('loadSeenBy', (global, actions, payload) => {
+addActionHandler('loadSeenBy', async (global, actions, payload) => {
   const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchSeenBy', { chat, messageId });
-    if (!result) {
-      return;
-    }
+  const result = await callApi('fetchSeenBy', { chat, messageId });
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(updateChatMessage(getGlobal(), chatId, messageId, {
-      seenByUserIds: result,
-    }));
-  })();
+  return updateChatMessage(getGlobal(), chatId, messageId, {
+    seenByUserIds: result,
+  });
 });
 
 addActionHandler('saveDefaultSendAs', (global, actions, payload) => {
@@ -997,31 +989,25 @@ addActionHandler('saveDefaultSendAs', (global, actions, payload) => {
   });
 });
 
-addActionHandler('loadSendAs', (global, actions, payload) => {
+addActionHandler('loadSendAs', async (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchSendAs', { chat });
-    if (!result) {
-      global = updateChat(global, chatId, {
-        sendAsIds: [],
-      });
-      setGlobal(global);
-      return;
-    }
-
-    global = getGlobal();
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-    global = updateChat(global, chatId, {
-      sendAsIds: result.ids,
+  const result = await callApi('fetchSendAs', { chat });
+  if (!result) {
+    return updateChat(getGlobal(), chatId, {
+      sendAsIds: [],
     });
-    setGlobal(global);
-  })();
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = updateChat(global, chatId, { sendAsIds: result.ids });
+  return global;
 });
 
 async function loadPinnedMessages(chat: ApiChat) {
@@ -1060,25 +1046,23 @@ async function loadScheduledHistory(chat: ApiChat) {
   setGlobal(global);
 }
 
-addActionHandler('loadSponsoredMessages', (global, actions, payload) => {
+addActionHandler('loadSponsoredMessages', async (global, actions, payload) => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchSponsoredMessages', { chat });
-    if (!result) {
-      return;
-    }
+  const result = await callApi('fetchSponsoredMessages', { chat });
+  if (!result) {
+    return undefined;
+  }
 
-    let newGlobal = updateSponsoredMessage(getGlobal(), chatId, result.messages[0]);
-    newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
-    newGlobal = addChats(newGlobal, buildCollectionByKey(result.chats, 'id'));
-
-    setGlobal(newGlobal);
-  })();
+  global = getGlobal();
+  global = updateSponsoredMessage(global, chatId, result.messages[0]);
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  return global;
 });
 
 addActionHandler('viewSponsoredMessage', (global, actions, payload) => {

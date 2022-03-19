@@ -5,7 +5,6 @@ import {
 import { GlobalState } from '../../types';
 
 import {
-  ApiUpdate,
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
@@ -20,7 +19,7 @@ import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
 import { getShippingError } from '../../../util/getReadableErrorText';
 
-addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update) => {
   if (DEBUG) {
     if (update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
       // eslint-disable-next-line no-console

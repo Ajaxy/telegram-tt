@@ -1,6 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiUpdate, ApiUserStatus } from '../../../api/types';
+import { ApiUserStatus } from '../../../api/types';
 
 import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
@@ -27,7 +27,7 @@ function flushStatusUpdates() {
   pendingStatusUpdates = {};
 }
 
-addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'deleteContact': {
       return deleteContact(global, update.id);

@@ -1,13 +1,12 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiUpdate } from '../../../api/types';
 import { ApiPrivacyKey, PaymentStep } from '../../../types';
 
 import {
   addBlockedContact, removeBlockedContact, setConfirmPaymentUrl, setPaymentStep,
 } from '../../reducers';
 
-addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'updatePeerBlocked':
       if (update.isBlocked) {

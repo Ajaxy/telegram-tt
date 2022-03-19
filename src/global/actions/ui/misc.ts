@@ -1,6 +1,5 @@
 import { addActionHandler } from '../../index';
 
-import { GlobalState } from '../../types';
 import { ApiError } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
@@ -33,7 +32,7 @@ addActionHandler('resetLeftColumnWidth', (global) => {
   };
 });
 
-addActionHandler('toggleManagement', (global): GlobalState | undefined => {
+addActionHandler('toggleManagement', (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
 
   if (!chatId) {
@@ -54,7 +53,7 @@ addActionHandler('toggleManagement', (global): GlobalState | undefined => {
   };
 });
 
-addActionHandler('requestNextManagementScreen', (global, actions, payload): GlobalState | undefined => {
+addActionHandler('requestNextManagementScreen', (global, actions, payload) => {
   const { screen } = payload || {};
   const { chatId } = selectCurrentMessageList(global) || {};
 
@@ -77,7 +76,7 @@ addActionHandler('requestNextManagementScreen', (global, actions, payload): Glob
   };
 });
 
-addActionHandler('closeManagement', (global): GlobalState | undefined => {
+addActionHandler('closeManagement', (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
 
   if (!chatId) {

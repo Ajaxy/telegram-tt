@@ -1,13 +1,12 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import {
-  ApiUpdate, ApiMessage, ApiPollResult, ApiThreadInfo, MAIN_THREAD_ID,
+  ApiMessage, ApiPollResult, ApiThreadInfo, MAIN_THREAD_ID,
 } from '../../../api/types';
 
 import { unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { notifyAboutMessage } from '../../../util/notifications';
-import { checkIfReactionAdded } from '../../helpers/reactions';
 import {
   updateChat,
   deleteChatMessages,
@@ -34,7 +33,7 @@ import {
   selectPinnedIds,
   selectScheduledMessage,
   selectScheduledMessages,
-  isMessageInCurrentMessageList,
+  selectIsMessageInCurrentMessageList,
   selectScheduledIds,
   selectCurrentMessageList,
   selectViewportIds,
@@ -46,12 +45,12 @@ import {
   selectLocalAnimatedEmoji,
 } from '../../selectors';
 import {
-  getMessageContent, isUserId, isMessageLocal, getMessageText,
+  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfReactionAdded,
 } from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
-addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
+addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
@@ -73,7 +72,7 @@ addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       const newMessage = selectChatMessage(global, chatId, id)!;
 
-      if (isMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
+      if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
         if (message.isOutgoing && !(message.content?.action)) {
           const currentMessageList = selectCurrentMessageList(global);
           if (currentMessageList) {
@@ -186,7 +185,7 @@ addActionHandler('apiUpdate', (global, actions, update: ApiUpdate) => {
         && !message.isOutgoing
         && chat.lastMessage?.id === message.id
         && selectIsChatWithBot(global, chat)
-        && isMessageInCurrentMessageList(global, chatId, message as ApiMessage)
+        && selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)
         && selectIsViewportNewest(global, chatId, message.threadInfo?.threadId || MAIN_THREAD_ID)
       ) {
         actions.focusLastMessage();
@@ -602,11 +601,11 @@ function updateListedAndViewportIds(global: GlobalState, actions: GlobalActions,
   if (selectIsViewportNewest(global, chatId, MAIN_THREAD_ID)) {
     // Always keep the first unread message in the viewport list
     const firstUnreadId = selectFirstUnreadId(global, chatId, MAIN_THREAD_ID);
-    const newGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id);
-    const newViewportIds = selectViewportIds(newGlobal, chatId, MAIN_THREAD_ID);
+    const candidateGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id);
+    const newViewportIds = selectViewportIds(candidateGlobal, chatId, MAIN_THREAD_ID);
 
     if (!firstUnreadId || newViewportIds!.includes(firstUnreadId)) {
-      global = newGlobal;
+      global = candidateGlobal;
     }
   }
 

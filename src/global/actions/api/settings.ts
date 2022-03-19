@@ -18,116 +18,110 @@ import {
 } from '../../reducers';
 import { isUserId } from '../../helpers';
 
-addActionHandler('updateProfile', (global, actions, payload) => {
+addActionHandler('updateProfile', async (global, actions, payload) => {
   const {
     photo, firstName, lastName, bio: about, username,
   } = payload!;
 
-  (async () => {
-    const { currentUserId } = global;
-    if (!currentUserId) {
-      return;
-    }
+  const { currentUserId } = global;
+  if (!currentUserId) {
+    return undefined;
+  }
 
-    setGlobal({
-      ...getGlobal(),
-      profileEdit: {
-        progress: ProfileEditProgress.InProgress,
-      },
-    });
+  setGlobal({
+    ...getGlobal(),
+    profileEdit: {
+      progress: ProfileEditProgress.InProgress,
+    },
+  });
 
-    if (photo) {
-      await callApi('updateProfilePhoto', photo);
-    }
+  if (photo) {
+    await callApi('updateProfilePhoto', photo);
+  }
 
-    if (firstName || lastName || about) {
-      const result = await callApi('updateProfile', { firstName, lastName, about });
-      if (result) {
-        global = getGlobal();
-        const currentUser = currentUserId && selectUser(global, currentUserId);
+  if (firstName || lastName || about) {
+    const result = await callApi('updateProfile', { firstName, lastName, about });
+    if (result) {
+      global = getGlobal();
+      const currentUser = currentUserId && selectUser(global, currentUserId);
 
-        if (currentUser) {
-          setGlobal(updateUser(
-            global,
-            currentUser.id,
-            {
-              firstName,
-              lastName,
-              fullInfo: {
-                ...currentUser.fullInfo,
-                bio: about,
-              },
+      if (currentUser) {
+        setGlobal(updateUser(
+          global,
+          currentUser.id,
+          {
+            firstName,
+            lastName,
+            fullInfo: {
+              ...currentUser.fullInfo,
+              bio: about,
             },
-          ));
-        }
+          },
+        ));
       }
     }
+  }
 
-    if (username) {
-      const result = await callApi('updateUsername', username);
-      if (result && currentUserId) {
-        setGlobal(updateUser(getGlobal(), currentUserId, { username }));
-      }
+  if (username) {
+    const result = await callApi('updateUsername', username);
+    if (result && currentUserId) {
+      setGlobal(updateUser(getGlobal(), currentUserId, { username }));
     }
+  }
 
-    setGlobal({
-      ...getGlobal(),
-      profileEdit: {
-        progress: ProfileEditProgress.Complete,
-      },
-    });
-  })();
+  return {
+    ...getGlobal(),
+    profileEdit: {
+      progress: ProfileEditProgress.Complete,
+    },
+  };
 });
 
-addActionHandler('checkUsername', (global, actions, payload) => {
+addActionHandler('checkUsername', async (global, actions, payload) => {
   const { username } = payload!;
 
-  (async () => {
-    // No need to check the username if profile update is already in progress
-    if (global.profileEdit && global.profileEdit.progress === ProfileEditProgress.InProgress) {
-      return;
-    }
+  // No need to check the username if profile update is already in progress
+  if (global.profileEdit && global.profileEdit.progress === ProfileEditProgress.InProgress) {
+    return undefined;
+  }
 
-    setGlobal({
-      ...global,
-      profileEdit: {
-        progress: global.profileEdit ? global.profileEdit.progress : ProfileEditProgress.Idle,
-        isUsernameAvailable: undefined,
-      },
-    });
+  setGlobal({
+    ...global,
+    profileEdit: {
+      progress: global.profileEdit ? global.profileEdit.progress : ProfileEditProgress.Idle,
+      isUsernameAvailable: undefined,
+    },
+  });
 
-    const isUsernameAvailable = await callApi('checkUsername', username);
+  const isUsernameAvailable = await callApi('checkUsername', username);
 
-    global = getGlobal();
-    setGlobal({
-      ...global,
-      profileEdit: {
-        ...global.profileEdit!,
-        isUsernameAvailable,
-      },
-    });
-  })();
+  global = getGlobal();
+  return {
+    ...global,
+    profileEdit: {
+      ...global.profileEdit!,
+      isUsernameAvailable,
+    },
+  };
 });
 
-addActionHandler('loadWallpapers', () => {
-  (async () => {
-    const result = await callApi('fetchWallpapers');
-    if (!result) {
-      return;
-    }
+addActionHandler('loadWallpapers', async () => {
+  const result = await callApi('fetchWallpapers');
+  if (!result) {
+    return undefined;
+  }
 
-    const global = getGlobal();
-    setGlobal({
-      ...global,
-      settings: {
-        ...global.settings,
-        loadedWallpapers: result.wallpapers,
-      },
-    });
-  })();
+  const global = getGlobal();
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      loadedWallpapers: result.wallpapers,
+    },
+  };
 });
 
-addActionHandler('uploadWallpaper', (global, actions, payload) => {
+addActionHandler('uploadWallpaper', async (global, actions, payload) => {
   const file = payload;
   const previewBlobUrl = URL.createObjectURL(file);
 
@@ -150,91 +144,82 @@ addActionHandler('uploadWallpaper', (global, actions, payload) => {
     },
   });
 
-  (async () => {
-    const result = await callApi('uploadWallpaper', file);
-    if (!result) {
-      return;
-    }
+  const result = await callApi('uploadWallpaper', file);
+  if (!result) {
+    return undefined;
+  }
 
-    const { wallpaper } = result;
+  const { wallpaper } = result;
 
-    global = getGlobal();
-    if (!global.settings.loadedWallpapers) {
-      return;
-    }
+  global = getGlobal();
+  if (!global.settings.loadedWallpapers) {
+    return undefined;
+  }
 
-    const firstWallpaper = global.settings.loadedWallpapers[0];
-    if (!firstWallpaper || firstWallpaper.slug !== UPLOADING_WALLPAPER_SLUG) {
-      return;
-    }
+  const firstWallpaper = global.settings.loadedWallpapers[0];
+  if (!firstWallpaper || firstWallpaper.slug !== UPLOADING_WALLPAPER_SLUG) {
+    return undefined;
+  }
 
-    const withLocalMedia = {
-      ...wallpaper,
-      document: {
-        ...wallpaper.document,
-        previewBlobUrl,
-      },
-    };
+  const withLocalMedia = {
+    ...wallpaper,
+    document: {
+      ...wallpaper.document,
+      previewBlobUrl,
+    },
+  };
 
-    setGlobal({
-      ...global,
-      settings: {
-        ...global.settings,
-        loadedWallpapers: [
-          withLocalMedia,
-          ...global.settings.loadedWallpapers.slice(1),
-        ],
-      },
-    });
-  })();
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      loadedWallpapers: [
+        withLocalMedia,
+        ...global.settings.loadedWallpapers.slice(1),
+      ],
+    },
+  };
 });
 
-addActionHandler('loadBlockedContacts', () => {
-  (async () => {
-    const result = await callApi('fetchBlockedContacts');
+addActionHandler('loadBlockedContacts', async (global) => {
+  const result = await callApi('fetchBlockedContacts');
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
-    }
+  global = getGlobal();
 
-    let newGlobal = getGlobal();
+  if (result.users?.length) {
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  }
+  if (result.chats?.length) {
+    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  }
 
-    if (result.users?.length) {
-      newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
-    }
-    if (result.chats?.length) {
-      newGlobal = updateChats(newGlobal, buildCollectionByKey(result.chats, 'id'));
-    }
+  global = {
+    ...global,
+    blocked: {
+      ...global.blocked,
+      ids: [...(global.blocked.ids || []), ...result.blockedIds],
+      totalCount: result.totalCount,
+    },
+  };
 
-    newGlobal = {
-      ...newGlobal,
-      blocked: {
-        ...newGlobal.blocked,
-        ids: [...(newGlobal.blocked.ids || []), ...result.blockedIds],
-        totalCount: result.totalCount,
-      },
-    };
-
-    setGlobal(newGlobal);
-  })();
+  return global;
 });
 
-addActionHandler('blockContact', (global, actions, payload) => {
+addActionHandler('blockContact', async (global, actions, payload) => {
   const { contactId, accessHash } = payload!;
 
-  (async () => {
-    const result = await callApi('blockContact', contactId, accessHash);
-    if (!result) {
-      return;
-    }
+  const result = await callApi('blockContact', contactId, accessHash);
+  if (!result) {
+    return undefined;
+  }
 
-    const newGlobal = getGlobal();
-
-    setGlobal(addBlockedContact(newGlobal, contactId));
-  })();
+  return addBlockedContact(getGlobal(), contactId);
 });
 
-addActionHandler('unblockContact', (global, actions, payload) => {
+addActionHandler('unblockContact', async (global, actions, payload) => {
   const { contactId } = payload!;
   let accessHash: string | undefined;
   const isPrivate = isUserId(contactId);
@@ -242,181 +227,156 @@ addActionHandler('unblockContact', (global, actions, payload) => {
   if (isPrivate) {
     const user = selectUser(global, contactId);
     if (!user) {
-      return;
+      return undefined;
     }
 
     accessHash = user.accessHash;
   }
 
-  (async () => {
-    const result = await callApi('unblockContact', contactId, accessHash);
-    if (!result) {
-      return;
-    }
+  const result = await callApi('unblockContact', contactId, accessHash);
+  if (!result) {
+    return undefined;
+  }
 
-    const newGlobal = getGlobal();
-
-    setGlobal(removeBlockedContact(newGlobal, contactId));
-  })();
+  return removeBlockedContact(getGlobal(), contactId);
 });
 
-addActionHandler('loadAuthorizations', () => {
-  (async () => {
-    const result = await callApi('fetchAuthorizations');
-    if (!result) {
-      return;
-    }
+addActionHandler('loadAuthorizations', async () => {
+  const result = await callApi('fetchAuthorizations');
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal({
-      ...getGlobal(),
-      activeSessions: result,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    activeSessions: result,
+  };
 });
 
-addActionHandler('terminateAuthorization', (global, actions, payload) => {
+addActionHandler('terminateAuthorization', async (global, actions, payload) => {
   const { hash } = payload!;
 
-  (async () => {
-    const result = await callApi('terminateAuthorization', hash);
-    if (!result) {
-      return;
-    }
+  const result = await callApi('terminateAuthorization', hash);
+  if (!result) {
+    return undefined;
+  }
 
-    const newGlobal = getGlobal();
+  global = getGlobal();
 
-    setGlobal({
-      ...newGlobal,
-      activeSessions: newGlobal.activeSessions.filter((session) => session.hash !== hash),
-    });
-  })();
+  return {
+    ...global,
+    activeSessions: global.activeSessions.filter((session) => session.hash !== hash),
+  };
 });
 
-addActionHandler('terminateAllAuthorizations', () => {
-  (async () => {
-    const result = await callApi('terminateAllAuthorizations');
-    if (!result) {
-      return;
-    }
+addActionHandler('terminateAllAuthorizations', async (global) => {
+  const result = await callApi('terminateAllAuthorizations');
+  if (!result) {
+    return undefined;
+  }
 
-    const global = getGlobal();
+  global = getGlobal();
 
-    setGlobal({
-      ...global,
-      activeSessions: global.activeSessions.filter((session) => session.isCurrent),
-    });
-  })();
+  return {
+    ...global,
+    activeSessions: global.activeSessions.filter((session) => session.isCurrent),
+  };
 });
 
-addActionHandler('loadNotificationExceptions', (global) => {
+addActionHandler('loadNotificationExceptions', async (global) => {
   const { serverTimeOffset } = global;
 
-  (async () => {
-    const result = await callApi('fetchNotificationExceptions', { serverTimeOffset });
-    if (!result) {
-      return;
-    }
+  const result = await callApi('fetchNotificationExceptions', { serverTimeOffset });
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(addNotifyExceptions(getGlobal(), result));
-  })();
+  return addNotifyExceptions(getGlobal(), result);
 });
 
-addActionHandler('loadNotificationSettings', (global) => {
+addActionHandler('loadNotificationSettings', async (global) => {
   const { serverTimeOffset } = global;
-  (async () => {
-    const result = await callApi('fetchNotificationSettings', {
-      serverTimeOffset,
-    });
-    if (!result) {
-      return;
-    }
+  const result = await callApi('fetchNotificationSettings', {
+    serverTimeOffset,
+  });
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(replaceSettings(getGlobal(), result));
-  })();
+  return replaceSettings(getGlobal(), result);
 });
 
-addActionHandler('updateNotificationSettings', (global, actions, payload) => {
+addActionHandler('updateNotificationSettings', async (global, actions, payload) => {
   const { peerType, isSilent, shouldShowPreviews } = payload!;
 
-  (async () => {
-    const result = await callApi('updateNotificationSettings', peerType, { isSilent, shouldShowPreviews });
+  const result = await callApi('updateNotificationSettings', peerType, { isSilent, shouldShowPreviews });
+  if (!result) {
+    return undefined;
+  }
 
-    if (!result) {
-      return;
-    }
-
-    setGlobal(updateNotifySettings(getGlobal(), peerType, isSilent, shouldShowPreviews));
-  })();
+  return updateNotifySettings(getGlobal(), peerType, isSilent, shouldShowPreviews);
 });
 
 addActionHandler('updateWebNotificationSettings', (global, actions, payload) => {
-  (async () => {
-    setGlobal(replaceSettings(getGlobal(), payload));
-    const newGlobal = getGlobal();
-    const { hasPushNotifications, hasWebNotifications } = newGlobal.settings.byKey;
-    if (hasWebNotifications && hasPushNotifications) {
-      await subscribe();
-    } else {
-      await unsubscribe();
-    }
-  })();
+  setGlobal(replaceSettings(global, payload));
+
+  const { hasPushNotifications, hasWebNotifications } = global.settings.byKey;
+  if (hasWebNotifications && hasPushNotifications) {
+    void subscribe();
+  } else {
+    void unsubscribe();
+  }
 });
 
-addActionHandler('updateContactSignUpNotification', (global, actions, payload) => {
+addActionHandler('updateContactSignUpNotification', async (global, actions, payload) => {
   const { isSilent } = payload!;
 
-  (async () => {
-    const result = await callApi('updateContactSignUpNotification', isSilent);
-    if (!result) {
-      return;
-    }
+  const result = await callApi('updateContactSignUpNotification', isSilent);
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(replaceSettings(getGlobal(), { hasContactJoinedNotifications: !isSilent }));
-  })();
+  return replaceSettings(getGlobal(), { hasContactJoinedNotifications: !isSilent });
 });
 
-addActionHandler('loadLanguages', () => {
-  (async () => {
-    const result = await callApi('fetchLanguages');
-    if (!result) {
-      return;
-    }
+addActionHandler('loadLanguages', async () => {
+  const result = await callApi('fetchLanguages');
+  if (!result) {
+    return undefined;
+  }
 
-    setGlobal(replaceSettings(getGlobal(), { languages: result }));
-  })();
+  return replaceSettings(getGlobal(), { languages: result });
 });
 
-addActionHandler('loadPrivacySettings', () => {
-  (async () => {
-    const [
-      phoneNumberSettings, lastSeenSettings, profilePhotoSettings, forwardsSettings, chatInviteSettings,
-    ] = await Promise.all([
-      callApi('fetchPrivacySettings', 'phoneNumber'),
-      callApi('fetchPrivacySettings', 'lastSeen'),
-      callApi('fetchPrivacySettings', 'profilePhoto'),
-      callApi('fetchPrivacySettings', 'forwards'),
-      callApi('fetchPrivacySettings', 'chatInvite'),
-    ]);
+addActionHandler('loadPrivacySettings', async (global) => {
+  const [
+    phoneNumberSettings, lastSeenSettings, profilePhotoSettings, forwardsSettings, chatInviteSettings,
+  ] = await Promise.all([
+    callApi('fetchPrivacySettings', 'phoneNumber'),
+    callApi('fetchPrivacySettings', 'lastSeen'),
+    callApi('fetchPrivacySettings', 'profilePhoto'),
+    callApi('fetchPrivacySettings', 'forwards'),
+    callApi('fetchPrivacySettings', 'chatInvite'),
+  ]);
 
-    if (
-      !phoneNumberSettings || !lastSeenSettings || !profilePhotoSettings || !forwardsSettings || !chatInviteSettings
-    ) {
-      return;
-    }
+  if (
+    !phoneNumberSettings || !lastSeenSettings || !profilePhotoSettings || !forwardsSettings || !chatInviteSettings
+  ) {
+    return undefined;
+  }
 
-    const global = getGlobal();
+  global = getGlobal();
 
-    global.settings.privacy.phoneNumber = phoneNumberSettings;
-    global.settings.privacy.lastSeen = lastSeenSettings;
-    global.settings.privacy.profilePhoto = profilePhotoSettings;
-    global.settings.privacy.forwards = forwardsSettings;
-    global.settings.privacy.chatInvite = chatInviteSettings;
+  global.settings.privacy.phoneNumber = phoneNumberSettings;
+  global.settings.privacy.lastSeen = lastSeenSettings;
+  global.settings.privacy.profilePhoto = profilePhotoSettings;
+  global.settings.privacy.forwards = forwardsSettings;
+  global.settings.privacy.chatInvite = chatInviteSettings;
 
-    setGlobal(global);
-  })();
+  return global;
 });
 
-addActionHandler('setPrivacyVisibility', (global, actions, payload) => {
+addActionHandler('setPrivacyVisibility', async (global, actions, payload) => {
   const { privacyKey, visibility } = payload!;
 
   const {
@@ -424,7 +384,7 @@ addActionHandler('setPrivacyVisibility', (global, actions, payload) => {
   } = global.settings;
 
   if (!settings) {
-    return;
+    return undefined;
   }
 
   const rules = buildInputPrivacyRules(global, {
@@ -433,27 +393,33 @@ addActionHandler('setPrivacyVisibility', (global, actions, payload) => {
     deniedIds: [...settings.blockUserIds, ...settings.blockChatIds],
   });
 
-  (async () => {
-    const result = await callApi('setPrivacySettings', privacyKey, rules);
+  const result = await callApi('setPrivacySettings', privacyKey, rules);
+  if (!result) {
+    return undefined;
+  }
 
-    if (result) {
-      const newGlobal = getGlobal();
+  global = getGlobal();
 
-      newGlobal.settings.privacy[privacyKey as ApiPrivacyKey] = result;
-
-      setGlobal(newGlobal);
-    }
-  })();
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      privacy: {
+        ...global.settings.privacy,
+        [privacyKey]: result,
+      },
+    },
+  };
 });
 
-addActionHandler('setPrivacySettings', (global, actions, payload) => {
+addActionHandler('setPrivacySettings', async (global, actions, payload) => {
   const { privacyKey, isAllowList, contactsIds } = payload!;
   const {
     privacy: { [privacyKey as ApiPrivacyKey]: settings },
   } = global.settings;
 
   if (!settings) {
-    return;
+    return undefined;
   }
 
   const rules = buildInputPrivacyRules(global, {
@@ -462,17 +428,23 @@ addActionHandler('setPrivacySettings', (global, actions, payload) => {
     deniedIds: !isAllowList ? contactsIds : [...settings.blockUserIds, ...settings.blockChatIds],
   });
 
-  (async () => {
-    const result = await callApi('setPrivacySettings', privacyKey, rules);
+  const result = await callApi('setPrivacySettings', privacyKey, rules);
+  if (!result) {
+    return undefined;
+  }
 
-    if (result) {
-      const newGlobal = getGlobal();
+  global = getGlobal();
 
-      newGlobal.settings.privacy[privacyKey as ApiPrivacyKey] = result;
-
-      setGlobal(newGlobal);
-    }
-  })();
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      privacy: {
+        ...global.settings.privacy,
+        [privacyKey]: result,
+      },
+    },
+  };
 });
 
 function buildInputPrivacyRules(global: GlobalState, {
@@ -547,71 +519,62 @@ addActionHandler('updateIsOnline', (global, actions, payload) => {
   callApi('updateIsOnline', payload);
 });
 
-addActionHandler('loadContentSettings', () => {
-  (async () => {
-    const result = await callApi('fetchContentSettings');
-    if (!result) return;
+addActionHandler('loadContentSettings', async () => {
+  const result = await callApi('fetchContentSettings');
+  if (!result) return undefined;
 
-    setGlobal(replaceSettings(getGlobal(), result));
-  })();
+  return replaceSettings(getGlobal(), result);
 });
 
-addActionHandler('updateContentSettings', (global, actions, payload) => {
-  (async () => {
-    setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: payload }));
+addActionHandler('updateContentSettings', async (global, actions, payload) => {
+  setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: payload }));
 
-    const result = await callApi('updateContentSettings', payload);
-    if (!result) {
-      setGlobal(replaceSettings(getGlobal(), { isSensitiveEnabled: !payload }));
-    }
-  })();
+  const result = await callApi('updateContentSettings', payload);
+  if (!result) {
+    return replaceSettings(getGlobal(), { isSensitiveEnabled: !payload });
+  }
+
+  return undefined;
 });
 
-addActionHandler('loadCountryList', (global, actions, payload = {}) => {
+addActionHandler('loadCountryList', async (global, actions, payload = {}) => {
   let { langCode } = payload;
   if (!langCode) langCode = global.settings.byKey.language;
 
-  (async () => {
-    const countryList = await callApi('fetchCountryList', { langCode });
-    if (!countryList) return;
+  const countryList = await callApi('fetchCountryList', { langCode });
+  if (!countryList) return undefined;
 
-    setGlobal({
-      ...getGlobal(),
-      countryList,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    countryList,
+  };
 });
 
-addActionHandler('ensureTimeFormat', (global, actions) => {
+addActionHandler('ensureTimeFormat', async (global, actions) => {
   if (global.authNearestCountry) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
     actions.setSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 
-  (async () => {
-    if (getGlobal().settings.byKey.wasTimeFormatSetManually) {
-      return;
-    }
+  if (global.settings.byKey.wasTimeFormatSetManually) {
+    return;
+  }
 
-    const nearestCountryCode = await callApi('fetchNearestCountry');
-    if (nearestCountryCode) {
-      const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
-      actions.setSettingOption({ timeFormat });
-      setTimeFormat(timeFormat);
-    }
-  })();
+  const nearestCountryCode = await callApi('fetchNearestCountry');
+  if (nearestCountryCode) {
+    const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
+    actions.setSettingOption({ timeFormat });
+    setTimeFormat(timeFormat);
+  }
 });
 
-addActionHandler('loadAppConfig', () => {
-  (async () => {
-    const appConfig = await callApi('fetchAppConfig');
+addActionHandler('loadAppConfig', async () => {
+  const appConfig = await callApi('fetchAppConfig');
+  if (!appConfig) return undefined;
 
-    if (!appConfig) return;
-
-    setGlobal({
-      ...getGlobal(),
-      appConfig,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    appConfig,
+  };
 });

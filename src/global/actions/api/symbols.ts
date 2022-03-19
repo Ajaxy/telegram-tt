@@ -25,26 +25,24 @@ addActionHandler('loadStickerSets', (global) => {
   void loadStickerSets(hash);
 });
 
-addActionHandler('loadAddedStickers', (global, actions) => {
+addActionHandler('loadAddedStickers', async (global, actions) => {
   const { setIds: addedSetIds } = global.stickers.added;
   const cached = global.stickers.setsById;
   if (!addedSetIds || !addedSetIds.length) {
     return;
   }
 
-  (async () => {
-    for (let i = 0; i < addedSetIds.length; i++) {
-      const id = addedSetIds[i];
-      if (cached[id].stickers) {
-        continue; // Already loaded
-      }
-      actions.loadStickers({ stickerSetId: id });
-
-      if (i % ADDED_SETS_THROTTLE_CHUNK === 0 && i > 0) {
-        await pause(ADDED_SETS_THROTTLE);
-      }
+  for (let i = 0; i < addedSetIds.length; i++) {
+    const id = addedSetIds[i];
+    if (cached[id].stickers) {
+      continue; // Already loaded
     }
-  })();
+    actions.loadStickers({ stickerSetId: id });
+
+    if (i % ADDED_SETS_THROTTLE_CHUNK === 0 && i > 0) {
+      await pause(ADDED_SETS_THROTTLE);
+    }
+  }
 });
 
 addActionHandler('loadRecentStickers', (global) => {
@@ -57,29 +55,26 @@ addActionHandler('loadFavoriteStickers', (global) => {
   void loadFavoriteStickers(hash);
 });
 
-addActionHandler('loadGreetingStickers', (global) => {
+addActionHandler('loadGreetingStickers', async (global) => {
   const { hash } = global.stickers.greeting || {};
 
-  (async () => {
-    const greeting = await callApi('fetchStickersForEmoji', { emoji: '👋⭐️', hash });
+  const greeting = await callApi('fetchStickersForEmoji', { emoji: '👋⭐️', hash });
+  if (!greeting) {
+    return undefined;
+  }
 
-    if (!greeting) {
-      return;
-    }
+  global = getGlobal();
 
-    const newGlobal = getGlobal();
-
-    setGlobal({
-      ...newGlobal,
-      stickers: {
-        ...newGlobal.stickers,
-        greeting: {
-          hash: greeting.hash,
-          stickers: greeting.stickers.filter((sticker) => sticker.emoji === '👋'),
-        },
+  return {
+    ...global,
+    stickers: {
+      ...global.stickers,
+      greeting: {
+        hash: greeting.hash,
+        stickers: greeting.stickers.filter((sticker) => sticker.emoji === '👋'),
       },
-    });
-  })();
+    },
+  };
 });
 
 addActionHandler('loadFeaturedStickers', (global) => {
@@ -141,12 +136,12 @@ addActionHandler('toggleStickerSet', (global, actions, payload) => {
   void callApi(!installedDate ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
 });
 
-addActionHandler('loadEmojiKeywords', (global, actions, payload: { language: LangCode }) => {
+addActionHandler('loadEmojiKeywords', async (global, actions, payload: { language: LangCode }) => {
   const { language } = payload;
 
   let currentEmojiKeywords = global.emojiKeywords[language];
   if (currentEmojiKeywords?.isLoading) {
-    return;
+    return undefined;
   }
 
   setGlobal({
@@ -160,45 +155,41 @@ addActionHandler('loadEmojiKeywords', (global, actions, payload: { language: Lan
     },
   });
 
-  (async () => {
-    const emojiKeywords = await callApi('fetchEmojiKeywords', {
-      language,
-      fromVersion: currentEmojiKeywords ? currentEmojiKeywords.version : 0,
-    });
+  const emojiKeywords = await callApi('fetchEmojiKeywords', {
+    language,
+    fromVersion: currentEmojiKeywords ? currentEmojiKeywords.version : 0,
+  });
 
-    global = getGlobal();
-    currentEmojiKeywords = global.emojiKeywords[language];
+  global = getGlobal();
+  currentEmojiKeywords = global.emojiKeywords[language];
 
-    if (!emojiKeywords) {
-      setGlobal({
-        ...global,
-        emojiKeywords: {
-          ...global.emojiKeywords,
-          [language]: {
-            ...currentEmojiKeywords,
-            isLoading: false,
-          },
-        },
-      });
-
-      return;
-    }
-
-    setGlobal({
+  if (!emojiKeywords) {
+    return {
       ...global,
       emojiKeywords: {
         ...global.emojiKeywords,
         [language]: {
+          ...currentEmojiKeywords,
           isLoading: false,
-          version: emojiKeywords.version,
-          keywords: {
-            ...(currentEmojiKeywords?.keywords),
-            ...emojiKeywords.keywords,
-          },
         },
       },
-    });
-  })();
+    };
+  }
+
+  return {
+    ...global,
+    emojiKeywords: {
+      ...global.emojiKeywords,
+      [language]: {
+        isLoading: false,
+        version: emojiKeywords.version,
+        keywords: {
+          ...(currentEmojiKeywords?.keywords),
+          ...emojiKeywords.keywords,
+        },
+      },
+    },
+  };
 });
 
 async function loadStickerSets(hash?: string) {

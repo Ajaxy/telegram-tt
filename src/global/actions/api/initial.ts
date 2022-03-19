@@ -1,9 +1,6 @@
-import {
-  addActionHandler, getActions, getGlobal, setGlobal,
-} from '../../index';
+import { addActionHandler, getActions, getGlobal } from '../../index';
 
 import { initApi, callApi } from '../../../api/gramjs';
-import { GlobalState } from '../../types';
 
 import {
   LANG_CACHE_NAME,
@@ -26,22 +23,20 @@ import {
 } from '../../../util/sessions';
 import { forceWebsync } from '../../../util/websync';
 
-addActionHandler('initApi', (global: GlobalState, actions) => {
-  (async () => {
-    if (!IS_TEST) {
-      await importLegacySession();
-      void clearLegacySessions();
-    }
+addActionHandler('initApi', async (global, actions) => {
+  if (!IS_TEST) {
+    await importLegacySession();
+    void clearLegacySessions();
+  }
 
-    void initApi(actions.apiUpdate, {
-      userAgent: navigator.userAgent,
-      platform: PLATFORM_ENV,
-      sessionData: loadStoredSession(),
-      isTest: window.location.search.includes('test'),
-      isMovSupported: IS_MOV_SUPPORTED,
-      isWebmSupported: IS_WEBM_SUPPORTED,
-    });
-  })();
+  void initApi(actions.apiUpdate, {
+    userAgent: navigator.userAgent,
+    platform: PLATFORM_ENV,
+    sessionData: loadStoredSession(),
+    isTest: window.location.search.includes('test'),
+    isMovSupported: IS_MOV_SUPPORTED,
+    isWebmSupported: IS_WEBM_SUPPORTED,
+  });
 });
 
 addActionHandler('setAuthPhoneNumber', (global, actions, payload) => {
@@ -127,18 +122,16 @@ addActionHandler('saveSession', (global, actions, payload) => {
   }
 });
 
-addActionHandler('signOut', () => {
-  (async () => {
-    try {
-      await unsubscribe();
-      await callApi('destroy');
-      await forceWebsync(false);
-    } catch (err) {
-      // Do nothing
-    }
+addActionHandler('signOut', async () => {
+  try {
+    await unsubscribe();
+    await callApi('destroy');
+    await forceWebsync(false);
+  } catch (err) {
+    // Do nothing
+  }
 
-    getActions().reset();
-  })();
+  getActions().reset();
 });
 
 addActionHandler('reset', () => {
@@ -163,38 +156,35 @@ addActionHandler('reset', () => {
 });
 
 addActionHandler('disconnect', () => {
-  (async () => {
-    await callApi('disconnect');
-  })();
+  void callApi('disconnect');
 });
 
-addActionHandler('loadNearestCountry', (global) => {
+addActionHandler('loadNearestCountry', async (global) => {
   if (global.connectionState !== 'connectionStateReady') {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const authNearestCountry = await callApi('fetchNearestCountry');
+  const authNearestCountry = await callApi('fetchNearestCountry');
 
-    setGlobal({
-      ...getGlobal(),
-      authNearestCountry,
-    });
-  })();
+  return {
+    ...getGlobal(),
+    authNearestCountry,
+  };
 });
 
 addActionHandler('setDeviceToken', (global, actions, deviceToken) => {
-  setGlobal({
+  return {
     ...global,
     push: {
       deviceToken,
       subscribedAt: Date.now(),
     },
-  });
+  };
 });
 
 addActionHandler('deleteDeviceToken', (global) => {
-  const newGlobal = { ...global };
-  delete newGlobal.push;
-  setGlobal(newGlobal);
+  return {
+    ...global,
+    push: undefined,
+  };
 });

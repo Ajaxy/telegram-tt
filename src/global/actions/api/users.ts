@@ -32,31 +32,29 @@ addActionHandler('loadFullUser', (global, actions, payload) => {
   runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
 });
 
-addActionHandler('loadUser', (global, actions, payload) => {
+addActionHandler('loadUser', async (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchUsers', { users: [user] });
-    if (!result) {
-      return;
-    }
+  const result = await callApi('fetchUsers', { users: [user] });
+  if (!result) {
+    return undefined;
+  }
 
-    const { users, userStatusesById } = result;
+  const { users, userStatusesById } = result;
 
-    global = getGlobal();
+  global = getGlobal();
 
-    global = updateUsers(global, buildCollectionByKey(users, 'id'));
-    setGlobal(replaceUserStatuses(global, {
-      ...global.users.statusesById,
-      ...userStatusesById,
-    }));
+  global = updateUsers(global, buildCollectionByKey(users, 'id'));
+  global = replaceUserStatuses(global, {
+    ...global.users.statusesById,
+    ...userStatusesById,
+  });
 
-    setGlobal(global);
-  })();
+  return global;
 });
 
 addActionHandler('loadTopUsers', (global) => {
@@ -75,35 +73,34 @@ addActionHandler('loadCurrentUser', () => {
   void callApi('fetchCurrentUser');
 });
 
-addActionHandler('loadCommonChats', (global) => {
+addActionHandler('loadCommonChats', async (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const user = chatId ? selectUser(global, chatId) : undefined;
   if (!user || isUserBot(user) || user.commonChats?.isFullyLoaded) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const maxId = user.commonChats?.maxId;
-    const result = await callApi('fetchCommonChats', user.id, user.accessHash!, maxId);
-    if (!result) {
-      return;
-    }
+  const maxId = user.commonChats?.maxId;
+  const result = await callApi('fetchCommonChats', user.id, user.accessHash!, maxId);
+  if (!result) {
+    return undefined;
+  }
 
-    const { chats, chatIds, isFullyLoaded } = result;
+  const { chats, chatIds, isFullyLoaded } = result;
 
-    global = getGlobal();
-    if (chats.length) {
-      global = addChats(global, buildCollectionByKey(chats, 'id'));
-    }
-    global = updateUser(global, user.id, {
-      commonChats: {
-        maxId: chatIds.length ? chatIds[chatIds.length - 1] : '0',
-        ids: unique((user.commonChats?.ids || []).concat(chatIds)),
-        isFullyLoaded,
-      },
-    });
-    setGlobal(global);
-  })();
+  global = getGlobal();
+  if (chats.length) {
+    global = addChats(global, buildCollectionByKey(chats, 'id'));
+  }
+  global = updateUser(global, user.id, {
+    commonChats: {
+      maxId: chatIds.length ? chatIds[chatIds.length - 1] : '0',
+      ids: unique((user.commonChats?.ids || []).concat(chatIds)),
+      isFullyLoaded,
+    },
+  });
+
+  return global;
 });
 
 addActionHandler('updateContact', (global, actions, payload) => {
@@ -223,32 +220,31 @@ async function deleteContact(userId: string) {
   await callApi('deleteContact', { id, accessHash });
 }
 
-addActionHandler('loadProfilePhotos', (global, actions, payload) => {
+addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
   const { profileId } = payload!;
   const isPrivate = isUserId(profileId);
+
   const user = isPrivate ? selectUser(global, profileId) : undefined;
   const chat = !isPrivate ? selectChat(global, profileId) : undefined;
-
   if (!user && !chat) {
-    return;
+    return undefined;
   }
 
-  (async () => {
-    const result = await callApi('fetchProfilePhotos', user, chat);
-    if (!result || !result.photos) {
-      return;
-    }
+  const result = await callApi('fetchProfilePhotos', user, chat);
+  if (!result || !result.photos) {
+    return undefined;
+  }
 
-    let newGlobal = getGlobal();
-    if (isPrivate) {
-      newGlobal = updateUser(newGlobal, profileId, { photos: result.photos });
-    } else {
-      newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users!, 'id'));
-      newGlobal = updateChat(newGlobal, profileId, { photos: result.photos });
-    }
+  global = getGlobal();
 
-    setGlobal(newGlobal);
-  })();
+  if (isPrivate) {
+    global = updateUser(global, profileId, { photos: result.photos });
+  } else {
+    global = addUsers(global, buildCollectionByKey(result.users!, 'id'));
+    global = updateChat(global, profileId, { photos: result.photos });
+  }
+
+  return global;
 });
 
 addActionHandler('setUserSearchQuery', (global, actions, payload) => {
