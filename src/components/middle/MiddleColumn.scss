@@ -40,7 +40,7 @@
       }
     }
 
-    .theme-dark & {
+    .theme-dark #MiddleColumn:not(.custom-bg-image) & {
       background-image: url('../../assets/chat-bg-dark.png');
       background-position: top left;
       background-size: 650px;
