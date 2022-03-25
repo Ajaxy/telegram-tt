@@ -134,6 +134,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
@@ -181,15 +182,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setSettingOption({ animationLevel: newLevel });
   }, [animationLevel, setSettingOption]);
 
-  const handleSwitchToWebK = () => {
+  const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
     disableHistoryBack();
-  };
+  }, []);
 
-  const handleOpenTipsChat = () => {
+  const handleOpenTipsChat = useCallback(() => {
     openTipsChat({ langCode: lang.code });
-  };
+  }, [lang.code, openTipsChat]);
 
   const isSearchFocused = (
     Boolean(globalSearchChatId)

@@ -163,9 +163,9 @@ const CalendarModal: FC<OwnProps> = ({
     });
   }
 
-  function handleSubmit() {
+  const handleSubmit = useCallback(() => {
     onSubmit(selectedDate);
-  }
+  }, [onSubmit, selectedDate]);
 
   const handleChangeHours = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d]+/g, '');

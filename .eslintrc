@@ -73,8 +73,8 @@
     "react/style-prop-object": "off",
     "react/jsx-no-bind": ["error", {
       "ignoreRefs": true,
-      "allowArrowFunctions": true,
-      "allowFunctions": true,
+      "allowArrowFunctions": false,
+      "allowFunctions": false,
       "allowBind": false,
       "ignoreDOMComponents": true
     }],

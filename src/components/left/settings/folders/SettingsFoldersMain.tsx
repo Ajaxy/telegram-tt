@@ -165,6 +165,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             className="mb-2 no-icon"
             narrow
             multiline
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onEditFolder(foldersById[folder.id])}
           >
             <span className="title">{folder.title}</span>
@@ -187,6 +188,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             <ListItem
               className="mb-2"
               narrow
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleCreateFolderFromRecommended(folder)}
             >
               <div className="settings-folders-recommended-item">

@@ -1,4 +1,6 @@
-import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useEffect,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiMessage } from '../../../api/types';
@@ -32,10 +34,10 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
   const { isKeyboardSingleUse } = message || {};
   const [forceOpen, markForceOpen, unmarkForceOpen] = useFlag(true);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     unmarkForceOpen();
     onClose();
-  };
+  }, [onClose, unmarkForceOpen]);
 
   useEffect(() => {
     markForceOpen();
@@ -65,6 +67,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
               <Button
                 ripple
                 disabled={button.type === 'NOT_SUPPORTED'}
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => clickInlineButton({ button })}
               >
                 {button.text}

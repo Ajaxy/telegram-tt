@@ -113,6 +113,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
               key={id}
               className="chat-item-clickable force-rounded-corners"
               style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onSelectChatOrUser(id)}
             >
               {isUserId(id) ? (

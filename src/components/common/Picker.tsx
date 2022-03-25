@@ -115,6 +115,7 @@ const Picker: FC<OwnProps> = ({
             <ListItem
               key={id}
               className="chat-item-clickable picker-list-item"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleItemClick(id)}
               ripple
             >

@@ -36,17 +36,17 @@ const ZoomControls: FC<OwnProps> = ({ isShown, onChangeZoom }) => {
     }
   }, [isShown, prevIsShown]);
 
-  const handleZoomOut = () => {
+  const handleZoomOut = useCallback(() => {
     if (inputRef.current) {
       setZoomLevel(Math.max(MIN_ZOOM_LEVEL, zoomLevel - 0.5));
     }
-  };
+  }, [zoomLevel]);
 
-  const handleZoomIn = () => {
+  const handleZoomIn = useCallback(() => {
     if (inputRef.current) {
       setZoomLevel(Math.min(MAX_ZOOM_LEVEL, zoomLevel + 0.5));
     }
-  };
+  }, [zoomLevel]);
 
   const handleStartSeek = useCallback(() => {
     isSeeking.current = true;

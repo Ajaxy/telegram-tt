@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
@@ -62,7 +62,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
 
   useHistoryBack(isActive, onReset, onScreenSelect, screen);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (error && clearError) {
       clearError();
     }
@@ -75,7 +75,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
 
     setValue(newValue);
     e.target.value = newValue;
-  };
+  }, [clearError, codeLength, error, onSubmit]);
 
   return (
     <div className="settings-content two-fa custom-scroll">

@@ -406,6 +406,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               key={id}
               teactOrderKey={i}
               className="chat-item-clickable scroll-item small-icon"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleMemberClick(id)}
               contextActions={getMemberContextAction(id)}
             >
@@ -418,6 +419,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               key={id}
               teactOrderKey={i}
               className="chat-item-clickable scroll-item small-icon"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => openChat({ id })}
             >
               <GroupChatInfo chatId={id} />

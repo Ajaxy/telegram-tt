@@ -40,6 +40,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
         narrow
         className="SettingsStickerSet"
         inactive={!firstSticker}
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => firstSticker && onClick(firstSticker)}
       >
         <Button
@@ -71,6 +72,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
       <ListItem
         narrow
         className="SettingsStickerSet"
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => onClick(firstSticker)}
       >
         <StickerButton

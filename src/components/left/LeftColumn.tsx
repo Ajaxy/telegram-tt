@@ -286,10 +286,10 @@ const LeftColumn: FC<StateProps> = ({
     initResize, resetResize, handleMouseUp,
   } = useResize(resizeRef, setLeftColumnWidth, resetLeftColumnWidth, leftColumnWidth);
 
-  const handleSettingsScreenSelect = (screen: SettingsScreens) => {
+  const handleSettingsScreenSelect = useCallback((screen: SettingsScreens) => {
     setContent(LeftColumnContent.Settings);
     setSettingsScreen(screen);
-  };
+  }, []);
 
   return (
     <div

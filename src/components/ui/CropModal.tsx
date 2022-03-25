@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useState, memo,
+  FC, useEffect, useState, memo, useCallback,
 } from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
@@ -93,7 +93,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
 
   const lang = useLang();
 
-  async function handleCropClick() {
+  const handleCropClick = useCallback(async () => {
     if (!cropper) {
       return;
     }
@@ -102,7 +102,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
     const croppedImg = typeof result === 'string' ? result : blobToFile(result, 'avatar.jpg');
 
     onChange(croppedImg);
-  }
+  }, [onChange]);
 
   return (
     <Modal

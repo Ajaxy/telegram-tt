@@ -204,6 +204,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           round
           faded={stickerSet.id === 'recent' || stickerSet.id === 'favorite'}
           color="translucent"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => selectStickerSet(index)}
         >
           {stickerSet.id === 'recent' ? (

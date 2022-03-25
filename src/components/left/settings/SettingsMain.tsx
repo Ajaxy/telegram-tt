@@ -60,36 +60,42 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         )}
         <ListItem
           icon="settings"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.General)}
         >
           {lang('Telegram.GeneralSettingsViewController')}
         </ListItem>
         <ListItem
           icon="unmute"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Notifications)}
         >
           {lang('Notifications')}
         </ListItem>
         <ListItem
           icon="lock"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Privacy)}
         >
           {lang('PrivacySettings')}
         </ListItem>
         <ListItem
           icon="data"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.DataStorage)}
         >
           {lang('DataSettings')}
         </ListItem>
         <ListItem
           icon="folder"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Folders)}
         >
           {lang('Filters')}
         </ListItem>
         <ListItem
           icon="language"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Language)}
         >
           {lang('Language')}

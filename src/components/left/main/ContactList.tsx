@@ -83,6 +83,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
           <ListItem
             key={id}
             className="chat-item-clickable"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleClick(id)}
             ripple={!IS_SINGLE_COLUMN_LAYOUT}
           >

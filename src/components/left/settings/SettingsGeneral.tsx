@@ -122,6 +122,18 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     openModal();
   }, [openModal]);
 
+  const handleMessageSendComboChange = useCallback((newCombo: string) => {
+    setSettingOption({ messageSendKeyCombo: newCombo });
+  }, [setSettingOption]);
+
+  const handleSuggestStickersChange = useCallback((newValue: boolean) => {
+    setSettingOption({ shouldSuggestStickers: newValue });
+  }, [setSettingOption]);
+
+  const handleShouldLoopStickersChange = useCallback((newValue: boolean) => {
+    setSettingOption({ shouldLoopStickers: newValue });
+  }, [setSettingOption]);
+
   const stickerSets = stickerSetIds && stickerSetIds.map((id: string) => {
     return stickerSetsById?.[id]?.installedDate ? stickerSetsById[id] : false;
   }).filter<ApiStickerSet>(Boolean as any);
@@ -143,6 +155,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
         <ListItem
           icon="photo"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.GeneralChatBackground)}
         >
           {lang('ChatBackground')}
@@ -183,7 +196,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
           <RadioGroup
             name="keyboard-send-settings"
             options={KEYBOARD_SEND_OPTIONS}
-            onChange={(value) => setSettingOption({ messageSendKeyCombo: value })}
+            onChange={handleMessageSendComboChange}
             selected={messageSendKeyCombo}
           />
         </div>
@@ -195,6 +208,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         {defaultReaction && (
           <ListItem
             className="SettingsDefaultReaction"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onScreenSelect(SettingsScreens.QuickReaction)}
           >
             <ReactionStaticEmoji reaction={defaultReaction} />
@@ -205,12 +219,12 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         <Checkbox
           label={lang('SuggestStickers')}
           checked={shouldSuggestStickers}
-          onCheck={(isChecked) => setSettingOption({ shouldSuggestStickers: isChecked })}
+          onCheck={handleSuggestStickersChange}
         />
         <Checkbox
           label={lang('LoopAnimatedStickers')}
           checked={shouldLoopStickers}
-          onCheck={(isChecked) => setSettingOption({ shouldLoopStickers: isChecked })}
+          onCheck={handleShouldLoopStickersChange}
         />
 
         <div className="mt-4" ref={stickerSettingsRef}>

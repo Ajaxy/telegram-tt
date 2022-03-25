@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
@@ -67,13 +67,13 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (error && clearError) {
       clearError();
     }
 
     setValue(e.target.value);
-  };
+  }, [clearError, error]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,14 +85,14 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
     onSubmit(value);
   };
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
     onSubmit();
-  };
+  }, [onSubmit]);
 
-  const handleSkipConfirm = () => {
+  const handleSkipConfirm = useCallback(() => {
     unmarkIsConfirmShown();
     onSubmit();
-  };
+  }, [onSubmit, unmarkIsConfirmShown]);
 
   const lang = useLang();
 

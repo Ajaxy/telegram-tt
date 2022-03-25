@@ -125,6 +125,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
           round
           size="smaller"
           color="translucent"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onReset()}
           ariaLabel="Return to member selection"
         >

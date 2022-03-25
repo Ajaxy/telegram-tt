@@ -133,13 +133,13 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     onScreenSelect(ManagementScreens.ChatAdministrators);
   }, [onScreenSelect]);
 
-  const handleClickInvites = () => {
+  const handleClickInvites = useCallback(() => {
     onScreenSelect(ManagementScreens.Invites);
-  };
+  }, [onScreenSelect]);
 
-  const handleClickRequests = () => {
+  const handleClickRequests = useCallback(() => {
     onScreenSelect(ManagementScreens.JoinRequests);
-  };
+  }, [onScreenSelect]);
 
   const handleSetPhoto = useCallback((file: File) => {
     setPhoto(file);

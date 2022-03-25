@@ -84,6 +84,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="delete-user"
           narrow
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBlockedUsers)}
         >
           <div className="multiline-menu-item">
@@ -98,6 +99,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="lock"
           narrow
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(
             hasPassword ? SettingsScreens.TwoFaEnabled : SettingsScreens.TwoFaDisabled,
           )}
@@ -112,6 +114,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="active-sessions"
           narrow
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyActiveSessions)}
         >
           <div className="multiline-menu-item">
@@ -131,6 +134,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneNumber)}
         >
           <div className="multiline-menu-item">
@@ -143,6 +147,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyLastSeen)}
         >
           <div className="multiline-menu-item">
@@ -155,6 +160,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyProfilePhoto)}
         >
           <div className="multiline-menu-item">
@@ -167,6 +173,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyForwarding)}
         >
           <div className="multiline-menu-item">
@@ -179,6 +186,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
         >
           <div className="multiline-menu-item">

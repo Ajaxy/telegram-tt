@@ -42,9 +42,9 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 
   useHistoryBack(isActive, onClose);
 
-  function handleRecentActionsClick() {
+  const handleRecentActionsClick = useCallback(() => {
     onScreenSelect(ManagementScreens.GroupRecentActions);
-  }
+  }, [onScreenSelect]);
 
   const adminMembers = useMemo(() => {
     if (!chat.fullInfo || !chat.fullInfo.adminMembers) {
@@ -112,6 +112,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             <ListItem
               key={member.userId}
               className="chat-item-clickable"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleAdminMemberClick(member)}
             >
               <PrivateChatInfo

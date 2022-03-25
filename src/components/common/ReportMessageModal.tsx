@@ -33,11 +33,11 @@ const ReportMessageModal: FC<OwnProps> = ({
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
   const [description, setDescription] = useState('');
 
-  const handleReport = () => {
+  const handleReport = useCallback(() => {
     reportMessages({ messageIds, reason: selectedReason, description });
     exitMessageSelectMode();
     onClose();
-  };
+  }, [description, exitMessageSelectMode, messageIds, onClose, reportMessages, selectedReason]);
 
   const handleSelectReason = useCallback((value: string) => {
     setSelectedReason(value as ApiReportReason);

@@ -124,12 +124,12 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     ? SettingsScreens.FoldersEditFolder
     : SettingsScreens.FoldersCreateFolder);
 
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { currentTarget } = event;
     dispatch({ type: 'setTitle', payload: currentTarget.value.trim() });
-  }
+  }, [dispatch]);
 
-  function handleSubmit() {
+  const handleSubmit = useCallback(() => {
     const { title } = state.folder;
 
     if (!title) {
@@ -152,7 +152,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     setTimeout(() => {
       onReset();
     }, SUBMIT_TIMEOUT);
-  }
+  }, [addChatFolder, dispatch, editChatFolder, includedChatIds.length, includedChatTypes, onReset, state]);
 
   function renderChatType(key: string, mode: 'included' | 'excluded') {
     const chatType = mode === 'included'
@@ -207,6 +207,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           <ShowMoreButton
             count={leftChatsCount}
             itemName="chat"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={clickHandler}
           />
         )}

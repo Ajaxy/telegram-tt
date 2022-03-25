@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useState, memo, useCallback,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
@@ -24,7 +26,7 @@ const AuthRegister: FC<StateProps> = ({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  function handleFirstNameChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleFirstNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     if (authError) {
       clearAuthError();
     }
@@ -33,13 +35,13 @@ const AuthRegister: FC<StateProps> = ({
 
     setFirstName(target.value);
     setIsButtonShown(target.value.length > 0);
-  }
+  }, [authError, clearAuthError]);
 
-  function handleLastNameChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleLastNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { target } = event;
 
     setLastName(target.value);
-  }
+  }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

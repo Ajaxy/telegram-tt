@@ -269,6 +269,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
             <ListItem
               key={member.userId}
               className="chat-item-clickable exceptions-member"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleExceptionMemberClick(member)}
             >
               <PrivateChatInfo

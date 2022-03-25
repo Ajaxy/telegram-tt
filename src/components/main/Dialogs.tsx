@@ -96,7 +96,12 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
               : lang('MemberRequests.RequestToJoinDescriptionGroup')}
           </p>
         )}
-        <Button isText className="confirm-dialog-button" onClick={handleJoinClick}>
+        <Button
+          isText
+          className="confirm-dialog-button"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={handleJoinClick}
+        >
           {isRequestNeeded ? requestToJoinText : joinText}
         </Button>
         <Button isText className="confirm-dialog-button" onClick={closeModal}>{lang('Cancel')}</Button>
@@ -122,7 +127,14 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
       >
         {lang('AreYouSureShareMyContactInfoBot')}
         <div>
-          <Button className="confirm-dialog-button" isText onClick={handleConfirm}>{lang('OK')}</Button>
+          <Button
+            className="confirm-dialog-button"
+            isText
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={handleConfirm}
+          >
+            {lang('OK')}
+          </Button>
           <Button className="confirm-dialog-button" isText onClick={closeModal}>{lang('Cancel')}</Button>
         </div>
       </Modal>

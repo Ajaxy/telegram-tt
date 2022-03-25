@@ -123,10 +123,10 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     }
   }, [connectionState, playGroupCallSound]);
 
-  const handleCloseConfirmLeaveModal = () => {
+  const handleCloseConfirmLeaveModal = useCallback(() => {
     closeConfirmLeaveModal();
     setIsEndGroupCallModal(false);
-  };
+  }, [closeConfirmLeaveModal]);
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -153,13 +153,13 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     }
   }, [closeFullscreen, isFullscreen, openFullscreen]);
 
-  const handleToggleSidebar = () => {
+  const handleToggleSidebar = useCallback(() => {
     if (isSidebarOpen) {
       closeSidebar();
     } else {
       openSidebar();
     }
-  };
+  }, [closeSidebar, isSidebarOpen, openSidebar]);
 
   const handleStreamsDoubleClick = useCallback(() => {
     if (!IS_REQUEST_FULLSCREEN_SUPPORTED) return;
@@ -180,12 +180,12 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     }
   }, [closeFullscreen, isFullscreen, openFullscreen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     toggleGroupCallPanel();
     if (isFullscreen) {
       closeFullscreen();
     }
-  };
+  }, [closeFullscreen, isFullscreen, toggleGroupCallPanel]);
 
   useEffect(() => {
     if (!IS_REQUEST_FULLSCREEN_SUPPORTED) return undefined;
@@ -211,16 +211,16 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     connectToActiveGroupCall();
   }, [connectToActiveGroupCall, groupCallId]);
 
-  const endGroupCall = () => {
+  const endGroupCall = useCallback(() => {
     setIsEndGroupCallModal(true);
     setShouldEndGroupCall(true);
     openConfirmLeaveModal();
     if (isFullscreen) {
       handleToggleFullscreen();
     }
-  };
+  }, [handleToggleFullscreen, isFullscreen, openConfirmLeaveModal]);
 
-  const handleLeaveGroupCall = () => {
+  const handleLeaveGroupCall = useCallback(() => {
     if (isAdmin && !isConfirmLeaveModalOpen) {
       openConfirmLeaveModal();
       if (isFullscreen) {
@@ -231,15 +231,18 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     playGroupCallSound({ sound: 'leave' });
     setIsLeaving(true);
     closeConfirmLeaveModal();
-  };
+  }, [
+    closeConfirmLeaveModal, handleToggleFullscreen, isAdmin, isConfirmLeaveModalOpen, isFullscreen,
+    openConfirmLeaveModal, playGroupCallSound,
+  ]);
 
-  const handleCloseAnimationEnd = () => {
+  const handleCloseAnimationEnd = useCallback(() => {
     if (isLeaving) {
       leaveGroupCall({
         shouldDiscard: shouldEndGroupCall,
       });
     }
-  };
+  }, [isLeaving, leaveGroupCall, shouldEndGroupCall]);
 
   return (
     <Modal

@@ -69,6 +69,14 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
     setSettingOption({ autoLoadFileMaxSizeMb: AUTODOWNLOAD_FILESIZE_MB_LIMITS[value] });
   }, [setSettingOption]);
 
+  const handleCanAutoPlayGifsChange = useCallback((value: boolean) => {
+    setSettingOption({ canAutoPlayGifs: value });
+  }, [setSettingOption]);
+
+  const handleCanAutoPlayVideosChange = useCallback((value: boolean) => {
+    setSettingOption({ canAutoPlayVideos: value });
+  }, [setSettingOption]);
+
   function renderContentSizeSlider() {
     const value = AUTODOWNLOAD_FILESIZE_MB_LIMITS.indexOf(autoLoadFileMaxSizeMb);
 
@@ -101,21 +109,26 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         <Checkbox
           label={lang('AutoDownloadSettings.Contacts')}
           checked={canAutoLoadFromContacts}
+          // TODO rewrite to support `useCallback`
+          // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}FromContacts`]: isChecked })}
         />
         <Checkbox
           label={lang('AutoDownloadSettings.PrivateChats')}
           checked={canAutoLoadInPrivateChats}
+          // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InPrivateChats`]: isChecked })}
         />
         <Checkbox
           label={lang('AutoDownloadSettings.GroupChats')}
           checked={canAutoLoadInGroups}
+          // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InGroups`]: isChecked })}
         />
         <Checkbox
           label={lang('AutoDownloadSettings.Channels')}
           checked={canAutoLoadInChannels}
+          // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InChannels`]: isChecked })}
         />
 
@@ -157,12 +170,12 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         <Checkbox
           label={lang('GifsTab2')}
           checked={canAutoPlayGifs}
-          onCheck={(isChecked) => setSettingOption({ canAutoPlayGifs: isChecked })}
+          onCheck={handleCanAutoPlayGifsChange}
         />
         <Checkbox
           label={lang('DataAndStorage.Autoplay.Videos')}
           checked={canAutoPlayVideos}
-          onCheck={(isChecked) => setSettingOption({ canAutoPlayVideos: isChecked })}
+          onCheck={handleCanAutoPlayVideosChange}
         />
       </div>
     </div>

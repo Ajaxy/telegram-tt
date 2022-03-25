@@ -72,6 +72,7 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
                 key={id}
                 teactOrderKey={i}
                 className="chat-item-clickable scroll-item"
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handleExceptionMemberClick(id)}
               >
                 <PrivateChatInfo userId={id} forceShowSelf />
