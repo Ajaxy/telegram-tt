@@ -53,12 +53,12 @@ export default function useBotCommandTooltip(
   }, [getFilteredCommands, html, isAllowed, unmarkIsOpen]);
 
   useEffect(() => {
-    if (filteredBotCommands && filteredBotCommands.length) {
+    if (filteredBotCommands && filteredBotCommands.length && html.length > 0) {
       markIsOpen();
     } else {
       unmarkIsOpen();
     }
-  }, [filteredBotCommands, markIsOpen, unmarkIsOpen]);
+  }, [filteredBotCommands, html.length, markIsOpen, unmarkIsOpen]);
 
   return {
     isOpen,
