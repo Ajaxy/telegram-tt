@@ -44,6 +44,11 @@
     &.selected:hover {
       --background-color: var(--color-chat-active) !important;
 
+      .VerifiedIcon {
+        --color-fill: #fff;
+        --color-checkmark: var(--color-primary)
+      }
+
       .Avatar.online::after {
         border-color: var(--color-chat-active) !important;
         background: var(--color-white);
