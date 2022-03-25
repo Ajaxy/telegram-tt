@@ -27,6 +27,8 @@ import Cumshot from '../../../assets/tgs/animatedEmojis/Cumshot.tgs';
 import JoinRequest from '../../../assets/tgs/invites/Requests.tgs';
 import Invite from '../../../assets/tgs/invites/Invite.tgs';
 
+import QrPlane from '../../../assets/tgs/auth/QrPlane.tgs';
+
 export const ANIMATED_STICKERS_PATHS = {
   MonkeyIdle,
   MonkeyTracking,
@@ -48,6 +50,7 @@ export const ANIMATED_STICKERS_PATHS = {
   Cumshot,
   JoinRequest,
   Invite,
+  QrPlane,
 };
 
 export default function getAnimationData(name: keyof typeof ANIMATED_STICKERS_PATHS) {

@@ -113,22 +113,34 @@
     height: 280px;
   }
 
-  .qr-container {
+  .qr-wrapper {
+    display: flex;
+    justify-content: center;
+    position: relative;
+
     opacity: 1;
     transform: scale(1);
     transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms;
-
     &.pre-animate {
       opacity: 0.5;
-      transform: scale(0.8);
+      transform: scale(0.5);
     }
+  }
 
-    canvas {
-      padding: 0.625rem;
-      border-radius: var(--border-radius-default);
-      background: var(--color-white);
-      margin-top: -0.625rem;
-    }
+  .qr-plane {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    border-radius: 50%;
+    background-color: var(--color-telegram-blue);
+  }
+
+  .qr-container {
+    background-color: white;
+    border-radius: var(--border-radius-default);
+    overflow: hidden;
   }
 
   h3 {

@@ -110,7 +110,10 @@
     "os-browserify": "^0.3.0",
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
-    "qr-creator": "^1.0.0",
+    "qr-code-styling": "github:zubiden/qr-code-styling#10f7cf3",
     "websocket": "^1.0.34"
+  },
+  "optionalDependencies": {
+    "fsevents": "2.1.2"
   }
 }

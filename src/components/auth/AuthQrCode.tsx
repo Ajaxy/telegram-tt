@@ -1,6 +1,6 @@
-import QrCreator from 'qr-creator';
+import QrCodeStyling from 'qr-code-styling';
 import React, {
-  FC, useEffect, useRef, memo, useCallback,
+  FC, useEffect, useRef, memo, useCallback, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -10,13 +10,17 @@ import { LangCode } from '../../types';
 import { DEFAULT_LANG_CODE } from '../../config';
 import { setLanguage } from '../../util/langProvider';
 import renderText from '../common/helpers/renderText';
+import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
+import getAnimationData from '../common/helpers/animatedAssets';
+
 import useLangString from '../../hooks/useLangString';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
-import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
+import AnimatedSticker from '../common/AnimatedSticker';
+import blankUrl from '../../assets/blank.png';
 
 type StateProps =
   Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
@@ -25,6 +29,29 @@ type StateProps =
   };
 
 const DATA_PREFIX = 'tg://login?token=';
+const QR_SIZE = 280;
+const QR_PLANE_SIZE = 54;
+
+const QR_CODE = new QrCodeStyling({
+  width: QR_SIZE,
+  height: QR_SIZE,
+  image: blankUrl,
+  margin: 10,
+  type: 'svg',
+  dotsOptions: {
+    type: 'rounded',
+  },
+  cornersSquareOptions: {
+    type: 'extra-rounded',
+  },
+  imageOptions: {
+    imageSize: 0.4,
+    margin: 8,
+  },
+  qrOptions: {
+    errorCorrectionLevel: 'M',
+  },
+});
 
 const AuthCode: FC<StateProps> = ({
   connectionState,
@@ -43,25 +70,45 @@ const AuthCode: FC<StateProps> = ({
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
+  const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
+
+  const [animationData, setAnimationData] = useState<string>();
+  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 
   useEffect(() => {
-    if (!authQrCode || connectionState !== 'connectionStateReady') {
-      return;
+    if (!animationData) {
+      getAnimationData('QrPlane').then(setAnimationData);
+    }
+  }, [animationData]);
+
+  useEffect(() => {
+    if (!authQrCode) {
+      return () => {
+        unmarkQrMounted();
+      };
+    }
+
+    if (connectionState !== 'connectionStateReady') {
+      return undefined;
     }
 
     const container = qrCodeRef.current!;
 
-    container.innerHTML = '';
-    container.classList.remove('pre-animate');
+    container.parentElement!.classList.remove('pre-animate');
 
-    QrCreator.render({
-      text: `${DATA_PREFIX}${authQrCode.token}`,
-      radius: 0.5,
-      ecLevel: 'M',
-      fill: '#4E96D4',
-      size: 280,
-    }, container);
-  }, [connectionState, authQrCode]);
+    const data = `${DATA_PREFIX}${authQrCode.token}`;
+
+    QR_CODE.update({
+      data,
+    });
+
+    if (!isQrMounted) {
+      QR_CODE.append(container);
+      markQrMounted();
+    }
+    return undefined;
+  }, [connectionState, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted]);
 
   useEffect(() => {
     if (connectionState === 'connectionStateReady') {
@@ -85,7 +132,25 @@ const AuthCode: FC<StateProps> = ({
     <div id="auth-qr-form" className="custom-scroll">
       <div className="auth-form qr">
         {authQrCode ? (
-          <div key="qr-container" className="qr-container pre-animate" ref={qrCodeRef} />
+          <div className="qr-wrapper pre-animate" key="qr-wrapper">
+            <div
+              key="qr-container"
+              className="qr-container"
+              ref={qrCodeRef}
+              style={`width: ${QR_SIZE}px; height: ${QR_SIZE}px`}
+            />
+            {animationData && (
+              <AnimatedSticker
+                id="qrPlane"
+                className="qr-plane"
+                size={QR_PLANE_SIZE}
+                animationData={animationData}
+                play={isAnimationLoaded}
+                onLoad={handleAnimationLoad}
+                key="qrPlane"
+              />
+            )}
+          </div>
         ) : (
           <div key="qr-loading" className="qr-loading"><Loading /></div>
         )}
