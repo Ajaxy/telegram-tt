@@ -21,7 +21,7 @@ type GramJsAppConfig = {
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
   const { emojies_sounds } = appConfig;
-  return Object.keys(emojies_sounds).reduce((acc: Record<string, string>, key) => {
+  return emojies_sounds ? Object.keys(emojies_sounds).reduce((acc: Record<string, string>, key) => {
     const l = emojies_sounds[key];
     localDb.documents[l.id] = new GramJs.Document({
       id: BigInt(l.id),
@@ -35,7 +35,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
 
     acc[key] = l.id;
     return acc;
-  }, {});
+  }, {}) : {};
 }
 
 export function buildApiConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
