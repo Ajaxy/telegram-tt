@@ -1,5 +1,5 @@
 export {
-  destroy, disconnect, downloadMedia, fetchCurrentUser,
+  destroy, disconnect, downloadMedia, fetchCurrentUser, repairFileReference,
 } from './client';
 
 export {
