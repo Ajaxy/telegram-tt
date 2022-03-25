@@ -1,4 +1,6 @@
-import React, { FC, useState, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useRef, useCallback,
+} from '../../lib/teact/teact';
 
 import Menu from './Menu';
 
@@ -55,10 +57,10 @@ const DropdownMenu: FC<OwnProps> = ({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsOpen(false);
     if (onClose) onClose();
-  };
+  }, [onClose]);
 
   return (
     <div

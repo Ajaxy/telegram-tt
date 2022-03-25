@@ -172,6 +172,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                 <ListItem
                   key={id}
                   className="chat-item-clickable scroll-item"
+                  // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => handleMemberClick(id)}
                 >
                   <PrivateChatInfo userId={id} forceShowSelf />

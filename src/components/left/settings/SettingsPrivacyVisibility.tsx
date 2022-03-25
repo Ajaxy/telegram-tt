@@ -176,6 +176,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           <ListItem
             narrow
             icon="add-user"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => {
               onScreenSelect(allowedContactsScreen);
             }}
@@ -191,6 +192,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           <ListItem
             narrow
             icon="delete-user"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => {
               onScreenSelect(deniedContactsScreen);
             }}

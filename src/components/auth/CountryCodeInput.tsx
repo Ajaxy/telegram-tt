@@ -138,6 +138,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
           <MenuItem
             key={`${country.iso2}-${country.countryCode}`}
             className={value && country.iso2 === value.iso2 ? 'selected' : ''}
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleChange(country)}
           >
             <span className="country-flag">{renderText(isoToEmoji(country.iso2), ['hq_emoji'])}</span>

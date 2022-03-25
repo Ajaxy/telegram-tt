@@ -215,6 +215,7 @@ const SettingsHeader: FC<OwnProps> = ({
               ripple={!IS_SINGLE_COLUMN_LAYOUT}
               size="smaller"
               color="translucent"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
               ariaLabel={lang('lng_settings_information')}
             >

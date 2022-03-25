@@ -210,6 +210,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
                 key={id}
                 teactOrderKey={i + 1}
                 className="chat-item-clickable scroll-item"
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => {
                   onDiscussionClick(id);
                 }}

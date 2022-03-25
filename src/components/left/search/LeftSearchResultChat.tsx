@@ -1,5 +1,5 @@
 import React, {
-  FC, memo,
+  FC, memo, useCallback,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
@@ -56,9 +56,9 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     handleChatFolderChange: openChatFolderModal,
   }, true);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     onClick(chatId);
-  };
+  }, [chatId, onClick]);
 
   const buttonRef = useSelectWithEnter(handleClick);
 

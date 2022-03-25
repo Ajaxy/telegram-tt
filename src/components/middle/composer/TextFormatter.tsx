@@ -109,7 +109,7 @@ const TextFormatter: FC<OwnProps> = ({
     setSelectedTextFormats(selectedFormats);
   }, [isOpen, selectedRange, openLinkControl]);
 
-  function restoreSelection() {
+  const restoreSelection = useCallback(() => {
     if (!selectedRange) {
       return;
     }
@@ -119,7 +119,7 @@ const TextFormatter: FC<OwnProps> = ({
       selection.removeAllRanges();
       selection.addRange(selectedRange);
     }
-  }
+  }, [selectedRange]);
 
   const updateSelectedRange = useCallback(() => {
     const selection = window.getSelection();
@@ -311,7 +311,7 @@ const TextFormatter: FC<OwnProps> = ({
     getSelectedElement, getSelectedText, onClose, selectedRange, selectedTextFormats.monospace,
   ]);
 
-  function handleLinkUrlConfirm() {
+  const handleLinkUrlConfirm = useCallback(() => {
     const formattedLinkUrl = encodeURI(ensureProtocol(linkUrl) || '');
 
     if (isEditingLink) {
@@ -335,7 +335,7 @@ const TextFormatter: FC<OwnProps> = ({
       `<a href=${formattedLinkUrl} class="text-entity-link" dir="auto">${text}</a>`,
     );
     onClose();
-  }
+  }, [getSelectedElement, getSelectedText, isEditingLink, linkUrl, onClose, restoreSelection]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {

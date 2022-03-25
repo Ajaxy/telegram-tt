@@ -98,6 +98,7 @@ const SendAsMenu: FC<OwnProps> = ({
           <ListItem
             key={id}
             className="SendAsItem chat-item-clickable scroll-item with-avatar"
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleUserSelect(id)}
             focus={selectedSendAsIndex === index}
           >

@@ -140,28 +140,28 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleBeforeContextMenu(e);
   };
 
-  const handleUnfaveClick = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleUnfaveClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
 
     onUnfaveClick!(sticker);
-  };
+  }, [onUnfaveClick, sticker]);
 
-  const handleContextUnfave = () => {
+  const handleContextUnfave = useCallback(() => {
     onUnfaveClick!(sticker);
-  };
+  }, [onUnfaveClick, sticker]);
 
-  const handleContextFave = () => {
+  const handleContextFave = useCallback(() => {
     onFaveClick!(sticker);
-  };
+  }, [onFaveClick, sticker]);
 
-  const handleSendQuiet = () => {
+  const handleSendQuiet = useCallback(() => {
     onClick?.(clickArg, true);
-  };
+  }, [clickArg, onClick]);
 
-  const handleSendScheduled = () => {
+  const handleSendScheduled = useCallback(() => {
     onClick?.(clickArg, undefined, true);
-  };
+  }, [clickArg, onClick]);
 
   const fullClassName = buildClassName(
     'StickerButton',

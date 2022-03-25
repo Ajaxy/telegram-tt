@@ -1,5 +1,5 @@
 import React, {
-  FC, useState, useEffect, memo,
+  FC, useState, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -40,13 +40,13 @@ const NewChatButton: FC<OwnProps> = ({
     isMenuOpen && 'menu-is-open',
   );
 
-  const toggleIsMenuOpen = () => {
+  const toggleIsMenuOpen = useCallback(() => {
     setIsMenuOpen(!isMenuOpen);
-  };
+  }, [isMenuOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsMenuOpen(false);
-  };
+  }, []);
 
   return (
     <div className={fabClassName}>

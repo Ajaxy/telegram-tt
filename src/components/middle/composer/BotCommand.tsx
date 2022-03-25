@@ -30,6 +30,7 @@ const BotCommand: FC<OwnProps> = ({
       key={botCommand.command}
       className={buildClassName('BotCommand chat-item-clickable scroll-item', withAvatar && 'with-avatar')}
       multiline
+      // eslint-disable-next-line react/jsx-no-bind
       onClick={() => onClick(botCommand)}
       focus={focus}
     >

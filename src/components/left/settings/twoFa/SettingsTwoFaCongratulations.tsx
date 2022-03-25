@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
 import { ApiSticker } from '../../../../api/types';
@@ -26,9 +26,9 @@ const SettingsTwoFaCongratulations: FC<OwnProps & StateProps> = ({
 }) => {
   const lang = useLang();
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     onScreenSelect(SettingsScreens.Privacy);
-  };
+  }, [onScreenSelect]);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.TwoFaCongratulations);
 

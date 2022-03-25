@@ -24,6 +24,7 @@ const Notifications: FC<StateProps> = ({ notifications }) => {
       {notifications.map(({ message, localId }) => (
         <Notification
           message={renderText(message, ['emoji', 'br', 'links', 'simple_markdown'])}
+          // eslint-disable-next-line react/jsx-no-bind
           onDismiss={() => dismissNotification({ localId })}
         />
       ))}

@@ -71,7 +71,9 @@ const TestOrdered: FC<{}> = () => {
             teactOrderKey={itemValue}
             key={key}
             value={itemValue}
+            // eslint-disable-next-line react/jsx-no-bind
             onChange={(newValue) => updateData(key, Number(newValue))}
+            // eslint-disable-next-line react/jsx-no-bind
             onDelete={() => deleteData(key)}
           />
         ))}

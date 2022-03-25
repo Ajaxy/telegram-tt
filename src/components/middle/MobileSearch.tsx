@@ -166,6 +166,7 @@ const MobileSearchFooter: FC<StateProps> = ({
               round
               size="smaller"
               color="translucent"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel="Search messages by date"
             >

@@ -86,6 +86,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   return (
     <div className="ChatExtra">
       {formattedNumber && Boolean(formattedNumber.length) && (
+        // eslint-disable-next-line react/jsx-no-bind
         <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
           <span className="title" dir="auto">{formattedNumber}</span>
           <span className="subtitle">{lang('Phone')}</span>
@@ -97,6 +98,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           multiline
           narrow
           ripple
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => copy(`@${username}`, lang('Username'))}
         >
           <span className="title" dir="auto">{renderText(username)}</span>
@@ -122,6 +124,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           multiline
           narrow
           ripple
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => copy(link, lang('SetUrlPlaceholder'))}
         >
           <div className="title">{link}</div>

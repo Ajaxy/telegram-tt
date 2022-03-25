@@ -209,6 +209,10 @@ const PollModal: FC<OwnProps> = ({
     }
   }, [handleCreate]);
 
+  const handleQuestionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setQuestion(e.target.value);
+  }, []);
+
   const getQuestionError = useCallback(() => {
     if (hasErrors && !question.trim().length) {
       return lang('lng_polls_choose_question');
@@ -253,6 +257,7 @@ const PollModal: FC<OwnProps> = ({
             : lang('CreatePoll.AddOption')}
           error={getOptionsError(index)}
           value={option}
+          // eslint-disable-next-line react/jsx-no-bind
           onChange={(e) => updateOption(index, e.currentTarget.value)}
           onKeyPress={handleKeyPress}
         />
@@ -263,6 +268,7 @@ const PollModal: FC<OwnProps> = ({
             color="translucent"
             size="smaller"
             ariaLabel={lang('Delete')}
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => removeOption(index)}
           >
             <i className="icon-close" />
@@ -292,7 +298,7 @@ const PollModal: FC<OwnProps> = ({
         label={lang('AskAQuestion')}
         value={question}
         error={getQuestionError()}
-        onChange={(e) => setQuestion(e.currentTarget.value)}
+        onChange={handleQuestionChange}
         onKeyPress={handleKeyPress}
       />
       <div className="options-divider" />

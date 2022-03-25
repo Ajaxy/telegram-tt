@@ -1,4 +1,6 @@
-import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useEffect,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
@@ -84,13 +86,13 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 
+  const handleClearWebpagePreview = useCallback(() => {
+    toggleMessageWebPage({ chatId, threadId, noWebPage: true });
+  }, [chatId, threadId, toggleMessageWebPage]);
+
   if (!shouldRender || !renderingWebPage) {
     return undefined;
   }
-
-  const handleClearWebpagePreview = () => {
-    toggleMessageWebPage({ chatId, threadId, noWebPage: true });
-  };
 
   // TODO Refactor so `WebPage` can be used without message
   const { photo, ...webPageWithoutPhoto } = renderingWebPage;

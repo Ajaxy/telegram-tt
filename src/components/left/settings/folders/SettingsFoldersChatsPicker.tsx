@@ -115,6 +115,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
       <ListItem
         key={type.key}
         className="chat-item-clickable picker-list-item chat-type-item"
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => handleChatTypeClick(type.key)}
         ripple
       >
@@ -136,6 +137,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
       <ListItem
         key={id}
         className="chat-item-clickable picker-list-item chat-item"
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => handleItemClick(id)}
         ripple
         disabled={!isSelected && hasMaxChats}

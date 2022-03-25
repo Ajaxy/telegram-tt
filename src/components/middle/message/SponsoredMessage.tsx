@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 import React, {
-  FC, memo, useEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -64,11 +64,8 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     }) : undefined;
   }, [chatId, shouldObserve, observeIntersection, viewSponsoredMessage]);
 
-  if (!message) {
-    return undefined;
-  }
-
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
+    if (!message) return;
     if (message.chatInviteHash) {
       openChatByInvite({ hash: message.chatInviteHash });
     } else if (message.channelPostId) {
@@ -83,7 +80,11 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         });
       }
     }
-  };
+  }, [focusMessage, message, openChat, openChatByInvite, startBot]);
+
+  if (!message) {
+    return undefined;
+  }
 
   return (
     <div className="SponsoredMessage Message open" key="sponsored-message">

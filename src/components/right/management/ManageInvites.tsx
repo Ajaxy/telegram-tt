@@ -333,6 +333,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               icon="link"
               secondaryIcon="more"
               multiline
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => showInviteInfo(invite)}
               contextActions={prepareContextActions(invite)}
               key={invite.link}
@@ -361,6 +362,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
                 icon="link"
                 secondaryIcon="more"
                 multiline
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => showInviteInfo(invite)}
                 contextActions={prepareContextActions(invite)}
                 key={invite.link}

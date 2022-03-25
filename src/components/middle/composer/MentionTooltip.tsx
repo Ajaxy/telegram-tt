@@ -92,6 +92,7 @@ const MentionTooltip: FC<OwnProps> = ({
         <ListItem
           key={id}
           className="chat-item-clickable scroll-item"
+          // eslint-disable-next-line react/jsx-no-bind
           onClick={() => handleUserSelect(id)}
           focus={selectedMentionIndex === index}
         >

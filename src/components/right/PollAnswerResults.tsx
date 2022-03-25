@@ -103,6 +103,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
             <ListItem
               key={id}
               className="chat-item-clickable"
+              // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleMemberClick(id)}
             >
               <PrivateChatInfo

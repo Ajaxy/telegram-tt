@@ -174,6 +174,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
         round
         faded
         color="translucent"
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => selectCategory(index)}
         ariaLabel={category.name}
       >

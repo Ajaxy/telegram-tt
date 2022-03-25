@@ -124,6 +124,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             className={buildClassName(!chosenTab && 'chosen')}
             size="tiny"
             ripple
+            // eslint-disable-next-line react/jsx-no-bind
             onClick={() => setChosenTab(undefined)}
           >
             <i className="icon-reaction-filled" />
@@ -136,6 +137,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                 className={buildClassName(chosenTab === reaction && 'chosen')}
                 size="tiny"
                 ripple
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => setChosenTab(reaction)}
               >
                 <ReactionStaticEmoji reaction={reaction} className="reaction-filter-emoji" />
@@ -162,6 +164,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                   <ListItem
                     key={userId}
                     className="chat-item-clickable reactors-list-item"
+                    // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => handleClick(userId)}
                   >
                     <Avatar user={user} size="medium" />

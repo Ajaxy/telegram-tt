@@ -37,6 +37,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
     return (
       <Button
         className={`symbol-tab-button ${activeTab === tab ? 'activated' : ''}`}
+        // eslint-disable-next-line react/jsx-no-bind
         onClick={() => onSwitchTab(tab)}
         ariaLabel={SYMBOL_MENU_TAB_TITLES[tab]}
         round

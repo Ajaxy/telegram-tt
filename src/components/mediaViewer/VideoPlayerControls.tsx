@@ -220,6 +220,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
         onClose={closePlaybackMenu}
       >
         {PLAYBACK_RATES.map((rate) => (
+          // eslint-disable-next-line react/jsx-no-bind
           <MenuItem disabled={playbackRate === rate} onClick={() => onPlaybackRateChange(rate)}>
             {`${rate}x`}
           </MenuItem>
