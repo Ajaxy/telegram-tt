@@ -198,6 +198,8 @@ async function updateContact(
 
   global = getGlobal();
   if (result) {
+    getActions().loadChatSettings({ chatId: userId });
+
     setGlobal(updateUser(
       global,
       user.id,

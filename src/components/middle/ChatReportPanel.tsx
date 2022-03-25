@@ -151,24 +151,24 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
         title={lang('BlockUserTitle', user ? getUserFirstOrLastName(user) : getChatTitle(lang, chat!))}
         text={user
           ? lang('UserInfo.BlockConfirmationTitle', getUserFullName(user))
-          : lang('Chat.Confirm.ReportSpam.Group')}
+          : lang('Chat.Confirm.ReportSpam.Channel')}
         isButtonsInOneRow
         confirmIsDestructive
         confirmLabel={lang('Block')}
         confirmHandler={user ? handleConfirmBlock : handleChatReportSpam}
       >
-        {user && canReportSpam && (
-          <Checkbox
-            label={lang('DeleteReportSpam')}
-            checked={shouldReportSpam}
-            onCheck={setShouldReportSpam}
-          />
-        )}
         {user && (
           <Checkbox
             label={lang('DeleteThisChat')}
             checked={shouldDeleteChat}
             onCheck={setShouldDeleteChat}
+          />
+        )}
+        {user && canReportSpam && (
+          <Checkbox
+            label={lang('ReportChat')}
+            checked={shouldReportSpam}
+            onCheck={setShouldReportSpam}
           />
         )}
       </ConfirmDialog>
