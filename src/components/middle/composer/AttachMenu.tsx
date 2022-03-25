@@ -35,6 +35,14 @@ const AttachMenu: FC<OwnProps> = ({
     }
   }, [isAttachMenuOpen, markMouseInside]);
 
+  const handleToggleAttachMenu = useCallback(() => {
+    if (isAttachMenuOpen) {
+      closeAttachMenu();
+    } else {
+      openAttachMenu();
+    }
+  }, [isAttachMenuOpen, openAttachMenu, closeAttachMenu]);
+
   const handleFileSelect = useCallback((e: Event, isQuick: boolean) => {
     const { files } = e.target as HTMLInputElement;
 
@@ -67,7 +75,7 @@ const AttachMenu: FC<OwnProps> = ({
         className={isAttachMenuOpen ? 'AttachMenu--button activated' : 'AttachMenu--button'}
         round
         color="translucent"
-        onActivate={openAttachMenu}
+        onActivate={handleToggleAttachMenu}
         ariaLabel="Add an attachment"
         ariaControls="attach-menu-controls"
         hasPopup
