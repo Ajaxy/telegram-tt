@@ -1,28 +1,10 @@
-**Telegram Web Z was updated to version 1.38**
-
-👏 **Harder**
-• See interactive statistics for groups you manage.
-• Adjust volume and playback speed with new controls in the Media Viewer.
-• Save GIFs sent by other users.
-• Schedule stickers and GIFs or send them silently – right-click on desktop or long-press on mobile.
-• "Report Spam and Leave" button added for unknown channels.
-• Drafts now save when editing messages.
-• Set a custom name or include a phone number when adding contacts.
-• New contacts can now be added from the Contacts page.
-• Click to copy code blocks to your clipboard.
+**Telegram Web Z was updated to version 1.39**
 
 🤩 **Better**
-• Background pattern added for Night Mode.
-• New message drafts are restored after editing another message.
-• Updated font for Persian language (Vazirmatn 32.1).
-• More and more UX improvements.
-
-🚀 **Faster**
-• Optimized multiple algorithms, accelerated rendering.
+• New animations for QR code on login screen.
+• Toggle Attach Menu with keyboard or screen reader.
+• Another update for Persian font.
+• Various UX improvements.
 
 💪 **Stronger**
-• Fixed notification sounds for reactions in muted chats.
-• Fixed chat participants sometimes being inaccurate.
-• Fixed seeking position for audio tracks.
-• Fixed unintended playback of videos in Media Viewer caused by <Space> key.
-• Fixed missing QR codes after canceling login on another device.
+• Fixed media sometimes being not loaded.
