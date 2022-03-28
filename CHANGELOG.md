@@ -1,10 +1,575 @@
-# 1.3.0
-- Settings / General: Show sensitive content toggle
+## 1.39.0 (2022-03-25)
 
-# 1.2.0
-- Dark Theme: Use system theme
-- Media Viewer: Video fullscreen on double click
-- Message: Open context menu by short tap on Android
+### 🤩 Better
+* New animations for QR code on login screen.
+* Toggle Attach Menu with keyboard or screen reader.
+* Another update for Persian font.
+* Various UX improvements.
 
-# 1.1.0
-- Audio: Add download button
+### 💪 Stronger
+* Fixed media sometimes being not loaded.
+
+## 1.38.0 (2022-03-19)
+### 👏 Harder
+* See interactive statistics for groups you manage.
+* Adjust volume and playback speed with new controls in the Media Viewer.
+* Save GIFs sent by other users.
+* Schedule stickers and GIFs or send them silently – right-click on desktop or long-press on mobile.
+* "Report Spam and Leave" button added for unknown channels.
+* Drafts now save when editing messages.
+* Set a custom name or include a phone number when adding contacts.
+* New contacts can now be added from the Contacts page.
+* Click to copy code blocks to your clipboard.
+
+### 🤩 Better
+* Background pattern added for Night Mode.
+* New message drafts are restored after editing another message.
+* Updated font for Persian language (Vazirmatn 32.1).
+* More and more UX improvements.
+
+### 🚀 Faster
+* Optimized multiple algorithms, accelerated rendering.
+
+### 💪 Stronger
+* Fixed notification sounds for reactions in muted chats.
+* Fixed chat participants sometimes being inaccurate.
+* Fixed seeking position for audio tracks.
+* Fixed unintended playback of videos in Media Viewer caused by <Space> key.
+* Fixed missing QR codes after canceling login on another device.
+
+## 1.37.0 (2022-03-11)
+
+### 👏 Harder
+* Access detailed interactive statistics for channels you manage.
+* Accessibility: screen readers properly detect the attachment menu.
+
+### 🤩 Better
+* Enhanced colors for dark mode with higher contrast.
+* Even more UX improvements.
+
+### 💪 Stronger
+* Fixed issues when creating polls in channels.
+* Drafts no longer overwrite original text when editing messages.
+* Reacting to your own message no longer sends a notification.
+
+## 1.36.0 (2022-03-05)
+
+### 👏 Harder
+* ‘Add Contact’ and ‘Block User’ buttons appear in the chat header of new chats.
+* Send media without sound or schedule it for later. Right-click the Send button on desktop, or press and hold on mobile.
+* Added support for viewing shared geo, live locations and venues.
+* Chat owners can leave their own groups without deleting them.
+* Choose from more categories when reporting specific messages.
+
+### 🤩 Better
+* Even more UX improvements.
+
+### 💪 Stronger
+* Fixed flickering menu for bot commands.
+* Copying message text on mobile devices now works as expected.
+* Fixed frozen UI when moving between chats and comments.
+
+## 1.35.0 (2022-02-25)
+
+### 👏 Harder
+* Admins can now manage removed users list in channels.
+* Copy text feature of multiple messages preserves sender’s name.
+* Added support for subscription bots such as @donate.
+
+### 🤩 Better
+* Fully redesigned context menu on desktops – featuring stunning blur effect.
+* Print or export as PDF chat history with Ctrl + P (⌘ + P on macOS).
+* Various layout improvements.
+
+### 🚀 Faster
+* More performance optimizations.
+
+## 1.34.0 (2022-02-20)
+
+### 🤩 Better
+* Reactions to your messages are now shown in notifications.
+* Multiple improvements for Media Viewer.
+* Better keyboard support in modal dialogs.
+* Various layout improvements.
+
+### 💪 Stronger
+* Video messages always play now.
+* Fixed playing multiple emoji interactions.
+
+## 1.33.0 (2022-02-11)
+
+### 🤩 Better
+* The chat list loads even faster.
+* More layout improvements.
+
+### 💪 Stronger
+* Irrelevant ‘You must be an admin’ popups no longer appear.
+* The New Chat button works properly on Android devices.
+* Files sent in Firefox no longer duplicate.
+* Fixed media streaming after clearing browser cache.
+* Fixed glitches when reacting to media albums and local messages.
+* Webpage video preview in Safari now renders properly.
+
+## 1.32.0 (2022-02-04)
+
+### 👏 Harder
+* Create and share Video Stickers made from .webm files.
+* 5 new reactions and interactive emoji: 🥰🤯🤔🤬👏
+* Send entire folders as a file.
+* Directly add chats to chat folders from Global Search.
+
+### 🤩 Better
+* Redesigned group management pages with animated artwork.
+* ‘Forward To’ menu has smooth infinite scroll on mobile.
+* Spoiler animations re-hide text after a short period.
+* Numerous layout fixes and improvements.
+
+### 🚀 Faster
+* Media loads and scrolls faster in Shared Media and Global Search.
+* Optimized some heavy background calculations.
+* Memory usage optimizations.
+
+### 💪 Stronger
+* Fixed missing sticker suggestions (e.g. for ❤️ emoji).
+* Fixed infinite spinning in Sticker panel.
+* Fixed scroll jumps and missing sender names in local search results.
+* Fixed highlight color when searching in dark mode.
+* Fixed pasting text and media from clipboard on Firefox and iOS browsers.
+* Media Viewer: Fixed navigating to the origin message on mobile.
+* Media Viewer: Fixed lingering audio after moving to the next item.
+* Reactions: Fixed unexpected interaction animations.
+* Fixed jumping cursor when typing in Safari.
+
+## 1.31.0 (2022-01-28)
+
+### 👏 Harder
+* Hide text with an animation using the crossed-eye icon 👁 in the formatting menu.
+* Quickly add Spoiler formatting with Ctrl + P (⌘ + P on macOS), or || markdown around the text.
+* Admins can manage Join Requests and revoked invites.
+* Promote new admins in your groups and channels via Global Search.
+
+### 🤩 Better
+* Network stability enhancements.
+* Various improvements and tuning for reactions and interactive emoji.
+* Media Viewer improved for mobile devices.
+* Numerous layout adjustments.
+
+### 🚀 Faster
+* The app better renders multiple components.
+
+### 💪 Stronger
+* Fixed inline playback for QuickTime videos.
+* Fixes for tooltips – including stickers, emoji, and mentions.
+* Unread counter now correctly reflects values on mobile devices.
+* Emoji now properly copy from message text.
+* Users’ display names now appear in service messages.
+* Fixed collapsing multiple spaces in messages.
+* Reactions and the “Send As” feature are now always available in Discussion Groups.
+
+## 1.30.0 (2022-01-21)
+
+### 👏 Harder
+* Meet Message Reactions:
+  - React to a message with ❤️🔥🎉😁😱🤩😢👎💩🤮 in the context menu.
+  - Send a quick 👍 reaction by hovering over the bottom corner of a message.
+  - You can change your default reaction to another emoji in Settings > General.
+  - Group and Channel admins can enable and control reactions via their chat's Info Page > Edit > Reactions.
+
+* Interactive Emoji:
+  - Added support for all interactive emoji, including fullscreen animations and sound effects. Try 🔥, 🍆, 🍑 and more.
+  - Animations play simultaneously when both users have the chat open.
+  – The “is watching…” status will appear when your chat partner is also seeing the animations.
+
+* Manage invite links for Groups and Channels:
+  – Enable admin approval or limited duration and users.
+
+### 🤩 Better
+* Better quality for uploaded profile pictures.
+* Various UI improvements.
+
+### 🚀 Faster
+* Several optimizations for older devices – no more freezing while typing.
+
+### 💪 Stronger
+* Saved Messages now correctly renders in search results.
+* Fixed missing icons for muted chats in the chat list.
+* The context menu no longer flickers on older devices.
+* Fix re-scheduling messages to a previous date.
+
+## 1.29.0 (2022-01-15)
+
+### 👏 Harder
+* Add admins in groups and channels.
+* Use inline "Request Contact" button for bots.
+* See inline search results in chats with bots that support it.
+
+### 🤩 Better
+* Dialogs now have a closing animation.
+* Messages with spoilers will be hidden in chat until full support is added.
+* Various UI fixes.
+
+### 💪 Stronger
+* Fixed missing user list when creating groups and channels.
+* Fixed chat history being deleted when deleting a contact.
+* Fixed missing text in messages containing specific emoji.
+
+## 1.28.0 (2022-01-07)
+
+### 👏 Harder
+* Support for join requests in groups and channels.
+* Support for more service messages.
+
+### 🤩 Better
+* Easier to select and adjust left column width.
+* Redundant single quotes removed in Spanish and French translations.
+* Support for hotkeys on non-qwerty keyboards.
+* Use Ctrl+Shift+F or Ctrl+F (in PWA mode) to open global or local search.
+* Chat: "Add to folder..." only appears for users with folders.
+* Support for `start` parameter in `tg://resolve` links.
+
+### 💪 Stronger
+* Fixed focusing on messages in a chat that was previously open.
+* Fixed missing stickers in sticker suggestions.
+* Fixed opening chats from user mentions.
+* Fixed various glitches when appearing as a channel in public groups.
+* Removed redundant download and forward options in chats with protected content.
+
+## 1.27.0 (2021-12-31)
+
+🎄 **Happy New Year 2022!** 🎄
+
+### 👏 Harder
+* Protected Content in Groups and Channels:
+  – Content creators can restrict the ability to forward messages from their groups and channels.
+  – When forwarding is restricted, users will also be unable to directly save media from the chat or take screenshots.
+  – Toggle this option on or off via Chat Info > Group / Channel Type.
+* Anonymous Posting in Public Groups
+  – Comment as one of your channels in public groups and channel comments.
+  – Tap the profile picture next to the message bar to choose which channel you will appear as when you send the message.
+* Your peers will now be notified when you are typing a message or selecting a sticker.
+
+### 🤩 Better
+* Detailed info is now shown when moving cursor over message timestamp.
+
+### 🚀 Faster
+* Some optimizations for heavy calculations.
+* The UI is even more responsive now.
+
+### 💪 Stronger
+* Fixed updating edited media.
+* Fixed switching folders with the same name.
+* Fix frozen scroll and missing UI elements when animations are turned off.
+* Fixed completely turning off animations.
+
+## 1.26.0 (2021-12-25)
+> No longer alpha
+
+### 👏 Harder
+* Added bot `start` parameter for t.me links.
+* Changed display of service notifications for errors.
+
+### 🤩 Better
+* Fixed scroll jumps in message history.
+* Improved font for Arabic and Persian languages.
+* Various fixes for RTL languages.
+* Rotating your device will no longer refresh the page during video chats.
+* Various UI improvements.
+
+### 🚀 Faster
+* Optimized rendering for context menus.
+* Optimized search in large lists.
+
+### 💪 Stronger
+* Fixed echo cancellation in calls.
+* Fixed focusing from forwarded channel posts.
+* Fixed keyboard navigation, missing contacts, and auto-focus when forwarding.
+* Fixed markdown parsing inside code and links.
+* Fixed missing UI elements when going back in history stack.
+* Fixed flickering profile photos in Safari.
+* Fixed t.me message links to private chats.
+* Fixed duplicated folders.
+* Fixed missing media due to outdated auth key.
+* Fixed loading default language pack on auth screen.
+* Fixed missing profile pictures in comments.
+
+## 1.25.0 (2021-12-10)
+
+### 👏 Harder
+* Brand new Media Viewer for touch screens with swipe, pinch, double-tap and pan gestures.
+* Read receipts are available for your messages in groups.
+* Join Group, Subscribe to Channel and Start Bot buttons are now shown on mobile screens.
+* Added support for wide screens up to 4K.
+* More accessibility support.
+
+### 🤩 Better
+* Context menus are more compact.
+* Animations adjust to be more native on various devices.
+* Several UI improvements.
+
+### 🚀 Faster
+* Slide transitions and context menus were drastically optimized.
+* UI effects are faster and more efficient.
+
+### 💪 Stronger
+* Deep links properly open in Safari.
+* Increased protocol security.
+
+## 1.24.0 (2021-12-04)
+
+### 👏 Harder
+* Starting a one-on-one call with another user creates a private channel to host the call.
+* Development is ongoing for direct one-on-one calls.
+
+### 🤩 Better
+* Various UI improvements.
+
+### 🚀 Faster
+* UI speed and animations were significantly improved by optimizing heavy calculations.
+
+### 💪 Stronger
+* Fixed missing red dot on unread favicon.
+* Fixed redundant scrolling in small message lists.
+
+## 1.23.0 (2021-11-27)
+
+### 👏 Harder
+* An early version of **Video Chats** is available in all groups.
+
+### 🤩 Better
+* Various UI improvements.
+
+### 🚀 Faster
+* Optimized the rendering engine.
+. Optimized rendering the chat list.
+* Fixed memory leaks in large audio playlists.
+
+### 💪 Stronger
+* Fixed videos pausing during playback.
+* Fixed missing sounds when notifications are disabled.
+* Fixed page refresh when listening to voice messages.
+* Fixed incorrect track order in audio playlists.
+* Fixed opening links without `https://` formatting.
+* Fixed scroll jumps in new chats.
+
+## 1.22.0 (2021-11-19)
+
+### 👏 Harder
+* Messages you forward can now be sent as Scheduled Messages.
+* Groups you have in common with another user are now listed on their Profile.
+* Added text and image previews for the WebZ URL.
+
+### 🤩 Better
+* Notifications are no longer shown when the app is in the foreground.
+* Various UI improvements.
+
+### 🚀 Faster
+* Fixed some minor memory leaks.
+
+### 💪 Stronger
+* Fixed opening unread comments on posts.
+* Fixed notifications opening the browser instead of the installed app.
+* Fixed missing Sticker Search section.
+* Fixed flickering when sending a message to an empty channel.
+* Fixed ESG panel sometimes being stuck.
+* Fixed app freezes when formatting text.
+* Fixed issues when creating a group.
+
+## 1.21.0 (2021-11-12)
+
+### 👏 Harder
+* Specify auto-download settings for media by chat type in Settings > Data & Storage.
+* The ‘Choosing a Sticker’ user status now appears in chats and the chat list.
+
+### 🤩 Better
+* Various UI fixes.
+
+### 🚀 Faster
+* Optimized animations for voice message playback.
+* Faster rendering of chats and messages with optimized time formatting.
+
+### 💪 Stronger
+* Fixed scrolling jumps in message list.
+* Fixed leaving/deleting groups and channels.
+* Fixed marking service notifications as read.
+* Fixed time display issues for both 12 and 24-hour formats.
+
+## 1.20.0 (2021-11-05)
+
+### 👏 Harder
+* Adjust playback speed and volume and navigate between tracks with the new audio player controls.
+* Switch between 12/24-hour clock from Settings > General > Time Format.
+* Reply to recent messages with Ctrl+Up.
+* Application has been updated to support new 64-bit identifiers.
+
+### 🤩 Better
+* Smooth loading for videos.
+* Various visual improvements.
+
+### 🚀 Faster
+* Optimized scrolling in chats with lots of media.
+* Optimized rendering of voice messages.
+
+### 💪 Stronger
+* Fixed hidden pinned messages when listening to audio files.
+* Fixed chat remaining in list after deleting.
+* Fixed cursor jumping when entering emoji.
+* Fixed the resolution of document previews.
+* Fixed marking changelog messages as read.
+* Fixed Firefox favicon.
+
+## 1.19.0 (2021-10-29)
+
+### 👏 Harder
+* You can now add users as a contact from their profile.
+* Improvements in handling t.me/ links.
+
+### 🤩 Better
+* Redesigned error messages in the login flow for invalid numbers and too many attempts.
+* Composer: Support for non-standard JPEG extensions.
+* Enhanced icons for app shortcuts and the “Favorites" tab in your browser.
+
+### 💪 Stronger
+* Added fixes for editing contacts.
+
+## 1.18.0 (2021-10-22)
+
+### 👏 Harder
+* Support for downloading all media types (via context menu).
+* Support for downloading media from multiple selected messages.
+* Group Management: Users can now be removed via the Member List and the Permissions screen.
+* Privacy and Security: Tap the `+` button in Privacy and Security > Blocked Users to add additional users to the list.
+* These fancy new changelogs.
+
+### 🤩 Better
+* Message: Video Mesages and GIFs are now larger in chat.
+* Sticker and GIF Search: Your cursor automatically moves to the panel when you open it.
+
+### 🚀 Faster
+* Optimized, more efficient animations.
+
+### 💪 Stronger
+* Notifications: Fixed missing sounds.
+* Left Column: Fixed default width for smaller screens.
+* Media Viewer: Fixed pinch-to-zoom for iOS users.
+* Audio: Fixed the download button for RTL language users.
+* Messages: Self-destructing videos must now be opened in the Telegram App for iOS or Android.
+* Various other layout improvements.
+
+## 1.17.0 (2021-10-15)
+
+* Message: show white outline for big emoji
+* PWA: Fixed stale unread badge
+* Design: Support left panel resizing. Stretch for bigger screens
+* Poll: Support multiline questions
+* Various fixes
+
+## 1.16.0 (2021-10-08)
+
+* Bots: Added support for forced replies
+* Various minor UI improvements
+
+## 1.15.0 (2021-09-24)
+
+* Auth: Always use white QR background
+* Media: Fixed image upload on Firefox
+* Video: Display .mov as document, if format not supported
+
+## 1.14.0 (2021-09-17)
+
+* Shared Media: Added 'Voice' tab
+* Added 'Show disscussion' button
+* Added support for 'Replies' bot
+* Attachment Menu: Fixes for quick mode items
+* Composer: Fixed pasting images in Linux
+
+## 1.13.0 (2021-09-12)
+
+* Auth: Get countries from the server
+* Audio Player: Big overhaul, Media Session support
+* Support t.me ang tg:// links
+* Support scrollbars in the context menu
+
+## 1.12.0 (2021-08-27)
+
+* Avatar: Fix emoji display
+* Various fixes
+
+## 1.11.0 (2021-08-20)
+
+* Payments 2.0
+* Emoji 13
+* Auth: Prevent refresh when rotating device
+* Bots: Commands menu
+* Composer: Notify, if message is too long
+* Settings: New design for profile
+
+## 1.10.0 (2021-08-13)
+
+* Mention: Support Unicode names
+* Support redirects from t.me
+* Various bug fixes
+
+## 1.9.0 (2021-08-07)
+
+* Chat: Suggest "Hello" sticker for empty dialogs
+* Dev: Allow invoking API methods from the console
+* Design: Use native fonts for iOS and MacOS systems
+* Composer: Fix potential XSS vulnerability
+* Performance: Various optimizations
+
+## 1.8.0 (2021-08-02)
+
+* GramJS: Support reconnects when transferring files
+* Auth: Support switching to system language
+* Messages: Fix copying link on iOS
+* Localization: Telegram Tips channels
+* Teact: Fix DOM nodes leak
+
+## 1.7.0 (2021-07-23)
+
+* Bots: Support stop and restart
+* Calendar: Fix months starting from Sunday
+* Composer: Preserve input when sending sticker
+* Video: Fixed incorrect duration
+* Comments: Various fixes
+
+## 1.6.0 (2021-07-16)
+
+* Inline bots are now supported
+* Message: You can now report messages
+* Support browser history
+* Login: Allow all phone numbers
+* Attachment Menu: Show emoji tooltip
+* Support for links with long TLDs
+
+## 1.5.0 (2021-07-09)
+
+* Media Viewer: Support document preview
+* Media Viewer: Prevent refresh when rotating device to watch video
+* Symbol Menu: Show scrollbar on non-touch devices
+
+## 1.4.0 (2021-07-06)
+
+* Media Viewer: Context menu for images
+* Dark Theme: Auto-change with system theme
+* Localization: Vazir font for Persian language
+* Notifications: Group multiple push notifications
+* Invites: Show confirmation modal
+
+## 1.3.0 (2021-06-21)
+
+* Settings / General: Show sensitive content toggle
+
+## 1.2.0 (2021-06-20)
+
+* Dark Theme: Use system theme
+* Media Viewer: Video fullscreen on double click
+* Message: Open context menu by short tap on Android
+
+## 1.1.0 (2021-06-19)
+
+* Audio: Add download button
+
+## 1.0.0 (2021-03-13)
+
+* Initial release
