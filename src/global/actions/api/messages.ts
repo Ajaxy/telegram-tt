@@ -461,7 +461,7 @@ addActionHandler('reportMessages', async (global, actions, payload) => {
   actions.showNotification({
     message: result
       ? 'Thank you! Your report will be reviewed by our team.'
-      : 'Error occured while submiting report. Please, try again later.',
+      : 'Error occurred while submitting report. Please, try again later.',
   });
 });
 

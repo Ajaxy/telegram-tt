@@ -12,6 +12,7 @@ import {
   ApiMessageEntity,
   ApiMessageEntityTypes,
   ApiNewPoll,
+  ApiPhoto,
   ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
@@ -338,6 +339,20 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
     dcId,
     photoId,
   });
+}
+
+export function buildTypeInputPhoto(photo: ApiPhoto) {
+  const localPhoto = localDb.photos[photo?.id];
+
+  if (!localPhoto) {
+    return undefined;
+  }
+
+  return new GramJs.InputPhoto(pick(localPhoto, [
+    'id',
+    'accessHash',
+    'fileReference',
+  ]));
 }
 
 export function buildInputContact({

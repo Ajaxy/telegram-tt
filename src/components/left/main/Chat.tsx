@@ -52,6 +52,7 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
 
 import './Chat.scss';
+import ReportModal from '../../common/ReportModal';
 
 type OwnProps = {
   style?: string;
@@ -115,8 +116,10 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
+  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+  const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
   const { lastMessage, typingStatus } = chat || {};
   const isAction = lastMessage && isActionMessage(lastMessage);
@@ -189,21 +192,27 @@ const Chat: FC<OwnProps & StateProps> = ({
     focusLastMessage,
   ]);
 
-  function handleDelete() {
+  const handleDelete = useCallback(() => {
     markRenderDeleteModal();
     openDeleteModal();
-  }
+  }, [markRenderDeleteModal, openDeleteModal]);
 
-  function handleChatFolderChange() {
+  const handleChatFolderChange = useCallback(() => {
     markRenderChatFolderModal();
     openChatFolderModal();
-  }
+  }, [markRenderChatFolderModal, openChatFolderModal]);
+
+  const handleReport = useCallback(() => {
+    markRenderReportModal();
+    openReportModal();
+  }, [markRenderReportModal, openReportModal]);
 
   const contextActions = useChatContextActions({
     chat,
     user,
     handleDelete,
     handleChatFolderChange,
+    handleReport,
     folderId,
     isPinned,
     isMuted,
@@ -326,6 +335,15 @@ const Chat: FC<OwnProps & StateProps> = ({
           onClose={closeChatFolderModal}
           onCloseAnimationEnd={unmarkRenderChatFolderModal}
           chatId={chatId}
+        />
+      )}
+      {shouldRenderReportModal && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={closeReportModal}
+          onCloseAnimationEnd={unmarkRenderReportModal}
+          chatId={chatId}
+          subject="peer"
         />
       )}
     </ListItem>

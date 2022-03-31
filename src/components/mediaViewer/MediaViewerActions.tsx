@@ -33,6 +33,8 @@ type OwnProps = {
   message?: ApiMessage;
   fileName?: string;
   isAvatar?: boolean;
+  canReport?: boolean;
+  onReport: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
   onZoomToggle: NoneToVoidFunction;
@@ -47,6 +49,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   isAvatar,
   isDownloading,
   isProtected,
+  canReport,
+  onReport,
   onCloseMediaViewer,
   onForward,
   onZoomToggle,
@@ -154,6 +158,14 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
               {lang('AccActionDownload')}
             </MenuItem>
           )}
+          {canReport && (
+            <MenuItem
+              icon="flag"
+              onClick={onReport}
+            >
+              {lang('ReportPeer.Report')}
+            </MenuItem>
+          )}
         </DropdownMenu>
         {isDownloading && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
       </div>
@@ -183,6 +195,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className={isZoomed ? 'icon-zoom-out' : 'icon-zoom-in'} />
       </Button>
+      {canReport && (
+        <Button
+          round
+          size="smaller"
+          color="translucent-white"
+          ariaLabel={lang('ReportPeer.Report')}
+          onClick={onReport}
+        >
+          <i className="icon-flag" />
+        </Button>
+      )}
       <Button
         round
         size="smaller"

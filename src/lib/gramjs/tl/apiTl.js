@@ -982,6 +982,7 @@ account.getNotifySettings#12b3ad31 peer:InputNotifyPeer = PeerNotifySettings;
 account.updateProfile#78515775 flags:# first_name:flags.0?string last_name:flags.1?string about:flags.2?string = User;
 account.updateStatus#6628562c offline:Bool = Bool;
 account.getWallPapers#7967d36 hash:long = account.WallPapers;
+account.reportPeer#c5ba3d86 peer:InputPeer reason:ReportReason message:string = Bool;
 account.checkUsername#2714d86c username:string = Bool;
 account.updateUsername#3e0bdd7c username:string = User;
 account.getPrivacy#dadbc950 key:InputPrivacyKey = account.PrivacyRules;
@@ -1002,6 +1003,7 @@ account.getNotifyExceptions#53577479 flags:# compare_sound:flags.1?true peer:fla
 account.uploadWallPaper#dd853661 file:InputFile mime_type:string settings:WallPaperSettings = WallPaper;
 account.setContentSettings#b574b16b flags:# sensitive_enabled:flags.0?true = Bool;
 account.getContentSettings#8b9b4dae = account.ContentSettings;
+account.reportProfilePhoto#fa8cc6f5 peer:InputPeer photo_id:InputPhoto reason:ReportReason message:string = Bool;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
 contacts.getContacts#5dd69e12 hash:long = contacts.Contacts;

@@ -5,7 +5,7 @@ import { ApiChat, ApiUser } from '../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
-  isChatArchived, getCanDeleteChat, isUserId, isChatChannel,
+  isChatArchived, getCanDeleteChat, isUserId, isChatChannel, isChatGroup,
 } from '../global/helpers';
 import { compact } from '../util/iteratees';
 import useLang from './useLang';
@@ -19,6 +19,7 @@ const useChatContextActions = ({
   canChangeFolder,
   handleDelete,
   handleChatFolderChange,
+  handleReport,
 }: {
   chat: ApiChat | undefined;
   user: ApiUser | undefined;
@@ -28,6 +29,7 @@ const useChatContextActions = ({
   canChangeFolder?: boolean;
   handleDelete: () => void;
   handleChatFolderChange: () => void;
+  handleReport?: () => void;
 }, isInSearch = false) => {
   const lang = useLang();
 
@@ -84,6 +86,11 @@ const useChatContextActions = ({
       ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
       : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
 
+    const canReport = handleReport && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
+    const actionReport = canReport
+      ? { title: lang('ReportPeer.Report'), icon: 'flag', handler: handleReport }
+      : undefined;
+
     const actionDelete = {
       title: isUserId(chat.id)
         ? lang('Delete')
@@ -103,11 +110,12 @@ const useChatContextActions = ({
       actionPin,
       !isSelf && actionMute,
       !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
+      actionReport,
       actionDelete,
     ]);
   }, [
-    chat, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, handleDelete, folderId, isSelf,
-    isServiceNotifications,
+    chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
+    handleDelete, handleReport, folderId, isSelf, isServiceNotifications,
   ]);
 };
 

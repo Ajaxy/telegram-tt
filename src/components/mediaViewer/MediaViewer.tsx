@@ -16,6 +16,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
+import useFlag from '../../hooks/useFlag';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import usePrevious from '../../hooks/usePrevious';
 import {
@@ -63,6 +64,7 @@ import PanZoom from './PanZoom';
 import SenderInfo from './SenderInfo';
 import SlideTransition from './SlideTransition';
 import ZoomControls from './ZoomControls';
+import ReportModal from '../common/ReportModal';
 
 import './MediaViewer.scss';
 
@@ -144,6 +146,7 @@ const MediaViewer: FC<StateProps> = ({
   const isGhostAnimation = animationLevel === 2;
 
   /* Controls */
+  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [canPanZoomWrap, setCanPanZoomWrap] = useState(false);
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -186,6 +189,8 @@ const MediaViewer: FC<StateProps> = ({
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
+  const avatarPhoto = avatarOwner?.photos?.[profilePhotoIndex!];
+  const canReport = !!avatarPhoto && profilePhotoIndex! > 0;
 
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
   let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
@@ -483,10 +488,19 @@ const MediaViewer: FC<StateProps> = ({
           isZoomed={isZoomed}
           message={message}
           fileName={fileName}
+          canReport={canReport}
+          onReport={openReportModal}
           onCloseMediaViewer={close}
           onForward={handleForward}
           onZoomToggle={handleZoomToggle}
           isAvatar={isAvatar}
+        />
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={closeReportModal}
+          subject="media"
+          photo={avatarPhoto}
+          chatId={avatarOwner?.id}
         />
       </div>
       <PanZoom
