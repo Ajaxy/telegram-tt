@@ -65,26 +65,17 @@ export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
     return lang(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
   }
 
-  const withYear = date.getFullYear() !== today.getFullYear();
-  const format = (
-    lang(withYear ? 'formatDateScheduleYear' : 'formatDateSchedule')
-    || (withYear ? 'd MMM yyyy' : 'd MMM')
-  );
+  const noYear = date.getFullYear() === today.getFullYear();
 
-  return formatDate(lang, date, format);
+  return formatDateToString(date, lang.code, noYear);
 }
 
 export function formatFullDate(lang: LangFn, datetime: number | Date) {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const format = lang('formatterYearMax') || 'dd.MM.yyyy';
-
-  return formatDate(lang, date, format);
+  return formatDateToString(datetime, lang.code, false, 'numeric');
 }
 
 export function formatMonthAndYear(lang: LangFn, date: Date, isShort = false) {
-  const format = lang(isShort ? 'formatterMonthYear2' : 'formatterMonthYear') || 'MMM yyyy';
-
-  return formatDate(lang, date, format);
+  return formatDateToString(date, lang.code, false, isShort ? 'short' : 'long', true);
 }
 
 export function formatCountdown(
@@ -164,29 +155,10 @@ export function formatHumanDate(
     }
   }
 
-  const withYear = date.getFullYear() !== today.getFullYear();
-  const formatKey = isShort
-    ? (withYear ? 'formatDateScheduleYear' : 'formatDateSchedule')
-    : (withYear ? 'chatFullDate' : 'chatDate');
-  const format = lang(formatKey) || 'd MMMM yyyy';
+  const noYear = date.getFullYear() === today.getFullYear();
+  const formattedDate = formatDateToString(date, lang.code, noYear, isShort ? 'short' : 'long');
 
-  return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(formatDate(lang, date, format));
-}
-
-function formatDate(lang: LangFn, date: Date, format: string) {
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-
-  return format
-    .replace('LLLL', lang(MONTHS_FULL[monthIndex]))
-    .replace('MMMM', lang(`Month.Gen${MONTHS_FULL[monthIndex]}`))
-    .replace('MMM', lang(`Month.Short${MONTHS_FULL[monthIndex]}`))
-    .replace('MM', String(monthIndex + 1).padStart(2, '0'))
-    .replace('dd', String(day).padStart(2, '0'))
-    .replace('d', String(day))
-    .replace('yyyy', String(date.getFullYear()))
-    // Workaround for https://bugs.telegram.org/c/5777
-    .replace(/'de'/g, 'de');
+  return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(formattedDate);
 }
 
 export function formatMediaDateTime(
@@ -247,22 +219,34 @@ export function formatVoiceRecordDuration(durationInMs: number) {
   return `${parts.join(':')},${String(milliseconds).padStart(2, '0')}`;
 }
 
-const formatDayToStringWithCache = withCache((dayStartAt: number, locale: string) => {
+const formatDayToStringWithCache = withCache((
+  dayStartAt: number,
+  locale: string,
+  noYear?: boolean,
+  monthFormat: 'short' | 'long' | 'numeric' = 'short',
+  noDay?: boolean,
+) => {
   return new Date(dayStartAt).toLocaleString(
     locale,
     {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: noYear ? undefined : 'numeric',
+      month: monthFormat,
+      day: noDay ? undefined : 'numeric',
     },
   );
 });
 
-export function formatDateToString(datetime: Date | number, locale = 'en-US') {
+export function formatDateToString(
+  datetime: Date | number,
+  locale = 'en-US',
+  noYear = false,
+  monthFormat: 'short' | 'long' | 'numeric' = 'short',
+  noDay = false,
+) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const dayStartAt = getDayStartAt(date);
 
-  return formatDayToStringWithCache(dayStartAt, locale);
+  return formatDayToStringWithCache(dayStartAt, locale, noYear, monthFormat, noDay);
 }
 
 export function formatDateTimeToString(datetime: Date | number, locale = 'en-US') {
