@@ -346,7 +346,7 @@ const Message: FC<OwnProps & StateProps> = ({
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && !isInDocumentGroupNotLast
   );
-  const canForward = isChannel && !isScheduled;
+  const canForward = isChannel && !isScheduled && !isProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
       && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat)
