@@ -45,6 +45,7 @@ addActionHandler('setMediaViewerVolume', (global, actions, payload) => {
     mediaViewer: {
       ...global.mediaViewer,
       volume,
+      isMuted: false,
     },
   };
 });
