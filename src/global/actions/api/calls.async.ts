@@ -312,6 +312,7 @@ addActionHandler('inviteToCallFallback', async (global, actions, payload) => {
       channel.title === fallbackChannelTitle
       && channel.isCreator
       && !channel.isRestricted
+      && !channel.isForbidden
     );
   });
   if (!fallbackChannel) {

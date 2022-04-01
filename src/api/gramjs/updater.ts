@@ -241,13 +241,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
             '@type': 'updateChat',
             id: message.chatId,
             chat: {
-              isRestricted: true,
+              isForbidden: true,
+              isNotJoined: true,
             },
-          });
-
-          onUpdate({
-            '@type': 'updateChatLeave',
-            id: message.chatId,
           });
         }
       } else if (action instanceof GramJs.MessageActionChatAddUser) {

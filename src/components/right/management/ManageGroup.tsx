@@ -234,7 +234,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, deleteChat, openChat,
   ]);
 
-  if (chat.isRestricted) {
+  if (chat.isRestricted || chat.isForbidden) {
     return undefined;
   }
 

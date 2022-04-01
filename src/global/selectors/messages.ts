@@ -380,9 +380,10 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     )
     && !isForwardedMessage(message)
     && !message.viaBotId
+    && !chat.isForbidden
   );
 
-  const canReply = !isLocal && !isServiceNotification && getCanPostInChat(chat, threadId);
+  const canReply = !isLocal && !isServiceNotification && !chat.isForbidden && getCanPostInChat(chat, threadId);
 
   const hasPinPermission = isPrivate || (
     chat.isCreator
@@ -410,7 +411,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
 
   const canReport = !isPrivate && !isOwn;
 
-  const canDeleteForAll = canDelete && (
+  const canDeleteForAll = canDelete && !chat.isForbidden && (
     (isPrivate && !isChatWithSelf)
     || (isBasicGroup && (
       isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator

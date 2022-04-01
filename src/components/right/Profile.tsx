@@ -289,10 +289,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   function renderContent() {
     if (!viewportIds || !canRenderContent || !chatMessages) {
       const noSpinner = isFirstTab && !canRenderContent;
+      const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
       return (
         <div className="content empty-list">
-          {!noSpinner && <Spinner />}
+          {!noSpinner && !forceRenderHiddenMembers && <Spinner />}
+          {forceRenderHiddenMembers && <NothingFound text="You have no access to group members list." />}
         </div>
       );
     }
@@ -518,7 +520,8 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
     const members = chat?.fullInfo?.members;
-    const areMembersHidden = hasMembersTab && chat && chat.fullInfo && !chat.fullInfo.canViewMembers;
+    const areMembersHidden = hasMembersTab && chat
+      && (chat.isForbidden || (chat.fullInfo && !chat.fullInfo.canViewMembers));
     const canAddMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloadIds = selectActiveDownloadIds(global, chatId);

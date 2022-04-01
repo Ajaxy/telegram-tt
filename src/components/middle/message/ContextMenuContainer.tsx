@@ -486,7 +486,7 @@ export default memo(withGlobal<OwnProps>(
       canSaveGif: !isProtected && canSaveGif,
       activeDownloads,
       canShowSeenBy,
-      enabledReactions: chat?.fullInfo?.enabledReactions,
+      enabledReactions: chat?.isForbidden ? undefined : chat?.fullInfo?.enabledReactions,
       isPrivate,
       hasFullInfo: Boolean(chat?.fullInfo),
       canShowReactionsCount,
