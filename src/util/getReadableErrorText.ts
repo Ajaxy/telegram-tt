@@ -1,8 +1,9 @@
 import { ApiError, ApiFieldError } from '../api/types';
 
+import { DEBUG } from '../config';
+
 const READABLE_ERROR_MESSAGES: Record<string, string> = {
   CHAT_RESTRICTED: 'You can\'t send messages in this chat, you were restricted',
-  CHAT_WRITE_FORBIDDEN: 'You can\'t write in this chat',
   CHAT_SEND_POLL_FORBIDDEN: 'You can\'t create polls in this chat',
   CHAT_SEND_STICKERS_FORBIDDEN: 'You can\'t send stickers in this chat',
   CHAT_SEND_GIFS_FORBIDDEN: 'You can\'t send gifs in this chat',
@@ -23,7 +24,6 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   MESSAGE_DELETE_FORBIDDEN: 'You can\'t delete one of the messages you tried to delete, most likely because it is a service message.',
   MESSAGE_POLL_CLOSED: 'Poll closed',
   MESSAGE_EDIT_TIME_EXPIRED: 'You can\'t edit this message anymore.',
-  CHAT_ADMIN_REQUIRED: 'You must be an admin in this chat to do this',
   PINNED_DIALOGS_TOO_MUCH: 'Sorry, you can only pin 5 chats to the top',
   DIALOG_FILTERS_TOO_MUCH: 'Sorry, you can\'t have more than 10 folders',
   CHANNEL_PRIVATE: 'This channel is private',
@@ -71,6 +71,11 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   INPUT_USER_DEACTIVATED: 'The specified user was deleted',
   BOT_PRECHECKOUT_TIMEOUT: 'The request for payment has expired',
 };
+
+if (DEBUG) {
+  READABLE_ERROR_MESSAGES.CHAT_WRITE_FORBIDDEN = 'You can\'t write in this chat';
+  READABLE_ERROR_MESSAGES.CHAT_ADMIN_REQUIRED = 'You must be an admin in this chat to do this';
+}
 
 export const SHIPPING_ERRORS: Record<string, ApiFieldError> = {
   ADDRESS_STREET_LINE1_INVALID: {
