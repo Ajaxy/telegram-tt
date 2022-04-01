@@ -63,9 +63,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   const handleDownloadClick = useCallback(() => {
     if (isDownloading) {
-      cancelMessageMediaDownload({ message });
+      cancelMessageMediaDownload({ message: message! });
     } else {
-      downloadMessageMedia({ message });
+      downloadMessageMedia({ message: message! });
     }
   }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
 

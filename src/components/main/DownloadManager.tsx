@@ -1,4 +1,6 @@
-import { FC, memo, useEffect } from '../../lib/teact/teact';
+import {
+  FC, memo, useCallback, useEffect,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { Thread } from '../../global/types';
@@ -10,58 +12,76 @@ import {
   getMessageContentFilename, getMessageMediaHash,
 } from '../../global/helpers';
 
+import useDebounce from '../../hooks/useDebounce';
+
 type StateProps = {
-  activeDownloads: Record<number, number[]>;
-  messages: Record<number, {
+  activeDownloads: Record<string, number[]>;
+  messages: Record<string, {
     byId: Record<number, ApiMessage>;
     threadsById: Record<number, Thread>;
   }>;
 };
 
-const startedDownloads = new Set<string>();
+const GLOBAL_UPDATE_DEBOUNCE = 1000;
+
+const processedMessages = new Set<ApiMessage>();
+const downloadedMessages = new Set<ApiMessage>();
 
 const DownloadManager: FC<StateProps> = ({
   activeDownloads,
   messages,
 }) => {
-  const { cancelMessageMediaDownload } = getActions();
+  const { cancelMessagesMediaDownload } = getActions();
+
+  const debouncedGlobalUpdate = useDebounce(GLOBAL_UPDATE_DEBOUNCE, true);
+
+  const handleMessageDownloaded = useCallback((message: ApiMessage) => {
+    downloadedMessages.add(message);
+    debouncedGlobalUpdate(() => {
+      if (downloadedMessages.size) {
+        cancelMessagesMediaDownload({ messages: Array.from(downloadedMessages) });
+        downloadedMessages.clear();
+      }
+    });
+  }, [cancelMessagesMediaDownload, debouncedGlobalUpdate]);
 
   useEffect(() => {
-    Object.entries(activeDownloads).forEach(([chatId, messageIds]) => {
-      const activeMessages = messageIds.map((id) => messages[Number(chatId)].byId[id]);
-      activeMessages.forEach((message) => {
-        const downloadHash = getMessageMediaHash(message, 'download');
-        if (!downloadHash) {
-          cancelMessageMediaDownload({ message });
-          return;
+    const activeMessages = Object.entries(activeDownloads).map(([chatId, messageIds]) => (
+      messageIds.map((id) => messages[chatId].byId[id])
+    )).flat();
+
+    if (!activeMessages.length) {
+      processedMessages.clear();
+      return;
+    }
+
+    activeMessages.forEach((message) => {
+      if (processedMessages.has(message)) {
+        return;
+      }
+      processedMessages.add(message);
+      const downloadHash = getMessageMediaHash(message, 'download');
+      if (!downloadHash) {
+        handleMessageDownloaded(message);
+        return;
+      }
+
+      const mediaData = mediaLoader.getFromMemory(downloadHash);
+
+      if (mediaData) {
+        download(mediaData, getMessageContentFilename(message));
+        handleMessageDownloaded(message);
+        return;
+      }
+
+      mediaLoader.fetch(downloadHash, ApiMediaFormat.BlobUrl, true).then((result) => {
+        if (result) {
+          download(result, getMessageContentFilename(message));
         }
-
-        if (!startedDownloads.has(downloadHash)) {
-          const mediaData = mediaLoader.getFromMemory(downloadHash);
-          if (mediaData) {
-            startedDownloads.delete(downloadHash);
-            download(mediaData, getMessageContentFilename(message));
-            cancelMessageMediaDownload({ message });
-            return;
-          }
-
-          mediaLoader.fetch(downloadHash, ApiMediaFormat.BlobUrl, true).then((result) => {
-            startedDownloads.delete(downloadHash);
-            if (result) {
-              download(result, getMessageContentFilename(message));
-            }
-            cancelMessageMediaDownload({ message });
-          });
-
-          startedDownloads.add(downloadHash);
-        }
+        handleMessageDownloaded(message);
       });
     });
-  }, [
-    cancelMessageMediaDownload,
-    messages,
-    activeDownloads,
-  ]);
+  }, [messages, activeDownloads, cancelMessagesMediaDownload, handleMessageDownloaded]);
 
   return undefined;
 };
