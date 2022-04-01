@@ -460,7 +460,7 @@ addActionHandler('openForwardMenuForSelectedMessages', (global, actions) => {
 });
 
 addActionHandler('cancelMessageMediaDownload', (global, actions, payload) => {
-  const { message } = payload!;
+  const { message } = payload;
 
   const byChatId = global.activeDownloads.byChatId[message.chatId];
   if (!byChatId || !byChatId.length) return;
@@ -476,9 +476,24 @@ addActionHandler('cancelMessageMediaDownload', (global, actions, payload) => {
   });
 });
 
+addActionHandler('cancelMessagesMediaDownload', (global, actions, payload) => {
+  const { messages } = payload;
+
+  const byChatId = global.activeDownloads.byChatId;
+  const newByChatId: GlobalState['activeDownloads']['byChatId'] = {};
+  Object.keys(byChatId).forEach((chatId) => {
+    newByChatId[chatId] = byChatId[chatId].filter((id) => !messages.find((message) => message.id === id));
+  });
+  return {
+    ...global,
+    activeDownloads: {
+      byChatId: newByChatId,
+    },
+  };
+});
+
 addActionHandler('downloadMessageMedia', (global, actions, payload) => {
-  const { message } = payload!;
-  if (!message) return;
+  const { message } = payload;
 
   setGlobal({
     ...global,

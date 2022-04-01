@@ -585,6 +585,18 @@ export interface ActionPayloads {
     origin: AudioOrigin;
   };
 
+  // Downloads
+  downloadSelectedMessages: {};
+  downloadMessageMedia: {
+    message: ApiMessage;
+  };
+  cancelMessageMediaDownload: {
+    message: ApiMessage;
+  };
+  cancelMessagesMediaDownload: {
+    messages: ApiMessage[];
+  };
+
   // Users
   openAddContactDialog: {
     userId?: string;
@@ -640,8 +652,6 @@ export type NonTypedActionNames = (
   'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
   'stopActiveReaction' | 'startActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
   'setEditingId' |
-  // downloads
-  'downloadSelectedMessages' | 'downloadMessageMedia' | 'cancelMessageMediaDownload' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result
