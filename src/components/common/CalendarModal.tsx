@@ -337,7 +337,7 @@ function buildCalendarGrid(year: number, month: number) {
   date.setDate(1);
   date.setMonth(month);
   date.setFullYear(year);
-  const firstDay = date.getDay();
+  const firstDay = date.getDay() || 7;
   const totalDaysInPrevMonth = new Date(year, month, 0).getDate();
 
   for (let i = 1; i < firstDay; i++) {
