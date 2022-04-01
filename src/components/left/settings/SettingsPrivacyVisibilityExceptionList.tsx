@@ -8,7 +8,7 @@ import { ApiPrivacySettings, SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../config';
 import { unique } from '../../../util/iteratees';
-import { filterChatsByName, isChatGroup, isUserId } from '../../../global/helpers';
+import { filterChatsByName, isUserId } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
@@ -67,7 +67,8 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     const chatIds = unique([...folderAllOrderedIds || [], ...folderArchivedOrderedIds || []])
       .filter((chatId) => {
         const chat = chatsById[chatId];
-        return chat && ((isUserId(chat.id) && chat.id !== currentUserId) || isChatGroup(chat));
+
+        return chat && isUserId(chat.id) && chat.id !== currentUserId;
       });
 
     return unique([
