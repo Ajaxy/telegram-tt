@@ -19,7 +19,7 @@ import SettingsNotifications from './SettingsNotifications';
 import SettingsPrivacy from './SettingsPrivacy';
 import SettingsLanguage from './SettingsLanguage';
 import SettingsPrivacyVisibility from './SettingsPrivacyVisibility';
-import SettingsPrivacyActiveSessions from './SettingsPrivacyActiveSessions';
+import SettingsActiveSessions from './SettingsActiveSessions';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
 import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
@@ -62,7 +62,7 @@ const FOLDERS_SCREENS = [
 
 const PRIVACY_SCREENS = [
   SettingsScreens.PrivacyBlockedUsers,
-  SettingsScreens.PrivacyActiveSessions,
+  SettingsScreens.ActiveSessions,
 ];
 
 const PRIVACY_PHONE_NUMBER_SCREENS = [
@@ -226,9 +226,9 @@ const Settings: FC<OwnProps> = ({
             onReset={handleReset}
           />
         );
-      case SettingsScreens.PrivacyActiveSessions:
+      case SettingsScreens.ActiveSessions:
         return (
-          <SettingsPrivacyActiveSessions
+          <SettingsActiveSessions
             onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}

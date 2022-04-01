@@ -6,7 +6,9 @@ import { getActions, withGlobal } from '../../../global';
 import { SettingsScreens, ISettings, TimeFormat } from '../../../types';
 import { ApiSticker, ApiStickerSet } from '../../../api/types';
 
-import { IS_IOS, IS_MAC_OS, IS_TOUCH_ENV } from '../../../util/environment';
+import {
+  getSystemTheme, IS_IOS, IS_MAC_OS, IS_TOUCH_ENV,
+} from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
 import useLang from '../../../hooks/useLang';
@@ -21,6 +23,8 @@ import RadioGroup, { IRadioOption } from '../../ui/RadioGroup';
 import SettingsStickerSet from './SettingsStickerSet';
 import StickerSetModal from '../../common/StickerSetModal.async';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import switchTheme from '../../../util/switchTheme';
+import { ANIMATION_LEVEL_MAX } from '../../../config';
 
 type OwnProps = {
   isActive?: boolean;
@@ -40,6 +44,8 @@ type StateProps =
     stickerSetIds?: string[];
     stickerSetsById?: Record<string, ApiStickerSet>;
     defaultReaction?: string;
+    theme: ISettings['theme'];
+    shouldUseSystemTheme: boolean;
   };
 
 const ANIMATION_LEVEL_OPTIONS = [
@@ -69,6 +75,8 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   shouldSuggestStickers,
   shouldLoopStickers,
   timeFormat,
+  theme,
+  shouldUseSystemTheme,
 }) => {
   const {
     setSettingOption,
@@ -81,6 +89,17 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   const [sticker, setSticker] = useState<ApiSticker>();
 
   const lang = useLang();
+
+  const APPEARANCE_THEME_OPTIONS: IRadioOption[] = [{
+    label: lang('EmptyChat.Appearance.Light'),
+    value: 'light',
+  }, {
+    label: lang('EmptyChat.Appearance.Dark'),
+    value: 'dark',
+  }, {
+    label: lang('EmptyChat.Appearance.System'),
+    value: 'auto',
+  }];
 
   const KEYBOARD_SEND_OPTIONS = !IS_TOUCH_ENV ? [
     { value: 'enter', label: lang('lng_settings_send_enter'), subLabel: 'New line by Shift + Enter' },
@@ -109,6 +128,16 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
     setSettingOption({ messageTextSize: newSize });
   }, [setSettingOption]);
+
+  const handleAppearanceThemeChange = useCallback((value: string) => {
+    const newTheme = value === 'auto' ? getSystemTheme() : value as ISettings['theme'];
+
+    setSettingOption({ theme: newTheme });
+    setSettingOption({ shouldUseSystemTheme: value === 'auto' });
+    if (newTheme !== theme) {
+      switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
+    }
+  }, [animationLevel, setSettingOption, theme]);
 
   const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
     setSettingOption({ timeFormat: newTimeFormat });
@@ -160,6 +189,18 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         >
           {lang('ChatBackground')}
         </ListItem>
+      </div>
+
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('Theme')}
+        </h4>
+        <RadioGroup
+          name="theme"
+          options={APPEARANCE_THEME_OPTIONS}
+          selected={shouldUseSystemTheme ? 'auto' : theme}
+          onChange={handleAppearanceThemeChange}
+        />
       </div>
 
       <div className="settings-item">
@@ -251,6 +292,8 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const { theme, shouldUseSystemTheme } = global.settings.byKey;
+
     return {
       ...pick(global.settings.byKey, [
         'messageTextSize',
@@ -265,6 +308,8 @@ export default memo(withGlobal<OwnProps>(
       stickerSetIds: global.stickers.added.setIds,
       stickerSetsById: global.stickers.setsById,
       defaultReaction: global.appConfig?.defaultReaction,
+      theme,
+      shouldUseSystemTheme,
     };
   },
 )(SettingsGeneral));

@@ -126,7 +126,7 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
         return <h3>{lang('NeverShareWith')}</h3>;
 
-      case SettingsScreens.PrivacyActiveSessions:
+      case SettingsScreens.ActiveSessions:
         return <h3>{lang('SessionsTitle')}</h3>;
       case SettingsScreens.PrivacyBlockedUsers:
         return <h3>{lang('BlockedUsers')}</h3>;

@@ -65,11 +65,11 @@ const SettingsTwoFaPassword: FC<OwnProps> = ({
 
   return (
     <div className="settings-content two-fa custom-scroll">
-      <div className="settings-content-header">
+      <div className="settings-content-header no-border">
         <PasswordMonkey isBig isPasswordVisible={shouldShowPassword} />
       </div>
 
-      <div className="settings-item pt-0 no-border">
+      <div className="settings-item pt-0">
         <PasswordForm
           error={validationError || error}
           hint={hint}

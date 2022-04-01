@@ -18,7 +18,6 @@ type OwnProps = {
 type StateProps = {
   hasPassword?: boolean;
   blockedCount: number;
-  sessionsCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
   visibilityPrivacyPhoneNumber?: PrivacyVisibility;
@@ -34,7 +33,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   onReset,
   hasPassword,
   blockedCount,
-  sessionsCount,
   isSensitiveEnabled,
   canChangeSensitive,
   visibilityPrivacyPhoneNumber,
@@ -109,21 +107,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             <span className="subtitle" dir="auto">
               {lang(hasPassword ? 'PasswordOn' : 'PasswordOff')}
             </span>
-          </div>
-        </ListItem>
-        <ListItem
-          icon="active-sessions"
-          narrow
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PrivacyActiveSessions)}
-        >
-          <div className="multiline-menu-item">
-            <span className="title">{lang('SessionsTitle')}</span>
-            {sessionsCount > 0 && (
-              <span className="subtitle" dir="auto">
-                {sessionsCount === 1 ? '1 session' : `${sessionsCount} sessions`}
-              </span>
-            )}
           </div>
         </ListItem>
       </div>
@@ -224,13 +207,11 @@ export default memo(withGlobal<OwnProps>(
         privacy,
       },
       blocked,
-      activeSessions,
     } = global;
 
     return {
       hasPassword,
       blockedCount: blocked.totalCount,
-      sessionsCount: activeSessions.length,
       isSensitiveEnabled,
       canChangeSensitive,
       visibilityPrivacyPhoneNumber: privacy.phoneNumber?.visibility,

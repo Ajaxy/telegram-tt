@@ -16,6 +16,7 @@ interface LangFn {
 
   isRtl?: boolean;
   code?: LangCode;
+  langName?: string;
   timeFormat?: TimeFormat;
 }
 
@@ -130,6 +131,7 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   const langInfo = languages?.find((l) => l.langCode === langCode);
   getTranslation.isRtl = Boolean(langInfo?.rtl);
   getTranslation.code = langCode;
+  getTranslation.langName = langInfo?.nativeName;
   getTranslation.timeFormat = timeFormat;
 
   if (callback) {
