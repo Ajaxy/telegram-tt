@@ -5,7 +5,7 @@ import { ApiFormattedText, ApiMessage } from '../../../../api/types';
 import { MessageListType } from '../../../../global/types';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
-import { EDITABLE_INPUT_ID } from '../../../../config';
+import { EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../global/helpers';
@@ -40,8 +40,10 @@ const useEditing = (
     setHtml(html);
     // `fastRaf` would execute syncronously in this case
     requestAnimationFrame(() => {
-      const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-      focusEditableElement(messageInput, true);
+      const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+      if (messageInput) {
+        focusEditableElement(messageInput, true);
+      }
     });
   }, [editedMessage, setHtml] as const);
 
@@ -62,10 +64,12 @@ const useEditing = (
     // Run 1 frame after editing draft reset
     fastRaf(() => {
       setHtml(getTextWithEntitiesAsHtml(draft));
-      const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-      requestAnimationFrame(() => {
-        focusEditableElement(messageInput, true);
-      });
+      const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+      if (messageInput) {
+        requestAnimationFrame(() => {
+          focusEditableElement(messageInput, true);
+        });
+      }
     });
   }, [draft, setHtml]);
 

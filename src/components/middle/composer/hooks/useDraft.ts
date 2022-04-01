@@ -3,7 +3,7 @@ import { getActions } from '../../../../global';
 
 import { ApiFormattedText, ApiMessage } from '../../../../api/types';
 
-import { DRAFT_DEBOUNCE, EDITABLE_INPUT_ID } from '../../../../config';
+import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import usePrevious from '../../../../hooks/usePrevious';
 import { debounce } from '../../../../util/schedulers';
 import focusEditableElement from '../../../../util/focusEditableElement';
@@ -70,8 +70,10 @@ const useDraft = (
 
     if (!IS_TOUCH_ENV) {
       requestAnimationFrame(() => {
-        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-        focusEditableElement(messageInput, true);
+        const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+        if (messageInput) {
+          focusEditableElement(messageInput, true);
+        }
       });
     }
   }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId, editedMessage]);
