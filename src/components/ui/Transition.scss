@@ -344,11 +344,11 @@
 
     &.animating {
       > .from {
-        animation: push-out 0.3s ease-in-out;
+        animation: push-out 0.25s ease-in-out;
       }
 
       > .to {
-        animation: slide-in-200 0.3s ease-in-out;
+        animation: slide-in-200 0.25s ease-in-out;
       }
     }
   }
@@ -360,11 +360,11 @@
 
     &.animating {
       > .from {
-        animation: slide-in-200-backwards 0.3s ease-in-out;
+        animation: slide-in-200-backwards 0.25s ease-in-out;
       }
 
       > .to {
-        animation: push-out-backwards 0.3s ease-in-out;
+        animation: push-out-backwards 0.25s ease-in-out;
       }
     }
   }
