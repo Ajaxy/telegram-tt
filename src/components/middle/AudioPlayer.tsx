@@ -127,10 +127,9 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   const handleVolumeChange = useCallback((value: number) => {
     setAudioPlayerVolume({ volume: value / 100 });
-    setAudioPlayerMuted({ isMuted: false });
 
     setVolume(value / 100);
-  }, [setAudioPlayerMuted, setAudioPlayerVolume, setVolume]);
+  }, [setAudioPlayerVolume, setVolume]);
 
   const handleVolumeClick = useCallback(() => {
     if (IS_TOUCH_ENV && !IS_IOS) return;

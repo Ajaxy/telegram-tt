@@ -185,6 +185,7 @@ addActionHandler('setAudioPlayerVolume', (global, actions, payload) => {
     audioPlayer: {
       ...global.audioPlayer,
       volume,
+      isMuted: false,
     },
   };
 });
