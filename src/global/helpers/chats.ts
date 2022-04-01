@@ -141,7 +141,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: number) {
     return true;
   }
 
-  if (chat.isRestricted || chat.migratedTo || chat.isNotJoined || isChatWithRepliesBot(chat.id)) {
+  if (chat.isRestricted || chat.isForbidden || chat.migratedTo || chat.isNotJoined || isChatWithRepliesBot(chat.id)) {
     return false;
   }
 

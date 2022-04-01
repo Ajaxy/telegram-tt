@@ -42,7 +42,8 @@ export interface ApiChat {
   isNotJoined?: boolean;
   isListed?: boolean;
   isCreator?: boolean;
-  isRestricted?: boolean;
+  isForbidden?: boolean; // Forbidden - can't send messages (user was kicked, for example)
+  isRestricted?: boolean; // Restricted - can't access the chat (user was banned or chat is violating rules)
   restrictionReason?: ApiRestrictionReason;
   adminRights?: ApiChatAdminRights;
   currentUserBannedRights?: ApiChatBannedRights;

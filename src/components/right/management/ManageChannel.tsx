@@ -186,7 +186,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 
   const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
 
-  if (chat.isRestricted) {
+  if (chat.isRestricted || chat.isForbidden) {
     return undefined;
   }
 
