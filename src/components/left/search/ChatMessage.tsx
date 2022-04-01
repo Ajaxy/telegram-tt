@@ -17,12 +17,14 @@ import {
   getMessageRoundVideo,
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
-import useMedia from '../../../hooks/useMedia';
 import { formatPastTimeShort } from '../../../util/dateFormat';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+
+import useMedia from '../../../hooks/useMedia';
 import useLang, { LangFn } from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
-import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -115,7 +117,7 @@ function renderSummary(
 
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" className={isRoundVideo ? 'round' : undefined} />
+      <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
       {getMessageVideo(message) && <i className="icon-play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
     </span>

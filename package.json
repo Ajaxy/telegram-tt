@@ -20,7 +20,7 @@
   },
   "engines": {
     "node": "^16.13",
-    "npm": "^8.1"
+    "npm": "^8.5.2"
   },
   "husky": {
     "hooks": {
@@ -103,7 +103,7 @@
     "async-mutex": "^0.3.2",
     "big-integer": "github:painor/BigInteger.js",
     "croppie": "^2.6.5",
-    "emoji-data-ios": "github:korenskoy/emoji-data-ios#162c821",
+    "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#54443d1938ec1c157e74d2a95e9103dcb3f5c6dd",
     "events": "^3.3.0",
     "idb-keyval": "^6.1.0",
     "opus-recorder": "github:Ajaxy/opus-recorder",

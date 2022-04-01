@@ -251,6 +251,15 @@ div[role="button"] {
   z-index: -1;
 }
 
+.emoji-test-element {
+  opacity: 0;
+  display: inline;
+  white-space: nowrap;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);
