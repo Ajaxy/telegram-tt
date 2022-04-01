@@ -33,6 +33,11 @@ export interface ApiAttachment {
     duration: number;
     waveform: number[];
   };
+  audio?: {
+    duration: number;
+    title?: string;
+    performer?: string;
+  };
   previewBlobUrl?: string;
 }
 

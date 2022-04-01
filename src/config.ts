@@ -148,6 +148,18 @@ export const SUPPORTED_VIDEO_CONTENT_TYPES = new Set([
   'video/mp4', // video/quicktime added dynamically in environment.ts
 ]);
 
+export const SUPPORTED_AUDIO_CONTENT_TYPES = new Set([
+  'audio/mp3',
+  'audio/ogg',
+  'audio/wav',
+  'audio/mpeg',
+  'audio/flac',
+  'audio/aac',
+  'audio/m4a',
+  'audio/mp4',
+  'audio/x-m4a',
+]);
+
 export const CONTENT_TYPES_WITH_PREVIEW = new Set([
   ...SUPPORTED_IMAGE_CONTENT_TYPES,
   ...SUPPORTED_VIDEO_CONTENT_TYPES,

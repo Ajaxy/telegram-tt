@@ -7,6 +7,7 @@ import { ApiAttachment, ApiChatMember } from '../../../api/types';
 import {
   CONTENT_TYPES_WITH_PREVIEW,
   EDITABLE_INPUT_MODAL_ID,
+  SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
@@ -185,7 +186,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
   const areAllPhotos = renderingAttachments.every((a) => SUPPORTED_IMAGE_CONTENT_TYPES.has(a.mimeType));
   const areAllVideos = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
-  const areAllAudios = renderingAttachments.every((a) => a.mimeType.startsWith('audio/'));
+  const areAllAudios = renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
 
   let title = '';
   if (areAllPhotos) {

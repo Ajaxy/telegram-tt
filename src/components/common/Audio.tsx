@@ -407,8 +407,12 @@ function renderAudio(
       {!showSeekline && !showProgress && (
         <div className="meta" dir={isRtl ? 'rtl' : undefined}>
           <span className="duration" dir="auto">{formatMediaDuration(duration)}</span>
-          <span className="bullet">&bull;</span>
-          <span className="performer" dir="auto" title={performer}>{renderText(performer || 'Unknown')}</span>
+          {performer && (
+            <>
+              <span className="bullet">&bull;</span>
+              <span className="performer" dir="auto" title={performer}>{renderText(performer)}</span>
+            </>
+          )}
           {date && (
             <>
               <span className="bullet">&bull;</span>
