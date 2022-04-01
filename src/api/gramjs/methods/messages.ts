@@ -534,10 +534,9 @@ export async function rescheduleMessage({
 
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
-    filename, blobUrl, mimeType, quick, voice,
+    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl,
   } = attachment;
 
-  const file = await fetchFile(blobUrl, filename);
   const patchedOnProgress: ApiOnProgress = (progress) => {
     if (onProgress.isCanceled) {
       patchedOnProgress.isCanceled = true;
@@ -545,7 +544,12 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
       onProgress(progress, localMessage.id);
     }
   };
+
+  const file = await fetchFile(blobUrl, filename);
   const inputFile = await uploadFile(file, patchedOnProgress);
+
+  const thumbFile = previewBlobUrl && await fetchFile(previewBlobUrl, filename);
+  const thumb = thumbFile ? await uploadFile(thumbFile) : undefined;
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (quick) {
@@ -566,6 +570,15 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     }
   }
 
+  if (audio) {
+    const { duration, title, performer } = audio;
+    attributes.push(new GramJs.DocumentAttributeAudio({
+      duration,
+      title,
+      performer,
+    }));
+  }
+
   if (voice) {
     const { duration, waveform } = voice;
     const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
@@ -580,6 +593,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     file: inputFile,
     mimeType,
     attributes,
+    thumb,
   });
 }
 

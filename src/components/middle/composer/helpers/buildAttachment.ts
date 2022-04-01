@@ -1,5 +1,10 @@
 import { ApiAttachment } from '../../../../api/types';
-import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../../config';
+import {
+  SUPPORTED_AUDIO_CONTENT_TYPES,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+} from '../../../../config';
+import { parseAudioMetadata } from '../../../../util/audio';
 import {
   preloadImage,
   preloadVideo,
@@ -17,6 +22,7 @@ export default async function buildAttachment(
   const blobUrl = URL.createObjectURL(blob);
   const { type: mimeType, size } = blob;
   let quick;
+  let audio;
   let previewBlobUrl;
 
   if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
@@ -44,6 +50,16 @@ export default async function buildAttachment(
     quick = { width, height, duration };
 
     previewBlobUrl = await createPosterForVideo(blobUrl);
+  } else if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
+    const {
+      duration, title, performer, coverUrl,
+    } = await parseAudioMetadata(blobUrl);
+    audio = {
+      duration: duration || 0,
+      title,
+      performer,
+    };
+    previewBlobUrl = coverUrl;
   }
 
   return {
@@ -52,6 +68,7 @@ export default async function buildAttachment(
     mimeType,
     size,
     quick,
+    audio,
     previewBlobUrl,
     ...options,
   };

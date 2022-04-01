@@ -133,6 +133,7 @@ module.exports = (env = {}, argv = {}) => {
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
       }),
       ...(argv.mode === 'production' ? [
         new BundleAnalyzerPlugin({

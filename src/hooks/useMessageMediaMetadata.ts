@@ -4,15 +4,16 @@ import {
   ApiAudio, ApiChat, ApiMessage, ApiUser, ApiVoice,
 } from '../api/types';
 
-import useMedia from './useMedia';
-import { useAsync } from './useAsync';
 import {
   getAudioHasCover, getChatAvatarHash, getChatTitle, getMessageContent, getMessageMediaHash, getSenderTitle,
 } from '../global/helpers';
-import { getTranslation } from '../util/langProvider';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { scaleImage, resizeImage } from '../util/imageResize';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
+
+import useLang from './useLang';
+import useMedia from './useMedia';
+import useAsync from './useAsync';
 
 import telegramLogoPath from '../assets/telegram-logo-filled.svg';
 
@@ -23,10 +24,12 @@ const MINIMAL_SIZE = 115; // spec says 100, but on Chrome 93 it's not showing
 const useMessageMediaMetadata = (
   message: ApiMessage, sender?: ApiUser | ApiChat, chat?: ApiChat,
 ): MediaMetadata | undefined => {
+  const lang = useLang();
+
   const { audio, voice } = getMessageContent(message);
   const title = audio ? (audio.title || audio.fileName) : voice ? 'Voice message' : '';
-  const artist = (audio && audio.performer) || (sender && getSenderTitle(getTranslation, sender));
-  const album = (chat && getChatTitle(getTranslation, chat)) || 'Telegram';
+  const artist = audio?.performer || (sender && getSenderTitle(lang, sender));
+  const album = (chat && getChatTitle(lang, chat)) || 'Telegram';
 
   const audioCoverHash = (audio && getAudioHasCover(audio) && getMessageMediaHash(message, 'pictogram'));
   const avatarHash = sender && getChatAvatarHash(sender, 'big');
@@ -36,7 +39,9 @@ const useMessageMediaMetadata = (
   const size = useMemo(() => {
     return getCoverSize(audio, voice, media);
   }, [audio, media, voice]);
-  const { result: url } = useAsync(() => makeGoodArtwork(media, size), [media, size], telegramLogoPath);
+  const { result: url } = useAsync(() => (
+    makeGoodArtwork(media, size)
+  ), [media, size], telegramLogoPath);
   return useMemo(() => {
     return buildMediaMetadata({
       title,
@@ -61,7 +66,7 @@ function makeGoodArtwork(url?: string, size?: { width: number; height: number })
 function getCoverSize(audio?: ApiAudio, voice?: ApiVoice, url?: string) {
   if (!url) return LOGO_DIMENSIONS;
   if (audio) {
-    if (!audio.thumbnailSizes || audio.thumbnailSizes.length === 0) return undefined;
+    if (!audio.thumbnailSizes?.length) return undefined;
     const preferred = audio.thumbnailSizes.find((size) => size.type === 'm');
     return preferred || audio.thumbnailSizes[0]; // Sometimes `m` is not present
   }

@@ -36,6 +36,7 @@ import {
   LOCAL_MESSAGE_ID_BASE,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
+  SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
@@ -1079,9 +1080,8 @@ function buildUploadingMedia(
   } = attachment;
 
   if (attachment.quick) {
-    const { width, height, duration } = attachment.quick;
-
-    if (mimeType.startsWith('image/')) {
+    if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+      const { width, height } = attachment.quick;
       return {
         photo: {
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
@@ -1090,7 +1090,9 @@ function buildUploadingMedia(
           blobUrl,
         },
       };
-    } else {
+    }
+    if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
+      const { width, height, duration } = attachment.quick;
       return {
         video: {
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
@@ -1105,7 +1107,8 @@ function buildUploadingMedia(
         },
       };
     }
-  } else if (attachment.voice) {
+  }
+  if (attachment.voice) {
     const { duration, waveform } = attachment.voice;
     const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
     return {
@@ -1115,26 +1118,29 @@ function buildUploadingMedia(
         waveform: inputWaveform,
       },
     };
-  } else if (mimeType.startsWith('audio/')) {
+  }
+  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
+    const { duration, performer, title } = attachment.audio || {};
     return {
       audio: {
         id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
         mimeType,
         fileName,
         size,
-        duration: 200, // Arbitrary
-      },
-    };
-  } else {
-    return {
-      document: {
-        mimeType,
-        fileName,
-        size,
-        ...(previewBlobUrl && { previewBlobUrl }),
+        duration: duration || 0,
+        title,
+        performer,
       },
     };
   }
+  return {
+    document: {
+      mimeType,
+      fileName,
+      size,
+      ...(previewBlobUrl && { previewBlobUrl }),
+    },
+  };
 }
 
 function buildNewPoll(poll: ApiNewPoll, localId: number) {
