@@ -312,7 +312,7 @@ const TextFormatter: FC<OwnProps> = ({
   ]);
 
   const handleLinkUrlConfirm = useCallback(() => {
-    const formattedLinkUrl = encodeURI(ensureProtocol(linkUrl) || '');
+    const formattedLinkUrl = (ensureProtocol(linkUrl) || '').split('%').map(encodeURI).join('%');
 
     if (isEditingLink) {
       const element = getSelectedElement();
