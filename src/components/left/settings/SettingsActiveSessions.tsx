@@ -59,7 +59,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.PrivacyActiveSessions);
+  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.ActiveSessions);
 
   function renderCurrentSession(session: ApiSession) {
     return (
