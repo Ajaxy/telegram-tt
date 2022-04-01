@@ -23,6 +23,7 @@ import { InlineBotSettings } from '../../../types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, REPLIES_USER_ID, SEND_MESSAGE_ACTION_INTERVAL,
+  EDITABLE_INPUT_CSS_SELECTOR,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -398,7 +399,12 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
     const selection = window.getSelection()!;
-    const messageInput = document.getElementById(inputId)!;
+    let messageInput: HTMLDivElement;
+    if (inputId === EDITABLE_INPUT_ID) {
+      messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
+    } else {
+      messageInput = document.getElementById(inputId) as HTMLDivElement;
+    }
     const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
       .join('')
       .replace(/\u200b+/g, '\u200b');
@@ -543,7 +549,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
     if (currentAttachments.length || text) {
       if (slowMode && !isAdmin) {
@@ -567,7 +573,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             },
           });
 
-          messageInput.blur();
+          messageInput?.blur();
 
           return;
         }
@@ -593,7 +599,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     clearDraft({ chatId, localOnly: true });
 
-    if (IS_IOS && messageInput === document.activeElement) {
+    if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }
 
@@ -723,8 +729,8 @@ const Composer: FC<OwnProps & StateProps> = ({
       });
     }
 
-    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-    if (IS_IOS && messageInput === document.activeElement) {
+    const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+    if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }
 
@@ -777,14 +783,14 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [setStickerSearchQuery, setGifSearchQuery]);
 
   const handleSymbolMenuOpen = useCallback(() => {
-    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
     if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
       openSymbolMenu();
       return;
     }
 
-    messageInput.blur();
+    messageInput?.blur();
     setTimeout(() => {
       closeBotCommandMenu();
       openSymbolMenu();
@@ -792,7 +798,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [openSymbolMenu, closeBotCommandMenu]);
 
   const handleSendAsMenuOpen = useCallback(() => {
-    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
     if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
       closeBotCommandMenu();
@@ -801,7 +807,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    messageInput.blur();
+    messageInput?.blur();
     setTimeout(() => {
       closeBotCommandMenu();
       closeSymbolMenu();

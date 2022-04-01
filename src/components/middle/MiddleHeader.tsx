@@ -10,7 +10,7 @@ import {
 } from '../../api/types';
 
 import {
-  EDITABLE_INPUT_ID,
+  EDITABLE_INPUT_CSS_SELECTOR,
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
@@ -190,10 +190,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     // Workaround for missing UI when quickly clicking the Back button
     isBackButtonActive.current = false;
     if (IS_SINGLE_COLUMN_LAYOUT) {
-      const messageInput = document.getElementById(EDITABLE_INPUT_ID);
-      if (messageInput) {
-        messageInput.blur();
-      }
+      const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+      messageInput?.blur();
     }
 
     if (isSelectModeActive) {

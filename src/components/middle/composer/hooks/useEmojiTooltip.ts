@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
 
-import { EDITABLE_INPUT_ID } from '../../../../config';
+import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import {
@@ -117,7 +117,12 @@ export default function useEmojiTooltip(
     const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
     if (atIndex !== -1) {
       onUpdateHtml(`${currentHtml.substr(0, atIndex)}${renderText(textEmoji, ['emoji_html'])}`);
-      const messageInput = document.getElementById(inputId)!;
+      let messageInput: HTMLDivElement;
+      if (inputId === EDITABLE_INPUT_ID) {
+        messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
+      } else {
+        messageInput = document.getElementById(inputId) as HTMLDivElement;
+      }
       requestAnimationFrame(() => {
         focusEditableElement(messageInput, true, true);
       });
