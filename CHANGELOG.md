@@ -1,3 +1,33 @@
+## 1.40.0 (2022-04-01)
+
+🤡 **Happy April Fool's Day!** 🤡
+
+### 👏 Harder
+* Explore 37 new emoji.
+* Set Night Mode to follow your operating system in Settings > General.
+* Upload all types of audio files with cover images and meta tags.
+* Improved designs for Settings and Management pages.
+
+### 🤩 Better
+* Proper date formatting for all languages.
+* Changing volume in the media viewer automatically unmutes audio.
+* Groups you were restricted from now stay in your chat list.
+* Accessibility: Screen Reader support for emoji panel.
+* Removed reaction sounds.
+* Various layout improvements.
+
+### 🚀 Faster
+* Smoother transitions in Settings.
+
+### 💪 Stronger
+* Fixed error messages for ‘You must be an admin’ and ‘You can't write in this chat’.
+* Fixed calendar months that start on a Sunday.
+* Fixed duplicated files when downloading.
+* Fixed pasting URLs with non-ASCII characters.
+* Fixed forwarding protected content.
+* Fixed saving Privacy Exceptions.
+* Fixed various issues when switching between message lists.
+
 ## 1.39.0 (2022-03-25)
 
 ### 🤩 Better
