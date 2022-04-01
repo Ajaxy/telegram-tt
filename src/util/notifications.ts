@@ -409,6 +409,8 @@ export async function notifyAboutMessage({
 
     // Play sound when notification is displayed
     notification.onshow = () => {
+      // TODO Remove when reaction badges are implemented
+      if (isReaction) return;
       playNotifySoundDebounced(String(message.id) || chat.id);
     };
   }

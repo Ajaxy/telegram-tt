@@ -129,7 +129,8 @@ function showNotification({
   };
 
   return Promise.all([
-    playNotificationSound(String(messageId) || chatId || ''),
+    // TODO Remove condition when reaction badges are implemented
+    !reaction ? playNotificationSound(String(messageId) || chatId || '') : undefined,
     self.registration.showNotification(title, options),
   ]);
 }

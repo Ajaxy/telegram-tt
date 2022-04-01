@@ -137,6 +137,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         notifyAboutMessage({
           chat,
           message,
+          isReaction: true,
         });
       }
 
