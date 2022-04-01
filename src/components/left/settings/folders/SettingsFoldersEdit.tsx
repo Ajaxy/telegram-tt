@@ -217,7 +217,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-fab-wrapper">
-      <div className="settings-content custom-scroll">
+      <div className="settings-content no-border custom-scroll">
         <div className="settings-content-header">
           <div className="settings-content-icon">
             {animationData && (
@@ -267,7 +267,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           {renderChats('included')}
         </div>
 
-        <div className="settings-item no-border pt-3">
+        <div className="settings-item pt-3">
           <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterExclude')}</h4>
 
           <ListItem

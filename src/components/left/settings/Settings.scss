@@ -33,11 +33,16 @@
 }
 
 .settings-content {
-  background: var(--color-background);
+  border-top: 1px solid var(--color-borders);
+  background-color: var(--color-background-secondary);
   height: calc(100% - var(--header-height));
 
   overflow-y: auto;
   @include overflow-y-overlay();
+
+  &.no-border, &.two-fa {
+    border-top: none;
+  }
 
   &.infinite-scroll {
     display: flex;
@@ -66,6 +71,14 @@
   align-items: center;
   padding: 0 1.5rem 1rem;
   text-align: center;
+  background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+  margin-bottom: 0.625rem;
+
+  &.no-border {
+    margin-bottom: 0;
+    box-shadow: none;
+  }
 
   .input-group {
     width: 100%;
@@ -93,6 +106,7 @@
 
 .settings-main-menu {
   padding: 0 0.5rem 0.75rem;
+  background-color: var(--color-background);
 
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;
@@ -107,11 +121,14 @@
 }
 
 .settings-item {
-  border-top: 1px solid var(--color-borders);
+  background-color: var(--color-background);
   padding: 1.5rem 1.5rem 1rem;
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+  margin-bottom: 0.625rem;
 
   &.no-border {
-    border-top: none;
+    margin-bottom: 0;
+    box-shadow: none;
   }
 
   &-header {
@@ -137,6 +154,11 @@
 
     .settings-content.two-fa & {
       font-size: 1rem;
+    }
+
+    .settings-edit-profile & {
+      margin-bottom: 0;
+      padding-bottom: 1.5rem;
     }
 
     &[dir="rtl"] {
@@ -281,6 +303,13 @@
   .Radio + .Radio,
   .Checkbox + .Checkbox {
     margin-top: 2rem;
+  }
+
+  &__current-value {
+    margin-inline-start: auto;
+    padding-inline-start: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
   }
 }
 

@@ -123,7 +123,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [foldersById, addChatFolder, showDialog]);
 
   return (
-    <div className="settings-content custom-scroll">
+    <div className="settings-content no-border custom-scroll">
       <div className="settings-content-header">
         <div className="settings-content-icon">
           {animationData && (

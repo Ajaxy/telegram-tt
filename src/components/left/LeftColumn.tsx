@@ -117,6 +117,7 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.Notifications:
         case SettingsScreens.DataStorage:
         case SettingsScreens.Privacy:
+        case SettingsScreens.ActiveSessions:
         case SettingsScreens.Language:
           setSettingsScreen(SettingsScreens.Main);
           return;
@@ -134,7 +135,6 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyProfilePhoto:
         case SettingsScreens.PrivacyForwarding:
         case SettingsScreens.PrivacyGroupChats:
-        case SettingsScreens.PrivacyActiveSessions:
         case SettingsScreens.PrivacyBlockedUsers:
         case SettingsScreens.TwoFaDisabled:
         case SettingsScreens.TwoFaEnabled:

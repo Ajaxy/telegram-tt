@@ -31,7 +31,7 @@ const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content two-fa custom-scroll">
-      <div className="settings-content-header">
+      <div className="settings-content-header no-border">
         <AnimatedEmoji sticker={animatedEmoji} size="large" />
 
         <p className="settings-item-description mb-3" dir="auto">
@@ -39,7 +39,7 @@ const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-0 no-border">
+      <div className="settings-item pt-0">
         <ListItem
           icon="edit"
           // eslint-disable-next-line react/jsx-no-bind

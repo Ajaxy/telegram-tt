@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo,
+  FC, memo, useCallback, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -10,9 +10,12 @@ import { formatPastTimeShort } from '../../../util/dateFormat';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import getSessionIcon from './helpers/getSessionIcon';
 
 import ListItem from '../../ui/ListItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+
+import './SettingsActiveSessions.scss';
 
 type OwnProps = {
   isActive?: boolean;
@@ -24,22 +27,18 @@ type StateProps = {
   activeSessions: ApiSession[];
 };
 
-const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps> = ({
+const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
   activeSessions,
 }) => {
   const {
-    loadAuthorizations,
     terminateAuthorization,
     terminateAllAuthorizations,
   } = getActions();
 
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
-  useEffect(() => {
-    loadAuthorizations();
-  }, [loadAuthorizations]);
 
   const handleTerminateSessionClick = useCallback((hash: string) => {
     terminateAuthorization({ hash });
@@ -69,10 +68,12 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps> = ({
           {lang('AuthSessions.CurrentSession')}
         </h4>
 
-        <ListItem narrow inactive className="no-icon">
+        <ListItem narrow inactive icon={`device-${getSessionIcon(session)} icon-device`}>
           <div className="multiline-menu-item" dir="auto">
-            <span className="title" dir="auto">{session.appName}</span>
-            <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
+            <span className="title" dir="auto">{session.deviceModel}</span>
+            <span className="subtitle black tight">
+              {session.appName} {session.appVersion}, {session.platform} {session.systemVersion}
+            </span>
             <span className="subtitle">{session.ip} - {getLocation(session)}</span>
           </div>
         </ListItem>
@@ -115,20 +116,22 @@ const SettingsPrivacyActiveSessions: FC<OwnProps & StateProps> = ({
             handleTerminateSessionClick(session.hash);
           },
         }]}
-        className="no-icon"
+        icon={`device-${getSessionIcon(session)} icon-device`}
       >
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
-          <span className="title">{session.appName}</span>
-          <span className="subtitle black tight">{getDeviceEnvironment(session)}</span>
-          <span className="subtitle">{session.ip} - {getLocation(session)}</span>
+          <span className="title">{session.deviceModel}</span>
+          <span className="subtitle black tight">
+            {session.appName} {session.appVersion}, {session.platform} {session.systemVersion}
+          </span>
+          <span className="subtitle">{session.ip} {getLocation(session)}</span>
         </div>
       </ListItem>
     );
   }
 
   return (
-    <div className="settings-content custom-scroll">
+    <div className="settings-content custom-scroll SettingsActiveSessions">
       {currentSession && renderCurrentSession(currentSession)}
       {otherSessions && renderOtherSessions(otherSessions)}
       {otherSessions && (
@@ -149,14 +152,10 @@ function getLocation(session: ApiSession) {
   return [session.region, session.country].filter(Boolean).join(', ');
 }
 
-function getDeviceEnvironment(session: ApiSession) {
-  return `${session.deviceModel}${session.deviceModel ? ', ' : ''} ${session.platform} ${session.systemVersion}`;
-}
-
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       activeSessions: global.activeSessions,
     };
   },
-)(SettingsPrivacyActiveSessions));
+)(SettingsActiveSessions));

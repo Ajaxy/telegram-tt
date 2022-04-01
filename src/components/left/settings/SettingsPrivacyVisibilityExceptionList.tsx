@@ -12,7 +12,7 @@ import { filterChatsByName, isChatGroup, isUserId } from '../../../global/helper
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
-import { getPrivacyKey } from './helper/privacy';
+import { getPrivacyKey } from './helpers/privacy';
 
 import Picker from '../../common/Picker';
 import FloatingActionButton from '../../ui/FloatingActionButton';

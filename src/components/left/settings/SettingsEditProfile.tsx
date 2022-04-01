@@ -178,8 +178,8 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-fab-wrapper">
-      <div className="settings-content custom-scroll">
-        <div className="settings-edit-profile">
+      <div className="settings-content no-border custom-scroll">
+        <div className="settings-edit-profile settings-item">
           <AvatarEditable
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handlePhotoChange}

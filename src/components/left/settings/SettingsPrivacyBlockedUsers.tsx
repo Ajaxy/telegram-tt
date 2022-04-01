@@ -97,7 +97,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-fab-wrapper">
       <div className="settings-content infinite-scroll">
-        <div className="settings-item">
+        <div className="settings-item no-border">
           <p className="settings-item-description-larger mt-0 mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('BlockedUsersInfo')}
           </p>

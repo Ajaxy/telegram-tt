@@ -11,7 +11,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
-import { getPrivacyKey } from './helper/privacy';
+import { getPrivacyKey } from './helpers/privacy';
 
 type OwnProps = {
   screen: SettingsScreens;

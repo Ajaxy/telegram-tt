@@ -60,8 +60,6 @@ type StateProps =
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing'>;
 
-const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
-
 const PRODUCTION_HOSTNAME = 'web.telegram.org';
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
@@ -171,17 +169,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
   }, [animationLevel, setSettingOption, theme]);
 
-  const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    e.stopPropagation();
-
-    const newLevel = animationLevel === 0 ? 2 : 0;
-    ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {
-      document.body.classList.toggle(`animation-level-${i}`, newLevel === i);
-    });
-
-    setSettingOption({ animationLevel: newLevel });
-  }, [animationLevel, setSettingOption]);
-
   const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
@@ -246,17 +233,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
               checked={theme === 'dark'}
               noAnimation
-            />
-          </MenuItem>
-          <MenuItem
-            icon="animations"
-            onClick={handleAnimationLevelChange}
-          >
-            <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
-            <Switcher
-              id="animations"
-              label="Toggle Animations"
-              checked={animationLevel > 0}
             />
           </MenuItem>
           <MenuItem

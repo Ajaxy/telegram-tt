@@ -59,7 +59,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Language);
 
   return (
-    <div className="settings-content settings-item settings-language custom-scroll">
+    <div className="settings-content settings-item settings-language custom-scroll settings-item--first">
       {options ? (
         <RadioGroup
           name="keyboard-send-settings"
