@@ -50,9 +50,9 @@ import ListItem from '../../ui/ListItem';
 import Badge from './Badge';
 import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
+import ReportModal from '../../common/ReportModal';
 
 import './Chat.scss';
-import ReportModal from '../../common/ReportModal';
 
 type OwnProps = {
   style?: string;

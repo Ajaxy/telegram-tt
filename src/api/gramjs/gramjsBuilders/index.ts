@@ -341,7 +341,7 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
   });
 }
 
-export function buildTypeInputPhoto(photo: ApiPhoto) {
+export function buildInputPhoto(photo: ApiPhoto) {
   const localPhoto = localDb.photos[photo?.id];
 
   if (!localPhoto) {

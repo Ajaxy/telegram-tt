@@ -28,7 +28,10 @@ import {
   ApiSponsoredMessage,
   ApiChannelStatistics,
   ApiGroupStatistics,
-  ApiPaymentFormNativeParams, ApiUpdate,
+  ApiPaymentFormNativeParams,
+  ApiUpdate,
+  ApiReportReason,
+  ApiPhoto,
 } from '../api/types';
 import {
   FocusDirection,
@@ -523,6 +526,19 @@ export interface ActionPayloads {
   signOut: { forceInitApi?: boolean } | undefined;
   apiUpdate: ApiUpdate;
 
+  // Accounts
+  reportPeer: {
+    chatId: string | undefined;
+    reason: ApiReportReason;
+    description: string;
+  };
+  reportProfilePhoto: {
+    chatId: string | undefined;
+    reason: ApiReportReason;
+    description: string;
+    photo: ApiPhoto | undefined;
+  };
+
   // Chats
   openChat: {
     id: string | undefined;
@@ -627,8 +643,6 @@ export type NonTypedActionNames = (
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
   'toggleStatistics' |
-  // accounts
-  'reportPeer' | 'reportProfilePhoto' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |

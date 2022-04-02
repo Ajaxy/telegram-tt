@@ -21,9 +21,9 @@ import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import DeleteChatModal from '../common/DeleteChatModal';
+import ReportModal from '../common/ReportModal';
 
 import './HeaderMenuContainer.scss';
-import ReportModal from '../common/ReportModal';
 
 export type OwnProps = {
   chatId: string;

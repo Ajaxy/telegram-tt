@@ -1,13 +1,17 @@
 import { addActionHandler } from '../../index';
 import { selectChat } from '../../selectors';
 import { callApi } from '../../../api/gramjs';
+import { getTranslation } from '../../../util/langProvider';
 
 addActionHandler('reportPeer', async (global, actions, payload) => {
   const {
     chatId,
     reason,
     description,
-  } = payload!;
+  } = payload;
+  if (!chatId) {
+    return;
+  }
 
   const chat = selectChat(global, chatId)!;
   if (!chat) {
@@ -21,9 +25,7 @@ addActionHandler('reportPeer', async (global, actions, payload) => {
   });
 
   actions.showNotification({
-    message: result
-      ? 'Thank you! Your report will be reviewed by our team.'
-      : 'Error occurred while submitting report. Please, try again later.',
+    message: getTranslation(result ? 'ReportPeer.AlertSuccess' : 'ReportPeer.AlertFailure'),
   });
 });
 
@@ -33,7 +35,10 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
     reason,
     description,
     photo,
-  } = payload!;
+  } = payload;
+  if (!chatId) {
+    return;
+  }
 
   const chat = selectChat(global, chatId)!;
   if (!chat || !photo) {
@@ -48,8 +53,6 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
   });
 
   actions.showNotification({
-    message: result
-      ? 'Thank you! Your report will be reviewed by our team.'
-      : 'Error occurred while submitting report. Please, try again later.',
+    message: getTranslation(result ? 'ReportPeer.AlertSuccess' : 'ReportPeer.AlertFailure'),
   });
 });

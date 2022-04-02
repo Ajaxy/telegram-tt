@@ -41,6 +41,7 @@ import {
   selectChatMessage,
   selectChatMessages,
   selectCurrentMediaSearch,
+  selectIsChatWithSelf,
   selectListedIds,
   selectOutlyingIds,
   selectScheduledMessage,
@@ -73,6 +74,7 @@ type StateProps = {
   threadId?: number;
   messageId?: number;
   senderId?: string;
+  isChatWithSelf?: boolean;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
   profilePhotoIndex?: number;
@@ -89,6 +91,7 @@ const MediaViewer: FC<StateProps> = ({
   threadId,
   messageId,
   senderId,
+  isChatWithSelf,
   origin,
   avatarOwner,
   profilePhotoIndex,
@@ -190,7 +193,7 @@ const MediaViewer: FC<StateProps> = ({
     isGhostAnimation && ANIMATION_DURATION,
   );
   const avatarPhoto = avatarOwner?.photos?.[profilePhotoIndex!];
-  const canReport = !!avatarPhoto && profilePhotoIndex! > 0;
+  const canReport = !!avatarPhoto && profilePhotoIndex! > 0 && !isChatWithSelf;
 
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
   let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
@@ -579,6 +582,8 @@ export default memo(withGlobal(
       animationLevel,
     } = global.settings.byKey;
 
+    let isChatWithSelf = !!chatId && selectIsChatWithSelf(global, chatId);
+
     if (origin === MediaViewerOrigin.SearchResult) {
       if (!(chatId && messageId)) {
         return { animationLevel };
@@ -593,6 +598,7 @@ export default memo(withGlobal(
         chatId,
         messageId,
         senderId: message.senderId,
+        isChatWithSelf,
         origin,
         message,
         animationLevel,
@@ -601,11 +607,13 @@ export default memo(withGlobal(
 
     if (avatarOwnerId) {
       const sender = selectUser(global, avatarOwnerId) || selectChat(global, avatarOwnerId);
+      isChatWithSelf = selectIsChatWithSelf(global, avatarOwnerId);
 
       return {
         messageId: -1,
         senderId: avatarOwnerId,
         avatarOwner: sender,
+        isChatWithSelf,
         profilePhotoIndex: profilePhotoIndex || 0,
         animationLevel,
         origin,
@@ -649,6 +657,7 @@ export default memo(withGlobal(
       threadId,
       messageId,
       senderId: message.senderId,
+      isChatWithSelf,
       origin,
       message,
       chatMessages,

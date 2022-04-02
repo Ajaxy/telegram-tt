@@ -200,7 +200,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           round
           size="smaller"
           color="translucent-white"
-          ariaLabel={lang('ReportPeer.Report')}
+          ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
           onClick={onReport}
         >
           <i className="icon-flag" />

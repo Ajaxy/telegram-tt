@@ -14254,6 +14254,10 @@
     "key": "ReportPeer.AlertSuccess",
     "value": "Thank you!\nYour report will be reviewed by our team."
   },
+  "ReportPeer.AlertFailure": {
+    "key": "ReportPeer.AlertFailure",
+    "value": "An error occurred while submitting your report. Please, try again later."
+  },
   "ReportPeer.ReasonChildAbuse": {
     "key": "ReportPeer.ReasonChildAbuse",
     "value": "Child Abuse"
