@@ -25,7 +25,9 @@ addActionHandler('reportPeer', async (global, actions, payload) => {
   });
 
   actions.showNotification({
-    message: getTranslation(result ? 'ReportPeer.AlertSuccess' : 'ReportPeer.AlertFailure'),
+    message: result
+      ? getTranslation('ReportPeer.AlertSuccess')
+      : 'An error occurred while submitting your report. Please, try again later.',
   });
 });
 
@@ -53,6 +55,8 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
   });
 
   actions.showNotification({
-    message: getTranslation(result ? 'ReportPeer.AlertSuccess' : 'ReportPeer.AlertFailure'),
+    message: result
+      ? getTranslation('ReportPeer.AlertSuccess')
+      : 'An error occurred while submitting your report. Please, try again later.',
   });
 });

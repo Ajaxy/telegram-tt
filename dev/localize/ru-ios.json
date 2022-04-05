@@ -14250,10 +14250,6 @@
     "key": "ReportPeer.AlertSuccess",
     "value": "Спасибо!\nВаша жалоба отправлена на проверку."
   },
-  "ReportPeer.AlertFailure": {
-    "key": "ReportPeer.AlertFailure",
-    "value": "При отправке отчета произошла ошибка. Пожалуйста, попробуйте позже."
-  },
   "ReportPeer.ReasonChildAbuse": {
     "key": "ReportPeer.ReasonChildAbuse",
     "value": "Детская порнография"

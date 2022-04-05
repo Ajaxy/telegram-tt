@@ -528,15 +528,15 @@ export interface ActionPayloads {
 
   // Accounts
   reportPeer: {
-    chatId: string | undefined;
+    chatId?: string;
     reason: ApiReportReason;
     description: string;
   };
   reportProfilePhoto: {
-    chatId: string | undefined;
+    chatId?: string;
     reason: ApiReportReason;
     description: string;
-    photo: ApiPhoto | undefined;
+    photo?: ApiPhoto;
   };
 
   // Chats
