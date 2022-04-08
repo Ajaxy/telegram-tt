@@ -1,7 +1,7 @@
 import { getCssColor } from './skin';
 import { mergeArrays } from './utils';
 import { getPieRadius, getPieTextShift, getPieTextSize } from './formulas';
-import { PLOT_BARS_WIDTH_SHIFT, PLOT_PIE_SHIFT } from './constants';
+import { PLOT_BARS_WIDTH_SHIFT, PLOT_PIE_SHIFT, PIE_MINIMUM_VISIBLE_PERCENT } from './constants';
 import { simplify } from './simplify';
 import { toPixels } from './Projection';
 
@@ -243,14 +243,16 @@ function drawDatasetPie(context, points, projection, options) {
   context.lineTo(x + shiftX, y + shiftY);
   context.fill();
 
-  context.font = `700 ${getPieTextSize(percent, radius)}px Helvetica, Arial, sans-serif`;
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.fillStyle = 'white';
-  const textShift = getPieTextShift(percent, radius);
-  context.fillText(
-    `${Math.round(percent * 100)}%`, x + directionX * textShift + shiftX, y + directionY * textShift + shiftY,
-  );
+  if (percent >= PIE_MINIMUM_VISIBLE_PERCENT) {
+    context.font = `700 ${getPieTextSize(percent, radius)}px Helvetica, Arial, sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = 'white';
+    const textShift = getPieTextShift(percent, radius);
+    context.fillText(
+      `${Math.round(percent * 100)}%`, x + directionX * textShift + shiftX, y + directionY * textShift + shiftY,
+    );
+  }
 
   context.restore();
 }

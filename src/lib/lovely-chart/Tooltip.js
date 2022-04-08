@@ -120,17 +120,17 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
       return;
     }
 
-    const oldLabelIndex = _clickedOnLabel;
-
-    _clickedOnLabel = null;
-    _onMouseMove(e, true);
-
-    const newLabelIndex = _getLabelIndex();
-    if (newLabelIndex !== oldLabelIndex) {
-      _clickedOnLabel = newLabelIndex;
-    }
-
     if (data.isZoomable) {
+      const oldLabelIndex = _clickedOnLabel;
+
+      _clickedOnLabel = null;
+      _onMouseMove(e, true);
+
+      const newLabelIndex = _getLabelIndex();
+      if (newLabelIndex !== oldLabelIndex) {
+        _clickedOnLabel = newLabelIndex;
+      }
+
       onZoom(newLabelIndex);
     }
   }
@@ -266,9 +266,9 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
 
     const shouldPlaceRight = data.isPie ? angle > Math.PI / 2 : labelIndex < meanLabel;
 
-    return shouldPlaceRight
-        ? _offsetX + BALLOON_OFFSET
-        : _offsetX - (_balloon.offsetWidth + BALLOON_OFFSET);
+    const leftOffset = shouldPlaceRight ? _offsetX + BALLOON_OFFSET : _offsetX - (_balloon.offsetWidth + BALLOON_OFFSET);
+
+    return Math.min(Math.max(0, leftOffset), container.offsetWidth - _balloon.offsetWidth);
   }
 
   function _getBalloonTopOffset() {

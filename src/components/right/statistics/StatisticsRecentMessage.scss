@@ -1,6 +1,10 @@
 .StatisticsRecentMessage {
   position: relative;
-  padding-left: 3rem;
+  margin-bottom: 1rem;
+
+  &--with-image {
+    padding-left: 3rem;
+  }
 
   &__summary {
     flex: 1;
