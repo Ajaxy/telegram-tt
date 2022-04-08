@@ -44,7 +44,7 @@ export function getMessageOriginalId(message: ApiMessage) {
 
 export function getMessageText(message: ApiMessage) {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
+    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location, game,
   } = message.content;
 
   if (text) {
@@ -52,7 +52,7 @@ export function getMessageText(message: ApiMessage) {
   }
 
   if (sticker || photo || video || audio || voice || document
-    || contact || poll || webPage || invoice || location) {
+    || contact || poll || webPage || invoice || location || game) {
     return undefined;
   }
 

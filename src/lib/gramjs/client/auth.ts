@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import utils from '../Utils';

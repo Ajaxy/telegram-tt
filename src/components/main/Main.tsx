@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { LangCode } from '../../types';
 import { ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType } from '../../api/types';
+import { GlobalState } from '../../global/types';
 
 import '../../global/actions/all';
 import {
@@ -40,6 +41,7 @@ import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
 import DownloadManager from './DownloadManager';
+import GameModal from './GameModal';
 import Notifications from './Notifications.async';
 import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
@@ -76,6 +78,8 @@ type StateProps = {
   addedSetIds?: string[];
   newContactUserId?: string;
   newContactByPhoneNumber?: boolean;
+  openedGame?: GlobalState['openedGame'];
+  gameTitle?: string;
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -109,6 +113,8 @@ const Main: FC<StateProps> = ({
   addedSetIds,
   newContactUserId,
   newContactByPhoneNumber,
+  openedGame,
+  gameTitle,
 }) => {
   const {
     sync,
@@ -340,6 +346,7 @@ const Main: FC<StateProps> = ({
         userId={newContactUserId}
         isByPhoneNumber={newContactByPhoneNumber}
       />
+      <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <DownloadManager />
       <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
       <UnreadCount isForAppBadge />
@@ -375,6 +382,9 @@ export default memo(withGlobal(
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
+    const openedGame = global.openedGame;
+    const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
+    const gameTitle = gameMessage?.content.game?.title;
 
     return {
       connectionState: global.connectionState,
@@ -400,6 +410,8 @@ export default memo(withGlobal(
       addedSetIds: global.stickers.added.setIds,
       newContactUserId: global.newContact?.userId,
       newContactByPhoneNumber: global.newContact?.isByPhoneNumber,
+      openedGame,
+      gameTitle,
     };
   },
 )(Main));

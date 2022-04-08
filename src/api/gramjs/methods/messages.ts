@@ -1102,6 +1102,7 @@ export async function forwardMessages({
   isSilent,
   scheduledAt,
   sendAs,
+  withMyScore,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
@@ -1110,6 +1111,7 @@ export async function forwardMessages({
   isSilent?: boolean;
   scheduledAt?: number;
   sendAs?: ApiUser | ApiChat;
+  withMyScore?: boolean;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
@@ -1131,7 +1133,8 @@ export async function forwardMessages({
     toPeer: buildInputPeer(toChat.id, toChat.accessHash),
     randomId: randomIds,
     id: messageIds,
-    ...(isSilent && { sil2ent: isSilent }),
+    withMyScore: withMyScore || undefined,
+    silent: isSilent || undefined,
     ...(scheduledAt && { scheduleDate: scheduledAt }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }), true);

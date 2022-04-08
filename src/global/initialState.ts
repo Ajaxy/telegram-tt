@@ -202,4 +202,8 @@ export const INITIAL_STATE: GlobalState = {
   statistics: {
     byChatId: {},
   },
+
+  pollModal: {
+    isOpen: false,
+  },
 };

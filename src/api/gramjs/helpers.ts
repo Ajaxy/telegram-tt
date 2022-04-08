@@ -31,6 +31,15 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
     localDb.documents[String(message.media.webpage.document.id)] = message.media.webpage.document;
   }
 
+  if (message instanceof GramJs.Message
+    && message.media instanceof GramJs.MessageMediaGame
+  ) {
+    if (message.media.game.document instanceof GramJs.Document) {
+      localDb.documents[String(message.media.game.document.id)] = message.media.game.document;
+    }
+    addPhotoToLocalDb(message.media.game.photo);
+  }
+
   if (message instanceof GramJs.MessageService && 'photo' in message.action) {
     addPhotoToLocalDb(message.action.photo);
   }

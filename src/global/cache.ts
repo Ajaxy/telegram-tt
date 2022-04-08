@@ -219,6 +219,12 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.activeReactions) {
     cached.activeReactions = {};
   }
+
+  if (!cached.pollModal) {
+    cached.pollModal = {
+      isOpen: false,
+    };
+  }
 }
 
 function updateCache() {

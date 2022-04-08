@@ -12,12 +12,11 @@ import './InlineButtons.scss';
 
 type OwnProps = {
   message: ApiMessage;
-  onClick: ({ button }: { button: ApiKeyboardButton }) => void;
+  onClick: ({ messageId, button }: { messageId: number; button: ApiKeyboardButton }) => void;
 };
 
 const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
   const lang = useLang();
-
   return (
     <div className="InlineButtons">
       {message.inlineButtons!.map((row) => (
@@ -26,13 +25,14 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
             <Button
               size="tiny"
               ripple
-              disabled={button.type === 'NOT_SUPPORTED'}
+              disabled={button.type === 'unsupported'}
               // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => onClick({ button })}
+              onClick={() => onClick({ messageId: message.id, button })}
             >
               {renderText(lang(button.text))}
-              {button.type === 'buy' && <i className="icon-card" />}
-              {button.type === 'url' && !button.value!.match(RE_TME_LINK) && <i className="icon-arrow-right" />}
+              {['buy', 'receipt'].includes(button.type) && <i className="icon-card" />}
+              {button.type === 'url' && !RE_TME_LINK.test(button.url) && <i className="icon-arrow-right" />}
+              {button.type === 'switchBotInline' && <i className="icon-share-filled" />}
             </Button>
           ))}
         </div>

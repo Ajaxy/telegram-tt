@@ -28,7 +28,7 @@ type StateProps = {
 const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
   isOpen, message, onClose,
 }) => {
-  const { clickInlineButton } = getActions();
+  const { clickBotInlineButton } = getActions();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};
@@ -66,9 +66,9 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
             {row.map((button) => (
               <Button
                 ripple
-                disabled={button.type === 'NOT_SUPPORTED'}
+                disabled={button.type === 'unsupported'}
                 // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => clickInlineButton({ button })}
+                onClick={() => clickBotInlineButton({ messageId: message.id, button })}
               >
                 {button.text}
               </Button>
