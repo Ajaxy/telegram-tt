@@ -1,0 +1,36 @@
+.root {
+  width: 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &:not(:first-child) {
+    margin-left: 1rem;
+  }
+}
+
+.button {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: #fff !important;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+  }
+
+  &.active {
+    background-color: #fff !important;
+    color: var(--color-text-secondary) !important;
+
+    &:hover {
+      background-color: #ddd !important;
+    }
+  }
+}
+
+.button-text {
+  color: #fff;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+}

@@ -1,14 +1,18 @@
-import { JoinGroupCallPayload } from '../../../lib/secret-sauce';
+import BigInt from 'big-integer';
+import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
 import {
-  ApiChat, ApiUser, OnApiUpdate, ApiGroupCall,
+  ApiChat, ApiUser, OnApiUpdate, ApiGroupCall, ApiPhoneCall,
 } from '../../types';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import { invokeRequest } from './client';
-import { buildInputGroupCall, buildInputPeer, generateRandomInt } from '../gramjsBuilders';
 import {
+  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, generateRandomInt,
+} from '../gramjsBuilders';
+import {
+  buildCallProtocol,
   buildApiGroupCall,
-  buildApiGroupCallParticipant,
+  buildApiGroupCallParticipant, buildPhoneCall,
 
 } from '../apiBuilders/calls';
 import { buildApiUser } from '../apiBuilders/users';
@@ -233,4 +237,132 @@ export function leaveGroupCallPresentation({
   return invokeRequest(new GramJs.phone.LeaveGroupCallPresentation({
     call: buildInputGroupCall(call),
   }), true);
+}
+
+export async function getDhConfig() {
+  const dhConfig = await invokeRequest(new GramJs.messages.GetDhConfig({}));
+
+  if (!dhConfig || dhConfig instanceof GramJs.messages.DhConfigNotModified) return undefined;
+
+  return {
+    g: dhConfig.g,
+    p: Array.from(dhConfig.p),
+    random: Array.from(dhConfig.random),
+  };
+}
+
+export function discardCall({
+  call, isBusy,
+}: {
+  call: ApiPhoneCall; isBusy?: boolean;
+}) {
+  return invokeRequest(new GramJs.phone.DiscardCall({
+    peer: buildInputPhoneCall(call),
+    reason: isBusy ? new GramJs.PhoneCallDiscardReasonBusy() : new GramJs.PhoneCallDiscardReasonHangup(),
+  }), true);
+}
+
+export async function requestCall({
+  user, gAHash, isVideo,
+}: {
+  user: ApiUser; gAHash: number[]; isVideo?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.phone.RequestCall({
+    randomId: generateRandomInt(),
+    userId: buildInputPeer(user.id, user.accessHash),
+    gAHash: Buffer.from(gAHash),
+    ...(isVideo && { video: true }),
+    protocol: buildCallProtocol(),
+  }));
+
+  if (!result) {
+    return;
+  }
+
+  const call = buildPhoneCall(result.phoneCall);
+
+  onUpdate({
+    '@type': 'updatePhoneCall',
+    call,
+  });
+}
+
+export function setCallRating({
+  call, rating, comment,
+}: {
+  call: ApiPhoneCall; rating: number; comment: string;
+}) {
+  return invokeRequest(new GramJs.phone.SetCallRating({
+    rating,
+    peer: buildInputPhoneCall(call),
+    comment,
+  }), true);
+}
+
+export function receivedCall({
+  call,
+}: {
+  call: ApiPhoneCall;
+}) {
+  return invokeRequest(new GramJs.phone.ReceivedCall({
+    peer: buildInputPhoneCall(call),
+  }));
+}
+
+export async function acceptCall({
+  call, gB,
+}: {
+  call: ApiPhoneCall; gB: number[];
+}) {
+  const result = await invokeRequest(new GramJs.phone.AcceptCall({
+    peer: buildInputPhoneCall(call),
+    gB: Buffer.from(gB),
+    protocol: buildCallProtocol(),
+  }));
+
+  if (!result) {
+    return;
+  }
+
+  call = buildPhoneCall(result.phoneCall);
+
+  onUpdate({
+    '@type': 'updatePhoneCall',
+    call,
+  });
+}
+
+export async function confirmCall({
+  call, gA, keyFingerprint,
+}: {
+  call: ApiPhoneCall; gA: number[]; keyFingerprint: string;
+}) {
+  const result = await invokeRequest(new GramJs.phone.ConfirmCall({
+    peer: buildInputPhoneCall(call),
+    gA: Buffer.from(gA),
+    keyFingerprint: BigInt(keyFingerprint),
+    protocol: buildCallProtocol(),
+  }));
+
+  if (!result) {
+    return;
+  }
+
+  call = buildPhoneCall(result.phoneCall);
+
+  onUpdate({
+    '@type': 'updatePhoneCall',
+    call,
+  });
+}
+
+export function sendSignalingData({
+  data, call,
+}: {
+  data: number[]; call: ApiPhoneCall;
+}) {
+  return invokeRequest(new GramJs.phone.SendSignalingData({
+    data: Buffer.from(data),
+    peer: buildInputPhoneCall(call),
+  }));
 }

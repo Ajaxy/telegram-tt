@@ -38,7 +38,6 @@ function toSignedLittleBuffer(big, number = 8) {
     return Buffer.from(byteArray);
 }
 
-
 /**
  * converts a big int to a buffer
  * @param bigInt {bigInt.BigInteger}
@@ -205,7 +204,6 @@ function sha1(data) {
     return shaSum.digest();
 }
 
-
 /**
  * Calculates the SHA256 digest for the given data
  * @param data
@@ -241,10 +239,9 @@ function modExp(a, b, n) {
     return result;
 }
 
-
 /**
  * Gets the arbitrary-length byte array corresponding to the given integer
- * @param integer {number,BigInteger}
+ * @param integer {any}
  * @param signed {boolean}
  * @returns {Buffer}
  */

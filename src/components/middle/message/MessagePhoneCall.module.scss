@@ -1,0 +1,49 @@
+.root {
+  display: flex;
+}
+
+.button {
+  margin-inline-end: 0.5rem;
+  color: var(--color-text) !important;
+}
+
+.info {
+  margin-inline-end: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.reason {
+  font-weight: 500;
+}
+
+.arrow {
+  font-size: 1.125rem;
+  display: inline-block;
+  transform: rotateZ(-45deg);
+  color: #4fae4e;
+
+  &.incoming {
+    transform: rotateZ(135deg);
+
+    &.missed {
+      color: var(--color-error);
+    }
+  }
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+}
+
+.duration {
+  margin-inline-start: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary)
+}
+
+:global(.own) .duration {
+  color: var(--color-message-meta-own);
+}

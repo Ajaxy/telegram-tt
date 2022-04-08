@@ -121,6 +121,47 @@ export function formatLastUpdated(lang: LangFn, currentTime: number, lastUpdated
   }
 }
 
+type DurationType = 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks';
+
+export function formatTimeDuration(lang: LangFn, duration: number, showLast = 2) {
+  if (!duration) {
+    return undefined;
+  }
+
+  const durationRecords: { duration: number; type: DurationType }[] = [];
+  const labels = [
+    { multiplier: 1, type: 'Seconds' },
+    { multiplier: 60, type: 'Minutes' },
+    { multiplier: 60, type: 'Hours' },
+    { multiplier: 24, type: 'Days' },
+    { multiplier: 7, type: 'Weeks' },
+  ] as Array<{ multiplier: number; type: DurationType }>;
+  let t = 1;
+  labels.forEach((label, idx) => {
+    t *= label.multiplier;
+
+    if (duration < t) {
+      return;
+    }
+
+    const modulus = labels[idx === (labels.length - 1) ? idx : idx + 1].multiplier!;
+    durationRecords.push({
+      duration: Math.floor((duration / t) % modulus),
+      type: label.type,
+    });
+  });
+
+  const out = durationRecords.slice(-showLast).reverse();
+  for (let i = out.length - 1; i >= 0; --i) {
+    if (out[i].duration === 0) {
+      out.splice(i, 1);
+    }
+  }
+
+  // TODO In arabic we don't use "," as delimiter rather we use "and" each time
+  return out.map((l) => lang(l.type, l.duration, 'i')).join(', ');
+}
+
 export function formatHumanDate(
   lang: LangFn,
   datetime: number | Date,

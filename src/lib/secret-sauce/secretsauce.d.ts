@@ -1,5 +1,5 @@
 import { GroupCallConnectionData, GroupCallParticipant, JoinGroupCallPayload } from './types';
-declare type StreamType = 'audio' | 'video' | 'presentation';
+export declare type StreamType = 'audio' | 'video' | 'presentation';
 export declare function getDevices(streamType: StreamType, isInput?: boolean): Promise<MediaDeviceInfo[]>;
 export declare function toggleSpeaker(): void;
 export declare function toggleNoiseSuppression(): void;
@@ -17,4 +17,3 @@ export declare function handleUpdateGroupCallParticipants(updatedParticipants: G
 export declare function handleUpdateGroupCallConnection(data: GroupCallConnectionData, isPresentation: boolean): Promise<void>;
 export declare function startSharingScreen(): Promise<JoinGroupCallPayload | undefined>;
 export declare function joinGroupCall(myId: string, audioContext: AudioContext, audioElement: HTMLAudioElement, onUpdate: (...args: any[]) => void): Promise<JoinGroupCallPayload>;
-export {};

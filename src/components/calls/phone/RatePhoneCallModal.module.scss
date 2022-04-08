@@ -1,0 +1,28 @@
+.stars {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.star {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+
+  &:not(:first-child) {
+    margin-left: 1rem;
+  }
+
+  &.isFilled {
+    color: var(--color-primary);
+  }
+}
+
+.comment {
+  margin-top: 1rem;
+  overflow: hidden;
+
+  &:not(.visible) {
+    display: none;
+  }
+}

@@ -1,3 +1,4 @@
+import { P2PPayloadType } from './p2pMessage';
 export interface GroupCallParticipant {
     isSelf?: boolean;
     isMuted?: boolean;
@@ -52,6 +53,7 @@ export declare type Candidate = {
     network: string;
     'rel-addr': string;
     'rel-port': string;
+    sdpString?: string;
 };
 export declare type JoinGroupCallPayload = {
     ufrag: string;
@@ -59,6 +61,14 @@ export declare type JoinGroupCallPayload = {
     fingerprints: Fingerprint[];
     ssrc?: number;
     'ssrc-groups'?: SsrcGroup[];
+};
+export declare type P2pParsedSdp = JoinGroupCallPayload & {
+    audioExtmap: RTPExtension[];
+    videoExtmap: RTPExtension[];
+    screencastExtmap: RTPExtension[];
+    audioPayloadTypes: P2PPayloadType[];
+    videoPayloadTypes: P2PPayloadType[];
+    screencastPayloadTypes: P2PPayloadType[];
 };
 export interface RTPExtension {
     id: number;
@@ -97,4 +107,20 @@ export interface GroupCallConnectionData {
         server_sources: number[];
     };
     stream?: boolean;
+}
+export interface ApiPhoneCallConnection {
+    username: string;
+    password: string;
+    isTurn?: boolean;
+    isStun?: boolean;
+    ip: string;
+    ipv6: string;
+    port: number;
+}
+export interface ApiCallProtocol {
+    libraryVersions: string[];
+    minLayer: number;
+    maxLayer: number;
+    isUdpP2p?: boolean;
+    isUdpReflector?: boolean;
 }

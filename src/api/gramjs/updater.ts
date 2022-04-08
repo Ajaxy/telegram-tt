@@ -1,4 +1,4 @@
-import { GroupCallConnectionData } from '../../lib/secret-sauce';
+import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
 import { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
 
@@ -44,7 +44,7 @@ import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './a
 import { buildApiPhoto } from './apiBuilders/common';
 import {
   buildApiGroupCall,
-  buildApiGroupCallParticipant,
+  buildApiGroupCallParticipant, buildPhoneCall,
   getGroupCallId,
 } from './apiBuilders/calls';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
@@ -896,6 +896,24 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       chatId: getApiChatIdFromMtpPeer(update.peer),
       recentRequesterIds: update.recentRequesters.map((id) => buildApiPeerId(id, 'user')),
       requestsPending: update.requestsPending,
+    });
+  } else if (update instanceof GramJs.UpdatePhoneCall) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
+    onUpdate({
+      '@type': 'updatePhoneCall',
+      call: buildPhoneCall(update.phoneCall),
+    });
+  } else if (update instanceof GramJs.UpdatePhoneCallSignalingData) {
+    onUpdate({
+      '@type': 'updatePhoneCallSignalingData',
+      callId: update.phoneCallId.toString(),
+      data: Array.from(update.data),
     });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;

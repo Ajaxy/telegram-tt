@@ -114,6 +114,7 @@ import CommentButton from './CommentButton';
 import Reactions from './Reactions';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import LocalAnimatedEmoji from '../../common/LocalAnimatedEmoji';
+import MessagePhoneCall from './MessagePhoneCall';
 
 import './Message.scss';
 
@@ -354,9 +355,6 @@ const Message: FC<OwnProps & StateProps> = ({
       && forwardInfo.fromMessageId
     ));
 
-  const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
-  const withQuickReactionButton = !IS_TOUCH_ENV && !isInSelectMode && defaultReaction && !isInDocumentGroupNotLast;
-
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
       messageId,
@@ -462,8 +460,14 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, game,
+    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
+
+  const { phoneCall } = action || {};
+
+  const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
+  const withQuickReactionButton = !IS_TOUCH_ENV && !phoneCall && !isInSelectMode && defaultReaction
+    && !isInDocumentGroupNotLast;
 
   const contentClassName = buildContentClassName(message, {
     hasReply,
@@ -482,7 +486,9 @@ const Message: FC<OwnProps & StateProps> = ({
   const textParts = renderMessageText(message, highlight, isEmojiOnlyMessage(customShape));
 
   let metaPosition!: MetaPosition;
-  if (isInDocumentGroupNotLast) {
+  if (phoneCall) {
+    metaPosition = 'none';
+  } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
   } else if (textParts && !hasAnimatedEmoji && !webPage) {
     metaPosition = 'in-text';
@@ -678,6 +684,13 @@ const Message: FC<OwnProps & StateProps> = ({
             hasCustomAppendix={hasCustomAppendix}
             lastSyncTime={lastSyncTime}
             onMediaClick={handleAlbumMediaClick}
+          />
+        )}
+        {phoneCall && (
+          <MessagePhoneCall
+            message={message}
+            phoneCall={phoneCall}
+            chatId={chatId}
           />
         )}
         {!isAlbum && photo && (

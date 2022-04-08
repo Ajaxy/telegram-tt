@@ -110,10 +110,9 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     createGroupCall,
     openLinkedChat,
     openAddContactDialog,
-    openCallFallbackConfirm,
+    requestCall,
     toggleStatistics,
   } = getActions();
-
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { x, y } = anchor;
@@ -177,10 +176,15 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [closeMenu, onSubscribeChannel]);
 
-  const handleCall = useCallback(() => {
-    openCallFallbackConfirm();
+  const handleVideoCall = useCallback(() => {
+    requestCall({ userId: chatId, isVideo: true });
     closeMenu();
-  }, [closeMenu, openCallFallbackConfirm]);
+  }, [chatId, closeMenu, requestCall]);
+
+  const handleCall = useCallback(() => {
+    requestCall({ userId: chatId });
+    closeMenu();
+  }, [chatId, closeMenu, requestCall]);
 
   const handleSearch = useCallback(() => {
     onSearchClick();
@@ -274,6 +278,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               onClick={handleCall}
             >
               {lang('Call')}
+            </MenuItem>
+          )}
+          {canCall && (
+            <MenuItem
+              icon="video-outlined"
+              onClick={handleVideoCall}
+            >
+              {lang('VideoCall')}
             </MenuItem>
           )}
           {IS_SINGLE_COLUMN_LAYOUT && canSearch && (

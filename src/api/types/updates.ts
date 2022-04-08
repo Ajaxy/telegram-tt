@@ -1,4 +1,9 @@
-import { GroupCallConnectionData, GroupCallParticipant, GroupCallConnectionState } from '../../lib/secret-sauce';
+import type {
+  GroupCallConnectionData,
+  GroupCallParticipant,
+  GroupCallConnectionState,
+  VideoState, VideoRotation,
+} from '../../lib/secret-sauce';
 import {
   ApiChat,
   ApiChatFullInfo,
@@ -15,7 +20,7 @@ import {
   ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
 import {
-  ApiGroupCall,
+  ApiGroupCall, ApiPhoneCall,
 } from './calls';
 
 export type ApiUpdateReady = {
@@ -456,6 +461,31 @@ export type ApiUpdateGroupCallConnectionState = {
   isSpeakerDisabled?: boolean;
 };
 
+export type ApiUpdatePhoneCall = {
+  '@type': 'updatePhoneCall';
+  call: ApiPhoneCall;
+};
+
+export type ApiUpdatePhoneCallSignalingData = {
+  '@type': 'updatePhoneCallSignalingData';
+  callId: string;
+  data: number[];
+};
+
+export type ApiUpdatePhoneCallMediaState = {
+  '@type': 'updatePhoneCallMediaState';
+  isMuted: boolean;
+  videoState: VideoState;
+  videoRotation: VideoRotation;
+  screencastState: VideoState;
+  isBatteryLow: boolean;
+};
+
+export type ApiUpdatePhoneCallConnectionState = {
+  '@type': 'updatePhoneCallConnectionState';
+  connectionState: RTCPeerConnectionState;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -476,7 +506,9 @@ export type ApiUpdate = (
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
-  ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted
+  ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
+  ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
+  ApiUpdatePhoneCallConnectionState
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

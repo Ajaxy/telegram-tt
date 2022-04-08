@@ -80,7 +80,16 @@ module.exports = (env = {}, argv = {}) => {
           test: /\.scss$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: {
+                  exportLocalsConvention: 'camelCase',
+                  auto: true,
+                  localIdentName: argv['optimize-minimize'] ? '[hash:base64]' : '[path][name]__[local]'
+                }
+              }
+            },
             'postcss-loader',
             'sass-loader',
           ],
