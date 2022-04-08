@@ -203,11 +203,11 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload) => {
 });
 
 addActionHandler('joinGroupCall', async (global, actions, payload) => {
-  if (!ARE_CALLS_SUPPORTED) return undefined;
+  if (!ARE_CALLS_SUPPORTED) return;
 
   if (global.phoneCall) {
     actions.toggleGroupCallPanel();
-    return undefined;
+    return;
   }
 
   const {
@@ -222,19 +222,19 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
 
   if (groupCall?.id === activeGroupCallId) {
     actions.toggleGroupCallPanel();
-    return undefined;
+    return;
   }
 
   if (activeGroupCallId) {
     actions.leaveGroupCall({
       rejoin: payload,
     });
-    return undefined;
+    return;
   }
 
   if (groupCall && activeGroupCallId === groupCall.id) {
     actions.toggleGroupCallPanel();
-    return undefined;
+    return;
   }
 
   if (!groupCall && (!id || !accessHash)) {
@@ -244,7 +244,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
     });
   }
 
-  if (!groupCall) return undefined;
+  if (!groupCall) return;
 
   global = getGlobal();
   global = updateGroupCall(
@@ -265,7 +265,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
     },
     isCallPanelVisible: false,
   };
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('playGroupCallSound', (global, actions, payload) => {
