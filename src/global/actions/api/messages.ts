@@ -65,7 +65,7 @@ import {
   selectSendAs,
   selectSponsoredMessage,
 } from '../../selectors';
-import { debounce, rafPromise } from '../../../util/schedulers';
+import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { isServiceNotificationMessage } from '../../helpers';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
@@ -113,7 +113,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload) => {
     }
 
     if (!areAllLocal) {
-      void loadViewportMessages(chat, threadId, offsetId, LoadMoreDirection.Around, isOutlying, isBudgetPreload);
+      onTickEnd(() => {
+        void loadViewportMessages(chat, threadId, offsetId, LoadMoreDirection.Around, isOutlying, isBudgetPreload);
+      });
     }
   } else {
     const offsetId = direction === LoadMoreDirection.Backwards ? viewportIds[0] : viewportIds[viewportIds.length - 1];
@@ -127,7 +129,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload) => {
       global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds);
     }
 
-    void loadWithBudget(actions, areAllLocal, isOutlying, isBudgetPreload, chat, threadId, direction, offsetId);
+    onTickEnd(() => {
+      void loadWithBudget(actions, areAllLocal, isOutlying, isBudgetPreload, chat, threadId, direction, offsetId);
+    });
 
     if (isBudgetPreload) {
       return undefined;
@@ -149,8 +153,6 @@ async function loadWithBudget(
   }
 
   if (!isBudgetPreload) {
-    // Let reducer return and update global
-    await Promise.resolve();
     actions.loadViewportMessages({
       chatId: chat.id, threadId, direction, isBudgetPreload: true,
     });
