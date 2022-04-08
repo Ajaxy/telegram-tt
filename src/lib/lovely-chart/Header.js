@@ -52,6 +52,7 @@ export function createHeader(container, title, zoomOutLabel = 'Zoom out', zoomOu
 
   function _onZoomOut() {
     _titleElement = toggleText(_zoomOutElement, title, 'lovely-chart--header-title', true);
+    _titleElement.classList.remove('lovely-chart--transition');
 
     zoomOutCallback();
   }

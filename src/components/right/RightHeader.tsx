@@ -371,7 +371,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
           />
         );
       case HeaderContent.Statistics:
-        return <h3>{lang('Statistics')}</h3>;
+        return <h3>{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3>{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
