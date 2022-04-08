@@ -109,12 +109,10 @@
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#54443d1938ec1c157e74d2a95e9103dcb3f5c6dd",
     "events": "^3.3.0",
     "idb-keyval": "^6.1.0",
-    "music-metadata-browser": "^2.5.5",
     "opus-recorder": "github:Ajaxy/opus-recorder",
     "os-browserify": "^0.3.0",
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
-    "process": "^0.11.10",
     "qr-code-styling": "github:zubiden/qr-code-styling#10f7cf3",
     "websocket": "^1.0.34"
   },

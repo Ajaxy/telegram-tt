@@ -6,7 +6,7 @@ type AudioMetadata = {
 };
 
 export async function parseAudioMetadata(url: string): Promise<AudioMetadata> {
-  const { fetchFromUrl, selectCover } = await import('music-metadata-browser');
+  const { fetchFromUrl, selectCover } = await import('../lib/music-metadata-browser');
   const metadata = await fetchFromUrl(url);
   const { common: { title, artist, picture }, format: { duration } } = metadata;
 
