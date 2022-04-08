@@ -1,4 +1,4 @@
-import { sleep } from '../lib/gramjs/Helpers';
+import { pause } from './schedulers';
 
 type PendingDownload = {
   url: string;
@@ -29,7 +29,7 @@ async function processQueue() {
     downloadOne(pendingDownload);
     count++;
     if (count === LIMIT_PER_BATCH) {
-      await sleep(BATCH_INTERVAL);
+      await pause(BATCH_INTERVAL);
       count = 0;
     }
   }
