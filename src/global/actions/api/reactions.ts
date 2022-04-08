@@ -1,4 +1,4 @@
-import { addActionHandler, getGlobal } from '../../index';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { ApiAppConfig, ApiMediaFormat } from '../../../api/types';
@@ -22,7 +22,7 @@ let interactionLocalId = 0;
 addActionHandler('loadAvailableReactions', async () => {
   const result = await callApi('getAvailableReactions');
   if (!result) {
-    return undefined;
+    return;
   }
 
   // Preload animations
@@ -35,10 +35,10 @@ addActionHandler('loadAvailableReactions', async () => {
     }
   });
 
-  return {
+  setGlobal({
     ...getGlobal(),
     availableReactions: result,
-  };
+  });
 });
 
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload) => {
@@ -198,16 +198,16 @@ addActionHandler('setDefaultReaction', async (global, actions, payload) => {
 
   const result = await callApi('setDefaultReaction', { reaction });
   if (!result) {
-    return undefined;
+    return;
   }
 
-  return {
+  setGlobal({
     ...getGlobal(),
     appConfig: {
       ...global.appConfig,
       defaultReaction: reaction,
     } as ApiAppConfig,
-  };
+  });
 });
 
 addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
@@ -224,7 +224,7 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
   if (!chat || !message) {
-    return undefined;
+    return;
   }
 
   const offset = message.reactors?.nextOffset;
@@ -236,7 +236,7 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
   });
 
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
@@ -247,7 +247,7 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
 
   const { nextOffset, count, reactions } = result;
 
-  return updateChatMessage(global, chatId, messageId, {
+  setGlobal(updateChatMessage(global, chatId, messageId, {
     reactors: {
       nextOffset,
       count,
@@ -256,7 +256,7 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
         ...reactions,
       ],
     },
-  });
+  }));
 });
 
 addActionHandler('loadMessageReactions', (global, actions, payload) => {

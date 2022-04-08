@@ -37,25 +37,23 @@ addActionHandler('loadUser', async (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
-    return undefined;
+    return;
   }
 
   const result = await callApi('fetchUsers', { users: [user] });
   if (!result) {
-    return undefined;
+    return;
   }
 
   const { users, userStatusesById } = result;
 
   global = getGlobal();
-
   global = updateUsers(global, buildCollectionByKey(users, 'id'));
   global = replaceUserStatuses(global, {
     ...global.users.statusesById,
     ...userStatusesById,
   });
-
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('loadTopUsers', (global) => {
@@ -78,13 +76,13 @@ addActionHandler('loadCommonChats', async (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const user = chatId ? selectUser(global, chatId) : undefined;
   if (!user || isUserBot(user) || user.commonChats?.isFullyLoaded) {
-    return undefined;
+    return;
   }
 
   const maxId = user.commonChats?.maxId;
   const result = await callApi('fetchCommonChats', user.id, user.accessHash!, maxId);
   if (!result) {
-    return undefined;
+    return;
   }
 
   const { chats, chatIds, isFullyLoaded } = result;
@@ -101,7 +99,7 @@ addActionHandler('loadCommonChats', async (global) => {
     },
   });
 
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('updateContact', (global, actions, payload) => {
@@ -235,12 +233,12 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
   const user = isPrivate ? selectUser(global, profileId) : undefined;
   const chat = !isPrivate ? selectChat(global, profileId) : undefined;
   if (!user && !chat) {
-    return undefined;
+    return;
   }
 
   const result = await callApi('fetchProfilePhotos', user, chat);
   if (!result || !result.photos) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
@@ -252,7 +250,7 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
     global = updateChat(global, profileId, { photos: result.photos });
   }
 
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('setUserSearchQuery', (global, actions, payload) => {
@@ -269,18 +267,17 @@ addActionHandler('importContact', async (global, actions, payload) => {
   const { phoneNumber: phone, firstName, lastName } = payload!;
 
   const result = await callApi('importContact', { phone, firstName, lastName });
+  if (!result) {
+    actions.showNotification({
+      message: langProvider.getTranslation('Contacts.PhoneNumber.NotRegistred'),
+    });
 
-  if (result) {
-    actions.openChat({ id: result });
-
-    return closeNewContactDialog(getGlobal());
+    return;
   }
 
-  actions.showNotification({
-    message: langProvider.getTranslation('Contacts.PhoneNumber.NotRegistred'),
-  });
+  actions.openChat({ id: result });
 
-  return undefined;
+  setGlobal(closeNewContactDialog(getGlobal()));
 });
 
 addActionHandler('reportSpam', (global, actions, payload) => {

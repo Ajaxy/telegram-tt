@@ -60,12 +60,12 @@ addActionHandler('loadGreetingStickers', async (global) => {
 
   const greeting = await callApi('fetchStickersForEmoji', { emoji: '👋⭐️', hash });
   if (!greeting) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
 
-  return {
+  setGlobal({
     ...global,
     stickers: {
       ...global.stickers,
@@ -74,7 +74,7 @@ addActionHandler('loadGreetingStickers', async (global) => {
         stickers: greeting.stickers.filter((sticker) => sticker.emoji === '👋'),
       },
     },
-  };
+  });
 });
 
 addActionHandler('loadFeaturedStickers', (global) => {
@@ -112,14 +112,14 @@ addActionHandler('saveGif', async (global, actions, payload) => {
   const { gif, shouldUnsave } = payload!;
   const result = await callApi('saveGif', { gif, shouldUnsave });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   const gifs = global.gifs.saved.gifs?.filter(({ id }) => id !== gif.id) || [];
   const newGifs = shouldUnsave ? gifs : [gif, ...gifs];
 
-  return {
+  setGlobal({
     ...global,
     gifs: {
       ...global.gifs,
@@ -128,7 +128,7 @@ addActionHandler('saveGif', async (global, actions, payload) => {
         gifs: newGifs,
       },
     },
-  };
+  });
 });
 
 addActionHandler('faveSticker', (global, actions, payload) => {
@@ -164,7 +164,7 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload: { languag
 
   let currentEmojiKeywords = global.emojiKeywords[language];
   if (currentEmojiKeywords?.isLoading) {
-    return undefined;
+    return;
   }
 
   setGlobal({
@@ -187,7 +187,7 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload: { languag
   currentEmojiKeywords = global.emojiKeywords[language];
 
   if (!emojiKeywords) {
-    return {
+    setGlobal({
       ...global,
       emojiKeywords: {
         ...global.emojiKeywords,
@@ -196,10 +196,12 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload: { languag
           isLoading: false,
         },
       },
-    };
+    });
+
+    return;
   }
 
-  return {
+  setGlobal({
     ...global,
     emojiKeywords: {
       ...global.emojiKeywords,
@@ -212,7 +214,7 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload: { languag
         },
       },
     },
-  };
+  });
 });
 
 async function loadStickerSets(hash?: string) {

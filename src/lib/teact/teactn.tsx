@@ -29,7 +29,7 @@ type ActionHandler = (
   global: GlobalState,
   actions: Actions,
   payload: any,
-) => GlobalState | void | Promise<GlobalState | void>;
+) => GlobalState | void | Promise<void>;
 
 type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral);
 
@@ -81,19 +81,11 @@ export function getActions() {
 function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
   actionHandlers[name]?.forEach((handler) => {
     const response = handler(currentGlobal, actions, payload);
-    if (!response) {
+    if (!response || typeof response.then === 'function') {
       return;
     }
 
-    if (typeof response.then === 'function') {
-      response.then((newGlobal: GlobalState | void) => {
-        if (newGlobal) {
-          setGlobal(newGlobal, options);
-        }
-      });
-    } else {
-      setGlobal(response, options);
-    }
+    setGlobal(response, options);
   });
 }
 
@@ -254,7 +246,7 @@ export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames e
       global: ProjectGlobalState,
       actions: ProjectActions,
       payload: ProjectActionTypes[ActionName],
-    ) => ProjectGlobalState | void | Promise<ProjectGlobalState | void>;
+    ) => ProjectGlobalState | void | Promise<void>;
   };
 
   return {
