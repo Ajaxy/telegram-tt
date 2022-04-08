@@ -17,11 +17,12 @@ type OwnProps = {
 
 const Badge: FC<OwnProps> = ({ chat, isPinned, isMuted }) => {
   const isShown = Boolean(chat.unreadCount || chat.hasUnreadMark || isPinned);
+  const isUnread = Boolean(chat.unreadCount || chat.hasUnreadMark);
   const className = buildClassName(
     'Badge',
     isMuted && 'muted',
-    isPinned && 'pinned',
-    Boolean(chat.unreadCount || chat.hasUnreadMark) && 'unread',
+    !isUnread && isPinned && 'pinned',
+    isUnread && 'unread',
   );
 
   function renderContent() {
