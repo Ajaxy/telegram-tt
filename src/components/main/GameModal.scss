@@ -1,0 +1,48 @@
+.GameModal {
+  .modal-dialog {
+    max-width: 80%;
+    height: 100%;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .modal-header {
+    display: none;
+  }
+
+  .modal-content {
+    overflow: hidden;
+  }
+
+  .game-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: var(--border-radius-default);
+  }
+
+  @media (max-width: 600px) {
+    .modal-dialog {
+      background-color: var(--color-background);
+      max-width: 100% !important;
+      border-radius: 0;
+    }
+
+    .modal-header {
+      display: flex;
+      padding: 0.5rem;
+    }
+
+    .modal-content {
+      max-height: none;
+      padding: 0;
+    }
+
+    .game-frame {
+      border-radius: 0;
+    }
+  }
+}

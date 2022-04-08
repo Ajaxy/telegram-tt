@@ -1,5 +1,5 @@
 import {
-  ApiAudio, ApiMediaFormat, ApiMessage, ApiMessageSearchType, ApiPhoto, ApiVideo, ApiDimensions, ApiLocation,
+  ApiAudio, ApiMediaFormat, ApiMessage, ApiMessageSearchType, ApiPhoto, ApiVideo, ApiDimensions, ApiLocation, ApiGame,
 } from '../../api/types';
 
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, IS_SAFARI } from '../../util/environment';
@@ -247,6 +247,26 @@ export function getMessageMediaHash(
       case 'download':
         return `${base}?download`;
     }
+  }
+
+  return undefined;
+}
+
+export function getGamePreviewPhotoHash(game: ApiGame) {
+  const { photo } = game;
+
+  if (photo) {
+    return `photo${photo.id}?size=x`;
+  }
+
+  return undefined;
+}
+
+export function getGamePreviewVideoHash(game: ApiGame) {
+  const { document } = game;
+
+  if (document) {
+    return `document${document.id}`;
   }
 
   return undefined;

@@ -165,3 +165,10 @@ export function selectSendAs(global: GlobalState, chatId: string) {
 
   return selectUser(global, id) || selectChat(global, id);
 }
+
+export function selectRequestedText(global: GlobalState, chatId: string) {
+  if (global.openChatWithText?.chatId === chatId) {
+    return global.openChatWithText.text;
+  }
+  return undefined;
+}

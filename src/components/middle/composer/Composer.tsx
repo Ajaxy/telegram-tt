@@ -42,6 +42,7 @@ import {
   selectCanScheduleUntilOnline,
   selectEditingScheduledDraft,
   selectEditingDraft,
+  selectRequestedText,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -127,7 +128,7 @@ type StateProps =
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
     isForwarding?: boolean;
-    isPollModalOpen?: boolean;
+    pollModal: GlobalState['pollModal'];
     botKeyboardMessageId?: number;
     botKeyboardPlaceholder?: string;
     withScheduledButton?: boolean;
@@ -151,6 +152,7 @@ type StateProps =
     sendAsChat?: ApiChat;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
+    requestedText?: string;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -196,7 +198,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   isRightColumnShown,
   isSelectModeActive,
   isForwarding,
-  isPollModalOpen,
+  pollModal,
   botKeyboardMessageId,
   botKeyboardPlaceholder,
   withScheduledButton,
@@ -218,6 +220,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsChat,
   sendAsId,
   editingDraft,
+  requestedText,
 }) => {
   const {
     sendMessage,
@@ -234,6 +237,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendInlineBotResult,
     loadSendAs,
     loadFullChat,
+    resetOpenChatWithText,
   } = getActions();
   const lang = useLang();
 
@@ -657,6 +661,17 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [contentToBeScheduled, handleMessageSchedule, requestCalendar]);
 
+  useEffect(() => {
+    if (requestedText) {
+      setHtml(requestedText);
+      resetOpenChatWithText();
+      requestAnimationFrame(() => {
+        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+        focusEditableElement(messageInput, true);
+      });
+    }
+  }, [requestedText, resetOpenChatWithText]);
+
   const handleStickerSelect = useCallback((
     sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean, shouldPreserveInput = false,
   ) => {
@@ -945,7 +960,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClear={handleClearAttachment}
       />
       <PollModal
-        isOpen={Boolean(isPollModalOpen)}
+        isOpen={pollModal.isOpen}
+        isQuiz={pollModal.isQuiz}
         shouldBeAnonimous={isChannel}
         onClear={closePollModal}
         onSend={handlePollSend}
@@ -1213,6 +1229,7 @@ export default memo(withGlobal<OwnProps>(
       : (chat?.adminRights?.anonymous ? chat?.id : undefined);
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
+    const requestedText = selectRequestedText(global, chatId);
 
     const editingDraft = messageListType === 'scheduled'
       ? selectEditingScheduledDraft(global, chatId)
@@ -1238,7 +1255,7 @@ export default memo(withGlobal<OwnProps>(
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
       isForwarding: chatId === global.forwardMessages.toChatId,
-      isPollModalOpen: global.isPollModalOpen,
+      pollModal: global.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       groupChatMembers: chat?.fullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
@@ -1257,6 +1274,7 @@ export default memo(withGlobal<OwnProps>(
       sendAsChat,
       sendAsId,
       editingDraft,
+      requestedText,
     };
   },
 )(Composer));

@@ -905,6 +905,30 @@ addActionHandler('setActiveChatFolder', (global, actions, payload) => {
   };
 });
 
+addActionHandler('openChatWithText', (global, actions, payload) => {
+  const { chatId, text } = payload;
+
+  actions.openChat({ id: chatId });
+  actions.exitMessageSelectMode();
+
+  global = getGlobal();
+
+  return {
+    ...global,
+    openChatWithText: {
+      chatId,
+      text,
+    },
+  };
+});
+
+addActionHandler('resetOpenChatWithText', (global) => {
+  return {
+    ...global,
+    openChatWithText: undefined,
+  };
+});
+
 addActionHandler('loadMoreMembers', async (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const chat = chatId ? selectChat(global, chatId) : undefined;

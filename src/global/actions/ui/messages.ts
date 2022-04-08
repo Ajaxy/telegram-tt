@@ -410,7 +410,9 @@ addActionHandler('focusMessage', (global, actions, payload) => {
 });
 
 addActionHandler('openForwardMenu', (global, actions, payload) => {
-  const { fromChatId, messageIds, groupedId } = payload!;
+  const {
+    fromChatId, messageIds, groupedId, withMyScore,
+  } = payload!;
   let groupedMessageIds;
   if (groupedId) {
     groupedMessageIds = selectMessageIdsByGroupId(global, fromChatId, groupedId);
@@ -421,6 +423,7 @@ addActionHandler('openForwardMenu', (global, actions, payload) => {
       fromChatId,
       messageIds: groupedMessageIds || messageIds,
       isModalShown: true,
+      withMyScore,
     },
   };
 });
@@ -573,17 +576,23 @@ addActionHandler('disableContextMenuHint', (global) => {
 
 addActionHandler('exitMessageSelectMode', exitMessageSelectMode);
 
-addActionHandler('openPollModal', (global) => {
+addActionHandler('openPollModal', (global, actions, payload) => {
+  const { isQuiz } = payload || {};
   return {
     ...global,
-    isPollModalOpen: true,
+    pollModal: {
+      isOpen: true,
+      isQuiz,
+    },
   };
 });
 
 addActionHandler('closePollModal', (global) => {
   return {
     ...global,
-    isPollModalOpen: false,
+    pollModal: {
+      isOpen: false,
+    },
   };
 });
 

@@ -4,6 +4,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
+import { GlobalState } from '../../global/types';
 
 import {
   filterChatsByName,
@@ -29,6 +30,7 @@ type StateProps = {
   pinnedIds?: string[];
   contactIds?: string[];
   currentUserId?: string;
+  switchBotInline?: GlobalState['switchBotInline'];
 };
 
 const ForwardPicker: FC<OwnProps & StateProps> = ({
@@ -39,10 +41,13 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
   contactIds,
   currentUserId,
   isOpen,
+  switchBotInline,
 }) => {
   const {
     setForwardChatId,
     exitForwardMode,
+    openChatWithText,
+    resetSwitchBotInline,
   } = getActions();
 
   const lang = useLang();
@@ -86,8 +91,14 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
   }, [activeListIds, archivedListIds, chatsById, contactIds, currentUserId, filter, isOpen, lang, pinnedIds]);
 
   const handleSelectUser = useCallback((userId: string) => {
-    setForwardChatId({ id: userId });
-  }, [setForwardChatId]);
+    if (switchBotInline) {
+      const text = `@${switchBotInline.botUsername} ${switchBotInline.query}`;
+      openChatWithText({ chatId: userId, text });
+      resetSwitchBotInline();
+    } else {
+      setForwardChatId({ id: userId });
+    }
+  }, [openChatWithText, resetSwitchBotInline, setForwardChatId, switchBotInline]);
 
   const renderingChatAndContactIds = useCurrentOrPrev(chatAndContactIds, true)!;
 
@@ -120,6 +131,7 @@ export default memo(withGlobal<OwnProps>(
         orderedPinnedIds,
       },
       currentUserId,
+      switchBotInline,
     } = global;
 
     return {
@@ -129,6 +141,7 @@ export default memo(withGlobal<OwnProps>(
       pinnedIds: orderedPinnedIds.active,
       contactIds: global.contactList?.userIds,
       currentUserId,
+      switchBotInline,
     };
   },
 )(ForwardPicker));

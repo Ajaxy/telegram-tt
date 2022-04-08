@@ -425,7 +425,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       messageSendKeyCombo,
       replyingToId: chatId && threadId ? selectReplyingToId(global, chatId, threadId) : undefined,
-      noTabCapture: global.isPollModalOpen || global.payment.isPaymentModalOpen,
+      noTabCapture: global.pollModal.isOpen || global.payment.isPaymentModalOpen,
     };
   },
 )(MessageInput));

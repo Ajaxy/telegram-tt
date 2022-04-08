@@ -16,14 +16,15 @@ export function init() {
 }
 
 export async function answerCallbackButton({
-  chatId, accessHash, messageId, data,
+  chatId, accessHash, messageId, data, isGame,
 }: {
-  chatId: string; accessHash?: string; messageId: number; data: string;
+  chatId: string; accessHash?: string; messageId: number; data?: string; isGame?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetBotCallbackAnswer({
     peer: buildInputPeer(chatId, accessHash),
     msgId: messageId,
-    data: deserializeBytes(data),
+    data: data ? deserializeBytes(data) : undefined,
+    game: isGame || undefined,
   }));
 
   return result ? omitVirtualClassFields(result) : undefined;

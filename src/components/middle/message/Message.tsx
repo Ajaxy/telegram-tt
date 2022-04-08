@@ -106,6 +106,7 @@ import Poll from './Poll';
 import WebPage from './WebPage';
 import Invoice from './Invoice';
 import Location from './Location';
+import Game from './Game';
 import Album from './Album';
 import RoundVideo from './RoundVideo';
 import InlineButtons from './InlineButtons';
@@ -281,7 +282,7 @@ const Message: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     toggleMessageSelection,
-    clickInlineButton,
+    clickBotInlineButton,
     disableContextMenuHint,
   } = getActions();
 
@@ -461,7 +462,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location,
+    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, game,
   } = getMessageContent(message);
 
   const contentClassName = buildContentClassName(message, {
@@ -753,6 +754,13 @@ const Message: FC<OwnProps & StateProps> = ({
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
+        {game && (
+          <Game
+            message={message}
+            canAutoLoadMedia={canAutoLoadMedia}
+            lastSyncTime={lastSyncTime}
+          />
+        )}
         {!hasAnimatedEmoji && textParts && (
           <p className={textContentClass} dir="auto">
             {textParts}
@@ -935,7 +943,7 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
         </div>
         {message.inlineButtons && (
-          <InlineButtons message={message} onClick={clickInlineButton} />
+          <InlineButtons message={message} onClick={clickBotInlineButton} />
         )}
         {reactionsPosition === 'outside' && (
           <Reactions

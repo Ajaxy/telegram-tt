@@ -28,7 +28,9 @@ import {
   ApiSponsoredMessage,
   ApiChannelStatistics,
   ApiGroupStatistics,
-  ApiPaymentFormNativeParams, ApiUpdate,
+  ApiPaymentFormNativeParams,
+  ApiUpdate,
+  ApiKeyboardButton,
 } from '../api/types';
 import {
   FocusDirection,
@@ -114,7 +116,6 @@ export type GlobalState = {
   isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
-  isPollModalOpen?: boolean;
   newChatMembersProgress?: NewChatMembersProgress;
   uiReadyState: 0 | 1 | 2;
   shouldSkipHistoryAnimations?: boolean;
@@ -407,6 +408,7 @@ export type GlobalState = {
     fromChatId?: string;
     messageIds?: number[];
     toChatId?: string;
+    withMyScore?: boolean;
   };
 
   pollResults: {
@@ -516,6 +518,27 @@ export type GlobalState = {
     userId?: string;
     isByPhoneNumber?: boolean;
   };
+
+  openedGame?: {
+    url: string;
+    chatId: string;
+    messageId: number;
+  };
+
+  switchBotInline?: {
+    query: string;
+    botUsername: string;
+  };
+
+  openChatWithText?: {
+    chatId: string;
+    text: string;
+  };
+
+  pollModal: {
+    isOpen: boolean;
+    isQuiz?: boolean;
+  };
 };
 
 export interface ActionPayloads {
@@ -530,6 +553,13 @@ export interface ActionPayloads {
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
   };
+
+  openChatWithText: {
+    chatId: string;
+    text: string;
+  };
+
+  resetOpenChatWithText: {};
 
   // Messages
   setEditingDraft: {
@@ -615,6 +645,34 @@ export interface ActionPayloads {
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   };
+
+  // Bots
+
+  clickBotInlineButton: {
+    messageId: number;
+    button: ApiKeyboardButton;
+  };
+
+  switchBotInline: {
+    messageId: number;
+    query: string;
+    isSamePeer?: boolean;
+  };
+
+  resetSwitchBotInline: {};
+
+  // Misc
+  openGame: {
+    url: string;
+    chatId: string;
+    messageId: number;
+  };
+  closeGame: {};
+
+  openPollModal: {
+    isQuiz?: boolean;
+  };
+  closePollModal: {};
 }
 
 export type NonTypedActionNames = (
@@ -697,10 +755,9 @@ export type NonTypedActionNames = (
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
   'openStickerSetShortName' |
   // bots
-  'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
+  'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
   // misc
-  'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |
   'setDeviceToken' | 'deleteDeviceToken' |
   'checkVersionNotification' | 'createServiceNotification' |

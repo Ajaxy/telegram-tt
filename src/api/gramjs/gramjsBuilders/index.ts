@@ -319,6 +319,9 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
           && media.webpage.document.mimeType.startsWith('video')
         )
       )
+    ) || (
+      media instanceof GramJs.MessageMediaGame
+      && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
     )
   );
 }
@@ -441,6 +444,8 @@ export function buildSendMessageAction(action: ApiSendMessageAction) {
       return new GramJs.SendMessageRecordAudioAction();
     case 'chooseSticker':
       return new GramJs.SendMessageChooseStickerAction();
+    case 'playingGame':
+      return new GramJs.SendMessageGamePlayAction();
   }
   return undefined;
 }

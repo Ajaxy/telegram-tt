@@ -261,3 +261,22 @@ addActionHandler('closeHistoryCalendar', (global) => {
     historyCalendarSelectedAt: undefined,
   };
 });
+
+addActionHandler('openGame', (global, actions, payload) => {
+  const { url, chatId, messageId } = payload;
+  return {
+    ...global,
+    openedGame: {
+      url,
+      chatId,
+      messageId,
+    },
+  };
+});
+
+addActionHandler('closeGame', (global) => {
+  return {
+    ...global,
+    openedGame: undefined,
+  };
+});

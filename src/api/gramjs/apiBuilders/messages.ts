@@ -29,6 +29,7 @@ import {
   ApiSponsoredMessage,
   ApiUser,
   ApiLocation,
+  ApiGame,
 } from '../../types';
 
 import {
@@ -327,6 +328,9 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
   const location = buildLocationFromMedia(media);
   if (location) return { location };
 
+  const game = buildGameFromMedia(media);
+  if (game) return { game };
+
   return undefined;
 }
 
@@ -532,6 +536,16 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
       }
     } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
       mediaType = 'video';
+      const videoAttribute = attributes
+        .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
+
+      if (videoAttribute) {
+        const { w: width, h: height } = videoAttribute;
+        mediaSize = {
+          width,
+          height,
+        };
+      }
     }
   }
 
@@ -635,6 +649,33 @@ function buildGeoPoint(geo: GramJs.TypeGeoPoint): ApiLocation['geo'] | undefined
     lat,
     accessHash: accessHash.toString(),
     accuracyRadius,
+  };
+}
+
+function buildGameFromMedia(media: GramJs.TypeMessageMedia): ApiGame | undefined {
+  if (!(media instanceof GramJs.MessageMediaGame)) {
+    return undefined;
+  }
+
+  return buildGame(media);
+}
+
+function buildGame(media: GramJs.MessageMediaGame): ApiGame | undefined {
+  const {
+    id, accessHash, shortName, title, description, photo: apiPhoto, document: apiDocument,
+  } = media.game;
+
+  const photo = apiPhoto instanceof GramJs.Photo ? buildApiPhoto(apiPhoto) : undefined;
+  const document = apiDocument instanceof GramJs.Document ? buildApiDocument(apiDocument) : undefined;
+
+  return {
+    id: id.toString(),
+    accessHash: accessHash.toString(),
+    shortName,
+    title,
+    description,
+    photo,
+    document,
   };
 }
 
@@ -751,6 +792,7 @@ function buildAction(
   const translationValues = [];
   let type: ApiAction['type'] = 'other';
   let photo: ApiPhoto | undefined;
+  let score: number | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -868,6 +910,10 @@ function buildAction(
   } else if (action instanceof GramJs.MessageActionChatJoinedByRequest) {
     text = 'ChatService.UserJoinedGroupByRequest';
     translationValues.push('%action_origin%');
+  } else if (action instanceof GramJs.MessageActionGameScore) {
+    text = senderId === currentUserId ? 'ActionYouScoredInGame' : 'ActionUserScoredInGame';
+    translationValues.push('%score%');
+    score = action.score;
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -887,21 +933,22 @@ function buildAction(
     currency,
     translationValues,
     call,
+    score,
   };
 }
 
 function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefined {
-  const { id: messageId, replyMarkup, media } = message;
+  const { replyMarkup, media } = message;
 
+  // TODO Move to the proper button inside preview
   if (!replyMarkup) {
     if (media instanceof GramJs.MessageMediaWebPage && media.webpage instanceof GramJs.WebPage) {
       if (media.webpage.type === 'telegram_message') {
         return {
           inlineButtons: [[{
-            type: 'url' as const,
+            type: 'url',
             text: 'Show Message',
-            messageId,
-            value: media.webpage.url,
+            url: media.webpage.url,
           }]],
         };
       }
@@ -916,40 +963,103 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
   }
 
   const markup = replyMarkup.rows.map(({ buttons }) => {
-    return buttons.map((button) => {
-      let { text } = button;
+    return buttons.map((button): ApiKeyboardButton => {
+      const { text } = button;
 
-      let type;
-      let value;
       if (button instanceof GramJs.KeyboardButton) {
-        type = 'command';
-        value = text;
-      } else if (button instanceof GramJs.KeyboardButtonUrl) {
-        type = 'url';
-        value = button.url;
-      } else if (button instanceof GramJs.KeyboardButtonCallback) {
-        type = 'callback';
-        value = serializeBytes(button.data);
-      } else if (button instanceof GramJs.KeyboardButtonRequestPoll) {
-        type = 'requestPoll';
-      } else if (button instanceof GramJs.KeyboardButtonRequestPhone) {
-        type = 'requestSelfContact';
-      } else if (button instanceof GramJs.KeyboardButtonBuy) {
-        if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
-          text = 'PaymentReceipt';
-          value = media.receiptMsgId;
+        return {
+          type: 'command',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonUrl) {
+        if (button.url.includes('?startgroup=')) {
+          return {
+            type: 'unsupported',
+            text,
+          };
         }
-        type = 'buy';
-      } else {
-        type = 'NOT_SUPPORTED';
+
+        return {
+          type: 'url',
+          text,
+          url: button.url,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonCallback) {
+        if (button.requiresPassword) {
+          return {
+            type: 'unsupported',
+            text,
+          };
+        }
+
+        return {
+          type: 'callback',
+          text,
+          data: serializeBytes(button.data),
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonRequestPoll) {
+        return {
+          type: 'requestPoll',
+          text,
+          isQuiz: button.quiz,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonRequestPhone) {
+        return {
+          type: 'requestPhone',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonBuy) {
+        if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
+          return {
+            type: 'receipt',
+            text: 'PaymentReceipt',
+            receiptMessageId: media.receiptMsgId,
+          };
+        }
+        return {
+          type: 'buy',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonGame) {
+        return {
+          type: 'game',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonSwitchInline) {
+        return {
+          type: 'switchBotInline',
+          text,
+          query: button.query,
+          isSamePeer: button.samePeer,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonUserProfile) {
+        return {
+          type: 'userProfile',
+          text,
+          userId: button.userId.toString(),
+        };
       }
 
       return {
-        type,
+        type: 'unsupported',
         text,
-        messageId,
-        value,
-      } as ApiKeyboardButton;
+      };
     });
   });
 
