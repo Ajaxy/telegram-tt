@@ -142,7 +142,6 @@ module.exports = (env = {}, argv = {}) => {
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser',
       }),
       new StatoscopeWebpackPlugin({
         statsOptions: {
