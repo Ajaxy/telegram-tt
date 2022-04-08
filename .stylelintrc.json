@@ -9,7 +9,7 @@
     "stylelint-declaration-block-no-ignored-properties",
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
-    "./plugins/wholePixel.js"
+    "./dev/wholePixel.js"
   ],
   "rules": {
     "number-leading-zero": "always",
