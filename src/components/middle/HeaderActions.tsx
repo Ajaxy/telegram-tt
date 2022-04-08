@@ -84,10 +84,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     sendBotCommand,
     openLocalTextSearch,
     restartBot,
-    openCallFallbackConfirm,
+    requestCall,
     requestNextManagementScreen,
   } = getActions();
-
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -139,6 +138,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       }, SEARCH_FOCUS_DELAY_MS);
     }
   }, [openLocalTextSearch]);
+
+  function handleRequestCall() {
+    requestCall({ userId: chatId });
+  }
 
   useEffect(() => {
     if (!canSearch) {
@@ -214,7 +217,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               round
               color="translucent"
               size="smaller"
-              onClick={openCallFallbackConfirm}
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={handleRequestCall}
               ariaLabel="Call"
             >
               <i className="icon-phone" />

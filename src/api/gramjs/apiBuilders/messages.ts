@@ -30,6 +30,7 @@ import {
   ApiUser,
   ApiLocation,
   ApiGame,
+  PhoneCallAction,
 } from '../../types';
 
 import {
@@ -50,6 +51,7 @@ import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
+import { buildApiCallDiscardReason } from './calls';
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -785,6 +787,7 @@ function buildAction(
     return undefined;
   }
 
+  let phoneCall: PhoneCallAction | undefined;
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let currency: string | undefined;
@@ -871,6 +874,13 @@ function buildAction(
       const mins = Math.max(Math.round(action.duration! / 60), 1);
       translationValues.push(`${mins} min${mins > 1 ? 's' : ''}`);
     }
+
+    phoneCall = {
+      isOutgoing,
+      isVideo: action.video,
+      duration: action.duration,
+      reason: buildApiCallDiscardReason(action.reason),
+    };
   } else if (action instanceof GramJs.MessageActionInviteToGroupCall) {
     text = 'Notification.VoiceChatInvitation';
     call = {
@@ -933,6 +943,7 @@ function buildAction(
     currency,
     translationValues,
     call,
+    phoneCall,
     score,
   };
 }

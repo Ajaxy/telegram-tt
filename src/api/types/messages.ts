@@ -1,4 +1,4 @@
-import { ApiGroupCall } from './calls';
+import { ApiGroupCall, PhoneCallAction } from './calls';
 
 export interface ApiDimensions {
   width: number;
@@ -203,6 +203,7 @@ export interface ApiAction {
   currency?: string;
   translationValues: string[];
   call?: Partial<ApiGroupCall>;
+  phoneCall?: PhoneCallAction;
   score?: number;
 }
 

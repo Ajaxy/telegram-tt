@@ -5,86 +5,21 @@ import {
   leaveGroupCall,
   toggleStream,
   isStreamEnabled,
-  setVolume,
-  handleUpdateGroupCallParticipants, handleUpdateGroupCallConnection,
+  setVolume, stopPhoneCall,
 } from '../../../lib/secret-sauce';
 
 import { GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import { callApi } from '../../../api/gramjs';
-import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
+import { selectChat, selectUser } from '../../selectors';
 import {
-  selectActiveGroupCall,
-  selectCallFallbackChannelTitle,
-  selectGroupCallParticipant,
+  selectActiveGroupCall, selectPhoneCallUser,
 } from '../../selectors/calls';
 import {
   removeGroupCall,
   updateActiveGroupCall,
-  updateGroupCall,
-  updateGroupCallParticipant,
 } from '../../reducers/calls';
-import { omit } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
-import { fetchFile } from '../../../util/files';
 import { getGroupCallAudioContext, getGroupCallAudioElement, removeGroupCallAudioElement } from '../ui/calls';
 import { loadFullChat } from './chats';
-
-import callFallbackAvatarPath from '../../../assets/call-fallback-avatar.png';
-
-const FALLBACK_INVITE_EXPIRE_SECONDS = 1800; // 30 min
-
-addActionHandler('apiUpdate', (global, actions, update) => {
-  const { activeGroupCallId } = global.groupCalls;
-
-  switch (update['@type']) {
-    case 'updateGroupCallLeavePresentation': {
-      actions.toggleGroupCallPresentation({ value: false });
-      break;
-    }
-    case 'updateGroupCallStreams': {
-      if (!update.userId || !activeGroupCallId) break;
-      if (!selectGroupCallParticipant(global, activeGroupCallId, update.userId)) break;
-
-      return updateGroupCallParticipant(global, activeGroupCallId, update.userId, omit(update, ['@type', 'userId']));
-    }
-    case 'updateGroupCallConnectionState': {
-      if (!activeGroupCallId) break;
-
-      if (update.connectionState === 'disconnected') {
-        actions.leaveGroupCall({ isFromLibrary: true });
-        break;
-      }
-
-      return updateGroupCall(global, activeGroupCallId, {
-        connectionState: update.connectionState,
-        isSpeakerDisabled: update.isSpeakerDisabled,
-      });
-    }
-    case 'updateGroupCallParticipants': {
-      const { groupCallId, participants } = update;
-      if (activeGroupCallId === groupCallId) {
-        void handleUpdateGroupCallParticipants(participants);
-      }
-      break;
-    }
-    case 'updateGroupCallConnection': {
-      if (update.data.stream) {
-        actions.showNotification({ message: 'Big live streams are not yet supported' });
-        actions.leaveGroupCall();
-        break;
-      }
-      void handleUpdateGroupCallConnection(update.data, update.presentation);
-
-      const groupCall = selectActiveGroupCall(global);
-      if (groupCall?.participants && Object.keys(groupCall.participants).length > 0) {
-        void handleUpdateGroupCallParticipants(Object.values(groupCall.participants));
-      }
-      break;
-    }
-  }
-
-  return undefined;
-});
 
 addActionHandler('leaveGroupCall', async (global, actions, payload) => {
   const {
@@ -101,18 +36,7 @@ addActionHandler('leaveGroupCall', async (global, actions, payload) => {
     call: groupCall,
   });
 
-  let shouldResetFallbackState = false;
   if (shouldDiscard) {
-    global = getGlobal();
-
-    if (global.groupCalls.fallbackChatId === groupCall.chatId) {
-      shouldResetFallbackState = true;
-
-      global.groupCalls.fallbackUserIdsToRemove?.forEach((userId) => {
-        actions.deleteChatMember({ chatId: global.groupCalls.fallbackChatId, userId });
-      });
-    }
-
     await callApi('discardGroupCall', {
       call: groupCall,
     });
@@ -129,13 +53,9 @@ addActionHandler('leaveGroupCall', async (global, actions, payload) => {
     ...global,
     groupCalls: {
       ...global.groupCalls,
-      isGroupCallPanelHidden: true,
       activeGroupCallId: undefined,
-      ...(shouldResetFallbackState && {
-        fallbackChatId: undefined,
-        fallbackUserIdsToRemove: undefined,
-      }),
     },
+    isCallPanelVisible: undefined,
   });
 
   if (!isFromLibrary) {
@@ -292,79 +212,106 @@ addActionHandler('connectToActiveGroupCall', async (global, actions) => {
   }
 });
 
-addActionHandler('inviteToCallFallback', async (global, actions, payload) => {
-  const { chatId } = selectCurrentMessageList(global) || {};
-  if (!chatId) {
+addActionHandler('connectToActivePhoneCall', async (global) => {
+  const { phoneCall } = global;
+
+  if (!phoneCall) return;
+
+  const user = selectPhoneCallUser(global);
+
+  if (!user) return;
+
+  const dhConfig = await callApi('getDhConfig');
+
+  if (!dhConfig) return;
+
+  await callApi('createPhoneCallState', [true]);
+
+  const gAHash = await callApi('requestPhoneCall', [dhConfig])!;
+
+  await callApi('requestCall', { user, gAHash, isVideo: phoneCall.isVideo });
+});
+
+addActionHandler('acceptCall', async (global) => {
+  const { phoneCall } = global;
+
+  if (!phoneCall) return;
+
+  const dhConfig = await callApi('getDhConfig');
+  if (!dhConfig) return;
+
+  await callApi('createPhoneCallState', [false]);
+
+  const gB = await callApi('acceptPhoneCall', [dhConfig])!;
+  callApi('acceptCall', { call: phoneCall, gB });
+});
+
+addActionHandler('sendSignalingData', (global, actions, payload) => {
+  const { phoneCall } = global;
+  if (!phoneCall) {
     return;
   }
 
-  const user = selectUser(global, chatId);
-  if (!user) {
-    return;
+  const data = JSON.stringify(payload);
+
+  (async () => {
+    const encodedData = await callApi('encodePhoneCallData', [data]);
+
+    if (!encodedData) return;
+
+    callApi('sendSignalingData', { data: encodedData, call: phoneCall });
+  })();
+});
+
+addActionHandler('closeCallRatingModal', (global) => {
+  return {
+    ...global,
+    ratingPhoneCall: undefined,
+  };
+});
+
+addActionHandler('setCallRating', (global, actions, payload) => {
+  const { ratingPhoneCall } = global;
+  if (!ratingPhoneCall) {
+    return undefined;
   }
 
-  const { shouldRemove } = payload;
+  const { rating, comment } = payload;
 
-  const fallbackChannelTitle = selectCallFallbackChannelTitle(global);
+  callApi('setCallRating', { call: ratingPhoneCall, rating, comment });
 
-  let fallbackChannel = Object.values(global.chats.byId).find((channel) => {
-    return (
-      channel.title === fallbackChannelTitle
-      && channel.isCreator
-      && !channel.isRestricted
-      && !channel.isForbidden
-    );
-  });
-  if (!fallbackChannel) {
-    fallbackChannel = await callApi('createChannel', {
-      title: fallbackChannelTitle,
-      users: [user],
-    });
+  return {
+    ...global,
+    ratingPhoneCall: undefined,
+  };
+});
 
-    if (!fallbackChannel) {
-      return;
-    }
+addActionHandler('hangUp', (global) => {
+  const { phoneCall } = global;
 
-    const photo = await fetchFile(callFallbackAvatarPath, 'avatar.png');
-    void callApi('editChatPhoto', {
-      chatId: fallbackChannel.id,
-      accessHash: fallbackChannel.accessHash,
-      photo,
-    });
-  } else {
-    actions.updateChatMemberBannedRights({
-      chatId: fallbackChannel.id,
-      userId: chatId,
-      bannedRights: {},
-    });
+  if (!phoneCall) return undefined;
 
-    void callApi('addChatMembers', fallbackChannel, [user], true);
-  }
-
-  const inviteLink = await callApi('updatePrivateLink', {
-    chat: fallbackChannel,
-    usageLimit: 1,
-    expireDate: getServerTime(global.serverTimeOffset) + FALLBACK_INVITE_EXPIRE_SECONDS,
-  });
-  if (!inviteLink) {
-    return;
-  }
-
-  if (shouldRemove) {
-    global = getGlobal();
-    const fallbackUserIdsToRemove = global.groupCalls.fallbackUserIdsToRemove || [];
-    setGlobal({
+  if (phoneCall.state === 'discarded') {
+    callApi('destroyPhoneCallState');
+    stopPhoneCall();
+    return {
       ...global,
-      groupCalls: {
-        ...global.groupCalls,
-        fallbackChatId: fallbackChannel.id,
-        fallbackUserIdsToRemove: [...fallbackUserIdsToRemove, chatId],
-      },
-    });
+      phoneCall: undefined,
+      isCallPanelVisible: undefined,
+    };
   }
 
-  actions.sendMessage({ text: `Join a call: ${inviteLink}` });
-  actions.openChat({ id: fallbackChannel.id });
-  actions.createGroupCall({ chatId: fallbackChannel.id });
-  actions.closeCallFallbackConfirm();
+  callApi('destroyPhoneCallState');
+  stopPhoneCall();
+  callApi('discardCall', { call: phoneCall });
+
+  if (phoneCall.state === 'requesting') {
+    return {
+      ...global,
+      phoneCall: undefined,
+      isCallPanelVisible: undefined,
+    };
+  }
+
+  return undefined;
 });

@@ -3,6 +3,10 @@ import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '..
 import { omit } from '../../../util/iteratees';
 import { selectChat } from '../../selectors';
 import { updateChat } from '../../reducers';
+import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
+import { notifyAboutCall } from '../../../util/notifications';
+import { selectPhoneCallUser } from '../../selectors/calls';
+import { initializeSoundsForSafari } from '../ui/calls';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
@@ -53,6 +57,32 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         });
       }
       return global;
+    }
+    case 'updatePhoneCall': {
+      if (!ARE_CALLS_SUPPORTED) return undefined;
+
+      const {
+        phoneCall,
+        currentUserId,
+      } = global;
+
+      if (phoneCall) return undefined;
+
+      const { call } = update;
+      const isOutgoing = call?.adminId === currentUserId;
+
+      if (!isOutgoing && call.state === 'requested') {
+        notifyAboutCall({
+          call,
+          user: selectPhoneCallUser(global)!,
+        });
+        void initializeSoundsForSafari();
+        return {
+          ...global,
+          phoneCall: call,
+          isCallPanelVisible: false,
+        };
+      }
     }
   }
 

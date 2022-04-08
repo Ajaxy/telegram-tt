@@ -276,6 +276,7 @@ function updateCache() {
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
     availableReactions: reduceAvailableReactions(global),
+    isCallPanelVisible: undefined,
   };
 
   const json = JSON.stringify(reducedGlobal);
@@ -389,8 +390,6 @@ function reduceGroupCalls(global: GlobalState): GlobalState['groupCalls'] {
     ...global.groupCalls,
     byId: {},
     activeGroupCallId: undefined,
-    isGroupCallPanelHidden: undefined,
-    isFallbackConfirmOpen: undefined,
   };
 }
 

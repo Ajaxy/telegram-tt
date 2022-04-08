@@ -1,6 +1,6 @@
 import { callApi } from '../api/gramjs';
 import {
-  ApiChat, ApiMediaFormat, ApiMessage, ApiUser, ApiUserReaction,
+  ApiChat, ApiMediaFormat, ApiMessage, ApiPhoneCall, ApiUser, ApiUserReaction,
 } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
@@ -12,7 +12,7 @@ import {
   getMessageRecentReaction,
   getMessageSenderName,
   getMessageSummaryText,
-  getPrivateChatUserId,
+  getPrivateChatUserId, getUserFullName,
   isActionMessage,
   isChatChannel,
   selectIsChatMuted,
@@ -322,7 +322,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   };
 }
 
-async function getAvatar(chat: ApiChat) {
+async function getAvatar(chat: ApiChat | ApiUser) {
   const imageHash = getChatAvatarHash(chat);
   if (!imageHash) return undefined;
   let mediaData = mediaLoader.getFromMemory(imageHash);
@@ -331,6 +331,39 @@ async function getAvatar(chat: ApiChat) {
     mediaData = mediaLoader.getFromMemory(imageHash);
   }
   return mediaData;
+}
+
+export async function notifyAboutCall({
+  call, user,
+}: {
+  call: ApiPhoneCall; user: ApiUser;
+}) {
+  const { hasWebNotifications } = await loadNotificationSettings();
+  if (document.hasFocus() || !hasWebNotifications) return;
+  const areNotificationsSupported = checkIfNotificationsSupported();
+  if (!areNotificationsSupported) return;
+
+  const icon = await getAvatar(user);
+
+  const options: NotificationOptions = {
+    body: getUserFullName(user),
+    icon,
+    badge: icon,
+    tag: `call_${call.id}`,
+  };
+
+  if ('vibrate' in navigator) {
+    options.vibrate = [200, 100, 200];
+  }
+
+  const notification = new Notification(getTranslation('VoipIncoming'), options);
+
+  notification.onclick = () => {
+    notification.close();
+    if (window.focus) {
+      window.focus();
+    }
+  };
 }
 
 export async function notifyAboutMessage({

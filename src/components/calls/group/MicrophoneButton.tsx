@@ -51,7 +51,7 @@ const MicrophoneButton: FC<StateProps> = ({
 
   useEffect(() => {
     if (prevShouldRaiseHand && !shouldRaiseHand) {
-      playGroupCallSound('allowTalk');
+      playGroupCallSound({ sound: 'allowTalk' });
     }
   }, [playGroupCallSound, prevShouldRaiseHand, shouldRaiseHand]);
 

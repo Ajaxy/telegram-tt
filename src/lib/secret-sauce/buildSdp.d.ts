@@ -17,5 +17,5 @@ export declare type Ssrc = {
     isPresentation?: boolean;
     sourceGroups: SsrcGroup[];
 };
-declare const _default: (conference: Conference, isAnswer?: boolean, isPresentation?: boolean) => string;
+declare const _default: (conference: Conference, isAnswer?: boolean, isPresentation?: boolean, isP2p?: boolean) => string;
 export default _default;

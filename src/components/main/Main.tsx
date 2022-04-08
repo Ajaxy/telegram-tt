@@ -49,8 +49,9 @@ import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
-import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
+import PhoneCall from '../calls/phone/PhoneCall.async';
 import NewContactModal from './NewContactModal.async';
+import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 
 import './Main.scss';
 
@@ -74,12 +75,13 @@ type StateProps = {
   animationLevel: number;
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
-  isCallFallbackConfirmOpen: boolean;
+  isPhoneCallActive?: boolean;
   addedSetIds?: string[];
   newContactUserId?: string;
   newContactByPhoneNumber?: boolean;
   openedGame?: GlobalState['openedGame'];
   gameTitle?: string;
+  isRatePhoneCallModalOpen?: boolean;
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -109,12 +111,13 @@ const Main: FC<StateProps> = ({
   animationLevel,
   language,
   wasTimeFormatSetManually,
-  isCallFallbackConfirmOpen,
   addedSetIds,
+  isPhoneCallActive,
   newContactUserId,
   newContactByPhoneNumber,
   openedGame,
   gameTitle,
+  isRatePhoneCallModalOpen,
 }) => {
   const {
     sync,
@@ -335,12 +338,8 @@ const Main: FC<StateProps> = ({
         onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
       />
-      {activeGroupCallId && (
-        <>
-          <GroupCall groupCallId={activeGroupCallId} />
-          <ActiveCallHeader groupCallId={activeGroupCallId} />
-        </>
-      )}
+      {activeGroupCallId && <GroupCall groupCallId={activeGroupCallId} />}
+      <ActiveCallHeader isActive={Boolean(activeGroupCallId || isPhoneCallActive)} />
       <NewContactModal
         isOpen={Boolean(newContactUserId || newContactByPhoneNumber)}
         userId={newContactUserId}
@@ -348,8 +347,9 @@ const Main: FC<StateProps> = ({
       />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <DownloadManager />
-      <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
+      <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
+      <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
     </div>
   );
 };
@@ -406,12 +406,13 @@ export default memo(withGlobal(
       animationLevel,
       language,
       wasTimeFormatSetManually,
-      isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
+      isPhoneCallActive: Boolean(global.phoneCall),
       addedSetIds: global.stickers.added.setIds,
       newContactUserId: global.newContact?.userId,
       newContactByPhoneNumber: global.newContact?.isByPhoneNumber,
       openedGame,
       gameTitle,
+      isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
     };
   },
 )(Main));

@@ -11,7 +11,7 @@ import {
   ApiGroupCall,
   ApiMessageEntity,
   ApiMessageEntityTypes,
-  ApiNewPoll,
+  ApiNewPoll, ApiPhoneCall,
   ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
@@ -463,5 +463,12 @@ export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
   return new GramJs.InputGroupCall({
     id: BigInt(groupCall.id!),
     accessHash: BigInt(groupCall.accessHash!),
+  });
+}
+
+export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
+  return new GramJs.InputPhoneCall({
+    id: BigInt(id),
+    accessHash: BigInt(accessHash!),
   });
 }

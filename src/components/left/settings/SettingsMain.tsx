@@ -44,7 +44,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   }, [lastSyncTime, profileId, loadProfilePhotos]);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Main);
-  
+
   useEffect(() => {
     if (lastSyncTime) {
       loadAuthorizations();

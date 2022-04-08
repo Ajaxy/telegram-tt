@@ -58,11 +58,12 @@ const Avatar: FC<OwnProps> = ({
   const isReplies = user && isChatWithRepliesBot(user.id);
   let imageHash: string | undefined;
 
+  const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
     if (user) {
-      imageHash = getChatAvatarHash(user);
+      imageHash = getChatAvatarHash(user, shouldFetchBig ? 'big' : undefined);
     } else if (chat) {
-      imageHash = getChatAvatarHash(chat);
+      imageHash = getChatAvatarHash(chat, shouldFetchBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
     }
