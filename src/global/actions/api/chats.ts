@@ -678,14 +678,14 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const user = selectUser(global, userId);
 
   if (!chat || !user) {
-    return undefined;
+    return;
   }
 
   if (isChatBasicGroup(chat)) {
     chat = await callApi('migrateChat', chat);
 
     if (!chat) {
-      return undefined;
+      return;
     }
 
     actions.openChat({ id: chat.id });
@@ -698,7 +698,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const chatAfterUpdate = selectChat(global, chatId);
 
   if (!chatAfterUpdate || !chatAfterUpdate.fullInfo) {
-    return undefined;
+    return;
   }
 
   const { members, kickedMembers } = chatAfterUpdate.fullInfo;
@@ -706,7 +706,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const isBanned = Boolean(bannedRights.viewMessages);
   const isUnblocked = !Object.keys(bannedRights).length;
 
-  return updateChat(global, chatId, {
+  setGlobal(updateChat(global, chatId, {
     fullInfo: {
       ...chatAfterUpdate.fullInfo,
       ...(members && isBanned && {
@@ -723,7 +723,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
         kickedMembers: kickedMembers.filter((m) => m.userId !== userId),
       }),
     },
-  });
+  }));
 });
 
 addActionHandler('updateChatAdmin', async (global, actions, payload) => {
@@ -734,13 +734,13 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
   let chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
   if (!chat || !user) {
-    return undefined;
+    return;
   }
 
   if (isChatBasicGroup(chat)) {
     chat = await callApi('migrateChat', chat);
     if (!chat) {
-      return undefined;
+      return;
     }
 
     actions.openChat({ id: chat.id });
@@ -752,7 +752,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
 
   const chatAfterUpdate = await callApi('fetchFullChat', chat);
   if (!chatAfterUpdate?.fullInfo) {
-    return undefined;
+    return;
   }
 
   const { adminMembers } = chatAfterUpdate.fullInfo;
@@ -760,7 +760,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
 
   global = getGlobal();
 
-  return updateChat(global, chatId, {
+  setGlobal(updateChat(global, chatId, {
     fullInfo: {
       ...chatAfterUpdate.fullInfo,
       ...(adminMembers && isDismissed && {
@@ -774,7 +774,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
         )),
       }),
     },
-  });
+  }));
 });
 
 addActionHandler('updateChat', async (global, actions, payload) => {
@@ -784,7 +784,7 @@ addActionHandler('updateChat', async (global, actions, payload) => {
 
   const chat = selectChat(global, chatId);
   if (!chat) {
-    return undefined;
+    return;
   }
 
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.InProgress));
@@ -801,7 +801,7 @@ addActionHandler('updateChat', async (global, actions, payload) => {
       : undefined,
   ]);
 
-  return updateManagementProgress(getGlobal(), ManagementProgress.Complete);
+  setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.Complete));
 });
 
 addActionHandler('toggleSignatures', (global, actions, payload) => {
@@ -818,7 +818,7 @@ addActionHandler('toggleSignatures', (global, actions, payload) => {
 addActionHandler('loadGroupsForDiscussion', async (global) => {
   const groups = await callApi('fetchGroupsForDiscussion');
   if (!groups) {
-    return undefined;
+    return;
   }
 
   const addedById = groups.reduce((result, group) => {
@@ -831,13 +831,13 @@ addActionHandler('loadGroupsForDiscussion', async (global) => {
 
   global = getGlobal();
   global = addChats(global, addedById);
-  return {
+  setGlobal({
     ...global,
     chats: {
       ...global.chats,
       forDiscussionIds: Object.keys(addedById),
     },
-  };
+  });
 });
 
 addActionHandler('linkDiscussionGroup', async (global, actions, payload) => {
@@ -905,28 +905,52 @@ addActionHandler('setActiveChatFolder', (global, actions, payload) => {
   };
 });
 
+addActionHandler('openChatWithText', (global, actions, payload) => {
+  const { chatId, text } = payload;
+
+  actions.openChat({ id: chatId });
+  actions.exitMessageSelectMode();
+
+  global = getGlobal();
+
+  return {
+    ...global,
+    openChatWithText: {
+      chatId,
+      text,
+    },
+  };
+});
+
+addActionHandler('resetOpenChatWithText', (global) => {
+  return {
+    ...global,
+    openChatWithText: undefined,
+  };
+});
+
 addActionHandler('loadMoreMembers', async (global) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   const chat = chatId ? selectChat(global, chatId) : undefined;
   if (!chat || isChatBasicGroup(chat)) {
-    return undefined;
+    return;
   }
 
   const offset = (chat.fullInfo?.members?.length) || undefined;
   const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
   if (!result) {
-    return undefined;
+    return;
   }
 
   const { members, users } = result;
   if (!members || !members.length) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChatMembers(global, chat, members);
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('addChatMembers', async (global, actions, payload) => {
@@ -984,12 +1008,12 @@ addActionHandler('setChatEnabledReactions', async (global, actions, payload) => 
 addActionHandler('loadChatSettings', async (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
-  if (!chat) return undefined;
+  if (!chat) return;
 
   const settings = await callApi('fetchChatSettings', chat);
-  if (!settings) return undefined;
+  if (!settings) return;
 
-  return updateChat(getGlobal(), chat.id, { settings });
+  setGlobal(updateChat(getGlobal(), chat.id, { settings }));
 });
 
 async function loadChats(

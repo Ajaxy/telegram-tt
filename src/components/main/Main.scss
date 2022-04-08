@@ -18,8 +18,8 @@
   }
 }
 
-.has-group-call-header {
-  --group-call-header-height: 2rem;
+.has-call-header {
+  --call-header-height: 2rem;
   #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
     height: calc(100% - 2rem);
     margin-top: 2rem;

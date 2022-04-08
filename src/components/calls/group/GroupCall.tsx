@@ -47,7 +47,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  isGroupCallPanelHidden: boolean;
+  isCallPanelVisible: boolean;
   connectionState: GroupCallConnectionState;
   title?: string;
   meParticipant?: TypeGroupCallParticipant;
@@ -59,7 +59,7 @@ type StateProps = {
 
 const GroupCall: FC<OwnProps & StateProps> = ({
   groupCallId,
-  isGroupCallPanelHidden,
+  isCallPanelVisible,
   connectionState,
   isSpeakerEnabled,
   title,
@@ -246,7 +246,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
 
   return (
     <Modal
-      isOpen={!isGroupCallPanelHidden && !isLeaving}
+      isOpen={!isCallPanelVisible && !isLeaving}
       onClose={toggleGroupCallPanel}
       className={buildClassName(
         'GroupCall',
@@ -287,7 +287,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           >
             {IS_SCREENSHARE_SUPPORTED && !shouldRaiseHand && (
               <MenuItem
-                icon="share-screen"
+                icon="share-screen-outlined"
                 onClick={toggleGroupCallPresentation}
               >
                 {lang(hasPresentation ? 'VoipChatStopScreenCapture' : 'VoipChatStartScreenCapture')}
@@ -405,7 +405,7 @@ export default memo(withGlobal<OwnProps>(
       isSpeakerEnabled: !isSpeakerDisabled,
       participantsCount,
       meParticipant: selectGroupCallParticipant(global, groupCallId, global.currentUserId!),
-      isGroupCallPanelHidden: Boolean(global.groupCalls.isGroupCallPanelHidden),
+      isCallPanelVisible: Boolean(global.isCallPanelVisible),
       isAdmin: selectIsAdminInActiveGroupCall(global),
       participants,
     };

@@ -9,12 +9,12 @@ import { isChatBasicGroup } from '../../helpers';
 addActionHandler('checkPublicLink', async (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   if (!chatId) {
-    return undefined;
+    return;
   }
 
   // No need to check the username if already in progress
   if (global.management.progress === ManagementProgress.InProgress) {
-    return undefined;
+    return;
   }
 
   const { username } = payload!;
@@ -30,14 +30,14 @@ addActionHandler('checkPublicLink', async (global, actions, payload) => {
     global, isUsernameAvailable ? ManagementProgress.Complete : ManagementProgress.Error,
   );
   global = updateManagement(global, chatId, { isUsernameAvailable });
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('updatePublicLink', async (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
   let chat = chatId && selectChat(global, chatId);
   if (!chatId || !chat) {
-    return undefined;
+    return;
   }
 
   const { username } = payload!;
@@ -49,7 +49,7 @@ addActionHandler('updatePublicLink', async (global, actions, payload) => {
     chat = await callApi('migrateChat', chat);
 
     if (!chat) {
-      return undefined;
+      return;
     }
 
     actions.openChat({ id: chat.id });
@@ -60,7 +60,7 @@ addActionHandler('updatePublicLink', async (global, actions, payload) => {
   global = getGlobal();
   global = updateManagementProgress(global, result ? ManagementProgress.Complete : ManagementProgress.Error);
   global = updateManagement(global, chatId, { isUsernameAvailable: undefined });
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('updatePrivateLink', (global) => {
@@ -93,18 +93,18 @@ addActionHandler('loadExportedChatInvites', async (global, actions, payload) => 
   } = payload!;
   const peer = selectChat(global, chatId);
   const admin = selectUser(global, adminId || global.currentUserId);
-  if (!peer || !admin) return undefined;
+  if (!peer || !admin) return;
 
   const result = await callApi('fetchExportedChatInvites', {
     peer, admin, isRevoked, limit,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   const update = isRevoked ? { revokedInvites: result } : { invites: result };
 
-  return updateManagement(getGlobal(), chatId, update);
+  setGlobal(updateManagement(getGlobal(), chatId, update));
 });
 
 addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
@@ -112,7 +112,7 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
     chatId, link, isRevoked, expireDate, usageLimit, isRequestNeeded, title,
   } = payload!;
   const peer = selectChat(global, chatId);
-  if (!peer) return undefined;
+  if (!peer) return;
 
   const result = await callApi('editExportedChatInvite', {
     peer,
@@ -124,7 +124,7 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
     title,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   const { oldInvite, newInvite } = result;
@@ -140,10 +140,10 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
     invites.push(newInvite);
   }
 
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     invites,
     revokedInvites,
-  });
+  }));
 });
 
 addActionHandler('exportChatInvite', async (global, actions, payload) => {
@@ -151,7 +151,7 @@ addActionHandler('exportChatInvite', async (global, actions, payload) => {
     chatId, expireDate, usageLimit, isRequestNeeded, title,
   } = payload!;
   const peer = selectChat(global, chatId);
-  if (!peer) return undefined;
+  if (!peer) return;
 
   const result = await callApi('exportChatInvite', {
     peer,
@@ -161,14 +161,14 @@ addActionHandler('exportChatInvite', async (global, actions, payload) => {
     title,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   const invites = global.management.byChatId[chatId].invites || [];
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     invites: [...invites, result],
-  });
+  }));
 });
 
 addActionHandler('deleteExportedChatInvite', async (global, actions, payload) => {
@@ -176,22 +176,22 @@ addActionHandler('deleteExportedChatInvite', async (global, actions, payload) =>
     chatId, link,
   } = payload!;
   const peer = selectChat(global, chatId);
-  if (!peer) return undefined;
+  if (!peer) return;
 
   const result = await callApi('deleteExportedChatInvite', {
     peer,
     link,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   const managementState = global.management.byChatId[chatId];
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     invites: managementState?.invites?.filter((invite) => invite.link !== link),
     revokedInvites: managementState?.revokedInvites?.filter((invite) => invite.link !== link),
-  });
+  }));
 });
 
 addActionHandler('deleteRevokedExportedChatInvites', async (global, actions, payload) => {
@@ -200,20 +200,20 @@ addActionHandler('deleteRevokedExportedChatInvites', async (global, actions, pay
   } = payload!;
   const peer = selectChat(global, chatId);
   const admin = selectUser(global, adminId || global.currentUserId);
-  if (!peer || !admin) return undefined;
+  if (!peer || !admin) return;
 
   const result = await callApi('deleteRevokedExportedChatInvites', {
     peer,
     admin,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     revokedInvites: [],
-  });
+  }));
 });
 
 addActionHandler('loadChatInviteImporters', async (global, actions, payload) => {
@@ -222,7 +222,7 @@ addActionHandler('loadChatInviteImporters', async (global, actions, payload) => 
   } = payload!;
   const peer = selectChat(global, chatId);
   const offsetUser = selectUser(global, offsetUserId);
-  if (!peer || (offsetUserId && !offsetUser)) return undefined;
+  if (!peer || (offsetUserId && !offsetUser)) return;
 
   const result = await callApi('fetchChatInviteImporters', {
     peer,
@@ -232,21 +232,21 @@ addActionHandler('loadChatInviteImporters', async (global, actions, payload) => 
     limit,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
   if (!currentInviteInfo?.invite || currentInviteInfo.invite.link !== link) {
-    return undefined;
+    return;
   }
 
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     inviteInfo: {
       ...currentInviteInfo,
       importers: result,
     },
-  });
+  }));
 });
 
 addActionHandler('loadChatInviteRequesters', async (global, actions, payload) => {
@@ -255,7 +255,7 @@ addActionHandler('loadChatInviteRequesters', async (global, actions, payload) =>
   } = payload!;
   const peer = selectChat(global, chatId);
   const offsetUser = selectUser(global, offsetUserId);
-  if (!peer || (offsetUserId && !offsetUser)) return undefined;
+  if (!peer || (offsetUserId && !offsetUser)) return;
 
   const result = await callApi('fetchChatInviteImporters', {
     peer,
@@ -266,21 +266,21 @@ addActionHandler('loadChatInviteRequesters', async (global, actions, payload) =>
     isRequested: true,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
   if (!currentInviteInfo?.invite || currentInviteInfo.invite.link !== link) {
-    return undefined;
+    return;
   }
 
-  return updateManagement(global, chatId, {
+  setGlobal(updateManagement(global, chatId, {
     inviteInfo: {
       ...currentInviteInfo,
       requesters: result,
     },
-  });
+  }));
 });
 
 addActionHandler('loadChatJoinRequests', async (global, actions, payload) => {
@@ -289,7 +289,7 @@ addActionHandler('loadChatJoinRequests', async (global, actions, payload) => {
   } = payload!;
   const peer = selectChat(global, chatId);
   const offsetUser = selectUser(global, offsetUserId);
-  if (!peer || (offsetUserId && !offsetUser)) return undefined;
+  if (!peer || (offsetUserId && !offsetUser)) return;
 
   const result = await callApi('fetchChatInviteImporters', {
     peer,
@@ -299,11 +299,11 @@ addActionHandler('loadChatJoinRequests', async (global, actions, payload) => {
     isRequested: true,
   });
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
-  return updateChat(global, chatId, { joinRequests: result });
+  setGlobal(updateChat(global, chatId, { joinRequests: result }));
 });
 
 addActionHandler('hideChatJoinRequest', async (global, actions, payload) => {
@@ -312,22 +312,22 @@ addActionHandler('hideChatJoinRequest', async (global, actions, payload) => {
   } = payload!;
   const peer = selectChat(global, chatId);
   const user = selectUser(global, userId);
-  if (!peer || !user) return undefined;
+  if (!peer || !user) return;
 
   const result = await callApi('hideChatJoinRequest', {
     peer,
     user,
     isApproved,
   });
-  if (!result) return undefined;
+  if (!result) return;
 
   global = getGlobal();
   const targetChat = selectChat(global, chatId);
-  if (!targetChat) return undefined;
+  if (!targetChat) return;
 
-  return updateChat(global, chatId, {
+  setGlobal(updateChat(global, chatId, {
     joinRequests: targetChat.joinRequests?.filter((importer) => importer.userId !== userId),
-  });
+  }));
 });
 
 addActionHandler('hideAllChatJoinRequests', async (global, actions, payload) => {
@@ -335,38 +335,38 @@ addActionHandler('hideAllChatJoinRequests', async (global, actions, payload) => 
     chatId, isApproved, link,
   } = payload!;
   const peer = selectChat(global, chatId);
-  if (!peer) return undefined;
+  if (!peer) return;
 
   const result = await callApi('hideAllChatJoinRequests', {
     peer,
     isApproved,
     link,
   });
-  if (!result) return undefined;
+  if (!result) return;
 
   global = getGlobal();
   const targetChat = selectChat(global, chatId);
-  if (!targetChat) return undefined;
+  if (!targetChat) return;
 
-  return updateChat(global, chatId, {
+  setGlobal(updateChat(global, chatId, {
     joinRequests: [],
     fullInfo: {
       ...targetChat.fullInfo,
       recentRequesterIds: [],
       requestsPending: 0,
     },
-  });
+  }));
 });
 
 addActionHandler('hideChatReportPanel', async (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
-  if (!chat) return undefined;
+  if (!chat) return;
 
   const result = await callApi('hideChatReportPanel', chat);
-  if (!result) return undefined;
+  if (!result) return;
 
-  return updateChat(getGlobal(), chatId, {
+  setGlobal(updateChat(getGlobal(), chatId, {
     settings: undefined,
-  });
+  }));
 });

@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { LangCode } from '../../types';
 import { ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType } from '../../api/types';
+import { GlobalState } from '../../global/types';
 
 import '../../global/actions/all';
 import {
@@ -40,6 +41,7 @@ import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
 import DownloadManager from './DownloadManager';
+import GameModal from './GameModal';
 import Notifications from './Notifications.async';
 import Dialogs from './Dialogs.async';
 import ForwardPicker from './ForwardPicker.async';
@@ -47,8 +49,9 @@ import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
-import CallFallbackConfirm from '../calls/CallFallbackConfirm.async';
+import PhoneCall from '../calls/phone/PhoneCall.async';
 import NewContactModal from './NewContactModal.async';
+import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 
 import './Main.scss';
 
@@ -72,10 +75,13 @@ type StateProps = {
   animationLevel: number;
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
-  isCallFallbackConfirmOpen: boolean;
+  isPhoneCallActive?: boolean;
   addedSetIds?: string[];
   newContactUserId?: string;
   newContactByPhoneNumber?: boolean;
+  openedGame?: GlobalState['openedGame'];
+  gameTitle?: string;
+  isRatePhoneCallModalOpen?: boolean;
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -105,10 +111,13 @@ const Main: FC<StateProps> = ({
   animationLevel,
   language,
   wasTimeFormatSetManually,
-  isCallFallbackConfirmOpen,
   addedSetIds,
+  isPhoneCallActive,
   newContactUserId,
   newContactByPhoneNumber,
+  openedGame,
+  gameTitle,
+  isRatePhoneCallModalOpen,
 }) => {
   const {
     sync,
@@ -329,20 +338,18 @@ const Main: FC<StateProps> = ({
         onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
       />
-      {activeGroupCallId && (
-        <>
-          <GroupCall groupCallId={activeGroupCallId} />
-          <ActiveCallHeader groupCallId={activeGroupCallId} />
-        </>
-      )}
+      {activeGroupCallId && <GroupCall groupCallId={activeGroupCallId} />}
+      <ActiveCallHeader isActive={Boolean(activeGroupCallId || isPhoneCallActive)} />
       <NewContactModal
         isOpen={Boolean(newContactUserId || newContactByPhoneNumber)}
         userId={newContactUserId}
         isByPhoneNumber={newContactByPhoneNumber}
       />
+      <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <DownloadManager />
-      <CallFallbackConfirm isOpen={isCallFallbackConfirmOpen} />
+      <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
+      <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
     </div>
   );
 };
@@ -375,6 +382,9 @@ export default memo(withGlobal(
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
+    const openedGame = global.openedGame;
+    const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
+    const gameTitle = gameMessage?.content.game?.title;
 
     return {
       connectionState: global.connectionState,
@@ -396,10 +406,13 @@ export default memo(withGlobal(
       animationLevel,
       language,
       wasTimeFormatSetManually,
-      isCallFallbackConfirmOpen: Boolean(global.groupCalls.isFallbackConfirmOpen),
+      isPhoneCallActive: Boolean(global.phoneCall),
       addedSetIds: global.stickers.added.setIds,
       newContactUserId: global.newContact?.userId,
       newContactByPhoneNumber: global.newContact?.isByPhoneNumber,
+      openedGame,
+      gameTitle,
+      isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
     };
   },
 )(Main));

@@ -8,10 +8,10 @@ const {
 } = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
-
+const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
+const WebpackContextExtension = require('./dev/webpackContextExtension');
 const appVersion = require('./package.json').version;
 
 dotenv.config();
@@ -80,7 +80,16 @@ module.exports = (env = {}, argv = {}) => {
           test: /\.scss$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: {
+                  exportLocalsConvention: 'camelCase',
+                  auto: true,
+                  localIdentName: argv['optimize-minimize'] ? '[hash:base64]' : '[path][name]__[local]'
+                }
+              }
+            },
             'postcss-loader',
             'sass-loader',
           ],
@@ -133,14 +142,17 @@ module.exports = (env = {}, argv = {}) => {
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser',
       }),
-      ...(argv.mode === 'production' ? [
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
-          openAnalyzer: false,
-        }),
-      ] : []),
+      new StatoscopeWebpackPlugin({
+        statsOptions: {
+          context: __dirname,
+        },
+        saveReportTo: path.resolve('./public/statoscope-report.html'),
+        saveStatsTo: path.resolve('./public/build-stats.json'),
+        normalizeStats: true,
+        open: 'file',
+        extensions: [new WebpackContextExtension()],
+      }),
     ],
 
     ...(!env.noSourceMap && {

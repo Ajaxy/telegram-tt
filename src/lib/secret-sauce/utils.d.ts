@@ -1,11 +1,10 @@
+import { P2PPayloadType } from './p2pMessage';
+import { PayloadType } from './types';
 export declare function toTelegramSource(source: number): number;
 export declare function fromTelegramSource(source: number): number;
 export declare function getAmplitude(array: Uint8Array, scale?: number): number;
-export declare function getPlatform(): "Windows" | "macOS" | "iOS" | "Android" | "Linux" | undefined;
+export declare function p2pPayloadTypeToConference(p: P2PPayloadType): PayloadType;
 export declare const THRESHOLD = 0.1;
-export declare const PLATFORM_ENV: "Windows" | "macOS" | "iOS" | "Android" | "Linux" | undefined;
-export declare const IS_MAC_OS: boolean;
-export declare const IS_IOS: boolean;
 export declare const IS_SCREENSHARE_SUPPORTED: boolean;
 export declare const IS_ECHO_CANCELLATION_SUPPORTED: boolean | undefined;
 export declare const IS_NOISE_SUPPRESSION_SUPPORTED: any;

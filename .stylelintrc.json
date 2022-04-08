@@ -9,7 +9,7 @@
     "stylelint-declaration-block-no-ignored-properties",
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
-    "./plugins/wholePixel.js"
+    "./dev/wholePixel.js"
   ],
   "rules": {
     "number-leading-zero": "always",
@@ -24,6 +24,12 @@
       }
     ],
     "plugin/stylelint-group-selectors": [true, { "severity": "warning" }],
-    "plugin/whole-pixel": [true, { "ignoreList": ["letter-spacing"] }]
+    "plugin/whole-pixel": [true, { "ignoreList": ["letter-spacing"] }],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ]
   }
 }

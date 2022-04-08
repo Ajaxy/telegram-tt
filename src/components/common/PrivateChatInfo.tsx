@@ -17,6 +17,7 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
+import FakeIcon from './FakeIcon';
 
 type OwnProps = {
   userId: string;
@@ -140,6 +141,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
           <div className="title">
             <h3 dir="auto">{fullName && renderText(fullName)}</h3>
             {user?.isVerified && <VerifiedIcon />}
+            {user.fakeType && <FakeIcon fakeType={user.fakeType} />}
           </div>
         )}
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}

@@ -1,4 +1,6 @@
-import { addActionHandler, getActions, getGlobal } from '../../index';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 
 import { initApi, callApi } from '../../../api/gramjs';
 
@@ -165,15 +167,15 @@ addActionHandler('disconnect', () => {
 
 addActionHandler('loadNearestCountry', async (global) => {
   if (global.connectionState !== 'connectionStateReady') {
-    return undefined;
+    return;
   }
 
   const authNearestCountry = await callApi('fetchNearestCountry');
 
-  return {
+  setGlobal({
     ...getGlobal(),
     authNearestCountry,
-  };
+  });
 });
 
 addActionHandler('setDeviceToken', (global, actions, deviceToken) => {

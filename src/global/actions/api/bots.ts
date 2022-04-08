@@ -18,37 +18,41 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce } from '../../../util/schedulers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { getServerTime } from '../../../util/serverTime';
+import PopupManager from '../../../util/PopupManager';
 
+const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 
-addActionHandler('clickInlineButton', (global, actions, payload) => {
-  const { button } = payload;
+addActionHandler('clickBotInlineButton', (global, actions, payload) => {
+  const { messageId, button } = payload;
 
   switch (button.type) {
     case 'command':
-      actions.sendBotCommand({ command: button.value });
+      actions.sendBotCommand({ command: button.text });
       break;
-    case 'url':
-      if (button.value.match(RE_TME_LINK) || button.value.match(RE_TG_LINK)) {
-        actions.openTelegramLink({ url: button.value });
+    case 'url': {
+      const { url } = button;
+      if (url.match(RE_TME_LINK) || url.match(RE_TG_LINK)) {
+        actions.openTelegramLink({ url });
       } else {
-        actions.toggleSafeLinkModal({ url: button.value });
+        actions.toggleSafeLinkModal({ url });
       }
       break;
+    }
     case 'callback': {
       const chat = selectCurrentChat(global);
       if (!chat) {
         return;
       }
 
-      void answerCallbackButton(chat, button.messageId, button.value);
+      void answerCallbackButton(chat, messageId, button.data);
       break;
     }
     case 'requestPoll':
-      actions.openPollModal();
+      actions.openPollModal({ isQuiz: button.isQuiz });
       break;
-    case 'requestSelfContact': {
+    case 'requestPhone': {
       const user = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
       if (!user) {
         return;
@@ -63,20 +67,44 @@ addActionHandler('clickInlineButton', (global, actions, payload) => {
       });
       break;
     }
+    case 'receipt': {
+      const chat = selectCurrentChat(global);
+      if (!chat) {
+        return;
+      }
+      const { receiptMessageId } = button;
+      actions.getReceipt({ receiptMessageId, chatId: chat.id, messageId });
+      break;
+    }
     case 'buy': {
       const chat = selectCurrentChat(global);
-      const { messageId, value } = button;
       if (!chat) {
         return;
       }
 
-      if (value) {
-        actions.getReceipt({ receiptMessageId: value, chatId: chat.id, messageId });
-      } else {
-        actions.getPaymentForm({ chat, messageId });
-        actions.setInvoiceMessageInfo(selectChatMessage(global, chat.id, messageId));
-        actions.openPaymentModal({ chatId: chat.id, messageId });
+      actions.getPaymentForm({ chat, messageId });
+      actions.setInvoiceMessageInfo(selectChatMessage(global, chat.id, messageId));
+      actions.openPaymentModal({ chatId: chat.id, messageId });
+      break;
+    }
+    case 'game': {
+      const chat = selectCurrentChat(global);
+      if (!chat) {
+        return;
       }
+
+      void answerCallbackButton(chat, messageId, undefined, true);
+      break;
+    }
+    case 'switchBotInline': {
+      const { query, isSamePeer } = button;
+      actions.switchBotInline({ query, isSamePeer, messageId });
+      break;
+    }
+
+    case 'userProfile': {
+      const { userId } = button;
+      actions.openChatWithInfo({ id: userId });
       break;
     }
   }
@@ -122,12 +150,12 @@ addActionHandler('restartBot', async (global, actions, payload) => {
 addActionHandler('loadTopInlineBots', async (global) => {
   const { lastRequestedAt } = global.topInlineBots;
   if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
-    return undefined;
+    return;
   }
 
   const result = await callApi('fetchTopInlineBots');
   if (!result) {
-    return undefined;
+    return;
   }
 
   const { ids, users } = result;
@@ -142,7 +170,7 @@ addActionHandler('loadTopInlineBots', async (global) => {
       lastRequestedAt: getServerTime(global.serverTimeOffset),
     },
   };
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('queryInlineBot', async (global, actions, payload) => {
@@ -191,6 +219,45 @@ addActionHandler('queryInlineBot', async (global, actions, payload) => {
       offset,
     });
   });
+});
+
+addActionHandler('switchBotInline', (global, actions, payload) => {
+  const { query, isSamePeer, messageId } = payload;
+  const chat = selectCurrentChat(global);
+  if (!chat) {
+    return undefined;
+  }
+  const message = selectChatMessage(global, chat.id, messageId);
+  if (!message) {
+    return undefined;
+  }
+
+  const botSender = selectChatBot(global, message.senderId!);
+  if (!botSender) {
+    return undefined;
+  }
+
+  const text = `@${botSender.username} ${query}`;
+
+  if (isSamePeer) {
+    actions.openChatWithText({ chatId: chat.id, text });
+    return undefined;
+  }
+
+  return {
+    ...global,
+    switchBotInline: {
+      query,
+      botUsername: botSender.username,
+    },
+  };
+});
+
+addActionHandler('resetSwitchBotInline', (global) => {
+  return {
+    ...global,
+    switchBotInline: undefined,
+  };
 });
 
 addActionHandler('sendInlineBotResult', (global, actions, payload) => {
@@ -327,19 +394,34 @@ async function sendBotCommand(
   });
 }
 
-async function answerCallbackButton(chat: ApiChat, messageId: number, data: string) {
+let gameePopups: PopupManager | undefined;
+
+async function answerCallbackButton(chat: ApiChat, messageId: number, data?: string, isGame = false) {
+  const {
+    showDialog, showNotification, toggleSafeLinkModal, openGame,
+  } = getActions();
+
+  if (isGame) {
+    if (!gameePopups) {
+      gameePopups = new PopupManager('popup,width=800,height=600', () => {
+        showNotification({ message: 'Allow browser to open popup window' });
+      });
+    }
+
+    gameePopups.preOpenIfNeeded();
+  }
+
   const result = await callApi('answerCallbackButton', {
     chatId: chat.id,
     accessHash: chat.accessHash,
     messageId,
     data,
+    isGame,
   });
 
   if (!result) {
     return;
   }
-
-  const { showDialog, showNotification, toggleSafeLinkModal } = getActions();
   const { message, alert: isError, url } = result;
 
   if (isError) {
@@ -347,6 +429,16 @@ async function answerCallbackButton(chat: ApiChat, messageId: number, data: stri
   } else if (message) {
     showNotification({ message });
   } else if (url) {
-    toggleSafeLinkModal({ url });
+    if (isGame) {
+      // Workaround for Gamee embedding bug
+      if (url.includes(GAMEE_URL)) {
+        gameePopups!.open(url);
+      } else {
+        gameePopups!.cancelPreOpen();
+        openGame({ url, chatId: chat.id, messageId });
+      }
+    } else {
+      toggleSafeLinkModal({ url });
+    }
   }
 }

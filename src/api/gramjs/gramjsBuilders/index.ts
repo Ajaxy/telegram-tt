@@ -13,6 +13,7 @@ import {
   ApiMessageEntityTypes,
   ApiNewPoll,
   ApiPhoto,
+  ApiPhoneCall,
   ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
@@ -320,6 +321,9 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
           && media.webpage.document.mimeType.startsWith('video')
         )
       )
+    ) || (
+      media instanceof GramJs.MessageMediaGame
+      && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
     )
   );
 }
@@ -456,6 +460,8 @@ export function buildSendMessageAction(action: ApiSendMessageAction) {
       return new GramJs.SendMessageRecordAudioAction();
     case 'chooseSticker':
       return new GramJs.SendMessageChooseStickerAction();
+    case 'playingGame':
+      return new GramJs.SendMessageGamePlayAction();
   }
   return undefined;
 }
@@ -473,5 +479,12 @@ export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
   return new GramJs.InputGroupCall({
     id: BigInt(groupCall.id!),
     accessHash: BigInt(groupCall.accessHash!),
+  });
+}
+
+export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
+  return new GramJs.InputPhoneCall({
+    id: BigInt(id),
+    accessHash: BigInt(accessHash!),
   });
 }

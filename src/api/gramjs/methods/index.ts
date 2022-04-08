@@ -74,6 +74,7 @@ export {
   getGroupCall, joinGroupCall, discardGroupCall, createGroupCall,
   editGroupCallTitle, editGroupCallParticipant, exportGroupCallInvite, fetchGroupCallParticipants,
   joinGroupCallPresentation, leaveGroupCall, leaveGroupCallPresentation, toggleGroupCallStartSubscription,
+  requestCall, getDhConfig, confirmCall, sendSignalingData, acceptCall, discardCall, setCallRating, receivedCall,
 } from './calls';
 
 export {
@@ -82,3 +83,8 @@ export {
 } from './reactions';
 
 export { fetchChannelStatistics, fetchGroupStatistics, fetchStatisticsAsyncGraph } from './statistics';
+
+export {
+  acceptPhoneCall, confirmPhoneCall, requestPhoneCall, decodePhoneCallData, createPhoneCallState,
+  destroyPhoneCallState, encodePhoneCallData,
+} from './phoneCallState';

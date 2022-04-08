@@ -20,6 +20,7 @@ import './PollModal.scss';
 export type OwnProps = {
   isOpen: boolean;
   shouldBeAnonimous?: boolean;
+  isQuiz?: boolean;
   onSend: (pollSummary: ApiNewPoll) => void;
   onClear: () => void;
 };
@@ -31,7 +32,7 @@ const MAX_QUESTION_LENGTH = 255;
 const MAX_SOLUTION_LENGTH = 200;
 
 const PollModal: FC<OwnProps> = ({
-  isOpen, shouldBeAnonimous, onSend, onClear,
+  isOpen, isQuiz, shouldBeAnonimous, onSend, onClear,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const questionInputRef = useRef<HTMLInputElement>(null);
@@ -44,8 +45,8 @@ const PollModal: FC<OwnProps> = ({
   const [options, setOptions] = useState<string[]>(['']);
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [isMultipleAnswers, setIsMultipleAnswers] = useState(false);
-  const [isQuizMode, setIsQuizMode] = useState(false);
-  const [solution, setSolution] = useState<string>();
+  const [isQuizMode, setIsQuizMode] = useState(isQuiz || false);
+  const [solution, setSolution] = useState<string>('');
   const [correctOption, setCorrectOption] = useState<string>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
@@ -64,12 +65,12 @@ const PollModal: FC<OwnProps> = ({
       setOptions(['']);
       setIsAnonymous(true);
       setIsMultipleAnswers(false);
-      setIsQuizMode(false);
+      setIsQuizMode(isQuiz || false);
       setSolution('');
       setCorrectOption('');
       setHasErrors(false);
     }
-  }, [isOpen]);
+  }, [isQuiz, isOpen]);
 
   useEffect(() => focusInput(questionInputRef), [focusInput, isOpen]);
 
@@ -338,7 +339,7 @@ const PollModal: FC<OwnProps> = ({
         <Checkbox
           label={lang('PollQuiz')}
           checked={isQuizMode}
-          disabled={isMultipleAnswers}
+          disabled={isMultipleAnswers || isQuiz !== undefined}
           onChange={handleQuizModeChange}
         />
         {isQuizMode && (

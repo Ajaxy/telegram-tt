@@ -642,8 +642,8 @@ export function selectIsPollResultsOpen(global: GlobalState) {
 }
 
 export function selectIsForwardModalOpen(global: GlobalState) {
-  const { forwardMessages } = global;
-  return Boolean(forwardMessages.isModalShown);
+  const { forwardMessages, switchBotInline } = global;
+  return Boolean(switchBotInline || forwardMessages.isModalShown);
 }
 
 export function selectCommonBoxChatId(global: GlobalState, messageId: number) {

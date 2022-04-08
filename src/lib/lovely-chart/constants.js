@@ -12,6 +12,8 @@ export const PLOT_PIE_RADIUS_FACTOR = 0.9 / 2;
 export const PLOT_PIE_SHIFT = 10;
 export const PLOT_BARS_WIDTH_SHIFT = 0.5;
 
+export const PIE_MINIMUM_VISIBLE_PERCENT = 0.02;
+
 export const BALLOON_OFFSET = 20;
 
 export const AXES_FONT = '300 10px Helvetica, Arial, sans-serif';

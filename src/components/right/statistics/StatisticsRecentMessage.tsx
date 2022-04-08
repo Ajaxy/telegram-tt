@@ -29,7 +29,12 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   return (
-    <p className="StatisticsRecentMessage">
+    <div
+      className={buildClassName(
+        'StatisticsRecentMessage',
+        Boolean(mediaBlobUrl || mediaThumbnail) && 'StatisticsRecentMessage--with-image',
+      )}
+    >
       <div className="StatisticsRecentMessage__title">
         <div className="StatisticsRecentMessage__summary">
           {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
@@ -47,7 +52,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
           {message.forwards ? lang('ChannelStats.SharesCount', message.forwards) : 'No shares'}
         </div>
       </div>
-    </p>
+    </div>
   );
 };
 

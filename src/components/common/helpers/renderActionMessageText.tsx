@@ -42,15 +42,17 @@ export function renderActionMessageText(
   }
 
   const {
-    text, translationValues, amount, currency, call,
+    text, translationValues, amount, currency, call, score,
   } = message.content.action;
   const content: TextPart[] = [];
   const noLinks = options.asPlainText || options.asTextWithSpoilers;
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
-
   let unprocessed = lang(translationKey, translationValues?.length ? translationValues : undefined);
+  if (translationKey.includes('ScoredInGame')) { // Translation hack for games
+    unprocessed = unprocessed.replace('un1', '%action_origin%').replace('un2', '%message%');
+  }
   let processed: TextPart[];
 
   if (unprocessed.includes('%payment_amount%')) {
@@ -75,6 +77,16 @@ export function renderActionMessageText(
 
   unprocessed = processed.pop() as string;
   content.push(...processed);
+
+  if (unprocessed.includes('%score%')) {
+    processed = processPlaceholder(
+      unprocessed,
+      '%score%',
+      score!.toString(),
+    );
+    unprocessed = processed.pop() as string;
+    content.push(...processed);
+  }
 
   processed = processPlaceholder(
     unprocessed,

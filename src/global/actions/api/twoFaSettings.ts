@@ -6,13 +6,13 @@ import { replaceSettings, updateTwoFaSettings } from '../../reducers';
 addActionHandler('loadPasswordInfo', async (global) => {
   const result = await callApi('getPasswordInfo');
   if (!result) {
-    return undefined;
+    return;
   }
 
   global = getGlobal();
   global = replaceSettings(global, { hasPassword: result.hasPassword });
   global = updateTwoFaSettings(global, { hint: result.hint });
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('checkPassword', async (global, actions, payload) => {

@@ -1,0 +1,179 @@
+.root {
+  :global(.modal-dialog) {
+    overflow: hidden;
+  }
+  :global(.modal-content) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 80vh;
+    padding: 0;
+  }
+
+  :global(.Avatar) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    z-index: -1;
+    transform: scale(1.1);
+
+    :global(.Avatar__img) {
+      border-radius: 0;
+      object-fit: cover;
+    }
+
+    &.blurred :global(.Avatar__img) {
+      filter: blur(10px);
+    }
+  }
+}
+
+.single-column {
+  :global(.modal-dialog) {
+    max-width: 100% !important;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  :global(.modal-content) {
+    height: calc(var(--vh) * 100);
+    max-height: calc(var(--vh) * 100);
+  }
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  position: absolute;
+  padding: 0.5rem;
+
+  :global(.Button) {
+    color: #fff;
+  }
+}
+
+.close-button {
+  margin-left: auto;
+}
+
+.emojis-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition: 0.25s ease-in-out background-color;
+  z-index: 2;
+
+  &.open {
+    background-color: rgba(0, 0, 0, 0.7);
+    pointer-events: all;
+  }
+}
+
+.emojis {
+  user-select: none;
+  pointer-events: all;
+  cursor: pointer;
+  margin-top: 1rem;
+  height: 3rem;
+  transition: 0.25s ease-in-out transform;
+  top: 0;
+  font-size: 1.5rem;
+
+  &.open {
+    transform: scale(2) translateY(3rem);
+  }
+}
+
+.emoji-tooltip {
+  user-select: none;
+  position: absolute;
+  margin-top: 10rem;
+  color: white;
+  max-width: 20rem;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0;
+  transition: 0.25s ease-in-out opacity;
+
+  &.open {
+    opacity: 1;
+  }
+}
+
+.user-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0;
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+  margin-bottom: auto;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 100%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.buttons {
+  display: flex;
+  position: absolute;
+  bottom: 1rem;
+  user-select: none;
+}
+
+.leave {
+  background: #ff595a !important;
+
+  &:hover {
+    background-color: #d24646 !important;
+  }
+}
+
+.accept {
+  background: #5CC85E !important;
+
+  &:hover {
+    background-color: #4eab50 !important;
+  }
+}
+
+.accept-icon {
+  transform: rotate(-135deg);
+}
+
+.main-video {
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.second-video {
+  z-index: -1;
+  position: absolute;
+  width: 9rem;
+  bottom: 1rem;
+  right: 1rem;
+  border-radius: 0.5rem;
+  transform: translateY(calc(100% + 1rem));
+  transition: 0.25s ease-in-out transform;
+
+  &.visible {
+    transform: translateY(-5.5rem);
+  }
+
+  &.fullscreen {
+    transform: translateY(0);
+  }
+}

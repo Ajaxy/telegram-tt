@@ -1,7 +1,6 @@
 type Scheduler =
   typeof requestAnimationFrame
-  | typeof onTickEnd
-  | typeof runNow;
+  | typeof onTickEnd;
 
 export function debounce<F extends AnyToVoidFunction>(
   fn: F,
@@ -77,10 +76,6 @@ export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onTickEnd, fn);
 }
 
-export function throttleWithNow<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(runNow, fn);
-}
-
 export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler, fn: F) {
   let waiting = false;
   let args: Parameters<F>;
@@ -107,10 +102,6 @@ export function onIdle(cb: NoneToVoidFunction, timeout?: number) {
   } else {
     onTickEnd(cb);
   }
-}
-
-function runNow(fn: NoneToVoidFunction) {
-  fn();
 }
 
 export const pause = (ms: number) => new Promise<void>((resolve) => {

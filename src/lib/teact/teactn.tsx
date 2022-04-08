@@ -13,7 +13,9 @@ import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
 export default React;
 
-type GlobalState = AnyLiteral;
+type GlobalState =
+  AnyLiteral
+  & { DEBUG_id: number };
 type ActionNames = string;
 type ActionPayload = any;
 
@@ -29,11 +31,18 @@ type ActionHandler = (
   global: GlobalState,
   actions: Actions,
   payload: any,
-) => GlobalState | void | Promise<GlobalState | void>;
+) => GlobalState | void | Promise<void>;
 
 type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral);
 
 let currentGlobal = {} as GlobalState;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let DEBUG_currentGlobalId: number | undefined;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const DEBUG_resetIdThrottled = throttleWithTickEnd(() => {
+  DEBUG_currentGlobalId = Math.random();
+});
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
 const callbacks: Function[] = [updateContainers];
@@ -61,6 +70,12 @@ function runCallbacks(forceOnHeavyAnimation = false) {
 
 export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
+    if (DEBUG) {
+      if (newGlobal.DEBUG_id !== DEBUG_currentGlobalId) {
+        throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
+      }
+    }
+
     currentGlobal = newGlobal;
     if (options?.forceSyncOnIOs) {
       runCallbacks(true);
@@ -71,6 +86,12 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
 }
 
 export function getGlobal() {
+  if (DEBUG) {
+    DEBUG_currentGlobalId = Math.random();
+    currentGlobal.DEBUG_id = DEBUG_currentGlobalId;
+    DEBUG_resetIdThrottled();
+  }
+
   return currentGlobal;
 }
 
@@ -80,20 +101,12 @@ export function getActions() {
 
 function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
   actionHandlers[name]?.forEach((handler) => {
-    const response = handler(currentGlobal, actions, payload);
-    if (!response) {
+    const response = handler(DEBUG ? getGlobal() : currentGlobal, actions, payload);
+    if (!response || typeof response.then === 'function') {
       return;
     }
 
-    if (typeof response.then === 'function') {
-      response.then((newGlobal: GlobalState | void) => {
-        if (newGlobal) {
-          setGlobal(newGlobal, options);
-        }
-      });
-    } else {
-      setGlobal(response, options);
-    }
+    setGlobal(response as GlobalState, options);
   });
 }
 
@@ -254,7 +267,7 @@ export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames e
       global: ProjectGlobalState,
       actions: ProjectActions,
       payload: ProjectActionTypes[ActionName],
-    ) => ProjectGlobalState | void | Promise<ProjectGlobalState | void>;
+    ) => ProjectGlobalState | void | Promise<void>;
   };
 
   return {

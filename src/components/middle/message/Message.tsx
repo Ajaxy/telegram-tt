@@ -106,6 +106,7 @@ import Poll from './Poll';
 import WebPage from './WebPage';
 import Invoice from './Invoice';
 import Location from './Location';
+import Game from './Game';
 import Album from './Album';
 import RoundVideo from './RoundVideo';
 import InlineButtons from './InlineButtons';
@@ -113,6 +114,7 @@ import CommentButton from './CommentButton';
 import Reactions from './Reactions';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import LocalAnimatedEmoji from '../../common/LocalAnimatedEmoji';
+import MessagePhoneCall from './MessagePhoneCall';
 
 import './Message.scss';
 
@@ -281,7 +283,7 @@ const Message: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     toggleMessageSelection,
-    clickInlineButton,
+    clickBotInlineButton,
     disableContextMenuHint,
   } = getActions();
 
@@ -352,9 +354,6 @@ const Message: FC<OwnProps & StateProps> = ({
       && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat)
       && forwardInfo.fromMessageId
     ));
-
-  const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
-  const withQuickReactionButton = !IS_TOUCH_ENV && !isInSelectMode && defaultReaction && !isInDocumentGroupNotLast;
 
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
@@ -461,8 +460,14 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location,
+    text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
+
+  const { phoneCall } = action || {};
+
+  const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
+  const withQuickReactionButton = !IS_TOUCH_ENV && !phoneCall && !isInSelectMode && defaultReaction
+    && !isInDocumentGroupNotLast;
 
   const contentClassName = buildContentClassName(message, {
     hasReply,
@@ -481,7 +486,9 @@ const Message: FC<OwnProps & StateProps> = ({
   const textParts = renderMessageText(message, highlight, isEmojiOnlyMessage(customShape));
 
   let metaPosition!: MetaPosition;
-  if (isInDocumentGroupNotLast) {
+  if (phoneCall) {
+    metaPosition = 'none';
+  } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
   } else if (textParts && !hasAnimatedEmoji && !webPage) {
     metaPosition = 'in-text';
@@ -679,6 +686,13 @@ const Message: FC<OwnProps & StateProps> = ({
             onMediaClick={handleAlbumMediaClick}
           />
         )}
+        {phoneCall && (
+          <MessagePhoneCall
+            message={message}
+            phoneCall={phoneCall}
+            chatId={chatId}
+          />
+        )}
         {!isAlbum && photo && (
           <Photo
             message={message}
@@ -752,6 +766,13 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
+        )}
+        {game && (
+          <Game
+            message={message}
+            canAutoLoadMedia={canAutoLoadMedia}
+            lastSyncTime={lastSyncTime}
+          />
         )}
         {!hasAnimatedEmoji && textParts && (
           <p className={textContentClass} dir="auto">
@@ -935,7 +956,7 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
         </div>
         {message.inlineButtons && (
-          <InlineButtons message={message} onClick={clickInlineButton} />
+          <InlineButtons message={message} onClick={clickBotInlineButton} />
         )}
         {reactionsPosition === 'outside' && (
           <Reactions

@@ -1,4 +1,5 @@
 const BigInt = require('big-integer');
+const aes = require('@cryptography/aes');
 
 const Helpers = require('../Helpers');
 const IGE = require('../crypto/IGE');
@@ -39,10 +40,14 @@ class MTProtoState {
      authentication process, at which point the `MTProtoPlainSender` is better
      * @param authKey
      * @param loggers
+     * @param isCall
+     * @param isOutgoing
      */
-    constructor(authKey, loggers) {
+    constructor(authKey, loggers, isCall = false, isOutgoing = false) {
         this.authKey = authKey;
         this._log = loggers;
+        this._isCall = isCall;
+        this._isOutgoing = isOutgoing;
         this.timeOffset = 0;
         this.salt = 0;
 
@@ -81,12 +86,20 @@ class MTProtoState {
      * @returns {{iv: Buffer, key: Buffer}}
      */
     async _calcKey(authKey, msgKey, client) {
-        const x = client === true ? 0 : 8;
+        const x = (this._isCall ? 128 + ((this._isOutgoing ^ client) ? 8 : 0) : (client === true ? 0 : 8));
         const [sha256a, sha256b] = await Promise.all([
             Helpers.sha256(Buffer.concat([msgKey, authKey.slice(x, x + 36)])),
             Helpers.sha256(Buffer.concat([authKey.slice(x + 40, x + 76), msgKey])),
         ]);
         const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)]);
+        if (this._isCall) {
+            const iv = Buffer.concat([sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28)]);
+
+            return {
+                key,
+                iv,
+            };
+        }
         const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)]);
         return {
             key,
@@ -133,24 +146,48 @@ class MTProtoState {
      */
     async encryptMessageData(data) {
         await this.authKey.waitForKey();
-        const s = toSignedLittleBuffer(this.salt, 8);
-        const i = toSignedLittleBuffer(this.id, 8);
-        data = Buffer.concat([Buffer.concat([s, i]), data]);
-        const padding = Helpers.generateRandomBytes(Helpers.mod(-(data.length + 12), 16) + 12);
-        // Being substr(what, offset, length); x = 0 for client
-        // "msg_key_large = SHA256(substr(auth_key, 88+x, 32) + pt + padding)"
-        const msgKeyLarge = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
-            .slice(88, 88 + 32), data, padding]));
-        // "msg_key = substr (msg_key_large, 8, 16)"
-        const msgKey = msgKeyLarge.slice(8, 24);
+        if (this._isCall) {
+            const x = 128 + (this._isOutgoing ? 0 : 8);
+            const lengthStart = data.length;
 
-        const {
-            iv,
-            key,
-        } = await this._calcKey(this.authKey.getKey(), msgKey, true);
+            data = Buffer.from(data);
+            if (lengthStart % 4 !== 0) {
+                data = Buffer.concat([data, Buffer.from(new Array(4 - (lengthStart % 4)).fill(0x20))]);
+            }
 
-        const keyId = Helpers.readBufferFromBigInt(this.authKey.keyId, 8);
-        return Buffer.concat([keyId, msgKey, new IGE(key, iv).encryptIge(Buffer.concat([data, padding]))]);
+            const msgKeyLarge = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+                .slice(88 + x, 88 + x + 32), Buffer.from(data)]));
+
+            const msgKey = msgKeyLarge.slice(8, 24);
+
+            const {
+                iv,
+                key,
+            } = await this._calcKey(this.authKey.getKey(), msgKey, true);
+
+            data = Helpers.convertToLittle(new aes.CTR(key, iv).encrypt(data));
+            // data = data.slice(0, lengthStart)
+            return Buffer.concat([msgKey, data]);
+        } else {
+            const s = toSignedLittleBuffer(this.salt, 8);
+            const i = toSignedLittleBuffer(this.id, 8);
+            data = Buffer.concat([Buffer.concat([s, i]), data]);
+            const padding = Helpers.generateRandomBytes(Helpers.mod(-(data.length + 12), 16) + 12);
+            // Being substr(what, offset, length); x = 0 for client
+            // "msg_key_large = SHA256(substr(auth_key, 88+x, 32) + pt + padding)"
+            const msgKeyLarge = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+                .slice(88, 88 + 32), data, padding]));
+            // "msg_key = substr (msg_key_large, 8, 16)"
+            const msgKey = msgKeyLarge.slice(8, 24);
+
+            const {
+                iv,
+                key,
+            } = await this._calcKey(this.authKey.getKey(), msgKey, true);
+
+            const keyId = Helpers.readBufferFromBigInt(this.authKey.keyId, 8);
+            return Buffer.concat([keyId, msgKey, new IGE(key, iv).encryptIge(Buffer.concat([data, padding]))]);
+        }
     }
 
     /**
@@ -164,65 +201,87 @@ class MTProtoState {
         if (body.length < 0) { // length needs to be positive
             throw new SecurityError('Server replied with negative length');
         }
-        if (body.length % 4 !== 0) {
+        if (body.length % 4 !== 0 && !this._isCall) {
             throw new SecurityError('Server replied with length not divisible by 4');
         }
         // TODO Check salt,sessionId, and sequenceNumber
-        const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8));
-        if (keyId.neq(this.authKey.keyId)) {
-            throw new SecurityError('Server replied with an invalid auth key');
-        }
+        if (!this._isCall) {
+            const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8));
 
-        const msgKey = body.slice(8, 24);
+            if (keyId.neq(this.authKey.keyId)) {
+                throw new SecurityError('Server replied with an invalid auth key');
+            }
+        }
+        const msgKey = this._isCall ? body.slice(0, 16) : body.slice(8, 24);
+
+        const x = this._isCall ? 128 + (this.isOutgoing ? 8 : 0) : undefined;
         const {
             iv,
             key,
         } = await this._calcKey(this.authKey.getKey(), msgKey, false);
-        body = new IGE(key, iv).decryptIge(body.slice(24));
 
+        if (this._isCall) {
+            body = body.slice(16);
+            const lengthStart = body.length;
+
+            body = Buffer.concat([body, Buffer.from(new Array(4 - (lengthStart % 4)).fill(0))]);
+
+            body = Helpers.convertToLittle(new aes.CTR(key, iv).decrypt(body));
+
+            body = body.slice(0, lengthStart);
+        } else {
+            body = new IGE(key, iv).decryptIge(this._isCall ? body.slice(16) : body.slice(24));
+        }
         // https://core.telegram.org/mtproto/security_guidelines
         // Sections "checking sha256 hash" and "message length"
 
-        const ourKey = await Helpers.sha256(Buffer.concat([this.authKey.getKey()
-            .slice(96, 96 + 32), body]));
+        const ourKey = this._isCall
+            ? await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+                .slice(88 + x, 88 + x + 32), body]))
+            : await Helpers.sha256(Buffer.concat([this.authKey.getKey()
+                .slice(96, 96 + 32), body]));
 
-        if (!msgKey.equals(ourKey.slice(8, 24))) {
+        if (!this._isCall && !msgKey.equals(ourKey.slice(8, 24))) {
             throw new SecurityError('Received msg_key doesn\'t match with expected one');
         }
-
         const reader = new BinaryReader(body);
-        reader.readLong(); // removeSalt
-        const serverId = reader.readLong();
-        if (!serverId.eq(this.id)) {
-            throw new SecurityError('Server replied with a wrong session ID');
-        }
 
-        const remoteMsgId = reader.readLong();
-        // if we get a duplicate message id we should ignore it.
-        if (this.msgIds.includes(remoteMsgId.toString())) {
-            throw new SecurityError('Duplicate msgIds');
-        }
-        // we only store the latest 500 message ids from the server
-        if (this.msgIds.length > 500) {
-            this.msgIds.shift();
-        }
-        this.msgIds.push(remoteMsgId.toString());
+        if (this._isCall) {
+            // Seq
+            reader.readInt(false);
+            return reader.read(body.length - 4);
+        } else {
+            reader.readLong(); // removeSalt
+            const serverId = reader.readLong();
+            if (!serverId.eq(this.id)) {
+                throw new SecurityError('Server replied with a wrong session ID');
+            }
 
-        const remoteSequence = reader.readInt();
-        const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
-        const diff = body.length - containerLen;
-        // We want to check if it's between 12 and 1024
-        // https://core.telegram.org/mtproto/security_guidelines#checking-message-length
-        if (diff < 12 || diff > 1024) {
-            throw new SecurityError('Server replied with the wrong message padding');
+            const remoteMsgId = reader.readLong();
+            // if we get a duplicate message id we should ignore it.
+            if (this.msgIds.includes(remoteMsgId.toString())) {
+                throw new SecurityError('Duplicate msgIds');
+            }
+            // we only store the latest 500 message ids from the server
+            if (this.msgIds.length > 500) {
+                this.msgIds.shift();
+            }
+            this.msgIds.push(remoteMsgId.toString());const remoteSequence = reader.readInt();
+            const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
+            const diff = body.length - containerLen;
+            // We want to check if it's between 12 and 1024
+            // https://core.telegram.org/mtproto/security_guidelines#checking-message-length
+            if (diff < 12 || diff > 1024) {
+                throw new SecurityError('Server replied with the wrong message padding');
+            }
+
+            // We could read msg_len bytes and use those in a new reader to read
+            // the next TLObject without including the padding, but since the
+            // reader isn't used for anything else after this, it's unnecessary.
+            const obj = reader.tgReadObject();
+
+            return new TLMessage(remoteMsgId, remoteSequence, obj);
         }
-
-        // We could read msg_len bytes and use those in a new reader to read
-        // the next TLObject without including the padding, but since the
-        // reader isn't used for anything else after this, it's unnecessary.
-        const obj = reader.tgReadObject();
-
-        return new TLMessage(remoteMsgId, remoteSequence, obj);
     }
 
     /**

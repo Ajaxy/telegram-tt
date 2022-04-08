@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
 import { callApi } from '../../../api/gramjs';
-import { selectChat } from '../../selectors';
+import { selectChat, selectUser } from '../../selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { ApiGroupCall } from '../../../api/types';
 import { updateGroupCall } from '../../reducers/calls';
@@ -11,28 +11,42 @@ import { fetchChatByUsername, loadFullChat } from '../api/chats';
 import safePlay from '../../../util/safePlay';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import * as langProvider from '../../../util/langProvider';
+import { CallSound } from '../../types';
 
 // Workaround for Safari not playing audio without user interaction
 let audioElement: HTMLAudioElement | undefined;
 let audioContext: AudioContext | undefined;
 
-const joinAudio = new Audio('./voicechat_join.mp3');
-const connectingAudio = new Audio('./voicechat_connecting.mp3');
-connectingAudio.loop = true;
-const leaveAudio = new Audio('./voicechat_leave.mp3');
-const allowTalkAudio = new Audio('./voicechat_onallowtalk.mp3');
-
-const sounds: Record<string, HTMLAudioElement> = {
-  join: joinAudio,
-  allowTalk: allowTalkAudio,
-  leave: leaveAudio,
-  connecting: connectingAudio,
-};
-
+let sounds: Record<CallSound, HTMLAudioElement>;
 let initializationPromise: Promise<void> | undefined = Promise.resolve();
 
-const initializeSoundsForSafari = () => {
+export const initializeSoundsForSafari = () => {
   if (!initializationPromise) return Promise.resolve();
+
+  const joinAudio = new Audio('./voicechat_join.mp3');
+  const connectingAudio = new Audio('./voicechat_connecting.mp3');
+  connectingAudio.loop = true;
+  const leaveAudio = new Audio('./voicechat_leave.mp3');
+  const allowTalkAudio = new Audio('./voicechat_onallowtalk.mp3');
+  const busyAudio = new Audio('./call_busy.mp3');
+  const connectAudio = new Audio('./call_connect.mp3');
+  const endAudio = new Audio('./call_end.mp3');
+  const incomingAudio = new Audio('./call_incoming.mp3');
+  incomingAudio.loop = true;
+  const ringingAudio = new Audio('./call_ringing.mp3');
+  ringingAudio.loop = true;
+
+  sounds = {
+    join: joinAudio,
+    allowTalk: allowTalkAudio,
+    leave: leaveAudio,
+    connecting: connectingAudio,
+    incoming: incomingAudio,
+    end: endAudio,
+    connect: connectAudio,
+    busy: busyAudio,
+    ringing: ringingAudio,
+  };
 
   initializationPromise = Promise.all(Object.values(sounds).map((l) => {
     l.muted = true;
@@ -95,10 +109,7 @@ async function fetchGroupCallParticipants(groupCall: Partial<ApiGroupCall>, next
 addActionHandler('toggleGroupCallPanel', (global) => {
   return {
     ...global,
-    groupCalls: {
-      ...global.groupCalls,
-      isGroupCallPanelHidden: !global.groupCalls.isGroupCallPanelHidden,
-    },
+    isCallPanelVisible: !global.isCallPanelVisible,
   };
 });
 
@@ -192,7 +203,12 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload) => {
 });
 
 addActionHandler('joinGroupCall', async (global, actions, payload) => {
-  if (!ARE_CALLS_SUPPORTED) return undefined;
+  if (!ARE_CALLS_SUPPORTED) return;
+
+  if (global.phoneCall) {
+    actions.toggleGroupCallPanel();
+    return;
+  }
 
   const {
     chatId, id, accessHash, inviteHash,
@@ -206,19 +222,19 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
 
   if (groupCall?.id === activeGroupCallId) {
     actions.toggleGroupCallPanel();
-    return undefined;
+    return;
   }
 
   if (activeGroupCallId) {
     actions.leaveGroupCall({
       rejoin: payload,
     });
-    return undefined;
+    return;
   }
 
   if (groupCall && activeGroupCallId === groupCall.id) {
     actions.toggleGroupCallPanel();
-    return undefined;
+    return;
   }
 
   if (!groupCall && (!id || !accessHash)) {
@@ -228,7 +244,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
     });
   }
 
-  if (!groupCall) return undefined;
+  if (!groupCall) return;
 
   global = getGlobal();
   global = updateGroupCall(
@@ -246,10 +262,10 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
     groupCalls: {
       ...global.groupCalls,
       activeGroupCallId: groupCall.id,
-      isGroupCallPanelHidden: false,
     },
+    isCallPanelVisible: false,
   };
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('playGroupCallSound', (global, actions, payload) => {
@@ -259,15 +275,23 @@ addActionHandler('playGroupCallSound', (global, actions, payload) => {
     return;
   }
 
-  if (initializationPromise) {
-    initializationPromise.then(() => {
-      safePlay(sounds[sound]);
-    });
-  } else {
+  const doPlay = () => {
     if (sound !== 'connecting') {
       sounds.connecting.pause();
     }
+    if (sound !== 'incoming') {
+      sounds.incoming.pause();
+    }
+    if (sound !== 'ringing') {
+      sounds.ringing.pause();
+    }
     safePlay(sounds[sound]);
+  };
+
+  if (initializationPromise) {
+    initializationPromise.then(doPlay);
+  } else {
+    doPlay();
   }
 });
 
@@ -278,6 +302,35 @@ addActionHandler('loadMoreGroupCallParticipants', (global) => {
   }
 
   void fetchGroupCallParticipants(groupCall, groupCall.nextOffset);
+});
+
+addActionHandler('requestCall', async (global, actions, payload) => {
+  const { userId, isVideo } = payload;
+
+  if (global.phoneCall) {
+    actions.toggleGroupCallPanel();
+    return;
+  }
+
+  const user = selectUser(global, userId);
+
+  if (!user) {
+    return;
+  }
+
+  await initializeSoundsForSafari();
+
+  setGlobal({
+    ...getGlobal(),
+    phoneCall: {
+      id: '',
+      state: 'requesting',
+      participantId: userId,
+      isVideo,
+      adminId: global.currentUserId,
+    },
+    isCallPanelVisible: false,
+  });
 });
 
 function createAudioContext() {
@@ -312,23 +365,3 @@ export function removeGroupCallAudioElement() {
   audioContext = undefined;
   audioElement = undefined;
 }
-
-addActionHandler('openCallFallbackConfirm', (global) => {
-  return {
-    ...global,
-    groupCalls: {
-      ...global.groupCalls,
-      isFallbackConfirmOpen: true,
-    },
-  };
-});
-
-addActionHandler('closeCallFallbackConfirm', (global) => {
-  return {
-    ...global,
-    groupCalls: {
-      ...global.groupCalls,
-      isFallbackConfirmOpen: false,
-    },
-  };
-});

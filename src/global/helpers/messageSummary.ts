@@ -118,6 +118,7 @@ export function getMessageSummaryDescription(
     poll,
     invoice,
     location,
+    game,
   } = message.content;
 
   let summary: string | TextPart[] | undefined;
@@ -176,6 +177,10 @@ export function getMessageSummaryDescription(
 
   if (location?.type === 'geoLive') {
     summary = lang('Message.LiveLocation');
+  }
+
+  if (game) {
+    summary = `🎮 ${game.title}`;
   }
 
   const reaction = !noReactions && getMessageRecentReaction(message);

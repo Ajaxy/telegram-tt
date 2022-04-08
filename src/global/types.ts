@@ -32,6 +32,8 @@ import {
   ApiUpdate,
   ApiReportReason,
   ApiPhoto,
+  ApiKeyboardButton,
+  ApiPhoneCall,
 } from '../api/types';
 import {
   FocusDirection,
@@ -59,6 +61,7 @@ import {
   ManagementState,
 } from '../types';
 import { typify } from '../lib/teact/teactn';
+import type { P2pMessage } from '../lib/secret-sauce';
 
 export type MessageListType =
   'thread'
@@ -117,7 +120,6 @@ export type GlobalState = {
   isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
-  isPollModalOpen?: boolean;
   newChatMembersProgress?: NewChatMembersProgress;
   uiReadyState: 0 | 1 | 2;
   shouldSkipHistoryAnimations?: boolean;
@@ -202,11 +204,11 @@ export type GlobalState = {
   groupCalls: {
     byId: Record<string, ApiGroupCall>;
     activeGroupCallId?: string;
-    isGroupCallPanelHidden?: boolean;
-    isFallbackConfirmOpen?: boolean;
-    fallbackChatId?: string;
-    fallbackUserIdsToRemove?: string[];
   };
+
+  isCallPanelVisible?: boolean;
+  phoneCall?: ApiPhoneCall;
+  ratingPhoneCall?: ApiPhoneCall;
 
   scheduledMessages: {
     byChatId: Record<string, {
@@ -410,6 +412,7 @@ export type GlobalState = {
     fromChatId?: string;
     messageIds?: number[];
     toChatId?: string;
+    withMyScore?: boolean;
   };
 
   pollResults: {
@@ -519,7 +522,32 @@ export type GlobalState = {
     userId?: string;
     isByPhoneNumber?: boolean;
   };
+
+  openedGame?: {
+    url: string;
+    chatId: string;
+    messageId: number;
+  };
+
+  switchBotInline?: {
+    query: string;
+    botUsername: string;
+  };
+
+  openChatWithText?: {
+    chatId: string;
+    text: string;
+  };
+
+  pollModal: {
+    isOpen: boolean;
+    isQuiz?: boolean;
+  };
 };
+
+export type CallSound = (
+  'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
+);
 
 export interface ActionPayloads {
   // Initial
@@ -546,6 +574,13 @@ export interface ActionPayloads {
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
   };
+
+  openChatWithText: {
+    chatId: string;
+    text: string;
+  };
+
+  resetOpenChatWithText: {};
 
   // Messages
   setEditingDraft: {
@@ -631,6 +666,52 @@ export interface ActionPayloads {
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   };
+
+  // Bots
+
+  clickBotInlineButton: {
+    messageId: number;
+    button: ApiKeyboardButton;
+  };
+
+  switchBotInline: {
+    messageId: number;
+    query: string;
+    isSamePeer?: boolean;
+  };
+
+  resetSwitchBotInline: {};
+
+  // Misc
+  openGame: {
+    url: string;
+    chatId: string;
+    messageId: number;
+  };
+  closeGame: {};
+
+  openPollModal: {
+    isQuiz?: boolean;
+  };
+  closePollModal: {};
+
+  // Calls
+  requestCall: {
+    userId: string;
+    isVideo?: boolean;
+  };
+  sendSignalingData: P2pMessage;
+  hangUp: {};
+  acceptCall: {};
+  setCallRating: {
+    rating: number;
+    comment: string;
+  };
+  closeCallRatingModal: {};
+  playGroupCallSound: {
+    sound: CallSound;
+  };
+  connectToActivePhoneCall: {};
 }
 
 export type NonTypedActionNames = (
@@ -713,10 +794,9 @@ export type NonTypedActionNames = (
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
   'openStickerSetShortName' |
   // bots
-  'clickInlineButton' | 'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
+  'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |
   // misc
-  'openPollModal' | 'closePollModal' |
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |
   'setDeviceToken' | 'deleteDeviceToken' |
   'checkVersionNotification' | 'createServiceNotification' |
@@ -728,8 +808,7 @@ export type NonTypedActionNames = (
   'joinGroupCall' | 'toggleGroupCallMute' | 'toggleGroupCallPresentation' | 'leaveGroupCall' |
   'toggleGroupCallVideo' | 'requestToSpeak' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' |
   'createGroupCall' | 'joinVoiceChatByLink' | 'subscribeToGroupCallUpdates' | 'createGroupCallInviteLink' |
-  'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' | 'playGroupCallSound' |
-  'openCallFallbackConfirm' | 'closeCallFallbackConfirm' | 'inviteToCallFallback' |
+  'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' |
   // stats
   'loadStatistics' | 'loadStatisticsAsyncGraph'
   );

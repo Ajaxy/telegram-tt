@@ -122,7 +122,12 @@ const MessageListContent: FC<OwnProps> = ({
       senderGroupIndex,
       senderGroupsArray,
     ) => {
-      if (senderGroup.length === 1 && !isAlbum(senderGroup[0]) && isActionMessage(senderGroup[0])) {
+      if (
+        senderGroup.length === 1
+        && !isAlbum(senderGroup[0])
+        && isActionMessage(senderGroup[0])
+        && !senderGroup[0].content.action?.phoneCall
+      ) {
         const message = senderGroup[0];
         const isLastInList = (
           senderGroupIndex === senderGroupsArray.length - 1

@@ -16,7 +16,9 @@
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint:fix": "eslint ./src/lib/gramjs --fix",
     "test": "cross-env APP_ENV=test jest --verbose --forceExit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "statoscope:validate": "statoscope validate --input  public/build-stats.json",
+    "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json"
   },
   "engines": {
     "node": "^16.13",
@@ -42,6 +44,8 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@peculiar/webcrypto": "^1.3.2",
+    "@statoscope/cli": "^5.20.1",
+    "@statoscope/webpack-plugin": "^5.20.1",
     "@testing-library/jest-dom": "^5.16.2",
     "@types/croppie": "^2.6.1",
     "@types/jest": "^27.4.1",
@@ -93,7 +97,6 @@
     "stylelint-high-performance-animation": "^1.6.0",
     "typescript": "^4.6.2",
     "webpack": "^5.70.0",
-    "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0"
@@ -106,12 +109,10 @@
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#54443d1938ec1c157e74d2a95e9103dcb3f5c6dd",
     "events": "^3.3.0",
     "idb-keyval": "^6.1.0",
-    "music-metadata-browser": "^2.5.5",
     "opus-recorder": "github:Ajaxy/opus-recorder",
     "os-browserify": "^0.3.0",
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
-    "process": "^0.11.10",
     "qr-code-styling": "github:zubiden/qr-code-styling#10f7cf3",
     "websocket": "^1.0.34"
   },
