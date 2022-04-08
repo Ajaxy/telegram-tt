@@ -30,6 +30,8 @@ import {
   ApiGroupStatistics,
   ApiPaymentFormNativeParams,
   ApiUpdate,
+  ApiReportReason,
+  ApiPhoto,
   ApiKeyboardButton,
   ApiPhoneCall,
 } from '../api/types';
@@ -551,6 +553,19 @@ export interface ActionPayloads {
   // Initial
   signOut: { forceInitApi?: boolean } | undefined;
   apiUpdate: ApiUpdate;
+
+  // Accounts
+  reportPeer: {
+    chatId?: string;
+    reason: ApiReportReason;
+    description: string;
+  };
+  reportProfilePhoto: {
+    chatId?: string;
+    reason: ApiReportReason;
+    description: string;
+    photo?: ApiPhoto;
+  };
 
   // Chats
   openChat: {
