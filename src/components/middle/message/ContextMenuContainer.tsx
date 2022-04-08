@@ -25,7 +25,7 @@ import useFlag from '../../../hooks/useFlag';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
-import ReportMessageModal from '../../common/ReportMessageModal';
+import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
@@ -396,7 +396,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         album={album}
         message={message}
       />
-      <ReportMessageModal
+      <ReportModal
         isOpen={isReportModalOpen}
         onClose={closeReportModal}
         messageIds={reportMessageIds}

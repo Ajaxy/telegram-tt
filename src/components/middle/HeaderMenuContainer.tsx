@@ -13,7 +13,7 @@ import {
   selectChat, selectNotifySettings, selectNotifyExceptions, selectUser, selectChatBot,
 } from '../../global/selectors';
 import {
-  isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
+  isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact, isChatChannel, isChatGroup,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
@@ -22,6 +22,7 @@ import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import DeleteChatModal from '../common/DeleteChatModal';
+import ReportModal from '../common/ReportModal';
 
 import './HeaderMenuContainer.scss';
 
@@ -69,6 +70,7 @@ type StateProps = {
   isPrivate?: boolean;
   isMuted?: boolean;
   canAddContact?: boolean;
+  canReportChat?: boolean;
   canDeleteChat?: boolean;
   hasLinkedChat?: boolean;
 };
@@ -93,6 +95,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   chat,
   isPrivate,
   isMuted,
+  canReportChat,
   canDeleteChat,
   hasLinkedChat,
   canAddContact,
@@ -115,9 +118,20 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   } = getActions();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { x, y } = anchor;
 
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+
+  const handleReport = useCallback(() => {
+    setIsMenuOpen(false);
+    setIsReportModalOpen(true);
+  }, []);
+
+  const closeReportModal = useCallback(() => {
+    setIsReportModalOpen(false);
+    onClose();
+  }, [onClose]);
 
   const handleDelete = useCallback(() => {
     setIsMenuOpen(false);
@@ -334,6 +348,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('Statistics')}
             </MenuItem>
           )}
+          {canReportChat && (
+            <MenuItem
+              icon="flag"
+              onClick={handleReport}
+            >
+              {lang('ReportPeer.Report')}
+            </MenuItem>
+          )}
           {botButtons}
           {canLeave && (
             <MenuItem
@@ -354,6 +376,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             chat={chat}
           />
         )}
+        {canReportChat && chat?.id && (
+          <ReportModal
+            isOpen={isReportModalOpen}
+            onClose={closeReportModal}
+            subject="peer"
+            chatId={chat.id}
+          />
+        )}
       </div>
     </Portal>
   );
@@ -368,6 +398,7 @@ export default memo(withGlobal<OwnProps>(
     const isPrivate = isUserId(chat.id);
     const user = isPrivate ? selectUser(global, chatId) : undefined;
     const canAddContact = user && getCanAddContact(user);
+    const canReportChat = isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf);
 
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
 
@@ -376,6 +407,7 @@ export default memo(withGlobal<OwnProps>(
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       isPrivate,
       canAddContact,
+      canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       botCommands: chatBot?.fullInfo?.botCommands,

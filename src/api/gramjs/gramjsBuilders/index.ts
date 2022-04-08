@@ -11,7 +11,9 @@ import {
   ApiGroupCall,
   ApiMessageEntity,
   ApiMessageEntityTypes,
-  ApiNewPoll, ApiPhoneCall,
+  ApiNewPoll,
+  ApiPhoto,
+  ApiPhoneCall,
   ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
@@ -341,6 +343,20 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
     dcId,
     photoId,
   });
+}
+
+export function buildInputPhoto(photo: ApiPhoto) {
+  const localPhoto = localDb.photos[photo?.id];
+
+  if (!localPhoto) {
+    return undefined;
+  }
+
+  return new GramJs.InputPhoto(pick(localPhoto, [
+    'id',
+    'accessHash',
+    'fileReference',
+  ]));
 }
 
 export function buildInputContact({

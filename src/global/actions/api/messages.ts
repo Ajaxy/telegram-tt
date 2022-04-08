@@ -67,6 +67,7 @@ import {
 } from '../../selectors';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { isServiceNotificationMessage } from '../../helpers';
+import { getTranslation } from '../../../util/langProvider';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
@@ -460,8 +461,8 @@ addActionHandler('reportMessages', async (global, actions, payload) => {
 
   actions.showNotification({
     message: result
-      ? 'Thank you! Your report will be reviewed by our team.'
-      : 'Error occured while submiting report. Please, try again later.',
+      ? getTranslation('ReportPeer.AlertSuccess')
+      : 'An error occurred while submitting your report. Please, try again later.',
   });
 });
 

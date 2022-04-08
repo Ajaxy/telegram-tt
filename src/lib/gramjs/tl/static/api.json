@@ -43,6 +43,8 @@
     "account.uploadWallPaper",
     "account.setContentSettings",
     "account.getContentSettings",
+    "account.reportPeer",
+    "account.reportProfilePhoto",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

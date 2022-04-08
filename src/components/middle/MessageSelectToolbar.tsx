@@ -23,7 +23,7 @@ import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 import Button from '../ui/Button';
 
 import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
-import ReportMessageModal from '../common/ReportMessageModal';
+import ReportModal from '../common/ReportModal';
 
 import './MessageSelectToolbar.scss';
 
@@ -157,7 +157,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         isSchedule={isSchedule}
         onClose={closeDeleteModal}
       />
-      <ReportMessageModal
+      <ReportModal
         isOpen={isReportModalOpen}
         onClose={closeReportModal}
         messageIds={selectedMessageIds}

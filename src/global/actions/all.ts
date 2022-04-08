@@ -19,6 +19,7 @@ import './api/globalSearch';
 import './api/localSearch';
 import './api/management';
 import './api/sync';
+import './api/accounts';
 import './api/users';
 import './api/bots';
 import './api/settings';

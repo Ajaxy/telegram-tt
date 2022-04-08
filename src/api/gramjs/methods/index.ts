@@ -3,6 +3,10 @@ export {
 } from './client';
 
 export {
+  reportPeer, reportProfilePhoto,
+} from './account';
+
+export {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,
 } from './auth';
 
