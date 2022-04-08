@@ -47,6 +47,7 @@ import {
 import {
   getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfReactionAdded,
 } from '../../helpers';
+import { onTickEnd } from '../../../util/schedulers';
 
 const ANIMATION_DELAY = 350;
 
@@ -497,10 +498,12 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (shouldNotify) {
         const newMessage = selectChatMessage(global, chatId, id);
         if (!chat || !newMessage) return;
-        notifyAboutMessage({
-          chat,
-          message: newMessage,
-          isReaction: true,
+        onTickEnd(() => {
+          notifyAboutMessage({
+            chat,
+            message: newMessage,
+            isReaction: true,
+          });
         });
       }
 
@@ -548,13 +551,15 @@ function updateThreadUnread(global: GlobalState, actions: GlobalActions, message
     if (originMessage) {
       global = updateThreadUnreadFromForwardedMessage(global, originMessage, chatId, message.id, isDeleting);
     } else {
-      actions.loadMessage({
-        chatId,
-        messageId: message.replyToMessageId,
-        threadUpdate: {
-          isDeleting,
-          lastMessageId: message.id,
-        },
+      onTickEnd(() => {
+        actions.loadMessage({
+          chatId,
+          messageId: message.replyToMessageId,
+          threadUpdate: {
+            isDeleting,
+            lastMessageId: message.id,
+          },
+        });
       });
     }
   }
