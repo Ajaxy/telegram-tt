@@ -34,6 +34,8 @@ function buildApiChatFieldsFromPeerEntity(
   const avatarHash = ('photo' in peerEntity) && peerEntity.photo && buildAvatarHash(peerEntity.photo);
   const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
+  const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
+  const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
 
   return {
     isMin,
@@ -60,6 +62,7 @@ function buildApiChatFieldsFromPeerEntity(
     ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),
     ...buildApiChatRestrictions(peerEntity),
     ...buildApiChatMigrationInfo(peerEntity),
+    fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
   };
 }
 

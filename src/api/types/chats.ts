@@ -1,6 +1,7 @@
 import { ApiMessage, ApiPhoto } from './messages';
 import { ApiBotCommand } from './bots';
 import { ApiChatInviteImporter } from './misc';
+import { ApiFakeType } from './users';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
@@ -33,6 +34,7 @@ export interface ApiChat {
   photos?: ApiPhoto[];
   draftDate?: number;
   isProtected?: boolean;
+  fakeType?: ApiFakeType;
 
   // Calls
   isCallActive?: boolean;

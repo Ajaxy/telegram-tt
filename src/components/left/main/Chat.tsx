@@ -50,6 +50,7 @@ import ListItem from '../../ui/ListItem';
 import Badge from './Badge';
 import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
+import FakeIcon from '../../common/FakeIcon';
 
 import './Chat.scss';
 
@@ -299,6 +300,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         <div className="title">
           <h3>{renderText(getChatTitle(lang, chat, user))}</h3>
           {chat.isVerified && <VerifiedIcon />}
+          {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
           {isMuted && <i className="icon-muted" />}
           {chat.lastMessage && (
             <LastMessageMeta
