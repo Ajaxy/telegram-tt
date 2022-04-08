@@ -54,7 +54,7 @@
     color: var(--color-white);
   }
 
-  &.pinned:not(.unread) {
+  &.pinned {
     color: var(--color-pinned);
     background: transparent;
     width: 1.5rem;
