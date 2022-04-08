@@ -1,15 +1,16 @@
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat } from '../../api/types';
+import { ApiBotCommand, ApiChat } from '../../api/types';
 import { IAnchorPosition } from '../../types';
 
+import { REPLIES_USER_ID } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
-  selectChat, selectNotifySettings, selectNotifyExceptions, selectUser,
+  selectChat, selectNotifySettings, selectNotifyExceptions, selectUser, selectChatBot,
 } from '../../global/selectors';
 import {
   isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact,
@@ -23,6 +24,21 @@ import MenuItem from '../ui/MenuItem';
 import DeleteChatModal from '../common/DeleteChatModal';
 
 import './HeaderMenuContainer.scss';
+
+const BOT_BUTTONS: Record<string, { icon: string; label: string }> = {
+  settings: {
+    icon: 'bots',
+    label: 'BotSettings',
+  },
+  privacy: {
+    icon: 'info',
+    label: 'Privacy',
+  },
+  help: {
+    icon: 'help',
+    label: 'BotHelp',
+  },
+};
 
 export type OwnProps = {
   chatId: string;
@@ -49,6 +65,7 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  botCommands?: ApiBotCommand[];
   isPrivate?: boolean;
   isMuted?: boolean;
   canAddContact?: boolean;
@@ -62,6 +79,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   withExtraActions,
   anchor,
   isChannel,
+  botCommands,
   canStartBot,
   canRestartBot,
   canSubscribe,
@@ -187,6 +205,28 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
+  const botButtons = useMemo(() => {
+    return botCommands?.map(({ command }) => {
+      const cmd = BOT_BUTTONS[command];
+      if (!cmd) return undefined;
+      const handleClick = () => {
+        sendBotCommand({ command: `/${command}` });
+        closeMenu();
+      };
+
+      return (
+        <MenuItem
+          key={command}
+          icon={cmd.icon}
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={handleClick}
+        >
+          {lang(cmd.label)}
+        </MenuItem>
+      );
+    });
+  }, [botCommands, closeMenu, lang, sendBotCommand]);
+
   return (
     <Portal>
       <div className="HeaderMenuContainer">
@@ -282,6 +322,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('Statistics')}
             </MenuItem>
           )}
+          {botButtons}
           {canLeave && (
             <MenuItem
               destructive
@@ -316,6 +357,8 @@ export default memo(withGlobal<OwnProps>(
     const user = isPrivate ? selectUser(global, chatId) : undefined;
     const canAddContact = user && getCanAddContact(user);
 
+    const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -323,6 +366,7 @@ export default memo(withGlobal<OwnProps>(
       canAddContact,
       canDeleteChat: getCanDeleteChat(chat),
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
+      botCommands: chatBot?.fullInfo?.botCommands,
     };
   },
 )(HeaderMenuContainer));
