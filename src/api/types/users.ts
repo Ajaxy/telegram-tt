@@ -23,6 +23,7 @@ export interface ApiUser {
     maxId: string;
     isFullyLoaded: boolean;
   };
+  fakeType?: ApiFakeType;
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;
@@ -36,6 +37,8 @@ export interface ApiUserFullInfo {
   pinnedMessageId?: number;
   botCommands?: ApiBotCommand[];
 }
+
+export type ApiFakeType = 'fake' | 'scam';
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';
 

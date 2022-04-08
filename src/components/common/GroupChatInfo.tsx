@@ -21,6 +21,7 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
+import FakeIcon from './FakeIcon';
 
 type OwnProps = {
   chatId: string;
@@ -144,6 +145,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         <div className="title">
           <h3 dir="auto">{renderText(getChatTitle(lang, chat))}</h3>
           {chat.isVerified && <VerifiedIcon />}
+          {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
         </div>
         {renderStatusOrTyping()}
       </div>

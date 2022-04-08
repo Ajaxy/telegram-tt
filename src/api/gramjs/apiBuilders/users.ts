@@ -32,7 +32,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     return undefined;
   }
 
-  const { id, firstName, lastName } = mtpUser;
+  const {
+    id, firstName, lastName, fake, scam,
+  } = mtpUser;
   const avatarHash = mtpUser.photo instanceof GramJs.UserProfilePhoto
     ? String(mtpUser.photo.photoId)
     : undefined;
@@ -41,6 +43,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   return {
     id: buildApiPeerId(id, 'user'),
     isMin: Boolean(mtpUser.min),
+    fakeType: scam ? 'scam' : (fake ? 'fake' : undefined),
     ...(mtpUser.self && { isSelf: true }),
     ...(mtpUser.verified && { isVerified: true }),
     ...((mtpUser.contact || mtpUser.mutualContact) && { isContact: true }),

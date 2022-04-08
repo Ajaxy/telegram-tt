@@ -30,6 +30,7 @@ import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
 import ListItem from '../../ui/ListItem';
 import Link from '../../ui/Link';
+import FakeIcon from '../../common/FakeIcon';
 
 import './ChatMessage.scss';
 
@@ -90,6 +91,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
           <div className="title">
             <h3 dir="auto">{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
             {chat.isVerified && <VerifiedIcon />}
+            {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
           </div>
           <div className="message-date">
             <Link className="date">
