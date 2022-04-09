@@ -54,7 +54,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const senderTitle = message?.forwardInfo?.hiddenUserName || (sender && getSenderTitle(lang, sender));
+  const senderTitle = sender && getSenderTitle(lang, sender);
 
   return (
     <div
