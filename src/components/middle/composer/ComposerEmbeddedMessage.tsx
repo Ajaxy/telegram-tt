@@ -148,9 +148,10 @@ export default memo(withGlobal<OwnProps>(
     }
 
     let sender: ApiChat | ApiUser | undefined;
-    if ((isForwarding || replyingToId) && message) {
+    if (replyingToId && message) {
       const { forwardInfo } = message;
       const isChatWithSelf = chatId === currentUserId;
+
       if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {
         sender = selectForwardedSender(global, message);
       }
@@ -158,10 +159,8 @@ export default memo(withGlobal<OwnProps>(
       if (!sender) {
         sender = selectSender(global, message);
       }
-
-      if (!sender) {
-        sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
-      }
+    } else if (isForwarding) {
+      sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
     }
 
     return {
