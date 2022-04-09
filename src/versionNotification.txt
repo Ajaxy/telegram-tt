@@ -1,29 +1,15 @@
-Telegram Web Z was updated to version 1.40
-
-🤡 **Happy April Fool's Day!** 🤡
+**Telegram Web Z was updated to version 1.41**
 
 👏 **Harder**
-• Explore 37 new emoji.
-• Set Night Mode to follow your operating system in Settings > General.
-• Upload all types of audio files with cover images and meta tags.
-• Improved designs for Settings and Management pages.
+• Telegram Peer-to-Peer Calls – send and receive voice and video calls with screen sharing from any up-to-date app – secured with end-to-end encryption.
+• Challenge your friends or enjoy solo 🎮 with the full support of game bots like @gamee or @gamebot.
+• Know who you can trust – `SCAM` and `FAKE` badges now appear in suspicious chats.
+• Report suspicious peers and their profile photos.
+• Configure bot extra settings (if available) in the chat via ⋮ > Settings.
 
 🤩 **Better**
-• Proper date formatting for all languages.
-• Changing volume in the media viewer automatically unmutes audio.
-• Groups you were restricted from now stay in your chat list.
-• Accessibility: Screen Reader support for emoji panel.
-• Removed reaction sounds.
-• Various layout improvements.
-
-🚀 **Faster**
-• Smoother transitions in Settings.
+• More UI improvements, as always.
+• New font for Persian language.
 
 💪 **Stronger**
-• Fixed error messages for ‘You must be an admin’ and ‘You can't write in this chat’.
-• Fixed calendar months that start on a Sunday.
-• Fixed duplicated files when downloading.
-• Fixed pasting URLs with non-ASCII characters.
-• Fixed forwarding protected content.
-• Fixed saving Privacy Exceptions.
-• Fixed various issues when switching between message lists.
+• Smoother navigation in Group and Channel Statistics.
