@@ -71,7 +71,7 @@ function runCallbacks(forceOnHeavyAnimation = false) {
 export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     if (DEBUG) {
-      if (newGlobal.DEBUG_id !== DEBUG_currentGlobalId) {
+      if (newGlobal.DEBUG_id && newGlobal.DEBUG_id !== DEBUG_currentGlobalId) {
         throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
       }
     }

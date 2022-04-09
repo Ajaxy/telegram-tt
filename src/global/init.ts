@@ -6,10 +6,7 @@ import { cloneDeep } from '../util/iteratees';
 
 initCache();
 
-addActionHandler('init', (global) => {
+addActionHandler('init', () => {
   const initial = cloneDeep(INITIAL_STATE);
-  return {
-    ...global,
-    ...(loadCache(initial) || initial),
-  };
+  return loadCache(initial) || initial;
 });
