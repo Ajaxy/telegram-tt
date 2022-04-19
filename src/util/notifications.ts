@@ -386,6 +386,9 @@ export async function notifyAboutMessage({
   if (!message.id) return;
 
   const activeReaction = getMessageRecentReaction(message);
+  // Do not notify about reactions on messages that are not outgoing
+  if (isReaction && !activeReaction) return;
+
   const icon = await getAvatar(chat);
 
   const {
