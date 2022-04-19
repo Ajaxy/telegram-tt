@@ -3,7 +3,9 @@ import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
 
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
-import { fixNonStandardEmoji, nativeToUnified } from '../../../util/emoji';
+import {
+  fixNonStandardEmoji, handleEmojiLoad, LOADED_EMOJIS, nativeToUnified,
+} from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
 
@@ -14,7 +16,7 @@ type TextPart = string | Element;
 export type TextFilter = (
   'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
   'simple_markdown' | 'simple_markdown_html'
-);
+  );
 
 const RE_LETTER_OR_DIGIT = /^[\d\wа-яё]$/i;
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
@@ -102,16 +104,22 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
       const code = nativeToUnified(removeVS16s(emoji));
       if (!code) return emojiResult;
+      const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
       const className = buildClassName(
         'emoji',
         size === 'small' && 'emoji-small',
       );
+
       if (type === 'jsx') {
+        const isLoaded = LOADED_EMOJIS.has(src);
+
         emojiResult.push(
           <img
-            className={className}
-            src={`./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`}
+            src={src}
+            className={`${className}${!isLoaded ? ' opacity-transition slow shown' : ''}`}
             alt={emoji}
+            data-path={src}
+            onLoad={!isLoaded ? handleEmojiLoad : undefined}
           />,
         );
       }

@@ -28,6 +28,13 @@ function unifiedToNative(unified: string) {
   return String.fromCodePoint(...codePoints);
 }
 
+export const LOADED_EMOJIS = new Set<string>();
+
+export function handleEmojiLoad(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.classList.add('open');
+  LOADED_EMOJIS.add(event.currentTarget.dataset.path!);
+}
+
 export function fixNonStandardEmoji(text: string) {
   // Non-standard sequences typically parsed as separate emojis, so no need to fix text without any
   if (!text.match(EMOJI_REGEX)) return text;
@@ -51,7 +58,7 @@ export function nativeToUnified(emoji: string) {
         if (emoji.charCodeAt(i + 1) >= 0xdc00 && emoji.charCodeAt(i + 1) <= 0xdfff) {
           pairs.push(
             (emoji.charCodeAt(i) - 0xd800) * 0x400
-              + (emoji.charCodeAt(i + 1) - 0xdc00) + 0x10000,
+            + (emoji.charCodeAt(i + 1) - 0xdc00) + 0x10000,
           );
         }
       } else if (emoji.charCodeAt(i) < 0xd800 || emoji.charCodeAt(i) > 0xdfff) {
