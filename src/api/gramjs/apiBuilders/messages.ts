@@ -712,10 +712,22 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
     description: text, title, photo, test, totalAmount, currency, receiptMsgId,
   } = media;
 
+  const imageAttribute = photo?.attributes
+    .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
+
+  let photoWidth: number | undefined;
+  let photoHeight: number | undefined;
+  if (imageAttribute) {
+    photoWidth = imageAttribute.w;
+    photoHeight = imageAttribute.h;
+  }
+
   return {
     text,
     title,
     photoUrl: photo?.url,
+    photoWidth,
+    photoHeight,
     receiptMsgId,
     amount: Number(totalAmount),
     currency,

@@ -60,7 +60,8 @@
   }
 
   .media:not(.text) &,
-  .Message .custom-shape & {
+  .Message .custom-shape &,
+  .Message .invoice & {
     background: rgba(0, 0, 0, 0.2);
     --color-accent-own: white;
     --color-accent: white;

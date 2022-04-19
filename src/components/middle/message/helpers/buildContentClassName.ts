@@ -33,7 +33,7 @@ export function buildContentClassName(
   } = {},
 ) {
   const {
-    text, photo, video, audio, voice, document, poll, webPage, contact, location,
+    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice,
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
@@ -80,6 +80,10 @@ export function buildContentClassName(
     if (webPage.photo || webPage.video) {
       classNames.push('media');
     }
+  }
+
+  if (invoice) {
+    classNames.push('invoice');
   }
 
   if (asForwarded) {

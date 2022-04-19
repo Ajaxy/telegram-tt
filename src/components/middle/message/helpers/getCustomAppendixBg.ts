@@ -23,6 +23,7 @@ export default function getCustomAppendixBg(
 async function getAppendixColorFromImage(src: string, isOwn: boolean) {
   const img = new Image();
   img.src = src;
+  img.crossOrigin = 'anonymous';
 
   if (!img.width) {
     await new Promise((resolve) => {

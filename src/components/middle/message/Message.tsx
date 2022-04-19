@@ -797,7 +797,15 @@ const Message: FC<OwnProps & StateProps> = ({
             theme={theme}
           />
         )}
-        {invoice && <Invoice message={message} />}
+        {invoice && (
+          <Invoice
+            message={message}
+            shouldAffectAppendix={hasCustomAppendix}
+            isInSelectMode={isInSelectMode}
+            isSelected={isSelected}
+            theme={theme}
+          />
+        )}
         {location && (
           <Location
             message={message}
