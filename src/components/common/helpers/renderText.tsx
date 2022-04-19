@@ -1,6 +1,8 @@
 import React from '../../../lib/teact/teact';
 import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
 
+import { TextPart } from '../../../types';
+
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import {
@@ -12,7 +14,6 @@ import { compact } from '../../../util/iteratees';
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 
-type TextPart = string | Element;
 export type TextFilter = (
   'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
   'simple_markdown' | 'simple_markdown_html'
@@ -90,7 +91,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
     return textParts;
   }
 
-  return textParts.reduce((result, part) => {
+  return textParts.reduce((result: TextPart[], part: TextPart) => {
     if (typeof part !== 'string') {
       result.push(part);
       return result;
@@ -98,7 +99,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
 
     part = fixNonStandardEmoji(part);
     const parts = part.split(EMOJI_REGEX);
-    const emojis = part.match(EMOJI_REGEX) || [];
+    const emojis: string[] = part.match(EMOJI_REGEX) || [];
     result.push(parts[0]);
 
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {

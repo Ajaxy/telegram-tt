@@ -3,6 +3,8 @@ import React from '../../../lib/teact/teact';
 import {
   ApiChat, ApiMessage, ApiUser, ApiGroupCall,
 } from '../../../api/types';
+import { TextPart } from '../../../types';
+
 import { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
@@ -11,7 +13,7 @@ import {
 } from '../../../global/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { TextPart, renderMessageSummary } from './renderMessageText';
+import { renderMessageSummary } from './renderMessageText';
 import renderText from './renderText';
 
 import UserLink from '../UserLink';

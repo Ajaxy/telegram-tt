@@ -1,6 +1,7 @@
 import React, { FC, memo, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../api/types';
+import { TextPart } from '../../types';
 import { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
@@ -12,7 +13,7 @@ import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 import { formatPastTimeShort } from '../../util/dateFormat';
 import useLang from '../../hooks/useLang';
-import { renderMessageSummary, TextPart } from './helpers/renderMessageText';
+import { renderMessageSummary } from './helpers/renderMessageText';
 
 import Media from './Media';
 import Link from '../ui/Link';

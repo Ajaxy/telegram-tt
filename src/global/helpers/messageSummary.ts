@@ -1,8 +1,9 @@
 import { ApiMessage, ApiMessageEntityTypes } from '../../api/types';
-import type { TextPart } from '../../components/common/helpers/renderTextWithEntities';
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 
+import { TextPart } from '../../types';
 import { LangFn } from '../../hooks/useLang';
+
 import trimText from '../../util/trimText';
 import { getMessageText } from './messages';
 import { getMessageRecentReaction } from './reactions';

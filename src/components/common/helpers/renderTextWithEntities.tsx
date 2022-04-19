@@ -2,7 +2,9 @@ import { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import { TextPart } from '../../../types';
 import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
+
 import renderText, { TextFilter } from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getTranslation } from '../../../util/langProvider';
@@ -10,10 +12,6 @@ import { getTranslation } from '../../../util/langProvider';
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
-
-export type TextPart =
-  string
-  | Element;
 
 interface IOrganizedEntity {
   entity: ApiMessageEntity;

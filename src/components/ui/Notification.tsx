@@ -6,11 +6,12 @@ import React, {
   useState,
 } from '../../lib/teact/teact';
 
+import { TextPart } from '../../types';
+
 import { ANIMATION_END_DELAY } from '../../config';
 import useShowTransition from '../../hooks/useShowTransition';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { TextPart } from '../common/helpers/renderMessageText';
 
 import Portal from './Portal';
 
