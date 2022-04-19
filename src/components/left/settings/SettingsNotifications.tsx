@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import useDebounce from '../../../hooks/useDebounce';
+import useRunDebounced from '../../../hooks/useRunDebounced';
 import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
@@ -59,7 +59,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     loadNotificationSettings();
   }, [loadNotificationSettings]);
 
-  const runDebounced = useDebounce(500, true);
+  const runDebounced = useRunDebounced(500, true);
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,

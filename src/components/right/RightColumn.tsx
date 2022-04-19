@@ -7,7 +7,7 @@ import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
 } from '../../types';
 
-import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
+import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
   selectAreActiveChatsLoaded,
@@ -41,7 +41,7 @@ type StateProps = {
   nextManagementScreen?: ManagementScreens;
 };
 
-const CLOSE_ANIMATION_DURATION = 300;
+const ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
 const MAIN_SCREENS_COUNT = Object.keys(RightColumnContent).length / 2;
 const MANAGEMENT_SCREENS_COUNT = Object.keys(ManagementScreens).length / 2;
 
@@ -191,7 +191,7 @@ const RightColumn: FC<StateProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setShouldSkipTransition(!isOpen);
-    }, CLOSE_ANIMATION_DURATION);
+    }, ANIMATION_DURATION);
   }, [isOpen]);
 
   useEffect(() => {
@@ -300,7 +300,6 @@ const RightColumn: FC<StateProps> = ({
           profileState={profileState}
           managementScreen={managementScreen}
           onClose={close}
-          shouldSkipAnimation={shouldSkipTransition || shouldSkipHistoryAnimations}
           onScreenSelect={setManagementScreen}
         />
         <Transition

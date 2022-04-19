@@ -114,8 +114,7 @@
     }
   }
 
-  #Main.right-column-open &,
-  body.animating-right-column & {
+  #Main.right-column-shown & {
     visibility: visible;
   }
 

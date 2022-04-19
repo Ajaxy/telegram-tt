@@ -185,7 +185,7 @@
     }
 
     // @optimization
-    @include while-transition() {
+    #Main.right-column-animating & {
       pointer-events: none;
     }
   }

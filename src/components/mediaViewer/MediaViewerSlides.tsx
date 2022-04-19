@@ -4,18 +4,18 @@ import React, {
 
 import { MediaViewerOrigin } from '../../types';
 
-import useDebounce from '../../hooks/useDebounce';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { animateNumber, timingFunctions } from '../../util/animation';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
 import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD, RealTouchEvent } from '../../util/captureEvents';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
+import useTimeout from '../../hooks/useTimeout';
+import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 
 import MediaViewerContent from './MediaViewerContent';
 
 import './MediaViewerSlides.scss';
-import useTimeout from '../../hooks/useTimeout';
 
 type OwnProps = {
   messageId?: number;
@@ -96,14 +96,14 @@ const MediaViewerSlides: FC<OwnProps> = ({
     forceUpdate();
   }, [forceUpdate]);
 
-  const setIsActive = useCallback((value: boolean) => {
+  const selectMessageDebounced = useDebouncedCallback(selectMessage, [], DEBOUNCE_MESSAGE, true);
+  const clearSwipeDirectionDebounced = useDebouncedCallback(() => {
+    swipeDirectionRef.current = undefined;
+  }, [], DEBOUNCE_SWIPE, true);
+  const setIsActiveDebounced = useDebouncedCallback((value: boolean) => {
     isActiveRef.current = value;
     forceUpdate();
-  }, [forceUpdate]);
-
-  const debounceSetMessage = useDebounce(DEBOUNCE_MESSAGE, true);
-  const debounceSwipeDirection = useDebounce(DEBOUNCE_SWIPE, true);
-  const debounceActive = useDebounce(DEBOUNCE_ACTIVE, true);
+  }, [forceUpdate], DEBOUNCE_ACTIVE, true);
 
   const handleToggleFooterVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!IS_TOUCH_ENV) return;
@@ -156,10 +156,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
         transformRef.current.x += offset;
         isActiveRef.current = false;
         setActiveMessageId(mId);
-        debounceSetMessage(() => selectMessage(mId));
-        debounceActive(() => {
-          setIsActive(true);
-        });
+        selectMessageDebounced(mId);
+        setIsActiveDebounced(true);
         lastTransform = { x: 0, y: 0, scale: 1 };
         cancelAnimation = animateNumber({
           from: transformRef.current.x,
@@ -351,12 +349,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
           y,
         } = transformRef.current;
 
-        debounceSwipeDirection(() => {
-          swipeDirectionRef.current = undefined;
-        });
-        debounceActive(() => {
-          setIsActive(true);
-        });
+        clearSwipeDirectionDebounced();
+        setIsActiveDebounced(true);
 
         // If scale is less than 1 we need to bounce back
         if (scale < 1) {
@@ -476,7 +470,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           // We shift everything by one screen width and then set new active message id
           transformRef.current.x += offset;
           setActiveMessageId(mId);
-          debounceSetMessage(() => selectMessage(mId));
+          selectMessageDebounced(mId);
         }
         // Then we always return to the original position
         cancelAnimation = animateNumber({
@@ -493,14 +487,15 @@ const MediaViewerSlides: FC<OwnProps> = ({
         return undefined;
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isZoomed,
     onClose,
     setTransform,
     getMessageId,
     activeMessageId,
-    setIsActive,
+    selectMessageDebounced,
+    setIsActiveDebounced,
+    clearSwipeDirectionDebounced,
   ]);
 
   if (!activeMessageId) return undefined;

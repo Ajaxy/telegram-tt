@@ -32,6 +32,7 @@
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: bottom 150ms ease-out, transform var(--layer-transition);
+
   body.keyboard-visible & {
     position: relative;
     bottom: calc(0px - env(safe-area-inset-bottom));
@@ -95,6 +96,7 @@
   @media (max-width: 600px) {
     &.with-bottom-shift {
       margin-bottom: 0;
+
       .last-in-list {
         margin-bottom: 4.25rem;
 
@@ -317,9 +319,7 @@
       transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
     }
 
-    body:not(.animating-right-column) #Main.right-column-open &.select-mode-active,
-    #Main.right-column-open &:not(.select-mode-active),
-    body.animating-right-column &:not(.select-mode-active) {
+    #Main.narrow-message-list & {
       width: calc(100% - var(--right-column-width));
 
       .messages-container {

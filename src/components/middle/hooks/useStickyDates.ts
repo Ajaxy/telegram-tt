@@ -1,7 +1,7 @@
 import { useCallback } from '../../../lib/teact/teact';
 
 import { fastRaf } from '../../../util/schedulers';
-import useDebounce from '../../../hooks/useDebounce';
+import useRunDebounced from '../../../hooks/useRunDebounced';
 import useFlag from '../../../hooks/useFlag';
 
 const DEBOUNCE = 1000;
@@ -13,7 +13,7 @@ export default function useStickyDates() {
   // so we will add `position: sticky` only after first scroll. There would be no animation on the first show though.
   const [isScrolled, markIsScrolled] = useFlag(false);
 
-  const runDebounced = useDebounce(DEBOUNCE, true);
+  const runDebounced = useRunDebounced(DEBOUNCE, true);
 
   const updateStickyDates = useCallback((container: HTMLDivElement, hasTools?: boolean) => {
     markIsScrolled();

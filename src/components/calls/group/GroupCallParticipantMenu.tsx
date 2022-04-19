@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import { IAnchorPosition } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
-import useThrottle from '../../../hooks/useThrottle';
+import useRunThrottled from '../../../hooks/useRunThrottled';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
@@ -80,7 +80,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const runThrottled = useThrottle(VOLUME_CHANGE_THROTTLE);
+  const runThrottled = useRunThrottled(VOLUME_CHANGE_THROTTLE);
 
   const handleRemove = useCallback((e: React.SyntheticEvent<any>) => {
     e.stopPropagation();
