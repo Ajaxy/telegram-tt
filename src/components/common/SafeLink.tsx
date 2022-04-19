@@ -84,7 +84,7 @@ function getDomain(url?: string) {
   }
 
   try {
-    let decodedHref = decodeURI(href);
+    let decodedHref = decodeURI(href.replace(/%%/g, '%25'));
 
     const match = decodedHref.match(/^https?:\/\/([^/:?#]+)(?:[/:?#]|$)/i);
     if (!match) {
