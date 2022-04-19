@@ -608,7 +608,7 @@ addActionHandler('checkVersionNotification', (global, actions) => {
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
     date: getServerTime(global.serverTimeOffset),
     content: {
-      text: parseMessageInput(versionNotification),
+      text: parseMessageInput(versionNotification, true),
     },
     isOutgoing: false,
   };
