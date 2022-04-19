@@ -47,7 +47,6 @@ import {
 import {
   getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfReactionAdded,
 } from '../../helpers';
-import { onTickEnd } from '../../../util/schedulers';
 
 const ANIMATION_DELAY = 350;
 
@@ -68,8 +67,6 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           message.threadInfo,
         );
       }
-
-      setGlobal(global);
 
       const newMessage = selectChatMessage(global, chatId, id)!;
 
@@ -104,8 +101,10 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           }, ANIMATION_DELAY);
         }
       } else {
-        setGlobal(updateChatLastMessage(getGlobal(), chatId, newMessage));
+        global = updateChatLastMessage(global, chatId, newMessage);
       }
+
+      setGlobal(global);
 
       // Edge case: New message in an old (not loaded) chat.
       if (!selectIsChatListed(global, chatId)) {
@@ -495,19 +494,19 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       global = updateChatMessage(global, chatId, id, { reactions: update.reactions });
 
+      setGlobal(global);
+
       if (shouldNotify) {
         const newMessage = selectChatMessage(global, chatId, id);
         if (!chat || !newMessage) return;
-        onTickEnd(() => {
-          notifyAboutMessage({
-            chat,
-            message: newMessage,
-            isReaction: true,
-          });
+
+        void notifyAboutMessage({
+          chat,
+          message: newMessage,
+          isReaction: true,
         });
       }
 
-      setGlobal(global);
       break;
     }
   }
@@ -551,15 +550,13 @@ function updateThreadUnread(global: GlobalState, actions: GlobalActions, message
     if (originMessage) {
       global = updateThreadUnreadFromForwardedMessage(global, originMessage, chatId, message.id, isDeleting);
     } else {
-      onTickEnd(() => {
-        actions.loadMessage({
-          chatId,
-          messageId: message.replyToMessageId,
-          threadUpdate: {
-            isDeleting,
-            lastMessageId: message.id,
-          },
-        });
+      actions.loadMessage({
+        chatId,
+        messageId: message.replyToMessageId,
+        threadUpdate: {
+          isDeleting,
+          lastMessageId: message.id,
+        },
       });
     }
   }
@@ -672,8 +669,6 @@ function deleteMessages(chatId: string | undefined, ids: number[], actions: Glob
         global = updateChatLastMessage(global, chatId, newLastMessage, true);
       }
     });
-
-    setGlobal(global);
 
     actions.requestChatUpdate({ chatId });
 

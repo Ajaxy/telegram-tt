@@ -81,7 +81,7 @@ addActionHandler('openChat', (global, actions, payload) => {
   }
 
   // Please telegram send us some updates about linked chat 🙏
-  if (chat && chat.lastMessage && chat.lastMessage.threadInfo) {
+  if (chat?.lastMessage?.threadInfo) {
     actions.requestThreadInfoUpdate({
       chatId: chat.lastMessage.threadInfo.chatId,
       threadId: chat.lastMessage.threadInfo.threadId,

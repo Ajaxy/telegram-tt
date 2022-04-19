@@ -28,12 +28,12 @@ const CURRENT_CHAT_UNREAD_DELAY = 1500;
 addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'updateChat': {
+      setGlobal(updateChat(global, update.id, update.chat, update.newProfilePhoto));
+
       if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)) {
         // Chat can appear in dialogs list.
         actions.loadTopChats();
       }
-
-      setGlobal(updateChat(global, update.id, update.chat, update.newProfilePhoto));
 
       if (update.chat.id) {
         closeMessageNotifications({

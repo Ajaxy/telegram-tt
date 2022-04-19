@@ -42,8 +42,6 @@ addActionHandler('openChat', (global, actions, payload) => {
         forwardMessages: {},
       }),
     };
-
-    setGlobal(global);
   }
 
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory);

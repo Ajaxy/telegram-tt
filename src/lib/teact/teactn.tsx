@@ -15,7 +15,7 @@ export default React;
 
 type GlobalState =
   AnyLiteral
-  & { DEBUG_id: number };
+  & { DEBUG_capturedId?: number };
 type ActionNames = string;
 type ActionPayload = any;
 
@@ -38,10 +38,10 @@ type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: Ow
 let currentGlobal = {} as GlobalState;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-let DEBUG_currentGlobalId: number | undefined;
+let DEBUG_currentCapturedId: number | undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DEBUG_resetIdThrottled = throttleWithTickEnd(() => {
-  DEBUG_currentGlobalId = Math.random();
+const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
+  DEBUG_currentCapturedId = undefined;
 });
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
@@ -71,9 +71,11 @@ function runCallbacks(forceOnHeavyAnimation = false) {
 export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     if (DEBUG) {
-      if (newGlobal.DEBUG_id && newGlobal.DEBUG_id !== DEBUG_currentGlobalId) {
+      if (newGlobal.DEBUG_capturedId && newGlobal.DEBUG_capturedId !== DEBUG_currentCapturedId) {
         throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
       }
+
+      DEBUG_currentCapturedId = undefined;
     }
 
     currentGlobal = newGlobal;
@@ -87,9 +89,12 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
 
 export function getGlobal() {
   if (DEBUG) {
-    DEBUG_currentGlobalId = Math.random();
-    currentGlobal.DEBUG_id = DEBUG_currentGlobalId;
-    DEBUG_resetIdThrottled();
+    DEBUG_currentCapturedId = Math.random();
+    currentGlobal = {
+      ...currentGlobal,
+      DEBUG_capturedId: DEBUG_currentCapturedId,
+    };
+    DEBUG_releaseCapturedIdThrottled();
   }
 
   return currentGlobal;
@@ -99,15 +104,30 @@ export function getActions() {
   return actions;
 }
 
-function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
-  actionHandlers[name]?.forEach((handler) => {
-    const response = handler(DEBUG ? getGlobal() : currentGlobal, actions, payload);
-    if (!response || typeof response.then === 'function') {
-      return;
-    }
+let actionQueue: NoneToVoidFunction[] = [];
 
-    setGlobal(response as GlobalState, options);
+function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
+  actionQueue.push(() => {
+    actionHandlers[name]?.forEach((handler) => {
+      const response = handler(DEBUG ? getGlobal() : currentGlobal, actions, payload);
+      if (!response || typeof response.then === 'function') {
+        return;
+      }
+
+      setGlobal(response as GlobalState, options);
+    });
   });
+
+  if (actionQueue.length === 1) {
+    try {
+      while (actionQueue.length) {
+        actionQueue[0]();
+        actionQueue.shift();
+      }
+    } finally {
+      actionQueue = [];
+    }
+  }
 }
 
 function updateContainers() {
