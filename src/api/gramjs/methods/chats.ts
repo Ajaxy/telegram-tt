@@ -990,10 +990,12 @@ export async function fetchMembers(
   }
 
   updateLocalDb(result);
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
 
   return {
     members: buildChatMembers(result),
-    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    users,
+    userStatusesById,
   };
 }
 

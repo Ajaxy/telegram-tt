@@ -942,13 +942,14 @@ addActionHandler('loadMoreMembers', async (global) => {
     return;
   }
 
-  const { members, users } = result;
+  const { members, users, userStatusesById } = result;
   if (!members || !members.length) {
     return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addUserStatuses(global, userStatusesById);
   global = addChatMembers(global, chat, members);
   setGlobal(global);
 });
