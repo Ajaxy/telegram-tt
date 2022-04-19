@@ -16,6 +16,7 @@ import {
   selectEditingId,
   selectEditingScheduledId,
   selectEditingMessage,
+  selectIsChatWithSelf,
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
@@ -127,7 +128,6 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const {
-      currentUserId,
       forwardMessages: { fromChatId, toChatId, messageIds: forwardMessageIds },
     } = global;
 
@@ -150,17 +150,24 @@ export default memo(withGlobal<OwnProps>(
     let sender: ApiChat | ApiUser | undefined;
     if (replyingToId && message) {
       const { forwardInfo } = message;
-      const isChatWithSelf = chatId === currentUserId;
-
+      const isChatWithSelf = selectIsChatWithSelf(global, chatId);
       if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {
         sender = selectForwardedSender(global, message);
       }
 
-      if (!sender) {
+      if (!sender && !forwardInfo?.hiddenUserName) {
         sender = selectSender(global, message);
       }
     } else if (isForwarding) {
-      sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
+      if (message) {
+        sender = selectForwardedSender(global, message);
+        if (!sender) {
+          sender = selectSender(global, message);
+        }
+      }
+      if (!sender) {
+        sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
+      }
     }
 
     return {
