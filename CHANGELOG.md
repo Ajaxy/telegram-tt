@@ -1,3 +1,38 @@
+## 1.42.0 (2022-04-19)
+
+### 👏 **Harder**
+* Telegram bots just became even [more powerful](https://t.me/telegram/178) – and Web Z fully supports their flexible interfaces.
+* Statistics for large groups and channels have expanded – see new metrics for recent posts at the bottom of the statistics page.
+
+### 🤩 **Better**
+* Emoji load faster on all platforms.
+
+### 💪 **Stronger**
+* An issue when adding users to groups has been fixed.
+* Fixed unwanted notifications caused by reactions to posts.
+* Online indicators for group members now work as expected.
+* Unexpected logouts should no longer occur.
+* Service notifications containing media are now rendered properly.
+* Read receipts now appear in groups with exactly 100 members.
+
+🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webztalks)** and **[Russian](https://t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
+
+## 1.41.0 (2022-04-08)
+
+### 👏 **Harder**
+* Telegram Peer-to-Peer Calls – send and receive voice and video calls with screen sharing from any up-to-date app – secured with end-to-end encryption.
+* Challenge your friends or enjoy solo 🎮 with the full support of game bots like @gamee or @gamebot.
+* Know who you can trust – `SCAM` and `FAKE` badges now appear in suspicious chats.
+* Report suspicious peers and their profile photos.
+* Configure bot extra settings (if available) in the chat via ⋮ > Settings.
+
+### 🤩 **Better**
+* More UI improvements, as always.
+* New font for Persian language.
+
+### 💪 **Stronger**
+* Smoother navigation in Group and Channel Statistics.
+
 ## 1.40.0 (2022-04-01)
 
 🤡 **Happy April Fool's Day!** 🤡
