@@ -123,6 +123,8 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         expireDate = getServerTime(serverTimeOffset) + DEFAULT_EXPIRE_DATE[selectedExpireOption] / 1000;
         break;
       case 'unlimited':
+        expireDate = 0;
+        break;
       default:
         expireDate = undefined;
     }
