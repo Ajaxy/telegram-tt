@@ -137,6 +137,8 @@ export interface ApiInvoice {
   text: string;
   title: string;
   photoUrl?: string;
+  photoWidth?: number;
+  photoHeight?: number;
   amount: number;
   currency: string;
   receiptMsgId?: number;
