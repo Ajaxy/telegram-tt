@@ -1,4 +1,3 @@
-dev
 
 src/lib/rlottie/rlottie-wasm.js
 src/lib/webp/webp_wasm.js
