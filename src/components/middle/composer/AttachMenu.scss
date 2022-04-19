@@ -15,6 +15,11 @@
       top: -2.875rem;
     }
 
+    .bubble {
+      max-height: 20rem;
+      overflow: auto;
+    }
+
     .is-pointer-env & {
       > .backdrop {
         position: absolute;
@@ -30,4 +35,8 @@
       white-space: normal;
     }
   }
+}
+
+.bot-attach-context-menu {
+  position: absolute;
 }

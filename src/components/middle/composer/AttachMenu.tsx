@@ -2,9 +2,13 @@ import React, {
   FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
+import { GlobalState } from '../../../global/types';
+import { ISettings } from '../../../types';
+
 import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -12,23 +16,39 @@ import useFlag from '../../../hooks/useFlag';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
+import AttachmentMenuBotItem from './AttachmentMenuBotItem';
 
 import './AttachMenu.scss';
 
 export type OwnProps = {
+  chatId: string;
   isButtonVisible: boolean;
   canAttachMedia: boolean;
   canAttachPolls: boolean;
+  isScheduled?: boolean;
+  isPrivateChat?: boolean;
+  attachMenuBots: GlobalState['attachMenu']['bots'];
   onFileSelect: (files: File[], isQuick: boolean) => void;
   onPollCreate: () => void;
+  theme: ISettings['theme'];
 };
 
 const AttachMenu: FC<OwnProps> = ({
-  isButtonVisible, canAttachMedia, canAttachPolls, onFileSelect, onPollCreate,
+  chatId,
+  isButtonVisible,
+  canAttachMedia,
+  canAttachPolls,
+  attachMenuBots,
+  isScheduled,
+  isPrivateChat,
+  onFileSelect,
+  onPollCreate,
+  theme,
 }) => {
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
 
+  const [isAttachmentBotMenuOpen, markAttachmentBotMenuOpen, unmarkAttachmentBotMenuOpen] = useFlag();
   useEffect(() => {
     if (isAttachMenuOpen) {
       markMouseInside();
@@ -84,7 +104,7 @@ const AttachMenu: FC<OwnProps> = ({
       </ResponsiveHoverButton>
       <Menu
         id="attach-menu-controls"
-        isOpen={isAttachMenuOpen}
+        isOpen={isAttachMenuOpen || isAttachmentBotMenuOpen}
         autoClose
         positionX="right"
         positionY="bottom"
@@ -105,15 +125,23 @@ const AttachMenu: FC<OwnProps> = ({
         )}
         {canAttachMedia && (
           <>
-            <MenuItem icon="photo" onClick={handleQuickSelect}>
-              {lang('AttachmentMenu.PhotoOrVideo')}
-            </MenuItem>
+            <MenuItem icon="photo" onClick={handleQuickSelect}>{lang('AttachmentMenu.PhotoOrVideo')}</MenuItem>
             <MenuItem icon="document" onClick={handleDocumentSelect}>{lang('AttachDocument')}</MenuItem>
           </>
         )}
         {canAttachPolls && (
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
+
+        {canAttachMedia && !isScheduled && isPrivateChat && Object.values(attachMenuBots).map((bot) => (
+          <AttachmentMenuBotItem
+            bot={bot}
+            chatId={chatId}
+            theme={theme}
+            onMenuOpened={markAttachmentBotMenuOpen}
+            onMenuClosed={unmarkAttachmentBotMenuOpen}
+          />
+        ))}
       </Menu>
     </div>
   );

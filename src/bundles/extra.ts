@@ -6,6 +6,9 @@ export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
 export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';
+export { default as WebAppModal } from '../components/main/WebAppModal';
+export { default as BotTrustModal } from '../components/main/BotTrustModal';
+export { default as BotAttachModal } from '../components/main/BotAttachModal';
 
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';

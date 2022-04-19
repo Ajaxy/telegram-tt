@@ -248,6 +248,9 @@ async function parseMedia(
     case ApiMediaFormat.Lottie: {
       return new Blob([data], { type: mimeType });
     }
+    case ApiMediaFormat.Text: {
+      return data.toString();
+    }
     case ApiMediaFormat.Progressive: {
       return data.buffer;
     }

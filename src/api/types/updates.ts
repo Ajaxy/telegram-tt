@@ -22,6 +22,7 @@ import {
 import {
   ApiGroupCall, ApiPhoneCall,
 } from './calls';
+import { ApiBotMenuButton } from './bots';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -486,6 +487,17 @@ export type ApiUpdatePhoneCallConnectionState = {
   connectionState: RTCPeerConnectionState;
 };
 
+export type ApiUpdateWebViewResultSent = {
+  '@type': 'updateWebViewResultSent';
+  queryId: string;
+};
+
+export type ApiUpdateBotMenuButton = {
+  '@type': 'updateBotMenuButton';
+  botId: string;
+  button: ApiBotMenuButton;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -501,14 +513,14 @@ export type ApiUpdate = (
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet |
   ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
-  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode |
+  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
-  ApiUpdatePhoneCallConnectionState
+  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

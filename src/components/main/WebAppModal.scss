@@ -1,0 +1,69 @@
+.WebAppModal {
+  .modal-header {
+    border-bottom: 1px solid var(--color-dividers);
+    padding: 0.5rem;
+  }
+
+  .modal-dialog {
+    height: 75%;
+    justify-content: center;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    border-bottom-right-radius: var(--border-radius-default);
+    border-bottom-left-radius: var(--border-radius-default);
+  }
+
+  .web-app-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+
+    &.with-button {
+      height: calc(100% - 56px);
+    }
+  }
+
+  .web-app-button {
+    position: absolute;
+    bottom: 0;
+    border-radius: 0;
+    transform: translateY(100%);
+    transition: 0.25s ease-in-out transform;
+
+    &.visible {
+      transform: translateY(0);
+    }
+
+    &.hidden {
+      visibility: hidden;
+    }
+  }
+
+  .Spinner {
+    position: absolute;
+    right: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .modal-dialog {
+      background-color: var(--color-background);
+      border-radius: 0;
+      height: 100%;
+      max-width: 100% !important;
+    }
+
+    .modal-content {
+      max-height: none;
+      border-radius: 0;
+    }
+  }
+}

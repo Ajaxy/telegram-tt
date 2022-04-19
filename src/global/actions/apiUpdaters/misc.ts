@@ -37,6 +37,13 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       global = setPaymentStep(global, PaymentStep.ConfirmPayment);
       setGlobal(global);
       break;
+
+    case 'updateWebViewResultSent':
+      if (global.webApp?.queryId === update.queryId) {
+        actions.setReplyingToId({ messageId: undefined });
+        actions.closeWebApp();
+      }
+      break;
   }
 
   return undefined;

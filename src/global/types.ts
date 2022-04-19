@@ -33,6 +33,8 @@ import {
   ApiReportReason,
   ApiPhoto,
   ApiKeyboardButton,
+  ApiThemeParameters,
+  ApiAttachMenuBot,
   ApiPhoneCall,
 } from '../api/types';
 import {
@@ -543,6 +545,33 @@ export type GlobalState = {
     isOpen: boolean;
     isQuiz?: boolean;
   };
+
+  webApp?: {
+    url: string;
+    bot: ApiUser;
+    buttonText: string;
+    queryId?: string;
+  };
+
+  trustedBotIds: string[];
+  botTrustRequest?: {
+    bot: ApiUser;
+    type: 'game' | 'webApp';
+    onConfirm?: {
+      action: keyof GlobalActions;
+      payload: any; // TODO add TS support
+    };
+  };
+  botAttachRequest?: {
+    bot: ApiUser;
+    chatId: string;
+    startParam?: string;
+  };
+
+  attachMenu: {
+    hash?: string;
+    bots: Record<string, ApiAttachMenuBot>;
+  };
 };
 
 export type CallSound = (
@@ -682,13 +711,70 @@ export interface ActionPayloads {
 
   resetSwitchBotInline: {};
 
-  // Misc
   openGame: {
     url: string;
     chatId: string;
     messageId: number;
   };
   closeGame: {};
+
+  requestWebView: {
+    url?: string;
+    bot: ApiUser;
+    peer: ApiChat | ApiUser;
+    theme?: ApiThemeParameters;
+    isSilent?: boolean;
+    buttonText: string;
+    isFromBotMenu?: boolean;
+    startParam?: string;
+  };
+  prolongWebView: {
+    bot: ApiUser;
+    peer: ApiChat | ApiUser;
+    queryId: string;
+    isSilent?: boolean;
+    replyToMessageId?: number;
+  };
+  requestSimpleWebView: {
+    url: string;
+    bot: ApiUser;
+    buttonText: string;
+    theme?: ApiThemeParameters;
+  };
+  closeWebApp: {};
+
+  cancelBotTrustRequest: {};
+  markBotTrusted: {
+    botId: string;
+  };
+
+  closeBotAttachRequestModal: never;
+  confirmBotAttachRequest: never;
+
+  sendWebViewData: {
+    bot: ApiUser;
+    data: string;
+    buttonText: string;
+  };
+
+  loadAttachMenuBots: {
+    hash?: string;
+  };
+
+  toggleBotInAttachMenu: {
+    botId: string;
+    isEnabled: boolean;
+  };
+
+  callAttachMenuBot: {
+    chatId: string;
+    botId: string;
+    isFromBotMenu?: boolean;
+    url?: string;
+    startParam?: string;
+  };
+
+  // Misc
 
   openPollModal: {
     isQuiz?: boolean;

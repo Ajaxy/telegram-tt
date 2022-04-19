@@ -225,6 +225,16 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
       isOpen: false,
     };
   }
+
+  if (!cached.attachMenu) {
+    cached.attachMenu = {
+      bots: {},
+    };
+  }
+
+  if (!cached.trustedBotIds) {
+    cached.trustedBotIds = [];
+  }
 }
 
 function updateCache() {
@@ -277,6 +287,7 @@ function updateCache() {
     groupCalls: reduceGroupCalls(global),
     availableReactions: reduceAvailableReactions(global),
     isCallPanelVisible: undefined,
+    trustedBotIds: global.trustedBotIds,
   };
 
   const json = JSON.stringify(reducedGlobal);

@@ -18,11 +18,15 @@ import {
   ApiUser,
   MAIN_THREAD_ID,
   ApiBotCommand,
+  ApiBotMenuButton,
 } from '../../../api/types';
-import { InlineBotSettings } from '../../../types';
+import { InlineBotSettings, ISettings } from '../../../types';
 
 import {
-  BASE_EMOJI_KEYWORD_LANG, EDITABLE_INPUT_ID, REPLIES_USER_ID, SEND_MESSAGE_ACTION_INTERVAL,
+  BASE_EMOJI_KEYWORD_LANG,
+  EDITABLE_INPUT_ID,
+  REPLIES_USER_ID,
+  SEND_MESSAGE_ACTION_INTERVAL,
   EDITABLE_INPUT_CSS_SELECTOR,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
@@ -43,6 +47,7 @@ import {
   selectEditingScheduledDraft,
   selectEditingDraft,
   selectRequestedText,
+  selectTheme,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -105,6 +110,7 @@ import PollModal from './PollModal.async';
 import DropArea, { DropAreaState } from './DropArea.async';
 import WebPagePreview from './WebPagePreview';
 import SendAsMenu from './SendAsMenu.async';
+import BotMenuButton from './BotMenuButton';
 
 import './Composer.scss';
 
@@ -147,12 +153,16 @@ type StateProps =
     isInlineBotLoading: boolean;
     inlineBots?: Record<string, false | InlineBotSettings>;
     botCommands?: ApiBotCommand[] | false;
+    botMenuButton?: ApiBotMenuButton;
     chatBotCommands?: ApiBotCommand[];
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
     requestedText?: string;
+    attachMenuBots: GlobalState['attachMenu']['bots'];
+    isPrivateChat?: boolean;
+    theme: ISettings['theme'];
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -221,6 +231,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsId,
   editingDraft,
   requestedText,
+  botMenuButton,
+  attachMenuBots,
+  isPrivateChat,
+  theme,
 }) => {
   const {
     sendMessage,
@@ -238,6 +252,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     loadSendAs,
     loadFullChat,
     resetOpenChatWithText,
+    callAttachMenuBot,
   } = getActions();
   const lang = useLang();
 
@@ -616,6 +631,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang, htmlRef,
   ]);
 
+  const handleClickBotMenu = useCallback(() => {
+    if (botMenuButton?.type !== 'webApp') return;
+    callAttachMenuBot({
+      botId: chatId, chatId, isFromBotMenu: true, url: botMenuButton.url,
+    });
+  }, [botMenuButton, callAttachMenuBot, chatId]);
+
   const handleActivateBotCommandMenu = useCallback(() => {
     closeSymbolMenu();
     openBotCommandMenu();
@@ -927,6 +949,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     : mainButtonState === MainButtonState.Schedule ? handleSendScheduled
       : handleSend;
 
+  const isBotMenuButtonCommands = botMenuButton && botMenuButton?.type === 'commands';
+
   return (
     <div className={className}>
       {canAttachMedia && isReady && (
@@ -1016,7 +1040,17 @@ const Composer: FC<OwnProps & StateProps> = ({
           disabled={!canAttachEmbedLinks}
         />
         <div className="message-input-wrapper">
-          {isChatWithBot && botCommands !== false && !activeVoiceRecording && !editingMessage && (
+          {isChatWithBot && botMenuButton && botMenuButton.type === 'webApp' && !editingMessage
+            && (
+              <BotMenuButton
+                isOpen={!html && !activeVoiceRecording}
+                onClick={handleClickBotMenu}
+                text={botMenuButton.text}
+                isDisabled={Boolean(activeVoiceRecording)}
+              />
+            )}
+          {isChatWithBot && isBotMenuButtonCommands && botCommands !== false && !activeVoiceRecording
+            && !editingMessage && (
             <ResponsiveHoverButton
               className={buildClassName('bot-commands', isBotCommandMenuOpen && 'activated')}
               round
@@ -1129,11 +1163,16 @@ const Composer: FC<OwnProps & StateProps> = ({
             addRecentEmoji={addRecentEmoji}
           />
           <AttachMenu
+            chatId={chatId}
             isButtonVisible={!activeVoiceRecording && !editingMessage}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
+            isScheduled={shouldSchedule}
+            isPrivateChat={isPrivateChat}
+            attachMenuBots={attachMenuBots}
+            theme={theme}
           />
           {botKeyboardMessageId && (
             <BotKeyboardMenu
@@ -1215,6 +1254,7 @@ export default memo(withGlobal<OwnProps>(
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
+    const isPrivateChat = Boolean(selectUser(global, chatId));
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
     const { language, shouldSuggestStickers } = global.settings.byKey;
@@ -1242,6 +1282,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isChatWithBot,
       isChatWithSelf,
+      isPrivateChat,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, chatId),
       isChannel: chat ? isChatChannel(chat) : undefined,
       isRightColumnShown: selectIsRightColumnShown(global),
@@ -1268,13 +1309,16 @@ export default memo(withGlobal<OwnProps>(
       emojiKeywords: emojiKeywords?.keywords,
       inlineBots: global.inlineBots.byUsername,
       isInlineBotLoading: global.inlineBots.isLoading,
-      chatBotCommands: chat?.fullInfo?.botCommands,
-      botCommands: chatBot?.fullInfo ? (chatBot.fullInfo.botCommands || false) : undefined,
+      chatBotCommands: chat?.fullInfo && chat.fullInfo.botCommands,
+      botCommands: chatBot?.fullInfo ? (chatBot.fullInfo.botInfo?.commands || false) : undefined,
+      botMenuButton: chatBot?.fullInfo?.botInfo?.menuButton,
       sendAsUser,
       sendAsChat,
       sendAsId,
       editingDraft,
       requestedText,
+      attachMenuBots: global.attachMenu.bots,
+      theme: selectTheme(global),
     };
   },
 )(Composer));

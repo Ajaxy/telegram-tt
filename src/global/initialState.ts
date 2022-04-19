@@ -206,4 +206,10 @@ export const INITIAL_STATE: GlobalState = {
   pollModal: {
     isOpen: false,
   },
+
+  trustedBotIds: [],
+
+  attachMenu: {
+    bots: {},
+  },
 };

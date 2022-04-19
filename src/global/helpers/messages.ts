@@ -227,3 +227,9 @@ export function isGeoLiveExpired(message: ApiMessage, timestamp = Date.now() / 1
   if (location?.type !== 'geoLive') return false;
   return (timestamp - (message.date || 0) >= location.period);
 }
+
+export function getMessageSingleInlineButton(message: ApiMessage) {
+  return message.inlineButtons?.length === 1
+    && message.inlineButtons[0].length === 1
+    && message.inlineButtons[0][0];
+}

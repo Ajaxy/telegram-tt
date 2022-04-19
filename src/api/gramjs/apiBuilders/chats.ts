@@ -149,7 +149,6 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
   if (peerEntity instanceof GramJs.Chat) {
     Object.assign(restrictions, {
       isNotJoined: peerEntity.left,
-      isForbidden: peerEntity.kicked,
     });
   }
 

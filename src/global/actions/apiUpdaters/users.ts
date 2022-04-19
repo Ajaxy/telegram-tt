@@ -4,6 +4,7 @@ import { ApiUserStatus } from '../../../api/types';
 
 import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
+import { selectUser } from '../../selectors';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 
@@ -54,6 +55,25 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         fullInfo: {
           ...targetUser.fullInfo,
           ...fullInfo,
+        },
+      });
+    }
+
+    case 'updateBotMenuButton': {
+      const { botId, button } = update;
+
+      const targetUser = selectUser(global, botId);
+      if (!targetUser?.fullInfo?.botInfo) {
+        return undefined;
+      }
+
+      return updateUser(global, botId, {
+        fullInfo: {
+          ...targetUser.fullInfo,
+          botInfo: {
+            ...targetUser.fullInfo.botInfo,
+            menuButton: button,
+          },
         },
       });
     }

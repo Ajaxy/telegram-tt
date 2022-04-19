@@ -37,7 +37,9 @@ export type OwnProps = {
   faded?: boolean;
   tabIndex?: number;
   isRtl?: boolean;
-  withClickPropagation?: boolean;
+  noPreventDefault?: boolean;
+  shouldStopPropagation?: boolean;
+  style?: string;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -79,7 +81,9 @@ const Button: FC<OwnProps> = ({
   faded,
   tabIndex,
   isRtl,
-  withClickPropagation,
+  noPreventDefault,
+  shouldStopPropagation,
+  style,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
@@ -111,18 +115,21 @@ const Button: FC<OwnProps> = ({
       onClick(e);
     }
 
+    if (shouldStopPropagation) e.stopPropagation();
+
     setIsClicked(true);
     setTimeout(() => {
       setIsClicked(false);
     }, CLICKED_TIMEOUT);
-  }, [disabled, onClick]);
+  }, [disabled, onClick, shouldStopPropagation]);
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
-    if (!withClickPropagation) e.preventDefault();
+    if (!noPreventDefault) e.preventDefault();
+
     if (!disabled && onMouseDown) {
       onMouseDown(e);
     }
-  }, [onMouseDown, disabled, withClickPropagation]);
+  }, [disabled, noPreventDefault, onMouseDown]);
 
   if (href) {
     return (
@@ -137,6 +144,7 @@ const Button: FC<OwnProps> = ({
         dir={isRtl ? 'rtl' : undefined}
         aria-label={ariaLabel}
         aria-controls={ariaControls}
+        style={style}
       >
         {children}
         {!disabled && ripple && (
@@ -164,7 +172,7 @@ const Button: FC<OwnProps> = ({
       title={ariaLabel}
       tabIndex={tabIndex}
       dir={isRtl ? 'rtl' : undefined}
-      style={backgroundImage ? `background-image: url(${backgroundImage})` : undefined}
+      style={backgroundImage ? `background-image: url(${backgroundImage})` : style}
     >
       {isLoading ? (
         <div>

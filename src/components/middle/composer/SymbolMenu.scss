@@ -96,11 +96,19 @@
     }
   }
 
+  // TODO Remove this monster with context menu refactor
+  .Button.bot-menu:not(.open) ~ &,
   .Button.bot-commands ~ &,
   .Button.send-as-button ~ & {
     .is-pointer-env & > .backdrop {
       left: 3rem;
       width: 3.25rem;
+    }
+  }
+
+  .Button.bot-menu.open ~ & {
+    .is-pointer-env & > .backdrop {
+      left: calc(var(--bot-menu-text-width, 0) + 3rem);
     }
   }
 

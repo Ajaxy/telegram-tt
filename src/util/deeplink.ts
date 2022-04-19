@@ -30,8 +30,10 @@ export const processDeepLink = (url: string) => {
   switch (method) {
     case 'resolve': {
       const {
-        domain, phone, post, comment, voicechat, livestream, start,
+        domain, phone, post, comment, voicechat, livestream, start, startattach, attach,
       } = params;
+
+      const startAttach = params.hasOwnProperty('startattach') && !startattach ? true : startattach;
 
       if (domain !== 'telegrampassport') {
         if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
@@ -40,13 +42,15 @@ export const processDeepLink = (url: string) => {
             inviteHash: voicechat || livestream,
           });
         } else if (phone) {
-          openChatByPhoneNumber({ phone });
+          openChatByPhoneNumber({ phone, startAttach, attach });
         } else {
           openChatByUsername({
             username: domain,
             messageId: Number(post),
             commentId: Number(comment),
             startParam: start,
+            startAttach,
+            attach,
           });
         }
       }

@@ -44,3 +44,22 @@ export interface ApiBotCommand {
   command: string;
   description: string;
 }
+
+type ApiBotMenuButtonCommands = {
+  type: 'commands';
+};
+
+type ApiBotMenuButtonWebApp = {
+  type: 'webApp';
+  text: string;
+  url: string;
+};
+
+export type ApiBotMenuButton = ApiBotMenuButtonWebApp | ApiBotMenuButtonCommands;
+
+export interface ApiBotInfo {
+  botId: string;
+  commands?: ApiBotCommand[];
+  description: string;
+  menuButton: ApiBotMenuButton;
+}

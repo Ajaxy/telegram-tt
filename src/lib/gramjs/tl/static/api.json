@@ -222,5 +222,13 @@
     "help.getAppConfig",
     "stats.getBroadcastStats",
     "stats.getMegagroupStats",
-    "stats.loadAsyncGraph"
+    "stats.loadAsyncGraph",
+    "messages.getAttachMenuBots",
+    "messages.getAttachMenuBot",
+    "messages.toggleBotInAttachMenu",
+    "messages.requestWebView",
+    "messages.prolongWebView",
+    "messages.requestSimpleWebView",
+    "messages.sendWebViewResultMessage",
+    "messages.sendWebViewData"
 ]

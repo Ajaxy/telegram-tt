@@ -105,13 +105,15 @@ export function buildApiNotifyException(
   notifySettings: GramJs.TypePeerNotifySettings, peer: GramJs.TypePeer, serverTimeOffset: number,
 ) {
   const {
-    silent, muteUntil, showPreviews, sound,
+    silent, muteUntil, showPreviews, otherSound,
   } = notifySettings;
+
+  const hasSound = Boolean(otherSound && !(otherSound instanceof GramJs.NotificationSoundNone));
 
   return {
     chatId: getApiChatIdFromMtpPeer(peer),
     isMuted: silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil),
-    ...(sound === '' && { isSilent: true }),
+    ...(!hasSound && { isSilent: true }),
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
   };
 }

@@ -44,11 +44,13 @@ import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './a
 import { buildApiPhoto } from './apiBuilders/common';
 import {
   buildApiGroupCall,
-  buildApiGroupCallParticipant, buildPhoneCall,
+  buildApiGroupCallParticipant,
+  buildPhoneCall,
   getGroupCallId,
 } from './apiBuilders/calls';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 import { buildApiEmojiInteraction } from './apiBuilders/symbols';
+import { buildApiBotMenuButton } from './apiBuilders/bots';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -914,6 +916,23 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updatePhoneCallSignalingData',
       callId: update.phoneCallId.toString(),
       data: Array.from(update.data),
+    });
+  } else if (update instanceof GramJs.UpdateWebViewResultSent) {
+    const { queryId } = update;
+
+    onUpdate({
+      '@type': 'updateWebViewResultSent',
+      queryId: queryId.toString(),
+    });
+  } else if (update instanceof GramJs.UpdateBotMenuButton) {
+    const { botId, button } = update;
+
+    const id = buildApiPeerId(botId, 'user');
+
+    onUpdate({
+      '@type': 'updateBotMenuButton',
+      botId: id,
+      button: buildApiBotMenuButton(button),
     });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
