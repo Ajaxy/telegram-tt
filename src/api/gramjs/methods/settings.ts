@@ -34,7 +34,7 @@ import { buildApiConfig } from '../apiBuilders/appConfig';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 
 const MAX_INT_32 = 2 ** 31 - 1;
-const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz'];
+const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz', 'en'];
 
 export function updateProfile({
   firstName,

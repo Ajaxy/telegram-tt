@@ -1,4 +1,4 @@
-import { ApiChat, MAIN_THREAD_ID } from '../../api/types';
+import { ApiChat, ApiUser, MAIN_THREAD_ID } from '../../api/types';
 import { GlobalState } from '../types';
 
 import {
@@ -66,6 +66,10 @@ export function selectChatBot(global: GlobalState, chatId: string) {
   }
 
   return user;
+}
+
+export function selectIsTrustedBot(global: GlobalState, bot: ApiUser) {
+  return bot.isVerified || global.trustedBotIds.includes(bot.id);
 }
 
 export function selectIsChatBotNotStarted(global: GlobalState, chatId: string) {

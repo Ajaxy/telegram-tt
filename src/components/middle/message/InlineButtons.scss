@@ -1,6 +1,7 @@
 .InlineButtons {
   display: flex;
   flex-direction: column;
+  max-width: var(--max-width);
 
   .row {
     display: flex;
@@ -61,6 +62,12 @@
         transform: rotate(-45deg);
       }
     }
+  }
+
+  .inline-button-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .row:first-of-type .Button {

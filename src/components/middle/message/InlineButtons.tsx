@@ -29,10 +29,11 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onClick({ messageId: message.id, button })}
             >
-              {renderText(lang(button.text))}
+              <span className="inline-button-text">{renderText(lang(button.text))}</span>
               {['buy', 'receipt'].includes(button.type) && <i className="icon-card" />}
               {button.type === 'url' && !RE_TME_LINK.test(button.url) && <i className="icon-arrow-right" />}
               {button.type === 'switchBotInline' && <i className="icon-share-filled" />}
+              {['webView', 'simpleWebView'].includes(button.type) && <i className="icon-webapp" />}
             </Button>
           ))}
         </div>

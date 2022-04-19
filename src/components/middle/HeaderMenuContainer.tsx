@@ -410,7 +410,7 @@ export default memo(withGlobal<OwnProps>(
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
-      botCommands: chatBot?.fullInfo?.botCommands,
+      botCommands: chatBot?.fullInfo?.botInfo?.commands,
     };
   },
 )(HeaderMenuContainer));

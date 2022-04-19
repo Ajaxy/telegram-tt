@@ -4,7 +4,9 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import { LangCode } from '../../types';
-import { ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType } from '../../api/types';
+import {
+  ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType,
+} from '../../api/types';
 import { GlobalState } from '../../global/types';
 
 import '../../global/actions/all';
@@ -54,10 +56,14 @@ import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import PhoneCall from '../calls/phone/PhoneCall.async';
 import NewContactModal from './NewContactModal.async';
 import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
+import WebAppModal from './WebAppModal.async';
+import BotTrustModal from './BotTrustModal.async';
+import BotAttachModal from './BotAttachModal.async';
 
 import './Main.scss';
 
 type StateProps = {
+  chat?: ApiChat;
   connectionState?: ApiUpdateConnectionStateType;
   authState?: ApiUpdateAuthorizationStateType;
   lastSyncTime?: number;
@@ -84,6 +90,9 @@ type StateProps = {
   openedGame?: GlobalState['openedGame'];
   gameTitle?: string;
   isRatePhoneCallModalOpen?: boolean;
+  webApp?: GlobalState['webApp'];
+  botTrustRequest?: GlobalState['botTrustRequest'];
+  botAttachRequest?: GlobalState['botAttachRequest'];
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -120,6 +129,9 @@ const Main: FC<StateProps> = ({
   openedGame,
   gameTitle,
   isRatePhoneCallModalOpen,
+  botTrustRequest,
+  botAttachRequest,
+  webApp,
 }) => {
   const {
     sync,
@@ -138,6 +150,7 @@ const Main: FC<StateProps> = ({
     openStickerSetShortName,
     checkVersionNotification,
     loadAppConfig,
+    loadAttachMenuBots,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -163,10 +176,11 @@ const Main: FC<StateProps> = ({
       loadNotificationExceptions();
       loadTopInlineBots();
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
+      loadAttachMenuBots();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
-    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig,
+    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots,
   ]);
 
   // Language-based API calls
@@ -366,10 +380,13 @@ const Main: FC<StateProps> = ({
         isByPhoneNumber={newContactByPhoneNumber}
       />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
+      <WebAppModal webApp={webApp} />
       <DownloadManager />
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
+      <BotTrustModal bot={botTrustRequest?.bot} type={botTrustRequest?.type} />
+      <BotAttachModal bot={botAttachRequest?.bot} />
     </div>
   );
 };
@@ -433,6 +450,9 @@ export default memo(withGlobal(
       openedGame,
       gameTitle,
       isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
+      botTrustRequest: global.botTrustRequest,
+      botAttachRequest: global.botAttachRequest,
+      webApp: global.webApp,
     };
   },
 )(Main));

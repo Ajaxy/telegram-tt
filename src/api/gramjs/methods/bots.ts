@@ -1,16 +1,19 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiChat, ApiUser } from '../../types';
+import { ApiChat, ApiThemeParameters, ApiUser } from '../../types';
 
 import localDb from '../localDb';
 import { invokeRequest } from './client';
-import { buildInputPeer, generateRandomBigInt } from '../gramjsBuilders';
+import { buildInputPeer, buildInputThemeParams, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm } from '../apiBuilders/bots';
+import {
+  buildApiAttachMenuBot, buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm,
+} from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 export function init() {
 }
@@ -138,6 +141,132 @@ export async function startBot({
     randomId,
     startParam,
   }), true);
+}
+
+export async function requestWebView({
+  isSilent,
+  peer,
+  bot,
+  url,
+  startParam,
+  replyToMessageId,
+  theme,
+  isFromBotMenu,
+}: {
+  isSilent?: boolean;
+  peer: ApiChat | ApiUser;
+  bot: ApiUser;
+  url?: string;
+  startParam?: string;
+  replyToMessageId?: number;
+  theme?: ApiThemeParameters;
+  isFromBotMenu?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.messages.RequestWebView({
+    silent: isSilent || undefined,
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    replyToMsgId: replyToMessageId,
+    url,
+    startParam,
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
+    fromBotMenu: isFromBotMenu || undefined,
+  }));
+
+  if (result instanceof GramJs.WebViewResultUrl) {
+    return {
+      url: result.url,
+      queryId: result.queryId.toString(),
+    };
+  }
+
+  return undefined;
+}
+
+export async function requestSimpleWebView({
+  bot, url, theme,
+}: {
+  bot: ApiUser;
+  url: string;
+  theme?: ApiThemeParameters;
+}) {
+  const result = await invokeRequest(new GramJs.messages.RequestSimpleWebView({
+    url,
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
+  }));
+
+  return result?.url;
+}
+
+export function prolongWebView({
+  isSilent,
+  peer,
+  bot,
+  queryId,
+  replyToMessageId,
+}: {
+  isSilent?: boolean;
+  peer: ApiChat | ApiUser;
+  bot: ApiUser;
+  queryId: string;
+  replyToMessageId?: number;
+}) {
+  return invokeRequest(new GramJs.messages.ProlongWebView({
+    silent: isSilent || undefined,
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    queryId: BigInt(queryId),
+    replyToMsgId: replyToMessageId,
+  }));
+}
+
+export async function sendWebViewData({
+  bot, buttonText, data,
+}: {
+  bot: ApiUser;
+  buttonText: string;
+  data: string;
+}) {
+  const randomId = generateRandomBigInt();
+  await invokeRequest(new GramJs.messages.SendWebViewData({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    buttonText,
+    data,
+    randomId,
+  }), true);
+}
+
+export async function loadAttachMenuBots({
+  hash,
+}: {
+  hash?: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetAttachMenuBots({
+    hash: hash ? BigInt(hash) : undefined,
+  }));
+
+  if (result instanceof GramJs.AttachMenuBots) {
+    addEntitiesWithPhotosToLocalDb(result.users);
+    return {
+      hash: result.hash.toString(),
+      bots: buildCollectionByKey(result.bots.map(buildApiAttachMenuBot), 'id'),
+    };
+  }
+  return undefined;
+}
+
+export function toggleBotInAttachMenu({
+  bot,
+  isEnabled,
+}: {
+  bot: ApiUser;
+  isEnabled: boolean;
+}) {
+  return invokeRequest(new GramJs.messages.ToggleBotInAttachMenu({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    enabled: isEnabled,
+  }));
 }
 
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {

@@ -1,5 +1,14 @@
 import {
-  ApiAudio, ApiMediaFormat, ApiMessage, ApiMessageSearchType, ApiPhoto, ApiVideo, ApiDimensions, ApiLocation, ApiGame,
+  ApiAudio,
+  ApiMediaFormat,
+  ApiMessage,
+  ApiMessageSearchType,
+  ApiPhoto,
+  ApiVideo,
+  ApiDimensions,
+  ApiLocation,
+  ApiGame,
+  ApiDocument,
 } from '../../api/types';
 
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, IS_SAFARI } from '../../util/environment';
@@ -125,6 +134,10 @@ export function getMessageMediaThumbnail(message: ApiMessage) {
 
 export function getMessageMediaThumbDataUri(message: ApiMessage) {
   return getMessageMediaThumbnail(message)?.dataUri;
+}
+
+export function getDocumentMediaHash(document: ApiDocument) {
+  return `document${document.id}`;
 }
 
 export function buildStaticMapHash(

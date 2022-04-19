@@ -924,6 +924,9 @@ function buildAction(
     text = senderId === currentUserId ? 'ActionYouScoredInGame' : 'ActionUserScoredInGame';
     translationValues.push('%score%');
     score = action.score;
+  } else if (action instanceof GramJs.MessageActionWebViewDataSent) {
+    text = 'Notification.WebAppSentData';
+    translationValues.push(action.text);
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -1064,6 +1067,22 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
           type: 'userProfile',
           text,
           userId: button.userId.toString(),
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonSimpleWebView) {
+        return {
+          type: 'simpleWebView',
+          text,
+          url: button.url,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonWebView) {
+        return {
+          type: 'webView',
+          text,
+          url: button.url,
         };
       }
 

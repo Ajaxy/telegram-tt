@@ -395,6 +395,18 @@ interface ApiKeyboardButtonUrl {
   url: string;
 }
 
+interface ApiKeyboardButtonSimpleWebView {
+  type: 'simpleWebView';
+  text: string;
+  url: string;
+}
+
+interface ApiKeyboardButtonWebView {
+  type: 'webView';
+  text: string;
+  url: string;
+}
+
 interface ApiKeyboardButtonCallback {
   type: 'callback';
   text: string;
@@ -407,7 +419,7 @@ interface ApiKeyboardButtonRequestPoll {
   isQuiz?: boolean;
 }
 
-interface ApiKeyboardButtonSwitchInline {
+interface ApiKeyboardButtonSwitchBotInline {
   type: 'switchBotInline';
   text: string;
   query: string;
@@ -426,8 +438,10 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonUrl
   | ApiKeyboardButtonCallback
   | ApiKeyboardButtonRequestPoll
-  | ApiKeyboardButtonSwitchInline
+  | ApiKeyboardButtonSwitchBotInline
   | ApiKeyboardButtonUserProfile
+  | ApiKeyboardButtonWebView
+  | ApiKeyboardButtonSimpleWebView
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
@@ -446,6 +460,15 @@ export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
 
 export type ApiSendMessageAction = {
   type: 'cancel' | 'typing' | 'recordAudio' | 'chooseSticker' | 'playingGame';
+};
+
+export type ApiThemeParameters = {
+  bg_color: string;
+  text_color: string;
+  hint_color: string;
+  link_color: string;
+  button_color: string;
+  button_text_color: string;
 };
 
 export const MAIN_THREAD_ID = -1;

@@ -591,7 +591,7 @@ export default memo(withGlobal<OwnProps>(
     let botDescription: string | undefined;
     if (selectIsChatBotNotStarted(global, chatId)) {
       if (chatBot.fullInfo) {
-        botDescription = chatBot.fullInfo.botDescription || 'NoMessages';
+        botDescription = chatBot.fullInfo.botInfo?.description || 'NoMessages';
       } else {
         botDescription = 'Updating bot info...';
       }

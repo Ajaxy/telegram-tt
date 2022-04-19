@@ -1,10 +1,12 @@
-import { addActionHandler } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 
 import { ApiError } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
-import { selectCurrentMessageList } from '../../selectors';
+import {
+  selectChatBot, selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
+} from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
@@ -264,14 +266,37 @@ addActionHandler('closeHistoryCalendar', (global) => {
 
 addActionHandler('openGame', (global, actions, payload) => {
   const { url, chatId, messageId } = payload;
-  return {
+
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) return;
+
+  const botId = message.viaBotId || message.senderId;
+  const bot = botId && selectChatBot(global, botId);
+  if (!bot) return;
+
+  if (!selectIsTrustedBot(global, bot)) {
+    setGlobal({
+      ...global,
+      botTrustRequest: {
+        bot,
+        type: 'game',
+        onConfirm: {
+          action: 'openGame',
+          payload,
+        },
+      },
+    });
+    return;
+  }
+
+  setGlobal({
     ...global,
     openedGame: {
       url,
       chatId,
       messageId,
     },
-  };
+  });
 });
 
 addActionHandler('closeGame', (global) => {

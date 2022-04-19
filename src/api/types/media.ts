@@ -6,6 +6,7 @@ export enum ApiMediaFormat {
   Lottie,
   Progressive,
   Stream,
+  Text,
 }
 
 export type ApiParsedMedia = string | Blob | ArrayBuffer;

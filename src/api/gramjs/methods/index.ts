@@ -64,6 +64,7 @@ export {
 
 export {
   answerCallbackButton, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults, sendInlineBotResult, startBot,
+  requestWebView, requestSimpleWebView, sendWebViewData, prolongWebView, loadAttachMenuBots, toggleBotInAttachMenu,
 } from './bots';
 
 export {

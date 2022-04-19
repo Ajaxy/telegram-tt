@@ -34,7 +34,7 @@ import {
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
-  isChatSummaryOnly, isChatArchived, isChatBasicGroup,
+  isChatSummaryOnly, isChatArchived, isChatBasicGroup, isUserBot,
 } from '../../helpers';
 import { processDeepLink } from '../../../util/deeplink';
 import { updateGroupCall } from '../../reducers/calls';
@@ -509,7 +509,7 @@ addActionHandler('openChatByInvite', async (global, actions, payload) => {
 });
 
 addActionHandler('openChatByPhoneNumber', async (global, actions, payload) => {
-  const { phoneNumber } = payload!;
+  const { phoneNumber, startAttach, attach } = payload!;
 
   // Open temporary empty chat to make the click response feel faster
   actions.openChat({ id: TMP_CHAT_ID });
@@ -524,6 +524,10 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload) => {
   }
 
   actions.openChat({ id: chat.id });
+
+  if (attach) {
+    openAttachMenuFromLink(actions, chat.id, attach, startAttach);
+  }
 });
 
 addActionHandler('openTelegramLink', (global, actions, payload) => {
@@ -542,8 +546,14 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
     hash = part2;
   }
 
+  const startAttach = params.hasOwnProperty('startattach') && !params.startattach ? true : params.startattach;
+
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
-    actions.openChatByPhoneNumber({ phoneNumber: part1.substr(1, part1.length - 1) });
+    actions.openChatByPhoneNumber({
+      phoneNumber: part1.substr(1, part1.length - 1),
+      startAttach,
+      attach: params.attach,
+    });
     return;
   }
 
@@ -590,6 +600,8 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
       messageId: messageId || Number(chatOrChannelPostId),
       commentId,
       startParam: params.start,
+      startAttach,
+      attach: params.attach,
     });
   }
 });
@@ -606,7 +618,7 @@ addActionHandler('acceptInviteConfirmation', async (global, actions, payload) =>
 
 addActionHandler('openChatByUsername', async (global, actions, payload) => {
   const {
-    username, messageId, commentId, startParam,
+    username, messageId, commentId, startParam, startAttach, attach,
   } = payload!;
 
   const chat = selectCurrentChat(global);
@@ -616,7 +628,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload) => {
       actions.focusMessage({ chatId: chat.id, messageId });
       return;
     }
-    await openChatByUsername(actions, username, messageId, startParam);
+    await openChatByUsername(actions, username, messageId, startParam, startAttach, attach);
     return;
   }
 
@@ -1330,7 +1342,35 @@ async function openChatByUsername(
   username: string,
   channelPostId?: number,
   startParam?: string,
+  startAttach?: string | boolean,
+  attach?: string,
 ) {
+  // Attach in the current chat
+  if (startAttach && !attach) {
+    const chat = await fetchChatByUsername(username);
+
+    if (!chat) return;
+    const global = getGlobal();
+    const user = selectUser(global, chat.id);
+    if (!user) return;
+    const isBot = isUserBot(user);
+    if (!isBot || !user.isAttachMenuBot) {
+      actions.showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
+      return;
+    }
+
+    const currentChat = selectCurrentChat(global);
+
+    if (!currentChat) return;
+
+    actions.callAttachMenuBot({
+      botId: user.id,
+      chatId: currentChat.id,
+      ...(typeof startAttach === 'string' && { startParam: startAttach }),
+    });
+    return;
+  }
+
   // Open temporary empty chat to make the click response feel faster
   actions.openChat({ id: TMP_CHAT_ID });
 
@@ -1350,6 +1390,29 @@ async function openChatByUsername(
   if (startParam) {
     actions.startBot({ botId: chat.id, param: startParam });
   }
+
+  if (attach) {
+    openAttachMenuFromLink(actions, chat.id, attach, startAttach);
+  }
+}
+
+async function openAttachMenuFromLink(
+  actions: GlobalActions,
+  chatId: string, attach: string, startAttach?: string | boolean,
+) {
+  const botChat = await fetchChatByUsername(attach);
+  if (!botChat) return;
+  const botUser = selectUser(getGlobal(), botChat.id);
+  if (!botUser || !botUser.isAttachMenuBot) {
+    actions.showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
+    return;
+  }
+
+  actions.callAttachMenuBot({
+    botId: botUser.id,
+    chatId,
+    ...(typeof startAttach === 'string' && { startParam: startAttach }),
+  });
 }
 
 async function openCommentsByUsername(

@@ -335,6 +335,23 @@ export function selectSender(global: GlobalState, message: ApiMessage): ApiUser 
   return isUserId(senderId) ? selectUser(global, senderId) : selectChat(global, senderId);
 }
 
+export function selectReplySender(global: GlobalState, message: ApiMessage, isForwarded = false) {
+  if (isForwarded) {
+    const { senderUserId, hiddenUserName } = message.forwardInfo || {};
+    if (senderUserId) {
+      return isUserId(senderUserId) ? selectUser(global, senderUserId) : selectChat(global, senderUserId);
+    }
+    if (hiddenUserName) return undefined;
+  }
+
+  const { senderId } = message;
+  if (!senderId) {
+    return undefined;
+  }
+
+  return isUserId(senderId) ? selectUser(global, senderId) : selectChat(global, senderId);
+}
+
 export function selectForwardedSender(global: GlobalState, message: ApiMessage): ApiUser | ApiChat | undefined {
   const { forwardInfo } = message;
   if (!forwardInfo) {

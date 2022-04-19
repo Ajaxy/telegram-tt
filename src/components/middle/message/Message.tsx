@@ -53,6 +53,7 @@ import {
   selectIsMessageProtected,
   selectLocalAnimatedEmojiEffect,
   selectDefaultReaction,
+  selectReplySender,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -992,7 +993,7 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, threadInfo,
+      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, threadInfo, forwardInfo,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1014,7 +1015,7 @@ export default memo(withGlobal<OwnProps>(
     const replyMessage = replyToMessageId && !shouldHideReply
       ? selectChatMessage(global, isRepliesChat && replyToChatId ? replyToChatId : chatId, replyToMessageId)
       : undefined;
-    const replyMessageSender = replyMessage && selectSender(global, replyMessage);
+    const replyMessageSender = replyMessage && selectReplySender(global, replyMessage, Boolean(forwardInfo));
 
     const uploadProgress = selectUploadProgress(global, message);
     const isFocused = messageListType === 'thread' && (

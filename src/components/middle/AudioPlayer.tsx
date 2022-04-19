@@ -208,7 +208,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         color="translucent"
         size="smaller"
         ariaLabel="Volume"
-        withClickPropagation
+        noPreventDefault
       >
         <i className={volumeIcon} onClick={handleVolumeClick} />
         {!IS_IOS && (

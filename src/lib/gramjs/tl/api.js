@@ -259,11 +259,13 @@ function createClasses(classesType, params) {
                     if (argsConfig.hasOwnProperty(argName)) {
                         const arg = argsConfig[argName];
                         if (arg.isFlag) {
+                            const flagValue = arg.flagIndex > 30
+                                ? args.flags2 & (1 << (arg.flagIndex - 31)) : args.flags & (1 << arg.flagIndex);
                             if (arg.type === 'true') {
-                                args[argName] = Boolean(args.flags & (1 << arg.flagIndex));
+                                args[argName] = Boolean(flagValue);
                                 continue;
                             }
-                            if (args.flags & (1 << arg.flagIndex)) {
+                            if (flagValue) {
                                 args[argName] = getArgFromReader(reader, arg);
                             } else {
                                 args[argName] = undefined;

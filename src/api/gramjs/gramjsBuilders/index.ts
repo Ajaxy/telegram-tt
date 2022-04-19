@@ -18,6 +18,7 @@ import {
   ApiSendMessageAction,
   ApiSticker,
   ApiVideo,
+  ApiThemeParameters,
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';
@@ -464,6 +465,12 @@ export function buildSendMessageAction(action: ApiSendMessageAction) {
       return new GramJs.SendMessageGamePlayAction();
   }
   return undefined;
+}
+
+export function buildInputThemeParams(params: ApiThemeParameters) {
+  return new GramJs.DataJSON({
+    data: JSON.stringify(params),
+  });
 }
 
 export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {

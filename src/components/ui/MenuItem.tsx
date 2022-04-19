@@ -10,9 +10,11 @@ type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElemen
 
 type OwnProps = {
   icon?: string;
+  customIcon?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
   onClick?: OnClickHandler;
+  onContextMenu?: (e: React.UIEvent) => void;
   href?: string;
   download?: string;
   disabled?: boolean;
@@ -23,6 +25,7 @@ type OwnProps = {
 const MenuItem: FC<OwnProps> = (props) => {
   const {
     icon,
+    customIcon,
     className,
     children,
     onClick,
@@ -31,6 +34,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     disabled,
     destructive,
     ariaLabel,
+    onContextMenu,
   } = props;
 
   const lang = useLang();
@@ -70,9 +74,10 @@ const MenuItem: FC<OwnProps> = (props) => {
 
   const content = (
     <>
-      {icon && (
+      {!customIcon && icon && (
         <i className={`icon-${icon}`} data-char={icon.startsWith('char-') ? icon.replace('char-', '') : undefined} />
       )}
+      {customIcon}
       {children}
     </>
   );
@@ -103,6 +108,7 @@ const MenuItem: FC<OwnProps> = (props) => {
       className={fullClassName}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onContextMenu={onContextMenu}
       aria-label={ariaLabel}
       title={ariaLabel}
       dir={lang.isRtl ? 'rtl' : undefined}
