@@ -1,5 +1,6 @@
 import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../api/types';
 import { IS_EMOJI_SUPPORTED } from './environment';
+import { RE_LINK_TEMPLATE } from '../config';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   B: ApiMessageEntityTypes.Bold,
@@ -17,9 +18,9 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
 
 const MAX_TAG_DEEPNESS = 3;
 
-export default function parseMessageInput(html: string): ApiFormattedText {
+export default function parseMessageInput(html: string, withMarkdownLinks = false): ApiFormattedText {
   const fragment = document.createElement('div');
-  fragment.innerHTML = parseMarkdown(html);
+  fragment.innerHTML = withMarkdownLinks ? parseMarkdown(parseMarkdownLinks(html)) : parseMarkdown(html);
   const text = fragment.innerText.trim().replace(/\u200b+/g, '');
   let textIndex = 0;
   let recursionDeepness = 0;
@@ -99,6 +100,13 @@ function parseMarkdown(html: string) {
   );
 
   return parsedHtml;
+}
+
+function parseMarkdownLinks(html: string) {
+  return html.replace(new RegExp(`\\[([^\\]]+?)]\\((${RE_LINK_TEMPLATE}+?)\\)`, 'g'), (_, text, link) => {
+    const url = link.includes('://') ? link : link.includes('@') ? `mailto:${link}` : `http://${link}`;
+    return `<a href="${url}">${text}</a>`;
+  });
 }
 
 function getEntityDataFromNode(
