@@ -108,23 +108,39 @@
 }
 
 #auth-qr-form {
-  .qr-container,
-  .qr-loading {
+  .qr-outer {
     height: 280px;
+    position: relative;
   }
 
-  .qr-wrapper {
+  .qr-inner,
+  .qr-loading {
+    height: 280px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: flex;
     justify-content: center;
-    position: relative;
+  }
 
+  .qr-inner {
     opacity: 1;
     transform: scale(1);
     transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms;
-    &.pre-animate {
+
+    &:not(.open) {
       opacity: 0.5;
       transform: scale(0.5);
     }
+
+    &:not(.shown) {
+      display: none;
+    }
+  }
+
+  .qr-loading {
+    transition: opacity 1ms;
   }
 
   .qr-plane {

@@ -9,6 +9,7 @@ import { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE } from '../../config';
 import { setLanguage } from '../../util/langProvider';
+import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 import getAnimationData from '../common/helpers/animatedAssets';
@@ -16,6 +17,7 @@ import getAnimationData from '../common/helpers/animatedAssets';
 import useLangString from '../../hooks/useLangString';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
@@ -24,9 +26,7 @@ import blankUrl from '../../assets/blank.png';
 
 type StateProps =
   Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
-  & {
-    language?: LangCode;
-  };
+  & { language?: LangCode };
 
 const DATA_PREFIX = 'tg://login?token=';
 const QR_SIZE = 280;
@@ -73,8 +73,10 @@ const AuthCode: FC<StateProps> = ({
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
 
   const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+  const [isAnimationLoaded, markAnimationLoaded] = useFlag();
+
+  const transitionClassNames = useMediaTransition(isQrMounted);
+  const airplaneTransitionClassNames = useMediaTransition(isAnimationLoaded);
 
   useEffect(() => {
     if (!animationData) {
@@ -94,9 +96,6 @@ const AuthCode: FC<StateProps> = ({
     }
 
     const container = qrCodeRef.current!;
-
-    container.parentElement!.classList.remove('pre-animate');
-
     const data = `${DATA_PREFIX}${authQrCode.token}`;
 
     QR_CODE.update({
@@ -131,8 +130,11 @@ const AuthCode: FC<StateProps> = ({
   return (
     <div id="auth-qr-form" className="custom-scroll">
       <div className="auth-form qr">
-        {authQrCode ? (
-          <div className="qr-wrapper pre-animate" key="qr-wrapper">
+        <div className="qr-outer">
+          <div
+            className={buildClassName('qr-inner', transitionClassNames)}
+            key="qr-inner"
+          >
             <div
               key="qr-container"
               className="qr-container"
@@ -142,18 +144,17 @@ const AuthCode: FC<StateProps> = ({
             {animationData && (
               <AnimatedSticker
                 id="qrPlane"
-                className="qr-plane"
+                className={buildClassName('qr-plane', airplaneTransitionClassNames)}
                 size={QR_PLANE_SIZE}
                 animationData={animationData}
                 play={isAnimationLoaded}
-                onLoad={handleAnimationLoad}
+                onLoad={markAnimationLoaded}
                 key="qrPlane"
               />
             )}
           </div>
-        ) : (
-          <div key="qr-loading" className="qr-loading"><Loading /></div>
-        )}
+          {!isQrMounted && <div className="qr-loading"><Loading /></div>}
+        </div>
         <h3>{lang('Login.QR.Title')}</h3>
         <ol>
           <li><span>{lang('Login.QR.Help1')}</span></li>
