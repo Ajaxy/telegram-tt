@@ -300,7 +300,7 @@ export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames e
     ) => void,
     withGlobal: withGlobal as <OwnProps>(
       mapStateToProps: ((global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral),
-    ) => (Component: FC) => FC,
+    ) => (Component: FC) => FC<OwnProps>,
   };
 }
 
