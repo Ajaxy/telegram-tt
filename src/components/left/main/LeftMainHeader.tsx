@@ -8,7 +8,7 @@ import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
 import {
-  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, DEBUG, FEEDBACK_URL,
+  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, BETA_CHANGELOG_URL, BETA_DISCUSSION_CHAT, DEBUG, FEEDBACK_URL, IS_BETA,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
@@ -93,6 +93,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setGlobalSearchDate,
     setSettingOption,
     setGlobalSearchChatId,
+    openChatByUsername,
   } = getActions();
 
   const lang = useLang();
@@ -169,6 +170,14 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
   }, [animationLevel, setSettingOption, theme]);
 
+  const handleChangelogClick = useCallback(() => {
+    window.open(BETA_CHANGELOG_URL, '_blank');
+  }, []);
+
+  const handleDiscussionClick = useCallback(() => {
+    openChatByUsername({ username: BETA_DISCUSSION_CHAT });
+  }, [openChatByUsername]);
+
   const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
@@ -189,12 +198,14 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     ? lang('SearchFriends')
     : lang('Search');
 
+  const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
+
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header">
         <DropdownMenu
           trigger={MainButton}
-          footer={`${APP_NAME} ${DEBUG ? APP_REVISION : APP_VERSION}`}
+          footer={`${APP_NAME} ${versionString}`}
         >
           <MenuItem
             icon="saved-messages"
@@ -247,6 +258,22 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           >
             Report Bug
           </MenuItem>
+          {IS_BETA && (
+            <>
+              <MenuItem
+                icon="permissions"
+                onClick={handleChangelogClick}
+              >
+                Beta Changelog
+              </MenuItem>
+              <MenuItem
+                icon="comments"
+                onClick={handleDiscussionClick}
+              >
+                Beta Discussion (ru)
+              </MenuItem>
+            </>
+          )}
           {withOtherVersions && (
             <>
               <MenuItem

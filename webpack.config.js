@@ -137,7 +137,8 @@ module.exports = (env = {}, argv = {}) => {
       new DefinePlugin({
         APP_REVISION: DefinePlugin.runtimeValue(() => {
           const { branch, commit } = getGitMetadata();
-          return JSON.stringify((!branch || branch === 'HEAD') ? commit : branch);
+          const shouldDisplayCommit = process.env.APP_ENV === 'staging' || !branch || branch === 'HEAD';
+          return JSON.stringify(shouldDisplayCommit ? commit : branch);
         }, argv.mode === 'development' ? true : []),
       }),
       new ProvidePlugin({
