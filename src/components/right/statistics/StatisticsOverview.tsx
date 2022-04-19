@@ -1,6 +1,8 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 
-import { ApiChannelStatistics, ApiGroupStatistics, StatisticsOverviewItem } from '../../../api/types';
+import {
+  ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsOverviewItem,
+} from '../../../api/types';
 
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { formatFullDate } from '../../../util/dateFormat';
@@ -13,6 +15,8 @@ type OverviewCell = {
   name: string;
   title: string;
   isPercentage?: boolean;
+  isPlain?: boolean;
+  isApproximate?: boolean;
 };
 
 const CHANNEL_OVERVIEW: OverviewCell[][] = [
@@ -37,12 +41,22 @@ const GROUP_OVERVIEW: OverviewCell[][] = [
   ],
 ];
 
+const MESSAGE_OVERVIEW: OverviewCell[][] = [
+  [
+    { name: 'views', title: 'StatisticViews', isPlain: true },
+    {
+      name: 'forwards', title: 'PrivateShares', isPlain: true, isApproximate: true,
+    },
+  ],
+];
+
 export type OwnProps = {
   isGroup?: boolean;
-  statistics: ApiChannelStatistics | ApiGroupStatistics;
+  isMessage?: boolean;
+  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiMessageStatistics;
 };
 
-const StatisticsOverview: FC<OwnProps> = ({ isGroup, statistics }) => {
+const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) => {
   const lang = useLang();
 
   const renderOverviewItemValue = ({ change, percentage }: StatisticsOverviewItem) => {
@@ -70,7 +84,7 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, statistics }) => {
   return (
     <div className="StatisticsOverview">
       <div className="StatisticsOverview__header">
-        <div className="StatisticsOverview__title">{lang('ChannelStats.Overview')}</div>
+        <div className="StatisticsOverview__title">{lang('StatisticOverview')}</div>
 
         {period && (
           <div className="StatisticsOverview__caption">
@@ -80,14 +94,23 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, statistics }) => {
       </div>
 
       <table className="StatisticsOverview__table">
-        {(isGroup ? GROUP_OVERVIEW : CHANNEL_OVERVIEW).map((row) => (
+        {(isMessage ? MESSAGE_OVERVIEW : isGroup ? GROUP_OVERVIEW : CHANNEL_OVERVIEW).map((row) => (
           <tr>
             {row.map((cell: OverviewCell) => {
               const field = (statistics as any)[cell.name];
 
+              if (cell.isPlain) {
+                return (
+                  <td className="StatisticsOverview__table-cell">
+                    <b className="StatisticsOverview__table-value">{cell.isApproximate ? `≈${field}` : field}</b>
+                    <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
+                  </td>
+                );
+              }
+
               if (cell.isPercentage) {
                 return (
-                  <td>
+                  <td className="StatisticsOverview__table-cell">
                     <b className="StatisticsOverview__table-value">{field.percentage}%</b>
                     <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
                   </td>
@@ -95,7 +118,7 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, statistics }) => {
               }
 
               return (
-                <td>
+                <td className="StatisticsOverview__table-cell">
                   <b className="StatisticsOverview__table-value">
                     {formatIntegerCompact(field.current)}
                   </b>

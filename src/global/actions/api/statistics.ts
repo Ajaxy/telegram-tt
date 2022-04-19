@@ -2,7 +2,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { ApiChannelStatistics } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
-import { updateStatistics, updateStatisticsGraph } from '../../reducers';
+import { updateStatistics, updateMessageStatistics, updateStatisticsGraph } from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';
 
 addActionHandler('loadStatistics', async (global, actions, payload) => {
@@ -27,6 +27,28 @@ addActionHandler('loadStatistics', async (global, actions, payload) => {
   }
 
   setGlobal(updateStatistics(global, chatId, result));
+});
+
+addActionHandler('loadMessageStatistics', async (global, actions, payload) => {
+  const { chatId, messageId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat?.fullInfo) {
+    return;
+  }
+
+  let result = await callApi('fetchMessageStatistics', { chat, messageId });
+  if (!result) {
+    result = {};
+  }
+
+  global = getGlobal();
+
+  const { views, forwards } = selectChatMessages(global, chatId)[messageId];
+
+  result.views = views;
+  result.forwards = forwards;
+
+  setGlobal(updateMessageStatistics(global, result));
 });
 
 addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload) => {

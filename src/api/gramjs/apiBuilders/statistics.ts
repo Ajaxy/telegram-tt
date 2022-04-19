@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import {
   ApiChannelStatistics,
   ApiGroupStatistics,
+  ApiMessageStatistics,
   StatisticsGraph,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
@@ -54,9 +55,17 @@ export function buildGroupStatistics(stats: GramJs.stats.MegagroupStats): ApiGro
   };
 }
 
-export function buildGraph(result: GramJs.TypeStatsGraph, isPercentage?: boolean): StatisticsGraph {
+export function buildMessageStatistics(stats: GramJs.stats.MessageStats): ApiMessageStatistics {
+  return {
+    viewsGraph: buildGraph(stats.viewsGraph),
+  };
+}
+
+export function buildGraph(
+  result: GramJs.TypeStatsGraph, isPercentage?: boolean
+): StatisticsGraph | undefined {
   if ((result as GramJs.StatsGraphError).error) {
-    throw new Error((result as GramJs.StatsGraphError).error);
+    return undefined;
   }
 
   const data = JSON.parse((result as GramJs.StatsGraph).json.data);

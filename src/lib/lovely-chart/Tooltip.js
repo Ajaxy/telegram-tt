@@ -292,6 +292,7 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
         return statsFormatDayHourFull(data.xLabels[labelIndex].value);
       case 'statsTooltipFormat(\'day\')':
         return getLabelDate(data.xLabels[labelIndex]);
+      case 'statsTooltipFormat(\'hour\')':
       case 'statsTooltipFormat(\'5min\')':
         return getLabelTime(data.xLabels[labelIndex]);
       default:

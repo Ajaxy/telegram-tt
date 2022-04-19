@@ -32,6 +32,10 @@
   &__table {
     width: 100%;
 
+    &-cell {
+      width: 50%;
+    }
+
     &-heading {
       font-size: 0.9375rem;
       color: var(--color-text-secondary);

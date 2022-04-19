@@ -40,6 +40,7 @@ type OwnProps = {
   isSearch?: boolean;
   isManagement?: boolean;
   isStatistics?: boolean;
+  isMessageStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
@@ -73,6 +74,7 @@ enum HeaderContent {
   SharedMedia,
   Search,
   Statistics,
+  MessageStatistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -107,6 +109,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isSearch,
   isManagement,
   isStatistics,
+  isMessageStatistics,
   isStickerSearch,
   isGifSearch,
   isPollResults,
@@ -246,6 +249,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     ) : undefined // Never reached
   ) : isStatistics ? (
     HeaderContent.Statistics
+  ) : isMessageStatistics ? (
+    HeaderContent.MessageStatistics
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -373,6 +378,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         );
       case HeaderContent.Statistics:
         return <h3>{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
+      case HeaderContent.MessageStatistics:
+        return <h3>{lang('Stats.MessageTitle')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3>{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:

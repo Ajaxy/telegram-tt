@@ -297,6 +297,7 @@ export interface ApiMessage {
   isDeleting?: boolean;
   previousLocalId?: number;
   views?: number;
+  forwards?: number;
   isEdited?: boolean;
   editDate?: number;
   isMentioned?: boolean;

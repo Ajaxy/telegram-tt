@@ -5,7 +5,7 @@ import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment'
 import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
 import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
-import { selectIsStatisticsShown } from './statistics';
+import { selectIsStatisticsShown, selectIsMessageStatisticsShown } from './statistics';
 import { selectCurrentManagement } from './management';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {
@@ -20,6 +20,8 @@ export function selectRightColumnContentKey(global: GlobalState) {
     RightColumnContent.Search
   ) : selectCurrentManagement(global) ? (
     RightColumnContent.Management
+  ) : selectIsMessageStatisticsShown(global) ? (
+    RightColumnContent.MessageStatistics
   ) : selectIsStatisticsShown(global) ? (
     RightColumnContent.Statistics
   ) : selectCurrentStickerSearch(global).query !== undefined ? (

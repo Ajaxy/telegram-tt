@@ -1,5 +1,5 @@
 import { getMaxMin } from './utils';
-import { statsFormatDay, statsFormatDayHour, statsFormatText, statsFormatMin } from './format';
+import { statsFormatHour, statsFormatDay, statsFormatDayHour, statsFormatText, statsFormatMin } from './format';
 
 export function analyzeData(data) {
   const { title, labelFormatter, tooltipFormatter, isStacked, isPercentage, hasSecondYAxis, onZoom, minimapRange, hideCaption, zoomOutLabel } = data;
@@ -28,6 +28,7 @@ export function analyzeData(data) {
     case 'statsFormat(\'day\')':
       xLabels = statsFormatDay(labels);
       break;
+    case 'statsFormat(\'hour\')':
     case 'statsFormat(\'5min\')':
       xLabels = statsFormatMin(labels);
       break;

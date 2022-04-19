@@ -9,6 +9,7 @@ import {
   ApiChannelStatistics,
   ApiGroupStatistics,
   StatisticsRecentMessage as StatisticsRecentMessageType,
+  StatisticsGraph,
 } from '../../../api/types';
 import { selectChat, selectStatistics } from '../../../global/selectors';
 
@@ -65,6 +66,7 @@ export type StateProps = {
   statistics: ApiChannelStatistics | ApiGroupStatistics;
   dcId?: number;
   isGroup: boolean;
+  messageId?: number;
 };
 
 const Statistics: FC<OwnProps & StateProps> = ({
@@ -73,6 +75,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   statistics,
   dcId,
   isGroup,
+  messageId,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -89,6 +92,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isActive) {
       loadedCharts.current = [];
+      setIsReady(false);
     }
   }, [isActive]);
 
@@ -131,7 +135,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      if (!statistics) {
+      if (!statistics || !containerRef.current) {
         return;
       }
 
@@ -143,26 +147,34 @@ const Statistics: FC<OwnProps & StateProps> = ({
           return;
         }
 
+        if (!graph) {
+          loadedCharts.current.push(name);
+
+          return;
+        }
+
         const { zoomToken } = graph;
 
         LovelyChart.create(
           containerRef.current!.children[index],
           {
             title: lang((graphTitles as Record<string, string>)[name]),
-            ...zoomToken && {
+            ...zoomToken ? {
               onZoom: (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId }),
               zoomOutLabel: lang('Graph.ZoomOut'),
-            },
-            ...graph,
+            } : {},
+            ...graph as StatisticsGraph,
           },
         );
 
         loadedCharts.current.push(name);
       });
     })();
-  }, [graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId]);
+  }, [
+    graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId,
+  ]);
 
-  if (!isReady || !statistics) {
+  if (!isReady || !statistics || messageId) {
     return <Loading />;
   }
 
@@ -197,7 +209,11 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const dcId = chat?.fullInfo?.statisticsDcId;
     const isGroup = chat?.type === 'chatTypeSuperGroup';
+    // Show Loading component if message was already selected for improving transition animation
+    const messageId = global.statistics.currentMessageId;
 
-    return { statistics, dcId, isGroup };
+    return {
+      statistics, dcId, isGroup, messageId,
+    };
   },
 )(Statistics));

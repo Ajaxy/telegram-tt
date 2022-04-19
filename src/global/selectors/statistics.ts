@@ -17,3 +17,11 @@ export function selectIsStatisticsShown(global: GlobalState) {
 
   return chat?.fullInfo?.canViewStatistics;
 }
+
+export function selectIsMessageStatisticsShown(global: GlobalState) {
+  if (!global.isStatisticsShown) {
+    return false;
+  }
+
+  return Boolean(global.statistics.currentMessageId);
+}

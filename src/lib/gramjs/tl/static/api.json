@@ -222,6 +222,7 @@
     "help.getAppConfig",
     "stats.getBroadcastStats",
     "stats.getMegagroupStats",
+    "stats.getMessageStats",
     "stats.loadAsyncGraph",
     "messages.getAttachMenuBots",
     "messages.getAttachMenuBot",

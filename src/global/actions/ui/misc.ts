@@ -114,6 +114,20 @@ addActionHandler('toggleStatistics', (global) => {
   return {
     ...global,
     isStatisticsShown: !global.isStatisticsShown,
+    statistics: {
+      ...global.statistics,
+      currentMessageId: undefined,
+    },
+  };
+});
+
+addActionHandler('toggleMessageStatistics', (global, action, payload) => {
+  return {
+    ...global,
+    statistics: {
+      ...global.statistics,
+      currentMessageId: payload?.messageId,
+    },
   };
 });
 

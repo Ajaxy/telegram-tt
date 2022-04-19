@@ -25,6 +25,7 @@ import Transition from '../ui/Transition';
 import RightSearch from './RightSearch.async';
 import Management from './management/Management.async';
 import Statistics from './statistics/Statistics.async';
+import MessageStatistics from './statistics/MessageStatistics.async';
 import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
@@ -71,6 +72,7 @@ const RightColumn: FC<StateProps> = ({
     setNewChatMembersDialogState,
     setEditingExportedInvite,
     toggleStatistics,
+    toggleMessageStatistics,
     setOpenedInviteInfo,
     requestNextManagementScreen,
   } = getActions();
@@ -87,6 +89,7 @@ const RightColumn: FC<StateProps> = ({
   const isSearch = contentKey === RightColumnContent.Search;
   const isManagement = contentKey === RightColumnContent.Management;
   const isStatistics = contentKey === RightColumnContent.Statistics;
+  const isMessageStatistics = contentKey === RightColumnContent.MessageStatistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
@@ -150,6 +153,9 @@ const RightColumn: FC<StateProps> = ({
 
         break;
       }
+      case RightColumnContent.MessageStatistics:
+        toggleMessageStatistics();
+        break;
       case RightColumnContent.Statistics:
         toggleStatistics();
         break;
@@ -174,7 +180,7 @@ const RightColumn: FC<StateProps> = ({
   }, [
     contentKey, isScrolledDown, toggleChatInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
-    setEditingExportedInvite, chatId, setOpenedInviteInfo, toggleStatistics,
+    setEditingExportedInvite, chatId, setOpenedInviteInfo, toggleStatistics, toggleMessageStatistics,
   ]);
 
   const handleSelectChatMember = useCallback((memberId, isPromoted) => {
@@ -268,6 +274,8 @@ const RightColumn: FC<StateProps> = ({
 
       case RightColumnContent.Statistics:
         return <Statistics chatId={chatId!} isActive={isOpen && isActive} />;
+      case RightColumnContent.MessageStatistics:
+        return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StickerSearch:
         return <StickerSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.GifSearch:
@@ -293,6 +301,7 @@ const RightColumn: FC<StateProps> = ({
           isSearch={isSearch}
           isManagement={isManagement}
           isStatistics={isStatistics}
+          isMessageStatistics={isMessageStatistics}
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isPollResults={isPollResults}
