@@ -31,7 +31,7 @@
       transition: none;
     }
 
-    &:not(.middle-column-open) {
+    &.left-column-open {
       transform: translate3d(100vw, 0, 0) !important;
     }
   }

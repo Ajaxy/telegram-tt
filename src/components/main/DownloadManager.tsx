@@ -12,7 +12,7 @@ import {
   getMessageContentFilename, getMessageMediaHash,
 } from '../../global/helpers';
 
-import useDebounce from '../../hooks/useDebounce';
+import useRunDebounced from '../../hooks/useRunDebounced';
 
 type StateProps = {
   activeDownloads: Record<string, number[]>;
@@ -33,17 +33,17 @@ const DownloadManager: FC<StateProps> = ({
 }) => {
   const { cancelMessagesMediaDownload } = getActions();
 
-  const debouncedGlobalUpdate = useDebounce(GLOBAL_UPDATE_DEBOUNCE, true);
+  const runDebounced = useRunDebounced(GLOBAL_UPDATE_DEBOUNCE, true);
 
   const handleMessageDownloaded = useCallback((message: ApiMessage) => {
     downloadedMessages.add(message);
-    debouncedGlobalUpdate(() => {
+    runDebounced(() => {
       if (downloadedMessages.size) {
         cancelMessagesMediaDownload({ messages: Array.from(downloadedMessages) });
         downloadedMessages.clear();
       }
     });
-  }, [cancelMessagesMediaDownload, debouncedGlobalUpdate]);
+  }, [cancelMessagesMediaDownload, runDebounced]);
 
   useEffect(() => {
     const activeMessages = Object.entries(activeDownloads).map(([chatId, messageIds]) => (

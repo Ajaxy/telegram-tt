@@ -464,9 +464,7 @@ export function setTarget($element: VirtualElement, target: Node) {
   }
 }
 
-export function useState<T>(): [T, StateHookSetter<T>];
-export function useState<T>(initial: T): [T, StateHookSetter<T>];
-export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
+export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter<T>] {
   const { cursor, byCursor } = renderingInstance.hooks.state;
 
   if (byCursor[cursor] === undefined) {
@@ -501,7 +499,9 @@ export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
                 componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
                   ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
                   : '',
-                `Forced update at cursor #${cursor}, next value: `,
+                debugKey
+                  ? `State update for ${debugKey}, next value: `
+                  : `State update at cursor #${cursor}, next value: `,
                 byCursor[cursor].nextValue,
               );
             }

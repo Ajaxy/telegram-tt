@@ -1,6 +1,6 @@
 export default function findInViewport(
   container: HTMLElement,
-  selectorOrElements: string | NodeListOf<HTMLElement>,
+  selectorOrElements: string | NodeListOf<HTMLElement> | HTMLElement[],
   margin = 0,
   isDense = false,
   shouldContainBottom = false,

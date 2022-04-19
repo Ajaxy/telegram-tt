@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../global';
 import { ManagementScreens, ProfileState } from '../../types';
 import { ApiExportedInvite } from '../../api/types';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
@@ -43,7 +44,6 @@ type OwnProps = {
   isGifSearch?: boolean;
   isPollResults?: boolean;
   isAddingChatMembers?: boolean;
-  shouldSkipAnimation?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: () => void;
@@ -61,9 +61,10 @@ type StateProps = {
   gifSearchQuery?: string;
   isEditingInvite?: boolean;
   currentInviteInfo?: ApiExportedInvite;
+  shouldSkipHistoryAnimations?: boolean;
 };
 
-const COLUMN_CLOSE_DELAY_MS = 300;
+const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 enum HeaderContent {
@@ -121,10 +122,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   messageSearchQuery,
   stickerSearchQuery,
   gifSearchQuery,
-  shouldSkipAnimation,
   isEditingInvite,
   canViewStatistics,
   currentInviteInfo,
+  shouldSkipHistoryAnimations,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -179,7 +180,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setShouldSkipTransition(!isColumnOpen);
-    }, COLUMN_CLOSE_DELAY_MS);
+    }, COLUMN_ANIMATION_DURATION);
   }, [isColumnOpen]);
 
   const lang = useLang();
@@ -436,7 +437,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const buttonClassName = buildClassName(
     'animated-close-icon',
     isBackButton && 'state-back',
-    (shouldSkipTransition || shouldSkipAnimation) && 'no-transition',
+    (shouldSkipTransition || shouldSkipHistoryAnimations) && 'no-transition',
   );
 
   return (
@@ -452,7 +453,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         <div ref={backButtonRef} className={buttonClassName} />
       </Button>
       <Transition
-        name={(shouldSkipTransition || shouldSkipAnimation) ? 'none' : 'slide-fade'}
+        name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'slide-fade'}
         activeKey={renderingContentKey}
       >
         {renderHeaderContent()}
@@ -495,6 +496,7 @@ export default memo(withGlobal<OwnProps>(
       gifSearchQuery,
       isEditingInvite,
       currentInviteInfo,
+      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
     };
   },
 )(RightHeader));

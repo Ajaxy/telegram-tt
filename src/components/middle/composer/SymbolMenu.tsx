@@ -211,7 +211,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     const className = buildClassName(
       'SymbolMenu mobile-menu',
       transitionClassNames,
-      !isLeftColumnShown && 'middle-column-open',
+      isLeftColumnShown && 'left-column-open',
     );
 
     return (

@@ -20,6 +20,7 @@
 
 .has-call-header {
   --call-header-height: 2rem;
+
   #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
     height: calc(100% - 2rem);
     margin-top: 2rem;
@@ -74,9 +75,10 @@
       right: 0;
       bottom: 0;
       background: black;
-      opacity: var(--layer-blackout-opacity);
+      opacity: 0;
       transition: opacity var(--layer-transition);
       z-index: 1;
+      pointer-events: none;
 
       body.animation-level-0 & {
         transition: none;
@@ -87,18 +89,18 @@
         display: none;
       }
 
-      body.is-android .middle-column-shown & {
+      body.is-android #Main.left-column-animating & {
         display: block;
+      }
+
+      body:not(.is-android) #Main:not(.left-column-open) &,
+      body.android-left-blackout-open & {
+        opacity: var(--layer-blackout-opacity);
       }
     }
 
-    #Main:not(.middle-column-open) & {
+    #Main.left-column-open & {
       transform: translate3d(0, 0, 0);
-
-      &::after {
-        opacity: 0;
-        pointer-events: none;
-      }
     }
 
     #Main.history-animation-disabled & {
@@ -154,7 +156,7 @@
       transition: none;
     }
 
-    #Main:not(.middle-column-open) & {
+    #Main.left-column-open & {
       transform: translate3d(26.5rem, 0, 0);
     }
   }
@@ -162,7 +164,7 @@
   @media (max-width: 600px) {
     border-left: none;
 
-    #Main:not(.middle-column-open) & {
+    #Main.left-column-open & {
       transform: translate3d(100vw, 0, 0);
     }
 
@@ -187,7 +189,7 @@ body.is-android.animation-level-1 {
     transition: transform var(--layer-transition), opacity var(--layer-transition);
   }
 
-  #Main:not(.middle-column-shown) {
+  #Main.left-column-open:not(.left-column-animating) {
     #MiddleColumn {
       display: none;
     }
@@ -200,14 +202,15 @@ body.is-android.animation-level-1 {
     }
   }
 
-  #Main.middle-column-open {
+  #Main:not(.left-column-open) {
     #LeftColumn {
       transform: translate3d(0, 0, 0);
       opacity: 0;
     }
   }
 
-  #Main:not(.right-column-shown) {
+  // @optimization
+  #Main:not(.right-column-open):not(.right-column-animating) {
     #RightColumn {
       display: none;
     }

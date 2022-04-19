@@ -60,6 +60,8 @@ const useShowTransition = (
   return {
     shouldRender,
     transitionClassNames,
+    hasShownClass: shouldRender,
+    hasOpenClass: shouldHaveOpenClassName,
   };
 };
 
