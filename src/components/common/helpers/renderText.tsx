@@ -1,12 +1,15 @@
 import React from '../../../lib/teact/teact';
-import EMOJI_REGEX, { removeVS16s } from '../../../lib/twemojiRegex';
+import EMOJI_REGEX from '../../../lib/twemojiRegex';
 
 import { TextPart } from '../../../types';
 
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import {
-  fixNonStandardEmoji, handleEmojiLoad, LOADED_EMOJIS, nativeToUnified,
+  fixNonStandardEmoji,
+  handleEmojiLoad,
+  LOADED_EMOJIS,
+  nativeToUnifiedExtendedWithCache,
 } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
@@ -103,7 +106,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
     result.push(parts[0]);
 
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
-      const code = nativeToUnified(removeVS16s(emoji));
+      const code = nativeToUnifiedExtendedWithCache(emoji);
       if (!code) return emojiResult;
       const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
       const className = buildClassName(
