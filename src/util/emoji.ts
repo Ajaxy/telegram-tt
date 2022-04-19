@@ -1,4 +1,5 @@
-import EMOJI_REGEX from '../lib/twemojiRegex';
+import EMOJI_REGEX, { removeVS16s } from '../lib/twemojiRegex';
+import withCache from './withCache';
 
 // Due to the fact that emoji from Apple do not contain some characters, it is necessary to remove them from emoji-data
 // https://github.com/iamcal/emoji-data/issues/136
@@ -71,6 +72,12 @@ export function nativeToUnified(emoji: string) {
 
   return code;
 }
+
+function nativeToUnifiedExtended(emoji: string) {
+  return nativeToUnified(removeVS16s(emoji));
+}
+
+export const nativeToUnifiedExtendedWithCache = withCache(nativeToUnifiedExtended);
 
 export function uncompressEmoji(data: EmojiRawData): EmojiData {
   const emojiData: EmojiData = { categories: [], emojis: {} };
