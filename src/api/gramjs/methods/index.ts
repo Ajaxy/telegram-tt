@@ -83,7 +83,9 @@ export {
   setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction,
 } from './reactions';
 
-export { fetchChannelStatistics, fetchGroupStatistics, fetchStatisticsAsyncGraph } from './statistics';
+export {
+  fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics, fetchStatisticsAsyncGraph,
+} from './statistics';
 
 export {
   acceptPhoneCall, confirmPhoneCall, requestPhoneCall, decodePhoneCallData, createPhoneCallState,

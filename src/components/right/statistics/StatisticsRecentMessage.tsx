@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import useLang, { LangFn } from '../../../hooks/useLang';
+import { getActions } from '../../../global';
 
 import { ApiMessage, StatisticsRecentMessage as StatisticsRecentMessageType } from '../../../api/types';
 
@@ -23,10 +24,15 @@ export type OwnProps = {
 
 const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
   const lang = useLang();
+  const { toggleMessageStatistics } = getActions();
 
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
+
+  const handleClick = useCallback(() => {
+    toggleMessageStatistics({ messageId: message.id });
+  }, [toggleMessageStatistics, message.id]);
 
   return (
     <div
@@ -34,6 +40,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
         'StatisticsRecentMessage',
         Boolean(mediaBlobUrl || mediaThumbnail) && 'StatisticsRecentMessage--with-image',
       )}
+      onClick={handleClick}
     >
       <div className="StatisticsRecentMessage__title">
         <div className="StatisticsRecentMessage__summary">

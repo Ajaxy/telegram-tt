@@ -201,6 +201,7 @@ export const INITIAL_STATE: GlobalState = {
 
   statistics: {
     byChatId: {},
+    currentMessage: {},
   },
 
   pollModal: {

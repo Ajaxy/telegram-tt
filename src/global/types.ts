@@ -28,6 +28,7 @@ import {
   ApiSponsoredMessage,
   ApiChannelStatistics,
   ApiGroupStatistics,
+  ApiMessageStatistics,
   ApiPaymentFormNativeParams,
   ApiUpdate,
   ApiReportReason,
@@ -518,6 +519,8 @@ export type GlobalState = {
 
   statistics: {
     byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
+    currentMessage: ApiMessageStatistics;
+    currentMessageId?: number;
   };
 
   newContact?: {
@@ -809,7 +812,7 @@ export type NonTypedActionNames = (
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
-  'toggleStatistics' |
+  'toggleStatistics' | 'toggleMessageStatistics' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'goToAuthQrCode' | 'clearCache' |
@@ -896,7 +899,7 @@ export type NonTypedActionNames = (
   'createGroupCall' | 'joinVoiceChatByLink' | 'subscribeToGroupCallUpdates' | 'createGroupCallInviteLink' |
   'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' |
   // stats
-  'loadStatistics' | 'loadStatisticsAsyncGraph'
+  'loadStatistics' | 'loadMessageStatistics' | 'loadStatisticsAsyncGraph'
   );
 
 const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();

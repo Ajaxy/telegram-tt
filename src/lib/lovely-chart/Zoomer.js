@@ -26,13 +26,7 @@ export function createZoomer(data, overviewData, colors, stateManager, container
 
     const { value } = label;
     const dataPromise = data.shouldZoomToPie ? Promise.resolve(_generatePieData(labelIndex)) : data.onZoom(value);
-    dataPromise
-      .then((newData) => _replaceData(newData, labelIndex, label))
-      .catch(() => {
-        tooltip.toggleLoading(false);
-        tooltip.toggleIsZoomed(false);
-        header.toggleIsZooming(false);
-      });
+    dataPromise.then((newData) => _replaceData(newData, labelIndex, label));
   }
 
   function zoomOut(state) {
@@ -58,6 +52,14 @@ export function createZoomer(data, overviewData, colors, stateManager, container
   }
 
   function _replaceData(newRawData, labelIndex, zoomInLabel) {
+    if (!newRawData) {
+      tooltip.toggleLoading(false);
+      tooltip.toggleIsZoomed(false);
+      header.toggleIsZooming(false);
+
+      return;
+    }
+
     tooltip.toggleLoading(false);
 
     const labelWidth = 1 / data.xLabels.length;

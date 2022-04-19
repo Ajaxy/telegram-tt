@@ -137,7 +137,7 @@ type UniversalMessage = (
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
-    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions'
+    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards'
   )>
 );
 
@@ -172,6 +172,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     date: mtpMessage.date,
     senderId: fromId || (mtpMessage.out && mtpMessage.post && currentUserId) || chatId,
     views: mtpMessage.views,
+    forwards: mtpMessage.forwards,
     isFromScheduled: mtpMessage.fromScheduled,
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
