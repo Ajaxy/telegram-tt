@@ -94,6 +94,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         qrCode: onRequestQrCode,
         onError: onAuthError,
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
+        shouldThrowIfUnauthorized: Boolean(sessionData),
       });
     } catch (err: any) {
       // eslint-disable-next-line no-console

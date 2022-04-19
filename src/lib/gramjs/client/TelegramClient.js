@@ -836,7 +836,7 @@ class TelegramClient {
             await this.connect();
         }
 
-        if (await checkAuthorization(this)) {
+        if (await checkAuthorization(this, authParams.shouldThrowIfUnauthorized)) {
             return;
         }
 
