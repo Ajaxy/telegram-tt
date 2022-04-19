@@ -23,9 +23,9 @@ export function getMessageHtmlId(messageId: number) {
 }
 
 export function getMessageKey(message: ApiMessage): MessageKey {
-  const { chatId, id } = message;
+  const { chatId, id, previousLocalId } = message;
 
-  return buildMessageKey(chatId, id);
+  return buildMessageKey(chatId, isServiceNotificationMessage(message) ? previousLocalId || id : id);
 }
 
 export function buildMessageKey(chatId: string, msgId: number): MessageKey {

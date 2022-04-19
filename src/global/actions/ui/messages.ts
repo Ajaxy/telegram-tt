@@ -632,6 +632,7 @@ addActionHandler('createServiceNotification', (global, actions, payload) => {
   // The fractional ID is made of the largest integer ID and an incremented fractional part
   const id = Math.floor(maxId) + fractionalPart;
 
+  message.previousLocalId = message.id;
   message.id = id;
 
   const serviceNotification = {
