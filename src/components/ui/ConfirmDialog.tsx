@@ -2,8 +2,9 @@ import React, {
   FC, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
 
+import { TextPart } from '../../types';
+
 import useLang from '../../hooks/useLang';
-import { TextPart } from '../common/helpers/renderMessageText';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 
 import Modal from './Modal';

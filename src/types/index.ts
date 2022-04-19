@@ -5,6 +5,8 @@ import {
   ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
 
+export type TextPart = string | JSX.Element;
+
 export enum LoadMoreDirection {
   Backwards,
   Forwards,

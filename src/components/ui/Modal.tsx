@@ -3,7 +3,7 @@ import React, {
   FC, useEffect, useRef,
 } from '../../lib/teact/teact';
 
-import { TextPart } from '../common/helpers/renderMessageText';
+import { TextPart } from '../../types';
 
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';

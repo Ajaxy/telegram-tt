@@ -1,4 +1,6 @@
 import { ApiMessage, ApiMessageEntityTypes } from '../../../api/types';
+import { TextPart } from '../../../types';
+
 import {
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
@@ -8,10 +10,8 @@ import {
 } from '../../../global/helpers';
 import { LangFn } from '../../../hooks/useLang';
 import renderText from './renderText';
-import { renderTextWithEntities, TextPart } from './renderTextWithEntities';
+import { renderTextWithEntities } from './renderTextWithEntities';
 import trimText from '../../../util/trimText';
-
-export type { TextPart };
 
 export function renderMessageText(
   message: ApiMessage,
