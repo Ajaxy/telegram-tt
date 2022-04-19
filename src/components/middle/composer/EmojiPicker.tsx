@@ -219,7 +219,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
 
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
-    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiModule>;
+    emojiDataPromise = import('emoji-data-ios/emoji-data.json');
     emojiRawData = (await emojiDataPromise).default;
 
     emojiData = uncompressEmoji(emojiRawData);
