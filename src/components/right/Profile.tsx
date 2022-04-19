@@ -23,7 +23,7 @@ import {
 } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
-  getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId,
+  getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';
 import {
   selectChatMessages,
@@ -522,7 +522,8 @@ export default memo(withGlobal<OwnProps>(
     const members = chat?.fullInfo?.members;
     const areMembersHidden = hasMembersTab && chat
       && (chat.isForbidden || (chat.fullInfo && !chat.fullInfo.canViewMembers));
-    const canAddMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'inviteUsers') || chat.isCreator);
+    const canAddMembers = hasMembersTab && chat
+      && (getHasAdminRight(chat, 'inviteUsers') || !isUserRightBanned(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloadIds = selectActiveDownloadIds(global, chatId);
 
