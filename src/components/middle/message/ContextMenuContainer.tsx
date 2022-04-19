@@ -456,7 +456,7 @@ export default memo(withGlobal<OwnProps>(
       && isOwnMessage(message)
       && !isScheduled
       && chat.membersCount
-      && chat.membersCount < seenByMaxChatMembers
+      && chat.membersCount <= seenByMaxChatMembers
       && message.date > Date.now() / 1000 - seenByExpiresAt);
     const isPrivate = chat && isUserId(chat.id);
     const isAction = isActionMessage(message);
