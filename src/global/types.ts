@@ -519,7 +519,7 @@ export type GlobalState = {
 
   statistics: {
     byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
-    currentMessage: ApiMessageStatistics;
+    currentMessage?: ApiMessageStatistics;
     currentMessageId?: number;
   };
 

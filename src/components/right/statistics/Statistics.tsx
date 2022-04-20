@@ -15,6 +15,7 @@ import { selectChat, selectStatistics } from '../../../global/selectors';
 
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
+import useForceUpdate from '../../../hooks/useForceUpdate';
 
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
@@ -84,6 +85,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   const loadedCharts = useRef<string[]>([]);
 
   const { loadStatistics, loadStatisticsAsyncGraph } = getActions();
+  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     loadStatistics({ chatId, isGroup });
@@ -169,9 +171,11 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
         loadedCharts.current.push(name);
       });
+
+      forceUpdate();
     })();
   }, [
-    graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId,
+    graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
 
   if (!isReady || !statistics || messageId) {
