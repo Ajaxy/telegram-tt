@@ -1,10 +1,15 @@
 .StatisticsRecentMessage {
   position: relative;
   cursor: pointer;
-  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-default-small);
+
+  &:hover, &:active {
+    background-color: var(--color-chat-hover);
+  }
 
   &--with-image {
-    padding-left: 3rem;
+    padding-left: 3.5rem;
   }
 
   &__summary {
@@ -18,8 +23,8 @@
       width: 2.5rem;
       height: 2.5rem;
       position: absolute;
-      left: 0;
-      top: 0;
+      left: 0.5rem;
+      top: 0.5rem;
       object-fit: cover;
       border-radius: 0.25rem;
       margin-inline-end: 0.25rem;

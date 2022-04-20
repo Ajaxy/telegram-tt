@@ -40,7 +40,7 @@ export type OwnProps = {
 };
 
 export type StateProps = {
-  statistics: ApiMessageStatistics;
+  statistics?: ApiMessageStatistics;
   messageId?: number;
   dcId?: number;
 };
@@ -99,7 +99,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      if (!statistics) {
+      if (!statistics || !containerRef.current) {
         return;
       }
 
@@ -161,10 +161,11 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { currentMessage, currentMessageId } = global.statistics;
     const chat = selectChat(global, chatId);
     const dcId = chat?.fullInfo?.statisticsDcId;
+    const statistics = global.statistics.currentMessage;
+    const messageId = global.statistics.currentMessageId;
 
-    return { statistics: currentMessage, dcId, messageId: currentMessageId };
+    return { statistics, dcId, messageId };
   },
 )(Statistics));

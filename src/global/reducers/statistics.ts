@@ -9,7 +9,6 @@ export function updateStatistics(
   return {
     ...global,
     statistics: {
-      currentMessage: {},
       byChatId: {
         ...global.statistics.byChatId,
         [chatId]: statistics,
