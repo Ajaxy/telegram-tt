@@ -1,3 +1,13 @@
+## 1.43.0 (2022-04-26)
+
+### 🤩 **Better**
+* Some improvements for revolutionary web bots such as [@wallet](https://t.me/wallet_news/60).
+* Better app icon on macOS.
+* Layout improvements and fixes.
+
+### 💪 **Stronger**
+* Various improvements for Statistics screen.
+
 ## 1.42.0 (2022-04-19)
 
 ### 👏 **Harder**
