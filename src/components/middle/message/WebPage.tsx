@@ -77,6 +77,7 @@ const WebPage: FC<OwnProps> = ({
 
   const className = buildClassName(
     'WebPage',
+    inPreview && 'in-preview',
     isSquarePhoto && 'with-square-photo',
     !photo && !video && !inPreview && 'without-media',
     video && 'with-video',
@@ -100,6 +101,7 @@ const WebPage: FC<OwnProps> = ({
           onCancelUpload={onCancelMediaTransfer}
           isDownloading={isDownloading}
           isProtected={isProtected}
+          withAspectRatio
           theme={theme}
         />
       )}
@@ -124,6 +126,7 @@ const WebPage: FC<OwnProps> = ({
           onCancelUpload={onCancelMediaTransfer}
           isDownloading={isDownloading}
           isProtected={isProtected}
+          withAspectRatio
         />
       )}
     </div>

@@ -123,4 +123,18 @@
       right: 0;
     }
   }
+
+  @media (min-width: 1921px) {
+    @supports (aspect-ratio: 1) {
+      &:not(.in-preview) {
+        max-width: none;
+
+        .thumbnail,
+        .full-media {
+          width: 100% !important;
+          height: auto !important;
+        }
+      }
+    }
+  }
 }
