@@ -57,7 +57,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   theme,
 }) => {
   const {
-    closeWebApp, sendWebViewData, prolongWebView, toggleBotInAttachMenu,
+    closeWebApp, sendWebViewData, prolongWebView, toggleBotInAttachMenu, openTelegramLink,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const lang = useLang();
@@ -70,6 +70,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const handleEvent = useCallback((event: WebAppInboundEvent) => {
     const { eventType } = event;
     if (eventType === 'web_app_close') {
+      closeWebApp();
+    }
+
+    if (eventType === 'open_tg_link') {
+      openTelegramLink({ url: event.eventData });
       closeWebApp();
     }
 
@@ -100,7 +105,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isProgressVisible: eventData.is_progress_visible,
       });
     }
-  }, [bot, buttonText, closeWebApp, sendWebViewData]);
+  }, [bot, buttonText, closeWebApp, openTelegramLink, sendWebViewData]);
 
   const {
     ref, reloadFrame, sendEvent, sendViewport, sendTheme,

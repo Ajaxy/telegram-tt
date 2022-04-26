@@ -18,15 +18,11 @@ export type WebAppInboundEvent = {
     is_progress_visible: boolean;
   };
 } | {
-  eventType: 'web_app_request_viewport';
+  eventType: 'open_tg_link';
+  eventData: string;
 } | {
-  eventType: 'web_app_request_theme';
-} | {
-  eventType: 'web_app_ready';
-} | {
-  eventType: 'web_app_expand';
-} | {
-  eventType: 'web_app_close';
+  eventType: 'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
+  | 'web_app_close' | 'iframe_ready';
 };
 
 type WebAppOutboundEvent = {
@@ -49,8 +45,31 @@ type WebAppOutboundEvent = {
     };
   };
 } | {
+  eventType: 'set_custom_style';
+  eventData: string;
+} | {
   eventType: 'main_button_pressed';
 };
+
+const SCROLLBAR_STYLE = `* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90,90,90,0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: rgba(90, 90, 90, 0.3);
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}`;
 
 const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event: WebAppInboundEvent) => void) => {
   // eslint-disable-next-line no-null/no-null
@@ -96,6 +115,13 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
     });
   }, [sendEvent]);
 
+  const sendCustomStyle = useCallback((style: string) => {
+    sendEvent({
+      eventType: 'set_custom_style',
+      eventData: style,
+    });
+  }, [sendEvent]);
+
   const handleMessage = useCallback((event: MessageEvent<string>) => {
     if (ignoreEventsRef.current) {
       return;
@@ -112,6 +138,10 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
         sendTheme();
       }
 
+      if (data.eventType === 'iframe_ready') {
+        sendCustomStyle(SCROLLBAR_STYLE);
+      }
+
       if (data.eventType === 'web_app_data_send') {
         if (!isSimpleView) return; // Allowed only in simple view
         ignoreEventsRef.current = true;
@@ -120,7 +150,7 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
     } catch (err) {
       // Ignore other messages
     }
-  }, [isSimpleView, onEvent, sendTheme, sendViewport]);
+  }, [isSimpleView, onEvent, sendCustomStyle, sendTheme, sendViewport]);
 
   useEffect(() => {
     if (windowSize) {
