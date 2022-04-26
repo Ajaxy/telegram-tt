@@ -9,7 +9,8 @@ export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebZ-Beta-04-01';
-export const BETA_DISCUSSION_CHAT = 'webzcommentsru';
+export const BETA_DISCUSSION_CHAT_RU = 'webzcommentsru';
+export const BETA_DISCUSSION_CHAT_EN = 'webzchat';
 
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;

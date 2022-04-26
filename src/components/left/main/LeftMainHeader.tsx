@@ -8,7 +8,14 @@ import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
 import {
-  ANIMATION_LEVEL_MAX, APP_NAME, APP_VERSION, BETA_CHANGELOG_URL, BETA_DISCUSSION_CHAT, DEBUG, FEEDBACK_URL, IS_BETA,
+  ANIMATION_LEVEL_MAX,
+  APP_NAME, APP_VERSION,
+  BETA_CHANGELOG_URL,
+  BETA_DISCUSSION_CHAT_EN,
+  BETA_DISCUSSION_CHAT_RU,
+  DEBUG,
+  FEEDBACK_URL,
+  IS_BETA,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
@@ -174,8 +181,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     window.open(BETA_CHANGELOG_URL, '_blank');
   }, []);
 
-  const handleDiscussionClick = useCallback(() => {
-    openChatByUsername({ username: BETA_DISCUSSION_CHAT });
+  const handleRuDiscussionClick = useCallback(() => {
+    openChatByUsername({ username: BETA_DISCUSSION_CHAT_RU });
+  }, [openChatByUsername]);
+
+  const handleEnDiscussionClick = useCallback(() => {
+    openChatByUsername({ username: BETA_DISCUSSION_CHAT_EN });
   }, [openChatByUsername]);
 
   const handleSwitchToWebK = useCallback(() => {
@@ -268,9 +279,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               </MenuItem>
               <MenuItem
                 icon="comments"
-                onClick={handleDiscussionClick}
+                onClick={handleRuDiscussionClick}
               >
                 Beta Discussion (ru)
+              </MenuItem>
+              <MenuItem
+                icon="comments"
+                onClick={handleEnDiscussionClick}
+              >
+                Beta Discussion (en)
               </MenuItem>
             </>
           )}
