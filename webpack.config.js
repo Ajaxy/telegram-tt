@@ -6,7 +6,7 @@ const {
   EnvironmentPlugin,
   ProvidePlugin,
 } = require('webpack');
-const HtmlPlugin = require('html-webpack-plugin');
+const HtmlWebackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
@@ -118,7 +118,9 @@ module.exports = (env = {}, argv = {}) => {
       },
     },
     plugins: [
-      new HtmlPlugin({
+      new HtmlWebackPlugin({
+        appName: process.env.APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
+        appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : './apple-touch-icon-dev',
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({
