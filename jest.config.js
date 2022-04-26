@@ -14,4 +14,7 @@ module.exports = {
     '\\.(jsx?|tsx?)$': 'babel-jest',
     '\\.txt$': 'jest-raw-loader',
   },
+  globals: {
+    APP_REVISION: "jest-test",
+  },
 };

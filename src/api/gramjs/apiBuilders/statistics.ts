@@ -62,7 +62,7 @@ export function buildMessageStatistics(stats: GramJs.stats.MessageStats): ApiMes
 }
 
 export function buildGraph(
-  result: GramJs.TypeStatsGraph, isPercentage?: boolean
+  result: GramJs.TypeStatsGraph, isPercentage?: boolean,
 ): StatisticsGraph | undefined {
   if ((result as GramJs.StatsGraphError).error) {
     return undefined;
