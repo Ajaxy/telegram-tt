@@ -612,7 +612,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload) => {
   const chat = selectCurrentChat(global);
 
   if (!commentId) {
-    if (chat && chat.username === username) {
+    if (chat && chat.username === username && !startAttach) {
       actions.focusMessage({ chatId: chat.id, messageId });
       return;
     }
@@ -1340,6 +1340,7 @@ async function openChatByUsername(
     if (!chat) return;
     const global = getGlobal();
     const user = selectUser(global, chat.id);
+
     if (!user) return;
     const isBot = isUserBot(user);
     if (!isBot || !user.isAttachMenuBot) {
