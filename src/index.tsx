@@ -5,6 +5,7 @@ import React from './lib/teact/teact';
 import TeactDOM from './lib/teact/teact-dom';
 
 import { getActions, getGlobal } from './global';
+import updateWebmanifest from './util/updateWebmanifest';
 import './global/init';
 
 import { DEBUG } from './config';
@@ -24,6 +25,8 @@ if (DEBUG) {
   // eslint-disable-next-line no-console
   console.log('>>> START INITIAL RENDER');
 }
+
+updateWebmanifest();
 
 TeactDOM.render(
   <App />,
