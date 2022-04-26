@@ -1,6 +1,7 @@
 {
-    "name": "Telegram WebZ",
-    "short_name": "Telegram WebZ",
+    "name": "Telegram Web",
+    "short_name": "Telegram Web",
+    "description": "Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.",
     "start_url": "./",
     "gcm_sender_id": "122867383838",
     "icons": [
@@ -20,6 +21,11 @@
             "type": "image/png"
         }
     ],
+    "screenshots" : [{
+      "src": "screenshot.jpg",
+      "sizes": "1280x802",
+      "type": "image/jpeg"
+    }],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone"
