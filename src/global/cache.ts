@@ -235,6 +235,13 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.trustedBotIds) {
     cached.trustedBotIds = [];
   }
+
+  if (cached.activeSessions?.byHash === undefined) {
+    cached.activeSessions = {
+      byHash: {},
+      orderedHashes: [],
+    };
+  }
 }
 
 function updateCache() {

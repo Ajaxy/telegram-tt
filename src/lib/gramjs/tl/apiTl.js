@@ -1032,6 +1032,8 @@ account.uploadWallPaper#dd853661 file:InputFile mime_type:string settings:WallPa
 account.setContentSettings#b574b16b flags:# sensitive_enabled:flags.0?true = Bool;
 account.getContentSettings#8b9b4dae = account.ContentSettings;
 account.reportProfilePhoto#fa8cc6f5 peer:InputPeer photo_id:InputPhoto reason:ReportReason message:string = Bool;
+account.setAuthorizationTTL#bf899aa0 authorization_ttl_days:int = Bool;
+account.changeAuthorizationSettings#40f48462 flags:# hash:long encrypted_requests_disabled:flags.0?Bool call_requests_disabled:flags.1?Bool = Bool;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
 contacts.getContacts#5dd69e12 hash:long = contacts.Contacts;

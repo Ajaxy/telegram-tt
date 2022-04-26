@@ -61,6 +61,7 @@ export interface ApiSession {
   ip: string;
   country: string;
   region: string;
+  areCallsEnabled: boolean;
 }
 
 export interface ApiSessionData {

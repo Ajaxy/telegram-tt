@@ -482,8 +482,11 @@ export type GlobalState = {
   notifications: ApiNotification[];
   dialogs: (ApiError | ApiInviteInfo)[];
 
-  // TODO Move to settings
-  activeSessions: ApiSession[];
+  activeSessions: {
+    byHash: Record<string, ApiSession>;
+    orderedHashes: string[];
+    ttlDays?: number;
+  };
 
   settings: {
     byKey: ISettings;
@@ -598,6 +601,13 @@ export interface ActionPayloads {
     description: string;
     photo?: ApiPhoto;
   };
+  changeSessionSettings: {
+    hash: string;
+    areCallsEnabled: boolean;
+  };
+  changeSessionTtl: {
+    days: number;
+  };
 
   // Chats
   openChat: {
@@ -700,7 +710,6 @@ export interface ActionPayloads {
   };
 
   // Bots
-
   clickBotInlineButton: {
     messageId: number;
     button: ApiKeyboardButton;
@@ -778,7 +787,6 @@ export interface ActionPayloads {
   };
 
   // Misc
-
   openPollModal: {
     isQuiz?: boolean;
   };

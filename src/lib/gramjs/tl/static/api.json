@@ -45,6 +45,8 @@
     "account.getContentSettings",
     "account.reportPeer",
     "account.reportProfilePhoto",
+    "account.changeAuthorizationSettings",
+    "account.setAuthorizationTTL",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",
