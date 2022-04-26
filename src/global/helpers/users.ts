@@ -6,6 +6,7 @@ import { orderBy } from '../../util/iteratees';
 import { LangFn } from '../../hooks/useLang';
 import { getServerTime } from '../../util/serverTime';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { formatPhoneNumber } from '../../util/phoneNumber';
 
 const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
@@ -52,6 +53,10 @@ export function getUserFullName(user?: ApiUser) {
 
       if (user.lastName) {
         return user.lastName;
+      }
+
+      if (user.phoneNumber) {
+        return `+${formatPhoneNumber(user.phoneNumber)}`;
       }
 
       break;

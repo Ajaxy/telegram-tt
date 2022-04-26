@@ -1,24 +1,16 @@
-import { useEffect } from '../../../lib/teact/teact';
-import { IS_MAC_OS } from '../../../util/environment';
-import getKeyFromEvent from '../../../util/getKeyFromEvent';
+import { useHotkeys } from '../../../hooks/useHotkeys';
 
 const useCopySelectedMessages = (isActive: boolean, copySelectedMessages: NoneToVoidFunction) => {
-  useEffect(() => {
-    function handleCopy(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && getKeyFromEvent(e) === 'c') {
-        e.preventDefault();
-        copySelectedMessages();
-      }
+  function handleCopy(e: KeyboardEvent) {
+    if (!isActive) {
+      return;
     }
 
-    if (isActive) {
-      document.addEventListener('keydown', handleCopy, false);
-    }
+    e.preventDefault();
+    copySelectedMessages();
+  }
 
-    return () => {
-      document.removeEventListener('keydown', handleCopy, false);
-    };
-  }, [copySelectedMessages, isActive]);
+  useHotkeys([['meta+C', handleCopy]]);
 };
 
 export default useCopySelectedMessages;

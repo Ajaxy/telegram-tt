@@ -12,8 +12,6 @@ import {
   ARCHIVED_FOLDER_ID,
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
-  TIPS_USERNAME,
-  LOCALIZED_TIPS,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
   TMP_CHAT_ID, ALL_FOLDER_ID, DEBUG,
@@ -151,16 +149,6 @@ addActionHandler('openSupportChat', async (global, actions) => {
   if (result) {
     actions.openChat({ id: result.chatId, shouldReplaceHistory: true });
   }
-});
-
-addActionHandler('openTipsChat', (global, actions, payload) => {
-  const { langCode } = payload;
-
-  const usernamePostfix = langCode === 'pt-br'
-    ? 'BR'
-    : LOCALIZED_TIPS.includes(langCode) ? (langCode as string).toUpperCase() : '';
-
-  actions.openChatByUsername({ username: `${TIPS_USERNAME}${usernamePostfix}` });
 });
 
 addActionHandler('loadAllChats', async (global, actions, payload) => {

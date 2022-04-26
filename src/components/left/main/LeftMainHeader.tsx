@@ -96,7 +96,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openChat,
-    openTipsChat,
     setGlobalSearchDate,
     setSettingOption,
     setGlobalSearchChatId,
@@ -196,8 +195,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleOpenTipsChat = useCallback(() => {
-    openTipsChat({ langCode: lang.code });
-  }, [lang.code, openTipsChat]);
+    openChatByUsername({ username: lang('Settings.TipsUsername') });
+  }, [lang, openChatByUsername]);
 
   const isSearchFocused = (
     Boolean(globalSearchChatId)

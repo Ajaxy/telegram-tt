@@ -5,11 +5,11 @@ import { getActions, withGlobal } from '../../global';
 
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { IS_MAC_OS, LAYERS_ANIMATION_NAME } from '../../util/environment';
+import { LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import getKeyFromEvent from '../../util/getKeyFromEvent';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
+import { useHotkeys } from '../../hooks/useHotkeys';
 
 import Transition from '../ui/Transition';
 import LeftMain from './main/LeftMain';
@@ -25,6 +25,7 @@ type StateProps = {
   activeChatFolder: number;
   shouldSkipHistoryAnimations?: boolean;
   leftColumnWidth?: number;
+  currentUserId?: string;
 };
 
 enum ContentType {
@@ -47,6 +48,7 @@ const LeftColumn: FC<StateProps> = ({
   activeChatFolder,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
+  currentUserId,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -57,6 +59,7 @@ const LeftColumn: FC<StateProps> = ({
     clearTwoFaError,
     setLeftColumnWidth,
     resetLeftColumnWidth,
+    openChat,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -255,24 +258,24 @@ const LeftColumn: FC<StateProps> = ({
     [activeChatFolder, content, handleReset],
   );
 
-  useEffect(() => {
+  const handleHotkeySearch = useCallback((e: KeyboardEvent) => {
     if (content === LeftColumnContent.GlobalSearch) {
-      return undefined;
+      return;
     }
 
-    function handleKeyDown(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.shiftKey && getKeyFromEvent(e) === 'f') {
-        e.preventDefault();
-        setContent(LeftColumnContent.GlobalSearch);
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown, false);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, false);
-    };
+    e.preventDefault();
+    setContent(LeftColumnContent.GlobalSearch);
   }, [content]);
+
+  const handleHotkeySavedMessages = useCallback((e: KeyboardEvent) => {
+    e.preventDefault();
+    openChat({ id: currentUserId });
+  }, [currentUserId, openChat]);
+
+  useHotkeys([
+    ['mod+shift+F', handleHotkeySearch],
+    ['mod+shift+S', handleHotkeySavedMessages],
+  ]);
 
   useEffect(() => {
     clearTwoFaError();
@@ -386,9 +389,16 @@ export default memo(withGlobal(
       },
       shouldSkipHistoryAnimations,
       leftColumnWidth,
+      currentUserId,
     } = global;
+
     return {
-      searchQuery: query, searchDate: date, activeChatFolder, shouldSkipHistoryAnimations, leftColumnWidth,
+      searchQuery: query,
+      searchDate: date,
+      activeChatFolder,
+      shouldSkipHistoryAnimations,
+      leftColumnWidth,
+      currentUserId,
     };
   },
 )(LeftColumn));

@@ -72,7 +72,7 @@ const Invoice: FC<OwnProps> = ({
         <p className="title">{renderText(title)}</p>
       )}
       {text && (
-        <p>{renderText(text, ['emoji', 'br'])}</p>
+        <div>{renderText(text, ['emoji', 'br'])}</div>
       )}
       <div className={`description ${photoUrl ? 'has-image' : ''}`}>
         {photoUrl && (

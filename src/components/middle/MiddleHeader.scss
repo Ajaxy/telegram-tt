@@ -253,6 +253,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    user-select: none;
 
     .info {
       display: flex;

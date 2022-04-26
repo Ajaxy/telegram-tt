@@ -4,7 +4,6 @@ import React, {
   useRef,
   useCallback,
   useState,
-  useEffect,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -13,9 +12,8 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { IAnchorPosition, ManagementScreens } from '../../types';
 
 import {
-  ARE_CALLS_SUPPORTED, IS_MAC_OS, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,
+  ARE_CALLS_SUPPORTED, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,
 } from '../../util/environment';
-import getKeyFromEvent from '../../util/getKeyFromEvent';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
@@ -29,6 +27,7 @@ import {
   selectIsRightColumnShown,
 } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
+import { useHotkeys } from '../../hooks/useHotkeys';
 
 import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
@@ -143,26 +142,18 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     requestCall({ userId: chatId });
   }
 
-  useEffect(() => {
-    if (!canSearch) {
-      return undefined;
+  const handleHotkeySearchClick = useCallback((e: KeyboardEvent) => {
+    if (!canSearch || !IS_PWA || e.shiftKey) {
+      return;
     }
 
-    function handleKeyDown(e: KeyboardEvent) {
-      if (
-        IS_PWA && ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && !e.shiftKey && getKeyFromEvent(e) === 'f'
-      ) {
-        e.preventDefault();
-        handleSearchClick();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown, false);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, false);
-    };
+    e.preventDefault();
+    handleSearchClick();
   }, [canSearch, handleSearchClick]);
+
+  useHotkeys([
+    ['meta+F', handleHotkeySearchClick],
+  ]);
 
   const lang = useLang();
 
