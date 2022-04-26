@@ -18,8 +18,10 @@ export type WebAppInboundEvent = {
     is_progress_visible: boolean;
   };
 } | {
-  eventType: 'open_tg_link';
-  eventData: string;
+  eventType: 'web_app_open_tg_link';
+  eventData: {
+    path_full: string;
+  };
 } | {
   eventType: 'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
   | 'web_app_close' | 'iframe_ready';
