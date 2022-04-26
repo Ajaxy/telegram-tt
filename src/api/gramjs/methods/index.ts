@@ -3,7 +3,7 @@ export {
 } from './client';
 
 export {
-  reportPeer, reportProfilePhoto,
+  reportPeer, reportProfilePhoto, changeSessionSettings, changeSessionTtl,
 } from './account';
 
 export {

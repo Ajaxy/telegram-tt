@@ -1,0 +1,52 @@
+$icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "opera", "safari", "samsung", "ubuntu", "unknown", "vivaldi", "windows", "xbox";
+
+@mixin device-icon($icon-name) {
+  .iconDevice__#{$icon-name} {
+    background-image: url("../../../assets/devices/#{$icon-name}.svg");
+  }
+}
+
+.SettingsActiveSession {
+  :global(.modal-dialog) {
+    max-width: 28rem;
+  }
+}
+
+.iconDevice {
+  width: 5rem;
+  height: 5rem;
+  background-repeat: no-repeat;
+  background-size: 5rem;
+  margin: 0 auto 1rem;
+}
+
+@each $icon in $icons {
+  @include device-icon($icon);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.note,
+.date {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.box {
+  background: var(--color-background-secondary);
+  padding: 1rem 1rem 0.5rem;
+  border-radius: var(--border-radius-default);
+  margin: 1rem 0;
+}
+
+.actionHeader {
+  margin-top: 1px;
+}
+
+.actionName {
+  margin-right: auto;
+}

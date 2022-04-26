@@ -1,5 +1,6 @@
+/* eslint-disable react/jsx-no-bind */
 import React, {
-  FC, memo, useCallback, useMemo,
+  FC, memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -14,8 +15,10 @@ import getSessionIcon from './helpers/getSessionIcon';
 
 import ListItem from '../../ui/ListItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import SettingsActiveSession from './SettingsActiveSession';
 
 import './SettingsActiveSessions.scss';
+import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
@@ -24,21 +27,63 @@ type OwnProps = {
 };
 
 type StateProps = {
-  activeSessions: ApiSession[];
+  byHash: Record<string, ApiSession>;
+  orderedHashes: string[];
+  ttlDays?: number;
 };
 
 const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
-  activeSessions,
+  byHash,
+  orderedHashes,
+  ttlDays,
 }) => {
   const {
     terminateAuthorization,
     terminateAllAuthorizations,
+    changeSessionTtl,
   } = getActions();
 
+  const lang = useLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
+  const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
+  const [isModalOpen, openModal, closeModal] = useFlag();
+
+  const autoTerminateValue = useMemo(() => {
+    if (ttlDays === undefined) {
+      return undefined;
+    }
+    if (ttlDays <= 7) {
+      return '7';
+    }
+    if (ttlDays <= 30) {
+      return '30';
+    }
+    if (ttlDays <= 90) {
+      return '90';
+    }
+    if (ttlDays <= 180) {
+      return '180';
+    }
+
+    return undefined;
+  }, [ttlDays]);
+
+  const AUTO_TERMINATE_OPTIONS = useMemo(() => [{
+    label: lang('Weeks', 1, 'i'),
+    value: '7',
+  }, {
+    label: lang('Months', 1, 'i'),
+    value: '30',
+  }, {
+    label: lang('Months', 3, 'i'),
+    value: '90',
+  }, {
+    label: lang('Months', 6, 'i'),
+    value: '180',
+  }], [lang]);
 
   const handleTerminateSessionClick = useCallback((hash: string) => {
     terminateAuthorization({ hash });
@@ -49,15 +94,30 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     terminateAllAuthorizations();
   }, [closeConfirmTerminateAllDialog, terminateAllAuthorizations]);
 
+  const handleOpenSessionModal = useCallback((hash: string) => {
+    setOpenedSessionHash(hash);
+    openModal();
+  }, [openModal]);
+
+  const handleCloseSessionModal = useCallback(() => {
+    setOpenedSessionHash(undefined);
+    closeModal();
+  }, [closeModal]);
+
+  const handleChangeSessionTtl = useCallback((value: string) => {
+    changeSessionTtl({ days: Number(value) });
+  }, [changeSessionTtl]);
+
   const currentSession = useMemo(() => {
-    return activeSessions.find((session) => session.isCurrent);
-  }, [activeSessions]);
+    const currentSessionHash = orderedHashes.find((hash) => byHash[hash].isCurrent);
 
-  const otherSessions = useMemo(() => {
-    return activeSessions.filter((session) => !session.isCurrent);
-  }, [activeSessions]);
+    return currentSessionHash ? byHash[currentSessionHash] : undefined;
+  }, [byHash, orderedHashes]);
 
-  const lang = useLang();
+  const otherSessionHashes = useMemo(() => {
+    return orderedHashes.filter((hash) => !byHash[hash].isCurrent);
+  }, [byHash, orderedHashes]);
+  const hasOtherSessions = Boolean(otherSessionHashes.length);
 
   useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.ActiveSessions);
 
@@ -78,32 +138,54 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           </div>
         </ListItem>
 
-        <ListItem
-          className="destructive mb-0 no-icon"
-          icon="stop"
-          ripple
-          narrow
-          onClick={openConfirmTerminateAllDialog}
-        >
-          {lang('TerminateAllSessions')}
-        </ListItem>
+        {hasOtherSessions && (
+          <ListItem
+            className="destructive mb-0 no-icon"
+            icon="stop"
+            ripple
+            narrow
+            onClick={openConfirmTerminateAllDialog}
+          >
+            {lang('TerminateAllSessions')}
+          </ListItem>
+        )}
       </div>
     );
   }
 
-  function renderOtherSessions(sessions: ApiSession[]) {
+  function renderOtherSessions(sessionHashes: string[]) {
     return (
       <div className="settings-item">
         <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('OtherSessions')}
         </h4>
 
-        {sessions.map(renderSession)}
+        {sessionHashes.map(renderSession)}
       </div>
     );
   }
 
-  function renderSession(session: ApiSession) {
+  function renderAutoTerminate() {
+    return (
+      <div className="settings-item">
+        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('TerminateOldSessionHeader')}
+        </h4>
+
+        <p>{lang('IfInactiveFor')}</p>
+        <RadioGroup
+          name="session_ttl"
+          options={AUTO_TERMINATE_OPTIONS}
+          selected={autoTerminateValue}
+          onChange={handleChangeSessionTtl}
+        />
+      </div>
+    );
+  }
+
+  function renderSession(sessionHash: string) {
+    const session = byHash[sessionHash];
+
     return (
       <ListItem
         key={session.hash}
@@ -117,6 +199,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           },
         }]}
         icon={`device-${getSessionIcon(session)} icon-device`}
+        onClick={() => { handleOpenSessionModal(session.hash); }}
       >
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
@@ -133,17 +216,19 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content custom-scroll SettingsActiveSessions">
       {currentSession && renderCurrentSession(currentSession)}
-      {otherSessions && renderOtherSessions(otherSessions)}
-      {otherSessions && (
+      {hasOtherSessions && renderOtherSessions(otherSessionHashes)}
+      {renderAutoTerminate()}
+      {hasOtherSessions && (
         <ConfirmDialog
           isOpen={isConfirmTerminateAllDialogOpen}
           onClose={closeConfirmTerminateAllDialog}
-          text="Are you sure you want to terminate all other sessions?"
-          confirmLabel="Terminate All Other Sessions"
+          text={lang('AreYouSureSessions')}
+          confirmLabel={lang('TerminateAllSessions')}
           confirmHandler={handleTerminateAllSessions}
           confirmIsDestructive
         />
       )}
+      <SettingsActiveSession isOpen={isModalOpen} hash={openedSessionHash} onClose={handleCloseSessionModal} />
     </div>
   );
 };
@@ -153,9 +238,5 @@ function getLocation(session: ApiSession) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    return {
-      activeSessions: global.activeSessions,
-    };
-  },
+  (global): StateProps => global.activeSessions,
 )(SettingsActiveSessions));

@@ -138,7 +138,10 @@ export const INITIAL_STATE: GlobalState = {
 
   dialogs: [],
 
-  activeSessions: [],
+  activeSessions: {
+    byHash: {},
+    orderedHashes: [],
+  },
 
   settings: {
     byKey: {

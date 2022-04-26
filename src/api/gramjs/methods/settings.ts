@@ -160,7 +160,10 @@ export async function fetchAuthorizations() {
     return undefined;
   }
 
-  return result.authorizations.map(buildApiSession);
+  return {
+    authorizations: buildCollectionByKey(result.authorizations.map(buildApiSession), 'hash'),
+    ttlDays: result.authorizationTtlDays,
+  };
 }
 
 export function terminateAuthorization(hash: string) {

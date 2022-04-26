@@ -127,7 +127,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId, lastSyncTime } = global;
 
     return {
-      sessionCount: global.activeSessions.length,
+      sessionCount: global.activeSessions.orderedHashes.length,
       currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
       lastSyncTime,
     };

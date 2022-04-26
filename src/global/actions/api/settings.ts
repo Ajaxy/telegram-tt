@@ -241,48 +241,6 @@ addActionHandler('unblockContact', async (global, actions, payload) => {
   setGlobal(removeBlockedContact(getGlobal(), contactId));
 });
 
-addActionHandler('loadAuthorizations', async () => {
-  const result = await callApi('fetchAuthorizations');
-  if (!result) {
-    return;
-  }
-
-  setGlobal({
-    ...getGlobal(),
-    activeSessions: result,
-  });
-});
-
-addActionHandler('terminateAuthorization', async (global, actions, payload) => {
-  const { hash } = payload!;
-
-  const result = await callApi('terminateAuthorization', hash);
-  if (!result) {
-    return;
-  }
-
-  global = getGlobal();
-
-  setGlobal({
-    ...global,
-    activeSessions: global.activeSessions.filter((session) => session.hash !== hash),
-  });
-});
-
-addActionHandler('terminateAllAuthorizations', async (global) => {
-  const result = await callApi('terminateAllAuthorizations');
-  if (!result) {
-    return;
-  }
-
-  global = getGlobal();
-
-  setGlobal({
-    ...global,
-    activeSessions: global.activeSessions.filter((session) => session.isCurrent),
-  });
-});
-
 addActionHandler('loadNotificationExceptions', async (global) => {
   const { serverTimeOffset } = global;
 

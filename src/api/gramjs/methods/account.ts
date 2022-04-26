@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import {
   ApiChat, ApiPhoto, ApiReportReason, ApiUser,
 } from '../../types';
@@ -37,6 +38,31 @@ export async function reportProfilePhoto({
     photoId,
     reason: buildInputReportReason(reason),
     message: description,
+  }));
+
+  return result;
+}
+
+export async function changeSessionSettings({
+  hash, areCallsEnabled,
+}: {
+  hash: string; areCallsEnabled: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.ChangeAuthorizationSettings({
+    hash: BigInt(hash),
+    callRequestsDisabled: !areCallsEnabled,
+  }));
+
+  return result;
+}
+
+export async function changeSessionTtl({
+  days,
+}: {
+  days: number;
+}) {
+  const result = await invokeRequest(new GramJs.account.SetAuthorizationTTL({
+    authorizationTtlDays: days,
   }));
 
   return result;
