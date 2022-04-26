@@ -1149,19 +1149,6 @@ const Composer: FC<OwnProps & StateProps> = ({
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
-          <StickerTooltip
-            chatId={chatId}
-            threadId={threadId}
-            isOpen={isStickerTooltipOpen}
-            onStickerSelect={handleStickerSelect}
-          />
-          <EmojiTooltip
-            isOpen={isEmojiTooltipOpen}
-            emojis={filteredEmojis}
-            onClose={closeEmojiTooltip}
-            onEmojiSelect={insertEmoji}
-            addRecentEmoji={addRecentEmoji}
-          />
           <AttachMenu
             chatId={chatId}
             isButtonVisible={!activeVoiceRecording && !editingMessage}
@@ -1188,6 +1175,19 @@ const Composer: FC<OwnProps & StateProps> = ({
               onClose={closeBotCommandMenu}
             />
           )}
+          <StickerTooltip
+            chatId={chatId}
+            threadId={threadId}
+            isOpen={isStickerTooltipOpen}
+            onStickerSelect={handleStickerSelect}
+          />
+          <EmojiTooltip
+            isOpen={isEmojiTooltipOpen}
+            emojis={filteredEmojis}
+            onClose={closeEmojiTooltip}
+            onEmojiSelect={insertEmoji}
+            addRecentEmoji={addRecentEmoji}
+          />
           <SymbolMenu
             chatId={chatId}
             threadId={threadId}

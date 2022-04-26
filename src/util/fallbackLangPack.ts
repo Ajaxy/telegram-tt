@@ -1849,4 +1849,8 @@ export default {
     key: 'ChannelVisibility.Forwarding.Disabled',
     value: 'Restrict Forwarding',
   },
+  'Settings.TipsUsername': {
+    key: 'Settings.TipsUsername',
+    value: 'TelegramTips',
+  },
 } as ApiLangPack;

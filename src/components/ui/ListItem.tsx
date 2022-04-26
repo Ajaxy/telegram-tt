@@ -165,9 +165,9 @@ const ListItem: FC<OwnProps> = ({
     >
       <div
         className={buildClassName('ListItem-button', isTouched && 'active')}
-        role="button"
+        role={!isStatic ? 'button' : undefined}
         ref={buttonRef}
-        tabIndex={0}
+        tabIndex={!isStatic ? 0 : undefined}
         onClick={(!inactive && IS_TOUCH_ENV) ? handleClick : undefined}
         onMouseDown={handleMouseDown}
         onContextMenu={(!inactive && contextActions) ? handleContextMenu : undefined}

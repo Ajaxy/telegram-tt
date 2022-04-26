@@ -76,19 +76,20 @@ const Avatar: FC<OwnProps> = ({
   const lang = useLang();
 
   let content: string | undefined = '';
+  const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);
 
   if (isSavedMessages) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} aria-label={author} />;
   } else if (isDeleted) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} aria-label={author} />;
   } else if (isReplies) {
-    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} />;
+    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} aria-label={author} />;
   } else if (blobUrl) {
     content = (
       <img
         src={blobUrl}
         className={buildClassName(cn.img, 'avatar-media', transitionClassNames)}
-        alt=""
+        alt={author}
         decoding="async"
       />
     );
@@ -125,7 +126,12 @@ const Avatar: FC<OwnProps> = ({
   const senderId = (user || chat) && (user || chat)!.id;
 
   return (
-    <div className={fullClassName} onClick={handleClick} data-test-sender-id={IS_TEST ? senderId : undefined}>
+    <div
+      className={fullClassName}
+      onClick={handleClick}
+      data-test-sender-id={IS_TEST ? senderId : undefined}
+      aria-label={typeof content === 'string' ? author : undefined}
+    >
       {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
     </div>
   );

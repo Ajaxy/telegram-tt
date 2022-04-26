@@ -19,6 +19,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useChatAnimationType } from './hooks';
+import { HotkeyItem, useHotkeys } from '../../../hooks/useHotkeys';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -74,14 +75,29 @@ const ChatList: FC<OwnProps> = ({
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
 
-  // Support <Cmd>+<Digit> and <Alt>+<Up/Down> to navigate between chats
+  // Support <Alt>+<Up/Down> to navigate between chats
+  const hotkeys: HotkeyItem[] = [];
+  if (isActive && orderedIds?.length) {
+    hotkeys.push(['alt+ArrowUp', (e: KeyboardEvent) => {
+      e.preventDefault();
+      openNextChat({ targetIndexDelta: -1, orderedIds });
+    }]);
+    hotkeys.push(['alt+ArrowDown', (e: KeyboardEvent) => {
+      e.preventDefault();
+      openNextChat({ targetIndexDelta: 1, orderedIds });
+    }]);
+  }
+
+  useHotkeys(hotkeys);
+
+  // Support <Cmd>+<Digit> to navigate between chats
   useEffect(() => {
-    if (!isActive || !orderedIds) {
+    if (!isActive || !orderedIds || !IS_PWA) {
       return undefined;
     }
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (IS_PWA && ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
         const [, digit] = e.code.match(/Digit(\d)/) || [];
         if (!digit) return;
 
@@ -89,14 +105,6 @@ const ChatList: FC<OwnProps> = ({
         if (position > orderedIds!.length - 1) return;
 
         openChat({ id: orderedIds![position], shouldReplaceHistory: true });
-      }
-
-      if (e.altKey) {
-        const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
-        if (!targetIndexDelta) return;
-
-        e.preventDefault();
-        openNextChat({ targetIndexDelta, orderedIds });
       }
     }
 

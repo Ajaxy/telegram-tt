@@ -6,9 +6,12 @@
 
   .description {
     position: relative;
+    margin-top: 0.5rem;
 
     &.has-image {
-      margin: 1rem -0.5rem -0.375rem;
+      .content-inner:not(.forwarded-message) & {
+        margin: 0.5rem -0.5rem -0.375rem;
+      }
 
       .invoice-image {
         width: 100%;
@@ -16,6 +19,11 @@
         object-fit: cover;
         border-bottom-left-radius: var(--border-bottom-left-radius);
         border-bottom-right-radius: var(--border-bottom-right-radius);
+
+        .forwarded-message & {
+          border-top-left-radius: var(--border-top-left-radius);
+          border-top-right-radius: var(--border-top-right-radius);
+        }
       }
 
       .description-text {
