@@ -1,18 +1,11 @@
-**Telegram Web Z was updated to version 1.42**
-
-👏 **Harder**
-• Telegram bots just became even [more powerful](https://t.me/telegram/178) – and Web Z fully supports their flexible interfaces.
-• Statistics for large groups and channels have expanded – see new metrics for recent posts at the bottom of the statistics page.
+**Telegram Web Z was updated to version 1.43**
 
 🤩 **Better**
-• Emoji load faster on all platforms.
+• Some improvements for revolutionary web bots such as [@wallet](https://t.me/wallet_news/60).
+• Better app icon on macOS.
+• Layout improvements and fixes.
 
 💪 **Stronger**
-• An issue when adding users to groups has been fixed.
-• Fixed unwanted notifications caused by reactions to posts.
-• Online indicators for group members now work as expected.
-• Unexpected logouts should no longer occur.
-• Service notifications containing media are now rendered properly.
-• Read receipts now appear in groups with exactly 100 members.
+• Various improvements for Statistics screen.
 
 🦄 **We also welcome** you to join our official channels in **[English](t.me/webztalks)** and **[Russian](t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
