@@ -1,105 +1,71 @@
-import React, {
-  FC, useCallback, memo, useRef,
-} from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import React, { FC, memo, useRef } from '../../lib/teact/teact';
 
-import { MessageListType } from '../../global/types';
-import { MAIN_THREAD_ID } from '../../api/types';
-
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 import { formatIntegerCompact } from '../../util/textFormat';
-import buildClassName from '../../util/buildClassName';
-import fastSmoothScroll from '../../util/fastSmoothScroll';
 import useLang from '../../hooks/useLang';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import buildClassName from '../../util/buildClassName';
 
+import Menu from '../ui/Menu';
 import Button from '../ui/Button';
+import MenuItem from '../ui/MenuItem';
 
-import './ScrollDownButton.scss';
+import styles from './ScrollDownButton.module.scss';
 
 type OwnProps = {
-  isShown: boolean;
-  canPost?: boolean;
-  withExtraShift?: boolean;
-};
-
-type StateProps = {
-  messageListType?: MessageListType;
+  icon: string;
+  ariaLabelLang: string;
   unreadCount?: number;
+  onClick: VoidFunction;
+  onReadAll?: VoidFunction;
+  className?: string;
 };
 
-const FOCUS_MARGIN = 20;
-
-const ScrollDownButton: FC<OwnProps & StateProps> = ({
-  isShown,
-  canPost,
-  messageListType,
+const ScrollDownButton: FC<OwnProps> = ({
+  icon,
+  ariaLabelLang,
   unreadCount,
-  withExtraShift,
+  onClick,
+  onReadAll,
+  className,
 }) => {
-  const { focusNextReply } = getActions();
-
   const lang = useLang();
+
   // eslint-disable-next-line no-null/no-null
-  const elementRef = useRef<HTMLDivElement>(null);
-
-  const handleClick = useCallback(() => {
-    if (!isShown) {
-      return;
-    }
-
-    if (messageListType === 'thread') {
-      focusNextReply();
-    } else {
-      const messagesContainer = elementRef.current!.parentElement!.querySelector<HTMLDivElement>('.MessageList')!;
-      const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
-      const lastMessageElement = messageElements[messageElements.length - 1];
-      if (!lastMessageElement) {
-        return;
-      }
-
-      fastSmoothScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
-    }
-  }, [isShown, messageListType, focusNextReply]);
-
-  const fabClassName = buildClassName(
-    'ScrollDownButton',
-    isShown && 'revealed',
-    !canPost && 'no-composer',
-    withExtraShift && 'with-extra-shift',
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  const {
+    isContextMenuOpen,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(ref, !onReadAll);
 
   return (
-    <div ref={elementRef} className={fabClassName}>
-      <div className="ScrollDownButton-inner">
-        <Button
-          color="secondary"
-          round
-          onClick={handleClick}
-          ariaLabel={lang('AccDescrPageDown')}
+    <div className={buildClassName(styles.root, className)} ref={ref}>
+      <Button
+        color="secondary"
+        round
+        className={styles.button}
+        onClick={onClick}
+        onContextMenu={handleContextMenu}
+        ariaLabel={lang(ariaLabelLang)}
+      >
+        <i className={buildClassName(styles.icon, `icon-${icon}`)} />
+      </Button>
+      {Boolean(unreadCount) && <div className={styles.unreadCount}>{formatIntegerCompact(unreadCount)}</div>}
+      {onReadAll && (
+        <Menu
+          isOpen={isContextMenuOpen}
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+          autoClose
+          positionX="right"
+          positionY="bottom"
         >
-          <i className="icon-arrow-down" />
-        </Button>
-        {Boolean(unreadCount) && (
-          <div className="unread-count">{formatIntegerCompact(unreadCount!)}</div>
-        )}
-      </div>
+          <MenuItem icon="readchats" onClick={onReadAll}>{lang('MarkAllAsRead')}</MenuItem>
+        </Menu>
+      )}
     </div>
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const currentMessageList = selectCurrentMessageList(global);
-    if (!currentMessageList) {
-      return {};
-    }
-
-    const { chatId, threadId, type: messageListType } = currentMessageList;
-    const chat = selectChat(global, chatId);
-
-    return {
-      messageListType,
-      unreadCount: chat && threadId === MAIN_THREAD_ID && messageListType === 'thread' ? chat.unreadCount : undefined,
-    };
-  },
-)(ScrollDownButton));
+export default memo(ScrollDownButton);

@@ -127,7 +127,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => setChosenTab(undefined)}
           >
-            <i className="icon-reaction-filled" />
+            <i className="icon-heart" />
             {reactors?.count && formatIntegerCompact(reactors.count)}
           </Button>
           {allReactions.map((reaction) => {

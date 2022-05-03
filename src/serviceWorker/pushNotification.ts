@@ -30,12 +30,14 @@ type NotificationData = {
   body: string;
   icon?: string;
   reaction?: string;
+  shouldReplaceHistory?: boolean;
 };
 
 type FocusMessageData = {
   chatId?: string;
   messageId?: number;
   reaction?: string;
+  shouldReplaceHistory?: boolean;
 };
 
 type CloseNotificationData = {
@@ -111,6 +113,7 @@ function showNotification({
   title,
   icon,
   reaction,
+  shouldReplaceHistory,
 }: NotificationData) {
   const isFirstBatch = new Date().valueOf() - lastSyncAt < 1000;
   const tag = String(isFirstBatch ? 0 : chatId || 0);
@@ -121,6 +124,7 @@ function showNotification({
       messageId,
       reaction,
       count: 1,
+      shouldReplaceHistory,
     },
     icon: icon || 'icon-192x192.png',
     badge: 'icon-192x192.png',

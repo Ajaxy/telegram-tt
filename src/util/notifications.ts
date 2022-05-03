@@ -407,6 +407,7 @@ export async function notifyAboutMessage({
           icon,
           chatId: chat.id,
           messageId: message.id,
+          shouldReplaceHistory: true,
           reaction: activeReaction?.reaction,
         },
       });
@@ -431,13 +432,8 @@ export async function notifyAboutMessage({
       dispatch.focusMessage({
         chatId: chat.id,
         messageId: message.id,
+        shouldReplaceHistory: true,
       });
-      if (activeReaction) {
-        dispatch.startActiveReaction({
-          messageId: message.id,
-          reaction: activeReaction.reaction,
-        });
-      }
       if (window.focus) {
         window.focus();
       }

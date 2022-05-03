@@ -22,12 +22,6 @@ function handleWorkerMessage(e: MessageEvent) {
       if (dispatch.focusMessage) {
         dispatch.focusMessage(payload);
       }
-      if (dispatch.startActiveReaction && payload.reaction) {
-        dispatch.startActiveReaction({
-          messageId: payload.messageId,
-          reaction: payload.reaction,
-        });
-      }
       break;
     case 'playNotificationSound':
       playNotifySoundDebounced(action.payload.id);

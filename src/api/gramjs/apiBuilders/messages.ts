@@ -221,11 +221,15 @@ function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCou
 }
 
 export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction {
-  const { peerId, reaction } = userReaction;
+  const {
+    peerId, reaction, big, unread,
+  } = userReaction;
 
   return {
     userId: getApiChatIdFromMtpPeer(peerId),
     reaction,
+    isUnread: unread,
+    isBig: big,
   };
 }
 

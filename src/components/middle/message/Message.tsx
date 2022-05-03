@@ -90,6 +90,7 @@ import useFocusMessage from './hooks/useFocusMessage';
 import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import { getServerTime } from '../../../util/serverTime';
+import { isElementInViewport } from '../../../util/isElementInViewport';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -195,6 +196,7 @@ type StateProps = {
   defaultReaction?: string;
   activeReaction?: ActiveReaction;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
+  hasUnreadReaction?: boolean;
 };
 
 type MetaPosition =
@@ -281,11 +283,13 @@ const Message: FC<OwnProps & StateProps> = ({
   shouldLoopStickers,
   autoLoadFileMaxSizeMb,
   threadInfo,
+  hasUnreadReaction,
 }) => {
   const {
     toggleMessageSelection,
     clickBotInlineButton,
     disableContextMenuHint,
+    animateUnreadReaction,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -520,6 +524,13 @@ const Message: FC<OwnProps & StateProps> = ({
     message.id,
   );
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer);
+
+  useEffect(() => {
+    const bottomMarker = bottomMarkerRef.current;
+    if (hasUnreadReaction && bottomMarker && isElementInViewport(bottomMarker)) {
+      animateUnreadReaction({ messageIds: [messageId] });
+    }
+  }, [hasUnreadReaction, messageId, animateUnreadReaction]);
 
   let style = '';
   let calculatedWidth;
@@ -896,7 +907,8 @@ const Message: FC<OwnProps & StateProps> = ({
         className="bottom-marker"
         data-message-id={messageId}
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
-        data-has-unread-mention={message.hasUnreadMention}
+        data-has-unread-mention={message.hasUnreadMention || undefined}
+        data-has-unread-reaction={hasUnreadReaction || undefined}
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
@@ -1065,6 +1077,8 @@ export default memo(withGlobal<OwnProps>(
 
     const localSticker = singleEmoji ? selectLocalAnimatedEmoji(global, singleEmoji) : undefined;
 
+    const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
+
     return {
       theme: selectTheme(global),
       chatUsername,
@@ -1117,6 +1131,7 @@ export default memo(withGlobal<OwnProps>(
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
+      hasUnreadReaction,
     };
   },
 )(Message));

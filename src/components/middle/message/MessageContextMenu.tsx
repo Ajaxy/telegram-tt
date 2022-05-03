@@ -226,7 +226,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         style={menuStyle}
         ref={scrollableRef}
       >
-        {canRemoveReaction && <MenuItem icon="reactions" onClick={handleRemoveReaction}>Remove Reaction</MenuItem>}
+        {canRemoveReaction && <MenuItem icon="heart-outline" onClick={handleRemoveReaction}>Remove Reaction</MenuItem>}
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
         {canReschedule && (
           <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>
@@ -256,7 +256,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         {(canShowSeenBy || canShowReactionsCount) && (
           <MenuItem
             className="MessageContextMenu--seen-by"
-            icon={canShowReactionsCount ? 'reactions' : 'group'}
+            icon={canShowReactionsCount ? 'heart-outline' : 'group'}
             onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
             disabled={!canShowReactionsCount && !message.seenByUserIds?.length}
           >
