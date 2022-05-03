@@ -1,6 +1,7 @@
 import BigInt from 'big-integer';
 import { UpdateConnectionState } from '../network';
-import Request, { default as GramJs } from '../tl/api';
+import Request from '../tl/api';
+import { Api as GramJs } from '..';
 
 type Peer = {
     peer: GramJs.Chat | GramJs.Channel | GramJs.User;
@@ -35,7 +36,7 @@ class TelegramClient {
         });
         user.TEST_sendMessage({});
 
-        const chat = this.createChat({});
+        const chat = this.createChat();
         chat.TEST_sendMessage({});
 
         const channel = this.createChannel({
@@ -90,7 +91,7 @@ class TelegramClient {
         }: CreateMessageParams) => {
             const pi = this.getPeerIndex(peer);
             const p = this.getPeer(peer);
-            if (!p || pi === undefined) return;
+            if (!p || pi === undefined) return undefined;
 
             const message = new GramJs.Message({
                 id: p.TEST_messages.length + 1,
@@ -115,7 +116,7 @@ class TelegramClient {
         };
     }
 
-    createChat({}) {
+    createChat() {
         const chat = new GramJs.Chat({
             id: BigInt(this.lastId++),
             title: 'Some chat',
@@ -219,7 +220,7 @@ class TelegramClient {
         }
         if (request instanceof GramJs.messages.GetHistory) {
             const peer = this.getPeer(request.peer);
-            if (!peer) return;
+            if (!peer) return undefined;
 
             return new GramJs.messages.Messages({
                 messages: peer.TEST_messages,
@@ -229,7 +230,7 @@ class TelegramClient {
         }
         if (request instanceof GramJs.messages.GetReplies) {
             const peer = this.peers[3];
-            if (!peer) return;
+            if (!peer) return undefined;
 
             return new GramJs.messages.ChannelMessages({
                 messages: peer.TEST_messages,
@@ -289,6 +290,7 @@ class TelegramClient {
                 users: this.getUsers(),
             });
         }
+        return undefined;
     // console.log(request.className, request);
     }
 
