@@ -1,3 +1,20 @@
+## 1.44.0 (2022-05-03)
+
+### 👏 **Harder**
+* Mention and reaction badges are now shown both in the chat list and inside chats – tapping the badge in chat jumps to the relevant message.
+* Improved Device Management – with a detailed overview of active sessions and new icons. Tap or click a session in the list to see more info or remotely log it out.
+* Privacy Settings now have options for Calls, including Exceptions.
+* From other chats, instantly open a 1-on-1 chat with a bot using ‘Open Bot' in the ⋮ menu of the bot's preview window.
+
+### 🤩 **Better**
+* Browser navigation has been rebuilt from scratch – no more freezes or crashes.
+
+### 💪 **Stronger**
+* Fixed an issue where chats could get stuck in the Unread folder.
+* The app no longer duplicates text pasted from the clipboard.
+* Random media files failing to load should no longer occur.
+* Fixed issues when adding a contact with a hidden phone number.
+
 ## 1.43.0 (2022-04-26)
 
 ### 🤩 **Better**
