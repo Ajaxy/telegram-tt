@@ -72,7 +72,8 @@ export function buildApiChatFromDialog(
   serverTimeOffset: number,
 ): ApiChat {
   const {
-    peer, folderId, unreadMark, unreadCount, unreadMentionsCount, notifySettings: { silent, muteUntil },
+    peer, folderId, unreadMark, unreadCount, unreadMentionsCount, unreadReactionsCount,
+    notifySettings: { silent, muteUntil },
     readOutboxMaxId, readInboxMaxId, draft,
   } = dialog;
   const isMuted = silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil);
@@ -86,6 +87,7 @@ export function buildApiChatFromDialog(
     lastReadInboxMessageId: readInboxMaxId,
     unreadCount,
     unreadMentionsCount,
+    unreadReactionsCount,
     isMuted,
     ...(unreadMark && { hasUnreadMark: true }),
     ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),

@@ -297,7 +297,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           </ListItem>
 
           <ListItem
-            icon="reactions"
+            icon="heart-outline"
             multiline
             onClick={handleClickReactions}
             disabled={!canChangeInfo}

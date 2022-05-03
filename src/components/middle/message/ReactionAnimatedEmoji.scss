@@ -44,6 +44,8 @@
       // Fix for weird positioning in Chrome
       canvas {
         position: absolute;
+        left: 0;
+        top: 0;
       }
     }
   }

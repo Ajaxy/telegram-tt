@@ -5,7 +5,6 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
-import { getMessageRecentReaction } from '../../helpers';
 import {
   updateChat,
   updateChatListIds,
@@ -20,6 +19,7 @@ import {
   selectChatListType,
   selectCurrentMessageList,
 } from '../../selectors';
+import { updateUnreadReactions } from '../../reducers/reactions';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 // Enough to animate and mark as read in Message List
@@ -109,37 +109,20 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         setTimeout(() => {
           actions.requestChatUpdate({ chatId: update.chatId });
         }, CURRENT_CHAT_UNREAD_DELAY);
-      } else {
-        setGlobal(updateChat(global, update.chatId, {
-          unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-          ...(update.message.hasUnreadMention && {
-            unreadMentionsCount: chat.unreadMentionsCount ? chat.unreadMentionsCount + 1 : 1,
-          }),
-        }));
       }
+
+      setGlobal(updateChat(global, update.chatId, {
+        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
+        ...(update.message.id && update.message.hasUnreadMention && {
+          unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1,
+          unreadMentions: [...(chat.unreadMentions || []), update.message.id],
+        }),
+      }));
 
       notifyAboutMessage({
         chat,
         message,
       });
-
-      return undefined;
-    }
-
-    case 'updateMessage': {
-      const { message } = update;
-      const chat = selectChat(global, update.chatId);
-      if (!chat) {
-        return undefined;
-      }
-
-      if (getMessageRecentReaction(message)) {
-        notifyAboutMessage({
-          chat,
-          message,
-          isReaction: true,
-        });
-      }
 
       return undefined;
     }
@@ -154,9 +137,18 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       ids.forEach((id) => {
         const chatId = ('channelId' in update ? update.channelId : selectCommonBoxChatId(global, id))!;
         const chat = selectChat(global, chatId);
+
+        if (chat?.unreadReactionsCount) {
+          global = updateUnreadReactions(global, chatId, {
+            unreadReactionsCount: (chat.unreadReactionsCount - 1) || undefined,
+            unreadReactions: chat.unreadReactions?.filter((i) => i !== id),
+          });
+        }
+
         if (chat?.unreadMentionsCount) {
           global = updateChat(global, chatId, {
-            unreadMentionsCount: chat.unreadMentionsCount - 1,
+            unreadMentionsCount: (chat.unreadMentionsCount - 1) || undefined,
+            unreadMentions: chat.unreadMentions?.filter((i) => i !== id),
           });
         }
       });

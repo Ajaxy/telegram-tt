@@ -632,6 +632,24 @@ export interface ActionPayloads {
     threadId: number;
     type: MessageListType;
   };
+  fetchUnreadMentions: {
+    chatId: string;
+    offsetId?: number;
+  };
+  fetchUnreadReactions: {
+    chatId: string;
+    offsetId?: number;
+  };
+  animateUnreadReaction: {
+    messageIds: number[];
+  };
+  focusNextReaction: {};
+  focusNextMention: {};
+  readAllReactions: {};
+  readAllMentions: {};
+  markMentionsRead: {
+    messageIds: number[];
+  };
 
   // Media Viewer & Audio Player
   openMediaViewer: {
@@ -845,7 +863,7 @@ export type NonTypedActionNames = (
   'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' | 'loadAvailableReactions' |
   'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' | 'setDefaultReaction' |
   'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
-  'stopActiveReaction' | 'startActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
+  'stopActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
   'setEditingId' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |

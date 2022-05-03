@@ -233,5 +233,9 @@
     "messages.prolongWebView",
     "messages.requestSimpleWebView",
     "messages.sendWebViewResultMessage",
-    "messages.sendWebViewData"
+    "messages.sendWebViewData",
+    "messages.readReactions",
+    "messages.getUnreadReactions",
+    "messages.readMentions",
+    "messages.getUnreadMentions"
 ]

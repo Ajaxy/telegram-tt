@@ -16,7 +16,7 @@ export default function useMessageObservers(
   containerRef: RefObject<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
 ) {
-  const { markMessageListRead, markMessagesRead } = getActions();
+  const { markMessageListRead, markMentionsRead, animateUnreadReaction } = getActions();
 
   const {
     observe: observeIntersectionForMedia,
@@ -38,6 +38,7 @@ export default function useMessageObservers(
 
     let maxId = 0;
     const mentionIds: number[] = [];
+    const reactionIds: number[] = [];
 
     entries.forEach((entry) => {
       const { isIntersecting, target } = entry;
@@ -56,6 +57,10 @@ export default function useMessageObservers(
       if (dataset.hasUnreadMention) {
         mentionIds.push(messageId);
       }
+
+      if (dataset.hasUnreadReaction) {
+        reactionIds.push(messageId);
+      }
     });
 
     if (memoFirstUnreadIdRef.current && maxId >= memoFirstUnreadIdRef.current) {
@@ -63,7 +68,11 @@ export default function useMessageObservers(
     }
 
     if (mentionIds.length) {
-      markMessagesRead({ messageIds: mentionIds });
+      markMentionsRead({ messageIds: mentionIds });
+    }
+
+    if (reactionIds.length) {
+      animateUnreadReaction({ messageIds: reactionIds });
     }
   });
 

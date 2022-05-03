@@ -8,6 +8,8 @@ import {
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import windowSize from '../../util/windowSize';
+import { updateChat } from './chats';
+import { ApiChat } from '../../api/types';
 
 function getLeftColumnWidth(windowWidth: number) {
   if (windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN) {
@@ -79,4 +81,10 @@ export function addMessageReaction(global: GlobalState, chatId: string, messageI
       recentReactions,
     },
   });
+}
+
+export function updateUnreadReactions(
+  global: GlobalState, chatId: string, update: Pick<ApiChat, 'unreadReactionsCount' | 'unreadReactions'>,
+) {
+  return updateChat(global, chatId, update, undefined, true);
 }

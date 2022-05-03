@@ -60,7 +60,7 @@ import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTran
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
-import ScrollDownButton from './ScrollDownButton';
+import FloatingActionButtons from './FloatingActionButtons';
 import Composer from './composer/Composer';
 import Button from '../ui/Button';
 import MobileSearch from './MobileSearch.async';
@@ -505,7 +505,7 @@ const MiddleColumn: FC<StateProps> = ({
               </div>
             </Transition>
 
-            <ScrollDownButton
+            <FloatingActionButtons
               isShown={renderingIsFabShown}
               canPost={renderingCanPost}
               withExtraShift={withExtraShift}

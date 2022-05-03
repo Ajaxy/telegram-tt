@@ -336,6 +336,8 @@ export interface ApiReactions {
 export interface ApiUserReaction {
   userId: string;
   reaction: string;
+  isBig?: boolean;
+  isUnread?: boolean;
 }
 
 export interface ApiReactionCount {

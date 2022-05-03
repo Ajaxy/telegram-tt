@@ -1082,6 +1082,79 @@ addActionHandler('viewSponsoredMessage', (global, actions, payload) => {
   void callApi('viewSponsoredMessage', { chat, random: message.randomId });
 });
 
+addActionHandler('fetchUnreadMentions', async (global, actions, payload) => {
+  const { chatId, offsetId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchUnreadMentions', { chat, offsetId });
+
+  if (!result) return;
+
+  const { messages, chats, users } = result;
+
+  const byId = buildCollectionByKey(messages, 'id');
+  const ids = Object.keys(byId).map(Number);
+
+  global = getGlobal();
+  global = addChatMessagesById(global, chat.id, byId);
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addChats(global, buildCollectionByKey(chats, 'id'));
+  global = updateChat(global, chatId, {
+    unreadMentions: [...(chat.unreadMentions || []), ...ids],
+  });
+
+  setGlobal(global);
+});
+
+addActionHandler('markMentionsRead', (global, actions, payload) => {
+  const { messageIds } = payload;
+
+  const chat = selectCurrentChat(global);
+  if (!chat) return;
+
+  if (!chat.unreadMentionsCount) {
+    return;
+  }
+
+  const unreadMentionsCount = chat.unreadMentionsCount - messageIds.length;
+  const unreadMentions = (chat.unreadMentions || []).filter((id) => !messageIds.includes(id));
+  global = updateChat(global, chat.id, {
+    unreadMentions,
+  });
+
+  setGlobal(global);
+
+  if (!unreadMentions.length && unreadMentionsCount) {
+    actions.fetchUnreadMentions({
+      chatId: chat.id,
+      offsetId: Math.max(...messageIds),
+    });
+  }
+
+  actions.markMessagesRead({ messageIds });
+});
+
+addActionHandler('focusNextMention', (global, actions) => {
+  const chat = selectCurrentChat(global);
+
+  if (!chat?.unreadMentions) return;
+
+  actions.focusMessage({ chatId: chat.id, messageId: chat.unreadMentions[0] });
+});
+
+addActionHandler('readAllMentions', (global) => {
+  const chat = selectCurrentChat(global);
+  if (!chat) return undefined;
+
+  callApi('readAllMentions', { chat });
+
+  return updateChat(global, chat.id, {
+    unreadMentionsCount: undefined,
+    unreadMentions: undefined,
+  });
+});
+
 function countSortedIds(ids: number[], from: number, to: number) {
   let count = 0;
 

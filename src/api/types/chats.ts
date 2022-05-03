@@ -20,6 +20,7 @@ export interface ApiChat {
   lastReadInboxMessageId?: number;
   unreadCount?: number;
   unreadMentionsCount?: number;
+  unreadReactionsCount?: number;
   isVerified?: boolean;
   isMuted?: boolean;
   isSignaturesShown?: boolean;
@@ -65,6 +66,9 @@ export interface ApiChat {
 
   joinRequests?: ApiChatInviteImporter[];
   sendAsIds?: string[];
+
+  unreadReactions?: number[];
+  unreadMentions?: number[];
 }
 
 export interface ApiTypingStatus {

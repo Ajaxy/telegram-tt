@@ -342,7 +342,7 @@ addActionHandler('focusNextReply', (global, actions) => {
 addActionHandler('focusMessage', (global, actions, payload) => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
-    replyMessageId, isResizingContainer,
+    replyMessageId, isResizingContainer, shouldReplaceHistory,
   } = payload!;
 
   let { messageId } = payload!;
@@ -387,7 +387,7 @@ addActionHandler('focusMessage', (global, actions, payload) => {
   const viewportIds = selectViewportIds(global, chatId, threadId);
   if (viewportIds && viewportIds.includes(messageId)) {
     setGlobal(global);
-    actions.openChat({ id: chatId, threadId });
+    actions.openChat({ id: chatId, threadId, shouldReplaceHistory });
     return undefined;
   }
 
@@ -404,7 +404,7 @@ addActionHandler('focusMessage', (global, actions, payload) => {
 
   setGlobal(global);
 
-  actions.openChat({ id: chatId, threadId });
+  actions.openChat({ id: chatId, threadId, shouldReplaceHistory });
   actions.loadViewportMessages();
   return undefined;
 });

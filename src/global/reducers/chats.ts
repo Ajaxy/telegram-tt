@@ -50,10 +50,11 @@ export function replaceChats(global: GlobalState, newById: Record<string, ApiCha
 
 export function updateChat(
   global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+  noOmitUnreadReactionCount = false,
 ): GlobalState {
   const { byId } = global.chats;
 
-  const updatedChat = getUpdatedChat(global, chatId, chatUpdate, photo);
+  const updatedChat = getUpdatedChat(global, chatId, chatUpdate, photo, noOmitUnreadReactionCount);
   if (!updatedChat) {
     return global;
   }
@@ -115,13 +116,19 @@ export function addChats(global: GlobalState, newById: Record<string, ApiChat>):
 // @optimization Don't spread/unspread global for each element, do it in a batch
 function getUpdatedChat(
   global: GlobalState, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+  noOmitUnreadReactionCount = false,
 ) {
   const { byId } = global.chats;
   const chat = byId[chatId];
   const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
+
+  chatUpdate = noOmitUnreadReactionCount
+    ? chatUpdate : omit(chatUpdate, ['unreadReactionsCount']);
   const updatedChat: ApiChat = {
     ...chat,
-    ...(shouldOmitMinInfo ? omit(chatUpdate, ['isMin', 'accessHash']) : chatUpdate),
+    ...(shouldOmitMinInfo
+      ? omit(chatUpdate, ['isMin', 'accessHash'])
+      : chatUpdate),
     ...(photo && { photos: [photo, ...(chat.photos || [])] }),
   };
 

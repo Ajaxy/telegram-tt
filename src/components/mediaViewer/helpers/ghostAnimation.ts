@@ -13,6 +13,7 @@ import windowSize from '../../../util/windowSize';
 import stopEvent from '../../../util/stopEvent';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { getMessageHtmlId } from '../../../global/helpers';
+import { isElementInViewport } from '../../../util/isElementInViewport';
 
 const ANIMATION_DURATION = 200;
 
@@ -262,17 +263,6 @@ function uncover(realWidth: number, realHeight: number, top: number, left: numbe
   return {
     top, left, width, height,
   };
-}
-
-function isElementInViewport(el: HTMLElement) {
-  if (el.style.display === 'none') {
-    return false;
-  }
-
-  const rect = el.getBoundingClientRect();
-  const { height: windowHeight } = windowSize.get();
-
-  return (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
 }
 
 function isMessageImageFullyVisible(container: HTMLElement, imageEl: HTMLElement) {

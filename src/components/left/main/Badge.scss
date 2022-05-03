@@ -65,7 +65,11 @@
     }
   }
 
-  &.mention {
+  &.reaction:not(.muted) {
+    background: #ed504f;
+  }
+
+  &.mention, &.reaction {
     width: 1.5rem;
     padding: 0.25rem;
 
