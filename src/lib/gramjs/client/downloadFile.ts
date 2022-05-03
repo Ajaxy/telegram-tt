@@ -1,11 +1,10 @@
-// eslint-disable-next-line import/no-named-default
-import { default as Api } from '../tl/api';
+import Api from '../tl/api';
 import TelegramClient from './TelegramClient';
 import { getAppropriatedPartSize } from '../Utils';
 import { sleep, createDeferred } from '../Helpers';
 import errors from '../errors';
 
-export interface progressCallback {
+interface OnProgress {
     isCanceled?: boolean;
     acceptsBuffer?: boolean;
 
@@ -22,7 +21,7 @@ export interface DownloadFileParams {
     partSizeKb?: number;
     start?: number;
     end?: number;
-    progressCallback?: progressCallback;
+    progressCallback?: OnProgress;
 }
 
 interface Deferred {
@@ -35,7 +34,6 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
-
 
 class Foreman {
     private deferred: Deferred | undefined;
@@ -124,7 +122,7 @@ export async function downloadFile(
             break;
         }
 
-        // eslint-disable-next-line no-loop-func
+        // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func
         promises.push((async (offsetMemo: number) => {
             // eslint-disable-next-line no-constant-condition
             while (true) {

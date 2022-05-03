@@ -1,7 +1,6 @@
 import BigInt from 'big-integer';
 import { UpdateConnectionState } from '../network';
-import Request from '../tl/api';
-import { default as GramJs } from "../tl/api";
+import Request, { default as GramJs } from '../tl/api';
 
 type Peer = {
     peer: GramJs.Chat | GramJs.Channel | GramJs.User;

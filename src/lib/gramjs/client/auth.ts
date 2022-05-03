@@ -1,4 +1,4 @@
-import { default as Api } from '../tl/api';
+import Api from '../tl/api';
 import TelegramClient from './TelegramClient';
 import utils from '../Utils';
 import { sleep } from '../Helpers';
