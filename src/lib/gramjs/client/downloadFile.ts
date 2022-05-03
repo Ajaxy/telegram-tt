@@ -35,6 +35,11 @@ const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
 
+// when the sender requests hangs for 60 second we will reimport
+const SENDER_TIMEOUT = 60 * 1000;
+// Telegram may have server issues so we try several times
+const SENDER_RETRIES = 5;
+
 class Foreman {
     private deferred: Deferred | undefined;
 
@@ -64,6 +69,26 @@ class Foreman {
 }
 
 export async function downloadFile(
+    client: TelegramClient,
+    inputLocation: Api.InputFileLocation,
+    fileParams: DownloadFileParams,
+) {
+    const { dcId } = fileParams;
+    for (let i = 0; i < SENDER_RETRIES; i++) {
+        try {
+            return await downloadFile2(client, inputLocation, fileParams);
+        } catch (err: any) {
+            if (i === SENDER_RETRIES - 1 || !err.message.startsWith('SESSION_REVOKED')) {
+                throw err;
+            }
+            await client._cleanupExportedSender(dcId);
+        }
+    }
+
+    return undefined;
+}
+
+async function downloadFile2(
     client: TelegramClient,
     inputLocation: Api.InputFileLocation,
     fileParams: DownloadFileParams,
@@ -129,12 +154,23 @@ export async function downloadFile(
                 let sender;
                 try {
                     sender = await client.getSender(dcId);
-                    const result = await sender.send(new Api.upload.GetFile({
-                        location: inputLocation,
-                        offset: offsetMemo,
-                        limit,
-                        precise: isPrecise || undefined,
-                    }));
+                    // sometimes a session is revoked and will cause this to hang.
+                    const result = await Promise.race([
+                        sender.send(new Api.upload.GetFile({
+                            location: inputLocation,
+                            offset: offsetMemo,
+                            limit,
+                            precise: isPrecise || undefined,
+                        })),
+                        sleep(SENDER_TIMEOUT).then(() => {
+                            // if we're on the main DC we just cancel the download and let the user retry later.
+                            if (dcId === client.session.dcId) {
+                                return Promise.reject(new Error('USER_CANCELED'));
+                            } else {
+                                return Promise.reject(new Error('SESSION_REVOKED'));
+                            }
+                        }),
+                    ]);
 
                     if (progressCallback) {
                         if (progressCallback.isCanceled) {
