@@ -30,7 +30,10 @@ const SettingsTwoFaCongratulations: FC<OwnProps & StateProps> = ({
     onScreenSelect(SettingsScreens.Privacy);
   }, [onScreenSelect]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.TwoFaCongratulations);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content two-fa custom-scroll">

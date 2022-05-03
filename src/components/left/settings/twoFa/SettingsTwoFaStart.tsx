@@ -2,7 +2,6 @@ import React, { FC, memo } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
 import { ApiSticker } from '../../../../api/types';
-import { SettingsScreens } from '../../../../types';
 
 import { selectAnimatedEmoji } from '../../../../global/selectors';
 import useLang from '../../../../hooks/useLang';
@@ -14,7 +13,6 @@ import AnimatedEmoji from '../../../common/AnimatedEmoji';
 type OwnProps = {
   onStart: NoneToVoidFunction;
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -23,11 +21,14 @@ type StateProps = {
 };
 
 const SettingsTwoFaStart: FC<OwnProps & StateProps> = ({
-  isActive, onScreenSelect, onReset, animatedEmoji, onStart,
+  isActive, onReset, animatedEmoji, onStart,
 }) => {
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.TwoFaDisabled);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content two-fa custom-scroll">

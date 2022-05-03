@@ -84,7 +84,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useEffect(() => {
     if (lastSyncTime) {

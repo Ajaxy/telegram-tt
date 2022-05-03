@@ -40,7 +40,10 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [localEnabledReactions, setLocalEnabledReactions] = useState(enabledReactions || []);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const handleSaveReactions = useCallback(() => {
     if (!chat) return;

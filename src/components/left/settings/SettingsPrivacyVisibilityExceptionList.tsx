@@ -92,7 +92,10 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     onScreenSelect(SettingsScreens.Privacy);
   }, [isAllowList, newSelectedContactIds, onScreenSelect, screen, setPrivacySettings]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, screen);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="NewChat-inner step-1">

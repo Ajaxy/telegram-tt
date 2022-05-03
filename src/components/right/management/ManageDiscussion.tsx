@@ -63,7 +63,10 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const linkedChatId = linkedChat?.id;
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useEffect(() => {
     loadGroupsForDiscussion();

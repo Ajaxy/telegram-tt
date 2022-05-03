@@ -33,7 +33,10 @@ const PollResults: FC<OwnProps & StateProps> = ({
   lastSyncTime,
 }) => {
   const lang = useLang();
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   if (!message || !chat) {
     return <Loading />;

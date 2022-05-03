@@ -54,7 +54,10 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
     }
   }, [animationData]);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useEffect(() => {
     if (!chat?.joinRequests && !isUserId(chatId)) {

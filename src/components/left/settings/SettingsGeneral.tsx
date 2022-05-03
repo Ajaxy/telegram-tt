@@ -167,7 +167,10 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     return stickerSetsById?.[id]?.installedDate ? stickerSetsById[id] : false;
   }).filter<ApiStickerSet>(Boolean as any);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content custom-scroll">

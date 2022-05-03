@@ -27,7 +27,10 @@ const SettingsTwoFaEnabled: FC<OwnProps & StateProps> = ({
 }) => {
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.TwoFaEnabled);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content two-fa custom-scroll">

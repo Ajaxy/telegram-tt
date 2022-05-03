@@ -58,7 +58,10 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const currentFirstName = user ? (user.firstName || '') : '';
   const currentLastName = user ? (user.lastName || '') : '';

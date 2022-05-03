@@ -15,10 +15,13 @@ export type OwnProps = {
   onContentChange: (content: LeftColumnContent) => void;
 };
 
-const ArchivedChats: FC<OwnProps> = ({ isActive, onReset, onContentChange }) => {
+const ArchivedChats: FC<OwnProps> = ({ isActive, onReset }) => {
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onContentChange, LeftColumnContent.Archived);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="ArchivedChats">

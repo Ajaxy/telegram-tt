@@ -1,17 +1,12 @@
-import { MessageList, MessageListType } from '../global/types';
+import { MessageListType } from '../global/types';
 import { MAIN_THREAD_ID } from '../api/types';
-
 import { LOCATION_HASH } from '../hooks/useHistoryBack';
 
-export function createMessageHash(messageList: MessageList) {
-  const typeOrThreadId = messageList.type !== 'thread' ? (
-    `_${messageList.type}`
-  ) : messageList.threadId !== -1 ? (
-    `_${messageList.threadId}`
-  ) : '';
-
-  return `${messageList.chatId}${typeOrThreadId}`;
-}
+export const createMessageHash = (chatId: string, type: string, threadId: number): string => (
+  chatId.toString()
+  + (type !== 'thread' ? `_${type}`
+    : (threadId !== -1 ? `_${threadId}` : ''))
+);
 
 export function parseLocationHash() {
   if (!LOCATION_HASH) return undefined;

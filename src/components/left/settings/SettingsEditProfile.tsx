@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiMediaFormat } from '../../../api/types';
-import { ProfileEditProgress, SettingsScreens } from '../../../types';
+import { ProfileEditProgress } from '../../../types';
 
 import { throttle } from '../../../util/schedulers';
 import { selectUser } from '../../../global/selectors';
@@ -23,7 +23,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 
 type OwnProps = {
   isActive: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -46,7 +45,6 @@ const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
 const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   currentAvatarHash,
   currentFirstName,
@@ -87,7 +85,10 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
   }, [photo, isProfileFieldsTouched, isUsernameError, isUsernameAvailable]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.EditProfile);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.

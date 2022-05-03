@@ -34,7 +34,7 @@ type OwnProps = {
   noCompact?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
-  onClose?: () => void;
+  onClose: () => void;
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: React.ReactNode;
@@ -84,11 +84,15 @@ const Menu: FC<OwnProps> = ({
   );
 
   useEffect(
-    () => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined),
+    () => (isOpen ? captureEscKeyListener(onClose) : undefined),
     [isOpen, onClose],
   );
 
-  useHistoryBack(isOpen, onClose, undefined, undefined, autoClose);
+  useHistoryBack({
+    isActive: isOpen,
+    onBack: onClose,
+    shouldBeReplaced: true,
+  });
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     if (isOpen || (!isOpen && prevIsOpen === true)) {

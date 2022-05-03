@@ -108,7 +108,10 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.GeneralChatBackground);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const isUploading = loadedWallpapers?.[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
 

@@ -63,7 +63,10 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   const [customTitle, setCustomTitle] = useState('');
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const selectedChatMember = useMemo(() => {
     const selectedAdminMember = chat.fullInfo?.adminMembers?.find(({ userId }) => userId === selectedUserId);

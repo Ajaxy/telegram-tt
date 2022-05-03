@@ -3,8 +3,6 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
-import { SettingsScreens } from '../../../../types';
-
 import { unique } from '../../../../util/iteratees';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
@@ -26,7 +24,6 @@ type OwnProps = {
   state: FoldersState;
   dispatch: FolderEditDispatch;
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -35,7 +32,6 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   state,
   dispatch,
   isActive,
-  onScreenSelect,
   onReset,
 }) => {
   const { chatFilter } = state;
@@ -103,12 +99,10 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
     }
   }, [mode, selectedChatIds, dispatch]);
 
-  useHistoryBack(
+  useHistoryBack({
     isActive,
-    onReset,
-    onScreenSelect,
-    mode === 'included' ? SettingsScreens.FoldersIncludedChats : SettingsScreens.FoldersExcludedChats,
-  );
+    onBack: onReset,
+  });
 
   if (!displayedIds) {
     return <Loading />;

@@ -3,8 +3,6 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import { SettingsScreens } from '../../../../types';
-
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { isUserId } from '../../../../global/helpers';
@@ -34,7 +32,6 @@ type OwnProps = {
   onAddIncludedChats: () => void;
   onAddExcludedChats: () => void;
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
   onBack: () => void;
 };
@@ -57,7 +54,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   onAddIncludedChats,
   onAddExcludedChats,
   isActive,
-  onScreenSelect,
   onReset,
   onBack,
   loadedActiveChatIds,
@@ -120,9 +116,10 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onBack, onScreenSelect, state.mode === 'edit'
-    ? SettingsScreens.FoldersEditFolder
-    : SettingsScreens.FoldersCreateFolder);
+  useHistoryBack({
+    isActive,
+    onBack,
+  });
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { currentTarget } = event;

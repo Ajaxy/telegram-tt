@@ -45,7 +45,10 @@ const AuthCode: FC<StateProps> = ({
     }
   }, []);
 
-  useHistoryBack(true, returnToAuthPhoneNumber);
+  useHistoryBack({
+    isActive: true,
+    onBack: returnToAuthPhoneNumber,
+  });
 
   const onCodeChange = useCallback((e: FormEvent<HTMLInputElement>) => {
     if (authError) {

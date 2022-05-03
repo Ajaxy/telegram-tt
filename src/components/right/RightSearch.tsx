@@ -66,7 +66,10 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const [viewportIds, getMore] = useInfiniteScroll(searchTextMessagesLocal, foundIds);
 

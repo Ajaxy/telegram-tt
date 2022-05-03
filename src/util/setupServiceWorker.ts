@@ -1,4 +1,4 @@
-import { DEBUG, DEBUG_MORE } from '../config';
+import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
 import { getActions } from '../global';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './environment';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
@@ -77,7 +77,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
           console.error('[SW] ServiceWorker not available');
         }
 
-        if (!IS_IOS && !IS_ANDROID) {
+        if (!IS_IOS && !IS_ANDROID && !IS_TEST) {
           getActions().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
         }
       }

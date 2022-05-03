@@ -5,8 +5,6 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { SettingsScreens } from '../../../types';
-
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { playNotifySound } from '../../../util/notifications';
@@ -16,7 +14,6 @@ import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -35,7 +32,6 @@ type StateProps = {
 
 const SettingsNotifications: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   hasPrivateChatsNotifications,
   hasPrivateChatsMessagePreview,
@@ -136,7 +132,10 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Notifications);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content custom-scroll">

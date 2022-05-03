@@ -1,5 +1,6 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 
+import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import { IS_COMPACT_MENU } from '../../util/environment';
@@ -91,7 +92,7 @@ const MenuItem: FC<OwnProps> = (props) => {
         download={download}
         aria-label={ariaLabel}
         title={ariaLabel}
-        target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
+        target={href.startsWith(window.location.origin) || IS_TEST ? '_self' : '_blank'}
         rel="noopener noreferrer"
         dir={lang.isRtl ? 'rtl' : undefined}
         onClick={onClick}

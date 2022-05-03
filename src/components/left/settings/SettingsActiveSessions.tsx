@@ -5,7 +5,6 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiSession } from '../../../api/types';
-import { SettingsScreens } from '../../../types';
 
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useFlag from '../../../hooks/useFlag';
@@ -22,7 +21,6 @@ import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -34,7 +32,6 @@ type StateProps = {
 
 const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   byHash,
   orderedHashes,
@@ -119,7 +116,10 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   }, [byHash, orderedHashes]);
   const hasOtherSessions = Boolean(otherSessionHashes.length);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.ActiveSessions);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   function renderCurrentSession(session: ApiSession) {
     return (

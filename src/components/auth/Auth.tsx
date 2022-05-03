@@ -42,10 +42,11 @@ const Auth: FC<StateProps> = ({
     }
   };
 
-  useHistoryBack(
-    (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
-    || (isMobile && authState === 'authorizationStateWaitQrCode'), handleChangeAuthorizationMethod,
-  );
+  useHistoryBack({
+    isActive: (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
+    || (isMobile && authState === 'authorizationStateWaitQrCode'),
+    onBack: handleChangeAuthorizationMethod,
+  });
 
   // Prevent refresh when rotating device
   useEffect(() => {

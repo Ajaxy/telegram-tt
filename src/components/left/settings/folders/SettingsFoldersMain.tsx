@@ -4,7 +4,6 @@ import React, {
 import { getActions, withGlobal } from '../../../../global';
 
 import { ApiChatFolder } from '../../../../api/types';
-import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { throttle } from '../../../../util/schedulers';
@@ -23,7 +22,6 @@ type OwnProps = {
   isActive?: boolean;
   onCreateFolder: () => void;
   onEditFolder: (folder: ApiChatFolder) => void;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -41,7 +39,6 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isActive,
   onCreateFolder,
   onEditFolder,
-  onScreenSelect,
   onReset,
   orderedFolderIds,
   foldersById,
@@ -88,7 +85,10 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Folders);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const chatsCountByFolderId = useFolderManagerForChatsCount();
   const userFolders = useMemo(() => {

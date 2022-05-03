@@ -96,7 +96,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const isPublicGroup = chat.username || hasLinkedChannel;
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useEffect(() => {
     if (lastSyncTime && canInvite) {

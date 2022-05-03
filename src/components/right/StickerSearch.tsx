@@ -57,7 +57,10 @@ const StickerSearch: FC<OwnProps & StateProps> = ({
     });
   });
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   function renderContent() {
     if (query === undefined) {

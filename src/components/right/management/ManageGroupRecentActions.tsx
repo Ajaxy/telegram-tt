@@ -25,7 +25,10 @@ type StateProps = {
 const ManageGroupRecentActions: FC<OwnProps & StateProps> = ({ chat, onClose, isActive }) => {
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const adminMembers = useMemo(() => {
     if (!chat || !chat.fullInfo || !chat.fullInfo.adminMembers) {

@@ -134,7 +134,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     }
   }) : undefined), [activeChatFolder, setActiveChatFolder]);
 
-  useHistoryBack(activeChatFolder !== 0, () => setActiveChatFolder(0, { forceOnHeavyAnimation: true }));
+  useHistoryBack({
+    isActive: activeChatFolder !== 0,
+    onBack: () => setActiveChatFolder(0, { forceOnHeavyAnimation: true }),
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

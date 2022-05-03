@@ -4,7 +4,6 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
-import { SettingsScreens } from '../../../types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
@@ -25,7 +24,6 @@ import BlockUserModal from './BlockUserModal';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -38,7 +36,6 @@ type StateProps = {
 
 const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   chatsByIds,
   usersByIds,
@@ -53,7 +50,10 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
     unblockContact({ contactId });
   }, [unblockContact]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.PrivacyBlockedUsers);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   function renderContact(contactId: string, i: number, viewportOffset: number) {
     const isPrivate = isUserId(contactId);
