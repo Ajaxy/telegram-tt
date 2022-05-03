@@ -48,6 +48,7 @@ import {
   selectEditingDraft,
   selectRequestedText,
   selectTheme,
+  selectCurrentMessageList,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -131,6 +132,7 @@ type StateProps =
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
+    isForCurrentMessageList: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
     isForwarding?: boolean;
@@ -201,6 +203,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   messageListType,
   draft,
   chat,
+  isForCurrentMessageList,
   connectionState,
   isChatWithBot,
   isChatWithSelf,
@@ -499,7 +502,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     editingDraft,
   );
   useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage);
-  useClipboardPaste(insertTextAndUpdateCursor, setAttachments, editingMessage);
+  useClipboardPaste(isForCurrentMessageList, insertTextAndUpdateCursor, setAttachments, editingMessage);
 
   const handleEmbeddedClear = useCallback(() => {
     if (editingMessage) {
@@ -1270,6 +1273,10 @@ export default memo(withGlobal<OwnProps>(
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
     const requestedText = selectRequestedText(global, chatId);
+    const currentMessageList = selectCurrentMessageList(global);
+    const isForCurrentMessageList = chatId === currentMessageList?.chatId
+        && threadId === currentMessageList?.threadId
+        && messageListType === currentMessageList?.type;
 
     const editingDraft = messageListType === 'scheduled'
       ? selectEditingScheduledDraft(global, chatId)
@@ -1283,6 +1290,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithBot,
       isChatWithSelf,
       isPrivateChat,
+      isForCurrentMessageList,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, chatId),
       isChannel: chat ? isChatChannel(chat) : undefined,
       isRightColumnShown: selectIsRightColumnShown(global),
