@@ -121,6 +121,17 @@
       padding-left: 1.25rem;
       padding-right: 1.25rem;
       min-width: 5rem;
+
+      &.danger {
+        background-color: var(--color-error);
+        color: var(--color-white);
+
+        &:hover,
+        &:focus,
+        &:active {
+          background-color: var(--color-error-shade);
+        }
+      }
     }
   }
 

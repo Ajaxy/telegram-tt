@@ -57,9 +57,26 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  function renderHeader() {
+    return (
+      <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
+          <i className="icon-close" />
+        </Button>
+        <div className="modal-title">{lang('SessionPreview.Title')}</div>
+        <Button
+          color="danger"
+          onClick={handleTerminateSessionClick}
+          className={buildClassName('modal-action-button', styles.headerButton)}
+        >
+          {lang('SessionPreview.TerminateSession')}
+        </Button>
+      </div>
+    );
+  }
   return (
     <Modal
-      title={lang('SessionPreview.Title')}
+      header={renderHeader()}
       isOpen={isOpen}
       hasCloseButton
       onClose={onClose}
@@ -91,7 +108,7 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
 
       <p className={styles.note}>{lang('SessionPreview.IpDesc')}</p>
 
-      <h4 className={styles.actionHeader}>{lang('SessionPreview.AcceptHeader')}</h4>
+      <h4 className={styles.actionHeader}>{lang('AuthSessions.View.AcceptTitle')}</h4>
 
       <ListItem onClick={handleSecretChatsStateChange}>
         <span className={styles.actionName}>{lang('SessionPreview.Accept.Secret')}</span>
@@ -109,8 +126,6 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
           checked={renderingSession.areCallsEnabled}
         />
       </ListItem>
-
-      <Button color="danger" onClick={handleTerminateSessionClick}>{lang('SessionPreview.TerminateSession')}</Button>
     </Modal>
   );
 };
