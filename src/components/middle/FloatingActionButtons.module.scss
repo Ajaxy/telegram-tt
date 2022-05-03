@@ -10,6 +10,10 @@
   z-index: var(--z-scroll-down-button);
   pointer-events: none;
 
+  .unread {
+    pointer-events: none;
+  }
+
   :global(body.animation-level-0) & {
     transform: none !important;
 
@@ -28,7 +32,10 @@
   &.revealed {
     transform: translateY(0);
     opacity: 1;
-    pointer-events: all;
+
+    .unread {
+      pointer-events: all;
+    }
 
     &.no-composer.no-extra-shift {
       transform: translateY(4rem);
@@ -40,6 +47,7 @@
 
     .unread {
       opacity: 0;
+      pointer-events: none;
     }
   }
 
