@@ -194,12 +194,11 @@ async function updateContact(
     });
   }
 
-  global = getGlobal();
   if (result) {
     getActions().loadChatSettings({ chatId: userId });
 
     setGlobal(updateUser(
-      global,
+      getGlobal(),
       user.id,
       {
         firstName,
@@ -208,6 +207,7 @@ async function updateContact(
     ));
   }
 
+  global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete);
   global = closeNewContactDialog(global);
   setGlobal(global);

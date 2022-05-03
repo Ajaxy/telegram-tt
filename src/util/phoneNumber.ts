@@ -32,6 +32,10 @@ export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input
 }
 
 export function formatPhoneNumber(input: string, country?: ApiCountryCode) {
+  if (!input) {
+    return '';
+  }
+
   let phoneNumber = input.replace(/[^\d]+/g, '');
   if (country) {
     phoneNumber = phoneNumber.substr(country.countryCode.length);
@@ -81,6 +85,10 @@ function getBestPattern(numberWithoutCode: string, patterns?: string[]) {
 }
 
 export function formatPhoneNumberWithCode(phoneCodeList: ApiCountryCode[], phoneNumber: string) {
+  if (!phoneNumber) {
+    return '';
+  }
+
   const numberWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const country = getCountryFromPhoneNumber(phoneCodeList, numberWithPlus);
   if (!country) {
