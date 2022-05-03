@@ -63,8 +63,9 @@ export async function uploadFile(
         for (let j = i; j < end; j++) {
             const bytes = buffer.slice(j * partSize, (j + 1) * partSize);
 
-            // eslint-disable-next-line no-loop-func
+            // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func
             sendingParts.push((async (jMemo: number, bytesMemo: Buffer) => {
+                // eslint-disable-next-line no-constant-condition
                 while (true) {
                     let sender;
                     try {

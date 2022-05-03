@@ -9,7 +9,7 @@ import { default as Api } from '../tl/api';
 import { SecurityError } from '../errors';
 // eslint-disable-next-line import/no-named-default
 import { default as MTProtoPlainSender } from './MTProtoPlainSender';
-import { _serverKeys } from '../crypto/RSA';
+import { SERVER_KEYS } from '../crypto/RSA';
 
 const bigInt = require('big-integer');
 const IGE = require('../crypto/IGE');
@@ -58,7 +58,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     let targetFingerprint;
     let targetKey;
     for (const fingerprint of resPQ.serverPublicKeyFingerprints) {
-        targetKey = _serverKeys.get(fingerprint.toString());
+        targetKey = SERVER_KEYS.get(fingerprint.toString());
         if (targetKey !== undefined) {
             targetFingerprint = fingerprint;
             break;
