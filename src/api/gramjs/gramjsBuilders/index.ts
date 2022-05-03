@@ -419,6 +419,12 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'chatInvite':
       return new GramJs.InputPrivacyKeyChatInvite();
+
+    case 'phoneCall':
+      return new GramJs.InputPrivacyKeyPhoneCall();
+
+    case 'phoneP2P':
+      return new GramJs.InputPrivacyKeyPhoneP2P();
   }
 
   return undefined;

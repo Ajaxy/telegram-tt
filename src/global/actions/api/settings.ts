@@ -308,17 +308,31 @@ addActionHandler('loadLanguages', async () => {
 
 addActionHandler('loadPrivacySettings', async (global) => {
   const [
-    phoneNumberSettings, lastSeenSettings, profilePhotoSettings, forwardsSettings, chatInviteSettings,
+    phoneNumberSettings,
+    lastSeenSettings,
+    profilePhotoSettings,
+    forwardsSettings,
+    chatInviteSettings,
+    phoneCallSettings,
+    phoneP2PSettings,
   ] = await Promise.all([
     callApi('fetchPrivacySettings', 'phoneNumber'),
     callApi('fetchPrivacySettings', 'lastSeen'),
     callApi('fetchPrivacySettings', 'profilePhoto'),
     callApi('fetchPrivacySettings', 'forwards'),
     callApi('fetchPrivacySettings', 'chatInvite'),
+    callApi('fetchPrivacySettings', 'phoneCall'),
+    callApi('fetchPrivacySettings', 'phoneP2P'),
   ]);
 
   if (
-    !phoneNumberSettings || !lastSeenSettings || !profilePhotoSettings || !forwardsSettings || !chatInviteSettings
+    !phoneNumberSettings
+    || !lastSeenSettings
+    || !profilePhotoSettings
+    || !forwardsSettings
+    || !chatInviteSettings
+    || !phoneCallSettings
+    || !phoneP2PSettings
   ) {
     return;
   }
@@ -335,6 +349,8 @@ addActionHandler('loadPrivacySettings', async (global) => {
         profilePhoto: profilePhotoSettings,
         forwards: forwardsSettings,
         chatInvite: chatInviteSettings,
+        phoneCall: phoneCallSettings,
+        phoneP2P: phoneP2PSettings,
       },
     },
   });
