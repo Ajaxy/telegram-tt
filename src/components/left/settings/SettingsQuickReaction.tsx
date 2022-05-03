@@ -1,7 +1,6 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { SettingsScreens } from '../../../types';
 import { ApiAvailableReaction } from '../../../api/types';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -11,7 +10,6 @@ import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -23,12 +21,15 @@ type StateProps = {
 const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
   isActive,
   onReset,
-  onScreenSelect,
   availableReactions,
   selectedReaction,
 }) => {
   const { setDefaultReaction } = getActions();
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
+
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const options = availableReactions?.filter((l) => !l.isInactive).map((l) => {
     return {

@@ -67,17 +67,10 @@ const Modal: FC<OwnProps & StateProps> = ({
     : undefined), [isOpen, onClose, onEnter]);
   useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
 
-  const { forceClose } = useHistoryBack(isOpen, onClose);
-
-  // For modals that are closed by unmounting without changing `isOpen` to `false`
-  useEffect(() => {
-    return () => {
-      if (isOpen) {
-        forceClose();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useHistoryBack({
+    isActive: isOpen,
+    onBack: onClose,
+  });
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', isOpen);

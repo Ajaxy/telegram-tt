@@ -42,7 +42,10 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const removedMembers = useMemo(() => {
     if (!chat || !chat.fullInfo || !chat.fullInfo.kickedMembers) {

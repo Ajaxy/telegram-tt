@@ -6,7 +6,6 @@ import { getActions, withGlobal } from '../../global';
 import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
 import {
   MessageListType,
-  MessageList as GlobalMessageList,
   ActiveEmojiInteraction,
 } from '../../global/types';
 import { ThemeKey } from '../../types';
@@ -48,7 +47,6 @@ import {
 } from '../../global/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
-import { createMessageHash } from '../../util/routing';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useWindowSize from '../../hooks/useWindowSize';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -104,7 +102,6 @@ type StateProps = {
   animationLevel?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
-  messageLists?: GlobalMessageList[];
   isChannel?: boolean;
   areChatSettingsLoaded?: boolean;
   canSubscribe?: boolean;
@@ -126,7 +123,6 @@ const MiddleColumn: FC<StateProps> = ({
   messageListType,
   isPrivate,
   isPinnedMessageList,
-  messageLists,
   canPost,
   currentUserBannedRights,
   defaultBannedRights,
@@ -158,6 +154,7 @@ const MiddleColumn: FC<StateProps> = ({
 }) => {
   const {
     openChat,
+    openPreviousChat,
     unpinAllMessages,
     loadUser,
     loadChatSettings,
@@ -293,8 +290,8 @@ const MiddleColumn: FC<StateProps> = ({
   const handleUnpinAllMessages = useCallback(() => {
     unpinAllMessages({ chatId });
     closeUnpinModal();
-    openChat({ id: chatId });
-  }, [unpinAllMessages, openChat, closeUnpinModal, chatId]);
+    openPreviousChat();
+  }, [unpinAllMessages, chatId, closeUnpinModal, openPreviousChat]);
 
   const handleTabletFocus = useCallback(() => {
     openChat({ id: chatId });
@@ -347,21 +344,15 @@ const MiddleColumn: FC<StateProps> = ({
     renderingCanPost && isNotchShown && !isSelectModeActive && 'with-notch',
   );
 
-  const closeChat = () => {
-    openChat({ id: undefined }, { forceSyncOnIOs: true });
-  };
+  useHistoryBack({
+    isActive: isSelectModeActive,
+    onBack: exitMessageSelectMode,
+  });
 
-  useHistoryBack(
-    renderingChatId && renderingThreadId,
-    closeChat,
-    undefined,
-    undefined,
-    undefined,
-    messageLists?.map(createMessageHash) || [],
-  );
-
-  useHistoryBack(isMobileSearchActive, closeLocalTextSearch);
-  useHistoryBack(isSelectModeActive, exitMessageSelectMode);
+  useHistoryBack({
+    isActive: isMobileSearchActive,
+    onBack: closeLocalTextSearch,
+  });
 
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
@@ -573,7 +564,7 @@ export default memo(withGlobal(
       isSeenByModalOpen: Boolean(global.seenByModal),
       isReactorListModalOpen: Boolean(global.reactorModal),
       animationLevel: global.settings.byKey.animationLevel,
-      currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
+      currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,
       lastSyncTime,
     };
@@ -620,7 +611,6 @@ export default memo(withGlobal(
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
-      messageLists,
       isChannel,
       canSubscribe,
       canStartBot,

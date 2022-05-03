@@ -48,7 +48,10 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const selectedChatMember = useMemo(() => {
     if (!chat || !chat.fullInfo || !chat.fullInfo.members) {

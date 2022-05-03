@@ -91,7 +91,10 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     }
   }, [animationData]);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const hasDetailedCountdown = useMemo(() => {
     if (!exportedInvites) return undefined;

@@ -91,7 +91,10 @@ const GifSearch: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   function renderContent() {
     if (query === undefined) {

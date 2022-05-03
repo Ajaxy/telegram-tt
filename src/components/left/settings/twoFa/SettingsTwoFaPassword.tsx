@@ -2,8 +2,6 @@ import React, {
   FC, memo, useCallback, useState,
 } from '../../../../lib/teact/teact';
 
-import { SettingsScreens } from '../../../../types';
-
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
@@ -11,7 +9,6 @@ import PasswordMonkey from '../../../common/PasswordMonkey';
 import PasswordForm from '../../../common/PasswordForm';
 
 type OwnProps = {
-  screen: SettingsScreens;
   error?: string;
   isLoading?: boolean;
   expectedPassword?: string;
@@ -21,16 +18,13 @@ type OwnProps = {
   clearError?: NoneToVoidFunction;
   onSubmit: (password: string) => void;
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
 const EQUAL_PASSWORD_ERROR = 'Passwords Should Be Equal';
 
 const SettingsTwoFaPassword: FC<OwnProps> = ({
-  screen,
   isActive,
-  onScreenSelect,
   onReset,
   error,
   isLoading,
@@ -61,7 +55,10 @@ const SettingsTwoFaPassword: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, screen);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div className="settings-content two-fa custom-scroll">

@@ -169,7 +169,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.EditProfile:
         return (
           <SettingsEditProfile
-            onScreenSelect={onScreenSelect}
             isActive={isActive && isScreenActive}
             onReset={handleReset}
           />
@@ -188,15 +187,15 @@ const Settings: FC<OwnProps> = ({
         );
       case SettingsScreens.QuickReaction:
         return (
-          <SettingsQuickReaction onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
+          <SettingsQuickReaction isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Notifications:
         return (
-          <SettingsNotifications onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
+          <SettingsNotifications isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.DataStorage:
         return (
-          <SettingsDataStorage onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
+          <SettingsDataStorage isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Privacy:
         return (
@@ -208,7 +207,7 @@ const Settings: FC<OwnProps> = ({
         );
       case SettingsScreens.Language:
         return (
-          <SettingsLanguage onScreenSelect={onScreenSelect} isActive={isScreenActive} onReset={handleReset} />
+          <SettingsLanguage isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.GeneralChatBackground:
         return (
@@ -221,7 +220,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.GeneralChatBackgroundColor:
         return (
           <SettingsGeneralBackgroundColor
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}
           />
@@ -229,7 +227,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.ActiveSessions:
         return (
           <SettingsActiveSessions
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}
           />
@@ -237,7 +234,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyBlockedUsers:
         return (
           <SettingsPrivacyBlockedUsers
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}
           />

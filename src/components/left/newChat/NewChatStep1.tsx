@@ -64,7 +64,10 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const handleFilterChange = useCallback((query: string) => {
     setGlobalSearchQuery({ query });

@@ -223,11 +223,13 @@ const RightColumn: FC<StateProps> = ({
     }
   }, [chatId]);
 
-  useHistoryBack(isChatSelected && (
-    contentKey === RightColumnContent.ChatInfo
-    || contentKey === RightColumnContent.Management
-    || contentKey === RightColumnContent.AddingMembers
-  ), () => close(false), toggleChatInfo);
+  useHistoryBack({
+    isActive: isChatSelected && (
+      contentKey === RightColumnContent.ChatInfo
+      || contentKey === RightColumnContent.Management
+      || contentKey === RightColumnContent.AddingMembers),
+    onBack: () => close(false),
+  });
 
   // eslint-disable-next-line consistent-return
   function renderContent(isActive: boolean) {

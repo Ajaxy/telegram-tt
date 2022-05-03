@@ -65,7 +65,10 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     || (privacyType === 'private' && isPublic),
   );
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useEffect(() => {
     if (privacyType && !privateLink) {

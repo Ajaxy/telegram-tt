@@ -397,12 +397,9 @@ const MediaViewer: FC<StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isOpen, closeMediaViewer, openMediaViewer, {
-    chatId,
-    threadId,
-    messageId,
-    origin,
-    avatarOwnerId: avatarOwner && avatarOwner.id,
+  useHistoryBack({
+    isActive: isOpen,
+    onBack: closeMediaViewer,
   });
 
   useEffect(() => {

@@ -54,6 +54,7 @@ import HistoryCalendar from './HistoryCalendar.async';
 import GroupCall from '../calls/group/GroupCall.async';
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import PhoneCall from '../calls/phone/PhoneCall.async';
+import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import NewContactModal from './NewContactModal.async';
 import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 import WebAppModal from './WebAppModal.async';
@@ -387,6 +388,7 @@ const Main: FC<StateProps> = ({
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
       <BotTrustModal bot={botTrustRequest?.bot} type={botTrustRequest?.type} />
       <BotAttachModal bot={botAttachRequest?.bot} />
+      <MessageListHistoryHandler />
     </div>
   );
 };

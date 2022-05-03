@@ -73,7 +73,10 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
     }
   }, [connectionState, isActive, loadContactList]);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const memberIds = useMemo(() => {
     return members ? members.map((member) => member.userId) : [];

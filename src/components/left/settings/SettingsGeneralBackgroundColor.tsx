@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { SettingsScreens, ThemeKey } from '../../../types';
+import { ThemeKey } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import {
@@ -22,7 +22,6 @@ import './SettingsGeneralBackgroundColor.scss';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -52,7 +51,6 @@ const PREDEFINED_COLORS = [
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   theme,
   backgroundColor,
@@ -205,7 +203,10 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     isDragging && 'is-dragging',
   );
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.GeneralChatBackgroundColor);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   return (
     <div ref={containerRef} className={className}>

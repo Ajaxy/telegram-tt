@@ -1,4 +1,4 @@
-import { APP_VERSION, DEBUG } from '../config';
+import { APP_VERSION, DEBUG, IS_MOCKED_CLIENT } from '../config';
 import { getGlobal } from '../global';
 import { hasStoredSession } from './sessions';
 
@@ -25,6 +25,7 @@ const saveSync = (authed: boolean) => {
 let lastTimeout: NodeJS.Timeout | undefined;
 
 export const forceWebsync = (authed: boolean) => {
+  if (IS_MOCKED_CLIENT) return undefined;
   const currentTs = getTs();
 
   const { canRedirect, ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');

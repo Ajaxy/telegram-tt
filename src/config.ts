@@ -4,6 +4,7 @@ export const APP_VERSION = process.env.APP_VERSION!;
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
 
+export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';

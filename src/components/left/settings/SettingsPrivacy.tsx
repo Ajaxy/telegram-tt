@@ -59,7 +59,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.Privacy);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   function getVisibilityValue(visibility?: PrivacyVisibility) {
     switch (visibility) {

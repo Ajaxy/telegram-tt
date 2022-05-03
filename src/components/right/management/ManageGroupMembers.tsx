@@ -139,7 +139,10 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     }
   }, '.ListItem-button', true);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   function renderSearchField() {
     return (

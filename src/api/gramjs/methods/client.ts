@@ -1,6 +1,8 @@
 import {
-  TelegramClient, sessions, Api as GramJs, connection,
+  sessions, Api as GramJs, connection,
 } from '../../../lib/gramjs';
+import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
+
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 

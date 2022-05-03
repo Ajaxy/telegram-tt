@@ -58,7 +58,10 @@ const ContactList: FC<OwnProps & StateProps> = ({
     });
   });
 
-  useHistoryBack(isActive, onReset);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });

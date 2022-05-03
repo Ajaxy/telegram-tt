@@ -61,7 +61,10 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   const [selectedUsageOption, setSelectedUsageOption] = useState('0');
   const [isSubmitBlocked, setIsSubmitBlocked] = useState(false);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   useOnChange(([oldEditingInvite]) => {
     if (oldEditingInvite === editingInvite) return;

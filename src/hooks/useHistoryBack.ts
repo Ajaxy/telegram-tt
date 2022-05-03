@@ -1,54 +1,78 @@
-import { useCallback, useEffect, useRef } from '../lib/teact/teact';
-
+import useOnChange from './useOnChange';
+import { useEffect, useRef } from '../lib/teact/teact';
+import { IS_TEST } from '../config';
+import { fastRaf } from '../util/schedulers';
 import { IS_IOS } from '../util/environment';
-import usePrevious from './usePrevious';
-import { getActions } from '../global';
-import { areSortedArraysEqual } from '../util/iteratees';
+import { getActions } from '../lib/teact/teactn';
 
-type HistoryState = {
-  currentIndex: number;
-  nextStateIndexToReplace: number;
-  isHistoryAltered: boolean;
-  isDisabled: boolean;
-  isEdge: boolean;
-  currentIndexes: number[];
-};
-
+export const LOCATION_HASH = window.location.hash;
+const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 // Carefully selected by swiping and observing visual changes
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
 const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
 const SAFARI_EDGE_BACK_GESTURE_DURATION = 350;
-export const LOCATION_HASH = window.location.hash;
-const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 
-const historyState: HistoryState = {
-  currentIndex: 0,
-  nextStateIndexToReplace: -1,
-  isHistoryAltered: false,
-  isDisabled: false,
-  isEdge: false,
-  currentIndexes: [],
+type HistoryRecord = {
+  index: number;
+  // Should this record be replaced by the next record (for example Menu)
+  shouldBeReplaced?: boolean;
+  // Mark this record as replaced by the next record. Only used to check if needed to perform effectBack
+  markReplaced?: VoidFunction;
+  onBack?: VoidFunction;
+  // Set if the element is closed in the UI, but not in the real history
+  isClosed?: boolean;
 };
 
-export const disableHistoryBack = () => {
-  historyState.isDisabled = true;
+type HistoryOperationGo = {
+  type: 'go';
+  delta: number;
 };
 
-const handleTouchStart = (event: TouchEvent) => {
+type HistoryOperationState = {
+  type: 'pushState' | 'replaceState';
+  data: any;
+  hash?: string;
+};
+
+type HistoryOperation = HistoryOperationGo | HistoryOperationState;
+
+// Needed to dismiss any 'trashed' history records from the previous page reloads.
+const historyUniqueSessionId = Number(new Date());
+// Reflects real history state, but also contains information on which records should be replaced by the next record and
+// which records are deferred to close on the next operation
+let historyState: HistoryRecord[];
+// Reflects current real history index
+let historyCursor: number;
+// If we alter real history programmatically, the popstate event will be fired, which we don't need
+let isAlteringHistory = false;
+// Unfortunately Safari doesn't really like when there's 2+ consequent history operations in one frame, so we need
+// to delay them to the next raf
+let deferredHistoryOperations: HistoryOperation[] = [];
+let isSafariGestureAnimation = false;
+
+// Do not remove: used for history unit tests
+if (IS_TEST) {
+  (window as any).TEST_getHistoryState = () => historyState;
+  (window as any).TEST_getHistoryCursor = () => historyCursor;
+}
+
+function handleTouchStart(event: TouchEvent) {
   const x = event.touches[0].pageX;
 
   if (x <= SAFARI_EDGE_BACK_GESTURE_LIMIT || x >= window.innerWidth - SAFARI_EDGE_BACK_GESTURE_LIMIT) {
-    historyState.isEdge = true;
+    isSafariGestureAnimation = true;
   }
-};
+}
 
-const handleTouchEnd = () => {
-  if (historyState.isEdge) {
-    setTimeout(() => {
-      historyState.isEdge = false;
-    }, SAFARI_EDGE_BACK_GESTURE_DURATION);
+function handleTouchEnd() {
+  if (!isSafariGestureAnimation) {
+    return;
   }
-};
+
+  setTimeout(() => {
+    isSafariGestureAnimation = false;
+  }, SAFARI_EDGE_BACK_GESTURE_DURATION);
+}
 
 if (IS_IOS) {
   window.addEventListener('touchstart', handleTouchStart);
@@ -56,197 +80,209 @@ if (IS_IOS) {
   window.addEventListener('popstate', handleTouchEnd);
 }
 
-window.history.replaceState({ index: historyState.currentIndex }, '', PATH_BASE);
+function applyDeferredHistoryOperations() {
+  const goOperations = deferredHistoryOperations.filter((op) => op.type === 'go') as HistoryOperationGo[];
+  const stateOperations = deferredHistoryOperations.filter((op) => op.type !== 'go') as HistoryOperationState[];
+  const goCount = goOperations.reduce((acc, op) => acc + op.delta, 0);
+  if (goCount) {
+    window.history.go(goCount);
+  }
 
-export default function useHistoryBack(
-  isActive: boolean | undefined,
-  onBack: ((noDisableAnimation: boolean) => void) | undefined,
-  onForward?: (state: any) => void,
-  currentState?: any,
-  shouldReplaceNext = false,
-  hashes?: string[],
-) {
-  const indexRef = useRef(-1);
-  const isForward = useRef(false);
-  const prevIsActive = usePrevious(isActive);
-  const isClosed = useRef(true);
-  const indexHashRef = useRef<{ index: number; hash: string }[]>([]);
-  const prevHashes = usePrevious(hashes);
-  const isHashChangedFromEvent = useRef<boolean>(false);
+  stateOperations.forEach((op) => window.history[op.type](op.data, '', op.hash));
 
-  const handleChange = useCallback((isForceClose = false) => {
-    if (!hashes) {
-      if (isActive && !isForceClose) {
-        isClosed.current = false;
+  deferredHistoryOperations = [];
+}
 
-        if (isForward.current) {
-          isForward.current = false;
-          historyState.currentIndexes.push(indexRef.current);
-        } else {
-          setTimeout(() => {
-            const index = ++historyState.currentIndex;
+function deferHistoryOperation(historyOperation: HistoryOperation) {
+  if (!deferredHistoryOperations.length) fastRaf(applyDeferredHistoryOperations);
+  deferredHistoryOperations.push(historyOperation);
+}
 
-            historyState.currentIndexes.push(index);
+// Resets history to the `root` state
+function resetHistory() {
+  historyCursor = 0;
+  historyState = [{
+    index: 0,
+    onBack: () => window.history.back(),
+  }];
 
-            window.history[(
-              (
-                historyState.currentIndexes.includes(historyState.nextStateIndexToReplace - 1)
-                && window.history.state.index !== 0
-                && historyState.nextStateIndexToReplace === index
-                && !shouldReplaceNext
-              )
-                ? 'replaceState'
-                : 'pushState'
-            )]({
-              index,
-              state: currentState,
-            }, '');
+  window.history.replaceState({ index: 0, historyUniqueSessionId }, PATH_BASE);
+}
 
-            indexRef.current = index;
+resetHistory();
 
-            if (shouldReplaceNext) {
-              historyState.nextStateIndexToReplace = historyState.currentIndex + 1;
-            }
-          }, 0);
-        }
-      }
+function cleanupClosed(alreadyClosedCount = 1) {
+  let countClosed = alreadyClosedCount;
+  for (let i = historyCursor - 1; i > 0; i--) {
+    if (!historyState[i].isClosed) break;
+    countClosed++;
+  }
+  if (countClosed) {
+    isAlteringHistory = true;
+    deferHistoryOperation({
+      type: 'go',
+      delta: -countClosed,
+    });
+  }
+  return countClosed;
+}
 
-      if ((isForceClose || !isActive) && !isClosed.current) {
-        if ((indexRef.current === historyState.currentIndex || !shouldReplaceNext)) {
-          historyState.isHistoryAltered = true;
-          window.history.back();
-
-          setTimeout(() => {
-            historyState.nextStateIndexToReplace = -1;
-          }, 400);
-        }
-        historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(indexRef.current), 1);
-
-        isClosed.current = true;
-      }
-    } else {
-      const prev = prevHashes || [];
-      if (prev.length < hashes.length) {
-        setTimeout(() => {
-          const index = ++historyState.currentIndex;
-          historyState.currentIndexes.push(index);
-
-          window.history.pushState({
-            index,
-            state: currentState,
-          }, '', `#${hashes[hashes.length - 1]}`);
-
-          indexHashRef.current.push({
-            index,
-            hash: hashes[hashes.length - 1],
-          });
-        }, 0);
-      } else {
-        const delta = prev.length - hashes.length;
-        if (isHashChangedFromEvent.current) {
-          isHashChangedFromEvent.current = false;
-        } else {
-          if (hashes.length !== indexHashRef.current.length) {
-            if (delta > 0) {
-              const last = indexHashRef.current[indexHashRef.current.length - delta - 1];
-              let realDelta = delta;
-              if (last) {
-                const indexLast = historyState.currentIndexes.findIndex(
-                  (l) => l === last.index,
-                );
-                realDelta = historyState.currentIndexes.length - indexLast - 1;
-              }
-              historyState.isHistoryAltered = true;
-              window.history.go(-realDelta);
-              const removed = indexHashRef.current.splice(indexHashRef.current.length - delta - 1, delta);
-              removed.forEach(({ index }) => {
-                historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(index), 1);
-              });
-            }
-          }
-
-          if (hashes.length > 0) {
-            setTimeout(() => {
-              const index = ++historyState.currentIndex;
-              historyState.currentIndexes[historyState.currentIndexes.length - 1] = index;
-
-              window.history.replaceState({
-                index,
-                state: currentState,
-              }, '', `${PATH_BASE}#${hashes[hashes.length - 1]}`);
-
-              indexHashRef.current[indexHashRef.current.length - 1] = {
-                index,
-                hash: hashes[hashes.length - 1],
-              };
-            }, 0);
-          }
-        }
-      }
+function cleanupTrashedState() {
+  // Navigation to previous page reload, state of which was trashed by reload
+  for (let i = historyState.length - 1; i > 0; i--) {
+    if (historyState[i].isClosed) {
+      continue;
     }
-  }, [currentState, hashes, isActive, prevHashes, shouldReplaceNext]);
+    if (isSafariGestureAnimation) {
+      getActions().disableHistoryAnimations();
+    }
+    historyState[i].onBack?.();
+  }
 
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      if (historyState.isHistoryAltered) {
-        setTimeout(() => {
-          historyState.isHistoryAltered = false;
-        }, 0);
-        return;
+  resetHistory();
+}
+
+window.addEventListener('popstate', ({ state }: PopStateEvent) => {
+  if (isAlteringHistory) {
+    isAlteringHistory = false;
+    return;
+  }
+
+  if (!state) {
+    cleanupTrashedState();
+
+    if (!window.location.hash) {
+      return;
+    }
+    return;
+  }
+
+  const { index, historyUniqueSessionId: previousUniqueSessionId } = state;
+  if (previousUniqueSessionId !== historyUniqueSessionId) {
+    cleanupTrashedState();
+    return;
+  }
+
+  // New real history state matches the old virtual one. Not possible in theory, but in practice we have Safari
+  if (index === historyCursor) {
+    return;
+  }
+
+  if (index < historyCursor) {
+    // Navigating back
+    let alreadyClosedCount = 0;
+    for (let i = historyCursor; i > index - alreadyClosedCount; i--) {
+      if (historyState[i].isClosed) {
+        alreadyClosedCount++;
+        continue;
       }
-      const { index: i } = event.state;
-      const index = i || 0;
-      try {
-        const currIndex = hashes ? indexHashRef.current[indexHashRef.current.length - 1].index : indexRef.current;
-
-        const prev = historyState.currentIndexes[historyState.currentIndexes.indexOf(currIndex) - 1];
-
-        if (historyState.isDisabled) return;
-
-        if ((!isClosed.current && (index === 0 || index === prev)) || (hashes && (index === 0 || index === prev))) {
-          if (hashes) {
-            isHashChangedFromEvent.current = true;
-            indexHashRef.current.pop();
-          }
-
-          historyState.currentIndexes.splice(historyState.currentIndexes.indexOf(currIndex), 1);
-
-          if (onBack) {
-            if (historyState.isEdge) {
-              getActions()
-                .disableHistoryAnimations();
-            }
-            onBack(!historyState.isEdge);
-            isClosed.current = true;
-          }
-        } else if (index === currIndex && isClosed.current && onForward && !hashes) {
-          isForward.current = true;
-          if (historyState.isEdge) {
-            getActions()
-              .disableHistoryAnimations();
-          }
-          onForward(event.state.state);
-        }
-      } catch (e) {
-        // Forward navigation for hashed is not supported
+      if (isSafariGestureAnimation) {
+        getActions().disableHistoryAnimations();
       }
+      historyState[i].onBack?.();
+    }
+
+    const countClosed = cleanupClosed(alreadyClosedCount);
+    historyCursor += index - historyCursor - countClosed;
+
+    // Can happen when we have deferred a real back for some element (for example Menu), closed via UI,
+    // pressed back button and caused a pushState.
+    if (historyCursor < 0) {
+      historyCursor = 0;
+    }
+  } else if (index > historyCursor) {
+    // Forward navigation is not yet supported
+    isAlteringHistory = true;
+    deferHistoryOperation({
+      type: 'go',
+      delta: -(index - historyCursor),
+    });
+  }
+});
+
+export default function useHistoryBack({
+  isActive,
+  shouldBeReplaced,
+  hash,
+  onBack,
+}: {
+  isActive?: boolean;
+  shouldBeReplaced?: boolean;
+  hash?: string;
+  title?: string;
+  onBack: VoidFunction;
+}) {
+  // Active index of the record
+  const indexRef = useRef<number>();
+  const wasReplaced = useRef(false);
+
+  const isFirstRender = useRef(true);
+
+  const pushState = (forceReplace = false) => {
+    // Check if the old state should be replaced
+    const shouldReplace = forceReplace || historyState[historyCursor].shouldBeReplaced;
+    indexRef.current = shouldReplace ? historyCursor : ++historyCursor;
+
+    historyCursor = indexRef.current;
+
+    // Mark the previous record as replaced so effectBack doesn't perform back operation on the new record
+    const previousRecord = historyState[indexRef.current];
+    if (previousRecord && !previousRecord.isClosed) {
+      previousRecord.markReplaced?.();
+    }
+
+    historyState[indexRef.current] = {
+      index: indexRef.current,
+      onBack,
+      shouldBeReplaced,
+      markReplaced: () => {
+        wasReplaced.current = true;
+      },
     };
 
-    const hasChanged = hashes
-      ? (!prevHashes || !areSortedArraysEqual(prevHashes, hashes))
-      : prevIsActive !== isActive;
-
-    if (!historyState.isDisabled && hasChanged) {
-      handleChange();
+    // Delete forward navigation in the virtual history. Not really needed, just looks better when debugging `logState`
+    for (let i = indexRef.current + 1; i < historyState.length; i++) {
+      delete historyState[i];
     }
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [
-    currentState, handleChange, hashes, isActive, onBack, onForward, prevHashes, prevIsActive, shouldReplaceNext,
-  ]);
-
-  return {
-    forceClose: () => handleChange(true),
+    deferHistoryOperation({
+      type: shouldReplace ? 'replaceState' : 'pushState',
+      data: {
+        index: indexRef.current,
+        historyUniqueSessionId,
+      },
+      hash: hash ? `#${hash}` : undefined,
+    });
   };
+
+  const processBack = () => {
+    // Only process back on open records
+    if (indexRef.current && historyState[indexRef.current] && !wasReplaced.current) {
+      historyState[indexRef.current].isClosed = true;
+      wasReplaced.current = true;
+      if (indexRef.current === historyCursor && !shouldBeReplaced) {
+        historyCursor -= cleanupClosed();
+      }
+    }
+  };
+
+  // Process back navigation when element is unmounted
+  useEffect(() => {
+    isFirstRender.current = false;
+    return () => {
+      if (!isActive || wasReplaced.current) return;
+      processBack();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useOnChange(() => {
+    if (isFirstRender.current && !isActive) return;
+
+    if (isActive) {
+      pushState();
+    } else {
+      processBack();
+    }
+  }, [isActive]);
 }

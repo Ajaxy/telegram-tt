@@ -40,7 +40,10 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 }) => {
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const handleRecentActionsClick = useCallback(() => {
     onScreenSelect(ManagementScreens.GroupRecentActions);

@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { SettingsScreens, ISettings } from '../../../types';
+import { ISettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { pick } from '../../../util/iteratees';
@@ -13,7 +13,6 @@ import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -37,7 +36,6 @@ type StateProps = Pick<ISettings, (
 
 const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   canAutoLoadPhotoFromContacts,
   canAutoLoadPhotoInPrivateChats,
@@ -59,7 +57,10 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset, onScreenSelect, SettingsScreens.General);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const renderFileSizeCallback = useCallback((value: number) => {
     return lang('AutodownloadSizeLimitUpTo', lang('FileSize.MB', String(AUTODOWNLOAD_FILESIZE_MB_LIMITS[value]), 'i'));

@@ -5,6 +5,8 @@ const {
   DefinePlugin,
   EnvironmentPlugin,
   ProvidePlugin,
+
+  NormalModuleReplacementPlugin,
 } = require('webpack');
 const HtmlWebackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -118,6 +120,10 @@ module.exports = (env = {}, argv = {}) => {
       },
     },
     plugins: [
+      ...(process.env.APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
+        /src\/lib\/gramjs\/client\/TelegramClient\.js/,
+        './MockClient.ts'
+      )] : []),
       new HtmlWebackPlugin({
         appName: process.env.APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
         appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : './apple-touch-icon-dev',
@@ -130,6 +136,7 @@ module.exports = (env = {}, argv = {}) => {
       }),
       new EnvironmentPlugin({
         APP_ENV: 'production',
+        APP_MOCKED_CLIENT: '',
         APP_NAME: null,
         APP_VERSION: appVersion,
         TELEGRAM_T_API_ID: undefined,

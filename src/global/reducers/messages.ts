@@ -7,6 +7,7 @@ import {
 import { FocusDirection } from '../../types';
 
 import {
+  IS_MOCKED_CLIENT,
   IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
 import {
@@ -41,7 +42,7 @@ export function updateCurrentMessageList(
 ): GlobalState {
   const { messageLists } = global.messages;
   let newMessageLists: MessageList[] = messageLists;
-  if (shouldReplaceHistory || IS_TEST) {
+  if (shouldReplaceHistory || (IS_TEST && !IS_MOCKED_CLIENT)) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
   } else if (chatId) {
     const last = messageLists[messageLists.length - 1];

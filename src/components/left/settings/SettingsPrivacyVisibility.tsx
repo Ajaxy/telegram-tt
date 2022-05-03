@@ -84,7 +84,10 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
     }
   }, [lang, screen]);
 
-  useHistoryBack(isActive, onReset, onScreenSelect, screen);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const descriptionText = useMemo(() => {
     switch (screen) {

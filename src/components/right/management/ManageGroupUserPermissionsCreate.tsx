@@ -41,7 +41,10 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   isActive,
   serverTimeOffset,
 }) => {
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const memberIds = useMemo(() => {
     if (!members || !usersById) {

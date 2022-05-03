@@ -46,7 +46,10 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
 
   const lang = useLang();
 
-  useHistoryBack(isActive, onReset);
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');

@@ -16,6 +16,7 @@ import {
   DEBUG,
   FEEDBACK_URL,
   IS_BETA,
+  IS_TEST,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
@@ -26,7 +27,6 @@ import { clearWebsync } from '../../../util/websync';
 import { selectCurrentMessageList, selectTheme } from '../../../global/selectors';
 import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
-import { disableHistoryBack } from '../../../hooks/useHistoryBack';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -129,7 +129,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
   );
 
-  const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME;
+  const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -191,7 +191,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
-    disableHistoryBack();
   }, []);
 
   const handleOpenTipsChat = useCallback(() => {
@@ -302,7 +301,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               <MenuItem
                 icon="char-W"
                 href={LEGACY_VERSION_URL}
-                onClick={disableHistoryBack}
               >
                 Switch to Old Version
               </MenuItem>

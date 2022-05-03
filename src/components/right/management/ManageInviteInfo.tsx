@@ -71,7 +71,10 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     });
   }, [invite, lang, showNotification]);
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const renderImporters = () => {
     if (!importers?.length && requesters?.length) return undefined;

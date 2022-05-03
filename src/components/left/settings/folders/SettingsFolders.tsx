@@ -91,7 +91,6 @@ const SettingsFolders: FC<OwnProps> = ({
         <SettingsFoldersMain
           onCreateFolder={handleCreateFolder}
           onEditFolder={handleEditFolder}
-          onScreenSelect={onScreenSelect}
           isActive={isActive || [
             SettingsScreens.FoldersCreateFolder,
             SettingsScreens.FoldersEditFolder,
@@ -111,7 +110,6 @@ const SettingsFolders: FC<OwnProps> = ({
           onAddIncludedChats={handleAddIncludedChats}
           onAddExcludedChats={handleAddExcludedChats}
           onReset={handleReset}
-          onScreenSelect={onScreenSelect}
           isActive={isActive || [
             SettingsScreens.FoldersIncludedChats,
             SettingsScreens.FoldersExcludedChats,
@@ -127,7 +125,6 @@ const SettingsFolders: FC<OwnProps> = ({
           state={state}
           dispatch={dispatch}
           onReset={handleReset}
-          onScreenSelect={onScreenSelect}
           isActive={isActive}
         />
       );
@@ -139,7 +136,6 @@ const SettingsFolders: FC<OwnProps> = ({
           state={state}
           dispatch={dispatch}
           onReset={handleReset}
-          onScreenSelect={onScreenSelect}
           isActive={isActive}
         />
       );

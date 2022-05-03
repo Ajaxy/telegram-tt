@@ -69,7 +69,10 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
 
-  useHistoryBack(isActive, onClose);
+  useHistoryBack({
+    isActive,
+    onBack: onClose,
+  });
 
   const handleRemovedUsersClick = useCallback(() => {
     onScreenSelect(ManagementScreens.GroupRemovedUsers);
