@@ -15,11 +15,11 @@
 
     transition: transform var(--layer-transition), opacity 0.2s ease;
 
-    body.animation-level-0 & {
+    :global(body.animation-level-0) & {
       transition: none !important;
     }
 
-    #Main.right-column-open & {
+    :global(#Main.right-column-open) & {
       transform: translateX(calc(-1 * var(--right-column-width)));
     }
   }
