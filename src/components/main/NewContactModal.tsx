@@ -147,7 +147,10 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           onChange={handleLastNameChange}
         />
         <p className="NewContactModal__help-text">
-          {renderText(lang('NewContact.Phone.Hidden.Text', renderingUser?.firstName), ['emoji', 'simple_markdown'])}
+          {renderText(
+            lang('NewContact.Phone.Hidden.Text', renderingUser?.firstName || ''),
+            ['emoji', 'simple_markdown'],
+          )}
         </p>
         <Checkbox
           checked={shouldSharePhoneNumber}
