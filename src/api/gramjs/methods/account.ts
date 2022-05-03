@@ -44,13 +44,14 @@ export async function reportProfilePhoto({
 }
 
 export async function changeSessionSettings({
-  hash, areCallsEnabled,
+  hash, areCallsEnabled, areSecretChatsEnabled,
 }: {
-  hash: string; areCallsEnabled: boolean;
+  hash: string; areCallsEnabled?: boolean; areSecretChatsEnabled?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.account.ChangeAuthorizationSettings({
     hash: BigInt(hash),
-    callRequestsDisabled: !areCallsEnabled,
+    ...(areCallsEnabled !== undefined ? { callRequestsDisabled: !areCallsEnabled } : undefined),
+    ...(areSecretChatsEnabled !== undefined ? { encryptedRequestsDisabled: !areSecretChatsEnabled } : undefined),
   }));
 
   return result;
