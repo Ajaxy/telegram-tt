@@ -58,7 +58,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   theme,
 }) => {
   const {
-    closeWebApp, sendWebViewData, prolongWebView, toggleBotInAttachMenu, openTelegramLink,
+    closeWebApp, sendWebViewData, prolongWebView, toggleBotInAttachMenu, openTelegramLink, openChat,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const lang = useLang();
@@ -164,6 +164,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     });
   }, [bot, isInstalled, toggleBotInAttachMenu]);
 
+  const openBotChat = useCallback(() => {
+    openChat({
+      id: bot!.id,
+    });
+    closeWebApp();
+  }, [bot, closeWebApp, openChat]);
+
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
       <Button
@@ -198,6 +205,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           trigger={MoreMenuButton}
           positionX="right"
         >
+          {chat && bot && chat.id !== bot.id && (
+            <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
+          )}
           <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
           {bot?.isAttachMenuBot && (
             <MenuItem icon={isInstalled ? 'stop' : 'install'} onClick={handleToggleClick} destructive={isInstalled}>
@@ -207,9 +217,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         </DropdownMenu>
       </div>
     );
-  }, [
-    MoreMenuButton, bot, closeWebApp, handleRefreshClick, handleToggleClick, lang, isInstalled,
-  ]);
+  }, [lang, closeWebApp, bot, MoreMenuButton, handleRefreshClick, isInstalled, handleToggleClick, chat, openBotChat]);
 
   const prevMainButtonColor = usePrevious(mainButton?.color, true);
   const prevMainButtonTextColor = usePrevious(mainButton?.textColor, true);
