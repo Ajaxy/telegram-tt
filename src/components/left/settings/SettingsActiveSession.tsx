@@ -34,10 +34,17 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
 
   const renderingSession = useCurrentOrPrev(session, true);
 
+  const handleSecretChatsStateChange = useCallback(() => {
+    changeSessionSettings({
+      hash: session!.hash,
+      areSecretChatsEnabled: !session!.areSecretChatsEnabled,
+    });
+  }, [changeSessionSettings, session]);
+
   const handleCallsStateChange = useCallback(() => {
     changeSessionSettings({
       hash: session!.hash,
-      areCallsEnabled: !session?.areCallsEnabled,
+      areCallsEnabled: !session!.areCallsEnabled,
     });
   }, [changeSessionSettings, session]);
 
@@ -71,7 +78,7 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
       <dl className={styles.box}>
         <dt>{lang('SessionPreview.App')}</dt>
         <dd>
-          {renderingSession?.appName} {renderingSession?.appVersion},
+          {renderingSession?.appName} {renderingSession?.appVersion},{' '}
           {renderingSession?.platform} {renderingSession?.systemVersion}
         </dd>
 
@@ -86,10 +93,18 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
 
       <h4 className={styles.actionHeader}>{lang('SessionPreview.AcceptHeader')}</h4>
 
+      <ListItem onClick={handleSecretChatsStateChange}>
+        <span className={styles.actionName}>{lang('SessionPreview.Accept.Secret')}</span>
+        <Switcher
+          id="accept_secrets"
+          label="On"
+          checked={renderingSession.areSecretChatsEnabled}
+        />
+      </ListItem>
       <ListItem onClick={handleCallsStateChange}>
         <span className={styles.actionName}>{lang('SessionPreview.Accept.Calls')}</span>
         <Switcher
-          id="darkmode"
+          id="accept_calls"
           label="On"
           checked={renderingSession.areCallsEnabled}
         />

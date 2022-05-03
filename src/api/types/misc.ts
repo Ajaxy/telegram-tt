@@ -62,6 +62,7 @@ export interface ApiSession {
   country: string;
   region: string;
   areCallsEnabled: boolean;
+  areSecretChatsEnabled: boolean;
 }
 
 export interface ApiSessionData {

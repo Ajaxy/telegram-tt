@@ -603,7 +603,8 @@ export interface ActionPayloads {
   };
   changeSessionSettings: {
     hash: string;
-    areCallsEnabled: boolean;
+    areCallsEnabled?: boolean;
+    areSecretChatsEnabled?: boolean;
   };
   changeSessionTtl: {
     days: number;
