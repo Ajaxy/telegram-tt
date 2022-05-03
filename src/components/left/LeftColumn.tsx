@@ -136,6 +136,8 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyPhoneNumber:
         case SettingsScreens.PrivacyLastSeen:
         case SettingsScreens.PrivacyProfilePhoto:
+        case SettingsScreens.PrivacyPhoneCall:
+        case SettingsScreens.PrivacyPhoneP2P:
         case SettingsScreens.PrivacyForwarding:
         case SettingsScreens.PrivacyGroupChats:
         case SettingsScreens.PrivacyBlockedUsers:
@@ -155,6 +157,14 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
         case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyProfilePhoto);
+          return;
+        case SettingsScreens.PrivacyPhoneCallAllowedContacts:
+        case SettingsScreens.PrivacyPhoneCallDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyPhoneCall);
+          return;
+        case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
+        case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyPhoneP2P);
           return;
         case SettingsScreens.PrivacyForwardingAllowedContacts:
         case SettingsScreens.PrivacyForwardingDeniedContacts:

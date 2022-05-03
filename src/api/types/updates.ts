@@ -2,7 +2,8 @@ import type {
   GroupCallConnectionData,
   GroupCallParticipant,
   GroupCallConnectionState,
-  VideoState, VideoRotation,
+  VideoState,
+  VideoRotation,
 } from '../../lib/secret-sauce';
 import {
   ApiChat,
@@ -16,13 +17,13 @@ import {
 } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 import {
-  ApiEmojiInteraction,
-  ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
+  ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
 import {
   ApiGroupCall, ApiPhoneCall,
 } from './calls';
 import { ApiBotMenuButton } from './bots';
+import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -398,9 +399,9 @@ export type ApiUpdatePaymentStateCompleted = {
 
 export type ApiUpdatePrivacy = {
   '@type': 'updatePrivacy';
-  key: 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'forwards' | 'chatInvite';
+  key: ApiPrivacyKey;
   rules: {
-    visibility: 'everybody' | 'contacts' | 'nonContacts' | 'nobody';
+    visibility: PrivacyVisibility;
     allowUserIds: string[];
     allowChatIds: string[];
     blockUserIds: string[];

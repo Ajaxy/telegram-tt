@@ -53,6 +53,10 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
       return 'lastSeen';
     case 'PrivacyKeyProfilePhoto':
       return 'profilePhoto';
+    case 'PrivacyKeyPhoneCall':
+      return 'phoneCall';
+    case 'PrivacyKeyPhoneP2P':
+      return 'phoneP2P';
     case 'PrivacyKeyForwards':
       return 'forwards';
     case 'PrivacyKeyChatInvite':

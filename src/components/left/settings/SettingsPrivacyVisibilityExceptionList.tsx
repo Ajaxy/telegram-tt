@@ -103,7 +103,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         itemIds={displayedIds || []}
         selectedIds={newSelectedContactIds}
         filterValue={searchQuery}
-        filterPlaceholder={isAllowList ? lang('AlwaysShareWithPlaceholder') : lang('NeverShareWithPlaceholder')}
+        filterPlaceholder={isAllowList ? lang('AlwaysAllowPlaceholder') : lang('NeverAllowPlaceholder')}
         searchInputId="new-group-picker-search"
         onSelectedIdsChange={handleSelectedContactIdsChange}
         onFilterChange={setSearchQuery}
@@ -112,7 +112,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
       <FloatingActionButton
         isShown={isSubmitShown}
         onClick={handleSubmit}
-        ariaLabel={isAllowList ? lang('AlwaysShareWithTitle') : lang('NeverShareWithTitle')}
+        ariaLabel={isAllowList ? lang('AlwaysAllow') : lang('NeverAllow')}
       >
         <i className="icon-arrow-right" />
       </FloatingActionButton>
@@ -132,6 +132,12 @@ function getCurrentPrivacySettings(global: GlobalState, screen: SettingsScreens)
     case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
     case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       return privacy.profilePhoto;
+    case SettingsScreens.PrivacyPhoneCallAllowedContacts:
+    case SettingsScreens.PrivacyPhoneCallDeniedContacts:
+      return privacy.phoneCall;
+    case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
+    case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
+      return privacy.phoneP2P;
     case SettingsScreens.PrivacyForwardingAllowedContacts:
     case SettingsScreens.PrivacyForwardingDeniedContacts:
       return privacy.forwards;

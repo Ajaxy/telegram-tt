@@ -169,6 +169,8 @@ export enum SettingsScreens {
   PrivacyPhoneNumber,
   PrivacyLastSeen,
   PrivacyProfilePhoto,
+  PrivacyPhoneCall,
+  PrivacyPhoneP2P,
   PrivacyForwarding,
   PrivacyGroupChats,
   PrivacyPhoneNumberAllowedContacts,
@@ -177,6 +179,10 @@ export enum SettingsScreens {
   PrivacyLastSeenDeniedContacts,
   PrivacyProfilePhotoAllowedContacts,
   PrivacyProfilePhotoDeniedContacts,
+  PrivacyPhoneCallAllowedContacts,
+  PrivacyPhoneCallDeniedContacts,
+  PrivacyPhoneP2PAllowedContacts,
+  PrivacyPhoneP2PDeniedContacts,
   PrivacyForwardingAllowedContacts,
   PrivacyForwardingDeniedContacts,
   PrivacyGroupChatsAllowedContacts,
@@ -308,7 +314,8 @@ export enum NewChatMembersProgress {
 
 export type ProfileTabType = 'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
-export type ApiPrivacyKey = 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'forwards' | 'chatInvite';
+export type ApiPrivacyKey = 'phoneNumber' | 'lastSeen' | 'profilePhoto' |
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'nonContacts' | 'nobody';
 
 export enum ProfileState {
