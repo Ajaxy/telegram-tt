@@ -98,7 +98,8 @@
     "teactn/prefer-separate-component-file": "off"
   },
   "settings": {
-    "import/resolver": "webpack"
+    "import/resolver": "webpack",
+    "import/core-modules": ["fs", "path"]
   },
   "parserOptions": {
     "project": "./tsconfig.json"

@@ -2,7 +2,6 @@
  * Errors not related to the Telegram API itself
  */
 
-
 /**
  * Occurs when a read operation was cancelled.
  */

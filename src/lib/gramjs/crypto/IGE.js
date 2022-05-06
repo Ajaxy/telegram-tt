@@ -1,7 +1,6 @@
 const { IGE: AESIGE } = require('@cryptography/aes');
 const Helpers = require('../Helpers');
 
-
 class IGENEW {
     constructor(key, iv) {
         this.ige = new AESIGE(key, iv);

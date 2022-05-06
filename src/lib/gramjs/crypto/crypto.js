@@ -95,7 +95,6 @@ class Hash {
         this.data = new Uint8Array(data);
     }
 
-
     async digest() {
         if (this.algorithm === 'sha1') {
             // eslint-disable-next-line no-restricted-globals
@@ -109,8 +108,7 @@ class Hash {
 }
 
 async function pbkdf2(password, salt, iterations) {
-    const passwordKey = await crypto.subtle.importKey('raw', password,
-        { name: 'PBKDF2' }, false, ['deriveBits']);
+    const passwordKey = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, ['deriveBits']);
     return Buffer.from(await crypto.subtle.deriveBits({
         name: 'PBKDF2',
         hash: 'SHA-512',

@@ -210,7 +210,6 @@ function buildArgConfig(name, argType) {
     return currentConfig;
 }
 
-
 function* parseTl(content, layer, methods = [], ignoreIds = CORE_TYPES) {
     (methods || []).reduce((o, m) => ({
         ...o,

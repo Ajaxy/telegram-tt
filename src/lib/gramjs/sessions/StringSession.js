@@ -4,7 +4,6 @@ const BinaryReader = require('../extensions/BinaryReader');
 
 const CURRENT_VERSION = '1';
 
-
 class StringSession extends MemorySession {
     /**
      * This session file can be easily saved and loaded as a string. According

@@ -371,6 +371,7 @@ class TelegramClient {
         // if we don't already have an auth key we want to use normal DCs not -1
         const dc = utils.getDC(dcId, Boolean(sender.authKey.getKey()));
 
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             try {
                 await sender.connect(new this._connection(
@@ -682,6 +683,7 @@ class TelegramClient {
         try {
             const buff = [];
             let offset = 0;
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 const downloaded = new requests.upload.GetWebFile({
                     location: new constructors.InputWebFileLocation({
@@ -718,6 +720,7 @@ class TelegramClient {
         try {
             const buff = [];
             let offset = 0;
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 try {
                     const downloaded = new requests.upload.GetWebFile({

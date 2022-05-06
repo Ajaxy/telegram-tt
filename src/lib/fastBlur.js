@@ -5,6 +5,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable prefer-const */
 /* eslint-disable eqeqeq */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 /*
 Superfast Blur - a fast Box Blur For Canvas

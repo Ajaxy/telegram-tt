@@ -48,7 +48,6 @@ class MemorySession extends Session {
         this._takeoutId = value
     }
 
-
     getUpdateState(entityId) {
         return this._updateStates[entityId]
     }

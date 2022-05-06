@@ -5,7 +5,6 @@ const {
     BadRequestError,
 } = require('./RPCBaseErrors');
 
-
 class UserMigrateError extends InvalidDCError {
     constructor(args) {
         const newDc = Number(args.capture || 0);
@@ -16,7 +15,6 @@ class UserMigrateError extends InvalidDCError {
         this.newDc = newDc;
     }
 }
-
 
 class PhoneMigrateError extends InvalidDCError {
     constructor(args) {

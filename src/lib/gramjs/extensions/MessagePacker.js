@@ -83,8 +83,7 @@ class MessagePacker {
                     afterId = state.after.msgId;
                 }
                 state.msgId = await this._state.writeDataAsMessage(
-                    buffer, state.data, state.request.classType === 'request',
-                    afterId,
+                    buffer, state.data, state.request.classType === 'request', afterId,
                 );
                 this._log.debug(`Assigned msgId = ${state.msgId} to ${state.request.className
                 || state.request.constructor.name}`);

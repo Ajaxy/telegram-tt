@@ -267,7 +267,6 @@ async function computeCheck(request, password) {
         K,
     ]));
 
-
     return new constructors.InputCheckPasswordSRP({
         srpId: request.srpId,
         A: Buffer.from(aForHash),
