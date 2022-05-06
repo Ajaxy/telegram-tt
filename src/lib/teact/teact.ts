@@ -378,12 +378,14 @@ function unmountComponent(componentInstance: ComponentInstance) {
     memoContainer.current = undefined;
   });
 
-  componentInstance.hooks.effects.byCursor.forEach(({ cleanup }) => {
-    if (typeof cleanup === 'function') {
+  componentInstance.hooks.effects.byCursor.forEach((effect) => {
+    if (effect.cleanup) {
       try {
-        cleanup();
+        effect.cleanup();
       } catch (err: any) {
         handleError(err);
+      } finally {
+        effect.cleanup = undefined;
       }
     }
   });
@@ -535,29 +537,33 @@ function useLayoutEffectBase(
     }
 
     const { cleanup } = byCursor[cursor];
-    if (typeof cleanup === 'function') {
-      try {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        let DEBUG_startAt: number | undefined;
-        if (DEBUG) {
-          DEBUG_startAt = performance.now();
-        }
+    if (!cleanup) {
+      return;
+    }
 
-        cleanup();
-
-        if (DEBUG) {
-          const duration = performance.now() - DEBUG_startAt!;
-          const componentName = componentInstance.name;
-          if (duration > DEBUG_EFFECT_THRESHOLD) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `[Teact] Slow cleanup at effect cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`,
-            );
-          }
-        }
-      } catch (err: any) {
-        handleError(err);
+    try {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      let DEBUG_startAt: number | undefined;
+      if (DEBUG) {
+        DEBUG_startAt = performance.now();
       }
+
+      cleanup();
+
+      if (DEBUG) {
+        const duration = performance.now() - DEBUG_startAt!;
+        const componentName = componentInstance.name;
+        if (duration > DEBUG_EFFECT_THRESHOLD) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[Teact] Slow cleanup at effect cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`,
+          );
+        }
+      }
+    } catch (err: any) {
+      handleError(err);
+    } finally {
+      byCursor[cursor].cleanup = undefined;
     }
   }
 
@@ -566,13 +572,18 @@ function useLayoutEffectBase(
       return;
     }
 
+    execCleanup();
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
       DEBUG_startAt = performance.now();
     }
 
-    byCursor[cursor].cleanup = effect() as Function;
+    const result = effect();
+    if (typeof result === 'function') {
+      byCursor[cursor].cleanup = result;
+    }
 
     if (DEBUG) {
       const duration = performance.now() - DEBUG_startAt!;
@@ -616,7 +627,7 @@ function useLayoutEffectBase(
   byCursor[cursor] = {
     effect,
     dependencies,
-    cleanup: byCursor[cursor] ? byCursor[cursor].cleanup : undefined,
+    cleanup: byCursor[cursor]?.cleanup,
   };
 
   renderingInstance.hooks.effects.cursor++;
