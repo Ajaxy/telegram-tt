@@ -1,5 +1,6 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-bitwise */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 const utf16 = {
   // The utf16-class is necessary to convert from javascripts internal character representation to unicode and back.

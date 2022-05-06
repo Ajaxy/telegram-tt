@@ -16,7 +16,6 @@ class EventBuilder {
     }
 }
 
-
 module.exports = {
     EventBuilder,
 };

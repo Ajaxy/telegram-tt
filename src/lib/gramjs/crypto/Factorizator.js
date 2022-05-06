@@ -68,7 +68,6 @@ class Factorizator {
             r = r.multiply(2);
         }
 
-
         if (g.eq(pq)) {
             // eslint-disable-next-line no-constant-condition
             while (true) {

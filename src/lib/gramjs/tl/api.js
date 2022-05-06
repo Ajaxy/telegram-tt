@@ -7,8 +7,8 @@ const {
     toSignedLittleBuffer,
 } = require('../Helpers');
 
-const tlContent = require('./apiTl.js');
-const schemeContent = require('./schemaTl.js');
+const tlContent = require('./apiTl');
+const schemeContent = require('./schemaTl');
 
 /* CONTEST
 const NAMED_AUTO_CASTS = new Set([

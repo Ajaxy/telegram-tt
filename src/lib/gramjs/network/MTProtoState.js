@@ -266,7 +266,8 @@ class MTProtoState {
             if (this.msgIds.length > 500) {
                 this.msgIds.shift();
             }
-            this.msgIds.push(remoteMsgId.toString());const remoteSequence = reader.readInt();
+            this.msgIds.push(remoteMsgId.toString());
+            const remoteSequence = reader.readInt();
             const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
             const diff = body.length - containerLen;
             // We want to check if it's between 12 and 1024

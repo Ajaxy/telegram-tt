@@ -205,7 +205,7 @@ class TelegramClient {
         return testChat;
     }
 
-    async invoke(request: Request) {
+    invoke(request: Request) {
     // await new Promise(resolve => setTimeout(resolve, 1000))
         if (request instanceof GramJs.messages.GetDiscussionMessage) {
             return new GramJs.messages.DiscussionMessage({

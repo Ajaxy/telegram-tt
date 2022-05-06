@@ -268,7 +268,9 @@ function getRandomInt(min, max) {
  * @param ms time in milliseconds
  * @returns {Promise}
  */
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => {
+    setTimeout(resolve, ms);
+});
 
 /**
  * Helper to export two buffers of same length

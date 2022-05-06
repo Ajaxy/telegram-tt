@@ -149,7 +149,8 @@ class StorageSession extends MemorySession {
 
     async delete() {
         try {
-            return await this._delete();
+            const deleted = await this._delete();
+            return deleted;
         } catch (err) {
             // eslint-disable-next-line no-console
             console.warn('Failed to delete session from storage');
