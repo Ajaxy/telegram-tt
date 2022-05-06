@@ -282,10 +282,10 @@ const LeftColumn: FC<StateProps> = ({
     openChat({ id: currentUserId });
   }, [currentUserId, openChat]);
 
-  useHotkeys([
-    ['mod+shift+F', handleHotkeySearch],
-    ['mod+shift+S', handleHotkeySavedMessages],
-  ]);
+  useHotkeys({
+    'mod+shift+F': handleHotkeySearch,
+    'mod+shift+S': handleHotkeySavedMessages,
+  });
 
   useEffect(() => {
     clearTwoFaError();
