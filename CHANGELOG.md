@@ -1,3 +1,18 @@
+## 1.45.0 (2022-05-06)
+
+### 👏 **Harder**
+* Copy phone number from the contact card context menu.
+
+### 🤩 **Better**
+* Migrated chats do not appear in the chat list anymore.
+
+### 🚀 **Faster**
+* Optimized memory usage.
+
+### 💪 **Stronger**
+* Header buttons are now clickable when notifications are shown.
+* Fixed infinite spinner when clicking on a contact card.
+
 ## 1.44.0 (2022-05-03)
 
 ### 👏 **Harder**
