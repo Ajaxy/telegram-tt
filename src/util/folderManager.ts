@@ -414,7 +414,7 @@ function buildChatSummary(
   user?: ApiUser,
 ): ChatSummary {
   const {
-    id, type, lastMessage, isRestricted, isNotJoined, folderId,
+    id, type, lastMessage, isRestricted, isNotJoined, migratedTo, folderId,
     unreadCount, unreadMentionsCount, hasUnreadMark,
     joinDate, draftDate,
   } = chat;
@@ -424,7 +424,7 @@ function buildChatSummary(
   return {
     id,
     type,
-    isListed: Boolean(lastMessage && !isRestricted && !isNotJoined),
+    isListed: Boolean(lastMessage && !isRestricted && !isNotJoined && !migratedTo),
     isArchived: folderId === ARCHIVED_FOLDER_ID,
     isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
