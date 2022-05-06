@@ -11,7 +11,7 @@ const useNativeCopySelectedMessages = (copyMessagesByIds: ({ messageIds }: { mes
     }
   }
 
-  useHotkeys([['meta+C', handleCopy]]);
+  useHotkeys({ 'meta+C': handleCopy });
 };
 
 export default useNativeCopySelectedMessages;

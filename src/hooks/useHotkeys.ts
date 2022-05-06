@@ -1,31 +1,40 @@
-// Original source from Mantine
-// https://github.com/mantinedev/mantine/blob/master/src/mantine-hooks/src/use-hotkeys/
-
 import { useEffect } from '../lib/teact/teact';
-import { getHotkeyHandler, getHotkeyMatcher } from '../util/parseHotkey';
+import { getHotkeyMatcher } from '../util/parseHotkey';
+import { createCallbackManager } from '../util/callbacks';
 
-export { getHotkeyHandler };
+const IGNORE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 
-export type HotkeyItem = [string, (event: KeyboardEvent) => void];
+const handlers = createCallbackManager();
+document.documentElement.addEventListener('keydown', handlers.runCallbacks);
 
-function shouldFireEvent(event: KeyboardEvent) {
-  if (event.target instanceof HTMLElement) {
-    return !['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName);
-  }
-  return true;
-}
-
-export function useHotkeys(hotkeys: HotkeyItem[]) {
+export function useHotkeys(hotkeys?: Record<string, (e: KeyboardEvent) => void>) {
   useEffect(() => {
-    const keydownListener = (event: KeyboardEvent) => {
-      hotkeys.forEach(([hotkey, handler]) => {
-        if (getHotkeyMatcher(hotkey)(event) && shouldFireEvent(event)) {
-          handler(event);
+    if (!hotkeys) {
+      return undefined;
+    }
+
+    const entries = Object.entries(hotkeys);
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!shouldFireEvent(e)) {
+        return;
+      }
+
+      entries.forEach(([hotkey, handler]) => {
+        if (getHotkeyMatcher(hotkey)(e)) {
+          handler(e);
         }
       });
-    };
+    }
 
-    document.documentElement.addEventListener('keydown', keydownListener);
-    return () => document.documentElement.removeEventListener('keydown', keydownListener);
+    return handlers.addCallback(handleKeyDown);
   }, [hotkeys]);
+}
+
+function shouldFireEvent(e: KeyboardEvent) {
+  if (e.target instanceof HTMLElement) {
+    return !IGNORE_TAGS.has(e.target.tagName);
+  }
+
+  return true;
 }

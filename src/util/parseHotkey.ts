@@ -13,8 +13,6 @@ export type Hotkey = KeyboardModifiers & {
   key?: string;
 };
 
-type HotkeyItem = [string, (event: React.KeyboardEvent<HTMLElement>) => void];
-
 type CheckHotkeyMatch = (event: KeyboardEvent) => boolean;
 
 export function parseHotkey(hotkey: string): Hotkey {
@@ -76,15 +74,4 @@ function isExactHotkey(hotkey: Hotkey, event: KeyboardEvent): boolean {
 
 export function getHotkeyMatcher(hotkey: string): CheckHotkeyMatch {
   return (event) => isExactHotkey(parseHotkey(hotkey), event);
-}
-
-export function getHotkeyHandler(hotkeys: HotkeyItem[]) {
-  return (event: React.KeyboardEvent<HTMLElement>) => {
-    hotkeys.forEach(([hotkey, handler]) => {
-      if (getHotkeyMatcher(hotkey)(event.nativeEvent)) {
-        event.preventDefault();
-        handler(event);
-      }
-    });
-  };
 }

@@ -19,7 +19,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useChatAnimationType } from './hooks';
-import { HotkeyItem, useHotkeys } from '../../../hooks/useHotkeys';
+import { useHotkeys } from '../../../hooks/useHotkeys';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -76,19 +76,16 @@ const ChatList: FC<OwnProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
 
   // Support <Alt>+<Up/Down> to navigate between chats
-  const hotkeys: HotkeyItem[] = [];
-  if (isActive && orderedIds?.length) {
-    hotkeys.push(['alt+ArrowUp', (e: KeyboardEvent) => {
+  useHotkeys(isActive && orderedIds?.length ? {
+    'alt+ArrowUp': (e: KeyboardEvent) => {
       e.preventDefault();
       openNextChat({ targetIndexDelta: -1, orderedIds });
-    }]);
-    hotkeys.push(['alt+ArrowDown', (e: KeyboardEvent) => {
+    },
+    'alt+ArrowDown': (e: KeyboardEvent) => {
       e.preventDefault();
       openNextChat({ targetIndexDelta: 1, orderedIds });
-    }]);
-  }
-
-  useHotkeys(hotkeys);
+    },
+  } : undefined);
 
   // Support <Cmd>+<Digit> to navigate between chats
   useEffect(() => {

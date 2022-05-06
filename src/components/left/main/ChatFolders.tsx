@@ -163,7 +163,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
     };
-  });
+  }, [currentUserId, folderTabs, openChat, setActiveChatFolder]);
 
   const {
     shouldRender: shouldRenderPlaceholder, transitionClassNames,
