@@ -6,6 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import { MessageListType } from '../../../global/types';
 import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
 import { IAlbum, IAnchorPosition } from '../../../types';
+
 import {
   selectActiveDownloadIds,
   selectAllowedMessageActions,
@@ -19,17 +20,18 @@ import {
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
+import buildClassName from '../../../util/buildClassName';
+import { REM } from '../../common/helpers/mediaDimensions';
+
 import { copyTextToClipboard } from '../../../util/clipboard';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
-import { REM } from '../../common/helpers/mediaDimensions';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
 import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
-import buildClassName from '../../../util/buildClassName';
 
 const START_SIZE = 2 * REM;
 
@@ -300,7 +302,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const handleCopyLink = useCallback(() => {
     copyTextToClipboard(`https://t.me/${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
     closeMenu();
-  }, [chatUsername, closeMenu, message.chatId, message.id]);
+  }, [chatUsername, closeMenu, message]);
+
+  const handleCopyNumber = useCallback(() => {
+    copyTextToClipboard(message.content.contact!.phoneNumber);
+    closeMenu();
+  }, [closeMenu, message]);
 
   const handleDownloadClick = useCallback(() => {
     (album?.messages || [message]).forEach((msg) => {
@@ -383,6 +390,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onClose={closeMenu}
         onCopyLink={handleCopyLink}
         onCopyMessages={handleCopyMessages}
+        onCopyNumber={handleCopyNumber}
         onDownload={handleDownloadClick}
         onSaveGif={handleSaveGif}
         onShowSeenBy={handleOpenSeenByModal}
@@ -464,6 +472,7 @@ export default memo(withGlobal<OwnProps>(
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
     const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
+    const canCopyNumber = Boolean(message.content.contact);
 
     return {
       availableReactions: global.availableReactions,
@@ -479,7 +488,7 @@ export default memo(withGlobal<OwnProps>(
       canForward: !isProtected && !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
       canUnfaveSticker: !isScheduled && canUnfaveSticker,
-      canCopy: !isProtected && canCopy,
+      canCopy: canCopyNumber || (!isProtected && canCopy),
       canCopyLink: !isProtected && !isScheduled && canCopyLink,
       canSelect,
       canDownload: !isProtected && canDownload,

@@ -60,7 +60,9 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     openForwardMenuForSelectedMessages,
     downloadSelectedMessages,
     copySelectedMessages,
+    showNotification,
   } = getActions();
+  const lang = useLang();
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
@@ -78,8 +80,11 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   const handleCopy = useCallback(() => {
     copySelectedMessages();
+    showNotification({
+      message: lang('Share.Link.Copied'),
+    });
     exitMessageSelectMode();
-  }, [copySelectedMessages, exitMessageSelectMode]);
+  }, [copySelectedMessages, exitMessageSelectMode, lang, showNotification]);
 
   const handleDownload = useCallback(() => {
     downloadSelectedMessages();
@@ -88,8 +93,6 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   const prevSelectedMessagesCount = usePrevious(selectedMessagesCount || undefined, true);
   const renderingSelectedMessagesCount = isActive ? selectedMessagesCount : prevSelectedMessagesCount;
-
-  const lang = useLang();
 
   const formattedMessagesCount = lang('VoiceOver.Chat.MessagesSelected', renderingSelectedMessagesCount, 'i');
 

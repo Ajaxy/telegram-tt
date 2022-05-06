@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import { ApiAvailableReaction, ApiMessage, ApiUser } from '../../../api/types';
 import { IAnchorPosition } from '../../../types';
@@ -8,11 +9,12 @@ import { IAnchorPosition } from '../../../types';
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { getUserFullName } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+
+import useFlag from '../../../hooks/useFlag';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
-import buildClassName from '../../../util/buildClassName';
-import useFlag from '../../../hooks/useFlag';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -66,6 +68,7 @@ type OwnProps = {
   onCloseAnimationEnd?: () => void;
   onCopyLink?: () => void;
   onCopyMessages?: (messageIds: number[]) => void;
+  onCopyNumber?: () => void;
   onDownload?: () => void;
   onSaveGif?: () => void;
   onShowSeenBy?: () => void;
@@ -121,6 +124,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
   onCopyLink,
+  onCopyNumber,
   onDownload,
   onSaveGif,
   onShowSeenBy,
@@ -128,15 +132,27 @@ const MessageContextMenu: FC<OwnProps> = ({
   onSendReaction,
   onCopyMessages,
 }) => {
+  const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const scrollableRef = useRef<HTMLDivElement>(null);
-  const copyOptions = getMessageCopyOptions(message, onClose, canCopyLink ? onCopyLink : undefined, onCopyMessages);
+  const lang = useLang();
   const noReactions = !isPrivate && !enabledReactions?.length;
   const withReactions = canShowReactionList && !noReactions;
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
+
+  const handleAfterCopy = useCallback(() => {
+    showNotification({
+      message: lang('Share.Link.Copied'),
+    });
+    onClose();
+  }, [lang, onClose, showNotification]);
+
+  const copyOptions = getMessageCopyOptions(
+    message, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
+  );
 
   const getTriggerElement = useCallback(() => {
     return document.querySelector(`.Transition__slide--active > .MessageList div[data-message-id="${message.id}"]`);
@@ -192,8 +208,6 @@ const MessageContextMenu: FC<OwnProps> = ({
 
     return enableScrolling;
   }, [withScroll]);
-
-  const lang = useLang();
 
   return (
     <Menu

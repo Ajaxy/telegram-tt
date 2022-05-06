@@ -2,6 +2,7 @@ import { ApiMediaFormat, ApiMessage } from '../../../../api/types';
 
 import * as mediaLoader from '../../../../util/mediaLoader';
 import {
+  getMessageContact,
   getMessageMediaHash,
   getMessagePhoto,
   getMessageText,
@@ -24,11 +25,13 @@ export function getMessageCopyOptions(
   afterEffect?: () => void,
   onCopyLink?: () => void,
   onCopyMessages?: (messageIds: number[]) => void,
+  onCopyNumber?: () => void,
 ): ICopyOptions {
   const options: ICopyOptions = [];
   const text = getMessageText(message);
   const photo = getMessagePhoto(message)
     || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
+  const contact = getMessageContact(message);
   const mediaHash = getMessageMediaHash(message, 'inline');
   const canImageBeCopied = photo && (mediaHash || hasMessageLocalBlobUrl(message)) && CLIPBOARD_ITEM_SUPPORTED;
   const selection = window.getSelection();
@@ -41,9 +44,7 @@ export function getMessageCopyOptions(
         Promise.resolve(mediaHash ? mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl) : photo!.blobUrl)
           .then(copyImageToClipboard);
 
-        if (afterEffect) {
-          afterEffect();
-        }
+        afterEffect?.();
       },
     });
   }
@@ -68,9 +69,7 @@ export function getMessageCopyOptions(
           copyTextToClipboard(clipboardText);
         }
 
-        if (afterEffect) {
-          afterEffect();
-        }
+        afterEffect?.();
       },
     });
   }
@@ -82,9 +81,19 @@ export function getMessageCopyOptions(
       handler: () => {
         onCopyLink();
 
-        if (afterEffect) {
-          afterEffect();
-        }
+        afterEffect?.();
+      },
+    });
+  }
+
+  if (contact && onCopyNumber) {
+    options.push({
+      label: 'lng_profile_copy_phone',
+      icon: 'copy',
+      handler: () => {
+        onCopyNumber();
+
+        afterEffect?.();
       },
     });
   }
