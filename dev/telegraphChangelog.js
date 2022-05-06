@@ -19,6 +19,7 @@ const pageTemplate = `
     <h3>Commits since ${version}</h3>\
     <blockquote>This list is automatically updated when a new commit pushed to the beta repo</blockquote>\
     <ul id="list"></ul>\
+    <blockquote>Last updated ${new Date().toLocaleDateString('en-CA')}</blockquote>\
 </body>
 `.trim();
 

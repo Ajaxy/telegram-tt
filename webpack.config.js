@@ -10,7 +10,6 @@ const {
 } = require('webpack');
 const HtmlWebackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
 const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
 const WebpackContextExtension = require('./dev/webpackContextExtension');
@@ -169,13 +168,10 @@ module.exports = (env = {}, argv = {}) => {
       devtool: 'source-map',
     }),
 
-    ...(argv['optimize-minimize'] && {
+    ...(process.env.APP_ENV !== 'production' && {
       optimization: {
-        minimize: !env.noMinify,
-        minimizer: [
-          new CssMinimizerPlugin(),
-        ],
-      },
+        chunkIds: 'named',
+      }
     }),
   };
 };
