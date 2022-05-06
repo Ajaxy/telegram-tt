@@ -30,7 +30,7 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
   if (!LOAD_PROMISES[bundleName]) {
     switch (bundleName) {
       case Bundles.Auth:
-        LOAD_PROMISES[Bundles.Auth] = import('../bundles/auth');
+        LOAD_PROMISES[Bundles.Auth] = import(/* webpackChunkName: "BundleAuth" */ '../bundles/auth');
         break;
       case Bundles.Main:
         if (DEBUG) {
@@ -38,13 +38,13 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
           console.log('>>> START LOAD MAIN BUNDLE');
         }
 
-        LOAD_PROMISES[Bundles.Main] = import('../bundles/main');
+        LOAD_PROMISES[Bundles.Main] = import(/* webpackChunkName: "BundleMain" */ '../bundles/main');
         break;
       case Bundles.Extra:
-        LOAD_PROMISES[Bundles.Extra] = import('../bundles/extra');
+        LOAD_PROMISES[Bundles.Extra] = import(/* webpackChunkName: "BundleExtra" */ '../bundles/extra');
         break;
       case Bundles.Calls:
-        LOAD_PROMISES[Bundles.Calls] = import('../bundles/calls');
+        LOAD_PROMISES[Bundles.Calls] = import(/* webpackChunkName: "BundleCalls" */ '../bundles/calls');
         break;
     }
 
