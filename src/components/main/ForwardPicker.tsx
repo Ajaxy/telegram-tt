@@ -100,6 +100,11 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
     }
   }, [openChatWithText, resetSwitchBotInline, setForwardChatId, switchBotInline]);
 
+  const handleClose = useCallback(() => {
+    exitForwardMode();
+    resetSwitchBotInline();
+  }, [exitForwardMode, resetSwitchBotInline]);
+
   const renderingChatAndContactIds = useCurrentOrPrev(chatAndContactIds, true)!;
 
   if (!isOpen && !isShown) {
@@ -116,7 +121,7 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
       filter={filter}
       onFilterChange={setFilter}
       onSelectChatOrUser={handleSelectUser}
-      onClose={exitForwardMode}
+      onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
     />
   );
