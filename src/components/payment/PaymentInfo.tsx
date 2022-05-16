@@ -2,9 +2,10 @@ import React, {
   FC, useCallback, memo, useRef, useEffect,
 } from '../../lib/teact/teact';
 
+import { ApiCountry } from '../../api/types';
+
 import { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import useLang from '../../hooks/useLang';
-import countryList from '../../util/countries';
 
 import InputText from '../ui/InputText';
 import Checkbox from '../ui/Checkbox';
@@ -20,6 +21,7 @@ export type OwnProps = {
   needCardholderName?: boolean;
   needCountry?: boolean;
   needZip?: boolean;
+  countryList: ApiCountry[];
   dispatch: FormEditDispatch;
 };
 
@@ -29,6 +31,7 @@ const PaymentInfo: FC<OwnProps> = ({
   needCardholderName,
   needCountry,
   needZip,
+  countryList,
   dispatch,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -121,12 +124,12 @@ const PaymentInfo: FC<OwnProps> = ({
             ref={selectCountryRef}
           >
             {
-              countryList.map(({ name }) => (
+              countryList.map(({ defaultName, name }) => (
                 <option
-                  value={name}
+                  value={defaultName}
                   className="county-item"
                 >
-                  {name}
+                  {defaultName || name}
                 </option>
               ))
             }
