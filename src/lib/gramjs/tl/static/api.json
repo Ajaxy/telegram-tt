@@ -113,6 +113,8 @@
     "messages.getFeaturedStickers",
     "messages.readFeaturedStickers",
     "messages.getRecentStickers",
+    "messages.saveRecentSticker",
+    "messages.clearRecentStickers",
     "messages.getCommonChats",
     "messages.getWebPage",
     "messages.toggleDialogPin",

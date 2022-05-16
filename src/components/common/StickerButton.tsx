@@ -2,6 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
+import { getActions } from '../../global';
 
 import { ApiBotInlineMediaResult, ApiMediaFormat, ApiSticker } from '../../api/types';
 
@@ -34,10 +35,12 @@ type OwnProps<T> = {
   clickArg: T;
   noContextMenu?: boolean;
   isSavedMessages?: boolean;
+  canViewSet?: boolean;
   observeIntersection: ObserveFn;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
   onFaveClick?: (sticker: ApiSticker) => void;
   onUnfaveClick?: (sticker: ApiSticker) => void;
+  onRemoveRecentClick?: (sticker: ApiSticker) => void;
 };
 
 const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult | undefined = undefined>({
@@ -49,11 +52,14 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   clickArg,
   noContextMenu,
   isSavedMessages,
+  canViewSet,
   observeIntersection,
   onClick,
   onFaveClick,
   onUnfaveClick,
+  onRemoveRecentClick,
 }: OwnProps<T>) => {
+  const { openStickerSet } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const lang = useLang();
@@ -140,12 +146,16 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleBeforeContextMenu(e);
   };
 
-  const handleUnfaveClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleRemoveClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
 
-    onUnfaveClick!(sticker);
-  }, [onUnfaveClick, sticker]);
+    onRemoveRecentClick!(sticker);
+  }, [onRemoveRecentClick, sticker]);
+
+  const handleContextRemoveRecent = useCallback(() => {
+    onRemoveRecentClick!(sticker);
+  }, [onRemoveRecentClick, sticker]);
 
   const handleContextUnfave = useCallback(() => {
     onUnfaveClick!(sticker);
@@ -162,6 +172,12 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const handleSendScheduled = useCallback(() => {
     onClick?.(clickArg, undefined, true);
   }, [clickArg, onClick]);
+
+  const handleOpenSet = useCallback(() => {
+    openStickerSet({ sticker });
+  }, [openStickerSet, sticker]);
+
+  const shouldShowCloseButton = !IS_TOUCH_ENV && onRemoveRecentClick;
 
   const fullClassName = buildClassName(
     'StickerButton',
@@ -207,12 +223,12 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           onLoad={markLoaded}
         />
       )}
-      {!IS_TOUCH_ENV && onUnfaveClick && (
+      {shouldShowCloseButton && (
         <Button
-          className="sticker-unfave-button"
+          className="sticker-remove-button"
           color="dark"
           round
-          onClick={handleUnfaveClick}
+          onClick={handleRemoveClick}
         >
           <i className="icon-close" />
         </Button>
@@ -244,6 +260,16 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           <MenuItem onClick={handleSendScheduled} icon="calendar">
             {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
           </MenuItem>
+          {canViewSet && (
+            <MenuItem onClick={handleOpenSet} icon="stickers">
+              {lang('ViewPackPreview')}
+            </MenuItem>
+          )}
+          {onRemoveRecentClick && (
+            <MenuItem icon="delete" onClick={handleContextRemoveRecent}>
+              {lang('DeleteFromRecent')}
+            </MenuItem>
+          )}
         </Menu>
       )}
     </div>

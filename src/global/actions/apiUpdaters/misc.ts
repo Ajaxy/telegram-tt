@@ -28,6 +28,22 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       actions.loadFavoriteStickers();
       break;
 
+    case 'updateRecentStickers':
+      actions.loadRecentStickers();
+      break;
+
+    case 'updateStickerSets':
+      actions.loadStickerSets();
+      break;
+
+    case 'updateStickerSetsOrder':
+      actions.reorderStickerSets({ order: update.order });
+      break;
+
+    case 'updateSavedGifs':
+      actions.loadSavedGifs();
+      break;
+
     case 'updatePrivacy':
       global.settings.privacy[update.key as ApiPrivacyKey] = update.rules;
       break;

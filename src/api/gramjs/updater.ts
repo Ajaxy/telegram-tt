@@ -49,7 +49,7 @@ import {
   getGroupCallId,
 } from './apiBuilders/calls';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
-import { buildApiEmojiInteraction } from './apiBuilders/symbols';
+import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
 import { buildApiBotMenuButton } from './apiBuilders/bots';
 
 type Update = (
@@ -381,8 +381,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     || originRequest instanceof GramJs.messages.SendMultiMedia
     || originRequest instanceof GramJs.messages.ForwardMessages
   ) && (
-    update instanceof GramJs.UpdateMessageID
-    || update instanceof GramJs.UpdateShortSentMessage
+    update instanceof GramJs.UpdateMessageID || update instanceof GramJs.UpdateShortSentMessage
   )) {
     let randomId;
     if ('randomId' in update) {
@@ -861,6 +860,23 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({ '@type': 'updateResetContactList' });
   } else if (update instanceof GramJs.UpdateFavedStickers) {
     onUpdate({ '@type': 'updateFavoriteStickers' });
+  } else if (update instanceof GramJs.UpdateRecentStickers) {
+    onUpdate({ '@type': 'updateRecentStickers' });
+  } else if (update instanceof GramJs.UpdateStickerSets) {
+    onUpdate({ '@type': 'updateStickerSets' });
+  } else if (update instanceof GramJs.UpdateStickerSetsOrder) {
+    onUpdate({ '@type': 'updateStickerSetsOrder', order: update.order.map((n) => n.toString()) });
+  } else if (update instanceof GramJs.UpdateNewStickerSet) {
+    if (update.stickerset instanceof GramJs.messages.StickerSet) {
+      const stickerSet = buildStickerSet(update.stickerset.set);
+      onUpdate({
+        '@type': 'updateStickerSet',
+        id: stickerSet.id,
+        stickerSet,
+      });
+    }
+  } else if (update instanceof GramJs.UpdateSavedGifs) {
+    onUpdate({ '@type': 'updateSavedGifs' });
   } else if (update instanceof GramJs.UpdateGroupCall) {
     onUpdate({
       '@type': 'updateGroupCall',

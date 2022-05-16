@@ -82,6 +82,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
             onClick={onStickerSelect}
             clickArg={sticker}
             isSavedMessages={isSavedMessages}
+            canViewSet
           />
         ))
       ) : shouldRender ? (

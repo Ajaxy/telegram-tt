@@ -147,18 +147,29 @@
 .symbol-set {
   margin-bottom: 1rem;
 
+  &-header {
+    display: flex;
+    align-items: center;
+    color: rgba(var(--color-text-secondary-rgb), 0.75);
+  }
+
   &-name {
     font-size: 1rem;
     line-height: 1.6875rem;
     font-weight: 500;
     margin: 0;
     padding-left: 0.5rem;
-    color: rgba(var(--color-text-secondary-rgb), 0.75);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     text-align: initial;
     unicode-bidi: plaintext;
+    flex-grow: 1;
+  }
+
+  &-remove {
+    font-size: 1rem;
+    cursor: pointer;
   }
 
   &-container {

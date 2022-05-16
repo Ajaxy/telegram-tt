@@ -5,7 +5,7 @@ import { withGlobal } from '../../../global';
 
 import { GlobalState } from '../../../global/types';
 
-import { MENU_TRANSITION_DURATION } from '../../../config';
+import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import {
@@ -126,7 +126,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     const themeCategories = [...categories];
     if (recentEmojis?.length) {
       themeCategories.unshift({
-        id: 'recent',
+        id: RECENT_SYMBOL_SET_ID,
         name: lang('RecentStickers'),
         emojis: recentEmojis,
       });

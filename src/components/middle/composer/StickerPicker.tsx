@@ -6,7 +6,9 @@ import { getActions, withGlobal } from '../../../global';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
 
-import { SLIDE_TRANSITION_DURATION, STICKER_SIZE_PICKER_HEADER } from '../../../config';
+import {
+  FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, SLIDE_TRANSITION_DURATION, STICKER_SIZE_PICKER_HEADER,
+} from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
@@ -72,6 +74,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     addRecentSticker,
     unfaveSticker,
     faveSticker,
+    removeRecentSticker,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -116,19 +119,28 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
-    return [
-      {
-        id: 'recent',
-        title: lang('RecentStickers'),
-        stickers: recentStickers,
-        count: recentStickers.length,
-      },
-      {
-        id: 'favorite',
+    const defaultSets = [];
+
+    if (favoriteStickers.length) {
+      defaultSets.push({
+        id: FAVORITE_SYMBOL_SET_ID,
         title: lang('FavoriteStickers'),
         stickers: favoriteStickers,
         count: favoriteStickers.length,
-      },
+      });
+    }
+
+    if (recentStickers.length) {
+      defaultSets.push({
+        id: RECENT_SYMBOL_SET_ID,
+        title: lang('RecentStickers'),
+        stickers: recentStickers,
+        count: recentStickers.length,
+      });
+    }
+
+    return [
+      ...defaultSets,
       ...addedSetIds.map((id) => stickerSetsById[id]).filter(Boolean),
     ];
   }, [addedSetIds, lang, recentStickers, favoriteStickers, stickerSetsById]);
@@ -186,6 +198,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     sendMessageAction({ type: 'chooseSticker' });
   }, [sendMessageAction]);
 
+  const handleRemoveRecentSticker = useCallback((sticker: ApiSticker) => {
+    removeRecentSticker({ sticker });
+  }, [removeRecentSticker]);
+
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   function renderCover(stickerSet: StickerSetOrRecent, index: number) {
@@ -195,21 +211,24 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       index === activeSetIndex && 'activated',
     );
 
-    if (stickerSet.id === 'recent' || stickerSet.id === 'favorite' || stickerSet.hasThumbnail || !firstSticker) {
+    if (stickerSet.id === RECENT_SYMBOL_SET_ID
+      || stickerSet.id === FAVORITE_SYMBOL_SET_ID
+      || stickerSet.hasThumbnail
+      || !firstSticker) {
       return (
         <Button
           key={stickerSet.id}
           className={buttonClassName}
           ariaLabel={stickerSet.title}
           round
-          faded={stickerSet.id === 'recent' || stickerSet.id === 'favorite'}
+          faded={stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === FAVORITE_SYMBOL_SET_ID}
           color="translucent"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => selectStickerSet(index)}
         >
-          {stickerSet.id === 'recent' ? (
+          {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
             <i className="icon-recent" />
-          ) : stickerSet.id === 'favorite' ? (
+          ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
             <i className="icon-favorite" />
           ) : stickerSet.isLottie ? (
             <StickerSetCoverAnimated
@@ -281,6 +300,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             onStickerSelect={handleStickerSelect}
             onStickerUnfave={handleStickerUnfave}
             onStickerFave={handleStickerFave}
+            onStickerRemoveRecent={handleRemoveRecentSticker}
             favoriteStickers={favoriteStickers}
             isSavedMessages={isSavedMessages}
           />

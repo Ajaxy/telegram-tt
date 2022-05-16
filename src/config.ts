@@ -139,6 +139,8 @@ export const STICKER_SIZE_JOIN_REQUESTS = 140;
 export const STICKER_SIZE_INVITES = 140;
 export const RECENT_STICKERS_LIMIT = 20;
 export const NO_STICKER_SET_ID = 'NO_STICKER_SET';
+export const RECENT_SYMBOL_SET_ID = 'recent';
+export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 
 export const BASE_EMOJI_KEYWORD_LANG = 'en';
 

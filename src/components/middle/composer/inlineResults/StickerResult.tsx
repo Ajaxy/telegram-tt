@@ -36,6 +36,7 @@ const StickerResult: FC<OwnProps> = ({
       onClick={onClick}
       clickArg={inlineResult}
       isSavedMessages={isSavedMessages}
+      canViewSet
     />
   );
 };
