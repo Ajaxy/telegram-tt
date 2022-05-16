@@ -1135,6 +1135,15 @@ export async function loadFullChat(chat: ApiChat) {
 
   setGlobal(global);
 
+  const stickerSet = fullInfo.stickerSet;
+  if (stickerSet) {
+    getActions().loadStickers({
+      stickerSetId: stickerSet.id,
+      stickerSetAccessHash: stickerSet.accessHash,
+      stickerSetShortName: stickerSet.shortName,
+    });
+  }
+
   return result;
 }
 
