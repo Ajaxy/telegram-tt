@@ -253,7 +253,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    user-select: none;
+
+    @media (max-width: 600px) {
+      user-select: none;
+    }
 
     .info {
       display: flex;
