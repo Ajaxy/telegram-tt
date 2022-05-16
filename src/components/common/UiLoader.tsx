@@ -3,8 +3,11 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
 import { GlobalState } from '../../global/types';
+import { ThemeKey } from '../../types';
 
+import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
+import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
 import { pause } from '../../util/schedulers';
@@ -13,13 +16,14 @@ import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
+import useCustomBackground from '../../hooks/useCustomBackground';
 
 import './UiLoader.scss';
 
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 import reactionThumbsPath from '../../assets/reaction-thumbs.png';
 import monkeyPath from '../../assets/monkey.svg';
-import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
@@ -29,10 +33,12 @@ type OwnProps = {
 type StateProps =
   Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'>
   & {
-    hasCustomBackground?: boolean;
-    hasCustomBackgroundColor: boolean;
     isRightColumnShown?: boolean;
     leftColumnWidth?: number;
+    isBackgroundBlurred?: boolean;
+    theme: ThemeKey;
+    customBackground?: string;
+    backgroundColor?: string;
   };
 
 const MAX_PRELOAD_DELAY = 700;
@@ -79,11 +85,13 @@ const preloadTasks = {
 const UiLoader: FC<OwnProps & StateProps> = ({
   page,
   children,
-  hasCustomBackground,
-  hasCustomBackgroundColor,
   isRightColumnShown,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
+  theme,
+  backgroundColor,
+  customBackground,
+  isBackgroundBlurred,
 }) => {
   const { setIsUiReady } = getActions();
 
@@ -91,6 +99,8 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldRenderMask, transitionClassNames,
   } = useShowTransition(!isReady, undefined, true);
+
+  const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   useEffect(() => {
     let timeout: number | undefined;
@@ -126,6 +136,19 @@ const UiLoader: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const className = buildClassName(
+    'middle',
+    transitionClassNames,
+    customBackground && 'custom-bg-image',
+    backgroundColor && 'custom-bg-color',
+    customBackground && isBackgroundBlurred && 'blurred',
+    isRightColumnShown && 'with-right-column',
+  );
+  const inlineStyles = [
+    `--theme-background-color: ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)}`,
+    customBackgroundValue && `--custom-background: ${customBackgroundValue}`,
+  ];
+
   return (
     <div id="UiLoader">
       {children}
@@ -138,12 +161,8 @@ const UiLoader: FC<OwnProps & StateProps> = ({
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
               <div
-                className={buildClassName(
-                  'middle',
-                  hasCustomBackground && 'custom-bg-image',
-                  hasCustomBackgroundColor && 'custom-bg-color',
-                  isRightColumnShown && 'with-right-column',
-                )}
+                className={className}
+                style={buildStyle(...inlineStyles)}
               />
               {isRightColumnShown && <div className="right" />}
             </>
@@ -159,15 +178,19 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 export default withGlobal<OwnProps>(
   (global): StateProps => {
     const theme = selectTheme(global);
-    const { background, backgroundColor } = global.settings.themes[theme] || {};
+    const {
+      isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor,
+    } = global.settings.themes[theme] || {};
 
     return {
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       uiReadyState: global.uiReadyState,
-      hasCustomBackground: Boolean(background),
-      hasCustomBackgroundColor: Boolean(backgroundColor),
       isRightColumnShown: selectIsRightColumnShown(global),
       leftColumnWidth: global.leftColumnWidth,
+      theme,
+      customBackground,
+      isBackgroundBlurred,
+      backgroundColor,
     };
   },
 )(UiLoader);
