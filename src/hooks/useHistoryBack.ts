@@ -48,6 +48,7 @@ let isAlteringHistory = false;
 // Unfortunately Safari doesn't really like when there's 2+ consequent history operations in one frame, so we need
 // to delay them to the next raf
 let deferredHistoryOperations: HistoryOperation[] = [];
+let deferredPopstateOperations: HistoryOperationState[] = [];
 let isSafariGestureAnimation = false;
 
 // Do not remove: used for history unit tests
@@ -84,13 +85,25 @@ function applyDeferredHistoryOperations() {
   const goOperations = deferredHistoryOperations.filter((op) => op.type === 'go') as HistoryOperationGo[];
   const stateOperations = deferredHistoryOperations.filter((op) => op.type !== 'go') as HistoryOperationState[];
   const goCount = goOperations.reduce((acc, op) => acc + op.delta, 0);
-  if (goCount) {
-    window.history.go(goCount);
-  }
-
-  stateOperations.forEach((op) => window.history[op.type](op.data, '', op.hash));
 
   deferredHistoryOperations = [];
+
+  if (goCount) {
+    window.history.go(goCount);
+
+    // If we have some `state` operations after the `go` operations, we need to wait until the popstate event
+    // so the order of operations is correctly preserved
+    if (stateOperations.length) {
+      deferredPopstateOperations.push(...stateOperations);
+      return;
+    }
+  }
+
+  processStateOperations(stateOperations);
+}
+
+function processStateOperations(stateOperations: HistoryOperationState[]) {
+  stateOperations.forEach((op) => window.history[op.type](op.data, '', op.hash));
 }
 
 function deferHistoryOperation(historyOperation: HistoryOperation) {
@@ -145,6 +158,10 @@ function cleanupTrashedState() {
 window.addEventListener('popstate', ({ state }: PopStateEvent) => {
   if (isAlteringHistory) {
     isAlteringHistory = false;
+    if (deferredPopstateOperations.length) {
+      processStateOperations(deferredPopstateOperations);
+      deferredPopstateOperations = [];
+    }
     return;
   }
 
