@@ -141,6 +141,7 @@ export const RECENT_STICKERS_LIMIT = 20;
 export const NO_STICKER_SET_ID = 'NO_STICKER_SET';
 export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
+export const CHAT_STICKER_SET_ID = 'chatStickers';
 
 export const BASE_EMOJI_KEYWORD_LANG = 'en';
 

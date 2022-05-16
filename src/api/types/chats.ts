@@ -1,4 +1,4 @@
-import { ApiMessage, ApiPhoto } from './messages';
+import { ApiMessage, ApiPhoto, ApiStickerSet } from './messages';
 import { ApiBotCommand } from './bots';
 import { ApiChatInviteImporter } from './misc';
 import { ApiFakeType } from './users';
@@ -104,6 +104,7 @@ export interface ApiChatFullInfo {
   recentRequesterIds?: string[];
   requestsPending?: number;
   statisticsDcId?: number;
+  stickerSet?: ApiStickerSet;
 }
 
 export interface ApiChatMember {
