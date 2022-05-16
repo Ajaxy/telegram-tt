@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { DEBUG, DEBUG_MORE } from '../../config';
 import {
   fastRaf, fastRafPrimary, onTickEnd, onTickEndPrimary, throttleWithPrimaryRaf, throttleWithRaf,
@@ -101,6 +102,9 @@ export type VirtualRealElement =
   VirtualElementTag
   | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
+
+// Compatibility with JSX types
+export type TeactNode = ReactElement | string | number | boolean;
 
 const Fragment = Symbol('Fragment');
 
@@ -712,10 +716,7 @@ export function memo<T extends FC>(Component: T, debugKey?: string) {
   } as T;
 }
 
-// We need to keep it here for JSX.
-const Teact = {
+export default {
   createElement,
   Fragment,
 };
-
-export default Teact;

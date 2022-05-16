@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 import React, {
-  FC, useEffect, useRef,
+  FC, TeactNode, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import { TextPart } from '../../types';
@@ -25,7 +25,7 @@ type OwnProps = {
   title?: string | TextPart[];
   className?: string;
   isOpen?: boolean;
-  header?: any;
+  header?: TeactNode;
   hasCloseButton?: boolean;
   noBackdrop?: boolean;
   children: React.ReactNode;

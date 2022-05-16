@@ -76,7 +76,7 @@ export default function renderText(
 
 function escapeHtml(textParts: TextPart[]): TextPart[] {
   const divEl = document.createElement('div');
-  return textParts.reduce((result, part) => {
+  return textParts.reduce((result: TextPart[], part) => {
     if (typeof part !== 'string') {
       result.push(part);
       return result;
@@ -86,7 +86,7 @@ function escapeHtml(textParts: TextPart[]): TextPart[] {
     result.push(divEl.innerHTML);
 
     return result;
-  }, [] as TextPart[]);
+  }, []);
 }
 
 function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx' | 'html'): TextPart[] {
@@ -174,7 +174,7 @@ function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] 
 }
 
 function addHighlight(textParts: TextPart[], highlight: string | undefined): TextPart[] {
-  return textParts.reduce((result, part) => {
+  return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string' || !highlight) {
       result.push(part);
       return result;
@@ -198,13 +198,13 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined): Tex
     newParts.push(part.substring(queryPosition + highlight.length));
 
     return [...result, ...newParts];
-  }, [] as TextPart[]);
+  }, []);
 }
 
 const RE_LINK = new RegExp(`${RE_LINK_TEMPLATE}|${RE_MENTION_TEMPLATE}`, 'ig');
 
 function addLinks(textParts: TextPart[]): TextPart[] {
-  return textParts.reduce((result, part) => {
+  return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string') {
       result.push(part);
       return result;
@@ -244,11 +244,11 @@ function addLinks(textParts: TextPart[]): TextPart[] {
     content.push(part.substring(lastIndex));
 
     return [...result, ...content];
-  }, [] as TextPart[]);
+  }, []);
 }
 
 function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
-  return textParts.reduce((result, part) => {
+  return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string') {
       result.push(part);
       return result;
@@ -280,7 +280,7 @@ function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): Tex
 
       return entityResult;
     }, result);
-  }, [] as TextPart[]);
+  }, []);
 }
 
 export function areLinesWrapping(text: string, element: HTMLElement) {

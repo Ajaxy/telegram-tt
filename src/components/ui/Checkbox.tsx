@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, memo, TeactNode, useCallback,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
@@ -13,7 +15,7 @@ type OwnProps = {
   id?: string;
   name?: string;
   value?: string;
-  label: string;
+  label: TeactNode;
   subLabel?: string;
   checked: boolean;
   disabled?: boolean;

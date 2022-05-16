@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, { FC, memo, TeactNode } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import { ApiChat, ApiUser } from '../../api/types';
@@ -42,7 +42,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 }) => {
   const lang = useLang();
 
-  let iconElement: any;
+  let iconElement: TeactNode | undefined;
   let titleText: any;
 
   if (icon && title) {

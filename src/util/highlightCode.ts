@@ -1,6 +1,6 @@
 import type { Element, Root } from 'hast';
 import { lowlight } from 'lowlight/lib/core';
-import Teact from '../lib/teact/teact';
+import Teact, { TeactNode } from '../lib/teact/teact';
 
 // First element in alias array MUST BE a language package name
 const SUPPORTED_LANGUAGES = {
@@ -85,7 +85,7 @@ async function ensureLanguage(language: string) {
   return true;
 }
 
-function treeToElements(tree: Element | Root): JSX.Element {
+function treeToElements(tree: Element | Root): TeactNode {
   const children = tree.children.map((child) => {
     if (child.type === 'text') {
       return child.value;
@@ -97,12 +97,12 @@ function treeToElements(tree: Element | Root): JSX.Element {
   }).filter(Boolean);
 
   if (tree.type === 'root') {
-    return Teact.createElement('code', { className: 'hljs custom-scroll-x' }, children);
+    return Teact.createElement('code', { className: 'hljs custom-scroll-x' }, children) as unknown as TeactNode;
   }
 
   const name = tree.tagName;
   const classNameArray = tree.properties?.className as string[];
   const className = classNameArray?.join(' ');
 
-  return Teact.createElement(name, { className }, children);
+  return Teact.createElement(name, { className }, children) as unknown as TeactNode;
 }

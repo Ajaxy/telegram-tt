@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, { FC, memo, TeactNode } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
@@ -11,7 +11,7 @@ import './Radio.scss';
 type OwnProps = {
   id?: string;
   name: string;
-  label: string;
+  label: TeactNode;
   subLabel?: string;
   value: string;
   checked: boolean;

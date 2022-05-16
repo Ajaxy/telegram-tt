@@ -1,3 +1,4 @@
+import { TeactNode } from '../lib/teact/teact';
 import {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiChatInviteImporter,
@@ -5,7 +6,7 @@ import {
   ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
 } from '../api/types';
 
-export type TextPart = string | JSX.Element;
+export type TextPart = TeactNode;
 
 export enum LoadMoreDirection {
   Backwards,
