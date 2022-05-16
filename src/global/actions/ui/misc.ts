@@ -5,7 +5,7 @@ import { ApiError } from '../../../api/types';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
-  selectChatBot, selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
+  selectBot, selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 
@@ -298,7 +298,7 @@ addActionHandler('openGame', (global, actions, payload) => {
   if (!message) return;
 
   const botId = message.viaBotId || message.senderId;
-  const bot = botId && selectChatBot(global, botId);
+  const bot = botId && selectBot(global, botId);
   if (!bot) return;
 
   if (!selectIsTrustedBot(global, bot)) {
