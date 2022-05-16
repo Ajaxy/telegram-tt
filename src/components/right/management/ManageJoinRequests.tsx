@@ -77,27 +77,27 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management ManageJoinRequests">
-      <div className="section">
-        <div className="section-icon">
-          {animationData && (
-            <AnimatedSticker
-              id="joinRequestDucks"
-              size={STICKER_SIZE_JOIN_REQUESTS}
-              animationData={animationData}
-              play={isAnimationLoaded}
-              onLoad={handleAnimationLoad}
-            />
+      <div className="custom-scroll">
+        <div className="section">
+          <div className="section-icon">
+            {animationData && (
+              <AnimatedSticker
+                id="joinRequestDucks"
+                size={STICKER_SIZE_JOIN_REQUESTS}
+                animationData={animationData}
+                play={isAnimationLoaded}
+                onLoad={handleAnimationLoad}
+              />
+            )}
+          </div>
+          {Boolean(chat?.joinRequests?.length) && (
+            <div className="bulk-actions">
+              <Button className="bulk-action-button" onClick={openAcceptAllDialog}>Accept all</Button>
+              <Button className="bulk-action-button" onClick={openRejectAllDialog} isText>Dismiss all</Button>
+            </div>
           )}
         </div>
-        {Boolean(chat?.joinRequests?.length) && (
-          <div className="bulk-actions">
-            <Button className="bulk-action-button" onClick={openAcceptAllDialog}>Accept all</Button>
-            <Button className="bulk-action-button" onClick={openRejectAllDialog} isText>Dismiss all</Button>
-          </div>
-        )}
-      </div>
-      <div className="section">
-        <div className="custom-scroll" teactFastList>
+        <div className="section" teactFastList>
           <p key="title">
             {!chat?.joinRequests ? lang('Loading') : chat.joinRequests.length
               ? lang('JoinRequests', chat.joinRequests.length) : lang('NoMemberRequests')}

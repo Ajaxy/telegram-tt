@@ -5,6 +5,8 @@ import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import { ApiChat, ApiUser, OnApiUpdate } from '../../types';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
+import { buildApiUser } from '../apiBuilders/users';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 let onUpdate: OnApiUpdate;
 
@@ -183,8 +185,12 @@ export async function fetchChatInviteImporters({
   }));
 
   if (!result) return undefined;
+  const users = result.users.map((user) => buildApiUser(user)).filter(Boolean);
   addEntitiesWithPhotosToLocalDb(result.users);
-  return result.importers.map((importer) => buildChatInviteImporter(importer));
+  return {
+    importers: result.importers.map((importer) => buildChatInviteImporter(importer)),
+    users: buildCollectionByKey(users, 'id'),
+  };
 }
 
 export function hideChatJoinRequest({
