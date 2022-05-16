@@ -10,6 +10,7 @@ import {
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
+  selectBot,
   selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList,
   selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser,
 } from '../../selectors';
@@ -115,7 +116,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       if (!chatId) {
         return;
       }
-      const bot = selectChatBot(global, chatId);
+      const bot = selectBot(global, chatId);
       if (!bot) {
         return;
       }
@@ -139,7 +140,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       if (!message.viaBotId && !message.senderId) {
         return;
       }
-      const bot = selectChatBot(global, message.viaBotId! || message.senderId!);
+      const bot = selectBot(global, message.viaBotId! || message.senderId!);
       if (!bot) {
         return;
       }
@@ -459,12 +460,12 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
   });
 });
 
-addActionHandler('prolongWebView', (global, actions, payload) => {
+addActionHandler('prolongWebView', async (global, actions, payload) => {
   const {
     bot, peer, isSilent, replyToMessageId, queryId,
   } = payload;
 
-  const result = callApi('prolongWebView', {
+  const result = await callApi('prolongWebView', {
     bot,
     peer,
     isSilent,

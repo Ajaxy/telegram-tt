@@ -1,5 +1,6 @@
 import { GlobalState } from '../types';
 import { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
+import { isUserBot } from '../helpers';
 
 export function selectUser(global: GlobalState, userId: string): ApiUser | undefined {
   return global.users.byId[userId];
@@ -32,4 +33,13 @@ export function selectUserByPhoneNumber(global: GlobalState, phoneNumber: string
 
 export function selectIsUserOrChatContact(global: GlobalState, userOrChat: ApiUser | ApiChat) {
   return global.contactList && global.contactList.userIds.includes(userOrChat.id);
+}
+
+export function selectBot(global: GlobalState, userId: string): ApiUser | undefined {
+  const user = selectUser(global, userId);
+  if (!user || !isUserBot(user)) {
+    return undefined;
+  }
+
+  return user;
 }
