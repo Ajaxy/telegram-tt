@@ -118,8 +118,11 @@ export async function fetchContactList() {
     }
   });
 
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
+
   return {
-    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    users,
+    userStatusesById,
     chats: result.users.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any),
   };
 }

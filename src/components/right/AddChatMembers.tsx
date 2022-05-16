@@ -1,10 +1,10 @@
 import React, {
-  FC, useCallback, useMemo, memo, useState, useEffect,
+  FC, useCallback, useMemo, memo, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import {
-  ApiChat, ApiChatMember, ApiUpdateConnectionStateType,
+  ApiChat, ApiChatMember,
 } from '../../api/types';
 import { NewChatMembersProgress } from '../../types';
 
@@ -31,7 +31,6 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  connectionState?: ApiUpdateConnectionStateType;
   isChannel?: boolean;
   members?: ApiChatMember[];
   currentUserId?: string;
@@ -46,7 +45,6 @@ type StateProps = {
 
 const AddChatMembers: FC<OwnProps & StateProps> = ({
   isChannel,
-  connectionState,
   members,
   onNextStep,
   currentUserId,
@@ -60,18 +58,12 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const { setUserSearchQuery, loadContactList } = getActions();
+  const { setUserSearchQuery } = getActions();
 
   const lang = useLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const prevSelectedMemberIds = usePrevious(selectedMemberIds);
   const noPickerScrollRestore = prevSelectedMemberIds === selectedMemberIds;
-
-  useEffect(() => {
-    if (isActive && connectionState === 'connectionStateReady') {
-      loadContactList();
-    }
-  }, [connectionState, isActive, loadContactList]);
 
   useHistoryBack({
     isActive,
@@ -160,7 +152,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const { userIds: localContactIds } = global.contactList || {};
     const { byId: chatsById } = global.chats;
-    const { currentUserId, newChatMembersProgress, connectionState } = global;
+    const { currentUserId, newChatMembersProgress } = global;
     const isChannel = chat && isChatChannel(chat);
 
     const {
@@ -181,7 +173,6 @@ export default memo(withGlobal<OwnProps>(
       isLoading: newChatMembersProgress === NewChatMembersProgress.Loading,
       globalUserIds,
       localUserIds,
-      connectionState,
     };
   },
 )(AddChatMembers));

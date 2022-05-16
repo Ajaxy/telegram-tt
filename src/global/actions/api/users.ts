@@ -11,8 +11,17 @@ import { isUserBot, isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import {
-  addChats, addUsers, closeNewContactDialog, replaceUserStatuses, updateChat, updateManagementProgress, updateUser,
-  updateUsers, updateUserSearch, updateUserSearchFetchingStatus,
+  addChats,
+  addUsers,
+  addUserStatuses,
+  closeNewContactDialog,
+  replaceUserStatuses,
+  updateChat,
+  updateManagementProgress,
+  updateUser,
+  updateUsers,
+  updateUserSearch,
+  updateUserSearchFetchingStatus,
 } from '../../reducers';
 import { getServerTime } from '../../../util/serverTime';
 import * as langProvider from '../../../util/langProvider';
@@ -145,6 +154,7 @@ async function loadContactList() {
 
   let global = addUsers(getGlobal(), buildCollectionByKey(contactList.users, 'id'));
   global = addChats(global, buildCollectionByKey(contactList.chats, 'id'));
+  global = addUserStatuses(global, contactList.userStatusesById);
 
   // Sort contact list by Last Name (or First Name), with latin names being placed first
   const getCompareString = (user: ApiUser) => (user.lastName || user.firstName || '');

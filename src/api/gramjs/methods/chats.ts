@@ -12,6 +12,7 @@ import {
   ApiChatBannedRights,
   ApiChatAdminRights,
   ApiGroupCall,
+  ApiUserStatus,
 } from '../../types';
 
 import {
@@ -338,6 +339,7 @@ export function clearDraft(chat: ApiChat) {
 async function getFullChatInfo(chatId: string): Promise<{
   fullInfo: ApiChatFullInfo;
   users?: ApiUser[];
+  userStatusesById?: { [userId: string]: ApiUserStatus };
   groupCall?: Partial<ApiGroupCall>;
   membersCount?: number;
 } | undefined> {
@@ -365,6 +367,7 @@ async function getFullChatInfo(chatId: string): Promise<{
   const members = buildChatMembers(participants);
   const adminMembers = members ? members.filter(({ isAdmin, isOwner }) => isAdmin || isOwner) : undefined;
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
 
   return {
     fullInfo: {
@@ -381,7 +384,8 @@ async function getFullChatInfo(chatId: string): Promise<{
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
     },
-    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    users,
+    userStatusesById,
     groupCall: call ? {
       chatId,
       isLoaded: false,
@@ -403,6 +407,7 @@ async function getFullChannelInfo(
 ): Promise<{
     fullInfo: ApiChatFullInfo;
     users?: ApiUser[];
+    userStatusesById: { [userId: string]: ApiUserStatus };
     groupCall?: Partial<ApiGroupCall>;
     membersCount?: number;
   } | undefined> {
@@ -440,11 +445,11 @@ async function getFullChannelInfo(
     ? exportedInvite.link
     : undefined;
 
-  const { members, users } = (canViewParticipants && await fetchMembers(id, accessHash)) || {};
-  const { members: kickedMembers, users: bannedUsers } = (
+  const { members, users, userStatusesById } = (canViewParticipants && await fetchMembers(id, accessHash)) || {};
+  const { members: kickedMembers, users: bannedUsers, userStatusesById: bannedStatusesById } = (
     canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'kicked')
   ) || {};
-  const { members: adminMembers, users: adminUsers } = (
+  const { members: adminMembers, users: adminUsers, userStatusesById: adminStatusesById } = (
     canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'admin')
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
@@ -462,6 +467,12 @@ async function getFullChannelInfo(
       });
     }
   }
+
+  const statusesById = {
+    ...userStatusesById,
+    ...bannedStatusesById,
+    ...adminStatusesById,
+  };
 
   return {
     fullInfo: {
@@ -492,6 +503,7 @@ async function getFullChannelInfo(
       statisticsDcId: statsDc,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
+    userStatusesById: statusesById,
     groupCall: call ? {
       chatId: id,
       isLoaded: false,
