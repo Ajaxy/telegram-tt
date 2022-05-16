@@ -1,12 +1,11 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, memo,
+  FC, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import { ApiChat } from '../../../api/types';
 
 import { unique } from '../../../util/iteratees';
-import { throttle } from '../../../util/schedulers';
 import { filterUsersByName, isUserBot, sortChatIds } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -33,8 +32,6 @@ type StateProps = {
   globalUserIds?: string[];
 };
 
-const runThrottled = throttle((cb) => cb(), 60000, true);
-
 const NewChatStep1: FC<OwnProps & StateProps> = ({
   isChannel,
   isActive,
@@ -50,17 +47,8 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   globalUserIds,
 }) => {
   const {
-    loadContactList,
     setGlobalSearchQuery,
   } = getActions();
-
-  // Due to the parent Transition, this component never gets unmounted,
-  // that's why we use throttled API call on every update.
-  useEffect(() => {
-    runThrottled(() => {
-      loadContactList();
-    });
-  });
 
   const lang = useLang();
 

@@ -1,12 +1,11 @@
 import React, {
-  FC, useEffect, useCallback, useMemo, memo,
+  FC, useCallback, useMemo, memo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
-import { throttle } from '../../../util/schedulers';
 import { filterUsersByName, sortUserIds } from '../../../global/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -31,8 +30,6 @@ type StateProps = {
   serverTimeOffset: number;
 };
 
-const runThrottled = throttle((cb) => cb(), 60000, true);
-
 const ContactList: FC<OwnProps & StateProps> = ({
   isActive,
   filter,
@@ -43,20 +40,11 @@ const ContactList: FC<OwnProps & StateProps> = ({
   onReset,
 }) => {
   const {
-    loadContactList,
     openChat,
     openNewContactDialog,
   } = getActions();
 
   const lang = useLang();
-
-  // Due to the parent Transition, this component never gets unmounted,
-  // that's why we use throttled API call on every update.
-  useEffect(() => {
-    runThrottled(() => {
-      loadContactList();
-    });
-  });
 
   useHistoryBack({
     isActive,

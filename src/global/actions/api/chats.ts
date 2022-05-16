@@ -1105,12 +1105,16 @@ export async function loadFullChat(chat: ApiChat) {
   }
 
   const {
-    users, fullInfo, groupCall, membersCount,
+    users, userStatusesById, fullInfo, groupCall, membersCount,
   } = result;
 
   let global = getGlobal();
   if (users) {
     global = addUsers(global, buildCollectionByKey(users, 'id'));
+  }
+
+  if (userStatusesById) {
+    global = addUserStatuses(global, userStatusesById);
   }
 
   if (groupCall) {

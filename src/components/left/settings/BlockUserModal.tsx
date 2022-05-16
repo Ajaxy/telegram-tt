@@ -34,7 +34,6 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
   onClose,
 }) => {
   const {
-    loadContactList,
     setUserSearchQuery,
     blockContact,
   } = getActions();
@@ -82,7 +81,6 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
       filterPlaceholder={lang('BlockedUsers.BlockUser')}
       filter={filter}
       onFilterChange={setFilter}
-      loadMore={loadContactList}
       onSelectChatOrUser={handleRemoveUser}
       onClose={onClose}
     />

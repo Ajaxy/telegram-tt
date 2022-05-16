@@ -152,6 +152,7 @@ const Main: FC<StateProps> = ({
     checkVersionNotification,
     loadAppConfig,
     loadAttachMenuBots,
+    loadContactList,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -178,10 +179,11 @@ const Main: FC<StateProps> = ({
       loadTopInlineBots();
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
       loadAttachMenuBots();
+      loadContactList();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
-    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots,
+    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots, loadContactList,
   ]);
 
   // Language-based API calls
