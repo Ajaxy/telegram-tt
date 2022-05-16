@@ -4,6 +4,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import { GlobalState } from '../../global/types';
+import { ApiCountry } from '../../api/types';
 import { PaymentStep, ShippingOption, Price } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
@@ -47,6 +48,7 @@ type StateProps = {
   needCountry?: boolean;
   needZip?: boolean;
   confirmPaymentUrl?: string;
+  countryList: ApiCountry[];
 };
 
 type GlobalStateProps = Pick<GlobalState['payment'], (
@@ -79,6 +81,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
   needZip,
   confirmPaymentUrl,
   error,
+  countryList,
 }) => {
   const {
     validateRequestedInfo,
@@ -115,6 +118,10 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
       const {
         name: fullName, phone, email, shippingAddress,
       } = savedInfo;
+      const {
+        countryIso2, ...shippingAddressRest
+      } = shippingAddress || {};
+      const shippingCountry = countryIso2 && countryList.find(({ iso2 }) => iso2 === countryIso2)!.defaultName;
       paymentDispatch({
         type: 'updateUserInfo',
         payload: {
@@ -123,11 +130,14 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             ? `+${phone}`
             : phone,
           email,
-          ...(shippingAddress || {}),
+          ...(shippingCountry && {
+            country: shippingCountry,
+            ...shippingAddressRest,
+          }),
         },
       });
     }
-  }, [savedInfo, paymentDispatch]);
+  }, [savedInfo, paymentDispatch, countryList]);
 
   const handleErrorModalClose = useCallback(() => {
     clearPaymentError();
@@ -181,6 +191,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             needEmail={Boolean(emailRequested || emailToProvider)}
             needPhone={Boolean(phoneRequested || phoneToProvider)}
             needName={Boolean(nameRequested)}
+            countryList={countryList}
           />
         );
       case PaymentStep.Shipping:
@@ -201,6 +212,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             needCardholderName={needCardholderName}
             needCountry={needCountry}
             needZip={needZip}
+            countryList={countryList}
           />
         );
       case PaymentStep.Checkout:
@@ -415,6 +427,7 @@ export default memo(withGlobal<OwnProps>(
       needZip,
       error,
       confirmPaymentUrl,
+      countryList: global.countryList.general,
     };
   },
 )(Invoice));

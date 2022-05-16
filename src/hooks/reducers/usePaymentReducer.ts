@@ -1,5 +1,4 @@
 import useReducer, { StateReducer, Dispatch } from '../useReducer';
-import countryList from '../../util/countries';
 
 export type FormState = {
   streetLine1: string;
@@ -94,8 +93,8 @@ const reducer: StateReducer<FormState, FormActions> = (state, action) => {
     case 'changeCountry':
       return {
         ...state,
-        countryIso2: action.payload,
-        billingCountry: getBillingCountry(action.payload),
+        countryIso2: action.payload.iso2,
+        billingCountry: action.payload.defaultName,
         formErrors: {
           ...state.formErrors,
           countryIso2: undefined,
@@ -198,11 +197,11 @@ const reducer: StateReducer<FormState, FormActions> = (state, action) => {
     case 'changeSaveCredentials':
       return { ...state, saveCredentials: action.payload };
     case 'updateUserInfo':
-      if (action.payload.countryIso2) {
+      if (action.payload.country) {
         return {
           ...state,
           ...action.payload,
-          billingCountry: getBillingCountry(action.payload.countryIso2),
+          billingCountry: action.payload.country,
         };
       }
       return { ...state, ...action.payload };
@@ -218,11 +217,6 @@ const reducer: StateReducer<FormState, FormActions> = (state, action) => {
       return state;
   }
 };
-
-function getBillingCountry(countryCode: string) {
-  const country = countryList.find(({ id }) => id === countryCode);
-  return country ? country.name : '';
-}
 
 const usePaymentReducer = () => {
   return useReducer(reducer, INITIAL_STATE);
