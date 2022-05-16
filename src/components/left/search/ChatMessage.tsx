@@ -62,7 +62,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   const handleClick = useCallback(() => {
-    focusMessage({ chatId, messageId: message.id });
+    focusMessage({ chatId, messageId: message.id, shouldReplaceHistory: true });
   }, [chatId, focusMessage, message.id]);
 
   const lang = useLang();
