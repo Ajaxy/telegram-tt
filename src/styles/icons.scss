@@ -51,11 +51,14 @@
 .icon-volume-3:before {
   content: "\e991";
 }
-.icon-heart:before {
-  content: "\e99a";
-}
 .icon-heart-outline:before {
-  content: "\e99b";
+  content: "\e99e";
+}
+.icon-heart:before {
+  content: "\e99f";
+}
+.icon-word-wrap:before {
+  content: "\e99d";
 }
 .icon-webapp:before {
   content: "\e993";
@@ -131,6 +134,9 @@
 }
 .icon-darkmode:before {
   content: "\e979";
+}
+.icon-animations:before {
+  content: "\e99c";
 }
 .icon-enter:before {
   content: "\e97b";

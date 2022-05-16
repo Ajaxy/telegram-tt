@@ -363,7 +363,7 @@
     line-height: 3.5rem;
     height: 3.5rem;
     padding: 0 3.125rem 0 1rem;
-    font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+    font-family: var(--font-family);
 
     &::after {
       content: "";
@@ -394,16 +394,10 @@
       calc(0.9rem - var(--border-width));
     overflow: hidden;
     line-height: 1.375;
-    font-family: Roboto, -apple-system, "Apple Color Emoji", "Helvetica Neue", sans-serif;
+    font-family: var(--font-family);
     unicode-bidi: plaintext;
     text-align: initial;
     font-size: var(--composer-text-size, 1rem);
-
-    body.is-ios &,
-    body.is-macos & {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
-        sans-serif;
-    }
 
     &.overflown {
       overflow-y: auto;

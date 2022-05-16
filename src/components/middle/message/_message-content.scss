@@ -813,17 +813,51 @@
   }
 }
 
-.text-entity-code,
-.text-entity-pre {
+.text-entity-code {
   color: var(--color-code);
   background: var(--color-code-bg);
   white-space: pre-wrap;
   margin: 0;
   padding: 1px 2px;
   border-radius: 4px;
-  font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+
+  &.clickable {
+    cursor: pointer;
+  }
 }
 
-.text-entity-code {
-  cursor: pointer;
+// Keep this close to `CodeBlock` style to avoid jumps in height
+.text-entity-pre {
+  white-space: pre-wrap;
+  background-color: var(--color-code-bg);
+  margin: 0;
+  padding: 0.5rem;
+  margin-block: 0.25rem;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    .code-overlay {
+      opacity: 1;
+    }
+  }
+
+  &.no-word-wrap {
+    white-space: pre;
+    padding-bottom: 0.25rem;
+  }
+
+  .pre-code {
+    overflow-x: auto;
+  }
+}
+
+.text-entity-code,
+.text-entity-pre,
+.code-block,
+.hljs {
+  --color-scrollbar: var(--color-scrollbar-code);
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
 }

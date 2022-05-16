@@ -5,10 +5,10 @@ const {
   DefinePlugin,
   EnvironmentPlugin,
   ProvidePlugin,
-
+  ContextReplacementPlugin,
   NormalModuleReplacementPlugin,
 } = require('webpack');
-const HtmlWebackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
 const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
@@ -119,11 +119,16 @@ module.exports = (env = {}, argv = {}) => {
       },
     },
     plugins: [
+      // Clearing of the unused files for code highlight for smaller chunk count
+      new ContextReplacementPlugin(
+        /highlight\.js\/lib\/languages/,
+        /^((?!\.js\.js).)*$/
+      ),
       ...(process.env.APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
         /src\/lib\/gramjs\/client\/TelegramClient\.js/,
         './MockClient.ts'
       )] : []),
-      new HtmlWebackPlugin({
+      new HtmlWebpackPlugin({
         appName: process.env.APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
         appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : './apple-touch-icon-dev',
         template: 'src/index.html',

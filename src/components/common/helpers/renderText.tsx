@@ -282,3 +282,11 @@ function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): Tex
     }, result);
   }, [] as TextPart[]);
 }
+
+export function areLinesWrapping(text: string, element: HTMLElement) {
+  const lines = (text.trim().match(/\n/g) || '').length + 1;
+  const { lineHeight } = getComputedStyle(element);
+  const lineHeightParsed = parseFloat(lineHeight.split('px')[0]);
+
+  return element.clientHeight >= (lines + 1) * lineHeightParsed;
+}

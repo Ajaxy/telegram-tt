@@ -241,6 +241,7 @@ export interface ApiMessageEntity {
   length: number;
   userId?: string;
   url?: string;
+  language?: string;
 }
 
 export enum ApiMessageEntityTypes {

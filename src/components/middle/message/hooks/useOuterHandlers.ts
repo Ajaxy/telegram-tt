@@ -152,6 +152,7 @@ export default function useOuterHandlers(
     let startedAt: number | undefined;
     return captureEvents(containerRef.current!, {
       selectorToPreventScroll: '.MessageList',
+      excludedClosestSelector: '.no-word-wrap',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
           if (!startedAt) {
