@@ -2,7 +2,9 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { ManagementProgress } from '../../../types';
 import { callApi } from '../../../api/gramjs';
-import { updateChat, updateManagement, updateManagementProgress } from '../../reducers';
+import {
+  addUsers, updateChat, updateManagement, updateManagementProgress,
+} from '../../reducers';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import { isChatBasicGroup } from '../../helpers';
 
@@ -234,6 +236,7 @@ addActionHandler('loadChatInviteImporters', async (global, actions, payload) => 
   if (!result) {
     return;
   }
+  const { importers, users } = result;
 
   global = getGlobal();
   const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
@@ -241,12 +244,14 @@ addActionHandler('loadChatInviteImporters', async (global, actions, payload) => 
     return;
   }
 
-  setGlobal(updateManagement(global, chatId, {
+  global = updateManagement(global, chatId, {
     inviteInfo: {
       ...currentInviteInfo,
-      importers: result,
+      importers,
     },
-  }));
+  });
+  global = addUsers(global, users);
+  setGlobal(global);
 });
 
 addActionHandler('loadChatInviteRequesters', async (global, actions, payload) => {
@@ -268,19 +273,21 @@ addActionHandler('loadChatInviteRequesters', async (global, actions, payload) =>
   if (!result) {
     return;
   }
+  const { importers, users } = result;
 
   global = getGlobal();
   const currentInviteInfo = global.management.byChatId[chatId]?.inviteInfo;
   if (!currentInviteInfo?.invite || currentInviteInfo.invite.link !== link) {
     return;
   }
-
-  setGlobal(updateManagement(global, chatId, {
+  global = updateManagement(global, chatId, {
     inviteInfo: {
       ...currentInviteInfo,
-      requesters: result,
+      requesters: importers,
     },
-  }));
+  });
+  global = addUsers(global, users);
+  setGlobal(global);
 });
 
 addActionHandler('loadChatJoinRequests', async (global, actions, payload) => {
@@ -301,9 +308,12 @@ addActionHandler('loadChatJoinRequests', async (global, actions, payload) => {
   if (!result) {
     return;
   }
+  const { importers, users } = result;
 
   global = getGlobal();
-  setGlobal(updateChat(global, chatId, { joinRequests: result }));
+  global = updateChat(global, chatId, { joinRequests: importers });
+  global = addUsers(global, users);
+  setGlobal(global);
 });
 
 addActionHandler('hideChatJoinRequest', async (global, actions, payload) => {
