@@ -161,7 +161,7 @@ addActionHandler('addRecentEmoji', (global, action, payload) => {
 });
 
 addActionHandler('addRecentSticker', (global, action, payload) => {
-  const { sticker } = payload!;
+  const { sticker } = payload;
   const { recent } = global.stickers;
   if (!recent) {
     return {
@@ -186,6 +186,19 @@ addActionHandler('addRecentSticker', (global, action, payload) => {
       recent: {
         ...recent,
         stickers: newStickers,
+      },
+    },
+  };
+});
+
+addActionHandler('reorderStickerSets', (global, action, payload) => {
+  const { order } = payload;
+  return {
+    ...global,
+    stickers: {
+      ...global.stickers,
+      added: {
+        setIds: order,
       },
     },
   };

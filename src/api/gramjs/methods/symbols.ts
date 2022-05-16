@@ -94,6 +94,23 @@ export async function faveSticker({
   }
 }
 
+export function removeRecentSticker({
+  sticker,
+}: {
+  sticker: ApiSticker;
+}) {
+  const request = new GramJs.messages.SaveRecentSticker({
+    id: buildInputDocument(sticker),
+    unsave: true,
+  });
+
+  return invokeRequest(request);
+}
+
+export function clearRecentStickers() {
+  return invokeRequest(new GramJs.messages.ClearRecentStickers());
+}
+
 export async function fetchStickers(
   { stickerSetShortName, stickerSetId, accessHash }:
   { stickerSetShortName?: string; stickerSetId?: string; accessHash: string },

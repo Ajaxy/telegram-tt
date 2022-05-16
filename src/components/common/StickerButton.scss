@@ -15,7 +15,7 @@
     &:hover {
       background-color: var(--color-interactive-element-hover);
 
-      .sticker-unfave-button {
+      .sticker-remove-button {
         opacity: 1;
       }
     }
@@ -54,7 +54,7 @@
     user-select: none;
   }
 
-  .sticker-unfave-button {
+  .sticker-remove-button {
     position: absolute;
     top: -0.5rem;
     right: -0.5rem;
@@ -71,6 +71,7 @@
 
   .sticker-context-menu {
     position: absolute;
+    cursor: default;
 
     .bubble {
       width: auto;

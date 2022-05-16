@@ -728,6 +728,39 @@ export interface ActionPayloads {
     shouldSharePhoneNumber?: boolean;
   };
 
+  // Stickers
+  addRecentSticker: {
+    sticker: ApiSticker;
+  };
+
+  removeRecentSticker: {
+    sticker: ApiSticker;
+  };
+
+  clearRecentStickers: {};
+
+  loadStickerSets: {};
+  loadAddedStickers: {};
+  loadRecentStickers: {};
+  loadFavoriteStickers: {};
+  loadFeaturedStickers: {};
+
+  reorderStickerSets: {
+    order: string[];
+  };
+
+  addNewStickerSet: {
+    stickerSet: ApiStickerSet;
+  };
+
+  openStickerSetShortName: {
+    stickerSetShortName?: string;
+  };
+
+  openStickerSet: {
+    sticker: ApiSticker;
+  };
+
   // Bots
   clickBotInlineButton: {
     messageId: number;
@@ -835,7 +868,7 @@ export type NonTypedActionNames = (
   'init' | 'reset' | 'disconnect' | 'initApi' | 'sync' | 'saveSession' |
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
-  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' | 'toggleLeftColumn' |
+  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
@@ -904,11 +937,9 @@ export type NonTypedActionNames = (
   'loadContentSettings' | 'updateContentSettings' |
   'loadCountryList' | 'ensureTimeFormat' | 'loadAppConfig' |
   // stickers & GIFs
-  'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
-  'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
-  'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' |
+  'setStickerSearchQuery' | 'loadSavedGifs' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' | 'loadStickers' |
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
-  'openStickerSetShortName' |
   // bots
   'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' | 'restartBot' | 'startBot' |

@@ -355,10 +355,27 @@ export type ApiUpdateFavoriteStickers = {
   '@type': 'updateFavoriteStickers';
 };
 
+export type ApiUpdateRecentStickers = {
+  '@type': 'updateRecentStickers';
+};
+
+export type ApiUpdateStickerSets = {
+  '@type': 'updateStickerSets';
+};
+
+export type ApiUpdateStickerSetsOrder = {
+  '@type': 'updateStickerSetsOrder';
+  order: string[];
+};
+
 export type ApiUpdateStickerSet = {
   '@type': 'updateStickerSet';
   id: string;
   stickerSet: Partial<ApiStickerSet>;
+};
+
+export type ApiUpdateSavedGifs = {
+  '@type': 'updateSavedGifs';
 };
 
 export type ApiUpdateTwoFaError = {
@@ -511,8 +528,9 @@ export type ApiUpdate = (
   ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateDeleteProfilePhotos |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
-  ApiUpdateFavoriteStickers | ApiUpdateStickerSet |
-  ApiUpdateNewScheduledMessage | ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
+  ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
+  ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage |
+  ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |

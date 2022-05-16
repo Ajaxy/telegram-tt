@@ -1,9 +1,11 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 
 import { ApiSticker } from '../../../api/types';
 import { LangCode } from '../../../types';
 import { callApi } from '../../../api/gramjs';
-import { pause, throttle } from '../../../util/schedulers';
+import { onTickEnd, pause, throttle } from '../../../util/schedulers';
 import {
   updateStickerSets,
   updateStickerSet,
@@ -14,6 +16,7 @@ import {
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectStickerSet } from '../../selectors';
+import { getTranslation } from '../../../util/langProvider';
 
 const ADDED_SETS_THROTTLE = 200;
 const ADDED_SETS_THROTTLE_CHUNK = 10;
@@ -34,7 +37,7 @@ addActionHandler('loadAddedStickers', async (global, actions) => {
 
   for (let i = 0; i < addedSetIds.length; i++) {
     const id = addedSetIds[i];
-    if (cached[id].stickers) {
+    if (cached[id]?.stickers) {
       continue; // Already loaded
     }
     actions.loadStickers({ stickerSetId: id });
@@ -89,13 +92,19 @@ addActionHandler('loadStickers', (global, actions, payload) => {
   if (!stickerSetAccessHash && !stickerSetShortName) {
     const stickerSet = selectStickerSet(global, stickerSetId);
     if (!stickerSet) {
+      if (global.openedStickerSetShortName === stickerSetShortName) {
+        setGlobal({
+          ...global,
+          openedStickerSetShortName: undefined,
+        });
+      }
       return;
     }
 
     stickerSetAccessHash = stickerSet.accessHash;
   }
 
-  void loadStickers(stickerSetId, stickerSetAccessHash, stickerSetShortName);
+  void loadStickers(stickerSetId, stickerSetAccessHash!, stickerSetShortName);
 });
 
 addActionHandler('loadAnimatedEmojis', () => {
@@ -145,6 +154,33 @@ addActionHandler('unfaveSticker', (global, actions, payload) => {
   if (sticker) {
     void unfaveSticker(sticker);
   }
+});
+
+addActionHandler('removeRecentSticker', async (global, action, payload) => {
+  const { sticker } = payload!;
+
+  const result = await callApi('removeRecentSticker', { sticker });
+
+  if (!result) return;
+
+  loadRecentStickers();
+});
+
+addActionHandler('clearRecentStickers', async (global) => {
+  const result = await callApi('clearRecentStickers');
+
+  if (!result) return;
+
+  global = getGlobal();
+  setGlobal({
+    ...global,
+    stickers: {
+      ...global.stickers,
+      recent: {
+        stickers: [],
+      },
+    },
+  });
 });
 
 addActionHandler('toggleStickerSet', (global, actions, payload) => {
@@ -284,13 +320,24 @@ async function loadStickers(stickerSetId: string, accessHash: string, stickerSet
     'fetchStickers',
     { stickerSetShortName, stickerSetId, accessHash },
   );
+  let global = getGlobal();
+
   if (!stickerSet) {
+    onTickEnd(() => {
+      getActions().showNotification({
+        message: getTranslation('StickerPack.ErrorNotFound'),
+      });
+    });
+    if (global.openedStickerSetShortName === stickerSetShortName) {
+      setGlobal({
+        ...global,
+        openedStickerSetShortName: undefined,
+      });
+    }
     return;
   }
 
   const { set, stickers, packs } = stickerSet;
-
-  let global = getGlobal();
 
   global = updateStickerSet(global, set.id, { ...set, stickers, packs });
 
@@ -396,11 +443,37 @@ addActionHandler('clearStickersForEmoji', (global) => {
 });
 
 addActionHandler('openStickerSetShortName', (global, actions, payload) => {
-  const { stickerSetShortName } = payload!;
+  const { stickerSetShortName } = payload;
   return {
     ...global,
     openedStickerSetShortName: stickerSetShortName,
   };
+});
+
+addActionHandler('openStickerSet', async (global, actions, payload) => {
+  const { sticker } = payload;
+
+  if (!selectStickerSet(global, sticker.stickerSetId)) {
+    if (!sticker.stickerSetAccessHash) {
+      actions.showNotification({
+        message: getTranslation('StickerPack.ErrorNotFound'),
+      });
+      return;
+    }
+
+    await loadStickers(sticker.stickerSetId, sticker.stickerSetAccessHash);
+  }
+
+  global = getGlobal();
+  const set = selectStickerSet(global, sticker.stickerSetId);
+  if (!set?.shortName) {
+    return;
+  }
+
+  setGlobal({
+    ...global,
+    openedStickerSetShortName: set.shortName,
+  });
 });
 
 async function searchStickers(query: string, hash?: string) {
