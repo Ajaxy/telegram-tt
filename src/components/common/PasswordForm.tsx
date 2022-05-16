@@ -7,6 +7,7 @@ import { MIN_PASSWORD_LENGTH } from '../../config';
 import { IS_TOUCH_ENV, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
+import useTimeout from '../../hooks/useTimeout';
 
 import Button from '../ui/Button';
 
@@ -44,13 +45,11 @@ const PasswordForm: FC<OwnProps> = ({
   const [password, setPassword] = useState('');
   const [canSubmit, setCanSubmit] = useState(false);
 
-  useEffect(() => {
+  useTimeout(() => {
     if (!IS_TOUCH_ENV) {
-      setTimeout(() => {
-        inputRef.current!.focus();
-      }, FOCUS_DELAY_TIMEOUT_MS);
+      inputRef.current!.focus();
     }
-  }, []);
+  }, FOCUS_DELAY_TIMEOUT_MS);
 
   useEffect(() => {
     if (error) {
