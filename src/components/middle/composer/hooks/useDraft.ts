@@ -29,10 +29,10 @@ const useDraft = (
 
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     const currentHtml = htmlRef.current;
-    if (editedMessage) return;
+    if (currentHtml === undefined || editedMessage) return;
     if (currentHtml.length) {
       saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(currentHtml!) });
-    } else if (currentHtml !== undefined) {
+    } else {
       clearDraft({ chatId: draftChatId, threadId: draftThreadId });
     }
   }, [clearDraft, editedMessage, htmlRef, saveDraft]);
