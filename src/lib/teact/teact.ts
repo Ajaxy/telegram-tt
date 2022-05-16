@@ -76,8 +76,14 @@ interface ComponentInstance {
     memos: {
       cursor: number;
       byCursor: {
-        current: any;
+        value: any;
         dependencies: any[];
+      }[];
+    };
+    refs: {
+      cursor: number;
+      byCursor: {
+        current: any;
       }[];
     };
   };
@@ -176,6 +182,10 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
         cursor: 0,
         byCursor: [],
       },
+      refs: {
+        cursor: 0,
+        byCursor: [],
+      },
     },
   };
 
@@ -259,6 +269,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
   componentInstance.hooks.memos.cursor = 0;
+  componentInstance.hooks.refs.cursor = 0;
 
   const { Component, props } = componentInstance;
   let newRenderedValue;
@@ -373,11 +384,6 @@ function unmountComponent(componentInstance: ComponentInstance) {
     return;
   }
 
-  // We need to clean refs before running effect cleanups
-  componentInstance.hooks.memos.byCursor.forEach((memoContainer) => {
-    memoContainer.current = undefined;
-  });
-
   componentInstance.hooks.effects.byCursor.forEach((effect) => {
     if (effect.cleanup) {
       try {
@@ -410,7 +416,12 @@ function helpGc(componentInstance: ComponentInstance) {
   });
 
   componentInstance.hooks.memos.byCursor.forEach((hook) => {
+    hook.value = undefined as any;
     hook.dependencies = undefined as any;
+  });
+
+  componentInstance.hooks.refs.byCursor.forEach((hook) => {
+    hook.current = undefined as any;
   });
 
   componentInstance.hooks = undefined as any;
@@ -643,7 +654,7 @@ export function useLayoutEffect(effect: () => Function | void, dependencies?: re
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {
   const { cursor, byCursor } = renderingInstance.hooks.memos;
-  let { current } = byCursor[cursor] || {};
+  let { value } = byCursor[cursor] || {};
 
   if (
     byCursor[cursor] === undefined
@@ -659,17 +670,17 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
       );
     }
 
-    current = resolver();
+    value = resolver();
   }
 
   byCursor[cursor] = {
-    current,
+    value,
     dependencies,
   };
 
   renderingInstance.hooks.memos.cursor++;
 
-  return current;
+  return value;
 }
 
 export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[], debugKey?: string): F {
@@ -682,10 +693,16 @@ export function useRef<T>(): { current: T | undefined }; // TT way (empty is `un
 export function useRef<T>(initial: null): { current: T | null }; // React way (empty is `null`)
 // eslint-disable-next-line no-null/no-null
 export function useRef<T>(initial?: T | null) {
-  return useMemo(() => ({
-    current: initial,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
+  const { cursor, byCursor } = renderingInstance.hooks.refs;
+  if (!byCursor[cursor]) {
+    byCursor[cursor] = {
+      current: initial,
+    };
+  }
+
+  renderingInstance.hooks.refs.cursor++;
+
+  return byCursor[cursor];
 }
 
 export function memo<T extends FC>(Component: T, debugKey?: string) {
