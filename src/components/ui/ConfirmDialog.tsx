@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useRef,
+  FC, memo, TeactNode, useCallback, useRef,
 } from '../../lib/teact/teact';
 
 import { TextPart } from '../../types';
@@ -15,7 +15,7 @@ type OwnProps = {
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   title?: string;
-  header?: FC;
+  header?: TeactNode;
   textParts?: TextPart[];
   text?: string;
   confirmLabel?: string;

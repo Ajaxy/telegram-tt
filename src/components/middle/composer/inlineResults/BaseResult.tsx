@@ -1,15 +1,15 @@
-import React, { FC, memo } from '../../../../lib/teact/teact';
+import React, { FC, memo, TeactNode } from '../../../../lib/teact/teact';
 
 import { ApiWebDocument } from '../../../../api/types';
 
 import { getFirstLetters } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 import useMedia from '../../../../hooks/useMedia';
+import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
 
 import ListItem from '../../../ui/ListItem';
 
 import './BaseResult.scss';
-import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
 
 export type OwnProps = {
   focus?: boolean;
@@ -30,7 +30,7 @@ const BaseResult: FC<OwnProps> = ({
   transitionClassNames = '',
   onClick,
 }) => {
-  let content: string | undefined = '';
+  let content: TeactNode | undefined;
 
   const thumbnailDataUrl = useMedia(thumbnail ? `webDocument:${thumbnail.url}` : undefined);
   thumbUrl = thumbUrl || thumbnailDataUrl;

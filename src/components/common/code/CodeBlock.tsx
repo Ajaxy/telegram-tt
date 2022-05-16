@@ -21,7 +21,7 @@ const CodeBlock: FC<OwnProps> = ({ text, language, noCopy }) => {
   const [isWordWrap, setWordWrap] = useState(true);
 
   const { result: highlighted } = useAsync(() => {
-    if (!language) return Promise.resolve();
+    if (!language) return Promise.resolve(undefined);
     return import('../../../util/highlightCode')
       .then((lib) => lib.default(text, language));
   }, [language, text]);

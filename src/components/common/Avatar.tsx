@@ -1,5 +1,7 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, memo, TeactNode, useCallback,
+} from '../../lib/teact/teact';
 
 import {
   ApiChat, ApiMediaFormat, ApiPhoto, ApiUser, ApiUserStatus,
@@ -75,7 +77,7 @@ const Avatar: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  let content: string | undefined = '';
+  let content: TeactNode | undefined;
   const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);
 
   if (isSavedMessages) {
