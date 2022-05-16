@@ -55,7 +55,7 @@ type WebAppOutboundEvent = {
 
 const SCROLLBAR_STYLE = `* {
   scrollbar-width: thin;
-  scrollbar-color: rgba(90,90,90,0.3) transparent;
+  scrollbar-color: %SCROLLBAR_COLOR% transparent;
 }
 
 *::-webkit-scrollbar {
@@ -66,7 +66,7 @@ const SCROLLBAR_STYLE = `* {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 6px;
-  background-color: rgba(90, 90, 90, 0.3);
+  background-color: %SCROLLBAR_COLOR%;
 }
 
 *::-webkit-scrollbar-corner {
@@ -141,7 +141,8 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
       }
 
       if (data.eventType === 'iframe_ready') {
-        sendCustomStyle(SCROLLBAR_STYLE);
+        const scrollbarColor = getComputedStyle(document.body).getPropertyValue('--color-scrollbar');
+        sendCustomStyle(SCROLLBAR_STYLE.replace(/%SCROLLBAR_COLOR%/g, scrollbarColor));
       }
 
       if (data.eventType === 'web_app_data_send') {

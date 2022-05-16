@@ -265,7 +265,7 @@ export function buildMessageFromUpdate(
 
 export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMessageEntity {
   const {
-    type, offset, length, url, userId,
+    type, offset, length, url, userId, language,
   } = entity;
 
   const user = userId ? localDb.users[userId] : undefined;
@@ -282,7 +282,7 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
     case ApiMessageEntityTypes.Code:
       return new GramJs.MessageEntityCode({ offset, length });
     case ApiMessageEntityTypes.Pre:
-      return new GramJs.MessageEntityPre({ offset, length, language: '' });
+      return new GramJs.MessageEntityPre({ offset, length, language: language || '' });
     case ApiMessageEntityTypes.Blockquote:
       return new GramJs.MessageEntityBlockquote({ offset, length });
     case ApiMessageEntityTypes.TextUrl:

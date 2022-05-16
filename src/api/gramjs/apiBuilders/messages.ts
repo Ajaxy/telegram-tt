@@ -1318,6 +1318,7 @@ function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEnti
     length,
     ...(entity instanceof GramJs.MessageEntityMentionName && { userId: buildApiPeerId(entity.userId, 'user') }),
     ...('url' in entity && { url: entity.url }),
+    ...('language' in entity && { language: entity.language }),
   };
 }
 

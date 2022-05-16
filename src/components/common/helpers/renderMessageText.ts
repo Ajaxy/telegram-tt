@@ -19,6 +19,7 @@ export function renderMessageText(
   shouldRenderHqEmoji?: boolean,
   isSimple?: boolean,
   truncateLength?: number,
+  isProtected?: boolean,
 ) {
   const { text, entities } = message.content.text || {};
 
@@ -35,6 +36,7 @@ export function renderMessageText(
     undefined,
     message.id,
     isSimple,
+    isProtected,
   );
 }
 

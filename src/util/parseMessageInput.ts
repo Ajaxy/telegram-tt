@@ -75,7 +75,8 @@ function parseMarkdown(html: string) {
   parsedHtml = parsedHtml.replace(/<\/div>/g, '');
 
   // Pre
-  parsedHtml = parsedHtml.replace(/^`{3}(.*[\n\r][^]*?^)`{3}/gm, '<pre>$1</pre>');
+  parsedHtml = parsedHtml.replace(/^`{3}(.*?)[\n\r](.*?[\n\r].*?^)`{3}/gms, '<pre data-language="$1">$2</pre>');
+  parsedHtml = parsedHtml.replace(/^`{3}[\n\r]?(.*?)[\n\r]?`{3}/gms, '<pre>$1</pre>');
   parsedHtml = parsedHtml.replace(/[`]{3}([^`]+)[`]{3}/g, '<pre>$1</pre>');
 
   // Code
@@ -131,11 +132,16 @@ function getEntityDataFromNode(
 
   let url: string | undefined;
   let userId: string | undefined;
+  let language: string | undefined;
   if (type === ApiMessageEntityTypes.TextUrl) {
     url = (node as HTMLAnchorElement).href;
   }
   if (type === ApiMessageEntityTypes.MentionName) {
     userId = (node as HTMLAnchorElement).dataset.userId;
+  }
+
+  if (type === ApiMessageEntityTypes.Pre) {
+    language = (node as HTMLPreElement).dataset.language;
   }
 
   return {
@@ -146,6 +152,7 @@ function getEntityDataFromNode(
       length,
       ...(url && { url }),
       ...(userId && { userId }),
+      ...(language && { language }),
     },
   };
 }

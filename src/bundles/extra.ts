@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
 
 export { default as ForwardPicker } from '../components/main/ForwardPicker';
@@ -52,11 +53,13 @@ export { default as EmojiTooltip } from '../components/middle/composer/EmojiTool
 export { default as InlineBotTooltip } from '../components/middle/composer/InlineBotTooltip';
 export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu';
 
+// eslint-disable-next-line import/no-cycle
 export { default as RightSearch } from '../components/right/RightSearch';
 // eslint-disable-next-line import/no-cycle
 export { default as StickerSearch } from '../components/right/StickerSearch';
 // eslint-disable-next-line import/no-cycle
 export { default as GifSearch } from '../components/right/GifSearch';
+// eslint-disable-next-line import/no-cycle
 export { default as Statistics } from '../components/right/statistics/Statistics';
 export { default as MessageStatistics } from '../components/right/statistics/MessageStatistics';
 export { default as PollResults } from '../components/right/PollResults';

@@ -488,7 +488,9 @@ const Message: FC<OwnProps & StateProps> = ({
   });
 
   const withAppendix = contentClassName.includes('has-appendix');
-  const textParts = renderMessageText(message, highlight, isEmojiOnlyMessage(customShape));
+  const textParts = renderMessageText(
+    message, highlight, isEmojiOnlyMessage(customShape), undefined, undefined, isProtected,
+  );
 
   let metaPosition!: MetaPosition;
   if (phoneCall) {
