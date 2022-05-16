@@ -351,7 +351,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
     channelPostId: fwdFrom.channelPost,
     isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),
     fromChatId: savedFromPeerId || fromId,
-    fromMessageId: fwdFrom.channelPost || fwdFrom.savedFromMsgId,
+    fromMessageId: fwdFrom.savedFromMsgId || fwdFrom.channelPost,
     senderUserId: fromId,
     hiddenUserName: fwdFrom.fromName,
     adminTitle: fwdFrom.postAuthor,
