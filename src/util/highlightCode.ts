@@ -8,7 +8,7 @@ const SUPPORTED_LANGUAGES = {
   bash: ['bash', 'sh'],
   c: ['c', 'h'],
   cpp: ['cpp', 'cc', 'c++', 'h++', 'hpp', 'hh', 'hxx', 'cxx'],
-  csharp: ['chasp', 'cs', 'c#'],
+  csharp: ['csharp', 'cs', 'c#'],
   css: ['css'],
   erlang: ['erlang', 'erl'],
   elixir: ['elixir', 'ex', 'exs'],
