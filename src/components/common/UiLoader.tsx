@@ -136,8 +136,8 @@ const UiLoader: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const className = buildClassName(
-    'middle',
+  const middleClassName = buildClassName(
+    'middle bg-layers',
     transitionClassNames,
     customBackground && 'custom-bg-image',
     backgroundColor && 'custom-bg-color',
@@ -161,7 +161,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
               <div
-                className={className}
+                className={middleClassName}
                 style={buildStyle(...inlineStyles)}
               />
               {isRightColumnShown && <div className="right" />}

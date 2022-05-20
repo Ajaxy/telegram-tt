@@ -1,0 +1,84 @@
+.bg-layers {
+  background-color: var(--theme-background-color);
+
+  body:not(.animation-level-0) &.with-transition {
+    transition: background-color 0.2s;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  html.theme-light &:not(.custom-bg-image)::before {
+    background-image: url('../assets/chat-bg-br.png');
+  }
+
+  &:not(.custom-bg-image).custom-bg-color::before {
+    display: none;
+  }
+
+  &.custom-bg-image::before {
+    background-image: var(--custom-background) !important;
+    transform: scale(1.1);
+  }
+
+  body:not(.animation-level-0) &.custom-bg-image.with-transition::before {
+    transition: background-image var(--layer-transition);
+  }
+
+  &.custom-bg-image.blurred::before {
+    filter: blur(12px);
+  }
+
+  @media screen and (min-width: 1276px) {
+    body.animation-level-2 &::before {
+      overflow: hidden;
+      transform: scale(1);
+      transform-origin: left center;
+    }
+  }
+
+  html.theme-light body.animation-level-2 &:not(.custom-bg-image).with-right-column::before {
+    transition: transform var(--layer-transition);
+
+    @media screen and (min-width: 1276px) {
+      transform: scaleX(0.67) !important;
+    }
+
+    @media screen and (min-width: 1921px) {
+      transform: scaleX(0.8) !important;
+    }
+
+    @media screen and (min-width: 2600px) {
+      transform: scaleX(0.95) !important;
+    }
+  }
+
+  &:not(.custom-bg-image):not(.custom-bg-color)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+    background-image: url('../assets/chat-bg-pattern-light.png');
+    background-position: top left;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    html.theme-dark & {
+      background-image: url('../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+  }
+}

@@ -200,10 +200,10 @@ export const DEFAULT_LANG_CODE = 'en';
 export const DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
-export const LIGHT_THEME_BG_COLOR = '#A2AF8E';
+export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
-export const DARK_THEME_PATTERN_COLOR = '#0a0a0a8c';
-export const DEFAULT_PATTERN_COLOR = 'rgba(90, 110, 70, 0.6)';
+export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
+export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
 
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;
