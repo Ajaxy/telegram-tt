@@ -19,7 +19,6 @@
     z-index: var(--z-ui-loader-mask);
     display: flex;
 
-
     @media (min-width: 600px) {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -64,62 +63,7 @@
       z-index: 1;
       overflow: hidden;
 
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background-color: var(--theme-background-color);
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        z-index: -1;
-        transform-origin: left center;
-
-        .theme-light & {
-          background-image: url('../../assets/chat-bg.jpg');
-
-          @media (max-width: 600px) {
-            background-image: url("../../assets/chat-bg-mobile.jpg");
-          }
-        }
-      }
-
-      .theme-dark &:not(.custom-bg-image)::before {
-        background-image: url('../../assets/chat-bg-dark.png');
-        background-position: top left;
-        background-size: 650px;
-        background-repeat: repeat;
-      }
-
-      &.custom-bg-image::before {
-        background-image: var(--custom-background) !important;
-        filter: none;
-        transform: scale(1.1);
-      }
-
-      &.custom-bg-image.blurred::before {
-        filter: blur(12px);
-      }
-
-      &.custom-bg-color:not(.custom-bg-image)::before {
-        opacity: 0;
-      }
-
-      html.theme-light body.animation-level-2 &.with-right-column::before {
-        transform: scale(0.67);
-      }
-
-      @media screen and (min-width: 1276px) {
-        &::before {
-          margin: -16rem -5rem -20rem 0;
-        }
-      }
-
       @media (max-width: 1275px) {
-        flex: 3;
         border-right: none;
       }
 

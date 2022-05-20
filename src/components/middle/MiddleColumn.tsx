@@ -313,10 +313,15 @@ const MiddleColumn: FC<StateProps> = ({
 
   const className = buildClassName(
     renderingHasTools && 'has-header-tools',
+    MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
+  );
+
+  const bgClassName = buildClassName(
+    'bg-layers with-transition',
     customBackground && 'custom-bg-image',
     backgroundColor && 'custom-bg-color',
     customBackground && isBackgroundBlurred && 'blurred',
-    MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
+    isRightColumnShown && 'with-right-column',
   );
 
   const messagingDisabledClassName = buildClassName(
@@ -383,6 +388,7 @@ const MiddleColumn: FC<StateProps> = ({
     >
       <div
         id="middle-column-bg"
+        className={bgClassName}
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
       />
       <div id="middle-column-portals" />
