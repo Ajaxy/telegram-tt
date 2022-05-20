@@ -1,3 +1,29 @@
+## 1.46.0 (2022-05-20)
+
+### 👏 **Harder**
+* Web Z becomes the first official app to support code syntax highlighting – start a code block with a language code, and the app will highlight separate terms and functions:
+```js
+console.log('Hello world!');
+```
+* Use new buttons to copy code contents and switch word wrapping.
+* When available, Group Sticker Sets now appear in the sticker panel.
+* Improved Sticker Management – preview sticker sets faster or clear recently sent stickers by right-clicking and selecting ‘View Pack’ or ‘Remove from Recent’.
+
+### 🤩 **Better**
+* Added fresh and modern chat background.
+* Various layout improvements.
+
+### 🚀 **Faster**
+* Reduced bundle size.
+
+### 💪 **Stronger**
+* Fixed issues when copying chat titles.
+* Searching for chats no longer adds them to the history stack.
+* The ‘Discuss Post’ button in channels now properly redirects.
+* Background should no longer flicker after logging in.
+* Fixed closing the forward dialog when switching to inline bots.
+* Fixed scrolling in Channel Management > Join Requests.
+
 ## 1.45.0 (2022-05-06)
 
 ### 👏 **Harder**
