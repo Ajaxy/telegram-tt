@@ -33,6 +33,10 @@ export default function parseMessageInput(html: string, withMarkdownLinks = fals
       textIndex = index;
       entities.push(entity);
     } else if (node.textContent) {
+      // Skip newlines on the beginning
+      if (index === 0 && node.textContent.trim() === '') {
+        return;
+      }
       textIndex += node.textContent.length;
     }
 
@@ -75,7 +79,7 @@ function parseMarkdown(html: string) {
   parsedHtml = parsedHtml.replace(/<\/div>/g, '');
 
   // Pre
-  parsedHtml = parsedHtml.replace(/^`{3}(.*?)[\n\r](.*?[\n\r].*?^)`{3}/gms, '<pre data-language="$1">$2</pre>');
+  parsedHtml = parsedHtml.replace(/^`{3}(.*?)[\n\r](.*?[\n\r]?)`{3}/gms, '<pre data-language="$1">$2</pre>');
   parsedHtml = parsedHtml.replace(/^`{3}[\n\r]?(.*?)[\n\r]?`{3}/gms, '<pre>$1</pre>');
   parsedHtml = parsedHtml.replace(/[`]{3}([^`]+)[`]{3}/g, '<pre>$1</pre>');
 
