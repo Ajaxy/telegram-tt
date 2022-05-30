@@ -276,7 +276,7 @@ const RightColumn: FC<StateProps> = ({
         );
 
       case RightColumnContent.Statistics:
-        return <Statistics chatId={chatId!} isActive={isOpen && isActive} />;
+        return <Statistics chatId={chatId!} />;
       case RightColumnContent.MessageStatistics:
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StickerSearch:
@@ -319,6 +319,7 @@ const RightColumn: FC<StateProps> = ({
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
+          cleanupExceptionKey={renderingContentKey === RightColumnContent.MessageStatistics ? RightColumnContent.Statistics : undefined}
         >
           {renderContent}
         </Transition>

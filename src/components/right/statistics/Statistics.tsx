@@ -61,23 +61,19 @@ const GROUP_GRAPHS = Object.keys(GROUP_GRAPHS_TITLES) as (keyof ApiGroupStatisti
 
 export type OwnProps = {
   chatId: string;
-  isActive: boolean;
 };
 
 export type StateProps = {
   statistics: ApiChannelStatistics | ApiGroupStatistics;
   dcId?: number;
   isGroup: boolean;
-  messageId?: number;
 };
 
 const Statistics: FC<OwnProps & StateProps> = ({
   chatId,
-  isActive,
   statistics,
   dcId,
   isGroup,
-  messageId,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -91,13 +87,6 @@ const Statistics: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     loadStatistics({ chatId, isGroup });
   }, [chatId, loadStatistics, isGroup]);
-
-  useEffect(() => {
-    if (!isActive) {
-      loadedCharts.current = [];
-      setIsReady(false);
-    }
-  }, [isActive]);
 
   const graphs = useMemo(() => {
     return isGroup ? GROUP_GRAPHS : CHANNEL_GRAPHS;
@@ -179,7 +168,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
     graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
 
-  if (!isReady || !statistics || messageId) {
+  if (!isReady || !statistics) {
     return <Loading />;
   }
 
@@ -214,11 +203,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const dcId = chat?.fullInfo?.statisticsDcId;
     const isGroup = chat?.type === 'chatTypeSuperGroup';
-    // Show Loading component if message was already selected for improving transition animation
-    const messageId = global.statistics.currentMessageId;
 
     return {
-      statistics, dcId, isGroup, messageId,
+      statistics, dcId, isGroup,
     };
   },
 )(Statistics));
