@@ -10,7 +10,7 @@ import {
 } from '../../../../util/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import {
-  buildCollectionByKey, flatten, mapValues, pickTruthy, unique,
+  buildCollectionByKey, mapValues, pickTruthy, unique,
 } from '../../../../util/iteratees';
 import memoized from '../../../../util/memoized';
 import useFlag from '../../../../hooks/useFlag';
@@ -222,11 +222,11 @@ function searchInLibrary(library: Library, filter: string, limit: number) {
   let matched: Emoji[] = MEMO_EMPTY_ARRAY;
 
   const matchedKeywords = keywords.filter((keyword) => keyword.startsWith(filter)).sort();
-  matched = matched.concat(flatten(Object.values(pickTruthy(byKeyword!, matchedKeywords))));
+  matched = matched.concat(Object.values(pickTruthy(byKeyword!, matchedKeywords)).flat());
 
   // Also search by names, which is useful for non-English languages
   const matchedNames = names.filter((name) => name.startsWith(filter));
-  matched = matched.concat(flatten(Object.values(pickTruthy(byName, matchedNames))));
+  matched = matched.concat(Object.values(pickTruthy(byName, matchedNames)).flat());
 
   matched = unique(matched);
 

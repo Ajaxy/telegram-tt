@@ -7,7 +7,7 @@ import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../t
 
 import { buildApiDocument } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { flatten, pick } from '../../../util/iteratees';
+import { pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
@@ -124,7 +124,7 @@ export function buildApiNotifyException(
   };
 }
 
-function buildApiCountry(country: GramJs.help.Country, code?: GramJs.help.CountryCode) {
+function buildApiCountry(country: GramJs.help.Country, code: GramJs.help.CountryCode) {
   const {
     hidden, iso2, defaultName, name,
   } = country;
@@ -142,20 +142,18 @@ function buildApiCountry(country: GramJs.help.Country, code?: GramJs.help.Countr
 }
 
 export function buildApiCountryList(countries: GramJs.help.Country[]) {
-  const listByCode = flatten(
-    countries
-      .filter((country) => !country.hidden)
-      .map((country) => (
-        country.countryCodes.map((code) => buildApiCountry(country, code))
-      )),
-  )
+  const nonHiddenCountries = countries.filter(({ hidden }) => !hidden);
+  const listByCode = nonHiddenCountries
+    .map((country) => (
+      country.countryCodes.map((code) => buildApiCountry(country, code))
+    ))
+    .flat()
     .sort((a: ApiCountry, b: ApiCountry) => (
       a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
     ));
 
-  const generalList = countries
-    .filter((country) => !country.hidden)
-    .map((country) => buildApiCountry(country))
+  const generalList = nonHiddenCountries
+    .map((country) => buildApiCountry(country, country.countryCodes[0]))
     .sort((a, b) => (
       a.name ? a.name.localeCompare(b.name!) : a.defaultName.localeCompare(b.defaultName)
     ));

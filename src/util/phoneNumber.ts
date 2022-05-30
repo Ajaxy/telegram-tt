@@ -1,5 +1,4 @@
 import { ApiCountryCode } from '../api/types';
-import { flatten } from './iteratees';
 
 const PATTERN_PLACEHOLDER = 'X';
 const DEFAULT_PATTERN = 'XXX XXX XXX XXX';
@@ -16,13 +15,14 @@ export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input
 
   const possibleCountries = phoneCodeList
     .filter((country) => phoneNumber.startsWith(country.countryCode));
-  const codesWithPrefix: { code: string; country: ApiCountryCode }[] = flatten(possibleCountries
+  const codesWithPrefix: { code: string; country: ApiCountryCode }[] = possibleCountries
     .map((country) => (country.prefixes || ['']).map((prefix) => {
       return {
         code: `${country.countryCode}${prefix}`,
         country,
       };
-    })));
+    }))
+    .flat();
 
   const bestMatches = codesWithPrefix
     .filter(({ code }) => phoneNumber.startsWith(code))
