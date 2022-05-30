@@ -13,7 +13,7 @@ import {
 } from '../../../config';
 import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import { mapValues } from '../../../util/iteratees';
-import { getPinnedChatsCount } from '../../../util/folderManager';
+import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
@@ -117,18 +117,22 @@ const ChatList: FC<OwnProps> = ({
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
     const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
 
-    return viewportIds!.map((id, i) => (
-      <Chat
-        key={id}
-        teactOrderKey={i}
-        chatId={id}
-        isPinned={viewportOffset + i < pinnedCount}
-        folderId={folderId}
-        animationType={getAnimationType(id)}
-        orderDiff={orderDiffById[id]}
-        style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
-      />
-    ));
+    return viewportIds!.map((id, i) => {
+      const isPinned = viewportOffset + i < pinnedCount;
+
+      return (
+        <Chat
+          key={id}
+          teactOrderKey={isPinned ? i : getOrderKey(id)}
+          chatId={id}
+          isPinned={isPinned}
+          folderId={folderId}
+          animationType={getAnimationType(id)}
+          orderDiff={orderDiffById[id]}
+          style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+        />
+      );
+    });
   }
 
   return (

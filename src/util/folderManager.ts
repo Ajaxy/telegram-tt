@@ -135,6 +135,10 @@ export function getAllNotificationsCount() {
   return getUnreadCounters()[ALL_FOLDER_ID]?.notificationsCount || 0;
 }
 
+export function getOrderKey(chatId: string) {
+  return prepared.chatSummariesById.get(chatId)!.order;
+}
+
 /* Callback managers */
 
 export function addOrderedIdsCallback(folderId: number, callback: (orderedIds: string[]) => void) {
