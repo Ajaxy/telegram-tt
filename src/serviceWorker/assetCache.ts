@@ -34,15 +34,19 @@ export async function respondWithCache(e: FetchEvent) {
 }
 
 async function withTimeout<T>(cb: () => Promise<T>, timeout: number) {
+  let isResolved = false;
+
   try {
     return await Promise.race([
-      pause(timeout).then(() => Promise.reject(new Error('TIMEOUT'))),
+      pause(timeout).then(() => (isResolved ? undefined : Promise.reject(new Error('TIMEOUT')))),
       cb(),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
     return undefined;
+  } finally {
+    isResolved = true;
   }
 }
 

@@ -1149,11 +1149,14 @@ class TelegramClient {
 }
 
 function timeout(cb, ms) {
+    let isResolved = false;
+
     return Promise.race([
         cb(),
-        Helpers.sleep(ms)
-            .then(() => Promise.reject(new Error('TIMEOUT'))),
-    ]);
+        Helpers.sleep(ms).then(() => isResolved ? undefined : Promise.reject(new Error('TIMEOUT'))),
+    ]).finally(() => {
+        isResolved = true;
+    });
 }
 
 async function attempts(cb, times, pause) {
