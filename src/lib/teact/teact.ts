@@ -3,7 +3,7 @@ import { DEBUG, DEBUG_MORE } from '../../config';
 import {
   fastRaf, fastRafPrimary, onTickEnd, onTickEndPrimary, throttleWithPrimaryRaf, throttleWithRaf,
 } from '../../util/schedulers';
-import { flatten, orderBy } from '../../util/iteratees';
+import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
 import { removeAllDelegatedListeners } from './dom-events';
@@ -143,7 +143,7 @@ function createElement(
     props = {};
   }
 
-  children = flatten(children);
+  children = children.flat();
 
   if (source === Fragment) {
     return children;

@@ -228,7 +228,7 @@ addActionHandler('sendMessage', (global, actions, payload) => {
     const {
       text, entities, attachments, ...commonParams
     } = params;
-    const groupedAttachments = split(attachments, MAX_MEDIA_FILES_FOR_ALBUM);
+    const groupedAttachments = split(attachments as ApiAttachment[], MAX_MEDIA_FILES_FOR_ALBUM);
     for (let i = 0; i < groupedAttachments.length; i++) {
       const [firstAttachment, ...restAttachments] = groupedAttachments[i];
       const groupedId = `${Date.now()}${i}`;

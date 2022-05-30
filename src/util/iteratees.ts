@@ -80,17 +80,6 @@ export function orderBy<T>(
   });
 }
 
-export function flatten(array: any[]) {
-  return array.reduce((result, member) => {
-    if (Array.isArray(member)) {
-      return result.concat(member);
-    } else {
-      result.push(member);
-      return result;
-    }
-  }, []);
-}
-
 export function unique<T extends any>(array: T[]): T[] {
   return Array.from(new Set(array));
 }
@@ -115,8 +104,8 @@ export function findIntersectionWithSet<T>(array: T[], set: Set<T>): T[] {
   return array.filter((a) => set.has(a));
 }
 
-export function split(array: any[], chunkSize: number) {
-  const result = [];
+export function split<T extends any>(array: T[], chunkSize: number) {
+  const result: T[][] = [];
   for (let i = 0; i < array.length; i += chunkSize) {
     result.push(array.slice(i, i + chunkSize));
   }

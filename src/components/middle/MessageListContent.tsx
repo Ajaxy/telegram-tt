@@ -5,7 +5,7 @@ import { MessageListType } from '../../global/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import buildClassName from '../../util/buildClassName';
-import { compact, flatten } from '../../util/iteratees';
+import { compact } from '../../util/iteratees';
 import { formatHumanDate } from '../../util/dateFormat';
 import {
   getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage,
@@ -108,7 +108,7 @@ const MessageListContent: FC<OwnProps> = ({
   );
 
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
-    return acc + flatten(messageGroup.senderGroups).length;
+    return acc + messageGroup.senderGroups.flat().length;
   }, 0);
   let appearanceIndex = 0;
 
@@ -148,7 +148,7 @@ const MessageListContent: FC<OwnProps> = ({
 
       let currentDocumentGroupId: string | undefined;
 
-      return flatten(senderGroup.map((
+      return senderGroup.map((
         messageOrAlbum,
         messageIndex,
       ) => {
@@ -214,7 +214,7 @@ const MessageListContent: FC<OwnProps> = ({
             </div>
           ),
         ]);
-      }));
+      }).flat();
     });
 
     return (
@@ -240,7 +240,7 @@ const MessageListContent: FC<OwnProps> = ({
             {!isSchedule && formatHumanDate(lang, dateGroup.datetime)}
           </span>
         </div>
-        {flatten(senderGroups)}
+        {senderGroups.flat()}
       </div>
     );
   });
@@ -248,7 +248,7 @@ const MessageListContent: FC<OwnProps> = ({
   return (
     <div className="messages-container" teactFastList>
       <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />
-      {flatten(dateGroups)}
+      {dateGroups.flat()}
       {isViewportNewest && <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />}
       <div
         ref={forwardsTriggerRef}
