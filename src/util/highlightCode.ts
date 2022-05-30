@@ -3,43 +3,42 @@ import { lowlight } from 'lowlight/lib/core';
 import type { TeactNode } from '../lib/teact/teact';
 import Teact from '../lib/teact/teact';
 
-// First element in alias array MUST BE a language package name
-const SUPPORTED_LANGUAGES = {
-  '1c': ['1c', '1с'], // Allow cyrillic
-  bash: ['bash', 'sh'],
-  c: ['c', 'h'],
-  cpp: ['cpp', 'cc', 'c++', 'h++', 'hpp', 'hh', 'hxx', 'cxx'],
-  csharp: ['chasp', 'cs', 'c#'],
-  css: ['css'],
-  erlang: ['erlang', 'erl'],
-  elixir: ['elixir', 'ex', 'exs'],
-  go: ['go', 'golang'],
-  handlebars: ['handlebars', 'hbs', 'html.hbs', 'html.handlebars', 'htmlbars'],
-  haskell: ['haskell', 'hs'],
-  ini: ['ini', 'toml'],
-  java: ['java', 'jsp'],
-  javascript: ['javascript', 'js', 'jsx', 'mjs', 'cjs'],
-  json: ['json'],
-  kotlin: ['kotlin', 'kt', 'kts'],
-  lisp: ['lisp'],
-  lua: ['lua'],
-  makefile: ['makefile', 'mk', 'mak', 'make'],
-  markdown: ['markdown', 'md', 'mkdown', 'mkd'],
-  matlab: ['matlab'],
-  objectivec: ['objectivec', 'mm', 'objc', 'obj-c', 'obj-c++', 'objective-c++'],
-  perl: ['perl', 'pl', 'pm'],
-  php: ['php'],
-  python: ['python', 'py', 'gyp', 'ipython'],
-  r: ['r'],
-  ruby: ['ruby', 'rb', 'gemspec', 'podspec', 'thor', 'irb'],
-  rust: ['rust', 'rs'],
-  scss: ['scss'],
-  sql: ['sql'],
-  swift: ['swift'],
-  twig: ['twig', 'craftcms'],
-  typescript: ['typescript', 'ts', 'tsx'],
-  xml: ['xml', 'html', 'xhtml', 'rss', 'atom', 'xjb', 'xsd', 'xsl', 'plist', 'wsf', 'svg'],
-  yaml: ['yaml', 'yml'],
+const SUPPORTED_LANGUAGES: Record<string, string[]> = {
+  '1c': ['1с'], // Allow cyrillic
+  bash: ['sh'],
+  c: ['h'],
+  cpp: ['cc', 'c++', 'h++', 'hpp', 'hh', 'hxx', 'cxx'],
+  csharp: ['cs', 'c#'],
+  css: [],
+  erlang: ['erl'],
+  elixir: ['ex', 'exs'],
+  go: ['golang'],
+  handlebars: ['hbs', 'html.hbs', 'html.handlebars', 'htmlbars'],
+  haskell: ['hs'],
+  ini: ['toml'],
+  java: ['jsp'],
+  javascript: ['js', 'jsx', 'mjs', 'cjs'],
+  json: [],
+  kotlin: ['kt', 'kts'],
+  lisp: [],
+  lua: [],
+  makefile: ['mk', 'mak', 'make'],
+  markdown: ['md', 'mkdown', 'mkd'],
+  matlab: [],
+  objectivec: ['mm', 'objc', 'obj-c', 'obj-c++', 'objective-c++'],
+  perl: ['pl', 'pm'],
+  php: [],
+  python: ['py', 'gyp', 'ipython'],
+  r: [],
+  ruby: ['rb', 'gemspec', 'podspec', 'thor', 'irb'],
+  rust: ['rs'],
+  scss: [],
+  sql: [],
+  swift: [],
+  twig: ['craftcms'],
+  typescript: ['ts', 'tsx'],
+  xml: ['html', 'xhtml', 'rss', 'atom', 'xjb', 'xsd', 'xsl', 'plist', 'wsf', 'svg'],
+  yaml: [],
 };
 
 const languagePromises = new Map<string, Promise<void>>();
@@ -53,7 +52,8 @@ export default async function highlightCode(text: string, language: string) {
 }
 
 function getLanguageName(alias: string) {
-  return Object.values(SUPPORTED_LANGUAGES).find((codes) => codes.includes(alias))?.[0];
+  return Object.entries(SUPPORTED_LANGUAGES)
+    .find(([langName, aliases]) => langName === alias || aliases.includes(alias))?.[0];
 }
 
 async function ensureLanguage(language: string) {
