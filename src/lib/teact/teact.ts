@@ -6,7 +6,6 @@ import {
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
-import { removeAllDelegatedListeners } from './dom-events';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
@@ -98,13 +97,18 @@ export type VirtualElement =
   | VirtualElementText
   | VirtualElementTag
   | VirtualElementComponent;
-export type VirtualRealElement =
+export type VirtualElementParent =
   VirtualElementTag
   | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
+export type VirtualElementReal = Exclude<VirtualElement, VirtualElementComponent>;
 
 // Compatibility with JSX types
-export type TeactNode = ReactElement | string | number | boolean;
+export type TeactNode =
+  ReactElement
+  | string
+  | number
+  | boolean;
 
 const Fragment = Symbol('Fragment');
 
@@ -130,7 +134,7 @@ export function isComponentElement($element: VirtualElement): $element is Virtua
   return $element.type === VirtualElementTypesEnum.Component;
 }
 
-export function isRealElement($element: VirtualElement): $element is VirtualRealElement {
+export function isParentElement($element: VirtualElement): $element is VirtualElementParent {
   return isTagElement($element) || isComponentElement($element);
 }
 
@@ -138,7 +142,7 @@ function createElement(
   source: string | FC | typeof Fragment,
   props: Props,
   ...children: any[]
-): VirtualRealElement | VirtualElementChildren {
+): VirtualElementParent | VirtualElementChildren {
   if (!props) {
     props = {};
   }
@@ -202,13 +206,13 @@ function buildComponentElement(
   componentInstance: ComponentInstance,
   children: VirtualElementChildren = [],
 ): VirtualElementComponent {
-  const { props } = componentInstance;
+  const builtChildren = dropEmptyTail(children).map(buildChildElement);
 
   return {
-    componentInstance,
     type: VirtualElementTypesEnum.Component,
-    props,
-    children,
+    componentInstance,
+    props: componentInstance.props,
+    children: builtChildren.length ? builtChildren : [buildEmptyElement()],
   };
 }
 
@@ -242,7 +246,7 @@ function isEmptyPlaceholder(child: any) {
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
     return buildEmptyElement();
-  } else if (isRealElement(child)) {
+  } else if (isParentElement(child)) {
     return child;
   } else {
     return buildTextElement(child);
@@ -325,8 +329,8 @@ export function renderComponent(componentInstance: ComponentInstance) {
 
   componentInstance.renderedValue = newRenderedValue;
 
-  const newChild = buildChildElement(newRenderedValue);
-  componentInstance.$element = buildComponentElement(componentInstance, [newChild]);
+  const children = Array.isArray(newRenderedValue) ? newRenderedValue : [newRenderedValue];
+  componentInstance.$element = buildComponentElement(componentInstance, children);
 
   return componentInstance.$element;
 }
@@ -351,39 +355,13 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   return false;
 }
 
-export function unmountTree($element: VirtualElement) {
-  if (isComponentElement($element)) {
-    unmountComponent($element.componentInstance);
-  } else {
-    if (isTagElement($element)) {
-      if ($element.target) {
-        removeAllDelegatedListeners($element.target as HTMLElement);
-      }
-
-      if ($element.props.ref) {
-        $element.props.ref.current = undefined; // Help GC
-      }
-    }
-
-    if ($element.target) {
-      $element.target = undefined; // Help GC
-    }
-
-    if (!isRealElement($element)) {
-      return;
-    }
-  }
-
-  $element.children.forEach(unmountTree);
-}
-
 export function mountComponent(componentInstance: ComponentInstance) {
   renderComponent(componentInstance);
   componentInstance.isMounted = true;
   return componentInstance.$element;
 }
 
-function unmountComponent(componentInstance: ComponentInstance) {
+export function unmountComponent(componentInstance: ComponentInstance) {
   if (!componentInstance.isMounted) {
     return;
   }
@@ -461,23 +439,6 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 
   if (componentInstance.$element !== currentElement) {
     componentInstance.onUpdate();
-  }
-}
-
-export function getTarget($element: VirtualElement): Node | undefined {
-  if (isComponentElement($element)) {
-    const componentElement = $element.children[0];
-    return componentElement ? getTarget(componentElement) : undefined;
-  } else {
-    return $element.target;
-  }
-}
-
-export function setTarget($element: VirtualElement, target: Node) {
-  if (isComponentElement($element)) {
-    setTarget($element.children[0], target);
-  } else {
-    $element.target = target;
   }
 }
 

@@ -30,7 +30,7 @@ updateWebmanifest();
 
 TeactDOM.render(
   <App />,
-  document.getElementById('root'),
+  document.getElementById('root')!,
 );
 
 if (DEBUG) {
