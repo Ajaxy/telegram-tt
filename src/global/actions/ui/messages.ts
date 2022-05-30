@@ -1,6 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiMessage, MAIN_THREAD_ID } from '../../../api/types';
+import type { ApiMessage } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
 
 import {
@@ -42,7 +43,7 @@ import parseMessageInput from '../../../util/parseMessageInput';
 import { getMessageSummaryText, getSenderTitle } from '../../helpers';
 import * as langProvider from '../../../util/langProvider';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { GlobalState } from '../../types';
+import type { GlobalState } from '../../types';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;

@@ -1,14 +1,17 @@
-import {
+import type {
   GroupCallConnectionState, GroupCallParticipant as TypeGroupCallParticipant,
+} from '../../../lib/secret-sauce';
+import {
   IS_SCREENSHARE_SUPPORTED, switchCameraInput, toggleSpeaker,
 } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import '../../../global/actions/calls';
 
-import { IAnchorPosition } from '../../../types';
+import type { IAnchorPosition } from '../../../types';
 
 import {
   IS_ANDROID,

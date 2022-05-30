@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import { ApiUser, ApiTypingStatus } from '../../api/types';
+import type { ApiUser, ApiTypingStatus } from '../../api/types';
 
 import { selectUser } from '../../global/selectors';
 import { getUserFirstOrLastName } from '../../global/helpers';

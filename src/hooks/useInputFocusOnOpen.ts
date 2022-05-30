@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 

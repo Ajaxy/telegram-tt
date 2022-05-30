@@ -1,9 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useCallback, useEffect, useRef, memo,
+  useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiBotCommand, ApiUser } from '../../../api/types';
+import type { ApiBotCommand, ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';

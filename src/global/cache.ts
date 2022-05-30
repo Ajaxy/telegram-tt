@@ -2,7 +2,7 @@ import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import { addActionHandler, getGlobal } from './index';
 
-import { GlobalState } from './types';
+import type { GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';

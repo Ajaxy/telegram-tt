@@ -1,11 +1,13 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
-import { ApiChat, ApiExportedInvite, ApiMediaFormat } from '../../../api/types';
+import type { ApiChat, ApiExportedInvite } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 
 import { getChatAvatarHash, getHasAdminRight } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';

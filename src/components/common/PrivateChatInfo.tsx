@@ -1,11 +1,10 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
-import React, {
-  FC, useEffect, useCallback, memo,
-} from '../../lib/teact/teact';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
-import { GlobalState } from '../../global/types';
+import type { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';

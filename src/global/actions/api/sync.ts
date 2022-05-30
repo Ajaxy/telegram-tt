@@ -2,10 +2,9 @@ import {
   addActionHandler, getGlobal, setGlobal, getActions,
 } from '../../index';
 
-import {
-  ApiChat, ApiMessage, MAIN_THREAD_ID,
-} from '../../../api/types';
-import { Thread } from '../../types';
+import type { ApiChat, ApiMessage } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
+import type { Thread } from '../../types';
 
 import {
   DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,

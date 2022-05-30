@@ -1,13 +1,15 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { MediaViewerOrigin } from '../../types';
+import type { MediaViewerOrigin } from '../../types';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { animateNumber, timingFunctions } from '../../util/animation';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
-import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD, RealTouchEvent } from '../../util/captureEvents';
+import type { RealTouchEvent } from '../../util/captureEvents';
+import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD } from '../../util/captureEvents';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import useTimeout from '../../hooks/useTimeout';

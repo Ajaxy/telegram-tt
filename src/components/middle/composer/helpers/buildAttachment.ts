@@ -1,4 +1,4 @@
-import { ApiAttachment } from '../../../../api/types';
+import type { ApiAttachment } from '../../../../api/types';
 import {
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,

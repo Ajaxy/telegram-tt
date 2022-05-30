@@ -1,8 +1,8 @@
-import { GlobalState } from '../../../../global/types';
-import {
+import type { GlobalState } from '../../../../global/types';
+import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
 } from '../../../../api/types';
-import { ISettings } from '../../../../types';
+import type { ISettings } from '../../../../types';
 
 import { selectChat, selectTheme } from '../../../../global/selectors';
 

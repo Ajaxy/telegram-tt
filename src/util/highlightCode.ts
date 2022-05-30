@@ -1,6 +1,7 @@
 import type { Element, Root } from 'hast';
 import { lowlight } from 'lowlight/lib/core';
-import Teact, { TeactNode } from '../lib/teact/teact';
+import type { TeactNode } from '../lib/teact/teact';
+import Teact from '../lib/teact/teact';
 
 // First element in alias array MUST BE a language package name
 const SUPPORTED_LANGUAGES = {

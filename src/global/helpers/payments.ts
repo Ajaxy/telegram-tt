@@ -1,4 +1,4 @@
-import { ApiFieldError } from '../../api/types';
+import type { ApiFieldError } from '../../api/types';
 
 const STRIPE_ERRORS: Record<string, ApiFieldError> = {
   missing_payment_information: {

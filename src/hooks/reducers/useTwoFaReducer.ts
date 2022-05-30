@@ -1,4 +1,5 @@
-import useReducer, { StateReducer, Dispatch } from '../useReducer';
+import type { StateReducer, Dispatch } from '../useReducer';
+import useReducer from '../useReducer';
 
 export type TwoFaActions = (
   'setCurrentPassword' | 'setPassword' | 'setHint' | 'setEmail' | 'reset'

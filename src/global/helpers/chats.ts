@@ -1,14 +1,16 @@
-import {
+import type {
   ApiChat,
   ApiUser,
   ApiChatBannedRights,
   ApiChatAdminRights,
   ApiChatFolder,
+} from '../../api/types';
+import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import { NotifyException, NotifySettings } from '../../types';
-import { LangFn } from '../../hooks/useLang';
+import type { NotifyException, NotifySettings } from '../../types';
+import type { LangFn } from '../../hooks/useLang';
 
 import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID } from '../../config';
 import { orderBy } from '../../util/iteratees';

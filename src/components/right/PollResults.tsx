@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import { ApiMessage, ApiChat } from '../../api/types';
+import type { ApiMessage, ApiChat } from '../../api/types';
 import { selectChat, selectChatMessage } from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../global/helpers';

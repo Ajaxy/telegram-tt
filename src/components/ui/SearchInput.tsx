@@ -1,6 +1,7 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useRef, useEffect, memo, useCallback,
+  useRef, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';

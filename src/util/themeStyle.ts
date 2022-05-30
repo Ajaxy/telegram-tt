@@ -1,4 +1,4 @@
-import { ApiThemeParameters } from '../api/types';
+import type { ApiThemeParameters } from '../api/types';
 
 export function extractCurrentThemeParams(): ApiThemeParameters {
   const style = getComputedStyle(document.documentElement);

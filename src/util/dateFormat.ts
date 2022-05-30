@@ -1,4 +1,4 @@
-import { LangFn } from '../hooks/useLang';
+import type { LangFn } from '../hooks/useLang';
 import withCache from './withCache';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

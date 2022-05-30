@@ -1,9 +1,9 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import {
+import type {
   ApiCountry, ApiSession, ApiWallpaper,
 } from '../../types';
-import { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
+import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';

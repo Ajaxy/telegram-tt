@@ -1,4 +1,4 @@
-import { ApiDocument } from '../../../api/types';
+import type { ApiDocument } from '../../../api/types';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
 const ONE_MEGABYTE = 1024 * 1024;

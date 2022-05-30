@@ -1,7 +1,7 @@
 import React from '../../../lib/teact/teact';
 import EMOJI_REGEX from '../../../lib/twemojiRegex';
 
-import { TextPart } from '../../../types';
+import type { TextPart } from '../../../types';
 
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';

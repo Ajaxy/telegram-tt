@@ -1,8 +1,8 @@
-import React, {
-  FC, memo, useEffect, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 
-import getAnimationData, { ANIMATED_STICKERS_PATHS } from './helpers/animatedAssets';
+import type { ANIMATED_STICKERS_PATHS } from './helpers/animatedAssets';
+import getAnimationData from './helpers/animatedAssets';
 
 import AnimatedSticker from './AnimatedSticker';
 

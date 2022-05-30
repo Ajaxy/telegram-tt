@@ -1,11 +1,13 @@
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { TextPart } from '../../../types';
-import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
+import type { TextPart } from '../../../types';
+import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
-import renderText, { TextFilter } from './renderText';
+import type { TextFilter } from './renderText';
+import renderText from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getTranslation } from '../../../util/langProvider';
 

@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 
 import { IS_TOUCH_ENV } from '../util/environment';
 import { fastRaf } from '../util/schedulers';

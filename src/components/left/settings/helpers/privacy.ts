@@ -1,4 +1,5 @@
-import { ApiPrivacyKey, SettingsScreens } from '../../../../types';
+import type { ApiPrivacyKey } from '../../../../types';
+import { SettingsScreens } from '../../../../types';
 
 export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefined {
   switch (screen) {

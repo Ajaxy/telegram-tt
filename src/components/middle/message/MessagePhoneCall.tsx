@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useCallback, useMemo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ApiMessage, PhoneCallAction } from '../../../api/types';
+import type { ApiMessage, PhoneCallAction } from '../../../api/types';
 
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';

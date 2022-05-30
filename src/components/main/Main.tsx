@@ -1,13 +1,14 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, memo, useCallback, useState, useRef,
+  useEffect, memo, useCallback, useState, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { LangCode } from '../../types';
-import {
+import type { LangCode } from '../../types';
+import type {
   ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType,
 } from '../../api/types';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import '../../global/actions/all';
 import {

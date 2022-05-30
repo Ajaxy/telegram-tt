@@ -1,8 +1,7 @@
-import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
+import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 
-import React, {
-  FC, useRef, useCallback, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useRef, useCallback, useState } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 

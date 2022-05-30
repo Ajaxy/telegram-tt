@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useCallback, useLayoutEffect, useRef, useState,
+  useCallback, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
-import { ISettings } from '../../../types';
-import { IMediaDimensions } from './helpers/calculateAlbumLayout';
+import type { ApiMessage } from '../../../api/types';
+import type { ISettings } from '../../../types';
+import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
 import {
@@ -14,7 +15,8 @@ import {
   getMediaTransferState,
   isOwnMessage,
 } from '../../../global/helpers';
-import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';

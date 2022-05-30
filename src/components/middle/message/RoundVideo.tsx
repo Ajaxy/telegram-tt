@@ -1,5 +1,5 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC,
   useCallback,
   useEffect,
   useRef,
@@ -7,7 +7,8 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ApiMediaFormat, ApiMessage } from '../../../api/types';
+import type { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
@@ -16,7 +17,8 @@ import buildClassName from '../../../util/buildClassName';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import safePlay from '../../../util/safePlay';
 import { fastRaf } from '../../../util/schedulers';
-import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMediaTransition from '../../../hooks/useMediaTransition';

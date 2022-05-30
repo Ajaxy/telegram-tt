@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import { ApiLangPack } from '../api/types';
+import type { ApiLangPack } from '../api/types';
 
 export default {
   Search: {

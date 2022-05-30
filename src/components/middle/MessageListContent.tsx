@@ -1,7 +1,8 @@
-import { RefObject } from 'react';
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../global/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import buildClassName from '../../util/buildClassName';
@@ -11,7 +12,8 @@ import {
   getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage,
 } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
-import { isAlbum, MessageDateGroup } from './helpers/groupMessages';
+import type { MessageDateGroup } from './helpers/groupMessages';
+import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useScrollHooks from './hooks/useScrollHooks';
 import useMessageObservers from './hooks/useMessageObservers';

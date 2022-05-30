@@ -1,9 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo,
+  memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
 
 import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';

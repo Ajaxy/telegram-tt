@@ -1,4 +1,4 @@
-import {
+import type {
   ApiChat,
   ApiMessage,
   ApiThreadInfo,
@@ -38,7 +38,7 @@ import {
   ApiAttachMenuBot,
   ApiPhoneCall,
 } from '../api/types';
-import {
+import type {
   FocusDirection,
   ISettings,
   MediaViewerOrigin,

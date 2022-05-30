@@ -1,8 +1,7 @@
-import React, {
-  FC, memo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import type { ApiMessage } from '../../../api/types';
 
 import { getActions } from '../../../global';
 import { getGamePreviewPhotoHash, getGamePreviewVideoHash, getMessageText } from '../../../global/helpers';

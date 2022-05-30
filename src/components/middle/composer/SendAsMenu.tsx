@@ -1,5 +1,6 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useCallback, useEffect, useRef, memo,
+  useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
 
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';

@@ -1,5 +1,6 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
@@ -7,10 +8,12 @@ import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { isUserId } from '../../../../global/helpers';
 import getAnimationData from '../../../common/helpers/animatedAssets';
-import {
-  EXCLUDED_CHAT_TYPES,
+import type {
   FolderEditDispatch,
   FoldersState,
+} from '../../../../hooks/reducers/useFoldersReducer';
+import {
+  EXCLUDED_CHAT_TYPES,
   INCLUDED_CHAT_TYPES,
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';

@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useCallback, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 import { withGlobal, getActions } from '../../global';
 
-import { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../global/selectors';
 import {

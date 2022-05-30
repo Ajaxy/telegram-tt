@@ -1,9 +1,8 @@
-import { RefObject } from 'react';
-import React, {
-  FC, useLayoutEffect, useRef,
-} from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useLayoutEffect, useRef } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
 import buildClassName from '../../util/buildClassName';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from '../lib/teact/teact';
-import { IAnchorPosition } from '../types';
+import type { IAnchorPosition } from '../types';
 
 interface Layout {
   extraPaddingX?: number;

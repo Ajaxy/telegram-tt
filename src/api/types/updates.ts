@@ -5,24 +5,24 @@ import type {
   VideoState,
   VideoRotation,
 } from '../../lib/secret-sauce';
-import {
+import type {
   ApiChat,
   ApiChatFullInfo,
   ApiTypingStatus,
   ApiChatMember,
   ApiChatFolder,
 } from './chats';
-import {
+import type {
   ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiReactions, ApiStickerSet, ApiThreadInfo,
 } from './messages';
-import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
-import {
+import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
+import type {
   ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
-import {
+import type {
   ApiGroupCall, ApiPhoneCall,
 } from './calls';
-import { ApiBotMenuButton } from './bots';
+import type { ApiBotMenuButton } from './bots';
 import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
 
 export type ApiUpdateReady = {

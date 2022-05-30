@@ -3,8 +3,8 @@
 // https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/ui/grouped_layout.cpp
 // https://github.com/overtake/TelegramSwift/blob/master/Telegram-Mac/GroupedLayout.swift#L83
 
-import { IAlbum } from '../../../../types';
-import { ApiMessage, ApiDimensions } from '../../../../api/types';
+import type { IAlbum } from '../../../../types';
+import type { ApiMessage, ApiDimensions } from '../../../../api/types';
 
 import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';

@@ -1,12 +1,13 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  FC, useCallback, useRef, useEffect, memo,
+  useCallback, useRef, useEffect, memo,
 } from '../../../../lib/teact/teact';
 
 import { isUserId } from '../../../../global/helpers';
+import type { FolderChatType } from '../../../../hooks/reducers/useFoldersReducer';
 import {
   INCLUDED_CHAT_TYPES,
   EXCLUDED_CHAT_TYPES,
-  FolderChatType,
 } from '../../../../hooks/reducers/useFoldersReducer';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import useLang from '../../../../hooks/useLang';

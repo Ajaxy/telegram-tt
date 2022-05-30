@@ -1,12 +1,13 @@
 import { getActions, getGlobal } from '../global';
 
 import { AudioOrigin, GlobalSearchContent } from '../types';
-import { ApiMessage } from '../api/types';
+import type { ApiMessage } from '../api/types';
 
 import { IS_SAFARI } from './environment';
 import safePlay from './safePlay';
 import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSafariProgressiveAudio';
-import { getMessageKey, MessageKey, parseMessageKey } from '../global/helpers';
+import type { MessageKey } from '../global/helpers';
+import { getMessageKey, parseMessageKey } from '../global/helpers';
 import { fastRaf } from './schedulers';
 import { selectCurrentMessageList } from '../global/selectors';
 

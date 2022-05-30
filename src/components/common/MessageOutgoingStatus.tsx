@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { ApiMessageOutgoingStatus } from '../../api/types';
+import type { ApiMessageOutgoingStatus } from '../../api/types';
 
 import Transition from '../ui/Transition';
 

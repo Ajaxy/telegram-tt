@@ -1,9 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChat } from '../../../api/types';
+import type { ApiChat } from '../../../api/types';
 
 import { STICKER_SIZE_JOIN_REQUESTS } from '../../../config';
 import useHistoryBack from '../../../hooks/useHistoryBack';

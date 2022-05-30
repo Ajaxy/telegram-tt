@@ -1,4 +1,4 @@
-import { IOpusRecorder } from 'opus-recorder';
+import type { IOpusRecorder } from 'opus-recorder';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 

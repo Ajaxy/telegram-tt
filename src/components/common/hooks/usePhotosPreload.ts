@@ -1,6 +1,5 @@
-import {
-  ApiChat, ApiMediaFormat, ApiPhoto, ApiUser,
-} from '../../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 import { useEffect } from '../../../lib/teact/teact';
 import * as mediaLoader from '../../../util/mediaLoader';
 

@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ApiUser, ApiUserStatus } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiUser, ApiUserStatus } from '../../api/types';
 
 import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';

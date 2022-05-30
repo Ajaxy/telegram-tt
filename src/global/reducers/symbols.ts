@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ApiSticker, ApiStickerSet, ApiVideo } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiSticker, ApiStickerSet, ApiVideo } from '../../api/types';
 import { buildCollectionByKey, unique } from '../../util/iteratees';
 import { selectStickersForEmoji } from '../selectors';
 

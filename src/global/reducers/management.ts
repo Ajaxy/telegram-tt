@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ManagementProgress, ManagementState } from '../../types';
+import type { GlobalState } from '../types';
+import type { ManagementProgress, ManagementState } from '../../types';
 
 export function updateManagementProgress(global: GlobalState, progress: ManagementProgress): GlobalState {
   return {

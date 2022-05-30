@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import useLang from '../../hooks/useLang';
-import { ConnectionStatus } from '../../hooks/useConnectionStatus';
+import type { ConnectionStatus } from '../../hooks/useConnectionStatus';
 
 import Transition from '../ui/Transition';
 import Spinner from '../ui/Spinner';

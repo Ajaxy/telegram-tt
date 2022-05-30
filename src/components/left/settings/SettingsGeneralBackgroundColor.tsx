@@ -1,16 +1,18 @@
-import { ChangeEvent, MutableRefObject, RefObject } from 'react';
+import type { ChangeEvent, MutableRefObject, RefObject } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ThemeKey } from '../../../types';
+import type { ThemeKey } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import {
   getPatternColor, hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
 } from '../../../util/colors';
-import { captureEvents, RealTouchEvent } from '../../../util/captureEvents';
+import type { RealTouchEvent } from '../../../util/captureEvents';
+import { captureEvents } from '../../../util/captureEvents';
 import { selectTheme } from '../../../global/selectors';
 import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';

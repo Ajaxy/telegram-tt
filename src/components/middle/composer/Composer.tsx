@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import { GlobalState, MessageListType } from '../../../global/types';
-import {
+import type { GlobalState, MessageListType } from '../../../global/types';
+import type {
   ApiAttachment,
   ApiBotInlineResult,
   ApiBotInlineMediaResult,
@@ -16,11 +17,13 @@ import {
   ApiChat,
   ApiChatMember,
   ApiUser,
-  MAIN_THREAD_ID,
   ApiBotCommand,
   ApiBotMenuButton,
 } from '../../../api/types';
-import { InlineBotSettings, ISettings } from '../../../types';
+import {
+  MAIN_THREAD_ID,
+} from '../../../api/types';
+import type { InlineBotSettings, ISettings } from '../../../types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,

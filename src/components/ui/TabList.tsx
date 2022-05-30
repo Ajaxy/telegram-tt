@@ -1,6 +1,5 @@
-import React, {
-  FC, memo, useRef, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
 
 import { IS_ANDROID, IS_IOS } from '../../util/environment';
 import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';

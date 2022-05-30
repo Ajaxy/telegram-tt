@@ -1,10 +1,9 @@
-import { ChangeEvent } from 'react';
-import React, {
-  FC, useState, memo, useCallback,
-} from '../../lib/teact/teact';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useState, memo, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
 import useLang from '../../hooks/useLang';

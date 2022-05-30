@@ -1,6 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { getGlobal, setGlobal, withGlobal } from '../../global';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 document.ondblclick = () => {
   const value = Math.random();

@@ -1,7 +1,7 @@
 import { useMemo } from '../lib/teact/teact';
 import { getActions } from '../global';
 
-import { ApiChat, ApiUser } from '../api/types';
+import type { ApiChat, ApiUser } from '../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {

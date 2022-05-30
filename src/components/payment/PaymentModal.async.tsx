@@ -1,5 +1,6 @@
-import React, { FC, memo } from '../../lib/teact/teact';
-import { OwnProps } from './PaymentModal';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
+import type { OwnProps } from './PaymentModal';
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';

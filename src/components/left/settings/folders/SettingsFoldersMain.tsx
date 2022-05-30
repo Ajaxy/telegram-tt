@@ -1,9 +1,10 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  FC, memo, useMemo, useCallback, useState, useEffect,
+  memo, useMemo, useCallback, useState, useEffect,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import { ApiChatFolder } from '../../../../api/types';
+import type { ApiChatFolder } from '../../../../api/types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { throttle } from '../../../../util/schedulers';

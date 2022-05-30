@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type {
   ApiAttachment,
   ApiChat,
   ApiGlobalMessageSearchType,
@@ -13,12 +13,14 @@ import {
   ApiThreadInfo,
   ApiUser,
   ApiVideo,
-  MAIN_THREAD_ID,
-  MESSAGE_DELETED,
   OnApiUpdate,
   ApiSponsoredMessage,
   ApiSendMessageAction,
   ApiContact,
+} from '../../types';
+import {
+  MAIN_THREAD_ID,
+  MESSAGE_DELETED,
 } from '../../types';
 
 import {

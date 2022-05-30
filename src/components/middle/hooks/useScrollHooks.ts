@@ -1,9 +1,9 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { getActions } from '../../../global';
 import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import { LoadMoreDirection } from '../../../types';
-import { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../global/types';
 
 import { LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../../config';
 import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';

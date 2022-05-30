@@ -2,7 +2,7 @@ import { useEffect, useState } from '../lib/teact/teact';
 
 import { throttle } from '../util/schedulers';
 import windowSize from '../util/windowSize';
-import { ApiDimensions } from '../api/types';
+import type { ApiDimensions } from '../api/types';
 
 const THROTTLE = 250;
 

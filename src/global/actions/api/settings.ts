@@ -1,8 +1,11 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { GlobalState } from '../../types';
+import type { GlobalState } from '../../types';
+import type {
+  ApiPrivacyKey, PrivacyVisibility, InputPrivacyRules, InputPrivacyContact,
+} from '../../../types';
 import {
-  ApiPrivacyKey, PrivacyVisibility, ProfileEditProgress, InputPrivacyRules, InputPrivacyContact,
+  ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 

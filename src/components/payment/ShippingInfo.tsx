@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useRef, useCallback, useEffect, memo,
+  useRef, useCallback, useEffect, memo,
 } from '../../lib/teact/teact';
 
-import { ApiCountry } from '../../api/types';
+import type { ApiCountry } from '../../api/types';
 
-import { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import useLang from '../../hooks/useLang';
 

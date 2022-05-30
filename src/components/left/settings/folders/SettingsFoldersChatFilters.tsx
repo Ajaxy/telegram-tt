@@ -1,6 +1,5 @@
-import React, {
-  FC, memo, useMemo, useCallback,
-} from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useMemo, useCallback } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
 import { unique } from '../../../../util/iteratees';
@@ -10,9 +9,11 @@ import { filterChatsByName } from '../../../../global/helpers';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
-import {
+import type {
   FoldersState,
   FolderEditDispatch,
+} from '../../../../hooks/reducers/useFoldersReducer';
+import {
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';
 

@@ -1,6 +1,5 @@
-import React, {
-  FC, useRef, memo, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useRef, memo, useEffect } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import forceReflow from '../../util/forceReflow';

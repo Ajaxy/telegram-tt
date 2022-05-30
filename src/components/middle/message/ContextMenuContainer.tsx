@@ -1,11 +1,12 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import { MessageListType } from '../../../global/types';
-import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
-import { IAlbum, IAnchorPosition } from '../../../types';
+import type { MessageListType } from '../../../global/types';
+import type { ApiAvailableReaction, ApiMessage } from '../../../api/types';
+import type { IAlbum, IAnchorPosition } from '../../../types';
 
 import {
   selectActiveDownloadIds,

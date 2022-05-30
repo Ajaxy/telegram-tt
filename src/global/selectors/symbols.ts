@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ApiSticker } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiSticker } from '../../api/types';
 
 export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;

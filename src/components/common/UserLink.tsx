@@ -1,6 +1,7 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback } from '../../lib/teact/teact';
 
-import { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiUser } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 

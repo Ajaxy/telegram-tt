@@ -1,5 +1,5 @@
-import { ApiInitialArgs, ApiUpdate } from '../../types';
-import { Methods, MethodArgs, MethodResponse } from '../methods/types';
+import type { ApiInitialArgs, ApiUpdate } from '../../types';
+import type { Methods, MethodArgs, MethodResponse } from '../methods/types';
 
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;
 

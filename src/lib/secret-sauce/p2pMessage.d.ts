@@ -1,4 +1,4 @@
-import { Fingerprint, RTCPFeedbackParam, RTPExtension } from './types';
+import type { Fingerprint, RTCPFeedbackParam, RTPExtension } from './types';
 export declare type VideoState = 'inactive' | 'active' | 'suspended';
 export declare type VideoRotation = 0 | 90 | 180 | 270;
 export declare type MediaStateMessage = {

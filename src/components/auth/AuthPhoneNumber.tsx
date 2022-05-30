@@ -1,15 +1,16 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
 import monkeyPath from '../../assets/monkey.svg';
 
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { GlobalState } from '../../global/types';
-import { LangCode } from '../../types';
-import { ApiCountryCode } from '../../api/types';
+import type { GlobalState } from '../../global/types';
+import type { LangCode } from '../../types';
+import type { ApiCountryCode } from '../../api/types';
 
 import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
 import { preloadImage } from '../../util/files';

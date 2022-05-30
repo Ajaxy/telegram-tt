@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { invokeRequest } from './client';
 import { buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
 import { buildShippingOptions, buildPaymentForm, buildReceipt } from '../apiBuilders/payments';
-import { ApiChat, OnApiUpdate } from '../../types';
+import type { ApiChat, OnApiUpdate } from '../../types';
 
 let onUpdate: OnApiUpdate;
 

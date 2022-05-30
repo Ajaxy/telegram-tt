@@ -2,8 +2,8 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import { ApiChat, ApiContact, ApiUser } from '../../../api/types';
-import { InlineBotSettings } from '../../../types';
+import type { ApiChat, ApiContact, ApiUser } from '../../../api/types';
+import type { InlineBotSettings } from '../../../types';
 
 import {
   RE_TG_LINK, RE_TME_LINK,

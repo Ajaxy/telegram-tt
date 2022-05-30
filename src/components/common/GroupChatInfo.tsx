@@ -1,11 +1,10 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
-import React, {
-  FC, useEffect, useCallback, memo,
-} from '../../lib/teact/teact';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat, ApiTypingStatus } from '../../api/types';
-import { GlobalState } from '../../global/types';
+import type { ApiChat, ApiTypingStatus } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -15,7 +14,8 @@ import {
 } from '../../global/helpers';
 import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../global/selectors';
 import renderText from './helpers/renderText';
-import useLang, { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useLang';
+import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';

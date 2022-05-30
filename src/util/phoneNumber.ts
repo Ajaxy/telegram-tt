@@ -1,4 +1,4 @@
-import { ApiCountryCode } from '../api/types';
+import type { ApiCountryCode } from '../api/types';
 
 const PATTERN_PLACEHOLDER = 'X';
 const DEFAULT_PATTERN = 'XXX XXX XXX XXX';

@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
 
-import { ApiBotCommand } from '../../../../api/types';
+import type { ApiBotCommand } from '../../../../api/types';
 
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import { throttle } from '../../../../util/schedulers';

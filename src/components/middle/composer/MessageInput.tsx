@@ -1,10 +1,11 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useEffect, useRef, memo, useState, useCallback,
+  useEffect, useRef, memo, useState, useCallback,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { IAnchorPosition, ISettings } from '../../../types';
+import type { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import { selectReplyingToId } from '../../../global/selectors';

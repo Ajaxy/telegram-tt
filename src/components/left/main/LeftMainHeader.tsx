@@ -1,11 +1,11 @@
-import React, {
-  FC, memo, useCallback, useMemo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ISettings, LeftColumnContent } from '../../../types';
-import { ApiChat } from '../../../api/types';
-import { GlobalState } from '../../../global/types';
+import type { ISettings } from '../../../types';
+import { LeftColumnContent } from '../../../types';
+import type { ApiChat } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
 import {
   ANIMATION_LEVEL_MAX,

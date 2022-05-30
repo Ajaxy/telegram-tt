@@ -95,6 +95,13 @@
     "@typescript-eslint/member-delimiter-style": "error",
     "@typescript-eslint/default-param-last": "off",
     "@typescript-eslint/return-await": ["error", "in-try-catch"],
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false
+      }
+    ],
     "teactn/prefer-separate-component-file": "off"
   },
   "settings": {

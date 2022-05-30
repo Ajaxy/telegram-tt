@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { ApiFormattedText, ApiMessage } from '../../../../api/types';
-import { MessageListType } from '../../../../global/types';
+import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
+import type { MessageListType } from '../../../../global/types';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import { EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';

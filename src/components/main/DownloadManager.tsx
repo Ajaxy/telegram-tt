@@ -1,10 +1,10 @@
-import {
-  FC, memo, useCallback, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { Thread } from '../../global/types';
-import { ApiMediaFormat, ApiMessage } from '../../api/types';
+import type { Thread } from '../../global/types';
+import type { ApiMessage } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import * as mediaLoader from '../../util/mediaLoader';
 import download from '../../util/download';

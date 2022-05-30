@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { PaymentStep } from '../../../types';
-import { ApiChat } from '../../../api/types';
+import type { ApiChat } from '../../../api/types';
 
 import {
   selectPaymentMessageId,

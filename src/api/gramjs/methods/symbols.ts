@@ -1,6 +1,6 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
+import type { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet, buildStickerSetCovered } from '../apiBuilders/symbols';

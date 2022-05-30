@@ -1,7 +1,7 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { getActions } from '../../../global';
 
-import { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../global/types';
 
 import { IS_ANDROID, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';

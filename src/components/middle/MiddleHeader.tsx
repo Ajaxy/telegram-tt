@@ -1,13 +1,15 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 import cycleRestrict from '../../util/cycleRestrict';
 
-import { GlobalState, MessageListType } from '../../global/types';
-import {
-  ApiChat, ApiMessage, ApiTypingStatus, ApiUser, MAIN_THREAD_ID,
+import type { GlobalState, MessageListType } from '../../global/types';
+import type {
+  ApiChat, ApiMessage, ApiTypingStatus, ApiUser,
 } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   EDITABLE_INPUT_CSS_SELECTOR,

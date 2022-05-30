@@ -1,4 +1,5 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import useMouseInside from '../../../hooks/useMouseInside';

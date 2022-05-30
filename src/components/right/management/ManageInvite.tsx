@@ -1,10 +1,9 @@
-import { ChangeEvent } from 'react';
-import React, {
-  FC, memo, useCallback, useState,
-} from '../../../lib/teact/teact';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiExportedInvite } from '../../../api/types';
+import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';

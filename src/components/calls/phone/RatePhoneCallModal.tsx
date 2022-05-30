@@ -1,6 +1,5 @@
-import React, {
-  FC, memo, useRef, useState,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import useLang from '../../../hooks/useLang';

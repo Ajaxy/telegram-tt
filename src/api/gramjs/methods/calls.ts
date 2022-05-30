@@ -1,6 +1,6 @@
 import BigInt from 'big-integer';
 import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
-import {
+import type {
   ApiChat, ApiUser, OnApiUpdate, ApiGroupCall, ApiPhoneCall,
 } from '../../types';
 import { Api as GramJs } from '../../../lib/gramjs';

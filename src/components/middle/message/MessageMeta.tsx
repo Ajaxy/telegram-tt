@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useMemo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import { ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
-import { ActiveReaction } from '../../../global/types';
+import type { ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
+import type { ActiveReaction } from '../../../global/types';
 
 import { formatDateTimeToString, formatTime } from '../../../util/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';

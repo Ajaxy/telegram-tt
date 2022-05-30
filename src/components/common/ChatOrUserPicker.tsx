@@ -1,7 +1,6 @@
-import { RefObject } from 'react';
-import React, {
-  FC, memo, useRef, useCallback,
-} from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useRef, useCallback } from '../../lib/teact/teact';
 
 import { CHAT_HEIGHT_PX } from '../../config';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';

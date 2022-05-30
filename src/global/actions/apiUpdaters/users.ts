@@ -1,6 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiUserStatus } from '../../../api/types';
+import type { ApiUserStatus } from '../../../api/types';
 
 import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';

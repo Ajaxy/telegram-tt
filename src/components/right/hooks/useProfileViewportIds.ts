@@ -1,9 +1,9 @@
 import { useMemo, useRef } from '../../../lib/teact/teact';
 
-import {
+import type {
   ApiChat, ApiChatMember, ApiMessage, ApiUser, ApiUserStatus,
 } from '../../../api/types';
-import { ProfileTabType, SharedMediaType } from '../../../types';
+import type { ProfileTabType, SharedMediaType } from '../../../types';
 
 import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../global/helpers';

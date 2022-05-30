@@ -1,4 +1,4 @@
-import { LangCode } from '../../../types';
+import type { LangCode } from '../../../types';
 
 export function getSuggestedLanguage() {
   let suggestedLanguage = navigator.language;

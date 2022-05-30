@@ -2,7 +2,8 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import { ApiChat, MAIN_THREAD_ID } from '../../../api/types';
+import type { ApiChat } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
@@ -21,7 +22,7 @@ import {
   updateLocalMediaSearchResults,
   updateLocalTextSearchResults,
 } from '../../reducers';
-import { SharedMediaType } from '../../../types';
+import type { SharedMediaType } from '../../../types';
 
 addActionHandler('searchTextMessagesLocal', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};

@@ -1,8 +1,9 @@
-import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiMessage } from '../../api/types';
-import { IAlbum } from '../../types';
+import type { ApiMessage } from '../../api/types';
+import type { IAlbum } from '../../types';
 
 import {
   selectAllowedMessageActions,

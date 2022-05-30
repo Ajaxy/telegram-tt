@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
-import { ApiSticker } from '../../../../api/types';
+import type { ApiSticker } from '../../../../api/types';
 
 import { selectAnimatedEmoji } from '../../../../global/selectors';
 import useLang from '../../../../hooks/useLang';

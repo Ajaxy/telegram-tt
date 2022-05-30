@@ -1,9 +1,11 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import {
-  ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
+import type {
+  ApiChat, ApiDimensions, ApiMessage, ApiUser,
 } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';

@@ -1,4 +1,4 @@
-import { Api as GramJs } from '../../../lib/gramjs';
+import type { Api as GramJs } from '../../../lib/gramjs';
 
 type VirtualFields =
   'flags'

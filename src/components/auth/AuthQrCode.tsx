@@ -1,11 +1,12 @@
 import QrCodeStyling from 'qr-code-styling';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, useRef, memo, useCallback, useState,
+  useEffect, useRef, memo, useCallback, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { GlobalState } from '../../global/types';
-import { LangCode } from '../../types';
+import type { GlobalState } from '../../global/types';
+import type { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE } from '../../config';
 import { setLanguage } from '../../util/langProvider';

@@ -1,8 +1,10 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../global/types';
 
-import useLang, { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useLang';
+import useLang from '../../hooks/useLang';
 
 import './NoMessages.scss';
 

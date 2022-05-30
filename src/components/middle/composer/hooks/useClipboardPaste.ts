@@ -1,5 +1,6 @@
-import { StateHookSetter, useEffect } from '../../../../lib/teact/teact';
-import { ApiAttachment, ApiMessage } from '../../../../api/types';
+import type { StateHookSetter } from '../../../../lib/teact/teact';
+import { useEffect } from '../../../../lib/teact/teact';
+import type { ApiAttachment, ApiMessage } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
 import { EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';

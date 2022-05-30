@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useState, useEffect, useRef,
+  memo, useState, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { callApi } from '../../../api/gramjs';
-import { ApiMessageStatistics, StatisticsGraph } from '../../../api/types';
+import type { ApiMessageStatistics, StatisticsGraph } from '../../../api/types';
 import { selectChat } from '../../../global/selectors';
 
 import buildClassName from '../../../util/buildClassName';

@@ -1,11 +1,12 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiPhoto, ApiReportReason } from '../../api/types';
+import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
 

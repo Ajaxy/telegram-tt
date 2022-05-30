@@ -1,10 +1,10 @@
-import React, {
-  FC, useCallback, useRef, useState,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useCallback, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ApiMediaFormat, ApiMessage } from '../../../api/types';
-import { IMediaDimensions } from './helpers/calculateAlbumLayout';
+import type { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
+import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
@@ -18,7 +18,8 @@ import {
   isForwardedMessage,
   isOwnMessage,
 } from '../../../global/helpers';
-import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';

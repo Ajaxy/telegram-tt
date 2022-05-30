@@ -1,8 +1,7 @@
-import React, {
-  FC, memo, useCallback, useRef,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 
-import { ApiMessage } from '../../api/types';
+import type { ApiMessage } from '../../api/types';
 
 import { formatMediaDuration } from '../../util/dateFormat';
 import stopEvent from '../../util/stopEvent';
@@ -15,7 +14,8 @@ import {
 import buildClassName from '../../util/buildClassName';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 
 import './Media.scss';
 

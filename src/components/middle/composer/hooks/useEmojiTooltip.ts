@@ -5,9 +5,8 @@ import {
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
-import {
-  EmojiData, EmojiModule, EmojiRawData, uncompressEmoji,
-} from '../../../../util/emoji';
+import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
+import { uncompressEmoji } from '../../../../util/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import {
   buildCollectionByKey, mapValues, pickTruthy, unique,

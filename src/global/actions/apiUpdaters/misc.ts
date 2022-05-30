@@ -1,6 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiPrivacyKey, PaymentStep } from '../../../types';
+import type { ApiPrivacyKey } from '../../../types';
+import { PaymentStep } from '../../../types';
 
 import {
   addBlockedContact, removeBlockedContact, setConfirmPaymentUrl, setPaymentStep,

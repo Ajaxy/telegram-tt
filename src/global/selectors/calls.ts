@@ -1,4 +1,4 @@
-import { GlobalState } from '../types';
+import type { GlobalState } from '../types';
 import { selectChat } from './chats';
 import { isChatBasicGroup } from '../helpers';
 import { selectUser } from './users';

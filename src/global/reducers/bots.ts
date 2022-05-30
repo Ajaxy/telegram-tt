@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { InlineBotSettings } from '../../types';
+import type { GlobalState } from '../types';
+import type { InlineBotSettings } from '../../types';
 
 export function replaceInlineBotSettings(
   global: GlobalState, username: string, inlineBotSettings: InlineBotSettings | false,

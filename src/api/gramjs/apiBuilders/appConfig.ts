@@ -2,7 +2,7 @@
 import BigInt from 'big-integer';
 import localDb from '../localDb';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiAppConfig } from '../../types';
+import type { ApiAppConfig } from '../../types';
 import { buildJson } from './misc';
 
 type GramJsAppConfig = {

@@ -1,7 +1,8 @@
-import React, { FC } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiUser } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
 

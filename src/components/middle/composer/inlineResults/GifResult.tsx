@@ -1,10 +1,9 @@
-import React, {
-  FC, memo, useCallback,
-} from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../../lib/teact/teact';
 
-import { ApiBotInlineMediaResult, ApiBotInlineResult, ApiVideo } from '../../../../api/types';
+import type { ApiBotInlineMediaResult, ApiBotInlineResult, ApiVideo } from '../../../../api/types';
 
-import { ObserveFn } from '../../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import GifButton from '../../../common/GifButton';
 

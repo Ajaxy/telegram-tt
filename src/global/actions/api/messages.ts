@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { GlobalActions } from '../../types';
-import {
+import type { GlobalActions } from '../../types';
+import type {
   ApiAttachment,
   ApiChat,
   ApiMessage,
@@ -11,6 +11,8 @@ import {
   ApiSticker,
   ApiUser,
   ApiVideo,
+} from '../../../api/types';
+import {
   MAIN_THREAD_ID,
   MESSAGE_DELETED,
 } from '../../../api/types';

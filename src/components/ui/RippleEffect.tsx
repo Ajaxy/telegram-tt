@@ -1,5 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, useMemo, useState, memo,
+  useCallback, useMemo, useState, memo,
 } from '../../lib/teact/teact';
 import { debounce } from '../../util/schedulers';
 

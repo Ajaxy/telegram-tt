@@ -1,4 +1,4 @@
-import { ApiError, ApiFieldError } from '../api/types';
+import type { ApiError, ApiFieldError } from '../api/types';
 
 import { DEBUG } from '../config';
 

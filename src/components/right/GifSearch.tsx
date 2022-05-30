@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useRef, useCallback,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useRef, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat, ApiVideo } from '../../api/types';
+import type { ApiChat, ApiVideo } from '../../api/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {

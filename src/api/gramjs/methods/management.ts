@@ -2,7 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import { invokeRequest } from './client';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
-import { ApiChat, ApiUser, OnApiUpdate } from '../../types';
+import type { ApiChat, ApiUser, OnApiUpdate } from '../../types';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
 import { buildApiUser } from '../apiBuilders/users';

@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useState, memo, useCallback, useRef,
+  useState, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import { ApiCountryCode } from '../../api/types';
+import type { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';

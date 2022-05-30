@@ -1,5 +1,5 @@
-import { ApiMessage, ApiReactions } from '../../api/types';
-import { GlobalState } from '../types';
+import type { ApiMessage, ApiReactions } from '../../api/types';
+import type { GlobalState } from '../types';
 
 export function getMessageRecentReaction(message: Partial<ApiMessage>) {
   return message.isOutgoing ? message.reactions?.recentReactions?.[0] : undefined;

@@ -1,10 +1,10 @@
-import { GroupCallParticipant as TypeGroupCallParticipant, THRESHOLD } from '../../../lib/secret-sauce';
-import React, {
-  FC, memo, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import { THRESHOLD } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { selectChat, selectUser } from '../../../global/selectors';

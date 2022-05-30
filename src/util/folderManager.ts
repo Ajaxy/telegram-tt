@@ -1,9 +1,9 @@
 import { addCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from '../global';
 
-import { GlobalState } from '../global/types';
-import { NotifyException, NotifySettings } from '../types';
-import { ApiChat, ApiChatFolder, ApiUser } from '../api/types';
+import type { GlobalState } from '../global/types';
+import type { NotifyException, NotifySettings } from '../types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../api/types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG } from '../config';
 import { selectNotifySettings, selectNotifyExceptions } from '../global/selectors';
@@ -11,7 +11,8 @@ import { selectIsChatMuted } from '../global/helpers';
 import { onIdle, throttle } from './schedulers';
 import { areSortedArraysEqual, unique } from './iteratees';
 import arePropsShallowEqual from './arePropsShallowEqual';
-import { CallbackManager, createCallbackManager } from './callbacks';
+import type { CallbackManager } from './callbacks';
+import { createCallbackManager } from './callbacks';
 
 interface FolderSummary {
   id: number;

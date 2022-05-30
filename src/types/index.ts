@@ -1,5 +1,5 @@
-import { TeactNode } from '../lib/teact/teact';
-import {
+import type { TeactNode } from '../lib/teact/teact';
+import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiChatInviteImporter,
   ApiExportedInvite,

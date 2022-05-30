@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { ApiFormattedText, ApiMessage } from '../../../../api/types';
+import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
 
 import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import usePrevious from '../../../../hooks/usePrevious';

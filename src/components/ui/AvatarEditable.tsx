@@ -1,6 +1,7 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useState, useEffect, memo, useCallback,
+  useState, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';

@@ -1,4 +1,4 @@
-import { GlobalState } from './types';
+import type { GlobalState } from './types';
 import { NewChatMembersProgress } from '../types';
 
 import {

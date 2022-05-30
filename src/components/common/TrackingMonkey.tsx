@@ -1,5 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useState, useEffect, useCallback, memo,
+  useState, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
 
 import { STICKER_SIZE_AUTH, STICKER_SIZE_AUTH_MOBILE, STICKER_SIZE_TWO_FA } from '../../config';

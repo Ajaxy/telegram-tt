@@ -1,11 +1,12 @@
-import React, {
-  FC, memo, useEffect, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 
-import { ActiveEmojiInteraction } from '../../global/types';
+import type { ActiveEmojiInteraction } from '../../global/types';
 
-import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import getAnimationData, { ANIMATED_STICKERS_PATHS } from './helpers/animatedAssets';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import type { ANIMATED_STICKERS_PATHS } from './helpers/animatedAssets';
+import getAnimationData from './helpers/animatedAssets';
 import useAnimatedEmoji from './hooks/useAnimatedEmoji';
 
 import AnimatedSticker from './AnimatedSticker';

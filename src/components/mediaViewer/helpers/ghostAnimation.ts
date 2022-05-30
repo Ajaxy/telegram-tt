@@ -1,4 +1,4 @@
-import { ApiMessage, ApiDimensions } from '../../../api/types';
+import type { ApiMessage, ApiDimensions } from '../../../api/types';
 
 import { MediaViewerOrigin } from '../../../types';
 

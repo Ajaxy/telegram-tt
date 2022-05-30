@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
-import { OwnProps } from './NewChatStep2';
+import type { OwnProps } from './NewChatStep2';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 import Loading from '../../ui/Loading';

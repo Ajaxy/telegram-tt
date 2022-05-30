@@ -1,4 +1,4 @@
-import { CancellableCallback, OriginMessageEvent, WorkerMessageData } from './WorkerConnector';
+import type { CancellableCallback, OriginMessageEvent, WorkerMessageData } from './WorkerConnector';
 import { DEBUG } from '../config';
 
 declare const self: WorkerGlobalScope;

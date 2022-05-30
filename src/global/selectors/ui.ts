@@ -1,4 +1,4 @@
-import { GlobalState } from '../types';
+import type { GlobalState } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';

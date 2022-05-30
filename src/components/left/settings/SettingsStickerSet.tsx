@@ -1,10 +1,9 @@
-import React, {
-  FC, memo,
-} from '../../../lib/teact/teact';
-import { ApiSticker, ApiStickerSet } from '../../../api/types';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
+import type { ApiSticker, ApiStickerSet } from '../../../api/types';
 
 import { STICKER_SIZE_GENERAL_SETTINGS } from '../../../config';
-import { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';

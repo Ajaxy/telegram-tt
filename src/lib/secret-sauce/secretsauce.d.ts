@@ -1,4 +1,4 @@
-import { GroupCallConnectionData, GroupCallParticipant, JoinGroupCallPayload } from './types';
+import type { GroupCallConnectionData, GroupCallParticipant, JoinGroupCallPayload } from './types';
 export declare type StreamType = 'audio' | 'video' | 'presentation';
 export declare function getDevices(streamType: StreamType, isInput?: boolean): Promise<MediaDeviceInfo[]>;
 export declare function toggleSpeaker(): void;

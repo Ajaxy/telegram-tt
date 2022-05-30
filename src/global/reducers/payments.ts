@@ -1,6 +1,6 @@
-import { GlobalState } from '../types';
-import { ShippingOption, PaymentStep } from '../../types';
-import { ApiMessage, ApiPaymentForm, ApiReceipt } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ShippingOption, PaymentStep } from '../../types';
+import type { ApiMessage, ApiPaymentForm, ApiReceipt } from '../../api/types';
 
 export function updateShippingOptions(
   global: GlobalState,

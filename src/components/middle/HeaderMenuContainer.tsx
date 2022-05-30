@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiBotCommand, ApiChat } from '../../api/types';
-import { IAnchorPosition } from '../../types';
+import type { ApiBotCommand, ApiChat } from '../../api/types';
+import type { IAnchorPosition } from '../../types';
 
 import { REPLIES_USER_ID } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';

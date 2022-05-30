@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type {
   ApiEmojiInteraction, ApiSticker, ApiStickerSet, GramJsEmojiInteraction,
 } from '../../types';
 import { NO_STICKER_SET_ID } from '../../../config';

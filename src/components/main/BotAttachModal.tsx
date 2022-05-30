@@ -1,7 +1,8 @@
-import React, { FC } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiUser } from '../../api/types';
+import type { ApiUser } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
 

@@ -1,6 +1,7 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback } from '../../lib/teact/teact';
 
-import { ApiGroupCall } from '../../api/types';
+import type { ApiGroupCall } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 

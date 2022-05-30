@@ -1,4 +1,4 @@
-import { ISettings } from '../../../../types';
+import type { ISettings } from '../../../../types';
 
 const SELECTED_APPENDIX_COLORS = {
   dark: {

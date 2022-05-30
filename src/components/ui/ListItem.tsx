@@ -1,5 +1,6 @@
-import { RefObject } from 'react';
-import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useRef, useCallback } from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { fastRaf } from '../../util/schedulers';

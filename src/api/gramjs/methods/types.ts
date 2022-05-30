@@ -1,4 +1,4 @@
-import * as methods from './index';
+import type * as methods from './index';
 
 export type Methods = typeof methods;
 export type MethodArgs<N extends keyof Methods> = Parameters<Methods[N]>;

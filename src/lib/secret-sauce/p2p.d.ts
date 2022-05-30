@@ -1,4 +1,4 @@
-import { ApiPhoneCallConnection } from './types';
+import type { ApiPhoneCallConnection } from './types';
 import { P2pMessage } from './p2pMessage';
 import { StreamType } from './secretsauce';
 export declare function getStreams(): {

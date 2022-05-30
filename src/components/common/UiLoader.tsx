@@ -1,9 +1,10 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
-import { GlobalState } from '../../global/types';
-import { ThemeKey } from '../../types';
+import type { GlobalState } from '../../global/types';
+import type { ThemeKey } from '../../types';
 
 import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting

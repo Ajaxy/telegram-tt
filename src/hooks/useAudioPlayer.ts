@@ -3,12 +3,14 @@ import {
 } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
-import { register, Track, TrackId } from '../util/audioPlayer';
+import type { Track, TrackId } from '../util/audioPlayer';
+import { register } from '../util/audioPlayer';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
 import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
 import useOnChange from './useOnChange';
+import type { MediaSessionHandlers } from '../util/mediaSession';
 import {
-  MediaSessionHandlers, registerMediaSession, setPlaybackState, setPositionState, updateMetadata,
+  registerMediaSession, setPlaybackState, setPositionState, updateMetadata,
 } from '../util/mediaSession';
 
 type Handler = (e: Event) => void;

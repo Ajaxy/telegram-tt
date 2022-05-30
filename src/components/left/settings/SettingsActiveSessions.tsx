@@ -1,10 +1,11 @@
 /* eslint-disable react/jsx-no-bind */
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiSession } from '../../../api/types';
+import type { ApiSession } from '../../../api/types';
 
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import useFlag from '../../../hooks/useFlag';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from '../lib/teact/teact';
 
-import { ThemeKey } from '../types';
+import type { ThemeKey } from '../types';
 
 import { CUSTOM_BG_CACHE_NAME } from '../config';
 import * as cacheApi from '../util/cacheApi';

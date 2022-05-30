@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ISettings, LangCode } from '../../../types';
-import { ApiLanguage } from '../../../api/types';
+import type { ISettings, LangCode } from '../../../types';
+import type { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
 

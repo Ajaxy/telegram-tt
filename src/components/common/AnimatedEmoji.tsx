@@ -1,12 +1,13 @@
-import React, {
-  FC, memo,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { ApiMediaFormat, ApiSticker } from '../../api/types';
-import { ActiveEmojiInteraction } from '../../global/types';
+import type { ApiSticker } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
+import type { ActiveEmojiInteraction } from '../../global/types';
 
 import buildClassName from '../../util/buildClassName';
-import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useAnimatedEmoji from './hooks/useAnimatedEmoji';

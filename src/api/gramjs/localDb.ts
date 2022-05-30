@@ -1,5 +1,5 @@
-import { Api as GramJs } from '../../lib/gramjs';
-import { ApiMessage } from '../types';
+import type { Api as GramJs } from '../../lib/gramjs';
+import type { ApiMessage } from '../types';
 
 interface LocalDb {
   localMessages: Record<string, ApiMessage>;

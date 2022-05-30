@@ -1,7 +1,9 @@
-import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import { ISettings } from '../../../types';
-import { ApiDocument, ApiMediaFormat } from '../../../api/types';
+import type { ISettings } from '../../../types';
+import type { ApiDocument } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 
 import { IS_COMPACT_MENU } from '../../../util/environment';
 import useMedia from '../../../hooks/useMedia';

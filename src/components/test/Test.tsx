@@ -1,6 +1,7 @@
-import React, { FC, useState } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import SubTest from './SubTest';
 import ErrorTest from './ErrorTest';

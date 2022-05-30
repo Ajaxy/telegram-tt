@@ -1,8 +1,7 @@
 import { useEffect } from '../lib/teact/teact';
 
-import {
-  BundleModules, Bundles, getModuleFromMemory, loadModule, addLoadListener,
-} from '../util/moduleLoader';
+import type { BundleModules, Bundles } from '../util/moduleLoader';
+import { getModuleFromMemory, loadModule, addLoadListener } from '../util/moduleLoader';
 
 import useForceUpdate from './useForceUpdate';
 

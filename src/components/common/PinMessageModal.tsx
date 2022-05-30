@@ -1,4 +1,5 @@
-import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../global/selectors';

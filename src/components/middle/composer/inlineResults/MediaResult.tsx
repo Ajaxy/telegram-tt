@@ -1,6 +1,7 @@
-import React, { FC, memo, useCallback } from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../../lib/teact/teact';
 
-import {
+import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiPhoto, ApiThumbnail, ApiWebDocument,
 } from '../../../../api/types';
 

@@ -1,6 +1,6 @@
 import { addActionHandler, setGlobal } from '../../index';
 
-import { ApiError } from '../../../api/types';
+import type { ApiError } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';

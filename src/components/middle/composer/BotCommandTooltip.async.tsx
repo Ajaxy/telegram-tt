@@ -1,5 +1,6 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
-import { OwnProps } from './BotCommandTooltip';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
+import type { OwnProps } from './BotCommandTooltip';
 import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
