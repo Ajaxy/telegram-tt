@@ -8,7 +8,7 @@ import {
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { selectCurrentMessageList } from '../../selectors';
 import { buildChatThreadKey } from '../../helpers';
-import { GlobalState } from '../../types';
+import type { GlobalState } from '../../types';
 
 addActionHandler('openLocalTextSearch', (global) => {
   const { chatId, threadId } = selectCurrentMessageList(global) || {};

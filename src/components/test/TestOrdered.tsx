@@ -1,5 +1,6 @@
-import { ChangeEvent } from 'react';
-import React, { FC, useRef, useState } from '../../lib/teact/teact';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useRef, useState } from '../../lib/teact/teact';
 
 const TestOrdered: FC<{}> = () => {
   const [items, setItems] = useState<Record<string, number>>({ a: 1, b: 5, c: 10 });

@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import {
   useEffect, useRef, useCallback, useState,
 } from '../lib/teact/teact';

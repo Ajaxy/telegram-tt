@@ -1,4 +1,4 @@
-import { ApiSession } from '../../../../api/types';
+import type { ApiSession } from '../../../../api/types';
 
 export default function getSessionIcon(session: ApiSession): string {
   const platform = session.platform.toLowerCase();

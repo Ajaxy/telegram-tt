@@ -1,9 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useMemo, useState, memo, useRef, useCallback, useEffect,
+  useMemo, useState, memo, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiUser } from '../../../api/types';
+import type { ApiUser } from '../../../api/types';
 
 import { filterUsersByName, getUserFullName } from '../../../global/helpers';
 import { unique } from '../../../util/iteratees';

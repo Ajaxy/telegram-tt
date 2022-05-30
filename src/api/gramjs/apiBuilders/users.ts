@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type {
   ApiUser, ApiUserStatus, ApiUserType,
 } from '../../types';
 import { buildApiPeerId } from './peers';

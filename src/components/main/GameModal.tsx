@@ -1,8 +1,7 @@
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions } from '../../lib/teact/teactn';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import windowSize from '../../util/windowSize';
 

@@ -1,12 +1,11 @@
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import { GlobalState } from '../../../../global/types';
+import type { GlobalState } from '../../../../global/types';
 import { SettingsScreens } from '../../../../types';
 
-import { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
+import type { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
 import useLang from '../../../../hooks/useLang';
 
 import SettingsTwoFaEnabled from './SettingsTwoFaEnabled';

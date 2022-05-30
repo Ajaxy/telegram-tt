@@ -1,5 +1,5 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC,
   useCallback,
   useEffect,
   useState,
@@ -9,14 +9,15 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import {
+import type {
   ApiMessage, ApiPoll, ApiUser, ApiPollAnswer,
 } from '../../../api/types';
 
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import useLang, { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useLang';
+import useLang from '../../../hooks/useLang';
 
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';

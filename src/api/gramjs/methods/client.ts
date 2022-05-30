@@ -4,9 +4,9 @@ import {
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
-import { TwoFaParams } from '../../../lib/gramjs/client/2fa';
+import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 
-import {
+import type {
   ApiInitialArgs,
   ApiMediaFormat,
   ApiOnProgress,

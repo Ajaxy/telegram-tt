@@ -1,12 +1,12 @@
-import React, {
-  FC, memo, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 
-import { ApiStickerSet } from '../../../api/types';
+import type { ApiStickerSet } from '../../../api/types';
 
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getFirstLetters } from '../../../util/textFormat';
-import { ObserveFn, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 

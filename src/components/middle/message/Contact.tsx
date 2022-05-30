@@ -1,7 +1,8 @@
-import React, { FC, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
+import type { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';

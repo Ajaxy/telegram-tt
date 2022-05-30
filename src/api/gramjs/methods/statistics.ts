@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import {
+import type {
   ApiChat, ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsGraph,
 } from '../../types';
 

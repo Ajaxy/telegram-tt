@@ -1,8 +1,10 @@
-import {
-  ApiMediaFormat,
+import type {
   ApiOnProgress,
   ApiParsedMedia,
   ApiPreparedMedia,
+} from '../api/types';
+import {
+  ApiMediaFormat,
 } from '../api/types';
 
 import {

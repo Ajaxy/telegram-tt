@@ -1,5 +1,6 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useRef,
+  memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -7,7 +8,8 @@ import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { createMapStateToProps, StateProps } from './helpers/createMapStateToProps';
+import type { StateProps } from './helpers/createMapStateToProps';
+import { createMapStateToProps } from './helpers/createMapStateToProps';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';

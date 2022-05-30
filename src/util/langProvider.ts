@@ -1,7 +1,7 @@
 import { getGlobal } from '../global';
 
-import { ApiLangPack, ApiLangString } from '../api/types';
-import { LangCode, TimeFormat } from '../types';
+import type { ApiLangPack, ApiLangString } from '../api/types';
+import type { LangCode, TimeFormat } from '../types';
 
 import {
   DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,

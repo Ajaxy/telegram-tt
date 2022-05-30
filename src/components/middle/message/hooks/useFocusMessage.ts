@@ -1,4 +1,4 @@
-import { FocusDirection } from '../../../../types';
+import type { FocusDirection } from '../../../../types';
 
 import { useLayoutEffect } from '../../../../lib/teact/teact';
 import fastSmoothScroll from '../../../../util/fastSmoothScroll';

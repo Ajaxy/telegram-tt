@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiChat, ApiThemeParameters, ApiUser } from '../../types';
+import type { ApiChat, ApiThemeParameters, ApiUser } from '../../types';
 
 import localDb from '../localDb';
 import { invokeRequest } from './client';

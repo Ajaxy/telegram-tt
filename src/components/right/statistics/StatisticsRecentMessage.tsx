@@ -1,9 +1,11 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
 
-import useLang, { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useLang';
+import useLang from '../../../hooks/useLang';
 import { getActions } from '../../../global';
 
-import { ApiMessage, StatisticsRecentMessage as StatisticsRecentMessageType } from '../../../api/types';
+import type { ApiMessage, StatisticsRecentMessage as StatisticsRecentMessageType } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dateFormat';

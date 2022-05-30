@@ -1,4 +1,5 @@
-import React, { FC, useRef } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useRef } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevious from '../../hooks/usePrevious';

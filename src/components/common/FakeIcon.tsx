@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { ApiFakeType } from '../../api/types';
+import type { ApiFakeType } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
 

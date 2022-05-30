@@ -1,9 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { LeftColumnContent, SettingsScreens } from '../../../types';
-import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { SettingsScreens } from '../../../types';
+import { LeftColumnContent } from '../../../types';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';

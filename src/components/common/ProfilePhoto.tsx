@@ -1,8 +1,8 @@
-import React, { FC, memo, TeactNode } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import {
-  ApiChat, ApiMediaFormat, ApiPhoto, ApiUser,
-} from '../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import {
   getChatAvatarHash,

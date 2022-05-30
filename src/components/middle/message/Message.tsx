@@ -1,5 +1,5 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC,
   memo,
   useCallback,
   useEffect,
@@ -8,8 +8,8 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
-import {
+import type { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
+import type {
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiUser,
@@ -18,8 +18,9 @@ import {
   ApiThreadInfo,
   ApiAvailableReaction,
 } from '../../../api/types';
+import type { FocusDirection, IAlbum, ISettings } from '../../../types';
 import {
-  AudioOrigin, FocusDirection, IAlbum, ISettings,
+  AudioOrigin,
 } from '../../../types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
@@ -82,7 +83,8 @@ import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimen
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
-import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';

@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiGroupCall, ApiUser } from '../../api/types';
+import type { ApiGroupCall, ApiUser } from '../../api/types';
 
 import { selectActiveGroupCall, selectPhoneCallUser } from '../../global/selectors/calls';
 import buildClassName from '../../util/buildClassName';

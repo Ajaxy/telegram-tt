@@ -1,4 +1,4 @@
-import { GlobalState } from '../types';
+import type { GlobalState } from '../types';
 
 export function selectNotifySettings(global: GlobalState) {
   return global.settings.byKey;

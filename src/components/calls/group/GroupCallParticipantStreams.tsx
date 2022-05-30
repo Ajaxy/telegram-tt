@@ -1,6 +1,7 @@
-import { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 import GroupCallParticipantVideo from './GroupCallParticipantVideo';

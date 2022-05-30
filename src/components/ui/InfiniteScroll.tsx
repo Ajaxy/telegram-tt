@@ -1,8 +1,9 @@
-import { RefObject, UIEvent } from 'react';
+import type { RefObject, UIEvent } from 'react';
 import { LoadMoreDirection } from '../../types';
 
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef,
+  useCallback, useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import { debounce } from '../../util/schedulers';

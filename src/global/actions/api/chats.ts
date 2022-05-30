@@ -2,11 +2,10 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import {
-  ApiChat, ApiUser, ApiChatFolder, MAIN_THREAD_ID,
-} from '../../../api/types';
+import type { ApiChat, ApiUser, ApiChatFolder } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 import { NewChatMembersProgress, ChatCreationProgress, ManagementProgress } from '../../../types';
-import { GlobalActions } from '../../types';
+import type { GlobalActions } from '../../types';
 
 import {
   ARCHIVED_FOLDER_ID,

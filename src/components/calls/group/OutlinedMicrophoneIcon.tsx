@@ -1,5 +1,7 @@
-import { GroupCallParticipant, THRESHOLD } from '../../../lib/secret-sauce';
-import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
+import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+import { THRESHOLD } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import AnimatedIcon from '../../common/AnimatedIcon';
 import usePrevious from '../../../hooks/usePrevious';
 

@@ -1,7 +1,8 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import * as mediaLoader from '../../../util/mediaLoader';
-import { ApiAppConfig, ApiMediaFormat } from '../../../api/types';
+import type { ApiAppConfig } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 import {
   selectChat,
   selectChatMessage, selectCurrentChat,

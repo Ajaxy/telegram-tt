@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, memo, useRef, useEffect, useState,
+  useCallback, memo, useRef, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiMessage } from '../../api/types';
+import type { ApiMessage } from '../../api/types';
 
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
@@ -12,7 +13,8 @@ import {
   getMessageMediaThumbDataUri,
   isMessageDocumentVideo,
 } from '../../global/helpers';
-import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../hooks/useMedia';
 import useFlag from '../../hooks/useFlag';

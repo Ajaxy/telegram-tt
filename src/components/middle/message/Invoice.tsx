@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useLayoutEffect, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useLayoutEffect, useRef } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
-import { ISettings } from '../../../types';
+import type { ApiMessage } from '../../../api/types';
+import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
 import { getMessageInvoice } from '../../../global/helpers';

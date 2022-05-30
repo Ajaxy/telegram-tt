@@ -3,7 +3,7 @@ import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectUser } from '../../selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { ApiGroupCall } from '../../../api/types';
+import type { ApiGroupCall } from '../../../api/types';
 import { updateGroupCall } from '../../reducers/calls';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { addChats, addUsers } from '../../reducers';
@@ -11,7 +11,7 @@ import { fetchChatByUsername, loadFullChat } from '../api/chats';
 import safePlay from '../../../util/safePlay';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import * as langProvider from '../../../util/langProvider';
-import { CallSound } from '../../types';
+import type { CallSound } from '../../types';
 
 // Workaround for Safari not playing audio without user interaction
 let audioElement: HTMLAudioElement | undefined;

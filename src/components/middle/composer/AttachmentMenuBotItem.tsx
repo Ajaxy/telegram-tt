@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { IAnchorPosition, ISettings } from '../../../types';
-import { ApiAttachMenuBot } from '../../../api/types';
+import type { IAnchorPosition, ISettings } from '../../../types';
+import type { ApiAttachMenuBot } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';

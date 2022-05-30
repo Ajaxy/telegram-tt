@@ -1,4 +1,4 @@
-import { ApiMessage } from '../../../../api/types';
+import type { ApiMessage } from '../../../../api/types';
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../common/helpers/mediaDimensions';
 import {
   getMessageText,

@@ -1,8 +1,9 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
-import { ApiMessage, ApiWebPage } from '../../api/types';
-import { TextPart } from '../../types';
-import { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { ApiMessage, ApiWebPage } from '../../api/types';
+import type { TextPart } from '../../types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   getFirstLinkInMessage, getMessageText,

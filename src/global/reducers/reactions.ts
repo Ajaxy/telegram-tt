@@ -1,5 +1,5 @@
 import { updateChatMessage } from './messages';
-import { GlobalState } from '../types';
+import type { GlobalState } from '../types';
 import { selectChatMessage } from '../selectors';
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import {
@@ -9,7 +9,7 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import windowSize from '../../util/windowSize';
 import { updateChat } from './chats';
-import { ApiChat } from '../../api/types';
+import type { ApiChat } from '../../api/types';
 
 function getLeftColumnWidth(windowWidth: number) {
   if (windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN) {

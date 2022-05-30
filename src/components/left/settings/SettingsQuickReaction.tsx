@@ -1,7 +1,8 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiAvailableReaction } from '../../../api/types';
+import type { ApiAvailableReaction } from '../../../api/types';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 

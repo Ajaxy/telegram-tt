@@ -1,11 +1,13 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useRef,
+  memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ApiSticker } from '../../../api/types';
-import { StickerSetOrRecent } from '../../../types';
-import { ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import type { ApiSticker } from '../../../api/types';
+import type { StickerSetOrRecent } from '../../../types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 
 import { FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, STICKER_SIZE_PICKER } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';

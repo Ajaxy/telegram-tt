@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 
-import { ApiAvailableReaction, ApiMessage } from '../../../api/types';
-import { ActiveReaction } from '../../../global/types';
+import type { ApiAvailableReaction, ApiMessage } from '../../../api/types';
+import type { ActiveReaction } from '../../../global/types';
 
 import buildClassName from '../../../util/buildClassName';
 

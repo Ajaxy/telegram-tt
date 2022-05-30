@@ -1,7 +1,7 @@
-import { Api } from '../../../lib/gramjs';
-import { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
-import { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import { WorkerMessageEvent, OriginRequest } from './types';
+import type { Api } from '../../../lib/gramjs';
+import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
+import type { Methods, MethodArgs, MethodResponse } from '../methods/types';
+import type { WorkerMessageEvent, OriginRequest } from './types';
 
 import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';

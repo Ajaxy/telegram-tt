@@ -1,7 +1,8 @@
-import React, { FC } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
-import { OwnProps } from './Statistics';
+import type { OwnProps } from './Statistics';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 import Loading from '../../ui/Loading';

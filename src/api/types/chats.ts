@@ -1,7 +1,7 @@
-import { ApiMessage, ApiPhoto, ApiStickerSet } from './messages';
-import { ApiBotCommand } from './bots';
-import { ApiChatInviteImporter } from './misc';
-import { ApiFakeType } from './users';
+import type { ApiMessage, ApiPhoto, ApiStickerSet } from './messages';
+import type { ApiBotCommand } from './bots';
+import type { ApiChatInviteImporter } from './misc';
+import type { ApiFakeType } from './users';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |

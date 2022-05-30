@@ -1,4 +1,4 @@
-import { ApiGroupCall, PhoneCallAction } from './calls';
+import type { ApiGroupCall, PhoneCallAction } from './calls';
 
 export interface ApiDimensions {
   width: number;

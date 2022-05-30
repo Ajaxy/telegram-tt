@@ -1,8 +1,7 @@
-import React, {
-  FC, memo,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { LangCode, Price } from '../../types';
+import type { LangCode, Price } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';

@@ -1,4 +1,4 @@
-import { ApiMessage } from '../../../../api/types';
+import type { ApiMessage } from '../../../../api/types';
 
 import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../../../util/environment';
 import { getMessageMediaThumbDataUri } from '../../../../global/helpers';

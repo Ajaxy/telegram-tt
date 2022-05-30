@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
-import { FocusDirection } from '../../types';
+import type { ApiUser, ApiMessage, ApiChat } from '../../api/types';
+import type { FocusDirection } from '../../types';
 
 import {
   selectUser,
@@ -17,7 +18,8 @@ import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import { ObserveFn, useOnIntersect } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useOnIntersect } from '../../hooks/useIntersectionObserver';
 import useFocusMessage from './message/hooks/useFocusMessage';
 import useLang from '../../hooks/useLang';
 

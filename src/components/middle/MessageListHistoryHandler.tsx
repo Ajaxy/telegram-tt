@@ -1,9 +1,10 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../lib/teact/teactn';
 
 import { createMessageHash } from '../../util/routing';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import { MessageList as GlobalMessageList } from '../../global/types';
+import type { MessageList as GlobalMessageList } from '../../global/types';
 
 type StateProps = {
   messageLists?: GlobalMessageList[];

@@ -1,4 +1,4 @@
-import React from '../lib/teact/teact';
+import type React from '../lib/teact/teact';
 
 const stopEvent = (e: React.UIEvent | Event) => {
   e.stopPropagation();

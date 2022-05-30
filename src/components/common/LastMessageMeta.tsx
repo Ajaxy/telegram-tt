@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
-import { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
+import type { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 
 import { formatPastTimeShort } from '../../util/dateFormat';
 import useLang from '../../hooks/useLang';

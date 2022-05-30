@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type {
   ApiAttachMenuBot,
   ApiAttachMenuBotIcon,
   ApiBotCommand,

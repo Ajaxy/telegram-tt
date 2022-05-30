@@ -1,6 +1,8 @@
-import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
+import type { TelegramClient } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
+import type { ApiOnProgress, ApiParsedMedia, ApiPreparedMedia } from '../../types';
 import {
-  ApiMediaFormat, ApiOnProgress, ApiParsedMedia, ApiPreparedMedia,
+  ApiMediaFormat,
 } from '../../types';
 
 import {

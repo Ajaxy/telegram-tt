@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ManagementScreens } from '../../../types';
-import { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/types';
+import type { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/types';
 
 import useLang from '../../../hooks/useLang';
 import { selectChat } from '../../../global/selectors';

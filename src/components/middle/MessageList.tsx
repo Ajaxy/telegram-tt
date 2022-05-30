@@ -1,12 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import {
-  ApiMessage, ApiRestrictionReason, MAIN_THREAD_ID,
-} from '../../api/types';
-import { MessageListType } from '../../global/types';
+import type { ApiMessage, ApiRestrictionReason } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
+import type { MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../config';

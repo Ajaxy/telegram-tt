@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
-import { OwnProps } from './LeftSearch';
+import type { OwnProps } from './LeftSearch';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 import Loading from '../../ui/Loading';

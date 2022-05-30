@@ -1,10 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useState, useEffect, useMemo, useCallback,
+  memo, useState, useEffect, useMemo, useCallback,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import { formatTime, formatDateToString, getDayStart } from '../../util/dateFormat';
-import useLang, { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useLang';
+import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import useFlag from '../../hooks/useFlag';
 

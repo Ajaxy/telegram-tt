@@ -1,10 +1,12 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import { GlobalState } from '../../../global/types';
-import { ApiPrivacySettings, SettingsScreens } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { ApiPrivacySettings } from '../../../types';
+import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../config';
 import { unique } from '../../../util/iteratees';

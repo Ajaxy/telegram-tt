@@ -1,6 +1,6 @@
 import { useMemo } from '../lib/teact/teact';
 
-import {
+import type {
   ApiAudio, ApiChat, ApiMessage, ApiUser, ApiVoice,
 } from '../api/types';
 

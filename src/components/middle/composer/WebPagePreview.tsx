@@ -1,10 +1,10 @@
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiMessage, ApiMessageEntityTypes, ApiWebPage } from '../../../api/types';
-import { ISettings } from '../../../types';
+import type { ApiMessage, ApiWebPage } from '../../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
+import type { ISettings } from '../../../types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectNoWebPage, selectTheme } from '../../../global/selectors';

@@ -1,4 +1,4 @@
-import { GroupCallTransport, PayloadType, RTPExtension, SsrcGroup } from './types';
+import type { GroupCallTransport, PayloadType, RTPExtension, SsrcGroup } from './types';
 export declare type Conference = {
     sessionId: number;
     audioExtensions: RTPExtension[];

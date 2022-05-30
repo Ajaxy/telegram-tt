@@ -1,4 +1,5 @@
-import React, { FC, memo, useEffect } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect } from '../../lib/teact/teact';
 
 import { formatIntegerCompact } from '../../util/textFormat';
 import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';

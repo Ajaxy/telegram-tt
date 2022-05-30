@@ -1,4 +1,4 @@
-import { MessageListType } from '../global/types';
+import type { MessageListType } from '../global/types';
 import { MAIN_THREAD_ID } from '../api/types';
 import { LOCATION_HASH } from '../hooks/useHistoryBack';
 

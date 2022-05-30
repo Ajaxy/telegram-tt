@@ -1,6 +1,7 @@
-import { GroupCallConnectionState } from '../../../lib/secret-sauce';
+import type { GroupCallConnectionState } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 

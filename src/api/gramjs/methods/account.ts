@@ -1,5 +1,5 @@
 import BigInt from 'big-integer';
-import {
+import type {
   ApiChat, ApiPhoto, ApiReportReason, ApiUser,
 } from '../../types';
 import { invokeRequest } from './client';

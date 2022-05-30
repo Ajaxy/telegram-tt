@@ -1,5 +1,5 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC,
   memo,
   useRef,
   useCallback,
@@ -7,9 +7,10 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { IAnchorPosition, ManagementScreens } from '../../types';
+import type { IAnchorPosition } from '../../types';
+import { ManagementScreens } from '../../types';
 
 import {
   ARE_CALLS_SUPPORTED, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,

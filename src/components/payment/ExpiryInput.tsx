@@ -1,6 +1,5 @@
-import React, {
-  FC, memo, useCallback, useRef,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 
 import { formatCardExpiry } from '../middle/helpers/inputFormatters';
 

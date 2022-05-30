@@ -1,9 +1,10 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import { ApiChatFolder, ApiSticker } from '../../../api/types';
+import type { ApiChatFolder, ApiSticker } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
-import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { selectAnimatedEmoji, selectChatFolder } from '../../../global/selectors';

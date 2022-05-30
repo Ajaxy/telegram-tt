@@ -1,4 +1,4 @@
-import {
+import type {
   ApiPhoto, ApiSticker, ApiThumbnail, ApiVideo,
 } from './messages';
 

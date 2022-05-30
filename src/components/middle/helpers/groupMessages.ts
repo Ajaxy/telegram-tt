@@ -1,5 +1,5 @@
-import { ApiMessage } from '../../../api/types';
-import { IAlbum } from '../../../types';
+import type { ApiMessage } from '../../../api/types';
+import type { IAlbum } from '../../../types';
 
 import { getDayStartAt } from '../../../util/dateFormat';
 import { isActionMessage } from '../../../global/helpers';

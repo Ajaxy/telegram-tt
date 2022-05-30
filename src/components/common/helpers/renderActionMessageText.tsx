@@ -1,11 +1,11 @@
 import React from '../../../lib/teact/teact';
 
-import {
+import type {
   ApiChat, ApiMessage, ApiUser, ApiGroupCall,
 } from '../../../api/types';
-import { TextPart } from '../../../types';
+import type { TextPart } from '../../../types';
 
-import { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useLang';
 import {
   getChatTitle,
   getMessageSummaryText,

@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, memo, useRef, useEffect,
+  useCallback, memo, useRef, useEffect,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList } from '../../global/selectors';

@@ -1,5 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, useRef, useCallback, useMemo,
+  useEffect, useRef, useCallback, useMemo,
 } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 
@@ -8,7 +9,7 @@ import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import formatFileSize from './helpers/formatFileSize';
 import useLang from '../../hooks/useLang';
-import { BufferedRange } from '../../hooks/useBuffering';
+import type { BufferedRange } from '../../hooks/useBuffering';
 import { captureEvents } from '../../util/captureEvents';
 
 import Button from '../ui/Button';

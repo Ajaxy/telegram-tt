@@ -1,7 +1,8 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getSenderTitle, isUserId } from '../../global/helpers';

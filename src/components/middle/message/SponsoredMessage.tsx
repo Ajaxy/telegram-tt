@@ -1,10 +1,11 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';

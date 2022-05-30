@@ -1,12 +1,15 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
-import { ApiMediaFormat, ApiVideo } from '../../api/types';
+import type { ApiVideo } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
-import { ObserveFn, useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useMedia from '../../hooks/useMedia';

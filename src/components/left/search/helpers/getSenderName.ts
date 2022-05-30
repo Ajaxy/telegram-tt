@@ -1,11 +1,11 @@
-import { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
 import {
   getChatTitle,
   getSenderTitle,
   isUserId,
   isChatGroup,
 } from '../../../../global/helpers';
-import { LangFn } from '../../../../hooks/useLang';
+import type { LangFn } from '../../../../hooks/useLang';
 
 export function getSenderName(
   lang: LangFn, message: ApiMessage, chatsById: Record<string, ApiChat>, usersById: Record<string, ApiUser>,

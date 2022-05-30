@@ -1,5 +1,5 @@
 import { addActionHandler } from '../../index';
-import { ISettings, IThemeSettings, ThemeKey } from '../../../types';
+import type { ISettings, IThemeSettings, ThemeKey } from '../../../types';
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
 
 addActionHandler('setSettingOption', (global, actions, payload?: Partial<ISettings>) => {

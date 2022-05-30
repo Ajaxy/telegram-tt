@@ -1,6 +1,6 @@
 import { Api as GramJs, errors } from '../../../lib/gramjs';
 
-import { OnApiUpdate } from '../../types';
+import type { OnApiUpdate } from '../../types';
 
 import { DEBUG } from '../../../config';
 import { invokeRequest, updateTwoFaSettings } from './client';

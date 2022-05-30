@@ -2,9 +2,9 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import { GlobalState } from '../../types';
+import type { GlobalState } from '../../types';
 
-import {
+import type {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,

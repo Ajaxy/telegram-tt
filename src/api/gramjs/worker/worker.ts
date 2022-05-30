@@ -1,5 +1,5 @@
-import { ApiOnProgress, ApiUpdate } from '../../types';
-import { OriginMessageEvent, WorkerMessageData } from './types';
+import type { ApiOnProgress, ApiUpdate } from '../../types';
+import type { OriginMessageEvent, WorkerMessageData } from './types';
 
 import { DEBUG } from '../../../config';
 import { initApi, callApi, cancelApiProgress } from '../provider';

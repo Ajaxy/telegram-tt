@@ -1,6 +1,6 @@
 import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
-import { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
+import type { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
 
 import { pick } from '../../util/iteratees';
 import {

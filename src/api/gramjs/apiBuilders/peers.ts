@@ -1,6 +1,6 @@
-import BigInt from 'big-integer';
+import type BigInt from 'big-integer';
 
-import { Api as GramJs } from '../../../lib/gramjs';
+import type { Api as GramJs } from '../../../lib/gramjs';
 
 export function isPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');

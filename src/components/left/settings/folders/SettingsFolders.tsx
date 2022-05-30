@@ -1,9 +1,10 @@
-import React, { FC, memo, useCallback } from '../../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../../lib/teact/teact';
 
-import { ApiChatFolder } from '../../../../api/types';
+import type { ApiChatFolder } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
-import { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
+import type { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
 
 import SettingsFoldersMain from './SettingsFoldersMain';
 import SettingsFoldersEdit from './SettingsFoldersEdit';

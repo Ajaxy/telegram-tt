@@ -1,6 +1,7 @@
-import React, { FC, memo, TeactNode } from '../../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
-import { ApiWebDocument } from '../../../../api/types';
+import type { ApiWebDocument } from '../../../../api/types';
 
 import { getFirstLetters } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';

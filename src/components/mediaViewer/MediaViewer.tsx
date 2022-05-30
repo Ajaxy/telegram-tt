@@ -1,11 +1,13 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import {
-  ApiChat, ApiDimensions, ApiMediaFormat, ApiMessage, ApiUser,
+import type {
+  ApiChat, ApiDimensions, ApiMessage, ApiUser,
 } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';

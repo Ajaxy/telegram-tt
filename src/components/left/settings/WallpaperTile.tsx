@@ -1,8 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useState, useRef,
+  memo, useCallback, useEffect, useState, useRef,
 } from '../../../lib/teact/teact';
-import { ApiWallpaper } from '../../../api/types';
-import { ThemeKey, UPLOADING_WALLPAPER_SLUG } from '../../../types';
+import type { ApiWallpaper } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
+import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
 import { CUSTOM_BG_CACHE_NAME } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';

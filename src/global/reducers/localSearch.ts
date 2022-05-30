@@ -1,8 +1,8 @@
-import { GlobalState } from '../types';
-import { ApiMessageSearchType } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiMessageSearchType } from '../../api/types';
 
 import { areSortedArraysEqual, unique } from '../../util/iteratees';
-import { SharedMediaType } from '../../types';
+import type { SharedMediaType } from '../../types';
 import { buildChatThreadKey } from '../helpers';
 
 interface TextSearchParams {

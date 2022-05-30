@@ -1,10 +1,9 @@
-import {
+import type {
   GlobalState, MessageList, MessageListType, Thread,
 } from '../types';
-import {
-  ApiMessage, ApiSponsoredMessage, ApiThreadInfo, MAIN_THREAD_ID,
-} from '../../api/types';
-import { FocusDirection } from '../../types';
+import type { ApiMessage, ApiSponsoredMessage, ApiThreadInfo } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
+import type { FocusDirection } from '../../types';
 
 import {
   IS_MOCKED_CLIENT,

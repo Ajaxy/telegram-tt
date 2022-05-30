@@ -1,9 +1,10 @@
-import { ChangeEvent, RefObject } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { ApiNewPoll } from '../../../api/types';
+import type { ApiNewPoll } from '../../../api/types';
 
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import parseMessageInput from '../../../util/parseMessageInput';

@@ -1,8 +1,10 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ActiveReaction } from '../../../global/types';
-import { ApiAvailableReaction, ApiMediaFormat } from '../../../api/types';
+import type { ActiveReaction } from '../../../global/types';
+import type { ApiAvailableReaction } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';

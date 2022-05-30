@@ -1,8 +1,8 @@
-import React, {
-  FC, memo, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useRef } from '../../../lib/teact/teact';
 
-import { ApiAvailableReaction, ApiMediaFormat } from '../../../api/types';
+import type { ApiAvailableReaction } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
 
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';

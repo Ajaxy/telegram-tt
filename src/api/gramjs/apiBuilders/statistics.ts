@@ -1,5 +1,5 @@
-import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type { Api as GramJs } from '../../../lib/gramjs';
+import type {
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessageStatistics,

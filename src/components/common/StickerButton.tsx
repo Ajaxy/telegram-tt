@@ -1,17 +1,19 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiBotInlineMediaResult, ApiMediaFormat, ApiSticker } from '../../api/types';
+import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 import safePlay from '../../util/safePlay';
 import { IS_TOUCH_ENV, IS_WEBM_SUPPORTED } from '../../util/environment';
 
-import { useIsIntersecting, ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useShowTransition from '../../hooks/useShowTransition';
 import useFlag from '../../hooks/useFlag';

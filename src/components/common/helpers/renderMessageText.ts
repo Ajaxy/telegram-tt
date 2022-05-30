@@ -1,5 +1,6 @@
-import { ApiMessage, ApiMessageEntityTypes } from '../../../api/types';
-import { TextPart } from '../../../types';
+import type { ApiMessage } from '../../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
+import type { TextPart } from '../../../types';
 
 import {
   getMessageSummaryDescription,
@@ -8,7 +9,7 @@ import {
   getMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers';
-import { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useLang';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
 import trimText from '../../../util/trimText';

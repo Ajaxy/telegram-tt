@@ -1,5 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, useRef, useEffect, memo,
+  useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
 
 import { isUserId } from '../../global/helpers';

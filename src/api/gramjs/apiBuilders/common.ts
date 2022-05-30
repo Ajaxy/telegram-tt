@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
-import {
+import type {
   ApiPhoto, ApiPhotoSize, ApiThumbnail,
 } from '../../types';
 import { bytesToDataUri } from './helpers';

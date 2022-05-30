@@ -1,17 +1,20 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useState, useEffect, memo, useRef, useMemo, useCallback,
+  useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import { GlobalState } from '../../../global/types';
+import type { GlobalState } from '../../../global/types';
 
 import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import {
+import type {
   EmojiModule,
   EmojiRawData,
   EmojiData,
+} from '../../../util/emoji';
+import {
   uncompressEmoji,
 } from '../../../util/emoji';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';

@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 
-import { GlobalState } from '../../../global/types';
-import { ISettings } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { ISettings } from '../../../types';
 
 import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';

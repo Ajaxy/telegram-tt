@@ -1,5 +1,5 @@
-import { ApiDocument, ApiPhoto } from './messages';
-import { ApiBotInfo } from './bots';
+import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiBotInfo } from './bots';
 
 export interface ApiUser {
   id: string;

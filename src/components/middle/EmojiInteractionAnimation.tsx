@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ActiveEmojiInteraction } from '../../global/types';
+import type { ActiveEmojiInteraction } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { IS_ANDROID } from '../../util/environment';

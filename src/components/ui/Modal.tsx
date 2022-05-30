@@ -1,9 +1,8 @@
-import { RefObject } from 'react';
-import React, {
-  FC, TeactNode, useEffect, useRef,
-} from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC, TeactNode } from '../../lib/teact/teact';
+import React, { useEffect, useRef } from '../../lib/teact/teact';
 
-import { TextPart } from '../../types';
+import type { TextPart } from '../../types';
 
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';

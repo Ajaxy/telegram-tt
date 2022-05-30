@@ -1,4 +1,4 @@
-import {
+import type {
   ApiPhoto, ApiVideo, ApiSticker, ApiDimensions,
 } from '../../../api/types';
 

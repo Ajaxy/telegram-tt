@@ -1,6 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import { ApiChannelStatistics } from '../../../api/types';
+import type { ApiChannelStatistics } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import { updateStatistics, updateMessageStatistics, updateStatisticsGraph } from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';

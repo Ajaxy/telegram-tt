@@ -1,15 +1,18 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { GlobalState } from '../../global/types';
-import { ApiCountry } from '../../api/types';
-import { PaymentStep, ShippingOption, Price } from '../../types';
+import type { GlobalState } from '../../global/types';
+import type { ApiCountry } from '../../api/types';
+import type { ShippingOption, Price } from '../../types';
+import { PaymentStep } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
-import usePaymentReducer, { FormState } from '../../hooks/reducers/usePaymentReducer';
+import type { FormState } from '../../hooks/reducers/usePaymentReducer';
+import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 import useLang from '../../hooks/useLang';
 
 import ShippingInfo from './ShippingInfo';

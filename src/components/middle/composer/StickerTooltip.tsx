@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiSticker } from '../../../api/types';
+import type { ApiSticker } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
 import buildClassName from '../../../util/buildClassName';

@@ -1,10 +1,11 @@
-import { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { IAnchorPosition } from '../../../types';
+import type { IAnchorPosition } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
 import useRunThrottled from '../../../hooks/useRunThrottled';

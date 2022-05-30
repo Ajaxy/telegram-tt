@@ -1,5 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, useRef, memo, useCallback, useState,
+  useEffect, useRef, memo, useCallback, useState,
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';

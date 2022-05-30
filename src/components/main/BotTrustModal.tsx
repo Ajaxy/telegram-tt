@@ -1,7 +1,8 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiUser } from '../../api/types';
+import type { ApiUser } from '../../api/types';
 
 import { getUserFullName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';

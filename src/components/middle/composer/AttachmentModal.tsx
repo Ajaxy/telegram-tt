@@ -1,8 +1,9 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
-import { ApiAttachment, ApiChatMember } from '../../../api/types';
+import type { ApiAttachment, ApiChatMember } from '../../../api/types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW,

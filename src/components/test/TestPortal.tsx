@@ -1,4 +1,5 @@
-import React, { FC, useState } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useState } from '../../lib/teact/teact';
 
 import Portal from '../ui/Portal';
 

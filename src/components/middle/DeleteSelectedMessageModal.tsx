@@ -1,6 +1,5 @@
-import React, {
-  FC, useCallback, memo, useEffect,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback, memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { selectCanDeleteSelectedMessages, selectCurrentChat, selectUser } from '../../global/selectors';

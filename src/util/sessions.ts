@@ -1,6 +1,6 @@
 import * as idb from 'idb-keyval';
 
-import { ApiSessionData } from '../api/types';
+import type { ApiSessionData } from '../api/types';
 
 import { DEBUG, LEGACY_SESSION_KEY, SESSION_USER_KEY } from '../config';
 import * as cacheApi from './cacheApi';

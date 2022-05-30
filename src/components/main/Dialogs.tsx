@@ -1,7 +1,8 @@
-import React, { FC, memo, useEffect } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import {
+import type {
   ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
 } from '../../api/types';
 

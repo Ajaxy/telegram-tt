@@ -1,11 +1,11 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
-import React, {
-  FC, memo, TeactNode, useCallback,
-} from '../../lib/teact/teact';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { FC, TeactNode } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
-import {
-  ApiChat, ApiMediaFormat, ApiPhoto, ApiUser, ApiUserStatus,
+import type {
+  ApiChat, ApiPhoto, ApiUser, ApiUserStatus,
 } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import { IS_TEST } from '../../config';
 import {

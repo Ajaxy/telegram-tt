@@ -1,8 +1,7 @@
-import React, {
-  FC, useState, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useState, useEffect, useRef } from '../../../lib/teact/teact';
 
-import { ApiPollAnswer, ApiPollResult } from '../../../api/types';
+import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';

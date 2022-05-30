@@ -1,3 +1,9 @@
+import type {
+  VirtualElement,
+  VirtualElementComponent,
+  VirtualRealElement,
+  VirtualElementChildren,
+} from './teact';
 import {
   hasElementChanged,
   isComponentElement,
@@ -9,10 +15,6 @@ import {
   unmountTree,
   getTarget,
   setTarget,
-  VirtualElement,
-  VirtualElementComponent,
-  VirtualRealElement,
-  VirtualElementChildren,
 } from './teact';
 import generateIdFor from '../../util/generateIdFor';
 import { DEBUG } from '../../config';

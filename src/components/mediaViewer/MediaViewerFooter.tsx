@@ -1,6 +1,7 @@
-import React, { FC, useEffect, useState } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useEffect, useState } from '../../lib/teact/teact';
 
-import { TextPart } from '../../types';
+import type { TextPart } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { throttle } from '../../util/schedulers';

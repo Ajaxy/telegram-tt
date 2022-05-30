@@ -1,9 +1,10 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import {
+import type {
   ApiChat,
-  ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo, MAIN_THREAD_ID,
+  ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo,
 } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
@@ -20,7 +21,7 @@ import {
   deleteChatScheduledMessages,
   updateThreadUnreadFromForwardedMessage,
 } from '../../reducers';
-import { ActiveEmojiInteraction, GlobalActions, GlobalState } from '../../types';
+import type { ActiveEmojiInteraction, GlobalActions, GlobalState } from '../../types';
 import {
   selectChatMessage,
   selectChatMessages,

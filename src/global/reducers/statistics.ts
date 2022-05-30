@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import {
+import type { GlobalState } from '../types';
+import type {
   ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsGraph,
 } from '../../api/types';
 

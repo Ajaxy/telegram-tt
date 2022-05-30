@@ -1,12 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from '../../lib/teact/teact';
 
-import { TextPart } from '../../types';
+import type { TextPart } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import useShowTransition from '../../hooks/useShowTransition';

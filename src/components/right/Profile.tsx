@@ -1,10 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
+  useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import {
-  MAIN_THREAD_ID,
+import type {
   ApiMessage,
   ApiChat,
   ApiChatMember,
@@ -12,7 +12,13 @@ import {
   ApiUserStatus,
 } from '../../api/types';
 import {
-  NewChatMembersProgress, ISettings, MediaViewerOrigin, ProfileState, ProfileTabType, SharedMediaType, AudioOrigin,
+  MAIN_THREAD_ID,
+} from '../../api/types';
+import type {
+  ISettings, ProfileState, ProfileTabType, SharedMediaType,
+} from '../../types';
+import {
+  NewChatMembersProgress, MediaViewerOrigin, AudioOrigin,
 } from '../../types';
 
 import {

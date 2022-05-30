@@ -1,4 +1,4 @@
-import { GlobalState } from '../types';
+import type { GlobalState } from '../types';
 import { selectCurrentMessageList } from './messages';
 import { buildChatThreadKey } from '../helpers';
 

@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useCallback, memo, useMemo, useEffect, useState, useRef,
+  useCallback, memo, useMemo, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import { ApiMessage } from '../../api/types';
+import type { ApiMessage } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
 import useLang from '../../hooks/useLang';

@@ -1,4 +1,5 @@
-import { ApiMediaFormat, ApiMessage } from '../../../../api/types';
+import type { ApiMessage } from '../../../../api/types';
+import { ApiMediaFormat } from '../../../../api/types';
 
 import * as mediaLoader from '../../../../util/mediaLoader';
 import {

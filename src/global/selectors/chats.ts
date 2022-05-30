@@ -1,5 +1,6 @@
-import { ApiChat, ApiUser, MAIN_THREAD_ID } from '../../api/types';
-import { GlobalState } from '../types';
+import type { ApiChat, ApiUser } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
+import type { GlobalState } from '../types';
 
 import {
   getPrivateChatUserId, isChatChannel, isUserId, isHistoryClearMessage, isUserBot, isUserOnline,

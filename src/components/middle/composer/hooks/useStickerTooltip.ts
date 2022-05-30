@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { ApiSticker } from '../../../../api/types';
+import type { ApiSticker } from '../../../../api/types';
 
 import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
 

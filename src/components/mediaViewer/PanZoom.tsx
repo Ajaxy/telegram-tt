@@ -4,8 +4,9 @@
   Heavily inspired/lifted from this idea: https://stackoverflow.com/a/39311435/661768
   without jqueryUI or jquery dependency.
 */
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import { areSortedArraysEqual } from '../../util/iteratees';

@@ -1,8 +1,7 @@
-import React, {
-  FC, memo, useLayoutEffect, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useLayoutEffect, useRef } from '../../../lib/teact/teact';
 
-import { ApiAvailableReaction } from '../../../api/types';
+import type { ApiAvailableReaction } from '../../../api/types';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useFlag from '../../../hooks/useFlag';

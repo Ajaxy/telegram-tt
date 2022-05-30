@@ -1,7 +1,8 @@
-import {
-  ApiChat, ApiMessage, ApiMessageEntityTypes, ApiReactions, ApiUser,
+import type {
+  ApiChat, ApiMessage, ApiReactions, ApiUser,
 } from '../../api/types';
-import { LangFn } from '../../hooks/useLang';
+import { ApiMessageEntityTypes } from '../../api/types';
+import type { LangFn } from '../../hooks/useLang';
 
 import {
   CONTENT_NOT_SUPPORTED,

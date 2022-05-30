@@ -1,7 +1,9 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import { ManagementScreens, ManagementType } from '../../../types';
+import type { ManagementType } from '../../../types';
+import { ManagementScreens } from '../../../types';
 
 import { selectCurrentManagementType } from '../../../global/selectors';
 

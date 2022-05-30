@@ -1,5 +1,6 @@
-import { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
-import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import useLang from '../../../hooks/useLang';

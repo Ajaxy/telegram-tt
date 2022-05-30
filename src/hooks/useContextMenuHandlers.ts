@@ -1,7 +1,7 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { useState, useEffect, useCallback } from '../lib/teact/teact';
 
-import { IAnchorPosition } from '../types';
+import type { IAnchorPosition } from '../types';
 import {
   IS_TOUCH_ENV, IS_PWA, IS_IOS,
 } from '../util/environment';

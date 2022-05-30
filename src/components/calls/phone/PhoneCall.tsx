@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import '../../../global/actions/calls';
 
-import { ApiPhoneCall, ApiUser } from '../../../api/types';
+import type { ApiPhoneCall, ApiUser } from '../../../api/types';
 
 import {
   IS_ANDROID,

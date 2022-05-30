@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from '../lib/teact/teact';
 
-import { ApiMessage } from '../api/types';
+import type { ApiMessage } from '../api/types';
 
 import { DEBUG } from '../config';
 import { isWebpSupported } from '../util/environment';

@@ -1,9 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, useEffect, memo, useRef, useCallback,
+  useEffect, memo, useRef, useCallback,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiVideo } from '../../../api/types';
+import type { ApiVideo } from '../../../api/types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';

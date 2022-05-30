@@ -1,12 +1,13 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import {
-  ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
-} from '../../api/types';
-import { AudioOrigin, ISettings } from '../../types';
+import type { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
+import type { ISettings } from '../../types';
+import { AudioOrigin } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
@@ -25,9 +26,11 @@ import { getFileSizeString } from './helpers/documentInfo';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
-import useBuffering, { BufferedRange } from '../../hooks/useBuffering';
+import type { BufferedRange } from '../../hooks/useBuffering';
+import useBuffering from '../../hooks/useBuffering';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useLang, { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useLang';
+import useLang from '../../hooks/useLang';
 import { captureEvents } from '../../util/captureEvents';
 import useMedia from '../../hooks/useMedia';
 import { makeTrackId } from '../../util/audioPlayer';

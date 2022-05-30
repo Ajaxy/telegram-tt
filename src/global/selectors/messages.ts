@@ -1,9 +1,11 @@
-import { GlobalState, MessageListType, Thread } from '../types';
-import {
+import type { GlobalState, MessageListType, Thread } from '../types';
+import type {
   ApiChat,
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiUser,
+} from '../../api/types';
+import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 

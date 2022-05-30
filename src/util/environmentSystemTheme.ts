@@ -1,4 +1,4 @@
-import { ThemeKey } from '../types';
+import type { ThemeKey } from '../types';
 
 let systemThemeCache: ThemeKey = (
   window.matchMedia?.('(prefers-color-scheme: dark)').matches

@@ -1,11 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat } from '../../api/types';
-import { GlobalState } from '../../global/types';
-import { ThemeKey } from '../../types';
+import type { ApiChat } from '../../api/types';
+import type { GlobalState } from '../../global/types';
+import type { ThemeKey } from '../../types';
 
 import windowSize from '../../util/windowSize';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
@@ -16,7 +17,8 @@ import { extractCurrentThemeParams, validateHexColor } from '../../util/themeSty
 import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
 import useOnChange from '../../hooks/useOnChange';
-import useWebAppFrame, { WebAppInboundEvent } from './hooks/useWebAppFrame';
+import type { WebAppInboundEvent } from './hooks/useWebAppFrame';
+import useWebAppFrame from './hooks/useWebAppFrame';
 import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';

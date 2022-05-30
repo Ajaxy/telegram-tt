@@ -1,4 +1,4 @@
-import { ApiMessage } from './messages';
+import type { ApiMessage } from './messages';
 
 export interface ApiChannelStatistics {
   growthGraph?: StatisticsGraph | string;

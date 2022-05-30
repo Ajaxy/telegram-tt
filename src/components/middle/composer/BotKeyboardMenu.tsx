@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiMessage } from '../../../api/types';
+import type { ApiMessage } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';

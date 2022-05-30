@@ -1,5 +1,6 @@
-import { RefObject } from 'react';
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
+import React, { useEffect, useRef } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';

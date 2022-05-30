@@ -1,6 +1,5 @@
-import {
+import type {
   ApiAudio,
-  ApiMediaFormat,
   ApiMessage,
   ApiMessageSearchType,
   ApiPhoto,
@@ -9,6 +8,9 @@ import {
   ApiLocation,
   ApiGame,
   ApiDocument,
+} from '../../api/types';
+import {
+  ApiMediaFormat,
 } from '../../api/types';
 
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, IS_SAFARI } from '../../util/environment';

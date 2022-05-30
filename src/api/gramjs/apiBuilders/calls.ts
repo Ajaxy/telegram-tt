@@ -6,7 +6,7 @@ import type {
   SsrcGroup,
 } from '../../../lib/secret-sauce';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiGroupCall, ApiPhoneCall } from '../../types';
+import type { ApiGroupCall, ApiPhoneCall } from '../../types';
 import { getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 
 export function buildApiGroupCallParticipant(participant: GramJs.GroupCallParticipant): GroupCallParticipant {

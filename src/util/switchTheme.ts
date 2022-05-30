@@ -1,4 +1,4 @@
-import { ISettings } from '../types';
+import type { ISettings } from '../types';
 
 import { animateSingle } from './animation';
 import { fastRaf } from './schedulers';

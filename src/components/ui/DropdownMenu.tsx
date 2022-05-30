@@ -1,6 +1,5 @@
-import React, {
-  FC, useState, useRef, useCallback,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useState, useRef, useCallback } from '../../lib/teact/teact';
 
 import Menu from './Menu';
 

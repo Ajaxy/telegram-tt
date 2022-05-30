@@ -1,11 +1,12 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChatFolder } from '../../../api/types';
-import { SettingsScreens } from '../../../types';
-import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { ApiChatFolder } from '../../../api/types';
+import type { SettingsScreens } from '../../../types';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { ALL_FOLDER_ID } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';

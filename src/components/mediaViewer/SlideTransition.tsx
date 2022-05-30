@@ -1,8 +1,10 @@
-import React, { FC } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 
-import Transition, { ChildrenFn, TransitionProps } from '../ui/Transition';
+import type { ChildrenFn, TransitionProps } from '../ui/Transition';
+import Transition from '../ui/Transition';
 
 const SlideTransition: FC<TransitionProps & { children: ChildrenFn }> = ({ children, ...props }) => {
   if (IS_TOUCH_ENV) return children(true, true, 1);

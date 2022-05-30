@@ -1,8 +1,9 @@
-import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
-import { ApiUser } from '../../../api/types';
+import type { ApiUser } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';

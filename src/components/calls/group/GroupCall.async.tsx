@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 import { Bundles } from '../../../util/moduleLoader';
-import { OwnProps } from './GroupCall';
+import type { OwnProps } from './GroupCall';
 
 const GroupCallAsync: FC<OwnProps> = (props) => {
   const { groupCallId } = props;

@@ -1,6 +1,6 @@
 import { inflate } from 'pako/dist/pako_inflate';
 import createWorkerInterface from '../../util/createWorkerInterface';
-import { CancellableCallback } from '../../util/WorkerConnector';
+import type { CancellableCallback } from '../../util/WorkerConnector';
 
 declare const Module: any;
 

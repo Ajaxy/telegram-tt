@@ -1,10 +1,9 @@
-import React, {
-  FC, memo, useMemo, useEffect,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo, useEffect } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { SettingsScreens } from '../../../types';
-import { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { SettingsScreens } from '../../../types';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import {
   ALL_FOLDER_ID,

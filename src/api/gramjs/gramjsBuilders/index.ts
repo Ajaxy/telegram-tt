@@ -1,16 +1,15 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiPrivacyKey } from '../../../types';
+import type { ApiPrivacyKey } from '../../../types';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
-import {
+import type {
   ApiChatAdminRights,
   ApiChatBannedRights,
   ApiChatFolder,
   ApiGroupCall,
   ApiMessageEntity,
-  ApiMessageEntityTypes,
   ApiNewPoll,
   ApiPhoto,
   ApiPhoneCall,
@@ -19,6 +18,9 @@ import {
   ApiSticker,
   ApiVideo,
   ApiThemeParameters,
+} from '../../types';
+import {
+  ApiMessageEntityTypes,
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';

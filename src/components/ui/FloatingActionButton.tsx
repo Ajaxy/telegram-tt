@@ -1,8 +1,10 @@
-import React, { FC } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import Button, { OwnProps as ButtonProps } from './Button';
+import type { OwnProps as ButtonProps } from './Button';
+import Button from './Button';
 
 import './FloatingActionButton.scss';
 

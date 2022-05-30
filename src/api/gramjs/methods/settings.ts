@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import {
+import type {
   ApiAppConfig,
   ApiChat,
   ApiLangString,
@@ -10,9 +10,10 @@ import {
   ApiUser,
   ApiWallpaper,
 } from '../../types';
-import { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
+import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 
-import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, LANG_PACKS } from '../../../config';
+import type { LANG_PACKS } from '../../../config';
+import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
 import {
   buildApiCountryList,
   buildApiNotifyException,

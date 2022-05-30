@@ -1,7 +1,8 @@
 import { callApi } from '../api/gramjs';
-import {
-  ApiChat, ApiMediaFormat, ApiMessage, ApiPhoneCall, ApiUser, ApiUserReaction,
+import type {
+  ApiChat, ApiMessage, ApiPhoneCall, ApiUser, ApiUserReaction,
 } from '../api/types';
+import { ApiMediaFormat } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { DEBUG, IS_TEST } from '../config';
 import { getActions, getGlobal, setGlobal } from '../global';

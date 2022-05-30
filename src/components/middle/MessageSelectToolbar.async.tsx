@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
-import { OwnProps } from './MessageSelectToolbar';
+import type { OwnProps } from './MessageSelectToolbar';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
 

@@ -1,6 +1,5 @@
-import React, {
-  FC, FC_withDebug, Props, useEffect, useState,
-} from './teact';
+import type { FC, FC_withDebug, Props } from './teact';
+import React, { useEffect, useState } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import useForceUpdate from '../../hooks/useForceUpdate';

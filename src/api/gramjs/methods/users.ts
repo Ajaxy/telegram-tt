@@ -1,6 +1,6 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
+import type {
   OnApiUpdate, ApiUser, ApiChat, ApiPhoto,
 } from '../../types';
 

@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, useCallback, memo, useState,
+  useEffect, useCallback, memo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
-import { GlobalState } from '../../global/types';
+import type { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';

@@ -1,10 +1,10 @@
-import {
+import type {
   OnApiUpdate,
   ApiInitialArgs,
   ApiUpdate,
   ApiOnProgress,
 } from '../types';
-import { Methods, MethodArgs, MethodResponse } from './methods/types';
+import type { Methods, MethodArgs, MethodResponse } from './methods/types';
 
 import { API_THROTTLE_RESET_UPDATES, API_UPDATE_THROTTLE } from '../../config';
 import { throttle, throttleWithTickEnd } from '../../util/schedulers';

@@ -1,4 +1,4 @@
-import { ApiChat, ApiUser } from '../../types';
+import type { ApiChat, ApiUser } from '../../types';
 import { invokeRequest } from './client';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { buildInputPeer } from '../gramjsBuilders';

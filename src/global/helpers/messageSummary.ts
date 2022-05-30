@@ -1,8 +1,9 @@
-import { ApiMessage, ApiMessageEntityTypes } from '../../api/types';
+import type { ApiMessage } from '../../api/types';
+import { ApiMessageEntityTypes } from '../../api/types';
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 
-import { TextPart } from '../../types';
-import { LangFn } from '../../hooks/useLang';
+import type { TextPart } from '../../types';
+import type { LangFn } from '../../hooks/useLang';
 
 import trimText from '../../util/trimText';
 import { getMessageText } from './messages';

@@ -2,8 +2,8 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import { ApiSticker } from '../../../api/types';
-import { LangCode } from '../../../types';
+import type { ApiSticker } from '../../../api/types';
+import type { LangCode } from '../../../types';
 import { callApi } from '../../../api/gramjs';
 import { onTickEnd, pause, throttle } from '../../../util/schedulers';
 import {

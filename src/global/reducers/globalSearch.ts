@@ -1,6 +1,6 @@
-import { GlobalState } from '../types';
-import { GlobalSearchContent } from '../../types';
-import { ApiGlobalMessageSearchType, ApiMessage } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { GlobalSearchContent } from '../../types';
+import type { ApiGlobalMessageSearchType, ApiMessage } from '../../api/types';
 import { areSortedArraysEqual } from '../../util/iteratees';
 
 const getComplexKey = (message: ApiMessage) => `${message.chatId}_${message.id}`;

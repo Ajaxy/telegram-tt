@@ -1,9 +1,10 @@
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useState, useEffect, useCallback, memo, useRef,
+  useState, useEffect, useCallback, memo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
-import { GlobalState } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { pick } from '../../util/iteratees';

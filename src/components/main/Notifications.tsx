@@ -1,7 +1,8 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiNotification } from '../../api/types';
+import type { ApiNotification } from '../../api/types';
 
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';

@@ -1,5 +1,5 @@
 import { errors } from '../../../lib/gramjs';
-import {
+import type {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationStateType,
   OnApiUpdate,

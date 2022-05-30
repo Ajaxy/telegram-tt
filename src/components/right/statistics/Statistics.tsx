@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useState, useEffect, useRef, useMemo,
+  memo, useState, useEffect, useRef, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { callApi } from '../../../api/gramjs';
-import {
+import type {
   ApiMessage,
   ApiChannelStatistics,
   ApiGroupStatistics,

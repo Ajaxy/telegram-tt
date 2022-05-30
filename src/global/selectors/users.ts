@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
 import { isUserBot } from '../helpers';
 
 export function selectUser(global: GlobalState, userId: string): ApiUser | undefined {

@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { ApiAvailableReaction, ApiMessage, ApiUser } from '../../../api/types';
-import { IAnchorPosition } from '../../../types';
+import type { ApiAvailableReaction, ApiMessage, ApiUser } from '../../../api/types';
+import type { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';

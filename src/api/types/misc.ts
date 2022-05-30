@@ -1,4 +1,4 @@
-import { ApiDocument, ApiPhoto } from './messages';
+import type { ApiDocument, ApiPhoto } from './messages';
 
 export interface ApiInitialArgs {
   userAgent: string;

@@ -1,8 +1,7 @@
-import React, {
-  FC, memo, TeactNode, useCallback, useRef,
-} from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
+import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 
-import { TextPart } from '../../types';
+import type { TextPart } from '../../types';
 
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';

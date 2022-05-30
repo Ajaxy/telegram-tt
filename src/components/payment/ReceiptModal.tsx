@@ -1,10 +1,9 @@
-import React, {
-  FC, memo, useMemo,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import { Price } from '../../types';
-import { ApiShippingAddress } from '../../api/types';
+import type { Price } from '../../types';
+import type { ApiShippingAddress } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
 

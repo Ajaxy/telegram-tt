@@ -1,10 +1,9 @@
-import React, {
-  FC, useCallback, useEffect, useMemo,
-} from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { useCallback, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { AudioOrigin } from '../../types';
-import {
+import type { AudioOrigin } from '../../types';
+import type {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 

@@ -1,6 +1,7 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 
-import { ApiBotCommand, ApiUser } from '../../../api/types';
+import type { ApiBotCommand, ApiUser } from '../../../api/types';
 
 import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';

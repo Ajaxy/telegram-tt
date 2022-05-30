@@ -1,6 +1,6 @@
-import { GroupCallParticipant } from '../../lib/secret-sauce';
-import { GlobalState } from '../types';
-import { ApiGroupCall } from '../../api/types';
+import type { GroupCallParticipant } from '../../lib/secret-sauce';
+import type { GlobalState } from '../types';
+import type { ApiGroupCall } from '../../api/types';
 import { selectGroupCall } from '../selectors/calls';
 import { omit } from '../../util/iteratees';
 import { updateChat } from './chats';

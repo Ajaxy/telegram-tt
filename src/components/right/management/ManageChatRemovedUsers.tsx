@@ -1,9 +1,8 @@
-import React, {
-  FC, memo, useCallback, useMemo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
 import { selectChat } from '../../../global/selectors';
 import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../global/helpers';

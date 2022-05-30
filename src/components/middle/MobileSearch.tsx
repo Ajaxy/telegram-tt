@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
+  memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChat } from '../../api/types';
+import type { ApiChat } from '../../api/types';
 
 import { debounce } from '../../util/schedulers';
 import { selectCurrentTextSearch, selectCurrentChat } from '../../global/selectors';

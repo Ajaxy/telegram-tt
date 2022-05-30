@@ -1,7 +1,8 @@
-import React, { FC, useEffect } from './lib/teact/teact';
+import type { FC } from './lib/teact/teact';
+import React, { useEffect } from './lib/teact/teact';
 import { getActions, withGlobal } from './global';
 
-import { GlobalState } from './global/types';
+import type { GlobalState } from './global/types';
 
 import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { pick } from './util/iteratees';

@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { ManagementScreens, ProfileState } from '../../types';
-import { ApiExportedInvite } from '../../api/types';
+import type { ApiExportedInvite } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';

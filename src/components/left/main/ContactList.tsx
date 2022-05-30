@@ -1,9 +1,8 @@
-import React, {
-  FC, useCallback, useMemo, memo,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useCallback, useMemo, memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiUser, ApiUserStatus } from '../../../api/types';
+import type { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { filterUsersByName, sortUserIds } from '../../../global/helpers';

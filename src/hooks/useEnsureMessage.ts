@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from '../lib/teact/teact';
 import { getActions } from '../global';
 
-import { ApiMessage } from '../api/types';
+import type { ApiMessage } from '../api/types';
 
 import { throttle } from '../util/schedulers';
 

@@ -1,6 +1,7 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useState, useCallback, memo, useEffect, useMemo,
+  useState, useCallback, memo, useEffect, useMemo,
 } from '../../lib/teact/teact';
 
 import { debounce } from '../../util/schedulers';

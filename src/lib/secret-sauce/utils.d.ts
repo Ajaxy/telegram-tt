@@ -1,5 +1,5 @@
 import { P2PPayloadType } from './p2pMessage';
-import { PayloadType } from './types';
+import type { PayloadType } from './types';
 export declare function toTelegramSource(source: number): number;
 export declare function fromTelegramSource(source: number): number;
 export declare function getAmplitude(array: Uint8Array, scale?: number): number;

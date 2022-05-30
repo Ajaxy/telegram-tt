@@ -1,7 +1,8 @@
-import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ApiSession } from '../../../api/types';
+import type { ApiSession } from '../../../api/types';
 
 import { formatDateTimeToString } from '../../../util/dateFormat';
 import useLang from '../../../hooks/useLang';

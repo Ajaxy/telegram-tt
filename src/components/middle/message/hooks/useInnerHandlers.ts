@@ -1,11 +1,12 @@
-import React, { useCallback } from '../../../../lib/teact/teact';
+import type React from '../../../../lib/teact/teact';
+import { useCallback } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { IAlbum, MediaViewerOrigin } from '../../../../types';
-import {
-  ApiChat, ApiMessage, ApiUser, MAIN_THREAD_ID,
-} from '../../../../api/types';
-import { LangFn } from '../../../../hooks/useLang';
+import type { IAlbum } from '../../../../types';
+import { MediaViewerOrigin } from '../../../../types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
+import { MAIN_THREAD_ID } from '../../../../api/types';
+import type { LangFn } from '../../../../hooks/useLang';
 
 export default function useInnerHandlers(
   lang: LangFn,

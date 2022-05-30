@@ -3,7 +3,8 @@ import {
 } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
-import { ApiMessageEntityTypes, ApiChatMember, ApiUser } from '../../../../api/types';
+import type { ApiChatMember, ApiUser } from '../../../../api/types';
+import { ApiMessageEntityTypes } from '../../../../api/types';
 import { EDITABLE_INPUT_ID } from '../../../../config';
 import { filterUsersByName, getUserFirstOrLastName } from '../../../../global/helpers';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';

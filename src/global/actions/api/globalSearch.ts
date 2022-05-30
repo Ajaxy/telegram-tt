@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { callApi } from '../../../api/gramjs';
-import { ApiChat, ApiGlobalMessageSearchType } from '../../../api/types';
+import type { ApiChat, ApiGlobalMessageSearchType } from '../../../api/types';
 
 import {
   addChats,

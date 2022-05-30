@@ -1,6 +1,5 @@
-import {
-  FC, useRef, useLayoutEffect, VirtualElement,
-} from '../../lib/teact/teact';
+import type { FC, VirtualElement } from '../../lib/teact/teact';
+import { useRef, useLayoutEffect } from '../../lib/teact/teact';
 import TeactDOM from '../../lib/teact/teact-dom';
 
 type OwnProps = {

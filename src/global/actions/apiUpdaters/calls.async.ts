@@ -2,13 +2,13 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser } from '../../selectors/calls';
 import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { omit } from '../../../util/iteratees';
+import type { ApiCallProtocol } from '../../../lib/secret-sauce';
 import {
-  ApiCallProtocol,
   handleUpdateGroupCallConnection,
   handleUpdateGroupCallParticipants,
   joinPhoneCall, processSignalingMessage,
 } from '../../../lib/secret-sauce';
-import { ApiPhoneCall } from '../../../api/types';
+import type { ApiPhoneCall } from '../../../api/types';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { callApi } from '../../../api/gramjs';
 import * as langProvider from '../../../util/langProvider';

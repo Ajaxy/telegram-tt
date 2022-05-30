@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
-import { InlineBotSettings } from '../../../../types';
+import type { InlineBotSettings } from '../../../../types';
 import useFlag from '../../../../hooks/useFlag';
 import usePrevious from '../../../../hooks/usePrevious';
 import useDebouncedMemo from '../../../../hooks/useDebouncedMemo';

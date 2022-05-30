@@ -1,7 +1,8 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiMessage } from '../../api/types';
+import type { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageSingleInlineButton } from '../../global/helpers';

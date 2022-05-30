@@ -1,14 +1,16 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, useEffect, useState, memo, useMemo, useCallback,
+  useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiChatBannedRights, MAIN_THREAD_ID } from '../../api/types';
-import {
+import type { ApiChatBannedRights } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
+import type {
   MessageListType,
   ActiveEmojiInteraction,
 } from '../../global/types';
-import { ThemeKey } from '../../types';
+import type { ThemeKey } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,

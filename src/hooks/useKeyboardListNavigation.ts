@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { useState, useCallback, useEffect } from '../lib/teact/teact';
 
 const useKeyboardListNavigation = (

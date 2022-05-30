@@ -4,7 +4,7 @@ import {
 import safePlay from '../../../util/safePlay';
 import { getActions } from '../../../global';
 import useMedia from '../../../hooks/useMedia';
-import { ActiveEmojiInteraction } from '../../../global/types';
+import type { ActiveEmojiInteraction } from '../../../global/types';
 import useFlag from '../../../hooks/useFlag';
 import { selectLocalAnimatedEmojiEffectByName } from '../../../global/selectors';
 

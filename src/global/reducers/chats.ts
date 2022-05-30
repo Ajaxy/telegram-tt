@@ -1,5 +1,5 @@
-import { GlobalState } from '../types';
-import { ApiChat, ApiChatMember, ApiPhoto } from '../../api/types';
+import type { GlobalState } from '../types';
+import type { ApiChat, ApiChatMember, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areSortedArraysEqual, omit } from '../../util/iteratees';

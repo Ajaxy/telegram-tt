@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
+import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 
 import { selectChat } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';

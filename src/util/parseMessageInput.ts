@@ -1,4 +1,5 @@
-import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../api/types';
+import type { ApiMessageEntity, ApiFormattedText } from '../api/types';
+import { ApiMessageEntityTypes } from '../api/types';
 import { IS_EMOJI_SUPPORTED } from './environment';
 import { RE_LINK_TEMPLATE } from '../config';
 

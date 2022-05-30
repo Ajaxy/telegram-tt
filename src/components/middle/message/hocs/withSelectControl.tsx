@@ -1,14 +1,14 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  FC,
   useCallback,
   useMemo,
   memo,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import { OwnProps as PhotoProps } from '../Photo';
-import { OwnProps as VideoProps } from '../Video';
+import type { OwnProps as PhotoProps } from '../Photo';
+import type { OwnProps as VideoProps } from '../Video';
 
 import buildClassName from '../../../../util/buildClassName';
 import {

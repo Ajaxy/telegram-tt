@@ -1,8 +1,7 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import useRunDebounced from '../../../hooks/useRunDebounced';
-import React, {
-  FC, memo, useCallback, useEffect,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import useLang from '../../../hooks/useLang';
