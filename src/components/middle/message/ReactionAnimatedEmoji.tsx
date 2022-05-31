@@ -4,7 +4,6 @@ import { getActions } from '../../../global';
 
 import type { ActiveReaction } from '../../../global/types';
 import type { ApiAvailableReaction } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
@@ -37,8 +36,8 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   const availableReaction = availableReactions?.find((r) => r.reaction === reaction);
   const centerIconId = availableReaction?.centerIcon?.id;
   const effectId = availableReaction?.aroundAnimation?.id;
-  const mediaDataCenterIcon = useMedia(`sticker${centerIconId}`, !centerIconId, ApiMediaFormat.Lottie);
-  const mediaDataEffect = useMedia(`sticker${effectId}`, !effectId, ApiMediaFormat.Lottie);
+  const mediaDataCenterIcon = useMedia(`sticker${centerIconId}`, !centerIconId);
+  const mediaDataEffect = useMedia(`sticker${effectId}`, !effectId);
 
   const shouldPlay = Boolean(activeReaction?.reaction === reaction && mediaDataCenterIcon && mediaDataEffect);
   const {
@@ -66,10 +65,9 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
         <>
           <AnimatedSticker
             key={centerIconId}
-            id={`reaction_emoji_${centerIconId}`}
             className={animationClassNames}
             size={CENTER_ICON_SIZE}
-            animationData={mediaDataCenterIcon}
+            tgsUrl={mediaDataCenterIcon}
             play
             noLoop
             forceOnHeavyAnimation
@@ -78,10 +76,9 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
           />
           <AnimatedSticker
             key={effectId}
-            id={`reaction_effect_${effectId}`}
             className={buildClassName('effect', animationClassNames)}
             size={EFFECT_SIZE}
-            animationData={mediaDataEffect}
+            tgsUrl={mediaDataEffect}
             play
             noLoop
             forceOnHeavyAnimation

@@ -5,9 +5,9 @@ import React, {
 import { getActions, withGlobal } from '../../../../global';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { isUserId } from '../../../../global/helpers';
-import getAnimationData from '../../../common/helpers/animatedAssets';
 import type {
   FolderEditDispatch,
   FoldersState,
@@ -21,13 +21,13 @@ import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import ListItem from '../../../ui/ListItem';
-import AnimatedSticker from '../../../common/AnimatedSticker';
 import InputText from '../../../ui/InputText';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import Spinner from '../../../ui/Spinner';
 import ShowMoreButton from '../../../ui/ShowMoreButton';
+import AnimatedIcon from '../../../common/AnimatedIcon';
 
 type OwnProps = {
   state: FoldersState;
@@ -67,10 +67,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     addChatFolder,
   } = getActions();
 
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
-
   const [isIncludedChatsListExpanded, setIsIncludedChatsListExpanded] = useState(false);
   const [isExcludedChatsListExpanded, setIsExcludedChatsListExpanded] = useState(false);
 
@@ -82,12 +78,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     selectedChatIds: excludedChatIds,
     selectedChatTypes: excludedChatTypes,
   } = selectChatFilters(state, 'excluded');
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('FoldersNew').then(setAnimationData);
-    }
-  }, [animationData]);
 
   useEffect(() => {
     setIsIncludedChatsListExpanded(false);
@@ -219,18 +209,12 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     <div className="settings-fab-wrapper">
       <div className="settings-content no-border custom-scroll">
         <div className="settings-content-header">
-          <div className="settings-content-icon">
-            {animationData && (
-              <AnimatedSticker
-                id="settingsFoldersEdit"
-                size={STICKER_SIZE_FOLDER_SETTINGS}
-                animationData={animationData}
-                play={isAnimationLoaded && String(state.folderId)}
-                noLoop
-                onLoad={handleAnimationLoad}
-              />
-            )}
-          </div>
+          <AnimatedIcon
+            size={STICKER_SIZE_FOLDER_SETTINGS}
+            tgsUrl={LOCAL_TGS_URLS.FoldersNew}
+            play={String(state.folderId)}
+            className="settings-content-icon"
+          />
 
           {state.mode === 'create' && (
             <p className="settings-item-description mb-3" dir={lang.isRtl ? 'rtl' : undefined}>

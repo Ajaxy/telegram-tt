@@ -14,7 +14,6 @@ import type {
   ApiMessageOutgoingStatus,
   ApiUser,
   ApiChat,
-  ApiSticker,
   ApiThreadInfo,
   ApiAvailableReaction,
 } from '../../../api/types';
@@ -33,7 +32,6 @@ import {
   selectUser,
   selectIsMessageFocused,
   selectCurrentTextSearch,
-  selectAnimatedEmoji,
   selectIsInSelectMode,
   selectIsMessageSelected,
   selectIsDocumentGroupSelected,
@@ -47,14 +45,12 @@ import {
   selectAllowedMessageActions,
   selectIsDownloading,
   selectThreadInfo,
-  selectAnimatedEmojiEffect,
-  selectAnimatedEmojiSound,
   selectMessageIdsByGroupId,
-  selectLocalAnimatedEmoji,
   selectIsMessageProtected,
-  selectLocalAnimatedEmojiEffect,
   selectDefaultReaction,
   selectReplySender,
+  selectAnimatedEmoji,
+  selectLocalAnimatedEmoji,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -102,7 +98,7 @@ import Audio from '../../common/Audio';
 import MessageMeta from './MessageMeta';
 import ContextMenuContainer from './ContextMenuContainer.async';
 import Sticker from './Sticker';
-import AnimatedEmoji from '../../common/AnimatedEmoji';
+import AnimatedEmoji from './AnimatedEmoji';
 import Photo from './Photo';
 import Video from './Video';
 import Contact from './Contact';
@@ -117,7 +113,6 @@ import InlineButtons from './InlineButtons';
 import CommentButton from './CommentButton';
 import Reactions from './Reactions';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
-import LocalAnimatedEmoji from '../../common/LocalAnimatedEmoji';
 import MessagePhoneCall from './MessagePhoneCall';
 
 import './Message.scss';
@@ -176,12 +171,7 @@ type StateProps = {
   lastSyncTime?: number;
   serverTimeOffset: number;
   highlight?: string;
-  isSingleEmoji?: boolean;
-  animatedEmoji?: ApiSticker;
-  localSticker?: string;
-  localEffect?: string;
-  animatedEmojiEffect?: ApiSticker;
-  animatedEmojiSoundId?: string;
+  animatedEmoji?: string;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
@@ -264,10 +254,6 @@ const Message: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   highlight,
   animatedEmoji,
-  localSticker,
-  localEffect,
-  animatedEmojiEffect,
-  animatedEmojiSoundId,
   isInSelectMode,
   isSelected,
   isGroupSelected,
@@ -338,7 +324,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const customShape = getMessageCustomShape(message);
-  const hasAnimatedEmoji = localSticker || animatedEmoji;
+  const hasAnimatedEmoji = animatedEmoji;
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
     forwardInfo
@@ -662,26 +648,9 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {animatedEmoji && (
           <AnimatedEmoji
-            size="small"
+            emoji={animatedEmoji}
+            withEffects={isUserId(chatId)}
             isOwn={isOwn}
-            sticker={animatedEmoji}
-            effect={animatedEmojiEffect}
-            soundId={animatedEmojiSoundId}
-            observeIntersection={observeIntersectionForMedia}
-            lastSyncTime={lastSyncTime}
-            forceLoadPreview={isLocal}
-            messageId={messageId}
-            chatId={chatId}
-            activeEmojiInteractions={activeEmojiInteractions}
-          />
-        )}
-        {localSticker && (
-          <LocalAnimatedEmoji
-            size="small"
-            isOwn={isOwn}
-            localSticker={localSticker}
-            localEffect={localEffect}
-            soundId={animatedEmojiSoundId}
             observeIntersection={observeIntersectionForMedia}
             lastSyncTime={lastSyncTime}
             forceLoadPreview={isLocal}
@@ -1057,8 +1026,11 @@ export default memo(withGlobal<OwnProps>(
     const { query: highlight } = selectCurrentTextSearch(global) || {};
 
     const singleEmoji = getMessageSingleEmoji(message);
-    let isSelected: boolean;
+    const animatedEmoji = singleEmoji && (
+      selectAnimatedEmoji(global, singleEmoji) || selectLocalAnimatedEmoji(global, singleEmoji)
+    ) ? singleEmoji : undefined;
 
+    let isSelected: boolean;
     if (album?.messages) {
       isSelected = album.messages.every(({ id: messageId }) => selectIsMessageSelected(global, messageId));
     } else {
@@ -1078,8 +1050,6 @@ export default memo(withGlobal<OwnProps>(
     const reactionMessage = isInDocumentGroup ? (
       isLastInDocumentGroup ? selectChatMessage(global, chatId, documentGroupFirstMessageId!) : undefined
     ) : message;
-
-    const localSticker = singleEmoji ? selectLocalAnimatedEmoji(global, singleEmoji) : undefined;
 
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
 
@@ -1107,12 +1077,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
       serverTimeOffset,
       highlight,
-      isSingleEmoji: Boolean(singleEmoji),
-      animatedEmoji: singleEmoji ? selectAnimatedEmoji(global, singleEmoji) : undefined,
-      animatedEmojiEffect: singleEmoji && isUserId(chatId) ? selectAnimatedEmojiEffect(global, singleEmoji) : undefined,
-      animatedEmojiSoundId: singleEmoji ? selectAnimatedEmojiSound(global, singleEmoji) : undefined,
-      localSticker,
-      localEffect: localSticker && isUserId(chatId) ? selectLocalAnimatedEmojiEffect(localSticker) : undefined,
+      animatedEmoji,
       isInSelectMode: selectIsInSelectMode(global),
       isSelected,
       isGroupSelected: (

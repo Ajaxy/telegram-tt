@@ -1,24 +1,22 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useCallback, useEffect, useState,
-} from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
 
 import { STICKER_SIZE_JOIN_REQUESTS } from '../../../config';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { selectChat } from '../../../global/selectors';
 import { isChatChannel, isUserId } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
-import getAnimationData from '../../common/helpers/animatedAssets';
 
 import JoinRequest from './JoinRequest';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
-import AnimatedSticker from '../../common/AnimatedSticker';
 import Spinner from '../../ui/Spinner';
+import AnimatedIcon from '../../common/AnimatedIcon';
 
 type OwnProps = {
   chatId: string;
@@ -45,16 +43,6 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('JoinRequest').then(setAnimationData);
-    }
-  }, [animationData]);
-
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -80,17 +68,11 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
     <div className="Management ManageJoinRequests">
       <div className="custom-scroll">
         <div className="section">
-          <div className="section-icon">
-            {animationData && (
-              <AnimatedSticker
-                id="joinRequestDucks"
-                size={STICKER_SIZE_JOIN_REQUESTS}
-                animationData={animationData}
-                play={isAnimationLoaded}
-                onLoad={handleAnimationLoad}
-              />
-            )}
-          </div>
+          <AnimatedIcon
+            tgsUrl={LOCAL_TGS_URLS.JoinRequest}
+            size={STICKER_SIZE_JOIN_REQUESTS}
+            className="section-icon"
+          />
           {Boolean(chat?.joinRequests?.length) && (
             <div className="bulk-actions">
               <Button className="bulk-action-button" onClick={openAcceptAllDialog}>Accept all</Button>

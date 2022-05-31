@@ -17,7 +17,6 @@ import * as cacheApi from '../../../util/cacheApi';
 import { getEntityTypeById } from '../gramjsBuilders';
 
 const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document']);
-const TGS_MIME_TYPE = 'application/x-tgsticker';
 
 export default async function downloadMedia(
   {
@@ -63,8 +62,8 @@ export default async function downloadMedia(
 
 export type EntityType = (
   'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument' |
-  'document'
-  );
+  'document' | 'staticMap'
+);
 
 async function download(
   url: string,
@@ -83,12 +82,6 @@ async function download(
   const {
     entityType, entityId, sizeType, params, mediaMatchType,
   } = parsed;
-
-  if (entityType === 'file') {
-    const response = await fetch(entityId);
-    const data = await response.arrayBuffer();
-    return { data };
-  }
 
   if (!isConnected) {
     return Promise.reject(new Error('ERROR: Client is not connected'));
@@ -192,7 +185,7 @@ async function download(
     return { mimeType, data, fullSize };
   } else if (entityType === 'stickerSet') {
     const data = await client.downloadStickerSetThumb(entity);
-    const mimeType = mediaFormat === ApiMediaFormat.Lottie ? TGS_MIME_TYPE : getMimeType(data);
+    const mimeType = getMimeType(data);
 
     return { mimeType, data };
   } else {
@@ -247,15 +240,11 @@ async function parseMedia(
 ): Promise<ApiParsedMedia | undefined> {
   switch (mediaFormat) {
     case ApiMediaFormat.BlobUrl:
-    case ApiMediaFormat.Lottie: {
       return new Blob([data], { type: mimeType });
-    }
-    case ApiMediaFormat.Text: {
+    case ApiMediaFormat.Text:
       return data.toString();
-    }
-    case ApiMediaFormat.Progressive: {
+    case ApiMediaFormat.Progressive:
       return data.buffer;
-    }
   }
 
   return undefined;
@@ -307,7 +296,7 @@ export function parseMediaUrl(url: string) {
     : url.startsWith('webDocument')
       ? url.match(/(webDocument):(.+)/)
       : url.match(
-        /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|file|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
+        /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
       );
   if (!mediaMatch) {
     return undefined;
@@ -316,14 +305,6 @@ export function parseMediaUrl(url: string) {
   const mediaMatchType = mediaMatch[1];
   const entityId: string | number = mediaMatch[2];
 
-  if (mediaMatchType === 'file') {
-    return {
-      mediaMatchType,
-      entityType: 'file',
-      entityId,
-    };
-  }
-
   let entityType: EntityType;
   const params = mediaMatch[3];
   const sizeType = params?.replace('?size=', '') || undefined;
@@ -331,9 +312,7 @@ export function parseMediaUrl(url: string) {
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
     entityType = getEntityTypeById(entityId);
   } else {
-    entityType = mediaMatch[1] as (
-      'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet' | 'photo' | 'webDocument' | 'document'
-    );
+    entityType = mediaMatch[1] as EntityType;
   }
 
   return {

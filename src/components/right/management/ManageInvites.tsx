@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -8,7 +8,7 @@ import type { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_INVITES } from '../../../config';
-import getAnimationData from '../../common/helpers/animatedAssets';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
@@ -27,7 +27,7 @@ import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
-import AnimatedSticker from '../../common/AnimatedSticker';
+import AnimatedIcon from '../../common/AnimatedIcon';
 
 type OwnProps = {
   chatId: string;
@@ -81,16 +81,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const [revokingInvite, setRevokingInvite] = useState<ApiExportedInvite | undefined>();
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [deletingInvite, setDeletingInvite] = useState<ApiExportedInvite | undefined>();
-
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('Invite').then(setAnimationData);
-    }
-  }, [animationData]);
 
   useHistoryBack({
     isActive,
@@ -288,17 +278,11 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     <div className="Management ManageInvites">
       <div className="custom-scroll">
         <div className="section">
-          <div className="section-icon">
-            {animationData && (
-              <AnimatedSticker
-                id="inviteDuck"
-                size={STICKER_SIZE_INVITES}
-                animationData={animationData}
-                play={isAnimationLoaded}
-                onLoad={handleAnimationLoad}
-              />
-            )}
-          </div>
+          <AnimatedIcon
+            tgsUrl={LOCAL_TGS_URLS.Invite}
+            size={STICKER_SIZE_INVITES}
+            className="section-icon"
+          />
           <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (

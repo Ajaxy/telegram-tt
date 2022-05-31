@@ -19,6 +19,7 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
   IS_SINGLE_COLUMN_LAYOUT,
 } from '../../../util/environment';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
 import {
   selectGroupCall,
@@ -338,7 +339,11 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           <div className="video-buttons">
             {hasVideo && (IS_ANDROID || IS_IOS) && (
               <button className="smaller-button" onClick={switchCameraInput}>
-                <AnimatedIcon name="CameraFlip" playSegment={CAMERA_FLIP_PLAY_SEGMENT} size={24} />
+                <AnimatedIcon
+                  tgsUrl={LOCAL_TGS_URLS.CameraFlip}
+                  playSegment={CAMERA_FLIP_PLAY_SEGMENT}
+                  size={24}
+                />
               </button>
             )}
             <button

@@ -2,7 +2,6 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiAvailableReaction } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
@@ -31,7 +30,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const mediaData = useMedia(`document${reaction.selectAnimation?.id}`, !isReady, ApiMediaFormat.Lottie);
+  const mediaData = useMedia(`document${reaction.selectAnimation?.id}`, !isReady);
 
   const [isActivated, activate, deactivate] = useFlag();
   const [isAnimationLoaded, markAnimationLoaded] = useFlag();
@@ -67,9 +66,8 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
       )}
       {shouldRenderAnimated && (
         <AnimatedSticker
-          id={`select_${reaction.reaction}`}
           className={cn('animated', [animatedClassNames])}
-          animationData={mediaData}
+          tgsUrl={mediaData}
           play={isActivated}
           noLoop
           size={REACTION_SIZE}

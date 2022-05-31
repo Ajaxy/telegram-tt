@@ -6,7 +6,7 @@ import { pause } from './util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 
-const ASSET_CACHE_PATTERN = /[0-9a-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|json|wasm)$/;
+const ASSET_CACHE_PATTERN = /[\da-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|tgs|json|wasm)$/;
 const ACTIVATE_TIMEOUT = 3000;
 
 self.addEventListener('install', (e) => {

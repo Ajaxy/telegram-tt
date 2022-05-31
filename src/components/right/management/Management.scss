@@ -36,22 +36,7 @@
     }
 
     .section-icon {
-      width: 8.75rem;
-      height: 8.75rem;
       margin: 0 auto 2rem;
-      position: relative;
-
-      .AnimatedSticker {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-
-        &.hidden {
-          display: none;
-        }
-      }
     }
 
     .ListItem {

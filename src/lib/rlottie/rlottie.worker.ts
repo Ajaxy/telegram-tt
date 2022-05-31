@@ -39,7 +39,7 @@ const renderers = new Map<string, {
 
 async function init(
   key: string,
-  animationData: string,
+  tgsUrl: string,
   imgSize: number,
   isLowPriority: boolean,
   onInit: CancellableCallback,
@@ -48,7 +48,7 @@ async function init(
     await rLottieApiPromise;
   }
 
-  const json = await extractJson(animationData);
+  const json = await extractJson(tgsUrl);
   const stringOnWasmHeap = allocate(intArrayFromString(json), 'i8', 0);
   const handle = rLottieApi.init();
   const framesCount = rLottieApi.loadFromData(handle, stringOnWasmHeap);
@@ -62,7 +62,7 @@ async function init(
 
 async function changeData(
   key: string,
-  animationData: string,
+  tgsUrl: string,
   isLowPriority: boolean,
   onInit: CancellableCallback,
 ) {
@@ -70,7 +70,7 @@ async function changeData(
     await rLottieApiPromise;
   }
 
-  const json = await extractJson(animationData);
+  const json = await extractJson(tgsUrl);
   const stringOnWasmHeap = allocate(intArrayFromString(json), 'i8', 0);
   const { handle } = renderers.get(key)!;
   const framesCount = rLottieApi.loadFromData(handle, stringOnWasmHeap);
@@ -79,8 +79,8 @@ async function changeData(
   onInit(reduceFactor, msPerFrame, reducedFramesCount);
 }
 
-async function extractJson(animationData: string) {
-  const response = await fetch(animationData);
+async function extractJson(tgsUrl: string) {
+  const response = await fetch(tgsUrl);
   const contentType = response.headers.get('Content-Type');
 
   // Support deprecated JSON format cached locally

@@ -1,24 +1,18 @@
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import safePlay from '../../../util/safePlay';
 import { getActions } from '../../../global';
 import useMedia from '../../../hooks/useMedia';
 import type { ActiveEmojiInteraction } from '../../../global/types';
-import useFlag from '../../../hooks/useFlag';
 import { selectLocalAnimatedEmojiEffectByName } from '../../../global/selectors';
 
-const WIDTH = {
-  large: 160,
-  medium: 128,
-  small: 104,
-};
+const SIZE = 104;
 const INTERACTION_BUNCH_TIME = 1000;
 const MS_DIVIDER = 1000;
 const TIME_DEFAULT = 0;
 
 export default function useAnimatedEmoji(
-  size: 'large' | 'medium' | 'small',
   chatId?: string,
   messageId?: number,
   soundId?: string,
@@ -32,7 +26,6 @@ export default function useAnimatedEmoji(
   } = getActions();
 
   const hasEffect = localEffect || emoji;
-  const [isAnimationLoaded, markAnimationLoaded] = useFlag();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -42,10 +35,8 @@ export default function useAnimatedEmoji(
 
   const soundMediaData = useMedia(soundId ? `document${soundId}` : undefined, !soundId);
 
-  const width = WIDTH[size];
-  const style = `width: ${width}px; height: ${width}px;`;
+  const style = `width: ${SIZE}px; height: ${SIZE}px;`;
 
-  const [playKey, setPlayKey] = useState(String(Math.random()));
   const interactions = useRef<number[] | undefined>(undefined);
   const startedInteractions = useRef<number | undefined>(undefined);
   const sendInteractionBunch = useCallback(() => {
@@ -65,8 +56,6 @@ export default function useAnimatedEmoji(
   }, [sendEmojiInteraction, chatId, messageId, localEffect, emoji]);
 
   const play = useCallback(() => {
-    setPlayKey(String(Math.random()));
-
     const audio = audioRef.current;
     if (soundMediaData) {
       if (audio) {
@@ -98,7 +87,7 @@ export default function useAnimatedEmoji(
       emoji,
       x,
       y,
-      startSize: width,
+      startSize: SIZE,
       isReversed: !isOwn,
     });
 
@@ -113,7 +102,7 @@ export default function useAnimatedEmoji(
       : TIME_DEFAULT);
   }, [
     chatId, emoji, hasEffect, interactWithAnimatedEmoji, isOwn,
-    localEffect, messageId, play, sendInteractionBunch, width,
+    localEffect, messageId, play, sendInteractionBunch,
   ]);
 
   // Set an end anchor for remote activated interaction
@@ -137,7 +126,7 @@ export default function useAnimatedEmoji(
         id,
         chatId,
         emoticon: localEffect ? selectLocalAnimatedEmojiEffectByName(localEffect) : emoji,
-        startSize: width,
+        startSize: SIZE,
         x,
         y,
         isReversed: !isOwn,
@@ -145,16 +134,13 @@ export default function useAnimatedEmoji(
       play();
     });
   }, [
-    activeEmojiInteractions, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction, width,
+    activeEmojiInteractions, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction,
   ]);
 
   return {
-    playKey,
     ref,
+    size: SIZE,
     style,
-    width,
     handleClick,
-    markAnimationLoaded,
-    isAnimationLoaded,
   };
 }

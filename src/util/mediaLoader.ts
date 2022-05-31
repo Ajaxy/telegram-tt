@@ -19,7 +19,6 @@ import { webpToPng } from './webpToPng';
 
 const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
-  [ApiMediaFormat.Lottie]: cacheApi.Type.Blob,
   [ApiMediaFormat.Text]: cacheApi.Type.Text,
   [ApiMediaFormat.Progressive]: undefined,
   [ApiMediaFormat.Stream]: undefined,

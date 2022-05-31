@@ -2,11 +2,14 @@ import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
 import { STICKER_SIZE_PASSCODE } from '../../../../config';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import Button from '../../../ui/Button';
-import AnimatedIcon from '../../../common/AnimatedIcon';
+import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
+
+import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   onStart: NoneToVoidFunction;
@@ -24,7 +27,12 @@ const SettingsPasscodeStart: FC<OwnProps> = ({
   return (
     <div className="settings-content local-passcode custom-scroll">
       <div className="settings-content-header no-border">
-        <AnimatedIcon size={STICKER_SIZE_PASSCODE} name="Lock" />
+        <AnimatedIconWithPreview
+          tgsUrl={LOCAL_TGS_URLS.Lock}
+          previewUrl={lockPreviewUrl}
+          size={STICKER_SIZE_PASSCODE}
+          className="settings-content-icon"
+        />
 
         <p className="settings-item-description" dir="auto">
           When you set up an additional passcode, a lock icon will appear on the chats page.

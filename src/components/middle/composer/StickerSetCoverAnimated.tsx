@@ -2,7 +2,6 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiStickerSet } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -30,7 +29,7 @@ const StickerSetCoverAnimated: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const mediaHash = `stickerSet${stickerSet.id}`;
-  const lottieData = useMedia(mediaHash, !isIntersecting, ApiMediaFormat.Lottie);
+  const lottieData = useMedia(mediaHash, !isIntersecting);
   const transitionClassNames = useMediaTransition(lottieData);
 
   const firstLetters = useMemo(() => {
@@ -44,9 +43,8 @@ const StickerSetCoverAnimated: FC<OwnProps> = ({
       {firstLetters}
       {lottieData && (
         <AnimatedSticker
-          id={mediaHash}
           size={size}
-          animationData={lottieData}
+          tgsUrl={lottieData}
           className={transitionClassNames}
         />
       )}

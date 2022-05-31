@@ -6,21 +6,22 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import useLang from '../../hooks/useLang';
 import buildClassName from '../../util/buildClassName';
 import { decryptSession } from '../../util/passcode';
-import getAnimationData from '../common/helpers/animatedAssets';
 import useShowTransition from '../../hooks/useShowTransition';
 import useTimeout from '../../hooks/useTimeout';
 import useFlag from '../../hooks/useFlag';
 
-import AnimatedSticker from '../common/AnimatedSticker';
+import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import PasswordForm from '../common/PasswordForm';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
 import Link from '../ui/Link';
 
 import styles from './LockScreen.module.scss';
+import lockPreviewUrl from '../../assets/lock.png';
 
 export type OwnProps = {
   isLocked?: boolean;
@@ -55,18 +56,6 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   const [shouldShowPasscode, setShouldShowPasscode] = useState(false);
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
   const { transitionClassNames, shouldRender } = useShowTransition(isLocked);
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, markAnimationLoaded] = useFlag();
-  const shouldRenderAnimated = Boolean(animationData);
-
-  useEffect(() => {
-    getAnimationData('Lock').then(setAnimationData);
-  }, []);
-
-  const { transitionClassNames: animatedClassNames } = useShowTransition(shouldRenderAnimated);
-  const { shouldRender: shouldRenderStatic, transitionClassNames: staticClassNames } = useShowTransition(
-    !isAnimationLoaded, undefined, true,
-  );
 
   useTimeout(
     resetInvalidUnlockAttempts,
@@ -128,22 +117,12 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   return (
     <div className={buildClassName(styles.container, transitionClassNames)}>
       <div className={styles.wrapper} dir={lang.isRtl ? 'rtl' : undefined}>
-        <div className={styles.icon}>
-          {shouldRenderStatic && (
-            <div className={buildClassName(styles.iconStatic, staticClassNames)} />
-          )}
-          {shouldRenderAnimated && (
-            <AnimatedSticker
-              id="lock_screen_icon"
-              animationData={animationData}
-              className={buildClassName(styles.iconAnimated, animatedClassNames)}
-              play
-              noLoop
-              size={ICON_SIZE}
-              onLoad={markAnimationLoaded}
-            />
-          )}
-        </div>
+        <AnimatedIconWithPreview
+          tgsUrl={LOCAL_TGS_URLS.Lock}
+          previewUrl={lockPreviewUrl}
+          size={ICON_SIZE}
+          className={styles.icon}
+        />
 
         <PasswordForm
           key="password-form"

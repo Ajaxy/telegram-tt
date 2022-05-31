@@ -1,13 +1,14 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  useState, useEffect, useCallback, memo,
-} from '../../lib/teact/teact';
+import React, { useCallback, memo } from '../../lib/teact/teact';
 
 import { STICKER_SIZE_AUTH, STICKER_SIZE_AUTH_MOBILE, STICKER_SIZE_TWO_FA } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import getAnimationData from './helpers/animatedAssets';
+import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 
 import AnimatedSticker from './AnimatedSticker';
+
+import useTimeout from '../../hooks/useTimeout';
+import useFlag from '../../hooks/useFlag';
 
 import './PasswordMonkey.scss';
 
@@ -23,53 +24,32 @@ const SEGMENT_COVER_EYE: [number, number] = [20, 0];
 const STICKER_SIZE = IS_SINGLE_COLUMN_LAYOUT ? STICKER_SIZE_AUTH_MOBILE : STICKER_SIZE_AUTH;
 
 const PasswordMonkey: FC<OwnProps> = ({ isPasswordVisible, isBig }) => {
-  const [closeMonkeyData, setCloseMonkeyData] = useState<string>();
-  const [peekMonkeyData, setPeekMonkeyData] = useState<string>();
-  const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
-  const [isPeekShown, setIsPeekShown] = useState(false);
+  const [isFirstMonkeyLoaded, markFirstMonkeyLoaded] = useFlag(false);
+  const [isPeekShown, markPeekShown] = useFlag(false);
 
-  useEffect(() => {
-    if (!closeMonkeyData) {
-      getAnimationData('MonkeyClose').then(setCloseMonkeyData);
-    } else {
-      setTimeout(() => setIsPeekShown(true), PEEK_MONKEY_SHOW_DELAY);
-    }
-  }, [closeMonkeyData]);
-
-  useEffect(() => {
-    if (!peekMonkeyData) {
-      getAnimationData('MonkeyPeek').then(setPeekMonkeyData);
-    }
-  }, [peekMonkeyData]);
-
-  const handleFirstMonkeyLoad = useCallback(() => setIsFirstMonkeyLoaded(true), []);
+  useTimeout(markPeekShown, PEEK_MONKEY_SHOW_DELAY);
+  const handleFirstMonkeyLoad = useCallback(markFirstMonkeyLoaded, [markFirstMonkeyLoaded]);
 
   return (
     <div id="monkey" className={isBig ? 'big' : ''}>
       {!isFirstMonkeyLoaded && (
         <div className="monkey-preview" />
       )}
-      {closeMonkeyData && (
-        <AnimatedSticker
-          id="closeMonkey"
-          size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
-          className={isPeekShown ? 'hidden' : 'shown'}
-          animationData={closeMonkeyData}
-          playSegment={SEGMENT_COVER_EYES}
-          noLoop
-          onLoad={handleFirstMonkeyLoad}
-        />
-      )}
-      {peekMonkeyData && (
-        <AnimatedSticker
-          id="peekMonkey"
-          size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
-          className={isPeekShown ? 'shown' : 'hidden'}
-          animationData={peekMonkeyData}
-          playSegment={isPasswordVisible ? SEGMENT_UNCOVER_EYE : SEGMENT_COVER_EYE}
-          noLoop
-        />
-      )}
+      <AnimatedSticker
+        size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
+        className={isPeekShown ? 'hidden' : 'shown'}
+        tgsUrl={LOCAL_TGS_URLS.MonkeyClose}
+        playSegment={SEGMENT_COVER_EYES}
+        noLoop
+        onLoad={handleFirstMonkeyLoad}
+      />
+      <AnimatedSticker
+        size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
+        className={isPeekShown ? 'shown' : 'hidden'}
+        tgsUrl={LOCAL_TGS_URLS.MonkeyPeek}
+        playSegment={isPasswordVisible ? SEGMENT_UNCOVER_EYE : SEGMENT_COVER_EYE}
+        noLoop
+      />
     </div>
   );
 };

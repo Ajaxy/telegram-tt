@@ -5,6 +5,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
 import usePrevious from '../../../hooks/usePrevious';
@@ -147,7 +148,7 @@ const MicrophoneButton: FC<StateProps> = ({
         onMouseUp={handleMouseUpMute}
       >
         <AnimatedIcon
-          name={animatedIconName}
+          tgsUrl={LOCAL_TGS_URLS[animatedIconName]}
           size={ICON_SIZE}
           playSegment={playSegment}
         />

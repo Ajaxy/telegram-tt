@@ -1,17 +1,21 @@
+import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
+
 import React, {
   useEffect, useRef, memo, useCallback, useState,
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 
-type OwnProps = {
+export type OwnProps = {
+  ref?: RefObject<HTMLDivElement>;
   className?: string;
-  id: string;
-  animationData?: string;
+  style?: string;
+  tgsUrl?: string;
   play?: boolean | string;
   playSegment?: [number, number];
   speed?: number;
@@ -19,9 +23,10 @@ type OwnProps = {
   size: number;
   quality?: number;
   isLowPriority?: boolean;
-  onLoad?: NoneToVoidFunction;
   forceOnHeavyAnimation?: boolean;
   color?: [number, number, number];
+  onClick?: NoneToVoidFunction;
+  onLoad?: NoneToVoidFunction;
   onEnded?: NoneToVoidFunction;
 };
 
@@ -45,9 +50,10 @@ async function ensureLottie() {
 setTimeout(ensureLottie, LOTTIE_LOAD_DELAY);
 
 const AnimatedSticker: FC<OwnProps> = ({
+  ref,
   className,
-  id,
-  animationData,
+  style,
+  tgsUrl,
   play,
   playSegment,
   speed,
@@ -57,12 +63,17 @@ const AnimatedSticker: FC<OwnProps> = ({
   isLowPriority,
   color,
   forceOnHeavyAnimation,
+  onClick,
   onLoad,
   onEnded,
 }) => {
-  const [animation, setAnimation] = useState<RLottieInstance>();
   // eslint-disable-next-line no-null/no-null
-  const container = useRef<HTMLDivElement>(null);
+  let containerRef = useRef<HTMLDivElement>(null);
+  if (ref) {
+    containerRef = ref;
+  }
+
+  const [animation, setAnimation] = useState<RLottieInstance>();
   const wasPlaying = useRef(false);
   const isFrozen = useRef(false);
   const isFirstRender = useRef(true);
@@ -73,19 +84,18 @@ const AnimatedSticker: FC<OwnProps> = ({
   playSegmentRef.current = playSegment;
 
   useEffect(() => {
-    if (animation || !animationData) {
+    if (animation || !tgsUrl) {
       return;
     }
 
     const exec = () => {
-      if (!container.current) {
+      if (!containerRef.current) {
         return;
       }
 
       const newAnimation = new RLottie(
-        id,
-        container.current,
-        animationData,
+        containerRef.current,
+        tgsUrl,
         {
           noLoop,
           size,
@@ -109,13 +119,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     } else {
       ensureLottie().then(() => {
         fastRaf(() => {
-          if (container.current) {
+          if (containerRef.current) {
             exec();
           }
         });
       });
     }
-  }, [color, animation, animationData, id, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded]);
+  }, [color, animation, tgsUrl, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded]);
 
   useEffect(() => {
     if (!animation) return;
@@ -135,10 +145,8 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (animation && (playRef.current || playSegmentRef.current)) {
       if (playSegmentRef.current) {
         animation.playSegment(playSegmentRef.current);
-      } else if (shouldRestart) {
-        animation.goToAndPlay(0);
       } else {
-        animation.play();
+        animation.play(shouldRestart);
       }
     }
   }, [animation]);
@@ -167,12 +175,12 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const unfreezeAnimation = useCallback(() => {
     if (wasPlaying.current) {
-      playAnimation();
+      playAnimation(noLoop);
     }
 
     wasPlaying.current = false;
     isFrozen.current = false;
-  }, [playAnimation]);
+  }, [noLoop, playAnimation]);
 
   const unfreezeAnimationOnRaf = useCallback(() => {
     fastRaf(unfreezeAnimation);
@@ -203,12 +211,12 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (animation) {
       if (isFirstRender.current) {
         isFirstRender.current = false;
-      } else if (animationData) {
-        animation.changeData(animationData);
+      } else if (tgsUrl) {
+        animation.changeData(tgsUrl);
         playAnimation();
       }
     }
-  }, [playAnimation, animation, animationData]);
+  }, [playAnimation, animation, tgsUrl]);
 
   useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation, forceOnHeavyAnimation);
   // Pausing frame may not happen in background
@@ -216,15 +224,16 @@ const AnimatedSticker: FC<OwnProps> = ({
   // then we can play again.
   useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf);
 
-  const fullClassName = buildClassName('AnimatedSticker', className);
-
-  const style = size ? `width: ${size}px; height: ${size}px;` : undefined;
-
   return (
     <div
-      ref={container}
-      className={fullClassName}
-      style={style}
+      ref={containerRef}
+      className={buildClassName('AnimatedSticker', className)}
+      style={buildStyle(
+        size !== undefined && `width: ${size}px; height: ${size}px;`,
+        onClick && 'cursor: pointer',
+        style,
+      )}
+      onClick={onClick}
     />
   );
 };

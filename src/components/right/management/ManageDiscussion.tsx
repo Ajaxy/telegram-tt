@@ -8,20 +8,20 @@ import type { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { selectChat } from '../../../global/selectors';
-import getAnimationData from '../../common/helpers/animatedAssets';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
 import GroupChatInfo from '../../common/GroupChatInfo';
-import AnimatedSticker from '../../common/AnimatedSticker';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import useFlag from '../../../hooks/useFlag';
 import renderText from '../../common/helpers/renderText';
 import Avatar from '../../common/Avatar';
 import { isChatChannel } from '../../../global/helpers';
+import AnimatedIcon from '../../common/AnimatedIcon';
 
 type OwnProps = {
   chatId: string;
@@ -56,9 +56,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
   const [isConfirmUnlinkGroupDialogOpen, openConfirmUnlinkGroupDialog, closeConfirmUnlinkGroupDialog] = useFlag();
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
   const lang = useLang();
@@ -72,12 +69,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     loadGroupsForDiscussion();
   }, [loadGroupsForDiscussion]);
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('DiscussionGroups').then(setAnimationData);
-    }
-  }, [animationData]);
 
   const handleUnlinkGroupSessions = useCallback(() => {
     closeConfirmUnlinkGroupDialog();
@@ -143,10 +134,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
         `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?`,
         ['br', 'simple_markdown'],
       );
-      // return renderText(
-      //   lang('DiscussionLinkGroupPublicAlert', linkedChat.title, chat!.title),
-      //   ['br', 'simple_markdown'],
-      // );
     }
 
     return renderText(
@@ -154,10 +141,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
       `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?\n\nAnyone from the channel will be able to see messages in this group.`,
       ['br', 'simple_markdown'],
     );
-    // return renderText(
-    //   lang('DiscussionLinkGroupPrivateAlert', linkedChat.title, chat!.title),
-    //   ['br', 'simple_markdown'],
-    // );
   }
 
   function renderLinkedGroup() {
@@ -244,18 +227,11 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <div className="section-icon">
-            {animationData && (
-              <AnimatedSticker
-                id="discussionGroupsDucks"
-                size={STICKER_SIZE_DISCUSSION_GROUPS}
-                animationData={animationData}
-                play={isAnimationLoaded}
-                noLoop
-                onLoad={handleAnimationLoad}
-              />
-            )}
-          </div>
+          <AnimatedIcon
+            tgsUrl={LOCAL_TGS_URLS.DiscussionGroups}
+            size={STICKER_SIZE_DISCUSSION_GROUPS}
+            className="section-icon"
+          />
           {linkedChat && renderLinkedGroup()}
           {!linkedChat && renderDiscussionGroups()}
         </div>

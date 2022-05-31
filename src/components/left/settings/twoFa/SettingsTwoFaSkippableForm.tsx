@@ -8,15 +8,15 @@ import type { ApiSticker } from '../../../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../../util/environment';
 import { selectAnimatedEmoji } from '../../../../global/selectors';
+import renderText from '../../../common/helpers/renderText';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
-import AnimatedEmoji from '../../../common/AnimatedEmoji';
 import InputText from '../../../ui/InputText';
-import renderText from '../../../common/helpers/renderText';
+import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 
 type OwnProps = {
   icon: 'hint' | 'email';
@@ -36,6 +36,7 @@ type StateProps = {
 };
 
 const FOCUS_DELAY_TIMEOUT_MS = IS_SINGLE_COLUMN_LAYOUT ? 550 : 400;
+const ICON_SIZE = 160;
 
 const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   animatedEmoji,
@@ -100,7 +101,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content two-fa custom-scroll">
       <div className="settings-content-header no-border">
-        <AnimatedEmoji sticker={animatedEmoji} size="large" />
+        <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} className="settings-content-icon" />
       </div>
 
       <div className="settings-item pt-0">

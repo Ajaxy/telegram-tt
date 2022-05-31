@@ -13,6 +13,7 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
   IS_SINGLE_COLUMN_LAYOUT,
 } from '../../../util/environment';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
 import useLang from '../../../hooks/useLang';
@@ -311,9 +312,13 @@ const PhoneCall: FC<StateProps> = ({
         {hasOwnVideo && (IS_ANDROID || IS_IOS) && (
           <PhoneCallButton
             onClick={handleFlipCamera}
-            customIcon={
-              <AnimatedIcon name="CameraFlip" playSegment={!isFlipping ? [0, 1] : [0, 10]} size={32} />
-            }
+            customIcon={(
+              <AnimatedIcon
+                tgsUrl={LOCAL_TGS_URLS.CameraFlip}
+                playSegment={!isFlipping ? [0, 1] : [0, 10]}
+                size={32}
+              />
+            )}
             isDisabled={!isActive}
             label={lang('VoipFlip')}
           />

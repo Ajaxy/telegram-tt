@@ -1,42 +1,70 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { memo, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useCallback, useState,
+} from '../../lib/teact/teact';
 
-import type { ANIMATED_STICKERS_PATHS } from './helpers/animatedAssets';
-import getAnimationData from './helpers/animatedAssets';
+import type { OwnProps as AnimatedStickerProps } from './AnimatedSticker';
+
+import buildClassName from '../../util/buildClassName';
+import useMediaTransition from '../../hooks/useMediaTransition';
+import useFlag from '../../hooks/useFlag';
 
 import AnimatedSticker from './AnimatedSticker';
 
-type OwnProps = {
-  name: keyof typeof ANIMATED_STICKERS_PATHS;
-  size: number;
-  playSegment?: [number, number];
-  color?: [number, number, number];
-};
+const DEFAULT_SIZE = 150;
 
-const AnimatedIcon: FC<OwnProps> = ({
-  size,
-  name,
-  playSegment,
-  color,
-}) => {
-  const [iconData, setIconData] = useState<string>();
+export type OwnProps =
+  Partial<AnimatedStickerProps>
+  & { noTransition?: boolean; nonInteractive?: boolean };
 
-  useEffect(() => {
-    getAnimationData(name).then(setIconData);
-  }, [name]);
+const loadedAnimationUrls = new Set();
+
+function AnimatedIcon(props: OwnProps) {
+  const {
+    size = DEFAULT_SIZE,
+    play = true,
+    noLoop = true,
+    className,
+    noTransition,
+    nonInteractive,
+    onLoad,
+    onClick,
+    ...otherProps
+  } = props;
+  const { tgsUrl } = props;
+
+  const key = `${tgsUrl}_${size}`;
+  const [isAnimationLoaded, markAnimationLoaded] = useFlag(loadedAnimationUrls.has(key));
+  const transitionClassNames = useMediaTransition(noTransition || isAnimationLoaded);
+
+  const handleLoad = useCallback(() => {
+    markAnimationLoaded();
+    loadedAnimationUrls.add(key);
+
+    onLoad?.();
+  }, [key, markAnimationLoaded, onLoad]);
+
+  const [playKey, setPlayKey] = useState(String(Math.random()));
+
+  const handleClick = useCallback(() => {
+    if (play === true) {
+      setPlayKey(String(Math.random()));
+    }
+
+    onClick?.();
+  }, [onClick, play]);
 
   return (
     <AnimatedSticker
-      id={name}
-      play
-      noLoop
-      playSegment={playSegment}
+      className={buildClassName(className, transitionClassNames, 'shown')}
       size={size}
-      speed={1}
-      animationData={iconData}
-      color={color}
+      play={play === true ? playKey : play}
+      noLoop={noLoop}
+      onClick={!nonInteractive ? handleClick : undefined}
+      onLoad={handleLoad}
+      /* eslint-disable-next-line react/jsx-props-no-spreading */
+      {...otherProps}
     />
   );
-};
+}
 
 export default memo(AnimatedIcon);

@@ -1,11 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ActiveEmojiInteraction } from '../../global/types';
-import { ApiMediaFormat } from '../../api/types';
 
 import { IS_ANDROID } from '../../util/environment';
 import useFlag from '../../hooks/useFlag';
@@ -14,7 +13,7 @@ import buildClassName from '../../util/buildClassName';
 import {
   selectAnimatedEmojiEffect,
 } from '../../global/selectors';
-import getAnimationData, { ANIMATED_STICKERS_PATHS } from '../common/helpers/animatedAssets';
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import AnimatedSticker from '../common/AnimatedSticker';
@@ -84,22 +83,16 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     }, PLAYING_DURATION);
   }, [stop]);
 
-  const effectAnimationData = useMedia(`sticker${effectAnimationId}`, !effectAnimationId, ApiMediaFormat.Lottie);
-
-  const [localEffectAnimationData, setLocalEffectAnimationData] = useState<string | undefined>();
-  useEffect(() => {
-    if (localEffectAnimation) {
-      getAnimationData(localEffectAnimation as keyof typeof ANIMATED_STICKERS_PATHS).then((data) => {
-        setLocalEffectAnimationData(data);
-      });
-    }
-  }, [localEffectAnimation]);
+  const effectTgsUrl = useMedia(`sticker${effectAnimationId}`, !effectAnimationId);
 
   if (!activeEmojiInteraction.startSize) {
     return undefined;
   }
 
   const scale = (activeEmojiInteraction.startSize || 0) / EFFECT_SIZE;
+  const tgsUrl = localEffectAnimation && (localEffectAnimation in LOCAL_TGS_URLS)
+    ? LOCAL_TGS_URLS[localEffectAnimation as keyof typeof LOCAL_TGS_URLS]
+    : effectTgsUrl;
 
   return (
     <div
@@ -113,9 +106,8 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     >
       <AnimatedSticker
         key={`effect_${effectAnimationId}`}
-        id={`effect_${effectAnimationId}`}
         size={EFFECT_SIZE}
-        animationData={localEffectAnimationData || effectAnimationData}
+        tgsUrl={tgsUrl}
         play={isPlaying}
         quality={IS_ANDROID ? 0.5 : undefined}
         forceOnHeavyAnimation
@@ -133,7 +125,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       effectAnimationId: animatedEffect ? animatedEffect.id : undefined,
       localEffectAnimation: !animatedEffect && activeEmojiInteraction.animatedEffect
-      && Object.keys(ANIMATED_STICKERS_PATHS).includes(activeEmojiInteraction.animatedEffect)
+      && Object.keys(LOCAL_TGS_URLS).includes(activeEmojiInteraction.animatedEffect)
         ? activeEmojiInteraction.animatedEffect : undefined,
     };
   },

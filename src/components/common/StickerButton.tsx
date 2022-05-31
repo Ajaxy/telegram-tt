@@ -75,7 +75,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !isIntersecting, ApiMediaFormat.BlobUrl);
 
   const shouldPlay = isIntersecting && !noAnimate;
-  const lottieData = useMedia(sticker.isLottie && localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
+  const lottieData = useMedia(sticker.isLottie && localMediaHash, !shouldPlay);
   const [isLottieLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
   const canLottiePlay = isLottieLoaded && shouldPlay;
   const isVideo = sticker.isVideo && IS_WEBM_SUPPORTED;
@@ -217,8 +217,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
       )}
       {shouldPlay && lottieData && (
         <AnimatedSticker
-          id={localMediaHash}
-          animationData={lottieData}
+          tgsUrl={lottieData}
           play
           size={size}
           isLowPriority

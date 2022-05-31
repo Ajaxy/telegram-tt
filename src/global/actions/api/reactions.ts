@@ -31,10 +31,10 @@ addActionHandler('loadAvailableReactions', async () => {
   // Preload animations
   result.forEach((availableReaction) => {
     if (availableReaction.aroundAnimation) {
-      mediaLoader.fetch(`sticker${availableReaction.aroundAnimation.id}`, ApiMediaFormat.Lottie);
+      mediaLoader.fetch(`sticker${availableReaction.aroundAnimation.id}`, ApiMediaFormat.BlobUrl);
     }
     if (availableReaction.centerIcon) {
-      mediaLoader.fetch(`sticker${availableReaction.centerIcon.id}`, ApiMediaFormat.Lottie);
+      mediaLoader.fetch(`sticker${availableReaction.centerIcon.id}`, ApiMediaFormat.BlobUrl);
     }
   });
 
