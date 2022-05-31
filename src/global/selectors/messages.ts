@@ -311,7 +311,7 @@ export function selectFocusedMessageId(global: GlobalState, chatId: string) {
 export function selectIsMessageFocused(global: GlobalState, message: ApiMessage) {
   const focusedId = selectFocusedMessageId(global, message.chatId);
 
-  return focusedId ? focusedId === getMessageOriginalId(message) : false;
+  return focusedId ? focusedId === message.id || focusedId === message.previousLocalId : false;
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
