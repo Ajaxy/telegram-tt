@@ -1,6 +1,5 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import type { ApiPrivacyKey } from '../../../types';
 import { PaymentStep } from '../../../types';
 
 import {
@@ -46,7 +45,16 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       break;
 
     case 'updatePrivacy':
-      global.settings.privacy[update.key as ApiPrivacyKey] = update.rules;
+      setGlobal({
+        ...global,
+        settings: {
+          ...global.settings,
+          privacy: {
+            ...global.settings.privacy,
+            [update.key]: update.rules,
+          },
+        },
+      });
       break;
 
     case 'updatePaymentVerificationNeeded':
