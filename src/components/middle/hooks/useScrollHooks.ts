@@ -5,7 +5,7 @@ import { useMemo, useRef } from '../../../lib/teact/teact';
 import { LoadMoreDirection } from '../../../types';
 import type { MessageListType } from '../../../global/types';
 
-import { LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../../config';
+import { LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../../config';
 import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';
 import { debounce } from '../../../util/schedulers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -84,7 +84,7 @@ export default function useScrollHooks(
     }
 
     // Loading history while sending a message can return the same message and cause ambiguity
-    const isFirstMessageLocal = messageIds[0] >= LOCAL_MESSAGE_ID_BASE;
+    const isFirstMessageLocal = messageIds[0] > LOCAL_MESSAGE_MIN_ID;
     if (isFirstMessageLocal) {
       return;
     }

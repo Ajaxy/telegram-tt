@@ -9,7 +9,7 @@ import buildClassName from '../../util/buildClassName';
 import { compact } from '../../util/iteratees';
 import { formatHumanDate } from '../../util/dateFormat';
 import {
-  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage,
+  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
 } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import type { MessageDateGroup } from './helpers/groupMessages';
@@ -182,10 +182,8 @@ const MessageListContent: FC<OwnProps> = ({
         currentDocumentGroupId = documentGroupId;
 
         const originalId = getMessageOriginalId(message);
-        // Scheduled messages can have local IDs in the middle of the list,
-        // and keys should be ordered, so we prefix it with a date.
-        // However, this may lead to issues if server date is not synchronized with the local one.
-        const key = type !== 'scheduled' ? originalId : `${message.date}_${originalId}`;
+        // Service notifications saved in cache in previous versions may share the same `previousLocalId`
+        const key = isServiceNotificationMessage(message) ? `${message.date}_${originalId}` : originalId;
 
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,

@@ -9,7 +9,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
-import { ANIMATION_END_DELAY, LOCAL_MESSAGE_ID_BASE, MESSAGE_LIST_SLICE } from '../../config';
+import { ANIMATION_END_DELAY, LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../config';
 import {
   selectChatMessages,
   selectIsViewportNewest,
@@ -303,7 +303,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     // Loading history while sending a message can return the same message and cause ambiguity
-    const isLastMessageLocal = messageIds && messageIds[messageIds.length - 1] >= LOCAL_MESSAGE_ID_BASE;
+    const isLastMessageLocal = messageIds && messageIds[messageIds.length - 1] > LOCAL_MESSAGE_MIN_ID;
     if (isLastMessageLocal) {
       return;
     }

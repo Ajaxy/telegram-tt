@@ -68,7 +68,7 @@ import {
   selectSponsoredMessage,
 } from '../../selectors';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
-import { isServiceNotificationMessage } from '../../helpers';
+import { getMessageOriginalId, isServiceNotificationMessage } from '../../helpers';
 import { getTranslation } from '../../../util/langProvider';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
@@ -302,7 +302,7 @@ addActionHandler('editMessage', (global, actions, payload) => {
 addActionHandler('cancelSendingMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
   const message = selectChatMessage(global, chatId, messageId);
-  const progressCallback = message && uploadProgressCallbacks.get(message.previousLocalId || message.id);
+  const progressCallback = message && uploadProgressCallbacks.get(getMessageOriginalId(message));
   if (progressCallback) {
     cancelApiProgress(progressCallback);
   }
