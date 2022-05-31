@@ -121,6 +121,7 @@ export interface ServiceNotification {
 
 export type GlobalState = {
   appConfig?: ApiAppConfig;
+  canInstall?: boolean;
   isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
@@ -598,6 +599,9 @@ export interface ActionPayloads {
   // Initial
   signOut: { forceInitApi?: boolean } | undefined;
   apiUpdate: ApiUpdate;
+
+  // Misc
+  setInstallPrompt: { canInstall: boolean };
 
   // Accounts
   reportPeer: {

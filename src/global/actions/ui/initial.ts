@@ -47,6 +47,14 @@ addActionHandler('init', (global) => {
   }
 });
 
+addActionHandler('setInstallPrompt', (global, actions, payload) => {
+  const { canInstall } = payload;
+  return {
+    ...global,
+    canInstall,
+  };
+});
+
 addActionHandler('setIsUiReady', (global, actions, payload) => {
   const { uiReadyState } = payload!;
 

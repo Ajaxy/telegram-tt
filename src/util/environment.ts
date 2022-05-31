@@ -91,6 +91,7 @@ export const IS_BACKDROP_BLUR_SUPPORTED = !IS_TEST && (
 );
 export const IS_COMPACT_MENU = !IS_TOUCH_ENV;
 export const IS_SCROLL_PATCH_NEEDED = !IS_MAC_OS && !IS_IOS && !IS_ANDROID;
+export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 
 // Smaller area reduces scroll jumps caused by `patchChromiumScroll`
 export const MESSAGE_LIST_SENSITIVE_AREA = IS_SCROLL_PATCH_NEEDED ? 300 : 750;
