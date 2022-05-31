@@ -29,7 +29,7 @@ type StateProps = {
 type OwnProps = {
   mediaData?: string;
   isVideo: boolean;
-  isZoomed: boolean;
+  zoomLevelChange: number;
   message?: ApiMessage;
   fileName?: string;
   isAvatar?: boolean;
@@ -37,13 +37,12 @@ type OwnProps = {
   onReport: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
-  onZoomToggle: NoneToVoidFunction;
+  setZoomLevelChange: (change: number) => void;
 };
 
 const MediaViewerActions: FC<OwnProps & StateProps> = ({
   mediaData,
   isVideo,
-  isZoomed,
   message,
   fileName,
   isAvatar,
@@ -52,8 +51,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   canReport,
   onReport,
   onCloseMediaViewer,
+  zoomLevelChange,
+  setZoomLevelChange,
   onForward,
-  onZoomToggle,
 }) => {
   const {
     downloadMessageMedia,
@@ -72,6 +72,16 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       downloadMessageMedia({ message: message! });
     }
   }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
+
+  const handleZoomOut = useCallback(() => {
+    const change = zoomLevelChange < 0 ? zoomLevelChange : 0;
+    setZoomLevelChange(change - 1);
+  }, [setZoomLevelChange, zoomLevelChange]);
+
+  const handleZoomIn = useCallback(() => {
+    const change = zoomLevelChange > 0 ? zoomLevelChange : 0;
+    setZoomLevelChange(change + 1);
+  }, [setZoomLevelChange, zoomLevelChange]);
 
   const lang = useLang();
 
@@ -190,10 +200,19 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         round
         size="smaller"
         color="translucent-white"
-        ariaLabel={isZoomed ? 'Zoom Out' : 'Zoom In'}
-        onClick={onZoomToggle}
+        ariaLabel={lang('MediaZoomOut')}
+        onClick={handleZoomOut}
       >
-        <i className={isZoomed ? 'icon-zoom-out' : 'icon-zoom-in'} />
+        <i className="icon-zoom-out" />
+      </Button>
+      <Button
+        round
+        size="smaller"
+        color="translucent-white"
+        ariaLabel={lang('MediaZoomIn')}
+        onClick={handleZoomIn}
+      >
+        <i className="icon-zoom-in" />
       </Button>
       {canReport && (
         <Button

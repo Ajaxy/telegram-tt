@@ -8,6 +8,7 @@ import type { ApiMessage, ApiDimensions } from '../../../../api/types';
 
 import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';
+import { clamp } from '../../../../util/math';
 
 export const AlbumRectPart = {
   None: 0,
@@ -67,12 +68,10 @@ function accumulate(list: number[], initValue: number) {
   return list.reduce((accumulator, item) => accumulator + item, initValue);
 }
 
-function clamp(num: number, low: number, high: number) {
-  return num < low ? low : (num > high ? high : num);
-}
-
 function cropRatios(ratios: number[], averageRatio: number) {
-  return ratios.map((ratio) => (averageRatio > 1.1 ? clamp(ratio, 1, 2.75) : clamp(ratio, 0.6667, 1)));
+  return ratios.map((ratio) => {
+    return (averageRatio > 1.1 ? clamp(ratio, 1, 2.75) : clamp(ratio, 0.6667, 1));
+  });
 }
 
 function calculateContainerSize(layout: IMediaLayout[]) {

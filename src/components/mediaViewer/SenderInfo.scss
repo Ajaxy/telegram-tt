@@ -1,14 +1,12 @@
 .SenderInfo {
   display: flex;
   align-content: center;
-  color: white;
   cursor: pointer;
-
-  opacity: 0.5;
-  transition: 0.15s opacity;
+  color: rgba(255, 255, 255, 0.5);
+  transition: 0.15s color;
 
   &:hover {
-    opacity: 1;
+    color: white;
   }
 
   .Avatar {

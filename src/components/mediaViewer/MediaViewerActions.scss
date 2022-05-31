@@ -5,6 +5,7 @@
 
   .Button {
     margin-inline-start: 0.25rem;
+    color: rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -16,5 +17,9 @@
     position: absolute;
     top: 0;
     left: 0;
+  }
+
+  .Button {
+    color: rgba(255, 255, 255, 0.5);
   }
 }

@@ -35,4 +35,8 @@
   &--active {
     z-index: 1;
   }
+
+  &--moving {
+    cursor: move;
+  }
 }
