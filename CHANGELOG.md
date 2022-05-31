@@ -1,3 +1,21 @@
+## 1.47.0 (2022-05-31)
+
+### 👏 **Harder**
+* This update adds a Passcode Lock feature, giving Telegram users the most private and secure experience of any web app. To add a passcode, go to _Settings > Privacy and Security > Passcode Lock_.
+* When the app is locked, it encrypts its data, including your chats, text messages, contacts, and your session keys – making it impossible to access them without the code. By adding a passcode, users on shared PCs no longer need to log out to protect their privacy.
+* Remember the passcode you set, you will need to log out and back in to your account if you forget it.
+
+### 🤩 **Better**
+* Media Viewer now supports native zoom and pan gestures with a trackpad or Magic Mouse.
+* Statistics now include data about Public Shares for posts.
+* Improvements and tweaks for Group and Channel Statistics.
+
+### 🚀 **Faster**
+* Optimizations for the rendering engine.
+
+### 💪 **Stronger**
+* Various fixes for code syntax highlighting, including support for C#.
+
 ## 1.46.0 (2022-05-20)
 
 ### 👏 **Harder**

@@ -1,25 +1,19 @@
-**Telegram Web Z was updated to version 1.46**
+**Telegram Web Z was updated to version 1.47**
 
 👏 **Harder**
-• Web Z becomes the first official app to support code syntax highlighting – start a code block with a language code, and the app will highlight separate terms and functions:
-```js
-console.log('Hello world!');
-```
-• Use new buttons to copy code contents and switch word wrapping.
-• When available, Group Sticker Sets now appear in the sticker panel.
-• Improved Sticker Management – preview sticker sets faster or clear recently sent stickers by right-clicking and selecting ‘View Pack’ or ‘Remove from Recent’.
+• This update adds a Passcode Lock feature, giving Telegram users the most private and secure experience of any web app. To add a passcode, go to Settings > Privacy and Security > Passcode Lock.
+• When the app is locked, it encrypts its data, including your chats, text messages, contacts, and your session keys – making it impossible to access them without the code. By adding a passcode, users on shared PCs no longer need to log out to protect their privacy.
+• Remember the passcode you set, you will need to log out and back in to your account if you forget it.
 
 🤩 **Better**
-• Added fresh and modern chat background.
-• Various layout improvements.
+• Media Viewer now supports native zoom and pan gestures with a trackpad or Magic Mouse.
+• Statistics now include data about Public Shares for posts.
+• Improvements and tweaks for Group and Channel Statistics.
 
 🚀 **Faster**
-• Reduced bundle size.
+• Optimizations for the rendering engine.
 
 💪 **Stronger**
-• Fixed issues when copying chat titles.
-• Searching for chats no longer adds them to the history stack.
-• The ‘Discuss Post’ button in channels now properly redirects.
-• Background should no longer flicker after logging in.
-• Fixed closing the forward dialog when switching to inline bots.
-• Fixed scrolling in Channel Management > Join Requests.
+• Various fixes for code syntax highlighting, including support for C#.
+
+🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webztalks)** and **[Russian](https://t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
