@@ -2,13 +2,14 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsGraph,
+  ApiChat, ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, ApiMessagePublicForward, StatisticsGraph,
 } from '../../types';
 
 import { invokeRequest } from './client';
+import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildInputEntity } from '../gramjsBuilders';
 import {
-  buildChannelStatistics, buildGroupStatistics, buildMessageStatistics, buildGraph,
+  buildChannelStatistics, buildGroupStatistics, buildMessageStatistics, buildMessagePublicForwards, buildGraph,
 } from '../apiBuilders/statistics';
 
 export async function fetchChannelStatistics({
@@ -56,6 +57,32 @@ export async function fetchMessageStatistics({
   }
 
   return buildMessageStatistics(result);
+}
+
+export async function fetchMessagePublicForwards({
+  chat,
+  messageId,
+  dcId,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  dcId?: number;
+}): Promise<ApiMessagePublicForward[] | undefined> {
+  const result = await invokeRequest(new GramJs.stats.GetMessagePublicForwards({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    msgId: messageId,
+    offsetPeer: new GramJs.InputPeerEmpty(),
+  }), undefined, undefined, undefined, dcId);
+
+  if (!result) {
+    return undefined;
+  }
+
+  if ('chats' in result) {
+    addEntitiesWithPhotosToLocalDb(result.chats);
+  }
+
+  return buildMessagePublicForwards(result);
 }
 
 export async function fetchStatisticsAsyncGraph({

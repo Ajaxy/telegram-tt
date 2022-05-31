@@ -49,7 +49,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
           {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
         </div>
         <div className="StatisticsRecentMessage__meta">
-          {lang('ChannelStats.ViewsCount', message.views)}
+          {lang('ChannelStats.ViewsCount', message.views, 'i')}
         </div>
       </div>
 

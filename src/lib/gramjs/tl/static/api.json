@@ -227,6 +227,7 @@
     "stats.getBroadcastStats",
     "stats.getMegagroupStats",
     "stats.getMessageStats",
+    "stats.getMessagePublicForwards",
     "stats.loadAsyncGraph",
     "messages.getAttachMenuBots",
     "messages.getAttachMenuBot",

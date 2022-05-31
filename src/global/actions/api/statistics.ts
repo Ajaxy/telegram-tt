@@ -44,9 +44,15 @@ addActionHandler('loadMessageStatistics', async (global, actions, payload) => {
   global = getGlobal();
 
   const { views, forwards } = selectChatMessages(global, chatId)[messageId];
-
   result.views = views;
   result.forwards = forwards;
+
+  const dcId = chat.fullInfo!.statisticsDcId;
+  const publicForwards = await callApi('fetchMessagePublicForwards', { chat, messageId, dcId });
+  result.publicForwards = publicForwards?.length;
+  result.publicForwardsData = publicForwards;
+
+  global = getGlobal();
 
   setGlobal(updateMessageStatistics(global, result));
 });

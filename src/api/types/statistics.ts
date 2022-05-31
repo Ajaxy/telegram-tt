@@ -1,4 +1,5 @@
-import type { ApiMessage } from './messages';
+import type { ApiChat } from './chats';
+import type { ApiMessage, ApiPhoto } from './messages';
 
 export interface ApiChannelStatistics {
   growthGraph?: StatisticsGraph | string;
@@ -34,6 +35,15 @@ export interface ApiMessageStatistics {
   viewsGraph?: StatisticsGraph | string;
   forwards?: number;
   views?: number;
+  publicForwards?: number;
+  publicForwardsData?: ApiMessagePublicForward[];
+}
+
+export interface ApiMessagePublicForward {
+  messageId: number;
+  views?: number;
+  title?: string;
+  chat: ApiChat;
 }
 
 export interface StatisticsGraph {

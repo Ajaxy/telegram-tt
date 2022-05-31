@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { callApi } from '../../../api/gramjs';
-import type { ApiMessageStatistics, StatisticsGraph } from '../../../api/types';
+import type { ApiMessageStatistics, ApiMessagePublicForward, StatisticsGraph } from '../../../api/types';
 import { selectChat } from '../../../global/selectors';
 
 import buildClassName from '../../../util/buildClassName';
@@ -14,6 +14,7 @@ import useForceUpdate from '../../../hooks/useForceUpdate';
 
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
+import StatisticsPublicForward from './StatisticsPublicForward';
 
 import './Statistics.scss';
 
@@ -156,6 +157,16 @@ const Statistics: FC<OwnProps & StateProps> = ({
           <div className={buildClassName('Statistics__graph', !loadedCharts.current.includes(graph) && 'hidden')} />
         ))}
       </div>
+
+      {Boolean(statistics.publicForwards) && (
+        <div className="Statistics__public-forwards">
+          <h2 className="Statistics__public-forwards-title">{lang('Stats.Message.PublicShares')}</h2>
+
+          {statistics.publicForwardsData!.map((item: ApiMessagePublicForward) => (
+            <StatisticsPublicForward data={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
