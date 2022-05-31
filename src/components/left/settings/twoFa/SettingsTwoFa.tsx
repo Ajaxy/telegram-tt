@@ -9,7 +9,7 @@ import type { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTw
 import useLang from '../../../../hooks/useLang';
 
 import SettingsTwoFaEnabled from './SettingsTwoFaEnabled';
-import SettingsTwoFaPassword from './SettingsTwoFaPassword';
+import SettingsTwoFaPassword from '../SettingsPasswordForm';
 import SettingsTwoFaStart from './SettingsTwoFaStart';
 import SettingsTwoFaSkippableForm from './SettingsTwoFaSkippableForm';
 import SettingsTwoFaCongratulations from './SettingsTwoFaCongratulations';

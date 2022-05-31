@@ -157,6 +157,23 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.TwoFaRecoveryEmailCurrentPassword:
         return <h3>{lang('PleaseEnterCurrentPassword')}</h3>;
 
+      case SettingsScreens.PasscodeDisabled:
+      case SettingsScreens.PasscodeEnabled:
+      case SettingsScreens.PasscodeNewPasscode:
+      case SettingsScreens.PasscodeNewPasscodeConfirm:
+      case SettingsScreens.PasscodeCongratulations:
+        return <h3>{lang('Passcode')}</h3>;
+
+      case SettingsScreens.PasscodeTurnOff:
+        return <h3>{lang('PasscodeController.Disable.Title')}</h3>;
+
+      case SettingsScreens.PasscodeChangePasscodeCurrent:
+      case SettingsScreens.PasscodeChangePasscodeNew:
+        return <h3>{lang('PasscodeController.Change.Title')}</h3>;
+
+      case SettingsScreens.PasscodeChangePasscodeConfirm:
+        return <h3>{lang('PasscodeController.ReEnterPasscode.Placeholder')}</h3>;
+
       case SettingsScreens.Folders:
         return <h3>{lang('Filters')}</h3>;
       case SettingsScreens.FoldersCreateFolder:

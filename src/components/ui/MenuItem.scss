@@ -69,8 +69,16 @@
     transition: none !important;
   }
 
-  & > .Switcher {
+  .Switcher, .menu-item-badge {
     margin-left: auto;
+  }
+
+  .menu-item-badge {
+    margin-right: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    font-weight: normal;
+    line-height: normal;
   }
 
   &[dir="rtl"] {

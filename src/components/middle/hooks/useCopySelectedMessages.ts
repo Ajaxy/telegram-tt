@@ -10,7 +10,7 @@ const useCopySelectedMessages = (isActive: boolean, copySelectedMessages: NoneTo
     copySelectedMessages();
   }
 
-  useHotkeys({ 'meta+C': handleCopy });
+  useHotkeys({ 'Meta+C': handleCopy });
 };
 
 export default useCopySelectedMessages;

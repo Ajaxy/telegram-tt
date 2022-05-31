@@ -25,7 +25,7 @@ import { updater } from '../updater';
 import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
 import { buildApiUserFromFull } from '../apiBuilders/users';
-import localDb from '../localDb';
+import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { addMessageToLocalDb } from '../helpers';
 
@@ -102,7 +102,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       // eslint-disable-next-line no-console
       console.error(err);
 
-      if (err.message !== 'Disconnect') {
+      if (err.message !== 'Disconnect' && err.message !== 'Cannot send requests while disconnected') {
         onUpdate({
           '@type': 'updateConnectionState',
           connectionState: 'connectionStateBroken',
@@ -134,8 +134,13 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   }
 }
 
-export async function destroy() {
-  await invokeRequest(new GramJs.auth.LogOut());
+export async function destroy(noLogOut = false) {
+  if (!noLogOut) {
+    await invokeRequest(new GramJs.auth.LogOut());
+  }
+
+  clearLocalDb();
+
   await client.destroy();
 }
 

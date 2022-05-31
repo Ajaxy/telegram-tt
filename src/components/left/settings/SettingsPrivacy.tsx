@@ -19,6 +19,7 @@ type OwnProps = {
 
 type StateProps = {
   hasPassword?: boolean;
+  hasPasscode?: boolean;
   blockedCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
@@ -36,6 +37,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onReset,
   hasPassword,
+  hasPasscode,
   blockedCount,
   isSensitiveEnabled,
   canChangeSensitive,
@@ -110,6 +112,21 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
                 {lang('Users', blockedCount)}
               </span>
             )}
+          </div>
+        </ListItem>
+        <ListItem
+          icon="key"
+          narrow
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(
+            hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
+          )}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('Passcode')}</span>
+            <span className="subtitle" dir="auto">
+              {lang(hasPasscode ? 'PasswordOn' : 'PasswordOff')}
+            </span>
           </div>
         </ListItem>
         <ListItem
@@ -247,14 +264,20 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
       settings: {
-        byKey: { hasPassword, isSensitiveEnabled, canChangeSensitive },
+        byKey: {
+          hasPassword, isSensitiveEnabled, canChangeSensitive,
+        },
         privacy,
       },
       blocked,
+      passcode: {
+        hasPasscode,
+      },
     } = global;
 
     return {
       hasPassword,
+      hasPasscode: Boolean(hasPasscode),
       blockedCount: blocked.totalCount,
       isSensitiveEnabled,
       canChangeSensitive,

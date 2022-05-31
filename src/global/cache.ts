@@ -27,11 +27,13 @@ import {
   selectCurrentMessageList,
   selectVisibleUsers,
 } from './selectors';
-import { hasStoredSession } from '../util/sessions';
+import { hasStoredSession, loadStoredSession } from '../util/sessions';
 import { INITIAL_STATE } from './initialState';
 import { parseLocationHash } from '../util/routing';
 import { isUserId } from './helpers';
 import { getOrderedIds } from '../util/folderManager';
+import { clearGlobalForLockScreen } from './reducers';
+import { encryptSession } from '../util/passcode';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -45,6 +47,16 @@ export function initCache() {
     return;
   }
 
+  const resetCache = () => {
+    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+
+    if (!isCaching) {
+      return;
+    }
+
+    clearCaching();
+  };
+
   addActionHandler('saveSession', () => {
     if (isCaching) {
       return;
@@ -53,15 +65,7 @@ export function initCache() {
     setupCaching();
   });
 
-  addActionHandler('reset', () => {
-    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
-
-    if (!isCaching) {
-      return;
-    }
-
-    clearCaching();
-  });
+  addActionHandler('reset', resetCache);
 }
 
 export function loadCache(initialState: GlobalState): GlobalState | undefined {
@@ -236,6 +240,10 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.trustedBotIds = [];
   }
 
+  if (!cached.passcode) {
+    cached.passcode = {};
+  }
+
   if (cached.activeSessions?.byHash === undefined) {
     cached.activeSessions = {
       byHash: {},
@@ -245,16 +253,30 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
 }
 
 function updateCache() {
-  if (!isCaching || isHeavyAnimating()) {
-    return;
-  }
-
   const global = getGlobal();
-
-  if (global.isLoggingOut) {
+  if (!isCaching || global.isLoggingOut || isHeavyAnimating()) {
     return;
   }
 
+  const { hasPasscode, isScreenLocked } = global.passcode;
+  const serializedGlobal = serializeGlobal();
+
+  if (hasPasscode) {
+    if (!isScreenLocked) {
+      const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
+      void encryptSession(sessionJson, serializedGlobal);
+    }
+
+    localStorage.setItem(GLOBAL_STATE_CACHE_KEY, JSON.stringify(clearGlobalForLockScreen(global)));
+
+    return;
+  }
+
+  localStorage.setItem(GLOBAL_STATE_CACHE_KEY, serializedGlobal);
+}
+
+export function serializeGlobal() {
+  const global = getGlobal();
   const reducedGlobal: GlobalState = {
     ...INITIAL_STATE,
     ...pick(global, [
@@ -295,10 +317,14 @@ function updateCache() {
     availableReactions: reduceAvailableReactions(global),
     isCallPanelVisible: undefined,
     trustedBotIds: global.trustedBotIds,
+    passcode: pick(global.passcode, [
+      'isScreenLocked',
+      'hasPasscode',
+      'invalidAttemptsCount',
+    ]),
   };
 
-  const json = JSON.stringify(reducedGlobal);
-  localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
+  return JSON.stringify(reducedGlobal);
 }
 
 function reduceShowChatInfo(global: GlobalState): boolean {
@@ -352,7 +378,7 @@ function reduceChats(global: GlobalState): GlobalState['chats'] {
 function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const { currentUserId } = global;
   const byChatId: GlobalState['messages']['byChatId'] = {};
-  const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
+  const { chatId: currentChatId, threadId, type } = selectCurrentMessageList(global) || {};
   const chatIdsToSave = [
     ...currentChatId ? [currentChatId] : [],
     ...currentUserId ? [currentUserId] : [],
@@ -380,7 +406,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 
   return {
     byChatId,
-    messageLists: [],
+    messageLists: currentChatId && threadId && type ? [{ chatId: currentChatId, threadId, type }] : [],
     sponsoredByChatId: {},
   };
 }

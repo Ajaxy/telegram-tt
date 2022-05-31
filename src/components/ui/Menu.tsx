@@ -8,6 +8,7 @@ import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
@@ -143,8 +144,10 @@ const Menu: FC<OwnProps> = ({
       <div
         ref={menuRef}
         className={bubbleClassName}
-        style={`transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY};${
-          bubbleStyle || ''}`}
+        style={buildStyle(
+          `transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY}`,
+          bubbleStyle,
+        )}
         onClick={autoClose ? onClose : undefined}
       >
         {children}

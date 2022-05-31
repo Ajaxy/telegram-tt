@@ -214,6 +214,15 @@ export enum SettingsScreens {
   TwoFaRecoveryEmailCode,
   TwoFaCongratulations,
   QuickReaction,
+  PasscodeDisabled,
+  PasscodeNewPasscode,
+  PasscodeNewPasscodeConfirm,
+  PasscodeEnabled,
+  PasscodeChangePasscodeCurrent,
+  PasscodeChangePasscodeNew,
+  PasscodeChangePasscodeConfirm,
+  PasscodeTurnOff,
+  PasscodeCongratulations,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (

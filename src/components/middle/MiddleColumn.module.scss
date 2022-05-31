@@ -1,0 +1,90 @@
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: -1;
+  overflow: hidden;
+  background-color: var(--theme-background-color);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  :global(html.theme-light) &:not(.customBgImage)::before {
+    background-image: url('../../assets/chat-bg-br.png');
+  }
+
+  &:not(.customBgImage).customBgColor::before {
+    display: none;
+  }
+
+  &.customBgImage::before {
+    background-image: var(--custom-background) !important;
+    transform: scale(1.1);
+  }
+
+  :global(body:not(.animation-level-0)) &.withTransition {
+    transition: background-color 0.2s;
+
+    &.customBgImage::before {
+      transition: background-image var(--layer-transition);
+    }
+  }
+
+  &.customBgImage.blurred::before {
+    filter: blur(12px);
+  }
+
+  @media screen and (min-width: 1276px) {
+    :global(body.animation-level-2) &:not(.customBgImage)::before {
+      overflow: hidden;
+      transform: scale(1);
+      transform-origin: left center;
+    }
+  }
+
+  :global(html.theme-light body.animation-level-2) &:not(.customBgImage).withRightColumn::before {
+    @media screen and (min-width: 1276px) {
+      transform: scaleX(0.67) !important;
+    }
+    @media screen and (min-width: 1921px) {
+      transform: scaleX(0.8) !important;
+    }
+    @media screen and (min-width: 2600px) {
+      transform: scaleX(0.95) !important;
+    }
+  }
+
+  :global(html.theme-light body.animation-level-2) &:not(.customBgImage).withRightColumn.withTransition::before {
+    transition: transform var(--layer-transition);
+  }
+
+  &:not(.customBgImage):not(.customBgColor)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url('../../assets/chat-bg-pattern-light.png');
+    background-position: top right;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    :global(html.theme-dark) & {
+      background-image: url('../../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+  }
+}

@@ -10,6 +10,8 @@ import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs
 import FoldersAll from '../../../assets/tgs/settings/FoldersAll.tgs';
 import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
+import Lock from '../../../assets/tgs/settings/Lock.tgs';
+import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
 
 import CameraFlip from '../../../assets/tgs/calls/CameraFlip.tgs';
 import HandFilled from '../../../assets/tgs/calls/HandFilled.tgs';
@@ -37,6 +39,7 @@ export const ANIMATED_STICKERS_PATHS = {
   FoldersAll,
   FoldersNew,
   DiscussionGroups,
+  Lock,
   CameraFlip,
   HandFilled,
   HandOutline,
@@ -51,6 +54,7 @@ export const ANIMATED_STICKERS_PATHS = {
   JoinRequest,
   Invite,
   QrPlane,
+  Congratulations,
 };
 
 export default function getAnimationData(name: keyof typeof ANIMATED_STICKERS_PATHS) {

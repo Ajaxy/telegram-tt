@@ -4,7 +4,7 @@ import type {
 } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
-import { DEBUG, IS_TEST } from '../config';
+import { APP_NAME, DEBUG, IS_TEST } from '../config';
 import { getActions, getGlobal, setGlobal } from '../global';
 import {
   getChatAvatarHash,
@@ -275,6 +275,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   } = message;
   if (reaction) senderId = reaction.userId;
 
+  const { isScreenLocked } = global.passcode;
   const messageSender = senderId ? selectUser(global, senderId) : undefined;
   const messageAction = getMessageAction(message as ApiMessage);
   const actionTargetMessage = messageAction && replyToMessageId
@@ -293,7 +294,10 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
 
   let body: string;
-  if (selectShouldShowMessagePreview(chat, selectNotifySettings(global), selectNotifyExceptions(global))) {
+  if (
+    !isScreenLocked
+    && selectShouldShowMessagePreview(chat, selectNotifySettings(global), selectNotifyExceptions(global))
+  ) {
     if (isActionMessage(message)) {
       const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
 
@@ -318,7 +322,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   }
 
   return {
-    title: getChatTitle(getTranslation, chat, privateChatUser),
+    title: isScreenLocked ? APP_NAME : getChatTitle(getTranslation, chat, privateChatUser),
     body,
   };
 }

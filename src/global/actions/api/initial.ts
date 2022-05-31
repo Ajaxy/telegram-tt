@@ -11,6 +11,7 @@ import {
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
   IS_TEST,
+  LOCK_SCREEN_ANIMATION_DURATION_MS,
 } from '../../../config';
 import { IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, PLATFORM_ENV } from '../../../util/environment';
 import { unsubscribe } from '../../../util/notifications';
@@ -24,6 +25,9 @@ import {
   clearLegacySessions,
 } from '../../../util/sessions';
 import { forceWebsync } from '../../../util/websync';
+import { clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
+import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
+import { serializeGlobal } from '../../cache';
 
 addActionHandler('initApi', async (global, actions) => {
   if (!IS_TEST) {
@@ -142,6 +146,7 @@ addActionHandler('signOut', async (_global, _actions, payload) => {
 
 addActionHandler('reset', () => {
   clearStoredSession();
+  clearEncryptedSession();
 
   void cacheApi.clear(MEDIA_CACHE_NAME);
   void cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
@@ -159,6 +164,18 @@ addActionHandler('reset', () => {
   updateAppBadge(0);
 
   getActions().init();
+});
+
+addActionHandler('softReset', () => {
+  clearStoredSession();
+
+  void clearLegacySessions();
+
+  updateAppBadge(0);
+
+  let global = getGlobal();
+  global = clearGlobalForLockScreen(global);
+  setGlobal(global);
 });
 
 addActionHandler('disconnect', () => {
@@ -193,4 +210,30 @@ addActionHandler('deleteDeviceToken', (global) => {
     ...global,
     push: undefined,
   };
+});
+
+addActionHandler('lockScreen', async (global, { softReset }) => {
+  const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
+  const globalJson = serializeGlobal();
+
+  await encryptSession(sessionJson, globalJson);
+  forgetPasscode();
+
+  global = getGlobal();
+  setGlobal(updatePasscodeSettings(
+    global,
+    {
+      isScreenLocked: true,
+      invalidAttemptsCount: 0,
+    },
+  ));
+
+  try {
+    await unsubscribe();
+    await callApi('destroy', true);
+  } catch (err) {
+    // Do nothing
+  }
+
+  setTimeout(() => softReset(), LOCK_SCREEN_ANIMATION_DURATION_MS);
 });

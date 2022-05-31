@@ -356,7 +356,6 @@ const Main: FC<StateProps> = ({
   // Online status and browser tab indicators
   useBackgroundMode(handleBlur, handleFocus);
   useBeforeUnload(handleBlur);
-
   usePreventPinchZoomGesture(isMediaViewerOpen);
 
   return (
@@ -419,7 +418,13 @@ function updatePageTitle(nextTitle: string) {
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { settings: { byKey: { animationLevel, language, wasTimeFormatSetManually } } } = global;
+    const {
+      settings: {
+        byKey: {
+          animationLevel, language, wasTimeFormatSetManually,
+        },
+      },
+    } = global;
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)

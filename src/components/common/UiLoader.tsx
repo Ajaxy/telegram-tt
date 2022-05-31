@@ -6,9 +6,9 @@ import { ApiMediaFormat } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 
-import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
 import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
+import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
 import { pause } from '../../util/schedulers';
@@ -17,30 +17,32 @@ import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import buildClassName from '../../util/buildClassName';
-import buildStyle from '../../util/buildStyle';
-import useCustomBackground from '../../hooks/useCustomBackground';
 
-import './UiLoader.scss';
+import styles from './UiLoader.module.scss';
 
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 import reactionThumbsPath from '../../assets/reaction-thumbs.png';
+import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 
+export type UiLoaderPage =
+  'main'
+  | 'lock'
+  | 'authCode'
+  | 'authPassword'
+  | 'authPhoneNumber'
+  | 'authQrCode';
+
 type OwnProps = {
-  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
+  page?: UiLoaderPage;
   children: React.ReactNode;
 };
 
-type StateProps =
-  Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'>
-  & {
-    isRightColumnShown?: boolean;
-    leftColumnWidth?: number;
-    isBackgroundBlurred?: boolean;
-    theme: ThemeKey;
-    customBackground?: string;
-    backgroundColor?: string;
-  };
+type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
+  isRightColumnShown?: boolean;
+  leftColumnWidth?: number;
+  theme: ThemeKey;
+};
 
 const MAX_PRELOAD_DELAY = 700;
 const SECOND_STATE_DELAY = 1000;
@@ -81,6 +83,10 @@ const preloadTasks = {
   authCode: () => preloadImage(monkeyPath),
   authPassword: () => preloadImage(monkeyPath),
   authQrCode: preloadFonts,
+  lock: () => Promise.all([
+    preloadFonts(),
+    preloadImage(lockPreviewPath),
+  ]),
 };
 
 const UiLoader: FC<OwnProps & StateProps> = ({
@@ -90,9 +96,6 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   leftColumnWidth,
   theme,
-  backgroundColor,
-  customBackground,
-  isBackgroundBlurred,
 }) => {
   const { setIsUiReady } = getActions();
 
@@ -101,14 +104,12 @@ const UiLoader: FC<OwnProps & StateProps> = ({
     shouldRender: shouldRenderMask, transitionClassNames,
   } = useShowTransition(!isReady, undefined, true);
 
-  const customBackgroundValue = useCustomBackground(theme, customBackground);
-
   useEffect(() => {
     let timeout: number | undefined;
 
     const safePreload = async () => {
       try {
-        await preloadTasks[page]();
+        await preloadTasks[page!]();
       } catch (err) {
         // Do nothing
       }
@@ -116,7 +117,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 
     Promise.race([
       pause(MAX_PRELOAD_DELAY),
-      safePreload(),
+      page ? safePreload() : Promise.resolve(),
     ]).then(() => {
       markReady();
       setIsUiReady({ uiReadyState: 1 });
@@ -137,38 +138,26 @@ const UiLoader: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const middleClassName = buildClassName(
-    'middle bg-layers',
-    transitionClassNames,
-    customBackground && 'custom-bg-image',
-    backgroundColor && 'custom-bg-color',
-    customBackground && isBackgroundBlurred && 'blurred',
-    isRightColumnShown && 'with-right-column',
-  );
-  const inlineStyles = [
-    `--theme-background-color: ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)}`,
-    customBackgroundValue && `--custom-background: ${customBackgroundValue}`,
-  ];
-
   return (
-    <div id="UiLoader">
+    <div
+      id="UiLoader"
+      className={styles.root}
+      style={`--theme-background-color: ${theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR}`}
+    >
       {children}
-      {shouldRenderMask && !shouldSkipHistoryAnimations && (
-        <div className={buildClassName('mask', transitionClassNames)}>
+      {shouldRenderMask && !shouldSkipHistoryAnimations && Boolean(page) && (
+        <div className={buildClassName(styles.mask, transitionClassNames)}>
           {page === 'main' ? (
             <>
               <div
-                className="left"
+                className={styles.left}
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
-              <div
-                className={middleClassName}
-                style={buildStyle(...inlineStyles)}
-              />
-              {isRightColumnShown && <div className="right" />}
+              <div className={buildClassName(styles.middle, transitionClassNames)} />
+              {isRightColumnShown && <div className={styles.right} />}
             </>
           ) : (
-            <div className="blank" />
+            <div className={styles.blank} />
           )}
         </div>
       )}
@@ -179,9 +168,6 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 export default withGlobal<OwnProps>(
   (global): StateProps => {
     const theme = selectTheme(global);
-    const {
-      isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor,
-    } = global.settings.themes[theme] || {};
 
     return {
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
@@ -189,9 +175,6 @@ export default withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       leftColumnWidth: global.leftColumnWidth,
       theme,
-      customBackground,
-      isBackgroundBlurred,
-      backgroundColor,
     };
   },
 )(UiLoader);

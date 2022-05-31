@@ -9,6 +9,7 @@ import React, {
 import { debounce } from '../../util/schedulers';
 import resetScroll from '../../util/resetScroll';
 import { IS_ANDROID } from '../../util/environment';
+import buildStyle from '../../util/buildStyle';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -226,7 +227,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       {withAbsolutePositioning && items?.length ? (
         <div
           teactFastList={!noFastList}
-          style={`position: relative;${IS_ANDROID ? ` height: ${maxHeight}px;` : undefined}`}
+          style={buildStyle('position: relative', IS_ANDROID && `height: ${maxHeight}px`)}
         >
           {children}
         </div>

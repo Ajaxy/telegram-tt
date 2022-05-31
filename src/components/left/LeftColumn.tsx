@@ -11,6 +11,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
+import useOnChange from '../../hooks/useOnChange';
 
 import Transition from '../ui/Transition';
 import LeftMain from './main/LeftMain';
@@ -27,6 +28,8 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   leftColumnWidth?: number;
   currentUserId?: string;
+  hasPasscode?: boolean;
+  nextSettingsScreen?: SettingsScreens;
 };
 
 enum ContentType {
@@ -50,6 +53,8 @@ const LeftColumn: FC<StateProps> = ({
   shouldSkipHistoryAnimations,
   leftColumnWidth,
   currentUserId,
+  hasPasscode,
+  nextSettingsScreen,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -61,6 +66,7 @@ const LeftColumn: FC<StateProps> = ({
     setLeftColumnWidth,
     resetLeftColumnWidth,
     openChat,
+    requestNextSettingsScreen,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -91,17 +97,30 @@ const LeftColumn: FC<StateProps> = ({
       break;
   }
 
-  const handleReset = useCallback((forceReturnToChatList?: boolean) => {
-    if (content === LeftColumnContent.NewGroupStep2
-      && !forceReturnToChatList
-    ) {
+  const handleReset = useCallback((forceReturnToChatList?: true | Event) => {
+    function fullReset() {
+      setContent(LeftColumnContent.ChatList);
+      setContactsFilter('');
+      setGlobalSearchQuery({ query: '' });
+      setGlobalSearchDate({ date: undefined });
+      setGlobalSearchChatId({ id: undefined });
+      resetChatCreation();
+      setTimeout(() => {
+        setLastResetTime(Date.now());
+      }, RESET_TRANSITION_DELAY_MS);
+    }
+
+    if (forceReturnToChatList === true) {
+      fullReset();
+      return;
+    }
+
+    if (content === LeftColumnContent.NewGroupStep2) {
       setContent(LeftColumnContent.NewGroupStep1);
       return;
     }
 
-    if (content === LeftColumnContent.NewChannelStep2
-      && !forceReturnToChatList
-    ) {
+    if (content === LeftColumnContent.NewChannelStep2) {
       setContent(LeftColumnContent.NewChannelStep1);
       return;
     }
@@ -145,8 +164,33 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.TwoFaDisabled:
         case SettingsScreens.TwoFaEnabled:
         case SettingsScreens.TwoFaCongratulations:
+        case SettingsScreens.PasscodeDisabled:
+        case SettingsScreens.PasscodeEnabled:
+        case SettingsScreens.PasscodeCongratulations:
           setSettingsScreen(SettingsScreens.Privacy);
           return;
+
+        case SettingsScreens.PasscodeNewPasscode:
+          setSettingsScreen(hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled);
+          return;
+
+        case SettingsScreens.PasscodeChangePasscodeCurrent:
+        case SettingsScreens.PasscodeTurnOff:
+          setSettingsScreen(SettingsScreens.PasscodeEnabled);
+          return;
+
+        case SettingsScreens.PasscodeNewPasscodeConfirm:
+          setSettingsScreen(SettingsScreens.PasscodeNewPasscode);
+          return;
+
+        case SettingsScreens.PasscodeChangePasscodeNew:
+          setSettingsScreen(SettingsScreens.PasscodeChangePasscodeCurrent);
+          return;
+
+        case SettingsScreens.PasscodeChangePasscodeConfirm:
+          setSettingsScreen(SettingsScreens.PasscodeChangePasscodeNew);
+          return;
+
         case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
         case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyPhoneNumber);
@@ -235,18 +279,10 @@ const LeftColumn: FC<StateProps> = ({
       return;
     }
 
-    setContent(LeftColumnContent.ChatList);
-    setContactsFilter('');
-    setGlobalSearchQuery({ query: '' });
-    setGlobalSearchDate({ date: undefined });
-    setGlobalSearchChatId({ id: undefined });
-    resetChatCreation();
-    setTimeout(() => {
-      setLastResetTime(Date.now());
-    }, RESET_TRANSITION_DELAY_MS);
+    fullReset();
   }, [
     content, activeChatFolder, settingsScreen, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId,
-    resetChatCreation,
+    resetChatCreation, hasPasscode,
   ]);
 
   const handleSearchQuery = useCallback((query: string) => {
@@ -295,6 +331,14 @@ const LeftColumn: FC<StateProps> = ({
       loadPasswordInfo();
     }
   }, [clearTwoFaError, loadPasswordInfo, settingsScreen]);
+
+  useOnChange(() => {
+    if (nextSettingsScreen) {
+      setContent(LeftColumnContent.Settings);
+      setSettingsScreen(nextSettingsScreen);
+      requestNextSettingsScreen(undefined);
+    }
+  }, [nextSettingsScreen, requestNextSettingsScreen]);
 
   const {
     initResize, resetResize, handleMouseUp,
@@ -401,6 +445,12 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations,
       leftColumnWidth,
       currentUserId,
+      passcode: {
+        hasPasscode,
+      },
+      settings: {
+        nextScreen: nextSettingsScreen,
+      },
     } = global;
 
     return {
@@ -410,6 +460,8 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations,
       leftColumnWidth,
       currentUserId,
+      hasPasscode,
+      nextSettingsScreen,
     };
   },
 )(LeftColumn));

@@ -153,7 +153,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   }, [canSearch, handleSearchClick]);
 
   useHotkeys({
-    'meta+F': handleHotkeySearchClick,
+    'Meta+F': handleHotkeySearchClick,
   });
 
   const lang = useLang();

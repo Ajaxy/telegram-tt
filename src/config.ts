@@ -23,6 +23,7 @@ export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 
 export const SESSION_USER_KEY = 'user_auth';
 export const LEGACY_SESSION_KEY = 'GramJs:sessionId';
+export const PASSCODE_CACHE_NAME = 'tt-passcode';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
@@ -122,6 +123,8 @@ export const API_THROTTLE_RESET_UPDATES = new Set([
   'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
 ]);
 
+export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;
+
 export const STICKER_SIZE_INLINE_DESKTOP_FACTOR = 13;
 export const STICKER_SIZE_INLINE_MOBILE_FACTOR = 11;
 export const STICKER_SIZE_AUTH = 160;
@@ -132,6 +135,7 @@ export const STICKER_SIZE_PICKER_HEADER = 32;
 export const STICKER_SIZE_SEARCH = 64;
 export const STICKER_SIZE_MODAL = 64;
 export const STICKER_SIZE_TWO_FA = 160;
+export const STICKER_SIZE_PASSCODE = 160;
 export const STICKER_SIZE_DISCUSSION_GROUPS = 140;
 export const STICKER_SIZE_FOLDER_SETTINGS = 100;
 export const STICKER_SIZE_INLINE_BOT_RESULT = 100;

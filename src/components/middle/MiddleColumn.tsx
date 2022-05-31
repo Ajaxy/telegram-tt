@@ -75,6 +75,7 @@ import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import ReactorListModal from './ReactorListModal.async';
 
 import './MiddleColumn.scss';
+import styles from './MiddleColumn.module.scss';
 
 type StateProps = {
   chatId?: string;
@@ -319,11 +320,12 @@ const MiddleColumn: FC<StateProps> = ({
   );
 
   const bgClassName = buildClassName(
-    'bg-layers with-transition',
-    customBackground && 'custom-bg-image',
-    backgroundColor && 'custom-bg-color',
-    customBackground && isBackgroundBlurred && 'blurred',
-    isRightColumnShown && 'with-right-column',
+    styles.background,
+    styles.withTransition,
+    customBackground && styles.customBgImage,
+    backgroundColor && styles.customBgColor,
+    customBackground && isBackgroundBlurred && styles.blurred,
+    isRightColumnShown && styles.withRightColumn,
   );
 
   const messagingDisabledClassName = buildClassName(
@@ -389,7 +391,6 @@ const MiddleColumn: FC<StateProps> = ({
       onClick={(IS_TABLET_COLUMN_LAYOUT && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
       <div
-        id="middle-column-bg"
         className={bgClassName}
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
       />
