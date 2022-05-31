@@ -46,6 +46,8 @@ const useInfiniteScroll = <ListId extends string | number>(
     if (!viewportIdsRef.current || !areSortedArraysEqual(viewportIdsRef.current, newViewportIds)) {
       viewportIdsRef.current = newViewportIds;
     }
+  } else if (!listIds) {
+    viewportIdsRef.current = undefined;
   }
 
   const getMore: GetMore = useCallback(({

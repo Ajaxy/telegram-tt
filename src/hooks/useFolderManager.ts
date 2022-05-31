@@ -1,4 +1,5 @@
-import { useEffect, useState } from '../lib/teact/teact';
+import { useEffect } from '../lib/teact/teact';
+
 import {
   getOrderedIds,
   getUnreadCounters,
@@ -7,27 +8,28 @@ import {
   addUnreadCountersCallback,
   addChatsCountCallback,
 } from '../util/folderManager';
+import useForceUpdate from './useForceUpdate';
 
 export function useFolderManagerForOrderedIds(folderId: number) {
-  const [orderedIds, setOrderedIds] = useState(getOrderedIds(folderId));
+  const forceUpdate = useForceUpdate();
 
-  useEffect(() => addOrderedIdsCallback(folderId, setOrderedIds), [folderId]);
+  useEffect(() => addOrderedIdsCallback(folderId, forceUpdate), [folderId, forceUpdate]);
 
-  return orderedIds;
+  return getOrderedIds(folderId);
 }
 
 export function useFolderManagerForUnreadCounters() {
-  const [unreadCounters, setUnreadCounters] = useState(getUnreadCounters());
+  const forceUpdate = useForceUpdate();
 
-  useEffect(() => addUnreadCountersCallback(setUnreadCounters), []);
+  useEffect(() => addUnreadCountersCallback(forceUpdate), [forceUpdate]);
 
-  return unreadCounters;
+  return getUnreadCounters();
 }
 
 export function useFolderManagerForChatsCount() {
-  const [chatsCount, setChatsCount] = useState(getChatsCount());
+  const forceUpdate = useForceUpdate();
 
-  useEffect(() => addChatsCountCallback(setChatsCount), []);
+  useEffect(() => addChatsCountCallback(forceUpdate), [forceUpdate]);
 
-  return chatsCount;
+  return getChatsCount();
 }
