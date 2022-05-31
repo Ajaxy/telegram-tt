@@ -228,7 +228,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         <MediaViewerFooter
           text={textParts}
           onClick={onFooterClick}
-          isHidden={isFooterHidden && IS_TOUCH_ENV}
+          isHidden={isFooterHidden}
           isForVideo={isVideo && !isGif}
         />
       )}
