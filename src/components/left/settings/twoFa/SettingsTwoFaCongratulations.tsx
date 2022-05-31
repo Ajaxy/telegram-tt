@@ -4,6 +4,7 @@ import React, { memo, useCallback } from '../../../../lib/teact/teact';
 import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_TWO_FA } from '../../../../config';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
@@ -33,7 +34,11 @@ const SettingsTwoFaCongratulations: FC<OwnProps> = ({
   return (
     <div className="settings-content two-fa custom-scroll">
       <div className="settings-content-header no-border">
-        <AnimatedIcon size={STICKER_SIZE_TWO_FA} name="Congratulations" />
+        <AnimatedIcon
+          size={STICKER_SIZE_TWO_FA}
+          tgsUrl={LOCAL_TGS_URLS.Congratulations}
+          className="settings-content-icon"
+        />
 
         <p className="settings-item-description mb-3" dir="auto">
           {lang('TwoStepVerificationPasswordSetInfo')}

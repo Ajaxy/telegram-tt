@@ -3,7 +3,6 @@
 
 export enum ApiMediaFormat {
   BlobUrl,
-  Lottie,
   Progressive,
   Stream,
   Text,

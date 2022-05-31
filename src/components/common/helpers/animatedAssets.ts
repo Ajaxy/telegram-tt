@@ -1,7 +1,3 @@
-import { ApiMediaFormat } from '../../../api/types';
-
-import * as mediaLoader from '../../../util/mediaLoader';
-
 import MonkeyIdle from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyIdle.tgs';
 import MonkeyTracking from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyTracking.tgs';
 import MonkeyClose from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyClose.tgs';
@@ -31,7 +27,7 @@ import Invite from '../../../assets/tgs/invites/Invite.tgs';
 
 import QrPlane from '../../../assets/tgs/auth/QrPlane.tgs';
 
-export const ANIMATED_STICKERS_PATHS = {
+export const LOCAL_TGS_URLS = {
   MonkeyIdle,
   MonkeyTracking,
   MonkeyClose,
@@ -56,9 +52,3 @@ export const ANIMATED_STICKERS_PATHS = {
   QrPlane,
   Congratulations,
 };
-
-export default function getAnimationData(name: keyof typeof ANIMATED_STICKERS_PATHS) {
-  const path = ANIMATED_STICKERS_PATHS[name].replace(window.location.origin, '');
-
-  return mediaLoader.fetch(`file${path}`, ApiMediaFormat.Lottie);
-}

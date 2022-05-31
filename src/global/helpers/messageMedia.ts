@@ -302,15 +302,10 @@ export function getAudioHasCover(media: ApiAudio) {
 export function getMessageMediaFormat(
   message: ApiMessage, target: Target,
 ): ApiMediaFormat {
-  const {
-    sticker, video, audio, voice,
-  } = message.content;
-
+  const { video, audio, voice } = message.content;
   const fullVideo = video || getMessageWebPageVideo(message);
 
-  if (sticker && target === 'inline' && sticker.isLottie) {
-    return ApiMediaFormat.Lottie;
-  } else if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
+  if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
     target === 'viewerFull' || target === 'inline'
   )) {
     return ApiMediaFormat.Progressive;

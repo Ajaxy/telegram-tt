@@ -90,22 +90,7 @@
 }
 
 .settings-content-icon {
-  width: 5rem;
-  height: 5rem;
   margin-bottom: 2.5rem;
-  position: relative;
-
-  .AnimatedSticker {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-
-    &.hidden {
-      display: none;
-    }
-  }
 }
 
 .settings-main-menu {

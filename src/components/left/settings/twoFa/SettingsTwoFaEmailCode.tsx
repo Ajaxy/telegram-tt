@@ -11,9 +11,9 @@ import { selectAnimatedEmoji } from '../../../../global/selectors';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 
-import AnimatedEmoji from '../../../common/AnimatedEmoji';
 import InputText from '../../../ui/InputText';
 import Loading from '../../../ui/Loading';
+import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 
 type OwnProps = {
   isLoading?: boolean;
@@ -30,6 +30,7 @@ type StateProps = {
 };
 
 const FOCUS_DELAY_TIMEOUT_MS = IS_SINGLE_COLUMN_LAYOUT ? 550 : 400;
+const ICON_SIZE = 160;
 
 const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   animatedEmoji,
@@ -79,7 +80,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content two-fa custom-scroll">
       <div className="settings-content-header no-border">
-        <AnimatedEmoji sticker={animatedEmoji} size="large" />
+        <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} className="settings-content-icon" />
       </div>
 
       <div className="settings-item pt-0">

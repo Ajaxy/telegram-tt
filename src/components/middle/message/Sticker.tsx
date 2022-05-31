@@ -118,8 +118,7 @@ const Sticker: FC<OwnProps> = ({
         <AnimatedSticker
           key={mediaHash}
           className={buildClassName('full-media', transitionClassNames)}
-          id={mediaHash}
-          animationData={mediaData}
+          tgsUrl={mediaData}
           size={width}
           play={shouldPlay}
           noLoop={!shouldLoop}

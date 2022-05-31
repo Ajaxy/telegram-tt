@@ -26,24 +26,9 @@
 }
 
 .icon {
-  position: relative;
   width: 10rem;
   height: 10rem;
   margin: 0 auto 1rem;
-}
-
-.iconAnimated,
-.iconStatic {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 10rem;
-  height: 10rem;
-}
-
-.iconStatic {
-  background: url("../../assets/lock.png") no-repeat center;
-  background-size: contain;
 }
 
 .help {

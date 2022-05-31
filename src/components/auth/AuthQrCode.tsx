@@ -1,7 +1,7 @@
 import QrCodeStyling from 'qr-code-styling';
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, useRef, memo, useCallback, useState,
+  useEffect, useRef, memo, useCallback,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -9,11 +9,11 @@ import type { GlobalState } from '../../global/types';
 import type { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE } from '../../config';
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import { setLanguage } from '../../util/langProvider';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
-import getAnimationData from '../common/helpers/animatedAssets';
 
 import useLangString from '../../hooks/useLangString';
 import useFlag from '../../hooks/useFlag';
@@ -22,8 +22,8 @@ import useMediaTransition from '../../hooks/useMediaTransition';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
-import AnimatedSticker from '../common/AnimatedSticker';
 import blankUrl from '../../assets/blank.png';
+import AnimatedIcon from '../common/AnimatedIcon';
 
 type StateProps =
   Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
@@ -73,17 +73,7 @@ const AuthCode: FC<StateProps> = ({
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
 
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, markAnimationLoaded] = useFlag();
-
   const transitionClassNames = useMediaTransition(isQrMounted);
-  const airplaneTransitionClassNames = useMediaTransition(isAnimationLoaded);
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('QrPlane').then(setAnimationData);
-    }
-  }, [animationData]);
 
   useEffect(() => {
     if (!authQrCode) {
@@ -142,17 +132,13 @@ const AuthCode: FC<StateProps> = ({
               ref={qrCodeRef}
               style={`width: ${QR_SIZE}px; height: ${QR_SIZE}px`}
             />
-            {animationData && (
-              <AnimatedSticker
-                id="qrPlane"
-                className={buildClassName('qr-plane', airplaneTransitionClassNames)}
-                size={QR_PLANE_SIZE}
-                animationData={animationData}
-                play={isAnimationLoaded}
-                onLoad={markAnimationLoaded}
-                key="qrPlane"
-              />
-            )}
+            <AnimatedIcon
+              tgsUrl={LOCAL_TGS_URLS.QrPlane}
+              size={QR_PLANE_SIZE}
+              className="qr-plane"
+              nonInteractive
+              noLoop={false}
+            />
           </div>
           {!isQrMounted && <div className="qr-loading"><Loading /></div>}
         </div>

@@ -1,14 +1,14 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  memo, useMemo, useCallback, useState, useEffect,
+  memo, useMemo, useCallback, useEffect,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiChatFolder } from '../../../../api/types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { throttle } from '../../../../util/schedulers';
-import getAnimationData from '../../../common/helpers/animatedAssets';
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
@@ -17,7 +17,7 @@ import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManage
 import ListItem from '../../../ui/ListItem';
 import Button from '../../../ui/Button';
 import Loading from '../../../ui/Loading';
-import AnimatedSticker from '../../../common/AnimatedSticker';
+import AnimatedIcon from '../../../common/AnimatedIcon';
 
 type OwnProps = {
   isActive?: boolean;
@@ -50,16 +50,6 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     addChatFolder,
     showDialog,
   } = getActions();
-
-  const [animationData, setAnimationData] = useState<string>();
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
-
-  useEffect(() => {
-    if (!animationData) {
-      getAnimationData('FoldersAll').then(setAnimationData);
-    }
-  }, [animationData]);
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -126,18 +116,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content no-border custom-scroll">
       <div className="settings-content-header">
-        <div className="settings-content-icon">
-          {animationData && (
-            <AnimatedSticker
-              id="settingsFoldersMain"
-              size={STICKER_SIZE_FOLDER_SETTINGS}
-              animationData={animationData}
-              play={isAnimationLoaded}
-              noLoop
-              onLoad={handleAnimationLoad}
-            />
-          )}
-        </div>
+        <AnimatedIcon
+          size={STICKER_SIZE_FOLDER_SETTINGS}
+          tgsUrl={LOCAL_TGS_URLS.FoldersAll}
+          className="settings-content-icon"
+        />
 
         <p className="settings-item-description mb-3" dir="auto">
           {lang('CreateNewFilterInfo')}

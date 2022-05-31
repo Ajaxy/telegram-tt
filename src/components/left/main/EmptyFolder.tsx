@@ -11,7 +11,7 @@ import { selectAnimatedEmoji, selectChatFolder } from '../../../global/selectors
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
-import AnimatedEmoji from '../../common/AnimatedEmoji';
+import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 
 import './EmptyFolder.scss';
 
@@ -27,6 +27,8 @@ type StateProps = {
   animatedEmoji?: ApiSticker;
 };
 
+const ICON_SIZE = 128;
+
 const EmptyFolder: FC<OwnProps & StateProps> = ({
   chatFolder, animatedEmoji, foldersDispatch, onScreenSelect,
 }) => {
@@ -39,7 +41,9 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="EmptyFolder">
-      <div className="sticker">{animatedEmoji && <AnimatedEmoji sticker={animatedEmoji} />}</div>
+      <div className="sticker">
+        {animatedEmoji && <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} />}
+      </div>
       <h3 className="title" dir="auto">{lang('FilterNoChatsToDisplay')}</h3>
       <p className="description" dir="auto">
         {lang(chatFolder ? 'ChatList.EmptyChatListFilterText' : 'Chat.EmptyChat')}

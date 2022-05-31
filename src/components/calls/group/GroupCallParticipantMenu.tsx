@@ -7,13 +7,14 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { IAnchorPosition } from '../../../types';
 
+import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import useRunThrottled from '../../../hooks/useRunThrottled';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
-import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -171,7 +172,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
               />
               <div className="info">
                 <AnimatedIcon
-                  name="Speaker"
+                  tgsUrl={LOCAL_TGS_URLS.Speaker}
                   playSegment={speakerIconPlaySegment}
                   size={SPEAKER_ICON_SIZE}
                 />

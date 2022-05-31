@@ -7,6 +7,7 @@ import {
 import WorkerConnector from '../../util/WorkerConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
+import generateIdFor from '../../util/generateIdFor';
 
 interface Params {
   noLoop?: boolean;
@@ -25,6 +26,7 @@ const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
+const KEY_STORE = {};
 
 const workers = new Array(MAX_WORKERS).fill(undefined).map(
   () => new WorkerConnector(new Worker(new URL('./rlottie.worker.ts', import.meta.url))),
@@ -36,7 +38,7 @@ class RLottie {
 
   private imgSize!: number;
 
-  private key!: string;
+  private key = generateIdFor(KEY_STORE);
 
   private msPerFrame = 1000 / 60;
 
@@ -66,6 +68,8 @@ class RLottie {
 
   private isWaiting = true;
 
+  private isEnded = false;
+
   private isOnLoadFired = false;
 
   private isDestroyed = false;
@@ -83,9 +87,8 @@ class RLottie {
   private lastRenderAt?: number;
 
   constructor(
-    private id: string,
     private container: HTMLDivElement,
-    private animationData: string,
+    private tgsUrl: string,
     private params: Params = {},
     private onLoad?: () => void,
     private customColor?: [number, number, number],
@@ -100,7 +103,11 @@ class RLottie {
     return this.isAnimating || this.isWaiting;
   }
 
-  play() {
+  play(forceRestart = false) {
+    if (this.isEnded && forceRestart) {
+      this.approxFrameIndex = Math.floor(0);
+    }
+
     this.stopFrameIndex = undefined;
     this.direction = 1;
     this.doPlay();
@@ -115,20 +122,6 @@ class RLottie {
 
     const currentChunkIndex = this.getChunkIndex(this.approxFrameIndex);
     this.chunks = this.chunks.map((chunk, i) => (i === currentChunkIndex ? chunk : undefined));
-  }
-
-  goToAndPlay(frameIndex: number) {
-    this.approxFrameIndex = Math.floor(frameIndex / this.reduceFactor);
-    this.stopFrameIndex = undefined;
-    this.direction = 1;
-    this.doPlay();
-  }
-
-  goToAndStop(frameIndex: number) {
-    this.approxFrameIndex = Math.floor(frameIndex / this.reduceFactor);
-    this.stopFrameIndex = Math.floor(frameIndex / this.reduceFactor);
-    this.direction = 1;
-    this.doPlay();
   }
 
   playSegment([startFrameIndex, stopFrameIndex]: [number, number]) {
@@ -184,8 +177,6 @@ class RLottie {
   }
 
   private initConfig() {
-    this.key = `${this.id}_${this.imgSize}`;
-
     const { isLowPriority } = this.params;
 
     this.cacheModulo = isLowPriority ? LOW_PRIORITY_CACHE_MODULO : HIGH_PRIORITY_CACHE_MODULO;
@@ -221,7 +212,7 @@ class RLottie {
       name: 'init',
       args: [
         this.key,
-        this.animationData,
+        this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority,
         this.onRendererInit.bind(this),
@@ -247,16 +238,16 @@ class RLottie {
     }
   }
 
-  changeData(animationData: string) {
+  changeData(tgsUrl: string) {
     this.pause();
-    this.animationData = animationData;
+    this.tgsUrl = tgsUrl;
     this.initConfig();
 
     workers[this.workerIndex].request({
       name: 'changeData',
       args: [
         this.key,
-        this.animationData,
+        this.tgsUrl,
         this.params.isLowPriority,
         this.onChangeData.bind(this),
       ],
@@ -291,6 +282,7 @@ class RLottie {
       this.lastRenderAt = undefined;
     }
 
+    this.isEnded = false;
     this.isAnimating = true;
     this.isWaiting = false;
 
@@ -359,6 +351,7 @@ class RLottie {
       if (delta > 0 && (frameIndex === this.framesCount! - 1 || expectedNextFrameIndex > this.framesCount! - 1)) {
         if (this.params.noLoop) {
           this.isAnimating = false;
+          this.isEnded = true;
           this.onEnded?.();
           return false;
         }
@@ -369,6 +362,7 @@ class RLottie {
       } else if (delta < 0 && (frameIndex === 0 || expectedNextFrameIndex < 0)) {
         if (this.params.noLoop) {
           this.isAnimating = false;
+          this.isEnded = true;
           this.onEnded?.();
           return false;
         }
@@ -379,10 +373,10 @@ class RLottie {
       } else if (
         this.stopFrameIndex !== undefined
         && (frameIndex === this.stopFrameIndex
-        || (
-          (delta > 0 && expectedNextFrameIndex > this.stopFrameIndex)
-          || (delta < 0 && expectedNextFrameIndex < this.stopFrameIndex)
-        ))
+          || (
+            (delta > 0 && expectedNextFrameIndex > this.stopFrameIndex)
+            || (delta < 0 && expectedNextFrameIndex < this.stopFrameIndex)
+          ))
       ) {
         this.stopFrameIndex = undefined;
         this.isAnimating = false;

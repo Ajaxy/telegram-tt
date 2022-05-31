@@ -1,11 +1,9 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  useState, useEffect, useCallback, memo,
-} from '../../lib/teact/teact';
+import React, { useState, useCallback, memo } from '../../lib/teact/teact';
 
 import { STICKER_SIZE_AUTH, STICKER_SIZE_AUTH_MOBILE, STICKER_SIZE_TWO_FA } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import getAnimationData from './helpers/animatedAssets';
+import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 
 import AnimatedSticker from './AnimatedSticker';
 
@@ -30,22 +28,8 @@ const TrackingMonkey: FC<OwnProps> = ({
   isTracking,
   isBig,
 }) => {
-  const [idleMonkeyData, setIdleMonkeyData] = useState<string>();
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState<string>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const TRACKING_FRAMES_PER_SYMBOL = (TRACKING_END_FRAME - TRACKING_START_FRAME) / codeLength;
-
-  useEffect(() => {
-    if (!idleMonkeyData) {
-      getAnimationData('MonkeyIdle').then(setIdleMonkeyData);
-    }
-  }, [idleMonkeyData]);
-
-  useEffect(() => {
-    if (!trackingMonkeyData) {
-      getAnimationData('MonkeyTracking').then(setTrackingMonkeyData);
-    }
-  }, [trackingMonkeyData]);
 
   const handleFirstMonkeyLoad = useCallback(() => setIsFirstMonkeyLoaded(true), []);
 
@@ -75,27 +59,21 @@ const TrackingMonkey: FC<OwnProps> = ({
       {!isFirstMonkeyLoaded && (
         <div className="monkey-preview" />
       )}
-      {idleMonkeyData && (
-        <AnimatedSticker
-          id="idleMonkey"
-          size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
-          className={isTracking ? 'hidden' : undefined}
-          animationData={idleMonkeyData}
-          play={!isTracking}
-          onLoad={handleFirstMonkeyLoad}
-        />
-      )}
-      {trackingMonkeyData && (
-        <AnimatedSticker
-          id="trackingMonkey"
-          size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
-          className={!isTracking ? 'hidden' : 'shown'}
-          animationData={trackingMonkeyData}
-          playSegment={isTracking ? getTrackingFrames() : undefined}
-          speed={2}
-          noLoop
-        />
-      )}
+      <AnimatedSticker
+        size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
+        className={isTracking ? 'hidden' : undefined}
+        tgsUrl={LOCAL_TGS_URLS.MonkeyIdle}
+        play={!isTracking}
+        onLoad={handleFirstMonkeyLoad}
+      />
+      <AnimatedSticker
+        size={isBig ? STICKER_SIZE_TWO_FA : STICKER_SIZE}
+        className={!isTracking ? 'hidden' : 'shown'}
+        tgsUrl={LOCAL_TGS_URLS.MonkeyTracking}
+        playSegment={isTracking ? getTrackingFrames() : undefined}
+        speed={2}
+        noLoop
+      />
     </div>
   );
 };
