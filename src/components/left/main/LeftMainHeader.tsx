@@ -29,6 +29,7 @@ import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import { useHotkeys } from '../../../hooks/useHotkeys';
+import { getPromptInstall } from '../../../util/installPrompt';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -67,7 +68,7 @@ type StateProps =
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing'>;
+  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'canInstall'>;
 
 const PRODUCTION_HOSTNAME = 'web.telegram.org';
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
@@ -96,6 +97,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   isConnectionStatusMinimized,
   areChatsLoaded,
   hasPasscode,
+  canInstall,
 }) => {
   const {
     openChat,
@@ -345,6 +347,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               </MenuItem>
             </>
           )}
+          {canInstall && (
+            <MenuItem
+              icon="install"
+              onClick={getPromptInstall()}
+            >
+              Install App
+              <span className="menu-item-badge">{lang('New')}</span>
+            </MenuItem>
+          )}
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
@@ -436,6 +447,7 @@ export default memo(withGlobal<OwnProps>(
       isConnectionStatusMinimized,
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
+      canInstall: Boolean(global.canInstall),
     };
   },
 )(LeftMainHeader));

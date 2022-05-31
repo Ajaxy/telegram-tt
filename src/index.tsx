@@ -6,6 +6,8 @@ import TeactDOM from './lib/teact/teact-dom';
 
 import { getActions, getGlobal } from './global';
 import updateWebmanifest from './util/updateWebmanifest';
+import { setupBeforeInstallPrompt } from './util/installPrompt';
+import { IS_INSTALL_PROMPT_SUPPORTED } from './util/environment';
 import './global/init';
 
 import { DEBUG } from './config';
@@ -19,6 +21,9 @@ if (DEBUG) {
   console.log('>>> INIT');
 }
 
+if (IS_INSTALL_PROMPT_SUPPORTED) {
+  setupBeforeInstallPrompt();
+}
 getActions().init();
 
 if (DEBUG) {
