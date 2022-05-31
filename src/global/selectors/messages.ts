@@ -9,7 +9,7 @@ import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import { LOCAL_MESSAGE_ID_BASE, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import {
   selectChat, selectChatBot, selectIsChatWithBot, selectIsChatWithSelf,
 } from './chats';
@@ -37,6 +37,7 @@ import {
   getMessageVoice,
   getMessageDocument,
   getMessageWebPagePhoto,
+  getMessageOriginalId,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -253,7 +254,7 @@ export function selectIsViewportNewest(global: GlobalState, chatId: string, thre
   }
 
   // Edge case: outgoing `lastMessage` is updated with a delay to optimize animation
-  if (lastMessageId >= LOCAL_MESSAGE_ID_BASE && !selectChatMessage(global, chatId, lastMessageId)) {
+  if (lastMessageId > LOCAL_MESSAGE_MIN_ID && !selectChatMessage(global, chatId, lastMessageId)) {
     return true;
   }
 
@@ -310,7 +311,7 @@ export function selectFocusedMessageId(global: GlobalState, chatId: string) {
 export function selectIsMessageFocused(global: GlobalState, message: ApiMessage) {
   const focusedId = selectFocusedMessageId(global, message.chatId);
 
-  return focusedId ? focusedId === message.id || focusedId === message.previousLocalId : false;
+  return focusedId ? focusedId === getMessageOriginalId(message) : false;
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
@@ -554,7 +555,7 @@ export function selectActiveDownloadIds(global: GlobalState, chatId: string) {
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
-  return global.fileUploads.byMessageLocalId[message.previousLocalId || message.id]?.progress;
+  return global.fileUploads.byMessageLocalId[getMessageOriginalId(message)]?.progress;
 }
 
 export function selectRealLastReadId(global: GlobalState, chatId: string, threadId: number) {

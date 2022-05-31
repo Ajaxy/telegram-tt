@@ -107,7 +107,7 @@ export const MOBILE_SCREEN_MAX_WIDTH = 600; // px
 export const MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH = 950; // px
 export const MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT = 450; // px
 
-export const LOCAL_MESSAGE_ID_BASE = 1e9;
+export const LOCAL_MESSAGE_MIN_ID = 1e11; // `Date.now()` is always used as base
 export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;

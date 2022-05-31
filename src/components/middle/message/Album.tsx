@@ -7,7 +7,7 @@ import type { IAlbum, ISettings } from '../../../types';
 import type { IAlbumLayout } from './helpers/calculateAlbumLayout';
 import { AlbumRectPart } from './helpers/calculateAlbumLayout';
 
-import { getMessageContent, getMessageHtmlId } from '../../../global/helpers';
+import { getMessageContent, getMessageHtmlId, getMessageOriginalId } from '../../../global/helpers';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 import withSelectControl from './hocs/withSelectControl';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -66,7 +66,7 @@ const Album: FC<OwnProps & StateProps> = ({
 
   function renderAlbumMessage(message: ApiMessage, index: number) {
     const { photo, video } = getMessageContent(message);
-    const fileUpload = uploadsById[message.previousLocalId || message.id];
+    const fileUpload = uploadsById[getMessageOriginalId(message)];
     const uploadProgress = fileUpload?.progress;
     const { dimensions, sides } = albumLayout.layout[index];
 

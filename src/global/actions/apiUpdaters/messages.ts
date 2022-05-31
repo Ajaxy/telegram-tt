@@ -47,7 +47,7 @@ import {
   selectLocalAnimatedEmoji,
 } from '../../selectors';
 import {
-  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions,
+  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions, getMessageOriginalId,
 } from '../../helpers';
 import { onTickEnd } from '../../../util/schedulers';
 import { updateUnreadReactions } from '../../reducers/reactions';
@@ -665,7 +665,7 @@ function updateChatLastMessage(
 
   if (currentLastMessage && !force) {
     const isSameOrNewer = (
-      currentLastMessage.id === message.id || currentLastMessage.id === message.previousLocalId
+      currentLastMessage.id === getMessageOriginalId(message)
     ) || message.id > currentLastMessage.id;
 
     if (!isSameOrNewer) {

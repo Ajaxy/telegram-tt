@@ -35,7 +35,6 @@ import type {
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
-  LOCAL_MESSAGE_ID_BASE,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -56,7 +55,9 @@ import { buildApiCallDiscardReason } from './calls';
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
 
-let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
+let localMessageCounter = 0;
+const getNextLocalMessageId = () => parseFloat(`${Date.now()}.${localMessageCounter++}`);
+
 let currentUserId!: string;
 
 export function setMessageBuilderCurrentUserId(_currentUserId: string) {
@@ -120,7 +121,7 @@ export function buildApiMessageFromNotification(
   notification: GramJs.UpdateServiceNotification,
   currentDate: number,
 ): ApiMessage {
-  const localId = localMessageCounter++;
+  const localId = getNextLocalMessageId();
   const content = buildMessageContent(notification);
 
   return {
@@ -1148,7 +1149,7 @@ export function buildLocalMessage(
   sendAs?: ApiChat | ApiUser,
   serverTimeOffset = 0,
 ): ApiMessage {
-  const localId = localMessageCounter++;
+  const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
 
@@ -1186,7 +1187,7 @@ export function buildLocalForwardedMessage(
   serverTimeOffset: number,
   scheduledAt?: number,
 ): ApiMessage {
-  const localId = localMessageCounter++;
+  const localId = getNextLocalMessageId();
   const {
     content,
     chatId: fromChatId,
