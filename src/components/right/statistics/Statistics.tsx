@@ -160,6 +160,8 @@ const Statistics: FC<OwnProps & StateProps> = ({
         );
 
         loadedCharts.current.push(name);
+
+        containerRef.current!.children[index].classList.remove('hidden');
       });
 
       forceUpdate();
@@ -180,7 +182,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
       <div ref={containerRef}>
         {graphs.map((graph) => (
-          <div className={buildClassName('Statistics__graph', !loadedCharts.current.includes(graph) && 'hidden')} />
+          <div key={graph} className="Statistics__graph hidden" />
         ))}
       </div>
 

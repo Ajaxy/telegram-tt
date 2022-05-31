@@ -439,6 +439,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
     || contentKey === HeaderContent.AddingMembers
+    || contentKey === HeaderContent.MessageStatistics
     || isManagement
   );
 

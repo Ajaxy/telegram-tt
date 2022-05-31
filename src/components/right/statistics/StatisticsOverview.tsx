@@ -5,7 +5,7 @@ import type {
   ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsOverviewItem,
 } from '../../../api/types';
 
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 import { formatFullDate } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
@@ -44,10 +44,13 @@ const GROUP_OVERVIEW: OverviewCell[][] = [
 
 const MESSAGE_OVERVIEW: OverviewCell[][] = [
   [
-    { name: 'views', title: 'StatisticViews', isPlain: true },
+    { name: 'views', title: 'Stats.Message.Views', isPlain: true },
     {
-      name: 'forwards', title: 'PrivateShares', isPlain: true, isApproximate: true,
+      name: 'forwards', title: 'Stats.Message.PrivateShares', isPlain: true, isApproximate: true,
     },
+  ],
+  [
+    { name: 'publicForwards', title: 'Stats.Message.PublicShares', isPlain: true },
   ],
 ];
 
@@ -103,7 +106,9 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) =>
               if (cell.isPlain) {
                 return (
                   <td className="StatisticsOverview__table-cell">
-                    <b className="StatisticsOverview__table-value">{cell.isApproximate ? `≈${field}` : field}</b>
+                    <b className="StatisticsOverview__table-value">
+                      {cell.isApproximate ? `≈${formatInteger(field)}` : formatInteger(field)}
+                    </b>
                     <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
                   </td>
                 );

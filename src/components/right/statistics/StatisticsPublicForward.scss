@@ -1,0 +1,25 @@
+.StatisticsPublicForward {
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+
+  &:hover, &:active {
+    background-color: var(--color-chat-hover);
+  }
+
+  .Avatar {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+  }
+
+  &__title {
+    line-height: 1.25rem;
+  }
+
+  &__views {
+    color: var(--color-text-meta);
+    font-size: 0.8125rem;
+  }
+}

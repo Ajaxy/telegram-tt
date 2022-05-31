@@ -85,7 +85,8 @@ export {
 } from './reactions';
 
 export {
-  fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics, fetchStatisticsAsyncGraph,
+  fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,
+	fetchMessagePublicForwards, fetchStatisticsAsyncGraph,
 } from './statistics';
 
 export {

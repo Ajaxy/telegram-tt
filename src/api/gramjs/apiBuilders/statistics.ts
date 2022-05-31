@@ -3,11 +3,14 @@ import type {
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessageStatistics,
+  ApiMessagePublicForward,
   StatisticsGraph,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
   StatisticsOverviewPeriod,
 } from '../../types';
+import { buildAvatarHash } from './chats';
+import { buildApiPeerId } from './peers';
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {
@@ -59,6 +62,31 @@ export function buildMessageStatistics(stats: GramJs.stats.MessageStats): ApiMes
   return {
     viewsGraph: buildGraph(stats.viewsGraph),
   };
+}
+
+export function buildMessagePublicForwards(
+  result: GramJs.messages.TypeMessages,
+): ApiMessagePublicForward[] | undefined {
+  if (!result || !('messages' in result)) {
+    return undefined;
+  }
+
+  return result.messages.map((message) => {
+    const peerId = buildApiPeerId((message.peerId as GramJs.PeerChannel).channelId, 'channel');
+    const channel = result.chats.find((p) => buildApiPeerId(p.id, 'channel') === peerId);
+
+    return {
+      messageId: message.id,
+      views: (message as GramJs.Message).views,
+      title: (channel as GramJs.Channel).title,
+      chat: {
+        id: peerId,
+        type: 'chatTypeChannel',
+        username: (channel as GramJs.Channel).username,
+        avatarHash: buildAvatarHash((channel as GramJs.Channel).photo),
+      },
+    };
+  });
 }
 
 export function buildGraph(

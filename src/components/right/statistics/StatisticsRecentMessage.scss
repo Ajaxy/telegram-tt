@@ -1,8 +1,7 @@
 .StatisticsRecentMessage {
   position: relative;
   cursor: pointer;
-  padding: 0.5rem;
-  border-radius: var(--border-radius-default-small);
+  padding: 0.5rem 0.75rem;
 
   &:hover, &:active {
     background-color: var(--color-chat-hover);
