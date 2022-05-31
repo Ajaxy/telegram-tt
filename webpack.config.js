@@ -51,6 +51,7 @@ module.exports = (env = {}, argv = {}) => {
         stats: 'minimal',
       },
     },
+
     output: {
       filename: '[name].[contenthash].js',
       chunkFilename: '[id].[chunkhash].js',

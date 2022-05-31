@@ -18,7 +18,7 @@ import AnimatedSticker from './AnimatedSticker';
 import './AnimatedEmoji.scss';
 
 type OwnProps = {
-  sticker: ApiSticker;
+  sticker?: ApiSticker;
   effect?: ApiSticker;
   isOwn?: boolean;
   soundId?: string;
@@ -56,13 +56,13 @@ const AnimatedEmoji: FC<OwnProps> = ({
     playKey,
   } = useAnimatedEmoji(size, chatId, messageId, soundId, activeEmojiInteractions, isOwn, undefined, effect?.emoji);
 
-  const localMediaHash = `sticker${sticker.id}`;
+  const localMediaHash = `sticker${sticker?.id}`;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const thumbDataUri = sticker.thumbnail?.dataUri;
+  const thumbDataUri = sticker?.thumbnail?.dataUri;
   const previewBlobUrl = useMedia(
-    `${localMediaHash}?size=m`,
+    sticker ? `${localMediaHash}?size=m` : undefined,
     !isIntersecting && !forceLoadPreview,
     ApiMediaFormat.BlobUrl,
     lastSyncTime,
@@ -75,7 +75,7 @@ const AnimatedEmoji: FC<OwnProps> = ({
   return (
     <div
       ref={ref}
-      className={buildClassName('AnimatedEmoji media-inner', sticker.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
+      className={buildClassName('AnimatedEmoji media-inner', sticker?.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
       style={style}
       onClick={handleClick}
     >

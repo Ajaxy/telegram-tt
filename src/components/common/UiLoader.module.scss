@@ -1,0 +1,115 @@
+.root {
+  height: 100%;
+
+  background-color: var(--theme-background-color);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  :global(html.theme-light) & {
+    background-image: url('../../assets/chat-bg-br.png');
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url('../../assets/chat-bg-pattern-light.png');
+    background-position: top right;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    :global(html.theme-dark) & {
+      background-image: url('../../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+  }
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-ui-loader-mask);
+  display: flex;
+
+  @media (min-width: 600px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 100%;
+  }
+}
+
+.left {
+  flex: 1;
+  background: var(--color-background);
+  min-width: 12rem;
+  width: 33vw;
+  max-width: 26.5rem;
+
+  @media (min-width: 926px) {
+    max-width: 40vw;
+  }
+
+  @media (min-width: 1276px) {
+    width: 25vw;
+    max-width: 33vw;
+  }
+
+  @media (max-width: 1275px) {
+    flex: 2;
+  }
+
+  @media (max-width: 925px) {
+    width: 26.5rem !important;
+  }
+
+  @media (max-width: 600px) {
+    max-width: none;
+    width: 100vw !important;
+  }
+}
+
+.middle {
+  flex: 3;
+  border-left: 1px solid var(--color-borders);
+  border-right: 1px solid var(--color-borders);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+
+  @media (max-width: 1275px) {
+    border-right: none;
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  height: 100%;
+  width: var(--right-column-width);
+  border-left: 1px solid var(--color-borders);
+  background: var(--color-background);
+}
+
+.blank {
+  flex: 1;
+  background: var(--color-background);
+}

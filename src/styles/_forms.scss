@@ -148,6 +148,26 @@
     box-shadow: inset 0 0 0 1px var(--color-text-green);
     caret-color: var(--color-text-green);
   }
+
+  // Disable yellow highlight on autofill
+  &:autofill,
+  &:-webkit-autofill-strong-password,
+  &:-webkit-autofill-strong-password-viewable,
+  &:-webkit-autofill-and-obscured {
+    box-shadow: inset 0 0 0 10rem var(--color-background);
+    -webkit-text-fill-color: var(--color-text);
+  }
+
+  // Hide hint for Safari password strength meter
+  &::-webkit-strong-password-auto-fill-button {
+    opacity: 0;
+    width: 0 !important;
+    overflow: hidden !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    clip: rect(0, 0, 0, 0);
+    position: absolute;
+  }
 }
 
 select.form-control {

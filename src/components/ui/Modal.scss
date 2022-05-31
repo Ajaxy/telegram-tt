@@ -2,6 +2,10 @@
   position: relative;
   z-index: var(--z-modal);
 
+  &.confirm {
+    z-index: var(--z-lock-screen);
+  }
+
   &.delete,
   &.error,
   &.confirm,

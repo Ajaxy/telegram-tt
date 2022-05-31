@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
 import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
@@ -25,6 +25,7 @@ import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
 import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
 import SettingsQuickReaction from './SettingsQuickReaction';
+import SettingsPasscode from './passcode/SettingsPasscode';
 
 import './Settings.scss';
 
@@ -48,6 +49,11 @@ const TWO_FA_SCREENS = [
   SettingsScreens.TwoFaRecoveryEmailCurrentPassword,
   SettingsScreens.TwoFaRecoveryEmail,
   SettingsScreens.TwoFaRecoveryEmailCode,
+];
+
+const PASSCODE_SCREENS = [
+  SettingsScreens.PasscodeDisabled,
+  SettingsScreens.PasscodeEnabled,
 ];
 
 const FOLDERS_SCREENS = [
@@ -108,7 +114,7 @@ export type OwnProps = {
   foldersDispatch: FolderEditDispatch;
   onScreenSelect: (screen: SettingsScreens) => void;
   shouldSkipTransition?: boolean;
-  onReset: () => void;
+  onReset: (forceReturnToChatList?: true | Event) => void;
 };
 
 const Settings: FC<OwnProps> = ({
@@ -121,8 +127,14 @@ const Settings: FC<OwnProps> = ({
   shouldSkipTransition,
 }) => {
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
+  const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
 
-  const handleReset = useCallback(() => {
+  const handleReset = useCallback((forceReturnToChatList?: true | Event) => {
+    if (forceReturnToChatList === true) {
+      onReset(true);
+      return;
+    }
+
     if (
       currentScreen === SettingsScreens.FoldersCreateFolder
       || currentScreen === SettingsScreens.FoldersEditFolder
@@ -168,9 +180,11 @@ const Settings: FC<OwnProps> = ({
     };
 
     const isTwoFaScreen = TWO_FA_SCREENS.includes(screen);
+    const isPasscodeScreen = PASSCODE_SCREENS.includes(screen);
     const isFoldersScreen = FOLDERS_SCREENS.includes(screen);
     const isPrivacyScreen = PRIVACY_SCREENS.includes(screen)
       || isTwoFaScreen
+      || isPasscodeScreen
       || Object.keys(privacyAllowScreens).includes(screen.toString())
       || Object.values(privacyAllowScreens).find((key) => key === true);
 
@@ -191,10 +205,10 @@ const Settings: FC<OwnProps> = ({
           <SettingsGeneral
             onScreenSelect={onScreenSelect}
             isActive={isScreenActive
-            || screen === SettingsScreens.GeneralChatBackgroundColor
-            || screen === SettingsScreens.GeneralChatBackground
-            || screen === SettingsScreens.QuickReaction
-            || isPrivacyScreen || isFoldersScreen}
+              || screen === SettingsScreens.GeneralChatBackgroundColor
+              || screen === SettingsScreens.GeneralChatBackground
+              || screen === SettingsScreens.QuickReaction
+              || isPrivacyScreen || isFoldersScreen}
             onReset={handleReset}
           />
         );
@@ -214,7 +228,7 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacy
             onScreenSelect={onScreenSelect}
-            isActive={isScreenActive || isPrivacyScreen || isTwoFaScreen}
+            isActive={isScreenActive || isPrivacyScreen}
             onReset={handleReset}
           />
         );
@@ -341,6 +355,27 @@ const Settings: FC<OwnProps> = ({
             currentScreen={currentScreen}
             state={twoFaState}
             dispatch={twoFaDispatch}
+            shownScreen={screen}
+            isActive={isScreenActive}
+            onScreenSelect={onScreenSelect}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.PasscodeDisabled:
+      case SettingsScreens.PasscodeNewPasscode:
+      case SettingsScreens.PasscodeNewPasscodeConfirm:
+      case SettingsScreens.PasscodeChangePasscodeCurrent:
+      case SettingsScreens.PasscodeChangePasscodeNew:
+      case SettingsScreens.PasscodeChangePasscodeConfirm:
+      case SettingsScreens.PasscodeCongratulations:
+      case SettingsScreens.PasscodeEnabled:
+      case SettingsScreens.PasscodeTurnOff:
+        return (
+          <SettingsPasscode
+            currentScreen={currentScreen}
+            passcode={privacyPasscode}
+            onSetPasscode={setPrivacyPasscode}
             shownScreen={screen}
             isActive={isScreenActive}
             onScreenSelect={onScreenSelect}

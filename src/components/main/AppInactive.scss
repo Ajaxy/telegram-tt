@@ -10,6 +10,8 @@
     margin: auto;
     padding: 1.5rem;
     text-align: center;
+    background: var(--color-background);
+    border-radius: var(--border-radius-default);
   }
 
   .title {

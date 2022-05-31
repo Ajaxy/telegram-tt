@@ -18,8 +18,12 @@ type OwnProps = {
   hint?: string;
   placeholder?: string;
   isLoading?: boolean;
+  shouldDisablePasswordManager?: boolean;
+  shouldShowSubmit?: boolean;
+  shouldResetValue?: boolean;
   isPasswordVisible?: boolean;
   clearError: NoneToVoidFunction;
+  noRipple?: boolean;
   onChangePasswordVisibility: (state: boolean) => void;
   onInputChange?: (password: string) => void;
   onSubmit: (password: string) => void;
@@ -34,6 +38,10 @@ const PasswordForm: FC<OwnProps> = ({
   hint,
   placeholder = 'Password',
   submitLabel = 'Next',
+  shouldShowSubmit,
+  shouldResetValue,
+  shouldDisablePasswordManager = false,
+  noRipple = false,
   clearError,
   onChangePasswordVisibility,
   onInputChange,
@@ -45,6 +53,12 @@ const PasswordForm: FC<OwnProps> = ({
 
   const [password, setPassword] = useState('');
   const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (shouldResetValue) {
+      setPassword('');
+    }
+  }, [shouldResetValue]);
 
   useTimeout(() => {
     if (!IS_TOUCH_ENV) {
@@ -102,8 +116,9 @@ const PasswordForm: FC<OwnProps> = ({
           type={isPasswordVisible ? 'text' : 'password'}
           id="sign-in-password"
           value={password || ''}
-          autoComplete="current-password"
+          autoComplete={shouldDisablePasswordManager ? 'one-time-code' : 'current-password'}
           onChange={onPasswordChange}
+          maxLength={256}
           dir="auto"
         />
         <label>{error || hint || placeholder}</label>
@@ -117,8 +132,8 @@ const PasswordForm: FC<OwnProps> = ({
           <i className={isPasswordVisible ? 'icon-eye' : 'icon-eye-closed'} />
         </div>
       </div>
-      {canSubmit && (
-        <Button type="submit" ripple isLoading={isLoading}>
+      {(canSubmit || shouldShowSubmit) && (
+        <Button type="submit" ripple={!noRipple} isLoading={isLoading} disabled={!canSubmit}>
           {submitLabel}
         </Button>
       )}

@@ -2,7 +2,9 @@ import * as idb from 'idb-keyval';
 
 import type { ApiSessionData } from '../api/types';
 
-import { DEBUG, LEGACY_SESSION_KEY, SESSION_USER_KEY } from '../config';
+import {
+  DEBUG, GLOBAL_STATE_CACHE_KEY, LEGACY_SESSION_KEY, SESSION_USER_KEY,
+} from '../config';
 import * as cacheApi from './cacheApi';
 
 const DC_IDS = [1, 2, 3, 4, 5];
@@ -12,8 +14,14 @@ export function hasStoredSession(withLegacy = false) {
     return true;
   }
 
+  if (checkSessionLocked()) {
+    return true;
+  }
+
   const userAuthJson = localStorage.getItem(SESSION_USER_KEY);
-  if (!userAuthJson) return false;
+  if (!userAuthJson) {
+    return false;
+  }
 
   try {
     const userAuth = JSON.parse(userAuthJson);
@@ -57,6 +65,9 @@ export function loadStoredSession(): ApiSessionData | undefined {
   }
 
   const userAuth = JSON.parse(localStorage.getItem(SESSION_USER_KEY)!);
+  if (!userAuth) {
+    return undefined;
+  }
   const mainDcId = Number(userAuth.dcID);
   const keys: Record<number, string> = {};
   const hashes: Record<number, string> = {};
@@ -133,4 +144,10 @@ export function importTestSession() {
     }
     // Do nothing.
   }
+}
+
+function checkSessionLocked() {
+  const stateFromCache = JSON.parse(localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '{}');
+
+  return Boolean(stateFromCache?.passcode?.isScreenLocked);
 }

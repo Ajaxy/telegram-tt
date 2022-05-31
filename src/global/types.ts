@@ -62,6 +62,7 @@ import type {
   NewChatMembersProgress,
   AudioOrigin,
   ManagementState,
+  SettingsScreens,
 } from '../types';
 import { typify } from '../lib/teact/teactn';
 import type { P2pMessage } from '../lib/secret-sauce';
@@ -494,6 +495,7 @@ export type GlobalState = {
     themes: Partial<Record<ThemeKey, IThemeSettings>>;
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyExceptions?: Record<number, NotifyException>;
+    nextScreen?: SettingsScreens;
   };
 
   twoFaSettings: {
@@ -501,6 +503,14 @@ export type GlobalState = {
     isLoading?: boolean;
     error?: string;
     waitingEmailCodeLength?: number;
+  };
+
+  passcode: {
+    isScreenLocked?: boolean;
+    hasPasscode?: boolean;
+    error?: string;
+    invalidAttemptsCount?: number;
+    isLoading?: boolean;
   };
 
   push?: {
@@ -861,6 +871,21 @@ export interface ActionPayloads {
     sound: CallSound;
   };
   connectToActivePhoneCall: {};
+
+  // Passcode
+  setPasscode: { passcode: string };
+  clearPasscode: never;
+  lockScreen: never;
+  unlockScreen: { sessionJson: string; globalJson: string };
+  softSignIn: never;
+  softReset: never;
+  logInvalidUnlockAttempt: never;
+  resetInvalidUnlockAttempts: never;
+  setPasscodeError: { error: string };
+  clearPasscodeError: never;
+
+  // Settings
+  requestNextSettingsScreen: SettingsScreens;
 }
 
 export type NonTypedActionNames = (

@@ -1,0 +1,51 @@
+.container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--color-background);
+  color: var(--color-text);
+  max-width: 20rem;
+  padding: 1.5rem 1rem 0;
+  border-radius: var(--border-radius-default);
+  z-index: 2;
+
+  &[dir="rtl"] {
+    text-align: right;
+  }
+}
+
+.icon {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  margin: 0 auto 1rem;
+}
+
+.iconAnimated,
+.iconStatic {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10rem;
+  height: 10rem;
+}
+
+.iconStatic {
+  background: url("../../assets/lock.png") no-repeat center;
+  background-size: contain;
+}
+
+.help {
+  margin-top: 2rem;
+}

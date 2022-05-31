@@ -4,6 +4,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { useRef, useCallback, useState } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 
 import Spinner from './Spinner';
 import RippleEffect from './RippleEffect';
@@ -171,7 +172,7 @@ const Button: FC<OwnProps> = ({
       title={ariaLabel}
       tabIndex={tabIndex}
       dir={isRtl ? 'rtl' : undefined}
-      style={backgroundImage ? `background-image: url(${backgroundImage})` : style}
+      style={buildStyle(backgroundImage && `background-image: url(${backgroundImage})`)}
     >
       {isLoading ? (
         <div>

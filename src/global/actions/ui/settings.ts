@@ -11,3 +11,13 @@ addActionHandler('setThemeSettings', (global, actions, payload: { theme: ThemeKe
 
   return replaceThemeSettings(global, theme, settings);
 });
+
+addActionHandler('requestNextSettingsScreen', (global, actions, nextScreen) => {
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      nextScreen,
+    },
+  };
+});

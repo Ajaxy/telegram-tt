@@ -8,6 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { IAnchorPosition } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import useRunThrottled from '../../../hooks/useRunThrottled';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -147,7 +148,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
         isOpen={isDropdownOpen}
         positionX="right"
         autoClose
-        style={anchor ? `right: 1rem; top: ${anchor.y}px;` : undefined}
+        style={buildStyle(anchor && `right: 1rem; top: ${anchor.y}px`)}
         onClose={closeDropdown}
         className="participant-menu"
       >

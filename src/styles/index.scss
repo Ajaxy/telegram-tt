@@ -5,7 +5,6 @@
 @import "forms";
 @import "icons";
 @import "common";
-@import "bg";
 @import "../assets/fonts/roboto.css";
 @import "./print";
 
@@ -66,11 +65,16 @@ body.cursor-ew-resize {
   cursor: ew-resize !important;
 }
 
-#root {
+#root,
+.full-height {
   height: 100%;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
+  }
+
+  &.is-auth {
+    background: var(--color-background);
   }
 }
 

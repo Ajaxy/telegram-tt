@@ -1,15 +1,16 @@
-import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback, useState } from '../../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
-import PasswordMonkey from '../../../common/PasswordMonkey';
-import PasswordForm from '../../../common/PasswordForm';
+import PasswordMonkey from '../../common/PasswordMonkey';
+import PasswordForm from '../../common/PasswordForm';
 
 type OwnProps = {
   error?: string;
   isLoading?: boolean;
+  shouldDisablePasswordManager?: boolean;
   expectedPassword?: string;
   placeholder?: string;
   hint?: string;
@@ -22,11 +23,12 @@ type OwnProps = {
 
 const EQUAL_PASSWORD_ERROR = 'Passwords Should Be Equal';
 
-const SettingsTwoFaPassword: FC<OwnProps> = ({
+const SettingsPasswordForm: FC<OwnProps> = ({
   isActive,
   onReset,
   error,
   isLoading,
+  shouldDisablePasswordManager,
   expectedPassword,
   placeholder = 'Current Password',
   hint,
@@ -60,7 +62,7 @@ const SettingsTwoFaPassword: FC<OwnProps> = ({
   });
 
   return (
-    <div className="settings-content two-fa custom-scroll">
+    <div className="settings-content password-form custom-scroll">
       <div className="settings-content-header no-border">
         <PasswordMonkey isBig isPasswordVisible={shouldShowPassword} />
       </div>
@@ -70,10 +72,12 @@ const SettingsTwoFaPassword: FC<OwnProps> = ({
           error={validationError || error}
           hint={hint}
           placeholder={placeholder}
+          shouldDisablePasswordManager={shouldDisablePasswordManager}
           submitLabel={submitLabel || lang('Next')}
           clearError={handleClearError}
           isLoading={isLoading}
           isPasswordVisible={shouldShowPassword}
+          shouldResetValue={isActive}
           onChangePasswordVisibility={setShouldShowPassword}
           onSubmit={handleSubmit}
         />
@@ -82,4 +86,4 @@ const SettingsTwoFaPassword: FC<OwnProps> = ({
   );
 };
 
-export default memo(SettingsTwoFaPassword);
+export default memo(SettingsPasswordForm);

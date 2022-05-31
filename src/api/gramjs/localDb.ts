@@ -13,7 +13,7 @@ interface LocalDb {
   webDocuments: Record<string, GramJs.TypeWebDocument>;
 }
 
-export default {
+const LOCAL_DB_INITIAL = {
   localMessages: {},
   chats: {},
   users: {},
@@ -22,4 +22,12 @@ export default {
   stickerSets: {},
   photos: {},
   webDocuments: {},
-} as LocalDb;
+};
+
+const localDb: LocalDb = LOCAL_DB_INITIAL;
+
+export default localDb;
+
+export function clearLocalDb() {
+  Object.assign(localDb, LOCAL_DB_INITIAL);
+}

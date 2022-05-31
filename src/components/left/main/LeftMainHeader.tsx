@@ -3,7 +3,7 @@ import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ISettings } from '../../../types';
-import { LeftColumnContent } from '../../../types';
+import { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { ApiChat } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
@@ -18,7 +18,7 @@ import {
   IS_BETA,
   IS_TEST,
 } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_PWA, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
@@ -28,6 +28,7 @@ import { selectCurrentMessageList, selectTheme } from '../../../global/selectors
 import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
+import { useHotkeys } from '../../../hooks/useHotkeys';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -64,6 +65,7 @@ type StateProps =
     isMessageListOpen: boolean;
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     areChatsLoaded?: boolean;
+    hasPasscode?: boolean;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing'>;
 
@@ -93,6 +95,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   isMessageListOpen,
   isConnectionStatusMinimized,
   areChatsLoaded,
+  hasPasscode,
 }) => {
   const {
     openChat,
@@ -100,6 +103,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setSettingOption,
     setGlobalSearchChatId,
     openChatByUsername,
+    lockScreen,
+    requestNextSettingsScreen,
   } = getActions();
 
   const lang = useLang();
@@ -128,6 +133,23 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
     lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
   );
+
+  const handleLockScreenHotkey = useCallback((e: KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hasPasscode) {
+      lockScreen();
+    } else {
+      requestNextSettingsScreen(SettingsScreens.PasscodeDisabled);
+    }
+  }, [hasPasscode, lockScreen, requestNextSettingsScreen]);
+
+  useHotkeys({
+    'Ctrl+Shift+L': handleLockScreenHotkey,
+    'Alt+Shift+L': handleLockScreenHotkey,
+    'Meta+Shift+L': handleLockScreenHotkey,
+    ...(IS_PWA && { 'Meta+L': handleLockScreenHotkey }),
+  });
 
   const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
 
@@ -167,6 +189,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   }, [currentUserId, openChat]);
 
+  const handleSelectPasscode = useCallback(() => {
+    requestNextSettingsScreen(
+      hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
+    );
+  }, [hasPasscode, requestNextSettingsScreen]);
+
   const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -196,6 +224,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const handleOpenTipsChat = useCallback(() => {
     openChatByUsername({ username: lang('Settings.TipsUsername') });
   }, [lang, openChatByUsername]);
+
+  const handleLockScreen = useCallback(() => {
+    lockScreen();
+  }, [lockScreen]);
 
   const isSearchFocused = (
     Boolean(globalSearchChatId)
@@ -242,6 +274,13 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             onClick={onSelectSettings}
           >
             {lang('Settings')}
+          </MenuItem>
+          <MenuItem
+            icon="lock"
+            onClick={handleSelectPasscode}
+          >
+            {lang('Passcode')}
+            <span className="menu-item-badge">{lang('New')}</span>
           </MenuItem>
           <MenuItem
             icon="darkmode"
@@ -344,6 +383,19 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             />
           )}
         </SearchInput>
+        {hasPasscode && (
+          <Button
+            round
+            ripple={!IS_SINGLE_COLUMN_LAYOUT}
+            size="smaller"
+            color="translucent"
+            ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
+            onClick={handleLockScreen}
+            className="passcode-lock"
+          >
+            <i className="icon-lock" />
+          </Button>
+        )}
         <ShowTransition
           isOpen={connectionStatusPosition === 'overlay'}
           isCustom
@@ -383,6 +435,7 @@ export default memo(withGlobal<OwnProps>(
       isMessageListOpen: Boolean(selectCurrentMessageList(global)),
       isConnectionStatusMinimized,
       areChatsLoaded: Boolean(global.chats.listIds.active),
+      hasPasscode: Boolean(global.passcode.hasPasscode),
     };
   },
 )(LeftMainHeader));

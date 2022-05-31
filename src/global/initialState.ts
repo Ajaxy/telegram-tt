@@ -192,6 +192,7 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   twoFaSettings: {},
+  passcode: {},
   activeReactions: {},
 
   shouldShowContextMenuHint: true,

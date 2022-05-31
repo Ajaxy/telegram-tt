@@ -38,7 +38,9 @@ if (DEBUG) {
   console.log('>>> FINISH INITIAL RENDER');
 }
 
-document.addEventListener('dblclick', () => {
-  // eslint-disable-next-line no-console
-  console.warn('GLOBAL STATE', getGlobal());
-});
+if (DEBUG) {
+  document.addEventListener('dblclick', () => {
+    // eslint-disable-next-line no-console
+    console.warn('GLOBAL STATE', getGlobal());
+  });
+}

@@ -32,6 +32,10 @@ const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map
 }));
 
 const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
+  const themeClassName = `theme-${theme}`;
+  if (document.documentElement.classList.contains(themeClassName)) {
+    return;
+  }
   const isDarkTheme = theme === 'dark';
   const shouldAnimate = isInitialized && withAnimation;
   const startIndex = isDarkTheme ? 0 : 1;
@@ -43,7 +47,7 @@ const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
   if (isInitialized) {
     document.documentElement.classList.add('no-animations');
   }
-  document.documentElement.classList.add(`theme-${theme}`);
+  document.documentElement.classList.add(themeClassName);
   if (themeColorTag) {
     themeColorTag.setAttribute('content', isDarkTheme ? '#212121' : '#fff');
   }

@@ -319,7 +319,10 @@ const RightColumn: FC<StateProps> = ({
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
-          cleanupExceptionKey={renderingContentKey === RightColumnContent.MessageStatistics ? RightColumnContent.Statistics : undefined}
+          cleanupExceptionKey={
+            renderingContentKey === RightColumnContent.MessageStatistics
+              ? RightColumnContent.Statistics : undefined
+          }
         >
           {renderContent}
         </Transition>
