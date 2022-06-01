@@ -119,8 +119,11 @@ addActionHandler('goToAuthQrCode', (global) => {
 });
 
 addActionHandler('saveSession', (global, actions, payload) => {
-  const { sessionData } = payload;
+  if (global.passcode.isScreenLocked) {
+    return;
+  }
 
+  const { sessionData } = payload;
   if (sessionData) {
     storeSession(payload.sessionData, global.currentUserId);
   } else {

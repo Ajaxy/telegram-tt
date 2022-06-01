@@ -5,6 +5,7 @@ import { IS_MOCKED_CLIENT } from '../config';
 import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';
 import { updatePasscodeSettings } from './reducers';
+import { clearStoredSession } from '../util/sessions';
 
 initCache();
 
@@ -18,6 +19,8 @@ addActionHandler('init', () => {
     global = updatePasscodeSettings(global, {
       isScreenLocked: true,
     });
+
+    clearStoredSession();
   }
 
   return global;
