@@ -54,6 +54,7 @@ export function clearStoredSession() {
     'dc',
     ...DC_IDS.map((dcId) => `dc${dcId}_auth_key`),
     ...DC_IDS.map((dcId) => `dc${dcId}_hash`),
+    ...DC_IDS.map((dcId) => `dc${dcId}_server_salt`),
   ].forEach((key) => {
     localStorage.removeItem(key);
   });

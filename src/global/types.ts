@@ -886,6 +886,7 @@ export interface ActionPayloads {
   resetInvalidUnlockAttempts: never;
   setPasscodeError: { error: string };
   clearPasscodeError: never;
+  skipLockOnUnload: never;
 
   // Settings
   requestNextSettingsScreen: SettingsScreens;

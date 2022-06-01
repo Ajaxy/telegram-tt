@@ -6,8 +6,9 @@ import { clearEncryptedSession, encryptSession, setupPasscode } from '../../../u
 import { forceUpdateCache, serializeGlobal } from '../../cache';
 import { onBeforeUnload } from '../../../util/schedulers';
 
+let noLockOnUnload = false;
 onBeforeUnload(() => {
-  if (getGlobal().passcode.hasPasscode) {
+  if (getGlobal().passcode.hasPasscode && !noLockOnUnload) {
     clearStoredSession();
   }
 });
@@ -79,4 +80,8 @@ addActionHandler('setPasscodeError', (global, actions, payload) => {
 
 addActionHandler('clearPasscodeError', (global) => {
   return updatePasscodeSettings(global, { error: undefined });
+});
+
+addActionHandler('skipLockOnUnload', () => {
+  noLockOnUnload = true;
 });

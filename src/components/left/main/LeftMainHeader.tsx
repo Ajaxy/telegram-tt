@@ -107,6 +107,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     openChatByUsername,
     lockScreen,
     requestNextSettingsScreen,
+    skipLockOnUnload,
   } = getActions();
 
   const lang = useLang();
@@ -221,7 +222,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
-  }, []);
+    skipLockOnUnload();
+  }, [skipLockOnUnload]);
+
+  const handleSwitchToLegacy = useCallback(() => {
+    skipLockOnUnload();
+  }, [skipLockOnUnload]);
 
   const handleOpenTipsChat = useCallback(() => {
     openChatByUsername({ username: lang('Settings.TipsUsername') });
@@ -342,6 +348,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               <MenuItem
                 icon="char-W"
                 href={LEGACY_VERSION_URL}
+                onClick={handleSwitchToLegacy}
               >
                 Switch to Old Version
               </MenuItem>
