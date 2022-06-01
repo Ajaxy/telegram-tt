@@ -260,15 +260,21 @@ function updateCache() {
     return;
   }
 
+  forceUpdateCache();
+}
+
+export function forceUpdateCache(noEncrypt = false) {
+  const global = getGlobal();
   const { hasPasscode, isScreenLocked } = global.passcode;
-  const serializedGlobal = serializeGlobal();
+  const serializedGlobal = serializeGlobal(global);
 
   if (hasPasscode) {
-    if (!isScreenLocked) {
+    if (!isScreenLocked && !noEncrypt) {
       void encryptSession(undefined, serializedGlobal);
     }
 
-    localStorage.setItem(GLOBAL_STATE_CACHE_KEY, JSON.stringify(clearGlobalForLockScreen(global)));
+    const serializedGlobalClean = JSON.stringify(clearGlobalForLockScreen(global));
+    localStorage.setItem(GLOBAL_STATE_CACHE_KEY, serializedGlobalClean);
 
     return;
   }
@@ -276,8 +282,7 @@ function updateCache() {
   localStorage.setItem(GLOBAL_STATE_CACHE_KEY, serializedGlobal);
 }
 
-export function serializeGlobal() {
-  const global = getGlobal();
+export function serializeGlobal(global: GlobalState) {
   const reducedGlobal: GlobalState = {
     ...INITIAL_STATE,
     ...pick(global, [

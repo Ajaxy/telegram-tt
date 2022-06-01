@@ -3,7 +3,7 @@ import { addActionHandler, setGlobal, getGlobal } from '../../index';
 import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
 import { clearEncryptedSession, encryptSession, setupPasscode } from '../../../util/passcode';
-import { serializeGlobal } from '../../cache';
+import { forceUpdateCache, serializeGlobal } from '../../cache';
 import { onBeforeUnload } from '../../../util/schedulers';
 
 onBeforeUnload(() => {
@@ -19,7 +19,11 @@ addActionHandler('setPasscode', async (global, actions, { passcode }) => {
   await setupPasscode(passcode);
 
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
-  const globalJson = serializeGlobal();
+  const globalJson = serializeGlobal(updatePasscodeSettings(getGlobal(), {
+    hasPasscode: true,
+    error: undefined,
+    isLoading: false,
+  }));
 
   await encryptSession(sessionJson, globalJson);
 
@@ -28,6 +32,8 @@ addActionHandler('setPasscode', async (global, actions, { passcode }) => {
     error: undefined,
     isLoading: false,
   }));
+
+  forceUpdateCache(true);
 });
 
 addActionHandler('clearPasscode', (global) => {

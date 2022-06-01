@@ -202,7 +202,7 @@ addActionHandler('deleteDeviceToken', (global) => {
 
 addActionHandler('lockScreen', async (global) => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
-  const globalJson = serializeGlobal();
+  const globalJson = serializeGlobal(global);
 
   await encryptSession(sessionJson, globalJson);
   forgetPasscode();
