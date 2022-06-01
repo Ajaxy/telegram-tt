@@ -168,6 +168,11 @@
     clip: rect(0, 0, 0, 0);
     position: absolute;
   }
+
+  &::-ms-clear,
+  &::-ms-reveal {
+    display: none;
+  }
 }
 
 select.form-control {

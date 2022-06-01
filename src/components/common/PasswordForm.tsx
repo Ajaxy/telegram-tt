@@ -104,12 +104,25 @@ const PasswordForm: FC<OwnProps> = ({
     }
   }
 
+  function renderFakeInput() {
+    return (
+      <input
+        type="password"
+        id="prevent_autofill"
+        autoComplete="off"
+        className="visually-hidden"
+        tabIndex={-2}
+      />
+    );
+  }
+
   return (
     <form action="" onSubmit={handleSubmit} autoComplete="off">
       <div
         className={buildClassName('input-group password-input', password && 'touched', error && 'error')}
         dir={lang.isRtl ? 'rtl' : undefined}
       >
+        {shouldDisablePasswordManager && renderFakeInput()}
         <input
           ref={inputRef}
           className="form-control"
