@@ -10,19 +10,24 @@ export async function setupPasscode(passcode: string) {
   currentPasscodeHash = await sha256(passcode);
 }
 
-export async function encryptSession(sessionJson: string, globalJson: string) {
+export async function encryptSession(sessionJson?: string, globalJson?: string) {
   if (!currentPasscodeHash) {
     throw new Error('[api/passcode] Missing current passcode');
   }
 
-  const [sessionEncrypted, globalEncrypted] = await Promise.all([
-    aesEncrypt(sessionJson, currentPasscodeHash),
-    aesEncrypt(globalJson, currentPasscodeHash),
-  ]);
-
   await Promise.all([
-    store('sessionEncrypted', sessionEncrypted),
-    store('globalEncrypted', globalEncrypted),
+    (async () => {
+      if (!sessionJson) return;
+
+      const sessionEncrypted = await aesEncrypt(sessionJson, currentPasscodeHash);
+      await store('sessionEncrypted', sessionEncrypted);
+    })(),
+    (async () => {
+      if (!globalJson) return;
+
+      const globalEncrypted = await aesEncrypt(globalJson, currentPasscodeHash);
+      await store('globalEncrypted', globalEncrypted);
+    })(),
   ]);
 }
 

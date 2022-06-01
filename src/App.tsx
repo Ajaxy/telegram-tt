@@ -25,6 +25,7 @@ import UiLoader from './components/common/UiLoader';
 type StateProps = {
   authState: GlobalState['authState'];
   isScreenLocked?: boolean;
+  hasPasscode?: boolean;
 };
 
 enum AppScreens {
@@ -37,6 +38,7 @@ enum AppScreens {
 const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
+  hasPasscode,
 }) => {
   const { disconnect } = getActions();
 
@@ -95,6 +97,8 @@ const App: FC<StateProps> = ({
   } else if (hasStoredSession(true)) {
     page = 'main';
     activeKey = AppScreens.main;
+  } else if (hasPasscode) {
+    activeKey = AppScreens.lock;
   } else {
     page = isMobile ? 'authPhoneNumber' : 'authQrCode';
     activeKey = AppScreens.auth;
@@ -138,6 +142,7 @@ export default withGlobal(
     return {
       authState: global.authState,
       isScreenLocked: global.passcode?.isScreenLocked,
+      hasPasscode: global.passcode?.hasPasscode,
     };
   },
 )(App);

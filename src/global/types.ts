@@ -882,7 +882,6 @@ export interface ActionPayloads {
   lockScreen: never;
   unlockScreen: { sessionJson: string; globalJson: string };
   softSignIn: never;
-  softReset: never;
   logInvalidUnlockAttempt: never;
   resetInvalidUnlockAttempts: never;
   setPasscodeError: { error: string };

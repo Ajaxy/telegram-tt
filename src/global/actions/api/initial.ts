@@ -166,18 +166,6 @@ addActionHandler('reset', () => {
   getActions().init();
 });
 
-addActionHandler('softReset', () => {
-  clearStoredSession();
-
-  void clearLegacySessions();
-
-  updateAppBadge(0);
-
-  let global = getGlobal();
-  global = clearGlobalForLockScreen(global);
-  setGlobal(global);
-});
-
 addActionHandler('disconnect', () => {
   void callApi('disconnect');
 });
@@ -212,12 +200,14 @@ addActionHandler('deleteDeviceToken', (global) => {
   };
 });
 
-addActionHandler('lockScreen', async (global, { softReset }) => {
+addActionHandler('lockScreen', async (global) => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
   const globalJson = serializeGlobal();
 
   await encryptSession(sessionJson, globalJson);
   forgetPasscode();
+  clearStoredSession();
+  updateAppBadge(0);
 
   global = getGlobal();
   setGlobal(updatePasscodeSettings(
@@ -228,12 +218,14 @@ addActionHandler('lockScreen', async (global, { softReset }) => {
     },
   ));
 
+  setTimeout(() => {
+    setGlobal(clearGlobalForLockScreen(getGlobal()));
+  }, LOCK_SCREEN_ANIMATION_DURATION_MS);
+
   try {
     await unsubscribe();
     await callApi('destroy', true);
   } catch (err) {
     // Do nothing
   }
-
-  setTimeout(() => softReset(), LOCK_SCREEN_ANIMATION_DURATION_MS);
 });

@@ -27,7 +27,7 @@ import {
   selectCurrentMessageList,
   selectVisibleUsers,
 } from './selectors';
-import { hasStoredSession, loadStoredSession } from '../util/sessions';
+import { hasStoredSession } from '../util/sessions';
 import { INITIAL_STATE } from './initialState';
 import { parseLocationHash } from '../util/routing';
 import { isUserId } from './helpers';
@@ -73,10 +73,12 @@ export function loadCache(initialState: GlobalState): GlobalState | undefined {
     return undefined;
   }
 
-  if (hasStoredSession(true)) {
+  const cache = readCache(initialState);
+
+  if (cache.passcode.hasPasscode || hasStoredSession(true)) {
     setupCaching();
 
-    return readCache(initialState);
+    return cache;
   } else {
     clearCaching();
 
@@ -263,8 +265,7 @@ function updateCache() {
 
   if (hasPasscode) {
     if (!isScreenLocked) {
-      const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
-      void encryptSession(sessionJson, serializedGlobal);
+      void encryptSession(undefined, serializedGlobal);
     }
 
     localStorage.setItem(GLOBAL_STATE_CACHE_KEY, JSON.stringify(clearGlobalForLockScreen(global)));

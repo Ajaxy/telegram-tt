@@ -1,9 +1,16 @@
 import { addActionHandler, setGlobal, getGlobal } from '../../index';
 
 import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
-import { loadStoredSession, storeSession } from '../../../util/sessions';
+import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
 import { clearEncryptedSession, encryptSession, setupPasscode } from '../../../util/passcode';
 import { serializeGlobal } from '../../cache';
+import { onBeforeUnload } from '../../../util/schedulers';
+
+onBeforeUnload(() => {
+  if (getGlobal().passcode.hasPasscode) {
+    clearStoredSession();
+  }
+});
 
 addActionHandler('setPasscode', async (global, actions, { passcode }) => {
   setGlobal(updatePasscodeSettings(global, {
