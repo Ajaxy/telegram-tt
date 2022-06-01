@@ -5,6 +5,7 @@
   box-shadow: none !important;
   outline: none !important;
   display: flex;
+  align-items: center;
   padding: 0.75rem 1rem;
   position: relative;
   overflow: hidden;
@@ -99,7 +100,6 @@
   }
 
   &.compact {
-    align-items: center;
     font-size: 0.875rem;
     margin: 0.125rem 0.25rem;
     padding: 0.25rem;
