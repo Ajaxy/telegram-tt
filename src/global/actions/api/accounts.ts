@@ -170,3 +170,56 @@ addActionHandler('changeSessionTtl', async (global, actions, payload) => {
     },
   });
 });
+
+addActionHandler('loadWebAuthorizations', async () => {
+  const result = await callApi('fetchWebAuthorizations');
+  if (!result) {
+    return;
+  }
+
+  setGlobal({
+    ...getGlobal(),
+    activeWebSessions: {
+      byHash: result,
+      orderedHashes: Object.keys(result),
+    },
+  });
+});
+
+addActionHandler('terminateWebAuthorization', async (global, actions, payload) => {
+  const { hash } = payload!;
+
+  const result = await callApi('terminateWebAuthorization', hash);
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  const { [hash]: removedSessions, ...newSessions } = global.activeWebSessions.byHash;
+
+  setGlobal({
+    ...global,
+    activeWebSessions: {
+      byHash: newSessions,
+      orderedHashes: global.activeWebSessions.orderedHashes.filter((el) => el !== hash),
+    },
+  });
+});
+
+addActionHandler('terminateAllWebAuthorizations', async (global) => {
+  const result = await callApi('terminateAllWebAuthorizations');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  setGlobal({
+    ...global,
+    activeWebSessions: {
+      byHash: {},
+      orderedHashes: [],
+    },
+  });
+});

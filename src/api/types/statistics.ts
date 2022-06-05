@@ -1,5 +1,5 @@
 import type { ApiChat } from './chats';
-import type { ApiMessage, ApiPhoto } from './messages';
+import type { ApiMessage } from './messages';
 
 export interface ApiChannelStatistics {
   growthGraph?: StatisticsGraph | string;

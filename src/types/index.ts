@@ -214,6 +214,7 @@ export enum SettingsScreens {
   TwoFaRecoveryEmailCode,
   TwoFaCongratulations,
   QuickReaction,
+  ActiveWebsites,
   PasscodeDisabled,
   PasscodeNewPasscode,
   PasscodeNewPasscodeConfirm,

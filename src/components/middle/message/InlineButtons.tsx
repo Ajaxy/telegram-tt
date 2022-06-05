@@ -1,6 +1,6 @@
-import type { FC } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
 
 import { RE_TME_LINK } from '../../../config';
@@ -18,6 +18,30 @@ type OwnProps = {
 
 const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
   const lang = useLang();
+
+  const renderIcon = (button: ApiKeyboardButton) => {
+    const { type } = button;
+    switch (type) {
+      case 'url': {
+        if (!RE_TME_LINK.test(button.url)) {
+          return <i className="icon-arrow-right" />;
+        }
+        break;
+      }
+      case 'urlAuth':
+        return <i className="icon-arrow-right" />;
+      case 'buy':
+      case 'receipt':
+        return <i className="icon-cart" />;
+      case 'switchBotInline':
+        return <i className="icon-share-filled" />;
+      case 'webView':
+      case 'simpleWebView':
+        return <i className="icon-webapp" />;
+    }
+    return undefined;
+  };
+
   return (
     <div className="InlineButtons">
       {message.inlineButtons!.map((row) => (
@@ -31,10 +55,7 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
               onClick={() => onClick({ messageId: message.id, button })}
             >
               <span className="inline-button-text">{renderText(lang(button.text))}</span>
-              {['buy', 'receipt'].includes(button.type) && <i className="icon-card" />}
-              {button.type === 'url' && !RE_TME_LINK.test(button.url) && <i className="icon-arrow-right" />}
-              {button.type === 'switchBotInline' && <i className="icon-share-filled" />}
-              {['webView', 'simpleWebView'].includes(button.type) && <i className="icon-webapp" />}
+              {renderIcon(button)}
             </Button>
           ))}
         </div>

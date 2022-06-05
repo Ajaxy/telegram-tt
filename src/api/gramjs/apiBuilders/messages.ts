@@ -1104,6 +1104,15 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
         };
       }
 
+      if (button instanceof GramJs.KeyboardButtonUrlAuth) {
+        return {
+          type: 'urlAuth',
+          text,
+          url: button.url,
+          buttonId: button.buttonId,
+        };
+      }
+
       return {
         type: 'unsupported',
         text,

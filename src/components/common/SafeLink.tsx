@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 import convertPunycode from '../../lib/punycode';
 
 import {
-  DEBUG, RE_TG_LINK, RE_TME_LINK,
+  DEBUG,
 } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { ensureProtocol } from '../../util/ensureProtocol';
@@ -24,31 +24,18 @@ const SafeLink: FC<OwnProps> = ({
   children,
   isRtl,
 }) => {
-  const { toggleSafeLinkModal, openTelegramLink } = getActions();
+  const { openUrl } = getActions();
 
   const content = children || text;
-  const isNotSafe = url !== content;
+  const isSafe = url === content;
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (
-      e.ctrlKey || e.altKey || e.shiftKey || e.metaKey
-      || !url || (!url.match(RE_TME_LINK) && !url.match(RE_TG_LINK))
-    ) {
-      if (isNotSafe) {
-        toggleSafeLinkModal({ url });
-
-        e.preventDefault();
-        return false;
-      }
-
-      return true;
-    }
-
+    if (!url) return true;
     e.preventDefault();
-    openTelegramLink({ url });
+    openUrl({ url, shouldSkipModal: isSafe });
 
     return false;
-  }, [isNotSafe, openTelegramLink, toggleSafeLinkModal, url]);
+  }, [isSafe, openUrl, url]);
 
   if (!url) {
     return undefined;

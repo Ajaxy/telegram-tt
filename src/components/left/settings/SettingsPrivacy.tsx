@@ -21,6 +21,7 @@ type StateProps = {
   hasPassword?: boolean;
   hasPasscode?: boolean;
   blockedCount: number;
+  webAuthCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
   privacyPhoneNumber?: ApiPrivacySettings;
@@ -34,11 +35,10 @@ type StateProps = {
 
 const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
-  onReset,
   hasPassword,
   hasPasscode,
   blockedCount,
+  webAuthCount,
   isSensitiveEnabled,
   canChangeSensitive,
   privacyPhoneNumber,
@@ -48,7 +48,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   privacyGroupChats,
   privacyPhoneCall,
   privacyPhoneP2P,
-
+  onScreenSelect,
+  onReset,
 }) => {
   const {
     loadPrivacySettings,
@@ -114,6 +115,16 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             )}
           </div>
         </ListItem>
+        {webAuthCount > 0 && (
+          <ListItem
+            icon="web"
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
+          >
+            {lang('PrivacySettings.WebSessions')}
+            <span className="settings-item__current-value">{webAuthCount}</span>
+          </ListItem>
+        )}
         <ListItem
           icon="key"
           narrow
@@ -279,6 +290,7 @@ export default memo(withGlobal<OwnProps>(
       hasPassword,
       hasPasscode: Boolean(hasPasscode),
       blockedCount: blocked.totalCount,
+      webAuthCount: global.activeWebSessions.orderedHashes.length,
       isSensitiveEnabled,
       canChangeSensitive,
       privacyPhoneNumber: privacy.phoneNumber,

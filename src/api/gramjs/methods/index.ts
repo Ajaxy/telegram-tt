@@ -54,6 +54,7 @@ export {
   updateProfile, checkUsername, updateUsername, fetchBlockedContacts, blockContact, unblockContact,
   updateProfilePhoto, uploadProfilePhoto, fetchWallpapers, uploadWallpaper,
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
+  fetchWebAuthorizations, terminateWebAuthorization, terminateAllWebAuthorizations,
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
   updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
@@ -66,6 +67,7 @@ export {
 export {
   answerCallbackButton, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults, sendInlineBotResult, startBot,
   requestWebView, requestSimpleWebView, sendWebViewData, prolongWebView, loadAttachMenuBots, toggleBotInAttachMenu,
+  requestBotUrlAuth, requestLinkUrlAuth, acceptBotUrlAuth, acceptLinkUrlAuth,
 } from './bots';
 
 export {
@@ -86,7 +88,7 @@ export {
 
 export {
   fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,
-	fetchMessagePublicForwards, fetchStatisticsAsyncGraph,
+  fetchMessagePublicForwards, fetchStatisticsAsyncGraph,
 } from './statistics';
 
 export {

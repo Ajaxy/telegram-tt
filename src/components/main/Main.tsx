@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { LangCode } from '../../types';
 import type {
-  ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType,
+  ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType, ApiUser,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
@@ -21,6 +21,7 @@ import {
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
   selectIsServiceChatReady,
+  selectUser,
 } from '../../global/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import buildClassName from '../../util/buildClassName';
@@ -61,6 +62,7 @@ import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 import WebAppModal from './WebAppModal.async';
 import BotTrustModal from './BotTrustModal.async';
 import BotAttachModal from './BotAttachModal.async';
+import UrlAuthModal from './UrlAuthModal.async';
 
 import './Main.scss';
 
@@ -95,6 +97,8 @@ type StateProps = {
   webApp?: GlobalState['webApp'];
   botTrustRequest?: GlobalState['botTrustRequest'];
   botAttachRequest?: GlobalState['botAttachRequest'];
+  currentUser?: ApiUser;
+  urlAuth?: GlobalState['urlAuth'];
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -134,6 +138,8 @@ const Main: FC<StateProps> = ({
   botTrustRequest,
   botAttachRequest,
   webApp,
+  currentUser,
+  urlAuth,
 }) => {
   const {
     sync,
@@ -369,6 +375,7 @@ const Main: FC<StateProps> = ({
       <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
+      <UrlAuthModal urlAuth={urlAuth} currentUser={currentUser} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
         isOpen={Boolean(openedStickerSetShortName)}
@@ -432,6 +439,7 @@ export default memo(withGlobal(
     const openedGame = global.openedGame;
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
+    const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
 
     return {
       connectionState: global.connectionState,
@@ -463,6 +471,8 @@ export default memo(withGlobal(
       botTrustRequest: global.botTrustRequest,
       botAttachRequest: global.botAttachRequest,
       webApp: global.webApp,
+      currentUser,
+      urlAuth: global.urlAuth,
     };
   },
 )(Main));

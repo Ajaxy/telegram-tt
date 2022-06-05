@@ -19,20 +19,21 @@ import {
   buildApiNotifyException,
   buildApiSession,
   buildApiWallpaper,
+  buildApiWebSession,
   buildPrivacyRules,
 } from '../apiBuilders/misc';
 
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import { buildAppConfig } from '../apiBuilders/appConfig';
+import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildInputEntity, buildInputPeer, buildInputPrivacyKey } from '../gramjsBuilders';
 import { getClient, invokeRequest, uploadFile } from './client';
-import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
-import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
-import localDb from '../localDb';
-import { buildApiConfig } from '../apiBuilders/appConfig';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
+import localDb from '../localDb';
 
 const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz', 'en'];
@@ -173,6 +174,23 @@ export function terminateAuthorization(hash: string) {
 
 export function terminateAllAuthorizations() {
   return invokeRequest(new GramJs.auth.ResetAuthorizations());
+}
+
+export async function fetchWebAuthorizations() {
+  const result = await invokeRequest(new GramJs.account.GetWebAuthorizations());
+  if (!result) {
+    return undefined;
+  }
+
+  return buildCollectionByKey(result.authorizations.map(buildApiWebSession), 'hash');
+}
+
+export function terminateWebAuthorization(hash: string) {
+  return invokeRequest(new GramJs.account.ResetWebAuthorization({ hash: BigInt(hash) }));
+}
+
+export function terminateAllWebAuthorizations() {
+  return invokeRequest(new GramJs.account.ResetWebAuthorizations());
 }
 
 export async function fetchNotificationExceptions({
@@ -451,7 +469,7 @@ export async function fetchAppConfig(): Promise<ApiAppConfig | undefined> {
   const result = await invokeRequest(new GramJs.help.GetAppConfig());
   if (!result) return undefined;
 
-  return buildApiConfig(result);
+  return buildAppConfig(result);
 }
 
 function updateLocalDb(

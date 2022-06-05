@@ -208,7 +208,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [animationLevel, setSettingOption, theme]);
 
   const handleChangelogClick = useCallback(() => {
-    window.open(BETA_CHANGELOG_URL, '_blank');
+    window.open(BETA_CHANGELOG_URL, '_blank', 'noopener');
   }, []);
 
   const handleRuDiscussionClick = useCallback(() => {

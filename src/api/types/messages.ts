@@ -438,6 +438,13 @@ interface ApiKeyboardButtonUserProfile {
   userId: string;
 }
 
+interface ApiKeyboardButtonUrlAuth {
+  type: 'urlAuth';
+  text: string;
+  url: string;
+  buttonId: number;
+}
+
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
   | ApiKeyboardButtonReceipt
@@ -448,6 +455,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonUserProfile
   | ApiKeyboardButtonWebView
   | ApiKeyboardButtonSimpleWebView
+  | ApiKeyboardButtonUrlAuth
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];

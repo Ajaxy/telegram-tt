@@ -21,6 +21,8 @@ import { LoadMoreDirection } from '../../../types';
 import {
   MAX_MEDIA_FILES_FOR_ALBUM,
   MESSAGE_LIST_SLICE,
+  RE_TG_LINK,
+  RE_TME_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { IS_IOS } from '../../../util/environment';
@@ -70,6 +72,9 @@ import {
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { getMessageOriginalId, isServiceNotificationMessage } from '../../helpers';
 import { getTranslation } from '../../../util/langProvider';
+import { ensureProtocol } from '../../../util/ensureProtocol';
+
+const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
 
@@ -1155,6 +1160,38 @@ addActionHandler('readAllMentions', (global) => {
     unreadMentionsCount: undefined,
     unreadMentions: undefined,
   });
+});
+
+addActionHandler('openUrl', (global, actions, payload) => {
+  const { url, shouldSkipModal } = payload;
+  const urlWithProtocol = ensureProtocol(url)!;
+
+  if (urlWithProtocol.match(RE_TME_LINK) || urlWithProtocol.match(RE_TG_LINK)) {
+    actions.openTelegramLink({ url });
+    return;
+  }
+
+  const { appConfig } = global;
+  if (appConfig) {
+    const parsedUrl = new URL(urlWithProtocol);
+
+    if (appConfig.autologinDomains.includes(parsedUrl.hostname)) {
+      parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, appConfig.autologinToken);
+      window.open(parsedUrl.href, '_blank', 'noopener');
+      return;
+    }
+
+    if (appConfig.urlAuthDomains.includes(parsedUrl.hostname)) {
+      actions.requestLinkUrlAuth({ url });
+      return;
+    }
+  }
+
+  if (!shouldSkipModal) {
+    actions.toggleSafeLinkModal({ url: urlWithProtocol });
+  } else {
+    window.open(urlWithProtocol, '_blank', 'noopener');
+  }
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {
