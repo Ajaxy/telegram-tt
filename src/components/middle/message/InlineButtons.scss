@@ -4,8 +4,9 @@
   max-width: var(--max-width);
 
   .row {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
   }
 
   .Button {

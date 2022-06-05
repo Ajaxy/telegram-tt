@@ -17,6 +17,7 @@ import { init as initClient } from './methods/client';
 import { init as initStickers } from './methods/symbols';
 import { init as initManagement } from './methods/management';
 import { init as initTwoFaSettings } from './methods/twoFaSettings';
+import { init as initBots } from './methods/bots';
 import { init as initCalls } from './methods/calls';
 import { init as initPayments } from './methods/payments';
 import * as methods from './methods';
@@ -34,6 +35,7 @@ export async function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArg
   initStickers(handleUpdate);
   initManagement(handleUpdate);
   initTwoFaSettings(handleUpdate);
+  initBots(handleUpdate);
   initCalls(handleUpdate);
   initPayments(handleUpdate);
 

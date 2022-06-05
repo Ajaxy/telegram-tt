@@ -1,6 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useRef, useState } from '../../../lib/teact/teact';
+import React, {
+  memo, useRef, useState, useCallback,
+} from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
+
+import type { FC } from '../../../lib/teact/teact';
 
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
@@ -41,6 +44,10 @@ const RatePhoneCallModal: FC<OwnProps> = ({
     return () => setRating(rating === index ? undefined : index);
   }
 
+  const handleCancelClick = useCallback(() => {
+    closeCallRatingModal();
+  }, [closeCallRatingModal]);
+
   return (
     <Modal title={lang('lng_call_rate_label')} className="narrow" onClose={closeCallRatingModal} isOpen={isOpen}>
       <div className={styles.stars}>
@@ -68,7 +75,7 @@ const RatePhoneCallModal: FC<OwnProps> = ({
       <Button className="confirm-dialog-button" isText onClick={handleSend}>
         {lang('Send')}
       </Button>
-      <Button className="confirm-dialog-button" isText onClick={closeCallRatingModal}>{lang('Cancel')}</Button>
+      <Button className="confirm-dialog-button" isText onClick={handleCancelClick}>{lang('Cancel')}</Button>
     </Modal>
   );
 };

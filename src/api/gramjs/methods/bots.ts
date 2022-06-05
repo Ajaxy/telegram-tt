@@ -1,7 +1,9 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiChat, ApiThemeParameters, ApiUser } from '../../types';
+import type {
+  ApiChat, ApiThemeParameters, ApiUser, OnApiUpdate,
+} from '../../types';
 
 import localDb from '../localDb';
 import { invokeRequest } from './client';
@@ -14,8 +16,12 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildApiUrlAuthResult } from '../apiBuilders/misc';
 
-export function init() {
+let onUpdate: OnApiUpdate;
+
+export function init(_onUpdate: OnApiUpdate) {
+  onUpdate = _onUpdate;
 }
 
 export async function answerCallbackButton({
@@ -267,6 +273,100 @@ export function toggleBotInAttachMenu({
     bot: buildInputPeer(bot.id, bot.accessHash),
     enabled: isEnabled,
   }));
+}
+
+export async function requestBotUrlAuth({
+  chat, buttonId, messageId,
+}: {
+  chat: ApiChat;
+  buttonId: number;
+  messageId: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.RequestUrlAuth({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    buttonId,
+    msgId: messageId,
+  }));
+
+  if (!result) return undefined;
+
+  const authResult = buildApiUrlAuthResult(result);
+  if (authResult?.type === 'request') {
+    onUpdate({
+      '@type': 'updateUser',
+      id: authResult.bot.id,
+      user: authResult.bot,
+    });
+  }
+  return authResult;
+}
+
+export async function acceptBotUrlAuth({
+  chat,
+  messageId,
+  buttonId,
+  isWriteAllowed,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  buttonId: number;
+  isWriteAllowed?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.messages.AcceptUrlAuth({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    buttonId,
+    writeAllowed: isWriteAllowed || undefined,
+  }));
+
+  if (!result) return undefined;
+
+  const authResult = buildApiUrlAuthResult(result);
+  if (authResult?.type === 'request') {
+    onUpdate({
+      '@type': 'updateUser',
+      id: authResult.bot.id,
+      user: authResult.bot,
+    });
+  }
+  return authResult;
+}
+
+export async function requestLinkUrlAuth({ url }: { url: string }) {
+  const result = await invokeRequest(new GramJs.messages.RequestUrlAuth({
+    url,
+  }));
+
+  if (!result) return undefined;
+
+  const authResult = buildApiUrlAuthResult(result);
+  if (authResult?.type === 'request') {
+    onUpdate({
+      '@type': 'updateUser',
+      id: authResult.bot.id,
+      user: authResult.bot,
+    });
+  }
+  return authResult;
+}
+
+export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; isWriteAllowed?: boolean }) {
+  const result = await invokeRequest(new GramJs.messages.AcceptUrlAuth({
+    url,
+    writeAllowed: isWriteAllowed || undefined,
+  }));
+
+  if (!result) return undefined;
+
+  const authResult = buildApiUrlAuthResult(result);
+  if (authResult?.type === 'request') {
+    onUpdate({
+      '@type': 'updateUser',
+      id: authResult.bot.id,
+      user: authResult.bot,
+    });
+  }
+  return authResult;
 }
 
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {

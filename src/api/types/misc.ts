@@ -1,4 +1,5 @@
 import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiUser } from './users';
 
 export interface ApiInitialArgs {
   userAgent: string;
@@ -63,6 +64,18 @@ export interface ApiSession {
   region: string;
   areCallsEnabled: boolean;
   areSecretChatsEnabled: boolean;
+}
+
+export interface ApiWebSession {
+  hash: string;
+  botId: string;
+  domain: string;
+  browser: string;
+  platform: string;
+  dateCreated: number;
+  dateActive: number;
+  ip: string;
+  region: string;
 }
 
 export interface ApiSessionData {
@@ -145,6 +158,9 @@ export interface ApiAppConfig {
   defaultReaction: string;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
+  autologinDomains: string[];
+  autologinToken: string;
+  urlAuthDomains: string[];
 }
 
 export interface GramJsEmojiInteraction {
@@ -158,3 +174,21 @@ export interface GramJsEmojiInteraction {
 export interface ApiEmojiInteraction {
   timestamps: number[];
 }
+
+type ApiUrlAuthResultRequest = {
+  type: 'request';
+  bot: ApiUser;
+  domain: string;
+  shouldRequestWriteAccess?: boolean;
+};
+
+type ApiUrlAuthResultAccepted = {
+  type: 'accepted';
+  url: string;
+};
+
+type ApiUrlAuthResultDefault = {
+  type: 'default';
+};
+
+export type ApiUrlAuthResult = ApiUrlAuthResultRequest | ApiUrlAuthResultAccepted | ApiUrlAuthResultDefault;

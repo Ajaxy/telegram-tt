@@ -21,6 +21,7 @@ import SettingsPrivacy from './SettingsPrivacy';
 import SettingsLanguage from './SettingsLanguage';
 import SettingsPrivacyVisibility from './SettingsPrivacyVisibility';
 import SettingsActiveSessions from './SettingsActiveSessions';
+import SettingsActiveWebsites from './SettingsActiveWebsites';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
 import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
@@ -69,7 +70,7 @@ const FOLDERS_SCREENS = [
 
 const PRIVACY_SCREENS = [
   SettingsScreens.PrivacyBlockedUsers,
-  SettingsScreens.ActiveSessions,
+  SettingsScreens.ActiveWebsites,
 ];
 
 const PRIVACY_PHONE_NUMBER_SCREENS = [
@@ -254,6 +255,13 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.ActiveSessions:
         return (
           <SettingsActiveSessions
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+      case SettingsScreens.ActiveWebsites:
+        return (
+          <SettingsActiveWebsites
             isActive={isScreenActive}
             onReset={handleReset}
           />

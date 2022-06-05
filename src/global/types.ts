@@ -37,6 +37,7 @@ import type {
   ApiThemeParameters,
   ApiAttachMenuBot,
   ApiPhoneCall,
+  ApiWebSession,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -490,6 +491,11 @@ export type GlobalState = {
     ttlDays?: number;
   };
 
+  activeWebSessions: {
+    byHash: Record<string, ApiWebSession>;
+    orderedHashes: string[];
+  };
+
   settings: {
     byKey: ISettings;
     loadedWallpapers?: ApiWallpaper[];
@@ -589,6 +595,20 @@ export type GlobalState = {
     hash?: string;
     bots: Record<string, ApiAttachMenuBot>;
   };
+
+  urlAuth?: {
+    button?: {
+      chatId: string;
+      messageId: number;
+      buttonId: number;
+    };
+    request?: {
+      domain: string;
+      botId: string;
+      shouldRequestWriteAccess?: boolean;
+    };
+    url: string;
+  };
 };
 
 export type CallSound = (
@@ -637,7 +657,7 @@ export interface ActionPayloads {
     text: string;
   };
 
-  resetOpenChatWithText: {};
+  resetOpenChatWithText: never;
 
   // Messages
   setEditingDraft: {
@@ -657,10 +677,10 @@ export interface ActionPayloads {
   animateUnreadReaction: {
     messageIds: number[];
   };
-  focusNextReaction: {};
-  focusNextMention: {};
-  readAllReactions: {};
-  readAllMentions: {};
+  focusNextReaction: never;
+  focusNextMention: never;
+  readAllReactions: never;
+  readAllMentions: never;
   markMentionsRead: {
     messageIds: number[];
   };
@@ -677,7 +697,7 @@ export interface ActionPayloads {
     playbackRate?: number;
     isMuted?: boolean;
   };
-  closeMediaViewer: {};
+  closeMediaViewer: never;
   setMediaViewerVolume: {
     volume: number;
   };
@@ -697,7 +717,7 @@ export interface ActionPayloads {
     playbackRate?: number;
     isMuted?: boolean;
   };
-  closeAudioPlayer: {};
+  closeAudioPlayer: never;
   setAudioPlayerVolume: {
     volume: number;
   };
@@ -712,7 +732,7 @@ export interface ActionPayloads {
   };
 
   // Downloads
-  downloadSelectedMessages: {};
+  downloadSelectedMessages: never;
   downloadMessageMedia: {
     message: ApiMessage;
   };
@@ -787,14 +807,14 @@ export interface ActionPayloads {
     isSamePeer?: boolean;
   };
 
-  resetSwitchBotInline: {};
+  resetSwitchBotInline: never;
 
   openGame: {
     url: string;
     chatId: string;
     messageId: number;
   };
-  closeGame: {};
+  closeGame: never;
 
   requestWebView: {
     url?: string;
@@ -819,9 +839,9 @@ export interface ActionPayloads {
     buttonText: string;
     theme?: ApiThemeParameters;
   };
-  closeWebApp: {};
+  closeWebApp: never;
 
-  cancelBotTrustRequest: {};
+  cancelBotTrustRequest: never;
   markBotTrusted: {
     botId: string;
   };
@@ -852,11 +872,52 @@ export interface ActionPayloads {
     startParam?: string;
   };
 
+  requestBotUrlAuth: {
+    chatId: string;
+    messageId: number;
+    buttonId: number;
+    url: string;
+  };
+
+  acceptBotUrlAuth: {
+    isWriteAllowed?: boolean;
+  };
+
+  requestLinkUrlAuth: {
+    url: string;
+  };
+
+  acceptLinkUrlAuth: {
+    isWriteAllowed?: boolean;
+  };
+
+  // Settings
+  loadAuthorizations: never;
+  terminateAuthorization: {
+    hash: string;
+  };
+  terminateAllAuthorizations: never;
+
+  loadWebAuthorizations: never;
+  terminateWebAuthorization: {
+    hash: string;
+  };
+  terminateAllWebAuthorizations: never;
+
   // Misc
   openPollModal: {
     isQuiz?: boolean;
   };
-  closePollModal: {};
+  closePollModal: never;
+
+  openUrl: {
+    url: string;
+    shouldSkipModal?: boolean;
+  };
+  toggleSafeLinkModal: {
+    url?: string;
+  };
+  closeUrlAuthModal: never;
 
   // Calls
   requestCall: {
@@ -864,17 +925,17 @@ export interface ActionPayloads {
     isVideo?: boolean;
   };
   sendSignalingData: P2pMessage;
-  hangUp: {};
-  acceptCall: {};
+  hangUp: never;
+  acceptCall: never;
   setCallRating: {
     rating: number;
     comment: string;
   };
-  closeCallRatingModal: {};
+  closeCallRatingModal: never;
   playGroupCallSound: {
     sound: CallSound;
   };
-  connectToActivePhoneCall: {};
+  connectToActivePhoneCall: never;
 
   // Passcode
   setPasscode: { passcode: string };
@@ -959,7 +1020,6 @@ export type NonTypedActionNames = (
   'setSettingOption' | 'loadPasswordInfo' | 'clearTwoFaError' |
   'updatePassword' | 'updateRecoveryEmail' | 'clearPassword' | 'provideTwoFaEmailCode' | 'checkPassword' |
   'loadBlockedContacts' | 'blockContact' | 'unblockContact' |
-  'loadAuthorizations' | 'terminateAuthorization' | 'terminateAllAuthorizations' |
   'loadNotificationSettings' | 'updateContactSignUpNotification' | 'updateNotificationSettings' |
   'updateWebNotificationSettings' | 'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' |
   'setPrivacySettings' | 'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
@@ -987,7 +1047,7 @@ export type NonTypedActionNames = (
   'loadMoreGroupCallParticipants' | 'connectToActiveGroupCall' |
   // stats
   'loadStatistics' | 'loadMessageStatistics' | 'loadStatisticsAsyncGraph'
-  );
+);
 
 const typed = typify<GlobalState, ActionPayloads, NonTypedActionNames>();
 export type GlobalActions = ReturnType<typeof typed.getActions>;

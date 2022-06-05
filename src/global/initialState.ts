@@ -143,6 +143,11 @@ export const INITIAL_STATE: GlobalState = {
     orderedHashes: [],
   },
 
+  activeWebSessions: {
+    byHash: {},
+    orderedHashes: [],
+  },
+
   settings: {
     byKey: {
       theme: 'light',

@@ -33,7 +33,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   sessionCount,
   lastSyncTime,
 }) => {
-  const { loadProfilePhotos, loadAuthorizations } = getActions();
+  const { loadProfilePhotos, loadAuthorizations, loadWebAuthorizations } = getActions();
 
   const lang = useLang();
   const profileId = currentUser?.id;
@@ -52,8 +52,9 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (lastSyncTime) {
       loadAuthorizations();
+      loadWebAuthorizations();
     }
-  }, [lastSyncTime, loadAuthorizations]);
+  }, [lastSyncTime, loadAuthorizations, loadWebAuthorizations]);
 
   return (
     <div className="settings-content custom-scroll">

@@ -2,12 +2,11 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import type { ApiChat, ApiContact, ApiUser } from '../../../api/types';
+import type {
+  ApiChat, ApiContact, ApiUrlAuthResult, ApiUser,
+} from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 
-import {
-  RE_TG_LINK, RE_TME_LINK,
-} from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   selectBot,
@@ -35,11 +34,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       break;
     case 'url': {
       const { url } = button;
-      if (url.match(RE_TME_LINK) || url.match(RE_TG_LINK)) {
-        actions.openTelegramLink({ url });
-      } else {
-        actions.toggleSafeLinkModal({ url });
-      }
+      actions.openUrl({ url });
       break;
     }
     case 'callback': {
@@ -151,6 +146,20 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
         peer: chat,
         theme,
         buttonText: button.text,
+      });
+      break;
+    }
+    case 'urlAuth': {
+      const { url } = button;
+      const chat = selectCurrentChat(global);
+      if (!chat) {
+        return;
+      }
+      actions.requestBotUrlAuth({
+        chatId: chat.id,
+        messageId,
+        buttonId: button.buttonId,
+        url,
       });
       break;
     }
@@ -615,6 +624,117 @@ addActionHandler('closeBotAttachRequestModal', (global) => {
   };
 });
 
+addActionHandler('requestBotUrlAuth', async (global, actions, payload) => {
+  const {
+    chatId, buttonId, messageId, url,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('requestBotUrlAuth', {
+    chat,
+    buttonId,
+    messageId,
+  });
+
+  if (!result) return;
+  global = getGlobal();
+  setGlobal({
+    ...global,
+    urlAuth: {
+      url,
+      button: {
+        buttonId,
+        messageId,
+        chatId: chat.id,
+      },
+    },
+  });
+  handleUrlAuthResult(url, result);
+});
+
+addActionHandler('acceptBotUrlAuth', async (global, actions, payload) => {
+  const { isWriteAllowed } = payload;
+  if (!global.urlAuth?.button) return;
+  const {
+    button, url,
+  } = global.urlAuth;
+  const { chatId, messageId, buttonId } = button;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('acceptBotUrlAuth', {
+    chat,
+    messageId,
+    buttonId,
+    isWriteAllowed,
+  });
+  if (!result) return;
+  handleUrlAuthResult(url, result);
+});
+
+addActionHandler('requestLinkUrlAuth', async (global, actions, payload) => {
+  const { url } = payload;
+
+  const result = await callApi('requestLinkUrlAuth', { url });
+  if (!result) return;
+  global = getGlobal();
+  setGlobal({
+    ...global,
+    urlAuth: {
+      url,
+    },
+  });
+  handleUrlAuthResult(url, result);
+});
+
+addActionHandler('acceptLinkUrlAuth', async (global, actions, payload) => {
+  const { isWriteAllowed } = payload;
+  if (!global.urlAuth?.url) return;
+  const { url } = global.urlAuth;
+
+  const result = await callApi('acceptLinkUrlAuth', { url, isWriteAllowed });
+  if (!result) return;
+  handleUrlAuthResult(url, result);
+});
+
+addActionHandler('closeUrlAuthModal', (global) => {
+  return {
+    ...global,
+    urlAuth: undefined,
+  };
+});
+
+function handleUrlAuthResult(url: string, result: ApiUrlAuthResult) {
+  if (result.type === 'request') {
+    const global = getGlobal();
+    if (!global.urlAuth) return;
+    const { domain, bot, shouldRequestWriteAccess } = result;
+    setGlobal({
+      ...global,
+      urlAuth: {
+        ...global.urlAuth,
+        request: {
+          domain,
+          botId: bot.id,
+          shouldRequestWriteAccess,
+        },
+      },
+    });
+    return;
+  }
+
+  const siteUrl = result.type === 'accepted' ? result.url : url;
+  window.open(siteUrl, '_blank', 'noopener');
+  getActions().closeUrlAuthModal();
+}
+
 async function searchInlineBot({
   username,
   inlineBotData,
@@ -691,7 +811,7 @@ let gameePopups: PopupManager | undefined;
 
 async function answerCallbackButton(chat: ApiChat, messageId: number, data?: string, isGame = false) {
   const {
-    showDialog, showNotification, toggleSafeLinkModal, openGame,
+    showDialog, showNotification, openUrl, openGame,
   } = getActions();
 
   if (isGame) {
@@ -731,7 +851,7 @@ async function answerCallbackButton(chat: ApiChat, messageId: number, data?: str
         openGame({ url, chatId: chat.id, messageId });
       }
     } else {
-      toggleSafeLinkModal({ url });
+      openUrl({ url });
     }
   }
 }

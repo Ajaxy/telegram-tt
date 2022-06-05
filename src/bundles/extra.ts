@@ -5,6 +5,7 @@ export { default as ForwardPicker } from '../components/main/ForwardPicker';
 export { default as Dialogs } from '../components/main/Dialogs';
 export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
+export { default as UrlAuthModal } from '../components/main/UrlAuthModal';
 export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';
 export { default as WebAppModal } from '../components/main/WebAppModal';

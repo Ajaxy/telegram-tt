@@ -108,7 +108,7 @@ const Location: FC<OwnProps> = ({
 
   const handleClick = () => {
     const url = prepareMapUrl(point.lat, point.long, zoom);
-    window.open(url, '_blank')?.focus();
+    window.open(url, '_blank', 'noopener')?.focus();
   };
 
   const updateCountdown = useCallback((countdownEl: HTMLDivElement) => {

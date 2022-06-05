@@ -17,6 +17,9 @@ type GramJsAppConfig = {
   reactions_uniq_max: number;
   chat_read_mark_size_threshold: number;
   chat_read_mark_expire_period: number;
+  autologin_domains: string[];
+  autologin_token: string;
+  url_auth_domains: string[];
 };
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -38,7 +41,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
   }, {}) : {};
 }
 
-export function buildApiConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
+export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
   return {
@@ -46,5 +49,8 @@ export function buildApiConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     defaultReaction: appConfig.reactions_default,
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
+    autologinDomains: appConfig.autologin_domains || [],
+    autologinToken: appConfig.autologin_token || '',
+    urlAuthDomains: appConfig.url_auth_domains || [],
   };
 }

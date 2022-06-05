@@ -161,6 +161,7 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyForwarding:
         case SettingsScreens.PrivacyGroupChats:
         case SettingsScreens.PrivacyBlockedUsers:
+        case SettingsScreens.ActiveWebsites:
         case SettingsScreens.TwoFaDisabled:
         case SettingsScreens.TwoFaEnabled:
         case SettingsScreens.TwoFaCongratulations:

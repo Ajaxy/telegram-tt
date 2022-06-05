@@ -195,6 +195,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         contextActions={[{
           title: 'Terminate',
           icon: 'stop',
+          destructive: true,
           handler: () => {
             handleTerminateSessionClick(session.hash);
           },

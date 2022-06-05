@@ -19,7 +19,7 @@ const SafeLinkModal: FC<OwnProps> = ({ url }) => {
   const lang = useLang();
 
   const handleOpen = useCallback(() => {
-    window.open(ensureProtocol(url));
+    window.open(ensureProtocol(url), '_blank', 'noopener');
     toggleSafeLinkModal({ url: undefined });
   }, [toggleSafeLinkModal, url]);
 

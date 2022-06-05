@@ -252,6 +252,13 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
       orderedHashes: [],
     };
   }
+
+  if (!cached.activeWebSessions) {
+    cached.activeWebSessions = {
+      byHash: {},
+      orderedHashes: [],
+    };
+  }
 }
 
 function updateCache() {

@@ -23,6 +23,7 @@ type OwnProps = {
   blocking?: boolean;
   isLoading?: boolean;
   withCheckedCallback?: boolean;
+  className?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onCheck?: (isChecked: boolean) => void;
 };
@@ -39,6 +40,7 @@ const Checkbox: FC<OwnProps> = ({
   round,
   blocking,
   isLoading,
+  className,
   onChange,
   onCheck,
 }) => {
@@ -53,16 +55,17 @@ const Checkbox: FC<OwnProps> = ({
     }
   }, [onChange, onCheck]);
 
-  const className = buildClassName(
+  const labelClassName = buildClassName(
     'Checkbox',
     disabled && 'disabled',
     round && 'round',
     isLoading && 'loading',
     blocking && 'blocking',
+    className,
   );
 
   return (
-    <label className={className} dir={lang.isRtl ? 'rtl' : undefined}>
+    <label className={labelClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <input
         type="checkbox"
         id={id}
@@ -74,7 +77,7 @@ const Checkbox: FC<OwnProps> = ({
         onChange={handleChange}
       />
       <div className="Checkbox-main">
-        <span className="label" dir="auto">{renderText(label)}</span>
+        <span className="label" dir="auto">{typeof label === 'string' ? renderText(label) : label}</span>
         {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
       </div>
       {isLoading && <Spinner />}

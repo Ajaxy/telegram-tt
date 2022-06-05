@@ -166,6 +166,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     });
   }, [bot, isInstalled, toggleBotInAttachMenu]);
 
+  const handleCloseClick = useCallback(() => {
+    closeWebApp();
+  }, [closeWebApp]);
+
   const openBotChat = useCallback(() => {
     openChat({
       id: bot!.id,
@@ -197,7 +201,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           color="translucent"
           size="smaller"
           ariaLabel={lang('Close')}
-          onClick={closeWebApp}
+          onClick={handleCloseClick}
         >
           <i className="icon-close" />
         </Button>
@@ -219,7 +223,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         </DropdownMenu>
       </div>
     );
-  }, [lang, closeWebApp, bot, MoreMenuButton, handleRefreshClick, isInstalled, handleToggleClick, chat, openBotChat]);
+  }, [
+    lang, handleCloseClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, isInstalled, handleToggleClick,
+  ]);
 
   const prevMainButtonColor = usePrevious(mainButton?.color, true);
   const prevMainButtonTextColor = usePrevious(mainButton?.textColor, true);

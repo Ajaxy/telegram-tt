@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiCountry, ApiSession, ApiWallpaper,
+  ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
 } from '../../types';
 import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
@@ -9,6 +9,8 @@ import { buildApiDocument } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
+import { buildApiUser } from './users';
+import { addUserToLocalDb } from '../helpers';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
   if (wallpaper instanceof GramJs.WallPaperNoFile) {
@@ -41,6 +43,16 @@ export function buildApiSession(session: GramJs.Authorization): ApiSession {
     ...pick(session, [
       'deviceModel', 'platform', 'systemVersion', 'appName', 'appVersion', 'dateCreated', 'dateActive',
       'ip', 'country', 'region',
+    ]),
+  };
+}
+
+export function buildApiWebSession(session: GramJs.WebAuthorization): ApiWebSession {
+  return {
+    hash: String(session.hash),
+    botId: buildApiPeerId(session.botId, 'user'),
+    ...pick(session, [
+      'platform', 'browser', 'dateCreated', 'dateActive', 'ip', 'region', 'domain',
     ]),
   };
 }
@@ -175,4 +187,35 @@ export function buildJson(json: GramJs.TypeJSONValue): any {
     acc[el.key] = buildJson(el.value);
     return acc;
   }, {});
+}
+
+export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlAuthResult | undefined {
+  if (result instanceof GramJs.UrlAuthResultRequest) {
+    const { bot, domain, requestWriteAccess } = result;
+    const user = buildApiUser(bot);
+    if (!user) return undefined;
+
+    addUserToLocalDb(bot);
+
+    return {
+      type: 'request',
+      domain,
+      shouldRequestWriteAccess: requestWriteAccess,
+      bot: user,
+    };
+  }
+
+  if (result instanceof GramJs.UrlAuthResultAccepted) {
+    return {
+      type: 'accepted',
+      url: result.url,
+    };
+  }
+
+  if (result instanceof GramJs.UrlAuthResultDefault) {
+    return {
+      type: 'default',
+    };
+  }
+  return undefined;
 }
