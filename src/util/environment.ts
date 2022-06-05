@@ -6,6 +6,7 @@ import {
   IS_TEST,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
+  CONTENT_TYPES_WITH_PREVIEW,
 } from '../config';
 
 export * from './environmentWebp';
@@ -75,9 +76,14 @@ export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slide-fade' : IS_IOS ? 'slide
 
 const TEST_VIDEO = document.createElement('video');
 // `canPlayType(VIDEO_MOV_TYPE)` returns false negative at least for macOS Chrome and iOS Safari
-export const IS_MOV_SUPPORTED = true;
+export const IS_MOV_SUPPORTED = Boolean(
+  TEST_VIDEO.canPlayType(VIDEO_MOV_TYPE).replace('no', '') || IS_IOS || IS_MAC_OS,
+);
 
-if (IS_MOV_SUPPORTED) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
+if (IS_MOV_SUPPORTED) {
+  SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
+  CONTENT_TYPES_WITH_PREVIEW.add(VIDEO_MOV_TYPE);
+}
 
 export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''))
   && !(IS_MAC_OS && IS_SAFARI); // Safari on MacOS has some issues with WebM
