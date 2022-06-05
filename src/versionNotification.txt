@@ -1,7 +1,7 @@
 **Telegram Web Z was updated to version 1.48**
 
 👏 **Harder**
-• Meet Seamless Web Bots (such as [@discussbot](https://t.me/discussbot)) helping you to log in with your Telegram account on websites.
+• Meet Seamless Web Bots, such as [@discussbot](https://t.me/discussbot), that help you log in on websites with your Telegram account.
 
 🤩 **Better**
 • Podcasts and long tracks can now be played at 2X speed.
