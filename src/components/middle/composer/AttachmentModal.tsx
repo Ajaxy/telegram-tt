@@ -14,6 +14,7 @@ import {
 } from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -154,12 +155,13 @@ const AttachmentModal: FC<OwnProps> = ({
     unmarkHovered();
   };
 
-  const handleFilesDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleFilesDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     unmarkHovered();
 
-    const { dataTransfer: { files } } = e;
+    const { dataTransfer } = e;
 
+    const files = await getFilesFromDataTransferItems(dataTransfer.items);
     if (files?.length) {
       const newFiles = isQuick
         ? Array.from(files).filter((file) => {
