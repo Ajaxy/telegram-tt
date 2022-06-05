@@ -93,7 +93,7 @@ export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 // eslint-disable-next-line max-len
-export const EDITABLE_INPUT_CSS_SELECTOR = `.Transition__slide--active #${EDITABLE_INPUT_ID}, .Transition > .to #${EDITABLE_INPUT_ID}`;
+export const EDITABLE_INPUT_CSS_SELECTOR = `.messages-layout .Transition__slide--active #${EDITABLE_INPUT_ID}, .messages-layout .Transition > .to #${EDITABLE_INPUT_ID}`;
 
 export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 
