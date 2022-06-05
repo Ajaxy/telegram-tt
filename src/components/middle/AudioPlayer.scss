@@ -128,6 +128,7 @@
     justify-content: center;
     flex-direction: column;
     flex-shrink: 1;
+    max-width: 14rem;
     padding: 0 0.5rem;
     position: relative;
     overflow: hidden;
@@ -138,12 +139,24 @@
       background-color: var(--color-interactive-element-hover);
     }
 
-    @media (min-width: 1440px) and (max-width: 1500px) {
-      max-width: 14rem;
+    .right-column-shown & {
+      max-width: 10rem;
+    }
+
+    @media (max-width: 600px) {
+      max-width: 100%;
+    }
+
+    @media (min-width: 1440px) {
+      max-width: 24rem;
+      .right-column-shown & {
+        max-width: 14rem;
+      }
     }
 
     .AudioPlayer & .title {
       display: block;
+      margin-top: 0.125rem;
       font-weight: 500;
       font-size: 0.875rem !important;
       line-height: 1rem;
