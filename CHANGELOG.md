@@ -1,3 +1,16 @@
+## 1.48.0 (2022-06-06)
+
+👏 **Harder**
+* Meet Seamless Web Bots, such as [@discussbot](https://t.me/discussbot), that help you log in on websites with your Telegram account.
+
+🤩 **Better**
+* Podcasts and long audio can now be played at 2X speed.
+* Audio Player buttons do not jump anymore when navigating between tracks.
+
+💪 **Stronger**
+* Fixed pasting text after switching chat.
+* Fixed sending and playing `.mov` videos.
+
 ## 1.47.0 (2022-05-31)
 
 ### 👏 **Harder**

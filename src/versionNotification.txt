@@ -1,19 +1,12 @@
-**Telegram Web Z was updated to version 1.47**
+**Telegram Web Z was updated to version 1.48**
 
 👏 **Harder**
-• This update adds a Passcode Lock feature, giving Telegram users the most private and secure experience of any web app. To add a passcode, go to Settings > Privacy and Security > Passcode Lock.
-• When the app is locked, it encrypts its data, including your chats, text messages, contacts, and your session keys – making it impossible to access them without the code. By adding a passcode, users on shared PCs no longer need to log out to protect their privacy.
-• Remember the passcode you set, you will need to log out and back in to your account if you forget it.
+• Meet Seamless Web Bots (such as [@discussbot](https://t.me/discussbot)) helping you to log in with your Telegram account on websites.
 
 🤩 **Better**
-• Media Viewer now supports native zoom and pan gestures with a trackpad or Magic Mouse.
-• Statistics now include data about Public Shares for posts.
-• Improvements and tweaks for Group and Channel Statistics.
-
-🚀 **Faster**
-• Optimizations for the rendering engine.
+• Podcasts and long tracks can now be played at 2X speed.
+• Audio Player buttons do not jump anymore when navigating between tracks.
 
 💪 **Stronger**
-• Various fixes for code syntax highlighting, including support for C#.
-
-🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webztalks)** and **[Russian](https://t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
+• Fixed pasting text after switching chat.
+• Fixed sending and playing `.mov` videos.
