@@ -161,6 +161,11 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={buildClassName('AudioPlayer', className)} dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="AudioPlayer-content" onClick={handleClick}>
+        {audio ? renderAudio(audio) : renderVoice(lang('AttachAudio'), senderName)}
+        <RippleEffect />
+      </div>
+
       <Button
         round
         ripple={!IS_SINGLE_COLUMN_LAYOUT}
@@ -197,11 +202,6 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
       >
         <i className="icon-skip-next" />
       </Button>
-
-      <div className="AudioPlayer-content" onClick={handleClick}>
-        {audio ? renderAudio(audio) : renderVoice(lang('AttachAudio'), senderName)}
-        <RippleEffect />
-      </div>
 
       <Button
         round

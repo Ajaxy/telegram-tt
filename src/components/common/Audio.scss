@@ -177,6 +177,10 @@
     unicode-bidi: plaintext;
   }
 
+  .date {
+    flex-shrink: 0;
+  }
+
   .duration {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
@@ -201,7 +205,7 @@
     }
 
     .performer {
-      flex-shrink: 0;
+      flex-shrink: 1;
     }
 
     .duration.with-seekline {
@@ -302,10 +306,6 @@
     .performer,
     .date {
       line-height: 1.0625rem;
-    }
-
-    .duration {
-      line-height: 1rem;
     }
 
     .media-loading {
