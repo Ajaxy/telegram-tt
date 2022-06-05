@@ -3,15 +3,17 @@ import {
 } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
+import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../config';
 import type { Track, TrackId } from '../util/audioPlayer';
 import { register } from '../util/audioPlayer';
-import useEffectWithPrevDeps from './useEffectWithPrevDeps';
 import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
-import useOnChange from './useOnChange';
 import type { MediaSessionHandlers } from '../util/mediaSession';
 import {
   registerMediaSession, setPlaybackState, setPositionState, updateMetadata,
 } from '../util/mediaSession';
+
+import useEffectWithPrevDeps from './useEffectWithPrevDeps';
+import useOnChange from './useOnChange';
 
 type Handler = (e: Event) => void;
 
@@ -57,7 +59,8 @@ const useAudioPlayer = (
           setPlaybackState('playing');
           setVolume(getGlobal().audioPlayer.volume);
           toggleMuted(Boolean(getGlobal().audioPlayer.isMuted));
-          if (trackType === 'voice') {
+          const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
+          if (trackType === 'voice' || duration > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION) {
             setPlaybackRate(getGlobal().audioPlayer.playbackRate);
           }
 
