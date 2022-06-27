@@ -95,7 +95,7 @@ type StateProps = {
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
-const BOTTOM_THRESHOLD = 20;
+const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
 const SCROLL_DEBOUNCE = 200;
@@ -382,7 +382,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
     if (wasMessageAdded) {
       // If two new messages come at once (e.g. when bot responds) then the first message will update `scrollOffset`
-      // right away (before animation) which creates inconsistency until the animation completes. To workaround that,
+      // right away (before animation) which creates inconsistency until the animation completes. To work around that,
       // we calculate `isAtBottom` with a "buffer" of the latest message height (this is approximate).
       const lastItemHeight = lastItemElement ? lastItemElement.offsetHeight : 0;
       bottomOffset -= lastItemHeight;
