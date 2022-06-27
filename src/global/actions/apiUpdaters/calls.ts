@@ -69,16 +69,28 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         currentUserId,
       } = global;
 
-      if (phoneCall) return undefined;
-
       const { call } = update;
+
+      if (phoneCall) {
+        if (call.state === 'discarded') {
+          return {
+            ...global,
+            ...(call.needRating && { ratingPhoneCall: call }),
+            isCallPanelVisible: undefined,
+            phoneCall: undefined,
+          };
+        }
+
+        return undefined;
+      }
+
       const isOutgoing = call?.adminId === currentUserId;
 
       if (!isOutgoing && call.state === 'requested') {
         onTickEnd(() => {
           notifyAboutCall({
             call,
-            user: selectPhoneCallUser(global)!,
+            user: selectPhoneCallUser(getGlobal())!,
           });
         });
 
