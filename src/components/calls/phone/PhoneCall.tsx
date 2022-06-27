@@ -101,8 +101,16 @@ const PhoneCall: FC<StateProps> = ({
   const isActive = phoneCall?.state === 'active';
   const isConnected = phoneCall?.isConnected;
 
+  const [isHangingUp, startHangingUp, stopHangingUp] = useFlag();
+  const handleHangUp = useCallback(() => {
+    startHangingUp();
+    hangUp();
+  }, [hangUp, startHangingUp]);
+
   useEffect(() => {
-    if (isIncomingRequested) {
+    if (isHangingUp) {
+      playGroupCallSound({ sound: 'end' });
+    } else if (isIncomingRequested) {
       playGroupCallSound({ sound: 'incoming' });
     } else if (isBusy) {
       playGroupCallSound({ sound: 'busy' });
@@ -113,13 +121,7 @@ const PhoneCall: FC<StateProps> = ({
     } else if (isConnected) {
       playGroupCallSound({ sound: 'connect' });
     }
-  }, [isBusy, isDiscarded, isIncomingRequested, isOutgoingRequested, isConnected, playGroupCallSound]);
-
-  const [isHangingUp, startHangingUp, stopHangingUp] = useFlag();
-  const handleHangUp = useCallback(() => {
-    startHangingUp();
-    hangUp();
-  }, [hangUp, startHangingUp]);
+  }, [isBusy, isDiscarded, isIncomingRequested, isOutgoingRequested, isConnected, playGroupCallSound, isHangingUp]);
 
   useEffect(() => {
     if (phoneCall?.id) {

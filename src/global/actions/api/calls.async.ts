@@ -313,5 +313,13 @@ addActionHandler('hangUp', (global) => {
     };
   }
 
+  setTimeout(() => {
+    setGlobal({
+      ...getGlobal(),
+      phoneCall: undefined,
+      isCallPanelVisible: undefined,
+    });
+  }, 500);
+
   return undefined;
 });
