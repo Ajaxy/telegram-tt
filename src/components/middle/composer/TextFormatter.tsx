@@ -133,8 +133,7 @@ const TextFormatter: FC<OwnProps> = ({
     if (!selectedRange) {
       return undefined;
     }
-    fragmentEl.innerText = selectedRange.toString();
-
+    fragmentEl.replaceChildren(selectedRange.cloneContents());
     return fragmentEl.innerHTML;
   }, [selectedRange]);
 

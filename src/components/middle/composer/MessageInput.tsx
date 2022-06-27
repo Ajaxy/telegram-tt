@@ -204,9 +204,14 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     openTextFormatter();
   }
 
+  function processSelectionWithTimeout() {
+    // Small delay to allow browser properly recalculate selection
+    setTimeout(processSelection, 1);
+  }
+
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (e.button !== 2) {
-      e.target.addEventListener('mouseup', processSelection, { once: true });
+      e.target.addEventListener('mouseup', processSelectionWithTimeout, { once: true });
       return;
     }
 
@@ -261,7 +266,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       e.preventDefault();
       editLastMessage();
     } else {
-      e.target.addEventListener('keyup', processSelection, { once: true });
+      e.target.addEventListener('keyup', processSelectionWithTimeout, { once: true });
     }
   }
 
@@ -383,7 +388,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
         onContextMenu={IS_ANDROID ? stopEvent : undefined}
-        onTouchCancel={IS_ANDROID ? processSelection : undefined}
+        onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
         aria-label={placeholder}
       />
       <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
