@@ -321,6 +321,12 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
 
   function onWheel(e: WheelEvent) {
     if (!options.onZoom && !options.onDrag) return;
+    if (options.excludedClosestSelector && (
+      (e.target as HTMLElement).matches(options.excludedClosestSelector)
+      || (e.target as HTMLElement).closest(options.excludedClosestSelector)
+    )) {
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     if (!hasMoved) {
