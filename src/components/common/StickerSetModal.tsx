@@ -76,7 +76,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !stickerSet?.stickers) {
       if (fromSticker) {
         const { stickerSetId, stickerSetAccessHash } = fromSticker;
         loadStickers({
@@ -89,7 +89,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         });
       }
     }
-  }, [isOpen, fromSticker, loadStickers, stickerSetShortName]);
+  }, [isOpen, fromSticker, loadStickers, stickerSetShortName, stickerSet]);
 
   const handleSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean) => {
     sticker = {
