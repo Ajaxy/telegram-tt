@@ -76,7 +76,7 @@ const ForwardPicker: FC<OwnProps & StateProps> = ({
 
     const chatIds = [
       ...(activeListIds || []),
-      ...(archivedListIds || []),
+      ...((filter && archivedListIds) || []),
     ].filter((id) => {
       const chat = chatsById[id];
 
