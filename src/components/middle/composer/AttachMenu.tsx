@@ -1,7 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, {
+  memo, useMemo, useCallback, useEffect,
+} from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { GlobalState } from '../../../global/types';
+import type { ApiAttachMenuPeerType } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
@@ -25,8 +28,8 @@ export type OwnProps = {
   canAttachMedia: boolean;
   canAttachPolls: boolean;
   isScheduled?: boolean;
-  isPrivateChat?: boolean;
   attachMenuBots: GlobalState['attachMenu']['bots'];
+  peerType?: ApiAttachMenuPeerType;
   onFileSelect: (files: File[], isQuick: boolean) => void;
   onPollCreate: () => void;
   theme: ISettings['theme'];
@@ -38,8 +41,8 @@ const AttachMenu: FC<OwnProps> = ({
   canAttachMedia,
   canAttachPolls,
   attachMenuBots,
+  peerType,
   isScheduled,
-  isPrivateChat,
   onFileSelect,
   onPollCreate,
   theme,
@@ -80,6 +83,16 @@ const AttachMenu: FC<OwnProps> = ({
   const handleDocumentSelect = useCallback(() => {
     openSystemFilesDialog('*', (e) => handleFileSelect(e, false));
   }, [handleFileSelect]);
+
+  const bots = useMemo(() => {
+    return Object.values(attachMenuBots).filter((bot) => {
+      if (!peerType) return false;
+      if (peerType === 'bot' && bot.id === chatId && bot.peerTypes.includes('self')) {
+        return true;
+      }
+      return bot.peerTypes.includes(peerType);
+    });
+  }, [attachMenuBots, chatId, peerType]);
 
   const lang = useLang();
 
@@ -132,7 +145,7 @@ const AttachMenu: FC<OwnProps> = ({
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
 
-        {canAttachMedia && !isScheduled && isPrivateChat && Object.values(attachMenuBots).map((bot) => (
+        {canAttachMedia && !isScheduled && bots.map((bot) => (
           <AttachmentMenuBotItem
             bot={bot}
             chatId={chatId}

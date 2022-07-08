@@ -27,6 +27,8 @@
   padding: 0.9375rem 0.9375rem 0.9375rem 3.375rem;
   color: #fff;
   margin: 0 0.5rem;
+  display: flex;
+  align-items: center;
 
   .text-entity-link,
   .text-entity-link:hover,
@@ -39,5 +41,24 @@
     line-height: 1.25;
     word-break: break-word;
     font-size: 0.9375rem;
+    flex-grow: 1;
+  }
+
+  &.bold-link b {
+    color: var(--color-primary);
+    cursor: pointer;
+  }
+
+  .notification-title {
+    font-weight: 500;
+  }
+
+  .Notification-button {
+    color: var(--color-primary);
+    font-weight: 500;
+    text-transform: none;
+    flex: 1;
+    padding: 0 2rem;
+    height: 2rem;
   }
 }

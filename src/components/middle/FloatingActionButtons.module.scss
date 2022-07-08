@@ -34,7 +34,7 @@
     opacity: 1;
 
     .unread {
-      pointer-events: all;
+      pointer-events: auto;
     }
 
     &.no-composer.no-extra-shift {

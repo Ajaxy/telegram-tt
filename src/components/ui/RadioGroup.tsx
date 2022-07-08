@@ -18,7 +18,7 @@ type OwnProps = {
   selected?: string;
   disabled?: boolean;
   loadingOption?: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const RadioGroup: FC<OwnProps> = ({
@@ -32,7 +32,7 @@ const RadioGroup: FC<OwnProps> = ({
 }) => {
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
-    onChange(value);
+    onChange(value, event);
   }, [onChange]);
 
   return (

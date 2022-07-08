@@ -4,11 +4,13 @@ import type {
 } from '../../types';
 import { buildApiPeerId } from './peers';
 import { buildApiBotInfo } from './bots';
+import { buildApiPhoto } from './common';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUser {
   const {
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
+      profilePhoto,
     },
     users,
   } = mtpUserFull;
@@ -18,11 +20,12 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUse
   return {
     ...user,
     fullInfo: {
+      ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
       bio: about,
       commonChatsCount,
       pinnedMessageId: pinnedMsgId,
       isBlocked: Boolean(blocked),
-      ...(botInfo && { botInfo: buildApiBotInfo(botInfo) }),
+      ...(botInfo && { botInfo: buildApiBotInfo(botInfo, user.id) }),
     },
   };
 }
@@ -35,6 +38,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const {
     id, firstName, lastName, fake, scam,
   } = mtpUser;
+  const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
+    ? Boolean(mtpUser.photo.hasVideo)
+    : undefined;
   const avatarHash = mtpUser.photo instanceof GramJs.UserProfilePhoto
     ? String(mtpUser.photo.photoId)
     : undefined;
@@ -45,6 +51,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     isMin: Boolean(mtpUser.min),
     fakeType: scam ? 'scam' : (fake ? 'fake' : undefined),
     ...(mtpUser.self && { isSelf: true }),
+    isPremium: Boolean(mtpUser.premium),
     ...(mtpUser.verified && { isVerified: true }),
     ...((mtpUser.contact || mtpUser.mutualContact) && { isContact: true }),
     type: userType,
@@ -56,6 +63,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
     ...(avatarHash && { avatarHash }),
+    hasVideoAvatar,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
     ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachMenuBot: mtpUser.botAttachMenu }),
   };

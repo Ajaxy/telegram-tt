@@ -61,6 +61,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         user={user}
         size="small"
         isSavedMessages={user?.isSelf}
+        noVideo
       />
     );
 

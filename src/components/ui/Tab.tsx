@@ -11,6 +11,7 @@ type OwnProps = {
   className?: string;
   title: string;
   isActive?: boolean;
+  isBlocked?: boolean;
   badgeCount?: number;
   isBadgeActive?: boolean;
   previousActiveTab?: number;
@@ -27,6 +28,7 @@ const Tab: FC<OwnProps> = ({
   className,
   title,
   isActive,
+  isBlocked,
   badgeCount,
   isBadgeActive,
   previousActiveTab,
@@ -52,8 +54,8 @@ const Tab: FC<OwnProps> = ({
       return;
     }
 
-    const platformEl = tabEl.querySelector('i')!;
-    const prevPlatformEl = prevTabEl.querySelector('i')!;
+    const platformEl = tabEl.querySelector<HTMLElement>('.platform')!;
+    const prevPlatformEl = prevTabEl.querySelector<HTMLElement>('.platform')!;
 
     // We move and resize the platform, so it repeats the position and size of the previous one
     const shiftLeft = prevPlatformEl.parentElement!.offsetLeft - platformEl.parentElement!.offsetLeft;
@@ -81,7 +83,8 @@ const Tab: FC<OwnProps> = ({
         {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
-        <i />
+        {isBlocked && <i className="icon-lock-badge blocked" />}
+        <i className="platform" />
       </span>
     </div>
   );

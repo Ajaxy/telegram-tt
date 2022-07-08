@@ -5,7 +5,7 @@ import {
 import type { ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { debounce, throttle } from '../../../util/schedulers';
+import { throttle } from '../../../util/schedulers';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import { isUserBot, isUserId } from '../../helpers';
 import { callApi } from '../../../api/gramjs';
@@ -26,7 +26,6 @@ import {
 import { getServerTime } from '../../../util/serverTime';
 import * as langProvider from '../../../util/langProvider';
 
-const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
@@ -38,8 +37,7 @@ addActionHandler('loadFullUser', (global, actions, payload) => {
   }
 
   const { id, accessHash } = user;
-
-  runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
+  callApi('fetchFullUser', { id, accessHash });
 });
 
 addActionHandler('loadUser', async (global, actions, payload) => {

@@ -25,7 +25,6 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   MESSAGE_POLL_CLOSED: 'Poll closed',
   MESSAGE_EDIT_TIME_EXPIRED: 'You can\'t edit this message anymore.',
   PINNED_DIALOGS_TOO_MUCH: 'Sorry, you can only pin 5 chats to the top',
-  DIALOG_FILTERS_TOO_MUCH: 'Sorry, you can\'t have more than 10 folders',
   CHANNEL_PRIVATE: 'This channel is private',
   MEDIA_CAPTION_TOO_LONG: 'The provided caption is too long',
   ADDRESS_STREET_LINE1_INVALID: 'The address you provided is not valid',
@@ -116,6 +115,11 @@ export const SHIPPING_ERRORS: Record<string, ApiFieldError> = {
   },
 };
 
+const FINAL_PAYMENT_ERRORS = new Set([
+  'BOT_PRECHECKOUT_FAILED',
+  'PAYMENT_FAILED',
+]);
+
 export default function getReadableErrorText(error: ApiError) {
   const { message, isSlowMode, textParams } = error;
   // Currently, Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
@@ -134,4 +138,8 @@ export default function getReadableErrorText(error: ApiError) {
 
 export function getShippingError(error: ApiError): ApiFieldError | undefined {
   return SHIPPING_ERRORS[error.message];
+}
+
+export function shouldClosePaymentModal(error: ApiError): boolean {
+  return FINAL_PAYMENT_ERRORS.has(error.message);
 }

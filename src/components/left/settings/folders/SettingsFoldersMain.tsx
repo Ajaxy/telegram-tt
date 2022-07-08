@@ -6,13 +6,16 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiChatFolder } from '../../../../api/types';
 
-import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { ALL_FOLDER_ID, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 
 import ListItem from '../../../ui/ListItem';
 import Button from '../../../ui/Button';
@@ -30,11 +33,11 @@ type StateProps = {
   orderedFolderIds?: number[];
   foldersById: Record<number, ApiChatFolder>;
   recommendedChatFolders?: ApiChatFolder[];
+  maxFolders: number;
+  isPremium?: boolean;
 };
 
 const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
-
-const MAX_ALLOWED_FOLDERS = 10;
 
 const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isActive,
@@ -43,12 +46,15 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   onReset,
   orderedFolderIds,
   foldersById,
+  isPremium,
   recommendedChatFolders,
+  maxFolders,
 }) => {
   const {
     loadRecommendedChatFolders,
     addChatFolder,
-    showDialog,
+    openLimitReachedModal,
+    openDeleteChatFolderModal,
   } = getActions();
 
   // Due to the parent Transition, this component never gets unmounted,
@@ -60,19 +66,16 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [loadRecommendedChatFolders]);
 
   const handleCreateFolder = useCallback(() => {
-    if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
-      showDialog({
-        data: {
-          message: 'DIALOG_FILTERS_TOO_MUCH',
-          hasErrorKey: true,
-        },
+    if (Object.keys(foldersById).length >= maxFolders - 1) {
+      openLimitReachedModal({
+        limit: 'dialogFilters',
       });
 
       return;
     }
 
     onCreateFolder();
-  }, [foldersById, showDialog, onCreateFolder]);
+  }, [foldersById, maxFolders, onCreateFolder, openLimitReachedModal]);
 
   const lang = useLang();
 
@@ -87,8 +90,19 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
+    if (orderedFolderIds.length <= 1) {
+      return MEMO_EMPTY_ARRAY;
+    }
+
     return orderedFolderIds.map((id) => {
       const folder = foldersById[id];
+
+      if (id === ALL_FOLDER_ID) {
+        return {
+          id,
+          title: lang('FilterAllChats'),
+        };
+      }
 
       return {
         id: folder.id,
@@ -99,19 +113,20 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [orderedFolderIds, foldersById, lang, chatsCountByFolderId]);
 
   const handleCreateFolderFromRecommended = useCallback((folder: ApiChatFolder) => {
-    if (Object.keys(foldersById).length >= MAX_ALLOWED_FOLDERS) {
-      showDialog({
-        data: {
-          message: 'DIALOG_FILTERS_TOO_MUCH',
-          hasErrorKey: true,
-        },
+    if (Object.keys(foldersById).length >= maxFolders - 1) {
+      openLimitReachedModal({
+        limit: 'dialogFilters',
       });
 
       return;
     }
 
     addChatFolder({ folder });
-  }, [foldersById, addChatFolder, showDialog]);
+  }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
+
+  const canCreateNewFolder = useMemo(() => {
+    return !isPremium || Object.keys(foldersById).length < maxFolders - 1;
+  }, [foldersById, isPremium, maxFolders]);
 
   return (
     <div className="settings-content no-border custom-scroll">
@@ -126,36 +141,76 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           {lang('CreateNewFilterInfo')}
         </p>
 
-        <Button
+        {canCreateNewFolder && (
+          <Button
           // TODO: Refactor button component to handle icon placemenet with props
-          className="with-icon mb-2"
-          color="primary"
-          size="smaller"
-          pill
-          fluid
-          onClick={handleCreateFolder}
-          isRtl={lang.isRtl}
-        >
-          <i className="icon-add" />
-          {lang('CreateNewFilter')}
-        </Button>
+            className="with-icon mb-2"
+            color="primary"
+            size="smaller"
+            pill
+            fluid
+            onClick={handleCreateFolder}
+            isRtl={lang.isRtl}
+          >
+            <i className="icon-add" />
+            {lang('CreateNewFilter')}
+          </Button>
+        )}
       </div>
 
       <div className="settings-item pt-3">
         <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Filters')}</h4>
 
-        {userFolders?.length ? userFolders.map((folder) => (
-          <ListItem
-            className="mb-2 no-icon"
-            narrow
-            multiline
-            // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => onEditFolder(foldersById[folder.id])}
-          >
-            <span className="title">{folder.title}</span>
-            <span className="subtitle">{folder.subtitle}</span>
-          </ListItem>
-        )) : userFolders && !userFolders.length ? (
+        {userFolders?.length ? userFolders.map((folder, i) => {
+          const isBlocked = i > maxFolders - 1;
+          if (folder.id === ALL_FOLDER_ID) {
+            return (
+              <ListItem
+                className="mb-2 no-icon"
+                narrow
+                inactive
+                isStatic
+              >
+                {folder.title}
+              </ListItem>
+            );
+          }
+
+          return (
+            <ListItem
+              className="mb-2 no-icon"
+              narrow
+              secondaryIcon="more"
+              multiline
+              contextActions={[
+                {
+                  handler: () => {
+                    openDeleteChatFolderModal({ folderId: folder.id });
+                  },
+                  destructive: true,
+                  title: lang('Delete'),
+                  icon: 'delete',
+                },
+              ]}
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => {
+                if (isBlocked) {
+                  openLimitReachedModal({
+                    limit: 'dialogFilters',
+                  });
+                } else {
+                  onEditFolder(foldersById[folder.id]);
+                }
+              }}
+            >
+              <span className="title">
+                {folder.title}
+                {isBlocked && <i className="icon-lock-badge settings-folders-blocked-icon" />}
+              </span>
+              <span className="subtitle">{folder.subtitle}</span>
+            </ListItem>
+          );
+        }) : userFolders && !userFolders.length ? (
           <p className="settings-item-description my-4" dir="auto">
             You have no folders yet.
           </p>
@@ -211,7 +266,9 @@ export default memo(withGlobal<OwnProps>(
     return {
       orderedFolderIds,
       foldersById,
+      isPremium: selectIsCurrentUserPremium(global),
       recommendedChatFolders,
+      maxFolders: selectCurrentLimit(global, 'dialogFilters'),
     };
   },
 )(SettingsFoldersMain));

@@ -36,7 +36,7 @@ const BotCommand: FC<OwnProps> = ({
       focus={focus}
     >
       {withAvatar && (
-        <Avatar size="small" user={bot} />
+        <Avatar size="small" user={bot} noVideo />
       )}
       <div className="content-inner">
         <span className="title">/{botCommand.command}</span>

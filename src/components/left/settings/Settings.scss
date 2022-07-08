@@ -93,6 +93,10 @@
   margin-bottom: 2.5rem;
 }
 
+.settings-main-menu-premium .PremiumIcon {
+  margin-right: 2rem;
+}
+
 .settings-main-menu {
   padding: 0 0.5rem 0.75rem;
   background-color: var(--color-background);
@@ -330,6 +334,7 @@
 .settings-quick-reaction {
   .Radio-main .label {
     display: flex;
+    align-items: center;
   }
 
   .ReactionStaticEmoji {

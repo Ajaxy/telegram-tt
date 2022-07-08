@@ -492,3 +492,33 @@ export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCod
   }
   return buildApiCountryList(countryList.countries);
 }
+
+export async function fetchGlobalPrivacySettings() {
+  const result = await invokeRequest(new GramJs.account.GetGlobalPrivacySettings());
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
+  };
+}
+
+export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonContact } : {
+  shouldArchiveAndMuteNewNonContact: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({
+    settings: new GramJs.GlobalPrivacySettings({
+      archiveAndMuteNewNoncontactPeers: shouldArchiveAndMuteNewNonContact,
+    }),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
+  };
+}

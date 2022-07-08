@@ -1,4 +1,5 @@
 import type {
+  ApiDimensions,
   ApiPhoto, ApiSticker, ApiThumbnail, ApiVideo,
 } from './messages';
 
@@ -9,7 +10,10 @@ export type ApiInlineResultType = (
 
 export interface ApiWebDocument {
   url: string;
+  size: number;
   mimeType: string;
+  accessHash?: string;
+  dimensions?: ApiDimensions;
 }
 
 export interface ApiBotInlineResult {
@@ -60,6 +64,8 @@ export type ApiBotMenuButton = ApiBotMenuButtonWebApp | ApiBotMenuButtonCommands
 export interface ApiBotInfo {
   botId: string;
   commands?: ApiBotCommand[];
-  description: string;
+  description?: string;
+  photo?: ApiPhoto;
+  gif?: ApiVideo;
   menuButton: ApiBotMenuButton;
 }

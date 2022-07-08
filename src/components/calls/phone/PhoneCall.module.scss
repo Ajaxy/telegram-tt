@@ -20,12 +20,12 @@
     z-index: -1;
     transform: scale(1.1);
 
-    :global(.Avatar__img) {
+    :global(.Avatar__media) {
       border-radius: 0;
       object-fit: cover;
     }
 
-    &.blurred :global(.Avatar__img) {
+    &.blurred :global(.Avatar__media) {
       filter: blur(10px);
     }
   }
@@ -75,13 +75,13 @@
 
   &.open {
     background-color: rgba(0, 0, 0, 0.7);
-    pointer-events: all;
+    pointer-events: auto;
   }
 }
 
 .emojis {
   user-select: none;
-  pointer-events: all;
+  pointer-events: auto;
   cursor: pointer;
   margin-top: 1rem;
   height: 3rem;

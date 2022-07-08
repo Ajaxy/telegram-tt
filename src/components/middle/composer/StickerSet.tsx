@@ -33,6 +33,7 @@ type OwnProps = {
   onStickerUnfave: (sticker: ApiSticker) => void;
   onStickerFave: (sticker: ApiSticker) => void;
   onStickerRemoveRecent: (sticker: ApiSticker) => void;
+  isCurrentUserPremium?: boolean;
 };
 
 const STICKERS_PER_ROW_ON_DESKTOP = 5;
@@ -51,6 +52,7 @@ const StickerSet: FC<OwnProps> = ({
   onStickerUnfave,
   onStickerFave,
   onStickerRemoveRecent,
+  isCurrentUserPremium,
 }) => {
   const { clearRecentStickers } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -110,6 +112,7 @@ const StickerSet: FC<OwnProps> = ({
             onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
             isSavedMessages={isSavedMessages}
             canViewSet
+            isCurrentUserPremium={isCurrentUserPremium}
           />
         ))}
       </div>

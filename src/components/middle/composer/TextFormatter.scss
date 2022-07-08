@@ -106,7 +106,7 @@
   &.link-control-shown {
     .TextFormatter-link-control {
       opacity: 1;
-      pointer-events: all;
+      pointer-events: auto;
     }
   }
 

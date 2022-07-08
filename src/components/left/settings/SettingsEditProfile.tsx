@@ -13,14 +13,16 @@ import { selectUser } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
+import renderText from '../../common/helpers/renderText';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import Spinner from '../../ui/Spinner';
 import InputText from '../../ui/InputText';
-import renderText from '../../common/helpers/renderText';
 import UsernameInput from '../../common/UsernameInput';
-import useHistoryBack from '../../../hooks/useHistoryBack';
+import TextArea from '../../ui/TextArea';
 
 type OwnProps = {
   isActive: boolean;
@@ -35,14 +37,12 @@ type StateProps = {
   currentUsername?: string;
   progress?: ProfileEditProgress;
   isUsernameAvailable?: boolean;
+  maxBioLength: number;
 };
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const MAX_BIO_LENGTH = 70;
-
 const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
-const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
 const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   isActive,
@@ -54,6 +54,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   currentUsername,
   progress,
   isUsernameAvailable,
+  maxBioLength,
 }) => {
   const {
     loadCurrentUser,
@@ -135,7 +136,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     setIsProfileFieldsTouched(true);
   }, []);
 
-  const handleBioChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleBioChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setBio(e.target.value);
     setIsProfileFieldsTouched(true);
   }, []);
@@ -152,11 +153,6 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 
     if (!trimmedFirstName.length) {
       setError(ERROR_FIRST_NAME_MISSING);
-      return;
-    }
-
-    if (trimmedBio.length > MAX_BIO_LENGTH) {
-      setError(ERROR_BIO_TOO_LONG);
       return;
     }
 
@@ -201,12 +197,13 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
             label={lang('LastName')}
             disabled={isLoading}
           />
-          <InputText
+          <TextArea
             value={bio}
             onChange={handleBioChange}
             label={lang('UserBio')}
             disabled={isLoading}
-            error={error === ERROR_BIO_TOO_LONG ? error : undefined}
+            maxLength={maxBioLength}
+            maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
           />
 
           <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -259,10 +256,13 @@ export default memo(withGlobal<OwnProps>(
     const { progress, isUsernameAvailable } = global.profileEdit || {};
     const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
 
+    const maxBioLength = selectCurrentLimit(global, 'aboutLength');
+
     if (!currentUser) {
       return {
         progress,
         isUsernameAvailable,
+        maxBioLength,
       };
     }
 
@@ -283,6 +283,7 @@ export default memo(withGlobal<OwnProps>(
       currentUsername,
       progress,
       isUsernameAvailable,
+      maxBioLength,
     };
   },
 )(SettingsEditProfile));

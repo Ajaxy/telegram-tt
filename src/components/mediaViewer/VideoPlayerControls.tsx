@@ -7,7 +7,7 @@ import buildClassName from '../../util/buildClassName';
 import useFlag from '../../hooks/useFlag';
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
-import formatFileSize from './helpers/formatFileSize';
+import { formatFileSize } from '../../util/textFormat';
 import useLang from '../../hooks/useLang';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import { captureEvents } from '../../util/captureEvents';
@@ -187,7 +187,11 @@ const VideoPlayerControls: FC<OwnProps> = ({
           <RangeSlider bold className="volume-slider" value={isMuted ? 0 : volume * 100} onChange={onVolumeChange} />
         )}
         {renderTime(currentTime, duration)}
-        {!isBuffered && renderFileSize(bufferedProgress, fileSize)}
+        {!isBuffered && (
+          <div className="player-file-size">
+            {`${formatFileSize(lang, fileSize * bufferedProgress)} / ${formatFileSize(lang, fileSize)}`}
+          </div>
+        )}
         <div className="spacer" />
         <Button
           ariaLabel="Playback rate"
@@ -235,14 +239,6 @@ function renderTime(currentTime: number, duration: number) {
   return (
     <div className="player-time">
       {`${formatMediaDuration(currentTime)} / ${formatMediaDuration(duration)}`}
-    </div>
-  );
-}
-
-function renderFileSize(loadedPercent: number, totalSize: number) {
-  return (
-    <div className="player-file-size">
-      {`${formatFileSize(totalSize * loadedPercent)} / ${formatFileSize(totalSize)}`}
     </div>
   );
 }

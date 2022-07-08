@@ -24,6 +24,7 @@ import Checkbox from '../../ui/Checkbox';
 import Spinner from '../../ui/Spinner';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
 
@@ -46,6 +47,7 @@ type StateProps = {
 };
 
 const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
+const CHANNEL_MAX_DESCRIPTION = 255;
 
 const ManageChannel: FC<OwnProps & StateProps> = ({
   chatId,
@@ -143,7 +145,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     setIsProfileFieldsTouched(true);
   }, []);
 
-  const handleAboutChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleAboutChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setAbout(e.target.value);
     setIsProfileFieldsTouched(true);
   }, []);
@@ -214,12 +216,14 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
             disabled={!canChangeInfo}
           />
-          <InputText
+          <TextArea
             id="channel-about"
             className="mb-2"
             label={lang('DescriptionPlaceholder')}
             onChange={handleAboutChange}
             value={about}
+            maxLength={CHANNEL_MAX_DESCRIPTION}
+            maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
             disabled={!canChangeInfo}
           />
           {chat.isCreator && (

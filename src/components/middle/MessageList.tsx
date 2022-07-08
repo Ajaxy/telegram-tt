@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiMessage, ApiRestrictionReason } from '../../api/types';
+import type { ApiBotInfo, ApiMessage, ApiRestrictionReason } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
@@ -25,12 +25,17 @@ import {
   selectFirstMessageId,
   selectScheduledMessages,
   selectCurrentMessageIds,
+  selectIsCurrentUserPremium,
 } from '../../global/selectors';
 import {
   isChatChannel,
   isUserId,
   isChatWithRepliesBot,
   isChatGroup,
+  getBotCoverMediaHash,
+  getDocumentMediaHash,
+  getVideoDimensions,
+  getPhotoFullDimensions,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
@@ -49,11 +54,13 @@ import useLang from '../../hooks/useLang';
 import useWindowSize from '../../hooks/useWindowSize';
 import useInterval from '../../hooks/useInterval';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
+import useMedia from '../../hooks/useMedia';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
 import ContactGreeting from './ContactGreeting';
 import NoMessages from './NoMessages';
+import Skeleton from '../ui/Skeleton';
 
 import './MessageList.scss';
 
@@ -70,6 +77,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  isCurrentUserPremium?: boolean;
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isGroupChat?: boolean;
@@ -87,7 +95,8 @@ type StateProps = {
   isSelectModeActive?: boolean;
   animationLevel?: number;
   lastMessage?: ApiMessage;
-  botDescription?: string;
+  isLoadingBotInfo?: boolean;
+  botInfo?: ApiBotInfo;
   threadTopMessageId?: number;
   threadFirstMessageId?: number;
   hasLinkedChat?: boolean;
@@ -113,6 +122,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   hasTools,
   onFabToggle,
   onNotchToggle,
+  isCurrentUserPremium,
   isChatLoaded,
   isChannelChat,
   isGroupChat,
@@ -132,7 +142,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   focusingId,
   isSelectModeActive,
   lastMessage,
-  botDescription,
+  isLoadingBotInfo,
+  botInfo,
   threadTopMessageId,
   hasLinkedChat,
   lastSyncTime,
@@ -159,6 +170,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
 
+  const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
+  const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
+  const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
+    ? getVideoDimensions(botInfo.gif) : undefined;
+
   const areMessagesLoaded = Boolean(messageIds);
 
   useOnChange(() => {
@@ -176,10 +192,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useOnChange(() => {
-    if (isChannelChat && isReady && lastSyncTime) {
+    if (!isCurrentUserPremium && isChannelChat && isReady && lastSyncTime) {
       loadSponsoredMessages({ chatId });
     }
-  }, [chatId, isReady, isChannelChat, lastSyncTime]);
+  }, [isCurrentUserPremium, chatId, isReady, isChannelChat, lastSyncTime]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useOnChange(() => {
@@ -491,6 +507,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isGroupChatJustCreated = isGroupChat && isCreator
     && messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'chatCreate';
 
+  const isBotInfoEmpty = botInfo && !botInfo.description;
+
   const className = buildClassName(
     'MessageList custom-scroll',
     noAvatars && 'no-avatars',
@@ -515,8 +533,42 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
-      ) : botDescription ? (
-        <div className="empty"><span>{renderText(lang(botDescription), ['br', 'emoji', 'links'])}</span></div>
+      ) : botInfo ? (
+        <div className="empty">
+          {isLoadingBotInfo && <span>{lang('Loading')}</span>}
+          {isBotInfoEmpty && <span>{lang('NoMessages')}</span>}
+          {botInfo && (
+            <div className="bot-info" style={botInfoDimensions && `width: ${botInfoDimensions?.width}px`}>
+              {botInfoPhotoUrl && (
+                <img
+                  src={botInfoPhotoUrl}
+                  alt="Bot info"
+                />
+              )}
+              {botInfoGifUrl && (
+                <video
+                  src={botInfoGifUrl}
+                  loop
+                  autoPlay
+                  muted
+                  playsInline
+                />
+              )}
+              {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
+                <Skeleton
+                  width={botInfoDimensions?.width}
+                  height={botInfoDimensions?.height}
+                />
+              )}
+              {botInfo.description && (
+                <div className="bot-info-description">
+                  <p className="bot-info-title">{lang('BotInfoTitle')}</p>
+                  {renderText(botInfo.description, ['br', 'emoji', 'links'])}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       ) : shouldRenderGreeting ? (
         <ContactGreeting userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated) ? (
@@ -528,6 +580,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         />
       ) : ((messageIds && messageGroups) || lastMessage) ? (
         <MessageListContent
+          isCurrentUserPremium={isCurrentUserPremium}
           chatId={chatId}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
@@ -588,16 +641,18 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const chatBot = selectChatBot(global, chatId)!;
-    let botDescription: string | undefined;
+    let isLoadingBotInfo = false;
+    let botInfo;
     if (selectIsChatBotNotStarted(global, chatId)) {
       if (chatBot.fullInfo) {
-        botDescription = chatBot.fullInfo.botInfo?.description || 'NoMessages';
+        botInfo = chatBot.fullInfo.botInfo;
       } else {
-        botDescription = 'Updating bot info...';
+        isLoadingBotInfo = true;
       }
     }
 
     return {
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isChatLoaded: true,
       isRestricted,
       restrictionReason,
@@ -614,7 +669,8 @@ export default memo(withGlobal<OwnProps>(
       threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
       focusingId,
       isSelectModeActive: selectIsInSelectMode(global),
-      botDescription,
+      isLoadingBotInfo,
+      botInfo,
       threadTopMessageId,
       hasLinkedChat: chat.fullInfo && ('linkedChatId' in chat.fullInfo)
         ? Boolean(chat.fullInfo.linkedChatId)

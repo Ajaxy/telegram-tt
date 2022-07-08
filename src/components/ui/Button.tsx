@@ -37,6 +37,7 @@ export type OwnProps = {
   faded?: boolean;
   tabIndex?: number;
   isRtl?: boolean;
+  isShiny?: boolean;
   noPreventDefault?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
@@ -71,6 +72,7 @@ const Button: FC<OwnProps> = ({
   fluid,
   isText,
   isLoading,
+  isShiny,
   ariaLabel,
   ariaControls,
   hasPopup,
@@ -108,6 +110,7 @@ const Button: FC<OwnProps> = ({
     faded && 'faded',
     isClicked && 'clicked',
     backgroundImage && 'with-image',
+    isShiny && 'shiny',
   );
 
   const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {

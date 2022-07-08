@@ -12,8 +12,10 @@ import Tab from './Tab';
 import './TabList.scss';
 
 export type TabWithProperties = {
+  id?: number;
   title: string;
   badgeCount?: number;
+  isBlocked?: boolean;
   isBadgeActive?: boolean;
 };
 
@@ -71,9 +73,10 @@ const TabList: FC<OwnProps> = ({
     >
       {tabs.map((tab, i) => (
         <Tab
-          key={tab.title}
+          key={tab.id ?? tab.title}
           title={lang(tab.title)}
           isActive={i === activeTab}
+          isBlocked={tab.isBlocked}
           badgeCount={tab.badgeCount}
           isBadgeActive={tab.isBadgeActive}
           previousActiveTab={previousActiveTab}

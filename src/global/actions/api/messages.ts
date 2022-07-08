@@ -21,6 +21,7 @@ import { LoadMoreDirection } from '../../../types';
 import {
   MAX_MEDIA_FILES_FOR_ALBUM,
   MESSAGE_LIST_SLICE,
+  RE_TELEGRAM_LINK,
   RE_TG_LINK,
   RE_TME_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -711,6 +712,29 @@ addActionHandler('requestThreadInfoUpdate', (global, actions, payload) => {
   void callApi('requestThreadInfoUpdate', { chat, threadId });
 });
 
+addActionHandler('transcribeAudio', async (global, actions, payload) => {
+  const { messageId, chatId } = payload;
+
+  const chat = selectChat(global, chatId);
+
+  if (!chat) return;
+
+  global = updateChatMessage(global, chatId, messageId, {
+    transcriptionId: '',
+  });
+
+  setGlobal(global);
+
+  const result = await callApi('transcribeAudio', { chat, messageId });
+
+  global = updateChatMessage(getGlobal(), chatId, messageId, {
+    transcriptionId: result,
+    isTranscriptionError: !result,
+  });
+
+  setGlobal(global);
+});
+
 async function loadWebPagePreview(message: string) {
   const webPagePreview = await callApi('fetchWebPagePreview', { message });
 
@@ -1205,7 +1229,9 @@ addActionHandler('openUrl', (global, actions, payload) => {
     }
   }
 
-  if (!shouldSkipModal) {
+  const shouldDisplayModal = !urlWithProtocol.match(RE_TELEGRAM_LINK) && !shouldSkipModal;
+
+  if (shouldDisplayModal) {
     actions.toggleSafeLinkModal({ url: urlWithProtocol });
   } else {
     window.open(urlWithProtocol, '_blank', 'noopener');

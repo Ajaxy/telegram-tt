@@ -498,6 +498,24 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       setGlobal(updateReactions(global, chatId, id, reactions, chat, message.isOutgoing, message));
       break;
     }
+
+    case 'updateTranscribedAudio': {
+      const { transcriptionId, text, isPending } = update;
+
+      setGlobal({
+        ...global,
+        transcriptions: {
+          ...global.transcriptions,
+          [transcriptionId]: {
+            ...(global.transcriptions[transcriptionId] || {}),
+            transcriptionId,
+            text,
+            isPending,
+          },
+        },
+      });
+      break;
+    }
   }
 });
 

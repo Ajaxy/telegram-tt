@@ -78,6 +78,14 @@
     }
   }
 
+  .voice &[dir="rtl"] {
+    right: auto !important;
+    left: 0.25rem;
+    padding: 0 0.375rem 0 0.3125rem;
+  }
+
+  // This is currently only supported in Firefox.
+  // When attempting to combine with other selectors, the rule no longer applies anywhere except Firefox.
   .media:not(.text):dir(rtl) &,
   .Message .custom-shape:dir(rtl) & {
     right: auto !important;

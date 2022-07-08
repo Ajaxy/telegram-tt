@@ -81,6 +81,7 @@ const SettingsStickerSet: FC<OwnProps> = ({
           observeIntersection={observeIntersection}
           clickArg={undefined}
           noContextMenu
+          isCurrentUserPremium
         />
         <div className="multiline-menu-item">
           <div className="title">{stickerSet.title}</div>

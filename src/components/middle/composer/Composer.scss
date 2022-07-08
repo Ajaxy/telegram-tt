@@ -364,6 +364,7 @@
     height: 3.5rem;
     padding: 0 3.125rem 0 1rem;
     font-family: var(--font-family);
+    font-variant-numeric: tabular-nums;
 
     &::after {
       content: "";

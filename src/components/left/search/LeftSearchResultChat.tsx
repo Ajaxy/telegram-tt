@@ -73,9 +73,9 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       buttonRef={buttonRef}
     >
       {isUserId(chatId) ? (
-        <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" />
+        <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" withVideoAvatar />
       ) : (
-        <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
+        <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" withVideoAvatar />
       )}
       <DeleteChatModal
         isOpen={isDeleteModalOpen}

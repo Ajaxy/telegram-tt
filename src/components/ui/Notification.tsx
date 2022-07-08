@@ -14,21 +14,28 @@ import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import Portal from './Portal';
+import Button from './Button';
 
 import './Notification.scss';
 
 type OwnProps = {
+  title?: TextPart[];
   containerId?: string;
   message: TextPart[];
   duration?: number;
   onDismiss: () => void;
+  action?: VoidFunction;
+  actionText?: string;
+  className?: string;
 };
 
 const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
 
 const Notification: FC<OwnProps> = ({
+  title, className,
   message, duration = DEFAULT_DURATION, containerId, onDismiss,
+  action, actionText,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   // eslint-disable-next-line no-null/no-null
@@ -40,6 +47,11 @@ const Notification: FC<OwnProps> = ({
     setIsOpen(false);
     setTimeout(onDismiss, ANIMATION_DURATION + ANIMATION_END_DELAY);
   }, [onDismiss]);
+
+  function handleClick() {
+    action?.();
+    closeAndDismiss();
+  }
 
   useEffect(() => (isOpen ? captureEscKeyListener(closeAndDismiss) : undefined), [isOpen, closeAndDismiss]);
 
@@ -68,14 +80,24 @@ const Notification: FC<OwnProps> = ({
   return (
     <Portal className="Notification-container" containerId={containerId}>
       <div
-        className={buildClassName('Notification', transitionClassNames)}
-        onClick={closeAndDismiss}
+        className={buildClassName('Notification', transitionClassNames, className)}
+        onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div className="content">
+          {title && <div className="notification-title">{title}</div>}
           {message}
         </div>
+        {action && actionText && (
+          <Button
+            color="translucent-white"
+            onClick={action}
+            className="Notification-button"
+          >
+            {actionText}
+          </Button>
+        )}
       </div>
     </Portal>
   );

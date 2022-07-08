@@ -8,8 +8,10 @@ import useFlag from '../../../hooks/useFlag';
 import { getTouchY } from '../../../util/scrollLock';
 import { createClassNameBuilder } from '../../../util/buildClassName';
 import { IS_COMPACT_MENU } from '../../../util/environment';
+import { getActions } from '../../../global';
 
 import ReactionSelectorReaction from './ReactionSelectorReaction';
+import Button from '../../ui/Button';
 
 import './ReactionSelector.scss';
 
@@ -19,6 +21,8 @@ type OwnProps = {
   isPrivate?: boolean;
   availableReactions?: ApiAvailableReaction[];
   isReady?: boolean;
+  canBuyPremium?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const cn = createClassNameBuilder('ReactionSelector');
@@ -29,7 +33,10 @@ const ReactionSelector: FC<OwnProps> = ({
   onSendReaction,
   isPrivate,
   isReady,
+  canBuyPremium,
+  isCurrentUserPremium,
 }) => {
+  const { openPremiumModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const itemsScrollRef = useRef<HTMLDivElement>(null);
   const [isHorizontalScrollEnabled, enableHorizontalScroll] = useFlag(false);
@@ -57,7 +64,7 @@ const ReactionSelector: FC<OwnProps> = ({
       <div className={cn('items-wrapper')}>
         <div className={cn('items', ['no-scrollbar'])} ref={itemsScrollRef}>
           {availableReactions?.map((reaction, i) => {
-            if (reaction.isInactive
+            if (reaction.isInactive || (reaction.isPremium && canBuyPremium)
               || (!isPrivate && (!enabledReactions || !enabledReactions.includes(reaction.reaction)))) return undefined;
             return (
               <ReactionSelectorReaction
@@ -66,9 +73,27 @@ const ReactionSelector: FC<OwnProps> = ({
                 isReady={isReady}
                 onSendReaction={onSendReaction}
                 reaction={reaction}
+                isCurrentUserPremium={isCurrentUserPremium}
               />
             );
           })}
+          {canBuyPremium && Boolean(
+            availableReactions
+              .filter((r) => r.isPremium && (!enabledReactions || enabledReactions.includes(r.reaction)))
+              .length,
+          ) && (
+            <Button
+              round
+              color="translucent"
+              className={cn('blocked-button')}
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => openPremiumModal({
+                initialSection: 'reactions',
+              })}
+            >
+              <i className="icon-lock-badge" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

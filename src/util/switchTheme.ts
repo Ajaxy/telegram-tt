@@ -4,6 +4,7 @@ import { animateSingle } from './animation';
 import { fastRaf } from './schedulers';
 
 import themeColors from '../styles/themes.json';
+import { lerp } from './math';
 
 type RGBAColor = {
   r: number;
@@ -21,10 +22,6 @@ const RGB_VARIABLES = new Set([
   '--color-primary-shade',
   '--color-text-secondary',
 ]);
-
-const lerp = (start: number, end: number, interpolationRatio: number) => {
-  return (1 - interpolationRatio) * start + interpolationRatio * end;
-};
 
 const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map((property) => ({
   property,

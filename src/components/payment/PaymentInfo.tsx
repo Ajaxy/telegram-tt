@@ -88,10 +88,11 @@ const PaymentInfo: FC<OwnProps> = ({
         />
         { needCardholderName && (
           <InputText
-            label={lang('PaymentCardName')}
+            label={lang('Checkout.NewCard.CardholderNamePlaceholder')}
             onChange={handleCardholderChange}
             value={state.cardholder}
             inputMode="text"
+            tabIndex={0}
             error={formErrors.cardholder}
           />
         )}
@@ -107,6 +108,7 @@ const PaymentInfo: FC<OwnProps> = ({
             value={state.cvv}
             inputMode="numeric"
             maxLength={3}
+            tabIndex={0}
             error={formErrors.cvv}
           />
         </section>
@@ -122,6 +124,7 @@ const PaymentInfo: FC<OwnProps> = ({
             hasArrow={Boolean(true)}
             id="billing-country"
             error={formErrors.billingCountry}
+            tabIndex={0}
             ref={selectCountryRef}
           >
             {
@@ -129,6 +132,7 @@ const PaymentInfo: FC<OwnProps> = ({
                 <option
                   value={defaultName}
                   className="county-item"
+                  selected={defaultName === state.billingCountry}
                 >
                   {defaultName || name}
                 </option>
@@ -142,6 +146,7 @@ const PaymentInfo: FC<OwnProps> = ({
             onChange={handleBillingPostCodeChange}
             value={state.billingZip}
             inputMode="text"
+            tabIndex={0}
             error={formErrors.billingZip}
           />
         )}
@@ -149,6 +154,7 @@ const PaymentInfo: FC<OwnProps> = ({
           <Checkbox
             label={lang('PaymentCardSavePaymentInformation')}
             checked={state.saveCredentials}
+            tabIndex={0}
             onChange={handleChangeSaveCredentials}
           />
         ) }

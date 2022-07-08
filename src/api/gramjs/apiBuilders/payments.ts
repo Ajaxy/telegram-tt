@@ -1,5 +1,10 @@
 import type { Api as GramJs } from '../../../lib/gramjs';
 
+import type { ApiInvoice, ApiPaymentSavedInfo, ApiPremiumPromo } from '../../types';
+
+import { buildApiDocument, buildApiMessageEntity, buildApiWebDocument } from './messages';
+import { omitVirtualClassFields } from './helpers';
+
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
     return undefined;
@@ -8,11 +13,11 @@ export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | 
     return {
       id: option.id,
       title: option.title,
-      amount: option.prices.reduce((ac, cur) => ac + Number((cur.amount as any).value), 0),
+      amount: option.prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0),
       prices: option.prices.map(({ label, amount }) => {
         return {
           label,
-          amount: Number((amount as any).value),
+          amount: amount.toJSNumber(),
         };
       }),
     };
@@ -34,7 +39,7 @@ export function buildReceipt(receipt: GramJs.payments.PaymentReceipt) {
   const { prices } = invoice;
   const mapedPrices = prices.map(({ label, amount }) => ({
     label,
-    amount: Number((amount as any).value),
+    amount: amount.toJSNumber(),
   }));
 
   let shippingPrices;
@@ -44,7 +49,7 @@ export function buildReceipt(receipt: GramJs.payments.PaymentReceipt) {
     shippingPrices = shipping.prices.map(({ label, amount }) => {
       return {
         label,
-        amount: Number((amount as any).value),
+        amount: amount.toJSNumber(),
       };
     });
     shippingMethod = shipping.title;
@@ -54,7 +59,7 @@ export function buildReceipt(receipt: GramJs.payments.PaymentReceipt) {
     currency,
     prices: mapedPrices,
     info: { shippingAddress, phone, name },
-    totalAmount: Number((totalAmount as any).value),
+    totalAmount: totalAmount.toJSNumber(),
     credentialsTitle,
     shippingPrices,
     shippingMethod,
@@ -86,19 +91,25 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
     prices,
   } = invoice;
 
-  const mapedPrices = prices.map(({ label, amount }) => ({
+  const mappedPrices = prices.map(({ label, amount }) => ({
     label,
-    amount: Number((amount as any).value),
+    amount: amount.toJSNumber(),
   }));
+  const { shippingAddress } = savedInfo || {};
+  const cleanedInfo: ApiPaymentSavedInfo | undefined = savedInfo ? omitVirtualClassFields(savedInfo) : undefined;
+  if (cleanedInfo && shippingAddress) {
+    cleanedInfo.shippingAddress = omitVirtualClassFields(shippingAddress);
+  }
 
   const nativeData = nativeParams ? JSON.parse(nativeParams.data) : {};
+
   return {
     canSaveCredentials,
     passwordMissing,
     formId: String(formId),
     providerId: String(providerId),
     nativeProvider,
-    savedInfo,
+    savedInfo: cleanedInfo,
     invoice: {
       test,
       nameRequested,
@@ -109,7 +120,7 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
       phoneToProvider,
       emailToProvider,
       currency,
-      prices: mapedPrices,
+      prices: mappedPrices,
     },
     nativeParams: {
       needCardholderName: nativeData.need_cardholder_name,
@@ -118,5 +129,42 @@ export function buildPaymentForm(form: GramJs.payments.PaymentForm) {
       publishableKey: nativeData.publishable_key,
       publicToken: nativeData?.public_token,
     },
+  };
+}
+
+export function buildApiInvoiceFromForm(form: GramJs.payments.PaymentForm): ApiInvoice {
+  const {
+    invoice, description: text, title, photo,
+  } = form;
+  const {
+    test, currency, prices, recurring, recurringTermsUrl,
+  } = invoice;
+
+  const totalAmount = prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0);
+
+  return {
+    text,
+    title,
+    photo: buildApiWebDocument(photo),
+    amount: totalAmount,
+    currency,
+    isTest: test,
+    isRecurring: recurring,
+    recurringTermsUrl,
+  };
+}
+
+export function buildApiPremiumPromo(promo: GramJs.help.PremiumPromo): ApiPremiumPromo {
+  const {
+    statusText, statusEntities, videos, videoSections, currency, monthlyAmount,
+  } = promo;
+
+  return {
+    statusText,
+    statusEntities: statusEntities.map((l) => buildApiMessageEntity(l)),
+    videoSections,
+    currency,
+    videos: videos.map(buildApiDocument).filter(Boolean),
+    monthlyAmount: monthlyAmount.toString(),
   };
 }

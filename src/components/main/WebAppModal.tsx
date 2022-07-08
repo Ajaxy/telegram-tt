@@ -4,13 +4,13 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat } from '../../api/types';
+import type { ApiAttachMenuBot, ApiChat, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 
 import windowSize from '../../util/windowSize';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import { selectCurrentChat, selectTheme } from '../../global/selectors';
+import { selectCurrentChat, selectTheme, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { extractCurrentThemeParams, validateHexColor } from '../../util/themeStyle';
 
@@ -43,9 +43,12 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  isInstalled?: boolean;
   chat?: ApiChat;
+  bot?: ApiUser;
+  attachMenuBot?: ApiAttachMenuBot;
   theme?: ThemeKey;
+  isPaymentModalOpen?: boolean;
+  paymentStatus?: GlobalState['payment']['status'];
 };
 
 const MAIN_BUTTON_ANIMATION_TIME = 250;
@@ -56,34 +59,78 @@ const LINK_PREFIX = 'https://t.me/';
 const WebAppModal: FC<OwnProps & StateProps> = ({
   webApp,
   chat,
-  isInstalled,
+  bot,
+  attachMenuBot,
   theme,
+  isPaymentModalOpen,
+  paymentStatus,
 }) => {
   const {
-    closeWebApp, sendWebViewData, prolongWebView, toggleBotInAttachMenu, openTelegramLink, openChat,
+    closeWebApp,
+    sendWebViewData,
+    prolongWebView,
+    toggleBotInAttachMenu,
+    openTelegramLink,
+    openChat,
+    openInvoice,
+    setWebAppPaymentSlug,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
+  const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState(extractCurrentThemeParams().bg_color);
+  const [headerColor, setHeaderColor] = useState(extractCurrentThemeParams().bg_color);
   const lang = useLang();
   const {
-    url, bot, buttonText, queryId,
+    url, buttonText, queryId,
   } = webApp || {};
   const isOpen = Boolean(url);
   const isSimple = !queryId;
 
   const handleEvent = useCallback((event: WebAppInboundEvent) => {
-    const { eventType } = event;
+    const { eventType, eventData } = event;
     if (eventType === 'web_app_close') {
       closeWebApp();
     }
 
+    if (eventType === 'web_app_open_invoice') {
+      setWebAppPaymentSlug({
+        slug: eventData.slug,
+      });
+      openInvoice({
+        slug: eventData.slug,
+      });
+    }
+
     if (eventType === 'web_app_open_tg_link') {
-      const linkUrl = LINK_PREFIX + event.eventData.path_full;
+      const linkUrl = LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl });
       closeWebApp();
     }
 
+    if (eventType === 'web_app_open_link') {
+      const linkUrl = eventData.url;
+      window.open(linkUrl, '_blank', 'noreferrer');
+    }
+
+    if (eventType === 'web_app_setup_back_button') {
+      setIsBackButtonVisible(eventData.is_visible);
+    }
+
+    if (eventType === 'web_app_set_background_color') {
+      const themeParams = extractCurrentThemeParams();
+      const color = validateHexColor(eventData.color) ? eventData.color : themeParams.bg_color;
+      setBackgroundColor(color);
+    }
+
+    if (eventType === 'web_app_set_header_color') {
+      const themeParams = extractCurrentThemeParams();
+      const key = eventData.color_key;
+      const newColor = themeParams[key];
+      const color = validateHexColor(newColor) ? newColor : themeParams.bg_color;
+      setHeaderColor(color);
+    }
+
     if (eventType === 'web_app_data_send') {
-      const { eventData } = event;
       closeWebApp();
       sendWebViewData({
         bot: bot!,
@@ -93,13 +140,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_setup_main_button') {
-      const { eventData } = event;
       const themeParams = extractCurrentThemeParams();
-      // Validate colors if they are present
-      const color = !eventData.color || validateHexColor(eventData.color) ? eventData.color
-        : themeParams.button_color;
-      const textColor = !eventData.text_color || validateHexColor(eventData.text_color) ? eventData.text_color
-        : themeParams.text_color;
+      const color = validateHexColor(eventData.color) ? eventData.color : themeParams.button_color;
+      const textColor = validateHexColor(eventData.text_color) ? eventData.text_color : themeParams.text_color;
       setMainButton({
         isVisible: eventData.is_visible && Boolean(eventData.text?.trim().length),
         isActive: eventData.is_active,
@@ -109,7 +152,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isProgressVisible: eventData.is_progress_visible,
       });
     }
-  }, [bot, buttonText, closeWebApp, openTelegramLink, sendWebViewData]);
+  }, [bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug]);
 
   const {
     ref, reloadFrame, sendEvent, sendViewport, sendTheme,
@@ -119,15 +162,21 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   useInterval(() => {
     prolongWebView({
-      bot: bot!,
+      botId: bot!.id,
       queryId: queryId!,
-      peer: chat!,
+      peerId: chat!.id,
     });
   }, queryId ? PROLONG_INTERVAL : undefined, true);
 
   const handleMainButtonClick = useCallback(() => {
     sendEvent({
       eventType: 'main_button_pressed',
+    });
+  }, [sendEvent]);
+
+  const handleSettingsButtonClick = useCallback(() => {
+    sendEvent({
+      eventType: 'settings_button_pressed',
     });
   }, [sendEvent]);
 
@@ -159,16 +208,38 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     };
   }, [isOpen]);
 
+  useOnChange(([prevIsPaymentModalOpen]) => {
+    if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
+    if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
+      sendEvent({
+        eventType: 'invoice_closed',
+        eventData: {
+          slug: webApp.slug,
+          status: paymentStatus,
+        },
+      });
+      setWebAppPaymentSlug({
+        slug: undefined,
+      });
+    }
+  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp] as const);
+
   const handleToggleClick = useCallback(() => {
     toggleBotInAttachMenu({
       botId: bot!.id,
-      isEnabled: !isInstalled,
+      isEnabled: !attachMenuBot,
     });
-  }, [bot, isInstalled, toggleBotInAttachMenu]);
+  }, [bot, attachMenuBot, toggleBotInAttachMenu]);
 
-  const handleCloseClick = useCallback(() => {
-    closeWebApp();
-  }, [closeWebApp]);
+  const handleBackClick = useCallback(() => {
+    if (isBackButtonVisible) {
+      sendEvent({
+        eventType: 'back_button_pressed',
+      });
+    } else {
+      closeWebApp();
+    }
+  }, [closeWebApp, isBackButtonVisible, sendEvent]);
 
   const openBotChat = useCallback(() => {
     openChat({
@@ -193,17 +264,22 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     );
   }, []);
 
+  const backButtonClassName = buildClassName(
+    'animated-close-icon',
+    isBackButtonVisible && 'state-back',
+  );
+
   const header = useMemo(() => {
     return (
-      <div className="modal-header">
+      <div className="modal-header" style={`background-color: ${headerColor}`}>
         <Button
           round
           color="translucent"
           size="smaller"
-          ariaLabel={lang('Close')}
-          onClick={handleCloseClick}
+          ariaLabel={lang(isBackButtonVisible ? 'Back' : 'Close')}
+          onClick={handleBackClick}
         >
-          <i className="icon-close" />
+          <div className={backButtonClassName} />
         </Button>
         <div className="modal-title">{bot?.firstName}</div>
         <DropdownMenu
@@ -216,15 +292,25 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           )}
           <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
           {bot?.isAttachMenuBot && (
-            <MenuItem icon={isInstalled ? 'stop' : 'install'} onClick={handleToggleClick} destructive={isInstalled}>
-              {lang(isInstalled ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
+            <MenuItem
+              icon={attachMenuBot ? 'stop' : 'install'}
+              onClick={handleToggleClick}
+              destructive={Boolean(attachMenuBot)}
+            >
+              {lang(attachMenuBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
+            </MenuItem>
+          )}
+          {attachMenuBot?.hasSettings && (
+            <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
+              {lang('Settings')}
             </MenuItem>
           )}
         </DropdownMenu>
       </div>
     );
   }, [
-    lang, handleCloseClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, isInstalled, handleToggleClick,
+    lang, handleBackClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, attachMenuBot,
+    handleToggleClick, handleSettingsButtonClick, isBackButtonVisible, headerColor, backButtonClassName,
   ]);
 
   const prevMainButtonColor = usePrevious(mainButton?.color, true);
@@ -238,7 +324,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const mainButtonCurrentText = mainButton?.text || prevMainButtonText;
 
   useEffect(() => {
-    if (!isOpen) setMainButton(undefined);
+    if (!isOpen) {
+      const themeParams = extractCurrentThemeParams();
+      setMainButton(undefined);
+      setIsBackButtonVisible(false);
+      setBackgroundColor(themeParams.bg_color);
+      setHeaderColor(themeParams.bg_color);
+    }
   }, [isOpen]);
 
   const [shouldDecreaseWebFrameSize, setShouldDecreaseWebFrameSize] = useState(false);
@@ -268,6 +360,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       onClose={closeWebApp}
       header={header}
       hasCloseButton
+      style={`background-color: ${backgroundColor}`}
     >
       {isOpen && (
         <>
@@ -276,7 +369,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             className={buildClassName('web-app-frame', shouldDecreaseWebFrameSize && 'with-button')}
             src={url}
             title={`${bot?.firstName} Web App`}
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
             allow="camera; microphone; geolocation;"
             allowFullScreen
           />
@@ -301,15 +394,20 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { webApp }): StateProps => {
-    const { bot } = webApp || {};
-    const isInstalled = Boolean(bot && global.attachMenu.bots[bot.id]);
+    const { botId } = webApp || {};
+    const attachMenuBot = botId ? global.attachMenu.bots[botId] : undefined;
+    const bot = botId ? selectUser(global, botId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
+    const { isPaymentModalOpen, status } = global.payment;
 
     return {
-      isInstalled,
+      attachMenuBot,
+      bot,
       chat,
       theme,
+      isPaymentModalOpen,
+      paymentStatus: status,
     };
   },
 )(WebAppModal));

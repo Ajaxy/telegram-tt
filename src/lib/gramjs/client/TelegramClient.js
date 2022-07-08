@@ -47,7 +47,7 @@ const PING_WAKE_UP_WARNING_TIMEOUT = 1000; // 1 sec
 const PING_DISCONNECT_DELAY = 60000; // 1 min
 
 // All types
-const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's'];
+const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
 
 class TelegramClient {
     static DEFAULT_OPTIONS = {
@@ -612,7 +612,10 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return undefined;
         }
-        const size = this._pickFileSize(photo.sizes, args.sizeType);
+        const isVideoSize = args.sizeType === 'u' || args.sizeType === 'v';
+        const size = this._pickFileSize(isVideoSize
+            ? [...photo.videoSizes, ...photo.sizes]
+            : photo.sizes, args.sizeType);
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return undefined;
         }
@@ -645,7 +648,8 @@ class TelegramClient {
 
         let size;
         if (args.sizeType) {
-            size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : undefined;
+            size = doc.thumbs ? this._pickFileSize([...(doc.videoThumbs || []),
+                ...doc.thumbs], args.sizeType) : undefined;
             if (!size && doc.mimeType.startsWith('video/')) {
                 return undefined;
             }
@@ -664,7 +668,7 @@ class TelegramClient {
                 thumbSize: size ? size.type : '',
             }),
             {
-                fileSize: size ? size.size : doc.size,
+                fileSize: size ? size.size : doc.size.toJSNumber(),
                 progressCallback: args.progressCallback,
                 start: args.start,
                 end: args.end,
@@ -680,6 +684,11 @@ class TelegramClient {
     }
 
     async _downloadWebDocument(media) {
+        if (media.url && !('accessHash' in media)) {
+            const arrayBuff = await fetch(media.url).then((res) => res.arrayBuffer());
+            return Buffer.from(arrayBuff);
+        }
+
         try {
             const buff = [];
             let offset = 0;
@@ -1153,7 +1162,7 @@ function timeout(cb, ms) {
 
     return Promise.race([
         cb(),
-        Helpers.sleep(ms).then(() => isResolved ? undefined : Promise.reject(new Error('TIMEOUT'))),
+        Helpers.sleep(ms).then(() => (isResolved ? undefined : Promise.reject(new Error('TIMEOUT')))),
     ]).finally(() => {
         isResolved = true;
     });

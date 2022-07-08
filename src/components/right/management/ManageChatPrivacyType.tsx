@@ -1,8 +1,9 @@
+import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
@@ -12,6 +13,7 @@ import { isChatChannel } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
 
 import SafeLink from '../../common/SafeLink';
 import ListItem from '../../ui/ListItem';
@@ -36,6 +38,7 @@ type StateProps = {
   progress?: ManagementProgress;
   isUsernameAvailable?: boolean;
   isProtected?: boolean;
+  maxPublicLinks: number;
 };
 
 const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
@@ -46,12 +49,14 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   progress,
   isUsernameAvailable,
   isProtected,
+  maxPublicLinks,
 }) => {
   const {
     checkPublicLink,
     updatePublicLink,
     updatePrivateLink,
     toggleIsProtected,
+    openLimitReachedModal,
   } = getActions();
 
   const isPublic = Boolean(chat.username);
@@ -77,9 +82,18 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     }
   }, [privacyType, privateLink, updatePrivateLink]);
 
-  const handleOptionChange = useCallback((value: string) => {
+  const handleOptionChange = useCallback((value: string, e: ChangeEvent<HTMLInputElement>) => {
+    const myChats = Object.values(getGlobal().chats.byId).filter((l) => l.isCreator && l.username);
+    if (myChats.length >= maxPublicLinks && value === 'public') {
+      openLimitReachedModal({ limit: 'channelsPublic' });
+      const radioGroup = e.currentTarget.closest('.radio-group') as HTMLDivElement;
+      // Patch for Teact bug with controlled inputs
+      (radioGroup.querySelector('[value=public]') as HTMLInputElement).checked = false;
+      (radioGroup.querySelector('[value=private]') as HTMLInputElement).checked = true;
+      return;
+    }
     setPrivacyType(value as PrivacyType);
-  }, []);
+  }, [maxPublicLinks, openLimitReachedModal]);
 
   const handleForwardingOptionChange = useCallback((value: string) => {
     toggleIsProtected({
@@ -212,6 +226,7 @@ export default memo(withGlobal<OwnProps>(
       progress: global.management.progress,
       isUsernameAvailable,
       isProtected: chat?.isProtected,
+      maxPublicLinks: selectCurrentLimit(global, 'channelsPublic'),
     };
   },
 )(ManageChatPrivacyType));

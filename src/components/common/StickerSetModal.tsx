@@ -11,7 +11,7 @@ import {
   selectCanScheduleUntilOnline,
   selectChat,
   selectCurrentMessageList,
-  selectIsChatWithSelf,
+  selectIsChatWithSelf, selectIsCurrentUserPremium,
   selectShouldSchedule,
   selectStickerSet,
   selectStickerSetByShortName,
@@ -42,6 +42,7 @@ type StateProps = {
   canScheduleUntilOnline?: boolean;
   shouldSchedule?: boolean;
   isSavedMessages?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -55,6 +56,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   canScheduleUntilOnline,
   shouldSchedule,
   isSavedMessages,
+  isCurrentUserPremium,
   onClose,
 }) => {
   const {
@@ -132,6 +134,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
                 onClick={canSendStickers ? handleSelect : undefined}
                 clickArg={sticker}
                 isSavedMessages={isSavedMessages}
+                isCurrentUserPremium={isCurrentUserPremium}
               />
             ))}
           </div>
@@ -179,6 +182,7 @@ export default memo(withGlobal<OwnProps>(
         : stickerSetShortName
           ? selectStickerSetByShortName(global, stickerSetShortName)
           : undefined,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(StickerSetModal));

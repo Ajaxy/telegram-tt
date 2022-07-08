@@ -3,7 +3,7 @@ import React, { memo, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { Price } from '../../types';
-import type { ApiShippingAddress } from '../../api/types';
+import type { ApiShippingAddress, ApiWebDocument } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
 
@@ -14,7 +14,7 @@ import Button from '../ui/Button';
 import './PaymentModal.scss';
 
 export type OwnProps = {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
 };
 
@@ -28,7 +28,7 @@ type StateProps = {
     phone?: string;
     name?: string;
   };
-  photoUrl?: string;
+  photo?: ApiWebDocument;
   text?: string;
   title?: string;
   credentialsTitle?: string;
@@ -43,7 +43,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
   totalAmount,
   currency,
   info,
-  photoUrl,
+  photo,
   text,
   title,
   credentialsTitle,
@@ -80,12 +80,12 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
             shippingPrices={shippingPrices}
             totalPrice={totalAmount}
             invoiceContent={{
-              photoUrl,
+              photo,
               text,
               title,
             }}
             checkoutInfo={checkoutInfo}
-            currency={currency}
+            currency={currency!}
           />
         </div>
       </div>
@@ -104,7 +104,7 @@ export default memo(withGlobal<OwnProps>(
       credentialsTitle,
       shippingPrices,
       shippingMethod,
-      photoUrl,
+      photo,
       text,
       title,
     } = (receipt || {});
@@ -117,7 +117,7 @@ export default memo(withGlobal<OwnProps>(
       credentialsTitle,
       shippingPrices,
       shippingMethod,
-      photoUrl,
+      photo,
       text,
       title,
     };
@@ -141,7 +141,6 @@ function getCheckoutInfo(paymentMethod?: string,
   const { phone, name } = info;
   return {
     paymentMethod,
-    paymentProvider: 'Stripe',
     shippingAddress: fullAddress,
     name,
     phone,

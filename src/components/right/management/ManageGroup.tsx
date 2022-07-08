@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -25,6 +25,7 @@ import Checkbox from '../../ui/Checkbox';
 import Spinner from '../../ui/Spinner';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
 
@@ -46,9 +47,11 @@ type StateProps = {
   exportedInvites?: ApiExportedInvite[];
   lastSyncTime?: number;
   availableReactionsCount?: number;
+  isChannelsPremiumLimitReached: boolean;
 };
 
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
+const GROUP_MAX_DESCRIPTION = 255;
 
 // Some checkboxes control multiple rights, and some rights are not controlled from Permissions screen,
 // so we need to define the amount manually
@@ -69,6 +72,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   exportedInvites,
   lastSyncTime,
   availableReactionsCount,
+  isChannelsPremiumLimitReached,
 }) => {
   const {
     togglePreHistoryHidden,
@@ -95,6 +99,8 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const isPublicGroup = chat.username || hasLinkedChannel;
   const lang = useLang();
+  // eslint-disable-next-line no-null/no-null
+  const isPreHistoryHiddenCheckboxRef = useRef<HTMLDivElement>(null);
 
   useHistoryBack({
     isActive,
@@ -154,7 +160,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     setIsProfileFieldsTouched(true);
   }, []);
 
-  const handleAboutChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleAboutChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setAbout(e.target.value);
     setIsProfileFieldsTouched(true);
   }, []);
@@ -189,6 +195,16 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
     togglePreHistoryHidden({ chatId: chat.id, isEnabled: !isPreHistoryHidden });
   }, [chat, togglePreHistoryHidden]);
+
+  useEffect(() => {
+    if (!isChannelsPremiumLimitReached) {
+      return;
+    }
+
+    // Teact does not have full support of controlled form components, we need to "disable" input value change manually
+    const checkbox = isPreHistoryHiddenCheckboxRef.current?.querySelector('input') as HTMLInputElement;
+    checkbox.checked = !chat.fullInfo?.isPreHistoryHidden;
+  }, [isChannelsPremiumLimitReached, chat.fullInfo?.isPreHistoryHidden]);
 
   const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
 
@@ -260,10 +276,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             error={error === GROUP_TITLE_EMPTY ? error : undefined}
             disabled={!canChangeInfo}
           />
-          <InputText
+          <TextArea
             id="group-about"
             className="mb-2"
             label={lang('DescriptionPlaceholder')}
+            maxLength={GROUP_MAX_DESCRIPTION}
+            maxLengthIndicator={(GROUP_MAX_DESCRIPTION - about.length).toString()}
             onChange={handleAboutChange}
             value={about}
             disabled={!canChangeInfo}
@@ -348,7 +366,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           </ListItem>
 
           {!isPublicGroup && chat.fullInfo && (
-            <div className="ListItem narrow no-selection">
+            <div className="ListItem narrow no-selection" ref={isPreHistoryHiddenCheckboxRef}>
               <Checkbox
                 checked={!chat.fullInfo.isPreHistoryHidden}
                 label={lang('ChatHistory')}
@@ -412,6 +430,7 @@ export default memo(withGlobal<OwnProps>(
       exportedInvites: invites,
       lastSyncTime: global.lastSyncTime,
       availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
+      isChannelsPremiumLimitReached: global.limitReachedModal?.limit === 'channels',
     };
   },
 )(ManageGroup));

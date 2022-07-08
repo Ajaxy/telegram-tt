@@ -62,6 +62,7 @@ const CommentButton: FC<OwnProps> = ({
               size="small"
               user={isUserId(user.id) ? user as ApiUser : undefined}
               chat={!isUserId(user.id) ? user as ApiChat : undefined}
+              noVideo
             />
           ))}
         </div>

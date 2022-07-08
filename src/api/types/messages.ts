@@ -1,4 +1,6 @@
+import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
+import type { ApiChat } from './chats';
 
 export interface ApiDimensions {
   width: number;
@@ -9,6 +11,12 @@ export interface ApiPhotoSize extends ApiDimensions {
   type: 's' | 'm' | 'x' | 'y' | 'z';
 }
 
+export interface ApiVideoSize extends ApiDimensions {
+  type: 'u' | 'v';
+  videoStartTs: number;
+  size: number;
+}
+
 export interface ApiThumbnail extends ApiDimensions {
   dataUri: string;
 }
@@ -16,7 +24,9 @@ export interface ApiThumbnail extends ApiDimensions {
 export interface ApiPhoto {
   id: string;
   thumbnail?: ApiThumbnail;
+  isVideo?: boolean;
   sizes: ApiPhotoSize[];
+  videoSizes?: ApiVideoSize[];
   blobUrl?: string;
 }
 
@@ -31,6 +41,7 @@ export interface ApiSticker {
   height?: number;
   thumbnail?: ApiThumbnail;
   isPreloadedGlobally?: boolean;
+  hasEffect?: boolean;
 }
 
 export interface ApiStickerSet {
@@ -134,16 +145,31 @@ export interface ApiPoll {
   };
 }
 
+// First type used for state, second - for API requests
+export type ApiInputInvoice = {
+  chatId: string;
+  messageId: number;
+} | {
+  slug: string;
+};
+
+export type ApiRequestInputInvoice = {
+  chat: ApiChat;
+  messageId: number;
+} | {
+  slug: string;
+};
+
 export interface ApiInvoice {
   text: string;
   title: string;
-  photoUrl?: string;
-  photoWidth?: number;
-  photoHeight?: number;
+  photo?: ApiWebDocument;
   amount: number;
   currency: string;
   receiptMsgId?: number;
   isTest?: boolean;
+  isRecurring?: boolean;
+  recurringTermsUrl?: string;
 }
 
 interface ApiGeoPoint {
@@ -321,6 +347,8 @@ export interface ApiMessage {
   isFromScheduled?: boolean;
   seenByUserIds?: string[];
   isProtected?: boolean;
+  transcriptionId?: string;
+  isTranscriptionError?: boolean;
   reactors?: {
     nextOffset?: string;
     count: number;
@@ -350,12 +378,15 @@ export interface ApiReactionCount {
 
 export interface ApiAvailableReaction {
   selectAnimation?: ApiDocument;
+  activateAnimation?: ApiDocument;
+  effectAnimation?: ApiDocument;
   staticIcon?: ApiDocument;
   centerIcon?: ApiDocument;
   aroundAnimation?: ApiDocument;
   reaction: string;
   title: string;
   isInactive?: boolean;
+  isPremium?: boolean;
 }
 
 export interface ApiThreadInfo {
@@ -374,6 +405,7 @@ export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'faile
 export type ApiSponsoredMessage = {
   chatId?: string;
   randomId: string;
+  isRecommended?: boolean;
   isBot?: boolean;
   channelPostId?: number;
   startParam?: string;
@@ -446,6 +478,12 @@ interface ApiKeyboardButtonUrlAuth {
   buttonId: number;
 }
 
+export type ApiTranscription = {
+  text: string;
+  isPending?: boolean;
+  transcriptionId: string;
+};
+
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
   | ApiKeyboardButtonReceipt
@@ -484,6 +522,7 @@ export type ApiThemeParameters = {
   link_color: string;
   button_color: string;
   button_text_color: string;
+  secondary_bg_color: string;
 };
 
 export const MAIN_THREAD_ID = -1;

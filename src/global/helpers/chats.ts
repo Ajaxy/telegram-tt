@@ -17,6 +17,7 @@ import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { getVideoAvatarMediaHash } from './media';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
@@ -106,8 +107,17 @@ export function getChatLink(chat: ApiChat) {
 export function getChatAvatarHash(
   owner: ApiChat | ApiUser,
   size: 'normal' | 'big' = 'normal',
+  type: 'photo' | 'video' = 'photo',
 ) {
   if (!owner.avatarHash) {
+    return undefined;
+  }
+  const { fullInfo } = owner;
+
+  if (type === 'video') {
+    if (fullInfo?.profilePhoto?.isVideo) {
+      return getVideoAvatarMediaHash(fullInfo.profilePhoto);
+    }
     return undefined;
   }
 

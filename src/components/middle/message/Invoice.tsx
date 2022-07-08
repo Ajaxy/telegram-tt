@@ -5,11 +5,15 @@ import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
-import { getMessageInvoice } from '../../../global/helpers';
+import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
+
 import useLang from '../../../hooks/useLang';
+import useMedia from '../../../hooks/useMedia';
+
+import Skeleton from '../../ui/Skeleton';
 
 import './Invoice.scss';
 
@@ -40,10 +44,10 @@ const Invoice: FC<OwnProps> = ({
     amount,
     currency,
     isTest,
-    photoUrl,
-    photoWidth,
-    photoHeight,
+    photo,
   } = invoice!;
+
+  const photoUrl = useMedia(getWebDocumentHash(photo));
 
   useLayoutEffect(() => {
     if (!shouldAffectAppendix) {
@@ -60,8 +64,6 @@ const Invoice: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
 
-  const photoStyle = photoHeight && photoWidth ? `aspect-ratio: ${photoWidth / photoHeight};` : undefined;
-
   return (
     <div
       ref={ref}
@@ -73,15 +75,17 @@ const Invoice: FC<OwnProps> = ({
       {text && (
         <div>{renderText(text, ['emoji', 'br'])}</div>
       )}
-      <div className={`description ${photoUrl ? 'has-image' : ''}`}>
+      <div className={`description ${photo ? 'has-image' : ''}`}>
         {photoUrl && (
           <img
             className="invoice-image"
             src={photoUrl}
             alt=""
-            style={photoStyle}
             crossOrigin="anonymous"
           />
+        )}
+        {!photoUrl && photo && (
+          <Skeleton width={photo.dimensions?.width} height={photo.dimensions?.height} forceAspectRatio />
         )}
         <p className="description-text">
           {formatCurrency(amount, currency, lang.code)}

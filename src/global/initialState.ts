@@ -77,6 +77,9 @@ export const INITIAL_STATE: GlobalState = {
     greeting: {
       stickers: [],
     },
+    premium: {
+      stickers: [],
+    },
     featured: {
       setIds: [],
     },
@@ -181,6 +184,7 @@ export const INITIAL_STATE: GlobalState = {
       timeFormat: '24h',
       wasTimeFormatSetManually: false,
       isConnectionStatusMinimized: true,
+      shouldArchiveAndMuteNewNonContact: false,
     },
     themes: {
       light: {
@@ -221,4 +225,6 @@ export const INITIAL_STATE: GlobalState = {
   attachMenu: {
     bots: {},
   },
+
+  transcriptions: {},
 };

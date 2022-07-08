@@ -194,6 +194,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       if (action instanceof GramJs.MessageActionPaymentSent) {
         onUpdate({
           '@type': 'updatePaymentStateCompleted',
+          slug: action.invoiceSlug,
         });
       } else if (action instanceof GramJs.MessageActionChatEditTitle) {
         onUpdate({
@@ -559,7 +560,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   } else if (update instanceof GramJs.UpdateDialogFilter) {
     const { id, filter } = update;
-    const folder = filter ? buildApiChatFolder(filter) : undefined;
+    const folder = filter instanceof GramJs.DialogFilter ? buildApiChatFolder(filter) : undefined;
 
     onUpdate({
       '@type': 'updateChatFolder',
@@ -941,7 +942,10 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       queryId: queryId.toString(),
     });
   } else if (update instanceof GramJs.UpdateBotMenuButton) {
-    const { botId, button } = update;
+    const {
+      botId,
+      button,
+    } = update;
 
     const id = buildApiPeerId(botId, 'user');
 
@@ -950,6 +954,27 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       botId: id,
       button: buildApiBotMenuButton(button),
     });
+  } else if (update instanceof GramJs.UpdateTranscribedAudio) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
+    onUpdate({
+      '@type': 'updateTranscribedAudio',
+      transcriptionId: update.transcriptionId.toString(),
+      text: update.text,
+      isPending: update.pending,
+    });
+  } else if (update instanceof GramJs.UpdateConfig) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     // eslint-disable-next-line no-console

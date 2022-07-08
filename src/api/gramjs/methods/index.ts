@@ -19,7 +19,7 @@ export {
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
-  getChatByPhoneNumber,
+  getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest,
 } from './chats';
 
 export {
@@ -28,7 +28,8 @@ export {
   fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
   fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
-  saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, closePoll,
+  saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
+  closePoll,
 } from './messages';
 
 export {
@@ -58,6 +59,7 @@ export {
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
   updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
+  fetchGlobalPrivacySettings, updateGlobalPrivacySettings,
 } from './settings';
 
 export {
@@ -71,7 +73,7 @@ export {
 } from './bots';
 
 export {
-  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt,
+  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo,
 } from './payments';
 
 export {

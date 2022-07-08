@@ -1,0 +1,136 @@
+.root {
+  padding: 1rem;
+}
+
+.button {
+  font-weight: 600;
+  font-size: 16px;
+  height: 48px;
+}
+
+.button-premium {
+  background: var(--premium-gradient);
+}
+
+.button-content {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-button {
+  margin: -0.5rem;
+  position: absolute;
+  z-index: 2;
+}
+
+.white-back-button {
+  color: white !important;
+}
+
+.content {
+  margin: 0 -1rem;
+  margin-top: -1rem;
+  overflow-x: scroll;
+  display: flex;
+  scroll-snap-type: x mandatory;
+  width: calc(100% + 2rem);
+}
+
+.frame {
+  aspect-ratio: 1/1;
+}
+.slide {
+  width: 100%;
+  flex: none;
+  position: relative;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  margin-bottom: 7.5rem;
+}
+
+.limits {
+  background: var(--color-background);
+}
+
+.limits-content {
+  overflow: auto;
+  padding: 1rem;
+  margin-top: 59px;
+  height: calc(var(--vh) * 55 + 41px);
+}
+
+.header {
+  padding-left: 4rem;
+  font-size: 20px;
+  font-weight: 500;
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--color-borders);
+  position: absolute;
+  background: var(--color-background);
+  width: 100%;
+  transition: 0.1s ease-out border-bottom-color;
+}
+
+.no-header-border {
+  border-bottom-color: transparent;
+}
+
+.preview {
+  position: absolute;
+  margin: 0 -1rem;
+  margin-top: -1rem;
+  background: var(--premium-feature-background);
+  aspect-ratio: 1/1;
+  width: 100%;
+  border-top-right-radius: var(--border-radius-default);
+  border-top-left-radius: var(--border-radius-default);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-text);
+  margin-top: 1rem;
+}
+
+.description {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 0 5%;
+}
+
+.footer {
+  border-top: 1px solid var(--color-borders);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 0 1rem 1rem 1rem;
+  width: 100%;
+  background: var(--color-background);
+  transition: 0.1s ease-out border-top-color;
+}
+
+.no-footer-border {
+  border-top-color: transparent;
+}
+
+@media (max-width: 600px) {
+  .preview {
+    border-radius: 0;
+  }
+
+  .description {
+    padding: 0 2rem;
+  }
+
+  .limits-content {
+    height: calc(var(--vh) * 100 - 193px);
+  }
+}

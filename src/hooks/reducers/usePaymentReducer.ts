@@ -27,7 +27,7 @@ export type FormActions = (
   'changeAddress1' | 'changeAddress2' | 'changeCity' | 'changeState' | 'changeCountry' |
   'changePostCode' | 'changeFullName' | 'changeEmail' | 'changePhone' | 'changeShipping' | 'updateUserInfo' |
   'changeCardNumber' | 'changeCardholder' | 'changeExpiryDate' | 'changeCvvCode' | 'changeBillingCountry' |
-  'changeBillingZip' | 'changeSaveInfo' | 'changeSaveCredentials' | 'setFormErrors'
+  'changeBillingZip' | 'changeSaveInfo' | 'changeSaveCredentials' | 'setFormErrors' | 'resetState'
 );
 export type FormEditDispatch = Dispatch<FormActions>;
 
@@ -213,6 +213,10 @@ const reducer: StateReducer<FormState, FormActions> = (state, action) => {
           ...state.formErrors,
           ...action.payload,
         },
+      };
+    case 'resetState':
+      return {
+        ...INITIAL_STATE,
       };
     default:
       return state;

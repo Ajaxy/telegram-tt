@@ -42,6 +42,7 @@ type OwnProps = {
 type StateProps = {
   loadedActiveChatIds?: string[];
   loadedArchivedChatIds?: string[];
+  isRemoved?: boolean;
 };
 
 const SUBMIT_TIMEOUT = 500;
@@ -58,6 +59,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   onAddExcludedChats,
   isActive,
   onReset,
+  isRemoved,
   onBack,
   loadedActiveChatIds,
   loadedArchivedChatIds,
@@ -69,6 +71,12 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   const [isIncludedChatsListExpanded, setIsIncludedChatsListExpanded] = useState(false);
   const [isExcludedChatsListExpanded, setIsExcludedChatsListExpanded] = useState(false);
+
+  useEffect(() => {
+    if (isRemoved) {
+      onReset();
+    }
+  }, [isRemoved, onReset]);
 
   const {
     selectedChatIds: includedChatIds,
@@ -283,12 +291,14 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { state }): StateProps => {
     const { listIds } = global.chats;
+    const { byId } = global.chatFolders;
 
     return {
       loadedActiveChatIds: listIds.active,
       loadedArchivedChatIds: listIds.archived,
+      isRemoved: state.folderId !== undefined && !byId[state.folderId],
     };
   },
 )(SettingsFoldersEdit));

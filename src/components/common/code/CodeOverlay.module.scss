@@ -35,7 +35,7 @@
   background-color: var(--color-background-compact-menu);
   backdrop-filter: blur(1px);
   border-bottom-left-radius: 0.25rem;
-  pointer-events: all;
+  pointer-events: auto;
 
   &.hidden {
     display: none;

@@ -8,7 +8,7 @@ import type { LangCode } from '../../types';
 import type {
   ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType, ApiUser,
 } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { ApiLimitTypeWithModal, GlobalState } from '../../global/types';
 
 import '../../global/actions/all';
 import {
@@ -64,6 +64,11 @@ import BotTrustModal from './BotTrustModal.async';
 import BotAttachModal from './BotAttachModal.async';
 import ConfettiContainer from './ConfettiContainer';
 import UrlAuthModal from './UrlAuthModal.async';
+import PremiumMainModal from './premium/PremiumMainModal.async';
+import PaymentModal from '../payment/PaymentModal.async';
+import ReceiptModal from '../payment/ReceiptModal.async';
+import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
+import DeleteFolderDialog from './DeleteFolderDialog.async';
 
 import './Main.scss';
 
@@ -96,10 +101,16 @@ type StateProps = {
   gameTitle?: string;
   isRatePhoneCallModalOpen?: boolean;
   webApp?: GlobalState['webApp'];
+  isPremiumModalOpen?: boolean;
   botTrustRequest?: GlobalState['botTrustRequest'];
-  botAttachRequest?: GlobalState['botAttachRequest'];
+  botTrustRequestBot?: ApiUser;
+  botAttachRequestBot?: ApiUser;
   currentUser?: ApiUser;
   urlAuth?: GlobalState['urlAuth'];
+  limitReached?: ApiLimitTypeWithModal;
+  deleteFolderDialogId?: number;
+  isPaymentModalOpen?: boolean;
+  isReceiptModalOpen?: boolean;
 };
 
 const NOTIFICATION_INTERVAL = 1000;
@@ -124,6 +135,7 @@ const Main: FC<StateProps> = ({
   safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
+  limitReached,
   openedStickerSetShortName,
   isServiceChatReady,
   animationLevel,
@@ -137,10 +149,15 @@ const Main: FC<StateProps> = ({
   gameTitle,
   isRatePhoneCallModalOpen,
   botTrustRequest,
-  botAttachRequest,
+  botTrustRequestBot,
+  botAttachRequestBot,
   webApp,
   currentUser,
   urlAuth,
+  isPremiumModalOpen,
+  isPaymentModalOpen,
+  isReceiptModalOpen,
+  deleteFolderDialogId,
 }) => {
   const {
     sync,
@@ -161,6 +178,8 @@ const Main: FC<StateProps> = ({
     loadAppConfig,
     loadAttachMenuBots,
     loadContactList,
+    closePaymentModal,
+    clearReceipt,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -397,9 +416,14 @@ const Main: FC<StateProps> = ({
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
-      <BotTrustModal bot={botTrustRequest?.bot} type={botTrustRequest?.type} />
-      <BotAttachModal bot={botAttachRequest?.bot} />
+      <BotTrustModal bot={botTrustRequestBot} type={botTrustRequest?.type} />
+      <BotAttachModal bot={botAttachRequestBot} />
       <MessageListHistoryHandler />
+      {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
+      <PremiumLimitReachedModal limit={limitReached} />
+      <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
+      <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
+      <DeleteFolderDialog deleteFolderDialogId={deleteFolderDialogId} />
     </div>
   );
 };
@@ -433,6 +457,8 @@ export default memo(withGlobal(
           animationLevel, language, wasTimeFormatSetManually,
         },
       },
+      botTrustRequest,
+      botAttachRequest,
     } = global;
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
@@ -470,11 +496,17 @@ export default memo(withGlobal(
       openedGame,
       gameTitle,
       isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
-      botTrustRequest: global.botTrustRequest,
-      botAttachRequest: global.botAttachRequest,
+      botTrustRequest,
+      botTrustRequestBot: botTrustRequest && selectUser(global, botTrustRequest.botId),
+      botAttachRequestBot: botAttachRequest && selectUser(global, botAttachRequest.botId),
       webApp: global.webApp,
       currentUser,
       urlAuth: global.urlAuth,
+      isPremiumModalOpen: global.premiumModal?.isOpen,
+      limitReached: global.limitReachedModal?.limit,
+      isPaymentModalOpen: global.payment.isPaymentModalOpen,
+      isReceiptModalOpen: Boolean(global.payment.receipt),
+      deleteFolderDialogId: global.deleteFolderDialogModal,
     };
   },
 )(Main));

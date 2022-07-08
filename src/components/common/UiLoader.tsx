@@ -7,7 +7,7 @@ import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
-import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
+import { selectIsRightColumnShown, selectTheme, selectIsCurrentUserPremium } from '../../global/selectors';
 import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -22,6 +22,7 @@ import styles from './UiLoader.module.scss';
 
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 import reactionThumbsPath from '../../assets/reaction-thumbs.png';
+import premiumReactionThumbsPath from '../../assets/reaction-thumbs-premium.png';
 import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 
@@ -42,6 +43,7 @@ type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimation
   isRightColumnShown?: boolean;
   leftColumnWidth?: number;
   theme: ThemeKey;
+  isCurrentUserPremium?: boolean;
 };
 
 const MAX_PRELOAD_DELAY = 700;
@@ -70,11 +72,11 @@ function preloadAvatars() {
 }
 
 const preloadTasks = {
-  main: () => Promise.all([
+  main: (isCurrentUserPremium: boolean) => Promise.all([
     loadModule(Bundles.Main, 'Main')
       .then(preloadFonts),
     preloadAvatars(),
-    preloadImage(reactionThumbsPath),
+    preloadImage(isCurrentUserPremium ? premiumReactionThumbsPath : reactionThumbsPath),
   ]),
   authPhoneNumber: () => Promise.all([
     preloadFonts(),
@@ -96,6 +98,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   leftColumnWidth,
   theme,
+  isCurrentUserPremium,
 }) => {
   const { setIsUiReady } = getActions();
 
@@ -109,7 +112,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 
     const safePreload = async () => {
       try {
-        await preloadTasks[page!]();
+        await preloadTasks[page!](isCurrentUserPremium!);
       } catch (err) {
         // Do nothing
       }
@@ -175,6 +178,7 @@ export default withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       leftColumnWidth: global.leftColumnWidth,
       theme,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(UiLoader);

@@ -27,6 +27,7 @@ export interface ApiChat {
   hasPrivateLink?: boolean;
   accessHash?: string;
   isMin?: boolean;
+  hasVideoAvatar?: boolean;
   avatarHash?: string;
   username?: string;
   membersCount?: number;
@@ -65,6 +66,8 @@ export interface ApiChat {
   typingStatus?: ApiTypingStatus;
 
   joinRequests?: ApiChatInviteImporter[];
+  isJoinToSend?: boolean;
+  isJoinRequest?: boolean;
   sendAsIds?: string[];
 
   unreadReactions?: number[];
@@ -105,6 +108,7 @@ export interface ApiChatFullInfo {
   requestsPending?: number;
   statisticsDcId?: number;
   stickerSet?: ApiStickerSet;
+  profilePhoto?: ApiPhoto;
 }
 
 export interface ApiChatMember {

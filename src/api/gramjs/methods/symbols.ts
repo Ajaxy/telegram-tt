@@ -70,6 +70,7 @@ export async function fetchFeaturedStickers({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
+    isPremium: Boolean(result.premium),
     sets: result.sets.map(buildStickerSetCovered),
   };
 }

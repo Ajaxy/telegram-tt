@@ -13,6 +13,7 @@ type OwnProps = {
   isSavedMessages?: boolean;
   observeIntersection: ObserveFn;
   onClick: (result: ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  isCurrentUserPremium?: boolean;
 };
 
 const StickerResult: FC<OwnProps> = ({
@@ -20,6 +21,7 @@ const StickerResult: FC<OwnProps> = ({
   isSavedMessages,
   observeIntersection,
   onClick,
+  isCurrentUserPremium,
 }) => {
   const { sticker } = inlineResult;
 
@@ -38,6 +40,7 @@ const StickerResult: FC<OwnProps> = ({
       clickArg={inlineResult}
       isSavedMessages={isSavedMessages}
       canViewSet
+      isCurrentUserPremium={isCurrentUserPremium}
     />
   );
 };

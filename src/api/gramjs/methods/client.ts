@@ -312,6 +312,9 @@ export async function fetchCurrentUser() {
 
   const user = userFull.users[0];
 
+  if (user.photo instanceof GramJs.Photo) {
+    localDb.photos[user.photo.id.toString()] = user.photo;
+  }
   localDb.users[buildApiPeerId(user.id, 'user')] = user;
   const currentUser = buildApiUserFromFull(userFull);
 

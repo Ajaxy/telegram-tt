@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChatFolder } from '../../api/types';
 
+import { ALL_FOLDER_ID } from '../../config';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -54,7 +55,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
   const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>(initialSelectedFolderIds);
 
   const folders = useMemo(() => {
-    return folderOrderedIds?.map((folderId) => ({
+    return folderOrderedIds?.filter((folderId) => folderId !== ALL_FOLDER_ID).map((folderId) => ({
       label: foldersById ? foldersById[folderId].title : '',
       value: String(folderId),
     })) || [];

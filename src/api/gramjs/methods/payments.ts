@@ -1,9 +1,16 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { invokeRequest } from './client';
-import { buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
-import { buildShippingOptions, buildPaymentForm, buildReceipt } from '../apiBuilders/payments';
-import type { ApiChat, OnApiUpdate } from '../../types';
+import { buildInputInvoice, buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
+import {
+  buildShippingOptions, buildPaymentForm, buildReceipt, buildApiPremiumPromo, buildApiInvoiceFromForm,
+} from '../apiBuilders/payments';
+import type {
+  ApiChat, OnApiUpdate, ApiRequestInputInvoice,
+} from '../../types';
+import localDb from '../localDb';
+import { addEntitiesWithPhotosToLocalDb } from '../helpers';
+import { buildApiUser } from '../apiBuilders/users';
 
 let onUpdate: OnApiUpdate;
 
@@ -12,13 +19,11 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export async function validateRequestedInfo({
-  chat,
-  messageId,
+  inputInvoice,
   requestInfo,
   shouldSave,
 }: {
-  chat: ApiChat;
-  messageId: number;
+  inputInvoice: ApiRequestInputInvoice;
   requestInfo: GramJs.TypePaymentRequestedInfo;
   shouldSave?: boolean;
 }): Promise<{
@@ -26,8 +31,7 @@ export async function validateRequestedInfo({
     shippingOptions: any;
   } | undefined> {
   const result = await invokeRequest(new GramJs.payments.ValidateRequestedInfo({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    msgId: messageId,
+    invoice: buildInputInvoice(inputInvoice),
     save: shouldSave || undefined,
     info: buildShippingInfo(requestInfo),
   }));
@@ -47,15 +51,13 @@ export async function validateRequestedInfo({
 }
 
 export async function sendPaymentForm({
-  chat,
-  messageId,
+  inputInvoice,
   formId,
   requestedInfoId,
   shippingOptionId,
   credentials,
 }: {
-  chat: ApiChat;
-  messageId: number;
+  inputInvoice: ApiRequestInputInvoice;
   formId: string;
   credentials: any;
   requestedInfoId?: string;
@@ -63,8 +65,7 @@ export async function sendPaymentForm({
 }) {
   const result = await invokeRequest(new GramJs.payments.SendPaymentForm({
     formId: BigInt(formId),
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    msgId: messageId,
+    invoice: buildInputInvoice(inputInvoice),
     requestedInfoId,
     shippingOptionId,
     credentials: new GramJs.InputPaymentCredentials({
@@ -85,22 +86,23 @@ export async function sendPaymentForm({
   return Boolean(result);
 }
 
-export async function getPaymentForm({
-  chat, messageId,
-}: {
-  chat: ApiChat;
-  messageId: number;
-}) {
+export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
   const result = await invokeRequest(new GramJs.payments.GetPaymentForm({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    msgId: messageId,
+    invoice: buildInputInvoice(inputInvoice),
   }));
 
   if (!result) {
     return undefined;
   }
 
-  return buildPaymentForm(result);
+  if (result.photo) {
+    localDb.webDocuments[result.photo.url] = result.photo;
+  }
+
+  return {
+    form: buildPaymentForm(result),
+    invoice: buildApiInvoiceFromForm(result),
+  };
 }
 
 export async function getReceipt(chat: ApiChat, msgId: number) {
@@ -113,4 +115,23 @@ export async function getReceipt(chat: ApiChat, msgId: number) {
   }
 
   return buildReceipt(result);
+}
+
+export async function fetchPremiumPromo() {
+  const result = await invokeRequest(new GramJs.help.GetPremiumPromo());
+  if (!result) return undefined;
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  result.videos.forEach((video) => {
+    if (video instanceof GramJs.Document) {
+      localDb.documents[video.id.toString()] = video;
+    }
+  });
+
+  return {
+    promo: buildApiPremiumPromo(result),
+    users,
+  };
 }

@@ -11,7 +11,7 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
-import { selectIsChatWithSelf } from '../../../global/selectors';
+import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import Loading from '../../ui/Loading';
 import StickerButton from '../../common/StickerButton';
@@ -28,6 +28,7 @@ export type OwnProps = {
 type StateProps = {
   stickers?: ApiSticker[];
   isSavedMessages?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -39,6 +40,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   stickers,
   isSavedMessages,
   onStickerSelect,
+  isCurrentUserPremium,
 }) => {
   const { clearStickersForEmoji } = getActions();
 
@@ -82,6 +84,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
             clickArg={sticker}
             isSavedMessages={isSavedMessages}
             canViewSet
+            isCurrentUserPremium={isCurrentUserPremium}
           />
         ))
       ) : shouldRender ? (
@@ -95,7 +98,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { stickers } = global.stickers.forEmoji;
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
-
-    return { stickers, isSavedMessages };
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    return { stickers, isSavedMessages, isCurrentUserPremium };
   },
 )(StickerTooltip));

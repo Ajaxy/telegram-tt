@@ -9,7 +9,6 @@ import type { InlineBotSettings } from '../../../types';
 
 import { callApi } from '../../../api/gramjs';
 import {
-  selectBot,
   selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList,
   selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser,
 } from '../../selectors';
@@ -78,10 +77,10 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       if (!chat) {
         return;
       }
-
-      actions.getPaymentForm({ chat, messageId });
-      actions.setInvoiceMessageInfo(selectChatMessage(global, chat.id, messageId));
-      actions.openPaymentModal({ chatId: chat.id, messageId });
+      actions.openInvoice({
+        chatId: chat.id,
+        messageId,
+      });
       break;
     }
     case 'game': {
@@ -111,13 +110,11 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       if (!chatId) {
         return;
       }
-      const bot = selectBot(global, chatId);
-      if (!bot) {
-        return;
-      }
+      const message = selectChatMessage(global, chatId, messageId);
+      if (!message?.senderId) return;
       const theme = extractCurrentThemeParams();
       actions.requestSimpleWebView({
-        url, bot, theme, buttonText: button.text,
+        url, botId: message?.senderId, theme, buttonText: button.text,
       });
       break;
     }
@@ -132,18 +129,15 @@ addActionHandler('clickBotInlineButton', (global, actions, payload) => {
       if (!message) {
         return;
       }
-      if (!message.viaBotId && !message.senderId) {
-        return;
-      }
-      const bot = selectBot(global, message.viaBotId! || message.senderId!);
-      if (!bot) {
+      const botId = message.viaBotId || message.senderId;
+      if (!botId) {
         return;
       }
       const theme = extractCurrentThemeParams();
       actions.requestWebView({
         url,
-        bot,
-        peer: chat,
+        botId,
+        peerId: chat.id,
         theme,
         buttonText: button.text,
       });
@@ -367,10 +361,13 @@ addActionHandler('resetInlineBot', (global, actions, payload) => {
 addActionHandler('startBot', async (global, actions, payload) => {
   const { botId, param } = payload;
 
-  const bot = selectUser(global, botId);
+  let bot = selectUser(global, botId);
   if (!bot) {
     return;
   }
+  if (!bot.fullInfo) await callApi('fetchFullUser', { id: bot.id, accessHash: bot.accessHash });
+  bot = selectUser(getGlobal(), botId)!;
+  if (bot.fullInfo?.isBlocked) await callApi('unblockContact', bot.id, bot.accessHash);
 
   await callApi('startBot', {
     bot,
@@ -380,14 +377,17 @@ addActionHandler('startBot', async (global, actions, payload) => {
 
 addActionHandler('requestSimpleWebView', async (global, actions, payload) => {
   const {
-    url, bot, theme, buttonText,
+    url, botId, theme, buttonText,
   } = payload;
 
-  if (!selectIsTrustedBot(global, bot)) {
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  if (!selectIsTrustedBot(global, botId)) {
     setGlobal({
       ...global,
       botTrustRequest: {
-        bot,
+        botId,
         type: 'webApp',
         onConfirm: {
           action: 'requestSimpleWebView',
@@ -408,7 +408,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload) => {
     ...global,
     webApp: {
       url: webViewUrl,
-      bot,
+      botId,
       buttonText,
     },
   });
@@ -416,14 +416,19 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload) => {
 
 addActionHandler('requestWebView', async (global, actions, payload) => {
   const {
-    url, bot, peer, theme, isSilent, buttonText, isFromBotMenu, startParam,
+    url, botId, peerId, theme, isSilent, buttonText, isFromBotMenu, startParam,
   } = payload;
 
-  if (!selectIsTrustedBot(global, bot)) {
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+  const peer = selectChat(global, peerId);
+  if (!peer) return;
+
+  if (!selectIsTrustedBot(global, botId)) {
     setGlobal({
       ...global,
       botTrustRequest: {
-        bot,
+        botId,
         type: 'webApp',
         onConfirm: {
           action: 'requestWebView',
@@ -441,6 +446,7 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
 
   const { chatId, threadId } = currentMessageList;
   const reply = chatId && selectReplyingToId(global, chatId, threadId);
+  const sendAs = selectSendAs(global, chatId);
   const result = await callApi('requestWebView', {
     url,
     bot,
@@ -450,6 +456,7 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
     replyToMessageId: reply || undefined,
     isFromBotMenu,
     startParam,
+    sendAs,
   });
   if (!result) {
     return;
@@ -462,7 +469,7 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
     ...global,
     webApp: {
       url: webViewUrl,
-      bot,
+      botId,
       queryId,
       buttonText,
     },
@@ -471,8 +478,15 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
 
 addActionHandler('prolongWebView', async (global, actions, payload) => {
   const {
-    bot, peer, isSilent, replyToMessageId, queryId,
+    botId, peerId, isSilent, replyToMessageId, queryId,
   } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+  const peer = selectChat(global, peerId);
+  if (!peer) return;
+
+  const sendAs = selectSendAs(global, peerId);
 
   const result = await callApi('prolongWebView', {
     bot,
@@ -480,6 +494,7 @@ addActionHandler('prolongWebView', async (global, actions, payload) => {
     isSilent,
     replyToMessageId,
     queryId,
+    sendAs,
   });
 
   if (!result) {
@@ -503,6 +518,17 @@ addActionHandler('closeWebApp', (global) => {
   return {
     ...global,
     webApp: undefined,
+  };
+});
+
+addActionHandler('setWebAppPaymentSlug', (global, actions, payload) => {
+  if (!global.webApp?.url) return undefined;
+  return {
+    ...global,
+    webApp: {
+      ...global.webApp,
+      slug: payload.slug,
+    },
   };
 });
 
@@ -571,17 +597,12 @@ addActionHandler('callAttachMenuBot', (global, actions, payload) => {
   const {
     chatId, botId, isFromBotMenu, url, startParam,
   } = payload;
-  const chat = selectChat(global, chatId);
-  const bot = selectChatBot(global, botId);
-  if (!chat || !bot) {
-    return undefined;
-  }
   const { attachMenu: { bots } } = global;
   if (!isFromBotMenu && !bots[botId]) {
     return {
       ...global,
       botAttachRequest: {
-        bot,
+        botId,
         chatId,
         startParam,
       },
@@ -590,8 +611,8 @@ addActionHandler('callAttachMenuBot', (global, actions, payload) => {
   const theme = extractCurrentThemeParams();
   actions.requestWebView({
     url,
-    peer: chat,
-    bot,
+    peerId: chatId,
+    botId,
     theme,
     buttonText: '',
     isFromBotMenu,
@@ -605,16 +626,19 @@ addActionHandler('confirmBotAttachRequest', async (global, actions) => {
   const { botAttachRequest } = global;
   if (!botAttachRequest) return;
 
-  const { bot, chatId, startParam } = botAttachRequest;
+  const { botId, chatId, startParam } = botAttachRequest;
 
   setGlobal({
     ...global,
     botAttachRequest: undefined,
   });
 
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
   await toggleBotInAttachMenu(bot, true);
 
-  actions.callAttachMenuBot({ chatId, botId: bot.id, startParam });
+  actions.callAttachMenuBot({ chatId, botId, startParam });
 });
 
 addActionHandler('closeBotAttachRequestModal', (global) => {

@@ -1,0 +1,34 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.sticker {
+  --x: 0px;
+  --y: 0px;
+  --scale: 0;
+  transition: 0.25s ease-in-out transform, 0.25s ease-in-out opacity;
+  position: absolute;
+  transform:
+    translate(var(--x), var(--y))
+    scale(var(--scale));
+  opacity: var(--scale);
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.effect-sticker {
+  composes: sticker;
+  z-index: 2;
+  pointer-events: none;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

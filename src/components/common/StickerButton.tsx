@@ -1,6 +1,6 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -38,6 +38,7 @@ type OwnProps<T> = {
   noContextMenu?: boolean;
   isSavedMessages?: boolean;
   canViewSet?: boolean;
+  isCurrentUserPremium?: boolean;
   observeIntersection: ObserveFn;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
   onFaveClick?: (sticker: ApiSticker) => void;
@@ -60,8 +61,9 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   onFaveClick,
   onUnfaveClick,
   onRemoveRecentClick,
+  isCurrentUserPremium,
 }: OwnProps<T>) => {
-  const { openStickerSet } = getActions();
+  const { openStickerSet, openPremiumModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const lang = useLang();
@@ -81,6 +83,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const isVideo = sticker.isVideo && IS_WEBM_SUPPORTED;
   const videoBlobUrl = useMedia(isVideo && localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
   const canVideoPlay = Boolean(isVideo && videoBlobUrl && shouldPlay);
+  const isPremiumSticker = sticker.hasEffect;
+  const isLocked = !isCurrentUserPremium && isPremiumSticker;
 
   const { transitionClassNames: previewTransitionClassNames } = useShowTransition(
     Boolean(previewBlobUrl || canLottiePlay),
@@ -140,6 +144,10 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const handleClick = () => {
     if (isContextMenuOpen) return;
+    if (isLocked) {
+      openPremiumModal({ initialSection: 'stickers' });
+      return;
+    }
     onClick?.(clickArg);
   };
 
@@ -190,6 +198,58 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const style = (thumbDataUri && !canLottiePlay && !canVideoPlay) ? `background-image: url('${thumbDataUri}');` : '';
 
+  const contextMenuItems = useMemo(() => {
+    const items: ReactNode[] = [];
+    if (noContextMenu) return items;
+
+    if (onUnfaveClick) {
+      items.push(
+        <MenuItem icon="favorite" onClick={handleContextUnfave}>
+          {lang('Stickers.RemoveFromFavorites')}
+        </MenuItem>,
+      );
+    }
+
+    if (onFaveClick) {
+      items.push(
+        <MenuItem icon="favorite" onClick={handleContextFave}>
+          {lang('Stickers.AddToFavorites')}
+        </MenuItem>,
+      );
+    }
+
+    if (!isLocked && onClick) {
+      if (!isSavedMessages) {
+        items.push(<MenuItem onClick={handleSendQuiet} icon="muted">{lang('SendWithoutSound')}</MenuItem>);
+      }
+      items.push(
+        <MenuItem onClick={handleSendScheduled} icon="calendar">
+          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+        </MenuItem>,
+      );
+    }
+
+    if (canViewSet) {
+      items.push(
+        <MenuItem onClick={handleOpenSet} icon="stickers">
+          {lang('ViewPackPreview')}
+        </MenuItem>,
+      );
+    }
+    if (onRemoveRecentClick) {
+      items.push(
+        <MenuItem icon="delete" onClick={handleContextRemoveRecent}>
+          {lang('DeleteFromRecent')}
+        </MenuItem>,
+      );
+    }
+    return items;
+  }, [
+    canViewSet, handleContextFave, handleContextRemoveRecent, handleContextUnfave, handleOpenSet, handleSendQuiet,
+    handleSendScheduled, isLocked, isSavedMessages, lang, onFaveClick, onRemoveRecentClick, onUnfaveClick, onClick,
+    noContextMenu,
+  ]);
+
   return (
     <div
       ref={ref}
@@ -224,6 +284,18 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           onLoad={markLoaded}
         />
       )}
+      {isLocked && (
+        <div
+          className="sticker-locked"
+        >
+          <i className="icon-lock-badge" />
+        </div>
+      )}
+      {isPremiumSticker && !isLocked && (
+        <div className="sticker-premium">
+          <i className="icon-premium" />
+        </div>
+      )}
       {shouldShowCloseButton && (
         <Button
           className="sticker-remove-button"
@@ -234,7 +306,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           <i className="icon-close" />
         </Button>
       )}
-      {!noContextMenu && onClick && contextMenuPosition !== undefined && (
+      {Boolean(contextMenuItems.length) && contextMenuPosition !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
           transformOriginX={transformOriginX}
@@ -247,30 +319,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         >
-          {onUnfaveClick && (
-            <MenuItem icon="favorite" onClick={handleContextUnfave}>
-              {lang('Stickers.RemoveFromFavorites')}
-            </MenuItem>
-          )}
-          {onFaveClick && (
-            <MenuItem icon="favorite" onClick={handleContextFave}>
-              {lang('AddToFavorites')}
-            </MenuItem>
-          )}
-          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="muted">{lang('SendWithoutSound')}</MenuItem>}
-          <MenuItem onClick={handleSendScheduled} icon="calendar">
-            {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
-          </MenuItem>
-          {canViewSet && (
-            <MenuItem onClick={handleOpenSet} icon="stickers">
-              {lang('ViewPackPreview')}
-            </MenuItem>
-          )}
-          {onRemoveRecentClick && (
-            <MenuItem icon="delete" onClick={handleContextRemoveRecent}>
-              {lang('DeleteFromRecent')}
-            </MenuItem>
-          )}
+          {contextMenuItems}
         </Menu>
       )}
     </div>

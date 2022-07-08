@@ -85,4 +85,19 @@
   &--compact &__bubble-small {
     background: var(--color-background-compact-menu-reactions);
   }
+
+  &__blocked-button {
+    width: 2rem !important;
+    height: 2rem !important;
+    margin-left: 0.5rem !important;
+  }
+
+  &--compact &__blocked-button {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
 }

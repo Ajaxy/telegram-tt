@@ -33,7 +33,7 @@ export function renderWaveform(
     ctx.globalAlpha = (i / spikes.length >= progress) ? 0.5 : 1;
     ctx.fillStyle = progress > i / spikes.length ? progressFillStyle : fillStyle;
     const spikeHeight = Math.max(2, HEIGHT * (item / Math.max(1, peak)));
-    roundedRectangle(ctx, i * SPIKE_STEP, height, SPIKE_WIDTH, spikeHeight, SPIKE_RADIUS);
+    roundedRectangle(ctx, i * SPIKE_STEP, (height + spikeHeight) / 2, SPIKE_WIDTH, spikeHeight, SPIKE_RADIUS);
     ctx.fill();
   });
 }

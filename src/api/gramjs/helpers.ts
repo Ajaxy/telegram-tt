@@ -14,30 +14,31 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
   const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
   localDb.messages[messageFullId] = message;
 
-  if (
-    message instanceof GramJs.Message
-    && message.media instanceof GramJs.MessageMediaDocument
-    && message.media.document instanceof GramJs.Document
-  ) {
-    localDb.documents[String(message.media.document.id)] = message.media.document;
-  }
-
-  if (
-    message instanceof GramJs.Message
-    && message.media instanceof GramJs.MessageMediaWebPage
-    && message.media.webpage instanceof GramJs.WebPage
-    && message.media.webpage.document instanceof GramJs.Document
-  ) {
-    localDb.documents[String(message.media.webpage.document.id)] = message.media.webpage.document;
-  }
-
-  if (message instanceof GramJs.Message
-    && message.media instanceof GramJs.MessageMediaGame
-  ) {
-    if (message.media.game.document instanceof GramJs.Document) {
-      localDb.documents[String(message.media.game.document.id)] = message.media.game.document;
+  if (message instanceof GramJs.Message) {
+    if (message.media instanceof GramJs.MessageMediaDocument
+      && message.media.document instanceof GramJs.Document
+    ) {
+      localDb.documents[String(message.media.document.id)] = message.media.document;
     }
-    addPhotoToLocalDb(message.media.game.photo);
+
+    if (message.media instanceof GramJs.MessageMediaWebPage
+      && message.media.webpage instanceof GramJs.WebPage
+      && message.media.webpage.document instanceof GramJs.Document
+    ) {
+      localDb.documents[String(message.media.webpage.document.id)] = message.media.webpage.document;
+    }
+
+    if (message.media instanceof GramJs.MessageMediaGame) {
+      if (message.media.game.document instanceof GramJs.Document) {
+        localDb.documents[String(message.media.game.document.id)] = message.media.game.document;
+      }
+      addPhotoToLocalDb(message.media.game.photo);
+    }
+
+    if (message.media instanceof GramJs.MessageMediaInvoice
+      && message.media.photo) {
+      localDb.webDocuments[String(message.media.photo.url)] = message.media.photo;
+    }
   }
 
   if (message instanceof GramJs.MessageService && 'photo' in message.action) {

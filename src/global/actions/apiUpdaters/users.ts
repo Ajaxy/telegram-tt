@@ -4,7 +4,7 @@ import type { ApiUserStatus } from '../../../api/types';
 
 import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
-import { selectUser } from '../../selectors';
+import { selectIsCurrentUserPremium, selectUser } from '../../selectors';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 
@@ -35,6 +35,9 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     }
 
     case 'updateUser': {
+      if (update.id === global.currentUserId && update.user.isPremium && !selectIsCurrentUserPremium(global)) {
+        actions.openPremiumModal({ isSuccess: true });
+      }
       return updateUser(global, update.id, update.user);
     }
 

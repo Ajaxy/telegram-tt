@@ -6,6 +6,7 @@ import {
   addUsers, updateChat, updateManagement, updateManagementProgress,
 } from '../../reducers';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
+import { migrateChat } from './chats';
 import { isChatBasicGroup } from '../../helpers';
 
 addActionHandler('checkPublicLink', async (global, actions, payload) => {
@@ -33,6 +34,10 @@ addActionHandler('checkPublicLink', async (global, actions, payload) => {
   );
   global = updateManagement(global, chatId, { isUsernameAvailable });
   setGlobal(global);
+
+  if (isUsernameAvailable === undefined) {
+    actions.openLimitReachedModal({ limit: 'channelsPublic' });
+  }
 });
 
 addActionHandler('updatePublicLink', async (global, actions, payload) => {
@@ -48,7 +53,7 @@ addActionHandler('updatePublicLink', async (global, actions, payload) => {
   setGlobal(global);
 
   if (isChatBasicGroup(chat)) {
-    chat = await callApi('migrateChat', chat);
+    chat = await migrateChat(chat);
 
     if (!chat) {
       return;

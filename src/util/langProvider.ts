@@ -209,7 +209,8 @@ function processTemplate(template: string, value: any) {
 }
 
 function processTranslation(langString: ApiLangString | undefined, key: string, value?: any, format?: 'i') {
-  const template = langString ? langString[typeof value === 'number' ? getPluralOption(value) : 'value'] : undefined;
+  const preferedPluralOption = typeof value === 'number' ? getPluralOption(value) : 'value';
+  const template = langString ? (langString[preferedPluralOption] || langString.value) : undefined;
   if (!template || !template.trim()) {
     const parts = key.split('.');
 

@@ -1,0 +1,122 @@
+.root {
+  padding: 0.75rem 0 0.5rem;
+}
+
+.description {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin: 0 1rem;
+}
+.checkout-picture {
+  height: 6rem;
+
+  @supports (aspect-ratio: 1) {
+    margin: 0.25rem 0.75rem 0 0;
+    min-width: 0;
+    width: 100%;
+    max-width: 8rem;
+    height: auto;
+  }
+}
+
+.text {
+  min-width: 0;
+}
+
+.checkout-title {
+  font-size: 1.125rem;
+  line-height: 1.25;
+}
+
+.checkout-description {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+  margin-bottom: 0.25rem;
+}
+
+.price-info {
+  margin: 1rem;
+}
+
+.price-info-item {
+  margin: 1rem 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-content: space-between;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+
+  &-main {
+    color: var(--color-text);
+  }
+
+  &-title {
+    display: flex;
+    flex: 1 auto;
+  }
+}
+
+.invoice-info {
+  border-top: 1px var(--color-borders) solid;
+  padding: 1rem;
+}
+
+.checkout-info-item {
+  display: flex;
+  padding: 0.75rem 0.5rem 1rem;
+  text-align: left;
+}
+
+.checkout-info-item-icon {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  margin-right: 2rem;
+  width: 1.5rem;
+}
+
+.provider {
+  background: no-repeat center;
+  background-size: 2rem;
+  border-radius: 1rem;
+  height: 1.5rem;
+}
+
+.provider.stripe {
+  background-image: url("../../assets/stripe-logo.png");
+}
+
+.provider.smartglocal {
+  background-image: url("../../assets/smartglocal-logo.png");
+}
+
+.checkout-info-item-info {
+  &-title {
+    font-size: 1rem;
+    line-height: 1.4375rem;
+    margin-bottom: 0;
+    font-weight: 400;
+    word-break: break-word;
+    color: var(--color-text);
+    text-transform: capitalize;
+  }
+
+  &-data {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+.tos-checkbox {
+  padding-left: 4rem;
+
+  :global(.Checkbox-main) {
+    &::before,
+    &::after {
+      left: 0.6875rem;
+    }
+  }
+}

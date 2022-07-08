@@ -18,6 +18,7 @@ import {
   DEFAULT_PLAYBACK_RATE,
   ALL_FOLDER_ID,
   ARCHIVED_FOLDER_ID,
+  DEFAULT_LIMITS,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
@@ -184,6 +185,10 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.stickers.greeting = initialState.stickers.greeting;
   }
 
+  if (!cached.stickers.premium) {
+    cached.stickers.premium = initialState.stickers.premium;
+  }
+
   if (!cached.activeDownloads) {
     cached.activeDownloads = {
       byChatId: {},
@@ -259,6 +264,14 @@ function migrateCache(cached: GlobalState, initialState: GlobalState) {
       orderedHashes: [],
     };
   }
+
+  if (!cached.transcriptions) {
+    cached.transcriptions = {};
+  }
+
+  if (cached.appConfig && !cached.appConfig.limits) {
+    cached.appConfig.limits = DEFAULT_LIMITS;
+  }
 }
 
 function updateCache() {
@@ -293,6 +306,7 @@ export function serializeGlobal(global: GlobalState) {
   const reducedGlobal: GlobalState = {
     ...INITIAL_STATE,
     ...pick(global, [
+      'appConfig',
       'authState',
       'authPhoneNumber',
       'authRememberMe',

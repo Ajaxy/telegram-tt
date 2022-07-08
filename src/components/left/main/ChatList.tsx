@@ -1,7 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo, useEffect } from '../../../lib/teact/teact';
+import React, {
+  memo, useMemo, useEffect, useRef,
+} from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
@@ -14,10 +16,12 @@ import {
 import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import { mapValues } from '../../../util/iteratees';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
+
 import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useChatAnimationType } from './hooks';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -34,6 +38,8 @@ type OwnProps = {
   onScreenSelect?: (screen: SettingsScreens) => void;
 };
 
+const INTERSECTION_THROTTLE = 200;
+
 const ChatList: FC<OwnProps> = ({
   folderType,
   folderId,
@@ -42,6 +48,8 @@ const ChatList: FC<OwnProps> = ({
   onScreenSelect,
 }) => {
   const { openChat, openNextChat } = getActions();
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const resolvedFolderId = (
     folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
@@ -113,6 +121,11 @@ const ChatList: FC<OwnProps> = ({
 
   const getAnimationType = useChatAnimationType(orderDiffById);
 
+  const { observe } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE,
+  });
+
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
     const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
@@ -130,6 +143,7 @@ const ChatList: FC<OwnProps> = ({
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
           style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+          observeIntersection={observe}
         />
       );
     });
@@ -138,6 +152,7 @@ const ChatList: FC<OwnProps> = ({
   return (
     <InfiniteScroll
       className="chat-list custom-scroll"
+      ref={containerRef}
       items={viewportIds}
       preloadBackwards={CHAT_LIST_SLICE}
       withAbsolutePositioning

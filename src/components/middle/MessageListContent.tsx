@@ -24,6 +24,7 @@ import ActionMessage from './ActionMessage';
 import { getActions } from '../../global';
 
 interface OwnProps {
+  isCurrentUserPremium?: boolean;
   chatId: string;
   messageIds: number[];
   messageGroups: MessageDateGroup[];
@@ -52,6 +53,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
+  isCurrentUserPremium,
   chatId,
   messageIds,
   messageGroups,
@@ -207,6 +209,7 @@ const MessageListContent: FC<OwnProps> = ({
             isFirstInDocumentGroup={position.isFirstInDocumentGroup}
             isLastInDocumentGroup={position.isLastInDocumentGroup}
             isLastInList={position.isLastInList}
+            memoFirstUnreadIdRef={memoFirstUnreadIdRef}
           />,
           message.id === threadTopMessageId && (
             <div className="local-action-message" key="discussion-started">
@@ -249,7 +252,9 @@ const MessageListContent: FC<OwnProps> = ({
     <div className="messages-container" teactFastList>
       <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />
       {dateGroups.flat()}
-      {isViewportNewest && <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />}
+      {!isCurrentUserPremium && isViewportNewest && (
+        <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
+      )}
       <div
         ref={forwardsTriggerRef}
         key="forwards-trigger"

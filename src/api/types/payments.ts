@@ -1,3 +1,5 @@
+import type { ApiDocument, ApiMessageEntity } from './messages';
+
 export interface ApiShippingAddress {
   streetLine1: string;
   streetLine2: string;
@@ -60,4 +62,13 @@ export interface ApiReceipt {
   credentialsTitle: string;
   shippingPrices?: ApiLabeledPrice[];
   shippingMethod?: string;
+}
+
+export interface ApiPremiumPromo {
+  currency: string;
+  monthlyAmount: string;
+  videoSections: string[];
+  videos: ApiDocument[];
+  statusText: string;
+  statusEntities: ApiMessageEntity[];
 }

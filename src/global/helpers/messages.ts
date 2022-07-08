@@ -14,6 +14,7 @@ import { getUserFullName } from './users';
 import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/environment';
 import { getChatTitle, isUserId } from './chats';
 import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
+import { getGlobal } from '../index';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
@@ -41,6 +42,13 @@ export function parseMessageKey(key: MessageKey) {
 
 export function getMessageOriginalId(message: ApiMessage) {
   return message.previousLocalId || message.id;
+}
+
+export function getMessageTranscription(message: ApiMessage) {
+  const { transcriptionId } = message;
+  const global = getGlobal();
+
+  return transcriptionId && global.transcriptions[transcriptionId].text;
 }
 
 export function getMessageText(message: ApiMessage) {

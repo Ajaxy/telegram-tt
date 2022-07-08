@@ -8,6 +8,7 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
   const buttonTextColor = getPropertyWrapped(style, '--color-white');
   const linkColor = getPropertyWrapped(style, '--color-links');
   const hintColor = getPropertyWrapped(style, '--color-text-secondary');
+  const secondaryBgColor = getPropertyWrapped(style, '--color-background-secondary');
   return {
     bg_color: backgroundColor,
     text_color: textColor,
@@ -15,6 +16,7 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
     link_color: linkColor,
     button_color: buttonColor,
     button_text_color: buttonTextColor,
+    secondary_bg_color: secondaryBgColor,
   };
 }
 

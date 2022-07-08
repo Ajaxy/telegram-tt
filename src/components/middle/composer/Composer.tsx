@@ -19,6 +19,7 @@ import type {
   ApiUser,
   ApiBotCommand,
   ApiBotMenuButton,
+  ApiAttachMenuPeerType,
 } from '../../../api/types';
 import {
   MAIN_THREAD_ID,
@@ -30,7 +31,7 @@ import {
   EDITABLE_INPUT_ID,
   REPLIES_USER_ID,
   SEND_MESSAGE_ACTION_INTERVAL,
-  EDITABLE_INPUT_CSS_SELECTOR,
+  EDITABLE_INPUT_CSS_SELECTOR, FILEPART_SIZE,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -52,6 +53,8 @@ import {
   selectRequestedText,
   selectTheme,
   selectCurrentMessageList,
+  selectIsCurrentUserPremium,
+  selectAttachMenuPeerType,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -72,6 +75,7 @@ import windowSize from '../../../util/windowSize';
 import { isSelectionInsideInput } from './helpers/selection';
 import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 import { getServerTime } from '../../../util/serverTime';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
 
 import useFlag from '../../../hooks/useFlag';
 import usePrevious from '../../../hooks/usePrevious';
@@ -166,8 +170,11 @@ type StateProps =
     editingDraft?: ApiFormattedText;
     requestedText?: string;
     attachMenuBots: GlobalState['attachMenu']['bots'];
-    isPrivateChat?: boolean;
+    attachMenuPeerType?: ApiAttachMenuPeerType;
     theme: ISettings['theme'];
+    fileSizeLimit: number;
+    captionLimit: number;
+    isCurrentUserPremium?: boolean;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -189,7 +196,6 @@ const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 const SELECT_MODE_TRANSITION_MS = 200;
 const MESSAGE_MAX_LENGTH = 4096;
-const CAPTION_MAX_LENGTH = 1024;
 const SENDING_ANIMATION_DURATION = 350;
 // eslint-disable-next-line max-len
 const APPENDIX = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" class="corner"/></g></svg>';
@@ -207,10 +213,12 @@ const Composer: FC<OwnProps & StateProps> = ({
   draft,
   chat,
   isForCurrentMessageList,
+  isCurrentUserPremium,
   connectionState,
   isChatWithBot,
   isChatWithSelf,
   isChannel,
+  fileSizeLimit,
   isRightColumnShown,
   isSelectModeActive,
   isForwarding,
@@ -222,6 +230,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   groupChatMembers,
   topInlineBotIds,
   currentUserId,
+  captionLimit,
   lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
@@ -239,7 +248,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   requestedText,
   botMenuButton,
   attachMenuBots,
-  isPrivateChat,
+  attachMenuPeerType,
   theme,
 }) => {
   const {
@@ -259,6 +268,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     loadFullChat,
     resetOpenChatWithText,
     callAttachMenuBot,
+    openLimitReachedModal,
   } = getActions();
   const lang = useLang();
 
@@ -323,6 +333,19 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
   const [isHoverDisabled, disableHover, enableHover] = useFlag();
+
+  const handleSetAttachments = useCallback(
+    (newValue: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => {
+      const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
+      if (newAttachments && newAttachments.some((l) => l.size > fileSizeLimit)) {
+        openLimitReachedModal({
+          limit: 'uploadMaxFileparts',
+        });
+      } else {
+        setAttachments(newAttachments);
+      }
+    }, [attachments, fileSizeLimit, openLimitReachedModal],
+  );
 
   const {
     startRecordingVoice,
@@ -505,7 +528,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     editingDraft,
   );
   useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage);
-  useClipboardPaste(isForCurrentMessageList, insertTextAndUpdateCursor, setAttachments, editingMessage);
+  useClipboardPaste(isForCurrentMessageList, insertTextAndUpdateCursor, handleSetAttachments, editingMessage);
 
   const handleEmbeddedClear = useCallback(() => {
     if (editingMessage) {
@@ -514,15 +537,15 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [editingMessage, handleEditCancel]);
 
   const handleFileSelect = useCallback(async (files: File[], isQuick: boolean) => {
-    setAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
-  }, []);
+    handleSetAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
+  }, [handleSetAttachments]);
 
   const handleAppendFiles = useCallback(async (files: File[], isQuick: boolean) => {
-    setAttachments([
+    handleSetAttachments([
       ...attachments,
       ...await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))),
     ]);
-  }, [attachments]);
+  }, [attachments, handleSetAttachments]);
 
   const handleClearAttachment = useCallback(() => {
     setAttachments(MEMO_EMPTY_ARRAY);
@@ -557,7 +580,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     // No need to subscribe on updates in `mapStateToProps`
     const { serverTimeOffset } = getGlobal();
 
-    const maxLength = currentAttachments.length ? CAPTION_MAX_LENGTH : MESSAGE_MAX_LENGTH;
+    const maxLength = currentAttachments.length ? captionLimit : MESSAGE_MAX_LENGTH;
     if (text?.length > maxLength) {
       const extraLength = text.length - maxLength;
       showDialog({
@@ -633,7 +656,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       resetComposer();
     });
   }, [
-    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId,
+    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId, captionLimit,
     resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang, htmlRef,
   ]);
 
@@ -972,6 +995,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         threadId={threadId}
         canShowCustomSendMenu={canShowCustomSendMenu}
         attachments={attachments}
+        captionLimit={captionLimit}
         caption={attachments.length ? html : ''}
         groupChatMembers={groupChatMembers}
         currentUserId={currentUserId}
@@ -1028,6 +1052,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClose={closeInlineBotTooltip}
         isSavedMessages={isChatWithSelf}
         canSendGifs={canSendGifs}
+        isCurrentUserPremium={isCurrentUserPremium}
       />
       <BotCommandTooltip
         isOpen={isBotCommandTooltipOpen}
@@ -1080,6 +1105,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                 user={sendAsUser}
                 chat={sendAsChat}
                 size="tiny"
+                noVideo
               />
             </Button>
           )}
@@ -1163,8 +1189,8 @@ const Composer: FC<OwnProps & StateProps> = ({
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             isScheduled={shouldSchedule}
-            isPrivateChat={isPrivateChat}
             attachMenuBots={attachMenuBots}
+            peerType={attachMenuPeerType}
             theme={theme}
           />
           {botKeyboardMessageId && (
@@ -1260,7 +1286,6 @@ export default memo(withGlobal<OwnProps>(
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const isPrivateChat = Boolean(selectUser(global, chatId));
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
     const { language, shouldSuggestStickers } = global.settings.byKey;
@@ -1292,7 +1317,6 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isChatWithBot,
       isChatWithSelf,
-      isPrivateChat,
       isForCurrentMessageList,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, chatId),
       isChannel: chat ? isChatChannel(chat) : undefined,
@@ -1329,7 +1353,11 @@ export default memo(withGlobal<OwnProps>(
       editingDraft,
       requestedText,
       attachMenuBots: global.attachMenu.bots,
+      attachMenuPeerType: selectAttachMenuPeerType(global, chatId),
       theme: selectTheme(global),
+      fileSizeLimit: selectCurrentLimit(global, 'uploadMaxFileparts') * FILEPART_SIZE,
+      captionLimit: selectCurrentLimit(global, 'captionLength'),
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(Composer));

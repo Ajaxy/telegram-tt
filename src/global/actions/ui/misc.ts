@@ -5,7 +5,7 @@ import type { ApiError } from '../../../api/types';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
-  selectBot, selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
+  selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 
@@ -298,14 +298,13 @@ addActionHandler('openGame', (global, actions, payload) => {
   if (!message) return;
 
   const botId = message.viaBotId || message.senderId;
-  const bot = botId && selectBot(global, botId);
-  if (!bot) return;
+  if (!botId) return;
 
-  if (!selectIsTrustedBot(global, bot)) {
+  if (!selectIsTrustedBot(global, botId)) {
     setGlobal({
       ...global,
       botTrustRequest: {
-        bot,
+        botId,
         type: 'game',
         onConfirm: {
           action: 'openGame',
@@ -333,12 +332,39 @@ addActionHandler('closeGame', (global) => {
   };
 });
 
-addActionHandler('requestConfetti', (global) => {
+addActionHandler('requestConfetti', (global, actions, payload) => {
+  const {
+    top, left, width, height,
+  } = payload || {};
   const { animationLevel } = global.settings.byKey;
   if (animationLevel === 0) return undefined;
 
   return {
     ...global,
-    lastConfettiTime: Date.now(),
+    confetti: {
+      lastConfettiTime: Date.now(),
+      top,
+      left,
+      width,
+      height,
+    },
+  };
+});
+
+addActionHandler('openLimitReachedModal', (global, actions, payload) => {
+  const { limit } = payload;
+
+  return {
+    ...global,
+    limitReachedModal: {
+      limit,
+    },
+  };
+});
+
+addActionHandler('closeLimitReachedModal', (global) => {
+  return {
+    ...global,
+    limitReachedModal: undefined,
   };
 });

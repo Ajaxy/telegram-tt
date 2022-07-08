@@ -106,7 +106,9 @@ export function renderTextWithEntities(
     // Render the entity itself
     const newEntity = shouldRenderAsHtml
       ? processEntityAsHtml(entity, entityContent, nestedEntityContent)
-      : processEntity(entity, entityContent, nestedEntityContent, highlight, messageId, isSimple, isProtected);
+      : processEntity(
+        entity, entityContent, nestedEntityContent, highlight, messageId, isSimple, isProtected,
+      );
 
     if (Array.isArray(newEntity)) {
       renderResult.push(...newEntity);

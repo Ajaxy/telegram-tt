@@ -16,7 +16,7 @@ import './Shipping.scss';
 export type OwnProps = {
   state: FormState;
   shippingOptions: ShippingOption[];
-  currency?: string;
+  currency: string;
   dispatch: FormEditDispatch;
 };
 

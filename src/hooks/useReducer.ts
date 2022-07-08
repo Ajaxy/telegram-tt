@@ -1,4 +1,6 @@
-import { useState, useCallback, useRef } from '../lib/teact/teact';
+import { useCallback, useRef } from '../lib/teact/teact';
+
+import useForceUpdate from './useForceUpdate';
 
 export type ReducerAction<Actions> = { type: Actions; payload?: any };
 export type StateReducer<State, Actions> = (state: State, action: ReducerAction<Actions>) => State;
@@ -8,15 +10,17 @@ export default function useReducer<State, Actions>(
   reducer: StateReducer<State, Actions>,
   initialState: State,
 ) {
+  const forceUpdate = useForceUpdate();
   const reducerRef = useRef(reducer);
-  const [state, setState] = useState<State>(initialState);
+  const state = useRef(initialState);
 
   const dispatch = useCallback((action: ReducerAction<Actions>) => {
-    setState((currentState) => reducerRef.current(currentState, action));
-  }, []);
+    state.current = reducerRef.current(state.current, action);
+    forceUpdate();
+  }, [forceUpdate]);
 
   return [
-    state,
+    state.current,
     dispatch,
   ] as [State, Dispatch<Actions>];
 }

@@ -14,6 +14,7 @@ import {
   getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageRoundVideo,
+  getMessageSticker,
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -31,6 +32,7 @@ import VerifiedIcon from '../../common/VerifiedIcon';
 import ListItem from '../../ui/ListItem';
 import Link from '../../ui/Link';
 import FakeIcon from '../../common/FakeIcon';
+import PremiumIcon from '../../common/PremiumIcon';
 
 import './ChatMessage.scss';
 
@@ -57,7 +59,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
 }) => {
   const { focusMessage } = getActions();
 
-  const mediaThumbnail = getMessageMediaThumbDataUri(message);
+  const mediaThumbnail = !getMessageSticker(message) ? getMessageMediaThumbDataUri(message) : undefined;
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
@@ -91,6 +93,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
           <div className="title">
             <h3 dir="auto">{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
             {chat.isVerified && <VerifiedIcon />}
+            {privateChatUser?.isPremium && <PremiumIcon />}
             {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
           </div>
           <div className="message-date">

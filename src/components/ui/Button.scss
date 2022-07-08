@@ -335,4 +335,26 @@
   .emoji {
     vertical-align: -3px;
   }
+
+  &.shiny::before {
+    position: absolute;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent 0%, var(--color-skeleton-foreground) 50%, transparent 100%);
+    animation: wave 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    @keyframes wave {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  }
 }

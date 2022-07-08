@@ -19,6 +19,7 @@ import type {
   ApiVideo,
   ApiThemeParameters,
   ApiPoll,
+  ApiRequestInputInvoice,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -349,6 +350,8 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
     ) || (
       media instanceof GramJs.MessageMediaGame
       && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
+    ) || (
+      media instanceof GramJs.MessageMediaInvoice && media.photo
     )
   );
 }
@@ -524,4 +527,17 @@ export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
     id: BigInt(id),
     accessHash: BigInt(accessHash!),
   });
+}
+
+export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
+  if ('slug' in invoice) {
+    return new GramJs.InputInvoiceSlug({
+      slug: invoice.slug,
+    });
+  } else {
+    return new GramJs.InputInvoiceMessage({
+      peer: buildInputPeer(invoice.chat.id, invoice.chat.accessHash),
+      msgId: invoice.messageId,
+    });
+  }
 }

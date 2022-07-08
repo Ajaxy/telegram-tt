@@ -1,0 +1,61 @@
+.root {
+display: flex;
+  justify-content: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.wrapper {
+  width: 70%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  --y-static: -40%;
+  --y-dynamic: -10%;
+  --scroll-progress-converted: var(--scroll-progress, 0);
+  --abs-scroll-progress-converted: var(--abs-scroll-progress, 0);
+  transform:
+    perspective(200px)
+    translate3d(
+        calc(var(--scroll-progress-converted) * -30%),
+        calc(var(--y-static) + var(--abs-scroll-progress-converted) * var(--y-dynamic)),
+        0
+    )
+    rotateY(calc(var(--scroll-progress-converted) * 40deg));
+  opacity: calc(1 - var(--abs-scroll-progress-converted) * 0.4);
+}
+
+.down {
+  --y-static: 3%;
+  --y-dynamic: 10%;
+}
+
+.root :global(.reverse) {
+  --scroll-progress-converted: calc((1 - var(--scroll-progress, 0)) * -1);
+  --abs-scroll-progress-converted: calc(1 - var(--abs-scroll-progress, 0));
+}
+
+.frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  -webkit-user-drag: none;
+}
+
+.video {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  z-index: 0;
+  padding: 4%;
+  border-radius: 0 0 10% 10%;
+}
+
+.down .video {
+  top: 0;
+  bottom: initial;
+  border-radius: 10% 10% 0 0;
+}

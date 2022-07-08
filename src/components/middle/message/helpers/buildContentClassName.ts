@@ -19,6 +19,7 @@ export function buildContentClassName(
     hasActionButton,
     hasReactions,
     isGeoLiveActive,
+    withVoiceTranscription,
   }: {
     hasReply?: boolean;
     customShape?: boolean | number;
@@ -30,6 +31,7 @@ export function buildContentClassName(
     hasActionButton?: boolean;
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
+    withVoiceTranscription?: boolean;
   } = {},
 ) {
   const {
@@ -68,6 +70,9 @@ export function buildContentClassName(
     classNames.push('audio');
   } else if (voice) {
     classNames.push('voice');
+    if (withVoiceTranscription) {
+      classNames.push('with-voice-transcription');
+    }
   } else if (document) {
     classNames.push('document');
   } else if (contact) {

@@ -1,0 +1,134 @@
+.root {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
+  --premium-feature-background: linear-gradient(65.85deg, #6C93FF -0.24%, #976FFF 53.99%, #DF69D1 110.53%);
+
+  user-select: none;
+}
+
+.root :global(.modal-content) {
+  padding: 0;
+}
+
+.root :global(.modal-dialog) {
+  // The preview must always be a square
+  max-width: 55vh;
+}
+
+.root :global(.modal-dialog), .root :global(.modal-content) {
+  overflow: hidden;
+}
+
+.transition {
+  // TODO Refactor to get rid of unobvious constants
+  height: min(calc(55vh + 41px + 193px), 90vh);
+}
+
+.button {
+  font-weight: 600;
+  background: var(--premium-gradient);
+  font-size: 16px;
+  height: 48px;
+}
+
+.main {
+  padding: 1rem;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin: 1rem;
+}
+
+.header-text {
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.description {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.list {
+  margin-bottom: 80px;
+  width: 100%;
+}
+
+.no-button {
+  margin-bottom: 0;
+}
+
+.header {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-borders);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  height: 56px;
+  padding: 0.5rem;
+  background: var(--color-background);
+  transition: 0.25s ease-out transform;
+}
+
+.hidden-header {
+  transform: translateY(-100%);
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 3;
+}
+
+.premium-header-text {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 0 3rem;
+}
+
+.footer-text {
+  color: var(--color-text-secondary);
+  margin: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.primary-footer-text {
+  color: var(--color-text);
+}
+
+.footer {
+  position: absolute;
+  width: 100%;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-borders);
+  left: 0;
+  bottom: 0;
+  padding: 1rem;
+}
+
+
+@media (max-width: 600px) {
+  .root :global(.modal-dialog) {
+    width: 100%;
+    height: 100%;
+    max-width: 100% !important;
+    border-radius: 0;
+  }
+
+  .root :global(.modal-content) {
+    max-height: 100vh;
+  }
+
+  .root .transition {
+    height: 100%;
+  }
+}

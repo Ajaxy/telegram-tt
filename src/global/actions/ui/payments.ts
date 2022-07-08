@@ -2,22 +2,17 @@ import { addActionHandler } from '../../index';
 
 import { clearPayment, closeInvoice } from '../../reducers';
 
-addActionHandler('openPaymentModal', (global, actions, payload) => {
-  const { chatId, messageId } = payload;
-  return {
+addActionHandler('closePaymentModal', (global) => {
+  const status = global.payment.status;
+  global = clearPayment(global);
+  global = closeInvoice(global);
+  global = {
     ...global,
     payment: {
       ...global.payment,
-      chatId,
-      messageId,
-      isPaymentModalOpen: true,
+      status,
     },
   };
-});
-
-addActionHandler('closePaymentModal', (global) => {
-  global = clearPayment(global);
-  global = closeInvoice(global);
   return global;
 });
 
@@ -28,6 +23,7 @@ addActionHandler('addPaymentError', (global, actions, payload) => {
     ...global,
     payment: {
       ...global.payment,
+      status: 'failed',
       error,
     },
   };

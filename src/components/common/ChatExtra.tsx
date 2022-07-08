@@ -111,7 +111,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           narrow
           isStatic
         >
-          <span className="title" dir="auto">
+          <span className="title word-break" dir="auto">
             {renderText(description, ['br', 'links', 'emoji'])}
           </span>
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>

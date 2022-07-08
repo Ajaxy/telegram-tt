@@ -3,7 +3,7 @@ import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet,
+  ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet, ApiWebDocument,
 } from '../api/types';
 
 export type TextPart = TeactNode;
@@ -86,6 +86,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   timeFormat: TimeFormat;
   wasTimeFormatSetManually: boolean;
   isConnectionStatusMinimized: boolean;
+  shouldArchiveAndMuteNewNonContact?: boolean;
 }
 
 export interface ApiPrivacySettings {
@@ -151,7 +152,7 @@ export interface Receipt {
   credentialsTitle: string;
   shippingPrices?: Price[];
   shippingMethod?: string;
-  photoUrl?: string;
+  photo?: ApiWebDocument;
   text?: string;
   title?: string;
 }

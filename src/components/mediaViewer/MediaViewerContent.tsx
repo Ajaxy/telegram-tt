@@ -23,7 +23,7 @@ import {
   getMessageVideo,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
-  getPhotoFullDimensions,
+  getPhotoFullDimensions, getVideoAvatarMediaHash,
   getVideoDimensions,
   isMessageDocumentPhoto,
   isMessageDocumentVideo,
@@ -31,7 +31,9 @@ import {
 import {
   selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';
-import { AVATAR_FULL_DIMENSIONS, calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
+import {
+  AVATAR_FULL_DIMENSIONS, calculateMediaViewerDimensions, VIDEO_AVATAR_FULL_DIMENSIONS,
+} from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import stopEvent from '../../util/stopEvent';
 
@@ -105,6 +107,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
 
   const isOpen = Boolean(avatarOwner || messageId);
   const isAvatar = Boolean(avatarOwner);
+  const isVideoAvatar = isAvatar && avatarOwner.hasVideoAvatar;
 
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
@@ -114,9 +117,9 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   /* Media data */
   function getMediaHash(isFull?: boolean) {
     if (isAvatar && profilePhotoIndex !== undefined) {
-      const { photos } = avatarOwner!;
-      return photos && photos[profilePhotoIndex]
-        ? `photo${photos[profilePhotoIndex].id}?size=c`
+      const { photos, hasVideoAvatar } = avatarOwner!;
+      const avatarPhoto = photos && photos[profilePhotoIndex];
+      return avatarPhoto ? (hasVideoAvatar ? getVideoAvatarMediaHash(avatarPhoto) : `photo${avatarPhoto.id}?size=c`)
         : getChatAvatarHash(avatarOwner!, isFull ? 'big' : 'normal');
     }
 
@@ -172,19 +175,43 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       dimensions = getVideoDimensions((video || webPageVideo)!)!;
     }
   } else {
-    dimensions = AVATAR_FULL_DIMENSIONS;
+    dimensions = isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
   }
 
   if (isAvatar) {
-    return (
-      <div key={chatId} className="MediaViewerContent">
-        {renderPhoto(
-          fullMediaBlobUrl || previewBlobUrl,
-          calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false),
-          !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
-        )}
-      </div>
-    );
+    if (!isVideoAvatar) {
+      return (
+        <div key={chatId} className="MediaViewerContent">
+          {renderPhoto(
+            fullMediaBlobUrl || previewBlobUrl,
+            calculateMediaViewerDimensions(dimensions, false),
+            !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div key={chatId} className="MediaViewerContent">
+          <VideoPlayer
+            key={messageId}
+            url={localBlobUrl || fullMediaBlobUrl}
+            isGif
+            posterData={bestImageData}
+            posterSize={calculateMediaViewerDimensions(dimensions!, false, true)}
+            loadProgress={loadProgress}
+            fileSize={videoSize!}
+            isMediaViewerOpen={isOpen && isActive}
+            areControlsVisible={!isFooterHidden}
+            toggleControls={toggleControls}
+            noPlay={!isActive}
+            onClose={onClose}
+            isMuted
+            volume={0}
+            playbackRate={1}
+          />
+        </div>
+      );
+    }
   }
 
   if (!message) return undefined;

@@ -1,0 +1,54 @@
+.root :global(.modal-content) {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+}
+
+.root :global(.modal-dialog) {
+  max-width: 22.5rem;
+}
+
+.limit-compare {
+  margin: 2.5rem 0 1.25rem 0;
+  width: 100%;
+}
+
+.limit-badge {
+  background: var(--color-primary);
+  padding: 0.75rem 1.25rem;
+  border-radius: 1.5rem;
+  margin: 1.5rem 0 1.25rem 0;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.limit-value {
+  font-weight: 500;
+  color: var(--color-white);
+}
+
+.limit-icon {
+  margin-inline-end: 0.25rem;
+  font-size: 1.25rem;
+  color: var(--color-white);
+}
+
+.dialog-buttons {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+.subscribe-button {
+  margin-left: 1rem !important;
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
+  background: var(--premium-gradient);
+}
+
+.button-icon {
+  margin-left: 0.75rem;
+  font-size: 1.25rem;
+}

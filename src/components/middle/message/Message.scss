@@ -22,6 +22,7 @@
   --meta-safe-area-size: calc(
     var(--meta-safe-area-base) + var(--meta-safe-author-width) + var(--meta-safe-area-extra-width)
   );
+  --color-voice-transcribe: var(--color-voice-transcribe-button);
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
 
@@ -199,6 +200,7 @@
     --meta-safe-area-base: 3.5rem;
     --deleting-translate-x: 50%;
     --color-text-green: var(--color-accent-own);
+    --color-voice-transcribe: var(--color-voice-transcribe-button-own);
 
     @media (min-width: 1921px) {
       --max-width: 30vw;

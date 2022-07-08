@@ -44,7 +44,7 @@
     &.selected:hover {
       --background-color: var(--color-chat-active) !important;
 
-      .VerifiedIcon {
+      .VerifiedIcon, .PremiumIcon {
         --color-fill: #fff;
         --color-checkmark: var(--color-primary)
       }

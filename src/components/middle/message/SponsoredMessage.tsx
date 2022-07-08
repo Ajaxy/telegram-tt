@@ -7,14 +7,20 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
+import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
 import useLang from '../../../hooks/useLang';
+import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 
 import Button from '../../ui/Button';
+import AboutAdsModal from '../../common/AboutAdsModal.async';
+import SponsoredMessageContextMenuContainer from './SponsoredMessageContextMenuContainer.async';
 
 import './SponsoredMessage.scss';
 
@@ -47,6 +53,8 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   } = getActions();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
   const shouldObserve = Boolean(message);
   const {
@@ -56,6 +64,12 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     debounceMs: INTERSECTION_DEBOUNCE_MS,
     threshold: 1,
   });
+  const {
+    isContextMenuOpen, contextMenuPosition,
+    handleBeforeContextMenu, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(ref, IS_TOUCH_ENV, true, IS_ANDROID);
+  const [isAboutAdsModalOpen, openAboutAdsModal, closeAboutAdsModal] = useFlag(false);
 
   useEffect(() => {
     return shouldObserve ? observeIntersection(contentRef.current!, (target) => {
@@ -64,6 +78,11 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
       }
     }) : undefined;
   }, [chatId, shouldObserve, observeIntersection, viewSponsoredMessage]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    preventMessageInputBlur(e);
+    handleBeforeContextMenu(e);
+  };
 
   const handleClick = useCallback(() => {
     if (!message) return;
@@ -76,7 +95,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
       if (message.startParam) {
         startBot({
-          botId: message.chatId,
+          botId: message.chatId!,
           param: message.startParam,
         });
       }
@@ -88,7 +107,13 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className="SponsoredMessage Message open" key="sponsored-message">
+    <div
+      ref={ref}
+      key="sponsored-message"
+      className="SponsoredMessage Message open"
+      onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
+    >
       <div className="message-content has-shadow has-solid-background" dir="auto">
         <div className="content-inner" dir="auto">
           <div className="message-title" dir="ltr">
@@ -102,7 +127,9 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
             </span>
 
             <span className="MessageMeta" dir="ltr">
-              <span className="message-signature">{lang('SponsoredMessage')}</span>
+              <span className="message-signature">
+                {message.isRecommended ? lang('Message.RecommendedLabel') : lang('SponsoredMessage')}
+              </span>
             </span>
           </p>
 
@@ -113,6 +140,20 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           </Button>
         </div>
       </div>
+      {contextMenuPosition && (
+        <SponsoredMessageContextMenuContainer
+          isOpen={isContextMenuOpen}
+          anchor={contextMenuPosition}
+          message={message!}
+          onAboutAds={openAboutAdsModal}
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+        />
+      )}
+      <AboutAdsModal
+        isOpen={isAboutAdsModalOpen}
+        onClose={closeAboutAdsModal}
+      />
     </div>
   );
 };

@@ -1,0 +1,32 @@
+.root {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   height: 100%;
+  overflow: hidden;
+  position: relative;
+ }
+
+.sticker {
+  --x: 0px;
+  --y: 0px;
+  transition: 0.25s cubic-bezier(0.5,0.45,0.28,1.4) transform, 0.25s ease-in-out opacity;
+  position: absolute;
+  transform: translate(var(--x), var(--y)) scale(var(--opacity));
+  opacity: var(--opacity);
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.effect-sticker {
+  composes: sticker;
+  z-index: 2;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
