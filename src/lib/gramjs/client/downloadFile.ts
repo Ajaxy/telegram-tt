@@ -35,6 +35,7 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
+const MAX_BUFFER_SAFE_SIZE = 2000 * 1024 * 1024;
 
 // when the sender requests hangs for 60 second we will reimport
 const SENDER_TIMEOUT = 60 * 1000;
@@ -65,6 +66,58 @@ class Foreman {
 
         if (this.deferred && (this.activeWorkers <= this.maxWorkers)) {
             this.deferred.resolve();
+        }
+    }
+}
+
+class FileView {
+    private type: 'memory' | 'opfs';
+
+    private size?: number;
+
+    private buffer?: Buffer;
+
+    private largeFile?: FileSystemFileHandle;
+
+    private largeFileAccessHandle?: FileSystemSyncAccessHandle;
+
+    constructor(size?: number) {
+        this.size = size;
+        this.type = (size && size > MAX_BUFFER_SAFE_SIZE) ? 'opfs' : 'memory';
+    }
+
+    async init() {
+        if (this.type === 'opfs') {
+            if (!FileSystemFileHandle?.prototype.createSyncAccessHandle) {
+                throw new Error('`createSyncAccessHandle` is not available. Cannot download files larger than 2GB.');
+            }
+            const directory = await navigator.storage.getDirectory();
+            const downloadsFolder = await directory.getDirectoryHandle('downloads', { create: true });
+            this.largeFile = await downloadsFolder.getFileHandle(Math.random().toString(), { create: true });
+            this.largeFileAccessHandle = await this.largeFile.createSyncAccessHandle();
+        } else {
+            this.buffer = this.size ? Buffer.alloc(this.size) : Buffer.alloc(0);
+        }
+    }
+
+    write(data: Uint8Array, offset: number) {
+        if (this.type === 'opfs') {
+            this.largeFileAccessHandle!.write(data, { at: offset });
+        } else if (this.size) {
+            for (let i = 0; i < data.length; i++) {
+                if (offset + i >= this.buffer!.length) return;
+                this.buffer!.writeUInt8(data[i], offset + i);
+            }
+        } else {
+            this.buffer = Buffer.concat([this.buffer!, data]);
+        }
+    }
+
+    getData(): Promise<Buffer | File> {
+        if (this.type === 'opfs') {
+            return this.largeFile!.getFile();
+        } else {
+            return Promise.resolve(this.buffer!);
         }
     }
 }
@@ -118,6 +171,7 @@ async function downloadFile2(
     client._log.info(`Downloading file in chunks of ${partSize} bytes`);
 
     const foreman = new Foreman(workers);
+    const fileView = new FileView(end - start + 1);
     const promises: Promise<any>[] = [];
     let offset = start;
     // Used for files with unknown size and for manual cancellations
@@ -130,6 +184,9 @@ async function downloadFile2(
 
     // Preload sender
     await client.getSender(dcId);
+
+    // Allocate memory
+    await fileView.init();
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -188,7 +245,9 @@ async function downloadFile2(
 
                     foreman.releaseWorker();
 
-                    return result.bytes;
+                    fileView.write(result.bytes, offsetMemo - start);
+
+                    return;
                 } catch (err) {
                     if (sender && !sender.isConnected()) {
                         await sleep(DISCONNECT_SLEEP);
@@ -212,8 +271,6 @@ async function downloadFile2(
             break;
         }
     }
-    const results = await Promise.all(promises);
-    const buffers = results.filter(Boolean);
-    const totalLength = end ? (end + 1) - start : undefined;
-    return Buffer.concat(buffers, totalLength);
+    await Promise.all(promises);
+    return fileView.getData();
 }
