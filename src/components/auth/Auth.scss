@@ -34,7 +34,7 @@
     background-size: 100%;
   }
 
-  h2 {
+  h1 {
     font-size: 1.25rem;
     line-height: 1;
 
@@ -82,7 +82,7 @@
 
 #auth-code-form,
 #auth-password-form {
-  h2 {
+  h1 {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -159,8 +159,9 @@
     overflow: hidden;
   }
 
-  h3 {
+  h1 {
     margin: 1.5rem 0 1rem 0;
+    font-size: 1.25rem;
   }
 
   ol {
