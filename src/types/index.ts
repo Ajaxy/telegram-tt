@@ -224,6 +224,7 @@ export enum SettingsScreens {
   PasscodeChangePasscodeConfirm,
   PasscodeTurnOff,
   PasscodeCongratulations,
+  Experimental,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (

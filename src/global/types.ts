@@ -596,6 +596,7 @@ export type GlobalState = {
     bots: Record<string, ApiAttachMenuBot>;
   };
 
+  lastConfettiTime?: number;
   urlAuth?: {
     button?: {
       chatId: string;
@@ -683,6 +684,20 @@ export interface ActionPayloads {
   readAllMentions: never;
   markMentionsRead: {
     messageIds: number[];
+  };
+
+  sendPollVote: {
+    chatId: string;
+    messageId: number;
+    options: string[];
+  };
+  cancelPollVote: {
+    chatId: string;
+    messageId: number;
+  };
+  closePoll: {
+    chatId: string;
+    messageId: number;
   };
 
   // Media Viewer & Audio Player
@@ -909,6 +924,7 @@ export interface ActionPayloads {
     isQuiz?: boolean;
   };
   closePollModal: never;
+  requestConfetti: never;
 
   openUrl: {
     url: string;
@@ -977,7 +993,7 @@ export type NonTypedActionNames = (
   'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' | 'editChatFolders' | 'toggleIsProtected' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' |
+  'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' |
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |

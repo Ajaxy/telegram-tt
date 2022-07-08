@@ -54,14 +54,7 @@
       &::before {
         left: 0.125rem;
         background-color: var(--background-color);
-
-        .theme-dark & {
-          --color-borders: var(--color-borders-input);
-        }
-
-        .Message.own & {
-          --color-borders: var(--accent-color);
-        }
+        --color-borders-input: var(--secondary-color);
       }
 
       &::after {

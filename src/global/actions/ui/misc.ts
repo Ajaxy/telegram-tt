@@ -332,3 +332,13 @@ addActionHandler('closeGame', (global) => {
     openedGame: undefined,
   };
 });
+
+addActionHandler('requestConfetti', (global) => {
+  const { animationLevel } = global.settings.byKey;
+  if (animationLevel === 0) return undefined;
+
+  return {
+    ...global,
+    lastConfettiTime: Date.now(),
+  };
+});

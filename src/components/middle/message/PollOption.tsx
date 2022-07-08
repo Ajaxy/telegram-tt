@@ -33,7 +33,7 @@ const PollOption: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const lineRef = useRef<HTMLDivElement>(null);
   const lineWidth = result ? getPercentage(result.votersCount, maxVotersCount || 0) : 0;
-  const isAnimationDoesNotStart = finalPercent < answerPercent;
+  const isAnimationDoesNotStart = finalPercent !== answerPercent;
 
   useEffect(() => {
     if (shouldAnimate) {

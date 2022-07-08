@@ -27,6 +27,7 @@ import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
 import SettingsQuickReaction from './SettingsQuickReaction';
 import SettingsPasscode from './passcode/SettingsPasscode';
+import SettingsExperimental from './SettingsExperimental';
 
 import './Settings.scss';
 
@@ -236,6 +237,10 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Language:
         return (
           <SettingsLanguage isActive={isScreenActive} onReset={handleReset} />
+        );
+      case SettingsScreens.Experimental:
+        return (
+          <SettingsExperimental isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.GeneralChatBackground:
         return (

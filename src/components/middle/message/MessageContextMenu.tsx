@@ -50,6 +50,8 @@ type OwnProps = {
   isPrivate?: boolean;
   canDownload?: boolean;
   canSaveGif?: boolean;
+  canRevote?: boolean;
+  canClosePoll?: boolean;
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
   seenByRecentUsers?: ApiUser[];
@@ -72,6 +74,8 @@ type OwnProps = {
   onCopyNumber?: () => void;
   onDownload?: () => void;
   onSaveGif?: () => void;
+  onCancelVote?: () => void;
+  onClosePoll?: () => void;
   onShowSeenBy?: () => void;
   onShowReactors?: () => void;
   onSendReaction: (reaction: string | undefined, x: number, y: number) => void;
@@ -104,6 +108,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canSelect,
   canDownload,
   canSaveGif,
+  canRevote,
+  canClosePoll,
   isDownloading,
   canShowSeenBy,
   canShowReactionsCount,
@@ -128,6 +134,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyNumber,
   onDownload,
   onSaveGif,
+  onCancelVote,
+  onClosePoll,
   onShowSeenBy,
   onShowReactors,
   onSendReaction,
@@ -260,6 +268,8 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
         {canSaveGif && <MenuItem icon="gifs" onClick={onSaveGif}>{lang('lng_context_save_gif')}</MenuItem>}
+        {canRevote && <MenuItem icon="revote" onClick={onCancelVote}>{lang('lng_polls_retract')}</MenuItem>}
+        {canClosePoll && <MenuItem icon="stop" onClick={onClosePoll}>{lang('lng_polls_stop')}</MenuItem>}
         {canDownload && (
           <MenuItem icon="download" onClick={onDownload}>
             {isDownloading ? lang('lng_context_cancel_download') : lang('lng_media_download')}

@@ -62,6 +62,7 @@ import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 import WebAppModal from './WebAppModal.async';
 import BotTrustModal from './BotTrustModal.async';
 import BotAttachModal from './BotAttachModal.async';
+import ConfettiContainer from './ConfettiContainer';
 import UrlAuthModal from './UrlAuthModal.async';
 
 import './Main.scss';
@@ -392,6 +393,7 @@ const Main: FC<StateProps> = ({
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />
       <DownloadManager />
+      <ConfettiContainer />
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />

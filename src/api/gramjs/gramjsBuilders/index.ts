@@ -18,6 +18,7 @@ import type {
   ApiSticker,
   ApiVideo,
   ApiThemeParameters,
+  ApiPoll,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -194,6 +195,27 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
       solution,
       solutionEntities,
     }),
+  });
+}
+
+export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
+  return new GramJs.InputMediaPoll({
+    poll: new GramJs.Poll({
+      id: BigInt(poll.id),
+      publicVoters: poll.summary.isPublic,
+      question: poll.summary.question,
+      answers: poll.summary.answers.map(({ text, option }) => {
+        return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+      }),
+      quiz: poll.summary.quiz,
+      multipleChoice: poll.summary.multipleChoice,
+      closeDate: poll.summary.closeDate,
+      closePeriod: poll.summary.closePeriod,
+      closed: shouldClose ? true : poll.summary.closed,
+    }),
+    correctAnswers: poll.results.results?.filter((o) => o.isCorrect).map((o) => deserializeBytes(o.option)),
+    solution: poll.results.solution,
+    solutionEntities: poll.results.solutionEntities?.map(buildMtpMessageEntity),
   });
 }
 

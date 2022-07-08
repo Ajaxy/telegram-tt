@@ -742,7 +742,7 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
 
 export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['results'] {
   const {
-    results: rawResults, totalVoters, recentVoters, solution, solutionEntities: entities,
+    results: rawResults, totalVoters, recentVoters, solution, solutionEntities: entities, min,
   } = pollResults;
   const results = rawResults && rawResults.map(({
     option, chosen, correct, voters,
@@ -754,6 +754,7 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
   }));
 
   return {
+    isMin: min,
     totalVoters,
     recentVoterIds: recentVoters?.map((id) => buildApiPeerId(id, 'user')),
     results,
