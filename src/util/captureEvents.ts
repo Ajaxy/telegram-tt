@@ -1,4 +1,5 @@
 import { IS_IOS } from './environment';
+import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';
 
@@ -10,8 +11,8 @@ export enum SwipeDirection {
 }
 
 interface CaptureOptions {
-  onCapture?: (e: MouseEvent | TouchEvent) => void;
-  onRelease?: (e: MouseEvent | TouchEvent) => void;
+  onCapture?: (e: MouseEvent | TouchEvent | WheelEvent) => void;
+  onRelease?: (e: MouseEvent | TouchEvent | WheelEvent) => void;
   onDrag?: (
     e: MouseEvent | TouchEvent | WheelEvent,
     captureEvent: MouseEvent | TouchEvent | WheelEvent,
@@ -41,7 +42,7 @@ interface CaptureOptions {
     currentCenterY: number;
   }) => void;
   onClick?: (e: MouseEvent | TouchEvent) => void;
-  onDoubleClick?: (e: MouseEvent | RealTouchEvent, params: { centerX: number; centerY: number }) => void;
+  onDoubleClick?: (e: MouseEvent | RealTouchEvent | WheelEvent, params: { centerX: number; centerY: number }) => void;
   excludedClosestSelector?: string;
   selectorToPreventScroll?: string;
   withNativeDrag?: boolean;
@@ -68,6 +69,8 @@ type TSwipeAxis =
 export const IOS_SCREEN_EDGE_THRESHOLD = 20;
 const MOVED_THRESHOLD = 15;
 const SWIPE_THRESHOLD = 50;
+const RELEASE_WHEEL_ZOOM_DELAY = 150;
+const RELEASE_WHEEL_DRAG_DELAY = 150;
 
 function getDistance(a: Touch, b?: Touch) {
   if (!b) return 0;
@@ -82,6 +85,12 @@ function getTouchCenter(a: Touch, b: Touch) {
 }
 
 let lastClickTime = 0;
+const lethargy = new Lethargy({
+  stability: 5,
+  sensitivity: 25,
+  tolerance: 0.6,
+  delay: 150,
+});
 
 export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | WheelEvent | undefined;
@@ -317,7 +326,55 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     return processSwipe(e, axis, dragOffsetX, dragOffsetY, options.onSwipe!);
   }
 
-  const releaseWheel = debounce(onRelease, 100, false);
+  const releaseWheelDrag = debounce(onRelease, RELEASE_WHEEL_DRAG_DELAY, false);
+  const releaseWheelZoom = debounce(onRelease, RELEASE_WHEEL_ZOOM_DELAY, false);
+
+  function onWheelCapture(e: WheelEvent) {
+    if (hasMoved) return;
+    onCapture(e);
+    hasMoved = true;
+    initialTouchCenter = { x: e.x, y: e.y };
+  }
+
+  function onWheelZoom(e: WheelEvent) {
+    if (!options.onZoom) return;
+    onWheelCapture(e);
+    const dragOffsetX = e.x - initialTouchCenter.x;
+    const dragOffsetY = e.y - initialTouchCenter.y;
+    const delta = clamp(e.deltaY, -25, 25);
+    wheelZoom -= delta * 0.01;
+    wheelZoom = clamp(wheelZoom, minZoom * 0.5, maxZoom * 3);
+    options.onZoom(e, {
+      zoom: round(wheelZoom, 2),
+      initialCenterX: initialTouchCenter.x,
+      initialCenterY: initialTouchCenter.y,
+      dragOffsetX,
+      dragOffsetY,
+      currentCenterX: e.x,
+      currentCenterY: e.y,
+    });
+    releaseWheelZoom(e);
+  }
+
+  function onWheelDrag(e: WheelEvent) {
+    if (!options.onDrag) return;
+    onWheelCapture(e);
+    // Ignore wheel inertia if drag is canceled in this direction
+    if (!isDragCanceled.x || Math.sign(initialDragOffset.x) === Math.sign(e.deltaX)) {
+      initialDragOffset.x -= e.deltaX;
+    }
+    if (!isDragCanceled.y || Math.sign(initialDragOffset.y) === Math.sign(e.deltaY)) {
+      initialDragOffset.y -= e.deltaY;
+    }
+    const { x, y } = initialDragOffset;
+    options.onDrag(e, captureEvent!, {
+      dragOffsetX: x,
+      dragOffsetY: y,
+    }, (dx, dy) => {
+      isDragCanceled = { x: dx, y: dy };
+    });
+    releaseWheelDrag(e);
+  }
 
   function onWheel(e: WheelEvent) {
     if (!options.onZoom && !options.onDrag) return;
@@ -329,56 +386,27 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
     e.preventDefault();
     e.stopPropagation();
-    if (!hasMoved) {
-      onCapture(e);
-      hasMoved = true;
-      initialTouchCenter = {
-        x: e.x,
-        y: e.y,
-      };
-    }
     const { doubleTapZoom = 3 } = options;
     if (options.onDoubleClick && Object.is(e.deltaX, -0) && Object.is(e.deltaY, -0) && e.ctrlKey) {
+      onWheelCapture(e);
       wheelZoom = wheelZoom > 1 ? 1 : doubleTapZoom;
       options.onDoubleClick(e, { centerX: e.pageX, centerY: e.pageY });
       hasMoved = false;
       return;
     }
     const metaKeyPressed = e.metaKey || e.ctrlKey || e.shiftKey;
-    if (options.onZoom && metaKeyPressed) {
-      isZooming = true;
-      const dragOffsetX = e.x - initialTouchCenter.x;
-      const dragOffsetY = e.y - initialTouchCenter.y;
-      const delta = clamp(e.deltaY, -25, 25);
-      wheelZoom -= delta * 0.01;
-      wheelZoom = clamp(wheelZoom, minZoom * 0.5, maxZoom * 3);
-      options.onZoom(e, {
-        zoom: round(wheelZoom, 2),
-        initialCenterX: initialTouchCenter.x,
-        initialCenterY: initialTouchCenter.y,
-        dragOffsetX,
-        dragOffsetY,
-        currentCenterX: e.x,
-        currentCenterY: e.y,
-      });
+    if (metaKeyPressed) {
+      onWheelZoom(e);
     }
-    if (options.onDrag && !metaKeyPressed && !isZooming) {
-      // Ignore wheel inertia if drag is canceled in this direction
-      if (!isDragCanceled.x || Math.sign(initialDragOffset.x) === Math.sign(e.deltaX)) {
-        initialDragOffset.x -= e.deltaX;
+    if (!metaKeyPressed && !isZooming) {
+      // Check if this event produced by user scroll and not by inertia
+      const isUserEvent = lethargy.check(e);
+      if (wheelZoom !== 1) {
+        onWheelDrag(e);
+      } else if (isUserEvent) {
+        onWheelDrag(e);
       }
-      if (!isDragCanceled.y || Math.sign(initialDragOffset.y) === Math.sign(e.deltaY)) {
-        initialDragOffset.y -= e.deltaY;
-      }
-      const { x, y } = initialDragOffset;
-      options.onDrag(e, captureEvent!, {
-        dragOffsetX: x,
-        dragOffsetY: y,
-      }, (dx, dy) => {
-        isDragCanceled = { x: dx, y: dy };
-      });
     }
-    releaseWheel(e);
   }
 
   element.addEventListener('wheel', onWheel);
