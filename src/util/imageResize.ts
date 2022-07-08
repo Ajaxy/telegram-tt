@@ -1,3 +1,5 @@
+import { getAverageColor, isDarkColor } from './colors';
+
 export function scaleImage(image: string | Blob, ratio: number, outputType: string = 'image/png'): Promise<string> {
   const url = image instanceof Blob ? URL.createObjectURL(image) : image;
   const img = new Image();
@@ -53,15 +55,20 @@ async function scale(
       if (bitmap.height !== height || bitmap.width !== width) {
         throw new Error('Image bitmap resize not supported!'); // FF93 added support for options, but not resize
       }
+      const averageColor = await getAverageColor(img.src);
+      const fillColor = isDarkColor(averageColor) ? '#fff' : '#000';
       return await new Promise((res) => {
         const canvas = document.createElement('canvas');
         canvas.width = bitmap.width;
         canvas.height = bitmap.height;
+        const ctx2D = canvas.getContext('2d')!;
+        ctx2D.fillStyle = fillColor;
+        ctx2D.fillRect(0, 0, canvas.width, canvas.height);
         const ctx = canvas.getContext('bitmaprenderer');
         if (ctx) {
           ctx.transferFromImageBitmap(bitmap);
         } else {
-          canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+          ctx2D.drawImage(bitmap, 0, 0);
         }
         canvas.toBlob(res, outputType);
       });

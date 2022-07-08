@@ -171,6 +171,7 @@ export async function getAverageColor(url: string): Promise<[number, number, num
 
   // eslint-disable-next-line no-cond-assign
   while ((i += blockSize * 4) < length) {
+    if (data.data[i + 3] === 0) continue; // Ignore fully transparent pixels
     ++count;
     rgb[0] += data.data[i];
     rgb[1] += data.data[i + 1];
@@ -182,6 +183,12 @@ export async function getAverageColor(url: string): Promise<[number, number, num
   rgb[2] = Math.floor(rgb[2] / count);
 
   return rgb;
+}
+
+export function isDarkColor(rgbColor: [number, number, number]) {
+  const [r, g, b] = rgbColor;
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luma < 128;
 }
 
 // eslint-disable-next-line max-len
