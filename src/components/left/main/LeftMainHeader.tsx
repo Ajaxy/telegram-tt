@@ -11,8 +11,6 @@ import {
   ANIMATION_LEVEL_MAX,
   APP_NAME, APP_VERSION,
   BETA_CHANGELOG_URL,
-  BETA_DISCUSSION_CHAT_EN,
-  BETA_DISCUSSION_CHAT_RU,
   DEBUG,
   FEEDBACK_URL,
   IS_BETA,
@@ -211,14 +209,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     window.open(BETA_CHANGELOG_URL, '_blank', 'noopener');
   }, []);
 
-  const handleRuDiscussionClick = useCallback(() => {
-    openChatByUsername({ username: BETA_DISCUSSION_CHAT_RU });
-  }, [openChatByUsername]);
-
-  const handleEnDiscussionClick = useCallback(() => {
-    openChatByUsername({ username: BETA_DISCUSSION_CHAT_EN });
-  }, [openChatByUsername]);
-
   const handleSwitchToWebK = useCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
@@ -315,26 +305,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             Report Bug
           </MenuItem>
           {IS_BETA && (
-            <>
-              <MenuItem
-                icon="permissions"
-                onClick={handleChangelogClick}
-              >
-                Beta Changelog
-              </MenuItem>
-              <MenuItem
-                icon="comments"
-                onClick={handleRuDiscussionClick}
-              >
-                Beta Discussion (ru)
-              </MenuItem>
-              <MenuItem
-                icon="comments"
-                onClick={handleEnDiscussionClick}
-              >
-                Beta Discussion (en)
-              </MenuItem>
-            </>
+            <MenuItem
+              icon="permissions"
+              onClick={handleChangelogClick}
+            >
+              Beta Changelog
+            </MenuItem>
           )}
           {withOtherVersions && (
             <>

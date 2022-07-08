@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const Telegraph = require('telegraph-node');
 const { JSDOM } = require('jsdom');
 const { gitlogPromise } = require('gitlog');
@@ -16,10 +17,12 @@ const gitOptions = {
 
 const pageTemplate = `
 <body>\
+    <aside><img src="https://webz.dev/icon-dev-512x512.png" /></aside>
     <h3>Commits since ${version}</h3>\
-    <blockquote>This list is automatically updated when a new commit pushed to the beta repo</blockquote>\
+    <p><i>This list is automatically updated when a new commit pushed to the beta repo</i></p>\
     <ul id="list"></ul>\
-    <blockquote>Last updated ${new Date().toLocaleDateString('en-CA')}</blockquote>\
+    <aside><a href="https://t.me/webzchat">WebZ Discussion</a> <b>|</b> <a href="https://t.me/webzcommentsru">WebZ Обсуждение</a></aside>\
+    <aside><i>Last update: ${new Date().toLocaleDateString('en-CA')}</i></aside>\
 </body>
 `.trim();
 
