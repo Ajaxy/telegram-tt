@@ -30,7 +30,7 @@
   }
 
   .Transition {
-    height: 25rem;
+    height: min(25rem, 60vh);
   }
 
   .empty-content {
@@ -54,7 +54,7 @@
   }
 
   .footer {
-    position: absolute;
+    position: relative;
     bottom: 0;
     border-bottom-left-radius: var(--border-radius-default-small);
     border-bottom-right-radius: var(--border-radius-default-small);
@@ -75,8 +75,7 @@
 
   .modal-content {
     padding: 0;
-    overflow: auto;
-    overflow: overlay;
+    overflow: hidden;
   }
 }
 

@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import { formatCardExpiry } from '../middle/helpers/inputFormatters';
 
@@ -16,33 +16,27 @@ export type OwnProps = {
 
 const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
   const lang = useLang();
-  // eslint-disable-next-line no-null/no-null
-  const expiryInputRef = useRef<HTMLInputElement>(null);
-
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Backspace' && value.charAt(value.length - 1) === '/') {
-      const newValue = value.slice(0, value.length - 1);
-      if (expiryInputRef.current) {
-        expiryInputRef.current.value = newValue;
-      }
-    }
-  }, [value]);
 
   const handleChange = useCallback((e) => {
-    onChange(formatCardExpiry(e.target.value));
-  }, [onChange]);
+    const newValue = e.target.value;
+    // Allow deleting separator
+    if (value.endsWith('/') && value.length > newValue.length) {
+      onChange(newValue);
+    } else {
+      onChange(formatCardExpiry(e.target.value));
+    }
+  }, [onChange, value]);
 
   return (
     <InputText
       label={lang('PaymentCardExpireDate')}
-      ref={expiryInputRef}
       onChange={handleChange}
-      onKeyDown={handleKeyDown}
       value={value}
       error={error}
       inputMode="numeric"
       tabIndex={0}
       maxLength={MAX_FIELD_LENGTH}
+      teactExperimentControlled
     />
   );
 };

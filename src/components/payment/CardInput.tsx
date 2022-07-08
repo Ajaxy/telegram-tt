@@ -42,10 +42,7 @@ const CardInput : FC<OwnProps> = ({ value, error, onChange }) => {
     const newCardType = detectCardType(e.target.value);
     setCardType(newCardType);
     onChange(newValue);
-    if (cardNumberRef.current) {
-      cardNumberRef.current.value = newValue;
-    }
-  }, [onChange, cardNumberRef]);
+  }, [onChange]);
 
   const cardIcon = getCardIcon(cardType);
 
@@ -61,6 +58,7 @@ const CardInput : FC<OwnProps> = ({ value, error, onChange }) => {
         error={error}
         tabIndex={0}
         maxLength={CARD_NUMBER_MAX_LENGTH}
+        teactExperimentControlled
       />
       <span className="right-addon">{cardIcon}</span>
     </div>
