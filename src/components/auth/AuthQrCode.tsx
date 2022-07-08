@@ -142,7 +142,7 @@ const AuthCode: FC<StateProps> = ({
           </div>
           {!isQrMounted && <div className="qr-loading"><Loading /></div>}
         </div>
-        <h3>{lang('Login.QR.Title')}</h3>
+        <h1>{lang('Login.QR.Title')}</h1>
         <ol>
           <li><span>{lang('Login.QR.Help1')}</span></li>
           <li><span>{renderText(lang('Login.QR2.Help2'), ['simple_markdown'])}</span></li>

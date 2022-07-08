@@ -131,7 +131,8 @@ module.exports = (env = {}, argv = {}) => {
       )] : []),
       new HtmlWebpackPlugin({
         appName: process.env.APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
-        appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : './apple-touch-icon-dev',
+        appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
+        mainIcon: process.env.APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({

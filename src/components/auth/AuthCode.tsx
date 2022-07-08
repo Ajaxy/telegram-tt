@@ -91,7 +91,7 @@ const AuthCode: FC<StateProps> = ({
           isTracking={isTracking}
           trackingDirection={trackingDirection}
         />
-        <h2>
+        <h1>
           {authPhoneNumber}
           <div
             className="auth-number-edit"
@@ -102,7 +102,7 @@ const AuthCode: FC<StateProps> = ({
           >
             <i className="icon-edit" />
           </div>
-        </h2>
+        </h1>
         <p className="note">
           {renderText(lang(authIsCodeViaApp ? 'SentAppCode' : 'Login.JustSentSms'), ['simple_markdown'])}
         </p>

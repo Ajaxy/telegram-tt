@@ -34,6 +34,20 @@ body {
   }
 }
 
+noscript {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  .nojs-video {
+    pointer-events: none;
+    &::-webkit-media-controls {
+      display: none;
+    }
+  }
+}
+
 body.is-ios,
 body.is-macos {
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
