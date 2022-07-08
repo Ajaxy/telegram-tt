@@ -88,6 +88,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
       openLimitReachedModal({ limit: 'channelsPublic' });
       const radioGroup = e.currentTarget.closest('.radio-group') as HTMLDivElement;
       // Patch for Teact bug with controlled inputs
+      // TODO Teact support added, this can now be removed
       (radioGroup.querySelector('[value=public]') as HTMLInputElement).checked = false;
       (radioGroup.querySelector('[value=private]') as HTMLInputElement).checked = true;
       return;
