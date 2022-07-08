@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { LAYERS_ANIMATION_NAME } from '../../util/environment';
+import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
@@ -321,9 +321,15 @@ const LeftColumn: FC<StateProps> = ({
     openChat({ id: currentUserId });
   }, [currentUserId, openChat]);
 
+  const handleHotkeySettings = useCallback((e: KeyboardEvent) => {
+    e.preventDefault();
+    setContent(LeftColumnContent.Settings);
+  }, []);
+
   useHotkeys({
-    'mod+shift+F': handleHotkeySearch,
-    'mod+shift+S': handleHotkeySavedMessages,
+    'Mod+Shift+F': handleHotkeySearch,
+    'Mod+Shift+S': handleHotkeySavedMessages,
+    ...(IS_MAC_OS && IS_PWA && { 'Mod+,': handleHotkeySettings }),
   });
 
   useEffect(() => {

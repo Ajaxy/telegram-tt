@@ -149,7 +149,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
-    ...(IS_PWA && { 'Meta+L': handleLockScreenHotkey }),
+    ...(IS_PWA && { 'Mod+L': handleLockScreenHotkey }),
   });
 
   const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
