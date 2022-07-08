@@ -1,3 +1,24 @@
+## 1.49.0 (2022-07-08)
+
+👏 **Harder**
+* [Telegram Premium](https://t.me/TelegramTips/336). By subscribing, users unlock doubled limits, 4 GB file uploads, faster downloads, exclusive stickers and reactions, improved chat management – and a whole lot more.
+* Native trackpad gestures in the Media Viewer. Swipe left or right to move through media, swipe up or down to exit.
+* Improved polls that support retracting votes and closing the poll – plus a confetti effect.
+
+🤩 **Better**
+* Various layout and performance improvements.
+* Improved payment form validation.
+* Use the hotkey `⌘+`, to access app Settings on macOS.
+* See a helpful info screen when JavaScript support is disabled.
+
+💪 **Stronger**
+* Call panel properly disappears after answering on another device.
+* Fixed unexpected message deleting when using search in the forwarding menu.
+* Fixed unnecessary up-scaling when uploading small images.
+* Archived chats do not appear in the ‘Forward to’ list.
+* Fixed loading loop when disabling reactions in group management.
+* Various fixes in the text formatting menu.
+
 ## 1.48.0 (2022-06-06)
 
 👏 **Harder**
