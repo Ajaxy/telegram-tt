@@ -57,11 +57,9 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   }, [chat, localEnabledReactions, setChatEnabledReactions]);
 
   useEffect(() => {
-    if (enabledReactions) {
-      setIsLoading(false);
-      setIsTouched(false);
-      setLocalEnabledReactions(enabledReactions);
-    }
+    setIsLoading(false);
+    setIsTouched(false);
+    setLocalEnabledReactions(enabledReactions || []);
   }, [enabledReactions]);
 
   const availableActiveReactions = useMemo<ApiAvailableReaction[] | undefined>(
