@@ -127,3 +127,25 @@ interface Array<T> {
 interface ReadonlyArray<T> {
   filter<S extends T>(predicate: BooleanConstructor, thisArg?: any): Exclude<S, Falsy>[];
 }
+
+// Missing type definitions for OPFS (Origin Private File System) API
+// https://github.com/WICG/file-system-access/blob/main/AccessHandle.md#accesshandle-idl
+interface FileSystemFileHandle extends FileSystemHandle {
+  readonly kind: 'file';
+  getFile(): Promise<File>;
+  createSyncAccessHandle(): Promise<FileSystemSyncAccessHandle>;
+}
+
+interface FileSystemSyncAccessHandle {
+  read: (buffer: BufferSource, options: FilesystemReadWriteOptions) => number;
+  write: (buffer: BufferSource, options: FilesystemReadWriteOptions) => number;
+
+  truncate: (size: number) => Promise<undefined>;
+  getSize: () => Promise<number>;
+  flush: () => Promise<undefined> ;
+  close: () => Promise<undefined>;
+}
+
+type FilesystemReadWriteOptions = {
+  at: number;
+};

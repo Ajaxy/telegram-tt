@@ -6,6 +6,7 @@ import type { Thread } from '../../global/types';
 import type { ApiMessage } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
+import { IS_OPFS_SUPPORTED } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
 import download from '../../util/download';
 import {
@@ -24,7 +25,7 @@ type StateProps = {
 
 const GLOBAL_UPDATE_DEBOUNCE = 1000;
 
-const MAX_BLOB_SIZE = 0x7FFFFFFF - 1;
+const MAX_BLOB_SAFE_SIZE = 2000 * 1024 * 1024;
 
 const processedMessages = new Set<ApiMessage>();
 const downloadedMessages = new Set<ApiMessage>();
@@ -80,10 +81,9 @@ const DownloadManager: FC<StateProps> = ({
         document, video, audio,
       } = message.content;
       const mediaSize = (document || video || audio)?.size || 0;
-      if (mediaSize > MAX_BLOB_SIZE) {
+      if (mediaSize > MAX_BLOB_SAFE_SIZE && !IS_OPFS_SUPPORTED) {
         showNotification({
-          // eslint-disable-next-line max-len
-          message: 'Downloading files bigger than 2GB currently unsupported due to browser limitations. We are working on fixing this issue as soon as possible.',
+          message: 'Downloading files bigger than 2GB is currently not supported in your browser.',
         });
         handleMessageDownloaded(message);
         return;
