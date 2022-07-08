@@ -2,6 +2,7 @@ import type { FC } from '../../../../lib/teact/teact';
 import React, {
   useCallback, useRef, useEffect, memo,
 } from '../../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../../global';
 
 import { isUserId } from '../../../../global/helpers';
 import type { FolderChatType } from '../../../../hooks/reducers/useFoldersReducer';
@@ -11,6 +12,7 @@ import {
 } from '../../../../hooks/reducers/useFoldersReducer';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import useLang from '../../../../hooks/useLang';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
 
 import Checkbox from '../../../ui/Checkbox';
 import InputText from '../../../ui/InputText';
@@ -38,11 +40,14 @@ type OwnProps = {
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 500;
 
-const MAX_CHATS = 100;
 const MAX_FULL_ITEMS = 10;
 const ALWAYS_FULL_ITEMS_COUNT = 5;
 
-const SettingsFoldersChatsPicker: FC<OwnProps> = ({
+type StateProps = {
+  maxChats: number;
+};
+
+const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
   mode,
   chatIds,
   selectedIds,
@@ -51,12 +56,13 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
   onSelectedIdsChange,
   onSelectedChatTypesChange,
   onFilterChange,
+  maxChats,
 }) => {
+  const { openLimitReachedModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const chatTypes = mode === 'included' ? INCLUDED_CHAT_TYPES : EXCLUDED_CHAT_TYPES;
   const shouldMinimize = selectedIds.length + selectedChatTypes.length > MAX_FULL_ITEMS;
-  const hasMaxChats = selectedIds.length >= MAX_CHATS;
 
   useEffect(() => {
     setTimeout(() => {
@@ -71,10 +77,16 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
     if (newSelectedIds.includes(id)) {
       newSelectedIds.splice(newSelectedIds.indexOf(id), 1);
     } else {
+      if (selectedIds.length >= maxChats && mode === 'included') {
+        openLimitReachedModal({
+          limit: 'dialogFiltersChats',
+        });
+        return;
+      }
       newSelectedIds.push(id);
     }
     onSelectedIdsChange(newSelectedIds);
-  }, [selectedIds, onSelectedIdsChange]);
+  }, [selectedIds, onSelectedIdsChange, maxChats, mode, openLimitReachedModal]);
 
   const handleChatTypeClick = useCallback((key: FolderChatType['key']) => {
     const newSelectedChatTypes = [...selectedChatTypes];
@@ -141,7 +153,6 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => handleItemClick(id)}
         ripple
-        disabled={!isSelected && hasMaxChats}
       >
         {isUserId(id) ? (
           <PrivateChatInfo userId={id} />
@@ -172,18 +183,12 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
             clickArg={id}
           />
         ))}
-        {!hasMaxChats ? (
-          <InputText
-            ref={inputRef}
-            value={filterValue}
-            onChange={handleFilterChange}
-            placeholder={lang('Search')}
-          />
-        ) : (
-          <p className="max-items-reached" dir="auto">
-            {`Sorry, you can't add more than ${MAX_CHATS} chats.`}
-          </p>
-        )}
+        <InputText
+          ref={inputRef}
+          value={filterValue}
+          onChange={handleFilterChange}
+          placeholder={lang('Search')}
+        />
       </div>
       <InfiniteScroll
         className="picker-list custom-scroll"
@@ -216,4 +221,10 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
   );
 };
 
-export default memo(SettingsFoldersChatsPicker);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      maxChats: selectCurrentLimit(global, 'dialogFiltersChats'),
+    };
+  },
+)(SettingsFoldersChatsPicker));

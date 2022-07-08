@@ -22,7 +22,7 @@ import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
-import { selectCurrentMessageList, selectTheme } from '../../../global/selectors';
+import { selectCurrentMessageList, selectIsPremiumPurchaseBlocked, selectTheme } from '../../../global/selectors';
 import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
@@ -34,6 +34,7 @@ import MenuItem from '../../ui/MenuItem';
 import Button from '../../ui/Button';
 import SearchInput from '../../ui/SearchInput';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PremiumIcon from '../../common/PremiumIcon';
 import Switcher from '../../ui/Switcher';
 import ShowTransition from '../../ui/ShowTransition';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
@@ -65,6 +66,7 @@ type StateProps =
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
+    isPremiumPurchaseBlocked?: boolean;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'canInstall'>;
 
@@ -96,6 +98,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   areChatsLoaded,
   hasPasscode,
   canInstall,
+  isPremiumPurchaseBlocked,
 }) => {
   const {
     openChat,
@@ -106,6 +109,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lockScreen,
     requestNextSettingsScreen,
     skipLockOnUnload,
+    openPremiumModal,
   } = getActions();
 
   const lang = useLang();
@@ -190,11 +194,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   }, [currentUserId, openChat]);
 
-  const handleSelectPasscode = useCallback(() => {
-    requestNextSettingsScreen(
-      hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
-    );
-  }, [hasPasscode, requestNextSettingsScreen]);
+  const handleSelectPremium = useCallback(() => {
+    openPremiumModal();
+  }, [openPremiumModal]);
 
   const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -274,13 +276,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             {lang('Settings')}
           </MenuItem>
           <MenuItem
-            icon="lock"
-            onClick={handleSelectPasscode}
-          >
-            {lang('Passcode')}
-            <span className="menu-item-badge">{lang('New')}</span>
-          </MenuItem>
-          <MenuItem
             icon="darkmode"
             onClick={handleDarkModeToggle}
           >
@@ -292,6 +287,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               noAnimation
             />
           </MenuItem>
+          {!isPremiumPurchaseBlocked && (
+            <MenuItem
+              customIcon={<PremiumIcon withGradient big />}
+              onClick={handleSelectPremium}
+            >
+              {lang('TelegramPremium')}
+              <span className="menu-item-badge">{lang('New')}</span>
+            </MenuItem>
+          )}
           <MenuItem
             icon="help"
             onClick={handleOpenTipsChat}
@@ -336,7 +340,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               onClick={getPromptInstall()}
             >
               Install App
-              <span className="menu-item-badge">{lang('New')}</span>
             </MenuItem>
           )}
         </DropdownMenu>
@@ -431,6 +434,7 @@ export default memo(withGlobal<OwnProps>(
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canInstall: Boolean(global.canInstall),
+      isPremiumPurchaseBlocked: selectIsPremiumPurchaseBlocked(global),
     };
   },
 )(LeftMainHeader));

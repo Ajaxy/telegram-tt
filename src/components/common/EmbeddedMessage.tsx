@@ -8,6 +8,7 @@ import {
   isActionMessage,
   getSenderTitle,
   getMessageRoundVideo,
+  getUserColorKey,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
@@ -30,6 +31,7 @@ type OwnProps = {
   sender?: ApiUser | ApiChat;
   title?: string;
   customText?: string;
+  noUserColors?: boolean;
   isProtected?: boolean;
   onClick: NoneToVoidFunction;
 };
@@ -43,6 +45,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   title,
   customText,
   isProtected,
+  noUserColors,
   observeIntersection,
   onClick,
 }) => {
@@ -61,7 +64,11 @@ const EmbeddedMessage: FC<OwnProps> = ({
   return (
     <div
       ref={ref}
-      className={buildClassName('EmbeddedMessage', className)}
+      className={buildClassName(
+        'EmbeddedMessage',
+        className,
+        sender && !noUserColors && `color-${getUserColorKey(sender)}`,
+      )}
       onClick={message ? onClick : undefined}
     >
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected)}

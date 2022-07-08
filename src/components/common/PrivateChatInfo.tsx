@@ -17,6 +17,7 @@ import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
 import FakeIcon from './FakeIcon';
+import PremiumIcon from './PremiumIcon';
 
 type OwnProps = {
   userId: string;
@@ -29,6 +30,7 @@ type OwnProps = {
   withUsername?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
+  withVideoAvatar?: boolean;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
 };
@@ -52,6 +54,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   withUsername,
   withFullInfo,
   withUpdatingStatus,
+  withVideoAvatar,
   noStatusOrTyping,
   noRtl,
   user,
@@ -75,8 +78,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     }
   }, [userId, loadFullUser, lastSyncTime, withFullInfo]);
 
-  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
-    if (user && hasPhoto) {
+  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
+    if (user && hasMedia) {
       e.stopPropagation();
       openMediaViewer({
         avatarOwnerId: user.id,
@@ -130,6 +133,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         user={user}
         isSavedMessages={isSavedMessages}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
+        noVideo={!withVideoAvatar}
       />
       <div className="info">
         {isSavedMessages ? (
@@ -140,6 +144,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
           <div className="title">
             <h3 dir="auto">{fullName && renderText(fullName)}</h3>
             {user?.isVerified && <VerifiedIcon />}
+            {user.isPremium && <PremiumIcon />}
             {user.fakeType && <FakeIcon fakeType={user.fakeType} />}
           </div>
         )}

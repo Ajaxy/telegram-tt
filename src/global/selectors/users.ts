@@ -16,6 +16,16 @@ export function selectIsUserBlocked(global: GlobalState, userId: string) {
   return user?.fullInfo?.isBlocked;
 }
 
+export function selectIsCurrentUserPremium(global: GlobalState) {
+  if (!global.currentUserId) return false;
+
+  return Boolean(global.users.byId[global.currentUserId].isPremium);
+}
+
+export function selectIsPremiumPurchaseBlocked(global: GlobalState) {
+  return global.appConfig?.isPremiumPurchaseBlocked ?? true;
+}
+
 // Slow, not to be used in `withGlobal`
 export function selectUserByUsername(global: GlobalState, username: string) {
   const usernameLowered = username.toLowerCase();

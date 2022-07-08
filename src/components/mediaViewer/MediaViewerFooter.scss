@@ -23,7 +23,7 @@
 
       .video-controls-visible &:not(.is-hidden) {
         opacity: 1;
-        pointer-events: all;
+        pointer-events: auto;
       }
     }
   }

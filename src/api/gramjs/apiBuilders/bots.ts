@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiAttachMenuBot,
   ApiAttachMenuBotIcon,
+  ApiAttachMenuPeerType,
   ApiBotCommand,
   ApiBotInfo,
   ApiBotInlineMediaResult,
@@ -9,12 +10,11 @@ import type {
   ApiBotInlineSwitchPm,
   ApiBotMenuButton,
   ApiInlineResultType,
-  ApiWebDocument,
 } from '../../types';
 
 import { pick } from '../../../util/iteratees';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
-import { buildApiDocument, buildVideoFromDocument } from './messages';
+import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messages';
 import { buildStickerFromDocument } from './symbols';
 import localDb from '../localDb';
 import { buildApiPeerId } from './peers';
@@ -65,9 +65,20 @@ export function buildBotSwitchPm(switchPm?: GramJs.InlineBotSwitchPM) {
 export function buildApiAttachMenuBot(bot: GramJs.AttachMenuBot): ApiAttachMenuBot {
   return {
     id: bot.botId.toString(),
+    hasSettings: bot.hasSettings,
     shortName: bot.shortName,
+    peerTypes: bot.peerTypes.map(buildApiAttachMenuPeerType),
     icons: bot.icons.map(buildApiAttachMenuIcon).filter(Boolean),
   };
+}
+
+function buildApiAttachMenuPeerType(peerType: GramJs.TypeAttachMenuPeerType): ApiAttachMenuPeerType {
+  if (peerType instanceof GramJs.AttachMenuPeerTypeBotPM) return 'bot';
+  if (peerType instanceof GramJs.AttachMenuPeerTypePM) return 'private';
+  if (peerType instanceof GramJs.AttachMenuPeerTypeChat) return 'chat';
+  if (peerType instanceof GramJs.AttachMenuPeerTypeBroadcast) return 'channel';
+  if (peerType instanceof GramJs.AttachMenuPeerTypeSameBotPM) return 'self';
+  return undefined!; // Never reached
 }
 
 function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachMenuBotIcon | undefined {
@@ -85,23 +96,24 @@ function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachMenuBo
   };
 }
 
-function buildApiWebDocument(document?: GramJs.TypeWebDocument): ApiWebDocument | undefined {
-  return document ? pick(document, ['url', 'mimeType']) : undefined;
-}
-
-export function buildApiBotInfo(botInfo: GramJs.BotInfo): ApiBotInfo {
+export function buildApiBotInfo(botInfo: GramJs.BotInfo, chatId: string): ApiBotInfo {
   const {
-    description, userId, commands, menuButton,
+    description, descriptionPhoto, descriptionDocument, userId, commands, menuButton,
   } = botInfo;
 
-  const botId = buildApiPeerId(userId, 'user');
-  const commandsArray = commands.map((command) => buildApiBotCommand(botId, command));
+  const botId = userId && buildApiPeerId(userId, 'user');
+  const photo = descriptionPhoto instanceof GramJs.Photo ? buildApiPhoto(descriptionPhoto) : undefined;
+  const gif = descriptionDocument instanceof GramJs.Document ? buildVideoFromDocument(descriptionDocument) : undefined;
+
+  const commandsArray = commands?.map((command) => buildApiBotCommand(botId || chatId, command));
 
   return {
-    botId,
+    botId: botId || chatId,
     description,
+    gif,
+    photo,
     menuButton: buildApiBotMenuButton(menuButton),
-    commands: commandsArray.length ? commandsArray : undefined,
+    commands: commandsArray?.length ? commandsArray : undefined,
   };
 }
 
@@ -112,7 +124,7 @@ function buildApiBotCommand(botId: string, command: GramJs.BotCommand): ApiBotCo
   };
 }
 
-export function buildApiBotMenuButton(menuButton: GramJs.TypeBotMenuButton): ApiBotMenuButton {
+export function buildApiBotMenuButton(menuButton?: GramJs.TypeBotMenuButton): ApiBotMenuButton {
   if (menuButton instanceof GramJs.BotMenuButton) {
     return {
       type: 'webApp',

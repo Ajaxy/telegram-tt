@@ -12,8 +12,9 @@ import {
   selectActiveDownloadIds,
   selectAllowedMessageActions,
   selectChat,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectIsCurrentUserPremium,
   selectIsMessageProtected,
+  selectIsPremiumPurchaseBlocked,
 } from '../../../global/selectors';
 import {
   isActionMessage, isChatChannel,
@@ -57,6 +58,7 @@ type StateProps = {
   canReply?: boolean;
   canPin?: boolean;
   canShowReactionsCount?: boolean;
+  canBuyPremium?: boolean;
   canShowReactionList?: boolean;
   canRemoveReaction?: boolean;
   canUnpin?: boolean;
@@ -68,6 +70,7 @@ type StateProps = {
   canUnfaveSticker?: boolean;
   canCopy?: boolean;
   isPrivate?: boolean;
+  isCurrentUserPremium?: boolean;
   hasFullInfo?: boolean;
   canCopyLink?: boolean;
   canSelect?: boolean;
@@ -105,7 +108,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canEdit,
   enabledReactions,
   isPrivate,
+  isCurrentUserPremium,
   canForward,
+  canBuyPremium,
   canFaveSticker,
   canUnfaveSticker,
   canCopy,
@@ -371,6 +376,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         availableReactions={availableReactions}
         message={message}
         isPrivate={isPrivate}
+        isCurrentUserPremium={isCurrentUserPremium}
+        canBuyPremium={canBuyPremium}
         isOpen={isMenuOpen}
         enabledReactions={enabledReactions}
         anchor={anchor}
@@ -507,6 +514,7 @@ export default memo(withGlobal<OwnProps>(
     const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
     const canCopyNumber = Boolean(message.content.contact);
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     return {
       availableReactions: global.availableReactions,
@@ -533,10 +541,12 @@ export default memo(withGlobal<OwnProps>(
       canShowSeenBy,
       enabledReactions: chat?.isForbidden ? undefined : chat?.fullInfo?.enabledReactions,
       isPrivate,
+      isCurrentUserPremium,
       hasFullInfo: Boolean(chat?.fullInfo),
       canShowReactionsCount,
       canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
       canRemoveReaction,
+      canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
     };
   },
 )(ContextMenuContainer));

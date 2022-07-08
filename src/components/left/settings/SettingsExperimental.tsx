@@ -1,5 +1,6 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
+
+import type { FC } from '../../../lib/teact/teact';
 
 import { getActions } from '../../../global';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';

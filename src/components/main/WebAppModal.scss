@@ -66,4 +66,43 @@
       border-radius: 0;
     }
   }
+
+  .animated-close-icon {
+    position: absolute;
+    transform: rotate(-45deg);
+
+    &,
+    &::before,
+    &::after {
+      width: 1.125rem;
+      height: 0.125rem;
+      border-radius: 0.125rem;
+      background-color: var(--color-text-secondary);
+      transition: transform var(--slide-transition);
+    }
+
+    &::before,
+    &::after {
+      position: absolute;
+      left: 0;
+      top: 0;
+      content: "";
+    }
+
+    &::before {
+      transform: rotate(90deg);
+    }
+
+    &.state-back {
+      transform: rotate(180deg);
+
+      &::before {
+        transform: rotate(45deg) scaleX(0.75) translate(0, -0.375rem);
+      }
+
+      &::after {
+        transform: rotate(-45deg) scaleX(0.75) translate(0, 0.375rem);
+      }
+    }
+  }
 }

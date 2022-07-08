@@ -6,6 +6,7 @@ export interface ApiUser {
   isMin: boolean;
   isSelf?: true;
   isVerified?: true;
+  isPremium?: boolean;
   isContact?: true;
   type: ApiUserType;
   firstName?: string;
@@ -14,6 +15,7 @@ export interface ApiUser {
   username: string;
   phoneNumber: string;
   accessHash?: string;
+  hasVideoAvatar?: boolean;
   avatarHash?: string;
   photos?: ApiPhoto[];
   botPlaceholder?: string;
@@ -36,6 +38,7 @@ export interface ApiUserFullInfo {
   commonChatsCount?: number;
   pinnedMessageId?: number;
   botInfo?: ApiBotInfo;
+  profilePhoto?: ApiPhoto;
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -51,9 +54,13 @@ export interface ApiUserStatus {
   expires?: number;
 }
 
+export type ApiAttachMenuPeerType = 'self' | 'bot' | 'private' | 'chat' | 'channel';
+
 export interface ApiAttachMenuBot {
   id: string;
+  hasSettings?: boolean;
   shortName: string;
+  peerTypes: ApiAttachMenuPeerType[];
   icons: ApiAttachMenuBotIcon[];
 }
 

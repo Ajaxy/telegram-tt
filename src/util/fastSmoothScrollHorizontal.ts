@@ -6,17 +6,22 @@ import { fastRaf } from './schedulers';
 
 const DEFAULT_DURATION = 300;
 
+const stopById: Map<string, VoidFunction> = new Map();
+
 export default function fastSmoothScrollHorizontal(container: HTMLElement, left: number, duration = DEFAULT_DURATION) {
   if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
     duration = 0;
   }
 
-  scrollWithJs(container, left, duration);
+  return scrollWithJs(container, left, duration);
 }
 
 function scrollWithJs(container: HTMLElement, left: number, duration: number) {
   const isRtl = container.getAttribute('dir') === 'rtl';
-  const { scrollLeft, offsetWidth: containerWidth, scrollWidth } = container;
+  const {
+    scrollLeft, offsetWidth: containerWidth, scrollWidth, dataset: { scrollId },
+  } = container;
+
   let path = left - scrollLeft;
 
   if (path < 0) {
@@ -28,28 +33,55 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
   }
 
   if (path === 0) {
-    return;
+    return Promise.resolve();
+  }
+
+  if (scrollId && stopById.has(scrollId)) {
+    stopById.get(scrollId)!();
   }
 
   const target = scrollLeft + path;
 
   if (duration === 0) {
     container.scrollLeft = target;
-    return;
+    return Promise.resolve();
   }
 
+  let isStopped = false;
+  const id = Math.random().toString();
+  container.dataset.scrollId = id;
+  stopById.set(id, () => {
+    isStopped = true;
+  });
+
+  container.style.scrollSnapType = 'none';
+
+  let resolve: VoidFunction;
+  const promise = new Promise<void>((r) => {
+    resolve = r;
+  });
   const startAt = Date.now();
 
   fastRaf(() => {
     animate(() => {
+      if (isStopped) return false;
+
       const t = Math.min((Date.now() - startAt) / duration, 1);
 
       const currentPath = path * (1 - transition(t));
       container.scrollLeft = Math.round(target - currentPath);
 
+      if (t >= 1) {
+        container.style.scrollSnapType = '';
+        container.dataset.scrollId = undefined;
+        stopById.delete(id);
+        resolve();
+      }
       return t < 1;
     });
   });
+
+  return promise;
 }
 
 function transition(t: number) {

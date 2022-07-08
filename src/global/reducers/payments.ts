@@ -1,6 +1,8 @@
 import type { GlobalState } from '../types';
 import type { ShippingOption, PaymentStep } from '../../types';
-import type { ApiMessage, ApiPaymentForm, ApiReceipt } from '../../api/types';
+import type {
+  ApiInvoice, ApiMessage, ApiPaymentForm, ApiReceipt,
+} from '../../api/types';
 
 export function updateShippingOptions(
   global: GlobalState,
@@ -35,18 +37,18 @@ export function setPaymentStep(global: GlobalState, step: PaymentStep): GlobalSt
   };
 }
 
-export function setInvoiceMessageInfo(global: GlobalState, message: ApiMessage): GlobalState {
-  if (!message.content || !message.content.invoice) {
-    return global;
-  }
+export function setInvoiceInfo(global: GlobalState, invoice: ApiInvoice): GlobalState {
   const {
     title,
     text,
     amount,
     currency,
     isTest,
-    photoUrl,
-  } = message.content.invoice;
+    photo,
+    isRecurring,
+    recurringTermsUrl,
+  } = invoice;
+
   return {
     ...global,
     payment: {
@@ -54,10 +56,12 @@ export function setInvoiceMessageInfo(global: GlobalState, message: ApiMessage):
       invoiceContent: {
         title,
         text,
-        photoUrl,
+        photo,
         amount,
         currency,
         isTest,
+        isRecurring,
+        recurringTermsUrl,
       },
     },
   };
@@ -126,7 +130,9 @@ export function setReceipt(
   }
 
   const { invoice: messageInvoice } = message.content;
-  const { photoUrl, text, title } = (messageInvoice || {});
+  const {
+    photo, text, title,
+  } = (messageInvoice || {});
 
   return {
     ...global,
@@ -134,7 +140,7 @@ export function setReceipt(
       ...global.payment,
       receipt: {
         ...receipt,
-        photoUrl,
+        photo,
         text,
         title,
       },

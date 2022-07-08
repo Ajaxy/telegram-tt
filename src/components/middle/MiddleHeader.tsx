@@ -13,6 +13,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   EDITABLE_INPUT_CSS_SELECTOR,
+  MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
@@ -21,7 +22,7 @@ import {
 } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
-  getChatTitle, getMessageKey, getSenderTitle, isUserId,
+  getChatTitle, getMessageKey, getSenderTitle, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
 import {
   selectAllowedMessageActions,
@@ -29,10 +30,12 @@ import {
   selectChatMessage,
   selectChatMessages,
   selectForwardedSender,
+  selectIsChatBotNotStarted,
   selectIsChatWithBot,
   selectIsChatWithSelf,
   selectIsInSelectMode,
   selectIsRightColumnShown,
+  selectIsUserBlocked,
   selectPinnedIds,
   selectScheduledIds,
   selectThreadInfo,
@@ -84,6 +87,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isChatWithBot?: boolean;
   lastSyncTime?: number;
+  hasButtonInHeader?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
@@ -109,6 +113,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isChatWithSelf,
   isChatWithBot,
   lastSyncTime,
+  hasButtonInHeader,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
@@ -336,6 +341,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withFullInfo={isChatWithBot}
               withMediaViewer
               withUpdatingStatus
+              withVideoAvatar
               noRtl
             />
           ) : (
@@ -347,6 +353,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer
               withFullInfo
               withUpdatingStatus
+              withVideoAvatar
               noRtl
             />
           )}
@@ -373,6 +380,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   }
 
   const isAudioPlayerRendered = Boolean(shouldRenderAudioPlayer && renderingAudioMessage);
+  const isPinnedMessagesFullWidth = isAudioPlayerRendered
+    || (!IS_SINGLE_COLUMN_LAYOUT && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES);
 
   return (
     <div className="MiddleHeader" ref={componentRef}>
@@ -398,7 +407,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           count={renderingPinnedMessagesCount || 0}
           index={pinnedMessageIndex}
           customTitle={renderingPinnedMessageTitle}
-          className={buildClassName(pinnedMessageClassNames, isAudioPlayerRendered && 'full-width')}
+          className={buildClassName(pinnedMessageClassNames, isPinnedMessagesFullWidth && 'full-width')}
           onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
           onAllPinnedClick={handleAllPinnedClick}
@@ -456,6 +465,15 @@ export default memo(withGlobal<OwnProps>(
       messagesCount = threadInfo?.messagesCount || 0;
     }
 
+    const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
+    const isChatWithBot = chat && selectIsChatWithBot(global, chat);
+    const canRestartBot = Boolean(isChatWithBot && selectIsUserBlocked(global, chatId));
+    const canStartBot = isChatWithBot && !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));
+    const canSubscribe = Boolean(
+      isMainThread && chat && (isChatChannel(chat) || isChatSuperGroup(chat)) && chat.isNotJoined,
+    );
+    const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
+
     const state: StateProps = {
       typingStatus,
       isLeftColumnShown,
@@ -465,12 +483,13 @@ export default memo(withGlobal<OwnProps>(
       chat,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
-      isChatWithBot: chat && selectIsChatWithBot(global, chat),
+      isChatWithBot,
       lastSyncTime,
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
+      hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
     };
 
     const messagesById = selectChatMessages(global, chatId);

@@ -38,6 +38,10 @@ import type {
   ApiAttachMenuBot,
   ApiPhoneCall,
   ApiWebSession,
+  ApiPremiumPromo,
+  ApiTranscription,
+  ApiInputInvoice,
+  ApiInvoice,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -119,6 +123,15 @@ export interface ServiceNotification {
   version?: string;
   isUnread?: boolean;
 }
+
+export type ApiLimitType = (
+  'uploadMaxFileparts' | 'stickersFaved' | 'savedGifs' | 'dialogFiltersChats' | 'dialogFilters' | 'dialogFolderPinned' |
+  'captionLength' | 'channels' | 'channelsPublic' | 'aboutLength'
+);
+
+export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
+  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs'
+)>;
 
 export type GlobalState = {
   appConfig?: ApiAppConfig;
@@ -279,6 +292,10 @@ export type GlobalState = {
       hash?: string;
       stickers: ApiSticker[];
     };
+    premium: {
+      hash?: string;
+      stickers: ApiSticker[];
+    };
     featured: {
       hash?: string;
       setIds?: string[];
@@ -429,23 +446,16 @@ export type GlobalState = {
   };
 
   payment: {
-    chatId?: string;
-    messageId?: number;
+    inputInvoice?: ApiInputInvoice;
     step?: PaymentStep;
+    status?: 'paid' | 'failed' | 'pending' | 'cancelled';
     shippingOptions?: ShippingOption[];
     formId?: string;
     requestId?: string;
     savedInfo?: ApiPaymentSavedInfo;
     canSaveCredentials?: boolean;
     invoice?: Invoice;
-    invoiceContent?: {
-      title?: string;
-      text?: string;
-      photoUrl?: string;
-      amount?: number;
-      currency?: string;
-      isTest?: boolean;
-    };
+    invoiceContent?: Omit<ApiInvoice, 'receiptMsgId'>;
     nativeProvider?: string;
     providerId?: string;
     nativeParams?: ApiPaymentFormNativeParams;
@@ -571,14 +581,15 @@ export type GlobalState = {
 
   webApp?: {
     url: string;
-    bot: ApiUser;
+    botId: string;
     buttonText: string;
     queryId?: string;
+    slug?: string;
   };
 
   trustedBotIds: string[];
   botTrustRequest?: {
-    bot: ApiUser;
+    botId: string;
     type: 'game' | 'webApp';
     onConfirm?: {
       action: keyof GlobalActions;
@@ -586,7 +597,7 @@ export type GlobalState = {
     };
   };
   botAttachRequest?: {
-    bot: ApiUser;
+    botId: string;
     chatId: string;
     startParam?: string;
   };
@@ -596,7 +607,14 @@ export type GlobalState = {
     bots: Record<string, ApiAttachMenuBot>;
   };
 
-  lastConfettiTime?: number;
+  confetti?: {
+    lastConfettiTime?: number;
+    top?: number;
+    left?: number;
+    width?: number;
+    height?: number;
+  };
+
   urlAuth?: {
     button?: {
       chatId: string;
@@ -610,6 +628,23 @@ export type GlobalState = {
     };
     url: string;
   };
+
+  premiumModal?: {
+    isOpen?: boolean;
+    isClosing?: boolean;
+    promo: ApiPremiumPromo;
+    initialSection?: string;
+    fromUserId?: string;
+    isSuccess?: boolean;
+  };
+
+  transcriptions: Record<string, ApiTranscription>;
+
+  limitReachedModal?: {
+    limit: ApiLimitTypeWithModal;
+  };
+
+  deleteFolderDialogModal?: number;
 };
 
 export type CallSound = (
@@ -623,6 +658,8 @@ export interface ActionPayloads {
 
   // Misc
   setInstallPrompt: { canInstall: boolean };
+  openLimitReachedModal: { limit: ApiLimitTypeWithModal };
+  closeLimitReachedModal: never;
 
   // Accounts
   reportPeer: {
@@ -657,8 +694,17 @@ export interface ActionPayloads {
     chatId: string;
     text: string;
   };
-
   resetOpenChatWithText: never;
+
+  toggleJoinToSend: {
+    chatId: string;
+    isEnabled: boolean;
+  };
+
+  toggleJoinRequest: {
+    chatId: string;
+    isEnabled: boolean;
+  };
 
   // Messages
   setEditingDraft: {
@@ -811,6 +857,14 @@ export interface ActionPayloads {
   };
 
   // Bots
+  startBot: {
+    botId: string;
+    param?: string;
+  };
+  restartBot: {
+    chatId: string;
+  };
+
   clickBotInlineButton: {
     messageId: number;
     button: ApiKeyboardButton;
@@ -833,8 +887,8 @@ export interface ActionPayloads {
 
   requestWebView: {
     url?: string;
-    bot: ApiUser;
-    peer: ApiChat | ApiUser;
+    botId: string;
+    peerId: string;
     theme?: ApiThemeParameters;
     isSilent?: boolean;
     buttonText: string;
@@ -842,19 +896,22 @@ export interface ActionPayloads {
     startParam?: string;
   };
   prolongWebView: {
-    bot: ApiUser;
-    peer: ApiChat | ApiUser;
+    botId: string;
+    peerId: string;
     queryId: string;
     isSilent?: boolean;
     replyToMessageId?: number;
   };
   requestSimpleWebView: {
     url: string;
-    bot: ApiUser;
+    botId: string;
     buttonText: string;
     theme?: ApiThemeParameters;
   };
   closeWebApp: never;
+  setWebAppPaymentSlug: {
+    slug?: string;
+  };
 
   cancelBotTrustRequest: never;
   markBotTrusted: {
@@ -924,7 +981,12 @@ export interface ActionPayloads {
     isQuiz?: boolean;
   };
   closePollModal: never;
-  requestConfetti: never;
+  requestConfetti: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | undefined;
 
   openUrl: {
     url: string;
@@ -967,6 +1029,32 @@ export interface ActionPayloads {
 
   // Settings
   requestNextSettingsScreen: SettingsScreens;
+  closeDeleteChatFolderModal: never;
+  openDeleteChatFolderModal: { folderId: number };
+  loadGlobalPrivacySettings: never;
+  updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact: boolean };
+
+  // Premium
+  openPremiumModal: {
+    initialSection?: string;
+    fromUserId?: string;
+    isSuccess?: boolean;
+  };
+  closePremiumModal: never | {
+    isClosed?: boolean;
+  };
+
+  transcribeAudio: {
+    chatId: string;
+    messageId: number;
+  };
+
+  loadPremiumStickers: {
+    hash?: string;
+  };
+
+  // Invoice
+  openInvoice: ApiInputInvoice;
 }
 
 export type NonTypedActionNames = (
@@ -1047,15 +1135,14 @@ export type NonTypedActionNames = (
   'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
   // bots
   'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
-  'resetInlineBot' | 'restartBot' | 'startBot' |
+  'resetInlineBot' |
   // misc
   'loadWebPagePreview' | 'clearWebPagePreview' | 'loadWallpapers' | 'uploadWallpaper' |
   'setDeviceToken' | 'deleteDeviceToken' |
   'checkVersionNotification' | 'createServiceNotification' |
   // payment
-  'openPaymentModal' | 'closePaymentModal' | 'addPaymentError' |
-  'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' | 'getPaymentForm' | 'getReceipt' |
-  'sendCredentialsInfo' | 'setInvoiceMessageInfo' | 'clearPaymentError' | 'clearReceipt' |
+  'closePaymentModal' | 'addPaymentError' | 'validateRequestedInfo' | 'setPaymentStep' | 'sendPaymentForm' |
+  'getReceipt' | 'sendCredentialsInfo' | 'clearPaymentError' | 'clearReceipt' |
   // calls
   'joinGroupCall' | 'toggleGroupCallMute' | 'toggleGroupCallPresentation' | 'leaveGroupCall' |
   'toggleGroupCallVideo' | 'requestToSpeak' | 'setGroupCallParticipantVolume' | 'toggleGroupCallPanel' |

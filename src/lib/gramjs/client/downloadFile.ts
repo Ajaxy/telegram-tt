@@ -1,5 +1,6 @@
+import BigInt from 'big-integer';
 import Api from '../tl/api';
-import TelegramClient from './TelegramClient';
+import type TelegramClient from './TelegramClient';
 import { getAppropriatedPartSize } from '../Utils';
 import { sleep, createDeferred } from '../Helpers';
 import errors from '../errors';
@@ -158,7 +159,7 @@ async function downloadFile2(
                     const result = await Promise.race([
                         sender.send(new Api.upload.GetFile({
                             location: inputLocation,
-                            offset: offsetMemo,
+                            offset: BigInt(offsetMemo),
                             limit,
                             precise: isPrecise || undefined,
                         })),

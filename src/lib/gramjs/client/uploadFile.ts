@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 
-import TelegramClient from './TelegramClient';
+import type TelegramClient from './TelegramClient';
 import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
 import { getAppropriatedPartSize } from '../Utils';
 import errors from '../errors';
@@ -36,7 +36,6 @@ export async function uploadFile(
 
     const partSize = getAppropriatedPartSize(size) * KB_TO_BYTES;
     const partCount = Math.floor((size + partSize - 1) / partSize);
-    const buffer = Buffer.from(await fileToBuffer(file));
 
     // Make sure a new sender can be created before starting upload
     await client.getSender(client.session.dcId);
@@ -61,28 +60,29 @@ export async function uploadFile(
         }
 
         for (let j = i; j < end; j++) {
-            const bytes = buffer.slice(j * partSize, (j + 1) * partSize);
+            const blobSlice = file.slice(j * partSize, (j + 1) * partSize);
 
             // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func
-            sendingParts.push((async (jMemo: number, bytesMemo: Buffer) => {
+            sendingParts.push((async (jMemo: number, blobSliceMemo: Blob) => {
                 // eslint-disable-next-line no-constant-condition
                 while (true) {
                     let sender;
                     try {
                         // We always upload from the DC we are in
                         sender = await client.getSender(client.session.dcId);
+                        const partBytes = await blobSliceMemo.arrayBuffer();
                         await sender.send(
                             isLarge
                                 ? new Api.upload.SaveBigFilePart({
                                     fileId,
                                     filePart: jMemo,
                                     fileTotalParts: partCount,
-                                    bytes: bytesMemo,
+                                    bytes: Buffer.from(partBytes),
                                 })
                                 : new Api.upload.SaveFilePart({
                                     fileId,
                                     filePart: jMemo,
-                                    bytes: bytesMemo,
+                                    bytes: Buffer.from(partBytes),
                                 }),
                         );
                     } catch (err) {
@@ -106,7 +106,7 @@ export async function uploadFile(
                     }
                     break;
                 }
-            })(j, bytes));
+            })(j, blobSlice));
         }
 
         await Promise.all(sendingParts);
@@ -124,8 +124,4 @@ export async function uploadFile(
             name,
             md5Checksum: '', // This is not a "flag", so not sure if we can make it optional.
         });
-}
-
-function fileToBuffer(file: File) {
-    return new Response(file).arrayBuffer();
 }

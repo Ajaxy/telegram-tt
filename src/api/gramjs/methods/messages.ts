@@ -1431,3 +1431,25 @@ export async function fetchUnreadReactions({
     chats,
   };
 }
+
+export async function transcribeAudio({
+  chat, messageId,
+}: {
+  chat: ApiChat; messageId: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.TranscribeAudio({
+    msgId: messageId,
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) return undefined;
+
+  onUpdate({
+    '@type': 'updateTranscribedAudio',
+    isPending: result.pending,
+    transcriptionId: result.transcriptionId.toString(),
+    text: result.text,
+  });
+
+  return result.transcriptionId.toString();
+}

@@ -1,0 +1,22 @@
+.root {
+  display: flex;
+  padding: 0.5rem !important;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.75rem !important;
+}
+
+.header {
+  display: flex;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  line-height: 20px;
+  min-height: 40px;
+}

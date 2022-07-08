@@ -1,5 +1,6 @@
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiUser } from './users';
+import type { ApiLimitType } from '../../global/types';
 
 export interface ApiInitialArgs {
   userAgent: string;
@@ -93,7 +94,11 @@ export type ApiNotifyException = {
 
 export type ApiNotification = {
   localId: string;
+  title?: string;
   message: string;
+  actionText?: string;
+  action: VoidFunction;
+  className?: string;
 };
 
 export type ApiError = {
@@ -161,6 +166,10 @@ export interface ApiAppConfig {
   autologinDomains: string[];
   autologinToken: string;
   urlAuthDomains: string[];
+  premiumInvoiceSlug: string;
+  premiumBotUsername: string;
+  isPremiumPurchaseBlocked: boolean;
+  limits: Record<ApiLimitType, readonly [number, number]>;
 }
 
 export interface GramJsEmojiInteraction {

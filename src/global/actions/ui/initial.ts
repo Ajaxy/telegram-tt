@@ -8,7 +8,6 @@ import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
 import { selectTheme } from '../../selectors';
 import { startWebsync } from '../../../util/websync';
-import { ensurePermanentWebVersion } from '../../../util/permanentWebVersion';
 
 const HISTORY_ANIMATION_DURATION = 450;
 
@@ -32,7 +31,6 @@ addActionHandler('init', (global) => {
 
   switchTheme(theme, animationLevel === ANIMATION_LEVEL_MAX);
 
-  ensurePermanentWebVersion();
   startWebsync();
 
   if (IS_IOS) {

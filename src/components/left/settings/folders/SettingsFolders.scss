@@ -5,6 +5,11 @@
   justify-content: space-between;
 }
 
+.settings-folders-blocked-icon {
+  color: var(--color-text-secondary);
+  margin-left: 0.25rem;
+}
+
 .settings-folders-list-item {
   .ChatInfo {
     display: flex;

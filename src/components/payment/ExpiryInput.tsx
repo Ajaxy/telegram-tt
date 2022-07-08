@@ -41,6 +41,7 @@ const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
       value={value}
       error={error}
       inputMode="numeric"
+      tabIndex={0}
       maxLength={MAX_FIELD_LENGTH}
     />
   );

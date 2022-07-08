@@ -55,6 +55,7 @@ export type OwnProps = {
   onClear: () => void;
   onSendSilent: () => void;
   onSendScheduled: () => void;
+  captionLimit: number;
 };
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
@@ -65,6 +66,7 @@ const AttachmentModal: FC<OwnProps> = ({
   attachments,
   caption,
   canShowCustomSendMenu,
+  captionLimit,
   isReady,
   isChatWithSelf,
   currentUserId,
@@ -240,6 +242,8 @@ const AttachmentModal: FC<OwnProps> = ({
     );
   }
 
+  const leftChars = (captionLimit - caption.length) <= 100 ? captionLimit - caption.length : undefined;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -302,6 +306,7 @@ const AttachmentModal: FC<OwnProps> = ({
             onUpdate={onCaptionUpdate}
             onSend={sendAttachments}
             canAutoFocus={Boolean(isReady && attachments.length)}
+            captionLimit={leftChars}
           />
         </div>
       </div>

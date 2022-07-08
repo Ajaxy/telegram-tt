@@ -32,7 +32,7 @@
     user-select: text;
   }
 
-  .text-content {
+  .text-content, .transcription {
     margin: 0;
     word-break: break-word;
     white-space: pre-wrap;
@@ -42,10 +42,34 @@
     unicode-bidi: plaintext;
   }
 
+  .transcription {
+    & + .text-content {
+      margin-top: 0.5rem;
+    }
+
+    .DotAnimation {
+      display: inline;
+
+      .ellipsis {
+        display: inline-flex;
+      }
+    }
+
+    &.transcription-error {
+      color: var(--color-text-meta);
+      font-size: 0.875rem;
+    }
+
+    .own &.transcription-error {
+      color: var(--color-message-meta-own);
+    }
+  }
+
   .text-entity-link {
     unicode-bidi: plaintext;
   }
 
+  &.with-voice-transcription,
   &:not(.custom-shape) .text-content,
   &.document {
     & > .MessageMeta {
@@ -124,21 +148,29 @@
     }
   }
 
+  &.with-voice-transcription,
   &.document:not(.text) {
     &::after {
       content: "";
       display: block;
       clear: both;
     }
+  }
 
-    & > .MessageMeta {
-      top: auto !important;
-      bottom: -0.5rem !important;
-      margin-top: -0.25rem;
+  &.with-voice-transcription .MessageMeta[dir="rtl"] {
+    float: left;
+    margin-right: 0.4375rem;
+    margin-left: -0.5rem;
+  }
 
-      &:not([dir="rtl"]) {
-        margin-top: -1.25rem;
-      }
+
+  &.document:not(.text) > .MessageMeta {
+    top: auto !important;
+    bottom: -0.5rem !important;
+    margin-top: -0.25rem;
+
+    &:not([dir="rtl"]) {
+      margin-top: -1.25rem;
     }
   }
 
@@ -200,32 +232,10 @@
       }
     }
 
-    & > .color-1 {
-      color: var(--color-user-1);
-    }
-
-    & > .color-2 {
-      color: var(--color-user-2);
-    }
-
-    & > .color-4 {
-      color: var(--color-user-4);
-    }
-
-    & > .color-5 {
-      color: var(--color-user-5);
-    }
-
-    & > .color-6 {
-      color: var(--color-user-6);
-    }
-
-    & > .color-7 {
-      color: var(--color-user-7);
-    }
-
-    & > .color-8 {
-      color: var(--color-user-8);
+    @for $i from 1 through 8 {
+      & > .color-#{$i} {
+        color: var(--color-user-#{$i});
+      }
     }
 
     .theme-dark .Message.own & > .color-1 {

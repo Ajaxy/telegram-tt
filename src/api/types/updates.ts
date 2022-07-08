@@ -412,6 +412,7 @@ export type ApiUpdatePaymentVerificationNeeded = {
 
 export type ApiUpdatePaymentStateCompleted = {
   '@type': 'updatePaymentStateCompleted';
+  slug?: string;
 };
 
 export type ApiUpdatePrivacy = {
@@ -516,6 +517,13 @@ export type ApiUpdateBotMenuButton = {
   button: ApiBotMenuButton;
 };
 
+export type ApiUpdateTranscribedAudio = {
+  '@type': 'updateTranscribedAudio';
+  transcriptionId: string;
+  text: string;
+  isPending?: boolean;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -539,7 +547,7 @@ export type ApiUpdate = (
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
-  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton
+  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

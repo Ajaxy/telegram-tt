@@ -1,17 +1,16 @@
 import type {
   ApiAudio,
+  ApiDimensions,
+  ApiDocument,
+  ApiGame,
+  ApiLocation,
   ApiMessage,
   ApiMessageSearchType,
   ApiPhoto,
   ApiVideo,
-  ApiDimensions,
-  ApiLocation,
-  ApiGame,
-  ApiDocument,
+  ApiWebDocument,
 } from '../../api/types';
-import {
-  ApiMediaFormat,
-} from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
 
 import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, IS_SAFARI } from '../../util/environment';
 import { getMessageKey, isMessageLocal, matchLinkInMessageText } from './messages';
@@ -267,6 +266,11 @@ export function getMessageMediaHash(
   return undefined;
 }
 
+export function getWebDocumentHash(webDocument?: ApiWebDocument) {
+  if (!webDocument) return undefined;
+  return `webDocument:${webDocument.url}`;
+}
+
 export function getGamePreviewPhotoHash(game: ApiGame) {
   const { photo } = game;
 
@@ -357,7 +361,7 @@ export function getChatMediaMessageIds(
   return getMessageContentIds(messages, listedIds, isFromSharedMedia ? 'media' : 'inlineMedia');
 }
 
-export function getPhotoFullDimensions(photo: ApiPhoto): ApiDimensions | undefined {
+export function getPhotoFullDimensions(photo: Pick<ApiPhoto, 'sizes' | 'thumbnail'>): ApiDimensions | undefined {
   return (
     photo.sizes.find((size) => size.type === 'z')
     || photo.sizes.find((size) => size.type === 'y')
@@ -365,7 +369,7 @@ export function getPhotoFullDimensions(photo: ApiPhoto): ApiDimensions | undefin
   );
 }
 
-export function getPhotoInlineDimensions(photo: ApiPhoto): ApiDimensions | undefined {
+export function getPhotoInlineDimensions(photo: Pick<ApiPhoto, 'sizes' | 'thumbnail'>): ApiDimensions | undefined {
   return (
     photo.sizes.find((size) => size.type === 'x')
     || photo.sizes.find((size) => size.type === 'm')

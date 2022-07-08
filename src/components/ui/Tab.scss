@@ -24,7 +24,7 @@
     cursor: default;
     color: var(--color-primary);
 
-    i {
+    .platform {
       opacity: 1 !important;
     }
   }
@@ -72,7 +72,15 @@
     background: var(--color-primary) !important;
   }
 
-  i {
+  .blocked {
+    position: absolute;
+    bottom: -0.625rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+  }
+
+  .platform {
     position: absolute;
     bottom: calc(-0.625rem - 1px);
     left: 0;

@@ -559,3 +559,27 @@ addActionHandler('loadAppConfig', async () => {
     appConfig,
   });
 });
+
+addActionHandler('loadGlobalPrivacySettings', async () => {
+  const globalSettings = await callApi('fetchGlobalPrivacySettings');
+  if (!globalSettings) {
+    return;
+  }
+
+  setGlobal(replaceSettings(getGlobal(), {
+    shouldArchiveAndMuteNewNonContact: globalSettings.shouldArchiveAndMuteNewNonContact,
+  }));
+});
+
+addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload) => {
+  const { shouldArchiveAndMuteNewNonContact } = payload;
+  setGlobal(replaceSettings(getGlobal(), { shouldArchiveAndMuteNewNonContact }));
+
+  const result = await callApi('updateGlobalPrivacySettings', { shouldArchiveAndMuteNewNonContact });
+
+  setGlobal(replaceSettings(getGlobal(), {
+    shouldArchiveAndMuteNewNonContact: !result
+      ? !shouldArchiveAndMuteNewNonContact
+      : result.shouldArchiveAndMuteNewNonContact,
+  }));
+});

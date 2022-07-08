@@ -1,11 +1,11 @@
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiAttachMenuPeerType, ApiChat } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { GlobalState } from '../types';
 
 import {
   getPrivateChatUserId, isChatChannel, isUserId, isHistoryClearMessage, isUserBot, isUserOnline,
 } from '../helpers';
-import { selectUser } from './users';
+import { selectBot, selectUser } from './users';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
@@ -69,8 +69,30 @@ export function selectChatBot(global: GlobalState, chatId: string) {
   return user;
 }
 
-export function selectIsTrustedBot(global: GlobalState, bot: ApiUser) {
-  return bot.isVerified || global.trustedBotIds.includes(bot.id);
+export function selectIsTrustedBot(global: GlobalState, botId: string) {
+  const bot = selectUser(global, botId);
+  return bot && (bot.isVerified || global.trustedBotIds.includes(botId));
+}
+
+export function selectAttachMenuPeerType(global: GlobalState, chatId: string) : ApiAttachMenuPeerType | undefined {
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  const bot = selectBot(global, chatId);
+  if (bot) {
+    return 'bot';
+  }
+
+  const user = selectChatUser(global, chat);
+  if (user) {
+    return 'private';
+  }
+
+  if (isChatChannel(chat)) {
+    return 'channel';
+  }
+
+  return 'chat';
 }
 
 export function selectIsChatBotNotStarted(global: GlobalState, chatId: string) {

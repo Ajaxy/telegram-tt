@@ -5,8 +5,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { LangFn } from '../../../hooks/useLang';
-import useLang from '../../../hooks/useLang';
-
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText, ApiUserStatus,
 } from '../../../api/types';
@@ -37,12 +36,14 @@ import { renderActionMessageText } from '../../common/helpers/renderActionMessag
 import renderText from '../../common/helpers/renderText';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
+import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useMedia from '../../../hooks/useMedia';
 import { ChatAnimationTypes } from './hooks';
-import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
@@ -55,6 +56,7 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ReportModal from '../../common/ReportModal';
 import FakeIcon from '../../common/FakeIcon';
+import PremiumIcon from '../../common/PremiumIcon';
 
 import './Chat.scss';
 
@@ -65,6 +67,7 @@ type OwnProps = {
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
+  observeIntersection?: ObserveFn;
 };
 
 type StateProps = {
@@ -94,6 +97,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   orderDiff,
   animationType,
   isPinned,
+  observeIntersection,
   chat,
   isMuted,
   user,
@@ -303,6 +307,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
+          observeIntersection={observeIntersection}
         />
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
@@ -312,6 +317,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         <div className="title">
           <h3>{renderText(getChatTitle(lang, chat, user))}</h3>
           {chat.isVerified && <VerifiedIcon />}
+          {user?.isPremium && !user.isSelf && <PremiumIcon />}
           {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
           {isMuted && <i className="icon-muted" />}
           {chat.lastMessage && (
@@ -402,7 +408,7 @@ export default memo(withGlobal<OwnProps>(
       animationLevel: global.settings.byKey.animationLevel,
       isSelected,
       canScrollDown: isSelected && messageListType === 'thread',
-      canChangeFolder: Boolean(global.chatFolders.orderedIds?.length),
+      canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
       lastSyncTime: global.lastSyncTime,
       ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && {

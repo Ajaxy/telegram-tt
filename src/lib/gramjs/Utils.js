@@ -335,6 +335,9 @@ function getAppropriatedPartSize(fileSize) {
     if (fileSize <= 2097152000) { // 2000MB
         return 512;
     }
+    if (fileSize <= 4194304000) { // 4000MB
+        return 512;
+    }
 
     throw new Error('File size too large');
 }

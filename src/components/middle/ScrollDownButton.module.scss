@@ -6,7 +6,7 @@
   transition: opacity 0.2s ease;
   user-select: none;
 
-  pointer-events: all;
+  pointer-events: auto;
 
   &:not(:first-child) {
     margin-top: 0.5rem;

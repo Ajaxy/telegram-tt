@@ -5,11 +5,13 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import type { ApiCountry } from '../../api/types';
+import type { ApiChat, ApiCountry } from '../../api/types';
 import type { ShippingOption, Price } from '../../types';
 import { PaymentStep } from '../../types';
 
+import { selectChat } from '../../global/selectors';
 import { formatCurrency } from '../../util/formatCurrency';
+import buildClassName from '../../util/buildClassName';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
@@ -32,11 +34,12 @@ const DONATE_PROVIDER = 'smartglocal';
 const SUPPORTED_PROVIDERS = new Set([DEFAULT_PROVIDER, DONATE_PROVIDER]);
 
 export type OwnProps = {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
 };
 
 type StateProps = {
+  chat?: ApiChat;
   nameRequested?: boolean;
   shippingAddressRequested?: boolean;
   phoneRequested?: boolean;
@@ -60,10 +63,11 @@ type GlobalStateProps = Pick<GlobalState['payment'], (
   'error'
 )>;
 
-const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
+const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   isOpen,
   onClose,
   step,
+  chat,
   shippingOptions,
   savedInfo,
   canSaveCredentials,
@@ -96,6 +100,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
 
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);
+  const [isTosAccepted, setIsTosAccepted] = useState(false);
   const lang = useLang();
   const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
@@ -135,6 +140,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
           email,
           ...(shippingCountry && {
             country: shippingCountry,
+            countryIso2,
             ...shippingAddressRest,
           }),
         },
@@ -203,7 +209,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             state={paymentState}
             dispatch={paymentDispatch}
             shippingOptions={shippingOptions || []}
-            currency={currency}
+            currency={currency!}
           />
         );
       case PaymentStep.PaymentInfo:
@@ -221,6 +227,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
       case PaymentStep.Checkout:
         return (
           <Checkout
+            chat={chat}
             prices={prices}
             shippingPrices={paymentState.shipping && shippingOptions
               ? getShippingPrices(shippingOptions, paymentState.shipping)
@@ -228,7 +235,9 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
             totalPrice={totalPrice}
             invoiceContent={invoiceContent}
             checkoutInfo={checkoutInfo}
-            currency={currency}
+            currency={currency!}
+            isTosAccepted={isTosAccepted}
+            onAcceptTos={setIsTosAccepted}
           />
         );
       case PaymentStep.ConfirmPayment:
@@ -270,18 +279,26 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
     setIsLoading(true);
     switch (step) {
       case PaymentStep.ShippingInfo:
-        return validateRequest();
+        validateRequest();
+        break;
       case PaymentStep.Shipping:
-        return setStep(PaymentStep.PaymentInfo);
+        setStep(PaymentStep.PaymentInfo);
+        break;
       case PaymentStep.PaymentInfo:
-        return sendCredentials();
+        sendCredentials();
+        break;
       case PaymentStep.Checkout:
-        return sendForm();
-      default:
-        return () => {
-        };
+        sendForm();
+        break;
     }
   }, [step, validateRequest, setStep, sendCredentials, sendForm]);
+
+  const handleModalClose = useCallback(() => {
+    paymentDispatch({
+      type: 'resetState',
+    });
+    setIsTosAccepted(false);
+  }, [paymentDispatch]);
 
   const modalHeader = useMemo(() => {
     switch (step) {
@@ -303,11 +320,14 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
   const buttonText = useMemo(() => {
     switch (step) {
       case PaymentStep.Checkout:
-        return lang('Checkout.PayPrice', formatCurrency(totalPrice, currency, lang.code));
+        return lang('Checkout.PayPrice', formatCurrency(totalPrice, currency!, lang.code));
       default:
         return lang('Next');
     }
   }, [step, lang, currency, totalPrice]);
+
+  const isSubmitDisabled = isLoading
+    || Boolean(step === PaymentStep.Checkout && invoiceContent?.isRecurring && !isTosAccepted);
 
   if (isProviderError) {
     return (
@@ -332,9 +352,10 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
 
   return (
     <Modal
-      className="PaymentModal"
+      className={buildClassName('PaymentModal', invoiceContent?.isRecurring && 'recurring')}
       isOpen={isOpen}
       onClose={onClose}
+      onCloseAnimationEnd={handleModalClose}
     >
       <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button
@@ -365,7 +386,7 @@ const Invoice: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <Button
             type="submit"
             onClick={handleButtonClick}
-            disabled={isLoading}
+            disabled={isSubmitDisabled}
             isLoading={isLoading}
           >
             {buttonText}
@@ -391,8 +412,10 @@ export default memo(withGlobal<OwnProps>(
       passwordMissing,
       error,
       confirmPaymentUrl,
+      inputInvoice,
     } = global.payment;
 
+    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
     const isProviderError = Boolean(invoice && (!nativeProvider || !SUPPORTED_PROVIDERS.has(nativeProvider)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const {
@@ -409,6 +432,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       step,
+      chat,
       shippingOptions,
       savedInfo,
       canSaveCredentials,
@@ -433,7 +457,7 @@ export default memo(withGlobal<OwnProps>(
       countryList: global.countryList.general,
     };
   },
-)(Invoice));
+)(PaymentModal));
 
 function findShippingOption(shippingOptions: ShippingOption[], optionId: string) {
   return shippingOptions.find(({ id }) => id === optionId);

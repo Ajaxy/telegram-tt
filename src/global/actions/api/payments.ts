@@ -1,19 +1,18 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { PaymentStep } from '../../../types';
-import type { ApiChat } from '../../../api/types';
+import type { ApiChat, ApiRequestInputInvoice } from '../../../api/types';
 
 import {
-  selectPaymentMessageId,
   selectPaymentRequestId,
   selectProviderPublishableKey,
   selectStripeCredentials,
   selectChatMessage,
-  selectPaymentChatId,
   selectChat,
   selectPaymentFormId,
   selectProviderPublicToken,
   selectSmartGlocalCredentials,
+  selectPaymentInputInvoice,
 } from '../../selectors';
 import { callApi } from '../../../api/gramjs';
 import { getStripeError } from '../../helpers';
@@ -26,27 +25,32 @@ import {
   setRequestInfoId,
   setPaymentForm,
   setStripeCardInfo,
-  setInvoiceMessageInfo,
   setReceipt,
   clearPayment,
   closeInvoice,
-  setSmartGlocalCardInfo,
+  setSmartGlocalCardInfo, addUsers, setInvoiceInfo,
 } from '../../reducers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('validateRequestedInfo', (global, actions, payload) => {
   const { requestInfo, saveInfo } = payload;
-  const chatId = selectPaymentChatId(global);
-  const chat = chatId && selectChat(global, chatId);
-  const messageId = selectPaymentMessageId(global);
-  if (!chat || !messageId) {
-    return;
+  const inputInvoice = selectPaymentInputInvoice(global);
+  if (!inputInvoice) return;
+  if ('slug' in inputInvoice) {
+    void validateRequestedInfo(inputInvoice, requestInfo, saveInfo);
+  } else {
+    const chat = selectChat(global, inputInvoice.chatId);
+    if (!chat) return;
+    void validateRequestedInfo({
+      chat,
+      messageId: inputInvoice.messageId,
+    }, requestInfo, saveInfo);
   }
-  void validateRequestedInfo(chat, messageId, requestInfo, saveInfo);
 });
 
-async function validateRequestedInfo(chat: ApiChat, messageId: number, requestInfo: any, shouldSave?: true) {
+async function validateRequestedInfo(inputInvoice: ApiRequestInputInvoice, requestInfo: any, shouldSave?: true) {
   const result = await callApi('validateRequestedInfo', {
-    chat, messageId, requestInfo, shouldSave,
+    inputInvoice, requestInfo, shouldSave,
   });
   if (!result) {
     return;
@@ -67,30 +71,50 @@ async function validateRequestedInfo(chat: ApiChat, messageId: number, requestIn
   setGlobal(global);
 }
 
-addActionHandler('getPaymentForm', (global, actions, payload) => {
-  const { chat, messageId } = payload;
-  if (!chat || !messageId) {
-    return;
+addActionHandler('openInvoice', async (global, actions, payload) => {
+  let invoice;
+  if ('slug' in payload) {
+    invoice = await getPaymentForm({ slug: payload.slug });
+  } else {
+    const chat = selectChat(global, payload.chatId);
+    if (!chat) return;
+    invoice = await getPaymentForm({
+      chat,
+      messageId: payload.messageId,
+    });
   }
-  void getPaymentForm(chat, messageId);
+  if (!invoice) return;
+
+  global = getGlobal();
+  global = setInvoiceInfo(global, invoice);
+  setGlobal({
+    ...global,
+    payment: {
+      ...global.payment,
+      inputInvoice: payload,
+      isPaymentModalOpen: true,
+      status: 'cancelled',
+    },
+  });
 });
 
-async function getPaymentForm(chat: ApiChat, messageId: number) {
-  const result = await callApi('getPaymentForm', { chat, messageId });
+async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
+  const result = await callApi('getPaymentForm', inputInvoice);
   if (!result) {
-    return;
+    return undefined;
   }
-  let global = setPaymentForm(getGlobal(), result);
+  const { form, invoice } = result;
+  let global = setPaymentForm(getGlobal(), form);
   let step = PaymentStep.PaymentInfo;
-  if (global.payment.invoice
-    && (global.payment.invoice.shippingAddressRequested
-    || global.payment.invoice.nameRequested
-    || global.payment.invoice.phoneRequested
-    || global.payment.invoice.emailRequested)) {
+  const {
+    shippingAddressRequested, nameRequested, phoneRequested, emailRequested,
+  } = global.payment.invoice || {};
+  if (shippingAddressRequested || nameRequested || phoneRequested || emailRequested) {
     step = PaymentStep.ShippingInfo;
   }
   global = setPaymentStep(global, step);
   setGlobal(global);
+  return invoice;
 }
 
 addActionHandler('getReceipt', (global, actions, payload) => {
@@ -157,22 +181,46 @@ addActionHandler('sendCredentialsInfo', (global, actions, payload) => {
 
 addActionHandler('sendPaymentForm', (global, actions, payload) => {
   const { shippingOptionId, saveCredentials } = payload;
-  const chatId = selectPaymentChatId(global);
-  const chat = chatId && selectChat(global, chatId);
-  const messageId = selectPaymentMessageId(global);
+  const inputInvoice = selectPaymentInputInvoice(global);
   const formId = selectPaymentFormId(global);
   const requestInfoId = selectPaymentRequestId(global);
   const { nativeProvider } = global.payment;
   const publishableKey = nativeProvider === 'stripe'
     ? selectProviderPublishableKey(global) : selectProviderPublicToken(global);
-  if (!chat || !messageId || !publishableKey || !formId || !nativeProvider) {
-    return;
+
+  if (!inputInvoice || !publishableKey || !formId || !nativeProvider) {
+    return undefined;
   }
 
-  void sendPaymentForm(chat, messageId, nativeProvider, formId, {
+  let requestInputInvoice;
+  if ('slug' in inputInvoice) {
+    requestInputInvoice = {
+      slug: inputInvoice.slug,
+    };
+  } else {
+    const chat = selectChat(global, inputInvoice.chatId);
+    if (!chat) {
+      return undefined;
+    }
+
+    requestInputInvoice = {
+      chat,
+      messageId: inputInvoice.messageId,
+    };
+  }
+
+  void sendPaymentForm(requestInputInvoice, formId, {
     save: saveCredentials,
     data: nativeProvider === 'stripe' ? selectStripeCredentials(global) : selectSmartGlocalCredentials(global),
   }, requestInfoId, shippingOptionId);
+
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      status: 'pending',
+    },
+  };
 });
 
 async function sendStripeCredentials(
@@ -212,6 +260,7 @@ async function sendStripeCredentials(
       ...global,
       payment: {
         ...global.payment,
+        status: 'failed',
         error: {
           ...error,
         },
@@ -268,6 +317,7 @@ async function sendSmartGlocalCredentials(
       ...global,
       payment: {
         ...global.payment,
+        status: 'failed',
         error: {
           ...error,
         },
@@ -285,20 +335,25 @@ async function sendSmartGlocalCredentials(
 }
 
 async function sendPaymentForm(
-  chat: ApiChat,
-  messageId: number,
-  nativeProvider: string,
+  inputInvoice: ApiRequestInputInvoice,
   formId: string,
   credentials: any,
   requestedInfoId?: string,
   shippingOptionId?: string,
 ) {
   const result = await callApi('sendPaymentForm', {
-    chat, messageId, formId, credentials, requestedInfoId, shippingOptionId,
+    inputInvoice, formId, credentials, requestedInfoId, shippingOptionId,
   });
 
   if (result === true) {
-    const global = clearPayment(getGlobal());
+    let global = clearPayment(getGlobal());
+    global = {
+      ...global,
+      payment: {
+        ...global.payment,
+        status: 'paid',
+      },
+    };
     setGlobal(closeInvoice(global));
   }
 }
@@ -307,6 +362,38 @@ addActionHandler('setPaymentStep', (global, actions, payload = {}) => {
   return setPaymentStep(global, payload.step || PaymentStep.ShippingInfo);
 });
 
-addActionHandler('setInvoiceMessageInfo', (global, actions, payload) => {
-  return setInvoiceMessageInfo(global, payload);
+addActionHandler('closePremiumModal', (global, actions, payload) => {
+  if (!global.premiumModal) return undefined;
+  const { isClosed } = payload || {};
+  return {
+    ...global,
+    premiumModal: {
+      ...global.premiumModal,
+      ...(isClosed && { isOpen: false }),
+      isClosing: !isClosed,
+    },
+  };
+});
+
+addActionHandler('openPremiumModal', async (global, actions, payload) => {
+  const { initialSection, fromUserId, isSuccess } = payload || {};
+
+  actions.loadPremiumStickers();
+
+  const result = await callApi('fetchPremiumPromo');
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+
+  setGlobal({
+    ...global,
+    premiumModal: {
+      promo: result.promo,
+      initialSection,
+      isOpen: true,
+      fromUserId,
+      isSuccess,
+    },
+  });
 });

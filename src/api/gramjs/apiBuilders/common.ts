@@ -2,7 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
-  ApiPhoto, ApiPhotoSize, ApiThumbnail,
+  ApiPhoto, ApiPhotoSize, ApiThumbnail, ApiVideoSize,
 } from '../../types';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
@@ -73,6 +73,21 @@ export function buildApiPhoto(photo: GramJs.Photo): ApiPhoto {
     id: String(photo.id),
     thumbnail: buildApiThumbnailFromStripped(photo.sizes),
     sizes,
+    ...(photo.videoSizes && { videoSizes: photo.videoSizes.map(buildApiVideoSize), isVideo: true }),
+  };
+}
+
+export function buildApiVideoSize(videoSize: GramJs.VideoSize): ApiVideoSize {
+  const {
+    videoStartTs, size, h, w, type,
+  } = videoSize;
+
+  return {
+    videoStartTs,
+    size,
+    height: h,
+    width: w,
+    type: type as ('u' | 'v'),
   };
 }
 

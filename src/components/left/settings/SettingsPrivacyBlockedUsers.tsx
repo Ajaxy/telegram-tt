@@ -79,7 +79,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
         }]}
         style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
       >
-        <Avatar size="medium" user={user} chat={chat} />
+        <Avatar size="medium" user={user} chat={chat} noVideo />
         <div className="contact-info" dir="auto">
           <h3 dir="auto">{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
           {user?.phoneNumber && (

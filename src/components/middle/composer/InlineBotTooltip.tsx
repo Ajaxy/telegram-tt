@@ -41,6 +41,7 @@ export type OwnProps = {
   ) => void;
   loadMore: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
+  isCurrentUserPremium?: boolean;
 };
 
 const InlineBotTooltip: FC<OwnProps> = ({
@@ -54,6 +55,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
   loadMore,
   onClose,
   onSelectResult,
+  isCurrentUserPremium,
 }) => {
   const {
     openChat,
@@ -92,7 +94,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
 
   const handleSendPm = useCallback(() => {
     openChat({ id: botId });
-    startBot({ botId, param: switchPm!.startParam });
+    startBot({ botId: botId!, param: switchPm!.startParam });
   }, [botId, openChat, startBot, switchPm]);
 
   const prevInlineBotResults = usePrevious(
@@ -157,6 +159,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
               observeIntersection={observeIntersection}
               onClick={onSelectResult}
               isSavedMessages={isSavedMessages}
+              isCurrentUserPremium={isCurrentUserPremium}
             />
           );
 

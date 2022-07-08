@@ -1,3 +1,4 @@
+import type { LangFn } from '../hooks/useLang';
 import EMOJI_REGEX from '../lib/twemojiRegex';
 import { fixNonStandardEmoji } from './emoji';
 import withCache from './withCache';
@@ -44,3 +45,16 @@ export const getFirstLetters = withCache((phrase: string, count = 2) => {
     })
     .join('');
 });
+
+const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
+export function formatFileSize(lang: LangFn, bytes: number, decimals = 1): string {
+  if (bytes === 0) {
+    return lang('FileSize.B', 0);
+  }
+
+  const k = 1024;
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const value = (bytes / (k ** i)).toFixed(Math.max(decimals, 0));
+
+  return lang(`FileSize.${FILE_SIZE_UNITS[i]}`, value);
+}

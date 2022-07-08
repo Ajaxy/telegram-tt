@@ -1,0 +1,27 @@
+.PremiumIcon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+
+  &.big {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  --color-fill: var(--color-primary);
+
+  & > svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:not(.gradient) {
+    transform: translateY(-2px);
+  }
+
+  &.clickable {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+}

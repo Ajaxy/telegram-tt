@@ -199,8 +199,10 @@
       }
 
       .VerifiedIcon {
-        width: 1.25rem;
-        height: 1.25rem;
+        margin-left: 0.5rem;
+      }
+
+      .PremiumIcon, .VerifiedIcon {
         margin-left: 0.25rem;
       }
 
@@ -370,6 +372,10 @@
     flex-grow: 1;
     white-space: initial;
     overflow: hidden;
+
+    .word-break {
+      overflow-wrap: break-word;
+    }
 
     .title,
     .subtitle {

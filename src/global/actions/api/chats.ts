@@ -2,7 +2,9 @@ import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
-import type { ApiChat, ApiUser, ApiChatFolder } from '../../../api/types';
+import type {
+  ApiChat, ApiUser, ApiChatFolder, ApiError,
+} from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { NewChatMembersProgress, ChatCreationProgress, ManagementProgress } from '../../../types';
 import type { GlobalActions } from '../../types';
@@ -31,13 +33,14 @@ import {
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import {
-  isChatSummaryOnly, isChatArchived, isChatBasicGroup, isUserBot,
+  isChatSummaryOnly, isChatArchived, isChatBasicGroup, isUserBot, isChatChannel, isChatSuperGroup,
 } from '../../helpers';
 import { processDeepLink } from '../../../util/deeplink';
 import { updateGroupCall } from '../../reducers/calls';
 import { selectGroupCall } from '../../selectors/calls';
 import { getOrderedIds } from '../../../util/folderManager';
 import * as langProvider from '../../../util/langProvider';
+import { selectCurrentLimit } from '../../selectors/limits';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;
@@ -259,9 +262,11 @@ addActionHandler('joinChannel', (global, actions, payload) => {
 
   const { id: channelId, accessHash } = chat;
 
-  if (channelId && accessHash) {
-    void callApi('joinChannel', { channelId, accessHash });
+  if (!(channelId && accessHash)) {
+    return;
   }
+
+  void joinChannel(channelId, accessHash);
 });
 
 addActionHandler('deleteChatUser', (global, actions, payload) => {
@@ -355,6 +360,8 @@ addActionHandler('toggleChatPinned', (global, actions, payload) => {
     return;
   }
 
+  const limit = selectCurrentLimit(global, 'dialogFolderPinned');
+
   if (folderId) {
     const folder = selectChatFolder(global, folderId);
     if (folder) {
@@ -380,6 +387,14 @@ addActionHandler('toggleChatPinned', (global, actions, payload) => {
   } else {
     const listType = selectChatListType(global, id);
     const isPinned = selectIsChatPinned(global, id, listType === 'archived' ? ARCHIVED_FOLDER_ID : undefined);
+
+    const ids = global.chats.orderedPinnedIds[listType === 'archived' ? 'archived' : 'active'];
+    if ((ids?.length || 0) >= limit && !isPinned) {
+      actions.openLimitReachedModal({
+        limit: 'dialogFolderPinned',
+      });
+      return;
+    }
     void callApi('toggleChatPinned', { chat, shouldBePinned: !isPinned });
   }
 });
@@ -405,6 +420,14 @@ addActionHandler('loadRecommendedChatFolders', () => {
 
 addActionHandler('editChatFolders', (global, actions, payload) => {
   const { chatId, idsToRemove, idsToAdd } = payload!;
+  const limit = selectCurrentLimit(global, 'dialogFiltersChats');
+
+  const isLimitReached = (idsToAdd as number[])
+    .some((id) => selectChatFolder(global, id)!.includedChatIds.length >= limit);
+  if (isLimitReached) {
+    actions.openLimitReachedModal({ limit: 'dialogFiltersChats' });
+    return;
+  }
 
   (idsToRemove as number[]).forEach(async (id) => {
     const folder = selectChatFolder(global, id);
@@ -453,8 +476,17 @@ addActionHandler('editChatFolder', (global, actions, payload) => {
 
 addActionHandler('addChatFolder', (global, actions, payload) => {
   const { folder } = payload!;
-  const { orderedIds } = global.chatFolders;
-  const maxId = orderedIds?.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
+  const { orderedIds, byId } = global.chatFolders;
+
+  const limit = selectCurrentLimit(global, 'dialogFilters');
+  if (Object.keys(byId).length >= limit) {
+    actions.openLimitReachedModal({
+      limit: 'dialogFilters',
+    });
+    return;
+  }
+
+  const maxId = Math.max(...(orderedIds || []), ARCHIVED_FOLDER_ID);
 
   void createChatFolder(folder, maxId);
 });
@@ -581,6 +613,10 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
       chatId,
       messageId,
     });
+  } else if (part1 === 'invoice') {
+    actions.openInvoice({
+      slug: part2,
+    });
   } else {
     actions.openChatByUsername({
       username: part1,
@@ -611,7 +647,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload) => {
   const chat = selectCurrentChat(global);
 
   if (!commentId) {
-    if (chat && chat.username === username && !startAttach) {
+    if (chat && chat.username === username && !startAttach && !startParam) {
       actions.focusMessage({ chatId: chat.id, messageId });
       return;
     }
@@ -648,7 +684,7 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload) => {
   }
 
   if (isChatBasicGroup(chat)) {
-    chat = await callApi('migrateChat', chat);
+    chat = await migrateChat(chat);
 
     if (!chat) {
       return;
@@ -681,7 +717,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   }
 
   if (isChatBasicGroup(chat)) {
-    chat = await callApi('migrateChat', chat);
+    chat = await migrateChat(chat);
 
     if (!chat) {
       return;
@@ -737,7 +773,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
   }
 
   if (isChatBasicGroup(chat)) {
-    chat = await callApi('migrateChat', chat);
+    chat = await migrateChat(chat);
     if (!chat) {
       return;
     }
@@ -849,7 +885,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload) => {
   }
 
   if (isChatBasicGroup(chat)) {
-    chat = await callApi('migrateChat', chat);
+    chat = await migrateChat(chat);
 
     if (!chat) {
       return;
@@ -895,28 +931,22 @@ addActionHandler('unlinkDiscussionGroup', async (global, actions, payload) => {
 });
 
 addActionHandler('setActiveChatFolder', (global, actions, payload) => {
+  const maxFolders = selectCurrentLimit(global, 'dialogFilters');
+
+  const isBlocked = payload + 1 > maxFolders;
+
+  if (isBlocked) {
+    actions.openLimitReachedModal({
+      limit: 'dialogFilters',
+    });
+    return undefined;
+  }
+
   return {
     ...global,
     chatFolders: {
       ...global.chatFolders,
       activeChatFolder: payload,
-    },
-  };
-});
-
-addActionHandler('openChatWithText', (global, actions, payload) => {
-  const { chatId, text } = payload;
-
-  actions.openChat({ id: chatId });
-  actions.exitMessageSelectMode();
-
-  global = getGlobal();
-
-  return {
-    ...global,
-    openChatWithText: {
-      chatId,
-      text,
     },
   };
 });
@@ -1014,6 +1044,24 @@ addActionHandler('loadChatSettings', async (global, actions, payload) => {
   if (!settings) return;
 
   setGlobal(updateChat(getGlobal(), chat.id, { settings }));
+});
+
+addActionHandler('toggleJoinToSend', async (global, actions, payload) => {
+  const { chatId, isEnabled } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+  if (!isChatSuperGroup(chat) && !isChatChannel(chat)) return;
+
+  await callApi('toggleJoinToSend', chat, isEnabled);
+});
+
+addActionHandler('toggleJoinRequest', async (global, actions, payload) => {
+  const { chatId, isEnabled } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+  if (!isChatSuperGroup(chat) && !isChatChannel(chat)) return;
+
+  await callApi('toggleJoinRequest', chat, isEnabled);
 });
 
 async function loadChats(
@@ -1154,7 +1202,27 @@ async function createChannel(title: string, users: ApiUser[], about?: string, ph
     },
   });
 
-  const createdChannel = await callApi('createChannel', { title, about, users });
+  let createdChannel: ApiChat | undefined;
+
+  try {
+    createdChannel = await callApi('createChannel', { title, about, users });
+  } catch (error) {
+    const global = getGlobal();
+
+    setGlobal({
+      ...global,
+      chatCreation: {
+        progress: ChatCreationProgress.Error,
+      },
+    });
+
+    if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
+      getActions().openLimitReachedModal({ limit: 'channels' });
+    } else {
+      getActions().showDialog({ data: { ...(error as ApiError), hasErrorKey: true } });
+    }
+  }
+
   if (!createdChannel) {
     return;
   }
@@ -1175,6 +1243,18 @@ async function createChannel(title: string, users: ApiUser[], about?: string, ph
 
   if (channelId && accessHash && photo) {
     await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
+  }
+}
+
+async function joinChannel(channelId: string, accessHash: string) {
+  try {
+    await callApi('joinChannel', { channelId, accessHash });
+  } catch (error) {
+    if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
+      getActions().openLimitReachedModal({ limit: 'channels' });
+    } else {
+      getActions().showDialog({ data: { ...(error as ApiError), hasErrorKey: true } });
+    }
   }
 }
 
@@ -1232,6 +1312,22 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
         },
       });
     }
+  }
+}
+
+export async function migrateChat(chat: ApiChat): Promise<ApiChat | undefined> {
+  try {
+    const supergroup = await callApi('migrateChat', chat);
+
+    return supergroup;
+  } catch (error) {
+    if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
+      getActions().openLimitReachedModal({ limit: 'channels' });
+    } else {
+      getActions().showDialog({ data: { ...(error as ApiError), hasErrorKey: true } });
+    }
+
+    return undefined;
   }
 }
 

@@ -6,3 +6,5 @@ export * from './messageMedia';
 export * from './localSearch';
 export * from './payments';
 export * from './reactions';
+export * from './bots';
+export * from './media';

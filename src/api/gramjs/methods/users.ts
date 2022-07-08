@@ -19,6 +19,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
+import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -42,6 +43,18 @@ export async function fetchFullUser({
 
   if (!fullInfo) {
     return;
+  }
+
+  if (fullInfo.fullUser.profilePhoto instanceof GramJs.Photo) {
+    localDb.photos[fullInfo.fullUser.profilePhoto.id.toString()] = fullInfo.fullUser.profilePhoto;
+  }
+
+  const botInfo = fullInfo.fullUser.botInfo;
+  if (botInfo?.descriptionPhoto instanceof GramJs.Photo) {
+    localDb.photos[botInfo.descriptionPhoto.id.toString()] = botInfo.descriptionPhoto;
+  }
+  if (botInfo?.descriptionDocument instanceof GramJs.Document) {
+    localDb.documents[botInfo.descriptionDocument.id.toString()] = botInfo.descriptionDocument;
   }
 
   const userWithFullInfo = buildApiUserFromFull(fullInfo);

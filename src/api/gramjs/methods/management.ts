@@ -49,9 +49,8 @@ export async function updatePrivateLink({
     expireDate,
   }));
 
-  if (!result) {
-    return undefined;
-  }
+  // TODO Verify Exported Invite logic
+  if (!(result instanceof GramJs.ChatInviteExported)) return undefined;
 
   onUpdate({
     '@type': 'updateChatFullInfo',
@@ -76,7 +75,10 @@ export async function fetchExportedChatInvites({
 
   if (!exportedInvites) return undefined;
   addEntitiesWithPhotosToLocalDb(exportedInvites.users);
-  return exportedInvites.invites.map(buildApiExportedInvite);
+  // TODO Verify Exported Invite logic
+  return (exportedInvites.invites
+    .filter((l) => l instanceof GramJs.ChatInviteExported) as GramJs.ChatInviteExported[])
+    .map(buildApiExportedInvite);
 }
 
 export async function editExportedChatInvite({
@@ -90,6 +92,7 @@ export async function editExportedChatInvite({
   isRequestNeeded?: boolean;
   title?: string;
 }) {
+  // TODO Verify Exported Invite logic
   const invite = await invokeRequest(new GramJs.messages.EditExportedChatInvite({
     link,
     peer: buildInputPeer(peer.id, peer.accessHash),
@@ -103,7 +106,7 @@ export async function editExportedChatInvite({
   if (!invite) return undefined;
 
   addEntitiesWithPhotosToLocalDb(invite.users);
-  if (invite instanceof GramJs.messages.ExportedChatInvite) {
+  if (invite instanceof GramJs.messages.ExportedChatInvite && invite.invite instanceof GramJs.ChatInviteExported) {
     const replaceInvite = buildApiExportedInvite(invite.invite);
     return {
       oldInvite: replaceInvite,
@@ -111,7 +114,9 @@ export async function editExportedChatInvite({
     };
   }
 
-  if (invite instanceof GramJs.messages.ExportedChatInviteReplaced) {
+  if (invite instanceof GramJs.messages.ExportedChatInviteReplaced
+    && invite.invite instanceof GramJs.ChatInviteExported
+    && invite.newInvite instanceof GramJs.ChatInviteExported) {
     const oldInvite = buildApiExportedInvite(invite.invite);
     const newInvite = buildApiExportedInvite(invite.newInvite);
     return {
@@ -139,7 +144,8 @@ export async function exportChatInvite({
     title,
   }));
 
-  if (!invite) return undefined;
+  // TODO Verify Exported Invite logic
+  if (!(invite instanceof GramJs.ChatInviteExported)) return undefined;
   return buildApiExportedInvite(invite);
 }
 

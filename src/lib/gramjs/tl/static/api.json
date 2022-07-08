@@ -47,6 +47,8 @@
     "account.setContentSettings",
     "account.getContentSettings",
     "account.reportPeer",
+    "account.getGlobalPrivacySettings",
+    "account.setGlobalPrivacySettings",
     "account.reportProfilePhoto",
     "account.changeAuthorizationSettings",
     "account.setAuthorizationTTL",
@@ -192,6 +194,8 @@
     "channels.getGroupsForDiscussion",
     "channels.setDiscussionGroup",
     "channels.getSendAs",
+    "channels.toggleJoinToSend",
+    "channels.toggleJoinRequest",
     "channels.viewSponsoredMessage",
     "channels.getSponsoredMessages",
     "payments.getPaymentForm",
@@ -245,5 +249,7 @@
     "messages.readReactions",
     "messages.getUnreadReactions",
     "messages.readMentions",
-    "messages.getUnreadMentions"
+    "messages.getUnreadMentions",
+    "help.getPremiumPromo",
+    "messages.transcribeAudio"
 ]

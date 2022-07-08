@@ -18,6 +18,16 @@ addActionHandler('openChat', (global, actions, payload) => {
 
   const currentMessageList = selectCurrentMessageList(global);
 
+  if (global.premiumModal?.promo && global.premiumModal?.isOpen) {
+    global = {
+      ...global,
+      premiumModal: {
+        ...global.premiumModal,
+        isOpen: false,
+      },
+    };
+  }
+
   if (!currentMessageList
     || (
       currentMessageList.chatId !== id
@@ -60,6 +70,20 @@ addActionHandler('openChatWithInfo', (global, actions, payload) => {
   actions.openChat(payload);
 });
 
+addActionHandler('openChatWithText', (global, actions, payload) => {
+  const { chatId, text } = payload;
+
+  actions.openChat({ id: chatId });
+
+  return {
+    ...global,
+    openChatWithText: {
+      chatId,
+      text,
+    },
+  };
+});
+
 addActionHandler('resetChatCreation', (global) => {
   return {
     ...global,
@@ -92,4 +116,19 @@ addActionHandler('openNextChat', (global, actions, payload) => {
   const nextId = orderedIds[position + targetIndexDelta];
 
   actions.openChat({ id: nextId, shouldReplaceHistory: true });
+});
+
+addActionHandler('openDeleteChatFolderModal', (global, actions, payload) => {
+  const { folderId } = payload;
+  return {
+    ...global,
+    deleteFolderDialogModal: folderId,
+  };
+});
+
+addActionHandler('closeDeleteChatFolderModal', (global) => {
+  return {
+    ...global,
+    deleteFolderDialogModal: undefined,
+  };
 });

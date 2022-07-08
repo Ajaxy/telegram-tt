@@ -1,9 +1,24 @@
 .Sticker {
+  overflow: visible !important;
+  contain: layout;
+  position: relative;
+
+  &.reversed {
+    transform: scaleX(-1);
+  }
+
   &:not(.inactive) {
     cursor: pointer;
   }
 
   &.inactive {
     pointer-events: none;
+  }
+
+  .effect-sticker {
+    position: absolute;
+    top: 50%;
+    right: -1rem;
+    transform: translateY(-50%);
   }
 }

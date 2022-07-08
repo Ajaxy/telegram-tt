@@ -8,7 +8,7 @@ import type { ApiStickerSet } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_SEARCH } from '../../config';
-import { selectShouldLoopStickers, selectStickerSet } from '../../global/selectors';
+import { selectIsCurrentUserPremium, selectShouldLoopStickers, selectStickerSet } from '../../global/selectors';
 import useFlag from '../../hooks/useFlag';
 import useOnChange from '../../hooks/useOnChange';
 import useLang from '../../hooks/useLang';
@@ -28,13 +28,15 @@ type OwnProps = {
 type StateProps = {
   set?: ApiStickerSet;
   shouldPlay?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
+const PREMIUM_STICKERS_TO_DISPLAY = 3;
 const STICKERS_TO_DISPLAY = 5;
 
 const StickerSetResult: FC<OwnProps & StateProps> = ({
   stickerSetId, observeIntersection, set, shouldPlay,
-  isSomeModalOpen, onModalToggle,
+  isSomeModalOpen, onModalToggle, isCurrentUserPremium,
 }) => {
   const { loadStickers, toggleStickerSet } = getActions();
 
@@ -53,10 +55,12 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
       return [];
     }
 
+    const premiumStickerIds = (set.stickers?.filter(({ hasEffect }) => hasEffect) ?? [])
+      .slice(0, PREMIUM_STICKERS_TO_DISPLAY);
     const coverStickerIds = (set.covers || []).map(({ id }) => id);
     const otherStickers = set.stickers ? set.stickers.filter(({ id }) => !coverStickerIds.includes(id)) : [];
 
-    return [...(set.covers || []), ...otherStickers].slice(0, STICKERS_TO_DISPLAY);
+    return [...premiumStickerIds, ...(set.covers || []), ...otherStickers].slice(0, STICKERS_TO_DISPLAY);
   }, [set]);
 
   useEffect(() => {
@@ -105,6 +109,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
             clickArg={undefined}
             onClick={openModal}
             noContextMenu
+            isCurrentUserPremium={isCurrentUserPremium}
           />
         ))}
       </div>
@@ -124,6 +129,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       set: selectStickerSet(global, stickerSetId),
       shouldPlay: selectShouldLoopStickers(global),
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(StickerSetResult));

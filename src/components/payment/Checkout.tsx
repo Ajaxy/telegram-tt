@@ -2,18 +2,30 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import type { LangCode, Price } from '../../types';
+import type { ApiChat, ApiWebDocument } from '../../api/types';
 
+import { getWebDocumentHash } from '../../global/helpers';
 import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
+import renderText from '../common/helpers/renderText';
 
-import './Checkout.scss';
+import useLang from '../../hooks/useLang';
+import useMedia from '../../hooks/useMedia';
+
+import Checkbox from '../ui/Checkbox';
+import Skeleton from '../ui/Skeleton';
+import SafeLink from '../common/SafeLink';
+
+import styles from './Checkout.module.scss';
 
 export type OwnProps = {
+  chat?: ApiChat;
   invoiceContent?: {
     title?: string;
     text?: string;
-    photoUrl?: string;
+    photo?: ApiWebDocument;
+    isRecurring?: boolean;
+    recurringTermsUrl?: string;
   };
   checkoutInfo?: {
     paymentMethod?: string;
@@ -26,20 +38,27 @@ export type OwnProps = {
   prices?: Price[];
   totalPrice?: number;
   shippingPrices?: Price[];
-  currency?: string;
+  currency: string;
+  isTosAccepted?: boolean;
+  onAcceptTos?: (isAccepted: boolean) => void;
 };
 
 const Checkout: FC<OwnProps> = ({
+  chat,
   invoiceContent,
   prices,
   shippingPrices,
   checkoutInfo,
   currency,
   totalPrice,
+  isTosAccepted,
+  onAcceptTos,
 }) => {
   const lang = useLang();
 
-  const { photoUrl, title, text } = invoiceContent || {};
+  const {
+    photo, title, text, isRecurring, recurringTermsUrl,
+  } = invoiceContent || {};
   const {
     paymentMethod,
     paymentProvider,
@@ -49,30 +68,71 @@ const Checkout: FC<OwnProps> = ({
     shippingMethod,
   } = (checkoutInfo || {});
 
+  const photoUrl = useMedia(getWebDocumentHash(photo));
+
+  function renderTosLink(url: string, isRtl?: boolean) {
+    const langString = lang('PaymentCheckoutAcceptRecurrent', chat?.title);
+    const langStringSplit = langString.split('*');
+    return (
+      <>
+        {langStringSplit[0]}
+        <SafeLink
+          url={url}
+          text=""
+          isRtl={isRtl}
+        >
+          {langStringSplit[1]}
+        </SafeLink>
+        {langStringSplit.slice(2)}
+      </>
+    );
+  }
+
+  function renderTos(url: string) {
+    return (
+      <Checkbox
+        label={renderTosLink(url, lang.isRtl)}
+        name="checkout_tos"
+        checked={Boolean(isTosAccepted)}
+        className={styles.tosCheckbox}
+        tabIndex={0}
+        onCheck={onAcceptTos}
+      />
+    );
+  }
+
   return (
-    <div className="Checkout">
-      <div className="description has-image">
-        {photoUrl && <img src={photoUrl} alt="" />}
-        <div className="text">
-          <h5>{title}</h5>
-          <p>{text}</p>
+    <div className={styles.root}>
+      <div className={styles.description}>
+        {photoUrl && <img className={styles.checkoutPicture} src={photoUrl} alt="" />}
+        {!photoUrl && photo && (
+          <Skeleton
+            width={photo.dimensions?.width}
+            height={photo.dimensions?.height}
+            className={styles.checkoutPicture}
+            forceAspectRatio
+          />
+        )}
+        <div className={styles.text}>
+          <h5 className={styles.checkoutTitle}>{title}</h5>
+          {text && <div className={styles.checkoutDescription}>{renderText(text, ['br', 'links', 'emoji'])}</div>}
         </div>
       </div>
-      <div className="price-info">
-        { prices && prices.map((item) => (
+      <div className={styles.priceInfo}>
+        {prices && prices.map((item) => (
           renderPaymentItem(lang.code, item.label, item.amount, currency)
-        )) }
-        { shippingPrices && shippingPrices.map((item) => (
+        ))}
+        {shippingPrices && shippingPrices.map((item) => (
           renderPaymentItem(lang.code, item.label, item.amount, currency)
-        )) }
-        { totalPrice !== undefined && (
+        ))}
+        {totalPrice !== undefined && (
           renderPaymentItem(lang.code, lang('Checkout.TotalAmount'), totalPrice, currency, true)
-        ) }
+        )}
       </div>
-      <div className="invoice-info">
+      <div className={styles.invoiceInfo}>
         {paymentMethod && renderCheckoutItem('icon-card', paymentMethod, lang('PaymentCheckoutMethod'))}
         {paymentProvider && renderCheckoutItem(
-          buildClassName('provider', paymentProvider.toLowerCase()),
+          buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
           paymentProvider,
           lang('PaymentCheckoutProvider'),
         )}
@@ -80,20 +140,21 @@ const Checkout: FC<OwnProps> = ({
         {name && renderCheckoutItem('icon-user', name, lang('PaymentCheckoutName'))}
         {phone && renderCheckoutItem('icon-phone', phone, lang('PaymentCheckoutPhoneNumber'))}
         {shippingMethod && renderCheckoutItem('icon-truck', shippingMethod, lang('PaymentCheckoutShippingMethod'))}
+        {isRecurring && renderTos(recurringTermsUrl!)}
       </div>
     </div>
   );
 };
 
 function renderPaymentItem(
-  langCode: LangCode | undefined, title: string, value: number, currency?: string, main = false,
+  langCode: LangCode | undefined, title: string, value: number, currency: string, main = false,
 ) {
   return (
-    <div className={`price-info-item ${main ? 'price-info-item-main' : ''}`}>
-      <div className="title">
-        { title }
+    <div className={buildClassName(styles.priceInfoItem, main && styles.priceInfoItemMain)}>
+      <div className={styles.priceInfoItemTitle}>
+        {title}
       </div>
-      <div className="value">
+      <div>
         {formatCurrency(value, currency, langCode)}
       </div>
     </div>
@@ -102,14 +163,14 @@ function renderPaymentItem(
 
 function renderCheckoutItem(icon: string, title: string, data: string) {
   return (
-    <div className="checkout-info-item">
-      <i className={icon}> </i>
-      <div className="info">
-        <div className="title">
-          { title }
+    <div className={styles.checkoutInfoItem}>
+      <i className={buildClassName(icon, styles.checkoutInfoItemIcon)}> </i>
+      <div className={styles.checkoutInfoItemInfo}>
+        <div className={styles.checkoutInfoItemInfoTitle}>
+          {title}
         </div>
-        <p className="data">
-          { data }
+        <p className={styles.checkoutInfoItemInfoData}>
+          {data}
         </p>
       </div>
     </div>

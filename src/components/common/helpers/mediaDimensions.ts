@@ -12,6 +12,7 @@ export const REM = parseInt(getComputedStyle(document.documentElement).fontSize,
 export const ROUND_VIDEO_DIMENSIONS_PX = 240;
 export const GIF_MIN_WIDTH = 300;
 export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
+export const VIDEO_AVATAR_FULL_DIMENSIONS = { width: 800, height: 800 };
 export const LIKE_STICKER_ID = '4986041492570112461';
 
 const DEFAULT_MEDIA_DIMENSIONS: ApiDimensions = { width: 100, height: 100 };

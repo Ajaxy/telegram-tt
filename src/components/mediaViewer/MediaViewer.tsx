@@ -22,7 +22,7 @@ import {
   getMessageVideo,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
-  getPhotoFullDimensions,
+  getPhotoFullDimensions, getVideoAvatarMediaHash,
   getVideoDimensions,
   isMessageDocumentPhoto,
   isMessageDocumentVideo,
@@ -43,7 +43,9 @@ import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { ANIMATION_END_DELAY } from '../../config';
-import { AVATAR_FULL_DIMENSIONS, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
+import {
+  AVATAR_FULL_DIMENSIONS, MEDIA_VIEWER_MEDIA_QUERY, VIDEO_AVATAR_FULL_DIMENSIONS,
+} from '../common/helpers/mediaDimensions';
 import windowSize from '../../util/windowSize';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import { renderMessageText } from '../common/helpers/renderMessageText';
@@ -152,8 +154,10 @@ const MediaViewer: FC<StateProps> = ({
   function getMediaHash(isFull?: boolean) {
     if (isAvatar && profilePhotoIndex !== undefined) {
       const { photos } = avatarOwner!;
-      return photos && photos[profilePhotoIndex]
-        ? `photo${photos[profilePhotoIndex].id}?size=c`
+      const avatarPhoto = photos && photos[profilePhotoIndex];
+      return avatarPhoto
+        // Video for avatar should be used only for full size
+        ? (avatarPhoto.isVideo && isFull ? getVideoAvatarMediaHash(avatarPhoto) : `photo${avatarPhoto.id}?size=c`)
         : getChatAvatarHash(avatarOwner!, isFull ? 'big' : 'normal');
     }
 
@@ -183,6 +187,7 @@ const MediaViewer: FC<StateProps> = ({
     isGhostAnimation && ANIMATION_DURATION,
   );
   const avatarPhoto = avatarOwner?.photos?.[profilePhotoIndex!];
+  const isVideoAvatar = Boolean(isAvatar && avatarPhoto?.isVideo);
   const canReport = !!avatarPhoto && profilePhotoIndex! > 0 && !isChatWithSelf;
 
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
@@ -191,11 +196,14 @@ const MediaViewer: FC<StateProps> = ({
   if (!bestImageData && origin !== MediaViewerOrigin.SearchResult) {
     bestImageData = thumbDataUri;
   }
+  if (isVideoAvatar && previewBlobUrl) {
+    bestImageData = previewBlobUrl;
+  }
 
   const fileName = message
     ? getMessageFileName(message)
     : isAvatar
-      ? `avatar${avatarOwner!.id}-${profilePhotoIndex}.jpg`
+      ? `avatar${avatarOwner!.id}-${profilePhotoIndex}.${avatarOwner?.hasVideoAvatar ? 'mp4' : 'jpg'}`
       : undefined;
 
   let dimensions!: ApiDimensions;
@@ -208,7 +216,7 @@ const MediaViewer: FC<StateProps> = ({
       dimensions = getVideoDimensions((video || webPageVideo)!)!;
     }
   } else {
-    dimensions = AVATAR_FULL_DIMENSIONS;
+    dimensions = isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
   }
 
   useEffect(() => {

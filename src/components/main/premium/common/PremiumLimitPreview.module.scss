@@ -1,0 +1,18 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-weight: 500;
+  color: var(--color-text);
+  margin-left: 0.75rem;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+  margin-left: 0.75rem;
+}

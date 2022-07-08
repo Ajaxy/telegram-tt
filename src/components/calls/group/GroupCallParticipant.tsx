@@ -79,7 +79,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
       onClick={handleOnClick}
       ref={anchorRef}
     >
-      <Avatar user={user} chat={chat} size="medium" />
+      <Avatar user={user} chat={chat} size="medium" noVideo />
       <div className="info">
         <span className="name">{name}</span>
         <span className={buildClassName('about', aboutColor)}>{aboutText}</span>

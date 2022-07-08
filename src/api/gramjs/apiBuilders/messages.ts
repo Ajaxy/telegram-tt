@@ -31,6 +31,7 @@ import type {
   ApiLocation,
   ApiGame,
   PhoneCallAction,
+  ApiWebDocument,
 } from '../../types';
 
 import {
@@ -66,7 +67,7 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
-    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId,
+    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended,
   } = mtpMessage;
   const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
   const chatInviteTitle = chatInvite
@@ -80,6 +81,7 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     isBot: fromId ? isPeerUser(fromId) : false,
     text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
+    isRecommended: Boolean(recommended),
     ...(chatId && { chatId }),
     ...(chatInviteHash && { chatInviteHash }),
     ...(chatInvite && { chatInviteTitle }),
@@ -237,17 +239,21 @@ export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReactio
 export function buildApiAvailableReaction(availableReaction: GramJs.AvailableReaction): ApiAvailableReaction {
   const {
     selectAnimation, staticIcon, reaction, title,
-    inactive, aroundAnimation, centerIcon,
+    inactive, aroundAnimation, centerIcon, effectAnimation, activateAnimation,
+    premium,
   } = availableReaction;
 
   return {
     selectAnimation: buildApiDocument(selectAnimation),
+    activateAnimation: buildApiDocument(activateAnimation),
+    effectAnimation: buildApiDocument(effectAnimation),
     staticIcon: buildApiDocument(staticIcon),
     aroundAnimation: aroundAnimation ? buildApiDocument(aroundAnimation) : undefined,
     centerIcon: centerIcon ? buildApiDocument(centerIcon) : undefined,
     reaction,
     title,
     isInactive: inactive,
+    isPremium: premium,
   };
 }
 
@@ -368,7 +374,7 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | undefined {
     return undefined;
   }
 
-  return buildStickerFromDocument(media.document);
+  return buildStickerFromDocument(media.document, media.nopremium);
 }
 
 function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
@@ -427,7 +433,7 @@ export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | un
     isRound,
     isGif: Boolean(gifAttr),
     thumbnail: buildApiThumbnailFromStripped(thumbs),
-    size,
+    size: size.toJSNumber(),
   };
 }
 
@@ -469,7 +475,8 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     id: String(media.document.id),
     fileName: getFilenameFromDocument(media.document, 'audio'),
     thumbnailSizes,
-    ...pick(media.document, ['size', 'mimeType']),
+    size: media.document.size.toJSNumber(),
+    ...pick(media.document, ['mimeType']),
     ...pick(audioAttribute, ['duration', 'performer', 'title']),
   };
 }
@@ -559,7 +566,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
 
   return {
     id: String(id),
-    size,
+    size: size.toJSNumber(),
     mimeType,
     timestamp: date,
     fileName: getFilenameFromDocument(document),
@@ -717,22 +724,10 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
     description: text, title, photo, test, totalAmount, currency, receiptMsgId,
   } = media;
 
-  const imageAttribute = photo?.attributes
-    .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
-
-  let photoWidth: number | undefined;
-  let photoHeight: number | undefined;
-  if (imageAttribute) {
-    photoWidth = imageAttribute.w;
-    photoHeight = imageAttribute.h;
-  }
-
   return {
     text,
     title,
-    photoUrl: photo?.url,
-    photoWidth,
-    photoHeight,
+    photo: buildApiWebDocument(photo),
     receiptMsgId,
     amount: Number(totalAmount),
     currency,
@@ -1311,6 +1306,27 @@ function buildUploadingMedia(
   };
 }
 
+export function buildApiWebDocument(document?: GramJs.TypeWebDocument): ApiWebDocument | undefined {
+  if (!document) return undefined;
+
+  const {
+    url, size, mimeType,
+  } = document;
+  const accessHash = document instanceof GramJs.WebDocument ? document.accessHash.toString() : undefined;
+  const sizeAttr = document.attributes.find((attr): attr is GramJs.DocumentAttributeImageSize => (
+    attr instanceof GramJs.DocumentAttributeImageSize
+  ));
+  const dimensions = sizeAttr && { width: sizeAttr.w, height: sizeAttr.h };
+
+  return {
+    url,
+    accessHash,
+    size,
+    mimeType,
+    dimensions,
+  };
+}
+
 function buildNewPoll(poll: ApiNewPoll, localId: number) {
   return {
     poll: {
@@ -1321,7 +1337,7 @@ function buildNewPoll(poll: ApiNewPoll, localId: number) {
   };
 }
 
-function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
+export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
   const { className: type, offset, length } = entity;
   return {
     type,

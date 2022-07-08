@@ -187,6 +187,29 @@
       text-align: left;
     }
 
+    & > .bot-info {
+      max-width: 80%;
+      display: flex;
+      flex-direction: column;
+
+      background: var(--pattern-color);
+      color: white;
+      font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+      line-height: 1.75;
+      border-radius: var(--border-radius-messages);
+      overflow: hidden;
+      text-align: initial;
+
+      & > .bot-info-description {
+        padding: 0.5rem 1rem;
+      }
+
+      .bot-info-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+    }
+
     .text-entity-link {
       color: inherit !important;
       text-decoration: underline;

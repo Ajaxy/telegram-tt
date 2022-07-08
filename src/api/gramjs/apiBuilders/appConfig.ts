@@ -3,9 +3,18 @@ import BigInt from 'big-integer';
 import localDb from '../localDb';
 import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiAppConfig } from '../../types';
+import type { ApiLimitType } from '../../../global/types';
 import { buildJson } from './misc';
+import { DEFAULT_LIMITS } from '../../../config';
 
-type GramJsAppConfig = {
+type LimitType = 'default' | 'premium';
+type Limit = 'upload_max_fileparts' | 'stickers_faved_limit' | 'saved_gifs_limit' | 'dialog_filters_chats_limit' |
+'dialog_filters_limit' | 'dialogs_folder_pinned_limit' | 'dialogs_pinned_limit' | 'caption_length_limit' |
+'channels_limit' | 'channels_public_limit' | 'about_length_limit';
+type LimitKey = `${Limit}_${LimitType}`;
+type LimitsConfig = Record<LimitKey, number>;
+
+interface GramJsAppConfig extends LimitsConfig {
   emojies_sounds: Record<string, {
     id: string;
     access_hash: string;
@@ -20,7 +29,11 @@ type GramJsAppConfig = {
   autologin_domains: string[];
   autologin_token: string;
   url_auth_domains: string[];
-};
+  premium_purchase_blocked: boolean;
+  premium_bot_username: string;
+  premium_invoice_slug: string;
+  premium_promo_order: string[];
+}
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
   const { emojies_sounds } = appConfig;
@@ -41,6 +54,12 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
   }, {}) : {};
 }
 
+function getLimit(appConfig: GramJsAppConfig, key: Limit, fallbackKey: ApiLimitType) {
+  const defaultLimit = appConfig[`${key}_default`] || DEFAULT_LIMITS[fallbackKey][0];
+  const premiumLimit = appConfig[`${key}_premium`] || DEFAULT_LIMITS[fallbackKey][1];
+  return [defaultLimit, premiumLimit] as const;
+}
+
 export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
@@ -52,5 +71,20 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     autologinDomains: appConfig.autologin_domains || [],
     autologinToken: appConfig.autologin_token || '',
     urlAuthDomains: appConfig.url_auth_domains || [],
+    premiumBotUsername: appConfig.premium_bot_username,
+    premiumInvoiceSlug: appConfig.premium_invoice_slug,
+    isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
+    limits: {
+      uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),
+      stickersFaved: getLimit(appConfig, 'stickers_faved_limit', 'stickersFaved'),
+      savedGifs: getLimit(appConfig, 'saved_gifs_limit', 'savedGifs'),
+      dialogFiltersChats: getLimit(appConfig, 'dialog_filters_chats_limit', 'dialogFiltersChats'),
+      dialogFilters: getLimit(appConfig, 'dialog_filters_limit', 'dialogFilters'),
+      dialogFolderPinned: getLimit(appConfig, 'dialogs_pinned_limit', 'dialogFolderPinned'),
+      captionLength: getLimit(appConfig, 'caption_length_limit', 'captionLength'),
+      channels: getLimit(appConfig, 'channels_limit', 'channels'),
+      channelsPublic: getLimit(appConfig, 'channels_public_limit', 'channelsPublic'),
+      aboutLength: getLimit(appConfig, 'about_length_limit', 'aboutLength'),
+    },
   };
 }

@@ -12,6 +12,15 @@
     "./dev/wholePixel.js"
   ],
   "rules": {
+    "property-no-unknown": [
+      true,
+      {
+        "ignoreProperties": [
+          "composes",
+          "compose-with"
+        ]
+      }
+    ],
     "number-leading-zero": "always",
     "selector-attribute-quotes": "always",
     "scss/operator-no-unspaced": null,

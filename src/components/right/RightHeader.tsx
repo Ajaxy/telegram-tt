@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -144,8 +144,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     deleteExportedChatInvite,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const backButtonRef = useRef<HTMLDivElement>(null);
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
 
   const handleEditInviteClick = useCallback(() => {
@@ -459,7 +457,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         onClick={onClose}
         ariaLabel={isBackButton ? lang('Common.Back') : lang('Common.Close')}
       >
-        <div ref={backButtonRef} className={buttonClassName} />
+        <div className={buttonClassName} />
       </Button>
       <Transition
         name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'slide-fade'}

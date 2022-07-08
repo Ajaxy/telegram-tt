@@ -46,5 +46,7 @@
   "--color-message-reaction": ["#ebf3fd", "#2b2a35"],
   "--color-message-reaction-hover": ["#c5def9", "#343147"],
   "--color-message-reaction-own": ["#cef0ba", "#675CAF"],
-  "--color-message-reaction-hover-own": ["#b5e0a4", "#5B529B"]
+  "--color-message-reaction-hover-own": ["#b5e0a4", "#5B529B"],
+  "--color-voice-transcribe-button": ["#e8f3ff", "#2a2a3c"],
+  "--color-voice-transcribe-button-own": ["#cceebf", "#8373d3"]
 }

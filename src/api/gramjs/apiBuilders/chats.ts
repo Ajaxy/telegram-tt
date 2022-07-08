@@ -31,17 +31,22 @@ function buildApiChatFieldsFromPeerEntity(
 ): PeerEntityApiChatFields {
   const isMin = Boolean('min' in peerEntity && peerEntity.min);
   const accessHash = ('accessHash' in peerEntity) && String(peerEntity.accessHash);
+  const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
+    && peerEntity.photo.hasVideo;
   const avatarHash = ('photo' in peerEntity) && peerEntity.photo && buildAvatarHash(peerEntity.photo);
   const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
   const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
   const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
+  const isJoinToSend = Boolean('joinToSend' in peerEntity && peerEntity.joinToSend);
+  const isJoinRequest = Boolean('joinRequest' in peerEntity && peerEntity.joinRequest);
 
   return {
     isMin,
     hasPrivateLink,
     isSignaturesShown,
     ...(accessHash && { accessHash }),
+    hasVideoAvatar,
     ...(avatarHash && { avatarHash }),
     ...(
       (peerEntity instanceof GramJs.Channel || peerEntity instanceof GramJs.User)
@@ -63,6 +68,8 @@ function buildApiChatFieldsFromPeerEntity(
     ...buildApiChatRestrictions(peerEntity),
     ...buildApiChatMigrationInfo(peerEntity),
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
+    isJoinToSend,
+    isJoinRequest,
   };
 }
 
@@ -379,9 +386,10 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
 export function buildApiChatFolderFromSuggested({
   filter, description,
 }: {
-  filter: GramJs.DialogFilter;
+  filter: GramJs.TypeDialogFilter;
   description: string;
-}): ApiChatFolder {
+}): ApiChatFolder | undefined {
+  if (!(filter instanceof GramJs.DialogFilter)) return undefined;
   return {
     ...buildApiChatFolder(filter),
     description,
@@ -390,12 +398,14 @@ export function buildApiChatFolderFromSuggested({
 
 export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
   return botInfos.reduce((botCommands, botInfo) => {
-    const botId = buildApiPeerId(botInfo.userId, 'user');
+    const botId = buildApiPeerId(botInfo.userId!, 'user');
 
-    botCommands = botCommands.concat(botInfo.commands.map((mtpCommand) => ({
-      botId,
-      ...omitVirtualClassFields(mtpCommand),
-    })));
+    if (botInfo.commands) {
+      botCommands = botCommands.concat(botInfo.commands.map((mtpCommand) => ({
+        botId,
+        ...omitVirtualClassFields(mtpCommand),
+      })));
+    }
 
     return botCommands;
   }, [] as ApiBotCommand[]);

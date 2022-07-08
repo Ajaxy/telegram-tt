@@ -4,7 +4,9 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiAvailableReaction, ApiMessage, ApiUser } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiMessage, ApiSponsoredMessage, ApiUser,
+} from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
@@ -28,7 +30,7 @@ type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
   isOpen: boolean;
   anchor: IAnchorPosition;
-  message: ApiMessage;
+  message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
   enabledReactions?: string[];
   canReschedule?: boolean;
@@ -40,6 +42,7 @@ type OwnProps = {
   canShowReactionsCount?: boolean;
   canShowReactionList?: boolean;
   canRemoveReaction?: boolean;
+  canBuyPremium?: boolean;
   canEdit?: boolean;
   canForward?: boolean;
   canFaveSticker?: boolean;
@@ -48,6 +51,7 @@ type OwnProps = {
   canCopyLink?: boolean;
   canSelect?: boolean;
   isPrivate?: boolean;
+  isCurrentUserPremium?: boolean;
   canDownload?: boolean;
   canSaveGif?: boolean;
   canRevote?: boolean;
@@ -55,18 +59,18 @@ type OwnProps = {
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
   seenByRecentUsers?: ApiUser[];
-  onReply: () => void;
-  onEdit: () => void;
-  onPin: () => void;
-  onUnpin: () => void;
-  onForward: () => void;
-  onDelete: () => void;
-  onReport: () => void;
-  onFaveSticker: () => void;
-  onUnfaveSticker: () => void;
-  onSelect: () => void;
-  onSend: () => void;
-  onReschedule: () => void;
+  onReply?: () => void;
+  onEdit?: () => void;
+  onPin?: () => void;
+  onUnpin?: () => void;
+  onForward?: () => void;
+  onDelete?: () => void;
+  onReport?: () => void;
+  onFaveSticker?: () => void;
+  onUnfaveSticker?: () => void;
+  onSelect?: () => void;
+  onSend?: () => void;
+  onReschedule?: () => void;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onCopyLink?: () => void;
@@ -78,7 +82,9 @@ type OwnProps = {
   onClosePoll?: () => void;
   onShowSeenBy?: () => void;
   onShowReactors?: () => void;
-  onSendReaction: (reaction: string | undefined, x: number, y: number) => void;
+  onAboutAds?: () => void;
+  onSponsoredHide?: () => void;
+  onSendReaction?: (reaction: string | undefined, x: number, y: number) => void;
 };
 
 const SCROLLBAR_WIDTH = 10;
@@ -90,10 +96,12 @@ const MessageContextMenu: FC<OwnProps> = ({
   isOpen,
   message,
   isPrivate,
+  isCurrentUserPremium,
   enabledReactions,
   anchor,
   canSendNow,
   canReschedule,
+  canBuyPremium,
   canReply,
   canEdit,
   canPin,
@@ -140,6 +148,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowReactors,
   onSendReaction,
   onCopyMessages,
+  onAboutAds,
+  onSponsoredHide,
 }) => {
   const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -149,6 +159,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   const lang = useLang();
   const noReactions = !isPrivate && !enabledReactions?.length;
   const withReactions = canShowReactionList && !noReactions;
+  const isSponsoredMessage = !('id' in message);
+  const messageId = !isSponsoredMessage ? message.id : '';
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
 
@@ -159,13 +171,17 @@ const MessageContextMenu: FC<OwnProps> = ({
     onClose();
   }, [lang, onClose, showNotification]);
 
-  const copyOptions = getMessageCopyOptions(
-    message, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
-  );
+  const copyOptions = isSponsoredMessage
+    ? []
+    : getMessageCopyOptions(
+      message, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
+    );
 
   const getTriggerElement = useCallback(() => {
-    return document.querySelector(`.Transition__slide--active > .MessageList div[data-message-id="${message.id}"]`);
-  }, [message.id]);
+    return isSponsoredMessage
+      ? document.querySelector('.Transition__slide--active > .MessageList .SponsoredMessage')
+      : document.querySelector(`.Transition__slide--active > .MessageList div[data-message-id="${messageId}"]`);
+  }, [isSponsoredMessage, messageId]);
 
   const getRootElement = useCallback(
     () => document.querySelector('.Transition__slide--active > .MessageList'),
@@ -194,7 +210,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   }, [withReactions]);
 
   const handleRemoveReaction = useCallback(() => {
-    onSendReaction(undefined, 0, 0);
+    onSendReaction!(undefined, 0, 0);
   }, [onSendReaction]);
 
   useEffect(() => {
@@ -237,10 +253,12 @@ const MessageContextMenu: FC<OwnProps> = ({
       {canShowReactionList && (
         <ReactionSelector
           enabledReactions={enabledReactions}
-          onSendReaction={onSendReaction}
+          onSendReaction={onSendReaction!}
           isPrivate={isPrivate}
           availableReactions={availableReactions}
           isReady={isReady}
+          canBuyPremium={canBuyPremium}
+          isCurrentUserPremium={isCurrentUserPremium}
         />
       )}
 
@@ -278,7 +296,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
         {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
         {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
-        {(canShowSeenBy || canShowReactionsCount) && (
+        {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <MenuItem
             className="MessageContextMenu--seen-by"
             icon={canShowReactionsCount ? 'heart-outline' : 'group'}
@@ -307,12 +325,17 @@ const MessageContextMenu: FC<OwnProps> = ({
                 <Avatar
                   size="micro"
                   user={user}
+                  noVideo
                 />
               ))}
             </div>
           </MenuItem>
         )}
         {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}
+        {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
+        {isSponsoredMessage && onSponsoredHide && (
+          <MenuItem icon="stop" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+        )}
       </div>
     </Menu>
   );

@@ -10,12 +10,12 @@ import localDb from '../localDb';
 const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
 const VIDEO_STICKER_MIME_TYPE = 'video/webm';
 
-export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiSticker | undefined {
+export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPremium?: boolean): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
 
-  const { mimeType } = document;
+  const { mimeType, videoThumbs } = document;
   const stickerAttribute = document.attributes
     .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
       attr instanceof GramJs.DocumentAttributeSticker
@@ -78,6 +78,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
 
   const { w: width, h: height } = cachedThumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
+  const hasEffect = !isNoPremium && videoThumbs?.some(({ type }) => type === 'f');
+
   return {
     id: String(document.id),
     stickerSetId: stickerSetInfo ? String(stickerSetInfo.id) : NO_STICKER_SET_ID,
@@ -88,6 +90,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
     width,
     height,
     thumbnail,
+    hasEffect,
   };
 }
 

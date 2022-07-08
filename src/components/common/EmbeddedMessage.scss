@@ -11,6 +11,12 @@
   cursor: pointer;
   direction: ltr;
 
+  @for $i from 1 through 8 {
+    &.color-#{$i} {
+      --accent-color: var(--color-user-#{$i});
+    }
+  }
+
   body.animation-level-1 & {
     .ripple-container {
       display: none;
@@ -100,7 +106,7 @@
   }
 
   .embedded-action-message {
-    color: var(--accent-color);
+    color: var(---secondary-color);
     opacity: 0.75;
   }
 

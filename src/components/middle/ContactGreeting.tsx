@@ -85,6 +85,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
               size={160}
               className="large"
               noContextMenu
+              isCurrentUserPremium
             />
           )}
         </div>

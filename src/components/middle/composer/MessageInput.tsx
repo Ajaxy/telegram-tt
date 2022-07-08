@@ -47,6 +47,7 @@ type OwnProps = {
   onUpdate: (html: string) => void;
   onSuppressedFocus?: () => void;
   onSend: () => void;
+  captionLimit?: number;
 };
 
 type StateProps = {
@@ -78,6 +79,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   id,
   chatId,
   threadId,
+  captionLimit,
   isAttachmentModalInput,
   editableInputId,
   html,
@@ -391,6 +393,12 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
         aria-label={placeholder}
       />
+      {captionLimit && (
+        <div className="max-length-indicator" dir="auto">
+          {captionLimit}
+        </div>
+      )}
+
       <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
       {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
       <TextFormatter

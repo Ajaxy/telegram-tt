@@ -32,11 +32,10 @@ const SettingsHeader: FC<OwnProps> = ({
 }) => {
   const {
     signOut,
-    deleteChatFolder,
+    openDeleteChatFolderModal,
   } = getActions();
 
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
-  const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false);
 
   const handleMultiClick = useMultiClick(5, () => {
     onScreenSelect(SettingsScreens.Experimental);
@@ -51,23 +50,15 @@ const SettingsHeader: FC<OwnProps> = ({
   }, []);
 
   const openDeleteFolderConfirmation = useCallback(() => {
-    setIsDeleteFolderDialogOpen(true);
-  }, []);
+    if (!editedFolderId) return;
 
-  const closeDeleteFolderConfirmation = useCallback(() => {
-    setIsDeleteFolderDialogOpen(false);
-  }, []);
+    openDeleteChatFolderModal({ folderId: editedFolderId });
+  }, [editedFolderId, openDeleteChatFolderModal]);
 
   const handleSignOutMessage = useCallback(() => {
     closeSignOutConfirmation();
     signOut();
   }, [closeSignOutConfirmation, signOut]);
-
-  const handleDeleteFolderMessage = useCallback(() => {
-    closeDeleteFolderConfirmation();
-    deleteChatFolder({ id: editedFolderId });
-    onReset();
-  }, [editedFolderId, closeDeleteFolderConfirmation, deleteChatFolder, onReset]);
 
   const SettingsMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -281,14 +272,6 @@ const SettingsHeader: FC<OwnProps> = ({
         text={lang('lng_sure_logout')}
         confirmLabel={lang('AccountSettings.Logout')}
         confirmHandler={handleSignOutMessage}
-        confirmIsDestructive
-      />
-      <ConfirmDialog
-        isOpen={isDeleteFolderDialogOpen}
-        onClose={closeDeleteFolderConfirmation}
-        text={lang('FilterDeleteAlert')}
-        confirmLabel={lang('Delete')}
-        confirmHandler={handleDeleteFolderMessage}
         confirmIsDestructive
       />
     </div>

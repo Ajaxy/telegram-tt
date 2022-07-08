@@ -55,6 +55,8 @@ interface StateProps {
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
   pendingJoinRequests?: number;
+  shouldJoinToSend?: boolean;
+  shouldSendJoinRequest?: boolean;
 }
 
 // Chrome breaks layout when focusing input during transition
@@ -78,6 +80,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   pendingJoinRequests,
   isRightColumnShown,
   canExpandActions,
+  shouldJoinToSend,
+  shouldSendJoinRequest,
 }) => {
   const {
     joinChannel,
@@ -86,9 +90,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     restartBot,
     requestCall,
     requestNextManagementScreen,
+    showNotification,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const lang = useLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
@@ -108,7 +114,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   const handleSubscribeClick = useCallback(() => {
     joinChannel({ chatId });
-  }, [joinChannel, chatId]);
+    if (shouldSendJoinRequest) {
+      showNotification({
+        message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
+      });
+    }
+  }, [joinChannel, chatId, shouldSendJoinRequest, showNotification, isChannel, lang]);
 
   const handleStartBot = useCallback(() => {
     sendBotCommand({ command: '/start' });
@@ -156,13 +167,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     'Mod+F': handleHotkeySearchClick,
   });
 
-  const lang = useLang();
-
   return (
     <div className="HeaderActions">
       {!IS_SINGLE_COLUMN_LAYOUT && (
         <>
-          {canExpandActions && canSubscribe && (
+          {canExpandActions && !shouldSendJoinRequest && (canSubscribe || shouldJoinToSend) && (
             <Button
               size="tiny"
               ripple
@@ -170,6 +179,16 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleSubscribeClick}
             >
               {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
+            </Button>
+          )}
+          {canExpandActions && shouldSendJoinRequest && (
+            <Button
+              size="tiny"
+              ripple
+              fluid
+              onClick={handleSubscribeClick}
+            >
+              {lang('ChannelJoinRequest')}
             </Button>
           )}
           {canExpandActions && canStartBot && (
@@ -304,6 +323,8 @@ export default memo(withGlobal<OwnProps>(
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
     const canViewStatistics = chat.fullInfo?.canViewStatistics;
     const pendingJoinRequests = chat.fullInfo?.requestsPending;
+    const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
+    const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
 
     return {
       noMenu: false,
@@ -320,6 +341,8 @@ export default memo(withGlobal<OwnProps>(
       canEnterVoiceChat,
       canCreateVoiceChat,
       pendingJoinRequests,
+      shouldJoinToSend,
+      shouldSendJoinRequest,
     };
   },
 )(HeaderActions));

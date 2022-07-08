@@ -16,7 +16,9 @@ import localDb from '../localDb';
 import * as cacheApi from '../../../util/cacheApi';
 import { getEntityTypeById } from '../gramjsBuilders';
 
-const MEDIA_ENTITY_TYPES = new Set(['msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document']);
+const MEDIA_ENTITY_TYPES = new Set([
+  'msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document', 'videoAvatar',
+]);
 
 export default async function downloadMedia(
   {
@@ -31,6 +33,7 @@ export default async function downloadMedia(
   const {
     data, mimeType, fullSize,
   } = await download(url, client, isConnected, onProgress, start, end, mediaFormat, isHtmlAllowed) || {};
+
   if (!data) {
     return undefined;
   }
@@ -62,7 +65,7 @@ export default async function downloadMedia(
 
 export type EntityType = (
   'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'photo' | 'stickerSet' | 'webDocument' |
-  'document' | 'staticMap'
+  'document' | 'staticMap' | 'videoAvatar'
 );
 
 async function download(
@@ -127,6 +130,7 @@ async function download(
     case 'wallpaper':
       entity = localDb.documents[entityId];
       break;
+    case 'videoAvatar':
     case 'photo':
       entity = localDb.photos[entityId];
       break;
@@ -159,22 +163,27 @@ async function download(
     if (entity instanceof GramJs.Message) {
       mimeType = getMessageMediaMimeType(entity, sizeType);
       if (entity.media instanceof GramJs.MessageMediaDocument && entity.media.document instanceof GramJs.Document) {
-        fullSize = entity.media.document.size;
+        fullSize = entity.media.document.size.toJSNumber();
       }
       if (entity.media instanceof GramJs.MessageMediaWebPage
         && entity.media.webpage instanceof GramJs.WebPage
         && entity.media.webpage.document instanceof GramJs.Document) {
-        fullSize = entity.media.webpage.document.size;
+        fullSize = entity.media.webpage.document.size.toJSNumber();
       }
     } else if (entity instanceof GramJs.Photo) {
-      mimeType = 'image/jpeg';
+      if (entityType === 'videoAvatar') {
+        mimeType = 'video/mp4';
+      } else {
+        mimeType = 'image/jpeg';
+      }
     } else if (entityType === 'sticker' && sizeType) {
       mimeType = 'image/webp';
     } else if (entityType === 'webDocument') {
       mimeType = (entity as GramJs.TypeWebDocument).mimeType;
+      fullSize = (entity as GramJs.TypeWebDocument).size;
     } else {
       mimeType = (entity as GramJs.Document).mimeType;
-      fullSize = (entity as GramJs.Document).size;
+      fullSize = (entity as GramJs.Document).size.toJSNumber();
     }
 
     // Prevent HTML-in-video attacks
@@ -296,7 +305,8 @@ export function parseMediaUrl(url: string) {
     : url.startsWith('webDocument')
       ? url.match(/(webDocument):(.+)/)
       : url.match(
-        /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
+        // eslint-disable-next-line max-len
+        /(avatar|profile|photo|msg|stickerSet|sticker|wallpaper|gif|document|videoAvatar)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
       );
   if (!mediaMatch) {
     return undefined;

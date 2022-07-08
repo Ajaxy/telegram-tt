@@ -231,7 +231,12 @@ const PhoneCall: FC<StateProps> = ({
       )}
       dialogRef={containerRef}
     >
-      <Avatar user={user} size="jumbo" className={hasVideo || hasPresentation ? styles.blurred : ''} />
+      <Avatar
+        user={user}
+        size="jumbo"
+        className={hasVideo || hasPresentation ? styles.blurred : ''}
+        noLoop={phoneCall?.state !== 'requesting'}
+      />
       {phoneCall?.screencastState === 'active' && streams?.presentation
         && <video className={styles.mainVideo} muted autoPlay playsInline srcObject={streams.presentation} />}
       {phoneCall?.videoState === 'active' && streams?.video

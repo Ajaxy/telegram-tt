@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useRef, useCallback } from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
@@ -28,7 +28,9 @@ interface OwnProps {
   ref?: RefObject<HTMLDivElement>;
   buttonRef?: RefObject<HTMLDivElement>;
   icon?: string;
+  leftElement?: TeactNode;
   secondaryIcon?: string;
+  buttonClassName?: string;
   className?: string;
   style?: string;
   children: React.ReactNode;
@@ -50,6 +52,8 @@ const ListItem: FC<OwnProps> = ({
   ref,
   buttonRef,
   icon,
+  leftElement,
+  buttonClassName,
   secondaryIcon,
   className,
   style,
@@ -165,7 +169,7 @@ const ListItem: FC<OwnProps> = ({
       onMouseDown={onMouseDown}
     >
       <div
-        className={buildClassName('ListItem-button', isTouched && 'active')}
+        className={buildClassName('ListItem-button', isTouched && 'active', buttonClassName)}
         role={!isStatic ? 'button' : undefined}
         ref={buttonRef}
         tabIndex={!isStatic ? 0 : undefined}
@@ -173,6 +177,7 @@ const ListItem: FC<OwnProps> = ({
         onMouseDown={handleMouseDown}
         onContextMenu={(!inactive && contextActions) ? handleContextMenu : undefined}
       >
+        {leftElement}
         {icon && (
           <i className={`icon-${icon}`} />
         )}

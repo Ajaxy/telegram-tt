@@ -28,6 +28,7 @@ type OwnProps = {
   hasCloseButton?: boolean;
   noBackdrop?: boolean;
   children: React.ReactNode;
+  style?: string;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
@@ -47,6 +48,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   hasCloseButton,
   noBackdrop,
   children,
+  style,
   onClose,
   onCloseAnimationEnd,
   onEnter,
@@ -134,7 +136,7 @@ const Modal: FC<OwnProps & StateProps> = ({
           <div className="modal-backdrop" onClick={onClose} />
           <div className="modal-dialog" ref={dialogRef}>
             {renderHeader()}
-            <div className="modal-content custom-scroll">
+            <div className="modal-content custom-scroll" style={style}>
               {children}
             </div>
           </div>

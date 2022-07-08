@@ -31,7 +31,7 @@ type StateProps = {
 
 const HIDE_ANIMATION_DURATION = 250;
 const PLAYING_DURATION = 3000;
-const EFFECT_SIZE = 240;
+const EFFECT_SIZE = 309;
 
 const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
   effectAnimationId,

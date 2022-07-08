@@ -8,6 +8,36 @@
   background-size: contain;
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
   position: relative;
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
+
+  .sticker-locked {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: white;
+    background: var(--premium-gradient);
+  }
+
+  .sticker-premium {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: white;
+    background: var(--premium-gradient);
+  }
 
   &.interactive {
     cursor: pointer;

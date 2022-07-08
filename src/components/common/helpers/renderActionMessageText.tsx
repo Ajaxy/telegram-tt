@@ -61,7 +61,7 @@ export function renderActionMessageText(
     processed = processPlaceholder(
       unprocessed,
       '%payment_amount%',
-      formatCurrency(amount!, currency, lang.code),
+      formatCurrency(amount!, currency!, lang.code),
     );
     unprocessed = processed.pop() as string;
     content.push(...processed);

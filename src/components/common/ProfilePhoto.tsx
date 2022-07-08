@@ -1,6 +1,6 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -11,7 +11,7 @@ import {
   getUserFullName,
   isUserId,
   isChatWithRepliesBot,
-  isDeletedUser,
+  isDeletedUser, getVideoAvatarMediaHash,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
@@ -30,6 +30,7 @@ type OwnProps = {
   isSavedMessages?: boolean;
   photo?: ApiPhoto;
   lastSyncTime?: number;
+  notActive?: boolean;
   onClick: NoneToVoidFunction;
 };
 
@@ -39,34 +40,55 @@ const ProfilePhoto: FC<OwnProps> = ({
   photo,
   isFirstPhoto,
   isSavedMessages,
+  notActive,
   lastSyncTime,
   onClick,
 }) => {
+  // eslint-disable-next-line no-null/no-null
+  const videoRef = useRef<HTMLVideoElement>(null);
   const lang = useLang();
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
 
-  function getMediaHash(size: 'normal' | 'big', forceAvatar?: boolean) {
-    if (photo && !forceAvatar) {
-      return `photo${photo.id}?size=c`;
-    }
+  function getMediaHash(size: 'normal' | 'big', type: 'photo' | 'video' = 'photo') {
+    const userOrChat = user || chat;
+    const profilePhoto = photo || userOrChat?.fullInfo?.profilePhoto;
+    const hasVideo = profilePhoto?.isVideo;
+    const forceAvatar = isFirstPhoto;
 
-    let hash: string | undefined;
-    if (!isSavedMessages && !isDeleted && !isRepliesChat) {
-      if (user) {
-        hash = getChatAvatarHash(user, size);
-      } else if (chat) {
-        hash = getChatAvatarHash(chat, size);
+    if (type === 'video' && !hasVideo) return undefined;
+
+    if (photo && !forceAvatar) {
+      if (hasVideo && type === 'video') {
+        return getVideoAvatarMediaHash(photo);
+      }
+      if (type === 'photo') {
+        return `photo${photo.id}?size=c`;
       }
     }
 
-    return hash;
+    if (!isSavedMessages && !isDeleted && !isRepliesChat && userOrChat) {
+      return getChatAvatarHash(userOrChat, size, type);
+    }
+
+    return undefined;
   }
 
-  const photoBlobUrl = useMedia(getMediaHash('big'), false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const avatarMediaHash = isFirstPhoto && !photoBlobUrl ? getMediaHash('normal', true) : undefined;
-  const avatarBlobUrl = useMedia(avatarMediaHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const imageSrc = photoBlobUrl || avatarBlobUrl || photo?.thumbnail?.dataUri;
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (notActive) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    } else {
+      videoRef.current.play();
+    }
+  }, [notActive]);
+
+  const photoHash = getMediaHash('big', 'photo');
+  const photoBlobUrl = useMedia(photoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const videoHash = getMediaHash('normal', 'video');
+  const videoBlobUrl = useMedia(videoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const imageSrc = videoBlobUrl || photoBlobUrl || photo?.thumbnail?.dataUri;
 
   let content: TeactNode | undefined;
 
@@ -77,7 +99,21 @@ const ProfilePhoto: FC<OwnProps> = ({
   } else if (isRepliesChat) {
     content = <i className="icon-reply-filled" />;
   } else if (imageSrc) {
-    content = <img src={imageSrc} className="avatar-media" alt="" />;
+    if (videoBlobUrl) {
+      content = (
+        <video
+          ref={videoRef}
+          src={imageSrc}
+          className="avatar-media"
+          muted
+          autoPlay={!notActive}
+          loop
+          playsInline
+        />
+      );
+    } else {
+      content = <img src={imageSrc} className="avatar-media" alt="" />;
+    }
   } else if (user) {
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
@@ -98,7 +134,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',
-    (!isSavedMessages && !(imageSrc)) && 'no-photo',
+    (!isSavedMessages && !imageSrc) && 'no-photo',
   );
 
   return (

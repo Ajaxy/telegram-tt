@@ -17,7 +17,7 @@ import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
-import { getShippingError } from '../../../util/getReadableErrorText';
+import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   if (DEBUG) {
@@ -64,6 +64,8 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       const paymentShippingError = getShippingError(update.error);
       if (paymentShippingError) {
         actions.addPaymentError({ error: paymentShippingError });
+      } else if (shouldClosePaymentModal(update.error)) {
+        actions.closePaymentModal();
       } else if (actions.showDialog) {
         actions.showDialog({ data: update.error });
       }

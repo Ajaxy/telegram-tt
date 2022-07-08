@@ -15,8 +15,10 @@ import {
   rebuildStickersForEmoji,
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
-import { selectStickerSet } from '../../selectors';
+import { selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
 import { getTranslation } from '../../../util/langProvider';
+import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
+import * as langProvider from '../../../util/langProvider';
 
 const ADDED_SETS_THROTTLE = 200;
 const ADDED_SETS_THROTTLE_CHUNK = 10;
@@ -56,6 +58,28 @@ addActionHandler('loadRecentStickers', (global) => {
 addActionHandler('loadFavoriteStickers', (global) => {
   const { hash } = global.stickers.favorite || {};
   void loadFavoriteStickers(hash);
+});
+
+addActionHandler('loadPremiumStickers', async (global) => {
+  const { hash } = global.stickers.premium || {};
+
+  const result = await callApi('fetchStickersForEmoji', { emoji: '⭐️⭐️', hash });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  setGlobal({
+    ...global,
+    stickers: {
+      ...global.stickers,
+      premium: {
+        hash: result.hash,
+        stickers: result.stickers,
+      },
+    },
+  });
 });
 
 addActionHandler('loadGreetingStickers', async (global) => {
@@ -119,6 +143,23 @@ addActionHandler('loadSavedGifs', (global) => {
 
 addActionHandler('saveGif', async (global, actions, payload) => {
   const { gif, shouldUnsave } = payload!;
+  const length = global.gifs.saved.gifs?.length;
+
+  const limit = selectCurrentLimit(global, 'savedGifs');
+  const premiumLimit = selectPremiumLimit(global, 'savedGifs');
+  const isPremium = selectIsCurrentUserPremium(global);
+
+  if (!shouldUnsave && length && length >= limit) {
+    actions.showNotification({
+      title: langProvider.getTranslation('LimitReachedFavoriteGifs', limit.toString()),
+      message: isPremium ? langProvider.getTranslation('LimitReachedFavoriteGifsSubtitlePremium')
+        : langProvider.getTranslation('LimitReachedFavoriteGifsSubtitle',
+          premiumLimit.toString()),
+      ...(!isPremium && { action: actions.openPremiumModal }),
+      className: 'bold-link',
+    });
+  }
+
   const result = await callApi('saveGif', { gif, shouldUnsave });
   if (!result) {
     return;
@@ -142,6 +183,21 @@ addActionHandler('saveGif', async (global, actions, payload) => {
 
 addActionHandler('faveSticker', (global, actions, payload) => {
   const { sticker } = payload!;
+  const current = global.stickers.favorite.stickers.length;
+  const limit = selectCurrentLimit(global, 'stickersFaved');
+  const premiumLimit = selectPremiumLimit(global, 'stickersFaved');
+  const isPremium = selectIsCurrentUserPremium(global);
+
+  if (current >= limit) {
+    actions.showNotification({
+      title: langProvider.getTranslation('LimitReachedFavoriteStickers', limit.toString()),
+      message: isPremium ? langProvider.getTranslation('LimitReachedFavoriteStickersSubtitlePremium')
+        : langProvider.getTranslation('LimitReachedFavoriteStickersSubtitle',
+          premiumLimit.toString()),
+      ...(!isPremium && { action: actions.openPremiumModal }),
+      className: 'bold-link',
+    });
+  }
 
   if (sticker) {
     void callApi('faveSticker', { sticker });

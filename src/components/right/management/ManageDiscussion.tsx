@@ -22,6 +22,7 @@ import renderText from '../../common/helpers/renderText';
 import Avatar from '../../common/Avatar';
 import { isChatChannel } from '../../../global/helpers';
 import AnimatedIcon from '../../common/AnimatedIcon';
+import Checkbox from '../../ui/Checkbox';
 
 type OwnProps = {
   chatId: string;
@@ -53,11 +54,15 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     loadGroupsForDiscussion,
     linkDiscussionGroup,
     unlinkDiscussionGroup,
+    toggleJoinRequest,
+    toggleJoinToSend,
   } = getActions();
 
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
   const [isConfirmUnlinkGroupDialogOpen, openConfirmUnlinkGroupDialog, closeConfirmUnlinkGroupDialog] = useFlag();
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
+  const [isJoinToSend, setIsJoinToSend] = useState(linkedChat?.isJoinToSend);
+  const [isJoinRequest, setIsJoinRequest] = useState(linkedChat?.isJoinRequest);
   const lang = useLang();
   const linkedChatId = linkedChat?.id;
 
@@ -69,6 +74,13 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     loadGroupsForDiscussion();
   }, [loadGroupsForDiscussion]);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsJoinToSend(linkedChat?.isJoinToSend || false);
+      setIsJoinRequest(linkedChat?.isJoinRequest || false);
+    }
+  }, [linkedChat, isActive]);
 
   const handleUnlinkGroupSessions = useCallback(() => {
     closeConfirmUnlinkGroupDialog();
@@ -82,6 +94,19 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     closeConfirmLinkGroupDialog();
     linkDiscussionGroup({ channelId: chatId, chatId: linkedGroupId });
   }, [closeConfirmLinkGroupDialog, linkDiscussionGroup, chatId, linkedGroupId]);
+
+  const handleJoinToSendCheck = useCallback((checked: boolean) => {
+    setIsJoinToSend(checked);
+    toggleJoinToSend({ chatId: linkedChatId!, isEnabled: checked });
+    if (!checked) {
+      setIsJoinRequest(false);
+    }
+  }, [linkedChatId, toggleJoinToSend]);
+
+  const handleJoinRequestCheck = useCallback((checked: boolean) => {
+    setIsJoinRequest(checked);
+    toggleJoinRequest({ chatId: linkedChatId!, isEnabled: checked });
+  }, [linkedChatId, toggleJoinRequest]);
 
   const onDiscussionClick = (groupId: string) => {
     setLinkedGroupId(groupId);
@@ -235,6 +260,26 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           {linkedChat && renderLinkedGroup()}
           {!linkedChat && renderDiscussionGroups()}
         </div>
+        {linkedChat && (
+          <div className="section">
+            <h3 className="section-heading">{lang('ChannelSettingsJoinTitle')}</h3>
+            <Checkbox
+              checked={isJoinToSend}
+              onCheck={handleJoinToSendCheck}
+              label={lang('ChannelSettingsJoinToSend')}
+            />
+            {isJoinToSend && (
+              <Checkbox
+                checked={isJoinRequest}
+                onCheck={handleJoinRequestCheck}
+                label={lang('ChannelSettingsJoinRequest')}
+              />
+            )}
+            <p className="text-muted">
+              {isJoinToSend ? lang('ChannelSettingsJoinRequestInfo') : lang('ChannelSettingsJoinToSendInfo')}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

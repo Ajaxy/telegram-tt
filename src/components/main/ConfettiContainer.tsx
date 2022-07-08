@@ -1,10 +1,12 @@
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
+import type { GlobalState } from '../../global/types';
 import type { FC } from '../../lib/teact/teact';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { pick } from '../../util/iteratees';
+import buildStyle from '../../util/buildStyle';
 
 import useWindowSize from '../../hooks/useWindowSize';
 import useOnChange from '../../hooks/useOnChange';
@@ -13,7 +15,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import styles from './ConfettiContainer.module.scss';
 
 type StateProps = {
-  lastConfettiTime?: number;
+  confetti?: GlobalState['confetti'];
 };
 
 interface Confetti {
@@ -36,10 +38,10 @@ interface Confetti {
 
 const CONFETTI_FADEOUT_TIMEOUT = 10000;
 const DEFAULT_CONFETTI_AMOUNT = IS_SINGLE_COLUMN_LAYOUT ? 50 : 100;
-const DEFAULT_CONFETTI_SIZE = 15;
+const DEFAULT_CONFETTI_SIZE = 10;
 const CONFETTI_COLORS = ['#E8BC2C', '#D0049E', '#02CBFE', '#5723FD', '#FE8C27', '#6CB859'];
 
-const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
+const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
   // eslint-disable-next-line no-null/no-null
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const confettiRef = useRef<Confetti[]>([]);
@@ -47,15 +49,19 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
   const windowSize = useWindowSize();
   const forceUpdate = useForceUpdate();
 
-  function generateConfetti(width: number, height: number, amount = DEFAULT_CONFETTI_AMOUNT) {
+  const {
+    lastConfettiTime, top, width, left, height,
+  } = confetti || {};
+
+  function generateConfetti(w: number, h: number, amount = DEFAULT_CONFETTI_AMOUNT) {
     for (let i = 0; i < amount; i++) {
       const leftSide = i % 2;
       const pos = {
-        x: width * (leftSide ? -0.1 : 1.1),
-        y: height * 0.75,
+        x: w * (leftSide ? -0.1 : 1.1),
+        y: h * 0.75,
       };
-      const randomX = Math.random() * width * 0.8;
-      const randomY = -height / 2 - Math.random() * height * 0.5;
+      const randomX = Math.random() * w * 1.5;
+      const randomY = -h / 2 - Math.random() * h;
       const velocity = {
         x: leftSide ? randomX : randomX * -1,
         y: randomY,
@@ -88,11 +94,11 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
       return;
     }
 
-    const { width, height } = canvas;
-    ctx.clearRect(0, 0, width, height);
+    const { width: canvasWidth, height: canvasHeight } = canvas;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     const confettiToRemove: Confetti[] = [];
-    confettiRef.current.forEach((confetti, i) => {
+    confettiRef.current.forEach((c, i) => {
       const {
         pos,
         velocity,
@@ -103,7 +109,7 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
         rotation,
         lastDrawnAt,
         frameCount,
-      } = confetti;
+      } = c;
       const diff = (Date.now() - lastDrawnAt) / 1000;
 
       const newPos = {
@@ -112,8 +118,8 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
       };
 
       const newVelocity = {
-        x: velocity.x * 0.99, // Air Resistance
-        y: velocity.y += diff * 500, // Gravity
+        x: velocity.x * 0.98, // Air Resistance
+        y: velocity.y += diff * 1000, // Gravity
       };
 
       const newFlicker = size * Math.abs(Math.sin(frameCount * flickerFrequency));
@@ -122,14 +128,14 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
       const newFrameCount = frameCount + 1;
       const newLastDrawnAt = Date.now();
 
-      const shouldRemove = newPos.y > height + confetti.size;
+      const shouldRemove = newPos.y > canvasHeight + c.size;
       if (shouldRemove) {
-        confettiToRemove.push(confetti);
+        confettiToRemove.push(c);
         return;
       }
 
       const newConfetti = {
-        ...confetti,
+        ...c,
         pos: newPos,
         velocity: newVelocity,
         flicker: newFlicker,
@@ -152,7 +158,7 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
       );
       ctx.fill();
     });
-    confettiRef.current = confettiRef.current.filter((confetti) => !confettiToRemove.includes(confetti));
+    confettiRef.current = confettiRef.current.filter((c) => !confettiToRemove.includes(c));
     if (confettiRef.current.length) {
       requestAnimationFrame(updateCanvas);
     } else {
@@ -163,7 +169,7 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
   useOnChange(([prevConfettiTime]) => {
     let hideTimeout: ReturnType<typeof setTimeout>;
     if (prevConfettiTime !== lastConfettiTime) {
-      generateConfetti(windowSize.width, windowSize.height);
+      generateConfetti(width || windowSize.width, height || windowSize.height);
       hideTimeout = setTimeout(forceUpdate, CONFETTI_FADEOUT_TIMEOUT);
       if (!isRafStartedRef.current) {
         isRafStartedRef.current = true;
@@ -175,19 +181,26 @@ const ConfettiContainer: FC<StateProps> = ({ lastConfettiTime }) => {
         clearTimeout(hideTimeout);
       }
     };
-  }, [lastConfettiTime, updateCanvas, windowSize]);
+  }, [lastConfettiTime, updateCanvas]);
 
   if (!lastConfettiTime || Date.now() - lastConfettiTime > CONFETTI_FADEOUT_TIMEOUT) {
     return undefined;
   }
 
+  const style = buildStyle(
+    Boolean(top) && `top: ${top}px`,
+    Boolean(left) && `left: ${left}px`,
+    Boolean(width) && `width: ${width}px`,
+    Boolean(height) && `height: ${height}px`,
+  );
+
   return (
-    <div id="Confetti" className={styles.root}>
+    <div id="Confetti" className={styles.root} style={style}>
       <canvas ref={canvasRef} className={styles.canvas} width={windowSize.width} height={windowSize.height} />
     </div>
   );
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['lastConfettiTime']),
+  (global): StateProps => pick(global, ['confetti']),
 )(ConfettiContainer));

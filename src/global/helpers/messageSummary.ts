@@ -6,7 +6,7 @@ import type { TextPart } from '../../types';
 import type { LangFn } from '../../hooks/useLang';
 
 import trimText from '../../util/trimText';
-import { getMessageText } from './messages';
+import { getMessageText, getMessageTranscription } from './messages';
 import { getMessageRecentReaction } from './reactions';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
@@ -29,17 +29,19 @@ export function getMessageSummaryText(
 }
 
 export function getMessageTextWithSpoilers(message: ApiMessage) {
-  const text = getMessageText(message);
-  if (!text) {
-    return undefined;
+  const transcription = getMessageTranscription(message);
+
+  const textWithoutTranscription = getMessageText(message);
+  if (!textWithoutTranscription) {
+    return transcription;
   }
 
   const { entities } = message.content.text || {};
   if (!entities?.length) {
-    return text;
+    return transcription ? `${transcription}\n${textWithoutTranscription}` : textWithoutTranscription;
   }
 
-  return entities.reduce((accText, {
+  const text = entities.reduce((accText, {
     type,
     offset,
     length,
@@ -51,7 +53,9 @@ export function getMessageTextWithSpoilers(message: ApiMessage) {
     const spoiler = generateBrailleSpoiler(length);
 
     return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
-  }, text);
+  }, textWithoutTranscription);
+
+  return transcription ? `${transcription}\n${text}` : text;
 }
 
 export function getMessageSummaryEmoji(message: ApiMessage, noReactions = true) {

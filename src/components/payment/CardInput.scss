@@ -1,14 +1,14 @@
 .CardInput {
   position: relative;
 
-  .input-group.has-left-addon .form-control{
-    padding-left: 4rem;
+  .input-group.has-right-addon .form-control{
+    padding-right: 4rem;
   }
 
-  .left-addon {
+  .right-addon {
     position: absolute;
     top: 0.8125rem;
-    left: 1rem;
+    right: 1rem;
     z-index: 8;
 
     img {

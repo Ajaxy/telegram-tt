@@ -24,6 +24,7 @@ import Avatar from '../common/Avatar';
 import ListItem from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import Loading from '../ui/Loading';
+import PremiumIcon from '../common/PremiumIcon';
 
 import './ReactorListModal.scss';
 
@@ -168,9 +169,10 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => handleClick(userId)}
                   >
-                    <Avatar user={user} size="medium" />
+                    <Avatar user={user} size="small" />
                     <div className="title">
                       <h3 dir="auto">{fullName && renderText(fullName)}</h3>
+                      {user.isPremium && <PremiumIcon />}
                     </div>
                     {reaction && <ReactionStaticEmoji className="reactors-list-emoji" reaction={reaction} />}
                   </ListItem>

@@ -110,6 +110,7 @@ const ShippingInfo: FC<OwnProps> = ({
               onChange={handleAddress1Change}
               value={state.streetLine1}
               inputMode="text"
+              tabIndex={0}
               error={formErrors.streetLine1}
             />
             <InputText
@@ -117,6 +118,7 @@ const ShippingInfo: FC<OwnProps> = ({
               onChange={handleAddress2Change}
               value={state.streetLine2}
               inputMode="text"
+              tabIndex={0}
               error={formErrors.streetLine2}
             />
             <InputText
@@ -124,6 +126,7 @@ const ShippingInfo: FC<OwnProps> = ({
               onChange={handleCityChange}
               value={state.city}
               inputMode="text"
+              tabIndex={0}
               error={formErrors.city}
             />
             <InputText
@@ -142,11 +145,13 @@ const ShippingInfo: FC<OwnProps> = ({
               id="shipping-country"
               error={formErrors.countryIso2}
               ref={selectCountryRef}
+              tabIndex={0}
             >
               {countryList.map(({ defaultName, name, iso2 }) => (
                 <option
                   value={iso2}
                   className="county-item"
+                  selected={iso2 === state.countryIso2}
                 >
                   {defaultName || name}
                 </option>
@@ -158,6 +163,7 @@ const ShippingInfo: FC<OwnProps> = ({
               onChange={handlePostCodeChange}
               value={state.postCode}
               inputMode="text"
+              tabIndex={0}
               error={formErrors.postCode}
             />
           </div>
@@ -171,6 +177,7 @@ const ShippingInfo: FC<OwnProps> = ({
             onChange={handleFullNameChange}
             value={state.fullName}
             inputMode="text"
+            tabIndex={0}
             error={formErrors.fullName}
           />
         ) }
@@ -180,6 +187,7 @@ const ShippingInfo: FC<OwnProps> = ({
             onChange={handleEmailChange}
             value={state.email}
             inputMode="email"
+            tabIndex={0}
             error={formErrors.email}
           />
         ) }
@@ -189,6 +197,7 @@ const ShippingInfo: FC<OwnProps> = ({
             onChange={handlePhoneChange}
             value={state.phone}
             inputMode="tel"
+            tabIndex={0}
             error={formErrors.phone}
             ref={phoneRef}
           />
@@ -197,6 +206,7 @@ const ShippingInfo: FC<OwnProps> = ({
           label={lang('PaymentShippingSave')}
           subLabel={lang('PaymentShippingSaveInfo')}
           checked={Boolean(state.saveInfo)}
+          tabIndex={0}
           onChange={handleSaveInfoChange}
         />
       </form>

@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPrivacySettings } from '../../../types';
@@ -24,6 +24,7 @@ type StateProps = {
   webAuthCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
+  shouldArchiveAndMuteNewNonContact?: boolean;
   privacyPhoneNumber?: ApiPrivacySettings;
   privacyLastSeen?: ApiPrivacySettings;
   privacyProfilePhoto?: ApiPrivacySettings;
@@ -41,6 +42,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   webAuthCount,
   isSensitiveEnabled,
   canChangeSensitive,
+  shouldArchiveAndMuteNewNonContact,
   privacyPhoneNumber,
   privacyLastSeen,
   privacyProfilePhoto,
@@ -57,6 +59,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadAuthorizations,
     loadContentSettings,
     updateContentSettings,
+    loadGlobalPrivacySettings,
+    updateGlobalPrivacySettings,
   } = getActions();
 
   useEffect(() => {
@@ -66,12 +70,24 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadContentSettings();
   }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings, loadContentSettings]);
 
+  useEffect(() => {
+    if (isActive) {
+      loadGlobalPrivacySettings();
+    }
+  }, [isActive, loadGlobalPrivacySettings]);
+
   const lang = useLang();
 
   useHistoryBack({
     isActive,
     onBack: onReset,
   });
+
+  const handleArchiveAndMuteChange = useCallback((isEnabled: boolean) => {
+    updateGlobalPrivacySettings({
+      shouldArchiveAndMuteNewNonContact: isEnabled,
+    });
+  }, [updateGlobalPrivacySettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
     const { visibility } = setting || {};
@@ -253,6 +269,18 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
       </div>
 
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('NewChatsFromNonContacts')}
+        </h4>
+        <Checkbox
+          label={lang('ArchiveAndMute')}
+          subLabel={lang('ArchiveAndMuteInfo')}
+          checked={Boolean(shouldArchiveAndMuteNewNonContact)}
+          onCheck={handleArchiveAndMuteChange}
+        />
+      </div>
+
       {canChangeSensitive && (
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -276,7 +304,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       settings: {
         byKey: {
-          hasPassword, isSensitiveEnabled, canChangeSensitive,
+          hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
         },
         privacy,
       },
@@ -292,6 +320,7 @@ export default memo(withGlobal<OwnProps>(
       blockedCount: blocked.totalCount,
       webAuthCount: global.activeWebSessions.orderedHashes.length,
       isSensitiveEnabled,
+      shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       privacyPhoneNumber: privacy.phoneNumber,
       privacyLastSeen: privacy.lastSeen,

@@ -34,6 +34,7 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withChatType?: boolean;
+  withVideoAvatar?: boolean;
   noRtl?: boolean;
 };
 
@@ -55,6 +56,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   withFullInfo,
   withUpdatingStatus,
   withChatType,
+  withVideoAvatar,
   noRtl,
   chat,
   onlineCount,
@@ -75,8 +77,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, isSuperGroup]);
 
-  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
-    if (chat && hasPhoto) {
+  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
+    if (chat && hasMedia) {
       e.stopPropagation();
       openMediaViewer({
         avatarOwnerId: chat.id,
@@ -140,6 +142,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         size={avatarSize}
         chat={chat}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
+        noVideo={!withVideoAvatar}
       />
       <div className="info">
         <div className="title">

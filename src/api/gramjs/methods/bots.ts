@@ -157,6 +157,7 @@ export async function requestWebView({
   startParam,
   replyToMessageId,
   theme,
+  sendAs,
   isFromBotMenu,
 }: {
   isSilent?: boolean;
@@ -166,6 +167,7 @@ export async function requestWebView({
   startParam?: string;
   replyToMessageId?: number;
   theme?: ApiThemeParameters;
+  sendAs?: ApiUser | ApiChat;
   isFromBotMenu?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestWebView({
@@ -177,6 +179,7 @@ export async function requestWebView({
     startParam,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     fromBotMenu: isFromBotMenu || undefined,
+    ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 
   if (result instanceof GramJs.WebViewResultUrl) {
@@ -211,12 +214,14 @@ export function prolongWebView({
   bot,
   queryId,
   replyToMessageId,
+  sendAs,
 }: {
   isSilent?: boolean;
   peer: ApiChat | ApiUser;
   bot: ApiUser;
   queryId: string;
   replyToMessageId?: number;
+  sendAs?: ApiUser | ApiChat;
 }) {
   return invokeRequest(new GramJs.messages.ProlongWebView({
     silent: isSilent || undefined,
@@ -224,6 +229,7 @@ export function prolongWebView({
     bot: buildInputPeer(bot.id, bot.accessHash),
     queryId: BigInt(queryId),
     replyToMsgId: replyToMessageId,
+    ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 }
 

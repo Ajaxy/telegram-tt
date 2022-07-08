@@ -95,6 +95,9 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-interactive-element-hover: rgba(var(--color-text-secondary-rgb), 0.08);
   --color-composer-button: #{$color-text-secondary}CC;
 
+  --color-voice-transcribe-button: #e8f3ff;
+  --color-voice-transcribe-button-own: #cceebf;
+
   --color-primary: #{$color-primary};
   --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
   --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};

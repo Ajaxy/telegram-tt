@@ -1,11 +1,7 @@
 import type { GlobalState } from '../types';
 
-export function selectPaymentChatId(global: GlobalState) {
-  return global.payment.chatId;
-}
-
-export function selectPaymentMessageId(global: GlobalState) {
-  return global.payment.messageId;
+export function selectPaymentInputInvoice(global: GlobalState) {
+  return global.payment.inputInvoice;
 }
 
 export function selectPaymentFormId(global: GlobalState) {
