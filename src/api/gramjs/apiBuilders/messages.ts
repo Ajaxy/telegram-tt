@@ -268,7 +268,10 @@ export function buildMessageContent(
     };
   }
 
-  if (mtpMessage.message && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
+  const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
+
+  if (mtpMessage.message && !hasUnsupportedMedia
+      && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
     content = {
       ...content,
       text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
