@@ -8,6 +8,7 @@ declare namespace React {
   interface HTMLAttributes {
     // Optimization for DOM nodes prepends and inserts
     teactFastList?: boolean;
+    teactExperimentControlled?: boolean;
   }
 
   // Teact feature

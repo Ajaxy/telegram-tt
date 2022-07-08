@@ -27,7 +27,8 @@ type VirtualDomHead = {
 };
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
-const HTML_ATTRIBUTES = new Set(['dir', 'role']);
+const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
+const CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
 const MAPPED_ATTRIBUTES: { [k: string]: string } = {
   autoPlay: 'autoplay',
   autoComplete: 'autocomplete',
@@ -250,11 +251,15 @@ function createNode($element: VirtualElementReal): Node {
     props.ref.current = element;
   }
 
+  processControlled(tag, props);
+
   Object.entries(props).forEach(([key, value]) => {
     if (props[key] !== undefined) {
       setAttribute(element, key, value);
     }
   });
+
+  processUncontrolledOnMount(element, props);
 
   $element.children = children.map(($child, i) => (
     renderWithVirtual(element, undefined, $child, $element, i)
@@ -504,7 +509,55 @@ function renderFragment(
   return newChildren;
 }
 
+function processControlled(tag: string, props: AnyLiteral) {
+  // TODO Remove after tests
+  if (!props.teactExperimentControlled) {
+    return;
+  }
+
+  const isValueControlled = props.value !== undefined;
+  const isCheckedControlled = props.checked !== undefined;
+  const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(tag.toUpperCase());
+  if (!isControlled) {
+    return;
+  }
+
+  const {
+    value, checked, onInput, onChange,
+  } = props;
+
+  props.onChange = undefined;
+  props.onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onInput?.(e);
+    onChange?.(e);
+
+    if (value !== undefined) {
+      e.currentTarget.value = value;
+    }
+
+    if (checked !== undefined) {
+      e.currentTarget.checked = checked;
+    }
+  };
+}
+
+function processUncontrolledOnMount(element: HTMLElement, props: AnyLiteral) {
+  if (!CONTROLLABLE_TAGS.includes(element.tagName)) {
+    return;
+  }
+
+  if (props.defaultValue) {
+    setAttribute(element, 'value', props.defaultValue);
+  }
+
+  if (props.defaultChecked) {
+    setAttribute(element, 'checked', props.defaultChecked);
+  }
+}
+
 function updateAttributes($current: VirtualElementParent, $new: VirtualElementParent, element: HTMLElement) {
+  processControlled(element.tagName, $new.props);
+
   const currentEntries = Object.entries($current.props);
   const newEntries = Object.entries($new.props);
 

@@ -202,6 +202,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     }
 
     // Teact does not have full support of controlled form components, we need to "disable" input value change manually
+    // TODO Teact support added, this can now be removed
     const checkbox = isPreHistoryHiddenCheckboxRef.current?.querySelector('input') as HTMLInputElement;
     checkbox.checked = !chat.fullInfo?.isPreHistoryHidden;
   }, [isChannelsPremiumLimitReached, chat.fullInfo?.isPreHistoryHidden]);
