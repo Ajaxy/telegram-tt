@@ -23,16 +23,18 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
-
 import { copyTextToClipboard } from '../../../util/clipboard';
+
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
 import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import CalendarModal from '../../common/CalendarModal';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 
 const START_SIZE = 2 * REM;
 
@@ -71,6 +73,8 @@ type StateProps = {
   canSelect?: boolean;
   canDownload?: boolean;
   canSaveGif?: boolean;
+  canRevote?: boolean;
+  canClosePoll?: boolean;
   activeDownloads: number[];
   canShowSeenBy?: boolean;
   enabledReactions?: string[];
@@ -109,6 +113,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canSelect,
   canDownload,
   canSaveGif,
+  canRevote,
+  canClosePoll,
   activeDownloads,
   canShowSeenBy,
 }) => {
@@ -132,14 +138,18 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadReactors,
     copyMessagesByIds,
     saveGif,
+    cancelPollVote,
+    closePoll,
   } = getActions();
 
+  const lang = useLang();
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
+  const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
 
   useEffect(() => {
     if (canShowSeenBy && isOpen) {
@@ -253,6 +263,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
     unfaveSticker({ sticker: message.content.sticker });
   }, [closeMenu, message.content.sticker, unfaveSticker]);
+
+  const handleCancelVote = useCallback(() => {
+    closeMenu();
+    cancelPollVote({ chatId: message.chatId, messageId: message.id });
+  }, [closeMenu, message, cancelPollVote]);
+
+  const handlePollClose = useCallback(() => {
+    closeMenu();
+    closePoll({ chatId: message.chatId, messageId: message.id });
+  }, [closeMenu, message, closePoll]);
 
   const handleSelectMessage = useCallback(() => {
     const params = album?.messages
@@ -373,6 +393,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canSelect={canSelect}
         canDownload={canDownload}
         canSaveGif={canSaveGif}
+        canRevote={canRevote}
+        canClosePoll={canClosePoll}
         canShowSeenBy={canShowSeenBy}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
@@ -394,6 +416,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCopyNumber={handleCopyNumber}
         onDownload={handleDownloadClick}
         onSaveGif={handleSaveGif}
+        onCancelVote={handleCancelVote}
+        onClosePoll={openClosePollDialog}
         onShowSeenBy={handleOpenSeenByModal}
         onSendReaction={handleSendReaction}
         onShowReactors={handleOpenReactorListModal}
@@ -415,6 +439,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         messageId={message.id}
         chatId={message.chatId}
         onClose={closePinModal}
+      />
+      <ConfirmDialog
+        isOpen={isClosePollDialogOpen}
+        onClose={closeClosePollDialog}
+        text={lang('lng_polls_stop_warning')}
+        confirmLabel={lang('lng_polls_stop_sure')}
+        confirmHandler={handlePollClose}
       />
       {canReschedule && (
         <CalendarModal
@@ -453,6 +484,8 @@ export default memo(withGlobal<OwnProps>(
       canSelect,
       canDownload,
       canSaveGif,
+      canRevote,
+      canClosePoll,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
@@ -494,6 +527,8 @@ export default memo(withGlobal<OwnProps>(
       canSelect,
       canDownload: !isProtected && canDownload,
       canSaveGif: !isProtected && canSaveGif,
+      canRevote,
+      canClosePoll: !isScheduled && canClosePoll,
       activeDownloads,
       canShowSeenBy,
       enabledReactions: chat?.isForbidden ? undefined : chat?.fullInfo?.enabledReactions,

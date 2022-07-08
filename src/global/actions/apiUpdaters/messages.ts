@@ -389,22 +389,23 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       const message = selectChatMessageByPollId(global, pollId);
 
       if (message?.content.poll) {
-        const updatedPoll = { ...message.content.poll, ...pollUpdate };
-
-        // Workaround for poll update bug: `chosen` option gets reset when someone votes after current user
-        const { results: updatedResults } = updatedPoll.results || {};
-        if (updatedResults && !updatedResults.some(((result) => result.isChosen))) {
-          const { results } = message.content.poll.results;
-          const chosenAnswers = results && results.filter((result) => result.isChosen);
-          if (chosenAnswers) {
-            chosenAnswers.forEach((chosenAnswer) => {
-              const chosenAnswerIndex = updatedResults.findIndex((result) => result.option === chosenAnswer.option);
-              if (chosenAnswerIndex >= 0) {
-                updatedPoll.results.results![chosenAnswerIndex].isChosen = true;
-              }
-            });
+        const oldResults = message.content.poll.results;
+        let newResults = oldResults;
+        if (pollUpdate.results?.results) {
+          if (!oldResults.results || !pollUpdate.results.isMin) {
+            newResults = pollUpdate.results;
+          } else if (oldResults.results) {
+            newResults = {
+              ...pollUpdate.results,
+              results: pollUpdate.results.results.map((result) => ({
+                ...result,
+                isChosen: oldResults.results!.find((r) => r.option === result.option)?.isChosen,
+              })),
+              isMin: undefined,
+            };
           }
         }
+        const updatedPoll = { ...message.content.poll, ...pollUpdate, results: newResults };
 
         setGlobal(updateChatMessage(
           global,
@@ -438,8 +439,8 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       newRecentVoterIds.push(userId);
 
       options.forEach((option) => {
-        const targetOption = newResults.find((result) => result.option === option);
         const targetOptionIndex = newResults.findIndex((result) => result.option === option);
+        const targetOption = newResults[targetOptionIndex];
         const updatedOption: ApiPollResult = targetOption ? { ...targetOption } : { option, votersCount: 0 };
 
         updatedOption.votersCount += 1;

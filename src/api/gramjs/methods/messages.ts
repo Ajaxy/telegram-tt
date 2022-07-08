@@ -17,6 +17,7 @@ import type {
   ApiSponsoredMessage,
   ApiSendMessageAction,
   ApiContact,
+  ApiPoll,
 } from '../../types';
 import {
   MAIN_THREAD_ID,
@@ -51,6 +52,7 @@ import {
   isMessageWithMedia,
   isServiceMessageWithMedia,
   buildSendMessageAction,
+  buildInputPollFromExisting,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -1049,6 +1051,22 @@ export async function sendPollVote({
     msgId: messageId,
     options: options.map(deserializeBytes),
   }), true);
+}
+
+export async function closePoll({
+  chat, messageId, poll,
+} : {
+  chat: ApiChat;
+  messageId: number;
+  poll: ApiPoll;
+}) {
+  const { id, accessHash } = chat;
+
+  await invokeRequest(new GramJs.messages.EditMessage({
+    peer: buildInputPeer(id, accessHash),
+    id: messageId,
+    media: buildInputPollFromExisting(poll, true),
+  }));
 }
 
 export async function loadPollOptionResults({

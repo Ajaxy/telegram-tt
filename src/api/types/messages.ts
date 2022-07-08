@@ -125,6 +125,7 @@ export interface ApiPoll {
     closeDate?: number;
   };
   results: {
+    isMin?: true;
     results?: ApiPollResult[];
     totalVoters?: number;
     recentVoterIds?: string[];

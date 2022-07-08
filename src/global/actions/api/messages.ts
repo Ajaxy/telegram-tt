@@ -573,6 +573,24 @@ addActionHandler('sendPollVote', (global, actions, payload) => {
   }
 });
 
+addActionHandler('cancelPollVote', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+  const chat = selectChat(global, chatId);
+
+  if (chat) {
+    void callApi('sendPollVote', { chat, messageId, options: [] });
+  }
+});
+
+addActionHandler('closePoll', (global, actions, payload) => {
+  const { chatId, messageId } = payload;
+  const chat = selectChat(global, chatId);
+  const poll = selectChatMessage(global, chatId, messageId)?.content.poll;
+  if (chat && poll) {
+    void callApi('closePoll', { chat, messageId, poll });
+  }
+});
+
 addActionHandler('loadPollOptionResults', (global, actions, payload) => {
   const {
     chat, messageId, option, offset, limit, shouldResetVoters,

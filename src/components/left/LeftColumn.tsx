@@ -142,6 +142,7 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.Privacy:
         case SettingsScreens.ActiveSessions:
         case SettingsScreens.Language:
+        case SettingsScreens.Experimental:
           setSettingsScreen(SettingsScreens.Main);
           return;
 

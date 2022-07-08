@@ -8,6 +8,7 @@ import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
 import Lock from '../../../assets/tgs/settings/Lock.tgs';
 import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
+import Experimental from '../../../assets/tgs/settings/Experimental.tgs';
 
 import CameraFlip from '../../../assets/tgs/calls/CameraFlip.tgs';
 import HandFilled from '../../../assets/tgs/calls/HandFilled.tgs';
@@ -51,4 +52,5 @@ export const LOCAL_TGS_URLS = {
   Invite,
   QrPlane,
   Congratulations,
+  Experimental,
 };

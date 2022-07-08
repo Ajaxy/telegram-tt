@@ -458,6 +458,10 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
 
   const canSaveGif = message.content.video?.isGif;
 
+  const poll = content.poll;
+  const canRevote = !poll?.summary.closed && !poll?.summary.quiz && poll?.results.results?.some((r) => r.isChosen);
+  const canClosePoll = isOwn && poll && !poll.summary.closed;
+
   const noOptions = [
     canReply,
     canEdit,
@@ -474,6 +478,8 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canSelect,
     canDownload,
     canSaveGif,
+    canRevote,
+    canClosePoll,
   ].every((ability) => !ability);
 
   return {
@@ -493,6 +499,8 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     canSelect,
     canDownload,
     canSaveGif,
+    canRevote,
+    canClosePoll,
   };
 }
 

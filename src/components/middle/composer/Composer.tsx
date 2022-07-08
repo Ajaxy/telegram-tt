@@ -992,7 +992,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       <PollModal
         isOpen={pollModal.isOpen}
         isQuiz={pollModal.isQuiz}
-        shouldBeAnonimous={isChannel}
+        shouldBeAnonymous={isChannel}
         onClear={closePollModal}
         onSend={handlePollSend}
       />

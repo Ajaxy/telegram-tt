@@ -8,6 +8,7 @@ import { SettingsScreens } from '../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import useLang from '../../../hooks/useLang';
+import useMultiClick from '../../../hooks/useMultiClick';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -36,6 +37,10 @@ const SettingsHeader: FC<OwnProps> = ({
 
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false);
+
+  const handleMultiClick = useMultiClick(5, () => {
+    onScreenSelect(SettingsScreens.Experimental);
+  });
 
   const openSignOutConfirmation = useCallback(() => {
     setIsSignOutDialogOpen(true);
@@ -98,6 +103,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('PrivacySettings')}</h3>;
       case SettingsScreens.Language:
         return <h3>{lang('Language')}</h3>;
+      case SettingsScreens.Experimental:
+        return <h3>{lang('lng_settings_experimental')}</h3>;
 
       case SettingsScreens.GeneralChatBackground:
         return <h3>{lang('ChatBackground')}</h3>;
@@ -228,7 +235,10 @@ const SettingsHeader: FC<OwnProps> = ({
       default:
         return (
           <div className="settings-main-header">
-            <h3>{lang('SETTINGS')}</h3>
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+            <h3 onClick={handleMultiClick}>
+              {lang('SETTINGS')}
+            </h3>
 
             <Button
               round

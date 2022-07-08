@@ -28,7 +28,7 @@ export {
   fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
   fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
-  saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions,
+  saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, closePoll,
 } from './messages';
 
 export {

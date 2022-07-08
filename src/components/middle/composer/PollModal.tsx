@@ -20,7 +20,7 @@ import './PollModal.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  shouldBeAnonimous?: boolean;
+  shouldBeAnonymous?: boolean;
   isQuiz?: boolean;
   onSend: (pollSummary: ApiNewPoll) => void;
   onClear: () => void;
@@ -33,7 +33,7 @@ const MAX_QUESTION_LENGTH = 255;
 const MAX_SOLUTION_LENGTH = 200;
 
 const PollModal: FC<OwnProps> = ({
-  isOpen, isQuiz, shouldBeAnonimous, onSend, onClear,
+  isOpen, isQuiz, shouldBeAnonymous, onSend, onClear,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const questionInputRef = useRef<HTMLInputElement>(null);
@@ -324,7 +324,7 @@ const PollModal: FC<OwnProps> = ({
       <div className="options-divider" />
 
       <div className="quiz-mode">
-        {!shouldBeAnonimous && (
+        {!shouldBeAnonymous && (
           <Checkbox
             label={lang('PollAnonymous')}
             checked={isAnonymous}
