@@ -58,7 +58,8 @@ const PaymentInfo: FC<OwnProps> = ({
   }, [dispatch]);
 
   const handleCvvChange = useCallback((e) => {
-    dispatch({ type: 'changeCvvCode', payload: e.target.value });
+    const newValue = e.target.value.replace(/[^0-9]/g, '');
+    dispatch({ type: 'changeCvvCode', payload: newValue });
   }, [dispatch]);
 
   const handleCountryChange = useCallback((e) => {
@@ -110,6 +111,7 @@ const PaymentInfo: FC<OwnProps> = ({
             maxLength={3}
             tabIndex={0}
             error={formErrors.cvv}
+            teactExperimentControlled
           />
         </section>
         { needCountry || needZip ? (
@@ -147,6 +149,7 @@ const PaymentInfo: FC<OwnProps> = ({
             value={state.billingZip}
             inputMode="text"
             tabIndex={0}
+            maxLength={12}
             error={formErrors.billingZip}
           />
         )}

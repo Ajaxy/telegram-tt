@@ -21,6 +21,7 @@ type OwnProps = {
   autoComplete?: string;
   maxLength?: number;
   tabIndex?: number;
+  teactExperimentControlled?: boolean;
   inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
@@ -45,6 +46,7 @@ const InputText: FC<OwnProps> = ({
   inputMode,
   maxLength,
   tabIndex,
+  teactExperimentControlled,
   onChange,
   onInput,
   onKeyPress,
@@ -87,6 +89,7 @@ const InputText: FC<OwnProps> = ({
         onBlur={onBlur}
         onPaste={onPaste}
         aria-label={labelText}
+        teactExperimentControlled={teactExperimentControlled}
       />
       {labelText && (
         <label htmlFor={id}>{labelText}</label>
