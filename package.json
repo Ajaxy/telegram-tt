@@ -19,7 +19,7 @@
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint": "eslint src/lib/gramjs --ext .ts,.tsx,.js",
     "gramjs:lint:fix": "npm run gramjs:lint -- --fix",
-    "test": "cross-env APP_ENV=test jest --verbose --forceExit",
+    "test": "cross-env APP_ENV=test jest --verbose --silent --forceExit",
     "test:playwright": "playwright test",
     "test:record": "playwright codegen localhost:1235",
     "prepare": "husky install",
