@@ -29,9 +29,12 @@ export default async function buildAttachment(
     if (isQuick) {
       const img = await preloadImage(blobUrl);
       const { width, height } = img;
+      const shouldShrink = width > MAX_QUICK_IMG_SIZE || height > MAX_QUICK_IMG_SIZE;
 
-      if (width > MAX_QUICK_IMG_SIZE || height > MAX_QUICK_IMG_SIZE || mimeType !== 'image/jpeg') {
-        const resizedUrl = await scaleImage(blobUrl, MAX_QUICK_IMG_SIZE / Math.max(width, height), 'image/jpeg');
+      if (shouldShrink || mimeType !== 'image/jpeg') {
+        const resizedUrl = await scaleImage(
+          blobUrl, shouldShrink ? MAX_QUICK_IMG_SIZE / Math.max(width, height) : 1, 'image/jpeg',
+        );
         URL.revokeObjectURL(blobUrl);
         const newBlob = await fetchBlob(resizedUrl);
         return buildAttachment(filename, newBlob, true, options);
