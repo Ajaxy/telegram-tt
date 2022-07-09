@@ -50,6 +50,7 @@ type OwnProps = {
   origin: AudioOrigin;
   date?: number;
   lastSyncTime?: number;
+  noAvatars?: boolean;
   className?: string;
   isSelectable?: boolean;
   isSelected?: boolean;
@@ -66,7 +67,8 @@ type OwnProps = {
   onDateClick?: (messageId: number, chatId: string) => void;
 };
 
-export const TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 365px)');
+export const TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 375px)');
+export const WITH_AVATAR_TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 410px)');
 const AVG_VOICE_DURATION = 10;
 // This is needed for browsers requiring user interaction before playing.
 const PRELOAD = true;
@@ -81,6 +83,7 @@ const Audio: FC<OwnProps> = ({
   origin,
   date,
   lastSyncTime,
+  noAvatars,
   className,
   isSelectable,
   isSelected,
@@ -152,7 +155,9 @@ const Audio: FC<OwnProps> = ({
   );
 
   const isOwn = isOwnMessage(message);
-  const waveformCanvasRef = useWaveformCanvas(theme, voice, (isMediaUnread && !isOwn) ? 1 : playProgress, isOwn);
+  const waveformCanvasRef = useWaveformCanvas(
+    theme, voice, (isMediaUnread && !isOwn) ? 1 : playProgress, isOwn, !noAvatars,
+  );
 
   const withSeekline = isPlaying || (playProgress > 0 && playProgress < 1);
 
@@ -401,10 +406,14 @@ const Audio: FC<OwnProps> = ({
   );
 };
 
-function getSeeklineSpikeAmounts() {
+function getSeeklineSpikeAmounts(withAvatar?: boolean) {
   return {
     MIN_SPIKES: IS_SINGLE_COLUMN_LAYOUT ? (TINY_SCREEN_WIDTH_MQL.matches ? 16 : 20) : 25,
-    MAX_SPIKES: IS_SINGLE_COLUMN_LAYOUT ? (TINY_SCREEN_WIDTH_MQL.matches ? 35 : 48) : 75,
+    MAX_SPIKES: IS_SINGLE_COLUMN_LAYOUT
+      ? (TINY_SCREEN_WIDTH_MQL.matches
+        ? 35
+        : (withAvatar && WITH_AVATAR_TINY_SCREEN_WIDTH_MQL.matches ? 40 : 45))
+      : 75,
   };
 }
 
@@ -521,6 +530,7 @@ function useWaveformCanvas(
   voice?: ApiVoice,
   playProgress = 0,
   isOwn = false,
+  withAvatar = false,
 ) {
   // eslint-disable-next-line no-null/no-null
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -538,13 +548,13 @@ function useWaveformCanvas(
       };
     }
 
-    const { MIN_SPIKES, MAX_SPIKES } = getSeeklineSpikeAmounts();
+    const { MIN_SPIKES, MAX_SPIKES } = getSeeklineSpikeAmounts(withAvatar);
     const durationFactor = Math.min(duration / AVG_VOICE_DURATION, 1);
     const spikesCount = Math.round(MIN_SPIKES + (MAX_SPIKES - MIN_SPIKES) * durationFactor);
     const decodedWaveform = decodeWaveform(new Uint8Array(waveform));
 
     return interpolateArray(decodedWaveform, spikesCount);
-  }, [voice]) || {};
+  }, [voice, withAvatar]) || {};
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
