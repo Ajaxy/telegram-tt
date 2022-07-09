@@ -763,6 +763,7 @@ const Message: FC<OwnProps & StateProps> = ({
             lastSyncTime={lastSyncTime}
             isSelectable={isInDocumentGroup}
             isSelected={isSelected}
+            noAvatars={noAvatars}
             onPlay={handleAudioPlay}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
