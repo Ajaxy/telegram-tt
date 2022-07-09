@@ -318,7 +318,7 @@ const LeftColumn: FC<StateProps> = ({
 
   const handleHotkeySavedMessages = useCallback((e: KeyboardEvent) => {
     e.preventDefault();
-    openChat({ id: currentUserId });
+    openChat({ id: currentUserId, shouldReplaceHistory: true });
   }, [currentUserId, openChat]);
 
   const handleHotkeySettings = useCallback((e: KeyboardEvent) => {
@@ -329,6 +329,7 @@ const LeftColumn: FC<StateProps> = ({
   useHotkeys({
     'Mod+Shift+F': handleHotkeySearch,
     'Mod+Shift+S': handleHotkeySavedMessages,
+    'Mod+0': handleHotkeySavedMessages,
     ...(IS_MAC_OS && IS_PWA && { 'Mod+,': handleHotkeySettings }),
   });
 
