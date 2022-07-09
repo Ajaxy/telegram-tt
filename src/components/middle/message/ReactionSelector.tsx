@@ -64,7 +64,7 @@ const ReactionSelector: FC<OwnProps> = ({
       <div className={cn('items-wrapper')}>
         <div className={cn('items', ['no-scrollbar'])} ref={itemsScrollRef}>
           {availableReactions?.map((reaction, i) => {
-            if (reaction.isInactive || (reaction.isPremium && canBuyPremium)
+            if (reaction.isInactive || (reaction.isPremium && !isCurrentUserPremium)
               || (!isPrivate && (!enabledReactions || !enabledReactions.includes(reaction.reaction)))) return undefined;
             return (
               <ReactionSelectorReaction

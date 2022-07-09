@@ -249,6 +249,10 @@ const Audio: FC<OwnProps> = ({
     });
   }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek]);
 
+  const transcribeSvgMemo = useMemo(() => (
+    <div dangerouslySetInnerHTML={{ __html: TRANSCRIBE_SVG }} />
+  ), []);
+
   function renderFirstLine() {
     if (isVoice) {
       return senderTitle || 'Voice';
@@ -398,6 +402,7 @@ const Audio: FC<OwnProps> = ({
           isTranscriptionHidden,
           isTranscribed,
           isTranscriptionError,
+          transcribeSvgMemo,
           canTranscribe ? handleTranscribe : undefined,
           onHideTranscription,
         )
@@ -485,6 +490,7 @@ function renderVoice(
   isTranscriptionHidden?: boolean,
   isTranscribed?: boolean,
   isTranscriptionError?: boolean,
+  svgMemo?: React.ReactNode,
   onClickTranscribe?: VoidFunction,
   onHideTranscription?: (isHidden: boolean) => void,
 ) {
@@ -514,7 +520,7 @@ function renderVoice(
               (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
             )}
             />
-            {isTranscribing && <div dangerouslySetInnerHTML={{ __html: TRANSCRIBE_SVG }} />}
+            {isTranscribing && svgMemo}
           </Button>
         )}
       </div>
