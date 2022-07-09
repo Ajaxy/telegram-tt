@@ -48,7 +48,7 @@ export function getMessageTranscription(message: ApiMessage) {
   const { transcriptionId } = message;
   const global = getGlobal();
 
-  return transcriptionId && global.transcriptions[transcriptionId].text;
+  return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
 export function getMessageText(message: ApiMessage) {

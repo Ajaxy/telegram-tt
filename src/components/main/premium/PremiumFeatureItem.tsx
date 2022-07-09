@@ -22,7 +22,7 @@ const PremiumFeatureItem: FC<OwnProps> = ({
 }) => {
   return (
     <ListItem buttonClassName={styles.root} onClick={onClick}>
-      <img src={icon} alt="" />
+      <img src={icon} className={styles.icon} alt="" />
       <div className={styles.text}>
         <div className={styles.title}>{renderText(title, ['br'])}</div>
         <div className={styles.description}>{text}</div>

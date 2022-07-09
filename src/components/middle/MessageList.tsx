@@ -38,23 +38,25 @@ import {
   getPhotoFullDimensions,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
+import { DPR } from '../../util/environment';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
-import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-import useOnChange from '../../hooks/useOnChange';
-import useStickyDates from './hooks/useStickyDates';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import resetScroll, { patchChromiumScroll } from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
+
+import useOnChange from '../../hooks/useOnChange';
+import useStickyDates from './hooks/useStickyDates';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLang from '../../hooks/useLang';
 import useWindowSize from '../../hooks/useWindowSize';
 import useInterval from '../../hooks/useInterval';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
 import useMedia from '../../hooks/useMedia';
+import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -174,6 +176,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
   const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
     ? getVideoDimensions(botInfo.gif) : undefined;
+  const botInfoRealDimensions = botInfoDimensions && {
+    width: botInfoDimensions.width / DPR,
+    height: botInfoDimensions.height / DPR,
+  };
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -538,10 +544,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
           {isLoadingBotInfo && <span>{lang('Loading')}</span>}
           {isBotInfoEmpty && <span>{lang('NoMessages')}</span>}
           {botInfo && (
-            <div className="bot-info" style={botInfoDimensions && `width: ${botInfoDimensions?.width}px`}>
+            <div
+              className="bot-info"
+              style={botInfoRealDimensions && (
+                `width: ${botInfoRealDimensions.width}px`
+              )}
+            >
               {botInfoPhotoUrl && (
                 <img
                   src={botInfoPhotoUrl}
+                  width={botInfoRealDimensions?.width}
+                  height={botInfoRealDimensions?.height}
                   alt="Bot info"
                 />
               )}
@@ -556,8 +569,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
               )}
               {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
                 <Skeleton
-                  width={botInfoDimensions?.width}
-                  height={botInfoDimensions?.height}
+                  width={botInfoRealDimensions?.width}
+                  height={botInfoRealDimensions?.height}
                 />
               )}
               {botInfo.description && (
