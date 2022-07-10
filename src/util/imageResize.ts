@@ -1,4 +1,6 @@
-import { getAverageColor, isDarkColor } from './colors';
+import { getAverageColor, getColorLuma } from './colors';
+
+const LUMA_THRESHOLD = 240;
 
 export function scaleImage(image: string | Blob, ratio: number, outputType: string = 'image/png'): Promise<string> {
   const url = image instanceof Blob ? URL.createObjectURL(image) : image;
@@ -56,7 +58,7 @@ async function scale(
         throw new Error('Image bitmap resize not supported!'); // FF93 added support for options, but not resize
       }
       const averageColor = await getAverageColor(img.src);
-      const fillColor = isDarkColor(averageColor) ? '#fff' : '#000';
+      const fillColor = getColorLuma(averageColor) < LUMA_THRESHOLD ? '#fff' : '#000';
       return await new Promise((res) => {
         const canvas = document.createElement('canvas');
         canvas.width = bitmap.width;
@@ -81,7 +83,7 @@ async function scale(
   }
 }
 
-function steppedScale(
+async function steppedScale(
   img: HTMLImageElement, width: number, height: number, step: number = 0.5, outputType: string = 'image/png',
 ): Promise<Blob | null> {
   const canvas = document.createElement('canvas');
@@ -117,6 +119,11 @@ function steppedScale(
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   }
 
+  const averageColor = await getAverageColor(img.src);
+  const fillColor = getColorLuma(averageColor) < LUMA_THRESHOLD ? '#fff' : '#000';
+  ctx.fillStyle = fillColor;
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   return new Promise((resolve) => {
     canvas.toBlob(resolve, outputType);
   });
