@@ -185,10 +185,10 @@ export async function getAverageColor(url: string): Promise<[number, number, num
   return rgb;
 }
 
-export function isDarkColor(rgbColor: [number, number, number]) {
+export function getColorLuma(rgbColor: [number, number, number]) {
   const [r, g, b] = rgbColor;
   const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luma < 128;
+  return luma;
 }
 
 // eslint-disable-next-line max-len
