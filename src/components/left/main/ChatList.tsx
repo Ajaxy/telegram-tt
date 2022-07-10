@@ -106,7 +106,7 @@ const ChatList: FC<OwnProps> = ({
         if (!digit) return;
 
         const position = Number(digit) - 1;
-        if (position > orderedIds!.length - 1) return;
+        if (position > orderedIds!.length - 1 || position < 0) return;
 
         openChat({ id: orderedIds![position], shouldReplaceHistory: true });
       }
