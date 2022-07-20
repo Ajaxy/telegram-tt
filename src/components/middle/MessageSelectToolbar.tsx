@@ -72,12 +72,15 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     return isActive && !isDeleteModalOpen && !isReportModalOpen && !isForwardModalOpen
       ? captureKeyboardListeners({
-        onBackspace: openDeleteModal,
-        onDelete: openDeleteModal,
+        onBackspace: canDeleteMessages ? openDeleteModal : undefined,
+        onDelete: canDeleteMessages ? openDeleteModal : undefined,
         onEsc: exitMessageSelectMode,
       })
       : undefined;
-  }, [isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode, isForwardModalOpen]);
+  }, [
+    isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode, isForwardModalOpen,
+    canDeleteMessages,
+  ]);
 
   const handleCopy = useCallback(() => {
     copySelectedMessages();
