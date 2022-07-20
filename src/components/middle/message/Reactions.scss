@@ -70,6 +70,18 @@
 
   .own &.is-outside {
     flex-direction: row-reverse;
+
+    .Button {
+      &:first-of-type {
+        margin-left: 0.125rem;
+        margin-right: 0;
+      }
+
+      &:last-of-type {
+        margin-right: 0.125rem;
+        margin-left: 0;
+      }
+    }
   }
 
   &.is-outside .Button {
