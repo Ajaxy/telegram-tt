@@ -73,6 +73,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       if (phoneCall) {
         if (call.state === 'discarded') {
+          actions.playGroupCallSound({ sound: 'end' });
           return {
             ...global,
             ...(call.needRating && { ratingPhoneCall: call }),
