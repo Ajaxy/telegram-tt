@@ -39,7 +39,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   const {
     loadProfilePhotos,
     loadAuthorizations,
-    loadWebAuthorizations,
     openPremiumModal,
   } = getActions();
 
@@ -60,9 +59,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (lastSyncTime) {
       loadAuthorizations();
-      loadWebAuthorizations();
     }
-  }, [lastSyncTime, loadAuthorizations, loadWebAuthorizations]);
+  }, [lastSyncTime, loadAuthorizations]);
 
   return (
     <div className="settings-content custom-scroll">

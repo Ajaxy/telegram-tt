@@ -50,6 +50,8 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const autoTerminateValue = useMemo(() => {
+    // eslint-disable-next-line max-len
+    // https://github.com/DrKLO/Telegram/blob/96dce2c9aabc33b87db61d830aa087b6b03fe397/TMessagesProj/src/main/java/org/telegram/ui/SessionsActivity.java#L195
     if (ttlDays === undefined) {
       return undefined;
     }
@@ -59,11 +61,11 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     if (ttlDays <= 30) {
       return '30';
     }
-    if (ttlDays <= 90) {
+    if (ttlDays <= 93) {
       return '90';
     }
-    if (ttlDays <= 180) {
-      return '180';
+    if (ttlDays <= 183) {
+      return '183';
     }
 
     return undefined;
@@ -80,7 +82,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     value: '90',
   }, {
     label: lang('Months', 6, 'i'),
-    value: '180',
+    value: '183',
   }], [lang]);
 
   const handleTerminateSessionClick = useCallback((hash: string) => {
