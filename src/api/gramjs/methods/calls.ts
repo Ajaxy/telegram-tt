@@ -276,7 +276,7 @@ export async function requestCall({
   }));
 
   if (!result) {
-    return;
+    return false;
   }
 
   const call = buildPhoneCall(result.phoneCall);
@@ -285,6 +285,8 @@ export async function requestCall({
     '@type': 'updatePhoneCall',
     call,
   });
+
+  return true;
 }
 
 export function setCallRating({
