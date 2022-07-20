@@ -912,6 +912,7 @@ async function sendMessage(params: {
   isSilent?: boolean;
   scheduledAt?: number;
   sendAs?: ApiChat | ApiUser;
+  replyingToTopId?: number;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
@@ -948,6 +949,10 @@ async function sendMessage(params: {
 
   if (!params.replyingTo && threadId !== MAIN_THREAD_ID) {
     params.replyingTo = selectThreadTopMessageId(global, params.chat.id, threadId)!;
+  }
+
+  if (params.replyingTo && !params.replyingToTopId && threadId !== MAIN_THREAD_ID) {
+    params.replyingToTopId = selectThreadTopMessageId(global, params.chat.id, threadId)!;
   }
 
   await callApi('sendMessage', params, progressCallback);

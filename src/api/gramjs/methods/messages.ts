@@ -202,6 +202,7 @@ export function sendMessage(
     text,
     entities,
     replyingTo,
+    replyingToTopId,
     attachment,
     sticker,
     gif,
@@ -218,6 +219,7 @@ export function sendMessage(
     text?: string;
     entities?: ApiMessageEntity[];
     replyingTo?: number;
+    replyingToTopId?: number;
     attachment?: ApiAttachment;
     sticker?: ApiSticker;
     gif?: ApiVideo;
@@ -237,6 +239,7 @@ export function sendMessage(
     text,
     entities,
     replyingTo,
+    replyingToTopId,
     attachment,
     sticker,
     gif,
