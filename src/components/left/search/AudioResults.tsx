@@ -104,6 +104,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
             className="scroll-item"
             onPlay={handlePlayAudio}
             onDateClick={handleMessageFocus}
+            canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
             isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
           />
         </div>

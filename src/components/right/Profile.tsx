@@ -389,6 +389,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
+              canDownload={!isChatProtected && !chatMessages[id].isProtected}
               isDownloading={activeDownloadIds.includes(id)}
             />
           ))
@@ -405,6 +406,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
+              canDownload={!isChatProtected && !chatMessages[id].isProtected}
               isDownloading={activeDownloadIds.includes(id)}
             />
           ))

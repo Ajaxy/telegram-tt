@@ -772,6 +772,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isTranscriptionHidden={isTranscriptionHidden}
             isTranscribed={Boolean(transcribedText)}
             isTranscriptionError={isTranscriptionError}
+            canDownload={!isProtected}
             onHideTranscription={setTranscriptionHidden}
             canTranscribe={isPremium}
           />
