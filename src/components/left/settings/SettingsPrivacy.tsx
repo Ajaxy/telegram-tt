@@ -61,6 +61,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     updateContentSettings,
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
+    loadWebAuthorizations,
   } = getActions();
 
   useEffect(() => {
@@ -68,7 +69,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadAuthorizations();
     loadPrivacySettings();
     loadContentSettings();
-  }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings, loadContentSettings]);
+    loadWebAuthorizations();
+  }, [loadBlockedContacts, loadAuthorizations, loadPrivacySettings, loadContentSettings, loadWebAuthorizations]);
 
   useEffect(() => {
     if (isActive) {
