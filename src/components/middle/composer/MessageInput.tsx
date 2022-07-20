@@ -58,6 +58,8 @@ type StateProps = {
 
 const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
+// Heuristics allowing the user to make a triple click
+const SELECTION_RECALCULATE_DELAY_MS = 260;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
 // For some reason Safari inserts `<br>` after user removes text from input
 const SAFARI_BR = '<br>';
@@ -102,6 +104,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const selectionTimeoutRef = useRef<number>(null);
   // eslint-disable-next-line no-null/no-null
   const cloneRef = useRef<HTMLDivElement>(null);
 
@@ -207,8 +211,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   }
 
   function processSelectionWithTimeout() {
+    if (selectionTimeoutRef.current) {
+      window.clearTimeout(selectionTimeoutRef.current);
+    }
     // Small delay to allow browser properly recalculate selection
-    setTimeout(processSelection, 1);
+    selectionTimeoutRef.current = window.setTimeout(processSelection, SELECTION_RECALCULATE_DELAY_MS);
   }
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
