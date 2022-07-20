@@ -57,6 +57,7 @@ type OwnProps = {
   isDownloading: boolean;
   isTranscribing?: boolean;
   isTranscribed?: boolean;
+  canDownload?: boolean;
   canTranscribe?: boolean;
   isTranscriptionHidden?: boolean;
   isTranscriptionError?: boolean;
@@ -92,6 +93,7 @@ const Audio: FC<OwnProps> = ({
   isTranscriptionHidden,
   isTranscribed,
   isTranscriptionError,
+  canDownload,
   canTranscribe,
   onHideTranscription,
   onPlay,
@@ -365,7 +367,7 @@ const Audio: FC<OwnProps> = ({
           />
         </div>
       )}
-      {audio && !isUploading && (
+      {audio && canDownload && !isUploading && (
         <Button
           round
           size="tiny"
