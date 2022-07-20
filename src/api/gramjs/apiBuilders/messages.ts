@@ -1147,6 +1147,7 @@ export function buildLocalMessage(
   text?: string,
   entities?: ApiMessageEntity[],
   replyingTo?: number,
+  replyingToTopId?: number,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
@@ -1181,6 +1182,7 @@ export function buildLocalMessage(
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
     ...(replyingTo && { replyToMessageId: replyingTo }),
+    ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
     ...(groupedId && {
       groupedId,
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
