@@ -206,6 +206,36 @@
     margin-bottom: 0.5rem;
   }
 
+  .ListItem-button {
+    align-items: center;
+  }
+
+  .link-status-icon {
+    display: block;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 0.5rem;
+    position: static !important;
+    color: white !important;
+    margin-right: 1rem !important;
+
+    &-gray {
+      background-color: #707579;
+    }
+
+    &-green {
+      background-color: #4fae4e;
+    }
+
+    &-red {
+      background-color: #e17076;
+    }
+
+    &-blue {
+      background-color: #3390ec;
+    }
+  }
+
   .invite-title {
     white-space: nowrap;
   }

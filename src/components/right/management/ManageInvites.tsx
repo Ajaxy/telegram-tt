@@ -224,6 +224,25 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     return text;
   };
 
+  const getInviteIconClass = (invite: ApiExportedInvite) => {
+    const {
+      usage = 0, usageLimit, isRevoked, expireDate,
+    } = invite;
+    if (isRevoked) {
+      return 'link-status-icon-gray';
+    }
+    if (usageLimit && usage < usageLimit) {
+      return 'link-status-icon-green';
+    }
+    if (expireDate) {
+      const diff = (expireDate - getServerTime(serverTimeOffset)) * 1000;
+      if (diff <= 0) {
+        return 'link-status-icon-red';
+      }
+    }
+    return 'link-status-icon-blue';
+  };
+
   const prepareContextActions = (invite: ApiExportedInvite) => {
     const actions = [];
     actions.push({
@@ -318,7 +337,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem
-              icon="link"
+              leftElement={<i className={`icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
               secondaryIcon="more"
               multiline
               // eslint-disable-next-line react/jsx-no-bind
@@ -347,7 +366,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             </ListItem>
             {revokedExportedInvites?.map((invite) => (
               <ListItem
-                icon="link"
+                leftElement={<i className={`icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
                 secondaryIcon="more"
                 multiline
                 // eslint-disable-next-line react/jsx-no-bind

@@ -66,9 +66,11 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
       acceptInviteConfirmation({
         hash,
       });
-      showNotification({
-        message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
-      });
+      if (isRequestNeeded) {
+        showNotification({
+          message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
+        });
+      }
       closeModal();
     };
 
