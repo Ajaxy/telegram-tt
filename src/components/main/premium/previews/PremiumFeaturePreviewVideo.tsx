@@ -50,6 +50,7 @@ const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
           )}
           src={mediaData}
           autoPlay
+          disablePictureInPicture
           playsInline
           muted
           loop

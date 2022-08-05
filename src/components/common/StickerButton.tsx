@@ -272,6 +272,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           autoPlay={canVideoPlay}
           loop
           playsInline
+          disablePictureInPicture
           muted
         />
       )}

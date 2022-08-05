@@ -34,7 +34,7 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
     <div ref={ref} className="sticker-set-cover">
       {firstLetters}
       {isVideo ? (
-        <video src={mediaData} className={transitionClassNames} loop autoPlay />
+        <video src={mediaData} className={transitionClassNames} loop autoPlay disablePictureInPicture />
       ) : (
         <img src={mediaData} className={transitionClassNames} alt="" />
       )}

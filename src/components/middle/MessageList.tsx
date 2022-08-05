@@ -563,6 +563,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
                   src={botInfoGifUrl}
                   loop
                   autoPlay
+                  disablePictureInPicture
                   muted
                   playsInline
                 />

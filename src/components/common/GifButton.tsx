@@ -182,6 +182,7 @@ const GifButton: FC<OwnProps> = ({
           autoPlay
           loop
           muted
+          disablePictureInPicture
           playsInline
           preload="none"
           // eslint-disable-next-line react/jsx-props-no-spreading

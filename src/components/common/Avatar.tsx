@@ -151,6 +151,7 @@ const Avatar: FC<OwnProps> = ({
             className={buildClassName(cn.media, 'avatar-media', transitionClassNames)}
             muted
             autoPlay
+            disablePictureInPicture
             loop={!noLoop}
             playsInline
           />
