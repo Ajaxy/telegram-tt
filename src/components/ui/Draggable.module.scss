@@ -1,0 +1,43 @@
+.container {
+  position: absolute;
+  width: 100%;
+}
+
+.isDragging {
+  z-index: 2;
+
+  > *:not(.knob) {
+    pointer-events: none;
+  }
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  width: 2rem;
+  height: 2rem;
+
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+  line-height: 1.75;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 150ms;
+
+  cursor: grab !important;
+  transform: translateY(-50%);
+
+  .container:hover & {
+    opacity: 1;
+  }
+
+  .isDragging & {
+    opacity: 1;
+    cursor: grabbing !important;
+  }
+
+  @media (pointer: coarse) {
+    opacity: 1 !important;
+    touch-action: none;
+  }
+}

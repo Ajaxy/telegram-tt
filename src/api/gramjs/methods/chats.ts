@@ -831,6 +831,12 @@ export async function deleteChatFolder(id: number) {
   }
 }
 
+export function sortChatFolders(ids: number[]) {
+  return invokeRequest(new GramJs.messages.UpdateDialogFiltersOrder({
+    order: ids,
+  }));
+}
+
 export async function toggleDialogUnread({
   chat, hasUnreadMark,
 }: {

@@ -15,7 +15,7 @@ export {
   saveDraft, clearDraft, fetchChat, updateChatMutedState,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
-  fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
+  fetchChatFolders, editChatFolder, deleteChatFolder, sortChatFolders, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,

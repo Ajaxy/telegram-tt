@@ -146,6 +146,7 @@
     "messages.getDialogFilters",
     "messages.getSuggestedDialogFilters",
     "messages.updateDialogFilter",
+    "messages.updateDialogFiltersOrder",
     "messages.getReplies",
     "messages.getDiscussionMessage",
     "messages.readDiscussion",

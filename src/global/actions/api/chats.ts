@@ -491,6 +491,22 @@ addActionHandler('addChatFolder', (global, actions, payload) => {
   void createChatFolder(folder, maxId);
 });
 
+addActionHandler('sortChatFolders', async (global, actions, payload) => {
+  const { folderIds } = payload!;
+
+  const result = await callApi('sortChatFolders', folderIds);
+  if (result) {
+    global = getGlobal();
+    setGlobal({
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        orderedIds: folderIds,
+      },
+    });
+  }
+});
+
 addActionHandler('deleteChatFolder', (global, actions, payload) => {
   const { id } = payload!;
   const folder = selectChatFolder(global, id);
