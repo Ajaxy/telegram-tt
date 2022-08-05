@@ -210,7 +210,9 @@ function processTemplate(template: string, value: any) {
 
 function processTranslation(langString: ApiLangString | undefined, key: string, value?: any, format?: 'i') {
   const preferedPluralOption = typeof value === 'number' ? getPluralOption(value) : 'value';
-  const template = langString ? (langString[preferedPluralOption] || langString.value) : undefined;
+  const template = langString ? (
+    langString[preferedPluralOption] || langString.otherValue || langString.value
+  ) : undefined;
   if (!template || !template.trim()) {
     const parts = key.split('.');
 
