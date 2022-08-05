@@ -8,6 +8,11 @@
   justify-content: center;
   margin: 0;
 
+  // Target: Old Firefox (Waterfox Classic)
+  @supports not (bottom: calc(0.5rem + env(safe-area-inset-bottom))) {
+    bottom: 0.5rem;
+  }
+
   .mask-image-disabled &::before {
     left: auto !important;
     right: auto !important;

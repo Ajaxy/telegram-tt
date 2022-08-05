@@ -39,8 +39,14 @@
 }
 
 .frame {
-  aspect-ratio: 1/1;
+  aspect-ratio: 1;
+
+  @supports not (aspect-ratio: 1) {
+    height: 0;
+    padding-bottom: 100%;
+  }
 }
+
 .slide {
   width: 100%;
   flex: none;
@@ -83,10 +89,15 @@
   margin: 0 -1rem;
   margin-top: -1rem;
   background: var(--premium-feature-background);
-  aspect-ratio: 1/1;
+  aspect-ratio: 1;
   width: 100%;
   border-top-right-radius: var(--border-radius-default);
   border-top-left-radius: var(--border-radius-default);
+
+  @supports not (aspect-ratio: 1) {
+    height: 0;
+    padding-bottom: 100%;
+  }
 }
 
 .title {
