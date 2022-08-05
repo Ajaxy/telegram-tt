@@ -4,8 +4,10 @@ import type {
   ApiChat,
   ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo,
 } from '../../../api/types';
+import type { ActiveEmojiInteraction, GlobalActions, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { notifyAboutMessage } from '../../../util/notifications';
@@ -21,7 +23,6 @@ import {
   deleteChatScheduledMessages,
   updateThreadUnreadFromForwardedMessage,
 } from '../../reducers';
-import type { ActiveEmojiInteraction, GlobalActions, GlobalState } from '../../types';
 import {
   selectChatMessage,
   selectChatMessages,
@@ -346,9 +347,22 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     case 'deleteHistory': {
       const { chatId } = update;
       const chatMessages = global.messages.byChatId[chatId];
+      if (chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+        const lastNotification = global.serviceNotifications.sort((a, b) => b.id - a.id)?.[0];
+        const serviceNotifications = lastNotification ? [{
+          ...lastNotification,
+          isHidden: true,
+        }] : [];
+
+        setGlobal({
+          ...global,
+          serviceNotifications,
+        });
+      }
+
       if (chatMessages) {
         const ids = Object.keys(chatMessages.byId).map(Number);
-        deleteMessages(chatId, ids, actions, global);
+        deleteMessages(chatId, ids, actions, getGlobal());
       } else {
         actions.requestChatUpdate({ chatId });
       }

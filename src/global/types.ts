@@ -122,6 +122,7 @@ export interface ServiceNotification {
   message: ApiMessage;
   version?: string;
   isUnread?: boolean;
+  isHidden?: boolean;
 }
 
 export type ApiLimitType = (

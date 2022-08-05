@@ -15,7 +15,7 @@ import {
   CHAT_LIST_LOAD_SLICE,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
-  TMP_CHAT_ID, ALL_FOLDER_ID, DEBUG,
+  TMP_CHAT_ID, ALL_FOLDER_ID, DEBUG, SERVICE_NOTIFICATIONS_NUMBER,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -1068,14 +1068,14 @@ async function loadChats(
   listType: 'active' | 'archived', offsetId?: string, offsetDate?: number, shouldReplace = false,
 ) {
   let global = getGlobal();
-
+  const lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     archived: listType === 'archived',
     withPinned: shouldReplace,
     serverTimeOffset: global.serverTimeOffset,
-    lastLocalServiceMessage: selectLastServiceNotification(global)?.message,
+    lastLocalServiceMessage,
   });
 
   if (!result) {
@@ -1091,6 +1091,18 @@ async function loadChats(
   global = getGlobal();
 
   if (shouldReplace && listType === 'active') {
+    // Always include service notifications chat
+    if (!chatIds.includes(SERVICE_NOTIFICATIONS_USER_ID)) {
+      const chat = await callApi('getChatByPhoneNumber', SERVICE_NOTIFICATIONS_NUMBER);
+      global = getGlobal();
+      if (chat) {
+        chatIds.unshift(chat.id);
+        result.chats.unshift(chat);
+        if (lastLocalServiceMessage) {
+          chat.lastMessage = lastLocalServiceMessage;
+        }
+      }
+    }
     const currentChat = selectCurrentChat(global);
     const visibleChats = currentChat ? [currentChat] : [];
 

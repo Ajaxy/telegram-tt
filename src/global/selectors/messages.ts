@@ -894,7 +894,7 @@ export function selectLastServiceNotification(global: GlobalState) {
   const { serviceNotifications } = global;
   const maxId = Math.max(...serviceNotifications.map(({ id }) => id));
 
-  return serviceNotifications.find(({ id }) => id === maxId);
+  return serviceNotifications.find(({ id, isHidden }) => !isHidden && id === maxId);
 }
 
 export function selectIsMessageProtected(global: GlobalState, message?: ApiMessage) {
