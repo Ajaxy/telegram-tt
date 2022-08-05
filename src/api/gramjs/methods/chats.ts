@@ -1206,11 +1206,11 @@ function preparePeers(
 ) {
   const store: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {};
 
-  result.chats.forEach((chat) => {
+  result.chats?.forEach((chat) => {
     store[`chat${chat.id}`] = chat;
   });
 
-  result.users.forEach((user) => {
+  result.users?.forEach((user) => {
     store[`user${user.id}`] = user;
   });
 

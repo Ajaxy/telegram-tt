@@ -15,6 +15,7 @@ import {
   FEEDBACK_URL,
   IS_BETA,
   IS_TEST,
+  PRODUCTION_HOSTNAME,
 } from '../../../config';
 import { IS_PWA, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
@@ -70,7 +71,6 @@ type StateProps =
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'canInstall'>;
 
-const PRODUCTION_HOSTNAME = 'web.telegram.org';
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 

@@ -7,6 +7,7 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
   CONTENT_TYPES_WITH_PREVIEW,
+  PRODUCTION_HOSTNAME,
 } from '../config';
 
 export * from './environmentWebp';
@@ -35,6 +36,7 @@ export function getPlatform() {
   return os;
 }
 
+export const IS_PRODUCTION_HOST = window.location.host === PRODUCTION_HOSTNAME;
 export const PLATFORM_ENV = getPlatform();
 export const IS_MAC_OS = PLATFORM_ENV === 'macOS';
 export const IS_IOS = PLATFORM_ENV === 'iOS';

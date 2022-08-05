@@ -3,6 +3,8 @@ import type { ApiLimitType } from './global/types';
 export const APP_NAME = process.env.APP_NAME || 'Telegram WebZ';
 export const APP_VERSION = process.env.APP_VERSION!;
 
+export const PRODUCTION_HOSTNAME = 'web.telegram.org';
+
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
 
@@ -191,6 +193,7 @@ export const RE_MENTION_TEMPLATE = '(@[\\w\\d_-]+)';
 export const RE_TG_LINK = /^tg:(\/\/)?([?=&\d\w_-]+)?/gm;
 export const RE_TME_LINK = /^(?:https?:\/\/)?(?:t\.me\/)/gm;
 export const RE_TELEGRAM_LINK = /^(?:https?:\/\/)?(?:telegram\.org\/)/gm;
+export const TME_LINK_PREFIX = 'https://t.me/';
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
