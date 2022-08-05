@@ -27,7 +27,7 @@ body {
 
   --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell,
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Menlo", "Courier", "Courier New", monospace;
+  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono", "Consolas", monospace;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
