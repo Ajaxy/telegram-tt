@@ -167,6 +167,7 @@ const Sticker: FC<OwnProps> = ({
           height={height}
           autoPlay={shouldPlay}
           playsInline
+          disablePictureInPicture
           loop={shouldLoop}
           muted
         />

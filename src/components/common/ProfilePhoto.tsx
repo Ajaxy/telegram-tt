@@ -107,6 +107,7 @@ const ProfilePhoto: FC<OwnProps> = ({
           src={imageSrc}
           className="avatar-media"
           muted
+          disablePictureInPicture
           autoPlay={!notActive}
           loop
           playsInline

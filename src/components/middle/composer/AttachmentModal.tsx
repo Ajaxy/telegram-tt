@@ -264,7 +264,7 @@ const AttachmentModal: FC<OwnProps> = ({
             {renderingAttachments.map((attachment) => (
               attachment.mimeType.startsWith('image/')
                 ? <img src={attachment.blobUrl} alt="" />
-                : <video src={attachment.blobUrl} autoPlay muted loop />
+                : <video src={attachment.blobUrl} autoPlay muted loop disablePictureInPicture />
             ))}
           </div>
         ) : (

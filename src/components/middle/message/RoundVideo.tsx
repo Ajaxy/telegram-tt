@@ -218,6 +218,7 @@ const RoundVideo: FC<OwnProps> = ({
             width={ROUND_VIDEO_DIMENSIONS_PX}
             height={ROUND_VIDEO_DIMENSIONS_PX}
             autoPlay
+            disablePictureInPicture
             muted={!isActivated}
             loop={!isActivated}
             playsInline

@@ -68,6 +68,7 @@ const Game: FC<OwnProps> = ({
             className="preview-content"
             playsInline
             muted
+            disablePictureInPicture
             autoPlay
             loop
             src={videoBlobUrl}
