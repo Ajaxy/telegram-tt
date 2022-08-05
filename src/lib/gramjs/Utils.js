@@ -320,12 +320,35 @@ function getInputLocation(location) {
 */
 
 /**
- * Gets the appropriated part size when uploading or downloading files,
+ * Gets the appropriated part size when downloading files,
  * given an initial file size.
  * @param fileSize
  * @returns {Number}
  */
-function getAppropriatedPartSize(fileSize) {
+function getDownloadPartSize(fileSize) {
+    if (fileSize <= 104857600) { // 100MB
+        return 128;
+    }
+    if (fileSize <= 786432000) { // 750MB
+        return 256;
+    }
+    if (fileSize <= 2097152000) { // 2000MB
+        return 512;
+    }
+    if (fileSize <= 4194304000) { // 4000MB
+        return 1024;
+    }
+
+    throw new Error('File size too large');
+}
+
+/**
+ * Gets the appropriated part size when uploading files,
+ * given an initial file size.
+ * @param fileSize
+ * @returns {Number}
+ */
+function getUploadPartSize(fileSize) {
     if (fileSize <= 104857600) { // 100MB
         return 128;
     }
@@ -683,7 +706,8 @@ module.exports = {
     getDisplayName,
     // resolveId,
     // isListLike,
-    getAppropriatedPartSize,
+    getDownloadPartSize,
+    getUploadPartSize,
     // getInputLocation,
     strippedPhotoToJpg,
     getDC,

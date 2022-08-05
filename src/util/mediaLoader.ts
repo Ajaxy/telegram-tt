@@ -13,18 +13,22 @@ import {
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { fetchBlob } from './files';
-import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
+import {
+  IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported,
+} from './environment';
 import { oggToWav } from './oggToWav';
 import { webpToPng } from './webpToPng';
 
 const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
   [ApiMediaFormat.Text]: cacheApi.Type.Text,
+  [ApiMediaFormat.DownloadUrl]: undefined,
   [ApiMediaFormat.Progressive]: undefined,
   [ApiMediaFormat.Stream]: undefined,
 };
 
 const PROGRESSIVE_URL_PREFIX = './progressive/';
+const URL_DOWNLOAD_PREFIX = './download/';
 
 const memoryCache = new Map<string, ApiPreparedMedia>();
 const fetchPromises = new Map<string, Promise<ApiPreparedMedia | undefined>>();
@@ -42,6 +46,14 @@ export function fetch<T extends ApiMediaFormat>(
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? getProgressive(url)
+        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
+    ) as Promise<ApiPreparedMedia>;
+  }
+
+  if (mediaFormat === ApiMediaFormat.DownloadUrl) {
+    return (
+      IS_PROGRESSIVE_SUPPORTED
+        ? getDownloadUrl(url)
         : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
     ) as Promise<ApiPreparedMedia>;
   }
@@ -108,6 +120,10 @@ function getProgressive(url: string) {
   memoryCache.set(url, progressiveUrl);
 
   return Promise.resolve(progressiveUrl);
+}
+
+function getDownloadUrl(url: string) {
+  return Promise.resolve(`${URL_DOWNLOAD_PREFIX}${url}`);
 }
 
 async function fetchFromCacheOrRemote(

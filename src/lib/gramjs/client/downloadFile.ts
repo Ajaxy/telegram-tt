@@ -1,8 +1,8 @@
 import BigInt from 'big-integer';
 import Api from '../tl/api';
 import type TelegramClient from './TelegramClient';
-import { getAppropriatedPartSize } from '../Utils';
 import { sleep, createDeferred } from '../Helpers';
+import { getDownloadPartSize } from '../Utils';
 import errors from '../errors';
 
 interface OnProgress {
@@ -35,7 +35,6 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
-const MAX_BUFFER_SAFE_SIZE = 2000 * 1024 * 1024;
 
 // when the sender requests hangs for 60 second we will reimport
 const SENDER_TIMEOUT = 60 * 1000;
@@ -83,7 +82,8 @@ class FileView {
 
     constructor(size?: number) {
         this.size = size;
-        this.type = (size && size > MAX_BUFFER_SAFE_SIZE) ? 'opfs' : 'memory';
+        // eslint-disable-next-line no-restricted-globals
+        this.type = (size && size > (self as any).maxBufferSize) ? 'opfs' : 'memory';
     }
 
     async init() {
@@ -158,7 +158,7 @@ async function downloadFile2(
     end = end && end < fileSize ? end : fileSize - 1;
 
     if (!partSizeKb) {
-        partSizeKb = fileSize ? getAppropriatedPartSize(fileSize) : DEFAULT_CHUNK_SIZE;
+        partSizeKb = fileSize ? getDownloadPartSize(fileSize) : DEFAULT_CHUNK_SIZE;
     }
 
     const partSize = partSizeKb * 1024;

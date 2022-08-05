@@ -9,7 +9,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiMessage } from '../../api/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import { getMessageMediaHash } from '../../global/helpers';
+import { getMessageMediaFormat, getMessageMediaHash } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import { selectIsDownloading, selectIsMessageProtected } from '../../global/selectors';
@@ -63,6 +63,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     message && getMessageMediaHash(message, 'download'),
     !isDownloading,
+    message && getMessageMediaFormat(message, 'download'),
   );
 
   const handleDownloadClick = useCallback(() => {

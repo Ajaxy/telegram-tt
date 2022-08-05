@@ -9,6 +9,7 @@ export interface ApiInitialArgs {
   isTest?: boolean;
   isMovSupported?: boolean;
   isWebmSupported?: boolean;
+  maxBufferSize?: number;
 }
 
 export interface ApiOnProgress {

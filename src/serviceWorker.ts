@@ -1,5 +1,6 @@
 import { DEBUG } from './config';
 import { respondForProgressive } from './serviceWorker/progressive';
+import { respondForDownload } from './serviceWorker/download';
 import { respondWithCache, clearAssetCache } from './serviceWorker/assetCache';
 import { handlePush, handleNotificationClick, handleClientMessage } from './serviceWorker/pushNotification';
 import { pause } from './util/schedulers';
@@ -38,12 +39,16 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// eslint-disable-next-line no-restricted-globals
 self.addEventListener('fetch', (e: FetchEvent) => {
   const { url } = e.request;
 
   if (url.includes('/progressive/')) {
     e.respondWith(respondForProgressive(e));
+    return true;
+  }
+
+  if (url.includes('/download/')) {
+    e.respondWith(respondForDownload(e));
     return true;
   }
 

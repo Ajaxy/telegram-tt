@@ -9,6 +9,7 @@ import type { ApiMessage } from '../../api/types';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
   getMediaTransferState,
+  getMessageMediaFormat,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   isMessageDocumentVideo,
@@ -86,7 +87,7 @@ const Document: FC<OwnProps> = ({
 
   const documentHash = getMessageMediaHash(message, 'download');
   const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress(
-    documentHash, !shouldDownload, undefined, undefined, undefined, true,
+    documentHash, !shouldDownload, getMessageMediaFormat(message, 'download'), undefined, undefined, true,
   );
   const isLoaded = Boolean(mediaData);
 

@@ -14,6 +14,7 @@ import {
   getMessageMediaHash,
   getMediaTransferState,
   isOwnMessage,
+  getMessageMediaFormat,
 } from '../../../global/helpers';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
@@ -87,7 +88,9 @@ const Photo: FC<OwnProps> = ({
 
   const {
     loadProgress: downloadProgress,
-  } = useMediaWithLoadProgress(getMessageMediaHash(message, 'download'), !isDownloading);
+  } = useMediaWithLoadProgress(
+    getMessageMediaHash(message, 'download'), !isDownloading, getMessageMediaFormat(message, 'download'),
+  );
 
   const {
     isUploading, isTransferring, transferProgress,
