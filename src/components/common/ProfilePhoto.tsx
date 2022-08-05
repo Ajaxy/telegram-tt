@@ -15,6 +15,7 @@ import {
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
+import safePlay from '../../util/safePlay';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
@@ -80,7 +81,7 @@ const ProfilePhoto: FC<OwnProps> = ({
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     } else {
-      videoRef.current.play();
+      safePlay(videoRef.current);
     }
   }, [notActive]);
 

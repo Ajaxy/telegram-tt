@@ -64,6 +64,7 @@
     width: 3.25rem;
     height: 3.25rem;
     background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 3;
     body:not(.animation-level-0) & {
       transition: opacity 0.3s ease !important;
     }

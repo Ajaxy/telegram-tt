@@ -75,7 +75,10 @@ export default function useInnerHandlers(
 
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({
-      chatId, threadId, messageId, origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
+      chatId,
+      threadId,
+      mediaId: messageId,
+      origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
     });
   }, [chatId, threadId, messageId, openMediaViewer, isScheduled]);
 
@@ -87,7 +90,7 @@ export default function useInnerHandlers(
     openMediaViewer({
       chatId,
       threadId,
-      messageId: albumMessageId,
+      mediaId: albumMessageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledAlbum : MediaViewerOrigin.Album,
     });
   }, [chatId, threadId, openMediaViewer, isScheduled]);

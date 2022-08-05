@@ -12,13 +12,13 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import safePlay from '../../util/safePlay';
+import stopEvent from '../../util/stopEvent';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import VideoPlayerControls from './VideoPlayerControls';
 
 import './VideoPlayer.scss';
-
-import VideoPlayerControls from './VideoPlayerControls';
 
 type OwnProps = {
   url?: string;
@@ -33,6 +33,7 @@ type OwnProps = {
   volume: number;
   isMuted: boolean;
   playbackRate: number;
+  isProtected?: boolean;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
@@ -54,6 +55,7 @@ const VideoPlayer: FC<OwnProps> = ({
   onClose,
   toggleControls,
   areControlsVisible,
+  isProtected,
 }) => {
   const {
     setMediaViewerVolume,
@@ -181,9 +183,18 @@ const VideoPlayer: FC<OwnProps> = ({
         style={wrapperStyle}
       >
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        {isProtected && (
+          <div
+            onContextMenu={stopEvent}
+            onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
+            onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
+            className="protector"
+          />
+        )}
         <video
           ref={videoRef}
           autoPlay={IS_TOUCH_ENV}
+          controlsList={isProtected ? 'nodownload' : undefined}
           playsInline
           loop={isGif}
           // This is to force auto playing on mobiles

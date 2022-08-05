@@ -5,37 +5,17 @@ import { withGlobal } from '../../global';
 import type {
   ApiChat, ApiDimensions, ApiMessage, ApiUser,
 } from '../../api/types';
-import { ApiMediaFormat } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
-import useBlurSync from '../../hooks/useBlurSync';
-import useMedia from '../../hooks/useMedia';
-import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import {
-  getChatAvatarHash,
-  getMessageDocument,
-  getMessageFileSize,
-  getMessageMediaFormat,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessagePhoto,
-  getMessageVideo,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
-  getPhotoFullDimensions, getVideoAvatarMediaHash,
-  getVideoDimensions,
-  isMessageDocumentPhoto,
-  isMessageDocumentVideo,
-} from '../../global/helpers';
 import {
   selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';
-import {
-  AVATAR_FULL_DIMENSIONS, calculateMediaViewerDimensions, VIDEO_AVATAR_FULL_DIMENSIONS,
-} from '../common/helpers/mediaDimensions';
+import { calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import stopEvent from '../../util/stopEvent';
+import buildClassName from '../../util/buildClassName';
+import { useMediaProps } from './hooks/useMediaProps';
 
 import Spinner from '../ui/Spinner';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -44,11 +24,10 @@ import VideoPlayer from './VideoPlayer';
 import './MediaViewerContent.scss';
 
 type OwnProps = {
-  messageId?: number;
+  mediaId?: number;
   chatId?: string;
   threadId?: number;
   avatarOwnerId?: string;
-  profilePhotoIndex?: number;
   origin?: MediaViewerOrigin;
   isActive?: boolean;
   animationLevel: 0 | 1 | 2;
@@ -60,11 +39,10 @@ type OwnProps = {
 
 type StateProps = {
   chatId?: string;
-  messageId?: number;
+  mediaId?: number;
   senderId?: string;
   threadId?: number;
   avatarOwner?: ApiChat | ApiUser;
-  profilePhotoIndex?: number;
   message?: ApiMessage;
   origin?: MediaViewerOrigin;
   isProtected?: boolean;
@@ -77,12 +55,11 @@ const ANIMATION_DURATION = 350;
 
 const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const {
-    messageId,
+    mediaId,
     isActive,
     avatarOwner,
     chatId,
     message,
-    profilePhotoIndex,
     origin,
     animationLevel,
     isFooterHidden,
@@ -94,63 +71,27 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     onFooterClick,
     setIsFooterHidden,
   } = props;
-  /* Content */
-  const photo = message ? getMessagePhoto(message) : undefined;
-  const video = message ? getMessageVideo(message) : undefined;
-  const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
-  const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
-  const isDocumentPhoto = message ? isMessageDocumentPhoto(message) : false;
-  const isDocumentVideo = message ? isMessageDocumentVideo(message) : false;
-  const isVideo = Boolean(video || webPageVideo || isDocumentVideo);
-  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto || isDocumentPhoto));
-  const { isGif } = video || webPageVideo || {};
-
-  const isOpen = Boolean(avatarOwner || messageId);
-  const isAvatar = Boolean(avatarOwner);
-  const isVideoAvatar = isAvatar && avatarOwner.hasVideoAvatar;
-
-  const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
-  const isFromSearch = origin === MediaViewerOrigin.SearchResult;
 
   const isGhostAnimation = animationLevel === 2;
 
-  /* Media data */
-  function getMediaHash(isFull?: boolean) {
-    if (isAvatar && profilePhotoIndex !== undefined) {
-      const { photos, hasVideoAvatar } = avatarOwner!;
-      const avatarPhoto = photos && photos[profilePhotoIndex];
-      return avatarPhoto ? (hasVideoAvatar ? getVideoAvatarMediaHash(avatarPhoto) : `photo${avatarPhoto.id}?size=c`)
-        : getChatAvatarHash(avatarOwner!, isFull ? 'big' : 'normal');
-    }
-
-    return message && getMessageMediaHash(message, isFull ? 'viewerFull' : 'viewerPreview');
-  }
-
-  const pictogramBlobUrl = useMedia(
-    message && (isFromSharedMedia || isFromSearch) && getMessageMediaHash(message, 'pictogram'),
-    undefined,
-    ApiMediaFormat.BlobUrl,
-    undefined,
-    isGhostAnimation && ANIMATION_DURATION,
-  );
-  const previewMediaHash = getMediaHash();
-  const previewBlobUrl = useMedia(
-    previewMediaHash,
-    undefined,
-    ApiMediaFormat.BlobUrl,
-    undefined,
-    isGhostAnimation && ANIMATION_DURATION,
-  );
   const {
-    mediaData: fullMediaBlobUrl,
+    isVideo,
+    isPhoto,
+    bestImageData,
+    dimensions,
+    isGif,
+    isVideoAvatar,
+    localBlobUrl,
+    fullMediaBlobUrl,
+    previewBlobUrl,
+    pictogramBlobUrl,
+    videoSize,
     loadProgress,
-  } = useMediaWithLoadProgress(
-    getMediaHash(true),
-    undefined,
-    message && getMessageMediaFormat(message, 'viewerFull'),
-    undefined,
-    isGhostAnimation && ANIMATION_DURATION,
-  );
+  } = useMediaProps({
+    message, avatarOwner, mediaId, origin, delay: isGhostAnimation && ANIMATION_DURATION,
+  });
+
+  const isOpen = Boolean(avatarOwner || mediaId);
 
   const toggleControls = useCallback((isVisible) => {
     setIsFooterHidden?.(!isVisible);
@@ -164,29 +105,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     toggleControls(false);
   }, [toggleControls]);
 
-  const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
-  let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
-  const thumbDataUri = useBlurSync(!bestImageData && message && getMessageMediaThumbDataUri(message));
-  if (!bestImageData && origin !== MediaViewerOrigin.SearchResult) {
-    bestImageData = thumbDataUri;
-  }
-
-  const videoSize = message ? getMessageFileSize(message) : undefined;
-
-  let dimensions!: ApiDimensions;
-  if (message) {
-    if (isDocumentPhoto || isDocumentVideo) {
-      dimensions = getMessageDocument(message)!.mediaSize!;
-    } else if (photo || webPagePhoto) {
-      dimensions = getPhotoFullDimensions((photo || webPagePhoto)!)!;
-    } else if (video || webPageVideo) {
-      dimensions = getVideoDimensions((video || webPageVideo)!)!;
-    }
-  } else {
-    dimensions = isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
-  }
-
-  if (isAvatar) {
+  if (avatarOwner) {
     if (!isVideoAvatar) {
       return (
         <div key={chatId} className="MediaViewerContent">
@@ -194,6 +113,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             fullMediaBlobUrl || previewBlobUrl,
             calculateMediaViewerDimensions(dimensions, false),
             !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+            isProtected,
           )}
         </div>
       );
@@ -201,7 +121,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       return (
         <div key={chatId} className="MediaViewerContent">
           <VideoPlayer
-            key={messageId}
+            key={mediaId}
             url={localBlobUrl || fullMediaBlobUrl}
             isGif
             posterData={bestImageData}
@@ -211,6 +131,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             isMediaViewerOpen={isOpen && isActive}
             areControlsVisible={!isFooterHidden}
             toggleControls={toggleControls}
+            isProtected={isProtected}
             noPlay={!isActive}
             onClose={onClose}
             isMuted
@@ -228,23 +149,24 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
 
   return (
     <div
-      className={`MediaViewerContent ${hasFooter ? 'has-footer' : ''}`}
+      className={buildClassName('MediaViewerContent', hasFooter && 'has-footer')}
       onMouseMove={!isGif && !IS_TOUCH_ENV ? handleMouseMove : undefined}
       onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
-      {isProtected && <div onContextMenu={stopEvent} className="protector" />}
       {isPhoto && renderPhoto(
         localBlobUrl || fullMediaBlobUrl || previewBlobUrl || pictogramBlobUrl,
         message && calculateMediaViewerDimensions(dimensions!, hasFooter),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+        isProtected,
       )}
       {isVideo && (!isActive ? renderVideoPreview(
         bestImageData,
         message && calculateMediaViewerDimensions(dimensions!, hasFooter, true),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+        isProtected,
       ) : (
         <VideoPlayer
-          key={messageId}
+          key={mediaId}
           url={localBlobUrl || fullMediaBlobUrl}
           isGif={isGif}
           posterData={bestImageData}
@@ -257,6 +179,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           noPlay={!isActive}
           onClose={onClose}
           isMuted={isMuted}
+          isProtected={isProtected}
           volume={volume}
           playbackRate={playbackRate}
         />
@@ -265,6 +188,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         <MediaViewerFooter
           text={textParts}
           onClick={onFooterClick}
+          isProtected={isProtected}
           isHidden={isFooterHidden}
           isForVideo={isVideo && !isGif}
         />
@@ -278,9 +202,8 @@ export default memo(withGlobal<OwnProps>(
     const {
       chatId,
       threadId,
-      messageId,
+      mediaId,
       avatarOwnerId,
-      profilePhotoIndex,
       origin,
     } = ownProps;
 
@@ -291,18 +214,18 @@ export default memo(withGlobal<OwnProps>(
     } = global.mediaViewer;
 
     if (origin === MediaViewerOrigin.SearchResult) {
-      if (!(chatId && messageId)) {
+      if (!(chatId && mediaId)) {
         return { volume, isMuted, playbackRate };
       }
 
-      const message = selectChatMessage(global, chatId, messageId);
+      const message = selectChatMessage(global, chatId, mediaId);
       if (!message) {
         return { volume, isMuted, playbackRate };
       }
 
       return {
         chatId,
-        messageId,
+        mediaId,
         senderId: message.senderId,
         origin,
         message,
@@ -317,10 +240,9 @@ export default memo(withGlobal<OwnProps>(
       const sender = selectUser(global, avatarOwnerId) || selectChat(global, avatarOwnerId);
 
       return {
-        messageId: -1,
+        mediaId,
         senderId: avatarOwnerId,
         avatarOwner: sender,
-        profilePhotoIndex: profilePhotoIndex || 0,
         origin,
         volume,
         isMuted,
@@ -328,15 +250,15 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    if (!(chatId && threadId && messageId)) {
+    if (!(chatId && threadId && mediaId)) {
       return { volume, isMuted, playbackRate };
     }
 
     let message: ApiMessage | undefined;
     if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
-      message = selectScheduledMessage(global, chatId, messageId);
+      message = selectScheduledMessage(global, chatId, mediaId);
     } else {
-      message = selectChatMessage(global, chatId, messageId);
+      message = selectChatMessage(global, chatId, mediaId);
     }
 
     if (!message) {
@@ -346,7 +268,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chatId,
       threadId,
-      messageId,
+      mediaId,
       senderId: message.senderId,
       origin,
       message,
@@ -358,15 +280,19 @@ export default memo(withGlobal<OwnProps>(
   },
 )(MediaViewerContent));
 
-function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: boolean) {
+function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: boolean, isProtected?: boolean) {
   return blobUrl
     ? (
-      <img
-        src={blobUrl}
-        alt=""
-        style={imageSize ? `width: ${imageSize.width}px` : ''}
-        draggable={Boolean(canDrag)}
-      />
+      <div style="position: relative;">
+        {isProtected && <div onContextMenu={stopEvent} className="protector" />}
+        <img
+          src={blobUrl}
+          alt=""
+          className={buildClassName(isProtected && 'is-protected')}
+          style={imageSize ? `width: ${imageSize.width}px` : ''}
+          draggable={Boolean(canDrag)}
+        />
+      </div>
     )
     : (
       <div
@@ -378,7 +304,7 @@ function renderPhoto(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: bool
     );
 }
 
-function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: boolean) {
+function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag?: boolean, isProtected?: boolean) {
   const wrapperStyle = imageSize && `width: ${imageSize.width}px; height: ${imageSize.height}px`;
   const videoStyle = `background-image: url(${blobUrl})`;
   return blobUrl
@@ -386,12 +312,14 @@ function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag
       <div
         className="VideoPlayer"
       >
+        {isProtected && <div onContextMenu={stopEvent} className="protector" />}
         <div
           style={wrapperStyle}
         >
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             style={videoStyle}
+            className={buildClassName(isProtected && 'is-protected')}
             draggable={Boolean(canDrag)}
           />
         </div>

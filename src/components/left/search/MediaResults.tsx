@@ -79,10 +79,10 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleSelectMedia = useCallback((messageId: number, chatId: string) => {
+  const handleSelectMedia = useCallback((id: number, chatId: string) => {
     openMediaViewer({
       chatId,
-      messageId,
+      mediaId: id,
       origin: MediaViewerOrigin.SearchResult,
     });
   }, [openMediaViewer]);
