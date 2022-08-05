@@ -29,17 +29,34 @@
     margin-top: 0.75rem;
   }
 
-  & > div > .Button {
+  & &-left-icon {
     flex-shrink: 0;
     background: none !important;
     width: 3.5rem;
     height: 2.875rem;
     margin: 0 -0.0625rem 0 0;
     padding: 0;
-    align-self: center;
+    display: grid;
+    place-content: center;
+    font-size: 1.5rem;
+    color: var(--color-primary);
 
     @media (max-width: 600px) {
       width: 2.875rem;
+    }
+  }
+
+  & &-clear {
+    flex-shrink: 0;
+    background: none !important;
+    width: 2.25rem;
+    height: 2.875rem;
+    margin: 0 -0.0625rem 0 0;
+    padding: 0;
+    align-self: center;
+
+    @media (max-width: 600px) {
+      width: 1.75rem;
     }
   }
 
@@ -47,6 +64,7 @@
     flex-grow: 1;
     margin: 0.1875rem 0 0.1875rem 0.125rem;
     max-width: calc(100% - 3.375rem);
+    overflow: hidden;
 
     &::before {
       top: 0.125rem;

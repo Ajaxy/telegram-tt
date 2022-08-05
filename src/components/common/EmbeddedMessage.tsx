@@ -33,6 +33,7 @@ type OwnProps = {
   customText?: string;
   noUserColors?: boolean;
   isProtected?: boolean;
+  hasContextMenu?: boolean;
   onClick: NoneToVoidFunction;
 };
 
@@ -46,6 +47,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   customText,
   isProtected,
   noUserColors,
+  hasContextMenu,
   observeIntersection,
   onClick,
 }) => {
@@ -84,6 +86,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         </p>
         <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
       </div>
+      {hasContextMenu && <i className="embedded-more icon-more" />}
     </div>
   );
 };

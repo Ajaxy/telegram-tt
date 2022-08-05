@@ -437,6 +437,8 @@ export type GlobalState = {
     messageIds?: number[];
     toChatId?: string;
     withMyScore?: boolean;
+    noAuthors?: boolean;
+    noCaptions?: boolean;
   };
 
   pollResults: {
@@ -824,6 +826,26 @@ export interface ActionPayloads {
     shouldSharePhoneNumber?: boolean;
   };
 
+  // Forwards
+  openForwardMenu: {
+    fromChatId: string;
+    messageIds?: number[];
+    groupedId?: string;
+    withMyScore?: boolean;
+  };
+  openForwardMenuForSelectedMessages: never;
+  setForwardChatId: {
+    id: string;
+  };
+  forwardMessages: {
+    isSilent?: boolean;
+    scheduledAt?: number;
+  };
+  setForwardNoAuthors: boolean;
+  setForwardNoCaptions: boolean;
+  exitForwardMode: never;
+  changeForwardRecipient: never;
+
   // Stickers
   addRecentSticker: {
     sticker: ApiSticker;
@@ -1097,9 +1119,6 @@ export type NonTypedActionNames = (
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |
   // poll result
   'openPollResults' | 'closePollResults' | 'loadPollOptionResults' |
-  // forwarding messages
-  'openForwardMenu' | 'exitForwardMode' | 'setForwardChatId' | 'forwardMessages' |
-  'openForwardMenuForSelectedMessages' |
   // global search
   'setGlobalSearchQuery' | 'searchMessagesGlobal' | 'addRecentlyFoundChatId' | 'clearRecentlyFoundChats' |
   'setGlobalSearchContent' | 'setGlobalSearchChatId' | 'setGlobalSearchDate' |

@@ -1196,6 +1196,8 @@ export function buildLocalForwardedMessage(
   message: ApiMessage,
   serverTimeOffset: number,
   scheduledAt?: number,
+  noAuthor?: boolean,
+  noCaption?: boolean,
 ): ApiMessage {
   const localId = getNextLocalMessageId();
   const {
@@ -1211,11 +1213,16 @@ export function buildLocalForwardedMessage(
   const asIncomingInChatWithSelf = (
     toChat.id === currentUserId && (fromChatId !== toChat.id || message.forwardInfo) && !isAudio
   );
+  const shouldHideText = Object.keys(content).length > 1 && content.text && noCaption;
+  const updatedContent = {
+    ...content,
+    text: !shouldHideText ? content.text : undefined,
+  };
 
   return {
     id: localId,
     chatId: toChat.id,
-    content,
+    content: updatedContent,
     date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
     senderId: currentUserId,
@@ -1223,7 +1230,7 @@ export function buildLocalForwardedMessage(
     groupedId,
     isInAlbum,
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
-    ...(senderId !== currentUserId && !isAudio && {
+    ...(senderId !== currentUserId && !isAudio && !noAuthor && {
       forwardInfo: {
         date: message.date,
         isChannelPost: false,
