@@ -8,6 +8,7 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { selectCurrentChat } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -24,12 +25,13 @@ import './LeftColumn.scss';
 type StateProps = {
   searchQuery?: string;
   searchDate?: number;
-  activeChatFolder: number;
+  isFirstChatFolderActive: boolean;
   shouldSkipHistoryAnimations?: boolean;
   leftColumnWidth?: number;
   currentUserId?: string;
   hasPasscode?: boolean;
   nextSettingsScreen?: SettingsScreens;
+  isChatOpen: boolean;
 };
 
 enum ContentType {
@@ -49,12 +51,13 @@ const RESET_TRANSITION_DELAY_MS = 250;
 const LeftColumn: FC<StateProps> = ({
   searchQuery,
   searchDate,
-  activeChatFolder,
+  isFirstChatFolderActive,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
   currentUserId,
   hasPasscode,
   nextSettingsScreen,
+  isChatOpen,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -276,14 +279,15 @@ const LeftColumn: FC<StateProps> = ({
       }
     }
 
-    if (content === LeftColumnContent.ChatList && activeChatFolder === 0) {
+    if (content === LeftColumnContent.ChatList && isFirstChatFolderActive) {
       setContent(LeftColumnContent.GlobalSearch);
+
       return;
     }
 
     fullReset();
   }, [
-    content, activeChatFolder, settingsScreen, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId,
+    content, isFirstChatFolderActive, settingsScreen, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId,
     resetChatCreation, hasPasscode,
   ]);
 
@@ -301,10 +305,10 @@ const LeftColumn: FC<StateProps> = ({
   }, [content, searchQuery, setGlobalSearchQuery]);
 
   useEffect(
-    () => (content !== LeftColumnContent.ChatList || activeChatFolder === 0
+    () => (content !== LeftColumnContent.ChatList || (isFirstChatFolderActive && !isChatOpen)
       ? captureEscKeyListener(() => handleReset())
       : undefined),
-    [activeChatFolder, content, handleReset],
+    [isFirstChatFolderActive, content, handleReset, isChatOpen],
   );
 
   const handleHotkeySearch = useCallback((e: KeyboardEvent) => {
@@ -462,15 +466,18 @@ export default memo(withGlobal(
       },
     } = global;
 
+    const isChatOpen = Boolean(selectCurrentChat(global)?.id);
+
     return {
       searchQuery: query,
       searchDate: date,
-      activeChatFolder,
+      isFirstChatFolderActive: activeChatFolder === 0,
       shouldSkipHistoryAnimations,
       leftColumnWidth,
       currentUserId,
       hasPasscode,
       nextSettingsScreen,
+      isChatOpen,
     };
   },
 )(LeftColumn));

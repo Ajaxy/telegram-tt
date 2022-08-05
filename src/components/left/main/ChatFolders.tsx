@@ -39,6 +39,7 @@ type StateProps = {
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
+const FIRST_FOLDER_INDEX = 0;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   foldersDispatch,
@@ -68,7 +69,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     }
   }, [lastSyncTime, loadChatFolders]);
 
-  const defaultFolder = useMemo(() => {
+  const allChatsFolder = useMemo(() => {
     return {
       id: ALL_FOLDER_ID,
       title: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('FilterAllChatsShort') : lang('FilterAllChats'),
@@ -79,15 +80,17 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
         if (id === ALL_FOLDER_ID) {
-          return defaultFolder;
+          return allChatsFolder;
         }
+
         return chatFoldersById[id] || {};
       }).filter(Boolean)
       : undefined;
-  }, [chatFoldersById, defaultFolder, orderedFolderIds]);
+  }, [chatFoldersById, allChatsFolder, orderedFolderIds]);
 
-  const allFolderIndex = displayedFolders?.findIndex((folder) => folder.id === 0);
-  const isInAllFolder = allFolderIndex === activeChatFolder;
+  const allChatsFolderIndex = displayedFolders?.findIndex((folder) => folder.id === ALL_FOLDER_ID);
+  const isInAllChatsFolder = allChatsFolderIndex === activeChatFolder;
+  const isInFirstFolder = FIRST_FOLDER_INDEX === activeChatFolder;
 
   const folderCountersById = useFolderManagerForUnreadCounters();
   const folderTabs = useMemo(() => {
@@ -119,9 +122,9 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     }
 
     if (activeChatFolder >= folderTabs.length) {
-      setActiveChatFolder(allFolderIndex);
+      setActiveChatFolder(FIRST_FOLDER_INDEX);
     }
-  }, [activeChatFolder, allFolderIndex, folderTabs, setActiveChatFolder]);
+  }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
   useEffect(() => {
     if (!transitionRef.current || !IS_TOUCH_ENV || !folderTabs || !folderTabs.length) {
@@ -144,17 +147,17 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     });
   }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
-  const isNotInAllTabRef = useRef();
-  isNotInAllTabRef.current = !isInAllFolder;
-  useEffect(() => (isNotInAllTabRef.current ? captureEscKeyListener(() => {
-    if (isNotInAllTabRef.current) {
-      setActiveChatFolder(allFolderIndex);
+  const isNotInFirstFolderRef = useRef();
+  isNotInFirstFolderRef.current = !isInFirstFolder;
+  useEffect(() => (isNotInFirstFolderRef.current ? captureEscKeyListener(() => {
+    if (isNotInFirstFolderRef.current) {
+      setActiveChatFolder(FIRST_FOLDER_INDEX);
     }
-  }) : undefined), [activeChatFolder, allFolderIndex, setActiveChatFolder]);
+  }) : undefined), [activeChatFolder, setActiveChatFolder]);
 
   useHistoryBack({
-    isActive: !isInAllFolder,
-    onBack: () => setActiveChatFolder(allFolderIndex, { forceOnHeavyAnimation: true }),
+    isActive: !isInFirstFolder,
+    onBack: () => setActiveChatFolder(FIRST_FOLDER_INDEX, { forceOnHeavyAnimation: true }),
   });
 
   useEffect(() => {
@@ -191,7 +194,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     const activeFolder = Object.values(chatFoldersById)
       .find(({ id }) => id === folderTabs![activeChatFolder].id);
 
-    if (!activeFolder || isInAllFolder) {
+    if (!activeFolder || isInAllChatsFolder) {
       return (
         <ChatList
           folderType="all"
