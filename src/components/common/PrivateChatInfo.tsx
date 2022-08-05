@@ -67,22 +67,25 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullUser,
     openMediaViewer,
+    loadProfilePhotos,
   } = getActions();
 
   const { id: userId } = user || {};
   const fullName = getUserFullName(user);
 
   useEffect(() => {
-    if (withFullInfo && lastSyncTime && userId) {
-      loadFullUser({ userId });
+    if (userId && lastSyncTime) {
+      if (withFullInfo) loadFullUser({ userId });
+      if (withMediaViewer) loadProfilePhotos({ profileId: userId });
     }
-  }, [userId, loadFullUser, lastSyncTime, withFullInfo]);
+  }, [userId, loadFullUser, loadProfilePhotos, lastSyncTime, withFullInfo, withMediaViewer]);
 
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
     if (user && hasMedia) {
       e.stopPropagation();
       openMediaViewer({
         avatarOwnerId: user.id,
+        mediaId: 0,
         origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
       });
     }

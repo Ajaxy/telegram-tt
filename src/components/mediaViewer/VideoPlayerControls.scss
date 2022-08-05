@@ -9,6 +9,8 @@
   font-size: 0.875rem;
   background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
   transition: opacity 0.3s;
+  z-index: var(--z-video-player-controls);
+
   opacity: 0;
   pointer-events: none;
 
@@ -20,7 +22,6 @@
     position: fixed;
     padding: 2.25rem 0.5rem 0.75rem;
     background: none;
-    z-index: var(--z-media-viewer);
   }
 
   &.active {
@@ -147,8 +148,16 @@
     }
   }
 
-  .playback-rate-menu .bubble {
-    min-width: 4rem;
-    margin-right: 4rem;
+  .playback-rate-menu {
+    .bubble {
+      min-width: 3.5rem;
+      margin-right: 3.5rem;
+      bottom: 4.1875rem
+    }
+    &.no-fullscreen {
+      .bubble {
+        margin-right: 0.8125rem;
+      }
+    }
   }
 }

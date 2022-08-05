@@ -10,7 +10,7 @@ import { selectCurrentManagement } from './management';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {
   const { mediaViewer } = global;
-  return Boolean(mediaViewer.messageId || mediaViewer.avatarOwnerId);
+  return Boolean(mediaViewer.mediaId || mediaViewer.avatarOwnerId);
 }
 
 export function selectRightColumnContentKey(global: GlobalState) {

@@ -9,6 +9,7 @@ import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectChat, selectUser, selectUserStatus } from '../../global/selectors';
 import {
   getUserFullName, getUserStatus, isChatChannel, isUserOnline,
@@ -18,6 +19,7 @@ import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
 import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import VerifiedIcon from './VerifiedIcon';
 import ProfilePhoto from './ProfilePhoto';
@@ -40,6 +42,8 @@ type StateProps =
     isSavedMessages?: boolean;
     animationLevel: 0 | 1 | 2;
     serverTimeOffset: number;
+    mediaId?: number;
+    avatarOwnerId?: string;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -52,6 +56,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   connectionState,
   animationLevel,
   serverTimeOffset,
+  mediaId,
+  avatarOwnerId,
 }) => {
   const {
     loadFullUser,
@@ -64,14 +70,25 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
   const fullName = user ? getUserFullName(user) : (chat ? chat.title : '');
-  const photos = user?.photos || chat?.photos || [];
-  const slideAnimation = animationLevel >= 1
-    ? (lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized')
+  const photos = user?.photos || chat?.photos || MEMO_EMPTY_ARRAY;
+  const prevMediaId = usePrevious(mediaId);
+  const prevAvatarOwnerId = usePrevious(avatarOwnerId);
+  const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
+  const slideAnimation = hasSlideAnimation
+    ? animationLevel >= 1 ? (lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized') : 'none'
     : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const isFirst = isSavedMessages || photos.length <= 1 || currentPhotoIndex === 0;
   const isLast = isSavedMessages || photos.length <= 1 || currentPhotoIndex === photos.length - 1;
+
+  // Set the current avatar photo to the last selected photo in Media Viewer after it is closed
+  useEffect(() => {
+    if (prevAvatarOwnerId && prevMediaId !== undefined && mediaId === undefined) {
+      setHasSlideAnimation(false);
+      setCurrentPhotoIndex(prevMediaId);
+    }
+  }, [mediaId, prevMediaId, prevAvatarOwnerId]);
 
   // Deleting the last profile photo may result in an error
   useEffect(() => {
@@ -91,7 +108,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const handleProfilePhotoClick = useCallback(() => {
     openMediaViewer({
       avatarOwnerId: userId || chatId,
-      profilePhotoIndex: currentPhotoIndex,
+      mediaId: currentPhotoIndex,
       origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
   }, [openMediaViewer, userId, chatId, currentPhotoIndex, forceShowSelf]);
@@ -106,7 +123,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     if (isFirst) {
       return;
     }
-
+    setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex - 1);
   }, [currentPhotoIndex, isFirst]);
 
@@ -114,7 +131,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     if (isLast) {
       return;
     }
-
+    setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex + 1);
   }, [currentPhotoIndex, isLast]);
 
@@ -251,6 +268,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { animationLevel } = global.settings.byKey;
+    const { mediaId, avatarOwnerId } = global.mediaViewer;
 
     return {
       connectionState,
@@ -260,6 +278,8 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
       animationLevel,
       serverTimeOffset,
+      mediaId,
+      avatarOwnerId,
     };
   },
 )(ProfileInfo));

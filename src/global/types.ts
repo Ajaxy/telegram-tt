@@ -399,7 +399,7 @@ export type GlobalState = {
   mediaViewer: {
     chatId?: string;
     threadId?: number;
-    messageId?: number;
+    mediaId?: number;
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
     origin?: MediaViewerOrigin;
@@ -750,7 +750,7 @@ export interface ActionPayloads {
   openMediaViewer: {
     chatId?: string;
     threadId?: number;
-    messageId?: number;
+    mediaId?: number;
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
     origin?: MediaViewerOrigin;

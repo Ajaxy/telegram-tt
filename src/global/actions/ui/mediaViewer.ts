@@ -2,7 +2,7 @@ import { addActionHandler } from '../../index';
 
 addActionHandler('openMediaViewer', (global, actions, payload) => {
   const {
-    chatId, threadId, messageId, avatarOwnerId, profilePhotoIndex, origin, volume, playbackRate, isMuted,
+    chatId, threadId, mediaId, avatarOwnerId, profilePhotoIndex, origin, volume, playbackRate, isMuted,
   } = payload;
 
   return {
@@ -11,7 +11,7 @@ addActionHandler('openMediaViewer', (global, actions, payload) => {
       ...global.mediaViewer,
       chatId,
       threadId,
-      messageId,
+      mediaId,
       avatarOwnerId,
       profilePhotoIndex,
       origin,

@@ -66,22 +66,25 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullChat,
     openMediaViewer,
+    loadProfilePhotos,
   } = getActions();
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const { id: chatId, isMin, isRestricted } = chat || {};
 
   useEffect(() => {
-    if (chatId && !isMin && withFullInfo && lastSyncTime) {
-      loadFullChat({ chatId });
+    if (chatId && !isMin && lastSyncTime) {
+      if (withFullInfo) loadFullChat({ chatId });
+      if (withMediaViewer) loadProfilePhotos({ profileId: chatId });
     }
-  }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, isSuperGroup]);
+  }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, loadProfilePhotos, isSuperGroup, withMediaViewer]);
 
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
     if (chat && hasMedia) {
       e.stopPropagation();
       openMediaViewer({
         avatarOwnerId: chat.id,
+        mediaId: 0,
         origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
       });
     }

@@ -225,11 +225,11 @@ const Profile: FC<OwnProps & StateProps> = ({
     }
   }, [loadProfilePhotos, profileId, lastSyncTime]);
 
-  const handleSelectMedia = useCallback((messageId: number) => {
+  const handleSelectMedia = useCallback((mediaId: number) => {
     openMediaViewer({
       chatId: profileId,
       threadId: MAIN_THREAD_ID,
-      messageId,
+      mediaId,
       origin: MediaViewerOrigin.SharedMedia,
     });
   }, [profileId, openMediaViewer]);

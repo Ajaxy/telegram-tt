@@ -265,6 +265,8 @@ div[role="button"] {
   right: 0;
   bottom: 0;
   z-index: 2;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .for-ios-autocapitalization-fix {
