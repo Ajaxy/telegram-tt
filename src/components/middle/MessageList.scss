@@ -37,6 +37,11 @@
     position: relative;
     bottom: calc(0px - env(safe-area-inset-bottom));
 
+    // Target: Old Firefox (Waterfox Classic)
+    @supports not (bottom: calc(0px - env(safe-area-inset-bottom))) {
+      bottom: 0;
+    }
+
     body.keyboard-visible.animation-level-0 & {
       transition: none !important;
     }

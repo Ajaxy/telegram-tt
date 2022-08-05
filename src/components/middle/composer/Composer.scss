@@ -8,6 +8,11 @@
     padding-right: 2rem;
     bottom: env(safe-area-inset-bottom);
 
+    // Target: Old Firefox (Waterfox Classic)
+    @supports not (bottom: env(safe-area-inset-bottom)) {
+      bottom: 0;
+    }
+
     @media (max-width: 600px) {
       padding-right: 1rem;
     }

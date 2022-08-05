@@ -15,6 +15,12 @@
     margin-left: 0.25rem;
     flex: 1;
   }
+
+  // Target: Old Firefox (Waterfox Classic)
+  @supports not (padding-left: max(0.25rem, env(safe-area-inset-left))) {
+    padding-left: 0.25rem;
+    padding-right: 0.5rem;
+  }
 }
 
 #MobileSearch > .footer {
@@ -33,6 +39,17 @@
   body:not(.keyboard-visible) & {
     padding-bottom: env(safe-area-inset-bottom);
     height: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+
+  // Target: Old Firefox (Waterfox Classic)
+  @supports not (padding-left: max(1rem, env(safe-area-inset-left))) {
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+
+    body:not(.keyboard-visible) & {
+      padding-bottom: 0;
+      height: 3.5rem;
+    }
   }
 
   > .counter {

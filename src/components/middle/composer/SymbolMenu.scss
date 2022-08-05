@@ -27,6 +27,14 @@
       }
     }
 
+    // Target: Old Firefox (Waterfox Classic)
+    @supports not (padding-right: env(safe-area-inset-right)) {
+      padding-right: 0;
+      padding-bottom: 0;
+      padding-left: 0;
+      transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
+    }
+
     body.animation-level-0 & {
       transition: none;
     }
@@ -39,6 +47,11 @@
   &-main {
     height: var(--symbol-menu-height);
     max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
+
+    // Target: Old Firefox (Waterfox Classic)
+    @supports not (max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom))) {
+      max-height: calc(100vh - var(--symbol-menu-footer-height));
+    }
   }
 
   &-footer {
@@ -133,8 +146,14 @@
   .symbol-close-button {
     display: none;
     position: absolute;
-    right: max(calc(0.25rem), env(safe-area-inset-right));
-    top: max(calc(0.25rem), env(safe-area-inset-top));
+    right: max(0.25rem, env(safe-area-inset-right));
+    top: max(0.25rem, env(safe-area-inset-top));
+
+    // Target: Old Firefox (Waterfox Classic)
+    @supports not (right: max(0.25rem, env(safe-area-inset-right))) {
+      right: 0.25rem;
+      top: 0.25rem;
+    }
   }
 
   @media (orientation: landscape) {

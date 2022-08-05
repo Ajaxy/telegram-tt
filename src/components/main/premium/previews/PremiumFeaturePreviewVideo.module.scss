@@ -1,9 +1,14 @@
 .root {
-display: flex;
+  display: flex;
   justify-content: center;
   aspect-ratio: 1;
   overflow: hidden;
   position: relative;
+
+  @supports not (aspect-ratio: 1) {
+    height: 0;
+    padding-bottom: 100%;
+  }
 }
 
 .wrapper {
@@ -26,6 +31,10 @@ display: flex;
     )
     rotateY(calc(var(--scroll-progress-converted) * 40deg));
   opacity: calc(1 - var(--abs-scroll-progress-converted) * 0.4);
+
+  @supports not (aspect-ratio: 1) {
+    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.005, 0, -342.2, 0, 1)
+  }
 }
 
 .down {
@@ -54,8 +63,10 @@ display: flex;
   border-radius: 0 0 10% 10%;
 }
 
-.down .video {
-  top: 0;
-  bottom: initial;
-  border-radius: 10% 10% 0 0;
+@supports (aspect-ratio: 1) {
+  .down .video {
+    top: 0;
+    bottom: initial;
+    border-radius: 10% 10% 0 0;
+  }
 }

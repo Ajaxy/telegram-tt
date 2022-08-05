@@ -189,6 +189,11 @@
       body.keyboard-visible & {
         top: env(safe-area-inset-bottom);
       }
+
+      // Target: Old Firefox (Waterfox Classic)
+      @supports not (padding-bottom: env(safe-area-inset-bottom)) {
+        padding-bottom: 0;
+      }
     }
 
     &::before {
@@ -316,7 +321,12 @@
   }
 
   @media (max-width: 600px) {
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    padding-bottom: 0.75rem;
+
+    // Target: Old Firefox (Waterfox Classic)
+    @supports (padding-bottom: calc(0.75rem + env(safe-area-inset-bottom))) {
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    }
   }
 
   .mask-image-disabled &::before {
