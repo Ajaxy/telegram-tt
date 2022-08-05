@@ -33,6 +33,7 @@ const SUPPORTED_LANGUAGES: Record<string, string[]> = {
   ruby: ['rb', 'gemspec', 'podspec', 'thor', 'irb'],
   rust: ['rs'],
   scss: [],
+  smalltalk: ['st'],
   sql: [],
   swift: [],
   twig: ['craftcms'],
