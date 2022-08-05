@@ -1469,22 +1469,25 @@ async function openChatByUsername(
   startAttach?: string | boolean,
   attach?: string,
 ) {
+  let global = getGlobal();
+  const currentChat = selectCurrentChat(global);
+
   // Attach in the current chat
   if (startAttach && !attach) {
     const chat = await fetchChatByUsername(username);
-
     if (!chat) return;
-    const global = getGlobal();
-    const user = selectUser(global, chat.id);
 
+    global = getGlobal();
+
+    const user = selectUser(global, chat.id);
     if (!user) return;
+
     const isBot = isUserBot(user);
     if (!isBot || !user.isAttachMenuBot) {
       actions.showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
+
       return;
     }
-
-    const currentChat = selectCurrentChat(global);
 
     if (!currentChat) return;
 
@@ -1493,25 +1496,33 @@ async function openChatByUsername(
       chatId: currentChat.id,
       ...(typeof startAttach === 'string' && { startParam: startAttach }),
     });
+
     return;
   }
 
-  // Open temporary empty chat to make the click response feel faster
-  actions.openChat({ id: TMP_CHAT_ID });
+  const isCurrentChat = currentChat?.username === username;
+
+  if (!isCurrentChat) {
+    // Open temporary empty chat to make the click response feel faster
+    actions.openChat({ id: TMP_CHAT_ID });
+  }
 
   const chat = await fetchChatByUsername(username);
-
   if (!chat) {
-    actions.openPreviousChat();
-    actions.showNotification({ message: 'User does not exist' });
+    if (!isCurrentChat) {
+      actions.openPreviousChat();
+      actions.showNotification({ message: 'User does not exist' });
+    }
+
     return;
   }
 
   if (channelPostId) {
     actions.focusMessage({ chatId: chat.id, messageId: channelPostId });
-  } else {
+  } else if (!isCurrentChat) {
     actions.openChat({ id: chat.id });
   }
+
   if (startParam) {
     actions.startBot({ botId: chat.id, param: startParam });
   }
