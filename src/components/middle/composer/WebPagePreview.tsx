@@ -105,10 +105,20 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   return (
     <div className={buildClassName('WebPagePreview', transitionClassNames)}>
       <div>
-        <Button round faded color="translucent" ariaLabel="Clear Webpage Preview" onClick={handleClearWebpagePreview}>
+        <div className="WebPagePreview-left-icon">
+          <i className="icon-link" />
+        </div>
+        <WebPage message={messageStub} inPreview theme={theme} />
+        <Button
+          className="WebPagePreview-clear"
+          round
+          faded
+          color="translucent"
+          ariaLabel="Clear Webpage Preview"
+          onClick={handleClearWebpagePreview}
+        >
           <i className="icon-close" />
         </Button>
-        <WebPage message={messageStub} inPreview theme={theme} />
       </div>
     </div>
   );

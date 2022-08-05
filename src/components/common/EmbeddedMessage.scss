@@ -125,13 +125,10 @@
 
   &.inside-input {
     padding-inline-start: 0.5625rem;
-    margin: 0 0 -0.125rem -0.1875rem;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: 1fr;
     width: 100%;
     --accent-color: var(--color-primary);
     --hover-color: var(--color-interactive-element-hover);
+    --active-color: var(--color-reply-active);
 
     &::before {
       bottom: 0.3125rem;
@@ -143,11 +140,18 @@
 
     .message-text {
       margin-inline-start: 0.375rem;
+      flex-grow: 1;
     }
 
     .message-title {
       font-weight: 500;
       color: var(--accent-color);
+    }
+
+    .embedded-more {
+      font-size: 1.5rem;
+      opacity: 0.8;
+      color: var(--color-text-secondary);
     }
   }
 }

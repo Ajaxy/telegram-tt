@@ -202,8 +202,8 @@ const MediaViewer: FC<StateProps> = ({
 
   const handleForward = useCallback(() => {
     openForwardMenu({
-      fromChatId: chatId,
-      messageIds: [mediaId],
+      fromChatId: chatId!,
+      messageIds: [mediaId!],
     });
   }, [openForwardMenu, chatId, mediaId]);
 

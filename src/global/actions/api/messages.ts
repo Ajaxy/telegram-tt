@@ -602,7 +602,7 @@ addActionHandler('loadPollOptionResults', (global, actions, payload) => {
 
 addActionHandler('forwardMessages', (global, action, payload) => {
   const {
-    fromChatId, messageIds, toChatId, withMyScore,
+    fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions,
   } = global.forwardMessages;
   const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
@@ -630,6 +630,8 @@ addActionHandler('forwardMessages', (global, action, payload) => {
       scheduledAt,
       sendAs,
       withMyScore,
+      noAuthors,
+      noCaptions,
     });
   }
 

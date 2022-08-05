@@ -1126,6 +1126,8 @@ export async function forwardMessages({
   scheduledAt,
   sendAs,
   withMyScore,
+  noAuthors,
+  noCaptions,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
@@ -1135,12 +1137,16 @@ export async function forwardMessages({
   scheduledAt?: number;
   sendAs?: ApiUser | ApiChat;
   withMyScore?: boolean;
+  noAuthors?: boolean;
+  noCaptions?: boolean;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
 
   messages.forEach((message, index) => {
-    const localMessage = buildLocalForwardedMessage(toChat, message, serverTimeOffset, scheduledAt);
+    const localMessage = buildLocalForwardedMessage(
+      toChat, message, serverTimeOffset, scheduledAt, noAuthors, noCaptions,
+    );
     localDb.localMessages[String(randomIds[index])] = localMessage;
 
     onUpdate({
@@ -1158,6 +1164,8 @@ export async function forwardMessages({
     id: messageIds,
     withMyScore: withMyScore || undefined,
     silent: isSilent || undefined,
+    dropAuthor: noAuthors || undefined,
+    dropMediaCaptions: noCaptions || undefined,
     ...(scheduledAt && { scheduleDate: scheduledAt }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }), true);

@@ -413,7 +413,7 @@ addActionHandler('focusMessage', (global, actions, payload) => {
 addActionHandler('openForwardMenu', (global, actions, payload) => {
   const {
     fromChatId, messageIds, groupedId, withMyScore,
-  } = payload!;
+  } = payload;
   let groupedMessageIds;
   if (groupedId) {
     groupedMessageIds = selectMessageIdsByGroupId(global, fromChatId, groupedId);
@@ -429,6 +429,41 @@ addActionHandler('openForwardMenu', (global, actions, payload) => {
   };
 });
 
+addActionHandler('changeForwardRecipient', (global) => {
+  return {
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      toChatId: undefined,
+      isModalShown: true,
+      noAuthors: false,
+      noCaptions: false,
+    },
+  };
+});
+
+addActionHandler('setForwardNoAuthors', (global, actions, payload) => {
+  return {
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      noAuthors: payload,
+      noCaptions: payload && global.forwardMessages.noCaptions, // `noCaptions` cannot be true when `noAuthors` is false
+    },
+  };
+});
+
+addActionHandler('setForwardNoCaptions', (global, actions, payload) => {
+  return {
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      noCaptions: payload,
+      noAuthors: payload, // On other clients `noAuthors` updates together with `noCaptions`
+    },
+  };
+});
+
 addActionHandler('exitForwardMode', (global) => {
   setGlobal({
     ...global,
@@ -437,7 +472,7 @@ addActionHandler('exitForwardMode', (global) => {
 });
 
 addActionHandler('setForwardChatId', (global, actions, payload) => {
-  const { id } = payload!;
+  const { id } = payload;
 
   setGlobal({
     ...global,
