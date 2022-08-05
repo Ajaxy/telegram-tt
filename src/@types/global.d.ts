@@ -27,6 +27,10 @@ declare namespace React {
     offsetX: number;
     offsetY: number;
   }
+
+  interface KeyboardEvent {
+    isComposing: boolean;
+  }
 }
 
 type AnyLiteral = Record<string, any>;
