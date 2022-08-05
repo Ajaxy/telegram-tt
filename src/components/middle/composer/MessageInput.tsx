@@ -248,7 +248,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (!html.length && (e.metaKey || e.ctrlKey)) {
+    // https://levelup.gitconnected.com/javascript-events-handlers-keyboard-and-load-events-1b3e46a6b0c3#1960
+    const { isComposing } = e;
+
+    if (!isComposing && !html.length && (e.metaKey || e.ctrlKey)) {
       const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
       if (targetIndexDelta) {
         e.preventDefault();
@@ -258,7 +261,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       }
     }
 
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (!isComposing && e.key === 'Enter' && !e.shiftKey) {
       if (
         !(IS_IOS || IS_ANDROID)
         && (
@@ -271,7 +274,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         closeTextFormatter();
         onSend();
       }
-    } else if (e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    } else if (!isComposing && e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
       editLastMessage();
     } else {
