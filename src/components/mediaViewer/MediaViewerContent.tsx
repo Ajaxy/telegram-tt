@@ -8,7 +8,7 @@ import type {
 import { ApiMediaFormat } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import useBlurSync from '../../hooks/useBlurSync';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
@@ -156,6 +156,14 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     setIsFooterHidden?.(!isVisible);
   }, [setIsFooterHidden]);
 
+  const handleMouseMove = useCallback(() => {
+    toggleControls(true);
+  }, [toggleControls]);
+
+  const handleMouseOut = useCallback(() => {
+    toggleControls(false);
+  }, [toggleControls]);
+
   const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
   let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
   const thumbDataUri = useBlurSync(!bestImageData && message && getMessageMediaThumbDataUri(message));
@@ -221,6 +229,8 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   return (
     <div
       className={`MediaViewerContent ${hasFooter ? 'has-footer' : ''}`}
+      onMouseMove={!isGif && !IS_TOUCH_ENV ? handleMouseMove : undefined}
+      onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
       {isProtected && <div onContextMenu={stopEvent} className="protector" />}
       {isPhoto && renderPhoto(

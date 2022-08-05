@@ -120,16 +120,6 @@ const VideoPlayer: FC<OwnProps> = ({
 
   useVideoCleanup(videoRef, []);
 
-  const handleMouseMove = useCallback(() => {
-    toggleControls(true);
-  }, [toggleControls]);
-
-  const handleMouseOut = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (e.target === videoRef.current) {
-      toggleControls(false);
-    }
-  }, [toggleControls]);
-
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     setCurrentTime(e.currentTarget.currentTime);
   }, []);
@@ -186,8 +176,6 @@ const VideoPlayer: FC<OwnProps> = ({
   return (
     <div
       className="VideoPlayer"
-      onMouseMove={!isGif && !IS_TOUCH_ENV ? handleMouseMove : undefined}
-      onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
       <div
         style={wrapperStyle}
