@@ -15,13 +15,20 @@ const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
 const WebpackContextExtension = require('./dev/webpackContextExtension');
 const appVersion = require('./package.json').version;
 
+const {
+  HEAD,
+  APP_ENV = 'production',
+  APP_MOCKED_CLIENT = '',
+} = process.env;
+
 dotenv.config();
 
-module.exports = (env = {}, argv = {}) => {
+module.exports = (_env, { mode = 'production' }) => {
   return {
-    mode: argv.mode,
+    mode,
     entry: './src/index.tsx',
     target: 'web',
+
     devServer: {
       port: 1234,
       host: '0.0.0.0',
@@ -55,9 +62,11 @@ module.exports = (env = {}, argv = {}) => {
     output: {
       filename: '[name].[contenthash].js',
       chunkFilename: '[id].[chunkhash].js',
-      assetModuleFilename: '[name].[contenthash].[ext]',
-      path: path.resolve(__dirname, argv['output-path'] || 'dist'),
+      assetModuleFilename: '[name].[contenthash][ext]',
+      path: path.resolve(__dirname, 'dist'),
+      clean: true,
     },
+
     module: {
       rules: [
         {
@@ -88,7 +97,7 @@ module.exports = (env = {}, argv = {}) => {
                 modules: {
                   exportLocalsConvention: 'camelCase',
                   auto: true,
-                  localIdentName: argv['optimize-minimize'] ? '[hash:base64]' : '[path][name]__[local]'
+                  localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]'
                 }
               }
             },
@@ -110,6 +119,7 @@ module.exports = (env = {}, argv = {}) => {
         },
       ],
     },
+
     resolve: {
       extensions: ['.js', '.ts', '.tsx'],
       fallback: {
@@ -119,20 +129,21 @@ module.exports = (env = {}, argv = {}) => {
         fs: false,
       },
     },
+
     plugins: [
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
         /highlight\.js\/lib\/languages/,
         /^((?!\.js\.js).)*$/
       ),
-      ...(process.env.APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
+      ...(APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
         /src\/lib\/gramjs\/client\/TelegramClient\.js/,
         './MockClient.ts'
       )] : []),
       new HtmlWebpackPlugin({
-        appName: process.env.APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
-        appleIcon: process.env.APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
-        mainIcon: process.env.APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
+        appName: APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
+        appleIcon: APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
+        mainIcon: APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({
@@ -141,8 +152,8 @@ module.exports = (env = {}, argv = {}) => {
         ignoreOrder: true,
       }),
       new EnvironmentPlugin({
-        APP_ENV: 'production',
-        APP_MOCKED_CLIENT: '',
+        APP_ENV,
+        APP_MOCKED_CLIENT,
         APP_NAME: null,
         APP_VERSION: appVersion,
         TELEGRAM_T_API_ID: undefined,
@@ -152,9 +163,9 @@ module.exports = (env = {}, argv = {}) => {
       new DefinePlugin({
         APP_REVISION: DefinePlugin.runtimeValue(() => {
           const { branch, commit } = getGitMetadata();
-          const shouldDisplayCommit = process.env.APP_ENV === 'staging' || !branch || branch === 'HEAD';
+          const shouldDisplayCommit = APP_ENV === 'staging' || !branch || branch === 'HEAD';
           return JSON.stringify(shouldDisplayCommit ? commit : branch);
-        }, argv.mode === 'development' ? true : []),
+        }, mode === 'development' ? true : []),
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
@@ -171,11 +182,9 @@ module.exports = (env = {}, argv = {}) => {
       }),
     ],
 
-    ...(!env.noSourceMap && {
-      devtool: 'source-map',
-    }),
+    devtool: 'source-map',
 
-    ...(process.env.APP_ENV !== 'production' && {
+    ...(APP_ENV !== 'production' && {
       optimization: {
         chunkIds: 'named',
       }
@@ -185,7 +194,7 @@ module.exports = (env = {}, argv = {}) => {
 
 function getGitMetadata() {
   const gitRevisionPlugin = new GitRevisionPlugin();
-  const branch = process.env.HEAD || gitRevisionPlugin.branch();
+  const branch = HEAD || gitRevisionPlugin.branch();
   const commit = gitRevisionPlugin.commithash().substring(0, 7);
   return { branch, commit };
 }
