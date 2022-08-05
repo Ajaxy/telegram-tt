@@ -10,6 +10,7 @@ import type { ThemeKey } from '../../types';
 
 import windowSize from '../../util/windowSize';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { TME_LINK_PREFIX } from '../../config';
 import { selectCurrentChat, selectTheme, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { extractCurrentThemeParams, validateHexColor } from '../../util/themeStyle';
@@ -54,7 +55,6 @@ type StateProps = {
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const PROLONG_INTERVAL = 45000; // 45s
 const ANIMATION_WAIT = 400;
-const LINK_PREFIX = 'https://t.me/';
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
   'allow-same-origin',
@@ -110,7 +110,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_open_tg_link') {
-      const linkUrl = LINK_PREFIX + eventData.path_full;
+      const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl });
       closeWebApp();
     }

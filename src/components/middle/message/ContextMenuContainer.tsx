@@ -20,7 +20,7 @@ import {
   isActionMessage, isChatChannel,
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo,
 } from '../../../global/helpers';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX } from '../../../config';
 import { getDayStartAt } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -326,7 +326,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   }, [closeMenu, copyMessagesByIds]);
 
   const handleCopyLink = useCallback(() => {
-    copyTextToClipboard(`https://t.me/${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
+    copyTextToClipboard(`${TME_LINK_PREFIX}${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
     closeMenu();
   }, [chatUsername, closeMenu, message]);
 

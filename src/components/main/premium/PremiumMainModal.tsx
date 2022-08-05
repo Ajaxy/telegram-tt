@@ -12,6 +12,7 @@ import PremiumFeatureModal, {
   PREMIUM_FEATURE_SECTIONS,
   PREMIUM_FEATURE_TITLES,
 } from './PremiumFeatureModal';
+import { TME_LINK_PREFIX } from '../../../config';
 import { formatCurrency } from '../../../util/formatCurrency';
 import buildClassName from '../../../util/buildClassName';
 import { selectIsCurrentUserPremium, selectUser } from '../../../global/selectors';
@@ -77,8 +78,6 @@ type StateProps = {
   premiumBotUsername?: string;
 };
 
-const LINK_PREFIX = 'https://t.me/';
-
 const PremiumMainModal: FC<OwnProps & StateProps> = ({
   isOpen,
   fromUser,
@@ -127,7 +126,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       });
     } else if (premiumBotUsername) {
       openTelegramLink({
-        url: `${LINK_PREFIX}${premiumBotUsername}?start=${startParam || 'promo'}`,
+        url: `${TME_LINK_PREFIX}${premiumBotUsername}?start=${startParam || 'promo'}`,
       });
       closePremiumModal();
     }

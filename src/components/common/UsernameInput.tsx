@@ -4,6 +4,7 @@ import React, {
   useState, useCallback, memo, useEffect, useMemo,
 } from '../../lib/teact/teact';
 
+import { TME_LINK_PREFIX } from '../../config';
 import { debounce } from '../../util/schedulers';
 import useLang from '../../hooks/useLang';
 
@@ -20,7 +21,6 @@ type OwnProps = {
 
 const MIN_USERNAME_LENGTH = 5;
 const MAX_USERNAME_LENGTH = 32;
-const LINK_PREFIX = 'https://t.me/';
 const LINK_PREFIX_REGEX = /https:\/\/t\.me\/?/i;
 const USERNAME_REGEX = /^([a-zA-Z0-9_]+)$/;
 
@@ -79,7 +79,7 @@ const SettingsEditProfile: FC<OwnProps> = ({
   const handleUsernameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const newUsername = e.target.value.trim().replace(LINK_PREFIX_REGEX, '');
     setUsername(newUsername);
-    e.target.value = `${asLink ? LINK_PREFIX : ''}${newUsername}`;
+    e.target.value = `${asLink ? TME_LINK_PREFIX : ''}${newUsername}`;
 
     const isValid = isUsernameValid(newUsername);
 
@@ -96,7 +96,7 @@ const SettingsEditProfile: FC<OwnProps> = ({
 
   return (
     <InputText
-      value={`${asLink ? LINK_PREFIX : ''}${username}`}
+      value={`${asLink ? TME_LINK_PREFIX : ''}${username}`}
       onChange={handleUsernameChange}
       label={label}
       error={usernameError}

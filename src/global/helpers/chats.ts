@@ -12,7 +12,7 @@ import {
 import type { NotifyException, NotifySettings } from '../../types';
 import type { LangFn } from '../../hooks/useLang';
 
-import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID } from '../../config';
+import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID, TME_LINK_PREFIX } from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
@@ -96,7 +96,7 @@ export function getChatDescription(chat: ApiChat) {
 export function getChatLink(chat: ApiChat) {
   const { username } = chat;
   if (username) {
-    return `https://t.me/${username}`;
+    return `${TME_LINK_PREFIX}${username}`;
   }
 
   const { inviteLink } = chat.fullInfo || {};
