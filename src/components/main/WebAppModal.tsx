@@ -55,6 +55,14 @@ const MAIN_BUTTON_ANIMATION_TIME = 250;
 const PROLONG_INTERVAL = 45000; // 45s
 const ANIMATION_WAIT = 400;
 const LINK_PREFIX = 'https://t.me/';
+const SANDBOX_ATTRIBUTES = [
+  'allow-scripts',
+  'allow-same-origin',
+  'allow-popups',
+  'allow-forms',
+  'allow-modals',
+  'allow-storage-access-by-user-activation',
+].join(' ');
 
 const WebAppModal: FC<OwnProps & StateProps> = ({
   webApp,
@@ -369,7 +377,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             className={buildClassName('web-app-frame', shouldDecreaseWebFrameSize && 'with-button')}
             src={url}
             title={`${bot?.firstName} Web App`}
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
+            sandbox={SANDBOX_ATTRIBUTES}
             allow="camera; microphone; geolocation;"
             allowFullScreen
           />
