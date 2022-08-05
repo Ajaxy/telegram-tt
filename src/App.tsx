@@ -55,6 +55,32 @@ const App: FC<StateProps> = ({
     });
   }, [disconnect, markInactive]);
 
+  // Prevent drop on elements that do not accept it
+  useEffect(() => {
+    const body = document.body;
+    const handleDrag = (e: DragEvent) => {
+      e.preventDefault();
+      if (!e.dataTransfer) return;
+      if (!(e.target as HTMLElement).dataset.dropzone) {
+        e.dataTransfer.dropEffect = 'none';
+      } else {
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    };
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    body.addEventListener('drop', handleDrop);
+    body.addEventListener('dragover', handleDrag);
+    body.addEventListener('dragenter', handleDrag);
+
+    return () => {
+      body.removeEventListener('drop', handleDrop);
+      body.removeEventListener('dragover', handleDrag);
+      body.removeEventListener('dragenter', handleDrag);
+    };
+  }, []);
+
   // return <Test />;
 
   let activeKey: number;

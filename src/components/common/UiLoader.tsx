@@ -1,10 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
+import type { FC } from '../../lib/teact/teact';
 
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
 import { selectIsRightColumnShown, selectTheme, selectIsCurrentUserPremium } from '../../global/selectors';

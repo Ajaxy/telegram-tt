@@ -27,7 +27,6 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
-import stopEvent from '../../util/stopEvent';
 import windowSize from '../../util/windowSize';
 import { getAllNotificationsCount } from '../../util/folderManager';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
@@ -385,7 +384,7 @@ const Main: FC<StateProps> = ({
   usePreventPinchZoomGesture(isMediaViewerOpen);
 
   return (
-    <div id="Main" className={className} onDrop={stopEvent} onDragOver={stopEvent}>
+    <div id="Main" className={className}>
       <LeftColumn />
       <MiddleColumn />
       <RightColumn />

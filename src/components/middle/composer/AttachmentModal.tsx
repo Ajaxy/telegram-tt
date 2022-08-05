@@ -177,7 +177,6 @@ const AttachmentModal: FC<OwnProps> = ({
 
   function handleDragOver(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
-    e.stopPropagation();
 
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
@@ -258,6 +257,7 @@ const AttachmentModal: FC<OwnProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         data-attach-description={lang('Preview.Dragging.AddItems', 10)}
+        data-dropzone
       >
         {isQuick ? (
           <div className="media-wrapper custom-scroll">
