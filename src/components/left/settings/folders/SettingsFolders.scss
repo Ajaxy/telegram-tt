@@ -76,3 +76,15 @@
   width: calc(100% + 2rem);
   padding-left: 1rem !important;
 }
+
+.settings-sortable-container {
+  position: relative;
+}
+
+.settings-sortable-container .draggable-knob {
+  margin-top: -0.25rem;
+}
+
+.settings-sortable-item .multiline-item {
+  padding-inline-end: 3rem;
+}

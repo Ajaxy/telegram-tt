@@ -1052,6 +1052,7 @@ export interface ActionPayloads {
 
   // Settings
   requestNextSettingsScreen: SettingsScreens;
+  sortChatFolders: { folderIds: number[] };
   closeDeleteChatFolderModal: never;
   openDeleteChatFolderModal: { folderId: number };
   loadGlobalPrivacySettings: never;

@@ -1143,6 +1143,7 @@ messages.getPollVotes#b86e380e flags:# peer:InputPeer id:int option:flags.0?byte
 messages.getDialogFilters#f19ed96d = Vector<DialogFilter>;
 messages.getSuggestedDialogFilters#a29cd42c = Vector<DialogFilterSuggested>;
 messages.updateDialogFilter#1ad4a04a flags:# id:int filter:flags.0?DialogFilter = Bool;
+messages.updateDialogFiltersOrder#c563c1e4 order:Vector<int> = Bool;
 messages.getReplies#22ddd30c peer:InputPeer msg_id:int offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:long = messages.Messages;
 messages.getDiscussionMessage#446972fd peer:InputPeer msg_id:int = messages.DiscussionMessage;
 messages.readDiscussion#f731a9f4 peer:InputPeer msg_id:int read_max_id:int = Bool;
