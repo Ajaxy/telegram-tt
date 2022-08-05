@@ -14,7 +14,6 @@ export type OwnProps = {
 const DropTarget: FC<OwnProps> = ({ isQuick, onFileSelect }) => {
   const [isHovered, markHovered, unmarkHovered] = useFlag();
 
-  const handleDragEnter = () => { markHovered(); };
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     const { relatedTarget: toTarget } = e;
 
@@ -34,8 +33,9 @@ const DropTarget: FC<OwnProps> = ({ isQuick, onFileSelect }) => {
     <div
       className={className}
       onDrop={onFileSelect}
-      onDragEnter={handleDragEnter}
+      onDragEnter={markHovered}
       onDragLeave={handleDragLeave}
+      data-dropzone
     >
       <div className="target-content">
         <div className={`icon icon-${isQuick ? 'photo' : 'document'}`} />

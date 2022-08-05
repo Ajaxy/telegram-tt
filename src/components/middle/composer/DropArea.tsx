@@ -96,7 +96,13 @@ const DropArea: FC<OwnProps> = ({
 
   return (
     <Portal containerId="#middle-column-portals">
-      <div className={className} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={onHide}>
+      <div
+        className={className}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={onHide}
+        onClick={onHide}
+      >
         <DropTarget onFileSelect={handleFilesDrop} />
         {(withQuick || prevWithQuick) && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
       </div>

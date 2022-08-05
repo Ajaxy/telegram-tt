@@ -68,6 +68,7 @@ type OwnProps = {
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
   observeIntersection?: ObserveFn;
+  onDragEnter?: (chatId: string) => void;
 };
 
 type StateProps = {
@@ -113,6 +114,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   canScrollDown,
   canChangeFolder,
   lastSyncTime,
+  onDragEnter,
 }) => {
   const {
     openChat,
@@ -199,6 +201,11 @@ const Chat: FC<OwnProps & StateProps> = ({
     chatId,
     focusLastMessage,
   ]);
+
+  const handleDragEnter = useCallback((e) => {
+    e.preventDefault();
+    onDragEnter?.(chatId);
+  }, [chatId, onDragEnter]);
 
   const handleDelete = useCallback(() => {
     markRenderDeleteModal();
@@ -299,6 +306,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       ripple={!IS_SINGLE_COLUMN_LAYOUT}
       contextActions={contextActions}
       onClick={handleClick}
+      onDragEnter={handleDragEnter}
     >
       <div className="status">
         <Avatar

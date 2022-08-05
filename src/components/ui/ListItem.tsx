@@ -46,6 +46,7 @@ interface OwnProps {
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 const ListItem: FC<OwnProps> = ({
@@ -70,6 +71,7 @@ const ListItem: FC<OwnProps> = ({
   onMouseDown,
   onClick,
   onSecondaryIconClick,
+  onDragEnter,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -167,6 +169,7 @@ const ListItem: FC<OwnProps> = ({
       dir={lang.isRtl ? 'rtl' : undefined}
       style={style}
       onMouseDown={onMouseDown}
+      onDragEnter={onDragEnter}
     >
       <div
         className={buildClassName('ListItem-button', isTouched && 'active', buttonClassName)}

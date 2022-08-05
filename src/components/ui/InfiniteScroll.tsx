@@ -14,9 +14,6 @@ import buildStyle from '../../util/buildStyle';
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
-  onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
-  onScroll?: (e: UIEvent<HTMLDivElement>) => void;
-  onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   items?: any[];
   itemSelector?: string;
   preloadBackwards?: number;
@@ -28,6 +25,11 @@ type OwnProps = {
   noFastList?: boolean;
   cacheBuster?: any;
   children: React.ReactNode;
+  onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
+  onScroll?: (e: UIEvent<HTMLDivElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<any>) => void;
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 const DEFAULT_LIST_SELECTOR = '.ListItem';
@@ -37,9 +39,6 @@ const DEFAULT_SENSITIVE_AREA = 800;
 const InfiniteScroll: FC<OwnProps> = ({
   ref,
   className,
-  onLoadMore,
-  onScroll,
-  onKeyDown,
   items,
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
@@ -53,6 +52,11 @@ const InfiniteScroll: FC<OwnProps> = ({
   // Used to re-query `listItemElements` if rendering is delayed by transition
   cacheBuster,
   children,
+  onLoadMore,
+  onScroll,
+  onKeyDown,
+  onDragOver,
+  onDragLeave,
 }: OwnProps) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -223,6 +227,8 @@ const InfiniteScroll: FC<OwnProps> = ({
       onScroll={handleScroll}
       teactFastList={!noFastList && !withAbsolutePositioning}
       onKeyDown={onKeyDown}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
     >
       {withAbsolutePositioning && items?.length ? (
         <div

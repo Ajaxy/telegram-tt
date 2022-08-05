@@ -1,5 +1,5 @@
 import React, {
-  memo, useMemo, useEffect, useRef,
+  memo, useMemo, useEffect, useRef, useCallback,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -23,6 +23,7 @@ import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useChatAnimationType } from './hooks';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import { useHotkeys } from '../../../hooks/useHotkeys';
+import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -39,6 +40,7 @@ type OwnProps = {
 };
 
 const INTERSECTION_THROTTLE = 200;
+const DRAG_ENTER_DEBOUNCE = 500;
 
 const ChatList: FC<OwnProps> = ({
   folderType,
@@ -50,6 +52,7 @@ const ChatList: FC<OwnProps> = ({
   const { openChat, openNextChat } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  const shouldIgnoreDragRef = useRef(false);
 
   const resolvedFolderId = (
     folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
@@ -126,6 +129,22 @@ const ChatList: FC<OwnProps> = ({
     throttleMs: INTERSECTION_THROTTLE,
   });
 
+  const handleDragEnter = useDebouncedCallback((chatId: string) => {
+    if (shouldIgnoreDragRef.current) {
+      shouldIgnoreDragRef.current = false;
+      return;
+    }
+    openChat({ id: chatId, shouldReplaceHistory: true });
+  }, [], DRAG_ENTER_DEBOUNCE, true);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < rect.width || y < rect.y) return;
+    shouldIgnoreDragRef.current = true;
+  }, []);
+
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
     const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
@@ -144,6 +163,7 @@ const ChatList: FC<OwnProps> = ({
           orderDiff={orderDiffById[id]}
           style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
           observeIntersection={observe}
+          onDragEnter={handleDragEnter}
         />
       );
     });
@@ -158,6 +178,7 @@ const ChatList: FC<OwnProps> = ({
       withAbsolutePositioning
       maxHeight={(orderedIds?.length || 0) * CHAT_HEIGHT_PX}
       onLoadMore={getMore}
+      onDragLeave={handleDragLeave}
     >
       {viewportIds?.length ? (
         renderChats()
