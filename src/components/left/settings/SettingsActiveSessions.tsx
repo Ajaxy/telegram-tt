@@ -15,10 +15,10 @@ import getSessionIcon from './helpers/getSessionIcon';
 
 import ListItem from '../../ui/ListItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import RadioGroup from '../../ui/RadioGroup';
 import SettingsActiveSession from './SettingsActiveSession';
 
 import './SettingsActiveSessions.scss';
-import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
@@ -55,35 +55,52 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     if (ttlDays === undefined) {
       return undefined;
     }
+
     if (ttlDays <= 7) {
       return '7';
     }
+
     if (ttlDays <= 30) {
       return '30';
     }
+
     if (ttlDays <= 93) {
       return '90';
     }
+
     if (ttlDays <= 183) {
       return '183';
+    }
+
+    if (ttlDays > 183) {
+      return '365';
     }
 
     return undefined;
   }, [ttlDays]);
 
-  const AUTO_TERMINATE_OPTIONS = useMemo(() => [{
-    label: lang('Weeks', 1, 'i'),
-    value: '7',
-  }, {
-    label: lang('Months', 1, 'i'),
-    value: '30',
-  }, {
-    label: lang('Months', 3, 'i'),
-    value: '90',
-  }, {
-    label: lang('Months', 6, 'i'),
-    value: '183',
-  }], [lang]);
+  const AUTO_TERMINATE_OPTIONS = useMemo(() => {
+    const options = [{
+      label: lang('Weeks', 1, 'i'),
+      value: '7',
+    }, {
+      label: lang('Months', 1, 'i'),
+      value: '30',
+    }, {
+      label: lang('Months', 3, 'i'),
+      value: '90',
+    }, {
+      label: lang('Months', 6, 'i'),
+      value: '183',
+    }];
+    if (ttlDays && ttlDays >= 365) {
+      options.push({
+        label: lang('Years', 1, 'i'),
+        value: '365',
+      });
+    }
+    return options;
+  }, [lang, ttlDays]);
 
   const handleTerminateSessionClick = useCallback((hash: string) => {
     terminateAuthorization({ hash });
