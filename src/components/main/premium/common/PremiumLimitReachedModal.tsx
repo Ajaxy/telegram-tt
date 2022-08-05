@@ -10,7 +10,7 @@ import { formatFileSize } from '../../../../util/textFormat';
 import { getActions, withGlobal } from '../../../../global';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../../global/selectors';
 import useLang from '../../../../hooks/useLang';
-import { FILEPART_SIZE } from '../../../../config';
+import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
 import useFlag from '../../../../hooks/useFlag';
 
 import Modal from '../../../ui/Modal';
@@ -60,7 +60,7 @@ const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any
     // The real size is not exactly 4gb, so we need to round it
     if (value === 8000) return lang('FileSize.GB', '4');
     if (value === 4000) return lang('FileSize.GB', '2');
-    return formatFileSize(lang, value * FILEPART_SIZE);
+    return formatFileSize(lang, value * MAX_UPLOAD_FILEPART_SIZE);
   },
 };
 

@@ -31,7 +31,7 @@ import {
   EDITABLE_INPUT_ID,
   REPLIES_USER_ID,
   SEND_MESSAGE_ACTION_INTERVAL,
-  EDITABLE_INPUT_CSS_SELECTOR, FILEPART_SIZE,
+  EDITABLE_INPUT_CSS_SELECTOR, MAX_UPLOAD_FILEPART_SIZE,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -1355,7 +1355,7 @@ export default memo(withGlobal<OwnProps>(
       attachMenuBots: global.attachMenu.bots,
       attachMenuPeerType: selectAttachMenuPeerType(global, chatId),
       theme: selectTheme(global),
-      fileSizeLimit: selectCurrentLimit(global, 'uploadMaxFileparts') * FILEPART_SIZE,
+      fileSizeLimit: selectCurrentLimit(global, 'uploadMaxFileparts') * MAX_UPLOAD_FILEPART_SIZE,
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };

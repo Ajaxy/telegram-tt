@@ -137,16 +137,14 @@ async function saveToCache(cacheKey: string, arrayBuffer: ArrayBuffer, headers: 
   ]);
 }
 
-async function requestPart(
+export async function requestPart(
   e: FetchEvent,
   params: { url: string; start: number; end: number },
 ): Promise<PartInfo | undefined> {
-  if (!e.clientId) {
-    return undefined;
-  }
-
-  // eslint-disable-next-line no-restricted-globals
-  const client = await self.clients.get(e.clientId);
+  const isDownload = params.url.includes('/download/');
+  const client = isDownload ? (await self.clients.matchAll())
+    .find((c) => c.type === 'window' && c.frameType === 'top-level')
+    : await (self.clients.get(e.clientId));
   if (!client) {
     return undefined;
   }

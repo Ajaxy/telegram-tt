@@ -1,9 +1,9 @@
-import { Api } from '..';
+import type { Api } from '..';
 
-import { BotAuthParams, UserAuthParams } from './auth';
-import { uploadFile, UploadFileParams } from './uploadFile';
-import { downloadFile, DownloadFileParams } from './downloadFile';
-import { TwoFaParams, updateTwoFaSettings } from './2fa';
+import type { BotAuthParams, UserAuthParams } from './auth';
+import type { uploadFile, UploadFileParams } from './uploadFile';
+import type { downloadFile, DownloadFileParams } from './downloadFile';
+import type { TwoFaParams, updateTwoFaSettings } from './2fa';
 
 declare class TelegramClient {
     constructor(...args: any);

@@ -3,7 +3,7 @@ import { default as Api } from '../tl/api';
 
 import type TelegramClient from './TelegramClient';
 import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
-import { getAppropriatedPartSize } from '../Utils';
+import { getUploadPartSize } from '../Utils';
 import errors from '../errors';
 
 interface OnProgress {
@@ -34,7 +34,7 @@ export async function uploadFile(
     const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);
     const isLarge = size > LARGE_FILE_THRESHOLD;
 
-    const partSize = getAppropriatedPartSize(size) * KB_TO_BYTES;
+    const partSize = getUploadPartSize(size) * KB_TO_BYTES;
     const partCount = Math.floor((size + partSize - 1) / partSize);
 
     // Make sure a new sender can be created before starting upload

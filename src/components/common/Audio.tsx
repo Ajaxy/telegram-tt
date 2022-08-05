@@ -125,6 +125,7 @@ const Audio: FC<OwnProps> = ({
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'download'),
     !isDownloading,
+    getMessageMediaFormat(message, 'download'),
   );
 
   const handleForcePlay = useCallback(() => {

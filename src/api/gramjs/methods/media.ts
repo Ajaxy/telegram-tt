@@ -253,6 +253,7 @@ async function parseMedia(
     case ApiMediaFormat.Text:
       return data.toString();
     case ApiMediaFormat.Progressive:
+    case ApiMediaFormat.DownloadUrl:
       return data.buffer;
   }
 

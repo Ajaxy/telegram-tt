@@ -5,6 +5,7 @@ export enum ApiMediaFormat {
   BlobUrl,
   Progressive,
   Stream,
+  DownloadUrl,
   Text,
 }
 

@@ -50,7 +50,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   onUpdate = _onUpdate;
 
   const {
-    userAgent, platform, sessionData, isTest, isMovSupported, isWebmSupported,
+    userAgent, platform, sessionData, isTest, isMovSupported, isWebmSupported, maxBufferSize,
   } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
@@ -60,6 +60,8 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   if (isMovSupported) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
   // eslint-disable-next-line no-restricted-globals
   (self as any).isWebmSupported = isWebmSupported;
+  // eslint-disable-next-line no-restricted-globals
+  (self as any).maxBufferSize = maxBufferSize;
 
   client = new TelegramClient(
     session,

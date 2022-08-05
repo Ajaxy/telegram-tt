@@ -214,7 +214,7 @@ export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
 export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
-export const FILEPART_SIZE = 524288;
+export const MAX_UPLOAD_FILEPART_SIZE = 524288;
 
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;

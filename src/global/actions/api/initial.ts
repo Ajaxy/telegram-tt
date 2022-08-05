@@ -13,7 +13,9 @@ import {
   IS_TEST,
   LOCK_SCREEN_ANIMATION_DURATION_MS,
 } from '../../../config';
-import { IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, PLATFORM_ENV } from '../../../util/environment';
+import {
+  IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
+} from '../../../util/environment';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 import { updateAppBadge } from '../../../util/appBadge';
@@ -42,6 +44,7 @@ addActionHandler('initApi', async (global, actions) => {
     isTest: window.location.search.includes('test'),
     isMovSupported: IS_MOV_SUPPORTED,
     isWebmSupported: IS_WEBM_SUPPORTED,
+    maxBufferSize: MAX_BUFFER_SIZE,
   });
 });
 

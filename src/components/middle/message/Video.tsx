@@ -3,7 +3,6 @@ import React, { useCallback, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import { formatMediaDuration } from '../../../util/dateFormat';
@@ -101,7 +100,7 @@ const Video: FC<OwnProps> = ({
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'download'),
     !isDownloading,
-    ApiMediaFormat.BlobUrl,
+    getMessageMediaFormat(message, 'download'),
     lastSyncTime,
   );
 
