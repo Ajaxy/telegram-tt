@@ -4,6 +4,7 @@
   bottom: 1rem;
   transform: translateY(calc(5rem - var(--call-header-height, 0rem)));
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
 
   body.animation-level-0 & {
     transition: none !important;

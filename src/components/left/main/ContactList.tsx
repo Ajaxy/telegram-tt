@@ -88,6 +88,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
         <Loading key="loading" />
       )}
       <FloatingActionButton
+        key="create-new-contact"
         isShown
         onClick={openNewContactDialog}
         ariaLabel={lang('CreateNewContact')}
