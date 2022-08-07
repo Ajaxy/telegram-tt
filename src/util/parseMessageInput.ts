@@ -85,24 +85,27 @@ function parseMarkdown(html: string) {
   parsedHtml = parsedHtml.replace(/[`]{3}([^`]+)[`]{3}/g, '<pre>$1</pre>');
 
   // Code
-  parsedHtml = parsedHtml.replace(/[`]{1}([^`\n]+)[`]{1}/g, '<code>$1</code>');
+  parsedHtml = parsedHtml.replace(
+    /(?!<(code|pre)[^<]*|<\/)[`]{1}([^`\n]+)[`]{1}(?![^<]*<\/(code|pre)>)/g,
+    '<code>$2</code>',
+  );
 
   // Other simple markdown
   parsedHtml = parsedHtml.replace(
-    /(^|\s)(?!<code[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/code>)(\s|$)/g,
-    '$1<b>$2</b>$3',
+    /(^|\s)(?!<(code|pre)[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/(code|pre)>)(\s|$)/g,
+    '$1<b>$3</b>$5',
   );
   parsedHtml = parsedHtml.replace(
-    /(^|\s)(?!<code[^<]*|<\/)[_]{2}([^_\n]+)[_]{2}(?![^<]*<\/code>)(\s|$)/g,
-    '$1<i>$2</i>$3',
+    /(^|\s)(?!<(code|pre)[^<]*|<\/)[_]{2}([^_\n]+)[_]{2}(?![^<]*<\/(code|pre)>)(\s|$)/g,
+    '$1<i>$3</i>$5',
   );
   parsedHtml = parsedHtml.replace(
-    /(^|\s)(?!<code[^<]*|<\/)[~]{2}([^~\n]+)[~]{2}(?![^<]*<\/code>)(\s|$)/g,
-    '$1<s>$2</s>$3',
+    /(^|\s)(?!<(code|pre)[^<]*|<\/)[~]{2}([^~\n]+)[~]{2}(?![^<]*<\/(code|pre)>)(\s|$)/g,
+    '$1<s>$3</s>$5',
   );
   parsedHtml = parsedHtml.replace(
-    /(^|\s)(?!<code[^<]*|<\/)[|]{2}([^|\n]+)[|]{2}(?![^<]*<\/code>)(\s|$)/g,
-    `$1<span data-entity-type="${ApiMessageEntityTypes.Spoiler}">$2</span>$3`,
+    /(^|\s)(?!<(code|pre)[^<]*|<\/)[|]{2}([^|\n]+)[|]{2}(?![^<]*<\/(code|pre)>)(\s|$)/g,
+    `$1<span data-entity-type="${ApiMessageEntityTypes.Spoiler}">$3</span>$5`,
   );
 
   return parsedHtml;
