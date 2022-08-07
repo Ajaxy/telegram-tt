@@ -1,17 +1,47 @@
+## 1.50.0 (2022-08-07)
+
+### 👏 **Harder**
+* Flexible Forwarding: Forward messages without the sender's name or media captions.
+* Reorder Folders: Change the order of your folders in Settings.
+* Better Drag & Drop: Open a chat in your list by dragging a file to it.
+
+### 🤩 **Better**
+* Added more emojis.
+* Media Viewer now supports scrolling through profile pictures.
+* Use the hotkey `⌘+0` to open Saved Messages on macOS.
+* Triple click will now select all text in the message field.
+* Large file downloads (2 GB+) are supported in more browsers.
+* Added colored icons for the invite link section in groups and channels.
+* Added support for deleting chats with service notifications.
+* Background color now adapts for better contrast in uploaded transparent images.
+* Added support for SmallTalk highlighting, thanks to LinqLover on GitHub.
+
+### 💪 **Stronger**
+* Fixed issue with countable text localization in some languages.
+* Removed download button from media in chats with content protection enabled.
+* Various call fixes.
+* Small redesign for code formatting, fixed parsing issues.
+* Fixed video controls on mobile devices, thanks to y0ung3r on GitHub.
+* Fixed duplicated messages in CJK languages.
+* Removed ‘View in Picture-in-Picture’ button from stickers.
+* Fixed layout issues in Waterfox Classic.
+* Fixed issue with replies in discussions.
+* Small design improvements related to Telegram Premium.
+
 ## 1.49.0 (2022-07-08)
 
-👏 **Harder**
+### 👏 **Harder**
 * [Telegram Premium](https://t.me/TelegramTips/336). By subscribing, users unlock doubled limits, 4 GB file uploads, faster downloads, exclusive stickers and reactions, improved chat management – and a whole lot more.
 * Native trackpad gestures in the Media Viewer. Swipe left or right to move through media, swipe up or down to exit.
 * Improved polls that support retracting votes and closing the poll – plus a confetti effect.
 
-🤩 **Better**
+### 🤩 **Better**
 * Various layout and performance improvements.
 * Improved payment form validation.
 * Use the hotkey `⌘+`, to access app Settings on macOS.
 * See a helpful info screen when JavaScript support is disabled.
 
-💪 **Stronger**
+### 💪 **Stronger**
 * Call panel properly disappears after answering on another device.
 * Fixed unexpected message deleting when using search in the forwarding menu.
 * Fixed unnecessary up-scaling when uploading small images.
@@ -21,14 +51,14 @@
 
 ## 1.48.0 (2022-06-06)
 
-👏 **Harder**
+### 👏 **Harder**
 * Meet Seamless Web Bots, such as [@discussbot](https://t.me/discussbot), that help you log in on websites with your Telegram account.
 
-🤩 **Better**
+### 🤩 **Better**
 * Podcasts and long audio can now be played at 2X speed.
 * Audio Player buttons do not jump anymore when navigating between tracks.
 
-💪 **Stronger**
+### 💪 **Stronger**
 * Fixed pasting text after switching chat.
 * Fixed sending and playing `.mov` videos.
 
