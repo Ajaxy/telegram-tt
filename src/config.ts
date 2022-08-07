@@ -190,9 +190,9 @@ export const CONTENT_NOT_SUPPORTED = 'The message is not supported on this versi
 // eslint-disable-next-line max-len
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,63})\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)';
 export const RE_MENTION_TEMPLATE = '(@[\\w\\d_-]+)';
-export const RE_TG_LINK = /^tg:(\/\/)?([?=&\d\w_-]+)?/gm;
-export const RE_TME_LINK = /^(?:https?:\/\/)?(?:t\.me\/)/gm;
-export const RE_TELEGRAM_LINK = /^(?:https?:\/\/)?(?:telegram\.org\/)/gm;
+export const RE_TG_LINK = /^tg:(\/\/)?([?=&\d\w_-]+)?/;
+export const RE_TME_LINK = /^(https?:\/\/)?t\.me\//;
+export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//;
 export const TME_LINK_PREFIX = 'https://t.me/';
 
 // eslint-disable-next-line max-len

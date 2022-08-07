@@ -567,8 +567,10 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload) => {
 
 addActionHandler('openTelegramLink', (global, actions, payload) => {
   const { url } = payload!;
-  if (url.match(RE_TG_LINK)) {
-    processDeepLink(url.match(RE_TG_LINK)[0]);
+
+  const tgLinkMatch = url.match(RE_TG_LINK);
+  if (tgLinkMatch) {
+    processDeepLink(tgLinkMatch[0]);
     return;
   }
 
