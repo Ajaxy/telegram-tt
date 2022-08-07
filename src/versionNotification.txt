@@ -1,22 +1,29 @@
-**Telegram Web Z was updated to version 1.49**
+**Telegram Web Z was updated to version 1.50**
 
 👏 **Harder**
-• [Telegram Premium](https://t.me/TelegramTips/336). By subscribing, users unlock doubled limits, 4 GB file uploads, faster downloads, exclusive stickers and reactions, improved chat management – and a whole lot more.
-• Native trackpad gestures in the Media Viewer. Swipe left or right to move through media, swipe up or down to exit.
-• Improved polls that support retracting votes and closing the poll – plus a confetti effect.
+• Flexible Forwarding: Forward messages without the sender's name or media captions.
+• Reorder Folders: Change the order of your folders in Settings.
+• Better Drag & Drop: Open a chat in your list by dragging a file to it.
 
 🤩 **Better**
-• Various layout and performance improvements.
-• Improved payment form validation.
-• Use the hotkey `⌘+`, to access app Settings on macOS.
-• See a helpful info screen when JavaScript support is disabled.
+• Added more emojis.
+• Media Viewer now supports scrolling through profile pictures.
+• Use the hotkey `⌘+0` to open Saved Messages on macOS.
+• Triple click will now select all text in the message field.
+• Large file downloads (2 GB+) are supported in more browsers.
+• Added colored icons for the invite link section in groups and channels.
+• Added support for deleting chats with service notifications.
+• Background color now adapts for better contrast in uploaded transparent images.
+• Added support for SmallTalk highlighting, thanks to LinqLover on GitHub.
 
 💪 **Stronger**
-• Call panel properly disappears after answering on another device.
-• Fixed unexpected message deleting when using search in the forwarding menu.
-• Fixed unnecessary up-scaling when uploading small images.
-• Archived chats do not appear in the ‘Forward to’ list.
-• Fixed loading loop when disabling reactions in group management.
-• Various fixes in the text formatting menu.
-
-🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webztalks)** and **[Russian](https://t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
+• Fixed issue with countable text localization in some languages.
+• Removed download button from media in chats with content protection enabled.
+• Various call fixes.
+• Small redesign for code formatting, fixed parsing issues.
+• Fixed video controls on mobile devices, thanks to y0ung3r on GitHub.
+• Fixed duplicated messages in CJK languages.
+• Removed ‘View in Picture-in-Picture’ button from stickers.
+• Fixed layout issues in Waterfox Classic.
+• Fixed issue with replies in discussions.
+• Small design improvements related to Telegram Premium.
