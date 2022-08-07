@@ -223,7 +223,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   return (
     <div className="ChatFolders">
       {shouldRenderFolders ? (
-        <TabList tabs={folderTabs} activeTab={activeChatFolder} onSwitchTab={handleSwitchTab} />
+        <TabList tabs={folderTabs} activeTab={activeChatFolder} onSwitchTab={handleSwitchTab} areFolders />
       ) : shouldRenderPlaceholder ? (
         <div className={buildClassName('tabs-placeholder', transitionClassNames)} />
       ) : undefined}
