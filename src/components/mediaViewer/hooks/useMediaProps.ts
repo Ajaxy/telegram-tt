@@ -63,15 +63,18 @@ export const useMediaProps = ({
       if (avatarMedia) {
         if (avatarMedia.isVideo && isFull) {
           return getVideoAvatarMediaHash(avatarMedia);
+        } else if (mediaId === 0) {
+          // Show preloaded avatar if this is the first media (when user clicks on profile info avatar)
+          return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
         } else {
           return `photo${avatarMedia.id}?size=c`;
         }
       } else {
-        return getChatAvatarHash(avatarOwner!, isFull ? 'big' : 'normal');
+        return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
       }
     }
     return message && getMessageMediaHash(message, isFull ? 'viewerFull' : 'viewerPreview');
-  }, [avatarOwner, avatarMedia, message]);
+  }, [avatarOwner, message, avatarMedia, mediaId]);
 
   const pictogramBlobUrl = useMedia(
     message && (isFromSharedMedia || isFromSearch) && getMessageMediaHash(message, 'pictogram'),
