@@ -134,7 +134,10 @@ addActionHandler('saveSession', (global, actions, payload) => {
   }
 });
 
-addActionHandler('signOut', async (_global, _actions, payload) => {
+addActionHandler('signOut', async (_global, actions, payload) => {
+  if ('hangUp' in actions) actions.hangUp();
+  if ('leaveGroupCall' in actions) actions.leaveGroupCall();
+
   try {
     await unsubscribe();
     await callApi('destroy');
