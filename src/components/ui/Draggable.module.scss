@@ -1,6 +1,11 @@
 .container {
   position: absolute;
   width: 100%;
+  z-index: 1;
+
+  &:has(:global(.ListItem-context-menu)) {
+    z-index: 2;
+  }
 }
 
 .isDragging {
