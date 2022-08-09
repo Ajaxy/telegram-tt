@@ -137,7 +137,7 @@ function readCache(initialState: GlobalState): GlobalState {
   };
 }
 
-function migrateCache(cached: GlobalState, initialState: GlobalState) {
+export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   // Migrate from legacy setting names
   if ('shouldAutoDownloadMediaFromContacts' in cached.settings.byKey) {
     const {

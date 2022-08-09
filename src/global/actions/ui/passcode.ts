@@ -3,8 +3,10 @@ import { addActionHandler, setGlobal, getGlobal } from '../../index';
 import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
 import { clearEncryptedSession, encryptSession, setupPasscode } from '../../../util/passcode';
-import { forceUpdateCache, serializeGlobal } from '../../cache';
+import { forceUpdateCache, migrateCache, serializeGlobal } from '../../cache';
 import { onBeforeUnload } from '../../../util/schedulers';
+import { cloneDeep } from '../../../util/iteratees';
+import { INITIAL_STATE } from '../../initialState';
 
 let noLockOnUnload = false;
 onBeforeUnload(() => {
@@ -48,6 +50,8 @@ addActionHandler('unlockScreen', (global, actions, { sessionJson, globalJson }) 
   storeSession(session, session.userId);
 
   global = JSON.parse(globalJson);
+  migrateCache(global, cloneDeep(INITIAL_STATE));
+
   setGlobal(updatePasscodeSettings(
     global,
     {
