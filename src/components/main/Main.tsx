@@ -258,7 +258,7 @@ const Main: FC<StateProps> = ({
 
   // Prevent refresh by accidentally rotating device when listening to a voice chat
   useEffect(() => {
-    if (!activeGroupCallId) {
+    if (!activeGroupCallId && !isPhoneCallActive) {
       return undefined;
     }
 
@@ -267,7 +267,7 @@ const Main: FC<StateProps> = ({
     return () => {
       windowSize.enableRefresh();
     };
-  }, [activeGroupCallId]);
+  }, [activeGroupCallId, isPhoneCallActive]);
 
   const leftColumnTransition = useShowTransition(
     isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
