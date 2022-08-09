@@ -278,7 +278,7 @@ const Poll: FC<OwnProps & StateProps> = ({
         )}
       </div>
       {canVote && (
-        <div className="poll-answers">
+        <div className="poll-answers" onClick={stopPropagation}>
           {isMultiple
             ? (
               <CheckboxGroup
@@ -354,6 +354,10 @@ function getReadableVotersCount(lang: LangFn, isQuiz: true | undefined, count?: 
   }
 
   return lang(isQuiz ? 'Answer' : 'Vote', count, 'i');
+}
+
+function stopPropagation(e: React.MouseEvent<HTMLDivElement>) {
+  e.stopPropagation();
 }
 
 export default memo(withGlobal<OwnProps>(
