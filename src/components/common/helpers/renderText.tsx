@@ -131,7 +131,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
         emojiResult.push(
           // For preventing extra spaces in html
           // eslint-disable-next-line max-len
-          `<img draggable="false" contenteditable="false" class="${className}" src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png" alt="${emoji}" />`,
+          `<img draggable="false" class="${className}" src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png" alt="${emoji}" />`,
         );
       }
 
