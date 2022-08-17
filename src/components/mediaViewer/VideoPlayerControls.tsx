@@ -5,7 +5,7 @@ import React, {
 import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
 import useLang from '../../hooks/useLang';
@@ -54,7 +54,7 @@ const PLAYBACK_RATES = [
   2,
 ];
 
-const HIDE_CONTROLS_TIMEOUT_MS = 1500;
+const HIDE_CONTROLS_TIMEOUT_MS = 3000;
 
 const VideoPlayerControls: FC<OwnProps> = ({
   bufferedRanges,
@@ -86,6 +86,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const isSeeking = isSeekingRef.current;
 
   useEffect(() => {
+    if (!IS_TOUCH_ENV) return undefined;
     let timeout: number | undefined;
     if (!isVisible || !isPlayed || isSeeking || isPlaybackMenuOpen) {
       if (timeout) window.clearTimeout(timeout);
