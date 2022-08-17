@@ -15,7 +15,9 @@ import {
   CHAT_LIST_LOAD_SLICE,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
-  TMP_CHAT_ID, ALL_FOLDER_ID, DEBUG, SERVICE_NOTIFICATIONS_NUMBER,
+  TMP_CHAT_ID,
+  ALL_FOLDER_ID,
+  DEBUG,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -44,6 +46,15 @@ import { selectCurrentLimit } from '../../selectors/limits';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;
+
+const SERVICE_NOTIFICATIONS_USER_MOCK: ApiUser = {
+  id: SERVICE_NOTIFICATIONS_USER_ID,
+  accessHash: '0',
+  type: 'userTypeRegular',
+  isMin: true,
+  username: '',
+  phoneNumber: '',
+};
 
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForLoadFullChat = debounce((cb) => cb(), 500, false, true);
@@ -1111,16 +1122,23 @@ async function loadChats(
   if (shouldReplace && listType === 'active') {
     // Always include service notifications chat
     if (!chatIds.includes(SERVICE_NOTIFICATIONS_USER_ID)) {
-      const chat = await callApi('getChatByPhoneNumber', SERVICE_NOTIFICATIONS_NUMBER);
+      const result2 = await callApi('fetchChat', {
+        type: 'user',
+        user: SERVICE_NOTIFICATIONS_USER_MOCK,
+      });
+
       global = getGlobal();
-      if (chat) {
-        chatIds.unshift(chat.id);
-        result.chats.unshift(chat);
+
+      const notificationsChat = result2 && selectChat(global, result2.chatId);
+      if (notificationsChat) {
+        chatIds.unshift(notificationsChat.id);
+        result.chats.unshift(notificationsChat);
         if (lastLocalServiceMessage) {
-          chat.lastMessage = lastLocalServiceMessage;
+          notificationsChat.lastMessage = lastLocalServiceMessage;
         }
       }
     }
+
     const currentChat = selectCurrentChat(global);
     const visibleChats = currentChat ? [currentChat] : [];
 
