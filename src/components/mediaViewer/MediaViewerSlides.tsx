@@ -97,7 +97,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const prevZoomLevelChange = usePrevious(zoomLevelChange);
   const hasZoomChanged = prevZoomLevelChange !== undefined && prevZoomLevelChange !== zoomLevelChange;
   const forceUpdate = useForceUpdate();
-  const [isFooterHidden, setIsFooterHidden] = useState(true);
+  const [areControlsVisible, setControlsVisible] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const { height: windowHeight, width: windowWidth, isResizing } = useWindowSize();
   const { onClose } = rest;
@@ -121,15 +121,15 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const shouldCloseOnVideo = isGif && !IS_IOS;
   const clickXThreshold = IS_TOUCH_ENV ? 40 : windowWidth / 10;
 
-  const handleToggleFooterVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleControlsVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!IS_TOUCH_ENV) return;
     const isFooter = windowHeight - e.pageY < CLICK_Y_THRESHOLD;
     if (!isFooter && e.pageX < clickXThreshold) return;
     if (!isFooter && e.pageX > windowWidth - clickXThreshold) return;
-    setIsFooterHidden(!isFooterHidden);
-  }, [clickXThreshold, isFooterHidden, windowHeight, windowWidth]);
+    setControlsVisible(!areControlsVisible);
+  }, [clickXThreshold, areControlsVisible, windowHeight, windowWidth]);
 
-  useTimeout(() => setIsFooterHidden(false), ANIMATION_DURATION - 150);
+  useTimeout(() => setControlsVisible(true), ANIMATION_DURATION + 100);
 
   useEffect(() => {
     if (!containerRef.current || activeMediaId === undefined) {
@@ -665,7 +665,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
             animationLevel={animationLevel}
-            isFooterHidden={isFooterHidden}
+            areControlsVisible={areControlsVisible}
             mediaId={prevMediaId}
           />
         </div>
@@ -676,7 +676,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           'MediaViewerSlide--active',
           isMouseDown && scale > 1 && 'MediaViewerSlide--moving',
         )}
-        onClick={handleToggleFooterVisibility}
+        onClick={handleControlsVisibility}
         ref={activeSlideRef}
         style={getAnimationStyle(offsetX, offsetY, scale)}
       >
@@ -686,8 +686,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
           mediaId={activeMediaId}
           animationLevel={animationLevel}
           isActive={isActiveRef.current}
-          setIsFooterHidden={setIsFooterHidden}
-          isFooterHidden={isFooterHidden || scale !== 1}
+          setControlsVisible={setControlsVisible}
+          areControlsVisible={areControlsVisible && scale === 1}
         />
       </div>
       {hasNext && scale === 1 && !isResizing && (
@@ -696,7 +696,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
             animationLevel={animationLevel}
-            isFooterHidden={isFooterHidden}
+            areControlsVisible={areControlsVisible}
             mediaId={nextMediaId}
           />
         </div>

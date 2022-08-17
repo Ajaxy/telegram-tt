@@ -29,11 +29,11 @@ type OwnProps = {
   fileSize: number;
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
-  areControlsVisible: boolean;
   volume: number;
   isMuted: boolean;
   playbackRate: number;
   isProtected?: boolean;
+  areControlsVisible: boolean;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
@@ -66,8 +66,19 @@ const VideoPlayer: FC<OwnProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlayed, setIsPlayed] = useState(!IS_TOUCH_ENV || !IS_IOS);
   const [currentTime, setCurrentTime] = useState(0);
-
   const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlayed);
+
+  const handleVideoMove = useCallback(() => {
+    toggleControls(true);
+  }, [toggleControls]);
+
+  const handleVideoLeave = useCallback((e) => {
+    const bounds = videoRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    if (e.clientX < bounds.left || e.clientX > bounds.right || e.clientY < bounds.top || e.clientY > bounds.bottom) {
+      toggleControls(false);
+    }
+  }, [toggleControls]);
 
   const {
     isBuffered, bufferedRanges, bufferingHandlers, bufferedProgress,
@@ -178,6 +189,8 @@ const VideoPlayer: FC<OwnProps> = ({
   return (
     <div
       className="VideoPlayer"
+      onMouseMove={!IS_TOUCH_ENV ? handleVideoMove : undefined}
+      onMouseOut={!IS_TOUCH_ENV ? handleVideoLeave : undefined}
     >
       <div
         style={wrapperStyle}

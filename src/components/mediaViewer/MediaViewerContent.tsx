@@ -33,8 +33,8 @@ type OwnProps = {
   animationLevel: 0 | 1 | 2;
   onClose: () => void;
   onFooterClick: () => void;
-  setIsFooterHidden?: (isHidden: boolean) => void;
-  isFooterHidden?: boolean;
+  setControlsVisible?: (isVisible: boolean) => void;
+  areControlsVisible: boolean;
 };
 
 type StateProps = {
@@ -62,14 +62,14 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     message,
     origin,
     animationLevel,
-    isFooterHidden,
+    areControlsVisible,
     isProtected,
     volume,
     playbackRate,
     isMuted,
     onClose,
     onFooterClick,
-    setIsFooterHidden,
+    setControlsVisible,
   } = props;
 
   const isGhostAnimation = animationLevel === 2;
@@ -94,16 +94,8 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const isOpen = Boolean(avatarOwner || mediaId);
 
   const toggleControls = useCallback((isVisible) => {
-    setIsFooterHidden?.(!isVisible);
-  }, [setIsFooterHidden]);
-
-  const handleMouseMove = useCallback(() => {
-    toggleControls(true);
-  }, [toggleControls]);
-
-  const handleMouseOut = useCallback(() => {
-    toggleControls(false);
-  }, [toggleControls]);
+    setControlsVisible?.(isVisible);
+  }, [setControlsVisible]);
 
   if (avatarOwner) {
     if (!isVideoAvatar) {
@@ -129,7 +121,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             loadProgress={loadProgress}
             fileSize={videoSize!}
             isMediaViewerOpen={isOpen && isActive}
-            areControlsVisible={!isFooterHidden}
+            areControlsVisible={areControlsVisible}
             toggleControls={toggleControls}
             isProtected={isProtected}
             noPlay={!isActive}
@@ -150,8 +142,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   return (
     <div
       className={buildClassName('MediaViewerContent', hasFooter && 'has-footer')}
-      onMouseMove={!isGif && !IS_TOUCH_ENV ? handleMouseMove : undefined}
-      onMouseOut={!isGif && !IS_TOUCH_ENV ? handleMouseOut : undefined}
     >
       {isPhoto && renderPhoto(
         localBlobUrl || fullMediaBlobUrl || previewBlobUrl || pictogramBlobUrl,
@@ -173,8 +163,8 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
           loadProgress={loadProgress}
           fileSize={videoSize!}
+          areControlsVisible={areControlsVisible}
           isMediaViewerOpen={isOpen && isActive}
-          areControlsVisible={!isFooterHidden}
           toggleControls={toggleControls}
           noPlay={!isActive}
           onClose={onClose}
@@ -189,7 +179,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           text={textParts}
           onClick={onFooterClick}
           isProtected={isProtected}
-          isHidden={isFooterHidden}
+          isHidden={IS_TOUCH_ENV ? !areControlsVisible : false}
           isForVideo={isVideo && !isGif}
         />
       )}
