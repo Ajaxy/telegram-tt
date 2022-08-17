@@ -1,6 +1,6 @@
 import { useEffect } from '../lib/teact/teact';
 
-const useHorizontalScroll = (container: HTMLElement | null, isDisabled?: boolean) => {
+const useHorizontalScroll = (container: HTMLElement | null, isDisabled?: boolean, shouldPreventDefault = false) => {
   useEffect(() => {
     if (!container || isDisabled) {
       return undefined;
@@ -10,15 +10,16 @@ const useHorizontalScroll = (container: HTMLElement | null, isDisabled?: boolean
       // Ignore horizontal scroll and let it work natively (e.g. on touchpad)
       if (!e.deltaX) {
         container!.scrollLeft += e.deltaY / 4;
+        if (shouldPreventDefault) e.preventDefault();
       }
     }
 
-    container.addEventListener('wheel', handleScroll, { passive: true });
+    container.addEventListener('wheel', handleScroll, { passive: !shouldPreventDefault });
 
     return () => {
       container.removeEventListener('wheel', handleScroll);
     };
-  }, [container, isDisabled]);
+  }, [container, isDisabled, shouldPreventDefault]);
 };
 
 export default useHorizontalScroll;
