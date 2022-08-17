@@ -170,10 +170,13 @@ function setupIosHealthCheck() {
 }
 
 async function ensureWorkerPing() {
+  let isResolved = false;
+
   try {
     await Promise.race([
       makeRequest({ type: 'ping' }),
-      pause(HEALTH_CHECK_TIMEOUT).then(() => Promise.reject(new Error('HEALTH_CHECK_TIMEOUT'))),
+      pause(HEALTH_CHECK_TIMEOUT)
+        .then(() => (isResolved ? undefined : Promise.reject(new Error('HEALTH_CHECK_TIMEOUT')))),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -182,5 +185,7 @@ async function ensureWorkerPing() {
     if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
       window.location.reload();
     }
+  } finally {
+    isResolved = true;
   }
 }

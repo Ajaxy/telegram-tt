@@ -152,8 +152,9 @@ export async function requestPart(
   const messageId = generateIdFor(requestStates);
   const requestState = {} as RequestStates;
 
+  let isResolved = false;
   const promise = Promise.race([
-    pause(PART_TIMEOUT).then(() => Promise.reject(new Error('ERROR_PART_TIMEOUT'))),
+    pause(PART_TIMEOUT).then(() => (isResolved ? undefined : Promise.reject(new Error('ERROR_PART_TIMEOUT')))),
     new Promise<PartInfo>((resolve, reject) => {
       Object.assign(requestState, { resolve, reject });
     }),
@@ -164,6 +165,7 @@ export async function requestPart(
     .catch(() => undefined)
     .finally(() => {
       requestStates.delete(messageId);
+      isResolved = true;
     });
 
   client.postMessage({
