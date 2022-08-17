@@ -200,7 +200,6 @@ export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', '
 
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
-export const SERVICE_NOTIFICATIONS_NUMBER = '42777';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
