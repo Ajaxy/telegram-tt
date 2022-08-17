@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -17,6 +17,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import useLang from '../../../hooks/useLang';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import LeftSearchResultChat from './LeftSearchResultChat';
@@ -63,6 +64,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   const {
     openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
   } = getActions();
+
+  // eslint-disable-next-line no-null/no-null
+  const chatSelectionRef = useRef<HTMLDivElement>(null);
+
+  useHorizontalScroll(chatSelectionRef.current, undefined, true);
 
   const lang = useLang();
 
@@ -206,7 +212,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         />
       )}
       {Boolean(localResults.length) && (
-        <div className="chat-selection no-selection no-scrollbar" dir={lang.isRtl ? 'rtl' : undefined}>
+        <div
+          className="chat-selection no-selection no-scrollbar"
+          dir={lang.isRtl ? 'rtl' : undefined}
+          ref={chatSelectionRef}
+        >
           {localResults.map((id) => (
             <PickerSelectedItem
               chatOrUserId={id}
