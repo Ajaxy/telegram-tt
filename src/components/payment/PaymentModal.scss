@@ -1,7 +1,10 @@
+$modalHeaderAndFooterHeight: 8.375rem;
+
 .PaymentModal {
   &.recurring {
     .Transition {
       height: 33rem;
+      max-height: calc(90vh - $modalHeaderAndFooterHeight);
     }
   }
 
