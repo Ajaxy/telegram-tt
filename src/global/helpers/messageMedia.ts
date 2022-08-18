@@ -317,8 +317,11 @@ export function getMessageMediaFormat(
   } = message.content;
   const fullVideo = video || getMessageWebPageVideo(message);
   const size = (video || audio || document)?.size!;
-  if (target === 'download' && IS_PROGRESSIVE_SUPPORTED && size > MAX_BUFFER_SIZE && !IS_OPFS_SUPPORTED) {
-    return ApiMediaFormat.DownloadUrl;
+  if (target === 'download') {
+    if (IS_PROGRESSIVE_SUPPORTED && size > MAX_BUFFER_SIZE && !IS_OPFS_SUPPORTED) {
+      return ApiMediaFormat.DownloadUrl;
+    }
+    return ApiMediaFormat.BlobUrl;
   }
 
   if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
