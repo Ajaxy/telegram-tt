@@ -349,7 +349,8 @@ const Message: FC<OwnProps & StateProps> = ({
     && !forwardInfo.isLinkedChannelPost
     && !customShape
   );
-  const isAlbum = Boolean(album) && album!.messages.length > 1;
+  const isAlbum = Boolean(album) && album!.messages.length > 1
+    && !album?.messages.some((msg) => Object.keys(msg.content).length === 0);
   const isInDocumentGroupNotFirst = isInDocumentGroup && !isFirstInDocumentGroup;
   const isInDocumentGroupNotLast = isInDocumentGroup && !isLastInDocumentGroup;
   const isContextMenuShown = contextMenuPosition !== undefined;
