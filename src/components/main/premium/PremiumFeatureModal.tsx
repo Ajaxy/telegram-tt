@@ -65,7 +65,6 @@ export const PREMIUM_FEATURE_SECTIONS = [
 const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'faster_download',
   'voice_to_text',
-  'no_ads',
   'advanced_chat_management',
   'profile_badge',
   'animated_userpics',
@@ -241,7 +240,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             return (
               <div className={styles.slide}>
                 <div className={styles.frame}>
-                  <PremiumFeaturePreviewReactions />
+                  <PremiumFeaturePreviewReactions isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
                   {lang(PREMIUM_FEATURE_TITLES.reactions)}
@@ -257,7 +256,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             return (
               <div className={styles.slide}>
                 <div className={styles.frame}>
-                  <PremiumFeaturePreviewStickers />
+                  <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
                   {lang(PREMIUM_FEATURE_TITLES.stickers)}
@@ -275,6 +274,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             <div className={styles.slide}>
               <div className={styles.frame}>
                 <PremiumFeaturePreviewVideo
+                  isActive={currentSlideIndex === index}
                   videoId={promo.videos[i].id!}
                   videoThumbnail={promo.videos[i].thumbnail!}
                   isDown={PREMIUM_BOTTOM_VIDEOS.includes(section)}
