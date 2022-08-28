@@ -16,6 +16,10 @@ import AnimatedSticker from '../../../common/AnimatedSticker';
 
 import styles from './PremiumFeaturePreviewReactions.module.scss';
 
+type OwnProps = {
+  isActive: boolean;
+};
+
 type StateProps = {
   availableReactions: GlobalState['availableReactions'];
 };
@@ -34,8 +38,9 @@ const AnimatedCircleReaction: FC<{
   maxLength: number;
   handleClick: (index: number) => void;
   isActivated: boolean;
+  canPlay: boolean;
 }> = ({
-  size, realIndex, isActivated,
+  size, realIndex, isActivated, canPlay,
   reaction, index, maxLength, handleClick,
 }) => {
   const mediaData = useMedia(`document${reaction.activateAnimation?.id}`);
@@ -71,7 +76,7 @@ const AnimatedCircleReaction: FC<{
         <AnimatedSticker
           className={styles.effectSticker}
           tgsUrl={mediaDataAround}
-          play
+          play={canPlay}
           isLowPriority
           noLoop
           size={EFFECT_SIZE_MULTIPLIER * size}
@@ -83,7 +88,7 @@ const AnimatedCircleReaction: FC<{
         className={styles.sticker}
         tgsUrl={mediaData}
         onClick={handleClickEmoji}
-        play={isAnimated}
+        play={isAnimated && canPlay}
         noLoop
         size={EMOJI_SIZE_MULTIPLIER * size}
         style={`--x: ${x}px; --y: ${y}px; --scale: ${scale};`}
@@ -92,8 +97,8 @@ const AnimatedCircleReaction: FC<{
     </>
   );
 };
-const PremiumFeaturePreviewReactions: FC<StateProps> = ({
-  availableReactions,
+const PremiumFeaturePreviewReactions: FC<OwnProps & StateProps> = ({
+  availableReactions, isActive,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,7 +111,7 @@ const PremiumFeaturePreviewReactions: FC<StateProps> = ({
 
   useInterval(() => {
     setOffset((current) => cycleRestrict(renderedReactions.length, current + 1));
-  }, isIntervalPaused ? undefined : ROTATE_INTERVAL);
+  }, isIntervalPaused || !isActive ? undefined : ROTATE_INTERVAL);
 
   const handleClickEmoji = useCallback((i: number) => {
     setOffset(i);
@@ -139,6 +144,7 @@ const PremiumFeaturePreviewReactions: FC<StateProps> = ({
             maxLength={renderedReactions.length}
             handleClick={handleClickEmoji}
             isActivated={offset === i}
+            canPlay={isActive}
           />
         );
       })}
@@ -146,7 +152,7 @@ const PremiumFeaturePreviewReactions: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       availableReactions: global.availableReactions,

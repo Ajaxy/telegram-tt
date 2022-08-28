@@ -15,6 +15,10 @@ import AnimatedSticker from '../../../common/AnimatedSticker';
 
 import styles from './PremiumFeaturePreviewStickers.module.scss';
 
+type OwnProps = {
+  isActive: boolean;
+};
+
 type StateProps = {
   stickers: GlobalState['stickers']['premium']['stickers'];
 };
@@ -32,8 +36,9 @@ const AnimatedCircleSticker: FC<{
   maxLength: number;
   onClick: (index: number) => void;
   onEnded: NoneToVoidFunction;
+  canPlay: boolean;
 }> = ({
-  size, realIndex,
+  size, realIndex, canPlay,
   sticker, index, maxLength, onClick, onEnded,
 }) => {
   const mediaData = useMedia(`sticker${sticker.id}`);
@@ -75,7 +80,7 @@ const AnimatedCircleSticker: FC<{
         <AnimatedSticker
           className={styles.effectSticker}
           tgsUrl={mediaDataAround}
-          play
+          play={canPlay}
           isLowPriority
           noLoop
           size={EFFECT_SIZE_MULTIPLIER * size}
@@ -85,7 +90,7 @@ const AnimatedCircleSticker: FC<{
       <AnimatedSticker
         className={styles.sticker}
         tgsUrl={mediaData}
-        play={isAnimated}
+        play={canPlay && isAnimated}
         noLoop
         size={EMOJI_SIZE_MULTIPLIER * size}
         style={`--x: ${x}px; --y: ${y}px; --opacity: ${scale}`}
@@ -95,8 +100,8 @@ const AnimatedCircleSticker: FC<{
     </>
   );
 };
-const PremiumFeaturePreviewStickers: FC<StateProps> = ({
-  stickers,
+const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
+  stickers, isActive,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -137,6 +142,7 @@ const PremiumFeaturePreviewStickers: FC<StateProps> = ({
             maxLength={renderedStickers.length}
             onClick={handleClick}
             onEnded={handleEnded}
+            canPlay={isActive}
           />
         );
       })}
@@ -144,7 +150,7 @@ const PremiumFeaturePreviewStickers: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       stickers: global.stickers.premium.stickers,
