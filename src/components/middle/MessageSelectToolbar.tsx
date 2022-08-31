@@ -176,15 +176,16 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { type: messageListType, chatId } = selectCurrentMessageList(global) || {};
+    const isSchedule = messageListType === 'scheduled';
     const { canDelete } = selectCanDeleteSelectedMessages(global);
-    const canReport = selectCanReportSelectedMessages(global);
+    const canReport = Boolean(!isSchedule && selectCanReportSelectedMessages(global));
     const canDownload = selectCanDownloadSelectedMessages(global);
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const isForwardModalOpen = global.forwardMessages.isModalShown;
 
     return {
-      isSchedule: messageListType === 'scheduled',
+      isSchedule,
       selectedMessagesCount: selectSelectedMessagesCount(global),
       canDeleteMessages: canDelete,
       canReportMessages: canReport,

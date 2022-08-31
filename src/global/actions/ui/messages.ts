@@ -34,6 +34,7 @@ import {
   selectReplyingToId,
   selectReplyStack,
   selectSender,
+  selectScheduledMessages,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -729,10 +730,12 @@ addActionHandler('copyMessagesByIds', (global, actions, payload: { messageIds?: 
 });
 
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
-  const { threadId } = selectCurrentMessageList(global) || {};
+  const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
   const lang = langProvider.getTranslation;
 
-  const chatMessages = selectChatMessages(global, chatId);
+  const chatMessages = messageListType === 'scheduled'
+    ? selectScheduledMessages(global, chatId)
+    : selectChatMessages(global, chatId);
   if (!chatMessages || !threadId) return;
   const messages = messageIds
     .map((id) => chatMessages[id])
