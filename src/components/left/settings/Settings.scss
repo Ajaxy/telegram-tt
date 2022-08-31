@@ -327,6 +327,11 @@
 
   .FloatingActionButton {
     right: 1.5rem;
+
+    &[dir="rtl"] {
+      right: auto;
+      left: 1.5rem
+    }
   }
 }
 

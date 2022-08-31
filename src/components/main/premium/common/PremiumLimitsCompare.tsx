@@ -31,16 +31,16 @@ const PremiumLimitsCompare: FC<OwnProps> = ({
       {floatingBadgeIcon && (
         <div className={styles.floatingBadge}>
           <i className={buildClassName(styles.floatingBadgeIcon, floatingBadgeIcon)} />
-          <div className={styles.floatingBadgeValue}>{leftValue}</div>
+          <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>{leftValue}</div>
           <div className={styles.floatingBadgeTriangle} dangerouslySetInnerHTML={{ __html: TRIANGLE_SVG }} />
         </div>
       )}
       <div className={buildClassName(styles.line, styles.left)}>
-        <div className={styles.leftText}>{lang('LimitFree')}</div>
+        <div className={styles.leftText} dir={lang.isRtl ? 'rtl' : undefined}>{lang('LimitFree')}</div>
         {!floatingBadgeIcon && <div className={styles.leftValue}>{leftValue}</div>}
       </div>
       <div className={buildClassName(styles.line, styles.right)} style={rightStyle}>
-        <div className={styles.rightText}>{lang('LimitPremium')}</div>
+        <div className={styles.rightText} dir={lang.isRtl ? 'rtl' : undefined}>{lang('LimitPremium')}</div>
         <div className={styles.rightValue}>{rightValue}</div>
       </div>
     </div>

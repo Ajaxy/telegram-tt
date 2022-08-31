@@ -208,7 +208,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <div className={styles.footerText}>
+      <div className={styles.footerText} dir={lang.isRtl ? 'rtl' : undefined}>
         {renderTextWithEntities(promo.statusText, promo.statusEntities)}
       </div>
     );
@@ -267,7 +267,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                   />
                 );
               })}
-              <div className={buildClassName(styles.footerText, styles.primaryFooterText)}>
+              <div
+                className={buildClassName(styles.footerText, styles.primaryFooterText)}
+                dir={lang.isRtl ? 'rtl' : undefined}
+              >
                 <p>
                   {renderText(lang('AboutPremiumDescription'), ['simple_markdown'])}
                 </p>
