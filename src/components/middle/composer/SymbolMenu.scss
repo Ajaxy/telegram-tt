@@ -165,11 +165,24 @@
 
 .symbol-set {
   margin-bottom: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &.symbol-set-locked::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: -0.25rem;
+    top: 0.75rem;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><rect width='100%' height='100%' style='stroke: rgba(112, 117, 121, 0.7); width: calc(100% - 4px); height: calc(100% - 4px);' fill='none' stroke-dashoffset='5' stroke-width='2' stroke-dasharray='8' stroke-linecap='round' rx='8' ry='8' x='2' y='2' /></svg>");
+  }
 
   &-header {
     display: flex;
     align-items: center;
     color: rgba(var(--color-text-secondary-rgb), 0.75);
+    align-self: center;
   }
 
   &-name {
@@ -177,16 +190,24 @@
     line-height: 1.6875rem;
     font-weight: 500;
     margin: 0;
-    padding-left: 0.5rem;
+    padding: 0 0.5rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    text-align: initial;
+    text-align: center;
     unicode-bidi: plaintext;
     flex-grow: 1;
+    z-index: 1;
+    background-color: var(--color-background);
+  }
+
+  &-locked-icon {
+    margin-right: 0.25rem;
   }
 
   &-remove {
+    right: 0;
+    position: absolute;
     font-size: 1rem;
     cursor: pointer;
   }

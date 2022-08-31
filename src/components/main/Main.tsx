@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, memo, useCallback, useState, useRef,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { LangCode } from '../../types';
 import type {
@@ -23,12 +23,14 @@ import {
   selectIsServiceChatReady,
   selectUser,
 } from '../../global/selectors';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import windowSize from '../../util/windowSize';
 import { getAllNotificationsCount } from '../../util/folderManager';
+import { fastRaf } from '../../util/schedulers';
+
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
@@ -36,7 +38,7 @@ import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 import useShowTransition from '../../hooks/useShowTransition';
-import { fastRaf } from '../../util/schedulers';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -68,6 +70,7 @@ import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
+import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 
 import './Main.scss';
 
@@ -87,6 +90,7 @@ type StateProps = {
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
+  openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
   isServiceChatReady?: boolean;
   animationLevel: number;
@@ -94,6 +98,7 @@ type StateProps = {
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;
   addedSetIds?: string[];
+  addedCustomEmojiIds?: string[];
   newContactUserId?: string;
   newContactByPhoneNumber?: boolean;
   openedGame?: GlobalState['openedGame'];
@@ -136,11 +141,13 @@ const Main: FC<StateProps> = ({
   shouldSkipHistoryAnimations,
   limitReached,
   openedStickerSetShortName,
+  openedCustomEmojiSetIds,
   isServiceChatReady,
   animationLevel,
   language,
   wasTimeFormatSetManually,
   addedSetIds,
+  addedCustomEmojiIds,
   isPhoneCallActive,
   newContactUserId,
   newContactByPhoneNumber,
@@ -173,11 +180,13 @@ const Main: FC<StateProps> = ({
     loadAddedStickers,
     loadFavoriteStickers,
     ensureTimeFormat,
-    openStickerSetShortName,
+    closeStickerSetModal,
+    closeCustomEmojiSets,
     checkVersionNotification,
     loadAppConfig,
     loadAttachMenuBots,
     loadContactList,
+    loadCustomEmojis,
     closePaymentModal,
     clearReceipt,
   } = getActions();
@@ -226,17 +235,29 @@ const Main: FC<StateProps> = ({
     }
   }, [language, lastSyncTime, loadCountryList, loadEmojiKeywords]);
 
+  // Re-fetch cached saved emoji for `localDb`
+  useEffectWithPrevDeps(([prevLastSyncTime]) => {
+    if (!prevLastSyncTime && lastSyncTime) {
+      loadCustomEmojis({
+        ids: Object.keys(getGlobal().customEmojis.byId),
+        ignoreCache: true,
+      });
+    }
+  }, [lastSyncTime] as const);
+
   // Sticker sets
   useEffect(() => {
     if (lastSyncTime) {
-      if (!addedSetIds) {
+      if (!addedSetIds || !addedCustomEmojiIds) {
         loadStickerSets();
         loadFavoriteStickers();
-      } else {
+      }
+
+      if (addedSetIds && addedCustomEmojiIds) {
         loadAddedStickers();
       }
     }
-  }, [lastSyncTime, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers]);
+  }, [lastSyncTime, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers, addedCustomEmojiIds]);
 
   // Check version when service chat is ready
   useEffect(() => {
@@ -378,8 +399,12 @@ const Main: FC<StateProps> = ({
   }, [updateIsOnline]);
 
   const handleStickerSetModalClose = useCallback(() => {
-    openStickerSetShortName({ stickerSetShortName: undefined });
-  }, [openStickerSetShortName]);
+    closeStickerSetModal();
+  }, [closeStickerSetModal]);
+
+  const handleCustomEmojiSetsModalClose = useCallback(() => {
+    closeCustomEmojiSets();
+  }, [closeCustomEmojiSets]);
 
   // Online status and browser tab indicators
   useBackgroundMode(handleBlur, handleFocus);
@@ -403,6 +428,10 @@ const Main: FC<StateProps> = ({
         isOpen={Boolean(openedStickerSetShortName)}
         onClose={handleStickerSetModalClose}
         stickerSetShortName={openedStickerSetShortName}
+      />
+      <CustomEmojiSetsModal
+        customEmojiSetIds={openedCustomEmojiSetIds}
+        onClose={handleCustomEmojiSetsModalClose}
       />
       {activeGroupCallId && <GroupCall groupCallId={activeGroupCallId} />}
       <ActiveCallHeader isActive={Boolean(activeGroupCallId || isPhoneCallActive)} />
@@ -486,6 +515,7 @@ export default memo(withGlobal(
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       openedStickerSetShortName: global.openedStickerSetShortName,
+      openedCustomEmojiSetIds: global.openedCustomEmojiSetIds,
       isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: global.groupCalls.activeGroupCallId,
       animationLevel,
@@ -493,6 +523,7 @@ export default memo(withGlobal(
       wasTimeFormatSetManually,
       isPhoneCallActive: Boolean(global.phoneCall),
       addedSetIds: global.stickers.added.setIds,
+      addedCustomEmojiIds: global.customEmojis.added.setIds,
       newContactUserId: global.newContact?.userId,
       newContactByPhoneNumber: global.newContact?.isByPhoneNumber,
       openedGame,

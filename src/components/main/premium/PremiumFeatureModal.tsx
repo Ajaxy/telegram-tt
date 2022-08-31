@@ -309,8 +309,9 @@ const PremiumFeatureModal: FC<OwnProps> = ({
           onSelectSlide={handleSelectSlide}
         />
         <Button
-          className={buildClassName(styles.button, !isPremium && styles.buttonPremium)}
+          className={buildClassName(styles.button)}
           isShiny={!isPremium}
+          withPremiumGradient={!isPremium}
           onClick={isPremium ? onBack : handleClick}
         >
           {isPremium

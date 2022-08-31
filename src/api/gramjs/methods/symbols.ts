@@ -1,9 +1,13 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
-import type { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
+import type {
+  ApiStickerSetInfo, ApiSticker, ApiVideo, OnApiUpdate,
+} from '../../types';
 
 import { invokeRequest } from './client';
-import { buildStickerFromDocument, buildStickerSet, buildStickerSetCovered } from '../apiBuilders/symbols';
+import {
+  buildStickerSet, buildStickerSetCovered, processStickerPackResult, processStickerResult,
+} from '../apiBuilders/symbols';
 import { buildInputStickerSet, buildInputDocument, buildInputStickerSetShortName } from '../gramjsBuilders';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
 import { RECENT_STICKERS_LIMIT } from '../../../config';
@@ -14,6 +18,25 @@ let onUpdate: OnApiUpdate;
 
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
+}
+
+export async function fetchCustomEmojiSets({ hash = '0' }: { hash?: string }) {
+  const allStickers = await invokeRequest(new GramJs.messages.GetEmojiStickers({ hash: BigInt(hash) }));
+
+  if (!allStickers || allStickers instanceof GramJs.messages.AllStickersNotModified) {
+    return undefined;
+  }
+
+  allStickers.sets.forEach((stickerSet) => {
+    if (stickerSet.thumbs?.length) {
+      localDb.stickerSets[String(stickerSet.id)] = stickerSet;
+    }
+  });
+
+  return {
+    hash: String(allStickers.hash),
+    sets: allStickers.sets.map(buildStickerSet),
+  };
 }
 
 export async function fetchStickerSets({ hash = '0' }: { hash?: string }) {
@@ -113,13 +136,14 @@ export function clearRecentStickers() {
 }
 
 export async function fetchStickers(
-  { stickerSetShortName, stickerSetId, accessHash }:
-  { stickerSetShortName?: string; stickerSetId?: string; accessHash: string },
+  { stickerSetInfo }:
+  { stickerSetInfo: ApiStickerSetInfo },
 ) {
+  if ('isMissing' in stickerSetInfo) return undefined;
   const result = await invokeRequest(new GramJs.messages.GetStickerSet({
-    stickerset: stickerSetId
-      ? buildInputStickerSet(stickerSetId, accessHash)
-      : buildInputStickerSetShortName(stickerSetShortName!),
+    stickerset: 'id' in stickerSetInfo
+      ? buildInputStickerSet(stickerSetInfo.id, stickerSetInfo.accessHash)
+      : buildInputStickerSetShortName(stickerSetInfo.shortName),
   }));
 
   if (!(result instanceof GramJs.messages.StickerSet)) {
@@ -131,6 +155,16 @@ export async function fetchStickers(
     stickers: processStickerResult(result.documents),
     packs: processStickerPackResult(result.packs),
   };
+}
+
+export async function fetchCustomEmoji({ documentId }: { documentId: string[] }) {
+  if (!documentId.length) return undefined;
+  const result = await invokeRequest(new GramJs.messages.GetCustomEmojiDocuments({
+    documentId: documentId.map((id) => BigInt(id)),
+  }));
+  if (!result) return undefined;
+
+  return processStickerResult(result);
 }
 
 export async function fetchAnimatedEmojis() {
@@ -332,32 +366,6 @@ export async function fetchEmojiKeywords({ language, fromVersion }: {
       return acc;
     }, {} as Record<string, string[]>),
   };
-}
-
-function processStickerResult(stickers: GramJs.TypeDocument[]) {
-  return stickers
-    .map((document) => {
-      if (document instanceof GramJs.Document) {
-        const sticker = buildStickerFromDocument(document);
-        if (sticker) {
-          localDb.documents[String(document.id)] = document;
-
-          return sticker;
-        }
-      }
-
-      return undefined;
-    })
-    .filter<ApiSticker>(Boolean as any);
-}
-
-function processStickerPackResult(packs: GramJs.StickerPack[]) {
-  return packs.reduce((acc, { emoticon, documents }) => {
-    acc[emoticon] = documents.map((documentId) => buildStickerFromDocument(
-      localDb.documents[String(documentId)],
-    )).filter<ApiSticker>(Boolean as any);
-    return acc;
-  }, {} as Record<string, ApiSticker[]>);
 }
 
 function processGifResult(gifs: GramJs.TypeDocument[]) {

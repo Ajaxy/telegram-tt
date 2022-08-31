@@ -11,7 +11,7 @@ import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/environment';
 
 import useMedia from '../../hooks/useMedia';
-import useWebpThumbnail from '../../hooks/useWebpThumbnail';
+import useThumbnail from '../../hooks/useThumbnail';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 
@@ -36,7 +36,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 }) => {
   const { clickBotInlineButton } = getActions();
   const lang = useLang();
-  const mediaThumbnail = useWebpThumbnail(message);
+  const mediaThumbnail = useThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 
   const text = renderMessageSummary(lang, message, Boolean(mediaThumbnail));

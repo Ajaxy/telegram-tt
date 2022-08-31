@@ -1,8 +1,8 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment, ApiChatMember } from '../../../api/types';
 
 import {
@@ -48,6 +48,7 @@ export type OwnProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   shouldSchedule?: boolean;
+  captionLimit: number;
   addRecentEmoji: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
@@ -55,7 +56,6 @@ export type OwnProps = {
   onClear: () => void;
   onSendSilent: () => void;
   onSendScheduled: () => void;
-  captionLimit: number;
 };
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
@@ -105,6 +105,7 @@ const AttachmentModal: FC<OwnProps> = ({
     undefined,
     currentUserId,
   );
+
   const {
     isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
   } = useEmojiTooltip(

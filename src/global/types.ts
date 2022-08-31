@@ -42,6 +42,7 @@ import type {
   ApiTranscription,
   ApiInputInvoice,
   ApiInvoice,
+  ApiStickerSetInfo,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -274,6 +275,7 @@ export type GlobalState = {
   };
 
   recentEmojis: string[];
+  recentCustomEmojis: string[];
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;
@@ -297,6 +299,10 @@ export type GlobalState = {
       hash?: string;
       stickers: ApiSticker[];
     };
+    premiumSet: {
+      hash?: string;
+      stickers: ApiSticker[];
+    };
     featured: {
       hash?: string;
       setIds?: string[];
@@ -310,6 +316,15 @@ export type GlobalState = {
       stickers?: ApiSticker[];
       hash?: string;
     };
+  };
+
+  customEmojis: {
+    added: {
+      hash?: string;
+      setIds?: string[];
+    };
+    lastRendered: string[];
+    byId: Record<string, ApiSticker>;
   };
 
   animatedEmojis?: ApiStickerSet;
@@ -542,6 +557,7 @@ export type GlobalState = {
   safeLinkModalUrl?: string;
   historyCalendarSelectedAt?: number;
   openedStickerSetShortName?: string;
+  openedCustomEmojiSetIds?: string[];
 
   activeDownloads: {
     byChatId: Record<string, number[]>;
@@ -857,7 +873,16 @@ export interface ActionPayloads {
   exitForwardMode: never;
   changeForwardRecipient: never;
 
+  // GIFs
+  loadSavedGifs: never;
+
   // Stickers
+  loadStickers: {
+    stickerSetInfo: ApiStickerSetInfo;
+  };
+  loadAnimatedEmojis: never;
+  loadGreetingStickers: never;
+
   addRecentSticker: {
     sticker: ApiSticker;
   };
@@ -866,15 +891,16 @@ export interface ActionPayloads {
     sticker: ApiSticker;
   };
 
-  clearRecentStickers: {};
+  clearRecentStickers: never;
 
-  loadStickerSets: {};
-  loadAddedStickers: {};
-  loadRecentStickers: {};
-  loadFavoriteStickers: {};
-  loadFeaturedStickers: {};
+  loadStickerSets: never;
+  loadAddedStickers: never;
+  loadRecentStickers: never;
+  loadFavoriteStickers: never;
+  loadFeaturedStickers: never;
 
   reorderStickerSets: {
+    isCustomEmoji?: boolean;
     order: string[];
   };
 
@@ -882,13 +908,31 @@ export interface ActionPayloads {
     stickerSet: ApiStickerSet;
   };
 
-  openStickerSetShortName: {
-    stickerSetShortName?: string;
+  openStickerSet: {
+    stickerSetInfo: ApiStickerSetInfo;
+  };
+  closeStickerSetModal: never;
+
+  loadStickersForEmoji: {
+    emoji: string;
+  };
+  clearStickersForEmoji: never;
+
+  addRecentEmoji: {
+    emoji: string;
   };
 
-  openStickerSet: {
-    sticker: ApiSticker;
+  loadCustomEmojis: {
+    ids: string[];
+    ignoreCache?: boolean;
   };
+  updateLastRenderedCustomEmojis: {
+    ids: string[];
+  };
+  openCustomEmojiSets: {
+    setIds: string[];
+  };
+  closeCustomEmojiSets: never;
 
   // Bots
   startBot: {
@@ -1091,6 +1135,9 @@ export interface ActionPayloads {
   loadPremiumStickers: {
     hash?: string;
   };
+  loadPremiumSetStickers: {
+    hash?: string;
+  };
 
   openGiftPremiumModal: {
     forUserId?: string;
@@ -1107,7 +1154,7 @@ export type NonTypedActionNames = (
   'init' | 'reset' | 'disconnect' | 'initApi' | 'sync' | 'saveSession' |
   'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
   // ui
-  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'toggleLeftColumn' |
+  'toggleChatInfo' | 'setIsUiReady' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
@@ -1172,9 +1219,9 @@ export type NonTypedActionNames = (
   'loadContentSettings' | 'updateContentSettings' |
   'loadCountryList' | 'ensureTimeFormat' | 'loadAppConfig' |
   // stickers & GIFs
-  'setStickerSearchQuery' | 'loadSavedGifs' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
-  'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' | 'loadAnimatedEmojis' | 'loadStickers' |
-  'loadStickersForEmoji' | 'clearStickersForEmoji' | 'loadEmojiKeywords' | 'loadGreetingStickers' |
+  'setStickerSearchQuery' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |
+  'loadEmojiKeywords' |
   // bots
   'sendBotCommand' | 'loadTopInlineBots' | 'queryInlineBot' | 'sendInlineBotResult' |
   'resetInlineBot' |

@@ -287,7 +287,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             <span className="colon">:</span>
           </>
         )}
-        {renderSummary(lang, lastMessage!, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        {renderSummary(lang, lastMessage!, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
   }
@@ -369,16 +369,18 @@ const Chat: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
+function renderSummary(
+  lang: LangFn, message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
+) {
   if (!blobUrl) {
-    return renderMessageSummary(lang, message);
+    return renderMessageSummary(lang, message, undefined, undefined, undefined, observeIntersection);
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderMessageSummary(lang, message, true)}
+      {renderMessageSummary(lang, message, true, undefined, undefined, observeIntersection)}
     </span>
   );
 }

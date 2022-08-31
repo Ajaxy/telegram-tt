@@ -39,6 +39,7 @@ export type OwnProps = {
   tabIndex?: number;
   isRtl?: boolean;
   isShiny?: boolean;
+  withPremiumGradient?: boolean;
   noPreventDefault?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
@@ -74,6 +75,7 @@ const Button: FC<OwnProps> = ({
   isText,
   isLoading,
   isShiny,
+  withPremiumGradient,
   ariaLabel,
   ariaControls,
   hasPopup,
@@ -114,6 +116,7 @@ const Button: FC<OwnProps> = ({
     isClicked && 'clicked',
     backgroundImage && 'with-image',
     isShiny && 'shiny',
+    withPremiumGradient && 'premium',
   );
 
   const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {

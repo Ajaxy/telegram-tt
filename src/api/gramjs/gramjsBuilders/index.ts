@@ -290,10 +290,10 @@ export function buildMessageFromUpdate(
 
 export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMessageEntity {
   const {
-    type, offset, length, url, userId, language,
+    type, offset, length,
   } = entity;
 
-  const user = userId ? localDb.users[userId] : undefined;
+  const user = 'userId' in entity ? localDb.users[entity.userId] : undefined;
 
   switch (type) {
     case ApiMessageEntityTypes.Bold:
@@ -307,11 +307,11 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
     case ApiMessageEntityTypes.Code:
       return new GramJs.MessageEntityCode({ offset, length });
     case ApiMessageEntityTypes.Pre:
-      return new GramJs.MessageEntityPre({ offset, length, language: language || '' });
+      return new GramJs.MessageEntityPre({ offset, length, language: entity.language || '' });
     case ApiMessageEntityTypes.Blockquote:
       return new GramJs.MessageEntityBlockquote({ offset, length });
     case ApiMessageEntityTypes.TextUrl:
-      return new GramJs.MessageEntityTextUrl({ offset, length, url: url! });
+      return new GramJs.MessageEntityTextUrl({ offset, length, url: entity.url });
     case ApiMessageEntityTypes.Url:
       return new GramJs.MessageEntityUrl({ offset, length });
     case ApiMessageEntityTypes.Hashtag:
@@ -320,10 +320,12 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
       return new GramJs.InputMessageEntityMentionName({
         offset,
         length,
-        userId: new GramJs.InputUser({ userId: BigInt(userId!), accessHash: user!.accessHash! }),
+        userId: new GramJs.InputUser({ userId: BigInt(user!.id), accessHash: user!.accessHash! }),
       });
     case ApiMessageEntityTypes.Spoiler:
       return new GramJs.MessageEntitySpoiler({ offset, length });
+    case ApiMessageEntityTypes.CustomEmoji:
+      return new GramJs.MessageEntityCustomEmoji({ offset, length, documentId: BigInt(entity.documentId) });
     default:
       return new GramJs.MessageEntityUnknown({ offset, length });
   }

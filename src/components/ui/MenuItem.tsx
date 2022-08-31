@@ -22,6 +22,7 @@ type OwnProps = {
   disabled?: boolean;
   destructive?: boolean;
   ariaLabel?: string;
+  withWrap?: boolean;
 };
 
 const MenuItem: FC<OwnProps> = (props) => {
@@ -36,6 +37,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     disabled,
     destructive,
     ariaLabel,
+    withWrap,
     onContextMenu,
   } = props;
 
@@ -72,6 +74,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     disabled && 'disabled',
     destructive && 'destructive',
     IS_COMPACT_MENU && 'compact',
+    withWrap && 'wrap',
   );
 
   const content = (

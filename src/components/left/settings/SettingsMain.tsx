@@ -128,6 +128,13 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           {lang('Language')}
           <span className="settings-item__current-value">{lang.langName}</span>
         </ListItem>
+        <ListItem
+          icon="stickers"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.Stickers)}
+        >
+          {lang('StickersName')}
+        </ListItem>
         {canBuyPremium && (
           <ListItem
             leftElement={<PremiumIcon withGradient big />}

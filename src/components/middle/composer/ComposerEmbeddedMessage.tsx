@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
   selectChat,
@@ -18,6 +19,7 @@ import {
   selectEditingScheduledId,
   selectEditingMessage,
   selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
@@ -47,6 +49,7 @@ type StateProps = {
   noAuthors?: boolean;
   noCaptions?: boolean;
   forwardsHaveCaptions?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 type OwnProps = {
@@ -65,6 +68,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   noAuthors,
   noCaptions,
   forwardsHaveCaptions,
+  isCurrentUserPremium,
   onClear,
 }) => {
   const {
@@ -159,6 +163,23 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     ? lang('ForwardedMessageCount', forwardedMessagesCount)
     : undefined;
 
+  const strippedMessage = useMemo(() => {
+    const textEntities = message?.content.text?.entities;
+    if (!message || !isForwarding || !textEntities?.length || !noAuthors || isCurrentUserPremium) return message;
+
+    const filteredEntities = textEntities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji);
+    return {
+      ...message,
+      content: {
+        ...message.content,
+        text: {
+          text: message.content.text!.text,
+          entities: filteredEntities,
+        },
+      },
+    };
+  }, [isCurrentUserPremium, isForwarding, message, noAuthors]);
+
   if (!shouldRender) {
     return undefined;
   }
@@ -171,7 +192,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
         </div>
         <EmbeddedMessage
           className="inside-input"
-          message={message}
+          message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
           customText={customText}
           title={editingId ? lang('EditMessage') : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
@@ -315,6 +336,7 @@ export default memo(withGlobal<OwnProps>(
       noAuthors,
       noCaptions,
       forwardsHaveCaptions,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(ComposerEmbeddedMessage));

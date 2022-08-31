@@ -3,7 +3,7 @@ import { ApiMessageEntityTypes } from '../api/types';
 import { IS_EMOJI_SUPPORTED } from './environment';
 import { RE_LINK_TEMPLATE } from '../config';
 
-const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
+const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
   B: ApiMessageEntityTypes.Bold,
   STRONG: ApiMessageEntityTypes.Bold,
   I: ApiMessageEntityTypes.Italic,
@@ -15,6 +15,7 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   CODE: ApiMessageEntityTypes.Code,
   PRE: ApiMessageEntityTypes.Pre,
   BLOCKQUOTE: ApiMessageEntityTypes.Blockquote,
+  'CUSTOM-EMOJI': ApiMessageEntityTypes.CustomEmoji,
 };
 
 const MAX_TAG_DEEPNESS = 3;
@@ -90,6 +91,12 @@ function parseMarkdown(html: string) {
     '<code>$2</code>',
   );
 
+  // Custom Emoji markdown tag
+  parsedHtml = parsedHtml.replace(
+    /(^|\s)(?!<(?:code|pre)[^<]*|<\/)\[([^\]\n]+)\]\(customEmoji:(\d+)\)(?![^<]*<\/(?:code|pre)>)(\s|$)/g,
+    '$1<custom-emoji document-id="$3" alt="$2">$2</custom-emoji>$4',
+  );
+
   // Other simple markdown
   parsedHtml = parsedHtml.replace(
     /(^|\s)(?!<(code|pre)[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/(code|pre)>)(\s|$)/g,
@@ -138,18 +145,51 @@ function getEntityDataFromNode(
   const offset = rawText.substring(0, index).length;
   const { length } = rawText.substring(index, index + node.textContent.length);
 
-  let url: string | undefined;
-  let userId: string | undefined;
-  let language: string | undefined;
   if (type === ApiMessageEntityTypes.TextUrl) {
-    url = (node as HTMLAnchorElement).href;
+    return {
+      index,
+      entity: {
+        type,
+        offset,
+        length,
+        url: (node as HTMLAnchorElement).href,
+      },
+    };
   }
   if (type === ApiMessageEntityTypes.MentionName) {
-    userId = (node as HTMLAnchorElement).dataset.userId;
+    return {
+      index,
+      entity: {
+        type,
+        offset,
+        length,
+        userId: (node as HTMLAnchorElement).dataset.userId!,
+      },
+    };
   }
 
   if (type === ApiMessageEntityTypes.Pre) {
-    language = (node as HTMLPreElement).dataset.language;
+    return {
+      index,
+      entity: {
+        type,
+        offset,
+        length,
+        language: (node as HTMLPreElement).dataset.language,
+      },
+    };
+  }
+
+  if (type === ApiMessageEntityTypes.CustomEmoji) {
+    return {
+      index,
+      entity: {
+        type,
+        offset,
+        length,
+        documentId: (node as HTMLElement).getAttribute('document-id')!,
+      },
+    };
   }
 
   return {
@@ -158,14 +198,11 @@ function getEntityDataFromNode(
       type,
       offset,
       length,
-      ...(url && { url }),
-      ...(userId && { userId }),
-      ...(language && { language }),
     },
   };
 }
 
-function getEntityTypeFromNode(node: ChildNode) {
+function getEntityTypeFromNode(node: ChildNode): ApiMessageEntityTypes | undefined {
   if (ENTITY_CLASS_BY_NODE_NAME[node.nodeName]) {
     return ENTITY_CLASS_BY_NODE_NAME[node.nodeName];
   }
@@ -192,7 +229,7 @@ function getEntityTypeFromNode(node: ChildNode) {
   }
 
   if (node.nodeName === 'SPAN') {
-    return (node as HTMLElement).dataset.entityType;
+    return (node as HTMLElement).dataset.entityType as any;
   }
 
   return undefined;

@@ -507,7 +507,13 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const withAppendix = contentClassName.includes('has-appendix');
   const textParts = renderMessageText(
-    message, highlight, isEmojiOnlyMessage(customShape), undefined, undefined, isProtected,
+    message,
+    highlight,
+    isEmojiOnlyMessage(customShape),
+    undefined,
+    undefined,
+    isProtected,
+    observeIntersectionForAnimatedStickers,
   );
 
   let metaPosition!: MetaPosition;

@@ -229,10 +229,12 @@ export enum SettingsScreens {
   PasscodeTurnOff,
   PasscodeCongratulations,
   Experimental,
+  Stickers,
+  CustomEmoji,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (
-  'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isVideos'
+  'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isVideos' | 'isEmoji' | 'installedDate'
 )>;
 
 export enum LeftColumnContent {

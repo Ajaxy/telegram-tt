@@ -67,10 +67,14 @@
       max-height: 2.75rem;
     }
 
-    .emoji {
+    .emoji:not(.text-entity-custom-emoji) {
       width: 0.9375rem;
       height: 0.9375rem;
       vertical-align: -2px;
+    }
+
+    .text-entity-custom-emoji {
+      --custom-emoji-size: 1.25rem;
     }
 
     &.multiline {

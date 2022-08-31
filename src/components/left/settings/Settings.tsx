@@ -27,6 +27,8 @@ import SettingsTwoFa from './twoFa/SettingsTwoFa';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
 import SettingsQuickReaction from './SettingsQuickReaction';
 import SettingsPasscode from './passcode/SettingsPasscode';
+import SettingsStickers from './SettingsStickers';
+import SettingsCustomEmoji from './SettingsCustomEmoji';
 import SettingsExperimental from './SettingsExperimental';
 
 import './Settings.scss';
@@ -216,6 +218,7 @@ const Settings: FC<OwnProps> = ({
               || screen === SettingsScreens.GeneralChatBackgroundColor
               || screen === SettingsScreens.GeneralChatBackground
               || screen === SettingsScreens.QuickReaction
+              || screen === SettingsScreens.CustomEmoji
               || isPrivacyScreen || isFoldersScreen}
             onReset={handleReset}
           />
@@ -223,6 +226,10 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.QuickReaction:
         return (
           <SettingsQuickReaction isActive={isScreenActive} onReset={handleReset} />
+        );
+      case SettingsScreens.CustomEmoji:
+        return (
+          <SettingsCustomEmoji isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Notifications:
         return (
@@ -243,6 +250,10 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Language:
         return (
           <SettingsLanguage isActive={isScreenActive} onReset={handleReset} />
+        );
+      case SettingsScreens.Stickers:
+        return (
+          <SettingsStickers isActive={isScreenActive} onReset={handleReset} onScreenSelect={onScreenSelect} />
         );
       case SettingsScreens.Experimental:
         return (

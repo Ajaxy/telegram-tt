@@ -247,10 +247,13 @@
     "messages.requestSimpleWebView",
     "messages.sendWebViewResultMessage",
     "messages.sendWebViewData",
+    "messages.transcribeAudio",
+    "messages.getCustomEmojiDocuments",
+    "messages.getEmojiStickers",
+    "messages.getFeaturedEmojiStickers",
     "messages.readReactions",
     "messages.getUnreadReactions",
     "messages.readMentions",
     "messages.getUnreadMentions",
-    "help.getPremiumPromo",
-    "messages.transcribeAudio"
+    "help.getPremiumPromo"
 ]

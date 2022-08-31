@@ -43,6 +43,7 @@ export { default as SponsoredMessageContextMenuContainer }
   from '../components/middle/message/SponsoredMessageContextMenuContainer';
 // eslint-disable-next-line import/no-cycle
 export { default as StickerSetModal } from '../components/common/StickerSetModal';
+export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 export { default as MobileSearch } from '../components/middle/MobileSearch';
 

@@ -86,6 +86,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('General')}</h3>;
       case SettingsScreens.QuickReaction:
         return <h3>{lang('DoubleTapSetting')}</h3>;
+      case SettingsScreens.CustomEmoji:
+        return <h3>{lang('Emoji')}</h3>;
       case SettingsScreens.Notifications:
         return <h3>{lang('Notifications')}</h3>;
       case SettingsScreens.DataStorage:
@@ -94,6 +96,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('PrivacySettings')}</h3>;
       case SettingsScreens.Language:
         return <h3>{lang('Language')}</h3>;
+      case SettingsScreens.Stickers:
+        return <h3>{lang('StickersName')}</h3>;
       case SettingsScreens.Experimental:
         return <h3>{lang('lng_settings_experimental')}</h3>;
 
