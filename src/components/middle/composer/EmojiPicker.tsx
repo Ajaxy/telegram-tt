@@ -18,8 +18,8 @@ import {
   uncompressEmoji,
 } from '../../../util/emoji';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
-import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
+import buildClassName from '../../../util/buildClassName';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -38,6 +38,7 @@ type OwnProps = {
 };
 
 type StateProps = Pick<GlobalState, 'recentEmojis'>;
+
 type EmojiCategoryData = { id: string; name: string; emojis: string[] };
 
 const ICONS_BY_CATEGORY: Record<string, string> = {
@@ -66,7 +67,9 @@ let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
 const EmojiPicker: FC<OwnProps & StateProps> = ({
-  className, onEmojiSelect, recentEmojis,
+  className,
+  recentEmojis,
+  onEmojiSelect,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

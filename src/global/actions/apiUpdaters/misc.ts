@@ -37,7 +37,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       break;
 
     case 'updateStickerSetsOrder':
-      actions.reorderStickerSets({ order: update.order });
+      actions.reorderStickerSets({ order: update.order, isCustomEmoji: update.isCustomEmoji });
       break;
 
     case 'updateSavedGifs':

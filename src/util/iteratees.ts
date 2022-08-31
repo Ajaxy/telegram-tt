@@ -84,6 +84,10 @@ export function unique<T extends any>(array: T[]): T[] {
   return Array.from(new Set(array));
 }
 
+export function uniqueByField<T extends any>(array: T[], field: keyof T): T[] {
+  return [...new Map(array.map((item) => [item[field], item])).values()];
+}
+
 export function compact<T extends any>(array: T[]) {
   return array.filter(Boolean);
 }

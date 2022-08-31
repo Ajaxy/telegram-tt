@@ -10,6 +10,17 @@
   position: relative;
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
+  &.custom-emoji {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0.3125rem;
+  }
+
+  &.set-expand {
+    padding: 0;
+    vertical-align: bottom;
+  }
+
   .sticker-locked {
     position: absolute;
     bottom: 0;
@@ -52,7 +63,9 @@
   }
 
   @media (max-width: 600px) {
-    margin: 0.25rem;
+    &, &.custom-emoji {
+      margin: 0.25rem;
+    }
   }
 
   &.set-button {

@@ -30,7 +30,7 @@ import {
 } from '../../selectors';
 import { init as initFolderManager } from '../../../util/folderManager';
 
-const RELEASE_STATUS_TIMEOUT = 15000; // 10 sec;
+const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
 
 let releaseStatusTimeout: number | undefined;
 

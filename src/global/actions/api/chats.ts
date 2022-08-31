@@ -615,8 +615,10 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
   }
 
   if (part1 === 'addstickers' || part1 === 'addemoji') {
-    actions.openStickerSetShortName({
-      stickerSetShortName: part2,
+    actions.openStickerSet({
+      stickerSetInfo: {
+        shortName: part2,
+      },
     });
     return;
   }
@@ -1237,9 +1239,10 @@ export async function loadFullChat(chat: ApiChat) {
   const stickerSet = fullInfo.stickerSet;
   if (stickerSet) {
     getActions().loadStickers({
-      stickerSetId: stickerSet.id,
-      stickerSetAccessHash: stickerSet.accessHash,
-      stickerSetShortName: stickerSet.shortName,
+      stickerSetInfo: {
+        id: stickerSet.id,
+        accessHash: stickerSet.accessHash,
+      },
     });
   }
 

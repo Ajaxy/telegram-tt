@@ -1,12 +1,13 @@
-import type { MouseEvent } from 'react';
 import React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { TextPart } from '../../../types';
 import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';
 import { ApiMessageEntityTypes } from '../../../api/types';
-
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { TextFilter } from './renderText';
+
+import buildClassName from '../../../util/buildClassName';
 import renderText from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getTranslation } from '../../../util/langProvider';
@@ -14,8 +15,8 @@ import { getTranslation } from '../../../util/langProvider';
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
+import CustomEmoji from '../CustomEmoji';
 import CodeBlock from '../code/CodeBlock';
-import buildClassName from '../../../util/buildClassName';
 
 interface IOrganizedEntity {
   entity: ApiMessageEntity;
@@ -32,6 +33,7 @@ export function renderTextWithEntities(
   messageId?: number,
   isSimple?: boolean,
   isProtected?: boolean,
+  observeIntersection?: ObserveFn,
 ) {
   if (!entities || !entities.length) {
     return renderMessagePart(text, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple);
@@ -107,7 +109,7 @@ export function renderTextWithEntities(
     const newEntity = shouldRenderAsHtml
       ? processEntityAsHtml(entity, entityContent, nestedEntityContent)
       : processEntity(
-        entity, entityContent, nestedEntityContent, highlight, messageId, isSimple, isProtected,
+        entity, entityContent, nestedEntityContent, highlight, messageId, isSimple, isProtected, observeIntersection,
       );
 
     if (Array.isArray(newEntity)) {
@@ -284,6 +286,7 @@ function processEntity(
   messageId?: number,
   isSimple?: boolean,
   isProtected?: boolean,
+  observeIntersection?: ObserveFn,
 ) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -302,6 +305,14 @@ function processEntity(
     const text = renderNestedMessagePart();
     if (entity.type === ApiMessageEntityTypes.Spoiler) {
       return <Spoiler>{text}</Spoiler>;
+    }
+
+    if (entity.type === ApiMessageEntityTypes.CustomEmoji) {
+      return (
+        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection}>
+          {renderNestedMessagePart()}
+        </CustomEmoji>
+      );
     }
     return text;
   }
@@ -406,6 +417,12 @@ function processEntity(
       return <ins>{renderNestedMessagePart()}</ins>;
     case ApiMessageEntityTypes.Spoiler:
       return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
+    case ApiMessageEntityTypes.CustomEmoji:
+      return (
+        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection}>
+          {renderNestedMessagePart()}
+        </CustomEmoji>
+      );
     default:
       return renderNestedMessagePart();
   }
@@ -469,20 +486,20 @@ function processEntityAsHtml(
 }
 
 function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
-  const { type, url } = entity;
-  return type === ApiMessageEntityTypes.TextUrl && url ? url : entityContent;
+  const { type } = entity;
+  return type === ApiMessageEntityTypes.TextUrl && entity.url ? entity.url : entityContent;
 }
 
-function handleBotCommandClick(e: MouseEvent<HTMLAnchorElement>) {
+function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
   getActions().sendBotCommand({ command: e.currentTarget.innerText });
 }
 
-function handleHashtagClick(e: MouseEvent<HTMLAnchorElement>) {
+function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
   getActions().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
   getActions().searchTextMessagesLocal();
 }
 
-function handleCodeClick(e: MouseEvent<HTMLElement>) {
+function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
     message: getTranslation('TextCopied'),

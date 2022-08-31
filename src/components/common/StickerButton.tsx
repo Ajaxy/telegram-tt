@@ -20,6 +20,7 @@ import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useThumbnail from '../../hooks/useThumbnail';
 
 import AnimatedSticker from './AnimatedSticker';
 import Button from '../ui/Button';
@@ -73,7 +74,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const thumbDataUri = sticker.thumbnail ? sticker.thumbnail.dataUri : undefined;
+  const thumbDataUri = useThumbnail(sticker);
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !isIntersecting, ApiMediaFormat.BlobUrl);
 
   const shouldPlay = isIntersecting && !noAnimate;
@@ -81,6 +82,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const [isLottieLoaded, markLoaded, unmarkLoaded] = useFlag(Boolean(lottieData));
   const canLottiePlay = isLottieLoaded && shouldPlay;
   const isVideo = sticker.isVideo && IS_WEBM_SUPPORTED;
+  const isCustomEmoji = sticker.isCustomEmoji;
   const videoBlobUrl = useMedia(isVideo && localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
   const canVideoPlay = Boolean(isVideo && videoBlobUrl && shouldPlay);
   const isPremiumSticker = sticker.hasEffect;
@@ -184,7 +186,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   }, [clickArg, onClick]);
 
   const handleOpenSet = useCallback(() => {
-    openStickerSet({ sticker });
+    openStickerSet({ stickerSetInfo: sticker.stickerSetInfo });
   }, [openStickerSet, sticker]);
 
   const shouldShowCloseButton = !IS_TOUCH_ENV && onRemoveRecentClick;
@@ -192,6 +194,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const fullClassName = buildClassName(
     'StickerButton',
     onClick && 'interactive',
+    isCustomEmoji && 'custom-emoji',
     stickerSelector,
     className,
   );
@@ -200,7 +203,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const contextMenuItems = useMemo(() => {
     const items: ReactNode[] = [];
-    if (noContextMenu) return items;
+    if (noContextMenu || isCustomEmoji) return items;
 
     if (onUnfaveClick) {
       items.push(
@@ -247,7 +250,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   }, [
     canViewSet, handleContextFave, handleContextRemoveRecent, handleContextUnfave, handleOpenSet, handleSendQuiet,
     handleSendScheduled, isLocked, isSavedMessages, lang, onFaveClick, onRemoveRecentClick, onUnfaveClick, onClick,
-    noContextMenu,
+    noContextMenu, isCustomEmoji,
   ]);
 
   return (

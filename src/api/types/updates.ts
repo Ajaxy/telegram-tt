@@ -366,6 +366,7 @@ export type ApiUpdateStickerSets = {
 export type ApiUpdateStickerSetsOrder = {
   '@type': 'updateStickerSetsOrder';
   order: string[];
+  isCustomEmoji?: boolean;
 };
 
 export type ApiUpdateStickerSet = {

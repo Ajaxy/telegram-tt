@@ -2,14 +2,16 @@ import { addActionHandler, setGlobal } from '../../index';
 
 import type { ApiError } from '../../../api/types';
 
+import { GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
   selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
+import { unique } from '../../../util/iteratees';
 
-const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
+const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
 
 addActionHandler('toggleChatInfo', (global, action, payload) => {
   return {
@@ -139,7 +141,7 @@ addActionHandler('toggleLeftColumn', (global) => {
 });
 
 addActionHandler('addRecentEmoji', (global, action, payload) => {
-  const { emoji } = payload!;
+  const { emoji } = payload;
   const { recentEmojis } = global;
   if (!recentEmojis) {
     return {
@@ -192,12 +194,12 @@ addActionHandler('addRecentSticker', (global, action, payload) => {
 });
 
 addActionHandler('reorderStickerSets', (global, action, payload) => {
-  const { order } = payload;
+  const { order, isCustomEmoji } = payload;
   return {
     ...global,
     stickers: {
       ...global.stickers,
-      added: {
+      [isCustomEmoji ? 'customEmoji' : 'added']: {
         setIds: order,
       },
     },
@@ -366,5 +368,40 @@ addActionHandler('closeLimitReachedModal', (global) => {
   return {
     ...global,
     limitReachedModal: undefined,
+  };
+});
+
+addActionHandler('closeStickerSetModal', (global) => {
+  return {
+    ...global,
+    openedStickerSetShortName: undefined,
+  };
+});
+
+addActionHandler('openCustomEmojiSets', (global, actions, payload) => {
+  const { setIds } = payload;
+  return {
+    ...global,
+    openedCustomEmojiSetIds: setIds,
+  };
+});
+
+addActionHandler('closeCustomEmojiSets', (global) => {
+  return {
+    ...global,
+    openedCustomEmojiSetIds: undefined,
+  };
+});
+
+addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) => {
+  const { ids } = payload;
+  const { lastRendered } = global.customEmojis;
+
+  return {
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      lastRendered: unique([...lastRendered, ...ids]).slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT),
+    },
   };
 });

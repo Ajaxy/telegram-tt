@@ -1,4 +1,4 @@
-export default function insertHtmlInSelection(html: string) {
+export function insertHtmlInSelection(html: string) {
   const selection = window.getSelection();
 
   if (selection?.getRangeAt && selection.rangeCount) {

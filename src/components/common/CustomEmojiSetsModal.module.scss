@@ -1,0 +1,27 @@
+.root {
+  :global {
+    .modal-dialog {
+      max-width: 26.25rem;
+    }
+
+    .multiline-menu-item {
+      flex-grow: 1;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      line-height: 1.5rem;
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+.sets {
+  position: relative;
+  width: 100%;
+  min-height: 19rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0 0.25rem;
+  text-align: left;
+}

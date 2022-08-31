@@ -5,7 +5,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type {
-  ApiAvailableReaction, ApiMessage, ApiSponsoredMessage, ApiUser,
+  ApiAvailableReaction, ApiMessage, ApiSponsoredMessage, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
@@ -14,6 +14,7 @@ import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
@@ -21,6 +22,8 @@ import useLang from '../../../hooks/useLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
+import MenuSeparator from '../../ui/MenuSeparator';
+import Skeleton from '../../ui/Skeleton';
 import Avatar from '../../common/Avatar';
 import ReactionSelector from './ReactionSelector';
 
@@ -59,6 +62,8 @@ type OwnProps = {
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
   seenByRecentUsers?: ApiUser[];
+  hasCustomEmoji?: boolean;
+  customEmojiSets?: ApiStickerSet[];
   onReply?: () => void;
   onEdit?: () => void;
   onPin?: () => void;
@@ -124,6 +129,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canRemoveReaction,
   canShowReactionList,
   seenByRecentUsers,
+  hasCustomEmoji,
+  customEmojiSets,
   onReply,
   onEdit,
   onPin,
@@ -151,7 +158,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onAboutAds,
   onSponsoredHide,
 }) => {
-  const { showNotification } = getActions();
+  const { showNotification, openStickerSet, openCustomEmojiSets } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -170,6 +177,22 @@ const MessageContextMenu: FC<OwnProps> = ({
     });
     onClose();
   }, [lang, onClose, showNotification]);
+
+  const handleOpenCustomEmojiSets = useCallback(() => {
+    if (!customEmojiSets) return;
+    if (customEmojiSets.length === 1) {
+      openStickerSet({
+        stickerSetInfo: {
+          shortName: customEmojiSets[0].shortName,
+        },
+      });
+    } else {
+      openCustomEmojiSets({
+        setIds: customEmojiSets.map((set) => set.id),
+      });
+    }
+    onClose();
+  }, [customEmojiSets, onClose, openCustomEmojiSets, openStickerSet]);
 
   const copyOptions = isSponsoredMessage
     ? []
@@ -332,6 +355,27 @@ const MessageContextMenu: FC<OwnProps> = ({
           </MenuItem>
         )}
         {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}
+        {hasCustomEmoji && (
+          <>
+            <MenuSeparator />
+            {!customEmojiSets && (
+              <>
+                <Skeleton inline className="menu-loading-row" />
+                <Skeleton inline className="menu-loading-row" />
+              </>
+            )}
+            {customEmojiSets && customEmojiSets.length === 1 && (
+              <MenuItem withWrap onClick={handleOpenCustomEmojiSets} className="menu-custom-emoji-sets">
+                {renderText(lang('MessageContainsEmojiPack', customEmojiSets[0].title), ['simple_markdown', 'emoji'])}
+              </MenuItem>
+            )}
+            {customEmojiSets && customEmojiSets.length > 1 && (
+              <MenuItem withWrap onClick={handleOpenCustomEmojiSets} className="menu-custom-emoji-sets">
+                {renderText(lang('MessageContainsEmojiPacks', customEmojiSets.length), ['simple_markdown'])}
+              </MenuItem>
+            )}
+          </>
+        )}
         {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
         {isSponsoredMessage && onSponsoredHide && (
           <MenuItem icon="stop" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>

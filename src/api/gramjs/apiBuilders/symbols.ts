@@ -1,8 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import type {
-  ApiEmojiInteraction, ApiSticker, ApiStickerSet, GramJsEmojiInteraction,
+  ApiEmojiInteraction, ApiStickerSetInfo, ApiSticker, ApiStickerSet, GramJsEmojiInteraction,
 } from '../../types';
-import { NO_STICKER_SET_ID } from '../../../config';
 
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 import localDb from '../localDb';
@@ -20,6 +19,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
     .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
       attr instanceof GramJs.DocumentAttributeSticker
     ));
+  const customEmojiAttribute = document.attributes
+    .find((attr): attr is GramJs.DocumentAttributeCustomEmoji => attr instanceof GramJs.DocumentAttributeCustomEmoji);
 
   const fileAttribute = (mimeType === LOTTIE_STICKER_MIME_TYPE || mimeType === VIDEO_STICKER_MIME_TYPE)
     && document.attributes
@@ -27,12 +28,13 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
         attr instanceof GramJs.DocumentAttributeFilename
       ));
 
-  if (!stickerAttribute && !fileAttribute) {
+  if (!(stickerAttribute || customEmojiAttribute) && !fileAttribute) {
     return undefined;
   }
 
   const isLottie = mimeType === LOTTIE_STICKER_MIME_TYPE;
   const isVideo = mimeType === VIDEO_STICKER_MIME_TYPE;
+  const isCustomEmoji = Boolean(customEmojiAttribute);
 
   const imageSizeAttribute = document.attributes
     .find((attr: any): attr is GramJs.DocumentAttributeImageSize => (
@@ -46,10 +48,10 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
 
   const sizeAttribute = imageSizeAttribute || videoSizeAttribute;
 
-  const stickerSetInfo = stickerAttribute && stickerAttribute.stickerset instanceof GramJs.InputStickerSetID
-    ? stickerAttribute.stickerset
-    : undefined;
-  const emoji = stickerAttribute?.alt;
+  const stickerOrEmojiAttribute = (stickerAttribute || customEmojiAttribute)!;
+  const stickerSetInfo = buildApiStickerSetInfo(stickerOrEmojiAttribute?.stickerset);
+  const emoji = stickerOrEmojiAttribute?.alt;
+  const isFree = Boolean(customEmojiAttribute?.free ?? true);
 
   const cachedThumb = document.thumbs && document.thumbs.find(
     (s): s is GramJs.PhotoCachedSize => s instanceof GramJs.PhotoCachedSize,
@@ -82,15 +84,16 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
 
   return {
     id: String(document.id),
-    stickerSetId: stickerSetInfo ? String(stickerSetInfo.id) : NO_STICKER_SET_ID,
-    stickerSetAccessHash: stickerSetInfo && String(stickerSetInfo.accessHash),
+    stickerSetInfo,
     emoji,
+    isCustomEmoji,
     isLottie,
     isVideo,
     width,
     height,
     thumbnail,
     hasEffect,
+    isFree,
   };
 }
 
@@ -124,6 +127,24 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
   };
 }
 
+function buildApiStickerSetInfo(inputSet?: GramJs.TypeInputStickerSet): ApiStickerSetInfo {
+  if (inputSet instanceof GramJs.InputStickerSetID) {
+    return {
+      id: String(inputSet.id),
+      accessHash: String(inputSet.accessHash),
+    };
+  }
+  if (inputSet instanceof GramJs.InputStickerSetShortName) {
+    return {
+      shortName: inputSet.shortName,
+    };
+  }
+
+  return {
+    isMissing: true,
+  };
+}
+
 export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetCovered): ApiStickerSet {
   const stickerSet = buildStickerSet(coveredStickerSet.set);
 
@@ -131,22 +152,50 @@ export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetC
     : (coveredStickerSet instanceof GramJs.StickerSetMultiCovered) ? coveredStickerSet.covers
       : coveredStickerSet.documents;
 
-  stickerSet.covers = [];
-  stickerSetCovers.forEach((cover) => {
-    if (cover instanceof GramJs.Document) {
-      const coverSticker = buildStickerFromDocument(cover);
-      if (coverSticker) {
-        stickerSet.covers!.push(coverSticker);
-        localDb.documents[String(cover.id)] = cover;
-      }
-    }
-  });
+  const stickers = processStickerResult(stickerSetCovers);
 
-  return stickerSet;
+  if (coveredStickerSet instanceof GramJs.StickerSetFullCovered) {
+    return {
+      ...stickerSet,
+      stickers,
+      packs: processStickerPackResult(coveredStickerSet.packs),
+    };
+  }
+
+  return {
+    ...stickerSet,
+    covers: stickers,
+  };
 }
 
 export function buildApiEmojiInteraction(json: GramJsEmojiInteraction): ApiEmojiInteraction {
   return {
     timestamps: json.a.map((l) => l.t),
   };
+}
+
+export function processStickerPackResult(packs: GramJs.StickerPack[]) {
+  return packs.reduce((acc, { emoticon, documents }) => {
+    acc[emoticon] = documents.map((documentId) => buildStickerFromDocument(
+      localDb.documents[String(documentId)],
+    )).filter<ApiSticker>(Boolean as any);
+    return acc;
+  }, {} as Record<string, ApiSticker[]>);
+}
+
+export function processStickerResult(stickers: GramJs.TypeDocument[]) {
+  return stickers
+    .map((document) => {
+      if (document instanceof GramJs.Document) {
+        const sticker = buildStickerFromDocument(document);
+        if (sticker) {
+          localDb.documents[String(document.id)] = document;
+
+          return sticker;
+        }
+      }
+
+      return undefined;
+    })
+    .filter(Boolean);
 }

@@ -1,14 +1,17 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
+import type { GlobalActions } from '../../../global/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
+import { selectIsCurrentUserPremium } from '../../../global/selectors';
+
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
@@ -41,11 +44,12 @@ export type OwnProps = {
   onGifSelect: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
-  addRecentEmoji: AnyToVoidFunction;
+  addRecentEmoji: GlobalActions['addRecentEmoji'];
 };
 
 type StateProps = {
   isLeftColumnShown: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 let isActivated = false;
@@ -57,6 +61,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   canSendStickers,
   canSendGifs,
   isLeftColumnShown,
+  isCurrentUserPremium,
   onLoad,
   onClose,
   onEmojiSelect,
@@ -66,6 +71,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onSearchOpen,
   addRecentEmoji,
 }) => {
+  const { loadPremiumSetStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
 
@@ -79,6 +85,12 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     onLoad();
   }, [onLoad]);
+
+  useEffect(() => {
+    if (isCurrentUserPremium) {
+      loadPremiumSetStickers();
+    }
+  }, [isCurrentUserPremium, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
     if (!IS_SINGLE_COLUMN_LAYOUT) {
@@ -105,7 +117,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const recentEmojisRef = useRef(recentEmojis);
   recentEmojisRef.current = recentEmojis;
   useEffect(() => {
-    if (!recentEmojisRef.current.length) {
+    if (!recentEmojisRef.current.length || isOpen) {
       return;
     }
 
@@ -114,12 +126,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     });
 
     setRecentEmojis([]);
-  }, [isOpen, activeTab, addRecentEmoji]);
+  }, [isOpen, addRecentEmoji]);
 
   const handleEmojiSelect = useCallback((emoji: string, name: string) => {
-    setRecentEmojis((emojis) => {
-      return [...emojis, name];
-    });
+    setRecentEmojis((emojis) => [...emojis, name]);
 
     onEmojiSelect(emoji);
   }, [onEmojiSelect]);
@@ -177,7 +187,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     <>
       <div className="SymbolMenu-main" onClick={stopPropagation}>
         {isActivated && (
-          <Transition name="slide" activeKey={activeTab} renderCount={SYMBOL_MENU_TAB_TITLES.length}>
+          <Transition name="slide" activeKey={activeTab} renderCount={Object.values(SYMBOL_MENU_TAB_TITLES).length}>
             {renderContent}
           </Transition>
         )}
@@ -246,6 +256,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       isLeftColumnShown: global.isLeftColumnShown,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(SymbolMenu));

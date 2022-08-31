@@ -1,6 +1,8 @@
 import type { ApiMessage } from '../../../api/types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 import type { TextPart } from '../../../types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { LangFn } from '../../../hooks/useLang';
 
 import {
   getMessageSummaryDescription,
@@ -9,7 +11,6 @@ import {
   getMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers';
-import type { LangFn } from '../../../hooks/useLang';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
 import trimText from '../../../util/trimText';
@@ -21,6 +22,7 @@ export function renderMessageText(
   isSimple?: boolean,
   truncateLength?: number,
   isProtected?: boolean,
+  observeIntersection?: ObserveFn,
 ) {
   const { text, entities } = message.content.text || {};
 
@@ -38,6 +40,7 @@ export function renderMessageText(
     message.id,
     isSimple,
     isProtected,
+    observeIntersection,
   );
 }
 
@@ -47,11 +50,13 @@ export function renderMessageSummary(
   noEmoji = false,
   highlight?: string,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
+  observeIntersection?: ObserveFn,
 ): TextPart[] {
   const { entities } = message.content.text || {};
 
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
-  if (!hasSpoilers) {
+  const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
+  if (!hasSpoilers && !hasCustomEmoji) {
     const text = trimText(getMessageSummaryText(lang, message, noEmoji), truncateLength);
 
     if (highlight) {
@@ -64,11 +69,13 @@ export function renderMessageSummary(
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
 
-  const text = renderMessageText(message, highlight, undefined, true, truncateLength);
+  const text = renderMessageText(
+    message, highlight, undefined, true, truncateLength, undefined, observeIntersection,
+  );
   const description = getMessageSummaryDescription(lang, message, text);
 
   return [
-    emojiWithSpace,
+    ...renderText(emojiWithSpace),
     ...(Array.isArray(description) ? description : [description]),
   ].filter<TextPart>(Boolean);
 }

@@ -1,26 +1,27 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 
-import { STICKER_SIZE_MODAL } from '../../config';
+import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL } from '../../config';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
   selectCurrentMessageList,
   selectIsChatWithSelf, selectIsCurrentUserPremium,
+  selectIsSetPremium,
   selectShouldSchedule,
   selectStickerSet,
-  selectStickerSetByShortName,
 } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import renderText from './helpers/renderText';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import useSchedule from '../../hooks/useSchedule';
+import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -42,6 +43,7 @@ type StateProps = {
   canScheduleUntilOnline?: boolean;
   shouldSchedule?: boolean;
   isSavedMessages?: boolean;
+  isSetPremium?: boolean;
   isCurrentUserPremium?: boolean;
 };
 
@@ -56,6 +58,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   canScheduleUntilOnline,
   shouldSchedule,
   isSavedMessages,
+  isSetPremium,
   isCurrentUserPremium,
   onClose,
 }) => {
@@ -63,11 +66,18 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     loadStickers,
     toggleStickerSet,
     sendMessage,
+    openPremiumModal,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
+
+  const prevStickerSet = usePrevious(stickerSet);
+  const renderingStickerSet = stickerSet || prevStickerSet;
+
+  const isEmoji = renderingStickerSet?.isEmoji;
+  const isButtonLocked = !renderingStickerSet?.installedDate && isSetPremium && !isCurrentUserPremium;
 
   const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);
 
@@ -76,20 +86,12 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
   useEffect(() => {
-    if (isOpen && !stickerSet?.stickers) {
-      if (fromSticker) {
-        const { stickerSetId, stickerSetAccessHash } = fromSticker;
-        loadStickers({
-          stickerSetId,
-          stickerSetAccessHash,
-        });
-      } else if (stickerSetShortName) {
-        loadStickers({
-          stickerSetShortName,
-        });
-      }
+    if (isOpen && !renderingStickerSet?.stickers) {
+      loadStickers({
+        stickerSetInfo: fromSticker ? fromSticker.stickerSetInfo : { shortName: stickerSetShortName! },
+      });
     }
-  }, [isOpen, fromSticker, loadStickers, stickerSetShortName, stickerSet]);
+  }, [isOpen, fromSticker, loadStickers, stickerSetShortName, renderingStickerSet]);
 
   const handleSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean) => {
     sticker = {
@@ -109,11 +111,30 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   }, [onClose, requestCalendar, sendMessage, shouldSchedule]);
 
   const handleButtonClick = useCallback(() => {
-    if (stickerSet) {
-      toggleStickerSet({ stickerSetId: stickerSet.id });
+    if (renderingStickerSet) {
+      if (isButtonLocked) {
+        openPremiumModal({ initialSection: 'animated_emoji' });
+        return;
+      }
+      toggleStickerSet({ stickerSetId: renderingStickerSet.id });
       onClose();
     }
-  }, [onClose, stickerSet, toggleStickerSet]);
+  }, [isButtonLocked, onClose, openPremiumModal, renderingStickerSet, toggleStickerSet]);
+
+  const renderButtonText = () => {
+    if (!renderingStickerSet) return lang('Loading');
+    if (isButtonLocked) {
+      return lang('EmojiInput.UnlockPack', renderingStickerSet.title);
+    }
+
+    const suffix = isEmoji ? 'Emoji' : 'Sticker';
+
+    return lang(
+      renderingStickerSet.installedDate ? `StickerPack.Remove${suffix}Count` : `StickerPack.Add${suffix}Count`,
+      renderingStickerSet.count,
+      'i',
+    );
+  };
 
   return (
     <Modal
@@ -121,17 +142,18 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       hasCloseButton
-      title={stickerSet ? renderText(stickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
+      title={renderingStickerSet
+        ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
     >
-      {stickerSet?.stickers ? (
+      {renderingStickerSet?.stickers ? (
         <>
           <div ref={containerRef} className="stickers custom-scroll">
-            {stickerSet.stickers.map((sticker) => (
+            {renderingStickerSet.stickers.map((sticker) => (
               <StickerButton
                 sticker={sticker}
-                size={STICKER_SIZE_MODAL}
+                size={isEmoji ? EMOJI_SIZE_MODAL : STICKER_SIZE_MODAL}
                 observeIntersection={observeIntersection}
-                onClick={canSendStickers ? handleSelect : undefined}
+                onClick={canSendStickers && !isEmoji ? handleSelect : undefined}
                 clickArg={sticker}
                 isSavedMessages={isSavedMessages}
                 isCurrentUserPremium={isCurrentUserPremium}
@@ -142,14 +164,12 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
             <Button
               size="smaller"
               fluid
-              color={stickerSet.installedDate ? 'danger' : 'primary'}
+              color={renderingStickerSet.installedDate ? 'danger' : 'primary'}
+              isShiny={isButtonLocked}
+              withPremiumGradient={isButtonLocked}
               onClick={handleButtonClick}
             >
-              {lang(
-                stickerSet.installedDate ? 'StickerPack.RemoveStickerCount' : 'StickerPack.AddStickerCount',
-                stickerSet.count,
-                'i',
-              )}
+              {renderButtonText()}
             </Button>
           </div>
         </>
@@ -172,17 +192,20 @@ export default memo(withGlobal<OwnProps>(
     );
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 
+    const stickerSetInfo = fromSticker ? fromSticker.stickerSetInfo
+      : stickerSetShortName ? { shortName: stickerSetShortName } : undefined;
+
+    const stickerSet = stickerSetInfo ? selectStickerSet(global, stickerSetInfo) : undefined;
+    const isSetPremium = stickerSet && selectIsSetPremium(stickerSet);
+
     return {
       canScheduleUntilOnline: Boolean(chatId) && selectCanScheduleUntilOnline(global, chatId),
       canSendStickers,
       isSavedMessages,
       shouldSchedule: selectShouldSchedule(global),
-      stickerSet: fromSticker
-        ? selectStickerSet(global, fromSticker.stickerSetId)
-        : stickerSetShortName
-          ? selectStickerSetByShortName(global, stickerSetShortName)
-          : undefined,
+      stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      isSetPremium,
     };
   },
 )(StickerSetModal));

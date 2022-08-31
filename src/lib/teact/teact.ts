@@ -108,7 +108,8 @@ export type TeactNode =
   ReactElement
   | string
   | number
-  | boolean;
+  | boolean
+  | TeactNode[];
 
 const Fragment = Symbol('Fragment');
 

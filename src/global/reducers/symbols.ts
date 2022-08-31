@@ -22,6 +22,13 @@ export function updateStickerSets(
     };
   });
 
+  const regularSetIds = sets.filter((set) => !set.isEmoji).map((set) => set.id);
+  const addedEmojiSetIds = category === 'added' ? sets.filter((set) => set.isEmoji).map((set) => set.id) : [];
+  const customEmojis = sets.filter((set) => set.isEmoji)
+    .map((set) => set.stickers)
+    .flat()
+    .filter(Boolean);
+
   return {
     ...global,
     stickers: {
@@ -36,8 +43,28 @@ export function updateStickerSets(
         ...(
           category === 'search'
             ? { resultIds }
-            : { setIds: sets.map(({ id }) => id) }
+            : {
+              setIds: [
+                ...(global.stickers[category].setIds || []),
+                ...regularSetIds,
+              ],
+            }
         ),
+      },
+    },
+    customEmojis: {
+      ...global.customEmojis,
+      added: {
+        ...global.customEmojis.added,
+        hash,
+        setIds: [
+          ...(global.customEmojis.added.setIds || []),
+          ...addedEmojiSetIds,
+        ],
+      },
+      byId: {
+        ...global.customEmojis.byId,
+        ...buildCollectionByKey(customEmojis, 'id'),
       },
     },
   };
@@ -47,7 +74,8 @@ export function updateStickerSet(
   global: GlobalState, stickerSetId: string, update: Partial<ApiStickerSet>,
 ): GlobalState {
   const currentStickerSet = global.stickers.setsById[stickerSetId] || {};
-  const addedSets = global.stickers.added.setIds || [];
+  const isCustomEmoji = update.isEmoji || currentStickerSet.isEmoji;
+  const addedSets = (isCustomEmoji ? global.customEmojis.added.setIds : global.stickers.added.setIds) || [];
   let setIds: string[] = addedSets;
   if (update.installedDate && addedSets && !addedSets.includes(stickerSetId)) {
     setIds = [stickerSetId, ...setIds];
@@ -57,13 +85,16 @@ export function updateStickerSet(
     setIds = setIds.filter((id) => id !== stickerSetId);
   }
 
+  const customEmojiById = isCustomEmoji && currentStickerSet.stickers
+    && buildCollectionByKey(currentStickerSet.stickers, 'id');
+
   return {
     ...global,
     stickers: {
       ...global.stickers,
       added: {
         ...global.stickers.added,
-        setIds,
+        ...(!isCustomEmoji && { setIds }),
       },
       setsById: {
         ...global.stickers.setsById,
@@ -71,6 +102,17 @@ export function updateStickerSet(
           ...currentStickerSet,
           ...update,
         },
+      },
+    },
+    customEmojis: {
+      ...global.customEmojis,
+      byId: {
+        ...global.customEmojis.byId,
+        ...customEmojiById,
+      },
+      added: {
+        ...global.customEmojis.added,
+        ...(isCustomEmoji && { setIds }),
       },
     },
   };
@@ -135,10 +177,14 @@ export function updateStickersForEmoji(
 }
 
 export function rebuildStickersForEmoji(global: GlobalState): GlobalState {
-  const { emoji, stickers, hash } = global.stickers.forEmoji || {};
-  if (!emoji) {
-    return global;
+  if (global.stickers.forEmoji) {
+    const { emoji, stickers, hash } = global.stickers.forEmoji;
+    if (!emoji) {
+      return global;
+    }
+
+    return updateStickersForEmoji(global, emoji, stickers, hash);
   }
 
-  return updateStickersForEmoji(global, emoji, stickers, hash);
+  return global;
 }

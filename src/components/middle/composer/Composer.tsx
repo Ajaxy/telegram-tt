@@ -68,7 +68,7 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from '../../../util/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
 import renderText from '../../common/helpers/renderText';
-import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
+import { insertHtmlInSelection } from '../../../util/selection';
 import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharacterOutsideSelection';
 import buildClassName from '../../../util/buildClassName';
 import windowSize from '../../../util/windowSize';
@@ -448,7 +448,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     !isReady,
   );
 
-  const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
+  const insertHtmlAndUpdateCursor = useCallback((newHtml: string, inputId: string = EDITABLE_INPUT_ID) => {
     const selection = window.getSelection()!;
     let messageInput: HTMLDivElement;
     if (inputId === EDITABLE_INPUT_ID) {
@@ -456,9 +456,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     } else {
       messageInput = document.getElementById(inputId) as HTMLDivElement;
     }
-    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
-      .join('')
-      .replace(/\u200b+/g, '\u200b');
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
@@ -476,6 +473,13 @@ const Composer: FC<OwnProps & StateProps> = ({
       focusEditableElement(messageInput);
     });
   }, [htmlRef]);
+
+  const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
+    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+      .join('')
+      .replace(/\u200b+/g, '\u200b');
+    insertHtmlAndUpdateCursor(newHtml, inputId);
+  }, [insertHtmlAndUpdateCursor]);
 
   const removeSymbol = useCallback(() => {
     const selection = window.getSelection()!;
@@ -1094,8 +1098,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                 isDisabled={Boolean(activeVoiceRecording)}
               />
             )}
-          {isChatWithBot && isBotMenuButtonCommands && botCommands !== false && !activeVoiceRecording
-            && !editingMessage && (
+          {(isChatWithBot && isBotMenuButtonCommands
+            && botCommands !== false && !activeVoiceRecording && !editingMessage) && (
             <ResponsiveHoverButton
               className={buildClassName('bot-commands', isBotCommandMenuOpen && 'activated')}
               round
@@ -1318,8 +1322,8 @@ export default memo(withGlobal<OwnProps>(
     const requestedText = selectRequestedText(global, chatId);
     const currentMessageList = selectCurrentMessageList(global);
     const isForCurrentMessageList = chatId === currentMessageList?.chatId
-        && threadId === currentMessageList?.threadId
-        && messageListType === currentMessageList?.type;
+      && threadId === currentMessageList?.threadId
+      && messageListType === currentMessageList?.type;
     const user = selectUser(global, chatId);
     const canSendVoiceByPrivacy = (user && !user.fullInfo?.noVoiceMessages) ?? true;
 

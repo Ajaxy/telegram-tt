@@ -80,7 +80,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
             sticker={sticker}
             size={STICKER_SIZE_PICKER}
             observeIntersection={observeIntersection}
-            onClick={onStickerSelect}
+            onClick={isOpen ? onStickerSelect : undefined}
             clickArg={sticker}
             isSavedMessages={isSavedMessages}
             canViewSet

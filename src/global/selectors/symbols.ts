@@ -1,5 +1,7 @@
 import type { GlobalState } from '../types';
-import type { ApiSticker } from '../../api/types';
+import type { ApiStickerSetInfo, ApiSticker, ApiStickerSet } from '../../api/types';
+
+import { selectIsCurrentUserPremium } from './users';
 
 export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;
@@ -14,16 +16,24 @@ export function selectCurrentGifSearch(global: GlobalState) {
   return global.gifs.search;
 }
 
-export function selectStickerSet(global: GlobalState, id: string) {
-  return global.stickers.setsById[id];
-}
+export function selectStickerSet(global: GlobalState, id: string | ApiStickerSetInfo) {
+  if (typeof id === 'string') {
+    return global.stickers.setsById[id];
+  }
 
-export function selectStickerSetByShortName(global: GlobalState, shortName: string) {
-  return Object.values(global.stickers.setsById).find((l) => l.shortName.toLowerCase() === shortName.toLowerCase());
+  if ('id' in id) {
+    return global.stickers.setsById[id.id];
+  }
+
+  if ('isMissing' in id) return undefined;
+
+  return Object.values(global.stickers.setsById).find(({ shortName }) => (
+    shortName.toLowerCase() === id.shortName.toLowerCase()
+  ));
 }
 
 export function selectStickersForEmoji(global: GlobalState, emoji: string) {
-  const stickerSets = Object.values(global.stickers.setsById);
+  const addedSets = global.stickers.added.setIds;
   let stickersForEmoji: ApiSticker[] = [];
   // Favorites
   global.stickers.favorite.stickers.forEach((sticker) => {
@@ -31,7 +41,8 @@ export function selectStickersForEmoji(global: GlobalState, emoji: string) {
   });
 
   // Added sets
-  stickerSets.forEach(({ packs }) => {
+  addedSets?.forEach((id) => {
+    const packs = global.stickers.setsById[id].packs;
     if (!packs) {
       return;
     }
@@ -39,6 +50,27 @@ export function selectStickersForEmoji(global: GlobalState, emoji: string) {
     stickersForEmoji = stickersForEmoji.concat(packs[emoji] || [], packs[cleanEmoji(emoji)] || []);
   });
   return stickersForEmoji;
+}
+
+export function selectCustomEmojiForEmoji(global: GlobalState, emoji: string) {
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  const addedCustomSets = global.customEmojis.added.setIds;
+  let customEmojiForEmoji: ApiSticker[] = [];
+
+  // Added sets
+  addedCustomSets?.forEach((id) => {
+    const packs = global.stickers.setsById[id].packs;
+    if (!packs) {
+      return;
+    }
+
+    customEmojiForEmoji = customEmojiForEmoji.concat(packs[emoji] || [], packs[cleanEmoji(emoji)] || []);
+  });
+  return isCurrentUserPremium ? customEmojiForEmoji : customEmojiForEmoji.filter(({ isFree }) => isFree);
+}
+
+export function selectIsSetPremium(stickerSet: ApiStickerSet) {
+  return stickerSet.isEmoji && stickerSet.stickers?.some((sticker) => !sticker.isFree);
 }
 
 function cleanEmoji(emoji: string) {

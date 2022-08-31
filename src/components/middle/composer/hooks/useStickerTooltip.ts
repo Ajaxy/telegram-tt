@@ -20,14 +20,14 @@ export default function useStickerTooltip(
     (IS_EMOJI_SUPPORTED && parseEmojiOnlyString(cleanHtml) === 1)
     || (!IS_EMOJI_SUPPORTED && Boolean(html.match(/^<img.[^>]*?>$/g)))
   );
-  const hasStickers = Boolean(stickers) && isSingleEmoji;
+  const hasStickers = Boolean(stickers?.length) && isSingleEmoji;
 
   useEffect(() => {
     if (isDisabled) return;
 
     if (isAllowed && isSingleEmoji) {
       loadStickersForEmoji({
-        emoji: IS_EMOJI_SUPPORTED ? cleanHtml : cleanHtml.match(/alt="(.+)"/)?.[1],
+        emoji: IS_EMOJI_SUPPORTED ? cleanHtml : cleanHtml.match(/alt="(.+)"/)?.[1]!,
       });
     } else if (hasStickers || !isSingleEmoji) {
       clearStickersForEmoji();

@@ -1189,6 +1189,9 @@ messages.requestSimpleWebView#6abb2f73 flags:# bot:InputUser url:string theme_pa
 messages.sendWebViewResultMessage#a4314f5 bot_query_id:string result:InputBotInlineResult = WebViewMessageSent;
 messages.sendWebViewData#dc0242c8 bot:InputUser random_id:long button_text:string data:string = Updates;
 messages.transcribeAudio#269e9a49 peer:InputPeer msg_id:int = messages.TranscribedAudio;
+messages.getCustomEmojiDocuments#d9ab0f54 document_id:Vector<long> = Vector<Document>;
+messages.getEmojiStickers#fbfca18f hash:long = messages.AllStickers;
+messages.getFeaturedEmojiStickers#ecf6736 hash:long = messages.FeaturedStickers;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;
 updates.getChannelDifference#3173d78 flags:# force:flags.0?true channel:InputChannel filter:ChannelMessagesFilter pts:int limit:int = updates.ChannelDifference;

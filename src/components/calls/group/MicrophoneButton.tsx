@@ -124,15 +124,13 @@ const MicrophoneButton: FC<StateProps> = ({
     muteMouseDownState.current = 'up';
   };
 
-  const buttonText = useMemo(() => {
-    return lang(
-      hasRequestedToSpeak ? 'VoipMutedTapedForSpeak' : (
-        shouldRaiseHand ? 'VoipMutedByAdmin' : (
-          noAudioStream ? 'VoipUnmute' : 'VoipTapToMute'
-        )
-      ),
-    );
-  }, [hasRequestedToSpeak, noAudioStream, lang, shouldRaiseHand]);
+  const buttonText = lang(
+    hasRequestedToSpeak ? 'VoipMutedTapedForSpeak' : (
+      shouldRaiseHand ? 'VoipMutedByAdmin' : (
+        noAudioStream ? 'VoipUnmute' : 'VoipTapToMute'
+      )
+    ),
+  );
 
   return (
     <div className="button-wrapper microphone-wrapper">

@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiMessage, ApiWebPage } from '../../../api/types';
+import type { ApiMessage, ApiMessageEntityTextUrl, ApiWebPage } from '../../../api/types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
@@ -54,7 +54,9 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const link = useDebouncedMemo(() => {
     const { text, entities } = parseMessageInput(messageText);
 
-    const linkEntity = entities && entities.find(({ type }) => type === ApiMessageEntityTypes.TextUrl);
+    const linkEntity = entities?.find((entity): entity is ApiMessageEntityTextUrl => (
+      entity.type === ApiMessageEntityTypes.TextUrl
+    ));
     if (linkEntity) {
       return linkEntity.url;
     }

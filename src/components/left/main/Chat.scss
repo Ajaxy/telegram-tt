@@ -173,6 +173,10 @@
         vertical-align: -0.125rem;
       }
 
+      .text-entity-custom-emoji {
+        --custom-emoji-size: 1.25rem;
+      }
+
       .icon-play {
         position: relative;
         display: inline-block;

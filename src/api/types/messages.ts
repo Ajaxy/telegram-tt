@@ -32,9 +32,9 @@ export interface ApiPhoto {
 
 export interface ApiSticker {
   id: string;
-  stickerSetId: string;
-  stickerSetAccessHash?: string;
+  stickerSetInfo: ApiStickerSetInfo;
   emoji?: string;
+  isCustomEmoji?: boolean;
   isLottie: boolean;
   isVideo: boolean;
   width?: number;
@@ -42,6 +42,7 @@ export interface ApiSticker {
   thumbnail?: ApiThumbnail;
   isPreloadedGlobally?: boolean;
   hasEffect?: boolean;
+  isFree?: boolean;
 }
 
 export interface ApiStickerSet {
@@ -60,6 +61,21 @@ export interface ApiStickerSet {
   covers?: ApiSticker[];
   shortName: string;
 }
+
+type ApiStickerSetInfoShortName = {
+  shortName: string;
+};
+
+type ApiStickerSetInfoId = {
+  id: string;
+  accessHash: string;
+};
+
+type ApiStickerSetInfoMissing = {
+  isMissing: true;
+};
+
+export type ApiStickerSetInfo = ApiStickerSetInfoShortName | ApiStickerSetInfoId | ApiStickerSetInfoMissing;
 
 export interface ApiVideo {
   id: string;
@@ -264,14 +280,46 @@ export interface ApiMessageForwardInfo {
   adminTitle?: string;
 }
 
-export interface ApiMessageEntity {
-  type: string;
+export type ApiMessageEntityDefault = {
+  type: Exclude<
+  `${ApiMessageEntityTypes}`,
+  `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
+  `${ApiMessageEntityTypes.CustomEmoji}`
+  >;
   offset: number;
   length: number;
-  userId?: string;
-  url?: string;
+};
+
+export type ApiMessageEntityPre = {
+  type: ApiMessageEntityTypes.Pre;
+  offset: number;
+  length: number;
   language?: string;
-}
+};
+
+export type ApiMessageEntityTextUrl = {
+  type: ApiMessageEntityTypes.TextUrl;
+  offset: number;
+  length: number;
+  url: string;
+};
+
+export type ApiMessageEntityMentionName = {
+  type: ApiMessageEntityTypes.MentionName;
+  offset: number;
+  length: number;
+  userId: string;
+};
+
+export type ApiMessageEntityCustomEmoji = {
+  type: ApiMessageEntityTypes.CustomEmoji;
+  offset: number;
+  length: number;
+  documentId: string;
+};
+
+export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
+ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -291,6 +339,7 @@ export enum ApiMessageEntityTypes {
   Url = 'MessageEntityUrl',
   Underline = 'MessageEntityUnderline',
   Spoiler = 'MessageEntitySpoiler',
+  CustomEmoji = 'MessageEntityCustomEmoji',
   Unknown = 'MessageEntityUnknown',
 }
 

@@ -18,10 +18,11 @@ export enum SymbolMenuTabs {
   'GIFs',
 }
 
-// Getting enum string values for display in Tabs.
-// See: https://www.typescriptlang.org/docs/handbook/enums.html#reverse-mappings
-export const SYMBOL_MENU_TAB_TITLES = Object.values(SymbolMenuTabs)
-  .filter((value): value is string => typeof value === 'string');
+export const SYMBOL_MENU_TAB_TITLES: Record<SymbolMenuTabs, string> = {
+  [SymbolMenuTabs.Emoji]: 'Emoji',
+  [SymbolMenuTabs.Stickers]: 'AccDescrStickers',
+  [SymbolMenuTabs.GIFs]: 'GifsTab',
+};
 
 const SYMBOL_MENU_TAB_ICONS = {
   [SymbolMenuTabs.Emoji]: 'icon-smile',
@@ -40,7 +41,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
         className={`symbol-tab-button ${activeTab === tab ? 'activated' : ''}`}
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => onSwitchTab(tab)}
-        ariaLabel={SYMBOL_MENU_TAB_TITLES[tab]}
+        ariaLabel={lang(SYMBOL_MENU_TAB_TITLES[tab])}
         round
         faded
         color="translucent"

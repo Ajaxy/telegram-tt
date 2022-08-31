@@ -94,4 +94,9 @@
       background: var(--color-background);
     }
   }
+
+  .menu-loading-row {
+    margin: 0.125rem 1rem;
+    width: calc(100% - 2rem);
+  }
 }

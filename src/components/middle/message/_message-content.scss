@@ -406,10 +406,16 @@
     }
   }
 
-  &:not(.custom-shape) .text-content .emoji {
-    width: calc(1.25 * var(--message-text-size, 1rem));
-    height: calc(1.25 * var(--message-text-size, 1rem));
-    background-size: calc(1.25 * var(--message-text-size, 1rem));
+  &:not(.custom-shape) .text-content {
+    .emoji {
+      width: calc(1.25 * var(--message-text-size, 1rem));
+      height: calc(1.25 * var(--message-text-size, 1rem));
+      background-size: calc(1.25 * var(--message-text-size, 1rem));
+    }
+
+    .text-entity-custom-emoji {
+      --custom-emoji-size: calc(1.25 * var(--message-text-size, 1rem));
+    }
   }
 
   .no-media-corners {
@@ -820,6 +826,31 @@
   &:active,
   &:visited {
     text-decoration: underline !important;
+  }
+}
+
+.text-entity-custom-emoji {
+  display: inline-block;
+  vertical-align: text-bottom;
+  --custom-emoji-size: 1.5rem;
+  width: var(--custom-emoji-size);
+  height: var(--custom-emoji-size);
+
+  & > video, & > img {
+    width: calc(100% + 1px) !important;
+    height: calc(100% + 1px) !important;
+    vertical-align: baseline;
+  }
+
+  & > .AnimatedSticker {
+    width: var(--custom-emoji-size) !important;
+    height: var(--custom-emoji-size) !important;
+    display: flex !important;
+
+    & > canvas {
+      width: var(--custom-emoji-size) !important;
+      height: var(--custom-emoji-size) !important;
+    }
   }
 }
 

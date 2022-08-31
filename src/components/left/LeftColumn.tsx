@@ -145,12 +145,12 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.Privacy:
         case SettingsScreens.ActiveSessions:
         case SettingsScreens.Language:
+        case SettingsScreens.Stickers:
         case SettingsScreens.Experimental:
           setSettingsScreen(SettingsScreens.Main);
           return;
 
         case SettingsScreens.GeneralChatBackground:
-        case SettingsScreens.QuickReaction:
           setSettingsScreen(SettingsScreens.General);
           return;
         case SettingsScreens.GeneralChatBackgroundColor:
@@ -278,6 +278,11 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.FoldersEditFolderFromChatList:
           setContent(LeftColumnContent.ChatList);
           setSettingsScreen(SettingsScreens.Main);
+          return;
+
+        case SettingsScreens.QuickReaction:
+        case SettingsScreens.CustomEmoji:
+          setSettingsScreen(SettingsScreens.Stickers);
           return;
         default:
           break;

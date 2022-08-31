@@ -1,12 +1,15 @@
 import type { GlobalState, MessageListType, Thread } from '../types';
 import type {
   ApiChat,
+  ApiStickerSetInfo,
   ApiMessage,
+  ApiMessageEntityCustomEmoji,
   ApiMessageOutgoingStatus,
   ApiUser,
 } from '../../api/types';
 import {
   MAIN_THREAD_ID,
+  ApiMessageEntityTypes,
 } from '../../api/types';
 
 import { LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
@@ -974,6 +977,40 @@ export function selectCanScheduleUntilOnline(global: GlobalState, id: string) {
   return Boolean(
     !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
   );
+}
+
+export function selectCustomEmojis(message: ApiMessage) {
+  const entities = message.content.text?.entities;
+  return entities?.filter((entity): entity is ApiMessageEntityCustomEmoji => (
+    entity.type === ApiMessageEntityTypes.CustomEmoji
+  ));
+}
+
+export function selectMessageCustomEmojiSets(
+  global: GlobalState, message: ApiMessage,
+): ApiStickerSetInfo[] | undefined {
+  const customEmojis = selectCustomEmojis(message);
+  if (!customEmojis) return MEMO_EMPTY_ARRAY;
+  const documents = customEmojis.map((entity) => global.customEmojis.byId[entity.documentId]);
+  // If some emoji still loading, do not return empty array
+  if (!documents.every(Boolean)) return undefined;
+  const sets = documents.map((doc) => doc.stickerSetInfo);
+  const setsWithoutDuplicates = sets.reduce((acc, set) => {
+    if ('shortName' in set) {
+      if (acc.some((s) => 'shortName' in s && s.shortName === set.shortName)) {
+        return acc;
+      }
+    }
+
+    if ('id' in set) {
+      if (acc.some((s) => 'id' in s && s.id === set.id)) {
+        return acc;
+      }
+    }
+    acc.push(set); // Optimization
+    return acc;
+  }, [] as ApiStickerSetInfo[]);
+  return setsWithoutDuplicates;
 }
 
 export function selectForwardsContainVoiceMessages(global: GlobalState) {

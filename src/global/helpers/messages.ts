@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMessage, ApiReactions, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiReactions, ApiUser,
 } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
@@ -78,7 +78,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean | number {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact) {
+  if (!text || text.entities?.length || photo || video || audio || voice || document || poll || webPage || contact) {
     return false;
   }
 
@@ -88,7 +88,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean | number {
 
 export function getMessageSingleEmoji(message: ApiMessage) {
   const { text } = message.content;
-  if (!(text && text.text.length <= 6)) {
+  if (!(text && text.text.length <= 6) || text.entities?.length) {
     return undefined;
   }
 
@@ -104,15 +104,17 @@ export function getFirstLinkInMessage(message: ApiMessage) {
 
   let match: RegExpMatchArray | null | undefined;
   if (text?.entities) {
-    let link = text.entities.find((entity) => entity.type === ApiMessageEntityTypes.TextUrl);
-    if (link) {
-      match = link.url!.match(RE_LINK);
+    const firstTextUrl = text.entities.find((entity): entity is ApiMessageEntityTextUrl => (
+      entity.type === ApiMessageEntityTypes.TextUrl
+    ));
+    if (firstTextUrl) {
+      match = firstTextUrl.url.match(RE_LINK);
     }
 
     if (!match) {
-      link = text.entities.find((entity) => entity.type === ApiMessageEntityTypes.Url);
-      if (link) {
-        const { offset, length } = link;
+      const firstUrl = text.entities.find((entity) => entity.type === ApiMessageEntityTypes.Url);
+      if (firstUrl) {
+        const { offset, length } = firstUrl;
         match = text.text.substring(offset, offset + length).match(RE_LINK);
       }
     }

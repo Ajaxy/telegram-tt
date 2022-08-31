@@ -13,12 +13,13 @@ import {
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
+import { renderMessageSummary } from './helpers/renderMessageText';
+
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
-import useWebpThumbnail from '../../hooks/useWebpThumbnail';
+import useThumbnail from '../../hooks/useThumbnail';
 import useLang from '../../hooks/useLang';
-import { renderMessageSummary } from './helpers/renderMessageText';
 
 import ActionMessage from '../middle/ActionMessage';
 
@@ -56,7 +57,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
-  const mediaThumbnail = useWebpThumbnail(message);
+  const mediaThumbnail = useThumbnail(message);
   const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
 
   const lang = useLang();

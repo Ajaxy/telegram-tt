@@ -5,7 +5,9 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
-import type { ApiAvailableReaction, ApiMessage } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet,
+} from '../../../api/types';
 import type { IAlbum, IAnchorPosition } from '../../../types';
 
 import {
@@ -15,6 +17,8 @@ import {
   selectCurrentMessageList, selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
+  selectMessageCustomEmojiSets,
+  selectStickerSet,
 } from '../../../global/selectors';
 import {
   isActionMessage, isChatChannel,
@@ -52,6 +56,8 @@ export type OwnProps = {
 
 type StateProps = {
   availableReactions?: ApiAvailableReaction[];
+  customEmojiSetsInfo?: ApiStickerSetInfo[];
+  customEmojiSets?: ApiStickerSet[];
   noOptions?: boolean;
   canSendNow?: boolean;
   canReschedule?: boolean;
@@ -89,6 +95,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   messageListType,
   chatUsername,
   message,
+  customEmojiSetsInfo,
+  customEmojiSets,
   album,
   anchor,
   onClose,
@@ -143,6 +151,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadReactors,
     copyMessagesByIds,
     saveGif,
+    loadStickers,
     cancelPollVote,
     closePoll,
   } = getActions();
@@ -156,6 +165,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
 
+  // `undefined` indicates that emoji are present and loading
+  const hasCustomEmoji = customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length);
+
   useEffect(() => {
     if (canShowSeenBy && isOpen) {
       loadSeenBy({ chatId: message.chatId, messageId: message.id });
@@ -167,6 +179,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       loadReactors({ chatId: message.chatId, messageId: message.id });
     }
   }, [canShowReactionsCount, isOpen, loadReactors, message.chatId, message.id]);
+
+  useEffect(() => {
+    if (customEmojiSetsInfo?.length && customEmojiSets?.length !== customEmojiSetsInfo.length) {
+      customEmojiSetsInfo.forEach((set) => {
+        loadStickers({ stickerSetInfo: set });
+      });
+    }
+  }, [customEmojiSetsInfo, customEmojiSets, loadStickers]);
 
   useEffect(() => {
     if (!hasFullInfo && !isPrivate && isOpen) {
@@ -403,6 +423,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canRevote={canRevote}
         canClosePoll={canClosePoll}
         canShowSeenBy={canShowSeenBy}
+        hasCustomEmoji={hasCustomEmoji}
+        customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
         onReply={handleReply}
@@ -516,6 +538,11 @@ export default memo(withGlobal<OwnProps>(
     const canCopyNumber = Boolean(message.content.contact);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
+    const customEmojiSetsInfo = selectMessageCustomEmojiSets(global, message);
+    const customEmojiSetsNotFiltered = customEmojiSetsInfo?.map((set) => selectStickerSet(global, set));
+    const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
+      ? customEmojiSetsNotFiltered : undefined;
+
     return {
       availableReactions: global.availableReactions,
       noOptions,
@@ -547,6 +574,8 @@ export default memo(withGlobal<OwnProps>(
       canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
       canRemoveReaction,
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
+      customEmojiSetsInfo,
+      customEmojiSets,
     };
   },
 )(ContextMenuContainer));

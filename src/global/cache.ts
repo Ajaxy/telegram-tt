@@ -19,6 +19,7 @@ import {
   ALL_FOLDER_ID,
   ARCHIVED_FOLDER_ID,
   DEFAULT_LIMITS,
+  GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
@@ -272,6 +273,20 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   if (cached.appConfig && !cached.appConfig.limits) {
     cached.appConfig.limits = DEFAULT_LIMITS;
   }
+
+  if (!cached.customEmojis) {
+    cached.customEmojis = {
+      added: {},
+      byId: {},
+      lastRendered: [],
+    };
+  }
+
+  if (!cached.stickers.premiumSet) {
+    cached.stickers.premiumSet = {
+      stickers: [],
+    };
+  }
 }
 
 function updateCache() {
@@ -316,6 +331,7 @@ export function serializeGlobal(global: GlobalState) {
       'topPeers',
       'topInlineBots',
       'recentEmojis',
+      'recentCustomEmojis',
       'push',
       'shouldShowContextMenuHint',
       'leftColumnWidth',
@@ -326,6 +342,7 @@ export function serializeGlobal(global: GlobalState) {
       playbackRate: global.audioPlayer.playbackRate,
       isMuted: global.audioPlayer.isMuted,
     },
+    customEmojis: reduceCustomEmojis(global),
     mediaViewer: {
       volume: global.mediaViewer.volume,
       playbackRate: global.mediaViewer.playbackRate,
@@ -352,6 +369,18 @@ export function serializeGlobal(global: GlobalState) {
   };
 
   return JSON.stringify(reducedGlobal);
+}
+
+function reduceCustomEmojis(global: GlobalState): GlobalState['customEmojis'] {
+  const { lastRendered, byId } = global.customEmojis;
+  const idsToSave = lastRendered.slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT);
+  const byIdToSave = pick(byId, idsToSave);
+
+  return {
+    byId: byIdToSave,
+    lastRendered: idsToSave,
+    added: {},
+  };
 }
 
 function reduceShowChatInfo(global: GlobalState): boolean {

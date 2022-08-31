@@ -16,7 +16,7 @@ export const processDeepLink = (url: string) => {
     openChatByInvite,
     openChatByUsername,
     openChatByPhoneNumber,
-    openStickerSetShortName,
+    openStickerSet,
     focusMessage,
     joinVoiceChatByLink,
     openInvoice,
@@ -85,8 +85,10 @@ export const processDeepLink = (url: string) => {
     case 'addstickers': {
       const { set } = params;
 
-      openStickerSetShortName({
-        stickerSetShortName: set,
+      openStickerSet({
+        stickerSetInfo: {
+          shortName: set,
+        },
       });
       break;
     }

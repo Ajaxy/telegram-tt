@@ -63,7 +63,8 @@ export const INITIAL_STATE: GlobalState = {
     byMessageLocalId: {},
   },
 
-  recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],
+  recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy', 'duck', 'cherries'],
+  recentCustomEmojis: ['5377305978079288312'],
 
   stickers: {
     setsById: {},
@@ -80,11 +81,20 @@ export const INITIAL_STATE: GlobalState = {
     premium: {
       stickers: [],
     },
+    premiumSet: {
+      stickers: [],
+    },
     featured: {
       setIds: [],
     },
     search: {},
     forEmoji: {},
+  },
+
+  customEmojis: {
+    lastRendered: [],
+    byId: {},
+    added: {},
   },
 
   emojiKeywords: {},

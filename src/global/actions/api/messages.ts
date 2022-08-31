@@ -69,6 +69,7 @@ import {
   selectUser,
   selectSendAs,
   selectSponsoredMessage,
+  selectIsCurrentUserPremium,
   selectForwardsContainVoiceMessages,
 } from '../../selectors';
 import {
@@ -607,6 +608,7 @@ addActionHandler('forwardMessages', (global, action, payload) => {
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions,
   } = global.forwardMessages;
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
   const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
   const messages = fromChatId && messageIds
@@ -635,6 +637,7 @@ addActionHandler('forwardMessages', (global, action, payload) => {
       withMyScore,
       noAuthors,
       noCaptions,
+      isCurrentUserPremium,
     });
   }
 
@@ -738,6 +741,28 @@ addActionHandler('transcribeAudio', async (global, actions, payload) => {
   });
 
   setGlobal(global);
+});
+
+addActionHandler('loadCustomEmojis', async (global, actions, payload) => {
+  const { ids, ignoreCache } = payload;
+  const newCustomEmojiIds = ignoreCache ? ids
+    : unique(ids.filter((documentId) => !global.customEmojis.byId[documentId]));
+  const customEmoji = await callApi('fetchCustomEmoji', {
+    documentId: newCustomEmojiIds,
+  });
+  if (!customEmoji) return;
+
+  global = getGlobal();
+  setGlobal({
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      byId: {
+        ...global.customEmojis.byId,
+        ...buildCollectionByKey(customEmoji, 'id'),
+      },
+    },
+  });
 });
 
 async function loadWebPagePreview(message: string) {

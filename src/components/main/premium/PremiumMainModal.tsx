@@ -283,7 +283,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && (
               <div className={styles.footer}>
                 {/* eslint-disable-next-line react/jsx-no-bind */}
-                <Button className={styles.button} isShiny onClick={handleClick}>
+                <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
                   {lang('SubscribeToPremium', formatCurrency(Number(promo.monthlyAmount), promo.currency, lang.code))}
                 </Button>
               </div>

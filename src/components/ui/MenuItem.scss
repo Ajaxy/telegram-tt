@@ -133,4 +133,21 @@
       }
     }
   }
+
+  b {
+    font-weight: 600;
+  }
+
+  &.wrap {
+    display: block;
+    white-space: normal;
+  }
+
+  &.menu-custom-emoji-sets {
+    margin: 0 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-weight: 400;
+    font-size: small;
+    line-height: 1.125rem;
+  }
 }

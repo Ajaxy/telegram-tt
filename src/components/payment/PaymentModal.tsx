@@ -317,14 +317,9 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     }
   }, [step, lang]);
 
-  const buttonText = useMemo(() => {
-    switch (step) {
-      case PaymentStep.Checkout:
-        return lang('Checkout.PayPrice', formatCurrency(totalPrice, currency!, lang.code));
-      default:
-        return lang('Next');
-    }
-  }, [step, lang, currency, totalPrice]);
+  const buttonText = step === PaymentStep.Checkout
+    ? lang('Checkout.PayPrice', formatCurrency(totalPrice, currency!, lang.code))
+    : lang('Next');
 
   const isSubmitDisabled = isLoading
     || Boolean(step === PaymentStep.Checkout && invoiceContent?.isRecurring && !isTosAccepted);

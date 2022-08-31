@@ -866,7 +866,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if (update instanceof GramJs.UpdateStickerSets) {
     onUpdate({ '@type': 'updateStickerSets' });
   } else if (update instanceof GramJs.UpdateStickerSetsOrder) {
-    onUpdate({ '@type': 'updateStickerSetsOrder', order: update.order.map((n) => n.toString()) });
+    onUpdate({
+      '@type': 'updateStickerSetsOrder',
+      order: update.order.map((n) => n.toString()),
+      isCustomEmoji: update.emojis,
+    });
   } else if (update instanceof GramJs.UpdateNewStickerSet) {
     if (update.stickerset instanceof GramJs.messages.StickerSet) {
       const stickerSet = buildStickerSet(update.stickerset.set);

@@ -20,7 +20,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
-import { pickTruthy } from '../../../util/iteratees';
+import { pickTruthy, uniqueByField } from '../../../util/iteratees';
 import { selectChat, selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
@@ -53,6 +53,7 @@ type StateProps = {
   chat?: ApiChat;
   recentStickers: ApiSticker[];
   favoriteStickers: ApiSticker[];
+  premiumStickers: ApiSticker[];
   stickerSetsById: Record<string, ApiStickerSet>;
   addedSetIds?: string[];
   shouldPlay?: boolean;
@@ -74,6 +75,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   canSendStickers,
   recentStickers,
   favoriteStickers,
+  premiumStickers,
   addedSetIds,
   stickerSetsById,
   shouldPlay,
@@ -155,17 +157,19 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     }
 
     if (isCurrentUserPremium) {
-      const premiumStickers = existingAddedSetIds
+      const addedPremiumStickers = existingAddedSetIds
         .map((l) => l.stickers?.filter((sticker) => sticker.hasEffect))
         .flat()
         .filter(Boolean);
 
-      if (premiumStickers.length) {
+      const totalPremiumStickers = uniqueByField([...addedPremiumStickers, ...premiumStickers], 'id');
+
+      if (totalPremiumStickers.length) {
         defaultSets.push({
           id: PREMIUM_STICKER_SET_ID,
           title: lang('PremiumStickers'),
-          stickers: premiumStickers,
-          count: premiumStickers.length,
+          stickers: totalPremiumStickers,
+          count: totalPremiumStickers.length,
         });
       }
     }
@@ -187,7 +191,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       ...existingAddedSetIds,
     ];
   }, [
-    addedSetIds, favoriteStickers, isCurrentUserPremium, recentStickers, chat, lang, stickerSetsById,
+    addedSetIds, stickerSetsById, favoriteStickers, recentStickers, isCurrentUserPremium, chat, lang, premiumStickers,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -274,7 +278,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           onClick={() => selectStickerSet(index)}
         >
           {stickerSet.id === PREMIUM_STICKER_SET_ID ? (
-            <PremiumIcon withGradient />
+            <PremiumIcon withGradient big />
           ) : stickerSet.id === RECENT_SYMBOL_SET_ID ? (
             <i className="icon-recent" />
           ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
@@ -370,6 +374,7 @@ export default memo(withGlobal<OwnProps>(
       added,
       recent,
       favorite,
+      premiumSet,
     } = global.stickers;
 
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
@@ -379,6 +384,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       recentStickers: recent.stickers,
       favoriteStickers: favorite.stickers,
+      premiumStickers: premiumSet.stickers,
       stickerSetsById: setsById,
       addedSetIds: added.setIds,
       shouldPlay: global.settings.byKey.shouldLoopStickers,

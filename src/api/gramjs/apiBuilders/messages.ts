@@ -1,4 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import {
+  ApiMessageEntityTypes,
+} from '../../types';
 import type {
   ApiMessage,
   ApiMessageForwardInfo,
@@ -32,6 +35,7 @@ import type {
   ApiGame,
   PhoneCallAction,
   ApiWebDocument,
+  ApiMessageEntityDefault,
 } from '../../types';
 
 import {
@@ -271,7 +275,7 @@ export function buildMessageContent(
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
   if (mtpMessage.message && !hasUnsupportedMedia
-      && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
+    && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
     content = {
       ...content,
       text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
@@ -1211,8 +1215,9 @@ export function buildLocalForwardedMessage(
   message: ApiMessage,
   serverTimeOffset: number,
   scheduledAt?: number,
-  noAuthor?: boolean,
-  noCaption?: boolean,
+  noAuthors?: boolean,
+  noCaptions?: boolean,
+  isCurrentUserPremium?: boolean,
 ): ApiMessage {
   const localId = getNextLocalMessageId();
   const {
@@ -1228,10 +1233,16 @@ export function buildLocalForwardedMessage(
   const asIncomingInChatWithSelf = (
     toChat.id === currentUserId && (fromChatId !== toChat.id || message.forwardInfo) && !isAudio
   );
-  const shouldHideText = Object.keys(content).length > 1 && content.text && noCaption;
+  const shouldHideText = Object.keys(content).length > 1 && content.text && noCaptions;
+  const shouldDropCustomEmoji = !isCurrentUserPremium;
+  const strippedText = content.text?.entities && shouldDropCustomEmoji ? {
+    text: content.text.text,
+    entities: content.text.entities?.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
+  } : content.text;
+
   const updatedContent = {
     ...content,
-    text: !shouldHideText ? content.text : undefined,
+    text: !shouldHideText ? strippedText : undefined,
   };
 
   return {
@@ -1245,7 +1256,7 @@ export function buildLocalForwardedMessage(
     groupedId,
     isInAlbum,
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
-    ...(senderId !== currentUserId && !isAudio && !noAuthor && {
+    ...(senderId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {
         date: message.date,
         isChannelPost: false,
@@ -1365,14 +1376,50 @@ function buildNewPoll(poll: ApiNewPoll, localId: number) {
 }
 
 export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
-  const { className: type, offset, length } = entity;
+  const {
+    className: type, offset, length,
+  } = entity;
+
+  if (entity instanceof GramJs.MessageEntityMentionName) {
+    return {
+      type: ApiMessageEntityTypes.MentionName,
+      offset,
+      length,
+      userId: buildApiPeerId(entity.userId, 'user'),
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityTextUrl) {
+    return {
+      type: ApiMessageEntityTypes.TextUrl,
+      offset,
+      length,
+      url: entity.url,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityPre) {
+    return {
+      type: ApiMessageEntityTypes.Pre,
+      offset,
+      length,
+      language: entity.language,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityCustomEmoji) {
+    return {
+      type: ApiMessageEntityTypes.CustomEmoji,
+      offset,
+      length,
+      documentId: entity.documentId.toString(),
+    };
+  }
+
   return {
-    type,
+    type: type as `${ApiMessageEntityDefault['type']}`,
     offset,
     length,
-    ...(entity instanceof GramJs.MessageEntityMentionName && { userId: buildApiPeerId(entity.userId, 'user') }),
-    ...('url' in entity && { url: entity.url }),
-    ...('language' in entity && { language: entity.language }),
   };
 }
 

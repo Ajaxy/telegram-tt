@@ -4,23 +4,22 @@ import React, { useCallback, useEffect, useRef } from '../../../lib/teact/teact'
 import type { ApiMessage } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { NO_STICKER_SET_ID } from '../../../config';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import safePlay from '../../../util/safePlay';
+import { IS_WEBM_SUPPORTED } from '../../../util/environment';
+import { getActions } from '../../../global';
+
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useFlag from '../../../hooks/useFlag';
-import useWebpThumbnail from '../../../hooks/useWebpThumbnail';
-import safePlay from '../../../util/safePlay';
-import { IS_WEBM_SUPPORTED } from '../../../util/environment';
-import { getActions } from '../../../global';
+import useThumbnail from '../../../hooks/useThumbnail';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
-import StickerSetModal from '../../common/StickerSetModal.async';
 
 import './Sticker.scss';
 
@@ -43,20 +42,18 @@ const Sticker: FC<OwnProps> = ({
   message, observeIntersection, observeIntersectionForPlaying, shouldLoop, lastSyncTime,
   shouldPlayEffect, onPlayEffect, onStopEffect,
 }) => {
-  const { showNotification } = getActions();
+  const { showNotification, openStickerSet } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const [isModalOpen, openModal, closeModal] = useFlag();
-
   const sticker = message.content.sticker!;
   const {
-    isLottie, stickerSetId, isVideo, hasEffect,
+    isLottie, stickerSetInfo, isVideo, hasEffect,
   } = sticker;
   const canDisplayVideo = IS_WEBM_SUPPORTED;
-  const isMemojiSticker = stickerSetId === NO_STICKER_SET_ID;
+  const isMemojiSticker = 'isMissing' in stickerSetInfo;
 
   const [isPlayingEffect, startPlayingEffect, stopPlayingEffect] = useFlag();
   const shouldLoad = useIsIntersecting(ref, observeIntersection);
@@ -68,7 +65,7 @@ const Sticker: FC<OwnProps> = ({
   const previewMediaHash = isVideo && !canDisplayVideo && (
     sticker.isPreloadedGlobally ? `sticker${sticker.id}?size=m` : getMessageMediaHash(message, 'pictogram'));
   const previewBlobUrl = useMedia(previewMediaHash);
-  const thumbDataUri = useWebpThumbnail(message);
+  const thumbDataUri = useThumbnail(sticker);
   const previewUrl = previewBlobUrl || thumbDataUri;
 
   const mediaData = useMedia(
@@ -121,6 +118,12 @@ const Sticker: FC<OwnProps> = ({
       onPlayEffect?.();
     }
   }, [hasEffect, shouldPlayEffect, onPlayEffect, shouldPlay, startPlayingEffect]);
+
+  const openModal = useCallback(() => {
+    openStickerSet({
+      stickerSetInfo: sticker.stickerSetInfo,
+    });
+  }, [openStickerSet, sticker]);
 
   const handleClick = useCallback(() => {
     if (hasEffect) {
@@ -195,11 +198,6 @@ const Sticker: FC<OwnProps> = ({
           onEnded={handleEffectEnded}
         />
       )}
-      <StickerSetModal
-        isOpen={isModalOpen}
-        fromSticker={sticker}
-        onClose={closeModal}
-      />
     </div>
   );
 };
