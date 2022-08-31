@@ -65,21 +65,21 @@ class PromisedWebSockets {
         return toReturn;
     }
 
-    getWebSocketLink(ip, port, testServers) {
+    getWebSocketLink(ip, port, testServers, isPremium) {
         if (port === 443) {
-            return `wss://${ip}:${port}/apiws${testServers ? '_test' : ''}`;
+            return `wss://${ip}:${port}/apiws${testServers ? '_test' : ''}${isPremium ? '_premium' : ''}`;
         } else {
-            return `ws://${ip}:${port}/apiws${testServers ? '_test' : ''}`;
+            return `ws://${ip}:${port}/apiws${testServers ? '_test' : ''}${isPremium ? '_premium' : ''}`;
         }
     }
 
-    connect(port, ip, testServers = false) {
+    connect(port, ip, testServers = false, isPremium = false) {
         this.stream = Buffer.alloc(0);
         this.canRead = new Promise((resolve) => {
             this.resolveRead = resolve;
         });
         this.closed = false;
-        this.website = this.getWebSocketLink(ip, port, testServers);
+        this.website = this.getWebSocketLink(ip, port, testServers, isPremium);
         this.client = new WebSocketClient(this.website, 'binary');
         return new Promise((resolve, reject) => {
             this.client.onopen = () => {

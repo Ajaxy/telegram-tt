@@ -42,29 +42,31 @@ const SENDER_TIMEOUT = 60 * 1000;
 const SENDER_RETRIES = 5;
 
 class Foreman {
-    private deferred: Deferred | undefined;
+    private deferreds: Deferred[] = [];
 
-    private activeWorkers = 0;
+    activeWorkers = 0;
 
     constructor(private maxWorkers: number) {
     }
 
     requestWorker() {
-        this.activeWorkers++;
-
-        if (this.activeWorkers > this.maxWorkers) {
-            this.deferred = createDeferred();
-            return this.deferred!.promise;
+        if (this.activeWorkers === this.maxWorkers) {
+            const deferred = createDeferred();
+            this.deferreds.push(deferred);
+            return deferred.promise;
+        } else {
+            this.activeWorkers++;
         }
 
         return Promise.resolve();
     }
 
     releaseWorker() {
-        this.activeWorkers--;
-
-        if (this.deferred && (this.activeWorkers <= this.maxWorkers)) {
-            this.deferred.resolve();
+        if (this.deferreds.length && (this.activeWorkers === this.maxWorkers)) {
+            const deferred = this.deferreds.shift()!;
+            deferred.resolve();
+        } else {
+            this.activeWorkers--;
         }
     }
 }
@@ -142,6 +144,14 @@ export async function downloadFile(
     return undefined;
 }
 
+const MAX_CONCURRENT_CONNECTIONS = 3;
+const MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
+const MAX_WORKERS_PER_CONNECTION = 10;
+const MULTIPLE_CONNECTIONS_MIN_FILE_SIZE = 10485760; // 10MB
+
+const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(undefined)
+    .map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
+
 async function downloadFile2(
     client: TelegramClient,
     inputLocation: Api.InputFileLocation,
@@ -151,8 +161,9 @@ async function downloadFile2(
         partSizeKb, end,
     } = fileParams;
     const {
-        fileSize, workers = 1,
+        fileSize,
     } = fileParams;
+    const isPremium = Boolean(client.isPremium);
     const { dcId, progressCallback, start = 0 } = fileParams;
 
     end = end && end < fileSize ? end : fileSize - 1;
@@ -163,6 +174,11 @@ async function downloadFile2(
 
     const partSize = partSizeKb * 1024;
     const partsCount = end ? Math.ceil((end - start) / partSize) : 1;
+    const noParallel = !end;
+    const shouldUseMultipleConnections = fileSize
+        && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
+        && !noParallel;
+    let deferred: Deferred | undefined;
 
     if (partSize % MIN_CHUNK_SIZE !== 0) {
         throw new Error(`The part size must be evenly divisible by ${MIN_CHUNK_SIZE}`);
@@ -170,10 +186,14 @@ async function downloadFile2(
 
     client._log.info(`Downloading file in chunks of ${partSize} bytes`);
 
-    const foreman = new Foreman(workers);
     const fileView = new FileView(end - start + 1);
     const promises: Promise<any>[] = [];
     let offset = start;
+    // Pick the least busy foreman
+    // For some reason, fresh connections give out a higher speed for the first couple of seconds
+    // I have no idea why, but this may speed up the download of small files
+    const activeCounts = foremans.map((l) => l.activeWorkers);
+    let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
     // Used for files with unknown size and for manual cancellations
     let hasEnded = false;
 
@@ -181,9 +201,6 @@ async function downloadFile2(
     if (progressCallback) {
         progressCallback(progress);
     }
-
-    // Preload sender
-    await client.getSender(dcId);
 
     // Allocate memory
     await fileView.init();
@@ -198,10 +215,20 @@ async function downloadFile2(
             isPrecise = true;
         }
 
-        await foreman.requestWorker();
+        // Use only first connection for avatars, because no size is known and we don't want to
+        // download empty parts using all connections at once
+        const senderIndex = !shouldUseMultipleConnections ? 0 : currentForemanIndex % (
+            isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS
+        );
+
+        await foremans[senderIndex].requestWorker();
+
+        if (deferred) await deferred.promise;
+
+        if (noParallel) deferred = createDeferred();
 
         if (hasEnded) {
-            foreman.releaseWorker();
+            foremans[senderIndex].releaseWorker();
             break;
         }
 
@@ -211,7 +238,7 @@ async function downloadFile2(
             while (true) {
                 let sender;
                 try {
-                    sender = await client.getSender(dcId);
+                    sender = await client.getSender(dcId, senderIndex, isPremium);
                     // sometimes a session is revoked and will cause this to hang.
                     const result = await Promise.race([
                         sender.send(new Api.upload.GetFile({
@@ -243,7 +270,8 @@ async function downloadFile2(
                         hasEnded = true;
                     }
 
-                    foreman.releaseWorker();
+                    foremans[senderIndex].releaseWorker();
+                    if (deferred) deferred.resolve();
 
                     fileView.write(result.bytes, offsetMemo - start);
 
@@ -257,7 +285,8 @@ async function downloadFile2(
                         continue;
                     }
 
-                    foreman.releaseWorker();
+                    foremans[senderIndex].releaseWorker();
+                    if (deferred) deferred.resolve();
 
                     hasEnded = true;
                     throw err;
@@ -266,6 +295,7 @@ async function downloadFile2(
         })(offset));
 
         offset += limit;
+        currentForemanIndex++;
 
         if (end && (offset > end)) {
             break;
