@@ -40,7 +40,7 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type }) => {
       onClose={cancelBotTrustRequest}
       confirmHandler={handleBotTrustAccept}
       title={title}
-      textParts={renderText(text, ['br', 'simple_markdown'])}
+      textParts={renderText(text, ['br', 'simple_markdown', 'emoji'])}
     />
   );
 };

@@ -471,23 +471,6 @@ addActionHandler('exitForwardMode', (global) => {
   });
 });
 
-addActionHandler('setForwardChatId', (global, actions, payload) => {
-  const { id } = payload;
-
-  setGlobal({
-    ...global,
-    forwardMessages: {
-      ...global.forwardMessages,
-      toChatId: id,
-      isModalShown: false,
-    },
-  });
-
-  actions.openChat({ id });
-  actions.closeMediaViewer();
-  actions.exitMessageSelectMode();
-});
-
 addActionHandler('openForwardMenuForSelectedMessages', (global, actions) => {
   if (!global.selectedMessages) {
     return;

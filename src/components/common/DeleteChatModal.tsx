@@ -149,14 +149,18 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
 
   function renderMessage() {
     if (isChannel && chat.isCreator) {
-      return <p>{renderText(lang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown'])}</p>;
+      return (
+        <p>
+          {renderText(lang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown', 'emoji'])}
+        </p>
+      );
     }
 
     if ((isChannel && !chat.isCreator) || isBasicGroup || isSuperGroup) {
-      return <p>{renderText(lang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown'])}</p>;
+      return <p>{renderText(lang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown', 'emoji'])}</p>;
     }
 
-    return <p>{renderText(lang('ChatList.DeleteChatConfirmation', contactName), ['simple_markdown'])}</p>;
+    return <p>{renderText(lang('ChatList.DeleteChatConfirmation', contactName), ['simple_markdown', 'emoji'])}</p>;
   }
 
   function renderActionText() {

@@ -30,11 +30,13 @@ interface OwnProps {
   icon?: string;
   leftElement?: TeactNode;
   secondaryIcon?: string;
+  rightElement?: TeactNode;
   buttonClassName?: string;
   className?: string;
   style?: string;
   children: React.ReactNode;
   disabled?: boolean;
+  allowDisabledClick?: boolean;
   ripple?: boolean;
   narrow?: boolean;
   inactive?: boolean;
@@ -56,10 +58,12 @@ const ListItem: FC<OwnProps> = ({
   leftElement,
   buttonClassName,
   secondaryIcon,
+  rightElement,
   className,
   style,
   children,
   disabled,
+  allowDisabledClick,
   ripple,
   narrow,
   inactive,
@@ -108,7 +112,7 @@ const ListItem: FC<OwnProps> = ({
   );
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (disabled || !onClick) {
+    if ((disabled && !allowDisabledClick) || !onClick) {
       return;
     }
     onClick(e);
@@ -117,10 +121,10 @@ const ListItem: FC<OwnProps> = ({
       markIsTouched();
       fastRaf(unmarkIsTouched);
     }
-  }, [disabled, markIsTouched, onClick, ripple, unmarkIsTouched]);
+  }, [allowDisabledClick, disabled, markIsTouched, onClick, ripple, unmarkIsTouched]);
 
   const handleSecondaryIconClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (disabled || e.button !== 0 || (!onSecondaryIconClick && !contextActions)) return;
+    if ((disabled && !allowDisabledClick) || e.button !== 0 || (!onSecondaryIconClick && !contextActions)) return;
     e.stopPropagation();
     if (onSecondaryIconClick) {
       onSecondaryIconClick(e);
@@ -154,6 +158,7 @@ const ListItem: FC<OwnProps> = ({
     ripple && 'has-ripple',
     narrow && 'narrow',
     disabled && 'disabled',
+    allowDisabledClick && 'click-allowed',
     inactive && 'inactive',
     contextMenuPosition && 'has-menu-open',
     focus && 'focus',
@@ -201,6 +206,7 @@ const ListItem: FC<OwnProps> = ({
             <i className={`icon-${secondaryIcon}`} />
           </Button>
         )}
+        {rightElement}
       </div>
       {contextActions && contextMenuPosition !== undefined && (
         <Menu

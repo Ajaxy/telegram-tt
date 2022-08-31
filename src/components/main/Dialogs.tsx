@@ -153,7 +153,8 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
         className="error"
         title={getErrorHeader(error)}
       >
-        {error.hasErrorKey ? getReadableErrorText(error) : renderText(error.message!, ['emoji', 'br'])}
+        {error.hasErrorKey ? getReadableErrorText(error)
+          : renderText(error.message!, ['simple_markdown', 'emoji', 'br'])}
         <div>
           <Button isText onClick={closeModal}>{lang('OK')}</Button>
         </div>

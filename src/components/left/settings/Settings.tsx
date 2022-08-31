@@ -104,6 +104,11 @@ const PRIVACY_FORWARDING_SCREENS = [
   SettingsScreens.PrivacyForwardingDeniedContacts,
 ];
 
+const PRIVACY_VOICE_MESSAGES_SCREENS = [
+  SettingsScreens.PrivacyVoiceMessagesAllowedContacts,
+  SettingsScreens.PrivacyVoiceMessagesDeniedContacts,
+];
+
 const PRIVACY_GROUP_CHATS_SCREENS = [
   SettingsScreens.PrivacyGroupChatsAllowedContacts,
   SettingsScreens.PrivacyGroupChatsDeniedContacts,
@@ -178,6 +183,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(screen),
       [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(screen),
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(screen),
+      [SettingsScreens.PrivacyVoiceMessages]: PRIVACY_VOICE_MESSAGES_SCREENS.includes(screen),
       [SettingsScreens.PrivacyGroupChats]: PRIVACY_GROUP_CHATS_SCREENS.includes(screen),
     };
 
@@ -284,6 +290,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneCall:
       case SettingsScreens.PrivacyPhoneP2P:
       case SettingsScreens.PrivacyForwarding:
+      case SettingsScreens.PrivacyVoiceMessages:
       case SettingsScreens.PrivacyGroupChats:
         return (
           <SettingsPrivacyVisibility
@@ -300,6 +307,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
+      case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
         return (
           <SettingsPrivacyVisibilityExceptionList
@@ -317,6 +325,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
+      case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
         return (
           <SettingsPrivacyVisibilityExceptionList

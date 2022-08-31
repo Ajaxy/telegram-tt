@@ -71,6 +71,8 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
       return 'phoneP2P';
     case 'PrivacyKeyForwards':
       return 'forwards';
+    case 'PrivacyKeyVoiceMessages':
+      return 'voiceMessages';
     case 'PrivacyKeyChatInvite':
       return 'chatInvite';
   }

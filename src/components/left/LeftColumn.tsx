@@ -164,6 +164,7 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyPhoneP2P:
         case SettingsScreens.PrivacyForwarding:
         case SettingsScreens.PrivacyGroupChats:
+        case SettingsScreens.PrivacyVoiceMessages:
         case SettingsScreens.PrivacyBlockedUsers:
         case SettingsScreens.ActiveWebsites:
         case SettingsScreens.TwoFaDisabled:
@@ -219,6 +220,10 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.PrivacyForwardingAllowedContacts:
         case SettingsScreens.PrivacyForwardingDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyForwarding);
+          return;
+        case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
+        case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyVoiceMessages);
           return;
         case SettingsScreens.PrivacyGroupChatsAllowedContacts:
         case SettingsScreens.PrivacyGroupChatsDeniedContacts:

@@ -69,9 +69,12 @@ import {
   selectUser,
   selectSendAs,
   selectSponsoredMessage,
+  selectForwardsContainVoiceMessages,
 } from '../../selectors';
-import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
-import { getMessageOriginalId, isServiceNotificationMessage } from '../../helpers';
+import {
+  debounce, onTickEnd, rafPromise,
+} from '../../../util/schedulers';
+import { getMessageOriginalId, getUserFullName, isServiceNotificationMessage } from '../../helpers';
 import { getTranslation } from '../../../util/langProvider';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 
@@ -1243,6 +1246,39 @@ addActionHandler('openUrl', (global, actions, payload) => {
   } else {
     window.open(urlWithProtocol, '_blank', 'noopener');
   }
+});
+
+addActionHandler('setForwardChatId', async (global, actions, payload) => {
+  const { id } = payload;
+  let user = selectUser(global, id);
+  if (user && selectForwardsContainVoiceMessages(global)) {
+    if (!user.fullInfo) {
+      const { accessHash } = user;
+      user = await callApi('fetchFullUser', { id, accessHash });
+    }
+
+    if (user?.fullInfo!.noVoiceMessages) {
+      actions.showDialog({
+        data: {
+          message: getTranslation('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+        },
+      });
+      return;
+    }
+  }
+
+  setGlobal({
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      toChatId: id,
+      isModalShown: false,
+    },
+  });
+
+  actions.openChat({ id });
+  actions.closeMediaViewer();
+  actions.exitMessageSelectMode();
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

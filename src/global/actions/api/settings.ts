@@ -318,6 +318,7 @@ addActionHandler('loadPrivacySettings', async (global) => {
     chatInviteSettings,
     phoneCallSettings,
     phoneP2PSettings,
+    voiceMessagesSettings,
   ] = await Promise.all([
     callApi('fetchPrivacySettings', 'phoneNumber'),
     callApi('fetchPrivacySettings', 'lastSeen'),
@@ -326,6 +327,7 @@ addActionHandler('loadPrivacySettings', async (global) => {
     callApi('fetchPrivacySettings', 'chatInvite'),
     callApi('fetchPrivacySettings', 'phoneCall'),
     callApi('fetchPrivacySettings', 'phoneP2P'),
+    callApi('fetchPrivacySettings', 'voiceMessages'),
   ]);
 
   if (
@@ -336,6 +338,7 @@ addActionHandler('loadPrivacySettings', async (global) => {
     || !chatInviteSettings
     || !phoneCallSettings
     || !phoneP2PSettings
+    || !voiceMessagesSettings
   ) {
     return;
   }
@@ -354,6 +357,7 @@ addActionHandler('loadPrivacySettings', async (global) => {
         chatInvite: chatInviteSettings,
         phoneCall: phoneCallSettings,
         phoneP2P: phoneP2PSettings,
+        voiceMessages: voiceMessagesSettings,
       },
     },
   });

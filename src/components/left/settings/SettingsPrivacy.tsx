@@ -5,6 +5,8 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
+import { selectIsCurrentUserPremium } from '../../../global/selectors';
+
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -18,6 +20,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  isCurrentUserPremium?: boolean;
   hasPassword?: boolean;
   hasPasscode?: boolean;
   blockedCount: number;
@@ -29,6 +32,7 @@ type StateProps = {
   privacyLastSeen?: ApiPrivacySettings;
   privacyProfilePhoto?: ApiPrivacySettings;
   privacyForwarding?: ApiPrivacySettings;
+  privacyVoiceMessages?: ApiPrivacySettings;
   privacyGroupChats?: ApiPrivacySettings;
   privacyPhoneCall?: ApiPrivacySettings;
   privacyPhoneP2P?: ApiPrivacySettings;
@@ -36,6 +40,7 @@ type StateProps = {
 
 const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   isActive,
+  isCurrentUserPremium,
   hasPassword,
   hasPasscode,
   blockedCount,
@@ -47,6 +52,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   privacyLastSeen,
   privacyProfilePhoto,
   privacyForwarding,
+  privacyVoiceMessages,
   privacyGroupChats,
   privacyPhoneCall,
   privacyPhoneP2P,
@@ -62,6 +68,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
     loadWebAuthorizations,
+    showNotification,
   } = getActions();
 
   useEffect(() => {
@@ -90,6 +97,16 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       shouldArchiveAndMuteNewNonContact: isEnabled,
     });
   }, [updateGlobalPrivacySettings]);
+
+  const handleVoiceMessagesClick = useCallback(() => {
+    if (isCurrentUserPremium) {
+      onScreenSelect(SettingsScreens.PrivacyVoiceMessages);
+    } else {
+      showNotification({
+        message: lang('PrivacyVoiceMessagesPremiumOnly'),
+      });
+    }
+  }, [isCurrentUserPremium, lang, onScreenSelect, showNotification]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
     const { visibility } = setting || {};
@@ -258,6 +275,21 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
+          disabled={!isCurrentUserPremium}
+          allowDisabledClick
+          rightElement={!isCurrentUserPremium && <i className="icon-lock-badge settings-icon-locked" />}
+          className="no-icon"
+          onClick={handleVoiceMessagesClick}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('PrivacyVoiceMessages')}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(privacyVoiceMessages)}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
@@ -317,6 +349,7 @@ export default memo(withGlobal<OwnProps>(
     } = global;
 
     return {
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
       hasPassword,
       hasPasscode: Boolean(hasPasscode),
       blockedCount: blocked.totalCount,
@@ -328,6 +361,7 @@ export default memo(withGlobal<OwnProps>(
       privacyLastSeen: privacy.lastSeen,
       privacyProfilePhoto: privacy.profilePhoto,
       privacyForwarding: privacy.forwards,
+      privacyVoiceMessages: privacy.voiceMessages,
       privacyGroupChats: privacy.chatInvite,
       privacyPhoneCall: privacy.phoneCall,
       privacyPhoneP2P: privacy.phoneP2P,

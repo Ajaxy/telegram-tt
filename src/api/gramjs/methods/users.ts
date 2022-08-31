@@ -36,13 +36,13 @@ export async function fetchFullUser({
 }) {
   const input = buildInputEntity(id, accessHash);
   if (!(input instanceof GramJs.InputUser)) {
-    return;
+    return undefined;
   }
 
   const fullInfo = await invokeRequest(new GramJs.users.GetFullUser({ id: input }));
 
   if (!fullInfo) {
-    return;
+    return undefined;
   }
 
   if (fullInfo.fullUser.profilePhoto instanceof GramJs.Photo) {
@@ -66,6 +66,8 @@ export async function fetchFullUser({
       fullInfo: userWithFullInfo.fullInfo,
     },
   });
+
+  return userWithFullInfo;
 }
 
 export async function fetchCommonChats(id: string, accessHash?: string, maxId?: string) {
