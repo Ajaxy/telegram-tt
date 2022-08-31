@@ -614,7 +614,7 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
     return;
   }
 
-  if (part1 === 'addstickers') {
+  if (part1 === 'addstickers' || part1 === 'addemoji') {
     actions.openStickerSetShortName({
       stickerSetShortName: part2,
     });

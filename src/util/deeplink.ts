@@ -1,8 +1,9 @@
 import { getActions } from '../global';
 import { IS_SAFARI } from './environment';
 
-type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'setlanguage' |
-'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' | 'invoice';
+type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
+'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
+'invoice';
 
 export const processDeepLink = (url: string) => {
   const {
@@ -80,6 +81,7 @@ export const processDeepLink = (url: string) => {
       openChatByInvite({ hash: invite });
       break;
     }
+    case 'addemoji':
     case 'addstickers': {
       const { set } = params;
 

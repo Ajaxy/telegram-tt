@@ -39,6 +39,8 @@ export interface ApiUserFullInfo {
   pinnedMessageId?: number;
   botInfo?: ApiBotInfo;
   profilePhoto?: ApiPhoto;
+  noVoiceMessages?: boolean;
+  premiumGifts?: ApiPremiumGiftOption[];
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -67,4 +69,11 @@ export interface ApiAttachMenuBot {
 export interface ApiAttachMenuBotIcon {
   name: string;
   document: ApiDocument;
+}
+
+export interface ApiPremiumGiftOption {
+  months: number;
+  currency: string;
+  amount: number;
+  botUrl: string;
 }

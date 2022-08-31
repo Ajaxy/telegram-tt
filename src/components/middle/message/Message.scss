@@ -70,6 +70,16 @@
     }
   }
 
+  & > .chat-avatar-premium {
+    position: absolute;
+    bottom: 0.1875rem;
+    left: 1.25rem;
+    height: 0.75rem;
+    z-index: 1;
+
+    --color-fill: white;
+  }
+
   .quick-reaction {
     cursor: pointer;
     position: absolute;

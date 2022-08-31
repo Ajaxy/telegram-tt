@@ -116,6 +116,7 @@ import CommentButton from './CommentButton';
 import Reactions from './Reactions';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import MessagePhoneCall from './MessagePhoneCall';
+import PremiumIcon from '../../common/PremiumIcon';
 import DotAnimation from '../../common/DotAnimation';
 
 import './Message.scss';
@@ -598,17 +599,21 @@ const Message: FC<OwnProps & StateProps> = ({
     const avatarUser = (avatarPeer && isAvatarPeerUser) ? avatarPeer as ApiUser : undefined;
     const avatarChat = (avatarPeer && !isAvatarPeerUser) ? avatarPeer as ApiChat : undefined;
     const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
+    const isAvatarPremium = avatarUser?.isPremium;
 
     return (
-      <Avatar
-        size="small"
-        user={avatarUser}
-        chat={avatarChat}
-        text={hiddenName}
-        lastSyncTime={lastSyncTime}
-        onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
-        observeIntersection={observeIntersectionForMedia}
-      />
+      <>
+        <Avatar
+          size="small"
+          user={avatarUser}
+          chat={avatarChat}
+          text={hiddenName}
+          lastSyncTime={lastSyncTime}
+          onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
+          observeIntersection={observeIntersectionForMedia}
+        />
+        {isAvatarPremium && <PremiumIcon className="chat-avatar-premium" />}
+      </>
     );
   }
 

@@ -1,5 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import type {
+  ApiPremiumGiftOption,
   ApiUser, ApiUserStatus, ApiUserType,
 } from '../../types';
 import { buildApiPeerId } from './peers';
@@ -10,7 +11,7 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUse
   const {
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
-      profilePhoto,
+      profilePhoto, voiceMessagesForbidden, premiumGifts,
     },
     users,
   } = mtpUserFull;
@@ -25,6 +26,8 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUse
       commonChatsCount,
       pinnedMessageId: pinnedMsgId,
       isBlocked: Boolean(blocked),
+      noVoiceMessages: voiceMessagesForbidden,
+      ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
       ...(botInfo && { botInfo: buildApiBotInfo(botInfo, user.id) }),
     },
   };
@@ -114,4 +117,17 @@ export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
   });
 
   return { users, userStatusesById };
+}
+
+export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption): ApiPremiumGiftOption {
+  const {
+    months, currency, amount, botUrl,
+  } = option;
+
+  return {
+    months,
+    currency,
+    amount: amount.toJSNumber(),
+    botUrl,
+  };
 }

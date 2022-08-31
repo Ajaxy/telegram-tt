@@ -40,15 +40,17 @@ import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
 import PremiumChats from '../../../assets/premium/PremiumChats.svg';
 import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
+import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
 
 import styles from './PremiumMainModal.module.scss';
 
 const LIMIT_ACCOUNTS = 4;
 
 const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
-  limits: PremiumLimits,
-  reactions: PremiumReactions,
-  stickers: PremiumStickers,
+  double_limits: PremiumLimits,
+  unique_reactions: PremiumReactions,
+  premium_stickers: PremiumStickers,
+  animated_emoji: PremiumEmoji,
   no_ads: PremiumAds,
   voice_to_text: PremiumVoice,
   profile_badge: PremiumBadge,
@@ -76,6 +78,7 @@ type StateProps = {
   limits?: NonNullable<GlobalState['appConfig']>['limits'];
   premiumSlug?: string;
   premiumBotUsername?: string;
+  premiumPromoOrder?: string[];
 };
 
 const PremiumMainModal: FC<OwnProps & StateProps> = ({
@@ -93,6 +96,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   premiumBotUsername,
   isClosing,
   isSuccess,
+  premiumPromoOrder,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -212,18 +216,22 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             </div>
 
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
-              {PREMIUM_FEATURE_SECTIONS.map((section) => (
-                <PremiumFeatureItem
-                  key={section}
-                  title={lang(PREMIUM_FEATURE_TITLES[section])}
-                  text={section === 'limits'
-                    ? lang(PREMIUM_FEATURE_DESCRIPTIONS[section],
-                      [limitChannels, limitFolders, limitPins, limitLinks, LIMIT_ACCOUNTS])
-                    : lang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
-                  icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
-                  onClick={handleOpen(section)}
-                />
-              ))}
+              {(premiumPromoOrder || PREMIUM_FEATURE_SECTIONS).map((section, index) => {
+                if (!PREMIUM_FEATURE_SECTIONS.includes(section)) return undefined;
+                return (
+                  <PremiumFeatureItem
+                    key={section}
+                    title={lang(PREMIUM_FEATURE_TITLES[section])}
+                    text={section === 'double_limits'
+                      ? lang(PREMIUM_FEATURE_DESCRIPTIONS[section],
+                        [limitChannels, limitFolders, limitPins, limitLinks, LIMIT_ACCOUNTS])
+                      : lang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
+                    icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
+                    index={index}
+                    onClick={handleOpen(section)}
+                  />
+                );
+              })}
               <div className={buildClassName(styles.footerText, styles.primaryFooterText)}>
                 <p>
                   {renderText(lang('AboutPremiumDescription'), ['simple_markdown'])}
@@ -285,5 +293,6 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     limits: global.appConfig?.limits,
     premiumSlug: global.appConfig?.premiumInvoiceSlug,
     premiumBotUsername: global.appConfig?.premiumBotUsername,
+    premiumPromoOrder: global.appConfig?.premiumPromoOrder,
   };
 })(PremiumMainModal));
