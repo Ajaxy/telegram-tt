@@ -314,6 +314,7 @@ export type GlobalState = {
 
   animatedEmojis?: ApiStickerSet;
   animatedEmojiEffects?: ApiStickerSet;
+  premiumGifts?: ApiStickerSet;
   emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
   gifs: {
@@ -638,7 +639,17 @@ export type GlobalState = {
     promo: ApiPremiumPromo;
     initialSection?: string;
     fromUserId?: string;
+    toUserId?: string;
+    isGift?: boolean;
+    monthsAmount?: number;
     isSuccess?: boolean;
+  };
+
+  giftPremiumModal?: {
+    isOpen?: boolean;
+    forUserId?: string;
+    monthlyCurrency?: string;
+    monthlyAmount?: string;
   };
 
   transcriptions: Record<string, ApiTranscription>;
@@ -1062,7 +1073,10 @@ export interface ActionPayloads {
   openPremiumModal: {
     initialSection?: string;
     fromUserId?: string;
+    toUserId?: string;
     isSuccess?: boolean;
+    isGift?: boolean;
+    monthsAmount?: number;
   };
   closePremiumModal: never | {
     isClosed?: boolean;
@@ -1073,9 +1087,16 @@ export interface ActionPayloads {
     messageId: number;
   };
 
+  loadPremiumGifts: never;
   loadPremiumStickers: {
     hash?: string;
   };
+
+  openGiftPremiumModal: {
+    forUserId?: string;
+  };
+
+  closeGiftPremiumModal: never;
 
   // Invoice
   openInvoice: ApiInputInvoice;

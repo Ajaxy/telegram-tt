@@ -235,6 +235,7 @@ export interface ApiAction {
   call?: Partial<ApiGroupCall>;
   phoneCall?: PhoneCallAction;
   score?: number;
+  months?: number;
 }
 
 export interface ApiWebPage {

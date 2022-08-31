@@ -259,6 +259,31 @@
     }
   }
 
+  .ActionMessage.premium-gift {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-message-gift {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1rem !important;
+    padding-bottom: 0.75rem !important;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .action-message-button {
+    display: inline-block;
+    border-radius: var(--border-radius-default);
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    background-color: var(--pattern-color);
+  }
+
   .sticky-date {
     margin-top: 1rem;
     margin-bottom: 1rem;

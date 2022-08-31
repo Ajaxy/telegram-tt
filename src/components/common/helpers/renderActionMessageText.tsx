@@ -55,6 +55,15 @@ export function renderActionMessageText(
   if (translationKey.includes('ScoredInGame')) { // Translation hack for games
     unprocessed = unprocessed.replace('un1', '%action_origin%').replace('un2', '%message%');
   }
+  if (translationKey === 'ActionGiftOutbound') { // Translation hack for Premium Gift
+    unprocessed = unprocessed.replace('un2', '%gift_payment_amount%').replace(/\*\*/g, '');
+  }
+  if (translationKey === 'ActionGiftInbound') { // Translation hack for Premium Gift
+    unprocessed = unprocessed
+      .replace('un1', '%action_origin%')
+      .replace('un2', '%gift_payment_amount%')
+      .replace(/\*\*/g, '');
+  }
   let processed: TextPart[];
 
   if (unprocessed.includes('%payment_amount%')) {
@@ -79,6 +88,16 @@ export function renderActionMessageText(
 
   unprocessed = processed.pop() as string;
   content.push(...processed);
+
+  if (unprocessed.includes('%gift_payment_amount%')) {
+    processed = processPlaceholder(
+      unprocessed,
+      '%gift_payment_amount%',
+      formatCurrency(amount!, currency!, lang.code),
+    );
+    unprocessed = processed.pop() as string;
+    content.push(...processed);
+  }
 
   if (unprocessed.includes('%score%')) {
     processed = processPlaceholder(

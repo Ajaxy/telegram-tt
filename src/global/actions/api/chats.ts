@@ -642,6 +642,10 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
       chatId,
       messageId,
     });
+  } else if (part1.startsWith('$')) {
+    actions.openInvoice({
+      slug: part1.substring(1),
+    });
   } else if (part1 === 'invoice') {
     actions.openInvoice({
       slug: part2,

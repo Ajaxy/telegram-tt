@@ -169,6 +169,7 @@ const Main: FC<StateProps> = ({
     loadCountryList,
     loadAvailableReactions,
     loadStickerSets,
+    loadPremiumGifts,
     loadAddedStickers,
     loadFavoriteStickers,
     ensureTimeFormat,
@@ -206,10 +207,12 @@ const Main: FC<StateProps> = ({
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
       loadAttachMenuBots();
       loadContactList();
+      loadPremiumGifts();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots, loadContactList,
+    loadPremiumGifts,
   ]);
 
   // Language-based API calls
