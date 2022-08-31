@@ -1,3 +1,27 @@
+## 1.51.0 (2022-08-31)
+
+### 👏 **Harder**
+* Custom Animated Emoji: Messages with custom emoji are now viewable.
+* Gifting Telegram Premium: Premium users can send friends, family, and coworkers a prepaid subscription from their profile for 3, 6, or 12 months – at a discount.
+* Privacy Settings for Voice Messages: Control who can send you voice and video messages with Telegram Premium.
+
+### 🚀 **Faster**
+* Increased download speed.
+* Optimized Premium modal.
+
+### 💪 **Stronger**
+* Fixed ‘No File’ error when downloading media.
+* Fixed issues with hiding video controls.
+* Various RTL layout fixes.
+* Fixed scrolling with mouse wheel inside horizontal containers.
+* Fixed jumping text cursor on Windows.
+* Fixed display problems with the ‘Next’ button in payments.
+* Fixed voting in polls on mobile devices triggering a quick reaction.
+* Fixed page reload when rotating device during a call.
+* Fixed hanging calls after signing out.
+* Fixed copying message content and removed the ‘Report’ option in scheduled messages.
+* Small fixes and improvements for bots running web apps.
+
 ## 1.50.0 (2022-08-07)
 
 ### 👏 **Harder**

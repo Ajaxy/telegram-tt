@@ -1,29 +1,23 @@
-**Telegram Web Z was updated to version 1.50**
+**Telegram Web Z was updated to version 1.51**
 
-👏 **Harder**
-• Flexible Forwarding: Forward messages without the sender's name or media captions.
-• Reorder Folders: Change the order of your folders in Settings.
-• Better Drag & Drop: Open a chat in your list by dragging a file to it.
+[👏](customEmoji:5471921242866981303) **Harder**
+• Custom Animated Emoji: Messages with custom emoji are now viewable.
+• Gifting Telegram Premium: Premium users can send friends, family, and coworkers a prepaid subscription from their profile for 3, 6, or 12 months – at a discount.
+• Privacy Settings for Voice Messages: Control who can send you voice and video messages with Telegram Premium.
 
-🤩 **Better**
-• Added more emojis.
-• Media Viewer now supports scrolling through profile pictures.
-• Use the hotkey `⌘+0` to open Saved Messages on macOS.
-• Triple click will now select all text in the message field.
-• Large file downloads (2 GB+) are supported in more browsers.
-• Added colored icons for the invite link section in groups and channels.
-• Added support for deleting chats with service notifications.
-• Background color now adapts for better contrast in uploaded transparent images.
-• Added support for SmallTalk highlighting, thanks to LinqLover on GitHub.
+[🚀](customEmoji:5445284980978621387) **Faster**
+• Increased download speed.
+• Optimized Premium modal.
 
-💪 **Stronger**
-• Fixed issue with countable text localization in some languages.
-• Removed download button from media in chats with content protection enabled.
-• Various call fixes.
-• Small redesign for code formatting, fixed parsing issues.
-• Fixed video controls on mobile devices, thanks to y0ung3r on GitHub.
-• Fixed duplicated messages in CJK languages.
-• Removed ‘View in Picture-in-Picture’ button from stickers.
-• Fixed layout issues in Waterfox Classic.
-• Fixed issue with replies in discussions.
-• Small design improvements related to Telegram Premium.
+[💪](customEmoji:5471883477219549006) **Stronger**
+• Fixed ‘No File’ error when downloading media.
+• Fixed issues with hiding video controls.
+• Various RTL layout fixes.
+• Fixed scrolling with mouse wheel inside horizontal containers.
+• Fixed jumping text cursor on Windows.
+• Fixed display problems with the ‘Next’ button in payments.
+• Fixed voting in polls on mobile devices triggering a quick reaction.
+• Fixed page reload when rotating device during a call.
+• Fixed hanging calls after signing out.
+• Fixed copying message content and removed the ‘Report’ option in scheduled messages.
+• Small fixes and improvements for bots running web apps.
