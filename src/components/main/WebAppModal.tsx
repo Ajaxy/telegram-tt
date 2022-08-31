@@ -125,7 +125,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       });
     }
 
-    if (eventType === 'web_app_open_tg_link') {
+    if (eventType === 'web_app_open_tg_link' && !isPaymentModalOpen) {
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl });
       closeWebApp();
@@ -185,7 +185,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       if (!eventData.message.trim().length || !eventData.buttons?.length || eventData.buttons.length > 3) return;
       setPopupParams(eventData);
     }
-  }, [bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug]);
+  }, [
+    bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug,
+    isPaymentModalOpen,
+  ]);
 
   const {
     ref, reloadFrame, sendEvent, sendViewport, sendTheme,
