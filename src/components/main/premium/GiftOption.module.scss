@@ -1,0 +1,110 @@
+.wrapper {
+  position: relative;
+  display: block;
+  padding-inline: 4.5rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius-default);
+  background: var(--color-background);
+  box-shadow: 0 0 0 0.0625rem var(--color-borders-input);
+
+  cursor: pointer;
+
+  line-height: 1.5rem;
+}
+
+.active {
+  box-shadow: 0 0 0 0.125rem var(--color-primary);
+}
+
+.input {
+  position: absolute;
+  z-index: var(--z-below);
+  opacity: 0;
+
+  &:checked ~ .content {
+    &::before {
+      border-color: var(--color-primary);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+.content {
+  display: grid;
+  grid-template-areas: "left_top right" "left_bottom right";
+  grid-template-columns: 1fr auto;
+  justify-content: start;
+  padding: 0.5rem 0;
+  gap: 0.25rem;
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    inset-inline-start: 1.0625rem;
+    top: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    transform: translateY(-50%);
+  }
+
+  &::before {
+    border: 2px solid var(--color-borders-input);
+    border-radius: 50%;
+    background-color: var(--color-background);
+    opacity: 1;
+    transition: border-color 0.1s ease, opacity 0.1s ease;
+  }
+
+  &::after {
+    inset-inline-start: 1.375rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    opacity: 0;
+    transition: opacity 0.1s ease;
+  }
+}
+
+.month {
+  grid-area: left_top;
+  white-space: nowrap;
+}
+
+.perMonth {
+  grid-area: left_bottom;
+  align-self: end;
+  display: flex;
+  flex-direction: row-reverse;
+  margin-inline-end: auto;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+
+  @media (max-width: 450px) {
+    flex-direction: column-reverse;
+  }
+}
+
+.amount {
+  grid-area: right;
+  align-self: center;
+  justify-self: end;
+  padding-inline-start: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.discount {
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-radius: var(--border-radius-default-small);
+  padding: 0 0.5rem;
+  unicode-bidi: plaintext;
+  margin-inline-end: 0.5rem;
+  align-self: baseline;
+}

@@ -11,7 +11,7 @@ import { REPLIES_USER_ID } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
-  selectChat, selectNotifySettings, selectNotifyExceptions, selectUser, selectChatBot,
+  selectChat, selectNotifySettings, selectNotifyExceptions, selectUser, selectChatBot, selectIsPremiumPurchaseBlocked,
 } from '../../global/selectors';
 import {
   isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact, isChatChannel, isChatGroup,
@@ -73,6 +73,7 @@ type StateProps = {
   canAddContact?: boolean;
   canReportChat?: boolean;
   canDeleteChat?: boolean;
+  canGiftPremium?: boolean;
   hasLinkedChat?: boolean;
 };
 
@@ -98,6 +99,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isMuted,
   canReportChat,
   canDeleteChat,
+  canGiftPremium,
   hasLinkedChat,
   canAddContact,
   onSubscribeChannel,
@@ -116,6 +118,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openAddContactDialog,
     requestCall,
     toggleStatistics,
+    openGiftPremiumModal,
   } = getActions();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -180,6 +183,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openLinkedChat({ id: chatId });
     closeMenu();
   }, [chatId, closeMenu, openLinkedChat]);
+
+  const handleGiftPremiumClick = useCallback(() => {
+    openGiftPremiumModal({ forUserId: chatId });
+    closeMenu();
+  }, [openGiftPremiumModal, chatId, closeMenu]);
 
   const handleAddContactClick = useCallback(() => {
     openAddContactDialog({ userId: chatId });
@@ -358,6 +366,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             </MenuItem>
           )}
           {botButtons}
+          {canGiftPremium && (
+            <MenuItem
+              icon="gift"
+              onClick={handleGiftPremiumClick}
+            >
+              {lang('GiftPremium')}
+            </MenuItem>
+          )}
           {canLeave && (
             <MenuItem
               destructive
@@ -402,6 +418,11 @@ export default memo(withGlobal<OwnProps>(
     const canReportChat = isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf);
 
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
+    const canGiftPremium = Boolean(
+      global.lastSyncTime
+      && user?.fullInfo?.premiumGifts?.length
+      && !selectIsPremiumPurchaseBlocked(global),
+    );
 
     return {
       chat,
@@ -410,6 +431,7 @@ export default memo(withGlobal<OwnProps>(
       canAddContact,
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
+      canGiftPremium,
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       botCommands: chatBot?.fullInfo?.botInfo?.commands,
     };

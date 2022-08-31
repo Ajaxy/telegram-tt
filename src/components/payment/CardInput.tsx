@@ -14,6 +14,7 @@ import './CardInput.scss';
 
 import mastercardIconPath from '../../assets/mastercard.svg';
 import visaIconPath from '../../assets/visa.svg';
+import mirIconPath from '../../assets/mir.svg';
 
 const CARD_NUMBER_MAX_LENGTH = 23;
 
@@ -73,6 +74,8 @@ function getCardIcon(cardType: CardType) {
       return <img src={mastercardIconPath} alt="" />;
     case CardType.Visa:
       return <img src={visaIconPath} alt="" />;
+    case CardType.Mir:
+      return <img src={mirIconPath} alt="" />;
     default:
       return undefined;
   }

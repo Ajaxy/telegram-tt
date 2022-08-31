@@ -376,7 +376,9 @@ addActionHandler('closePremiumModal', (global, actions, payload) => {
 });
 
 addActionHandler('openPremiumModal', async (global, actions, payload) => {
-  const { initialSection, fromUserId, isSuccess } = payload || {};
+  const {
+    initialSection, fromUserId, isSuccess, isGift, monthsAmount, toUserId,
+  } = payload || {};
 
   actions.loadPremiumStickers();
 
@@ -393,7 +395,36 @@ addActionHandler('openPremiumModal', async (global, actions, payload) => {
       initialSection,
       isOpen: true,
       fromUserId,
+      toUserId,
+      isGift,
+      monthsAmount,
       isSuccess,
     },
+  });
+});
+
+addActionHandler('openGiftPremiumModal', async (global, actions, payload) => {
+  const { forUserId } = payload || {};
+  const result = await callApi('fetchPremiumPromo');
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+
+  setGlobal({
+    ...global,
+    giftPremiumModal: {
+      isOpen: true,
+      forUserId,
+      monthlyCurrency: result.promo.currency,
+      monthlyAmount: result.promo.monthlyAmount,
+    },
+  });
+});
+
+addActionHandler('closeGiftPremiumModal', (global) => {
+  setGlobal({
+    ...global,
+    giftPremiumModal: { isOpen: false },
   });
 });

@@ -109,6 +109,20 @@ addActionHandler('loadFeaturedStickers', (global) => {
   void loadFeaturedStickers(hash);
 });
 
+addActionHandler('loadPremiumGifts', async () => {
+  const stickerSet = await callApi('fetchPremiumGifts');
+  if (!stickerSet) {
+    return;
+  }
+
+  const { set, stickers } = stickerSet;
+
+  setGlobal({
+    ...getGlobal(),
+    premiumGifts: { ...set, stickers },
+  });
+});
+
 addActionHandler('loadStickers', (global, actions, payload) => {
   const { stickerSetId, stickerSetShortName } = payload!;
   let { stickerSetAccessHash } = payload!;

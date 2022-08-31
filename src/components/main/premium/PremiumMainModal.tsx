@@ -65,12 +65,16 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  currentUserId?: string;
   promo?: ApiPremiumPromo;
   isClosing?: boolean;
   fromUser?: ApiUser;
+  toUser?: ApiUser;
   initialSection?: string;
   isPremium?: boolean;
   isSuccess?: boolean;
+  isGift?: boolean;
+  monthsAmount?: number;
   limitChannels: number;
   limitPins: number;
   limitLinks: number;
@@ -83,6 +87,7 @@ type StateProps = {
 
 const PremiumMainModal: FC<OwnProps & StateProps> = ({
   isOpen,
+  currentUserId,
   fromUser,
   promo,
   initialSection,
@@ -96,6 +101,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   premiumBotUsername,
   isClosing,
   isSuccess,
+  isGift,
+  toUser,
+  monthsAmount,
   premiumPromoOrder,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -170,6 +178,42 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   if (!promo) return undefined;
 
+  function getHeaderText() {
+    if (isGift) {
+      return fromUser?.id === currentUserId
+        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
+        : lang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]);
+    }
+
+    return fromUser
+      ? lang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
+      : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium');
+  }
+
+  function getHeaderDescription() {
+    if (isGift) {
+      return fromUser?.id === currentUserId
+        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', getUserFullName(toUser))
+        : lang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
+    }
+
+    return fromUser
+      ? lang('TelegramPremiumUserDialogSubtitle')
+      : lang(isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle');
+  }
+
+  function renderFooterText() {
+    if (!promo || (isGift && fromUser?.id === currentUserId)) {
+      return undefined;
+    }
+
+    return (
+      <div className={styles.footerText}>
+        {renderTextWithEntities(promo.statusText, promo.statusEntities)}
+      </div>
+    );
+  }
+
   return (
     <Modal
       className={styles.root}
@@ -195,19 +239,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             </Button>
             <img className={styles.logo} src={PremiumLogo} alt="" />
             <h2 className={styles.headerText}>
-              {renderText(
-                fromUser
-                  ? lang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
-                  : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium'),
-                ['simple_markdown', 'emoji'],
-              )}
+              {renderText(getHeaderText(), ['simple_markdown', 'emoji'])}
             </h2>
             <div className={styles.description}>
-              {renderText(
-                lang(fromUser ? 'TelegramPremiumUserDialogSubtitle'
-                  : (isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle')),
-                ['simple_markdown'],
-              )}
+              {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
             </div>
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
@@ -240,18 +275,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                   {renderText(lang('AboutPremiumDescription2'), ['simple_markdown'])}
                 </p>
               </div>
-              <div className={styles.footerText}>
-                {renderTextWithEntities(
-                  promo.statusText,
-                  promo.statusEntities,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                )}
-              </div>
+              {renderFooterText()}
             </div>
             {!isPremium && (
               <div className={styles.footer}>
@@ -280,10 +304,14 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
+    currentUserId: global.currentUserId,
     promo: global.premiumModal?.promo,
     isClosing: global.premiumModal?.isClosing,
     isSuccess: global.premiumModal?.isSuccess,
+    isGift: global.premiumModal?.isGift,
+    monthsAmount: global.premiumModal?.monthsAmount,
     fromUser: global.premiumModal?.fromUserId ? selectUser(global, global.premiumModal.fromUserId) : undefined,
+    toUser: global.premiumModal?.toUserId ? selectUser(global, global.premiumModal.toUserId) : undefined,
     initialSection: global.premiumModal?.initialSection,
     isPremium: selectIsCurrentUserPremium(global),
     limitChannels: selectPremiumLimit(global, 'channels'),

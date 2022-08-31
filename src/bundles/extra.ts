@@ -13,6 +13,7 @@ export { default as BotTrustModal } from '../components/main/BotTrustModal';
 export { default as BotAttachModal } from '../components/main/BotAttachModal';
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';
 export { default as PremiumMainModal } from '../components/main/premium/PremiumMainModal';
+export { default as GiftPremiumModal } from '../components/main/premium/GiftPremiumModal';
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';

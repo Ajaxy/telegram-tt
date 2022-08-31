@@ -71,6 +71,7 @@ import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import ReactorListModal from './ReactorListModal.async';
+import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
 
 import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
@@ -98,6 +99,7 @@ type StateProps = {
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
   isReactorListModalOpen: boolean;
+  isGiftPremiumModalOpen?: boolean;
   animationLevel?: number;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -140,6 +142,7 @@ const MiddleColumn: FC<StateProps> = ({
   isSelectModeActive,
   isSeenByModalOpen,
   isReactorListModalOpen,
+  isGiftPremiumModalOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -551,6 +554,7 @@ const MiddleColumn: FC<StateProps> = ({
           />
         ))}
       </div>
+      <GiftPremiumModal isOpen={isGiftPremiumModalOpen} />
     </div>
   );
 };
@@ -580,6 +584,7 @@ export default memo(withGlobal(
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(global.seenByModal),
       isReactorListModalOpen: Boolean(global.reactorModal),
+      isGiftPremiumModalOpen: global.giftPremiumModal?.isOpen,
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,

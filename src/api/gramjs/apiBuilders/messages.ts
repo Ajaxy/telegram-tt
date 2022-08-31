@@ -813,6 +813,7 @@ function buildAction(
   let type: ApiAction['type'] = 'other';
   let photo: ApiPhoto | undefined;
   let score: number | undefined;
+  let months: number | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -944,6 +945,19 @@ function buildAction(
   } else if (action instanceof GramJs.MessageActionWebViewDataSent) {
     text = 'Notification.WebAppSentData';
     translationValues.push(action.text);
+  } else if (action instanceof GramJs.MessageActionGiftPremium) {
+    text = isOutgoing ? 'ActionGiftOutbound' : 'ActionGiftInbound';
+    if (isOutgoing) {
+      translationValues.push('%gift_payment_amount%');
+    } else {
+      translationValues.push('%action_origin%', '%gift_payment_amount%');
+    }
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+    }
+    currency = action.currency;
+    amount = action.amount.toJSNumber();
+    months = action.months;
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -965,6 +979,7 @@ function buildAction(
     call,
     phoneCall,
     score,
+    months,
   };
 }
 
