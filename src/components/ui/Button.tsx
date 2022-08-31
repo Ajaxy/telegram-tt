@@ -33,6 +33,7 @@ export type OwnProps = {
   href?: string;
   download?: string;
   disabled?: boolean;
+  allowDisabledClick?: boolean;
   ripple?: boolean;
   faded?: boolean;
   tabIndex?: number;
@@ -79,6 +80,7 @@ const Button: FC<OwnProps> = ({
   href,
   download,
   disabled,
+  allowDisabledClick,
   ripple,
   faded,
   tabIndex,
@@ -104,6 +106,7 @@ const Button: FC<OwnProps> = ({
     pill && 'pill',
     fluid && 'fluid',
     disabled && 'disabled',
+    allowDisabledClick && 'click-allowed',
     isText && 'text',
     isLoading && 'loading',
     ripple && 'has-ripple',
@@ -114,7 +117,7 @@ const Button: FC<OwnProps> = ({
   );
 
   const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (!disabled && onClick) {
+    if ((allowDisabledClick || !disabled) && onClick) {
       onClick(e);
     }
 
@@ -124,15 +127,15 @@ const Button: FC<OwnProps> = ({
     setTimeout(() => {
       setIsClicked(false);
     }, CLICKED_TIMEOUT);
-  }, [disabled, onClick, shouldStopPropagation]);
+  }, [allowDisabledClick, disabled, onClick, shouldStopPropagation]);
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
     if (!noPreventDefault) e.preventDefault();
 
-    if (!disabled && onMouseDown) {
+    if ((allowDisabledClick || !disabled) && onMouseDown) {
       onMouseDown(e);
     }
-  }, [disabled, noPreventDefault, onMouseDown]);
+  }, [allowDisabledClick, disabled, noPreventDefault, onMouseDown]);
 
   if (href) {
     return (

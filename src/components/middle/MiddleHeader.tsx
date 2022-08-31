@@ -85,7 +85,6 @@ type StateProps = {
   audioMessage?: ApiMessage;
   messagesCount?: number;
   isChatWithSelf?: boolean;
-  isChatWithBot?: boolean;
   lastSyncTime?: number;
   hasButtonInHeader?: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -111,7 +110,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   chat,
   messagesCount,
   isChatWithSelf,
-  isChatWithBot,
   lastSyncTime,
   hasButtonInHeader,
   shouldSkipHistoryAnimations,
@@ -338,7 +336,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               typingStatus={typingStatus}
               status={connectionStatusText}
               withDots={Boolean(connectionStatusText)}
-              withFullInfo={isChatWithBot}
+              withFullInfo
               withMediaViewer
               withUpdatingStatus
               withVideoAvatar
@@ -483,7 +481,6 @@ export default memo(withGlobal<OwnProps>(
       chat,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
-      isChatWithBot,
       lastSyncTime,
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),

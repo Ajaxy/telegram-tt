@@ -58,6 +58,12 @@
     }
   }
 
+  .settings-icon-locked {
+    align-self: center;
+    margin-right: 0.25rem !important;
+    font-size: 1rem !important;
+  }
+
   #monkey {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
@@ -183,6 +189,7 @@
 
     .multiline-menu-item {
       white-space: initial;
+      flex-grow: 1;
 
       &.full-size {
         width: 100%;

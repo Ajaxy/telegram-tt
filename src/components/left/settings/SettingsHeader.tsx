@@ -110,18 +110,22 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('Privacy.ProfilePhoto')}</h3>;
       case SettingsScreens.PrivacyForwarding:
         return <h3>{lang('PrivacyForwards')}</h3>;
+      case SettingsScreens.PrivacyVoiceMessages:
+        return <h3>{lang('PrivacyVoiceMessages')}</h3>;
       case SettingsScreens.PrivacyGroupChats:
         return <h3>{lang('AutodownloadGroupChats')}</h3>;
       case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
+      case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
         return <h3>{lang('AlwaysShareWith')}</h3>;
       case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
+      case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
         return <h3>{lang('NeverShareWith')}</h3>;
 

@@ -975,3 +975,13 @@ export function selectCanScheduleUntilOnline(global: GlobalState, id: string) {
     !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
   );
 }
+
+export function selectForwardsContainVoiceMessages(global: GlobalState) {
+  const { messageIds, fromChatId } = global.forwardMessages;
+  if (!messageIds) return false;
+  const chatMessages = selectChatMessages(global, fromChatId!);
+  return messageIds.some((messageId) => {
+    const message = chatMessages[messageId];
+    return Boolean(message.content.voice) || message.content.video?.isRound;
+  });
+}

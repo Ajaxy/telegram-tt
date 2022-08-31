@@ -77,6 +77,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         return lang('PrivacyProfilePhotoTitle');
       case SettingsScreens.PrivacyForwarding:
         return lang('PrivacyForwardsTitle');
+      case SettingsScreens.PrivacyVoiceMessages:
+        return lang('PrivacyVoiceMessagesTitle');
       case SettingsScreens.PrivacyGroupChats:
         return lang('WhoCanAddMe');
       case SettingsScreens.PrivacyPhoneCall:
@@ -116,6 +118,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         return SettingsScreens.PrivacyPhoneCallAllowedContacts;
       case SettingsScreens.PrivacyPhoneP2P:
         return SettingsScreens.PrivacyPhoneP2PAllowedContacts;
+      case SettingsScreens.PrivacyVoiceMessages:
+        return SettingsScreens.PrivacyVoiceMessagesAllowedContacts;
       default:
         return SettingsScreens.PrivacyGroupChatsAllowedContacts;
     }
@@ -135,6 +139,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         return SettingsScreens.PrivacyPhoneCallDeniedContacts;
       case SettingsScreens.PrivacyPhoneP2P:
         return SettingsScreens.PrivacyPhoneP2PDeniedContacts;
+      case SettingsScreens.PrivacyVoiceMessages:
+        return SettingsScreens.PrivacyVoiceMessagesDeniedContacts;
       default:
         return SettingsScreens.PrivacyGroupChatsDeniedContacts;
     }
@@ -256,6 +262,10 @@ export default memo(withGlobal<OwnProps>(
 
       case SettingsScreens.PrivacyForwarding:
         privacySettings = privacy.forwards;
+        break;
+
+      case SettingsScreens.PrivacyVoiceMessages:
+        privacySettings = privacy.voiceMessages;
         break;
 
       case SettingsScreens.PrivacyGroupChats:

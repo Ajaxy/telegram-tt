@@ -40,7 +40,6 @@ const Notification: FC<OwnProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   // eslint-disable-next-line no-null/no-null
   const timerRef = useRef<number | undefined>(null);
-
   const { transitionClassNames } = useShowTransition(isOpen);
 
   const closeAndDismiss = useCallback(() => {

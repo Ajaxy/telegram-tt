@@ -69,12 +69,12 @@
     }
   }
 
-  &.disabled {
+  &.disabled:not(.click-allowed) {
     pointer-events: none;
+  }
 
-    .ListItem-button {
-      opacity: 0.5;
-    }
+  &.disabled .ListItem-button {
+    opacity: 0.5;
   }
 
   &:not(.disabled):not(.is-static) {
@@ -86,6 +86,7 @@
       }
 
       @media (hover: hover) {
+
         &:hover,
         &:focus {
           --background-color: var(--color-chat-hover);
@@ -202,7 +203,8 @@
         margin-left: 0.5rem;
       }
 
-      .PremiumIcon, .VerifiedIcon {
+      .PremiumIcon,
+      .VerifiedIcon {
         margin-left: 0.25rem;
       }
 

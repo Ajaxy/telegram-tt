@@ -175,6 +175,7 @@ type StateProps =
     fileSizeLimit: number;
     captionLimit: number;
     isCurrentUserPremium?: boolean;
+    canSendVoiceByPrivacy?: boolean;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -214,6 +215,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   chat,
   isForCurrentMessageList,
   isCurrentUserPremium,
+  canSendVoiceByPrivacy,
   connectionState,
   isChatWithBot,
   isChatWithSelf,
@@ -269,6 +271,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     resetOpenChatWithText,
     callAttachMenuBot,
     openLimitReachedModal,
+    showNotification,
   } = getActions();
   const lang = useLang();
 
@@ -903,14 +906,26 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [isSelectModeActive, enableHover, disableHover, isReady]);
 
+  const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
+    && (!canAttachMedia || !canSendVoiceByPrivacy);
+
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
       case MainButtonState.Send:
         handleSend();
         break;
-      case MainButtonState.Record:
-        void startRecordingVoice();
+      case MainButtonState.Record: {
+        if (areVoiceMessagesNotAllowed) {
+          if (!canSendVoiceByPrivacy) {
+            showNotification({
+              message: lang('VoiceMessagesRestrictedByPrivacy', chat?.title),
+            });
+          }
+        } else {
+          startRecordingVoice();
+        }
         break;
+      }
       case MainButtonState.Edit:
         handleEditComplete();
         break;
@@ -926,11 +941,10 @@ const Composer: FC<OwnProps & StateProps> = ({
         break;
     }
   }, [
-    mainButtonState, handleSend, startRecordingVoice, handleEditComplete, activeVoiceRecording, requestCalendar,
-    pauseRecordingVoice, handleMessageSchedule,
+    mainButtonState, handleSend, handleEditComplete, activeVoiceRecording, requestCalendar, areVoiceMessagesNotAllowed,
+    canSendVoiceByPrivacy, showNotification, lang, chat?.title, startRecordingVoice, pauseRecordingVoice,
+    handleMessageSchedule,
   ]);
-
-  const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record && !canAttachMedia;
 
   const prevEditedMessage = usePrevious(editingMessage, true);
   const renderedEditedMessage = editingMessage || prevEditedMessage;
@@ -948,7 +962,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendButtonAriaLabel = 'Save edited message';
       break;
     case MainButtonState.Record:
-      sendButtonAriaLabel = areVoiceMessagesNotAllowed
+      sendButtonAriaLabel = !canAttachMedia
         ? 'Conversation.DefaultRestrictedMedia'
         : 'AccDescrVoiceMessage';
   }
@@ -1254,6 +1268,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         color="secondary"
         className={buildClassName(mainButtonState, !isReady && 'not-ready', activeVoiceRecording && 'recording')}
         disabled={areVoiceMessagesNotAllowed}
+        allowDisabledClick
         ariaLabel={lang(sendButtonAriaLabel)}
         onClick={mainButtonHandler}
         onContextMenu={
@@ -1305,6 +1320,8 @@ export default memo(withGlobal<OwnProps>(
     const isForCurrentMessageList = chatId === currentMessageList?.chatId
         && threadId === currentMessageList?.threadId
         && messageListType === currentMessageList?.type;
+    const user = selectUser(global, chatId);
+    const canSendVoiceByPrivacy = (user && !user.fullInfo?.noVoiceMessages) ?? true;
 
     const editingDraft = messageListType === 'scheduled'
       ? selectEditingScheduledDraft(global, chatId)
@@ -1358,6 +1375,7 @@ export default memo(withGlobal<OwnProps>(
       fileSizeLimit: selectCurrentLimit(global, 'uploadMaxFileparts') * MAX_UPLOAD_FILEPART_SIZE,
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      canSendVoiceByPrivacy,
     };
   },
 )(Composer));
