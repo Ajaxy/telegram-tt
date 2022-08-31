@@ -38,6 +38,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (update.id === global.currentUserId && update.user.isPremium && !selectIsCurrentUserPremium(global)) {
         actions.openPremiumModal({ isSuccess: true });
       }
+
       return updateUser(global, update.id, update.user);
     }
 

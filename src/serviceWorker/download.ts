@@ -4,7 +4,7 @@ import { requestPart } from './progressive';
 const DOWNLOAD_PART_SIZE = 1024 * 1024;
 const TEST_PART_SIZE = 64 * 1024;
 
-const QUEUE_SIZE = 5;
+const QUEUE_SIZE = 8;
 
 class FilePartQueue<T> {
   queue: Promise<T>[];

@@ -40,6 +40,7 @@ const gramJsUpdateEventBuilder = { build: (update: object) => update };
 let onUpdate: OnApiUpdate;
 let client: TelegramClient;
 let isConnected = false;
+let currentUserId: string | undefined;
 
 export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   if (DEBUG) {
@@ -138,6 +139,10 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   }
 }
 
+export function setIsPremium({ isPremium }: { isPremium: boolean }) {
+  client.setIsPremium(isPremium);
+}
+
 export async function destroy(noLogOut = false) {
   if (!noLogOut) {
     await invokeRequest(new GramJs.auth.LogOut());
@@ -173,6 +178,14 @@ function handleGramJsUpdate(update: any) {
       '@type': 'updateServerTimeOffset',
       serverTimeOffset: update.timeOffset,
     });
+  } else if (update instanceof GramJs.UpdateConfig) {
+    // eslint-disable-next-line no-underscore-dangle
+    const currentUser = (update as GramJs.UpdateConfig & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] })
+      ._entities
+      ?.find((entity) => entity instanceof GramJs.User && buildApiPeerId(entity.id, 'user') === currentUserId);
+    if (!(currentUser instanceof GramJs.User)) return;
+
+    setIsPremium({ isPremium: Boolean(currentUser.premium) });
   }
 }
 
@@ -322,6 +335,9 @@ export async function fetchCurrentUser() {
 
   setMessageBuilderCurrentUserId(currentUser.id);
   onCurrentUserUpdate(currentUser);
+
+  currentUserId = currentUser.id;
+  setIsPremium({ isPremium: Boolean(currentUser.isPremium) });
 }
 
 export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, request: T) {
