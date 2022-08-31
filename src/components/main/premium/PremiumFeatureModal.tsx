@@ -24,9 +24,10 @@ import PremiumFeaturePreviewStickers from './previews/PremiumFeaturePreviewStick
 import styles from './PremiumFeatureModal.module.scss';
 
 export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
-  limits: 'PremiumPreviewLimits',
-  reactions: 'PremiumPreviewReactions',
-  stickers: 'PremiumPreviewStickers',
+  double_limits: 'PremiumPreviewLimits',
+  unique_reactions: 'PremiumPreviewReactions',
+  premium_stickers: 'PremiumPreviewStickers',
+  animated_emoji: 'PremiumPreviewEmoji',
   no_ads: 'PremiumPreviewNoAds',
   voice_to_text: 'PremiumPreviewVoiceToText',
   profile_badge: 'PremiumPreviewProfileBadge',
@@ -37,10 +38,11 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
-  limits: 'PremiumPreviewLimitsDescription',
-  reactions: 'PremiumPreviewReactionsDescription',
-  stickers: 'PremiumPreviewStickersDescription',
+  double_limits: 'PremiumPreviewLimitsDescription',
+  unique_reactions: 'PremiumPreviewReactionsDescription',
+  premium_stickers: 'PremiumPreviewStickersDescription',
   no_ads: 'PremiumPreviewNoAdsDescription',
+  animated_emoji: 'PremiumPreviewEmojiDescription',
   voice_to_text: 'PremiumPreviewVoiceToTextDescription',
   profile_badge: 'PremiumPreviewProfileBadgeDescription',
   faster_download: 'PremiumPreviewDownloadSpeedDescription',
@@ -50,13 +52,14 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export const PREMIUM_FEATURE_SECTIONS = [
-  'limits',
+  'double_limits',
   'more_upload',
   'faster_download',
   'voice_to_text',
   'no_ads',
-  'reactions',
-  'stickers',
+  'unique_reactions',
+  'premium_stickers',
+  'animated_emoji',
   'advanced_chat_management',
   'profile_badge',
   'animated_userpics',
@@ -212,11 +215,11 @@ const PremiumFeatureModal: FC<OwnProps> = ({
       <div className={buildClassName(styles.content, 'no-scrollbar')} onScroll={handleScroll} ref={scrollContainerRef}>
 
         {PREMIUM_FEATURE_SECTIONS.map((section, index) => {
-          if (section === 'limits') {
+          if (section === 'double_limits') {
             return (
               <div className={buildClassName(styles.slide, styles.limits)}>
                 <h2 className={buildClassName(styles.header, isScrolledToTop && styles.noHeaderBorder)}>
-                  {lang(PREMIUM_FEATURE_TITLES.limits)}
+                  {lang(PREMIUM_FEATURE_TITLES.double_limits)}
                 </h2>
                 <div className={buildClassName(styles.limitsContent, 'custom-scroll')} onScroll={handleLimitsScroll}>
                   {LIMITS_ORDER.map((limit, i) => {
@@ -236,33 +239,33 @@ const PremiumFeatureModal: FC<OwnProps> = ({
               </div>
             );
           }
-          if (section === 'reactions') {
+          if (section === 'unique_reactions') {
             return (
               <div className={styles.slide}>
                 <div className={styles.frame}>
                   <PremiumFeaturePreviewReactions isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
-                  {lang(PREMIUM_FEATURE_TITLES.reactions)}
+                  {lang(PREMIUM_FEATURE_TITLES.unique_reactions)}
                 </h1>
                 <div className={styles.description}>
-                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.reactions), ['br'])}
+                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.unique_reactions), ['br'])}
                 </div>
               </div>
             );
           }
 
-          if (section === 'stickers') {
+          if (section === 'premium_stickers') {
             return (
               <div className={styles.slide}>
                 <div className={styles.frame}>
                   <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
-                  {lang(PREMIUM_FEATURE_TITLES.stickers)}
+                  {lang(PREMIUM_FEATURE_TITLES.premium_stickers)}
                 </h1>
                 <div className={styles.description}>
-                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.stickers), ['br'])}
+                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
                 </div>
               </div>
             );

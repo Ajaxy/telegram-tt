@@ -23,4 +23,8 @@
 
 .icon {
   min-width: 2rem;
+  height: 2rem;
+  align-self: center;
+  border-radius: 0.625rem;
+  background: var(--item-color, #000);
 }

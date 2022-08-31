@@ -48,6 +48,7 @@ export interface ApiStickerSet {
   archived?: true;
   isLottie?: true;
   isVideos?: true;
+  isEmoji?: true;
   installedDate?: number;
   id: string;
   accessHash: string;

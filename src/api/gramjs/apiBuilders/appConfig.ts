@@ -73,6 +73,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     urlAuthDomains: appConfig.url_auth_domains || [],
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
+    premiumPromoOrder: appConfig.premium_promo_order,
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),

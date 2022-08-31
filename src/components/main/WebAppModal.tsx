@@ -1,12 +1,13 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiAttachMenuBot, ApiChat, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
+import type { PopupOptions, WebAppInboundEvent } from './hooks/useWebAppFrame';
 
 import windowSize from '../../util/windowSize';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
@@ -18,15 +19,16 @@ import { extractCurrentThemeParams, validateHexColor } from '../../util/themeSty
 import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
 import useOnChange from '../../hooks/useOnChange';
-import type { WebAppInboundEvent } from './hooks/useWebAppFrame';
 import useWebAppFrame from './hooks/useWebAppFrame';
 import usePrevious from '../../hooks/usePrevious';
+import useFlag from '../../hooks/useFlag';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import Spinner from '../ui/Spinner';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 import './WebAppModal.scss';
 
@@ -52,6 +54,8 @@ type StateProps = {
   paymentStatus?: GlobalState['payment']['status'];
 };
 
+const NBSP = '\u00A0';
+
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const PROLONG_INTERVAL = 45000; // 45s
 const ANIMATION_WAIT = 400;
@@ -63,6 +67,12 @@ const SANDBOX_ATTRIBUTES = [
   'allow-modals',
   'allow-storage-access-by-user-activation',
 ].join(' ');
+
+const DEFAULT_BUTTON_TEXT: Record<string, string> = {
+  ok: 'OK',
+  cancel: 'Cancel',
+  close: 'Close',
+};
 
 const WebAppModal: FC<OwnProps & StateProps> = ({
   webApp,
@@ -87,6 +97,12 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState(extractCurrentThemeParams().bg_color);
   const [headerColor, setHeaderColor] = useState(extractCurrentThemeParams().bg_color);
+  const [confirmClose, setConfirmClose] = useState(false);
+  const [isCloseModalOpen, openCloseModal, closeCloseModal] = useFlag(false);
+  const [popupParams, setPopupParams] = useState<PopupOptions | undefined>();
+  const prevPopupParams = usePrevious(popupParams);
+  const renderingPopupParams = popupParams || prevPopupParams;
+
   const lang = useLang();
   const {
     url, buttonText, queryId,
@@ -160,6 +176,15 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isProgressVisible: eventData.is_progress_visible,
       });
     }
+
+    if (eventType === 'web_app_setup_closing_behavior') {
+      setConfirmClose(eventData.need_confirmation);
+    }
+
+    if (eventType === 'web_app_open_popup') {
+      if (!eventData.message.trim().length || !eventData.buttons?.length || eventData.buttons.length > 3) return;
+      setPopupParams(eventData);
+    }
   }, [bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug]);
 
   const {
@@ -191,6 +216,24 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const handleRefreshClick = useCallback(() => {
     reloadFrame(webApp!.url);
   }, [reloadFrame, webApp]);
+
+  const handleClose = useCallback(() => {
+    if (confirmClose) {
+      openCloseModal();
+    } else {
+      closeWebApp();
+    }
+  }, [confirmClose, openCloseModal, closeWebApp]);
+
+  const handlePopupClose = useCallback((buttonId?: string) => {
+    setPopupParams(undefined);
+    sendEvent({
+      eventType: 'popup_closed',
+      eventData: {
+        button_id: buttonId,
+      },
+    });
+  }, [sendEvent]);
 
   // Notify view that height changed
   useOnChange(() => {
@@ -245,9 +288,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         eventType: 'back_button_pressed',
       });
     } else {
-      closeWebApp();
+      handleClose();
     }
-  }, [closeWebApp, isBackButtonVisible, sendEvent]);
+  }, [handleClose, isBackButtonVisible, sendEvent]);
 
   const openBotChat = useCallback(() => {
     openChat({
@@ -255,6 +298,14 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     });
     closeWebApp();
   }, [bot, closeWebApp, openChat]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmClose(false);
+      closeCloseModal();
+      setPopupParams(undefined);
+    }
+  }, [closeCloseModal, isOpen]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -365,7 +416,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     <Modal
       className="WebAppModal"
       isOpen={isOpen}
-      onClose={closeWebApp}
+      onClose={handleClose}
       header={header}
       hasCloseButton
       style={`background-color: ${backgroundColor}`}
@@ -395,6 +446,43 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             {mainButton?.isProgressVisible && <Spinner color="white" />}
           </Button>
         </>
+      )}
+      {confirmClose && (
+        <ConfirmDialog
+          isOpen={isCloseModalOpen}
+          onClose={closeCloseModal}
+          title={lang('lng_bot_close_warning_title')}
+          text={lang('lng_bot_close_warning')}
+          confirmHandler={closeWebApp}
+          confirmIsDestructive
+          confirmLabel={lang('lng_bot_close_warning_sure')}
+        />
+      )}
+      {renderingPopupParams && (
+        <Modal
+          isOpen={Boolean(popupParams)}
+          title={renderingPopupParams.title || NBSP}
+          onClose={handlePopupClose}
+          hasCloseButton
+          className={buildClassName('web-app-popup', !renderingPopupParams.title?.trim().length && 'without-title')}
+        >
+          {renderingPopupParams.message}
+          <div className="dialog-buttons mt-2">
+            {renderingPopupParams.buttons.map((button) => (
+              <Button
+                key={button.id || button.text || button.type}
+                color={button.type === 'destructive' ? 'danger' : 'primary'}
+                isText
+                fluid
+                size="smaller"
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => handlePopupClose(button.id)}
+              >
+                {button.text || lang(DEFAULT_BUTTON_TEXT[button.type])}
+              </Button>
+            ))}
+          </div>
+        </Modal>
       )}
     </Modal>
   );

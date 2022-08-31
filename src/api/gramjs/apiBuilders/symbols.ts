@@ -106,12 +106,14 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     thumbs,
     count,
     shortName,
+    emojis,
   } = set;
 
   return {
     archived,
     isLottie: animated,
     isVideos: videos,
+    isEmoji: emojis,
     installedDate,
     id: String(id),
     accessHash: String(accessHash),
@@ -125,9 +127,9 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
 export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetCovered): ApiStickerSet {
   const stickerSet = buildStickerSet(coveredStickerSet.set);
 
-  const stickerSetCovers = (coveredStickerSet instanceof GramJs.StickerSetMultiCovered)
-    ? coveredStickerSet.covers
-    : [coveredStickerSet.cover];
+  const stickerSetCovers = (coveredStickerSet instanceof GramJs.StickerSetCovered) ? [coveredStickerSet.cover]
+    : (coveredStickerSet instanceof GramJs.StickerSetMultiCovered) ? coveredStickerSet.covers
+      : coveredStickerSet.documents;
 
   stickerSet.covers = [];
   stickerSetCovers.forEach((cover) => {

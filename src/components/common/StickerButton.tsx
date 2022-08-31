@@ -145,7 +145,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const handleClick = () => {
     if (isContextMenuOpen) return;
     if (isLocked) {
-      openPremiumModal({ initialSection: 'stickers' });
+      openPremiumModal({ initialSection: 'premium_stickers' });
       return;
     }
     onClick?.(clickArg);

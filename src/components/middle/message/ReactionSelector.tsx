@@ -88,7 +88,7 @@ const ReactionSelector: FC<OwnProps> = ({
               className={cn('blocked-button')}
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => openPremiumModal({
-                initialSection: 'reactions',
+                initialSection: 'unique_reactions',
               })}
             >
               <i className="icon-lock-badge" />

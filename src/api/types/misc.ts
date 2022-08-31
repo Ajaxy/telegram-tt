@@ -170,6 +170,7 @@ export interface ApiAppConfig {
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
+  premiumPromoOrder: string[];
   limits: Record<ApiLimitType, readonly [number, number]>;
 }
 
