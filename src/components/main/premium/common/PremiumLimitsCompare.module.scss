@@ -35,9 +35,14 @@
   composes: text;
 }
 
+.right-text, .left-text {
+  composes: text;
+  margin-inline-end: auto;
+}
+
 .right-value, .left-value {
   composes: text;
-  margin-left: auto;
+  margin-inline-start: 1rem;
 }
 
 .right-text, .right-value {

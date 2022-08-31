@@ -8,6 +8,7 @@
   font-weight: 500;
   color: var(--color-text);
   margin-left: 0.75rem;
+  unicode-bidi: plaintext;
 }
 
 .description {
@@ -15,4 +16,5 @@
   color: var(--color-text-secondary);
   margin-bottom: 0.5rem;
   margin-left: 0.75rem;
+  unicode-bidi: plaintext;
 }

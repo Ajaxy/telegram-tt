@@ -1,9 +1,11 @@
-import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 
-import buildClassName from '../../util/buildClassName';
-
+import type { FC } from '../../lib/teact/teact';
 import type { OwnProps as ButtonProps } from './Button';
+
+import buildClassName from '../../util/buildClassName';
+import useLang from '../../hooks/useLang';
+
 import Button from './Button';
 
 import './FloatingActionButton.scss';
@@ -27,6 +29,8 @@ const FloatingActionButton: FC<OwnProps> = ({
   onClick,
   children,
 }) => {
+  const lang = useLang();
+
   const buttonClassName = buildClassName(
     'FloatingActionButton',
     isShown && 'revealed',
@@ -42,6 +46,7 @@ const FloatingActionButton: FC<OwnProps> = ({
       onClick={isShown && !disabled ? onClick : undefined}
       ariaLabel={ariaLabel}
       tabIndex={-1}
+      isRtl={lang.isRtl}
     >
       {children}
     </Button>

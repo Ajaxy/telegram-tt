@@ -13,4 +13,9 @@
   &.revealed {
     transform: translateY(calc(0rem - var(--call-header-height, 0rem)));
   }
+
+  &[dir="rtl"] {
+    right: auto;
+    left: 1rem;
+  }
 }

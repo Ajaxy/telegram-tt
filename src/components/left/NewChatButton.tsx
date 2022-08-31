@@ -50,7 +50,7 @@ const NewChatButton: FC<OwnProps> = ({
   }, []);
 
   return (
-    <div className={fabClassName}>
+    <div className={fabClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
         round
         color="primary"
@@ -64,7 +64,7 @@ const NewChatButton: FC<OwnProps> = ({
       </Button>
       <Menu
         isOpen={isMenuOpen}
-        positionX="right"
+        positionX={lang.isRtl ? 'left' : 'right'}
         positionY="bottom"
         autoClose
         onClose={handleClose}
