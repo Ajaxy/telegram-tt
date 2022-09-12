@@ -15,6 +15,7 @@ export const INITIAL_STATE: GlobalState = {
   newChatMembersProgress: NewChatMembersProgress.Closed,
   uiReadyState: 0,
   serverTimeOffset: 0,
+  isUpdateAvailable: false,
 
   authRememberMe: true,
   countryList: {

@@ -16,6 +16,7 @@ import useHistoryBack from '../../../../hooks/useHistoryBack';
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
+import renderText from '../../../common/helpers/renderText';
 
 import ListItem from '../../../ui/ListItem';
 import Button from '../../../ui/Button';
@@ -277,7 +278,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                   }}
                 >
                   <span className="title">
-                    {folder.title}
+                    {renderText(folder.title, ['emoji'])}
                     {isBlocked && <i className="icon-lock-badge settings-folders-blocked-icon" />}
                   </span>
                   <span className="subtitle">{folder.subtitle}</span>
@@ -307,7 +308,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             >
               <div className="settings-folders-recommended-item">
                 <div className="multiline-item">
-                  <span className="title">{folder.title}</span>
+                  <span className="title">{renderText(folder.title, ['emoji'])}</span>
                   <span className="subtitle">{folder.description}</span>
                 </div>
 

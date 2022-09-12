@@ -147,6 +147,7 @@ export type GlobalState = {
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
   isSyncing?: boolean;
+  isUpdateAvailable?: boolean;
   lastSyncTime?: number;
   serverTimeOffset: number;
   leftColumnWidth?: number;
@@ -690,6 +691,7 @@ export interface ActionPayloads {
   setInstallPrompt: { canInstall: boolean };
   openLimitReachedModal: { limit: ApiLimitTypeWithModal };
   closeLimitReachedModal: never;
+  checkAppVersion: never;
 
   // Accounts
   reportPeer: {

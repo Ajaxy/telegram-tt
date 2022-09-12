@@ -230,7 +230,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         <div className="search-section">
           <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
-              <Link onClick={handleClickShowMoreLocal}>
+              <Link className="Link" onClick={handleClickShowMoreLocal}>
                 {lang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
               </Link>
             )}
@@ -254,7 +254,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         <div className="search-section">
           <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
-              <Link onClick={handleClickShowMoreGlobal}>
+              <Link className="Link" onClick={handleClickShowMoreGlobal}>
                 {lang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
               </Link>
             )}

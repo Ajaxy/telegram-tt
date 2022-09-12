@@ -1,13 +1,11 @@
-import { addActionHandler, setGlobal } from '../../index';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiError } from '../../../api/types';
 
-import { GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
+import { APP_VERSION, APP_VERSION_URL_PATH, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
-import {
-  selectChatMessage, selectCurrentMessageList, selectIsTrustedBot,
-} from '../../selectors';
+import { selectChatMessage, selectCurrentMessageList, selectIsTrustedBot } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { unique } from '../../../util/iteratees';
 
@@ -404,4 +402,22 @@ addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) =>
       lastRendered: unique([...lastRendered, ...ids]).slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT),
     },
   };
+});
+
+addActionHandler('checkAppVersion', () => {
+  const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
+
+  fetch(APP_VERSION_URL_PATH)
+    .then((response) => {
+      return response.text();
+    }).then((version) => {
+      version = version.trim();
+
+      if (APP_VERSION_REGEX.test(version) && version !== APP_VERSION) {
+        setGlobal({
+          ...getGlobal(),
+          isUpdateAvailable: true,
+        });
+      }
+    });
 });

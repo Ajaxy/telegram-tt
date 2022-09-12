@@ -9,7 +9,6 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
-import useFlag from '../../../hooks/useFlag';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
 
@@ -30,6 +29,7 @@ type OwnProps = {
   contactsFilter: string;
   shouldSkipTransition?: boolean;
   foldersDispatch: FolderEditDispatch;
+  isUpdateAvailable?: boolean;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onScreenSelect: (screen: SettingsScreens) => void;
@@ -38,7 +38,6 @@ type OwnProps = {
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 const BUTTON_CLOSE_DELAY_MS = 250;
-const APP_OUTDATED_TIMEOUT = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 let closeTimeout: number | undefined;
 
@@ -49,6 +48,7 @@ const LeftMain: FC<OwnProps> = ({
   contactsFilter,
   shouldSkipTransition,
   foldersDispatch,
+  isUpdateAvailable,
   onSearchQuery,
   onContentChange,
   onScreenSelect,
@@ -56,27 +56,12 @@ const LeftMain: FC<OwnProps> = ({
 }) => {
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
 
+  const {
+    shouldRender: shouldRenderUpdateButton,
+    transitionClassNames: updateButtonClassNames,
+  } = useShowTransition(isUpdateAvailable);
+
   const isMouseInside = useRef(false);
-
-  const handleSelectSettings = useCallback(() => {
-    onContentChange(LeftColumnContent.Settings);
-  }, [onContentChange]);
-
-  const handleSelectContacts = useCallback(() => {
-    onContentChange(LeftColumnContent.Contacts);
-  }, [onContentChange]);
-
-  const handleSelectNewChannel = useCallback(() => {
-    onContentChange(LeftColumnContent.NewChannelStep1);
-  }, [onContentChange]);
-
-  const handleSelectNewGroup = useCallback(() => {
-    onContentChange(LeftColumnContent.NewGroupStep1);
-  }, [onContentChange]);
-
-  const handleSelectArchived = useCallback(() => {
-    onContentChange(LeftColumnContent.Archived);
-  }, [onContentChange]);
 
   const handleMouseEnter = useCallback(() => {
     if (content !== LeftColumnContent.ChatList) {
@@ -101,6 +86,30 @@ const LeftMain: FC<OwnProps> = ({
     }, BUTTON_CLOSE_DELAY_MS);
   }, []);
 
+  const handleSelectSettings = useCallback(() => {
+    onContentChange(LeftColumnContent.Settings);
+  }, [onContentChange]);
+
+  const handleSelectContacts = useCallback(() => {
+    onContentChange(LeftColumnContent.Contacts);
+  }, [onContentChange]);
+
+  const handleSelectArchived = useCallback(() => {
+    onContentChange(LeftColumnContent.Archived);
+  }, [onContentChange]);
+
+  const handleUpdateClick = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleSelectNewChannel = useCallback(() => {
+    onContentChange(LeftColumnContent.NewChannelStep1);
+  }, [onContentChange]);
+
+  const handleSelectNewGroup = useCallback(() => {
+    onContentChange(LeftColumnContent.NewGroupStep1);
+  }, [onContentChange]);
+
   useEffect(() => {
     let autoCloseTimeout: number | undefined;
     if (content !== LeftColumnContent.ChatList) {
@@ -118,8 +127,6 @@ const LeftMain: FC<OwnProps> = ({
       }
     };
   }, [content]);
-
-  const [shouldRenderUpdateButton, updateButtonClassNames, handleUpdateClick] = useAppOutdatedCheck();
 
   const lang = useLang();
 
@@ -185,25 +192,5 @@ const LeftMain: FC<OwnProps> = ({
     </div>
   );
 };
-
-function useAppOutdatedCheck() {
-  const [isAppOutdated, markIsAppOutdated] = useFlag(false);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(markIsAppOutdated, APP_OUTDATED_TIMEOUT);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [markIsAppOutdated]);
-
-  const { shouldRender, transitionClassNames } = useShowTransition(isAppOutdated);
-
-  const handleUpdateClick = () => {
-    window.location.reload();
-  };
-
-  return [shouldRender, transitionClassNames, handleUpdateClick] as const;
-}
 
 export default memo(LeftMain);

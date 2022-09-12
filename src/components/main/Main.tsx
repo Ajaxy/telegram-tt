@@ -39,6 +39,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import useInterval from '../../hooks/useInterval';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -118,6 +119,7 @@ type StateProps = {
 };
 
 const NOTIFICATION_INTERVAL = 1000;
+const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 
 let notificationInterval: number | undefined;
 
@@ -189,6 +191,7 @@ const Main: FC<StateProps> = ({
     loadCustomEmojis,
     closePaymentModal,
     clearReceipt,
+    checkAppVersion,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -202,6 +205,8 @@ const Main: FC<StateProps> = ({
       sync();
     }
   }, [connectionState, authState, sync]);
+
+  useInterval(checkAppVersion, APP_OUTDATED_TIMEOUT_MS, true);
 
   // Initial API calls
   useEffect(() => {
@@ -217,11 +222,12 @@ const Main: FC<StateProps> = ({
       loadAttachMenuBots();
       loadContactList();
       loadPremiumGifts();
+      checkAppVersion();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots, loadContactList,
-    loadPremiumGifts,
+    loadPremiumGifts, checkAppVersion,
   ]);
 
   // Language-based API calls
