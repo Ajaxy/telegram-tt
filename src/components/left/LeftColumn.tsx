@@ -32,6 +32,7 @@ type StateProps = {
   hasPasscode?: boolean;
   nextSettingsScreen?: SettingsScreens;
   isChatOpen: boolean;
+  isUpdateAvailable?: boolean;
 };
 
 enum ContentType {
@@ -58,6 +59,7 @@ const LeftColumn: FC<StateProps> = ({
   hasPasscode,
   nextSettingsScreen,
   isChatOpen,
+  isUpdateAvailable,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -440,6 +442,7 @@ const LeftColumn: FC<StateProps> = ({
                   onScreenSelect={handleSettingsScreenSelect}
                   onReset={handleReset}
                   shouldSkipTransition={shouldSkipHistoryAnimations}
+                  isUpdateAvailable={isUpdateAvailable}
                 />
               );
           }
@@ -474,6 +477,7 @@ export default memo(withGlobal(
       settings: {
         nextScreen: nextSettingsScreen,
       },
+      isUpdateAvailable,
     } = global;
 
     const isChatOpen = Boolean(selectCurrentChat(global)?.id);
@@ -488,6 +492,7 @@ export default memo(withGlobal(
       hasPasscode,
       nextSettingsScreen,
       isChatOpen,
+      isUpdateAvailable,
     };
   },
 )(LeftColumn));
