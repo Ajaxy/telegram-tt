@@ -187,6 +187,9 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
     const changeSlideOnClick = (e: MouseEvent): [boolean, boolean] => {
       if (transformRef.current.scale !== 1) return [false, false];
+      if ((e.target as HTMLElement).closest('div.VideoPlayerControls')) {
+        return [false, false];
+      }
       let direction = 0;
       if (windowHeight - e.pageY < CLICK_Y_THRESHOLD) {
         return [false, false];
