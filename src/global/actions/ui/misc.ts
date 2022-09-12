@@ -2,13 +2,14 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiError } from '../../../api/types';
 
-import { APP_VERSION, APP_VERSION_URL_PATH, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
+import { APP_VERSION, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { selectChatMessage, selectCurrentMessageList, selectIsTrustedBot } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { unique } from '../../../util/iteratees';
 
+export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
 
 addActionHandler('toggleChatInfo', (global, action, payload) => {
@@ -407,7 +408,7 @@ addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) =>
 addActionHandler('checkAppVersion', () => {
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 
-  fetch(APP_VERSION_URL_PATH)
+  fetch(APP_VERSION_URL)
     .then((response) => {
       return response.text();
     }).then((version) => {
