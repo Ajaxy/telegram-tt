@@ -287,6 +287,11 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
       stickers: [],
     };
   }
+
+  // TODO This was re-designed but can be hardcoded in cache
+  if (cached.settings.themes.light?.patternColor === 'rgba(90, 110, 70, 0.6)') {
+    cached.settings.themes.light.patternColor = undefined;
+  }
 }
 
 function updateCache() {
