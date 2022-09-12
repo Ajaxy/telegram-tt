@@ -586,7 +586,15 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
   }
 
   const uri = new URL(url.startsWith('http') ? url : `https://${url}`);
-  const [part1, part2, part3] = uri.pathname.split('/').filter(Boolean).map((l) => decodeURI(l));
+  if (uri.hostname === 't.me' && uri.pathname === '/') {
+    window.open(uri.toString(), '_blank', 'noopener');
+    return;
+  }
+
+  const hostParts = uri.hostname.split('.');
+  if (hostParts.length > 3) return;
+  const pathname = hostParts.length === 3 ? `${hostParts[0]}/${uri.pathname}` : uri.pathname;
+  const [part1, part2, part3] = pathname.split('/').filter(Boolean).map((l) => decodeURI(l));
   const params = Object.fromEntries(uri.searchParams);
 
   let hash: string | undefined;

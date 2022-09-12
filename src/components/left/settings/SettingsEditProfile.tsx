@@ -8,6 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress } from '../../../types';
 
+import { TME_LINK_PREFIX } from '../../../config';
 import { throttle } from '../../../util/schedulers';
 import { selectUser } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
@@ -228,7 +229,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
           {username && (
             <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('lng_username_link')}<br />
-              <span className="username-link">https://t.me/{username}</span>
+              <span className="username-link">{TME_LINK_PREFIX}{username}</span>
             </p>
           )}
         </div>

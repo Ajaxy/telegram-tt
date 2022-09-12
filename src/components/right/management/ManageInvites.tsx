@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { STICKER_SIZE_INVITES } from '../../../config';
+import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -100,7 +100,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   }, hasDetailedCountdown ? 1000 : undefined);
 
   const primaryInvite = exportedInvites?.find(({ isPermanent }) => isPermanent);
-  const primaryInviteLink = chat?.username ? `t.me/${chat.username}` : primaryInvite?.link;
+  const primaryInviteLink = chat?.username ? `${TME_LINK_PREFIX}${chat.username}` : primaryInvite?.link;
   const temporalInvites = useMemo(() => {
     const invites = chat?.username ? exportedInvites : exportedInvites?.filter(({ isPermanent }) => !isPermanent);
     return invites?.sort(inviteComparator);
