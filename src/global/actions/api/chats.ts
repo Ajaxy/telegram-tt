@@ -191,7 +191,11 @@ addActionHandler('loadAllChats', async (global, actions, payload) => {
       ? listIds
         /* eslint-disable @typescript-eslint/no-loop-func */
         .map((id) => global.chats.byId[id])
-        .filter((chat) => Boolean(chat?.lastMessage) && !selectIsChatPinned(global, chat.id))
+        .filter((chat) => (
+          Boolean(chat?.lastMessage)
+          && chat.id !== SERVICE_NOTIFICATIONS_USER_ID
+          && !selectIsChatPinned(global, chat.id)
+        ))
         /* eslint-enable @typescript-eslint/no-loop-func */
         .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
       : undefined;
