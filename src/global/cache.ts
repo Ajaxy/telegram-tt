@@ -13,13 +13,14 @@ import {
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT,
+  GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
+  ALL_FOLDER_ID,
+  ARCHIVED_FOLDER_ID,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   DEFAULT_VOLUME,
   DEFAULT_PLAYBACK_RATE,
-  ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID,
+  DEFAULT_PATTERN_COLOR,
   DEFAULT_LIMITS,
-  GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
@@ -289,8 +290,12 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   // TODO This was re-designed but can be hardcoded in cache
-  if (cached.settings.themes.light?.patternColor === 'rgba(90, 110, 70, 0.6)') {
-    cached.settings.themes.light.patternColor = undefined;
+  const { light: lightTheme } = cached.settings.themes;
+  if (lightTheme?.patternColor === 'rgba(90, 110, 70, 0.6)' || !lightTheme?.patternColor) {
+    cached.settings.themes.light = {
+      ...lightTheme,
+      patternColor: DEFAULT_PATTERN_COLOR,
+    };
   }
 }
 
