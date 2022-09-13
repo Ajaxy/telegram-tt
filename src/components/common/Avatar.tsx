@@ -114,7 +114,7 @@ const Avatar: FC<OwnProps> = ({
 
   const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
 
-  useVideoAutoPause(videoRef, shouldPlayVideo);
+  const { handlePlaying } = useVideoAutoPause(videoRef, shouldPlayVideo);
   useVideoCleanup(videoRef, [shouldPlayVideo]);
 
   useEffect(() => {
@@ -170,6 +170,7 @@ const Avatar: FC<OwnProps> = ({
             autoPlay
             disablePictureInPicture
             playsInline
+            onPlaying={handlePlaying}
           />
         )}
       </>

@@ -10,7 +10,11 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
   const canPlayRef = useRef();
   canPlayRef.current = canPlay;
 
+  const isFrozenRef = useRef();
+
   const freezePlaying = useCallback(() => {
+    isFrozenRef.current = true;
+
     if (!playerRef.current) {
       return;
     }
@@ -23,6 +27,8 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
   }, [playerRef]);
 
   const unfreezePlaying = useCallback(() => {
+    isFrozenRef.current = false;
+
     if (
       playerRef.current && wasPlaying.current && canPlayRef.current
       // At this point HTMLVideoElement can be unmounted from the DOM
@@ -38,4 +44,13 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
 
   useBackgroundMode(freezePlaying, unfreezePlayingOnRaf);
   useHeavyAnimationCheck(freezePlaying, unfreezePlaying);
+
+  const handlePlaying = useCallback(() => {
+    if (isFrozenRef.current) {
+      wasPlaying.current = true;
+      playerRef.current!.pause();
+    }
+  }, [playerRef]);
+
+  return { handlePlaying };
 }
