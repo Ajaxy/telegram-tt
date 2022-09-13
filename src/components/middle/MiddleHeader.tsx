@@ -208,7 +208,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     if (threadId === MAIN_THREAD_ID && messageListType === 'thread' && currentTransitionKey === 0) {
       if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
-        openChat({ id: undefined });
+        openChat({ id: undefined }, { forceOnHeavyAnimation: true });
       } else {
         toggleLeftColumn();
       }

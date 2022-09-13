@@ -189,7 +189,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   }, [animationLevel, orderDiff, animationType]);
 
   const handleClick = useCallback(() => {
-    openChat({ id: chatId, shouldReplaceHistory: true });
+    openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
