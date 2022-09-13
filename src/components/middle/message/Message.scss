@@ -78,6 +78,10 @@
     z-index: 1;
 
     --color-fill: white;
+
+    @media (max-width: 600px) {
+      left: 1.5rem;
+    }
   }
 
   .quick-reaction {
