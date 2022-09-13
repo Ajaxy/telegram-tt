@@ -221,7 +221,7 @@ function renderMigratedContent(chatId: string, noLinks?: boolean): string | Text
     return text;
   }
 
-  return <ChatLink className="action-link" chatId={chatId}>{text}</ChatLink>;
+  return <ChatLink className="action-link underlined-link" chatId={chatId}>{text}</ChatLink>;
 }
 
 function processPlaceholder(text: string, placeholder: string, replaceValue?: TextPart | TextPart[]): TextPart[] {
