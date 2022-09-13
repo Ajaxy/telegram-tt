@@ -19,7 +19,6 @@ import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
-import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import useLang from '../../../hooks/useLang';
 import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
@@ -80,7 +79,6 @@ function clearSelection() {
 const MessageInput: FC<OwnProps & StateProps> = ({
   id,
   chatId,
-  threadId,
   captionLimit,
   isAttachmentModalInput,
   editableInputId,
@@ -114,8 +112,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
   const [selectedRange, setSelectedRange] = useState<Range>();
-
-  const sendMessageAction = useSendMessageAction(chatId, threadId);
 
   useEffect(() => {
     if (!isAttachmentModalInput) return;
@@ -286,7 +282,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     const { innerHTML, textContent } = e.currentTarget;
 
     onUpdate(innerHTML === SAFARI_BR ? '' : innerHTML);
-    sendMessageAction({ type: 'typing' });
 
     // Reset focus on the input to remove any active styling when input is cleared
     if (

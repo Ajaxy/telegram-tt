@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
@@ -6,6 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiStickerSet, ApiSticker, ApiChat } from '../../../api/types';
 import type { StickerSetOrRecent } from '../../../types';
+import type { FC } from '../../../lib/teact/teact';
 
 import {
   CHAT_STICKER_SET_ID,
@@ -80,8 +80,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   stickerSetsById,
   shouldPlay,
   isSavedMessages,
-  onStickerSelect,
   isCurrentUserPremium,
+  onStickerSelect,
 }) => {
   const {
     loadRecentStickers,
@@ -200,11 +200,11 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   ), [allSets, areAddedLoaded]);
 
   useEffect(() => {
-    if (loadAndPlay) {
-      loadRecentStickers();
-      sendMessageAction({ type: 'chooseSticker' });
-    }
-  }, [loadAndPlay, loadRecentStickers, sendMessageAction]);
+    if (!loadAndPlay) return;
+    loadRecentStickers();
+    if (!canSendStickers) return;
+    sendMessageAction({ type: 'chooseSticker' });
+  }, [canSendStickers, loadAndPlay, loadRecentStickers, sendMessageAction]);
 
   useHorizontalScroll(headerRef.current);
 
@@ -244,8 +244,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   }, [faveSticker]);
 
   const handleMouseMove = useCallback(() => {
+    if (!canSendStickers) return;
     sendMessageAction({ type: 'chooseSticker' });
-  }, [sendMessageAction]);
+  }, [canSendStickers, sendMessageAction]);
 
   const handleRemoveRecentSticker = useCallback((sticker: ApiSticker) => {
     removeRecentSticker({ sticker });
