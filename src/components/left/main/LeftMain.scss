@@ -63,8 +63,10 @@
   .btn-update {
     position: absolute;
     bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
+    left: 50%;
     margin: 0 auto;
+    transform: translateX(-50%);
+
+    white-space: nowrap;
   }
 }
