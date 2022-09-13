@@ -30,9 +30,10 @@ import useMedia from '../../hooks/useMedia';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
+import useVideoCleanup from '../../hooks/useVideoCleanup';
 
 import './Avatar.scss';
-import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
@@ -80,16 +81,12 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
-  const hasVideoAvatar = (user || chat)?.hasVideoAvatar;
-  const profilePhoto = (user?.fullInfo?.profilePhoto || chat?.fullInfo?.profilePhoto);
-  const shouldShowVideo = !noVideo && Boolean(user?.isPremium && profilePhoto?.isVideo);
-  const shouldPlayVideo = isIntersecting && shouldShowVideo;
+  const withVideo = isIntersecting && !noVideo && user?.isPremium && user?.hasVideoAvatar;
+  const profilePhoto = user?.fullInfo?.profilePhoto;
+  const shouldLoadVideo = withVideo && profilePhoto?.isVideo;
 
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
-    if (shouldShowVideo) {
-      videoHash = getChatAvatarHash(user!, undefined, 'video');
-    }
     if (user) {
       imageHash = getChatAvatarHash(user, shouldFetchBig ? 'big' : undefined);
     } else if (chat) {
@@ -97,9 +94,21 @@ const Avatar: FC<OwnProps> = ({
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
     }
+
+    if (shouldLoadVideo) {
+      videoHash = getChatAvatarHash(user!, undefined, 'video');
+    }
   }
 
+  const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
+  const shouldPlayVideo = Boolean(isIntersecting && videoBlobUrl);
+
+  const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
+
   useVideoAutoPause(videoRef, shouldPlayVideo);
+  useVideoCleanup(videoRef, [shouldPlayVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -113,16 +122,12 @@ const Avatar: FC<OwnProps> = ({
     return () => video.removeEventListener('ended', returnToStart);
   }, [noLoop]);
 
+  const userId = user?.id;
   useEffect(() => {
-    if (isIntersecting && !noVideo && user && hasVideoAvatar && !profilePhoto) {
-      loadFullUser({ userId: user.id });
+    if (withVideo && !profilePhoto) {
+      loadFullUser({ userId });
     }
-  }, [hasVideoAvatar, profilePhoto, loadFullUser, user, noVideo, isIntersecting]);
-
-  const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const videoBlobUrl = useMedia(videoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
-  const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
+  }, [loadFullUser, profilePhoto, userId, withVideo]);
 
   const lang = useLang();
 
@@ -144,11 +149,11 @@ const Avatar: FC<OwnProps> = ({
           alt={author}
           decoding="async"
         />
-        {videoBlobUrl && (
+        {shouldPlayVideo && (
           <video
             ref={videoRef}
             src={videoBlobUrl}
-            className={buildClassName(cn.media, 'avatar-media', transitionClassNames)}
+            className={buildClassName(cn.media, 'avatar-media')}
             muted
             autoPlay
             disablePictureInPicture
