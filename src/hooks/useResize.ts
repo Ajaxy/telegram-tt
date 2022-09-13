@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useState, useEffect } from '../lib/teact/teact';
+import { useState, useEffect, useLayoutEffect } from '../lib/teact/teact';
 import useFlag from './useFlag';
 
 export function useResize(
@@ -12,7 +12,7 @@ export function useResize(
   const [initialMouseX, setInitialMouseX] = useState<number>();
   const [initialElementWidth, setInitialElementWidth] = useState<number>();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!elementRef.current || !initialWidth) {
       return;
     }
