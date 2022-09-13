@@ -339,7 +339,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withFullInfo
               withMediaViewer
               withUpdatingStatus
-              withVideoAvatar
+              withVideoAvatar={isReady}
               noRtl
             />
           ) : (
@@ -351,7 +351,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer
               withFullInfo
               withUpdatingStatus
-              withVideoAvatar
+              withVideoAvatar={isReady}
               noRtl
             />
           )}
