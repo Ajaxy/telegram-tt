@@ -47,7 +47,8 @@
   }
 
   > .Avatar,
-  > .message-content-wrapper {
+  > .message-content-wrapper,
+  > .chat-avatar-premium {
     opacity: 1;
     transform: scale(1) translateX(0);
     transition: transform var(--select-transition);
@@ -72,10 +73,14 @@
 
   & > .chat-avatar-premium {
     position: absolute;
-    bottom: 0.1875rem;
+    bottom: -0.1875rem;
     left: 1.25rem;
     height: 0.75rem;
     z-index: 1;
+
+    & > svg {
+      position: absolute;
+    }
 
     --color-fill: white;
 
@@ -293,7 +298,8 @@
 
     &:not(.own) {
       > .Avatar,
-      > .message-content-wrapper {
+      > .message-content-wrapper,
+      > .chat-avatar-premium {
         transform: translateX(2.5rem);
       }
     }

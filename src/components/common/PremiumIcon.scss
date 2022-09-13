@@ -16,8 +16,9 @@
     height: 100%;
   }
 
-  &:not(.gradient) {
-    transform: translateY(-2px);
+  &:not(.gradient) > svg {
+    position: relative;
+    top: -2px;
   }
 
   &.clickable {
