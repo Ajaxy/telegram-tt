@@ -408,7 +408,7 @@ addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) =>
 addActionHandler('checkAppVersion', () => {
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 
-  fetch(APP_VERSION_URL)
+  fetch(`${APP_VERSION_URL}?${Date.now()}`)
     .then((response) => {
       return response.text();
     }).then((version) => {
