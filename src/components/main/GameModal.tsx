@@ -32,7 +32,7 @@ type StateProps = {
 };
 
 const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }) => {
-  const { closeGame, showNotification, openForwardMenu } = getActions();
+  const { closeGame, openForwardMenu } = getActions();
   const lang = useLang();
   const { url, chatId, messageId } = openedGame || {};
   const isOpen = Boolean(url);
@@ -51,12 +51,13 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
       }
 
       if (data.eventType === 'share_game') {
-        showNotification({ message: 'Unsupported game action' });
+        openForwardMenu({ fromChatId: chatId, messageIds: [messageId] });
+        closeGame();
       }
     } catch (e) {
       // Ignore other messages
     }
-  }, [chatId, closeGame, messageId, openForwardMenu, showNotification]);
+  }, [chatId, closeGame, messageId, openForwardMenu]);
 
   const handleLoad = useCallback((event: React.SyntheticEvent<HTMLIFrameElement>) => {
     event.currentTarget.focus();
