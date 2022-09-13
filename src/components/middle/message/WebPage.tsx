@@ -50,12 +50,6 @@ const WebPage: FC<OwnProps> = ({
 }) => {
   const webPage = getMessageWebPage(message);
 
-  let isSquarePhoto = false;
-  if (webPage?.photo && !webPage.video) {
-    const { width, height } = calculateMediaDimensions(message);
-    isSquarePhoto = width === height;
-  }
-
   const handleMediaClick = useCallback(() => {
     onMediaClick!();
   }, [onMediaClick]);
@@ -73,8 +67,14 @@ const WebPage: FC<OwnProps> = ({
     photo,
     video,
   } = webPage;
-  const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
+  const isArticle = Boolean(truncatedDescription || title || siteName);
+  let isSquarePhoto = false;
+  if (isArticle && webPage?.photo && !webPage.video) {
+    const { width, height } = calculateMediaDimensions(message);
+    isSquarePhoto = width === height;
+  }
+  const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
 
   const className = buildClassName(
     'WebPage',
@@ -82,6 +82,7 @@ const WebPage: FC<OwnProps> = ({
     isSquarePhoto && 'with-square-photo',
     !photo && !video && !inPreview && 'without-media',
     video && 'with-video',
+    !isArticle && 'no-article',
   );
 
   return (
@@ -106,15 +107,17 @@ const WebPage: FC<OwnProps> = ({
           theme={theme}
         />
       )}
-      <div className="WebPage-text">
-        <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
-        {!inPreview && title && (
-          <p className="site-title">{renderText(title)}</p>
-        )}
-        {truncatedDescription && (
-          <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
-        )}
-      </div>
+      {isArticle && (
+        <div className="WebPage-text">
+          <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
+          {!inPreview && title && (
+            <p className="site-title">{renderText(title)}</p>
+          )}
+          {truncatedDescription && (
+            <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
+          )}
+        </div>
+      )}
       {!inPreview && video && (
         <Video
           message={message}
