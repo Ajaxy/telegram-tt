@@ -5,6 +5,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
 import useLang from '../../hooks/useLang';
@@ -37,6 +38,7 @@ export type OwnProps = {
 export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUserIds'> & {
   chatId?: string;
   messageId?: number;
+  animationLevel: AnimationLevel;
 };
 
 const ReactorListModal: FC<OwnProps & StateProps> = ({
@@ -46,6 +48,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   chatId,
   messageId,
   seenByUserIds,
+  animationLevel,
 }) => {
   const {
     loadReactors,
@@ -169,7 +172,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => handleClick(userId)}
                   >
-                    <Avatar user={user} size="small" />
+                    <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
                     <div className="title">
                       <h3 dir="auto">{fullName && renderText(fullName)}</h3>
                       {user.isPremium && <PremiumIcon />}
@@ -204,6 +207,7 @@ export default memo(withGlobal<OwnProps>(
       reactions: message?.reactions,
       reactors: message?.reactors,
       seenByUserIds: message?.seenByUserIds,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(ReactorListModal));

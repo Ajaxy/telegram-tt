@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
 } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
@@ -47,6 +48,7 @@ type StateProps = {
   privateChatUser?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   lastSyncTime?: number;
+  animationLevel?: AnimationLevel;
 };
 
 const ChatMessage: FC<OwnProps & StateProps> = ({
@@ -55,6 +57,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   privateChatUser,
+  animationLevel,
   lastSyncTime,
 }) => {
   const { focusMessage } = getActions();
@@ -87,6 +90,8 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
         user={privateChatUser}
         isSavedMessages={privateChatUser?.isSelf}
         lastSyncTime={lastSyncTime}
+        withVideo
+        animationLevel={animationLevel}
       />
       <div className="info">
         <div className="info-row">
@@ -141,6 +146,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       lastSyncTime: global.lastSyncTime,
+      animationLevel: global.settings.byKey.animationLevel,
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
     };
   },

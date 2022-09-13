@@ -3,6 +3,7 @@ import React, { useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 
 import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import {
@@ -41,6 +42,7 @@ type StateProps = {
   currentUserId: string | undefined;
   canDeleteForAll?: boolean;
   contactName?: string;
+  animationLevel: AnimationLevel;
 };
 
 const DeleteChatModal: FC<OwnProps & StateProps> = ({
@@ -55,6 +57,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   currentUserId,
   canDeleteForAll,
   contactName,
+  animationLevel,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -125,6 +128,8 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
           size="tiny"
           chat={chat}
           isSavedMessages={isChatWithSelf}
+          animationLevel={animationLevel}
+          withVideo
         />
         <h3 className="modal-title">{lang(renderTitle())}</h3>
       </div>
@@ -236,6 +241,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       canDeleteForAll,
       contactName,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(DeleteChatModal));

@@ -348,7 +348,6 @@ const MessageContextMenu: FC<OwnProps> = ({
                 <Avatar
                   size="micro"
                   user={user}
-                  noVideo
                 />
               ))}
             </div>

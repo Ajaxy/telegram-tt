@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
 import type { GlobalState } from '../../global/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
@@ -40,6 +41,7 @@ type StateProps =
     user?: ApiUser;
     userStatus?: ApiUserStatus;
     isSavedMessages?: boolean;
+    animationLevel: AnimationLevel;
     areMessagesLoaded: boolean;
     serverTimeOffset: number;
   }
@@ -61,6 +63,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   userStatus,
   isSavedMessages,
   areMessagesLoaded,
+  animationLevel,
   lastSyncTime,
   serverTimeOffset,
 }) => {
@@ -136,7 +139,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         user={user}
         isSavedMessages={isSavedMessages}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
-        noVideo={!withVideoAvatar}
+        withVideo={withVideoAvatar}
+        animationLevel={animationLevel}
       />
       <div className="info">
         {isSavedMessages ? (
@@ -166,7 +170,13 @@ export default memo(withGlobal<OwnProps>(
     const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
 
     return {
-      lastSyncTime, user, userStatus, isSavedMessages, areMessagesLoaded, serverTimeOffset,
+      lastSyncTime,
+      user,
+      userStatus,
+      isSavedMessages,
+      areMessagesLoaded,
+      serverTimeOffset,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(PrivateChatInfo));

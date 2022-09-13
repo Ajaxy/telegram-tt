@@ -7,6 +7,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiBotInfo, ApiMessage, ApiRestrictionReason } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
+import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../config';
@@ -95,7 +96,7 @@ type StateProps = {
   restrictionReason?: ApiRestrictionReason;
   focusingId?: number;
   isSelectModeActive?: boolean;
-  animationLevel?: number;
+  animationLevel?: AnimationLevel;
   lastMessage?: ApiMessage;
   isLoadingBotInfo?: boolean;
   botInfo?: ApiBotInfo;

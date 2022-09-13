@@ -3,6 +3,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiUser, ApiWebSession } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 
 import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -25,10 +26,15 @@ type OwnProps = {
 type StateProps = {
   session?: ApiWebSession;
   bot?: ApiUser;
+  animationLevel: AnimationLevel;
 };
 
 const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
-  isOpen, session, bot, onClose,
+  isOpen,
+  session,
+  bot,
+  animationLevel,
+  onClose,
 }) => {
   const { terminateWebAuthorization } = getActions();
   const lang = useLang();
@@ -70,7 +76,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
       onClose={onClose}
       className={styles.root}
     >
-      <Avatar className={styles.avatar} user={renderingBot} size="large" />
+      <Avatar className={styles.avatar} user={renderingBot} size="large" animationLevel={animationLevel} withVideo />
       <h3 className={styles.title} dir="auto">{getUserFullName(renderingBot)}</h3>
       <div className={styles.date} aria-label={lang('PrivacySettings.LastSeen')}>
         {renderingSession?.domain}
@@ -99,5 +105,6 @@ export default memo(withGlobal<OwnProps>((global, { hash }) => {
   return {
     session,
     bot,
+    animationLevel: global.settings.byKey.animationLevel,
   };
 })(SettingsActiveWebsite));

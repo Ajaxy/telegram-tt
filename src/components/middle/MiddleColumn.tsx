@@ -10,7 +10,7 @@ import type {
   MessageListType,
   ActiveEmojiInteraction,
 } from '../../global/types';
-import type { ThemeKey } from '../../types';
+import type { AnimationLevel, ThemeKey } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
@@ -100,7 +100,7 @@ type StateProps = {
   isSeenByModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
-  animationLevel?: number;
+  animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   isChannel?: boolean;

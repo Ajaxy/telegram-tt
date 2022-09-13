@@ -9,6 +9,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText, ApiUserStatus,
 } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
@@ -82,7 +83,7 @@ type StateProps = {
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiFormattedText;
-  animationLevel?: number;
+  animationLevel?: AnimationLevel;
   isSelected?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
@@ -315,6 +316,8 @@ const Chat: FC<OwnProps & StateProps> = ({
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
+          animationLevel={animationLevel}
+          withVideo
           observeIntersection={observeIntersection}
         />
         {chat.isCallActive && chat.isCallNotEmpty && (

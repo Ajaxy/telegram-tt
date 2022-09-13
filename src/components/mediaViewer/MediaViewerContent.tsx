@@ -5,6 +5,7 @@ import { withGlobal } from '../../global';
 import type {
   ApiChat, ApiDimensions, ApiMessage, ApiUser,
 } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
@@ -30,7 +31,7 @@ type OwnProps = {
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
   isActive?: boolean;
-  animationLevel: 0 | 1 | 2;
+  animationLevel: AnimationLevel;
   onClose: () => void;
   onFooterClick: () => void;
   setControlsVisible?: (isVisible: boolean) => void;

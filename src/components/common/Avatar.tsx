@@ -9,9 +9,10 @@ import type {
   ApiChat, ApiPhoto, ApiUser, ApiUserStatus,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { AnimationLevel } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { IS_TEST } from '../../config';
+import { ANIMATION_LEVEL_MAX, IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -35,6 +36,8 @@ import useVideoCleanup from '../../hooks/useVideoCleanup';
 
 import './Avatar.scss';
 
+const LOOP_COUNT = 3;
+
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
 cn.icon = cn('icon');
@@ -48,8 +51,9 @@ type OwnProps = {
   userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
-  noVideo?: boolean;
+  withVideo?: boolean;
   noLoop?: boolean;
+  animationLevel?: AnimationLevel;
   lastSyncTime?: number;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
@@ -64,9 +68,10 @@ const Avatar: FC<OwnProps> = ({
   userStatus,
   text,
   isSavedMessages,
-  noVideo,
+  withVideo,
   noLoop,
   lastSyncTime,
+  animationLevel,
   observeIntersection,
   onClick,
 }) => {
@@ -75,15 +80,17 @@ const Avatar: FC<OwnProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoLoopCountRef = useRef(0);
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const isDeleted = user && isDeletedUser(user);
   const isReplies = user && isChatWithRepliesBot(user.id);
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
-  const withVideo = isIntersecting && !noVideo && user?.isPremium && user?.hasVideoAvatar;
+  const shouldShowVideo = isIntersecting && animationLevel === ANIMATION_LEVEL_MAX && withVideo && user?.isPremium
+    && user?.hasVideoAvatar;
   const profilePhoto = user?.fullInfo?.profilePhoto;
-  const shouldLoadVideo = withVideo && profilePhoto?.isVideo;
+  const shouldLoadVideo = shouldShowVideo && profilePhoto?.isVideo;
 
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
@@ -112,22 +119,27 @@ const Avatar: FC<OwnProps> = ({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !noLoop) return undefined;
+    if (!video || !videoBlobUrl) return undefined;
 
     const returnToStart = () => {
-      video.currentTime = 0;
+      videoLoopCountRef.current += 1;
+      if (videoLoopCountRef.current >= LOOP_COUNT || noLoop) {
+        video.style.display = 'none';
+      } else {
+        video.play();
+      }
     };
 
     video.addEventListener('ended', returnToStart);
     return () => video.removeEventListener('ended', returnToStart);
-  }, [noLoop]);
+  }, [noLoop, videoBlobUrl]);
 
   const userId = user?.id;
   useEffect(() => {
-    if (withVideo && !profilePhoto) {
+    if (shouldShowVideo && !profilePhoto) {
       loadFullUser({ userId });
     }
-  }, [loadFullUser, profilePhoto, userId, withVideo]);
+  }, [loadFullUser, profilePhoto, userId, shouldShowVideo]);
 
   const lang = useLang();
 
@@ -157,7 +169,6 @@ const Avatar: FC<OwnProps> = ({
             muted
             autoPlay
             disablePictureInPicture
-            loop={!noLoop}
             playsInline
           />
         )}

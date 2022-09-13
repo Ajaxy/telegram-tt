@@ -1128,7 +1128,6 @@ const Composer: FC<OwnProps & StateProps> = ({
                 user={sendAsUser}
                 chat={sendAsChat}
                 size="tiny"
-                noVideo
               />
             </Button>
           )}
