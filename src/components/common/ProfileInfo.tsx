@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
 import type { GlobalState } from '../../global/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
@@ -40,7 +41,7 @@ type StateProps =
     userStatus?: ApiUserStatus;
     chat?: ApiChat;
     isSavedMessages?: boolean;
-    animationLevel: 0 | 1 | 2;
+    animationLevel: AnimationLevel;
     serverTimeOffset: number;
     mediaId?: number;
     avatarOwnerId?: string;

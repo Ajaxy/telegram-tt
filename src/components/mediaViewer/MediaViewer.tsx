@@ -6,6 +6,7 @@ import React, {
 import type {
   ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { getActions, withGlobal } from '../../global';
@@ -62,7 +63,7 @@ type StateProps = {
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
   collectionIds?: number[];
-  animationLevel: 0 | 1 | 2;
+  animationLevel: AnimationLevel;
 };
 
 const ANIMATION_DURATION = 350;

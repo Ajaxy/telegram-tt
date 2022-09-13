@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
 } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
@@ -20,9 +21,10 @@ import './Dialogs.scss';
 
 type StateProps = {
   dialogs: (ApiError | ApiInviteInfo)[];
+  animationLevel: AnimationLevel;
 };
 
-const Dialogs: FC<StateProps> = ({ dialogs }) => {
+const Dialogs: FC<StateProps> = ({ dialogs, animationLevel }) => {
   const {
     dismissDialog,
     acceptInviteConfirmation,
@@ -46,7 +48,7 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
   function renderInviteHeader(title: string, photo?: ApiPhoto) {
     return (
       <div className="modal-header">
-        {photo && <Avatar size="small" photo={photo} />}
+        {photo && <Avatar size="small" photo={photo} animationLevel={animationLevel} withVideo />}
         <div className="modal-title">
           {renderText(title)}
         </div>
@@ -194,5 +196,10 @@ function getErrorHeader(error: ApiError) {
 }
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['dialogs']),
+  (global): StateProps => {
+    return {
+      dialogs: global.dialogs,
+      animationLevel: global.settings.byKey.animationLevel,
+    };
+  },
 )(Dialogs));

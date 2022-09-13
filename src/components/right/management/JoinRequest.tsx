@@ -2,6 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { AnimationLevel } from '../../../types';
 import type { ApiUser } from '../../../api/types';
 
 import useLang from '../../../hooks/useLang';
@@ -27,17 +28,19 @@ type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   isSavedMessages?: boolean;
+  animationLevel: AnimationLevel;
   serverTimeOffset: number;
 };
 
 const JoinRequest: FC<OwnProps & StateProps> = ({
   userId,
+  chatId,
   about,
   date,
   isChannel,
   user,
+  animationLevel,
   serverTimeOffset,
-  chatId,
 }) => {
   const { openChat, hideChatJoinRequest } = getActions();
 
@@ -70,6 +73,8 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
             key={userId}
             size="medium"
             user={user}
+            animationLevel={animationLevel}
+            withVideo
           />
           <div className={buildClassName('user-info')}>
             <div className={buildClassName('user-name')}>{fullName}</div>
@@ -96,6 +101,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       user,
+      animationLevel: global.settings.byKey.animationLevel,
       serverTimeOffset: global.serverTimeOffset,
     };
   },

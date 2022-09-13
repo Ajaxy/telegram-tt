@@ -285,7 +285,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
             <i className="icon-favorite" />
           ) : stickerSet.id === CHAT_STICKER_SET_ID ? (
-            <Avatar chat={chat} size="small" noVideo />
+            <Avatar chat={chat} size="small" />
           ) : stickerSet.isLottie ? (
             <StickerSetCoverAnimated
               stickerSet={stickerSet as ApiStickerSet}

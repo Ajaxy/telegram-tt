@@ -60,7 +60,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
           {lang('Back')}
         </button>
       )}
-      <Avatar user={user} chat={chat} className="thumbnail-avatar" noVideo />
+      <Avatar user={user} chat={chat} className="thumbnail-avatar" />
       {ENABLE_THUMBNAIL_VIDEO && (
         <div className="thumbnail-wrapper">
           <video className="thumbnail" muted autoPlay playsInline srcObject={streams?.[type]} />

@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { LangCode } from '../../types';
+import type { AnimationLevel, LangCode } from '../../types';
 import type {
   ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType, ApiUser,
 } from '../../api/types';
@@ -94,7 +94,7 @@ type StateProps = {
   openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
   isServiceChatReady?: boolean;
-  animationLevel: number;
+  animationLevel: AnimationLevel;
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;

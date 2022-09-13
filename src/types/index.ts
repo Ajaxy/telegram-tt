@@ -27,6 +27,7 @@ export interface IAlbum {
 }
 
 export type ThemeKey = 'light' | 'dark';
+export type AnimationLevel = 0 | 1 | 2;
 
 export interface IThemeSettings {
   background?: string;
@@ -59,7 +60,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   theme: ThemeKey;
   shouldUseSystemTheme: boolean;
   messageTextSize: number;
-  animationLevel: 0 | 1 | 2;
+  animationLevel: AnimationLevel;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
   canAutoLoadPhotoFromContacts: boolean;
   canAutoLoadPhotoInPrivateChats: boolean;

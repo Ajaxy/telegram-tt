@@ -234,7 +234,6 @@ const Poll: FC<OwnProps & StateProps> = ({
             <Avatar
               size="micro"
               user={user}
-              noVideo
             />
           ))}
         </div>

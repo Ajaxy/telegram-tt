@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 
 import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
@@ -26,6 +27,7 @@ type StateProps = {
   isActive: boolean;
   usersById: Record<string, ApiUser>;
   chatsById: Record<string, ApiChat>;
+  animationLevel: AnimationLevel;
 };
 
 const GroupCallTopPane: FC<OwnProps & StateProps> = ({
@@ -35,6 +37,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   hasPinnedOffset,
   usersById,
   chatsById,
+  animationLevel,
 }) => {
   const {
     joinGroupCall,
@@ -105,9 +108,9 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
         {fetchedParticipants.map((p) => {
           if (!p) return undefined;
           if (p.user) {
-            return <Avatar key={p.user.id} user={p.user} />;
+            return <Avatar key={p.user.id} user={p.user} animationLevel={animationLevel} />;
           } else {
-            return <Avatar key={p.chat.id} chat={p.chat} />;
+            return <Avatar key={p.chat.id} chat={p.chat} animationLevel={animationLevel} />;
           }
         })}
       </div>
@@ -130,6 +133,7 @@ export default memo(withGlobal<OwnProps>(
       isActive: ((!groupCall ? (chat && chat.isCallNotEmpty && chat.isCallActive)
         : (groupCall.participantsCount > 0 && groupCall.isLoaded)))
         && (global.groupCalls.activeGroupCallId !== groupCall?.id),
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(GroupCallTopPane));

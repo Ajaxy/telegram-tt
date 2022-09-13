@@ -3,6 +3,7 @@ import React, { useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 
 import { selectUser } from '../../../global/selectors';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
@@ -19,12 +20,13 @@ type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   phoneCodeList: ApiCountryCode[];
+  animationLevel: AnimationLevel;
 };
 
 const UNREGISTERED_CONTACT_ID = '0';
 
 const Contact: FC<OwnProps & StateProps> = ({
-  contact, user, phoneCodeList,
+  contact, user, phoneCodeList, animationLevel,
 }) => {
   const { openChat } = getActions();
 
@@ -45,7 +47,7 @@ const Contact: FC<OwnProps & StateProps> = ({
       className={buildClassName('Contact', isRegistered && 'interactive')}
       onClick={isRegistered ? handleClick : undefined}
     >
-      <Avatar size="large" user={user} text={firstName || lastName} />
+      <Avatar size="large" user={user} text={firstName || lastName} animationLevel={animationLevel} withVideo />
       <div className="contact-info">
         <div className="contact-name">{firstName} {lastName}</div>
         <div className="contact-phone">{formatPhoneNumberWithCode(phoneCodeList, phoneNumber)}</div>
@@ -60,6 +62,7 @@ export default withGlobal<OwnProps>(
     return {
       user: selectUser(global, contact.userId),
       phoneCodeList,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(Contact);

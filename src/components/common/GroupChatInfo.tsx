@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiTypingStatus } from '../../api/types';
 import type { GlobalState } from '../../global/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -43,6 +44,7 @@ type StateProps =
     chat?: ApiChat;
     onlineCount?: number;
     areMessagesLoaded: boolean;
+    animationLevel: AnimationLevel;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
 
@@ -61,6 +63,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   chat,
   onlineCount,
   areMessagesLoaded,
+  animationLevel,
   lastSyncTime,
 }) => {
   const {
@@ -145,7 +148,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         size={avatarSize}
         chat={chat}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
-        noVideo={!withVideoAvatar}
+        withVideo={withVideoAvatar}
+        animationLevel={animationLevel}
       />
       <div className="info">
         <div className="title">
@@ -184,7 +188,11 @@ export default memo(withGlobal<OwnProps>(
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
 
     return {
-      lastSyncTime, chat, onlineCount, areMessagesLoaded,
+      lastSyncTime,
+      chat,
+      onlineCount,
+      areMessagesLoaded,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(GroupChatInfo));

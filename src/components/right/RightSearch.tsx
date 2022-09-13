@@ -1,8 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { useMemo, memo, useRef } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
@@ -43,18 +44,20 @@ type StateProps = {
   query?: string;
   totalCount?: number;
   foundIds?: number[];
+  animationLevel?: AnimationLevel;
 };
 
 const RightSearch: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
-  onClose,
   isActive,
   chat,
   messagesById,
   query,
   totalCount,
   foundIds,
+  animationLevel,
+  onClose,
 }) => {
   const {
     searchTextMessagesLocal,
@@ -129,7 +132,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         className="chat-item-clickable search-result-message m-0"
         onClick={onClick}
       >
-        <Avatar chat={senderChat} user={senderUser} />
+        <Avatar chat={senderChat} user={senderUser} animationLevel={animationLevel} withVideo />
         <div className="info">
           <div className="title">
             <h3 dir="auto">{title && renderText(title)}</h3>
@@ -189,6 +192,7 @@ export default memo(withGlobal<OwnProps>(
       query,
       totalCount,
       foundIds,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(RightSearch));

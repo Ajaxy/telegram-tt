@@ -18,7 +18,9 @@ import type {
   ApiThreadInfo,
   ApiAvailableReaction,
 } from '../../../api/types';
-import type { FocusDirection, IAlbum, ISettings } from '../../../types';
+import type {
+  AnimationLevel, FocusDirection, IAlbum, ISettings,
+} from '../../../types';
 import {
   AudioOrigin,
 } from '../../../types';
@@ -198,6 +200,7 @@ type StateProps = {
   transcribedText?: string;
   isTranscriptionError?: boolean;
   isPremium: boolean;
+  animationLevel: AnimationLevel;
 };
 
 type MetaPosition =
@@ -285,6 +288,7 @@ const Message: FC<OwnProps & StateProps> = ({
   threadInfo,
   hasUnreadReaction,
   memoFirstUnreadIdRef,
+  animationLevel,
 }) => {
   const {
     toggleMessageSelection,
@@ -617,6 +621,8 @@ const Message: FC<OwnProps & StateProps> = ({
           lastSyncTime={lastSyncTime}
           onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
           observeIntersection={observeIntersectionForMedia}
+          animationLevel={animationLevel}
+          withVideo
         />
         {isAvatarPremium && <PremiumIcon className="chat-avatar-premium" />}
       </>
@@ -1176,6 +1182,7 @@ export default memo(withGlobal<OwnProps>(
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium: selectIsCurrentUserPremium(global),
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(Message));

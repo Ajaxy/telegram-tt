@@ -3,7 +3,7 @@ import React, {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { MediaViewerOrigin } from '../../types';
+import type { AnimationLevel, MediaViewerOrigin } from '../../types';
 import type { RealTouchEvent } from '../../util/captureEvents';
 
 import { animateNumber, timingFunctions } from '../../util/animation';
@@ -38,7 +38,7 @@ type OwnProps = {
   threadId?: number;
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
-  animationLevel: 0 | 1 | 2;
+  animationLevel: AnimationLevel;
   onClose: () => void;
   hasFooter?: boolean;
   onFooterClick: () => void;

@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings } from '../../../types';
+import type { AnimationLevel, ISettings } from '../../../types';
 import { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { ApiChat } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
@@ -63,7 +63,7 @@ type StateProps =
     globalSearchChatId?: string;
     searchDate?: number;
     theme: ISettings['theme'];
-    animationLevel: 0 | 1 | 2;
+    animationLevel: AnimationLevel;
     chatsById?: Record<string, ApiChat>;
     isMessageListOpen: boolean;
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];

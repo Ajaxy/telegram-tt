@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
+import type { AnimationLevel } from '../../../types';
 
 import { getUserFirstOrLastName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
@@ -26,6 +27,7 @@ type StateProps = {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
+  animationLevel: AnimationLevel;
 };
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
@@ -34,7 +36,10 @@ const NBSP = '\u00A0';
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const RecentContacts: FC<OwnProps & StateProps> = ({
-  topUserIds, usersById, recentlyFoundChatIds,
+  topUserIds,
+  usersById,
+  recentlyFoundChatIds,
+  animationLevel,
   onReset,
 }) => {
   const {
@@ -72,7 +77,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
           <div ref={topUsersRef} className="top-peers no-selection">
             {topUserIds.map((userId) => (
               <div className="top-peer-item" onClick={() => handleClick(userId)} dir={lang.isRtl ? 'rtl' : undefined}>
-                <Avatar user={usersById[userId]} />
+                <Avatar user={usersById[userId]} animationLevel={animationLevel} withVideo />
                 <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}
@@ -112,11 +117,13 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
     const { recentlyFoundChatIds } = global.globalSearch;
+    const { animationLevel } = global.settings.byKey;
 
     return {
       topUserIds,
       usersById,
       recentlyFoundChatIds,
+      animationLevel,
     };
   },
 )(RecentContacts));
