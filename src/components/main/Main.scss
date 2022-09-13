@@ -90,7 +90,7 @@
         display: none;
       }
 
-      body.is-android #Main.left-column-animating & {
+      body.is-android #Main.left-column-animating &, body.is-android #Main:not(.left-column-open) & {
         display: block;
       }
 
