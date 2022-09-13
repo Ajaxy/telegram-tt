@@ -1058,7 +1058,7 @@ export async function sendPollVote({
 
 export async function closePoll({
   chat, messageId, poll,
-} : {
+}: {
   chat: ApiChat;
   messageId: number;
   poll: ApiPoll;

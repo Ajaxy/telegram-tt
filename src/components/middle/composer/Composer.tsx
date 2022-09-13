@@ -370,6 +370,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [activeVoiceRecording, sendMessageAction]);
 
+  useEffect(() => {
+    if (!html || editingMessage) return;
+    sendMessageAction({ type: 'typing' });
+  }, [editingMessage, html, sendMessageAction]);
+
   const mainButtonState = editingMessage ? MainButtonState.Edit
     : (!IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length) || isForwarding)
       ? (shouldSchedule ? MainButtonState.Schedule : MainButtonState.Send)
