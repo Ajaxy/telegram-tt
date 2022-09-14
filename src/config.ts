@@ -223,7 +223,7 @@ export const MAX_UPLOAD_FILEPART_SIZE = 524288;
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;
 export const GROUP_CALL_DEFAULT_VOLUME = 100 * GROUP_CALL_VOLUME_MULTIPLIER;
-export const ENABLE_THUMBNAIL_VIDEO = false;
+export const GROUP_CALL_THUMB_VIDEO_DISABLED = true;
 
 export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   uploadMaxFileparts: [4000, 8000],
