@@ -202,7 +202,7 @@ body.is-android.animation-level-1 {
     }
   }
 
-  #Main:not(.middle-column-open) {
+  #Main.left-column-open {
     #MiddleColumn {
       transform: translate3d(10vw, 0, 0);
       opacity: 0;
