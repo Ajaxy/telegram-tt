@@ -13,6 +13,7 @@ import type { AnimationLevel } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { ANIMATION_LEVEL_MAX, IS_TEST } from '../../config';
+import { VIDEO_AVATARS_DISABLED } from '../../util/environment';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -87,8 +88,10 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
-  const shouldShowVideo = isIntersecting && animationLevel === ANIMATION_LEVEL_MAX && withVideo && user?.isPremium
-    && user?.hasVideoAvatar;
+  const shouldShowVideo = (
+    !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
+    && isIntersecting && withVideo && user?.isPremium && user?.hasVideoAvatar
+  );
   const profilePhoto = user?.fullInfo?.profilePhoto;
   const shouldLoadVideo = shouldShowVideo && profilePhoto?.isVideo;
 

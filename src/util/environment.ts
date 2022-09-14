@@ -118,6 +118,9 @@ export const MESSAGE_LIST_SENSITIVE_AREA = IS_SCROLL_PATCH_NEEDED ? 300 : 750;
 
 export const MAX_BUFFER_SIZE = (IS_ANDROID || IS_IOS ? 512 : 2000) * 1024 ** 2; // 512 OR 2000 MB
 
+// TODO Turn on later as `!IS_IOS && !IS_ANDROID`
+export const VIDEO_AVATARS_DISABLED = true;
+
 function isLastEmojiVersionSupported() {
   const ALLOWABLE_CALCULATION_ERROR_SIZE = 5;
   const inlineEl = document.createElement('span');
