@@ -29,6 +29,7 @@ import monkeyPath from '../../assets/monkey.svg';
 export type UiLoaderPage =
   'main'
   | 'lock'
+  | 'inactive'
   | 'authCode'
   | 'authPassword'
   | 'authPhoneNumber'
@@ -89,6 +90,8 @@ const preloadTasks = {
     preloadFonts(),
     preloadImage(lockPreviewPath),
   ]),
+  inactive: () => {
+  },
 };
 
 const UiLoader: FC<OwnProps & StateProps> = ({
@@ -144,21 +147,23 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   return (
     <div
       id="UiLoader"
-      className={styles.root}
+      className={styles.bg}
       style={`--theme-background-color: ${theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR}`}
     >
       {children}
       {shouldRenderMask && !shouldSkipHistoryAnimations && Boolean(page) && (
         <div className={buildClassName(styles.mask, transitionClassNames)}>
           {page === 'main' ? (
-            <>
+            <div className={styles.main}>
               <div
                 className={styles.left}
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
-              <div className={buildClassName(styles.middle, transitionClassNames)} />
+              <div className={buildClassName(styles.middle, styles.bg)} />
               {isRightColumnShown && <div className={styles.right} />}
-            </>
+            </div>
+          ) : (page === 'inactive' || page === 'lock') ? (
+            <div className={buildClassName(styles.blank, styles.bg)} />
           ) : (
             <div className={styles.blank} />
           )}
