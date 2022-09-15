@@ -48,20 +48,13 @@ function buildApiChatFieldsFromPeerEntity(
     ...(accessHash && { accessHash }),
     hasVideoAvatar,
     ...(avatarHash && { avatarHash }),
-    ...(
-      (peerEntity instanceof GramJs.Channel || peerEntity instanceof GramJs.User)
-      && { username: peerEntity.username }
-    ),
+    ...(('username' in peerEntity) && { username: peerEntity.username }),
     ...(('verified' in peerEntity) && { isVerified: peerEntity.verified }),
     ...(('callActive' in peerEntity) && { isCallActive: peerEntity.callActive }),
     ...(('callNotEmpty' in peerEntity) && { isCallNotEmpty: peerEntity.callNotEmpty }),
-    ...((peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel) && {
-      ...(peerEntity.participantsCount && { membersCount: peerEntity.participantsCount }),
-      joinDate: peerEntity.date,
-    }),
-    ...((peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel) && {
-      isProtected: Boolean('noforwards' in peerEntity && peerEntity.noforwards),
-    }),
+    ...('date' in peerEntity && { joinDate: peerEntity.date }),
+    ...('participantsCount' in peerEntity && { membersCount: peerEntity.participantsCount }),
+    ...(('noforwards' in peerEntity) && { isProtected: Boolean(peerEntity.noforwards) }),
     ...(isSupport && { isSupport: true }),
     ...buildApiChatPermissions(peerEntity),
     ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),
@@ -113,7 +106,7 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
 
   return {
     adminRights: peerEntity.adminRights ? omitVirtualClassFields(peerEntity.adminRights) : undefined,
-    currentUserBannedRights: peerEntity instanceof GramJs.Channel && peerEntity.bannedRights
+    currentUserBannedRights: 'bannedRights' in peerEntity && peerEntity.bannedRights
       ? omitVirtualClassFields(peerEntity.bannedRights)
       : undefined,
     defaultBannedRights: peerEntity.defaultBannedRights
@@ -178,7 +171,7 @@ function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
   };
 } {
   if (
-    peerEntity instanceof GramJs.Chat
+    'migratedTo' in peerEntity
     && peerEntity.migratedTo
     && !(peerEntity.migratedTo instanceof GramJs.InputChannelEmpty)
   ) {
@@ -209,20 +202,8 @@ function buildApiChatRestrictionReason(
 export function buildApiChatFromPreview(
   preview: GramJs.TypeChat | GramJs.TypeUser,
   isSupport = false,
-  withForbidden = false,
 ): ApiChat | undefined {
-  if (!(
-    preview instanceof GramJs.Chat
-    || preview instanceof GramJs.Channel
-    || preview instanceof GramJs.User
-    || (
-      withForbidden
-      && (
-        preview instanceof GramJs.ChatForbidden
-        || preview instanceof GramJs.ChannelForbidden
-      )
-    )
-  )) {
+  if (preview instanceof GramJs.ChatEmpty || preview instanceof GramJs.UserEmpty) {
     return undefined;
   }
 

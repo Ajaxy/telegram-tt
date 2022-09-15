@@ -469,7 +469,7 @@ async function getFullChannelInfo(
     updateLocalDb(result);
 
     const [, mtpLinkedChat] = result.chats;
-    const chat = buildApiChatFromPreview(mtpLinkedChat, undefined, true);
+    const chat = buildApiChatFromPreview(mtpLinkedChat);
     if (chat) {
       onUpdate({
         '@type': 'updateChat',

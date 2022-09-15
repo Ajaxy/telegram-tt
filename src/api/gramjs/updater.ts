@@ -87,7 +87,10 @@ function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat
     });
 
   entities
-    .filter((e) => e instanceof GramJs.Chat || e instanceof GramJs.Channel)
+    .filter((e) => (
+      e instanceof GramJs.Chat || e instanceof GramJs.ChatForbidden
+      || e instanceof GramJs.Channel || e instanceof GramJs.ChannelForbidden
+    ))
     .map((e) => buildApiChatFromPreview(e))
     .forEach((chat) => {
       if (!chat) {
