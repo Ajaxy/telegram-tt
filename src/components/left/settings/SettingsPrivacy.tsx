@@ -137,29 +137,20 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       <div className="settings-item pt-3">
         <ListItem
           icon="delete-user"
-          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBlockedUsers)}
         >
-          <div className="multiline-menu-item">
-            <span className="title">{lang('BlockedUsers')}</span>
-            {blockedCount > 0 && (
-              <span className="subtitle" dir="auto">
-                {lang('Users', blockedCount)}
-              </span>
-            )}
-          </div>
+          {lang('BlockedUsers')}
+          <span className="settings-item__current-value">{blockedCount || ''}</span>
         </ListItem>
-        {webAuthCount > 0 && (
-          <ListItem
-            icon="web"
-            // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
-          >
-            {lang('PrivacySettings.WebSessions')}
-            <span className="settings-item__current-value">{webAuthCount}</span>
-          </ListItem>
-        )}
+        <ListItem
+          icon="web"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
+        >
+          {lang('PrivacySettings.WebSessions')}
+          <span className="settings-item__current-value">{webAuthCount || ''}</span>
+        </ListItem>
         <ListItem
           icon="key"
           narrow

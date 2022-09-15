@@ -55,7 +55,7 @@ function AnimatedIcon(props: OwnProps) {
 
   return (
     <AnimatedSticker
-      className={buildClassName(className, transitionClassNames, 'shown')}
+      className={buildClassName(className, transitionClassNames)}
       size={size}
       play={play === true ? playKey : play}
       noLoop={noLoop}
