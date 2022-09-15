@@ -11,6 +11,7 @@ import windowSize from '../../util/windowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
+import Transition from '../ui/Transition';
 import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthCode from './AuthCode.async';
 import AuthPassword from './AuthPassword.async';
@@ -51,7 +52,7 @@ const Auth: FC<OwnProps & StateProps> = ({
 
   useHistoryBack({
     isActive: (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
-    || (isMobile && authState === 'authorizationStateWaitQrCode'),
+      || (isMobile && authState === 'authorizationStateWaitQrCode'),
     onBack: handleChangeAuthorizationMethod,
   });
 
@@ -70,20 +71,45 @@ const Auth: FC<OwnProps & StateProps> = ({
     true,
   );
 
-  switch (renderingAuthState) {
-    case 'authorizationStateWaitCode':
-      return <AuthCode />;
-    case 'authorizationStateWaitPassword':
-      return <AuthPassword />;
-    case 'authorizationStateWaitRegistration':
-      return <AuthRegister />;
-    case 'authorizationStateWaitPhoneNumber':
-      return <AuthPhoneNumber />;
-    case 'authorizationStateWaitQrCode':
-      return <AuthQrCode />;
-    default:
-      return isMobile ? <AuthPhoneNumber /> : <AuthQrCode />;
+  function getScreen() {
+    switch (renderingAuthState) {
+      case 'authorizationStateWaitCode':
+        return <AuthCode />;
+      case 'authorizationStateWaitPassword':
+        return <AuthPassword />;
+      case 'authorizationStateWaitRegistration':
+        return <AuthRegister />;
+      case 'authorizationStateWaitPhoneNumber':
+        return <AuthPhoneNumber />;
+      case 'authorizationStateWaitQrCode':
+        return <AuthQrCode />;
+      default:
+        return isMobile ? <AuthPhoneNumber /> : <AuthQrCode />;
+    }
   }
+
+  function getActiveKey() {
+    switch (renderingAuthState) {
+      case 'authorizationStateWaitCode':
+        return 0;
+      case 'authorizationStateWaitPassword':
+        return 1;
+      case 'authorizationStateWaitRegistration':
+        return 2;
+      case 'authorizationStateWaitPhoneNumber':
+        return 3;
+      case 'authorizationStateWaitQrCode':
+        return 4;
+      default:
+        return isMobile ? 3 : 4;
+    }
+  }
+
+  return (
+    <Transition activeKey={getActiveKey()} name="fade" className="Auth">
+      {getScreen()}
+    </Transition>
+  );
 };
 
 export default memo(withGlobal<OwnProps>(
