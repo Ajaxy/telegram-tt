@@ -74,7 +74,8 @@ const Modal: FC<OwnProps & StateProps> = ({
   });
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
-    document.body.classList.toggle('has-open-dialog', isOpen);
+    document.body.classList.toggle('has-open-dialog', Boolean(isOpen));
+
     if (isOpen || (!isOpen && prevIsOpen !== undefined)) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION);
     }
