@@ -8,7 +8,6 @@ import type { GlobalState } from '../../global/types';
 
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import useLang from '../../hooks/useLang';
-import buildClassName from '../../util/buildClassName';
 import { decryptSession } from '../../util/passcode';
 import useShowTransition from '../../hooks/useShowTransition';
 import useTimeout from '../../hooks/useTimeout';
@@ -55,7 +54,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   const [validationError, setValidationError] = useState<string>('');
   const [shouldShowPasscode, setShouldShowPasscode] = useState(false);
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
-  const { transitionClassNames, shouldRender } = useShowTransition(isLocked);
+  const { shouldRender } = useShowTransition(isLocked);
 
   useTimeout(
     resetInvalidUnlockAttempts,
@@ -115,7 +114,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className={buildClassName(styles.container, transitionClassNames)}>
+    <div className={styles.container}>
       <div className={styles.wrapper} dir={lang.isRtl ? 'rtl' : undefined}>
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
