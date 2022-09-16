@@ -170,6 +170,10 @@ addActionHandler('loadAllChats', async (global, actions, payload) => {
   let { shouldReplace } = payload;
   let i = 0;
 
+  const getOrderDate = (chat: ApiChat) => {
+    return chat.lastMessage?.date || chat.joinDate;
+  };
+
   while (shouldReplace || !getGlobal().chats.isFullyLoaded[listType]) {
     if (i++ >= INFINITE_LOOP_MARKER) {
       if (DEBUG) {
@@ -192,15 +196,15 @@ addActionHandler('loadAllChats', async (global, actions, payload) => {
         /* eslint-disable @typescript-eslint/no-loop-func */
         .map((id) => global.chats.byId[id])
         .filter((chat) => (
-          Boolean(chat?.lastMessage)
+          Boolean(chat && getOrderDate(chat))
           && chat.id !== SERVICE_NOTIFICATIONS_USER_ID
           && !selectIsChatPinned(global, chat.id)
         ))
         /* eslint-enable @typescript-eslint/no-loop-func */
-        .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
+        .sort((chat1, chat2) => getOrderDate(chat1)! - getOrderDate(chat2)!)[0]
       : undefined;
 
-    await loadChats(listType, oldestChat?.id, oldestChat?.lastMessage!.date, shouldReplace);
+    await loadChats(listType, oldestChat?.id, oldestChat ? getOrderDate(oldestChat) : undefined, shouldReplace);
 
     if (shouldReplace) {
       onReplace?.();
