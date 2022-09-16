@@ -156,6 +156,7 @@ module.exports = (_env, { mode = 'production' }) => {
         APP_MOCKED_CLIENT,
         APP_NAME: null,
         APP_VERSION: appVersion,
+        RELEASE_DATETIME: Date.now(),
         TELEGRAM_T_API_ID: undefined,
         TELEGRAM_T_API_HASH: undefined,
         TEST_SESSION: null,
