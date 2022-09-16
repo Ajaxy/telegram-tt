@@ -7,6 +7,7 @@ import { FocusDirection } from '../../../types';
 import {
   ANIMATION_END_DELAY,
   APP_VERSION,
+  RELEASE_DATETIME,
   FAST_SMOOTH_MAX_DURATION,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
@@ -49,6 +50,7 @@ import type { GlobalState } from '../../types';
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
+const VERSION_NOTIFICATION_DURATION = 1000 * 60 * 60 * 24 * 3; // 3 days
 const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
@@ -617,6 +619,10 @@ addActionHandler('closePollModal', (global) => {
 });
 
 addActionHandler('checkVersionNotification', (global, actions) => {
+  if (RELEASE_DATETIME && Date.now() > Number(RELEASE_DATETIME) + VERSION_NOTIFICATION_DURATION) {
+    return;
+  }
+
   const currentVersion = APP_VERSION.split('.').slice(0, 2).join('.');
   const { serviceNotifications } = global;
 
