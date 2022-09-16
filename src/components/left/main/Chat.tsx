@@ -135,7 +135,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   const { lastMessage, typingStatus } = chat || {};
   const isAction = lastMessage && isActionMessage(lastMessage);
 
-  useEnsureMessage(chatId, isAction ? lastMessage!.replyToMessageId : undefined, actionTargetMessage);
+  useEnsureMessage(chatId, isAction ? lastMessage.replyToMessageId : undefined, actionTargetMessage);
 
   const mediaThumbnail = lastMessage && !getMessageSticker(lastMessage)
     ? getMessageMediaThumbDataUri(lastMessage)
@@ -288,7 +288,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             <span className="colon">:</span>
           </>
         )}
-        {renderSummary(lang, lastMessage!, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
   }
@@ -391,13 +391,13 @@ function renderSummary(
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    if (!chat || !chat.lastMessage) {
+    if (!chat) {
       return {};
     }
 
-    const { senderId, replyToMessageId, isOutgoing } = chat.lastMessage;
+    const { senderId, replyToMessageId, isOutgoing } = chat.lastMessage || {};
     const lastMessageSender = senderId ? selectUser(global, senderId) : undefined;
-    const lastMessageAction = getMessageAction(chat.lastMessage);
+    const lastMessageAction = chat.lastMessage ? getMessageAction(chat.lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
@@ -423,7 +423,9 @@ export default memo(withGlobal<OwnProps>(
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
       lastSyncTime: global.lastSyncTime,
-      ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
+      ...(isOutgoing && chat.lastMessage && {
+        lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage),
+      }),
       ...(privateChatUserId && {
         user: selectUser(global, privateChatUserId),
         userStatus: selectUserStatus(global, privateChatUserId),
