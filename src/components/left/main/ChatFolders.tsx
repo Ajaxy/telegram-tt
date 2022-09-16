@@ -13,15 +13,15 @@ import { IS_TOUCH_ENV } from '../../../util/environment';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 import Transition from '../../ui/Transition';
 import TabList from '../../ui/TabList';
 import ChatList from './ChatList';
-import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
-import { selectCurrentLimit } from '../../../global/selectors/limits';
 
 type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
