@@ -299,10 +299,10 @@ export function unmountRealTree($element: VirtualElement) {
     if (isTagElement($element)) {
       if ($element.target) {
         removeAllDelegatedListeners($element.target as HTMLElement);
-      }
 
-      if ($element.props.ref) {
-        $element.props.ref.current = undefined; // Help GC
+        if ($element.props.ref?.current === $element.target) {
+          $element.props.ref.current = undefined;
+        }
       }
     }
 
