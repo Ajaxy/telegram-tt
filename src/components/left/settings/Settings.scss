@@ -97,6 +97,11 @@
 
 .settings-content-icon {
   margin-bottom: 2.5rem;
+
+  &.opacity-transition:not(.shown) {
+    display: block;
+    visibility: hidden;
+  }
 }
 
 .settings-main-menu-premium .PremiumIcon {

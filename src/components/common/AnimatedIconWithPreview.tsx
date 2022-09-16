@@ -41,7 +41,7 @@ function AnimatedIconWithPreview(props: OwnProps) {
         // eslint-disable-next-line jsx-a11y/alt-text
         <img src={thumbDataUri} className={buildClassName(styles.preview)} />
       )}
-      {!isAnimationReady && (
+      {!isAnimationReady && previewUrl && (
         // eslint-disable-next-line jsx-a11y/alt-text
         <img
           src={previewUrl}
