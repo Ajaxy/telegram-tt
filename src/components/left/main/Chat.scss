@@ -29,6 +29,10 @@
     }
   }
 
+  &:last-of-type {
+    padding-bottom: 0.5rem;
+  }
+
   @media (max-width: 600px) {
     &.selected {
       --background-color: var(--color-chat-hover) !important;

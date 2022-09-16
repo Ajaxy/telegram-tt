@@ -429,7 +429,7 @@ function buildChatSummary(
   return {
     id,
     type,
-    isListed: Boolean(lastMessage && !isRestricted && !isNotJoined && !migratedTo),
+    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo),
     isArchived: folderId === ARCHIVED_FOLDER_ID,
     isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
