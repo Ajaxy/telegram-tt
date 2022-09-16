@@ -37,7 +37,7 @@ export function getUserFullName(user?: ApiUser) {
   }
 
   if (isDeletedUser(user)) {
-    return 'Deleted account';
+    return 'Deleted Account';
   }
 
   switch (user.type) {
@@ -60,11 +60,6 @@ export function getUserFullName(user?: ApiUser) {
       }
 
       break;
-    }
-
-    case 'userTypeDeleted':
-    case 'userTypeUnknown': {
-      return 'Deleted account';
     }
   }
 
@@ -179,12 +174,8 @@ export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
 }
 
 export function isDeletedUser(user: ApiUser) {
-  if (user.noStatus || user.type === 'userTypeBot' || user.id === SERVICE_NOTIFICATIONS_USER_ID) {
-    return false;
-  }
-
-  return user.type === 'userTypeDeleted'
-    || user.type === 'userTypeUnknown';
+  return (user.type === 'userTypeDeleted' || user.type === 'userTypeUnknown')
+    && user.id !== SERVICE_NOTIFICATIONS_USER_ID;
 }
 
 export function isUserBot(user: ApiUser) {
