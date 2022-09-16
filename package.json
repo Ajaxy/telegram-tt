@@ -12,7 +12,7 @@
     "deploy:production": "npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
     "update_version": "npm run print_version --silent > ./public/version.txt",
     "print_version": "echo \"$(node -p -e \"require('./package.json').version.match(/^\\d+\\.\\d+/)[0]\").$(cat .patch-version)\"",
-    "inc_version": "echo $((`cat .patch-version` + 1)) > .patch-version && npm run update_version --silent && npm run print_version",
+    "inc_version": "echo $((`cat .patch-version || echo -1` + 1)) > .patch-version && npm run update_version --silent && npm run print_version",
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
     "check": "tsc && stylelint \"**/*.{css,scss}\" && eslint . --ext .ts,.tsx,.js --ignore-pattern src/lib/gramjs",
     "check:fix": "npm run check -- --fix",
