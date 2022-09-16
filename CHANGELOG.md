@@ -1,3 +1,27 @@
+## 1.52.0 (2022-09-16)
+
+### 👏 **Harder**
+* Added support for username.t.me links.
+* ‘Update Telegram’ button now automatically appears when an update is available.
+* Games can now request a share window.
+
+### 🤩 **Better**
+* Square images for web page previews are now properly displayed.
+* Auth screen transitions are now smoother.
+* Changelog notifications are only delivered every 3 days.
+
+### 🚀 **Faster**
+* Interface performance was heavily optimized.
+* Initial app bundle is now even more lightweight.
+
+### 💪 **Stronger**
+* Fixed several issues causing missing chats.
+* Fixed frozen UI on Android after selecting ‘Nice and Fast’ animation setting.
+* Fixed Play button overlapping with Slide Left button in Media Viewer.
+* Fixed quick reaction button not showing in some cases.
+* Fixed names and profile pictures for deleted accounts.
+* Numerous other layout fixes.
+
 ## 1.51.0 (2022-08-31)
 
 ### 👏 **Harder**
