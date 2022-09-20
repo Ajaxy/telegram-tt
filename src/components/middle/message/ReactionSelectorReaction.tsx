@@ -3,11 +3,10 @@ import React, { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiAvailableReaction } from '../../../api/types';
 
+import { IS_COMPACT_MENU } from '../../../util/environment';
+import { createClassNameBuilder } from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
-import useShowTransition from '../../../hooks/useShowTransition';
-import { createClassNameBuilder } from '../../../util/buildClassName';
-import { IS_COMPACT_MENU } from '../../../util/environment';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 
@@ -36,11 +35,8 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
   const [isActivated, activate, deactivate] = useFlag();
   const [isAnimationLoaded, markAnimationLoaded] = useFlag();
 
+  const shouldRenderStatic = !isReady || !isAnimationLoaded;
   const shouldRenderAnimated = Boolean(isReady && mediaData);
-  const { transitionClassNames: animatedClassNames } = useShowTransition(shouldRenderAnimated);
-  const { shouldRender: shouldRenderStatic, transitionClassNames: staticClassNames } = useShowTransition(
-    !isReady || !isAnimationLoaded, undefined, true,
-  );
 
   function handleClick() {
     if (!containerRef.current) return;
@@ -61,14 +57,12 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           className={cn(
             'static',
             isCurrentUserPremium && 'premium',
-            isReady ? [staticClassNames] : undefined,
           )}
           style={`background-position-x: ${previewIndex * -REACTION_SIZE}px;`}
         />
       )}
       {shouldRenderAnimated && (
         <AnimatedSticker
-          className={cn('animated', [animatedClassNames])}
           tgsUrl={mediaData}
           play={isActivated}
           noLoop
