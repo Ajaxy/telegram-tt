@@ -150,11 +150,11 @@ const Avatar: FC<OwnProps> = ({
   const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);
 
   if (isSavedMessages) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} aria-label={author} />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} role="img" aria-label={author} />;
   } else if (isDeleted) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} aria-label={author} />;
+    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} role="img" aria-label={author} />;
   } else if (isReplies) {
-    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} aria-label={author} />;
+    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} role="img" aria-label={author} />;
   } else if (hasBlobUrl) {
     content = (
       <>

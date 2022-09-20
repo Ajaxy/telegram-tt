@@ -389,7 +389,9 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         id={editableInputId || EDITABLE_INPUT_ID}
         className={className}
         contentEditable
+        role="textbox"
         dir="auto"
+        tabIndex={0}
         onClick={focusInput}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

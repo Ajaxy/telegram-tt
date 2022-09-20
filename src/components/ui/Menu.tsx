@@ -142,6 +142,7 @@ const Menu: FC<OwnProps> = ({
         <div className="backdrop" onMouseDown={preventMessageInputBlurWithBubbling} />
       )}
       <div
+        role="presentation"
         ref={menuRef}
         className={bubbleClassName}
         style={buildStyle(
