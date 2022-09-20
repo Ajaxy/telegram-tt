@@ -14,6 +14,7 @@ type CallMethodData = {
   messageId?: string;
   name: string;
   args: any;
+  withCallback?: boolean;
 };
 
 type OriginMessageData = CallMethodData | {
@@ -78,6 +79,8 @@ export default class WorkerConnector {
     });
 
     if (typeof payload.args[payload.args.length - 1] === 'function') {
+      payload.withCallback = true;
+
       const callback = payload.args.pop() as AnyToVoidFunction;
       requestState.callback = callback;
       requestStatesByCallback.set(callback, requestState);
