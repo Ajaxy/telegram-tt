@@ -676,7 +676,7 @@ export async function deleteScheduledMessages({
 }
 
 export async function deleteHistory({
-  chat, shouldDeleteForAll, maxId,
+  chat, shouldDeleteForAll,
 }: {
   chat: ApiChat; shouldDeleteForAll?: boolean; maxId?: number;
 }) {
@@ -685,17 +685,20 @@ export async function deleteHistory({
     isChannel
       ? new GramJs.channels.DeleteHistory({
         channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-        maxId,
       })
       : new GramJs.messages.DeleteHistory({
         peer: buildInputPeer(chat.id, chat.accessHash),
         ...(shouldDeleteForAll && { revoke: true }),
         ...(!shouldDeleteForAll && { just_clear: true }),
-        maxId,
       }),
   );
 
   if (!result) {
+    return;
+  }
+
+  if ('offset' in result && result.offset) {
+    await deleteHistory({ chat, shouldDeleteForAll });
     return;
   }
 

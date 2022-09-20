@@ -72,7 +72,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);
 
-  const handleDeleteMessageForAll = useCallback(() => {
+  const handleDeleteForAll = useCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
 
     onClose();
@@ -152,7 +152,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     return 'DeleteChatUser';
   }
 
-  function renderMessage() {
+  function renderContent() {
     if (isChannel && chat.isCreator) {
       return (
         <p>
@@ -191,14 +191,14 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      {renderMessage()}
+      {renderContent()}
       {isBot && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
           {lang('DeleteAndStop')}
         </Button>
       )}
       {canDeleteForAll && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteForAll}>
           {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
         </Button>
       )}
