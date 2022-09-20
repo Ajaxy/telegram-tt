@@ -5,7 +5,9 @@ import type { GlobalState } from '../global/types';
 import type { NotifyException, NotifySettings } from '../types';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../api/types';
 
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG } from '../config';
+import {
+  ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG, SERVICE_NOTIFICATIONS_USER_ID,
+} from '../config';
 import { selectNotifySettings, selectNotifyExceptions } from '../global/selectors';
 import { selectIsChatMuted } from '../global/helpers';
 import { onIdle, throttle } from './schedulers';
@@ -425,11 +427,12 @@ function buildChatSummary(
   } = chat;
 
   const userInfo = type === 'chatTypePrivate' && user;
+  const shouldHideServiceChat = chat.id === SERVICE_NOTIFICATIONS_USER_ID && !chat.lastMessage;
 
   return {
     id,
     type,
-    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo),
+    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat),
     isArchived: folderId === ARCHIVED_FOLDER_ID,
     isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
