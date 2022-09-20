@@ -75,7 +75,9 @@ import {
 import {
   debounce, onTickEnd, rafPromise,
 } from '../../../util/schedulers';
-import { getMessageOriginalId, getUserFullName, isServiceNotificationMessage } from '../../helpers';
+import {
+  getMessageOriginalId, getUserFullName, isDeletedUser, isServiceNotificationMessage, isUserBot,
+} from '../../helpers';
 import { getTranslation } from '../../../util/langProvider';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 
@@ -332,6 +334,8 @@ addActionHandler('saveDraft', (global, actions, payload) => {
 
   const { text, entities } = draft;
   const chat = selectChat(global, chatId)!;
+  const user = selectUser(global, chatId)!;
+  if (user && isDeletedUser(user)) return undefined;
 
   if (threadId === MAIN_THREAD_ID) {
     void callApi('saveDraft', {
@@ -484,6 +488,8 @@ addActionHandler('sendMessageAction', async (global, actions, payload) => {
 
   const chat = selectChat(global, chatId)!;
   if (!chat) return;
+  const user = selectUser(global, chatId);
+  if (user && (isUserBot(user) || isDeletedUser(user))) return;
 
   await callApi('sendMessageAction', {
     peer: chat, threadId, action,
