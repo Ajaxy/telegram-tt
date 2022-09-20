@@ -135,7 +135,9 @@ function makeRequest(message: OriginRequest) {
     Object.assign(requestState, { resolve, reject });
   });
 
-  if (('args' in payload) && typeof payload.args[1] === 'function') {
+  if ('args' in payload && 'name' in payload && typeof payload.args[1] === 'function') {
+    payload.withCallback = true;
+
     const callback = payload.args.pop() as AnyToVoidFunction;
     requestState.callback = callback;
     requestStatesByCallback.set(callback, requestState);

@@ -33,6 +33,7 @@ export type OriginRequest = {
   messageId?: string;
   name: keyof Methods;
   args: MethodArgs<keyof Methods>;
+  withCallback?: boolean;
 } | {
   type: 'ping';
   messageId?: string;

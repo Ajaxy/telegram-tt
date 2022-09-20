@@ -13,9 +13,11 @@ export default function createInterface(api: Record<string, Function>) {
 
     switch (data.type) {
       case 'callMethod': {
-        const { messageId, name, args } = data;
+        const {
+          messageId, name, args, withCallback,
+        } = data;
         try {
-          if (messageId) {
+          if (messageId && withCallback) {
             const callback = (...callbackArgs: any[]) => {
               const lastArg = callbackArgs[callbackArgs.length - 1];
 
