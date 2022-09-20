@@ -147,7 +147,9 @@ export function renderActionMessageText(
       ? renderMigratedContent(targetChatId, noLinks)
       : 'another chat',
   );
-  content.push(...processed);
+  processed.forEach((part) => {
+    content.push(...renderText(part));
+  });
 
   if (options.asPlainText) {
     return content.join('').trim();
