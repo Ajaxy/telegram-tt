@@ -734,12 +734,17 @@ export async function sendMessageAction({
     return undefined;
   }
 
-  const result = await invokeRequest(new GramJs.messages.SetTyping({
-    peer: buildInputPeer(peer.id, peer.accessHash),
-    topMsgId: threadId,
-    action: gramAction,
-  }));
-  return result;
+  try {
+    const result = await invokeRequest(new GramJs.messages.SetTyping({
+      peer: buildInputPeer(peer.id, peer.accessHash),
+      topMsgId: threadId,
+      action: gramAction,
+    }), undefined, true);
+    return result;
+  } catch (error) {
+    // Prevent error from being displayed in UI
+  }
+  return undefined;
 }
 
 export async function markMessageListRead({
