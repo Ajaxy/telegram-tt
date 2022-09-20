@@ -75,8 +75,9 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       const newMessage = selectChatMessage(global, chatId, id)!;
 
+      const isLocal = isMessageLocal(message as ApiMessage);
       if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
-        if (message.isOutgoing && !(message.content?.action)) {
+        if (isLocal && message.isOutgoing && !(message.content?.action)) {
           const currentMessageList = selectCurrentMessageList(global);
           if (currentMessageList) {
             // We do not use `actions.focusLastMessage` as it may be set with a delay (see below)
@@ -96,7 +97,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         }
 
         // @perf Wait until scroll animation finishes or simply rely on delivery status update (which is itself delayed)
-        if (!isMessageLocal(message as ApiMessage)) {
+        if (!isLocal) {
           setTimeout(() => {
             let delayedGlobal = getGlobal();
             if (shouldForceReply) {
