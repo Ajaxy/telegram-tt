@@ -409,7 +409,7 @@ function renderChildren(
 function renderFastListChildren($current: VirtualElementParent, $new: VirtualElementParent, currentEl: HTMLElement) {
   const newKeys = new Set(
     $new.children.map(($newChild) => {
-      const key = 'props' in $newChild && $newChild.props.key;
+      const key = 'props' in $newChild ? $newChild.props.key : undefined;
 
       if (DEBUG && isParentElement($newChild)) {
         // eslint-disable-next-line no-null/no-null
