@@ -322,6 +322,7 @@
 
   @media (max-width: 600px) {
     padding-bottom: 0.75rem;
+    margin-left: -0.5rem;
 
     // Target: Old Firefox (Waterfox Classic)
     @supports (padding-bottom: calc(0.75rem + env(safe-area-inset-bottom))) {
