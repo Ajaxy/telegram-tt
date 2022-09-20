@@ -289,7 +289,7 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
     };
   }
 
-  // TODO This was re-designed but can be hardcoded in cache
+  // TODO Remove in Jan 2023 (this was re-designed but can be hardcoded in cache)
   const { light: lightTheme } = cached.settings.themes;
   if (lightTheme?.patternColor === 'rgba(90, 110, 70, 0.6)' || !lightTheme?.patternColor) {
     cached.settings.themes.light = {
@@ -297,6 +297,13 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
       patternColor: DEFAULT_PATTERN_COLOR,
     };
   }
+
+  cached.serviceNotifications.forEach((notification) => {
+    const { isHidden } = notification as any;
+    if (isHidden) {
+      notification.isDeleted = isHidden;
+    }
+  });
 }
 
 function updateCache() {

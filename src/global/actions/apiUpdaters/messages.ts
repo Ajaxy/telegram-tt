@@ -349,15 +349,12 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       const { chatId } = update;
       const chatMessages = global.messages.byChatId[chatId];
       if (chatId === SERVICE_NOTIFICATIONS_USER_ID) {
-        const lastNotification = global.serviceNotifications.sort((a, b) => b.id - a.id)?.[0];
-        const serviceNotifications = lastNotification ? [{
-          ...lastNotification,
-          isHidden: true,
-        }] : [];
-
         setGlobal({
           ...global,
-          serviceNotifications,
+          serviceNotifications: global.serviceNotifications.map((notification) => ({
+            ...notification,
+            isDeleted: true,
+          })),
         });
       }
 
