@@ -449,9 +449,7 @@ addActionHandler('deleteHistory', async (global, actions, payload) => {
     return;
   }
 
-  const maxId = chat.lastMessage?.id;
-
-  await callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+  await callApi('deleteHistory', { chat, shouldDeleteForAll });
 
   const activeChat = selectCurrentMessageList(global);
   if (activeChat && activeChat.chatId === chatId) {
