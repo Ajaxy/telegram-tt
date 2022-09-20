@@ -820,7 +820,7 @@ async function loadViewportMessages(
   let global = getGlobal();
 
   const localMessages = chatId === SERVICE_NOTIFICATIONS_USER_ID
-    ? global.serviceNotifications.filter((notification) => !notification.isHidden).map(({ message }) => message)
+    ? global.serviceNotifications.filter(({ isDeleted }) => !isDeleted).map(({ message }) => message)
     : [];
   const allMessages = ([] as ApiMessage[]).concat(messages, localMessages);
   const byId = buildCollectionByKey(allMessages, 'id');

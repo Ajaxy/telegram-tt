@@ -427,7 +427,9 @@ function buildChatSummary(
   } = chat;
 
   const userInfo = type === 'chatTypePrivate' && user;
-  const shouldHideServiceChat = chat.id === SERVICE_NOTIFICATIONS_USER_ID && !chat.lastMessage;
+  const shouldHideServiceChat = chat.id === SERVICE_NOTIFICATIONS_USER_ID && (
+    !chat.lastMessage || chat.lastMessage.content.action?.type === 'historyClear'
+  );
 
   return {
     id,
