@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -10,7 +10,7 @@ import { ManagementScreens } from '../../../types';
 import { unique } from '../../../util/iteratees';
 import { selectChat } from '../../../global/selectors';
 import {
-  sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot,
+  sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight,
 } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -23,6 +23,7 @@ import ListItem from '../../ui/ListItem';
 import InputText from '../../ui/InputText';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
+import DeleteMemberModal from '../DeleteMemberModal';
 
 type OwnProps = {
   chatId: string;
@@ -44,6 +45,8 @@ type StateProps = {
   localUserIds?: string[];
   globalUserIds?: string[];
   serverTimeOffset: number;
+  currentUserId?: string;
+  canDeleteMembers?: boolean;
 };
 
 const ManageGroupMembers: FC<OwnProps & StateProps> = ({
@@ -59,6 +62,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   isSearching,
   searchQuery,
   serverTimeOffset,
+  currentUserId,
+  canDeleteMembers,
   onClose,
   onScreenSelect,
   onChatMemberSelect,
@@ -69,6 +74,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const adminIds = useMemo(() => {
     return noAdmins ? adminMembers?.map(({ userId }) => userId) || [] : [];
@@ -141,10 +148,24 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     }
   }, '.ListItem-button', true);
 
+  const handleDeleteMembersModalClose = useCallback(() => {
+    setDeletingUserId(undefined);
+  }, []);
+
   useHistoryBack({
     isActive,
     onBack: onClose,
   });
+
+  function getMemberContextAction(memberId: string) {
+    return memberId === currentUserId || !canDeleteMembers ? undefined : [{
+      title: lang('lng_context_remove_from_group'),
+      icon: 'stop',
+      handler: () => {
+        setDeletingUserId(memberId);
+      },
+    }];
+  }
 
   function renderSearchField() {
     return (
@@ -179,6 +200,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                   className="chat-item-clickable scroll-item"
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => handleMemberClick(id)}
+                  contextActions={getMemberContextAction(id)}
                 >
                   <PrivateChatInfo userId={id} forceShowSelf />
                 </ListItem>
@@ -195,6 +217,13 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           )}
         </div>
       </div>
+      {canDeleteMembers && (
+        <DeleteMemberModal
+          isOpen={Boolean(deletingUserId)}
+          userId={deletingUserId}
+          onClose={handleDeleteMembersModalClose}
+        />
+      )}
     </div>
   );
 };
@@ -215,6 +244,8 @@ export default memo(withGlobal<OwnProps>(
       localUserIds,
     } = global.userSearch;
 
+    const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
+
     return {
       members,
       adminMembers,
@@ -225,7 +256,9 @@ export default memo(withGlobal<OwnProps>(
       isSearching: fetchingStatus,
       globalUserIds,
       localUserIds,
+      canDeleteMembers,
       serverTimeOffset: global.serverTimeOffset,
+      currentUserId: global.currentUserId,
     };
   },
 )(ManageGroupMembers));
