@@ -22,23 +22,56 @@ interface LangFn {
 
 const SUBSTITUTION_REGEX = /%\d?\$?[sdf@]/g;
 const PLURAL_OPTIONS = ['value', 'zeroValue', 'oneValue', 'twoValue', 'fewValue', 'manyValue', 'otherValue'] as const;
+// Some rules edited from https://github.com/eemeli/make-plural/blob/master/packages/plurals/cardinals.js
 const PLURAL_RULES = {
   /* eslint-disable max-len */
   en: (n: number) => (n !== 1 ? 6 : 2),
   ar: (n: number) => (n === 0 ? 1 : n === 1 ? 2 : n === 2 ? 3 : n % 100 >= 3 && n % 100 <= 10 ? 4 : n % 100 >= 11 ? 5 : 6),
+  be: (n: number) => {
+    const s = String(n).split('.'); const t0 = Number(s[0]) === n; const n10 = t0 && Number(s[0].slice(-1)); const n100 = t0 && Number(s[0].slice(-2));
+    return n10 === 1 && n100 !== 11 ? 2
+      : (n10 >= 2 && n10 <= 4) && (n100 < 12 || n100 > 14) ? 4
+        : (t0 && n10 === 0) || (n10 >= 5 && n10 <= 9) || (n100 >= 11 && n100 <= 14) ? 5
+          : 6;
+  },
   ca: (n: number) => (n !== 1 ? 6 : 2),
+  cs: (n: number) => {
+    const s = String(n).split('.'); const i = Number(s[0]); const v0 = !s[1];
+    return n === 1 && v0 ? 2 : (i >= 2 && i <= 4) && v0 ? 4 : !v0 ? 5 : 6;
+  },
   de: (n: number) => (n !== 1 ? 6 : 2),
   es: (n: number) => (n !== 1 ? 6 : 2),
   fa: (n: number) => (n > 1 ? 6 : 2),
+  fi: (n: number) => (n !== 1 ? 6 : 2),
   fr: (n: number) => (n > 1 ? 6 : 2),
   id: () => 0,
   it: (n: number) => (n !== 1 ? 6 : 2),
+  hr: (n: number) => {
+    const s = String(n).split('.'); const i = s[0]; const f = s[1] || ''; const v0 = !s[1]; const i10 = Number(i.slice(-1));
+    const i100 = Number(i.slice(-2)); const f10 = Number(f.slice(-1)); const f100 = Number(f.slice(-2));
+    return (v0 && i10 === 1 && i100 !== 11) || (f10 === 1 && f100 !== 11) ? 2
+      : (v0 && (i10 >= 2 && i10 <= 4) && (i100 < 12 || i100 > 14)) || ((f10 >= 2 && f10 <= 4) && (f100 < 12 || f100 > 14)) ? 4
+        : 6;
+  },
+  hu: (n: number) => (n > 1 ? 6 : 2),
   ko: () => 0,
   ms: () => 0,
+  nb: (n: number) => (n > 1 ? 6 : 2),
   nl: (n: number) => (n !== 1 ? 6 : 2),
   pl: (n: number) => (n === 1 ? 2 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 4 : 5),
-  pt_BR: (n: number) => (n > 1 ? 6 : 2),
+  'pt-br': (n: number) => (n > 1 ? 6 : 2),
   ru: (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 2 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 4 : 5),
+  sk: (n: number) => {
+    const s = String(n).split('.'); const i = Number(s[0]); const v0 = !s[1];
+    return n === 1 && v0 ? 2 : (i >= 2 && i <= 4) && v0 ? 4 : !v0 ? 5 : 6;
+  },
+  sr: (n: number) => {
+    const s = String(n).split('.'); const i = s[0]; const f = s[1] || ''; const v0 = !s[1]; const i10 = Number(i.slice(-1));
+    const i100 = Number(i.slice(-2)); const f10 = Number(f.slice(-1)); const f100 = Number(f.slice(-2));
+    return (v0 && i10 === 1 && i100 !== 11) || (f10 === 1 && f100 !== 11) ? 2
+      : (v0 && (i10 >= 2 && i10 <= 4) && (i100 < 12 || i100 > 14)) || ((f10 >= 2 && f10 <= 4) && (f100 < 12 || f100 > 14)) ? 4
+        : 6;
+  },
   tr: (n: number) => (n > 1 ? 6 : 2),
   uk: (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 2 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 4 : 5),
   uz: (n: number) => (n > 1 ? 6 : 2),
