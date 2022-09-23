@@ -2,7 +2,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiError } from '../../../api/types';
 
-import { APP_VERSION, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
+import { APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { selectChatMessage, selectCurrentMessageList, selectIsTrustedBot } from '../../selectors';
@@ -409,9 +409,8 @@ addActionHandler('checkAppVersion', () => {
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 
   fetch(`${APP_VERSION_URL}?${Date.now()}`)
-    .then((response) => {
-      return response.text();
-    }).then((version) => {
+    .then((response) => response.text())
+    .then((version) => {
       version = version.trim();
 
       if (APP_VERSION_REGEX.test(version) && version !== APP_VERSION) {
@@ -419,6 +418,12 @@ addActionHandler('checkAppVersion', () => {
           ...getGlobal(),
           isUpdateAvailable: true,
         });
+      }
+    })
+    .catch((err) => {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.error('[checkAppVersion failed] ', err);
       }
     });
 });
