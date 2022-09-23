@@ -171,7 +171,7 @@ function createElement(
 function buildFragmentElement(children: any[]): VirtualElementFragment {
   return {
     type: VirtualElementTypesEnum.Fragment,
-    children: dropEmptyTail(children).map(buildChildElement),
+    children: dropEmptyTail(children, true).map(buildChildElement),
   };
 }
 
@@ -223,13 +223,11 @@ function buildComponentElement(
   componentInstance: ComponentInstance,
   children: VirtualElementChildren = [],
 ): VirtualElementComponent {
-  const builtChildren = dropEmptyTail(children).map(buildChildElement);
-
   return {
     type: VirtualElementTypesEnum.Component,
     componentInstance,
     props: componentInstance.props,
-    children: builtChildren.length ? builtChildren : [buildEmptyElement()],
+    children: dropEmptyTail(children, true).map(buildChildElement),
   };
 }
 
@@ -243,7 +241,7 @@ function buildTagElement(tag: string, props: Props, children: any[]): VirtualEle
 }
 
 // We only need placeholders in the middle of collection (to ensure other elements order).
-function dropEmptyTail(children: any[]) {
+function dropEmptyTail(children: any[], noEmpty = false) {
   let i = children.length - 1;
 
   for (; i >= 0; i--) {
@@ -252,7 +250,15 @@ function dropEmptyTail(children: any[]) {
     }
   }
 
-  return i + 1 < children.length ? children.slice(0, i + 1) : children;
+  if (i === children.length - 1) {
+    return children;
+  }
+
+  if (i === -1 && noEmpty) {
+    return children.slice(0, 1);
+  }
+
+  return children.slice(0, i + 1);
 }
 
 function isEmptyPlaceholder(child: any) {
