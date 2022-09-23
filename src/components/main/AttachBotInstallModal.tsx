@@ -1,7 +1,7 @@
-import type { FC } from '../../lib/teact/teact';
-import React from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiUser } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
@@ -12,10 +12,10 @@ export type OwnProps = {
   bot?: ApiUser;
 };
 
-const BotAttachModal: FC<OwnProps> = ({
+const AttachBotInstallModal: FC<OwnProps> = ({
   bot,
 }) => {
-  const { closeBotAttachRequestModal, confirmBotAttachRequest } = getActions();
+  const { cancelAttachBotInstall, confirmAttachBotInstall } = getActions();
 
   const lang = useLang();
 
@@ -24,12 +24,12 @@ const BotAttachModal: FC<OwnProps> = ({
   return (
     <ConfirmDialog
       isOpen={Boolean(bot)}
-      onClose={closeBotAttachRequestModal}
-      confirmHandler={confirmBotAttachRequest}
+      onClose={cancelAttachBotInstall}
+      confirmHandler={confirmAttachBotInstall}
       title={name}
       textParts={lang('WebApp.AddToAttachmentText', name)}
     />
   );
 };
 
-export default BotAttachModal;
+export default memo(AttachBotInstallModal);

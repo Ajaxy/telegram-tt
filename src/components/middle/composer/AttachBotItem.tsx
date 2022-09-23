@@ -5,7 +5,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { IAnchorPosition, ISettings } from '../../../types';
-import type { ApiAttachMenuBot } from '../../../api/types';
+import type { ApiAttachBot } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -13,24 +13,24 @@ import useLang from '../../../hooks/useLang';
 import Portal from '../../ui/Portal';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
-import AttachmentMenuBotIcon from './AttachmentMenuBotIcon';
+import AttachBotIcon from './AttachBotIcon';
 
 type OwnProps = {
-  bot: ApiAttachMenuBot;
+  bot: ApiAttachBot;
   theme: ISettings['theme'];
   chatId: string;
   onMenuOpened: VoidFunction;
   onMenuClosed: VoidFunction;
 };
 
-const AttachmentMenuBotItem: FC<OwnProps> = ({
+const AttachBotItem: FC<OwnProps> = ({
   bot,
   theme,
   chatId,
   onMenuOpened,
   onMenuClosed,
 }) => {
-  const { callAttachMenuBot, toggleBotInAttachMenu } = getActions();
+  const { callAttachBot, toggleAttachBot } = getActions();
 
   const lang = useLang();
 
@@ -59,19 +59,19 @@ const AttachmentMenuBotItem: FC<OwnProps> = ({
   }, []);
 
   const handleRemoveBot = useCallback(() => {
-    toggleBotInAttachMenu({
+    toggleAttachBot({
       botId: bot.id,
       isEnabled: false,
     });
-  }, [bot.id, toggleBotInAttachMenu]);
+  }, [bot.id, toggleAttachBot]);
 
   return (
     <MenuItem
       key={bot.id}
-      customIcon={icon && <AttachmentMenuBotIcon icon={icon} theme={theme} />}
+      customIcon={icon && <AttachBotIcon icon={icon} theme={theme} />}
       icon={!icon ? 'bots' : undefined}
       // eslint-disable-next-line react/jsx-no-bind
-      onClick={() => callAttachMenuBot({
+      onClick={() => callAttachBot({
         botId: bot.id,
         chatId,
       })}
@@ -98,4 +98,4 @@ const AttachmentMenuBotItem: FC<OwnProps> = ({
   );
 };
 
-export default memo(AttachmentMenuBotItem);
+export default memo(AttachBotItem);

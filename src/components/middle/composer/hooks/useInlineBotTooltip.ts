@@ -54,10 +54,12 @@ export default function useInlineBotTooltip(
   }, [query, isAllowed, queryInlineBot, chatId, usernameLowered]);
 
   const loadMore = useCallback(() => {
-    queryInlineBot({
-      chatId, username: usernameLowered, query, offset,
-    });
-  }, [offset, chatId, query, queryInlineBot, usernameLowered]);
+    if (isAllowed && usernameLowered && chatId) {
+      queryInlineBot({
+        chatId, username: usernameLowered, query, offset,
+      });
+    }
+  }, [isAllowed, usernameLowered, chatId, queryInlineBot, query, offset]);
 
   useEffect(() => {
     if (isAllowed && botId && (switchPm || (results?.length))) {

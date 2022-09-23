@@ -1,4 +1,4 @@
-import type { ApiAttachMenuPeerType, ApiChat } from '../../api/types';
+import type { ApiChatType, ApiChat } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { GlobalState } from '../types';
 
@@ -74,25 +74,25 @@ export function selectIsTrustedBot(global: GlobalState, botId: string) {
   return bot && (bot.isVerified || global.trustedBotIds.includes(botId));
 }
 
-export function selectAttachMenuPeerType(global: GlobalState, chatId: string) : ApiAttachMenuPeerType | undefined {
+export function selectChatType(global: GlobalState, chatId: string) : ApiChatType | undefined {
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
   const bot = selectBot(global, chatId);
   if (bot) {
-    return 'bot';
+    return 'bots';
   }
 
   const user = selectChatUser(global, chat);
   if (user) {
-    return 'private';
+    return 'users';
   }
 
   if (isChatChannel(chat)) {
-    return 'channel';
+    return 'channels';
   }
 
-  return 'chat';
+  return 'chats';
 }
 
 export function selectIsChatBotNotStarted(global: GlobalState, chatId: string) {
@@ -194,8 +194,18 @@ export function selectSendAs(global: GlobalState, chatId: string) {
 }
 
 export function selectRequestedText(global: GlobalState, chatId: string) {
-  if (global.openChatWithText?.chatId === chatId) {
-    return global.openChatWithText.text;
+  if (global.requestedDraft?.chatId === chatId) {
+    return global.requestedDraft.text;
   }
   return undefined;
+}
+
+export function filterChatIdsByType(global: GlobalState, chatIds: string[], filter: readonly ApiChatType[]) {
+  return chatIds.filter((id) => {
+    const type = selectChatType(global, id);
+    if (!type) {
+      return false;
+    }
+    return filter.includes(type);
+  });
 }

@@ -3,7 +3,7 @@ import {
 } from '../../index';
 
 import type {
-  ApiChat, ApiContact, ApiUrlAuthResult, ApiUser,
+  ApiChat, ApiChatType, ApiContact, ApiUrlAuthResult, ApiUser,
 } from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 
@@ -287,27 +287,11 @@ addActionHandler('switchBotInline', (global, actions, payload) => {
     return undefined;
   }
 
-  const text = `@${botSender.username} ${query}`;
-
-  if (isSamePeer) {
-    actions.openChatWithText({ chatId: chat.id, text });
-    return undefined;
-  }
-
-  return {
-    ...global,
-    switchBotInline: {
-      query,
-      botUsername: botSender.username,
-    },
-  };
-});
-
-addActionHandler('resetSwitchBotInline', (global) => {
-  return {
-    ...global,
-    switchBotInline: undefined,
-  };
+  actions.openChatWithDraft({
+    text: `@${botSender.username} ${query}`,
+    chatId: isSamePeer ? chat.id : undefined,
+  });
+  return undefined;
 });
 
 addActionHandler('sendInlineBotResult', (global, actions, payload) => {
@@ -557,28 +541,28 @@ addActionHandler('markBotTrusted', (global, actions, payload) => {
   }
 });
 
-addActionHandler('loadAttachMenuBots', async (global, actions, payload) => {
+addActionHandler('loadAttachBots', async (global, actions, payload) => {
   const { hash } = payload || {};
-  await loadAttachMenuBots(hash);
+  await loadAttachBots(hash);
 });
 
-addActionHandler('toggleBotInAttachMenu', async (global, actions, payload) => {
+addActionHandler('toggleAttachBot', async (global, actions, payload) => {
   const { botId, isEnabled } = payload;
 
   const bot = selectUser(global, botId);
 
   if (!bot) return;
 
-  await toggleBotInAttachMenu(bot, isEnabled);
+  await toggleAttachBot(bot, isEnabled);
 });
 
-async function toggleBotInAttachMenu(bot: ApiUser, isEnabled: boolean) {
-  await callApi('toggleBotInAttachMenu', { bot, isEnabled });
-  await loadAttachMenuBots();
+async function toggleAttachBot(bot: ApiUser, isEnabled: boolean) {
+  await callApi('toggleAttachBot', { bot, isEnabled });
+  await loadAttachBots();
 }
 
-async function loadAttachMenuBots(hash?: string) {
-  const result = await callApi('loadAttachMenuBots', { hash });
+async function loadAttachBots(hash?: string) {
+  const result = await callApi('loadAttachBots', { hash });
   if (!result) {
     return;
   }
@@ -593,7 +577,7 @@ async function loadAttachMenuBots(hash?: string) {
   });
 }
 
-addActionHandler('callAttachMenuBot', (global, actions, payload) => {
+addActionHandler('callAttachBot', (global, actions, payload) => {
   const {
     chatId, botId, isFromBotMenu, url, startParam,
   } = payload;
@@ -601,14 +585,17 @@ addActionHandler('callAttachMenuBot', (global, actions, payload) => {
   if (!isFromBotMenu && !bots[botId]) {
     return {
       ...global,
-      botAttachRequest: {
+      requestedAttachBotInstall: {
         botId,
-        chatId,
-        startParam,
+        onConfirm: {
+          action: 'callAttachBot',
+          payload: { chatId, botId, startParam },
+        },
       },
     };
   }
   const theme = extractCurrentThemeParams();
+  actions.openChat({ id: chatId });
   actions.requestWebView({
     url,
     peerId: chatId,
@@ -622,29 +609,67 @@ addActionHandler('callAttachMenuBot', (global, actions, payload) => {
   return undefined;
 });
 
-addActionHandler('confirmBotAttachRequest', async (global, actions) => {
-  const { botAttachRequest } = global;
-  if (!botAttachRequest) return;
+addActionHandler('confirmAttachBotInstall', async (global) => {
+  const { requestedAttachBotInstall } = global;
 
-  const { botId, chatId, startParam } = botAttachRequest;
+  const { botId, onConfirm } = requestedAttachBotInstall!;
 
   setGlobal({
     ...global,
-    botAttachRequest: undefined,
+    requestedAttachBotInstall: undefined,
   });
 
   const bot = selectUser(global, botId);
   if (!bot) return;
 
-  await toggleBotInAttachMenu(bot, true);
-
-  actions.callAttachMenuBot({ chatId, botId, startParam });
+  await toggleAttachBot(bot, true);
+  if (onConfirm) {
+    const { action, payload } = onConfirm;
+    getActions()[action](payload);
+  }
 });
 
-addActionHandler('closeBotAttachRequestModal', (global) => {
+addActionHandler('cancelAttachBotInstall', (global) => {
   return {
     ...global,
-    botAttachRequest: undefined,
+    requestedAttachBotInstall: undefined,
+  };
+});
+
+addActionHandler('requestAttachBotInChat', (global, actions, payload) => {
+  const { botId, filter, startParam } = payload;
+  const currentChatId = selectCurrentMessageList(global)?.chatId;
+
+  const { attachMenu: { bots } } = global;
+  const bot = bots[botId];
+  if (!bot) return;
+  const supportedFilters = bot.peerTypes.filter((type): type is ApiChatType => (
+    type !== 'self' && filter.includes(type)
+  ));
+
+  if (!supportedFilters.length) {
+    actions.callAttachBot({
+      chatId: currentChatId || botId,
+      botId,
+      startParam,
+    });
+    return;
+  }
+
+  setGlobal({
+    ...global,
+    requestedAttachBotInChat: {
+      botId,
+      filter: supportedFilters,
+      startParam,
+    },
+  });
+});
+
+addActionHandler('cancelAttachBotInChat', (global) => {
+  return {
+    ...global,
+    requestedAttachBotInChat: undefined,
   };
 });
 

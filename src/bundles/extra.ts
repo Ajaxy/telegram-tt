@@ -1,7 +1,9 @@
 // eslint-disable-next-line import/no-cycle
 export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
 
-export { default as ForwardPicker } from '../components/main/ForwardPicker';
+export { default as ForwardRecipientPicker } from '../components/main/ForwardRecipientPicker';
+export { default as DraftRecipientPicker } from '../components/main/DraftRecipientPicker';
+export { default as AttachBotRecipientPicker } from '../components/main/AttachBotRecipientPicker';
 export { default as Dialogs } from '../components/main/Dialogs';
 export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
@@ -10,7 +12,7 @@ export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';
 export { default as WebAppModal } from '../components/main/WebAppModal';
 export { default as BotTrustModal } from '../components/main/BotTrustModal';
-export { default as BotAttachModal } from '../components/main/BotAttachModal';
+export { default as AttachBotInstallModal } from '../components/main/AttachBotInstallModal';
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';
 export { default as PremiumMainModal } from '../components/main/premium/PremiumMainModal';
 export { default as GiftPremiumModal } from '../components/main/premium/GiftPremiumModal';

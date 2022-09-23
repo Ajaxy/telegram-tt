@@ -39,7 +39,7 @@ type StateProps = {
   canReportMessages?: boolean;
   canDownloadMessages?: boolean;
   hasProtectedMessage?: boolean;
-  isForwardModalOpen?: boolean;
+  isAnyModalOpen?: boolean;
   selectedMessageIds?: number[];
 };
 
@@ -53,7 +53,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   canReportMessages,
   canDownloadMessages,
   hasProtectedMessage,
-  isForwardModalOpen,
+  isAnyModalOpen,
   selectedMessageIds,
 }) => {
   const {
@@ -70,7 +70,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   useCopySelectedMessages(Boolean(isActive), copySelectedMessages);
   useEffect(() => {
-    return isActive && !isDeleteModalOpen && !isReportModalOpen && !isForwardModalOpen
+    return isActive && !isDeleteModalOpen && !isReportModalOpen && !isAnyModalOpen
       ? captureKeyboardListeners({
         onBackspace: canDeleteMessages ? openDeleteModal : undefined,
         onDelete: canDeleteMessages ? openDeleteModal : undefined,
@@ -78,7 +78,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
       })
       : undefined;
   }, [
-    isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode, isForwardModalOpen,
+    isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode, isAnyModalOpen,
     canDeleteMessages,
   ]);
 
@@ -183,6 +183,8 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const isForwardModalOpen = global.forwardMessages.isModalShown;
+    const isAnyModalOpen = Boolean(isForwardModalOpen || global.requestedDraft
+      || global.requestedAttachBotInChat || global.requestedAttachBotInstall);
 
     return {
       isSchedule,
@@ -192,7 +194,7 @@ export default memo(withGlobal<OwnProps>(
       canDownloadMessages: canDownload,
       selectedMessageIds,
       hasProtectedMessage,
-      isForwardModalOpen,
+      isAnyModalOpen,
     };
   },
 )(MessageSelectToolbar));

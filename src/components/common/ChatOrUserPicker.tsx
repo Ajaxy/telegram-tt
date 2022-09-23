@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useCallback } from '../../lib/teact/teact';
 
@@ -24,11 +23,10 @@ export type OwnProps = {
   currentUserId?: string;
   chatOrUserIds: string[];
   isOpen: boolean;
-  filterRef: RefObject<HTMLInputElement>;
-  filterPlaceholder: string;
-  filter: string;
+  searchPlaceholder: string;
+  search: string;
   loadMore?: NoneToVoidFunction;
-  onFilterChange: (filter: string) => void;
+  onSearchChange: (search: string) => void;
   onSelectChatOrUser: (chatOrUserId: string) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
@@ -38,28 +36,29 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   isOpen,
   currentUserId,
   chatOrUserIds,
-  filterRef,
-  filter,
-  filterPlaceholder,
+  search,
+  searchPlaceholder,
   loadMore,
-  onFilterChange,
+  onSearchChange,
   onSelectChatOrUser,
   onClose,
   onCloseAnimationEnd,
 }) => {
   const lang = useLang();
-  const [viewportIds, getMore] = useInfiniteScroll(loadMore, chatOrUserIds, Boolean(filter));
+  const [viewportIds, getMore] = useInfiniteScroll(loadMore, chatOrUserIds, Boolean(search));
+  // eslint-disable-next-line no-null/no-null
+  const searchRef = useRef<HTMLInputElement>(null);
 
-  const resetFilter = useCallback(() => {
-    onFilterChange('');
-  }, [onFilterChange]);
-  useInputFocusOnOpen(filterRef, isOpen, resetFilter);
+  const resetSearch = useCallback(() => {
+    onSearchChange('');
+  }, [onSearchChange]);
+  useInputFocusOnOpen(searchRef, isOpen, resetSearch);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange(e.currentTarget.value);
-  }, [onFilterChange]);
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.currentTarget.value);
+  }, [onSearchChange]);
   const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
     if (viewportIds && viewportIds.length > 0) {
       onSelectChatOrUser(viewportIds[index === -1 ? 0 : index]);
@@ -78,11 +77,11 @@ const ChatOrUserPicker: FC<OwnProps> = ({
         <i className="icon-close" />
       </Button>
       <InputText
-        ref={filterRef}
-        value={filter}
-        onChange={handleFilterChange}
+        ref={searchRef}
+        value={search}
+        onChange={handleSearchChange}
         onKeyDown={handleKeyDown}
-        placeholder={filterPlaceholder}
+        placeholder={searchPlaceholder}
       />
     </div>
   );

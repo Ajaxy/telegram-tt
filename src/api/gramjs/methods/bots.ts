@@ -10,7 +10,7 @@ import { invokeRequest } from './client';
 import { buildInputPeer, buildInputThemeParams, generateRandomBigInt } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildApiAttachMenuBot, buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm,
+  buildApiAttachBot, buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm,
 } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
@@ -249,7 +249,7 @@ export async function sendWebViewData({
   }), true);
 }
 
-export async function loadAttachMenuBots({
+export async function loadAttachBots({
   hash,
 }: {
   hash?: string;
@@ -262,13 +262,13 @@ export async function loadAttachMenuBots({
     addEntitiesWithPhotosToLocalDb(result.users);
     return {
       hash: result.hash.toString(),
-      bots: buildCollectionByKey(result.bots.map(buildApiAttachMenuBot), 'id'),
+      bots: buildCollectionByKey(result.bots.map(buildApiAttachBot), 'id'),
     };
   }
   return undefined;
 }
 
-export function toggleBotInAttachMenu({
+export function toggleAttachBot({
   bot,
   isEnabled,
 }: {

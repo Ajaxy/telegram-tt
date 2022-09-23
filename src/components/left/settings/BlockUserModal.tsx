@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useMemo, useState, memo, useRef, useCallback, useEffect,
+  useMemo, useState, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -40,13 +40,11 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  const [filter, setFilter] = useState('');
-  // eslint-disable-next-line no-null/no-null
-  const filterRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    setUserSearchQuery({ query: filter });
-  }, [filter, setUserSearchQuery]);
+    setUserSearchQuery({ query: search });
+  }, [search, setUserSearchQuery]);
 
   const filteredContactIds = useMemo(() => {
     const availableContactIds = unique([
@@ -56,14 +54,14 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
       return contactId !== currentUserId && !blockedIds.includes(contactId);
     }));
 
-    return filterUsersByName(availableContactIds, usersById, filter)
+    return filterUsersByName(availableContactIds, usersById, search)
       .sort((firstId, secondId) => {
         const firstName = getUserFullName(usersById[firstId]) || '';
         const secondName = getUserFullName(usersById[secondId]) || '';
 
         return firstName.localeCompare(secondName);
       });
-  }, [blockedIds, contactIds, currentUserId, filter, localContactIds, usersById]);
+  }, [blockedIds, contactIds, currentUserId, search, localContactIds, usersById]);
 
   const handleRemoveUser = useCallback((userId: string) => {
     const { id: contactId, accessHash } = usersById[userId] || {};
@@ -78,10 +76,9 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
     <ChatOrUserPicker
       isOpen={isOpen}
       chatOrUserIds={filteredContactIds}
-      filterRef={filterRef}
-      filterPlaceholder={lang('BlockedUsers.BlockUser')}
-      filter={filter}
-      onFilterChange={setFilter}
+      searchPlaceholder={lang('BlockedUsers.BlockUser')}
+      search={search}
+      onSearchChange={setSearch}
       onSelectChatOrUser={handleRemoveUser}
       onClose={onClose}
     />
