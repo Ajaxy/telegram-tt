@@ -70,14 +70,16 @@ addActionHandler('openChatWithInfo', (global, actions, payload) => {
   actions.openChat(payload);
 });
 
-addActionHandler('openChatWithText', (global, actions, payload) => {
+addActionHandler('openChatWithDraft', (global, actions, payload) => {
   const { chatId, text } = payload;
 
-  actions.openChat({ id: chatId });
+  if (chatId) {
+    actions.openChat({ id: chatId });
+  }
 
   return {
     ...global,
-    openChatWithText: {
+    requestedDraft: {
       chatId,
       text,
     },

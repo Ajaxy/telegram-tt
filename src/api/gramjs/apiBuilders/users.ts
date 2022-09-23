@@ -68,7 +68,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(avatarHash && { avatarHash }),
     hasVideoAvatar,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
-    ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachMenuBot: mtpUser.botAttachMenu }),
+    ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
   };
 }
 

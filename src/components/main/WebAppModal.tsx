@@ -4,7 +4,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiAttachMenuBot, ApiChat, ApiUser } from '../../api/types';
+import type { ApiAttachBot, ApiChat, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 import type { PopupOptions, WebAppInboundEvent } from './hooks/useWebAppFrame';
@@ -48,7 +48,7 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   bot?: ApiUser;
-  attachMenuBot?: ApiAttachMenuBot;
+  attachBot?: ApiAttachBot;
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
   paymentStatus?: GlobalState['payment']['status'];
@@ -78,7 +78,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   webApp,
   chat,
   bot,
-  attachMenuBot,
+  attachBot,
   theme,
   isPaymentModalOpen,
   paymentStatus,
@@ -87,7 +87,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     closeWebApp,
     sendWebViewData,
     prolongWebView,
-    toggleBotInAttachMenu,
+    toggleAttachBot,
     openTelegramLink,
     openChat,
     openInvoice,
@@ -279,11 +279,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp] as const);
 
   const handleToggleClick = useCallback(() => {
-    toggleBotInAttachMenu({
+    toggleAttachBot({
       botId: bot!.id,
-      isEnabled: !attachMenuBot,
+      isEnabled: !attachBot,
     });
-  }, [bot, attachMenuBot, toggleBotInAttachMenu]);
+  }, [bot, attachBot, toggleAttachBot]);
 
   const handleBackClick = useCallback(() => {
     if (isBackButtonVisible) {
@@ -353,16 +353,16 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
           )}
           <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
-          {bot?.isAttachMenuBot && (
+          {bot?.isAttachBot && (
             <MenuItem
-              icon={attachMenuBot ? 'stop' : 'install'}
+              icon={attachBot ? 'stop' : 'install'}
               onClick={handleToggleClick}
-              destructive={Boolean(attachMenuBot)}
+              destructive={Boolean(attachBot)}
             >
-              {lang(attachMenuBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
+              {lang(attachBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
             </MenuItem>
           )}
-          {attachMenuBot?.hasSettings && (
+          {attachBot?.hasSettings && (
             <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
               {lang('Settings')}
             </MenuItem>
@@ -371,7 +371,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       </div>
     );
   }, [
-    lang, handleBackClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, attachMenuBot,
+    lang, handleBackClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, attachBot,
     handleToggleClick, handleSettingsButtonClick, isBackButtonVisible, headerColor, backButtonClassName,
   ]);
 
@@ -494,14 +494,14 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { webApp }): StateProps => {
     const { botId } = webApp || {};
-    const attachMenuBot = botId ? global.attachMenu.bots[botId] : undefined;
+    const attachBot = botId ? global.attachMenu.bots[botId] : undefined;
     const bot = botId ? selectUser(global, botId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
     const { isPaymentModalOpen, status } = global.payment;
 
     return {
-      attachMenuBot,
+      attachBot,
       bot,
       chat,
       theme,

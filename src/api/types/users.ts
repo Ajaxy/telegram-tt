@@ -1,5 +1,6 @@
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiBotInfo } from './bots';
+import type { API_CHAT_TYPES } from '../../config';
 
 export interface ApiUser {
   id: string;
@@ -26,7 +27,7 @@ export interface ApiUser {
     isFullyLoaded: boolean;
   };
   fakeType?: ApiFakeType;
-  isAttachMenuBot?: boolean;
+  isAttachBot?: boolean;
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;
@@ -56,17 +57,18 @@ export interface ApiUserStatus {
   expires?: number;
 }
 
-export type ApiAttachMenuPeerType = 'self' | 'bot' | 'private' | 'chat' | 'channel';
+export type ApiChatType = typeof API_CHAT_TYPES[number];
+export type ApiAttachMenuPeerType = 'self' | ApiChatType;
 
-export interface ApiAttachMenuBot {
+export interface ApiAttachBot {
   id: string;
   hasSettings?: boolean;
   shortName: string;
   peerTypes: ApiAttachMenuPeerType[];
-  icons: ApiAttachMenuBotIcon[];
+  icons: ApiAttachBotIcon[];
 }
 
-export interface ApiAttachMenuBotIcon {
+export interface ApiAttachBotIcon {
   name: string;
   document: ApiDocument;
 }

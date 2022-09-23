@@ -52,7 +52,7 @@ import DownloadManager from './DownloadManager';
 import GameModal from './GameModal';
 import Notifications from './Notifications.async';
 import Dialogs from './Dialogs.async';
-import ForwardPicker from './ForwardPicker.async';
+import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import SafeLinkModal from './SafeLinkModal.async';
 import HistoryCalendar from './HistoryCalendar.async';
 import GroupCall from '../calls/group/GroupCall.async';
@@ -63,7 +63,7 @@ import NewContactModal from './NewContactModal.async';
 import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 import WebAppModal from './WebAppModal.async';
 import BotTrustModal from './BotTrustModal.async';
-import BotAttachModal from './BotAttachModal.async';
+import AttachBotInstallModal from './AttachBotInstallModal.async';
 import ConfettiContainer from './ConfettiContainer';
 import UrlAuthModal from './UrlAuthModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
@@ -72,6 +72,8 @@ import ReceiptModal from '../payment/ReceiptModal.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
 import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
+import DraftRecipientPicker from './DraftRecipientPicker.async';
+import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 
 import './Main.scss';
 
@@ -109,7 +111,9 @@ type StateProps = {
   isPremiumModalOpen?: boolean;
   botTrustRequest?: GlobalState['botTrustRequest'];
   botTrustRequestBot?: ApiUser;
-  botAttachRequestBot?: ApiUser;
+  attachBotToInstall?: ApiUser;
+  requestedAttachBotInChat?: GlobalState['requestedAttachBotInChat'];
+  requestedDraft?: GlobalState['requestedDraft'];
   currentUser?: ApiUser;
   urlAuth?: GlobalState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
@@ -158,7 +162,9 @@ const Main: FC<StateProps> = ({
   isRatePhoneCallModalOpen,
   botTrustRequest,
   botTrustRequestBot,
-  botAttachRequestBot,
+  attachBotToInstall,
+  requestedAttachBotInChat,
+  requestedDraft,
   webApp,
   currentUser,
   urlAuth,
@@ -186,7 +192,7 @@ const Main: FC<StateProps> = ({
     closeCustomEmojiSets,
     checkVersionNotification,
     loadAppConfig,
-    loadAttachMenuBots,
+    loadAttachBots,
     loadContactList,
     loadCustomEmojis,
     closePaymentModal,
@@ -219,14 +225,14 @@ const Main: FC<StateProps> = ({
       loadNotificationExceptions();
       loadTopInlineBots();
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
-      loadAttachMenuBots();
+      loadAttachBots();
       loadContactList();
       loadPremiumGifts();
       checkAppVersion();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
-    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachMenuBots, loadContactList,
+    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
     loadPremiumGifts, checkAppVersion,
   ]);
 
@@ -423,7 +429,8 @@ const Main: FC<StateProps> = ({
       <MiddleColumn />
       <RightColumn />
       <MediaViewer isOpen={isMediaViewerOpen} />
-      <ForwardPicker isOpen={isForwardModalOpen} />
+      <ForwardRecipientPicker isOpen={isForwardModalOpen} />
+      <DraftRecipientPicker requestedDraft={requestedDraft} />
       <Notifications isOpen={hasNotifications} />
       <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
@@ -454,7 +461,8 @@ const Main: FC<StateProps> = ({
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
       <BotTrustModal bot={botTrustRequestBot} type={botTrustRequest?.type} />
-      <BotAttachModal bot={botAttachRequestBot} />
+      <AttachBotInstallModal bot={attachBotToInstall} />
+      <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />
       {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
       <PremiumLimitReachedModal limit={limitReached} />
@@ -494,8 +502,19 @@ export default memo(withGlobal(
           animationLevel, language, wasTimeFormatSetManually,
         },
       },
+      connectionState,
       botTrustRequest,
-      botAttachRequest,
+      requestedAttachBotInstall,
+      requestedAttachBotInChat,
+      requestedDraft,
+      urlAuth,
+      webApp,
+      safeLinkModalUrl,
+      authState,
+      lastSyncTime,
+      openedStickerSetShortName,
+      openedCustomEmojiSetIds,
+      shouldSkipHistoryAnimations,
     } = global;
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
@@ -507,9 +526,9 @@ export default memo(withGlobal(
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
 
     return {
-      connectionState: global.connectionState,
-      authState: global.authState,
-      lastSyncTime: global.lastSyncTime,
+      connectionState,
+      authState,
+      lastSyncTime,
       isLeftColumnOpen: global.isLeftColumnShown,
       isRightColumnOpen: selectIsRightColumnShown(global),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
@@ -517,11 +536,11 @@ export default memo(withGlobal(
       hasNotifications: Boolean(global.notifications.length),
       hasDialogs: Boolean(global.dialogs.length),
       audioMessage,
-      safeLinkModalUrl: global.safeLinkModalUrl,
+      safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
-      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
-      openedStickerSetShortName: global.openedStickerSetShortName,
-      openedCustomEmojiSetIds: global.openedCustomEmojiSetIds,
+      shouldSkipHistoryAnimations,
+      openedStickerSetShortName,
+      openedCustomEmojiSetIds,
       isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: global.groupCalls.activeGroupCallId,
       animationLevel,
@@ -537,15 +556,17 @@ export default memo(withGlobal(
       isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
       botTrustRequest,
       botTrustRequestBot: botTrustRequest && selectUser(global, botTrustRequest.botId),
-      botAttachRequestBot: botAttachRequest && selectUser(global, botAttachRequest.botId),
-      webApp: global.webApp,
+      attachBotToInstall: requestedAttachBotInstall && selectUser(global, requestedAttachBotInstall.botId),
+      requestedAttachBotInChat,
+      webApp,
       currentUser,
-      urlAuth: global.urlAuth,
+      urlAuth,
       isPremiumModalOpen: global.premiumModal?.isOpen,
       limitReached: global.limitReachedModal?.limit,
       isPaymentModalOpen: global.payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(global.payment.receipt),
       deleteFolderDialogId: global.deleteFolderDialogModal,
+      requestedDraft,
     };
   },
 )(Main));

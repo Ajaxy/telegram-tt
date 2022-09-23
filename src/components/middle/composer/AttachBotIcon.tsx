@@ -10,7 +10,7 @@ import useMedia from '../../../hooks/useMedia';
 import { getDocumentMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
-import styles from './AttachmentMenuBotIcon.module.scss';
+import styles from './AttachBotIcon.module.scss';
 
 type OwnProps = {
   icon: ApiDocument;
@@ -22,7 +22,7 @@ const DARK_THEME_COLOR = 'rgb(170, 170, 170)';
 const LIGHT_THEME_COLOR = 'rgb(112, 117, 121)';
 const COLOR_REPLACE_PATTERN = /#fff/gi;
 
-const AttachmentMenuBotIcon: FC<OwnProps> = ({
+const AttachBotIcon: FC<OwnProps> = ({
   icon, theme,
 }) => {
   const mediaData = useMedia(getDocumentMediaHash(icon), false, ApiMediaFormat.Text);
@@ -48,4 +48,4 @@ const AttachmentMenuBotIcon: FC<OwnProps> = ({
   );
 };
 
-export default memo(AttachmentMenuBotIcon);
+export default memo(AttachBotIcon);

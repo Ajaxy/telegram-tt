@@ -54,7 +54,7 @@ import {
   selectTheme,
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
-  selectAttachMenuPeerType,
+  selectChatType,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -169,7 +169,7 @@ type StateProps =
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
     requestedText?: string;
-    attachMenuBots: GlobalState['attachMenu']['bots'];
+    attachBots: GlobalState['attachMenu']['bots'];
     attachMenuPeerType?: ApiAttachMenuPeerType;
     theme: ISettings['theme'];
     fileSizeLimit: number;
@@ -249,7 +249,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   editingDraft,
   requestedText,
   botMenuButton,
-  attachMenuBots,
+  attachBots,
   attachMenuPeerType,
   theme,
 }) => {
@@ -268,8 +268,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendInlineBotResult,
     loadSendAs,
     loadFullChat,
-    resetOpenChatWithText,
-    callAttachMenuBot,
+    resetOpenChatWithDraft,
+    callAttachBot,
     openLimitReachedModal,
     showNotification,
   } = getActions();
@@ -674,10 +674,10 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleClickBotMenu = useCallback(() => {
     if (botMenuButton?.type !== 'webApp') return;
-    callAttachMenuBot({
+    callAttachBot({
       botId: chatId, chatId, isFromBotMenu: true, url: botMenuButton.url,
     });
-  }, [botMenuButton, callAttachMenuBot, chatId]);
+  }, [botMenuButton, callAttachBot, chatId]);
 
   const handleActivateBotCommandMenu = useCallback(() => {
     closeSymbolMenu();
@@ -727,13 +727,13 @@ const Composer: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (requestedText) {
       setHtml(requestedText);
-      resetOpenChatWithText();
+      resetOpenChatWithDraft();
       requestAnimationFrame(() => {
         const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
         focusEditableElement(messageInput, true);
       });
     }
-  }, [requestedText, resetOpenChatWithText]);
+  }, [requestedText, resetOpenChatWithDraft]);
 
   const handleStickerSelect = useCallback((
     sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean, shouldPreserveInput = false,
@@ -1211,7 +1211,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             isScheduled={shouldSchedule}
-            attachMenuBots={attachMenuBots}
+            attachBots={attachBots}
             peerType={attachMenuPeerType}
             theme={theme}
           />
@@ -1377,8 +1377,8 @@ export default memo(withGlobal<OwnProps>(
       sendAsId,
       editingDraft,
       requestedText,
-      attachMenuBots: global.attachMenu.bots,
-      attachMenuPeerType: selectAttachMenuPeerType(global, chatId),
+      attachBots: global.attachMenu.bots,
+      attachMenuPeerType: selectChatType(global, chatId),
       theme: selectTheme(global),
       fileSizeLimit: selectCurrentLimit(global, 'uploadMaxFileparts') * MAX_UPLOAD_FILEPART_SIZE,
       captionLimit: selectCurrentLimit(global, 'captionLength'),

@@ -18,7 +18,7 @@ import useFlag from '../../../hooks/useFlag';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
-import AttachmentMenuBotItem from './AttachmentMenuBotItem';
+import AttachBotItem from './AttachBotItem';
 
 import './AttachMenu.scss';
 
@@ -28,7 +28,7 @@ export type OwnProps = {
   canAttachMedia: boolean;
   canAttachPolls: boolean;
   isScheduled?: boolean;
-  attachMenuBots: GlobalState['attachMenu']['bots'];
+  attachBots: GlobalState['attachMenu']['bots'];
   peerType?: ApiAttachMenuPeerType;
   onFileSelect: (files: File[], isQuick: boolean) => void;
   onPollCreate: () => void;
@@ -40,7 +40,7 @@ const AttachMenu: FC<OwnProps> = ({
   isButtonVisible,
   canAttachMedia,
   canAttachPolls,
-  attachMenuBots,
+  attachBots,
   peerType,
   isScheduled,
   onFileSelect,
@@ -85,14 +85,14 @@ const AttachMenu: FC<OwnProps> = ({
   }, [handleFileSelect]);
 
   const bots = useMemo(() => {
-    return Object.values(attachMenuBots).filter((bot) => {
+    return Object.values(attachBots).filter((bot) => {
       if (!peerType) return false;
-      if (peerType === 'bot' && bot.id === chatId && bot.peerTypes.includes('self')) {
+      if (peerType === 'bots' && bot.id === chatId && bot.peerTypes.includes('self')) {
         return true;
       }
       return bot.peerTypes.includes(peerType);
     });
-  }, [attachMenuBots, chatId, peerType]);
+  }, [attachBots, chatId, peerType]);
 
   const lang = useLang();
 
@@ -146,7 +146,7 @@ const AttachMenu: FC<OwnProps> = ({
         )}
 
         {canAttachMedia && !isScheduled && bots.map((bot) => (
-          <AttachmentMenuBotItem
+          <AttachBotItem
             bot={bot}
             chatId={chatId}
             theme={theme}

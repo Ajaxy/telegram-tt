@@ -35,7 +35,7 @@ import type {
   ApiPhoto,
   ApiKeyboardButton,
   ApiThemeParameters,
-  ApiAttachMenuBot,
+  ApiAttachBot,
   ApiPhoneCall,
   ApiWebSession,
   ApiPremiumPromo,
@@ -43,6 +43,7 @@ import type {
   ApiInputInvoice,
   ApiInvoice,
   ApiStickerSetInfo,
+  ApiChatType,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -585,13 +586,8 @@ export type GlobalState = {
     messageId: number;
   };
 
-  switchBotInline?: {
-    query: string;
-    botUsername: string;
-  };
-
-  openChatWithText?: {
-    chatId: string;
+  requestedDraft?: {
+    chatId?: string;
     text: string;
   };
 
@@ -614,18 +610,25 @@ export type GlobalState = {
     type: 'game' | 'webApp';
     onConfirm?: {
       action: keyof GlobalActions;
-      payload: any; // TODO add TS support
+      payload: any; // TODO Add TS support
     };
   };
-  botAttachRequest?: {
+  requestedAttachBotInstall?: {
     botId: string;
-    chatId: string;
+    onConfirm?: {
+      action: keyof GlobalActions;
+      payload: any; // TODO Add TS support
+    };
+  };
+  requestedAttachBotInChat?: {
+    botId: string;
+    filter: ApiChatType[];
     startParam?: string;
   };
 
   attachMenu: {
     hash?: string;
-    bots: Record<string, ApiAttachMenuBot>;
+    bots: Record<string, ApiAttachBot>;
   };
 
   confetti?: {
@@ -722,11 +725,11 @@ export interface ActionPayloads {
     shouldReplaceHistory?: boolean;
   };
 
-  openChatWithText: {
-    chatId: string;
+  openChatWithDraft: {
+    chatId?: string;
     text: string;
   };
-  resetOpenChatWithText: never;
+  resetOpenChatWithDraft: never;
 
   toggleJoinToSend: {
     chatId: string;
@@ -956,8 +959,6 @@ export interface ActionPayloads {
     isSamePeer?: boolean;
   };
 
-  resetSwitchBotInline: never;
-
   openGame: {
     url: string;
     chatId: string;
@@ -998,8 +999,20 @@ export interface ActionPayloads {
     botId: string;
   };
 
-  closeBotAttachRequestModal: never;
-  confirmBotAttachRequest: never;
+  cancelAttachBotInstall: never;
+  confirmAttachBotInstall: never;
+
+  processAttachBotParameters: {
+    username: string;
+    filter: ApiChatType[];
+    startParam?: string;
+  };
+  requestAttachBotInChat: {
+    botId: string;
+    filter: ApiChatType[];
+    startParam?: string;
+  };
+  cancelAttachBotInChat: never;
 
   sendWebViewData: {
     bot: ApiUser;
@@ -1007,16 +1020,16 @@ export interface ActionPayloads {
     buttonText: string;
   };
 
-  loadAttachMenuBots: {
+  loadAttachBots: {
     hash?: string;
   };
 
-  toggleBotInAttachMenu: {
+  toggleAttachBot: {
     botId: string;
     isEnabled: boolean;
   };
 
-  callAttachMenuBot: {
+  callAttachBot: {
     chatId: string;
     botId: string;
     isFromBotMenu?: boolean;
