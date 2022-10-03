@@ -6,6 +6,7 @@ import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';
 import { updatePasscodeSettings } from './reducers';
 import { clearStoredSession } from '../util/sessions';
+import './sync';
 
 initCache();
 
