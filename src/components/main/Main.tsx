@@ -6,7 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { AnimationLevel, LangCode } from '../../types';
 import type {
-  ApiChat, ApiMessage, ApiUpdateAuthorizationStateType, ApiUpdateConnectionStateType, ApiUser,
+  ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 import type { ApiLimitTypeWithModal, GlobalState } from '../../global/types';
 
@@ -79,8 +79,6 @@ import './Main.scss';
 
 type StateProps = {
   chat?: ApiChat;
-  connectionState?: ApiUpdateConnectionStateType;
-  authState?: ApiUpdateAuthorizationStateType;
   lastSyncTime?: number;
   isLeftColumnOpen: boolean;
   isRightColumnOpen: boolean;
@@ -131,8 +129,6 @@ let notificationInterval: number | undefined;
 let DEBUG_isLogged = false;
 
 const Main: FC<StateProps> = ({
-  connectionState,
-  authState,
   lastSyncTime,
   isLeftColumnOpen,
   isRightColumnOpen,
@@ -174,7 +170,6 @@ const Main: FC<StateProps> = ({
   deleteFolderDialogId,
 }) => {
   const {
-    sync,
     loadAnimatedEmojis,
     loadNotificationSettings,
     loadNotificationExceptions,
@@ -205,12 +200,6 @@ const Main: FC<StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
-
-  useEffect(() => {
-    if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
-      sync();
-    }
-  }, [connectionState, authState, sync]);
 
   useInterval(checkAppVersion, APP_OUTDATED_TIMEOUT_MS, true);
 
@@ -502,7 +491,6 @@ export default memo(withGlobal(
           animationLevel, language, wasTimeFormatSetManually,
         },
       },
-      connectionState,
       botTrustRequest,
       requestedAttachBotInstall,
       requestedAttachBotInChat,
@@ -510,7 +498,6 @@ export default memo(withGlobal(
       urlAuth,
       webApp,
       safeLinkModalUrl,
-      authState,
       lastSyncTime,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
@@ -526,8 +513,6 @@ export default memo(withGlobal(
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
 
     return {
-      connectionState,
-      authState,
       lastSyncTime,
       isLeftColumnOpen: global.isLeftColumnShown,
       isRightColumnOpen: selectIsRightColumnShown(global),
