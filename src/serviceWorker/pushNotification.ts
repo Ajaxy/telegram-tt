@@ -10,6 +10,7 @@ enum Boolean {
 type PushData = {
   custom: {
     msg_id?: string;
+    silent?: string;
     channel_id?: string;
     chat_id?: string;
     from_id?: string;
@@ -28,6 +29,7 @@ type NotificationData = {
   chatId?: string;
   title: string;
   body: string;
+  isSilent?: boolean;
   icon?: string;
   reaction?: string;
   shouldReplaceHistory?: boolean;
@@ -80,11 +82,17 @@ function getMessageId(data: PushData) {
 }
 
 function getNotificationData(data: PushData): NotificationData {
+  let title = data.title || APP_NAME;
+  const isSilent = data.custom?.silent === Boolean.True;
+  if (isSilent) {
+    title += ' 🔕';
+  }
   return {
     chatId: getChatId(data),
     messageId: getMessageId(data),
-    title: data.title || APP_NAME,
     body: data.description,
+    isSilent,
+    title,
   };
 }
 
@@ -113,6 +121,7 @@ function showNotification({
   title,
   icon,
   reaction,
+  isSilent,
   shouldReplaceHistory,
 }: NotificationData) {
   const isFirstBatch = new Date().valueOf() - lastSyncAt < 1000;
@@ -133,8 +142,8 @@ function showNotification({
   };
 
   return Promise.all([
-    // TODO Remove condition when reaction badges are implemented
-    !reaction ? playNotificationSound(String(messageId) || chatId || '') : undefined,
+    // TODO Update condition when reaction badges are implemented
+    (!reaction && !isSilent) ? playNotificationSound(String(messageId) || chatId || '') : undefined,
     self.registration.showNotification(title, options),
   ]);
 }

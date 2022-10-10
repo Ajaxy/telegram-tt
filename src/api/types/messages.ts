@@ -396,6 +396,7 @@ export interface ApiMessage {
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
   isFromScheduled?: boolean;
+  isSilent?: boolean;
   seenByUserIds?: string[];
   isProtected?: boolean;
   transcriptionId?: string;

@@ -321,10 +321,13 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     body = 'New message';
   }
 
-  return {
-    title: isScreenLocked ? APP_NAME : getChatTitle(getTranslation, chat, privateChatUser),
-    body,
-  };
+  let title = isScreenLocked ? APP_NAME : getChatTitle(getTranslation, chat, privateChatUser);
+
+  if (message.isSilent) {
+    title += ' 🔕';
+  }
+
+  return { title, body };
 }
 
 async function getAvatar(chat: ApiChat | ApiUser) {
@@ -380,10 +383,11 @@ export async function notifyAboutMessage({
   if (!checkIfShouldNotify(chat)) return;
   const areNotificationsSupported = checkIfNotificationsSupported();
   if (!hasWebNotifications || !areNotificationsSupported) {
-    // Do not play notification sound for reactions if web notifications are disabled
-    if (isReaction) return;
-    // Only play sound if web notifications are disabled
-    playNotifySoundDebounced(String(message.id) || chat.id);
+    if (!message.isSilent && !isReaction) {
+      // Only play sound if web notifications are disabled
+      playNotifySoundDebounced(String(message.id) || chat.id);
+    }
+
     return;
   }
   if (!areNotificationsSupported) return;
@@ -413,6 +417,7 @@ export async function notifyAboutMessage({
           chatId: chat.id,
           messageId: message.id,
           shouldReplaceHistory: true,
+          isSilent: message.isSilent,
           reaction: activeReaction?.reaction,
         },
       });
@@ -446,8 +451,8 @@ export async function notifyAboutMessage({
 
     // Play sound when notification is displayed
     notification.onshow = () => {
-      // TODO Remove when reaction badges are implemented
-      if (isReaction) return;
+      // TODO Update when reaction badges are implemented
+      if (isReaction || message.isSilent) return;
       playNotifySoundDebounced(String(message.id) || chat.id);
     };
   }
