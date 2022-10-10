@@ -41,6 +41,7 @@ type OwnProps = {
   origin?: MediaViewerOrigin;
   animationLevel: AnimationLevel;
   onClose: () => void;
+  isHidden?: boolean;
   hasFooter?: boolean;
   onFooterClick: () => void;
   zoomLevelChange: number;
@@ -83,6 +84,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   hasFooter,
   zoomLevelChange,
   animationLevel,
+  isHidden,
   ...rest
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -139,7 +141,11 @@ const MediaViewerSlides: FC<OwnProps> = ({
   useTimeout(() => setControlsVisible(true), ANIMATION_DURATION + 100);
 
   useEffect(() => {
-    if (!containerRef.current || activeMediaId === undefined) {
+    setActiveMediaId(mediaId);
+  }, [mediaId]);
+
+  useEffect(() => {
+    if (!containerRef.current || activeMediaId === undefined || isHidden) {
       return undefined;
     }
     let lastTransform = lastTransformRef.current;
@@ -624,10 +630,11 @@ const MediaViewerSlides: FC<OwnProps> = ({
     clearSwipeDirectionDebounced,
     animationLevel,
     setIsMouseDown,
+    isHidden,
   ]);
 
   useEffect(() => {
-    if (!containerRef.current || !hasZoomChanged) return;
+    if (!containerRef.current || !hasZoomChanged || isHidden) return;
     const { scale } = transformRef.current;
     const dir = zoomLevelChange > 0 ? -1 : +1;
     const minZoom = MIN_ZOOM * 0.6;
@@ -655,7 +662,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         containerRef.current.dispatchEvent(wheelEvent);
       },
     });
-  }, [zoomLevelChange, hasZoomChanged]);
+  }, [zoomLevelChange, hasZoomChanged, isHidden]);
 
   if (activeMediaId === undefined) return undefined;
 

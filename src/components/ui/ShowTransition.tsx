@@ -8,6 +8,7 @@ import buildClassName from '../../util/buildClassName';
 type OwnProps = {
   isOpen: boolean;
   isCustom?: boolean;
+  isHidden?: boolean;
   id?: string;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
@@ -17,18 +18,19 @@ type OwnProps = {
 
 const ShowTransition: FC<OwnProps> = ({
   isOpen,
+  isHidden,
   isCustom,
   id,
   className,
   onClick,
-  noCloseTransition,
   children,
+  noCloseTransition,
 }) => {
   const {
     shouldRender,
     transitionClassNames,
   } = useShowTransition(
-    isOpen, undefined, undefined, isCustom ? false : undefined, noCloseTransition,
+    isOpen && !isHidden, undefined, undefined, isCustom ? false : undefined, noCloseTransition,
   );
   const prevIsOpen = usePrevious(isOpen);
   const prevChildren = usePrevious(children);
@@ -39,7 +41,7 @@ const ShowTransition: FC<OwnProps> = ({
   }
 
   return (
-    shouldRender && (
+    (shouldRender || isHidden) && (
       <div id={id} className={buildClassName(className, transitionClassNames)} onClick={onClick}>
         {isOpen ? children : fromChildrenRef.current!}
       </div>

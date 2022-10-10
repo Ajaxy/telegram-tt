@@ -26,8 +26,9 @@ type OwnProps = {
   duration: number;
   fileSize: number;
   isForceMobileVersion?: boolean;
-  isPlayed: boolean;
+  isPlaying: boolean;
   isFullscreenSupported: boolean;
+  isPictureInPictureSupported: boolean;
   isFullscreen: boolean;
   isVisible: boolean;
   isBuffered: boolean;
@@ -35,6 +36,7 @@ type OwnProps = {
   isMuted: boolean;
   playbackRate: number;
   onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onPictureInPictureChange?: () => void ;
   onVolumeClick: () => void;
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: (playbackRate: number) => void;
@@ -63,7 +65,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   duration,
   fileSize,
   isForceMobileVersion,
-  isPlayed,
+  isPlaying,
   isFullscreenSupported,
   isFullscreen,
   isVisible,
@@ -75,6 +77,8 @@ const VideoPlayerControls: FC<OwnProps> = ({
   onVolumeClick,
   onVolumeChange,
   onPlaybackRateChange,
+  isPictureInPictureSupported,
+  onPictureInPictureChange,
   onPlayPause,
   setVisibility,
   onSeek,
@@ -88,7 +92,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   useEffect(() => {
     if (!IS_TOUCH_ENV) return undefined;
     let timeout: number | undefined;
-    if (!isVisible || !isPlayed || isSeeking || isPlaybackMenuOpen) {
+    if (!isVisible || !isPlaying || isSeeking || isPlaybackMenuOpen) {
       if (timeout) window.clearTimeout(timeout);
       return undefined;
     }
@@ -98,7 +102,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
     return () => {
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [isPlayed, isVisible, isSeeking, setVisibility, isPlaybackMenuOpen]);
+  }, [isPlaying, isVisible, isSeeking, setVisibility, isPlaybackMenuOpen]);
 
   useEffect(() => {
     if (isVisible) {
@@ -172,7 +176,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
           round
           onClick={onPlayPause}
         >
-          <i className={isPlayed ? 'icon-pause' : 'icon-play'} />
+          <i className={isPlaying ? 'icon-pause' : 'icon-play'} />
         </Button>
         <Button
           ariaLabel="Volume"
@@ -204,6 +208,18 @@ const VideoPlayerControls: FC<OwnProps> = ({
         >
           {`${playbackRate}x`}
         </Button>
+        {isPictureInPictureSupported && (
+          <Button
+            ariaLabel="Picture in picture"
+            size="tiny"
+            color="translucent-white"
+            className="fullscreen"
+            round
+            onClick={onPictureInPictureChange}
+          >
+            <i className="icon-pip" />
+          </Button>
+        )}
         {isFullscreenSupported && (
           <Button
             ariaLabel="Fullscreen"
