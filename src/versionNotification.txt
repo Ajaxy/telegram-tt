@@ -1,23 +1,24 @@
-**Telegram Web Z was updated to version 1.52**
+**Telegram Web Z was updated to version 1.53**
 
-👏 **Harder**
-• Added support for username.t.me links.
-• ‘Update Telegram’ button now automatically appears when an update is available.
-• Games can now request a share window.
+[👏](customEmoji:5471921242866981303) **Harder**
+• Introduced Picture-in-Picture mode in Media Viewer.
+• Added new reactions: 🍓 🍾 💋 🖕 😈
 
-🤩 **Better**
-• Square images for web page previews are now properly displayed.
-• Auth screen transitions are now smoother.
-• Changelog notifications are only delivered every 3 days.
+[🤩](customEmoji:5373026167722876724) **Better**
+• Forwarding to Saved Messages is easier now.
+• Better support for web bot actions.
+• Supported highlighting for Scheme lang.
 
-🚀 **Faster**
-• Interface performance was heavily optimized.
-• Initial app bundle is now even more lightweight.
-
-💪 **Stronger**
-• Fixed several issues causing missing chats.
-• Fixed frozen UI on Android after selecting ‘Nice and Fast’ animation setting.
-• Fixed Play button overlapping with Slide Left button in Media Viewer.
-• Fixed quick reaction button not showing in some cases.
-• Fixed names and profile pictures for deleted accounts.
-• Numerous other layout fixes.
+[💪](customEmoji:5471883477219549006) **Stronger**
+• Fixed plural forms in various languages.
+• Fixed missing updates when waking up from sleep mode.
+• Fixed deleting chat history.
+• Fixed terminating session after signing out.
+• Fixed system back button in Media Viewer.
+• Fixed playing sound for silent messages.
+• Fixed PWA mode on Android.
+• Fixed opening links to new bots.
+• Fixed sharing inline bots.
+• Fixed scrolling down when new message is sent from other client.
+• Fixed error when opening chat with read-only restrictions.
+• Various layout fixes.

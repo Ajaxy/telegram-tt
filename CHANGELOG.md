@@ -1,3 +1,28 @@
+## 1.53.0 (2022-10-10)
+
+### 👏 **Harder**
+* Introduced Picture-in-Picture mode in Media Viewer.
+* Added new reactions: 🍓 🍾 💋 🖕 😈
+
+### 🤩 **Better**
+* Forwarding to Saved Messages is easier now.
+* Better support for web bot actions.
+* Supported highlighting for Scheme lang.
+
+### 💪 **Stronger**
+* Fixed plural forms in various languages.
+* Fixed missing updates when waking up from sleep mode.
+* Fixed deleting chat history.
+* Fixed terminating session after signing out.
+* Fixed system back button in Media Viewer.
+* Fixed playing sound for silent messages.
+* Fixed PWA mode on Android.
+* Fixed opening links to new bots.
+* Fixed sharing inline bots.
+* Fixed scrolling down when new message is sent from other client.
+* Fixed error when opening chat with read-only restrictions.
+* Various layout fixes.
+
 ## 1.52.0 (2022-09-16)
 
 ### 👏 **Harder**
