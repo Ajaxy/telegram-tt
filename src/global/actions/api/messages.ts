@@ -1310,6 +1310,19 @@ addActionHandler('setForwardChatId', async (global, actions, payload) => {
   actions.exitMessageSelectMode();
 });
 
+addActionHandler('forwardToSavedMessages', (global, actions) => {
+  setGlobal({
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      toChatId: global.currentUserId,
+    },
+  });
+
+  actions.exitMessageSelectMode();
+  actions.forwardMessages({ isSilent: true });
+});
+
 function countSortedIds(ids: number[], from: number, to: number) {
   let count = 0;
 
