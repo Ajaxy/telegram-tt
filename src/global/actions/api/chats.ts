@@ -24,7 +24,7 @@ import {
   addChats, addUsers, addUserStatuses, replaceThreadParam,
   updateChatListIds, updateChats, updateChat, updateChatListSecondaryInfo,
   updateManagementProgress, leaveChat, replaceUsers, replaceUserStatuses,
-  replaceChats, replaceChatListIds, addChatMembers,
+  replaceChats, replaceChatListIds, addChatMembers, updateUser,
 } from '../../reducers';
 import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
@@ -1535,12 +1535,16 @@ export async function fetchChatByUsername(
     return localChat;
   }
 
-  const chat = await callApi('getChatByUsername', username);
+  const { chat, user } = await callApi('getChatByUsername', username) || {};
   if (!chat) {
     return undefined;
   }
 
   setGlobal(updateChat(getGlobal(), chat.id, chat));
+
+  if (user) {
+    setGlobal(updateUser(getGlobal(), user.id, user));
+  }
 
   return chat;
 }
@@ -1552,12 +1556,16 @@ export async function fetchChatByPhoneNumber(phoneNumber: string) {
     return selectChat(global, localUser.id);
   }
 
-  const chat = await callApi('getChatByPhoneNumber', phoneNumber);
+  const { chat, user } = await callApi('getChatByPhoneNumber', phoneNumber) || {};
   if (!chat) {
     return undefined;
   }
 
   setGlobal(updateChat(getGlobal(), chat.id, chat));
+
+  if (user) {
+    setGlobal(updateUser(getGlobal(), user.id, user));
+  }
 
   return chat;
 }
@@ -1566,6 +1574,7 @@ async function getAttachBotOrNotify(global: GlobalState, username: string) {
   const chat = await fetchChatByUsername(username);
   if (!chat) return undefined;
 
+  global = getGlobal();
   const user = selectUser(global, chat.id);
   if (!user) return undefined;
 
@@ -1591,12 +1600,12 @@ async function openChatByUsername(
 
   // Attach in the current chat
   if (startAttach && !attach) {
-    const user = await getAttachBotOrNotify(global, username);
+    const bot = await getAttachBotOrNotify(global, username);
 
-    if (!currentChat || !user) return;
+    if (!currentChat || !bot) return;
 
     actions.callAttachBot({
-      botId: user.id,
+      botId: bot.id,
       chatId: currentChat.id,
       ...(typeof startAttach === 'string' && { startParam: startAttach }),
     });

@@ -893,7 +893,10 @@ function processResolvedPeer(result?: GramJs.contacts.TypeResolvedPeer) {
 
   updateLocalDb(result);
 
-  return chat;
+  return {
+    chat,
+    user: buildApiUser(users[0]),
+  };
 }
 
 export function togglePreHistoryHidden({
