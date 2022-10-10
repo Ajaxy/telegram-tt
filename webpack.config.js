@@ -23,6 +23,8 @@ const {
 
 dotenv.config();
 
+const { BASE_URL = 'https://web.telegram.org/z/' } = process.env;
+
 module.exports = (_env, { mode = 'production' }) => {
   return {
     mode,
@@ -145,6 +147,7 @@ module.exports = (_env, { mode = 'production' }) => {
         appleIcon: APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
         mainIcon: APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
         manifest: APP_ENV === 'production' ? 'site.webmanifest' : 'site_dev.webmanifest',
+        baseUrl: BASE_URL,
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({
