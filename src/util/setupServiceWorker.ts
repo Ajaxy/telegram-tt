@@ -72,7 +72,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         }
 
         if (!IS_IOS && !IS_ANDROID && !IS_TEST) {
-          getActions().showDialog({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
+          getActions().showDialog?.({ data: { message: 'SERVICE_WORKER_DISABLED', hasErrorKey: true } });
         }
       }
     } catch (err) {
