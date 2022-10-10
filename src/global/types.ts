@@ -877,6 +877,7 @@ export interface ActionPayloads {
   setForwardNoCaptions: boolean;
   exitForwardMode: never;
   changeForwardRecipient: never;
+  forwardToSavedMessages: never;
 
   // GIFs
   loadSavedGifs: never;
