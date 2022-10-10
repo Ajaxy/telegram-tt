@@ -282,7 +282,7 @@ addActionHandler('switchBotInline', (global, actions, payload) => {
     return undefined;
   }
 
-  const botSender = selectChatBot(global, message.senderId!);
+  const botSender = selectUser(global, message.viaBotId || message.senderId!);
   if (!botSender) {
     return undefined;
   }
