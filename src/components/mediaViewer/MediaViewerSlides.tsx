@@ -19,6 +19,7 @@ import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import useTimeout from '../../hooks/useTimeout';
 import useWindowSize from '../../hooks/useWindowSize';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import MediaViewerContent from './MediaViewerContent';
 
@@ -103,6 +104,12 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const { onClose } = rest;
 
   const lang = useLang();
+
+  useHistoryBack({
+    isActive: isOpen,
+    onBack: onClose,
+    shouldBeReplaced: true,
+  });
 
   const setTransform = useCallback((value: Transform) => {
     transformRef.current = value;
@@ -370,7 +377,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         onUpdate: (value) => setTransform({
           y: 0,
           x: value,
-          scale: transformRef.current.scale,
+          scale: transformRef.current?.scale ?? 1,
         }),
       });
     };

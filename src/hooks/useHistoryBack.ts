@@ -142,12 +142,15 @@ function cleanupClosed(alreadyClosedCount = 1) {
 
 function cleanupTrashedState() {
   // Navigation to previous page reload, state of which was trashed by reload
+  let isAnimationDisabled = false;
   for (let i = historyState.length - 1; i > 0; i--) {
     if (historyState[i].isClosed) {
       continue;
     }
-    if (isSafariGestureAnimation) {
+    // TODO[history]: probably we should not call this inside the loop
+    if (!isAnimationDisabled && isSafariGestureAnimation) {
       getActions().disableHistoryAnimations();
+      isAnimationDisabled = true;
     }
     historyState[i].onBack?.();
   }
@@ -188,13 +191,16 @@ window.addEventListener('popstate', ({ state }: PopStateEvent) => {
   if (index < historyCursor) {
     // Navigating back
     let alreadyClosedCount = 0;
+    let isAnimationDisabled = false;
     for (let i = historyCursor; i > index - alreadyClosedCount; i--) {
       if (historyState[i].isClosed) {
         alreadyClosedCount++;
         continue;
       }
-      if (isSafariGestureAnimation) {
+      // TODO[history]: probably we should not call this inside the loop
+      if (!isAnimationDisabled && isSafariGestureAnimation) {
         getActions().disableHistoryAnimations();
+        isAnimationDisabled = true;
       }
       historyState[i].onBack?.();
     }
