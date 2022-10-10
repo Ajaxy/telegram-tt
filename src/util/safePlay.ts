@@ -9,4 +9,8 @@ const safePlay = (mediaEl: HTMLMediaElement) => {
   });
 };
 
+export const getIsVideoPlaying = (video: HTMLVideoElement) => {
+  return video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2;
+};
+
 export default safePlay;

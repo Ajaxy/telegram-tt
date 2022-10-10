@@ -8,6 +8,7 @@ import type { ApiDimensions } from '../../api/types';
 
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreenStatus from '../../hooks/useFullscreen';
+import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
@@ -31,6 +32,7 @@ type OwnProps = {
   noPlay?: boolean;
   volume: number;
   isMuted: boolean;
+  isHidden?: boolean;
   playbackRate: number;
   isProtected?: boolean;
   areControlsVisible: boolean;
@@ -39,6 +41,7 @@ type OwnProps = {
 };
 
 const MOBILE_VERSION_CONTROL_WIDTH = 400;
+const MAX_LOOP_DURATION = 30; // Seconds
 
 const VideoPlayer: FC<OwnProps> = ({
   url,
@@ -61,12 +64,21 @@ const VideoPlayer: FC<OwnProps> = ({
     setMediaViewerVolume,
     setMediaViewerMuted,
     setMediaViewerPlaybackRate,
+    setMediaViewerHidden,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlayed, setIsPlayed] = useState(!IS_TOUCH_ENV || !IS_IOS);
+  const [isPlaying, setIsPlaying] = useState(!IS_TOUCH_ENV || !IS_IOS);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlayed);
+  const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlaying);
+
+  const handleEnterFullscreen = useCallback(() => setMediaViewerHidden(true), [setMediaViewerHidden]);
+  const handleLeaveFullscreen = useCallback(() => setMediaViewerHidden(false), [setMediaViewerHidden]);
+
+  const [
+    isPictureInPictureSupported,
+    enterPictureInPicture,
+  ] = usePictureInPicture(videoRef, handleEnterFullscreen, handleLeaveFullscreen);
 
   const handleVideoMove = useCallback(() => {
     toggleControls(true);
@@ -90,7 +102,7 @@ const VideoPlayer: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderPlayButton,
     transitionClassNames: playButtonClassNames,
-  } = useShowTransition(IS_IOS && !isPlayed && !shouldRenderSpinner, undefined, undefined, 'slow');
+  } = useShowTransition(IS_IOS && !isPlaying && !shouldRenderSpinner, undefined, undefined, 'slow');
 
   useEffect(() => {
     if (noPlay || !isMediaViewerOpen) {
@@ -101,12 +113,12 @@ const VideoPlayer: FC<OwnProps> = ({
       // so we need to use `autoPlay` instead to allow pre-buffering.
       safePlay(videoRef.current!);
     }
-  }, [noPlay, isMediaViewerOpen, url]);
+  }, [noPlay, isMediaViewerOpen, url, setMediaViewerMuted]);
 
   useEffect(() => {
     if (videoRef.current!.currentTime === videoRef.current!.duration) {
       setCurrentTime(0);
-      setIsPlayed(false);
+      setIsPlaying(false);
     } else {
       setCurrentTime(videoRef.current!.currentTime);
     }
@@ -122,14 +134,14 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const togglePlayState = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent> | KeyboardEvent) => {
     e.stopPropagation();
-    if (isPlayed) {
+    if (isPlaying) {
       videoRef.current!.pause();
-      setIsPlayed(false);
+      setIsPlaying(false);
     } else {
       safePlay(videoRef.current!);
-      setIsPlayed(true);
+      setIsPlaying(true);
     }
-  }, [isPlayed]);
+  }, [isPlaying]);
 
   useVideoCleanup(videoRef, []);
 
@@ -139,7 +151,7 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const handleEnded = useCallback(() => {
     setCurrentTime(0);
-    setIsPlayed(false);
+    setIsPlaying(false);
     toggleControls(true);
   }, [toggleControls]);
 
@@ -160,6 +172,8 @@ const VideoPlayer: FC<OwnProps> = ({
   }, [setMediaViewerVolume]);
 
   const handleVolumeMuted = useCallback(() => {
+    // Browser requires explicit user interaction to keep video playing after unmuting
+    videoRef.current!.muted = !videoRef.current!.muted;
     setMediaViewerMuted({ isMuted: !isMuted });
   }, [isMuted, setMediaViewerMuted]);
 
@@ -185,6 +199,7 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;
+  const duration = videoRef.current?.duration || 0;
 
   return (
     <div
@@ -209,17 +224,21 @@ const VideoPlayer: FC<OwnProps> = ({
           autoPlay={IS_TOUCH_ENV}
           controlsList={isProtected ? 'nodownload' : undefined}
           playsInline
-          loop={isGif}
-          // This is to force auto playing on mobiles
+          loop={isGif || duration <= MAX_LOOP_DURATION}
+          // This is to force autoplaying on mobiles
           muted={isGif || isMuted}
           id="media-viewer-video"
           style={videoStyle}
-          onPlay={IS_IOS ? () => setIsPlayed(true) : undefined}
+          onPlay={() => setIsPlaying(true)}
           onEnded={handleEnded}
           onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
           onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
+          onPause={(e) => {
+            setIsPlaying(false);
+            bufferingHandlers.onPause(e);
+          }}
           onTimeUpdate={handleTimeUpdate}
         >
           {url && <source src={url} />}
@@ -243,20 +262,22 @@ const VideoPlayer: FC<OwnProps> = ({
       )}
       {!isGif && !shouldRenderSpinner && (
         <VideoPlayerControls
-          isPlayed={isPlayed}
+          isPlaying={isPlaying}
           bufferedRanges={bufferedRanges}
           bufferedProgress={bufferedProgress}
           isBuffered={isBuffered}
           currentTime={currentTime}
           isFullscreenSupported={Boolean(setFullscreen)}
+          isPictureInPictureSupported={isPictureInPictureSupported}
           isFullscreen={isFullscreen}
           fileSize={fileSize}
-          duration={videoRef.current ? videoRef.current.duration || 0 : 0}
+          duration={duration}
           isVisible={areControlsVisible}
           setVisibility={toggleControls}
           isForceMobileVersion={posterSize && posterSize.width < MOBILE_VERSION_CONTROL_WIDTH}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}
+          onPictureInPictureChange={enterPictureInPicture}
           onPlayPause={togglePlayState}
           volume={volume}
           playbackRate={playbackRate}

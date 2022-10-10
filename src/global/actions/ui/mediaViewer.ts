@@ -15,6 +15,7 @@ addActionHandler('openMediaViewer', (global, actions, payload) => {
       avatarOwnerId,
       profilePhotoIndex,
       origin,
+      isHidden: false,
       volume: volume ?? global.mediaViewer.volume,
       playbackRate: playbackRate || global.mediaViewer.playbackRate,
       isMuted: isMuted || global.mediaViewer.isMuted,
@@ -24,12 +25,15 @@ addActionHandler('openMediaViewer', (global, actions, payload) => {
 });
 
 addActionHandler('closeMediaViewer', (global) => {
-  const { volume, isMuted, playbackRate } = global.mediaViewer;
+  const {
+    volume, isMuted, playbackRate, isHidden,
+  } = global.mediaViewer;
   return {
     ...global,
     mediaViewer: {
       volume,
       isMuted,
+      isHidden,
       playbackRate,
     },
   };
@@ -74,6 +78,18 @@ addActionHandler('setMediaViewerMuted', (global, actions, payload) => {
     mediaViewer: {
       ...global.mediaViewer,
       isMuted,
+    },
+  };
+});
+
+addActionHandler('setMediaViewerHidden', (global, actions, payload) => {
+  const isHidden = payload;
+
+  return {
+    ...global,
+    mediaViewer: {
+      ...global.mediaViewer,
+      isHidden,
     },
   };
 });

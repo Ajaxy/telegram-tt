@@ -425,6 +425,7 @@ export type GlobalState = {
     volume: number;
     playbackRate: number;
     isMuted: boolean;
+    isHidden?: boolean;
   };
 
   audioPlayer: {
@@ -803,7 +804,7 @@ export interface ActionPayloads {
   setMediaViewerMuted: {
     isMuted: boolean;
   };
-
+  setMediaViewerHidden: boolean;
   openAudioPlayer: {
     chatId: string;
     threadId?: number;

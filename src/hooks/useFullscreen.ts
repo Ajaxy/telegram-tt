@@ -1,8 +1,8 @@
 import { useLayoutEffect, useState } from '../lib/teact/teact';
-import { PLATFORM_ENV } from '../util/environment';
+import { IS_IOS } from '../util/environment';
 
 type RefType = {
-  current: HTMLElement | null;
+  current: HTMLVideoElement | null;
 };
 
 type ReturnType = [boolean, () => void, () => void] | [false];
@@ -14,20 +14,10 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
   const [isFullscreen, setIsFullscreen] = useState(Boolean(prop && document[prop]));
 
   const setFullscreen = () => {
-    if (!elRef.current || !(prop || PLATFORM_ENV === 'iOS')) {
+    if (!elRef.current || !(prop || IS_IOS)) {
       return;
     }
-
-    if (elRef.current.requestFullscreen) {
-      elRef.current.requestFullscreen();
-    } else if (elRef.current.webkitRequestFullscreen) {
-      elRef.current.webkitRequestFullscreen();
-    } else if (elRef.current.webkitEnterFullscreen) {
-      elRef.current.webkitEnterFullscreen();
-    } else if (elRef.current.mozRequestFullScreen) {
-      elRef.current.mozRequestFullScreen();
-    }
-
+    safeRequestFullscreen(elRef.current);
     setIsFullscreen(true);
   };
 
@@ -35,17 +25,7 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
     if (!elRef.current) {
       return;
     }
-
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitCancelFullScreen) {
-      document.webkitCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-
+    safeExitFullscreen();
     setIsFullscreen(false);
   };
 
@@ -79,7 +59,7 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
     // eslint-disable-next-line
   }, []);
 
-  if (!prop && PLATFORM_ENV !== 'iOS') {
+  if (!prop && !IS_IOS) {
     return [false];
   }
 
@@ -96,4 +76,28 @@ function getBrowserFullscreenElementProp() {
   }
 
   return '';
+}
+
+export function safeRequestFullscreen(video: HTMLVideoElement) {
+  if (video.requestFullscreen) {
+    video.requestFullscreen();
+  } else if (video.webkitRequestFullscreen) {
+    video.webkitRequestFullscreen();
+  } else if (video.webkitEnterFullscreen) {
+    video.webkitEnterFullscreen();
+  } else if (video.mozRequestFullScreen) {
+    video.mozRequestFullScreen();
+  }
+}
+
+export function safeExitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitCancelFullScreen) {
+    document.webkitCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
 }
