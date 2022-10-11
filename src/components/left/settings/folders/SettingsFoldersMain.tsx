@@ -11,12 +11,13 @@ import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
 import { getFolderDescriptionText } from '../../../../global/helpers';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
-import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 import renderText from '../../../common/helpers/renderText';
+import useLang from '../../../../hooks/useLang';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
+import usePrevious from '../../../../hooks/usePrevious';
 
 import ListItem from '../../../ui/ListItem';
 import Button from '../../../ui/Button';
@@ -73,6 +74,19 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     draggedIndex: undefined,
   });
 
+  const prevFolderIds = usePrevious(folderIds);
+
+  // Sync folders state after changing folders in other clients
+  useEffect(() => {
+    if (prevFolderIds !== folderIds) {
+      setState({
+        orderedFolderIds: folderIds,
+        dragOrderIds: folderIds,
+        draggedIndex: undefined,
+      });
+    }
+  }, [prevFolderIds, folderIds, state.orderedFolderIds?.length]);
+
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
@@ -102,15 +116,15 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
   const chatsCountByFolderId = useFolderManagerForChatsCount();
   const userFolders = useMemo(() => {
-    if (!state.orderedFolderIds) {
+    if (!folderIds) {
       return undefined;
     }
 
-    if (state.orderedFolderIds.length <= 1) {
+    if (folderIds.length <= 1) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    return state.orderedFolderIds.map((id) => {
+    return folderIds.map((id) => {
       const folder = foldersById[id];
 
       if (id === ALL_FOLDER_ID) {
@@ -126,7 +140,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         subtitle: getFolderDescriptionText(lang, folder, chatsCountByFolderId[folder.id]),
       };
     });
-  }, [state.orderedFolderIds, foldersById, lang, chatsCountByFolderId]);
+  }, [folderIds, foldersById, lang, chatsCountByFolderId]);
 
   const handleCreateFolderFromRecommended = useCallback((folder: ApiChatFolder) => {
     if (Object.keys(foldersById).length >= maxFolders - 1) {
