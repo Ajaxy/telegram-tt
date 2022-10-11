@@ -112,6 +112,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
   const [selectedRange, setSelectedRange] = useState<Range>();
+  const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isAttachmentModalInput) return;
@@ -161,6 +162,9 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount || isContextMenuOpenRef.current) {
       closeTextFormatter();
+      if (IS_ANDROID) {
+        setIsTextFormatterDisabled(false);
+      }
       return false;
     }
 
@@ -182,6 +186,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   function processSelection() {
     if (!checkSelection()) {
+      return;
+    }
+
+    if (isTextFormatterDisabled) {
       return;
     }
 
@@ -299,13 +307,21 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
   }
 
-  function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+  function handleAndroidContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (!checkSelection()) {
       return;
     }
 
-    e.preventDefault();
-    e.stopPropagation();
+    setIsTextFormatterDisabled(!isTextFormatterDisabled);
+
+    if (!isTextFormatterDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      processSelection();
+    } else {
+      closeTextFormatter();
+    }
   }
 
   function updateInputHeight(willSend = false) {
@@ -396,7 +412,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
-        onContextMenu={IS_ANDROID ? stopEvent : undefined}
+        onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
         onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
         aria-label={placeholder}
       />
