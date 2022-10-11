@@ -331,7 +331,12 @@ const Main: FC<StateProps> = ({
 
   // Handle opening right column
   useOnChange(([prevIsRightColumnOpen]) => {
-    if (prevIsRightColumnOpen === undefined || animationLevel === 0) {
+    if (prevIsRightColumnOpen === undefined) {
+      return;
+    }
+
+    if (animationLevel === 0) {
+      setIsNarrowMessageList(isRightColumnOpen);
       return;
     }
 
