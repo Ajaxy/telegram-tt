@@ -1,24 +1,17 @@
-**Telegram Web Z was updated to version 1.53**
+**Telegram Web Z was updated to version 1.54**
 
 [👏](customEmoji:5471921242866981303) **Harder**
-• Introduced Picture-in-Picture mode in Media Viewer.
-• Added new reactions: 🍓 🍾 💋 🖕 😈
+• Enjoy viewing Emoji Statuses. Setting your own status will be possible in the following update.
 
 [🤩](customEmoji:5373026167722876724) **Better**
-• Forwarding to Saved Messages is easier now.
-• Better support for web bot actions.
-• Supported highlighting for Scheme lang.
+• Better accent colors in Message List.
+• When composing a message on Android, you can now open the system context menu with a second tap.
+
+[🚀](customEmoji:5445284980978621387) **Faster**
+• Various optimizations for video animations.
 
 [💪](customEmoji:5471883477219549006) **Stronger**
-• Fixed plural forms in various languages.
-• Fixed missing updates when waking up from sleep mode.
-• Fixed deleting chat history.
-• Fixed terminating session after signing out.
-• Fixed system back button in Media Viewer.
-• Fixed playing sound for silent messages.
-• Fixed PWA mode on Android.
-• Fixed opening links to new bots.
-• Fixed sharing inline bots.
-• Fixed scrolling down when new message is sent from other client.
-• Fixed error when opening chat with read-only restrictions.
-• Various layout fixes.
+• Various fixes in New Poll dialog.
+• Fixed mouse wheel scroll in Emoji Tooltip.
+• Fixed bot description layout.
+• Fixed deleting folders from Settings.
