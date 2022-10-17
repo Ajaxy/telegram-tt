@@ -11,7 +11,7 @@ import type {
   ApiUpdateSession,
   ApiUpdateCurrentUser, ApiUpdateServerTimeOffset,
 } from '../../../api/types';
-import { DEBUG, SESSION_USER_KEY } from '../../../config';
+import { SESSION_USER_KEY } from '../../../config';
 import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
@@ -20,13 +20,6 @@ import { forceWebsync } from '../../../util/websync';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
-  if (DEBUG) {
-    if (update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
-      // eslint-disable-next-line no-console
-      console.log('[GramJs] UPDATE', update['@type'], { update });
-    }
-  }
-
   switch (update['@type']) {
     case 'updateApiReady':
       onUpdateApiReady(global);

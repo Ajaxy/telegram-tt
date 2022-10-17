@@ -39,6 +39,7 @@ import {
   addPhotoToLocalDb,
   resolveMessageApiChatId,
   serializeBytes,
+  log,
 } from './helpers';
 import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
 import { buildApiPhoto } from './apiBuilders/common';
@@ -984,7 +985,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     }
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
-    // eslint-disable-next-line no-console
-    console.warn('[GramJs/updater] Unexpected update:', params);
+    log('UNEXPECTED UPDATE', params);
   }
 }
