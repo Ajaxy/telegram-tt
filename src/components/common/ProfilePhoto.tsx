@@ -15,10 +15,12 @@ import {
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
-import safePlay from '../../util/safePlay';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
+import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
+import useVideoCleanup from '../../hooks/useVideoCleanup';
+import safePlay from '../../util/safePlay';
 
 import Spinner from '../ui/Spinner';
 
@@ -31,7 +33,7 @@ type OwnProps = {
   isSavedMessages?: boolean;
   photo?: ApiPhoto;
   lastSyncTime?: number;
-  notActive?: boolean;
+  canPlayVideo: boolean;
   onClick: NoneToVoidFunction;
 };
 
@@ -41,12 +43,13 @@ const ProfilePhoto: FC<OwnProps> = ({
   photo,
   isFirstPhoto,
   isSavedMessages,
-  notActive,
+  canPlayVideo,
   lastSyncTime,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
+
   const lang = useLang();
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
@@ -77,13 +80,16 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   useEffect(() => {
     if (!videoRef.current) return;
-    if (notActive) {
+    if (!canPlayVideo) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     } else {
       safePlay(videoRef.current);
     }
-  }, [notActive]);
+  }, [canPlayVideo]);
+
+  const { handlePlaying } = useVideoAutoPause(videoRef, canPlayVideo);
+  useVideoCleanup(videoRef, []);
 
   const photoHash = getMediaHash('big', 'photo');
   const photoBlobUrl = useMedia(photoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
@@ -108,9 +114,10 @@ const ProfilePhoto: FC<OwnProps> = ({
           className="avatar-media"
           muted
           disablePictureInPicture
-          autoPlay={!notActive}
+          autoPlay={canPlayVideo}
           loop
           playsInline
+          onPlaying={handlePlaying}
         />
       );
     } else {

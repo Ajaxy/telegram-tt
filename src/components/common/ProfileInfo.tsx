@@ -31,6 +31,7 @@ import './ProfileInfo.scss';
 type OwnProps = {
   userId: string;
   forceShowSelf?: boolean;
+  canPlayVideo: boolean;
 };
 
 type StateProps =
@@ -48,6 +49,7 @@ type StateProps =
 
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
+  canPlayVideo,
   user,
   userStatus,
   chat,
@@ -184,7 +186,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         photo={photo}
         isSavedMessages={isSavedMessages}
         isFirstPhoto={isFirst}
-        notActive={!isActive}
+        canPlayVideo={Boolean(isActive && canPlayVideo)}
         onClick={handleProfilePhotoClick}
       />
     );
