@@ -282,8 +282,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   const lastMessageSendTimeSeconds = useRef<number>();
   const prevDropAreaState = usePrevious(dropAreaState);
   const { width: windowWidth } = windowSize.get();
-  const sendAsIds = chat?.sendAsIds;
-  const canShowSendAs = sendAsIds && (sendAsIds.length > 1 || !sendAsIds.includes(currentUserId!));
+  const sendAsPeerIds = chat?.sendAsPeerIds;
+  const canShowSendAs = sendAsPeerIds
+    && (sendAsPeerIds.length > 1 || !sendAsPeerIds.some((peer) => peer.id === currentUserId!));
   // Prevent Symbol Menu from closing when calendar is open
   const [isSymbolMenuForced, forceShowSymbolMenu, cancelForceShowSymbolMenu] = useFlag();
   const sendMessageAction = useSendMessageAction(chatId, threadId);
@@ -304,10 +305,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
 
   useEffect(() => {
-    if (chatId && chat && lastSyncTime && !sendAsIds && isReady && isChatSuperGroup(chat)) {
+    if (chatId && chat && lastSyncTime && !sendAsPeerIds && isReady && isChatSuperGroup(chat)) {
       loadSendAs({ chatId });
     }
-  }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsIds]);
+  }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsPeerIds]);
 
   useEffect(() => {
     if (chatId && chat && lastSyncTime && !chat.fullInfo && isReady && isChatSuperGroup(chat)) {
@@ -316,10 +317,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chat, chatId, isReady, lastSyncTime, loadFullChat]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
-  useOnChange(([prevChatId, prevSendAsIds]) => {
-    // We only animate send-as button if `sendAsIds` was missing when opening the chat
-    shouldAnimateSendAsButtonRef.current = Boolean(chatId === prevChatId && sendAsIds && !prevSendAsIds);
-  }, [chatId, sendAsIds]);
+  useOnChange(([prevChatId, prevSendAsPeerIds]) => {
+    // We only animate send-as button if `sendAsPeerIds` was missing when opening the chat
+    shouldAnimateSendAsButtonRef.current = Boolean(chatId === prevChatId && sendAsPeerIds && !prevSendAsPeerIds);
+  }, [chatId, sendAsPeerIds]);
 
   useLayoutEffect(() => {
     if (!appendixRef.current) return;
@@ -1056,7 +1057,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClose={closeSendAsMenu}
         chatId={chatId}
         selectedSendAsId={sendAsId}
-        sendAsIds={sendAsIds}
+        sendAsPeerIds={sendAsPeerIds}
+        isCurrentUserPremium={isCurrentUserPremium}
       />
       <MentionTooltip
         isOpen={isMentionTooltipOpen}
@@ -1318,8 +1320,8 @@ export default memo(withGlobal<OwnProps>(
     const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
     const { currentUserId } = global;
     const defaultSendAsId = chat?.fullInfo ? chat?.fullInfo?.sendAsId || currentUserId : undefined;
-    const sendAsId = chat?.sendAsIds && defaultSendAsId && chat.sendAsIds.includes(defaultSendAsId)
-      ? defaultSendAsId
+    const sendAsId = chat?.sendAsPeerIds && defaultSendAsId
+     && chat.sendAsPeerIds.some((peer) => peer.id === defaultSendAsId) ? defaultSendAsId
       : (chat?.adminRights?.anonymous ? chat?.id : undefined);
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;

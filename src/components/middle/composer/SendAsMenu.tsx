@@ -1,7 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
+
+import type { FC } from '../../../lib/teact/teact';
+import type { ApiSendAsPeerId } from '../../../api/types';
 
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -21,20 +23,22 @@ import './SendAsMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  onClose: () => void;
   chatId?: string;
   selectedSendAsId?: string;
-  sendAsIds?: string[];
+  sendAsPeerIds?: ApiSendAsPeerId[];
+  isCurrentUserPremium?: boolean;
+  onClose: () => void;
 };
 
 const SendAsMenu: FC<OwnProps> = ({
   isOpen,
-  onClose,
   chatId,
   selectedSendAsId,
-  sendAsIds,
+  sendAsPeerIds,
+  isCurrentUserPremium,
+  onClose,
 }) => {
-  const { saveDefaultSendAs } = getActions();
+  const { saveDefaultSendAs, showNotification, openPremiumModal } = getActions();
 
   // No need for expensive global updates on users and chats, so we avoid them
   const usersById = getGlobal().users.byId;
@@ -59,7 +63,7 @@ const SendAsMenu: FC<OwnProps> = ({
 
   const selectedSendAsIndex = useKeyboardNavigation({
     isActive: isOpen,
-    items: sendAsIds,
+    items: sendAsPeerIds,
     onSelect: handleUserSelect,
     shouldSelectOnTab: true,
     shouldSaveSelectionOnUpdateItems: true,
@@ -71,10 +75,10 @@ const SendAsMenu: FC<OwnProps> = ({
   }, [selectedSendAsIndex]);
 
   useEffect(() => {
-    if (sendAsIds && !sendAsIds.length) {
+    if (sendAsPeerIds && !sendAsPeerIds.length) {
       onClose();
     }
-  }, [sendAsIds, onClose]);
+  }, [sendAsPeerIds, onClose]);
 
   return (
     <Menu
@@ -90,18 +94,31 @@ const SendAsMenu: FC<OwnProps> = ({
       noCompact
     >
       <div className="send-as-title" dir="auto">{lang('SendMessageAsTitle')}</div>
-      {usersById && chatsById && sendAsIds?.map((id, index) => {
+      {usersById && chatsById && sendAsPeerIds?.map(({ id, isPremium }, index) => {
         const user = isUserId(id) ? usersById[id] : undefined;
         const chat = !user ? chatsById[id] : undefined;
         const userOrChat = user || chat;
+
+        const handleClick = () => {
+          if (!isPremium || isCurrentUserPremium) {
+            handleUserSelect(id);
+          } else {
+            showNotification({
+              message: lang('SelectSendAsPeerPremiumHint'),
+              actionText: lang('Open'),
+              action: () => openPremiumModal(),
+            });
+          }
+        };
 
         return (
           <ListItem
             key={id}
             className="SendAsItem chat-item-clickable scroll-item with-avatar"
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => handleUserSelect(id)}
+            onClick={handleClick}
             focus={selectedSendAsIndex === index}
+            rightElement={!isCurrentUserPremium && isPremium && <i className="icon-lock-badge send-as-icon-locked" />}
           >
             <Avatar
               size="small"

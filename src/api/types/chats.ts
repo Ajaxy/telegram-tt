@@ -68,7 +68,7 @@ export interface ApiChat {
   joinRequests?: ApiChatInviteImporter[];
   isJoinToSend?: boolean;
   isJoinRequest?: boolean;
-  sendAsIds?: string[];
+  sendAsPeerIds?: ApiSendAsPeerId[];
 
   unreadReactions?: number[];
   unreadMentions?: number[];
@@ -181,4 +181,9 @@ export interface ApiChatSettings {
   canReportSpam?: boolean;
   canAddContact?: boolean;
   canBlockContact?: boolean;
+}
+
+export interface ApiSendAsPeerId {
+  id: string;
+  isPremium?: boolean;
 }

@@ -59,6 +59,10 @@
     padding: 0.5625rem 1rem !important;
     border-radius: 0;
     align-items: center;
+
+    & > .send-as-icon-locked {
+      margin-right: 0.5rem;
+    }
   }
 
   .info {

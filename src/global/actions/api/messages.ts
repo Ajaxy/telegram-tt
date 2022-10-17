@@ -1091,7 +1091,7 @@ addActionHandler('loadSendAs', async (global, actions, payload) => {
   const result = await callApi('fetchSendAs', { chat });
   if (!result) {
     setGlobal(updateChat(getGlobal(), chatId, {
-      sendAsIds: [],
+      sendAsPeerIds: [],
     }));
 
     return;
@@ -1100,7 +1100,7 @@ addActionHandler('loadSendAs', async (global, actions, payload) => {
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChat(global, chatId, { sendAsIds: result.ids });
+  global = updateChat(global, chatId, { sendAsPeerIds: result.sendAs });
   setGlobal(global);
 });
 

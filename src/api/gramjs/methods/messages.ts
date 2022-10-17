@@ -55,7 +55,7 @@ import {
   buildInputPollFromExisting,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
 import {
   addEntitiesWithPhotosToLocalDb,
@@ -65,7 +65,6 @@ import {
 } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
-import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -1311,13 +1310,13 @@ export async function fetchSendAs({
   addEntitiesWithPhotosToLocalDb(result.users);
   addEntitiesWithPhotosToLocalDb(result.chats);
 
-  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
   return {
     users,
     chats,
-    ids: result.peers.map((sendAsPeer) => getApiChatIdFromMtpPeer(sendAsPeer.peer)),
+    sendAs: result.peers.map(buildApiSendAsPeerId),
   };
 }
 
