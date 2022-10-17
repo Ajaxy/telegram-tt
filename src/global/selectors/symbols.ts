@@ -1,6 +1,7 @@
 import type { GlobalState } from '../types';
 import type { ApiStickerSetInfo, ApiSticker, ApiStickerSet } from '../../api/types';
 
+import { RESTRICTED_EMOJI_SET_ID } from '../../config';
 import { selectIsCurrentUserPremium } from './users';
 
 export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
@@ -116,4 +117,12 @@ export function selectLocalAnimatedEmojiEffect(emoji: string) {
 
 export function selectLocalAnimatedEmojiEffectByName(name: string) {
   return name === 'Cumshot' ? '🍆' : undefined;
+}
+
+export function selectIsDefaultEmojiStatusPack(global: GlobalState, pack: ApiStickerSetInfo) {
+  return 'id' in pack && pack.id === global.appConfig?.defaultEmojiStatusesStickerSetId;
+}
+
+export function selectIsAlwaysHighPriorityEmoji(global: GlobalState, pack: ApiStickerSetInfo) {
+  return selectIsDefaultEmojiStatusPack(global, pack) || ('id' in pack && pack.id === RESTRICTED_EMOJI_SET_ID);
 }

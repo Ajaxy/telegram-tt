@@ -1,7 +1,7 @@
-import type { ApiChat, ApiUser } from '../../types';
+import type { ApiChat } from '../../types';
 import { invokeRequest } from './client';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { buildInputPeer } from '../gramjsBuilders';
+import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiAvailableReaction, buildMessagePeerReaction } from '../apiBuilders/messages';
 import { REACTION_LIST_LIMIT } from '../../../config';
@@ -79,7 +79,7 @@ export function sendReaction({
   chat: ApiChat; messageId: number; reaction?: string;
 }) {
   return invokeRequest(new GramJs.messages.SendReaction({
-    ...(reaction && { reaction }),
+    ...(reaction && { reaction: [buildInputReaction(reaction)] }),
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
   }), true);
@@ -104,7 +104,7 @@ export async function fetchMessageReactionsList({
   const result = await invokeRequest(new GramJs.messages.GetMessageReactionsList({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: messageId,
-    ...(reaction && { reaction }),
+    ...(reaction && { reaction: buildInputReaction(reaction) }),
     limit: REACTION_LIST_LIMIT,
     ...(offset && { offset }),
   }));
@@ -118,9 +118,9 @@ export async function fetchMessageReactionsList({
   const { nextOffset, reactions, count } = result;
 
   return {
-    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    users: result.users.map(buildApiUser).filter(Boolean),
     nextOffset,
-    reactions: reactions.map(buildMessagePeerReaction),
+    reactions: reactions.map(buildMessagePeerReaction).filter(Boolean),
     count,
   };
 }
@@ -131,6 +131,6 @@ export function setDefaultReaction({
   reaction: string;
 }) {
   return invokeRequest(new GramJs.messages.SetDefaultReaction({
-    reaction,
+    reaction: buildInputReaction(reaction),
   }));
 }

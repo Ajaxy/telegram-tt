@@ -11,8 +11,6 @@ import { LoadMoreDirection } from '../../types';
 import useLang from '../../hooks/useLang';
 import { selectChatMessage } from '../../global/selectors';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import { getUserFullName } from '../../global/helpers';
-import renderText from '../common/helpers/renderText';
 import useFlag from '../../hooks/useFlag';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
@@ -25,7 +23,7 @@ import Avatar from '../common/Avatar';
 import ListItem from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import Loading from '../ui/Loading';
-import PremiumIcon from '../common/PremiumIcon';
+import FullNameTitle from '../common/FullNameTitle';
 
 import './ReactorListModal.scss';
 
@@ -163,7 +161,6 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             {viewportIds?.map(
               (userId) => {
                 const user = usersById[userId];
-                const fullName = getUserFullName(user);
                 const reaction = reactors?.reactions.find((l) => l.userId === userId)?.reaction;
                 return (
                   <ListItem
@@ -173,10 +170,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                     onClick={() => handleClick(userId)}
                   >
                     <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
-                    <div className="title">
-                      <h3 dir="auto">{fullName && renderText(fullName)}</h3>
-                      {user.isPremium && <PremiumIcon />}
-                    </div>
+                    <FullNameTitle peer={user} withEmojiStatus />
                     {reaction && <ReactionStaticEmoji className="reactors-list-emoji" reaction={reaction} />}
                   </ListItem>
                 );

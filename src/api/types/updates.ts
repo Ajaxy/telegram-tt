@@ -15,7 +15,9 @@ import type {
 import type {
   ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiReactions, ApiStickerSet, ApiThreadInfo,
 } from './messages';
-import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
+import type {
+  ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
+} from './users';
 import type {
   ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
@@ -324,6 +326,12 @@ export type ApiUpdateUserStatus = {
   status: ApiUserStatus;
 };
 
+export type ApiUpdateUserEmojiStatus = {
+  '@type': 'updateUserEmojiStatus';
+  userId: string;
+  emojiStatus: ApiEmojiStatus;
+};
+
 export type ApiUpdateUserFullInfo = {
   '@type': 'updateUserFullInfo';
   id: string;
@@ -548,7 +556,7 @@ export type ApiUpdate = (
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
-  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio
+  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

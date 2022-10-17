@@ -26,6 +26,7 @@ import {
 } from '../../../types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
+import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import {
   selectChat,
   selectChatMessage,
@@ -118,8 +119,10 @@ import CommentButton from './CommentButton';
 import Reactions from './Reactions';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import MessagePhoneCall from './MessagePhoneCall';
-import PremiumIcon from '../../common/PremiumIcon';
 import DotAnimation from '../../common/DotAnimation';
+import CustomEmoji from '../../common/CustomEmoji';
+import PremiumIcon from '../../common/PremiumIcon';
+import FakeIcon from '../../common/FakeIcon';
 
 import './Message.scss';
 
@@ -609,23 +612,19 @@ const Message: FC<OwnProps & StateProps> = ({
     const avatarUser = (avatarPeer && isAvatarPeerUser) ? avatarPeer as ApiUser : undefined;
     const avatarChat = (avatarPeer && !isAvatarPeerUser) ? avatarPeer as ApiChat : undefined;
     const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
-    const isAvatarPremium = avatarUser?.isPremium;
 
     return (
-      <>
-        <Avatar
-          size="small"
-          user={avatarUser}
-          chat={avatarChat}
-          text={hiddenName}
-          lastSyncTime={lastSyncTime}
-          onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
-          observeIntersection={observeIntersectionForMedia}
-          animationLevel={animationLevel}
-          withVideo
-        />
-        {isAvatarPremium && <PremiumIcon className="chat-avatar-premium" />}
-      </>
+      <Avatar
+        size="small"
+        user={avatarUser}
+        chat={avatarChat}
+        text={hiddenName}
+        lastSyncTime={lastSyncTime}
+        onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
+        observeIntersection={observeIntersectionForMedia}
+        animationLevel={animationLevel}
+        withVideo
+      />
     );
   }
 
@@ -904,16 +903,27 @@ const Message: FC<OwnProps & StateProps> = ({
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
     }
+    const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
+    const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
 
     return (
       <div className="message-title" dir="ltr">
         {senderTitle ? (
           <span
-            className={buildClassName('interactive', senderColor)}
+            className={buildClassName('message-title-name interactive', senderColor)}
             onClick={handleSenderClick}
             dir="auto"
           >
             {renderText(senderTitle)}
+            {!asForwarded && senderEmojiStatus && (
+              <CustomEmoji
+                documentId={senderEmojiStatus.documentId}
+                loopLimit={EMOJI_STATUS_LOOP_LIMIT}
+                observeIntersection={observeIntersectionForAnimatedStickers}
+              />
+            )}
+            {!asForwarded && !senderEmojiStatus && senderIsPremium && <PremiumIcon />}
+            {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
           </span>
         ) : !botSender ? (
           NBSP

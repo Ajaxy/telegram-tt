@@ -213,32 +213,48 @@ export function buildMessageReactions(reactions: GramJs.MessageReactions): ApiRe
 
   return {
     canSeeList,
-    results: results.map(buildReactionCount),
-    recentReactions: recentReactions?.map(buildMessagePeerReaction),
+    results: results.map(buildReactionCount).filter(Boolean),
+    recentReactions: recentReactions?.map(buildMessagePeerReaction).filter(Boolean),
   };
 }
 
-function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount {
-  const { chosen, count, reaction } = reactionCount;
+function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount | undefined {
+  const { chosenOrder, count, reaction } = reactionCount;
+
+  // TODO: Add custom reactions support
+  const apiReaction = buildApiReaction(reaction);
+  if (!apiReaction) return undefined;
 
   return {
-    isChosen: chosen,
+    isChosen: Boolean(chosenOrder), // TODO: Add custom reactions support
     count,
-    reaction,
+    reaction: apiReaction,
   };
 }
 
-export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction {
+export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction | undefined {
   const {
     peerId, reaction, big, unread,
   } = userReaction;
 
+  // TODO: Add custom reactions support
+  const apiReaction = buildApiReaction(reaction);
+  if (!apiReaction) return undefined;
+
   return {
     userId: getApiChatIdFromMtpPeer(peerId),
-    reaction,
+    reaction: apiReaction,
     isUnread: unread,
     isBig: big,
   };
+}
+
+export function buildApiReaction(reaction: GramJs.TypeReaction): string | undefined {
+  if (reaction instanceof GramJs.ReactionEmoji) {
+    return reaction.emoticon;
+  }
+  // TODO: Add custom reactions support
+  return undefined;
 }
 
 export function buildApiAvailableReaction(availableReaction: GramJs.AvailableReaction): ApiAvailableReaction {

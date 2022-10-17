@@ -15,7 +15,6 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { ANIMATION_END_DELAY } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
-  getChatTitle,
   isUserId,
   isActionMessage,
   getPrivateChatUserId,
@@ -31,7 +30,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
-  selectNotifySettings, selectNotifyExceptions, selectUserStatus,
+  selectNotifySettings, selectNotifyExceptions, selectUserStatus, selectIsDefaultEmojiStatusPack,
 } from '../../../global/selectors';
 import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
 import renderText from '../../common/helpers/renderText';
@@ -47,7 +46,6 @@ import { ChatAnimationTypes } from './hooks';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
-import VerifiedIcon from '../../common/VerifiedIcon';
 import TypingStatus from '../../common/TypingStatus';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import DeleteChatModal from '../../common/DeleteChatModal';
@@ -56,8 +54,7 @@ import Badge from './Badge';
 import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ReportModal from '../../common/ReportModal';
-import FakeIcon from '../../common/FakeIcon';
-import PremiumIcon from '../../common/PremiumIcon';
+import FullNameTitle from '../../common/FullNameTitle';
 
 import './Chat.scss';
 
@@ -77,6 +74,7 @@ type StateProps = {
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
+  isEmojiStatusColored?: boolean;
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
@@ -104,6 +102,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isMuted,
   user,
   userStatus,
+  isEmojiStatusColored,
   actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
@@ -325,12 +324,16 @@ const Chat: FC<OwnProps & StateProps> = ({
         )}
       </div>
       <div className="info">
-        <div className="title">
-          <h3>{renderText(getChatTitle(lang, chat, user))}</h3>
-          {chat.isVerified && <VerifiedIcon />}
-          {user?.isPremium && !user.isSelf && <PremiumIcon />}
-          {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
+        <div className="info-row">
+          <FullNameTitle
+            peer={user || chat}
+            withEmojiStatus
+            isSavedMessages={chatId === user?.id && user?.isSelf}
+            observeIntersection={observeIntersection}
+            key={!IS_SINGLE_COLUMN_LAYOUT && isEmojiStatusColored ? `${isSelected}` : undefined}
+          />
           {isMuted && <i className="icon-muted" />}
+          <div className="separator" />
           {chat.lastMessage && (
             <LastMessageMeta
               message={chat.lastMessage}
@@ -410,6 +413,11 @@ export default memo(withGlobal<OwnProps>(
     } = selectCurrentMessageList(global) || {};
     const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
 
+    const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
+    const statusEmoji = user?.emojiStatus && global.customEmojis.byId[user.emojiStatus.documentId];
+    const isEmojiStatusColored = statusEmoji && selectIsDefaultEmojiStatusPack(global, statusEmoji.stickerSetInfo);
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -426,10 +434,9 @@ export default memo(withGlobal<OwnProps>(
       ...(isOutgoing && chat.lastMessage && {
         lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage),
       }),
-      ...(privateChatUserId && {
-        user: selectUser(global, privateChatUserId),
-        userStatus: selectUserStatus(global, privateChatUserId),
-      }),
+      user,
+      userStatus,
+      isEmojiStatusColored,
     };
   },
 )(Chat));

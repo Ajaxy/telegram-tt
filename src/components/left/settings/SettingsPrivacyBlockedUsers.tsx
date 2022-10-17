@@ -7,9 +7,8 @@ import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import {
-  getChatTitle, getUserFullName, isUserId,
+  isUserId,
 } from '../../../global/helpers';
-import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -20,6 +19,7 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import Avatar from '../../common/Avatar';
 import Loading from '../../ui/Loading';
 import BlockUserModal from './BlockUserModal';
+import FullNameTitle from '../../common/FullNameTitle';
 
 type OwnProps = {
   isActive?: boolean;
@@ -58,6 +58,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
     const isPrivate = isUserId(contactId);
     const user = isPrivate ? usersByIds[contactId] : undefined;
     const chat = !isPrivate ? chatsByIds[contactId] : undefined;
+    const userOrChat = user || chat;
 
     const className = buildClassName(
       'Chat chat-item-clickable blocked-list-item small-icon',
@@ -81,7 +82,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
       >
         <Avatar size="medium" user={user} chat={chat} />
         <div className="contact-info" dir="auto">
-          <h3 dir="auto">{renderText((isPrivate ? getUserFullName(user) : getChatTitle(lang, chat!)) || '')}</h3>
+          {userOrChat && <FullNameTitle peer={userOrChat} />}
           {user?.phoneNumber && (
             <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(phoneCodeList, user.phoneNumber)}</div>
           )}

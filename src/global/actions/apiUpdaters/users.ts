@@ -42,6 +42,10 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       return updateUser(global, update.id, update.user);
     }
 
+    case 'updateUserEmojiStatus': {
+      return updateUser(global, update.userId, { emojiStatus: update.emojiStatus });
+    }
+
     case 'updateUserStatus': {
       // Status updates come very often so we throttle them
       scheduleStatusUpdate(update.userId, update.status);

@@ -28,6 +28,7 @@ export interface ApiUser {
   };
   fakeType?: ApiFakeType;
   isAttachBot?: boolean;
+  emojiStatus?: ApiEmojiStatus;
 
   // Obtained from GetFullUser / UserFullInfo
   fullInfo?: ApiUserFullInfo;
@@ -78,4 +79,9 @@ export interface ApiPremiumGiftOption {
   currency: string;
   amount: number;
   botUrl: string;
+}
+
+export interface ApiEmojiStatus {
+  documentId: string;
+  until?: number;
 }

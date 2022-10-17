@@ -119,9 +119,6 @@
   }
 
   .title {
-    display: flex;
-    align-items: center;
-
     .fullName {
       font-weight: 500;
       font-size: 1.25rem;
@@ -132,17 +129,27 @@
     }
 
     .VerifiedIcon, .PremiumIcon {
-      margin-left: 0.25rem;
       z-index: 2;
       --color-fill: var(--color-white);
       --color-checkmark: var(--color-primary);
       opacity: 0.8;
     }
 
-    .emoji {
+    .emoji:not(.custom-emoji) {
       width: 1.5rem;
       height: 1.5rem;
       background-size: 1.5rem;
+    }
+
+    .custom-emoji {
+      pointer-events: auto;
+      cursor: pointer;
+
+      --custom-emoji-size: 1.5rem;
+
+      &.custom-color {
+        --emoji-status-color: var(--color-white);
+      }
     }
   }
 

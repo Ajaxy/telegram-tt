@@ -1317,7 +1317,7 @@ export async function fetchSendAs({
   return {
     users,
     chats,
-    ids: result.peers.map(getApiChatIdFromMtpPeer),
+    ids: result.peers.map((sendAsPeer) => getApiChatIdFromMtpPeer(sendAsPeer.peer)),
   };
 }
 

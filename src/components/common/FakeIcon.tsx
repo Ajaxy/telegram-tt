@@ -16,7 +16,11 @@ const FakeIcon: FC<OwnProps> = ({
 }) => {
   const lang = useLang();
 
-  return <span className="FakeIcon">{lang(fakeType === 'fake' ? 'FakeMessage' : 'ScamMessage')}</span>;
+  return (
+    <span className="FakeIcon">
+      {lang(fakeType === 'fake' ? 'FakeMessage' : 'ScamMessage')}
+    </span>
+  );
 };
 
 export default memo(FakeIcon);

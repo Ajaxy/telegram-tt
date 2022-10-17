@@ -8,7 +8,6 @@ import type { ApiWebSession } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 
 import { formatPastTimeShort } from '../../../util/dateFormat';
-import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
@@ -19,6 +18,7 @@ import ListItem from '../../ui/ListItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import SettingsActiveWebsite from './SettingsActiveWebsite';
 import Avatar from '../../common/Avatar';
+import FullNameTitle from '../../common/FullNameTitle';
 
 import styles from './SettingsActiveWebsites.module.scss';
 
@@ -116,7 +116,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         <Avatar className={styles.avatar} user={bot} size="tiny" animationLevel={animationLevel} withVideo />
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
-          <span className="title">{getUserFullName(bot)}</span>
+          {bot && <FullNameTitle className={styles.title} peer={bot} />}
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>
             {session.domain}, {session.browser}, {session.platform}
           </span>

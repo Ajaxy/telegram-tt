@@ -8,8 +8,10 @@ import React, {
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
+import useOnChange from '../../hooks/useOnChange';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -28,6 +30,7 @@ export type OwnProps = {
   onClick?: NoneToVoidFunction;
   onLoad?: NoneToVoidFunction;
   onEnded?: NoneToVoidFunction;
+  onLoop?: NoneToVoidFunction;
 };
 
 type RLottieClass = typeof import('../../lib/rlottie/RLottie').default;
@@ -66,6 +69,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   onClick,
   onLoad,
   onEnded,
+  onLoop,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -102,9 +106,10 @@ const AnimatedSticker: FC<OwnProps> = ({
           quality,
           isLowPriority,
         },
-        onLoad,
         color,
+        onLoad,
         onEnded,
+        onLoop,
       );
 
       if (speed) {
@@ -125,7 +130,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         });
       });
     }
-  }, [color, animation, tgsUrl, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded]);
+  }, [color, animation, tgsUrl, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop]);
 
   useEffect(() => {
     if (!animation) return;
@@ -185,6 +190,12 @@ const AnimatedSticker: FC<OwnProps> = ({
   const unfreezeAnimationOnRaf = useCallback(() => {
     fastRaf(unfreezeAnimation);
   }, [unfreezeAnimation]);
+
+  useOnChange(([prevNoLoop]) => {
+    if (noLoop !== undefined && noLoop !== prevNoLoop) {
+      animation?.setNoLoop(noLoop);
+    }
+  }, [noLoop, animation]);
 
   useEffect(() => {
     if (!animation) {

@@ -1,4 +1,6 @@
-import type { ApiMessage, ApiReactions } from '../../api/types';
+import type {
+  ApiMessage, ApiReactions,
+} from '../../api/types';
 import type { GlobalState } from '../types';
 
 export function getMessageRecentReaction(message: Partial<ApiMessage>) {

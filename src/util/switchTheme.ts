@@ -74,7 +74,7 @@ function transition(t: number) {
   return 1 - ((1 - t) ** 3.5);
 }
 
-function hexToRgb(hex: string): RGBAColor {
+export function hexToRgb(hex: string): RGBAColor {
   const result = HEX_COLOR_REGEX.exec(hex)!;
 
   return {

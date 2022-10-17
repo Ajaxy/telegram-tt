@@ -104,7 +104,7 @@
       vertical-align: text-bottom !important;
     }
 
-    .text-entity-custom-emoji {
+    .custom-emoji {
       // Custom emoji needs to be slightly bigger than normal emoji
       --custom-emoji-size: calc(1.125 * var(--message-text-size, 1rem) + 1px);
       margin-inline-end: 1px;

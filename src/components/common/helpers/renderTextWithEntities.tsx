@@ -309,7 +309,7 @@ function processEntity(
 
     if (entity.type === ApiMessageEntityTypes.CustomEmoji) {
       return (
-        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection}>
+        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection} withGridFix>
           {renderNestedMessagePart()}
         </CustomEmoji>
       );
@@ -419,7 +419,7 @@ function processEntity(
       return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
     case ApiMessageEntityTypes.CustomEmoji:
       return (
-        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection}>
+        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection} withGridFix>
           {renderNestedMessagePart()}
         </CustomEmoji>
       );

@@ -24,7 +24,7 @@ import {
   buildApiChatFolder,
   buildApiChatSettings,
 } from './apiBuilders/chats';
-import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
+import { buildApiUser, buildApiUserEmojiStatus, buildApiUserStatus } from './apiBuilders/users';
 import {
   buildMessageFromUpdate,
   isMessageWithMedia,
@@ -737,6 +737,14 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateUserStatus',
       userId: buildApiPeerId(update.userId, 'user'),
       status: buildApiUserStatus(update.status),
+    });
+  } else if (update instanceof GramJs.UpdateUserEmojiStatus) {
+    const emojiStatus = buildApiUserEmojiStatus(update.emojiStatus);
+    if (!emojiStatus) return;
+    onUpdate({
+      '@type': 'updateUserEmojiStatus',
+      userId: buildApiPeerId(update.userId, 'user'),
+      emojiStatus,
     });
   } else if (update instanceof GramJs.UpdateUserName) {
     const apiUserId = buildApiPeerId(update.userId, 'user');

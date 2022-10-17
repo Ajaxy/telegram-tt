@@ -9,16 +9,13 @@ import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
-import { getUserFullName, getUserStatus, isUserOnline } from '../../global/helpers';
-import renderText from './helpers/renderText';
+import { getUserStatus, isUserOnline } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
-import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
-import FakeIcon from './FakeIcon';
-import PremiumIcon from './PremiumIcon';
+import FullNameTitle from './FullNameTitle';
 
 type OwnProps = {
   userId: string;
@@ -74,7 +71,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const { id: userId } = user || {};
-  const fullName = getUserFullName(user);
 
   useEffect(() => {
     if (userId && lastSyncTime) {
@@ -143,18 +139,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         animationLevel={animationLevel}
       />
       <div className="info">
-        {isSavedMessages ? (
-          <div className="title">
-            <h3>{lang('SavedMessages')}</h3>
-          </div>
-        ) : (
-          <div className="title">
-            <h3 dir="auto">{fullName && renderText(fullName)}</h3>
-            {user?.isVerified && <VerifiedIcon />}
-            {user.isPremium && <PremiumIcon />}
-            {user.fakeType && <FakeIcon fakeType={user.fakeType} />}
-          </div>
-        )}
+        <FullNameTitle peer={user} withEmojiStatus isSavedMessages={isSavedMessages} />
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
     </div>

@@ -178,6 +178,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   if (!promo) return undefined;
 
+  // TODO Support all subscription options
+  const month = promo.options.find((option) => option.months === 1)!;
+
   function getHeaderText() {
     if (isGift) {
       return fromUser?.id === currentUserId
@@ -284,7 +287,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               <div className={styles.footer}>
                 {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
-                  {lang('SubscribeToPremium', formatCurrency(Number(promo.monthlyAmount), promo.currency, lang.code))}
+                  {lang('SubscribeToPremium', formatCurrency(Number(month.amount), month.currency, lang.code))}
                 </Button>
               </div>
             )}
