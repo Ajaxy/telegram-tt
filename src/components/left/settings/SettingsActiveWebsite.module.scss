@@ -17,12 +17,10 @@
 }
 
 .title {
-  text-align: center;
-  margin-bottom: 0.25rem;
+  justify-content: center;
 }
 
-.note,
-.date {
+.note {
   color: var(--color-text-secondary);
   font-size: 0.875rem;
   text-align: center;

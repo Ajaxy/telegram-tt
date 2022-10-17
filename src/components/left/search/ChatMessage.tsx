@@ -9,7 +9,6 @@ import type { AnimationLevel } from '../../../types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
-  getChatTitle,
   getPrivateChatUserId,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
@@ -19,7 +18,6 @@ import {
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import renderText from '../../common/helpers/renderText';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
@@ -29,11 +27,9 @@ import useLang from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
-import VerifiedIcon from '../../common/VerifiedIcon';
 import ListItem from '../../ui/ListItem';
 import Link from '../../ui/Link';
-import FakeIcon from '../../common/FakeIcon';
-import PremiumIcon from '../../common/PremiumIcon';
+import FullNameTitle from '../../common/FullNameTitle';
 
 import './ChatMessage.scss';
 
@@ -95,12 +91,11 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
       />
       <div className="info">
         <div className="info-row">
-          <div className="title">
-            <h3 dir="auto">{renderText(getChatTitle(lang, chat, privateChatUser))}</h3>
-            {chat.isVerified && <VerifiedIcon />}
-            {privateChatUser?.isPremium && <PremiumIcon />}
-            {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
-          </div>
+          <FullNameTitle
+            peer={privateChatUser || chat}
+            withEmojiStatus
+            isSavedMessages={chatId === privateChatUser?.id && privateChatUser?.isSelf}
+          />
           <div className="message-date">
             <Link className="date">
               {formatPastTimeShort(lang, message.date * 1000)}

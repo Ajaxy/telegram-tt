@@ -13,20 +13,18 @@ import { IS_TOUCH_ENV } from '../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectChat, selectUser, selectUserStatus } from '../../global/selectors';
 import {
-  getUserFullName, getUserStatus, isChatChannel, isUserOnline,
+  getUserStatus, isChatChannel, isUserOnline,
 } from '../../global/helpers';
-import renderText from './helpers/renderText';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
+
 import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 
-import VerifiedIcon from './VerifiedIcon';
+import FullNameTitle from './FullNameTitle';
 import ProfilePhoto from './ProfilePhoto';
 import Transition from '../ui/Transition';
-import FakeIcon from './FakeIcon';
-import PremiumIcon from './PremiumIcon';
 
 import './ProfileInfo.scss';
 
@@ -70,7 +68,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
-  const fullName = user ? getUserFullName(user) : (chat ? chat.title : '');
   const photos = user?.photos || chat?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaId = usePrevious(mediaId);
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
@@ -196,7 +193,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   function renderStatus() {
     if (user) {
       return (
-        <div className={`status ${isUserOnline(user, userStatus) ? 'online' : ''}`}>
+        <div className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
           <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
         </div>
       );
@@ -211,10 +208,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
       </span>
     );
   }
-
-  const isVerifiedIconShown = (user || chat)?.isVerified;
-  const isPremiumIconShown = user?.isPremium;
-  const fakeType = (user || chat)?.fakeType;
 
   return (
     <div className={buildClassName('ProfileInfo', forceShowSelf && 'self')} dir={lang.isRtl ? 'rtl' : undefined}>
@@ -243,17 +236,14 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
       </div>
 
       <div className="info" dir={lang.isRtl ? 'rtl' : 'auto'}>
-        {isSavedMessages ? (
-          <div className="title">
-            <div className="fullName" dir="auto">{lang('SavedMessages')}</div>
-          </div>
-        ) : (
-          <div className="title">
-            <div className="fullName" dir="auto">{fullName && renderText(fullName)}</div>
-            {isVerifiedIconShown && <VerifiedIcon />}
-            {isPremiumIconShown && <PremiumIcon onClick={handleClickPremium} />}
-            {fakeType && <FakeIcon fakeType={fakeType} />}
-          </div>
+        {(user || chat) && (
+          <FullNameTitle
+            peer={(user || chat)!}
+            withEmojiStatus
+            isSavedMessages={isSavedMessages}
+            onEmojiStatusClick={handleClickPremium}
+            noLoopLimit
+          />
         )}
         {!isSavedMessages && renderStatus()}
       </div>

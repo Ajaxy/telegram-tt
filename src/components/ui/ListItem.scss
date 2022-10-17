@@ -173,12 +173,17 @@
       overflow: hidden;
     }
 
+    .info-row,
     .title,
     .subtitle {
       overflow: hidden;
       display: flex;
       justify-content: flex-start;
       align-items: center;
+    }
+
+    .separator {
+      flex-grow: 1;
     }
 
     h3,
@@ -197,15 +202,6 @@
     .title {
       h3 {
         font-weight: 500;
-      }
-
-      .VerifiedIcon {
-        margin-left: 0.5rem;
-      }
-
-      .PremiumIcon,
-      .VerifiedIcon {
-        margin-left: 0.25rem;
       }
 
       .emoji {
@@ -289,7 +285,12 @@
 
   &.search-result-message {
     .title {
+      flex-grow: 1;
       padding-right: 0.125rem;
+    }
+
+    .search-result-message-top {
+      display: flex;
     }
 
     h3 {
@@ -305,11 +306,6 @@
       text-overflow: ellipsis;
       text-align: left;
       display: block;
-    }
-
-    .LastMessageMeta {
-      margin-left: auto;
-      margin-right: 0;
     }
 
     .subtitle {

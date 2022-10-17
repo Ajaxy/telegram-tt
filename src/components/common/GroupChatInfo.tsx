@@ -10,19 +10,16 @@ import { MediaViewerOrigin } from '../../types';
 
 import {
   getChatTypeString,
-  getChatTitle,
   isChatSuperGroup,
 } from '../../global/helpers';
 import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../global/selectors';
-import renderText from './helpers/renderText';
 import type { LangFn } from '../../hooks/useLang';
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
-import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
-import FakeIcon from './FakeIcon';
+import FullNameTitle from './FullNameTitle';
 
 type OwnProps = {
   chatId: string;
@@ -152,11 +149,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         animationLevel={animationLevel}
       />
       <div className="info">
-        <div className="title">
-          <h3 dir="auto">{renderText(getChatTitle(lang, chat))}</h3>
-          {chat.isVerified && <VerifiedIcon />}
-          {chat.fakeType && <FakeIcon fakeType={chat.fakeType} />}
-        </div>
+        <FullNameTitle peer={chat} />
         {renderStatusOrTyping()}
       </div>
     </div>

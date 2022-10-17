@@ -546,3 +546,16 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     });
   }
 }
+
+export function buildInputReaction(reaction?: string) {
+  if (!reaction) return new GramJs.ReactionEmpty();
+  return new GramJs.ReactionEmoji({
+    emoticon: reaction,
+  });
+}
+
+export function buildInputChatReactions(chatReactions: string[]) {
+  return new GramJs.ChatReactionsSome({
+    reactions: chatReactions.map(buildInputReaction),
+  });
+}

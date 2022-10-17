@@ -6,8 +6,7 @@ import React, {
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { IS_TOUCH_ENV } from '../../../util/environment';
-import renderText from '../../common/helpers/renderText';
-import { getUserFullName, isUserId } from '../../../global/helpers';
+import { isUserId } from '../../../global/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
@@ -16,6 +15,7 @@ import { getActions, getGlobal } from '../../../global';
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
 import Menu from '../../ui/Menu';
+import FullNameTitle from '../../common/FullNameTitle';
 
 import './SendAsMenu.scss';
 
@@ -93,7 +93,7 @@ const SendAsMenu: FC<OwnProps> = ({
       {usersById && chatsById && sendAsIds?.map((id, index) => {
         const user = isUserId(id) ? usersById[id] : undefined;
         const chat = !user ? chatsById[id] : undefined;
-        const fullName = user ? getUserFullName(user) : chat?.title;
+        const userOrChat = user || chat;
 
         return (
           <ListItem
@@ -110,9 +110,7 @@ const SendAsMenu: FC<OwnProps> = ({
               className={buildClassName(selectedSendAsId === id && 'selected')}
             />
             <div className="info">
-              <div className="title">
-                <h3 dir="auto">{fullName && renderText(fullName)}</h3>
-              </div>
+              {userOrChat && <FullNameTitle peer={userOrChat} noFake />}
               <span className="subtitle">{user
                 ? lang('VoipGroupPersonalAccount')
                 : lang('Subscribers', chat?.membersCount, 'i')}

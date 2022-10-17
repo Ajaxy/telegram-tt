@@ -48,6 +48,10 @@
     &.selected:hover {
       --background-color: var(--color-chat-active) !important;
 
+      .custom-emoji.custom-color {
+        --emoji-status-color: var(--color-white);
+      }
+
       .VerifiedIcon, .PremiumIcon {
         --color-fill: #fff;
         --color-checkmark: var(--color-primary)
@@ -95,15 +99,10 @@
       margin-top: -0.125rem;
     }
 
-    h3 {
-      width: auto;
-      max-width: 80%;
-    }
-
     .icon-muted {
       font-size: 1.25rem;
-      margin-left: 0.25rem;
       margin-top: -0.0625rem;
+      margin-left: 0.25rem;
       color: #c6c8ca;
 
       body.is-ios & {
@@ -113,8 +112,6 @@
     }
 
     .LastMessageMeta {
-      margin-left: auto;
-
       body.is-ios & {
         font-size: 0.875rem;
         margin-right: 0;
@@ -177,7 +174,7 @@
         vertical-align: -0.125rem;
       }
 
-      .text-entity-custom-emoji {
+      .custom-emoji {
         --custom-emoji-size: 1.25rem;
       }
 

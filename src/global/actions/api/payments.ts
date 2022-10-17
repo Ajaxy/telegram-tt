@@ -411,13 +411,16 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload) => {
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
 
+  // TODO Support all subscription options
+  const month = result.promo.options.find((option) => option.months === 1)!;
+
   setGlobal({
     ...global,
     giftPremiumModal: {
       isOpen: true,
       forUserId,
-      monthlyCurrency: result.promo.currency,
-      monthlyAmount: result.promo.monthlyAmount,
+      monthlyCurrency: month.currency,
+      monthlyAmount: month.amount,
     },
   });
 });

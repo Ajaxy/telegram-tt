@@ -1,6 +1,8 @@
 import type { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiInvoice, ApiPaymentSavedInfo, ApiPremiumPromo } from '../../types';
+import type {
+  ApiInvoice, ApiPaymentSavedInfo, ApiPremiumPromo, ApiPremiumSubscriptionOption,
+} from '../../types';
 
 import { buildApiDocument, buildApiMessageEntity, buildApiWebDocument } from './messages';
 import { omitVirtualClassFields } from './helpers';
@@ -156,15 +158,29 @@ export function buildApiInvoiceFromForm(form: GramJs.payments.PaymentForm): ApiI
 
 export function buildApiPremiumPromo(promo: GramJs.help.PremiumPromo): ApiPremiumPromo {
   const {
-    statusText, statusEntities, videos, videoSections, currency, monthlyAmount,
+    statusText, statusEntities, videos, videoSections, periodOptions,
   } = promo;
 
   return {
     statusText,
     statusEntities: statusEntities.map((l) => buildApiMessageEntity(l)),
     videoSections,
-    currency,
     videos: videos.map(buildApiDocument).filter(Boolean),
-    monthlyAmount: monthlyAmount.toString(),
+    options: periodOptions.map(buildApiPremiumSubscriptionOption),
+  };
+}
+
+function buildApiPremiumSubscriptionOption(option: GramJs.PremiumSubscriptionOption): ApiPremiumSubscriptionOption {
+  const {
+    current, canPurchaseUpgrade, currency, amount, botUrl, months,
+  } = option;
+
+  return {
+    isCurrent: current,
+    canPurchaseUpgrade,
+    currency,
+    amount: amount.toString(),
+    botUrl,
+    months,
   };
 }

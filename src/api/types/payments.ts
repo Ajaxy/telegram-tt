@@ -65,10 +65,18 @@ export interface ApiReceipt {
 }
 
 export interface ApiPremiumPromo {
-  currency: string;
-  monthlyAmount: string;
   videoSections: string[];
   videos: ApiDocument[];
   statusText: string;
   statusEntities: ApiMessageEntity[];
+  options: ApiPremiumSubscriptionOption[];
+}
+
+export interface ApiPremiumSubscriptionOption {
+  isCurrent?: boolean;
+  canPurchaseUpgrade?: boolean;
+  months: number;
+  currency: string;
+  amount: string;
+  botUrl: string;
 }

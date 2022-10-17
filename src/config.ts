@@ -150,6 +150,7 @@ export const STICKER_SIZE_INLINE_BOT_RESULT = 100;
 export const STICKER_SIZE_JOIN_REQUESTS = 140;
 export const STICKER_SIZE_INVITES = 140;
 export const RECENT_STICKERS_LIMIT = 20;
+export const EMOJI_STATUS_LOOP_LIMIT = 2;
 export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const CHAT_STICKER_SET_ID = 'chatStickers';
@@ -206,6 +207,7 @@ export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
+export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const DELETED_COMMENTS_CHANNEL_ID = '-777';

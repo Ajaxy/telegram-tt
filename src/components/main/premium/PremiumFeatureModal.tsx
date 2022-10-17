@@ -197,6 +197,9 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     stopScrolling();
   }, [startScrolling, stopScrolling]);
 
+  // TODO Support all subscription options
+  const month = promo.options.find((option) => option.months === 1)!;
+
   return (
     <div className={styles.root}>
       <Button
@@ -316,7 +319,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         >
           {isPremium
             ? lang('OK')
-            : lang('SubscribeToPremium', formatCurrency(Number(promo.monthlyAmount), promo.currency, lang.code))}
+            : lang('SubscribeToPremium', formatCurrency(Number(month.amount), month.currency, lang.code))}
         </Button>
       </div>
     </div>

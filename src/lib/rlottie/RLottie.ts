@@ -90,9 +90,10 @@ class RLottie {
     private container: HTMLDivElement,
     private tgsUrl: string,
     private params: Params = {},
-    private onLoad?: () => void,
     private customColor?: [number, number, number],
+    private onLoad?: () => void,
     private onEnded?: (isDestroyed?: boolean) => void,
+    private onLoop?: () => void,
   ) {
     this.initContainer();
     this.initConfig();
@@ -133,6 +134,10 @@ class RLottie {
 
   setSpeed(speed: number) {
     this.speed = speed;
+  }
+
+  setNoLoop(noLoop: boolean) {
+    this.params.noLoop = noLoop;
   }
 
   destroy() {
@@ -355,6 +360,7 @@ class RLottie {
           this.onEnded?.();
           return false;
         }
+        this.onLoop?.();
 
         this.approxFrameIndex = 0;
 
@@ -366,6 +372,7 @@ class RLottie {
           this.onEnded?.();
           return false;
         }
+        this.onLoop?.();
 
         this.approxFrameIndex = this.framesCount! - 1;
 

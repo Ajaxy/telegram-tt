@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  --custom-emoji-size: 1.25rem;
+
+  > h3 {
+    margin-bottom: 0;
+  }
+}

@@ -1,0 +1,36 @@
+.root {
+  display: inline-block;
+  vertical-align: text-bottom;
+  width: var(--custom-emoji-size);
+  height: var(--custom-emoji-size);
+
+  &.with-grid-fix .media {
+    width: calc(100% + 1px) !important;
+    height: calc(100% + 1px) !important;
+    vertical-align: baseline;
+  }
+
+  :global(.emoji-small) {
+    vertical-align: baseline !important; // Fix for fallback on Windows, when custom emoji not ready
+  }
+
+  &:global(.custom-color) {
+    --emoji-status-color: var(--color-primary);
+  }
+}
+
+.media {
+  width: 100%;
+  height: 100%;
+}
+
+.sticker {
+  width: var(--custom-emoji-size) !important;
+  height: var(--custom-emoji-size) !important;
+  display: flex !important;
+
+  :global(canvas) {
+    width: var(--custom-emoji-size) !important;
+    height: var(--custom-emoji-size) !important;
+  }
+}

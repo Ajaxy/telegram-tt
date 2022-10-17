@@ -160,8 +160,8 @@ export interface ApiCountryCode extends ApiCountry {
 }
 
 export interface ApiAppConfig {
-  emojiSounds: Record<string, string>;
   defaultReaction: string;
+  emojiSounds: Record<string, string>;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
   autologinDomains: string[];
@@ -171,6 +171,7 @@ export interface ApiAppConfig {
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
   premiumPromoOrder: string[];
+  defaultEmojiStatusesStickerSetId: string;
   limits: Record<ApiLimitType, readonly [number, number]>;
 }
 

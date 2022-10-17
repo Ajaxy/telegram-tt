@@ -33,6 +33,7 @@ interface GramJsAppConfig extends LimitsConfig {
   premium_bot_username: string;
   premium_invoice_slug: string;
   premium_promo_order: string[];
+  default_emoji_statuses_stickerset_id: string;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -64,8 +65,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
   return {
-    emojiSounds: buildEmojiSounds(appConfig),
     defaultReaction: appConfig.reactions_default,
+    emojiSounds: buildEmojiSounds(appConfig),
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
@@ -75,6 +76,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
     premiumPromoOrder: appConfig.premium_promo_order,
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
+    defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),
       stickersFaved: getLimit(appConfig, 'stickers_faved_limit', 'stickersFaved'),

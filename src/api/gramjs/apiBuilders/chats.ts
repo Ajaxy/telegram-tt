@@ -18,6 +18,7 @@ import {
 } from './peers';
 import { omitVirtualClassFields } from './helpers';
 import { getServerTime } from '../../../util/serverTime';
+import { buildApiReaction } from './messages';
 
 type PeerEntityApiChatFields = Omit<ApiChat, (
   'id' | 'type' | 'title' |
@@ -452,4 +453,17 @@ export function buildApiChatSettings({
     canAddContact: Boolean(addContact),
     canBlockContact: Boolean(blockContact),
   };
+}
+
+export function buildApiChatReactions(availableReactions?: GramJs.TypeChatReactions): string[] | undefined {
+  if (availableReactions instanceof GramJs.ChatReactionsAll) {
+    // TODO Hack before custom reactions are implemented
+    // eslint-disable-next-line max-len
+    return ['👍', '👎', '❤', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '😱', '🤬', '😢', '🎉', '🤩', '🤮', '💩', '🙏', '👌', '🕊', '🤡', '🥱', '🥴', '😍', '🐳', '❤‍🔥', '🌚', '🌭', '💯', '🤣', '⚡', '🍌', '🏆', '💔', '🤨', '😐', '🍓', '🍾', '💋', '🖕', '😈'];
+  }
+  if (availableReactions instanceof GramJs.ChatReactionsSome) {
+    return availableReactions.reactions.map(buildApiReaction).filter(Boolean);
+  }
+
+  return undefined;
 }
