@@ -7,7 +7,6 @@ import { ApiMediaFormat } from '../../../api/types';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import safePlay from '../../../util/safePlay';
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getActions } from '../../../global';
 
@@ -20,6 +19,7 @@ import useThumbnail from '../../../hooks/useThumbnail';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
+import OptimizedVideo from '../../ui/OptimizedVideo';
 
 import './Sticker.scss';
 
@@ -102,17 +102,6 @@ const Sticker: FC<OwnProps> = ({
   }, [onStopEffect, stopPlayingEffect]);
 
   useEffect(() => {
-    if (!isVideo || !ref.current) return;
-    const video = ref.current.querySelector('video');
-    if (!video) return;
-    if (shouldPlay) {
-      safePlay(video);
-    } else {
-      video.pause();
-    }
-  }, [isVideo, shouldPlay]);
-
-  useEffect(() => {
     if (hasEffect && shouldPlay && shouldPlayEffect) {
       startPlayingEffect();
       onPlayEffect?.();
@@ -164,11 +153,11 @@ const Sticker: FC<OwnProps> = ({
         />
       )}
       {isVideo && canDisplayVideo && isMediaReady && (
-        <video
+        <OptimizedVideo
+          canPlay={shouldPlay}
           src={mediaData as string}
           width={width}
           height={height}
-          autoPlay={shouldPlay}
           playsInline
           disablePictureInPicture
           loop={shouldLoop}

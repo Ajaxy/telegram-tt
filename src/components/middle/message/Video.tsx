@@ -24,12 +24,11 @@ import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
-import useVideoCleanup from '../../../hooks/useVideoCleanup';
 import useMediaTransition from '../../../hooks/useMediaTransition';
-import useVideoAutoPause from './hooks/useVideoAutoPause';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import OptimizedVideo from '../../ui/OptimizedVideo';
 
 export type OwnProps = {
   id?: string;
@@ -125,14 +124,11 @@ const Video: FC<OwnProps> = ({
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
   }, []);
 
-  const duration = (videoRef.current?.duration) || video.duration || 0;
+  const duration = videoRef.current?.duration || video.duration || 0;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
   const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
-
-  useVideoAutoPause(videoRef, isInline);
-  useVideoCleanup(videoRef, [isInline]);
 
   const handleClick = useCallback(() => {
     if (isUploading) {
@@ -145,7 +141,6 @@ const Video: FC<OwnProps> = ({
       setIsLoadAllowed((isAllowed) => !isAllowed);
     } else if (fullMediaData && !isPlayAllowed) {
       setIsPlayAllowed(true);
-      videoRef.current!.play();
     } else if (onClick) {
       onClick(message.id);
     }
@@ -177,12 +172,13 @@ const Video: FC<OwnProps> = ({
         draggable={!isProtected}
       />
       {isInline && (
-        <video
+        <OptimizedVideo
           ref={videoRef}
+          canPlay={isPlayAllowed}
+          src={fullMediaData}
           className="full-media"
           width={width}
           height={height}
-          autoPlay={isPlayAllowed}
           muted
           loop
           playsInline
@@ -191,9 +187,7 @@ const Video: FC<OwnProps> = ({
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
           style={aspectRatio}
-        >
-          <source src={fullMediaData} />
-        </video>
+        />
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderPlayButton && <i className={buildClassName('icon-large-play', playButtonClassNames)} />}

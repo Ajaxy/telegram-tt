@@ -18,11 +18,9 @@ import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
-import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
-import useVideoCleanup from '../../hooks/useVideoCleanup';
-import safePlay from '../../util/safePlay';
 
 import Spinner from '../ui/Spinner';
+import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './ProfilePhoto.scss';
 
@@ -79,17 +77,10 @@ const ProfilePhoto: FC<OwnProps> = ({
   }
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    if (!canPlayVideo) {
-      videoRef.current.pause();
+    if (videoRef.current && !canPlayVideo) {
       videoRef.current.currentTime = 0;
-    } else {
-      safePlay(videoRef.current);
     }
   }, [canPlayVideo]);
-
-  const { handlePlaying } = useVideoAutoPause(videoRef, canPlayVideo);
-  useVideoCleanup(videoRef, []);
 
   const photoHash = getMediaHash('big', 'photo');
   const photoBlobUrl = useMedia(photoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
@@ -108,16 +99,15 @@ const ProfilePhoto: FC<OwnProps> = ({
   } else if (imageSrc) {
     if (videoBlobUrl) {
       content = (
-        <video
+        <OptimizedVideo
+          canPlay={canPlayVideo}
           ref={videoRef}
           src={imageSrc}
           className="avatar-media"
           muted
           disablePictureInPicture
-          autoPlay={canPlayVideo}
           loop
           playsInline
-          onPlaying={handlePlaying}
         />
       );
     } else {

@@ -32,8 +32,8 @@ import useMedia from '../../hooks/useMedia';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLang from '../../hooks/useLang';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
-import useVideoCleanup from '../../hooks/useVideoCleanup';
+
+import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './Avatar.scss';
 
@@ -79,8 +79,6 @@ const Avatar: FC<OwnProps> = ({
   const { loadFullUser } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const videoRef = useRef<HTMLVideoElement>(null);
   const videoLoopCountRef = useRef(0);
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const isDeleted = user && isDeletedUser(user);
@@ -117,24 +115,14 @@ const Avatar: FC<OwnProps> = ({
 
   const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
 
-  const { handlePlaying } = useVideoAutoPause(videoRef, shouldPlayVideo);
-  useVideoCleanup(videoRef, [shouldPlayVideo]);
+  const handleVideoEnded = useCallback((e) => {
+    const video = e.currentTarget;
+    if (!videoBlobUrl) return;
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !videoBlobUrl) return undefined;
-
-    const returnToStart = () => {
-      videoLoopCountRef.current += 1;
-      if (videoLoopCountRef.current >= LOOP_COUNT || noLoop) {
-        video.style.display = 'none';
-      } else {
-        video.play();
-      }
-    };
-
-    video.addEventListener('ended', returnToStart);
-    return () => video.removeEventListener('ended', returnToStart);
+    videoLoopCountRef.current += 1;
+    if (videoLoopCountRef.current >= LOOP_COUNT || noLoop) {
+      video.style.display = 'none';
+    }
   }, [noLoop, videoBlobUrl]);
 
   const userId = user?.id;
@@ -165,15 +153,15 @@ const Avatar: FC<OwnProps> = ({
           decoding="async"
         />
         {shouldPlayVideo && (
-          <video
-            ref={videoRef}
+          <OptimizedVideo
+            canPlay
             src={videoBlobUrl}
             className={buildClassName(cn.media, 'avatar-media')}
             muted
             autoPlay
             disablePictureInPicture
             playsInline
-            onPlaying={handlePlaying}
+            onEnded={handleVideoEnded}
           />
         )}
       </>

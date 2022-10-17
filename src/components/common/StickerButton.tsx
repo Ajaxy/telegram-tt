@@ -26,6 +26,7 @@ import AnimatedSticker from './AnimatedSticker';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './StickerButton.scss';
 
@@ -269,10 +270,10 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         <img src={previewBlobUrl} className={previewTransitionClassNames} />
       )}
       {isVideo && (
-        <video
+        <OptimizedVideo
+          canPlay={canVideoPlay}
           className={previewTransitionClassNames}
           src={videoBlobUrl}
-          autoPlay={canVideoPlay}
           loop
           playsInline
           disablePictureInPicture

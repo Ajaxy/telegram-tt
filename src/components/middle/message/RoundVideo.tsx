@@ -24,11 +24,10 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
-import useVideoCleanup from '../../../hooks/useVideoCleanup';
-import useVideoAutoPause from './hooks/useVideoAutoPause';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import OptimizedVideo from '../../ui/OptimizedVideo';
 
 import './RoundVideo.scss';
 
@@ -141,21 +140,6 @@ const RoundVideo: FC<OwnProps> = ({
     stopPrevious = stopPlaying;
   }, [stopPlaying]);
 
-  useEffect(() => {
-    if (!playerRef.current) {
-      return;
-    }
-
-    if (shouldPlay) {
-      safePlay(playerRef.current);
-    } else {
-      playerRef.current.pause();
-    }
-  }, [shouldPlay]);
-
-  useVideoAutoPause(playerRef, shouldPlay);
-  useVideoCleanup(playerRef, [mediaData]);
-
   const handleClick = useCallback(() => {
     if (!mediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
@@ -212,8 +196,10 @@ const RoundVideo: FC<OwnProps> = ({
       {mediaData && (
         <div className="video-wrapper">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-          <video
+          <OptimizedVideo
+            canPlay={shouldPlay}
             ref={playerRef}
+            src={mediaData}
             className={videoClassName}
             width={ROUND_VIDEO_DIMENSIONS_PX}
             height={ROUND_VIDEO_DIMENSIONS_PX}
@@ -226,9 +212,7 @@ const RoundVideo: FC<OwnProps> = ({
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...bufferingHandlers}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
-          >
-            <source src={mediaData} />
-          </video>
+          />
         </div>
       )}
       <div className="progress" ref={playingProgressRef} />
