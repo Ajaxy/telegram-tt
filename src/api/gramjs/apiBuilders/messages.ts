@@ -226,7 +226,7 @@ function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCou
   if (!apiReaction) return undefined;
 
   return {
-    isChosen: Boolean(chosenOrder), // TODO: Add custom reactions support
+    isChosen: chosenOrder !== undefined, // TODO: Add custom reactions support
     count,
     reaction: apiReaction,
   };
