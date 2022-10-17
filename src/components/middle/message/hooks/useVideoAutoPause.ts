@@ -1,4 +1,4 @@
-import { useCallback, useRef } from '../../../../lib/teact/teact';
+import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 
 import { fastRaf } from '../../../../util/schedulers';
 import safePlay from '../../../../util/safePlay';
@@ -6,7 +6,6 @@ import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck from '../../../../hooks/useHeavyAnimationCheck';
 
 export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement | null }, canPlay: boolean) {
-  const wasPlaying = useRef(playerRef.current?.paused);
   const canPlayRef = useRef();
   canPlayRef.current = canPlay;
 
@@ -15,23 +14,15 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
   const freezePlaying = useCallback(() => {
     isFrozenRef.current = true;
 
-    if (!playerRef.current) {
-      return;
-    }
-
-    wasPlaying.current = !playerRef.current.paused;
-
-    if (wasPlaying.current) {
-      playerRef.current.pause();
-    }
+    playerRef.current?.pause();
   }, [playerRef]);
 
   const unfreezePlaying = useCallback(() => {
     isFrozenRef.current = false;
 
     if (
-      playerRef.current && wasPlaying.current && canPlayRef.current
-      // At this point HTMLVideoElement can be unmounted from the DOM
+      playerRef.current && canPlayRef.current
+      // At this point `HTMLVideoElement` can be unmounted from the DOM
       && document.body.contains(playerRef.current)
     ) {
       safePlay(playerRef.current);
@@ -46,11 +37,24 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
   useHeavyAnimationCheck(freezePlaying, unfreezePlaying);
 
   const handlePlaying = useCallback(() => {
-    if (isFrozenRef.current) {
-      wasPlaying.current = true;
+    if (!canPlayRef.current || isFrozenRef.current) {
       playerRef.current!.pause();
     }
   }, [playerRef]);
+
+  useEffect(() => {
+    if (!playerRef.current) {
+      return;
+    }
+
+    if (canPlay) {
+      if (!isFrozenRef.current) {
+        safePlay(playerRef.current);
+      }
+    } else {
+      playerRef.current!.pause();
+    }
+  }, [canPlay, playerRef]);
 
   return { handlePlaying };
 }

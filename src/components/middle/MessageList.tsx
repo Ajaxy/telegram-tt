@@ -64,6 +64,7 @@ import MessageListContent from './MessageListContent';
 import ContactGreeting from './ContactGreeting';
 import NoMessages from './NoMessages';
 import Skeleton from '../ui/Skeleton';
+import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './MessageList.scss';
 
@@ -563,10 +564,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
                 />
               )}
               {botInfoGifUrl && (
-                <video
+                <OptimizedVideo
+                  canPlay
                   src={botInfoGifUrl}
                   loop
-                  autoPlay
                   disablePictureInPicture
                   muted
                   playsInline

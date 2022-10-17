@@ -10,6 +10,8 @@ import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 
+import OptimizedVideo from '../../ui/OptimizedVideo';
+
 type OwnProps = {
   stickerSet: ApiStickerSet;
   observeIntersection: ObserveFn;
@@ -34,7 +36,7 @@ const StickerSetCover: FC<OwnProps> = ({ stickerSet, observeIntersection }) => {
     <div ref={ref} className="sticker-set-cover">
       {firstLetters}
       {isVideo ? (
-        <video src={mediaData} className={transitionClassNames} loop autoPlay disablePictureInPicture />
+        <OptimizedVideo canPlay src={mediaData} className={transitionClassNames} loop disablePictureInPicture />
       ) : (
         <img src={mediaData} className={transitionClassNames} alt="" />
       )}

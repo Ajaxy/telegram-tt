@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -8,7 +8,6 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { IS_WEBM_SUPPORTED } from '../../util/environment';
 import renderText from './helpers/renderText';
-import safePlay from '../../util/safePlay';
 import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
@@ -21,6 +20,7 @@ import useThumbnail from '../../hooks/useThumbnail';
 import useCustomEmoji from './hooks/useCustomEmoji';
 
 import AnimatedSticker from './AnimatedSticker';
+import OptimizedVideo from '../ui/OptimizedVideo';
 
 import styles from './CustomEmoji.module.scss';
 
@@ -77,36 +77,16 @@ const CustomEmoji: FC<OwnProps> = ({
 
   useEnsureCustomEmoji(documentId);
 
-  useEffect(() => {
-    if (!customEmoji?.isVideo) return;
-    const video = ref.current?.querySelector('video');
-    if (!video || isIntersecting === !video.paused) return;
+  const handleVideoEnded = useCallback((e) => {
+    if (!loopLimit) return;
 
-    if (isIntersecting) {
-      safePlay(video);
-    } else {
-      video.pause();
+    loopCountRef.current += 1;
+
+    if (loopCountRef.current >= loopLimit) {
+      setShouldLoop(false);
+      e.currentTarget.currentTime = 0;
     }
-  }, [customEmoji, isIntersecting]);
-
-  useEffect(() => {
-    if (!loopLimit) return undefined;
-    const video = ref.current?.querySelector('video');
-    if (!mediaData || !video) return undefined;
-
-    const returnToStart = () => {
-      loopCountRef.current += 1;
-      if (loopCountRef.current >= loopLimit) {
-        setShouldLoop(false);
-        video.currentTime = 0;
-      } else {
-        video.play();
-      }
-    };
-
-    video.addEventListener('ended', returnToStart);
-    return () => video.removeEventListener('ended', returnToStart);
-  }, [loopLimit, mediaData]);
+  }, [loopLimit]);
 
   const handleStickerLoop = useCallback(() => {
     if (!loopLimit) return;
@@ -117,7 +97,7 @@ const CustomEmoji: FC<OwnProps> = ({
     }
   }, [loopLimit]);
 
-  const content = useMemo(() => {
+  function renderContent() {
     if (!customEmoji || (!thumbDataUri && !mediaData)) {
       return (children && renderText(children, ['emoji']));
     }
@@ -136,14 +116,15 @@ const CustomEmoji: FC<OwnProps> = ({
 
     if (customEmoji.isVideo) {
       return (
-        <video
+        <OptimizedVideo
+          canPlay={isIntersecting}
           className={styles.media}
+          src={mediaData}
           playsInline
           muted
           loop={!loopLimit}
-          autoPlay={isIntersecting}
-          src={mediaData}
           disablePictureInPicture
+          onEnded={handleVideoEnded}
         />
       );
     }
@@ -161,10 +142,7 @@ const CustomEmoji: FC<OwnProps> = ({
         onLoop={handleStickerLoop}
       />
     );
-  }, [
-    children, customColor, customEmoji, handleStickerLoop, isIntersecting, loopLimit, mediaData, shouldLoop,
-    thumbDataUri,
-  ]);
+  }
 
   return (
     <div
@@ -179,7 +157,7 @@ const CustomEmoji: FC<OwnProps> = ({
       )}
       onClick={onClick}
     >
-      {content}
+      {renderContent()}
     </div>
   );
 };

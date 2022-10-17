@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useEffect, useRef } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiThumbnail } from '../../../../api/types';
 
@@ -7,9 +7,9 @@ import useMedia from '../../../../hooks/useMedia';
 import buildClassName from '../../../../util/buildClassName';
 import useCanvasBlur from '../../../../hooks/useCanvasBlur';
 import useMediaTransition from '../../../../hooks/useMediaTransition';
-import safePlay from '../../../../util/safePlay';
 
 import DeviceFrame from '../../../../assets/premium/DeviceFrame.svg';
+import OptimizedVideo from '../../../ui/OptimizedVideo';
 
 import styles from './PremiumFeaturePreviewVideo.module.scss';
 
@@ -33,19 +33,6 @@ const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
   const mediaData = useMedia(`document${videoId}`);
   const thumbnailRef = useCanvasBlur(videoThumbnail.dataUri);
   const transitionClassNames = useMediaTransition(mediaData);
-  // eslint-disable-next-line no-null/no-null
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isActive) {
-      safePlay(video);
-    } else {
-      video.pause();
-    }
-  }, [isActive]);
 
   return (
     <div className={styles.root}>
@@ -59,14 +46,10 @@ const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
       >
         <img src={DeviceFrame} alt="" className={styles.frame} />
         <canvas ref={thumbnailRef} className={styles.video} />
-        <video
-          ref={videoRef}
-          className={buildClassName(
-            styles.video,
-            transitionClassNames,
-          )}
+        <OptimizedVideo
+          canPlay={isActive}
+          className={buildClassName(styles.video, transitionClassNames)}
           src={mediaData}
-          autoPlay={isActive}
           disablePictureInPicture
           playsInline
           muted
