@@ -1,6 +1,6 @@
 .Notification-container {
   position: relative;
-  width: 24rem;
+  width: 27rem;
   max-width: 100vw;
   margin: 4.25rem auto 0.25rem;
   z-index: var(--z-notification);
@@ -61,8 +61,8 @@
     color: var(--color-primary);
     font-weight: 500;
     text-transform: none;
-    flex: 1;
-    padding: 0 2rem;
+    flex-shrink: 1;
+    padding: 0.25rem;
     height: 2rem;
   }
 }

@@ -11,6 +11,7 @@ import type {
   ApiExportedInvite,
   ApiChatInviteImporter,
   ApiChatSettings,
+  ApiSendAsPeerId,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -466,4 +467,11 @@ export function buildApiChatReactions(availableReactions?: GramJs.TypeChatReacti
   }
 
   return undefined;
+}
+
+export function buildApiSendAsPeerId(sendAs: GramJs.SendAsPeer): ApiSendAsPeerId {
+  return {
+    id: getApiChatIdFromMtpPeer(sendAs.peer),
+    isPremium: sendAs.premiumRequired,
+  };
 }
