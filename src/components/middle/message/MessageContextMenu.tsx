@@ -336,7 +336,7 @@ const MessageContextMenu: FC<OwnProps> = ({
                   : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
               ) : (
                 message.seenByUserIds?.length === 1 && seenByRecentUsers
-                  ? getUserFullName(seenByRecentUsers[0])
+                  ? renderText(getUserFullName(seenByRecentUsers[0])!)
                   : (message.seenByUserIds?.length
                     ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
                     : lang('Conversation.ContextMenuNoViews')
