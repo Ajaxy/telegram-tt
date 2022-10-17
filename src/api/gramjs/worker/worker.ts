@@ -3,6 +3,7 @@ import type { OriginMessageEvent, WorkerMessageData } from './types';
 
 import { DEBUG } from '../../../config';
 import { initApi, callApi, cancelApiProgress } from '../provider';
+import { log } from '../helpers';
 
 declare const self: WorkerGlobalScope;
 
@@ -47,8 +48,7 @@ onmessage = async (message: OriginMessageEvent) => {
         const response = await callApi(name, ...args);
 
         if (DEBUG && typeof response === 'object' && 'CONSTRUCTOR_ID' in response) {
-          // eslint-disable-next-line no-console
-          console.error(`[GramJs/worker] \`${name}\`: Unexpected response \`${(response as any).className}\``);
+          log('UNEXPECTED RESPONSE', `${name}: ${response.className}`);
         }
 
         const { arrayBuffer } = (typeof response === 'object' && 'arrayBuffer' in response && response) || {};
@@ -119,6 +119,10 @@ function onUpdate(update: ApiUpdate) {
     type: 'update',
     update,
   });
+
+  if (DEBUG && update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
+    log('UPDATE', update['@type'], update);
+  }
 }
 
 function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {

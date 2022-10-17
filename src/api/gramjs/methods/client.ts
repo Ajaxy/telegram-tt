@@ -27,7 +27,7 @@ import downloadMediaWithClient, { parseMediaUrl } from './media';
 import { buildApiUserFromFull } from '../apiBuilders/users';
 import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
-import { addMessageToLocalDb } from '../helpers';
+import { addMessageToLocalDb, log } from '../helpers';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
@@ -83,8 +83,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   try {
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[GramJs/client] CONNECTING');
+      log('CONNECTING');
 
       // eslint-disable-next-line no-restricted-globals
       (self as any).invoke = invokeRequest;
@@ -120,8 +119,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.log('>>> FINISH INIT API');
-      // eslint-disable-next-line no-console
-      console.log('[GramJs/client] CONNECTED');
+      log('CONNECTED');
     }
 
     onAuthReady();
@@ -131,8 +129,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     void fetchCurrentUser();
   } catch (err) {
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[GramJs/client] CONNECTING ERROR', err);
+      log('CONNECTING ERROR', err);
     }
 
     throw err;
@@ -214,8 +211,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 ) {
   if (!isConnected) {
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn(`[GramJs/client] INVOKE ERROR ${request.className}: Client is not connected`);
+      log('INVOKE ERROR', request.className, 'Client is not connected');
     }
 
     return undefined;
@@ -223,15 +219,13 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
   try {
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log(`[GramJs/client] INVOKE ${request.className}`);
+      log('INVOKE', request.className);
     }
 
     const result = await client.invoke(request, dcId);
 
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
+      log('INVOKE RESPONSE', request.className, result);
     }
 
     if (!shouldIgnoreUpdates) {
@@ -241,8 +235,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     return shouldReturnTrue ? result && true : result;
   } catch (err: any) {
     if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log(`[GramJs/client] INVOKE ERROR ${request.className}`);
+      log('INVOKE ERROR', request.className);
       // eslint-disable-next-line no-console
       console.error(err);
     }

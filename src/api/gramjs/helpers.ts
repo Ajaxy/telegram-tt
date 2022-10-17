@@ -2,6 +2,20 @@ import { Api as GramJs } from '../../lib/gramjs';
 import localDb from './localDb';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 
+const LOG_BACKGROUND = '#111111DD';
+const LOG_PREFIX_COLOR = '#E4D00A';
+const LOG_SUFFIX = {
+  INVOKE: '#49DBF5',
+  'INVOKE RESPONSE': '#6887F7',
+  CONNECTING: '#E4D00A',
+  CONNECTED: '#26D907',
+  'CONNECTING ERROR': '#D1191C',
+  'INVOKE ERROR': '#D1191C',
+  UPDATE: '#0DD151',
+  'UNEXPECTED UPDATE': '#9C9C9C',
+  'UNEXPECTED RESPONSE': '#D1191C',
+};
+
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
     return undefined;
@@ -82,4 +96,19 @@ export function serializeBytes(value: Buffer) {
 
 export function deserializeBytes(value: string) {
   return Buffer.from(value, 'binary');
+}
+
+export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
+  /* eslint-disable max-len */
+  /* eslint-disable no-console */
+  const func = suffix === 'UNEXPECTED RESPONSE' ? console.error
+    : suffix === 'INVOKE ERROR' || suffix === 'UNEXPECTED UPDATE' ? console.warn : console.log;
+  /* eslint-enable no-console */
+  func(
+    `%cGramJS%c${suffix}`,
+    `color: ${LOG_PREFIX_COLOR}; background: ${LOG_BACKGROUND}; padding: 0.25rem; border-radius: 0.25rem;`,
+    `color: ${LOG_SUFFIX[suffix]}; background: ${LOG_BACKGROUND}; padding: 0.25rem; border-radius: 0.25rem; margin-left: 0.25rem;`,
+    ...data,
+  );
+  /* eslint-enable max-len */
 }
