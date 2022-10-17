@@ -5,6 +5,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { ApiUser } from '../../api/types';
 
 import useLang from '../../hooks/useLang';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 
@@ -19,7 +20,7 @@ const AttachBotInstallModal: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const name = bot?.firstName;
+  const name = useCurrentOrPrev(bot?.firstName, true);
 
   return (
     <ConfirmDialog
