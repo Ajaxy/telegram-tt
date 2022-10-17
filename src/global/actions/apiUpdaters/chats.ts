@@ -105,19 +105,26 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         && update.chatId === currentChatId
       );
 
+      const hasMention = Boolean(update.message.id && update.message.hasUnreadMention);
+
       if (isActiveChat) {
         setTimeout(() => {
           actions.requestChatUpdate({ chatId: update.chatId });
         }, CURRENT_CHAT_UNREAD_DELAY);
+      } else {
+        global = updateChat(global, update.chatId, {
+          unreadCount: (chat.unreadCount || 0) + 1,
+          ...(hasMention && { unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1 }),
+        });
       }
 
-      setGlobal(updateChat(global, update.chatId, {
-        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-        ...(update.message.id && update.message.hasUnreadMention && {
-          unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1,
-          unreadMentions: [...(chat.unreadMentions || []), update.message.id],
-        }),
-      }));
+      if (hasMention) {
+        global = updateChat(global, update.chatId, {
+          unreadMentions: [...(chat.unreadMentions || []), update.message.id!],
+        });
+      }
+
+      setGlobal(global);
 
       notifyAboutMessage({
         chat,
