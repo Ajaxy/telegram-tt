@@ -1,3 +1,21 @@
+## 1.54.0 (2022-10-17)
+
+### 👏 **Harder**
+* Enjoy viewing Emoji Statuses. Setting your own status will be possible in the following update.
+
+### 🤩 **Better**
+* Better accent colors in Message List.
+* When composing a message on Android, you can now open the system context menu with a second tap.
+
+### 🚀 **Faster**
+* Various optimizations for video animations.
+
+### 💪 **Stronger**
+* Various fixes in New Poll dialog.
+* Fixed mouse wheel scroll in Emoji Tooltip.
+* Fixed bot description layout.
+* Fixed deleting folders from Settings.
+
 ## 1.53.0 (2022-10-10)
 
 ### 👏 **Harder**
