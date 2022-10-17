@@ -48,7 +48,7 @@ const PollModal: FC<OwnProps> = ({
   const [isMultipleAnswers, setIsMultipleAnswers] = useState(false);
   const [isQuizMode, setIsQuizMode] = useState(isQuiz || false);
   const [solution, setSolution] = useState<string>('');
-  const [correctOption, setCorrectOption] = useState<string>();
+  const [correctOption, setCorrectOption] = useState<number | undefined>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
   const lang = useLang();
@@ -68,7 +68,7 @@ const PollModal: FC<OwnProps> = ({
       setIsMultipleAnswers(false);
       setIsQuizMode(isQuiz || false);
       setSolution('');
-      setCorrectOption('');
+      setCorrectOption(undefined);
       setHasErrors(false);
     }
   }, [isQuiz, isOpen]);
@@ -120,7 +120,7 @@ const PollModal: FC<OwnProps> = ({
       return;
     }
 
-    if (isQuizMode && (!correctOption || !optionsTrimmed[Number(correctOption)])) {
+    if (isQuizMode && (correctOption === undefined || !optionsTrimmed[correctOption])) {
       setHasErrors(true);
       return;
     }
@@ -129,7 +129,7 @@ const PollModal: FC<OwnProps> = ({
       .map((text, index) => ({
         text: text.trim(),
         option: String(index),
-        ...(String(index) === correctOption && { correct: true }),
+        ...(index === correctOption && { correct: true }),
       }));
 
     const payload: ApiNewPoll = {
@@ -146,7 +146,7 @@ const PollModal: FC<OwnProps> = ({
       const { text, entities } = (solution && parseMessageInput(solution.substring(0, MAX_SOLUTION_LENGTH))) || {};
 
       payload.quiz = {
-        correctAnswers: [correctOption],
+        correctAnswers: [String(correctOption)],
         ...(text && { solution: text }),
         ...(entities && { solutionEntities: entities }),
       };
@@ -180,6 +180,15 @@ const PollModal: FC<OwnProps> = ({
     const newOptions = [...options];
     newOptions.splice(index, 1);
     setOptions(newOptions);
+
+    if (correctOption !== undefined) {
+      if (correctOption === index) {
+        setCorrectOption(undefined);
+      } else if (index < correctOption) {
+        setCorrectOption(correctOption - 1);
+      }
+    }
+
     requestAnimationFrame(() => {
       if (!optionsListRef.current) {
         return;
@@ -187,10 +196,10 @@ const PollModal: FC<OwnProps> = ({
 
       optionsListRef.current.classList.toggle('overflown', optionsListRef.current.scrollHeight > MAX_LIST_HEIGHT);
     });
-  }, [options]);
+  }, [correctOption, options]);
 
   const handleCorrectOptionChange = useCallback((newValue: string) => {
-    setCorrectOption(newValue);
+    setCorrectOption(Number(newValue));
   }, [setCorrectOption]);
 
   const handleIsAnonymousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -288,8 +297,8 @@ const PollModal: FC<OwnProps> = ({
   function renderQuizNoOptionError() {
     const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
 
-    return isQuizMode && (!correctOption || !optionsTrimmed[Number(correctOption)]) && (
-      <p className="error">{lang('lng_polls_choose_correct')}</p>
+    return isQuizMode && (correctOption === undefined || !optionsTrimmed[correctOption]) && (
+      <p className="poll-error">{lang('lng_polls_choose_correct')}</p>
     );
   }
 
@@ -313,6 +322,7 @@ const PollModal: FC<OwnProps> = ({
           <RadioGroup
             name="correctOption"
             options={renderRadioOptions()}
+            selected={String(correctOption)}
             onChange={handleCorrectOptionChange}
           />
         ) : (
