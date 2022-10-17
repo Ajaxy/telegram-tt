@@ -429,6 +429,7 @@ const MiddleColumn: FC<StateProps> = ({
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 withBottomShift={withMessageListBottomShift}
+                withDefaultBg={Boolean(!customBackground && !backgroundColor)}
               />
               <div className={footerClassName}>
                 {renderingCanPost && (

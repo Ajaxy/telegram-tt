@@ -17,27 +17,15 @@
     border-radius: var(--border-radius-messages-small);
     font-weight: 500;
     text-transform: none;
+    transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
 
-    &::before {
-      content: "";
-      background-color: var(--color-white);
-      opacity: 0;
-
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-radius: var(--border-radius-messages-small);
-      z-index: var(--z-below);
-      transition: opacity 200ms;
-    }
-
-    &:hover {
+    &:hover,
+    &:focus {
       background: var(--pattern-color) !important;
+      backdrop-filter: brightness(115%);
 
-      &::before {
-        opacity: 0.4;
+      @supports not (backdrop-filter: brightness(115%)) {
+        filter: brightness(115%);
       }
     }
 

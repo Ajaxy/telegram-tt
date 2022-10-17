@@ -616,10 +616,10 @@
     position: absolute;
     bottom: 0;
     color: white;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--pattern-color);
 
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 150ms, backdrop-filter 150ms, filter 150ms;
 
     @media (pointer: coarse) {
       opacity: 1 !important;
@@ -628,7 +628,12 @@
     &:hover,
     &:active,
     &:focus {
-      background-color: rgba(0, 0, 0, 0.28) !important;
+      background-color: var(--pattern-color) !important;
+      backdrop-filter: brightness(115%);
+
+      @supports not (backdrop-filter: brightness(115%)) {
+        filter: brightness(115%);
+      }
     }
   }
 
