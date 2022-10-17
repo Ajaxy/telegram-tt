@@ -11,15 +11,11 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../api/types';
-import {
-  MAIN_THREAD_ID,
-} from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 import type {
   ISettings, ProfileState, ProfileTabType, SharedMediaType,
 } from '../../types';
-import {
-  NewChatMembersProgress, MediaViewerOrigin, AudioOrigin,
-} from '../../types';
+import { NewChatMembersProgress, MediaViewerOrigin, AudioOrigin } from '../../types';
 
 import {
   MEMBERS_SLICE,
@@ -48,6 +44,7 @@ import useProfileState from './hooks/useProfileState';
 import useTransitionFixes from './hooks/useTransitionFixes';
 import useAsyncRendering from './hooks/useAsyncRendering';
 import useLang from '../../hooks/useLang';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -67,7 +64,6 @@ import DeleteMemberModal from './DeleteMemberModal';
 import GroupChatInfo from '../common/GroupChatInfo';
 
 import './Profile.scss';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
 type OwnProps = {
   chatId: string;
@@ -455,7 +451,7 @@ const Profile: FC<OwnProps & StateProps> = ({
       onLoadMore={getMore}
       onScroll={handleScroll}
     >
-      {!noProfileInfo && renderProfileInfo(chatId, resolvedUserId)}
+      {!noProfileInfo && renderProfileInfo(chatId, resolvedUserId, isRightColumnShown && canRenderContent)}
       {!isRestricted && (
         <div
           className="shared-media"
@@ -496,10 +492,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderProfileInfo(chatId: string, resolvedUserId?: string) {
+function renderProfileInfo(chatId: string, resolvedUserId: string | undefined, isReady: boolean) {
   return (
     <div className="profile-info">
-      <ProfileInfo userId={resolvedUserId || chatId} />
+      <ProfileInfo userId={resolvedUserId || chatId} canPlayVideo={isReady} />
       <ChatExtra chatOrUserId={resolvedUserId || chatId} />
     </div>
   );

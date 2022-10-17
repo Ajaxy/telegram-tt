@@ -68,6 +68,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {currentUser && (
           <ProfileInfo
             userId={currentUser.id}
+            canPlayVideo={Boolean(isActive)}
             forceShowSelf
           />
         )}
