@@ -7,9 +7,11 @@ import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
+
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 
 import Loading from '../../ui/Loading';
 import EmojiButton from './EmojiButton';
@@ -67,6 +69,8 @@ const EmojiTooltip: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
   const listEmojis: Emoji[] = usePrevDuringAnimation(emojis.length ? emojis : undefined, CLOSE_DURATION) || [];
+
+  useHorizontalScroll(containerRef.current);
 
   const handleSelectEmoji = useCallback((emoji: Emoji) => {
     onEmojiSelect(emoji.native);
