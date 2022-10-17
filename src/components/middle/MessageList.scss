@@ -139,7 +139,7 @@
       left: -50vw;
       right: -50vw;
       background: black;
-      z-index: -1;
+      z-index: 0;
 
       opacity: 0;
       transition: opacity var(--select-transition);
@@ -175,6 +175,24 @@
 
         .theme-dark & {
           opacity: 0.6;
+        }
+      }
+    }
+  }
+
+  html.theme-light &.with-default-bg {
+    .Message,
+    .ActionMessage {
+      &::before {
+        background: var(--pattern-color);
+      }
+
+      &.focused,
+      &.is-forwarding,
+      &.is-selected,
+      &.has-menu-open {
+        &::before {
+          opacity: 0.55;
         }
       }
     }
@@ -243,6 +261,8 @@
       padding: 0 0.5rem;
       border-radius: var(--border-radius-messages);
       word-break: break-word;
+      position: relative;
+      z-index: 0;
 
       body.is-ios &,
       body.is-macos & {

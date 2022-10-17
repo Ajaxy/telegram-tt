@@ -62,7 +62,6 @@
   .media:not(.text) &,
   .Message .custom-shape &,
   .Message .invoice & {
-    background: rgba(0, 0, 0, 0.2);
     --color-accent-own: white;
     --color-accent: white;
     color: white !important;
@@ -76,6 +75,15 @@
     .MessageOutgoingStatus i {
       background: transparent;
     }
+  }
+
+  .media:not(.text) &,
+  .Message .invoice & {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .Message .custom-shape & {
+    background: var(--pattern-color);
   }
 
   .voice &[dir="rtl"] {
