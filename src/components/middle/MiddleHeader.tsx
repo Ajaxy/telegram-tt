@@ -332,6 +332,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         <div className="chat-info-wrapper" onClick={handleHeaderClick}>
           {isUserId(chatId) ? (
             <PrivateChatInfo
+              key={chatId}
               userId={chatId}
               typingStatus={typingStatus}
               status={connectionStatusText}
@@ -344,6 +345,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             />
           ) : (
             <GroupChatInfo
+              key={chatId}
               chatId={chatId}
               typingStatus={typingStatus}
               status={connectionStatusText}
