@@ -18,6 +18,7 @@ import useEnsureCustomEmoji from '../../hooks/useEnsureCustomEmoji';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useThumbnail from '../../hooks/useThumbnail';
 import useCustomEmoji from './hooks/useCustomEmoji';
+import safePlay from '../../util/safePlay';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -85,12 +86,17 @@ const CustomEmoji: FC<OwnProps> = ({
     if (loopCountRef.current >= loopLimit) {
       setShouldLoop(false);
       e.currentTarget.currentTime = 0;
+    } else {
+      // Loop manually
+      safePlay(e.currentTarget);
     }
   }, [loopLimit]);
 
   const handleStickerLoop = useCallback(() => {
     if (!loopLimit) return;
+
     loopCountRef.current += 1;
+
     // Sticker plays 1 more time after disabling loop
     if (loopCountRef.current >= loopLimit - 1) {
       setShouldLoop(false);
@@ -117,7 +123,7 @@ const CustomEmoji: FC<OwnProps> = ({
     if (customEmoji.isVideo) {
       return (
         <OptimizedVideo
-          canPlay={isIntersecting}
+          canPlay={isIntersecting && shouldLoop}
           className={styles.media}
           src={mediaData}
           playsInline
