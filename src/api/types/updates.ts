@@ -329,7 +329,7 @@ export type ApiUpdateUserStatus = {
 export type ApiUpdateUserEmojiStatus = {
   '@type': 'updateUserEmojiStatus';
   userId: string;
-  emojiStatus: ApiEmojiStatus;
+  emojiStatus?: ApiEmojiStatus;
 };
 
 export type ApiUpdateUserFullInfo = {

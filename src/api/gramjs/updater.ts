@@ -740,7 +740,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   } else if (update instanceof GramJs.UpdateUserEmojiStatus) {
     const emojiStatus = buildApiUserEmojiStatus(update.emojiStatus);
-    if (!emojiStatus) return;
     onUpdate({
       '@type': 'updateUserEmojiStatus',
       userId: buildApiPeerId(update.userId, 'user'),
