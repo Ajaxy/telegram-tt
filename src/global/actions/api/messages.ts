@@ -1201,24 +1201,12 @@ addActionHandler('markMentionsRead', (global, actions, payload) => {
   const chat = selectCurrentChat(global);
   if (!chat) return;
 
-  if (!chat.unreadMentionsCount) {
-    return;
-  }
-
-  const unreadMentionsCount = chat.unreadMentionsCount - messageIds.length;
   const unreadMentions = (chat.unreadMentions || []).filter((id) => !messageIds.includes(id));
   global = updateChat(global, chat.id, {
     unreadMentions,
   });
 
   setGlobal(global);
-
-  if (!unreadMentions.length && unreadMentionsCount) {
-    actions.fetchUnreadMentions({
-      chatId: chat.id,
-      offsetId: Math.max(...messageIds),
-    });
-  }
 
   actions.markMessagesRead({ messageIds });
 });
