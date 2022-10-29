@@ -1245,13 +1245,10 @@ async function loadChats(
 
   global = updateChatListSecondaryInfo(global, listType, result);
 
-  Object.keys(result.draftsById).forEach((chatId) => {
+  result.chatIds.forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
     );
-  });
-
-  Object.keys(result.replyingToById).forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
     );

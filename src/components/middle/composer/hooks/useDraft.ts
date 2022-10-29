@@ -24,18 +24,20 @@ const useDraft = (
   htmlRef: { current: string },
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
+  lastSyncTime?: number,
 ) => {
   const { saveDraft, clearDraft } = getActions();
+  const prevDraft = usePrevious(draft);
 
   const updateDraft = useCallback((draftChatId: string, draftThreadId: number) => {
     const currentHtml = htmlRef.current;
-    if (currentHtml === undefined || editedMessage) return;
+    if (currentHtml === undefined || editedMessage || !lastSyncTime) return;
     if (currentHtml.length) {
       saveDraft({ chatId: draftChatId, threadId: draftThreadId, draft: parseMessageInput(currentHtml!) });
     } else {
       clearDraft({ chatId: draftChatId, threadId: draftThreadId });
     }
-  }, [clearDraft, editedMessage, htmlRef, saveDraft]);
+  }, [clearDraft, editedMessage, htmlRef, lastSyncTime, saveDraft]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runDebouncedForSaveDraft = useMemo(() => debounce((cb) => cb(), DRAFT_DEBOUNCE, false), [chatId]);
@@ -59,6 +61,9 @@ const useDraft = (
   // Restore draft on chat change
   useEffect(() => {
     if (chatId === prevChatId && threadId === prevThreadId) {
+      if (!draft && prevDraft) {
+        setHtml('');
+      }
       return;
     }
 
@@ -76,7 +81,7 @@ const useDraft = (
         }
       });
     }
-  }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId, editedMessage]);
+  }, [chatId, threadId, draft, setHtml, updateDraft, prevChatId, prevThreadId, editedMessage, prevDraft]);
 
   const html = htmlRef.current;
   // Update draft when input changes
