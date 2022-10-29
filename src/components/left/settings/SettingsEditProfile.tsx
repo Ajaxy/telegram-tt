@@ -17,6 +17,7 @@ import useLang from '../../../hooks/useLang';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import usePrevious from '../../../hooks/usePrevious';
 
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -37,6 +38,7 @@ type StateProps = {
   currentBio?: string;
   currentUsername?: string;
   progress?: ProfileEditProgress;
+  checkedUsername?: string;
   isUsernameAvailable?: boolean;
   maxBioLength: number;
 };
@@ -47,20 +49,20 @@ const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
 
 const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   isActive,
-  onReset,
   currentAvatarHash,
   currentFirstName,
   currentLastName,
   currentBio,
   currentUsername,
   progress,
+  checkedUsername,
   isUsernameAvailable,
   maxBioLength,
+  onReset,
 }) => {
   const {
     loadCurrentUser,
     updateProfile,
-    checkUsername,
   } = getActions();
 
   const lang = useLang();
@@ -80,13 +82,16 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   const isLoading = progress === ProfileEditProgress.InProgress;
   const isUsernameError = username === false;
 
+  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
+
   const isSaveButtonShown = useMemo(() => {
     if (isUsernameError) {
       return false;
     }
 
-    return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
-  }, [photo, isProfileFieldsTouched, isUsernameError, isUsernameAvailable]);
+    return Boolean(photo) || isProfileFieldsTouched || (isUsernameTouched && renderingIsUsernameAvailable === true);
+  }, [isUsernameError, photo, isProfileFieldsTouched, isUsernameTouched, renderingIsUsernameAvailable]);
 
   useHistoryBack({
     isActive,
@@ -144,8 +149,8 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 
   const handleUsernameChange = useCallback((value: string | false) => {
     setUsername(value);
-    setIsUsernameTouched(true);
-  }, []);
+    setIsUsernameTouched(currentUsername !== value);
+  }, [currentUsername]);
 
   const handleProfileSave = useCallback(() => {
     const trimmedFirstName = firstName.trim();
@@ -216,10 +221,10 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Username')}</h4>
 
           <UsernameInput
-            currentUsername={username || ''}
+            currentUsername={currentUsername}
             isLoading={isLoading}
             isUsernameAvailable={isUsernameAvailable}
-            checkUsername={checkUsername}
+            checkedUsername={checkedUsername}
             onChange={handleUsernameChange}
           />
 
@@ -239,7 +244,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         isShown={isSaveButtonShown}
         onClick={handleProfileSave}
         disabled={isLoading}
-        ariaLabel="Save changes"
+        ariaLabel={lang('Save')}
       >
         {isLoading ? (
           <Spinner color="white" />
@@ -254,7 +259,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentUserId } = global;
-    const { progress, isUsernameAvailable } = global.profileEdit || {};
+    const { progress, isUsernameAvailable, checkedUsername } = global.profileEdit || {};
     const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
 
     const maxBioLength = selectCurrentLimit(global, 'aboutLength');
@@ -262,6 +267,7 @@ export default memo(withGlobal<OwnProps>(
     if (!currentUser) {
       return {
         progress,
+        checkedUsername,
         isUsernameAvailable,
         maxBioLength,
       };
@@ -284,6 +290,7 @@ export default memo(withGlobal<OwnProps>(
       currentUsername,
       progress,
       isUsernameAvailable,
+      checkedUsername,
       maxBioLength,
     };
   },

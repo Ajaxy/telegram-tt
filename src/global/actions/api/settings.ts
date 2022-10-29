@@ -92,6 +92,7 @@ addActionHandler('checkUsername', async (global, actions, payload) => {
     ...global,
     profileEdit: {
       progress: global.profileEdit ? global.profileEdit.progress : ProfileEditProgress.Idle,
+      checkedUsername: undefined,
       isUsernameAvailable: undefined,
     },
   });
@@ -103,6 +104,7 @@ addActionHandler('checkUsername', async (global, actions, payload) => {
     ...global,
     profileEdit: {
       ...global.profileEdit!,
+      checkedUsername: username,
       isUsernameAvailable,
     },
   });

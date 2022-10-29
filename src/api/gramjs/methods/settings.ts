@@ -3,6 +3,8 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiAppConfig,
+  ApiChat,
+  ApiError,
   ApiLangString,
   ApiLanguage,
   ApiNotifyException,
@@ -52,7 +54,12 @@ export function updateProfile({
 }
 
 export function checkUsername(username: string) {
-  return invokeRequest(new GramJs.account.CheckUsername({ username }));
+  return invokeRequest(new GramJs.account.CheckUsername({ username }), undefined, true).catch((error) => {
+    if ((error as ApiError).message === 'USERNAME_INVALID') {
+      return false;
+    }
+    throw error;
+  });
 }
 
 export function updateUsername(username: string) {

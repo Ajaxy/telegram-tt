@@ -10,10 +10,12 @@ import { ManagementProgress } from '../../../types';
 
 import { selectChat, selectManagement } from '../../../global/selectors';
 import { isChatChannel } from '../../../global/helpers';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
+
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import { selectCurrentLimit } from '../../../global/selectors/limits';
+import usePrevious from '../../../hooks/usePrevious';
 
 import SafeLink from '../../common/SafeLink';
 import ListItem from '../../ui/ListItem';
@@ -37,22 +39,23 @@ type StateProps = {
   isChannel: boolean;
   progress?: ManagementProgress;
   isUsernameAvailable?: boolean;
+  checkedUsername?: string;
   isProtected?: boolean;
   maxPublicLinks: number;
 };
 
 const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   chat,
-  onClose,
   isActive,
   isChannel,
   progress,
   isUsernameAvailable,
+  checkedUsername,
   isProtected,
   maxPublicLinks,
+  onClose,
 }) => {
   const {
-    checkPublicLink,
     updatePublicLink,
     updatePrivateLink,
     toggleIsProtected,
@@ -66,8 +69,11 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const [username, setUsername] = useState();
   const [isRevokeConfirmDialogOpen, openRevokeConfirmDialog, closeRevokeConfirmDialog] = useFlag();
 
+  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
+
   const canUpdate = Boolean(
-    (privacyType === 'public' && username && isUsernameAvailable)
+    (privacyType === 'public' && username && renderingIsUsernameAvailable)
     || (privacyType === 'private' && isPublic),
   );
 
@@ -175,7 +181,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
               currentUsername={chat.username}
               isLoading={isLoading}
               isUsernameAvailable={isUsernameAvailable}
-              checkUsername={checkPublicLink}
+              checkedUsername={checkedUsername}
               onChange={setUsername}
             />
             <p className="section-info" dir="auto">
@@ -219,13 +225,14 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId)!;
-    const { isUsernameAvailable } = selectManagement(global, chatId)!;
+    const { isUsernameAvailable, checkedUsername } = selectManagement(global, chatId)!;
 
     return {
       chat,
       isChannel: isChatChannel(chat),
       progress: global.management.progress,
       isUsernameAvailable,
+      checkedUsername,
       isProtected: chat?.isProtected,
       maxPublicLinks: selectCurrentLimit(global, 'channelsPublic'),
     };
