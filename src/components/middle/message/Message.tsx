@@ -912,7 +912,7 @@ const Message: FC<OwnProps & StateProps> = ({
           <span
             className={buildClassName('message-title-name interactive', senderColor)}
             onClick={handleSenderClick}
-            dir="auto"
+            dir="ltr"
           >
             {renderText(senderTitle)}
             {!asForwarded && senderEmojiStatus && (
