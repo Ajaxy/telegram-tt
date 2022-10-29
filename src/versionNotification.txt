@@ -1,17 +1,11 @@
-**Telegram Web Z was updated to version 1.54**
+**Telegram Web Z was updated to version 1.55**
 
 [👏](customEmoji:5471921242866981303) **Harder**
-• Enjoy viewing Emoji Statuses. Setting your own status will be possible in the following update.
-
-[🤩](customEmoji:5373026167722876724) **Better**
-• Better accent colors in Message List.
-• When composing a message on Android, you can now open the system context menu with a second tap.
-
-[🚀](customEmoji:5445284980978621387) **Faster**
-• Various optimizations for video animations.
+• Sending custom emoji is now supported.
+• You can now access the app even when offline.
 
 [💪](customEmoji:5471883477219549006) **Stronger**
-• Various fixes in New Poll dialog.
-• Fixed mouse wheel scroll in Emoji Tooltip.
-• Fixed bot description layout.
-• Fixed deleting folders from Settings.
+• Fix syncing after editing draft on another device.
+• Fix multiple notification sounds when waking up from background mode.
+• Various fixes for username input.
+• Various fixes for Media Viewer.
