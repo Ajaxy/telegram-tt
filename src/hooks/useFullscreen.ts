@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from '../lib/teact/teact';
+import { useLayoutEffect, useState, useEffect } from '../lib/teact/teact';
 import { IS_IOS } from '../util/environment';
 
 type RefType = {
@@ -10,7 +10,7 @@ type CallbackType = (isPlayed: boolean) => void;
 
 const prop = getBrowserFullscreenElementProp();
 
-export default function useFullscreenStatus(elRef: RefType, setIsPlayed: CallbackType): ReturnType {
+export default function useFullscreen(elRef: RefType, setIsPlayed: CallbackType): ReturnType {
   const [isFullscreen, setIsFullscreen] = useState(Boolean(prop && document[prop]));
 
   const setFullscreen = () => {
@@ -30,13 +30,18 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
   };
 
   useLayoutEffect(() => {
-    const listener = () => { setIsFullscreen(Boolean(prop && document[prop])); };
+    const video = elRef.current;
+    const listener = () => {
+      const isEnabled = Boolean(prop && document[prop]);
+      setIsFullscreen(isEnabled);
+      // In Firefox fullscreen video controls are not visible by default, so we force them manually
+      video!.controls = isEnabled;
+    };
     const listenerEnter = () => { setIsFullscreen(true); };
     const listenerExit = () => {
       setIsFullscreen(false);
       setIsPlayed(false);
     };
-    const video = elRef.current;
 
     document.addEventListener('fullscreenchange', listener, false);
     document.addEventListener('webkitfullscreenchange', listener, false);
@@ -66,6 +71,28 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
   return [isFullscreen, setFullscreen, exitFullscreen];
 }
 
+export const useFullscreenStatus = () => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const listener = () => {
+      setIsFullscreen(checkIfFullscreen());
+    };
+
+    document.addEventListener('fullscreenchange', listener, false);
+    document.addEventListener('webkitfullscreenchange', listener, false);
+    document.addEventListener('mozfullscreenchange', listener, false);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', listener, false);
+      document.removeEventListener('webkitfullscreenchange', listener, false);
+      document.removeEventListener('mozfullscreenchange', listener, false);
+    };
+  }, []);
+
+  return isFullscreen;
+};
+
 function getBrowserFullscreenElementProp() {
   if (typeof document.fullscreenElement !== 'undefined') {
     return 'fullscreenElement';
@@ -74,8 +101,12 @@ function getBrowserFullscreenElementProp() {
   } else if (typeof document.webkitFullscreenElement !== 'undefined') {
     return 'webkitFullscreenElement';
   }
-
   return '';
+}
+
+export function checkIfFullscreen() {
+  const fullscreenProp = getBrowserFullscreenElementProp();
+  return Boolean(fullscreenProp && document[fullscreenProp]);
 }
 
 export function safeRequestFullscreen(video: HTMLVideoElement) {

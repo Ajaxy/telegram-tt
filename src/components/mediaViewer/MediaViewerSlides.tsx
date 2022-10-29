@@ -20,6 +20,7 @@ import usePrevious from '../../hooks/usePrevious';
 import useTimeout from '../../hooks/useTimeout';
 import useWindowSize from '../../hooks/useWindowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { useFullscreenStatus } from '../../hooks/useFullscreen';
 
 import MediaViewerContent from './MediaViewerContent';
 
@@ -101,6 +102,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const hasZoomChanged = prevZoomLevelChange !== undefined && prevZoomLevelChange !== zoomLevelChange;
   const forceUpdate = useForceUpdate();
   const [areControlsVisible, setControlsVisible] = useState(false);
+  const isFullscreen = useFullscreenStatus();
   const [isMouseDown, setIsMouseDown] = useState(false);
   const { height: windowHeight, width: windowWidth, isResizing } = useWindowSize();
   const { onClose } = rest;
@@ -145,7 +147,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   }, [mediaId]);
 
   useEffect(() => {
-    if (!containerRef.current || activeMediaId === undefined || isHidden) {
+    if (!containerRef.current || activeMediaId === undefined || isHidden || isFullscreen) {
       return undefined;
     }
     let lastTransform = lastTransformRef.current;
@@ -631,10 +633,11 @@ const MediaViewerSlides: FC<OwnProps> = ({
     animationLevel,
     setIsMouseDown,
     isHidden,
+    isFullscreen,
   ]);
 
   useEffect(() => {
-    if (!containerRef.current || !hasZoomChanged || isHidden) return;
+    if (!containerRef.current || !hasZoomChanged || isHidden || isFullscreen) return;
     const { scale } = transformRef.current;
     const dir = zoomLevelChange > 0 ? -1 : +1;
     const minZoom = MIN_ZOOM * 0.6;
@@ -662,7 +665,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         containerRef.current.dispatchEvent(wheelEvent);
       },
     });
-  }, [zoomLevelChange, hasZoomChanged, isHidden]);
+  }, [zoomLevelChange, hasZoomChanged, isHidden, isFullscreen]);
 
   if (activeMediaId === undefined) return undefined;
 

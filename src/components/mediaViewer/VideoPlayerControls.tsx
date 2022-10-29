@@ -235,7 +235,11 @@ const VideoPlayerControls: FC<OwnProps> = ({
       </div>
       <Menu
         isOpen={isPlaybackMenuOpen}
-        className={buildClassName('playback-rate-menu', !isFullscreenSupported && 'no-fullscreen')}
+        className={buildClassName(
+          'playback-rate-menu',
+          !isFullscreenSupported && 'no-fullscreen',
+          !isPictureInPictureSupported && 'no-pip',
+        )}
         positionX="right"
         positionY="bottom"
         autoClose
