@@ -4,11 +4,12 @@ import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import type { ApiStickerSet } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
+import { getFirstLetters } from '../../../util/textFormat';
+
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
-import { getFirstLetters } from '../../../util/textFormat';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 
@@ -46,6 +47,7 @@ const StickerSetCoverAnimated: FC<OwnProps> = ({
           size={size}
           tgsUrl={lottieData}
           className={transitionClassNames}
+          play={isIntersecting}
         />
       )}
     </div>

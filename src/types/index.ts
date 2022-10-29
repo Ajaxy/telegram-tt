@@ -78,6 +78,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   canAutoPlayGifs: boolean;
   canAutoPlayVideos: boolean;
   shouldSuggestStickers: boolean;
+  shouldSuggestCustomEmoji: boolean;
   shouldLoopStickers: boolean;
   hasPassword?: boolean;
   languages?: ApiLanguage[];

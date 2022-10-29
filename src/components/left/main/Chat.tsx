@@ -34,6 +34,7 @@ import {
 } from '../../../global/selectors';
 import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
 import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
@@ -249,7 +250,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>
-          {renderText(draft.text)}
+          {renderTextWithEntities(draft.text, draft.entities)}
         </p>
       );
     }

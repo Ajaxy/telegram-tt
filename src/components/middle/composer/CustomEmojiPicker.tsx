@@ -1,0 +1,298 @@
+import type { FC } from '../../../lib/teact/teact';
+import React, {
+  useState, useEffect, memo, useRef, useMemo, useCallback,
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../global';
+
+import type { ApiStickerSet, ApiSticker, ApiChat } from '../../../api/types';
+import type { StickerSetOrRecent } from '../../../types';
+
+import {
+  CHAT_STICKER_SET_ID,
+  FAVORITE_SYMBOL_SET_ID,
+  PREMIUM_STICKER_SET_ID,
+  RECENT_SYMBOL_SET_ID,
+  SLIDE_TRANSITION_DURATION,
+  STICKER_SIZE_PICKER_HEADER,
+} from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import buildClassName from '../../../util/buildClassName';
+import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
+import { pickTruthy } from '../../../util/iteratees';
+import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
+
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
+
+import Loading from '../../ui/Loading';
+import Button from '../../ui/Button';
+import StickerButton from '../../common/StickerButton';
+import StickerSet from './StickerSet';
+import StickerSetCover from './StickerSetCover';
+import StickerSetCoverAnimated from './StickerSetCoverAnimated';
+
+import './StickerPicker.scss';
+
+type OwnProps = {
+  chatId: string;
+  className: string;
+  loadAndPlay: boolean;
+  onCustomEmojiSelect: (sticker: ApiSticker) => void;
+};
+
+type StateProps = {
+  chat?: ApiChat;
+  stickerSetsById: Record<string, ApiStickerSet>;
+  addedCustomEmojiIds?: string[];
+  recentCustomEmoji: ApiSticker[];
+  featuredCustomEmojiIds?: string[];
+  shouldPlay?: boolean;
+  isSavedMessages?: boolean;
+  isCurrentUserPremium?: boolean;
+};
+
+const SMOOTH_SCROLL_DISTANCE = 500;
+const HEADER_BUTTON_WIDTH = 52; // px (including margin)
+const STICKER_INTERSECTION_THROTTLE = 200;
+
+const stickerSetIntersections: boolean[] = [];
+
+const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
+  className,
+  loadAndPlay,
+  addedCustomEmojiIds,
+  recentCustomEmoji,
+  stickerSetsById,
+  featuredCustomEmojiIds,
+  shouldPlay,
+  isSavedMessages,
+  isCurrentUserPremium,
+  onCustomEmojiSelect,
+}) => {
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
+
+  const { observe: observeIntersection } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: STICKER_INTERSECTION_THROTTLE,
+  }, (entries) => {
+    entries.forEach((entry) => {
+      const { id } = entry.target as HTMLDivElement;
+      if (!id || !id.startsWith('custom-emoji-set-')) {
+        return;
+      }
+
+      const index = Number(id.replace('custom-emoji-set-', ''));
+      stickerSetIntersections[index] = entry.isIntersecting;
+    });
+
+    const intersectingWithIndexes = stickerSetIntersections
+      .map((isIntersecting, index) => ({ index, isIntersecting }))
+      .filter(({ isIntersecting }) => isIntersecting);
+
+    if (!intersectingWithIndexes.length) {
+      return;
+    }
+
+    setActiveSetIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
+  });
+  const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: headerRef });
+
+  const lang = useLang();
+
+  const areAddedLoaded = Boolean(addedCustomEmojiIds);
+
+  const allSets = useMemo(() => {
+    if (!addedCustomEmojiIds) {
+      return MEMO_EMPTY_ARRAY;
+    }
+
+    const defaultSets = [];
+
+    if (recentCustomEmoji.length) {
+      defaultSets.push({
+        id: RECENT_SYMBOL_SET_ID,
+        title: lang('RecentStickers'),
+        stickers: recentCustomEmoji,
+        count: recentCustomEmoji.length,
+        isEmoji: true as true,
+      });
+    }
+
+    const existingAddedSetIds = Object.values(pickTruthy(stickerSetsById, addedCustomEmojiIds));
+
+    const filteredFeaturedIds = featuredCustomEmojiIds?.filter((id) => !addedCustomEmojiIds.includes(id)) || [];
+    const featuredSetIds = Object.values(pickTruthy(stickerSetsById, filteredFeaturedIds));
+
+    return [
+      ...defaultSets,
+      ...existingAddedSetIds,
+      ...featuredSetIds,
+    ];
+  }, [addedCustomEmojiIds, featuredCustomEmojiIds, lang, recentCustomEmoji, stickerSetsById]);
+
+  const noPopulatedSets = useMemo(() => (
+    areAddedLoaded
+    && allSets.filter((set) => set.stickers?.length).length === 0
+  ), [allSets, areAddedLoaded]);
+
+  useHorizontalScroll(headerRef.current);
+
+  // Scroll container and header when active set changes
+  useEffect(() => {
+    if (!areAddedLoaded) {
+      return;
+    }
+
+    const header = headerRef.current;
+    if (!header) {
+      return;
+    }
+
+    const newLeft = activeSetIndex * HEADER_BUTTON_WIDTH - (header.offsetWidth / 2 - HEADER_BUTTON_WIDTH / 2);
+
+    fastSmoothScrollHorizontal(header, newLeft);
+  }, [areAddedLoaded, activeSetIndex]);
+
+  const selectStickerSet = useCallback((index: number) => {
+    setActiveSetIndex(index);
+    const stickerSetEl = document.getElementById(`custom-emoji-set-${index}`)!;
+    fastSmoothScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
+  }, []);
+
+  const handleEmojiSelect = useCallback((emoji: ApiSticker) => {
+    onCustomEmojiSelect(emoji);
+  }, [onCustomEmojiSelect]);
+
+  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+
+  function renderCover(stickerSet: StickerSetOrRecent, index: number) {
+    const firstSticker = stickerSet.stickers?.[0];
+    const buttonClassName = buildClassName(
+      'symbol-set-button sticker-set-button',
+      index === activeSetIndex && 'activated',
+    );
+
+    if (stickerSet.id === RECENT_SYMBOL_SET_ID
+      || stickerSet.id === FAVORITE_SYMBOL_SET_ID
+      || stickerSet.id === CHAT_STICKER_SET_ID
+      || stickerSet.id === PREMIUM_STICKER_SET_ID
+      || stickerSet.hasThumbnail
+      || !firstSticker) {
+      return (
+        <Button
+          key={stickerSet.id}
+          className={buttonClassName}
+          ariaLabel={stickerSet.title}
+          round
+          faded={stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === FAVORITE_SYMBOL_SET_ID}
+          color="translucent"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => selectStickerSet(index)}
+        >
+          {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
+            <i className="icon-recent" />
+          ) : stickerSet.isLottie ? (
+            <StickerSetCoverAnimated
+              stickerSet={stickerSet as ApiStickerSet}
+              observeIntersection={observeIntersectionForCovers}
+            />
+          ) : (
+            <StickerSetCover
+              stickerSet={stickerSet as ApiStickerSet}
+              observeIntersection={observeIntersectionForCovers}
+            />
+          )}
+        </Button>
+      );
+    } else {
+      return (
+        <StickerButton
+          key={stickerSet.id}
+          sticker={firstSticker}
+          size={STICKER_SIZE_PICKER_HEADER}
+          title={stickerSet.title}
+          className={buttonClassName}
+          observeIntersection={observeIntersectionForCovers}
+          onClick={selectStickerSet}
+          clickArg={index}
+          noContextMenu
+          isCurrentUserPremium
+        />
+      );
+    }
+  }
+
+  const fullClassName = buildClassName('StickerPicker', 'CustomEmojiPicker', className);
+
+  if (!areAddedLoaded || !canRenderContents || noPopulatedSets) {
+    return (
+      <div className={fullClassName}>
+        {noPopulatedSets ? (
+          <div className="picker-disabled">{lang('NoStickers')}</div>
+        ) : (
+          <Loading />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={fullClassName}>
+      <div
+        ref={headerRef}
+        className="StickerPicker-header no-selection no-scrollbar"
+      >
+        {allSets.map(renderCover)}
+      </div>
+      <div
+        ref={containerRef}
+        className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      >
+        {allSets.map((stickerSet, i) => (
+          <StickerSet
+            key={stickerSet.id}
+            stickerSet={stickerSet}
+            loadAndPlay={Boolean(shouldPlay && loadAndPlay)}
+            index={i}
+            observeIntersection={observeIntersection}
+            shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+            onStickerSelect={handleEmojiSelect}
+            isSavedMessages={isSavedMessages}
+            isCustomEmojiPicker
+            isCurrentUserPremium={isCurrentUserPremium}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default memo(withGlobal<OwnProps>(
+  (global, { chatId }): StateProps => {
+    const {
+      setsById,
+    } = global.stickers;
+
+    const isSavedMessages = selectIsChatWithSelf(global, chatId);
+
+    const recentCustomEmoji = Object.values(pickTruthy(global.customEmojis.byId, global.recentCustomEmojis));
+
+    return {
+      stickerSetsById: setsById,
+      addedCustomEmojiIds: global.customEmojis.added.setIds,
+      shouldPlay: global.settings.byKey.shouldLoopStickers,
+      isSavedMessages,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      recentCustomEmoji,
+      featuredCustomEmojiIds: global.customEmojis.featuredIds,
+    };
+  },
+)(CustomEmojiPicker));

@@ -20,6 +20,7 @@ import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
+import CustomEmojiPicker from './CustomEmojiPicker';
 import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
 import SymbolMenuFooter, { SYMBOL_MENU_TAB_TITLES, SymbolMenuTabs } from './SymbolMenuFooter';
@@ -38,6 +39,7 @@ export type OwnProps = {
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
+  onCustomEmojiSelect: (emoji: ApiSticker) => void;
   onStickerSelect: (
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldPreserveInput?: boolean
   ) => void;
@@ -45,11 +47,13 @@ export type OwnProps = {
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
   addRecentEmoji: GlobalActions['addRecentEmoji'];
+  addRecentCustomEmoji: GlobalActions['addRecentCustomEmoji'];
 };
 
 type StateProps = {
   isLeftColumnShown: boolean;
   isCurrentUserPremium?: boolean;
+  lastSyncTime?: number;
 };
 
 let isActivated = false;
@@ -62,18 +66,22 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   canSendGifs,
   isLeftColumnShown,
   isCurrentUserPremium,
+  lastSyncTime,
   onLoad,
   onClose,
   onEmojiSelect,
+  onCustomEmojiSelect,
   onStickerSelect,
   onGifSelect,
   onRemoveSymbol,
   onSearchOpen,
   addRecentEmoji,
+  addRecentCustomEmoji,
 }) => {
-  const { loadPremiumSetStickers } = getActions();
+  const { loadPremiumSetStickers, loadFeaturedEmojiStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
+  const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_SINGLE_COLUMN_LAYOUT);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
@@ -87,10 +95,12 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [onLoad]);
 
   useEffect(() => {
+    if (!lastSyncTime) return;
     if (isCurrentUserPremium) {
       loadPremiumSetStickers();
     }
-  }, [isCurrentUserPremium, loadPremiumSetStickers]);
+    loadFeaturedEmojiStickers();
+  }, [isCurrentUserPremium, lastSyncTime, loadFeaturedEmojiStickers, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
     if (!IS_SINGLE_COLUMN_LAYOUT) {
@@ -134,6 +144,28 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     onEmojiSelect(emoji);
   }, [onEmojiSelect]);
 
+  const recentCustomEmojisRef = useRef(recentCustomEmojis);
+  recentCustomEmojisRef.current = recentCustomEmojis;
+  useEffect(() => {
+    if (!recentCustomEmojisRef.current.length || isOpen) {
+      return;
+    }
+
+    recentCustomEmojisRef.current.forEach((documentId) => {
+      addRecentCustomEmoji({
+        documentId,
+      });
+    });
+
+    setRecentEmojis([]);
+  }, [isOpen, addRecentCustomEmoji]);
+
+  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+    setRecentCustomEmojis((ids) => [...ids, emoji.id]);
+
+    onCustomEmojiSelect(emoji);
+  }, [onCustomEmojiSelect]);
+
   const handleSearch = useCallback((type: 'stickers' | 'gifs') => {
     onClose();
     onSearchOpen(type);
@@ -152,6 +184,15 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           <EmojiPicker
             className="picker-tab"
             onEmojiSelect={handleEmojiSelect}
+          />
+        );
+      case SymbolMenuTabs.CustomEmoji:
+        return (
+          <CustomEmojiPicker
+            className="picker-tab"
+            loadAndPlay={isOpen && (isActive || isFrom)}
+            onCustomEmojiSelect={handleCustomEmojiSelect}
+            chatId={chatId}
           />
         );
       case SymbolMenuTabs.Stickers:
@@ -257,6 +298,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       isLeftColumnShown: global.isLeftColumnShown,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      lastSyncTime: global.lastSyncTime,
     };
   },
 )(SymbolMenu));

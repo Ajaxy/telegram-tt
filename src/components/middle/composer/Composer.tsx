@@ -76,6 +76,8 @@ import { isSelectionInsideInput } from './helpers/selection';
 import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 import { getServerTime } from '../../../util/serverTime';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
+import { buildCustomEmojiHtml } from './helpers/customEmoji';
+import { processMessageInputForCustomEmoji } from '../../../util/customEmojiManager';
 
 import useFlag from '../../../hooks/useFlag';
 import usePrevious from '../../../hooks/usePrevious';
@@ -95,6 +97,7 @@ import useMentionTooltip from './hooks/useMentionTooltip';
 import useInlineBotTooltip from './hooks/useInlineBotTooltip';
 import useBotCommandTooltip from './hooks/useBotCommandTooltip';
 import useSchedule from '../../../hooks/useSchedule';
+import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -107,6 +110,7 @@ import InlineBotTooltip from './InlineBotTooltip.async';
 import MentionTooltip from './MentionTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
 import StickerTooltip from './StickerTooltip.async';
+import CustomEmojiTooltip from './CustomEmojiTooltip.async';
 import EmojiTooltip from './EmojiTooltip.async';
 import BotCommandTooltip from './BotCommandTooltip.async';
 import BotKeyboardMenu from './BotKeyboardMenu';
@@ -150,12 +154,14 @@ type StateProps =
     shouldSchedule?: boolean;
     canScheduleUntilOnline?: boolean;
     stickersForEmoji?: ApiSticker[];
+    customEmojiForEmoji?: ApiSticker[];
     groupChatMembers?: ApiChatMember[];
     currentUserId?: string;
     recentEmojis: string[];
     lastSyncTime?: number;
     contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
     shouldSuggestStickers?: boolean;
+    shouldSuggestCustomEmoji?: boolean;
     baseEmojiKeywords?: Record<string, string[]>;
     emojiKeywords?: Record<string, string[]>;
     topInlineBotIds?: string[];
@@ -229,6 +235,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   botKeyboardPlaceholder,
   withScheduledButton,
   stickersForEmoji,
+  customEmojiForEmoji,
   groupChatMembers,
   topInlineBotIds,
   currentUserId,
@@ -236,6 +243,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
+  shouldSuggestCustomEmoji,
   baseEmojiKeywords,
   emojiKeywords,
   recentEmojis,
@@ -271,13 +279,15 @@ const Composer: FC<OwnProps & StateProps> = ({
     resetOpenChatWithDraft,
     callAttachBot,
     openLimitReachedModal,
+    openPremiumModal,
+    addRecentCustomEmoji,
     showNotification,
   } = getActions();
   const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
   const appendixRef = useRef<HTMLDivElement>(null);
-  const [html, setHtml] = useState<string>('');
+  const [html, setInnerHtml] = useState<string>('');
   const htmlRef = useStateRef(html);
   const lastMessageSendTimeSeconds = useRef<number>();
   const prevDropAreaState = usePrevious(dropAreaState);
@@ -288,6 +298,15 @@ const Composer: FC<OwnProps & StateProps> = ({
   // Prevent Symbol Menu from closing when calendar is open
   const [isSymbolMenuForced, forceShowSymbolMenu, cancelForceShowSymbolMenu] = useFlag();
   const sendMessageAction = useSendMessageAction(chatId, threadId);
+
+  const setHtml = useCallback((newHtml: string) => {
+    setInnerHtml(newHtml);
+    requestAnimationFrame(() => {
+      processMessageInputForCustomEmoji();
+    });
+  }, []);
+
+  const customEmojiNotificationNumber = useRef(0);
 
   const handleScheduleCancel = useCallback(() => {
     cancelForceShowSymbolMenu();
@@ -441,8 +460,21 @@ const Composer: FC<OwnProps & StateProps> = ({
     stickersForEmoji,
     !isReady,
   );
+  const { isCustomEmojiTooltipOpen, closeCustomEmojiTooltip, insertCustomEmoji } = useCustomEmojiTooltip(
+    Boolean(shouldSuggestCustomEmoji && !attachments.length),
+    EDITABLE_INPUT_CSS_SELECTOR,
+    html,
+    setHtml,
+    customEmojiForEmoji,
+    !isReady,
+  );
   const {
-    isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
+    isEmojiTooltipOpen,
+    closeEmojiTooltip,
+    filteredEmojis,
+    filteredCustomEmojis,
+    insertEmoji,
+    insertCustomEmoji: insertCustomEmojiFromEmojiTooltip,
   } = useEmojiTooltip(
     Boolean(shouldSuggestStickers && canSendStickers && !attachments.length),
     htmlRef,
@@ -478,13 +510,17 @@ const Composer: FC<OwnProps & StateProps> = ({
     requestAnimationFrame(() => {
       focusEditableElement(messageInput);
     });
-  }, [htmlRef]);
+  }, [htmlRef, setHtml]);
 
   const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
     const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
       .join('')
       .replace(/\u200b+/g, '\u200b');
     insertHtmlAndUpdateCursor(newHtml, inputId);
+  }, [insertHtmlAndUpdateCursor]);
+
+  const insertCustomEmojiAndUpdateCursor = useCallback((emoji: ApiSticker, inputId: string = EDITABLE_INPUT_ID) => {
+    insertHtmlAndUpdateCursor(buildCustomEmojiHtml(emoji), inputId);
   }, [insertHtmlAndUpdateCursor]);
 
   const removeSymbol = useCallback(() => {
@@ -499,7 +535,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     setHtml(deleteLastCharacterOutsideSelection(htmlRef.current!));
-  }, [htmlRef]);
+  }, [htmlRef, setHtml]);
 
   const resetComposer = useCallback((shouldPreserveInput = false) => {
     if (!shouldPreserveInput) {
@@ -507,6 +543,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
     setAttachments(MEMO_EMPTY_ARRAY);
     closeStickerTooltip();
+    closeCustomEmojiTooltip();
     closeMentionTooltip();
     closeEmojiTooltip();
 
@@ -516,7 +553,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     } else {
       closeSymbolMenu();
     }
-  }, [closeStickerTooltip, closeMentionTooltip, closeEmojiTooltip, closeSymbolMenu]);
+  }, [closeStickerTooltip, closeCustomEmojiTooltip, closeMentionTooltip, closeEmojiTooltip, closeSymbolMenu, setHtml]);
 
   // Handle chat change (ref is used to avoid redundant effect calls)
   const stopRecordingVoiceRef = useRef<typeof stopRecordingVoice>();
@@ -734,7 +771,33 @@ const Composer: FC<OwnProps & StateProps> = ({
         focusEditableElement(messageInput, true);
       });
     }
-  }, [requestedText, resetOpenChatWithDraft]);
+  }, [requestedText, resetOpenChatWithDraft, setHtml]);
+
+  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+    if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
+      const notificationNumber = customEmojiNotificationNumber.current;
+      if (!notificationNumber) {
+        showNotification({
+          message: lang('UnlockPremiumEmojiHint'),
+          action: () => openPremiumModal({ initialSection: 'animated_emoji' }),
+          actionText: lang('PremiumMore'),
+        });
+      } else {
+        showNotification({
+          message: lang('UnlockPremiumEmojiHint2'),
+          action: () => openChat({ id: currentUserId, shouldReplaceHistory: true }),
+          actionText: lang('Open'),
+        });
+      }
+      customEmojiNotificationNumber.current = Number(!notificationNumber);
+      return;
+    }
+
+    insertCustomEmojiAndUpdateCursor(emoji);
+  }, [
+    currentUserId, insertCustomEmojiAndUpdateCursor, isChatWithSelf, isCurrentUserPremium, lang,
+    openChat, openPremiumModal, showNotification,
+  ]);
 
   const handleStickerSelect = useCallback((
     sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean, shouldPreserveInput = false,
@@ -1029,13 +1092,14 @@ const Composer: FC<OwnProps & StateProps> = ({
         onCaptionUpdate={setHtml}
         baseEmojiKeywords={baseEmojiKeywords}
         emojiKeywords={emojiKeywords}
-        addRecentEmoji={addRecentEmoji}
         shouldSchedule={shouldSchedule}
         onSendSilent={handleSendSilent}
         onSend={handleSend}
         onSendScheduled={handleSendScheduled}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachment}
+        shouldSuggestCustomEmoji={shouldSuggestCustomEmoji}
+        customEmojiForEmoji={customEmojiForEmoji}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1237,12 +1301,21 @@ const Composer: FC<OwnProps & StateProps> = ({
             isOpen={isStickerTooltipOpen}
             onStickerSelect={handleStickerSelect}
           />
+          <CustomEmojiTooltip
+            chatId={chatId}
+            isOpen={isCustomEmojiTooltipOpen}
+            onCustomEmojiSelect={insertCustomEmoji}
+            addRecentCustomEmoji={addRecentCustomEmoji}
+          />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}
             emojis={filteredEmojis}
+            customEmojis={filteredCustomEmojis}
             onClose={closeEmojiTooltip}
             onEmojiSelect={insertEmoji}
             addRecentEmoji={addRecentEmoji}
+            onCustomEmojiSelect={insertCustomEmojiFromEmojiTooltip}
+            addRecentCustomEmoji={addRecentCustomEmoji}
           />
           <SymbolMenu
             chatId={chatId}
@@ -1254,10 +1327,12 @@ const Composer: FC<OwnProps & StateProps> = ({
             onClose={closeSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
+            onCustomEmojiSelect={handleCustomEmojiSelect}
             onGifSelect={handleGifSelect}
             onRemoveSymbol={removeSymbol}
             onSearchOpen={handleSearchOpen}
             addRecentEmoji={addRecentEmoji}
+            addRecentCustomEmoji={addRecentCustomEmoji}
           />
         </div>
       </div>
@@ -1313,7 +1388,7 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
     const scheduledIds = selectScheduledIds(global, chatId);
-    const { language, shouldSuggestStickers } = global.settings.byKey;
+    const { language, shouldSuggestStickers, shouldSuggestCustomEmoji } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
@@ -1360,12 +1435,14 @@ export default memo(withGlobal<OwnProps>(
       isForwarding: chatId === global.forwardMessages.toChatId,
       pollModal: global.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
+      customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
       groupChatMembers: chat?.fullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
       lastSyncTime: global.lastSyncTime,
       contentToBeScheduled: global.messages.contentToBeScheduled,
       shouldSuggestStickers,
+      shouldSuggestCustomEmoji,
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,

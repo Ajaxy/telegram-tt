@@ -8,3 +8,4 @@ export * from './payments';
 export * from './reactions';
 export * from './bots';
 export * from './media';
+export * from './symbols';

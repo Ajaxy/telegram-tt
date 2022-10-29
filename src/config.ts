@@ -40,6 +40,8 @@ export const MEDIA_CACHE_NAME = 'tt-media';
 export const MEDIA_CACHE_NAME_AVATARS = 'tt-media-avatars';
 export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
+export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
+export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const LANG_CACHE_NAME = 'tt-lang-packs-v14';
@@ -155,6 +157,7 @@ export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const CHAT_STICKER_SET_ID = 'chatStickers';
 export const PREMIUM_STICKER_SET_ID = 'premium';
+export const EMOJI_IMG_REGEX = /<img[^>]+alt="([^"]+)"(?![^>]*data-document-id)[^>]*>/gm;
 
 export const BASE_EMOJI_KEYWORD_LANG = 'en';
 

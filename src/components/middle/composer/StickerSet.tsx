@@ -15,6 +15,7 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import buildClassName from '../../../util/buildClassName';
+import { selectIsSetPremium } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -31,12 +32,13 @@ type OwnProps = {
   shouldRender: boolean;
   favoriteStickers?: ApiSticker[];
   isSavedMessages?: boolean;
+  isCurrentUserPremium?: boolean;
+  isCustomEmojiPicker?: boolean;
   observeIntersection: ObserveFn;
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
-  isCurrentUserPremium?: boolean;
 };
 
 const STICKERS_PER_ROW_ON_DESKTOP = 5;
@@ -52,14 +54,20 @@ const StickerSet: FC<OwnProps> = ({
   shouldRender,
   favoriteStickers,
   isSavedMessages,
+  isCurrentUserPremium,
+  isCustomEmojiPicker,
   observeIntersection,
   onStickerSelect,
   onStickerUnfave,
   onStickerFave,
   onStickerRemoveRecent,
-  isCurrentUserPremium,
 }) => {
-  const { clearRecentStickers } = getActions();
+  const {
+    clearRecentStickers,
+    clearRecentCustomEmoji,
+    openPremiumModal,
+    toggleStickerSet,
+  } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
@@ -70,14 +78,32 @@ const StickerSet: FC<OwnProps> = ({
 
   const transitionClassNames = useMediaTransition(shouldRender);
 
+  const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
+  const isPremiumSet = !isRecent && selectIsSetPremium(stickerSet);
 
   const handleClearRecent = useCallback(() => {
-    clearRecentStickers();
+    if (isEmoji) {
+      clearRecentCustomEmoji();
+    } else {
+      clearRecentStickers();
+    }
     closeConfirmModal();
-  }, [clearRecentStickers, closeConfirmModal]);
+  }, [clearRecentCustomEmoji, clearRecentStickers, closeConfirmModal, isEmoji]);
 
-  const isLocked = !isSavedMessages && isEmoji && !isCurrentUserPremium
+  const handleAddClick = useCallback(() => {
+    if (isPremiumSet && !isCurrentUserPremium) {
+      openPremiumModal({
+        initialSection: 'animated_emoji',
+      });
+    } else {
+      toggleStickerSet({
+        stickerSetId: stickerSet.id,
+      });
+    }
+  }, [isCurrentUserPremium, isPremiumSet, openPremiumModal, stickerSet, toggleStickerSet]);
+
+  const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
     && stickerSet.stickers?.some((l) => !l.isFree);
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
   const itemsPerRow = isEmoji ? EMOJI_PER_ROW_ON_DESKTOP : STICKERS_PER_ROW_ON_DESKTOP;
@@ -97,13 +123,11 @@ const StickerSet: FC<OwnProps> = ({
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
   ), [favoriteStickers]);
 
-  const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
-
   return (
     <div
       ref={ref}
       key={stickerSet.id}
-      id={`sticker-set-${index}`}
+      id={`${isCustomEmojiPicker ? 'custom-emoji-set' : 'sticker-set'}-${index}`}
       className={
         buildClassName('symbol-set', isLocked && 'symbol-set-locked')
       }
@@ -115,6 +139,18 @@ const StickerSet: FC<OwnProps> = ({
         </p>
         {isRecent && (
           <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
+        )}
+        {!isRecent && isEmoji && !stickerSet.installedDate && (
+          <Button
+            className="symbol-set-add-button"
+            withPremiumGradient={isPremiumSet && !isCurrentUserPremium}
+            onClick={handleAddClick}
+            pill
+            size="tiny"
+            fluid
+          >
+            {isPremiumSet && isLocked ? lang('Unlock') : lang('Add')}
+          </Button>
         )}
       </div>
       <div
@@ -141,7 +177,7 @@ const StickerSet: FC<OwnProps> = ({
               isCurrentUserPremium={isCurrentUserPremium}
             />
           ))}
-        {!isExpanded && stickerSet.count > itemsBeforeCutout - 1 && (
+        {!isExpanded && stickerSet.count > itemsBeforeCutout && (
           <Button className="StickerButton custom-emoji set-expand" round color="translucent" onClick={expand}>
             +{stickerSet.count - itemsBeforeCutout + 1}
           </Button>

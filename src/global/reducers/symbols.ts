@@ -1,7 +1,7 @@
 import type { GlobalState } from '../types';
 import type { ApiSticker, ApiStickerSet, ApiVideo } from '../../api/types';
 import { buildCollectionByKey, unique } from '../../util/iteratees';
-import { selectStickersForEmoji } from '../selectors';
+import { selectCustomEmojiForEmoji, selectStickersForEmoji } from '../selectors';
 
 export function updateStickerSets(
   global: GlobalState,
@@ -176,6 +176,26 @@ export function updateStickersForEmoji(
   };
 }
 
+export function updateCustomEmojiForEmoji(
+  global: GlobalState, emoji: string,
+): GlobalState {
+  const localStickers = selectCustomEmojiForEmoji(global, emoji);
+  const uniqueIds = unique(localStickers.map(({ id }) => id));
+  const byId = buildCollectionByKey(localStickers, 'id');
+  const stickers = uniqueIds.map((id) => byId[id]);
+
+  return {
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      forEmoji: {
+        emoji,
+        stickers,
+      },
+    },
+  };
+}
+
 export function rebuildStickersForEmoji(global: GlobalState): GlobalState {
   if (global.stickers.forEmoji) {
     const { emoji, stickers, hash } = global.stickers.forEmoji;
@@ -184,6 +204,15 @@ export function rebuildStickersForEmoji(global: GlobalState): GlobalState {
     }
 
     return updateStickersForEmoji(global, emoji, stickers, hash);
+  }
+
+  if (global.customEmojis.forEmoji) {
+    const { emoji } = global.customEmojis.forEmoji;
+    if (!emoji) {
+      return global;
+    }
+
+    return updateCustomEmojiForEmoji(global, emoji);
   }
 
   return global;

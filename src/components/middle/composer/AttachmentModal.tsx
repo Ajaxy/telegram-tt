@@ -1,9 +1,10 @@
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiAttachment, ApiChatMember } from '../../../api/types';
+import type { ApiAttachment, ApiChatMember, ApiSticker } from '../../../api/types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW,
@@ -23,6 +24,7 @@ import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { useStateRef } from '../../../hooks/useStateRef';
+import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -31,6 +33,7 @@ import MessageInput from './MessageInput';
 import MentionTooltip from './MentionTooltip';
 import EmojiTooltip from './EmojiTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
+import CustomEmojiTooltip from './CustomEmojiTooltip.async';
 
 import './AttachmentModal.scss';
 
@@ -48,8 +51,9 @@ export type OwnProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   shouldSchedule?: boolean;
+  shouldSuggestCustomEmoji?: boolean;
+  customEmojiForEmoji?: ApiSticker[];
   captionLimit: number;
-  addRecentEmoji: AnyToVoidFunction;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onFileAppend: (files: File[], isQuick: boolean) => void;
@@ -75,7 +79,8 @@ const AttachmentModal: FC<OwnProps> = ({
   baseEmojiKeywords,
   emojiKeywords,
   shouldSchedule,
-  addRecentEmoji,
+  shouldSuggestCustomEmoji,
+  customEmojiForEmoji,
   onCaptionUpdate,
   onSend,
   onFileAppend,
@@ -83,6 +88,7 @@ const AttachmentModal: FC<OwnProps> = ({
   onSendSilent,
   onSendScheduled,
 }) => {
+  const { addRecentCustomEmoji, addRecentEmoji } = getActions();
   const captionRef = useStateRef(caption);
   // eslint-disable-next-line no-null/no-null
   const mainButtonRef = useStateRef<HTMLButtonElement | null>(null);
@@ -106,8 +112,22 @@ const AttachmentModal: FC<OwnProps> = ({
     currentUserId,
   );
 
+  const { isCustomEmojiTooltipOpen, insertCustomEmoji } = useCustomEmojiTooltip(
+    Boolean(shouldSuggestCustomEmoji) && isOpen,
+    `#${EDITABLE_INPUT_MODAL_ID}`,
+    caption,
+    onCaptionUpdate,
+    customEmojiForEmoji,
+    !isReady,
+  );
+
   const {
-    isEmojiTooltipOpen, closeEmojiTooltip, filteredEmojis, insertEmoji,
+    isEmojiTooltipOpen,
+    filteredEmojis,
+    filteredCustomEmojis,
+    insertEmoji,
+    insertCustomEmoji: insertCustomEmojiFromEmojiTooltip,
+    closeEmojiTooltip,
   } = useEmojiTooltip(
     isOpen,
     captionRef,
@@ -292,9 +312,18 @@ const AttachmentModal: FC<OwnProps> = ({
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}
             emojis={filteredEmojis}
+            customEmojis={filteredCustomEmojis}
             onClose={closeEmojiTooltip}
             onEmojiSelect={insertEmoji}
+            onCustomEmojiSelect={insertCustomEmojiFromEmojiTooltip}
             addRecentEmoji={addRecentEmoji}
+            addRecentCustomEmoji={addRecentCustomEmoji}
+          />
+          <CustomEmojiTooltip
+            chatId={chatId}
+            isOpen={isCustomEmojiTooltipOpen}
+            onCustomEmojiSelect={insertCustomEmoji}
+            addRecentCustomEmoji={addRecentCustomEmoji}
           />
           <MessageInput
             id="caption-input-text"

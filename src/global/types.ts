@@ -327,6 +327,11 @@ export type GlobalState = {
     };
     lastRendered: string[];
     byId: Record<string, ApiSticker>;
+    forEmoji: {
+      emoji?: string;
+      stickers?: ApiSticker[];
+    };
+    featuredIds?: string[];
   };
 
   animatedEmojis?: ApiStickerSet;
@@ -926,6 +931,11 @@ export interface ActionPayloads {
   };
   clearStickersForEmoji: never;
 
+  loadCustomEmojiForEmoji: {
+    emoji: string;
+  };
+  clearCustomEmojiForEmoji: never;
+
   addRecentEmoji: {
     emoji: string;
   };
@@ -941,6 +951,11 @@ export interface ActionPayloads {
     setIds: string[];
   };
   closeCustomEmojiSets: never;
+  addRecentCustomEmoji: {
+    documentId: string;
+  };
+  clearRecentCustomEmoji: never;
+  loadFeaturedEmojiStickers: never;
 
   // Bots
   startBot: {

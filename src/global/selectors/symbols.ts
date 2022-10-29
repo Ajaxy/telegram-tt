@@ -70,7 +70,27 @@ export function selectCustomEmojiForEmoji(global: GlobalState, emoji: string) {
   return isCurrentUserPremium ? customEmojiForEmoji : customEmojiForEmoji.filter(({ isFree }) => isFree);
 }
 
-export function selectIsSetPremium(stickerSet: ApiStickerSet) {
+// Slow, not to be used in `withGlobal`
+export function selectCustomEmojiForEmojis(global: GlobalState, emojis: string[]) {
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  const addedCustomSets = global.customEmojis.added.setIds;
+  let customEmojiForEmoji: ApiSticker[] = [];
+
+  // Added sets
+  addedCustomSets?.forEach((id) => {
+    const packs = global.stickers.setsById[id].packs;
+    if (!packs) {
+      return;
+    }
+    const customEmojis = Object.entries(packs).filter(([emoji]) => (
+      emojis.includes(emoji) || emojis.includes(cleanEmoji(emoji))
+    )).flatMap(([, stickers]) => stickers);
+    customEmojiForEmoji = customEmojiForEmoji.concat(customEmojis);
+  });
+  return isCurrentUserPremium ? customEmojiForEmoji : customEmojiForEmoji.filter(({ isFree }) => isFree);
+}
+
+export function selectIsSetPremium(stickerSet: Pick<ApiStickerSet, 'stickers' | 'isEmoji'>) {
   return stickerSet.isEmoji && stickerSet.stickers?.some((sticker) => !sticker.isFree);
 }
 

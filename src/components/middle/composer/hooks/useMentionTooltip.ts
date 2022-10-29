@@ -9,9 +9,10 @@ import { EDITABLE_INPUT_ID } from '../../../../config';
 import { filterUsersByName, getUserFirstOrLastName } from '../../../../global/helpers';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import useFlag from '../../../../hooks/useFlag';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
+
+import useFlag from '../../../../hooks/useFlag';
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 let RE_USERNAME_SEARCH: RegExp;
