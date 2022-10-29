@@ -2,7 +2,9 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import { invokeRequest } from './client';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
-import type { ApiChat, ApiUser, OnApiUpdate } from '../../types';
+import type {
+  ApiChat, ApiError, ApiUser, OnApiUpdate,
+} from '../../types';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
 import { buildApiUser } from '../apiBuilders/users';
@@ -18,7 +20,12 @@ export function checkChatUsername({ username }: { username: string }) {
   return invokeRequest(new GramJs.channels.CheckUsername({
     channel: new GramJs.InputChannelEmpty(),
     username,
-  }));
+  }), undefined, true).catch((error) => {
+    if ((error as ApiError).message === 'USERNAME_INVALID') {
+      return false;
+    }
+    throw error;
+  });
 }
 
 export async function setChatUsername(

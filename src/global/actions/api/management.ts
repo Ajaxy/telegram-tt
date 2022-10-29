@@ -1,6 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { ManagementProgress } from '../../../types';
+
 import { callApi } from '../../../api/gramjs';
 import {
   addUsers, updateChat, updateManagement, updateManagementProgress,
@@ -22,17 +23,16 @@ addActionHandler('checkPublicLink', async (global, actions, payload) => {
 
   const { username } = payload!;
 
-  global = updateManagementProgress(global, ManagementProgress.InProgress);
-  global = updateManagement(global, chatId, { isUsernameAvailable: undefined });
+  global = updateManagement(global, chatId, { isUsernameAvailable: undefined, checkedUsername: undefined });
   setGlobal(global);
 
-  const isUsernameAvailable = await callApi('checkChatUsername', { username })!;
+  const isUsernameAvailable = (await callApi('checkChatUsername', { username }))!;
 
   global = getGlobal();
   global = updateManagementProgress(
     global, isUsernameAvailable ? ManagementProgress.Complete : ManagementProgress.Error,
   );
-  global = updateManagement(global, chatId, { isUsernameAvailable });
+  global = updateManagement(global, chatId, { isUsernameAvailable, checkedUsername: username });
   setGlobal(global);
 
   if (isUsernameAvailable === undefined) {
@@ -66,7 +66,7 @@ addActionHandler('updatePublicLink', async (global, actions, payload) => {
 
   global = getGlobal();
   global = updateManagementProgress(global, result ? ManagementProgress.Complete : ManagementProgress.Error);
-  global = updateManagement(global, chatId, { isUsernameAvailable: undefined });
+  global = updateManagement(global, chatId, { isUsernameAvailable: undefined, checkedUsername: undefined });
   setGlobal(global);
 });
 

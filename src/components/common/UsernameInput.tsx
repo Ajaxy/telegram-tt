@@ -1,12 +1,15 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import React, {
   useState, useCallback, memo, useEffect, useMemo,
 } from '../../lib/teact/teact';
+import { getActions } from '../../global';
+
+import type { FC } from '../../lib/teact/teact';
 
 import { TME_LINK_PREFIX } from '../../config';
 import { debounce } from '../../util/schedulers';
+
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import InputText from '../ui/InputText';
 
@@ -15,14 +18,14 @@ type OwnProps = {
   asLink?: boolean;
   isLoading?: boolean;
   isUsernameAvailable?: boolean;
-  checkUsername: AnyToVoidFunction;
+  checkedUsername?: string;
   onChange: (value: string | false) => void;
 };
 
 const MIN_USERNAME_LENGTH = 5;
 const MAX_USERNAME_LENGTH = 32;
 const LINK_PREFIX_REGEX = /https:\/\/t\.me\/?/i;
-const USERNAME_REGEX = /^([a-zA-Z0-9_]+)$/;
+const USERNAME_REGEX = /^[^\d]([a-zA-Z0-9_]+)$/;
 
 const runDebouncedForCheckUsername = debounce((cb) => cb(), 250, false);
 
@@ -32,19 +35,25 @@ function isUsernameValid(username: string) {
     && USERNAME_REGEX.test(username);
 }
 
-const SettingsEditProfile: FC<OwnProps> = ({
+const UsernameInput: FC<OwnProps> = ({
   currentUsername,
   asLink,
   isLoading,
   isUsernameAvailable,
-  checkUsername,
+  checkedUsername,
   onChange,
 }) => {
+  const { checkUsername, checkPublicLink } = getActions();
   const [username, setUsername] = useState(currentUsername || '');
 
   const lang = useLang();
   const langPrefix = asLink ? 'SetUrl' : 'Username';
   const label = asLink ? lang('SetUrlPlaceholder') : lang('Username');
+
+  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const renderingIsUsernameAvailable = currentUsername !== username
+    ? (isUsernameAvailable ?? previousIsUsernameAvailable) : undefined;
+  const isChecking = username && currentUsername !== username && checkedUsername !== username;
 
   const [usernameSuccess, usernameError] = useMemo(() => {
     if (!username.length) {
@@ -52,58 +61,58 @@ const SettingsEditProfile: FC<OwnProps> = ({
     }
 
     if (username.length < MIN_USERNAME_LENGTH) {
-      return [undefined, `${label} is too short`];
+      return [undefined, lang(`${langPrefix}InvalidShort`)];
     }
     if (username.length > MAX_USERNAME_LENGTH) {
-      return [undefined, `${label} is too long`];
+      return [undefined, lang(`${langPrefix}InvalidLong`)];
     }
     if (!USERNAME_REGEX.test(username)) {
-      return [undefined, `${label} contains invalid characters`];
+      return [undefined, lang(`${langPrefix}Invalid`)];
     }
 
-    if (isUsernameAvailable === undefined) {
+    if (renderingIsUsernameAvailable === undefined || isChecking) {
       return [];
     }
 
     // Variable `isUsernameAvailable` is initialized with `undefined`, so a strict false check is required
     return [
-      isUsernameAvailable ? lang(`${langPrefix}Available`, 'Username') : undefined,
-      isUsernameAvailable === false ? lang(`${langPrefix}InUse`) : undefined,
+      renderingIsUsernameAvailable ? lang(`${langPrefix}Available`, label) : undefined,
+      renderingIsUsernameAvailable === false ? lang(`${langPrefix}InUse`) : undefined,
     ];
-  }, [username, isUsernameAvailable, lang, langPrefix, label]);
+  }, [username, renderingIsUsernameAvailable, isChecking, lang, langPrefix, label]);
 
   useEffect(() => {
     setUsername(currentUsername || '');
   }, [asLink, currentUsername]);
 
-  const handleUsernameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleUsernameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newUsername = e.target.value.trim().replace(LINK_PREFIX_REGEX, '');
     setUsername(newUsername);
-    e.target.value = `${asLink ? TME_LINK_PREFIX : ''}${newUsername}`;
 
     const isValid = isUsernameValid(newUsername);
+    if (!isValid) return;
 
-    if (isValid) {
-      runDebouncedForCheckUsername(() => {
-        checkUsername({ username: newUsername });
-      });
-    }
+    onChange?.(newUsername);
 
-    if (onChange) {
-      onChange(isValid ? newUsername : false);
-    }
-  }, [asLink, checkUsername, onChange]);
+    runDebouncedForCheckUsername(() => {
+      if (newUsername !== currentUsername) {
+        const check = asLink ? checkPublicLink : checkUsername;
+        check({ username: newUsername });
+      }
+    });
+  }, [asLink, checkPublicLink, checkUsername, currentUsername, onChange]);
 
   return (
     <InputText
       value={`${asLink ? TME_LINK_PREFIX : ''}${username}`}
       onChange={handleUsernameChange}
-      label={label}
+      label={isChecking ? lang('Checking') : label}
       error={usernameError}
       success={usernameSuccess}
       readOnly={isLoading}
+      teactExperimentControlled
     />
   );
 };
 
-export default memo(SettingsEditProfile);
+export default memo(UsernameInput);

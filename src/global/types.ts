@@ -511,6 +511,7 @@ export type GlobalState = {
 
   profileEdit?: {
     progress: ProfileEditProgress;
+    checkedUsername?: string;
     isUsernameAvailable?: boolean;
   };
 

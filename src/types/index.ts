@@ -313,6 +313,7 @@ export enum ManagementProgress {
 export interface ManagementState {
   isActive: boolean;
   nextScreen?: ManagementScreens;
+  checkedUsername?: string;
   isUsernameAvailable?: boolean;
   error?: string;
   invites?: ApiExportedInvite[];
