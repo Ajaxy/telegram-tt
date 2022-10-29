@@ -2,15 +2,13 @@ import { inflate } from 'pako/dist/pako_inflate';
 import createWorkerInterface from '../../util/createWorkerInterface';
 import type { CancellableCallback } from '../../util/WorkerConnector';
 
+import 'script-loader!./rlottie-wasm';
+
 declare const Module: any;
 
 declare function allocate(...args: any[]): string;
 
 declare function intArrayFromString(str: String): string;
-
-declare const self: WorkerGlobalScope;
-
-self.importScripts('rlottie-wasm.js');
 
 let rLottieApi: Record<string, Function>;
 const rLottieApiPromise = new Promise<void>((resolve) => {

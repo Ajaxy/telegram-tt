@@ -1,5 +1,5 @@
 /* eslint-disable */
-importScripts('webp_wasm.js');
+import 'script-loader!./webp_wasm';
 
 Module.onRuntimeInitialized = async () => {
   self.postMessage({ type: 'initialized' });
