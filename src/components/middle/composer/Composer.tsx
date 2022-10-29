@@ -540,7 +540,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     draft,
     editingDraft,
   );
-  useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage);
+  useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage, lastSyncTime);
   useClipboardPaste(isForCurrentMessageList, insertTextAndUpdateCursor, handleSetAttachments, editingMessage);
 
   const handleEmbeddedClear = useCallback(() => {
