@@ -1,3 +1,15 @@
+## 1.55.0 (2022-10-29)
+
+### 👏 **Harder**
+* Sending custom emoji is now supported.
+* You can now access the app even when offline.
+
+### 💪 **Stronger**
+* Fix syncing after editing draft on another device.
+* Fix multiple notification sounds when waking up from background mode.
+* Various fixes for username input.
+* Various fixes for Media Viewer.
+
 ## 1.54.0 (2022-10-17)
 
 ### 👏 **Harder**
