@@ -13,12 +13,14 @@ import {
   updateGifSearch,
   updateStickersForEmoji,
   rebuildStickersForEmoji,
+  updateCustomEmojiForEmoji,
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
 import { getTranslation } from '../../../util/langProvider';
 import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
 import * as langProvider from '../../../util/langProvider';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 const ADDED_SETS_THROTTLE = 200;
 const ADDED_SETS_THROTTLE_CHUNK = 10;
@@ -546,6 +548,49 @@ addActionHandler('clearStickersForEmoji', (global) => {
       forEmoji: {},
     },
   };
+});
+
+addActionHandler('loadCustomEmojiForEmoji', (global, actions, payload) => {
+  const { emoji } = payload;
+
+  return updateCustomEmojiForEmoji(global, emoji);
+});
+
+addActionHandler('clearCustomEmojiForEmoji', (global) => {
+  return {
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      forEmoji: {},
+    },
+  };
+});
+
+addActionHandler('loadFeaturedEmojiStickers', async (global) => {
+  const featuredStickers = await callApi('fetchFeaturedEmojiStickers');
+  if (!featuredStickers) {
+    return;
+  }
+
+  global = getGlobal();
+  setGlobal({
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      featuredIds: featuredStickers.sets.map(({ id }) => id),
+      byId: {
+        ...global.customEmojis.byId,
+        ...buildCollectionByKey(featuredStickers.sets.flatMap((set) => set.stickers || []), 'id'),
+      },
+    },
+    stickers: {
+      ...global.stickers,
+      setsById: {
+        ...global.stickers.setsById,
+        ...buildCollectionByKey(featuredStickers.sets, 'id'),
+      },
+    },
+  });
 });
 
 addActionHandler('openStickerSet', async (global, actions, payload) => {

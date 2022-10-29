@@ -96,6 +96,7 @@ export const INITIAL_STATE: GlobalState = {
     lastRendered: [],
     byId: {},
     added: {},
+    forEmoji: {},
   },
 
   emojiKeywords: {},
@@ -190,6 +191,7 @@ export const INITIAL_STATE: GlobalState = {
       canAutoPlayGifs: true,
       canAutoPlayVideos: true,
       shouldSuggestStickers: true,
+      shouldSuggestCustomEmoji: true,
       shouldLoopStickers: true,
       language: 'en',
       timeFormat: '24h',

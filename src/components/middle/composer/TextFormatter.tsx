@@ -11,6 +11,8 @@ import buildClassName from '../../../util/buildClassName';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getKeyFromEvent from '../../../util/getKeyFromEvent';
+import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
+
 import useShowTransition from '../../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 import useFlag from '../../../hooks/useFlag';
@@ -129,11 +131,16 @@ const TextFormatter: FC<OwnProps> = ({
     }
   }, [setSelectedRange]);
 
-  const getSelectedText = useCallback(() => {
+  const getSelectedText = useCallback((shouldDropCustomEmoji?: boolean) => {
     if (!selectedRange) {
       return undefined;
     }
     fragmentEl.replaceChildren(selectedRange.cloneContents());
+    if (shouldDropCustomEmoji) {
+      fragmentEl.querySelectorAll(INPUT_CUSTOM_EMOJI_SELECTOR).forEach((el) => {
+        el.replaceWith(el.getAttribute('alt')!);
+      });
+    }
     return fragmentEl.innerHTML;
   }, [selectedRange]);
 
@@ -304,7 +311,7 @@ const TextFormatter: FC<OwnProps> = ({
       return;
     }
 
-    const text = getSelectedText();
+    const text = getSelectedText(true);
     document.execCommand('insertHTML', false, `<code class="text-entity-code" dir="auto">${text}</code>`);
     onClose();
   }, [
@@ -327,7 +334,7 @@ const TextFormatter: FC<OwnProps> = ({
       return;
     }
 
-    const text = getSelectedText();
+    const text = getSelectedText(true);
     restoreSelection();
     document.execCommand(
       'insertHTML',

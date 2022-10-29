@@ -192,6 +192,35 @@ addActionHandler('addRecentSticker', (global, action, payload) => {
   };
 });
 
+addActionHandler('addRecentCustomEmoji', (global, action, payload) => {
+  const { documentId } = payload;
+  const { recentCustomEmojis } = global;
+  if (!recentCustomEmojis) {
+    return {
+      ...global,
+      recentCustomEmojis: [documentId],
+    };
+  }
+
+  const newEmojis = recentCustomEmojis.filter((id) => id !== documentId);
+  newEmojis.unshift(documentId);
+  if (newEmojis.length > MAX_STORED_EMOJIS) {
+    newEmojis.pop();
+  }
+
+  return {
+    ...global,
+    recentCustomEmojis: newEmojis,
+  };
+});
+
+addActionHandler('clearRecentCustomEmoji', (global) => {
+  return {
+    ...global,
+    recentCustomEmojis: [],
+  };
+});
+
 addActionHandler('reorderStickerSets', (global, action, payload) => {
   const { order, isCustomEmoji } = payload;
   return {

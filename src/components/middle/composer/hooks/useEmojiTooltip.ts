@@ -1,19 +1,26 @@
 import {
   useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
+import { getGlobal } from '../../../../global';
+
+import type { ApiSticker } from '../../../../api/types';
+import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
+import {
+  buildCollectionByKey, mapValues, pickTruthy, unique, uniqueByField,
+} from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
-import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
 import { uncompressEmoji } from '../../../../util/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import {
-  buildCollectionByKey, mapValues, pickTruthy, unique,
-} from '../../../../util/iteratees';
 import memoized from '../../../../util/memoized';
-import useFlag from '../../../../hooks/useFlag';
 import renderText from '../../../common/helpers/renderText';
+import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
+import { buildCustomEmojiHtml } from '../helpers/customEmoji';
+
+import useFlag from '../../../../hooks/useFlag';
+import useDebouncedCallback from '../../../../hooks/useDebouncedCallback';
 
 interface Library {
   keywords: string[];
@@ -29,6 +36,8 @@ let emojiData: EmojiData;
 let RE_EMOJI_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
+
+const DEBOUNCE = 300;
 
 const prepareRecentEmojisMemo = memoized(prepareRecentEmojis);
 const prepareLibraryMemo = memoized(prepareLibrary);
@@ -54,7 +63,12 @@ export default function useEmojiTooltip(
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const [byId, setById] = useState<Record<string, Emoji> | undefined>();
   const [shouldForceInsertEmoji, setShouldForceInsertEmoji] = useState(false);
-  const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
+  const [filteredEmojis, setFilteredEmojisInner] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
+  const [filteredCustomEmojis, setFilteredCustomEmojis] = useState<ApiSticker[]>(MEMO_EMPTY_ARRAY);
+
+  const setFilteredEmojis = useDebouncedCallback((emojis: Emoji[]) => {
+    setFilteredEmojisInner(emojis);
+  }, [], DEBOUNCE);
 
   // Initialize data on first render.
   useEffect(() => {
@@ -72,6 +86,15 @@ export default function useEmojiTooltip(
   }, [isDisabled]);
 
   const html = htmlRef.current;
+  useEffect(() => {
+    if (isDisabled) return;
+    const customEmojis = uniqueByField(
+      selectCustomEmojiForEmojis(getGlobal(), filteredEmojis.map((emoji) => emoji.native)),
+      'id',
+    );
+    setFilteredCustomEmojis(customEmojis);
+  }, [filteredEmojis, isDisabled]);
+
   useEffect(() => {
     if (!isAllowed || !html || !byId || isDisabled) {
       unmarkIsOpen();
@@ -108,7 +131,7 @@ export default function useEmojiTooltip(
     }
   }, [
     byId, html, isAllowed, markIsOpen, recentEmojiIds, unmarkIsOpen, setShouldForceInsertEmoji,
-    isDisabled, baseEmojiKeywords, emojiKeywords,
+    isDisabled, baseEmojiKeywords, emojiKeywords, setFilteredEmojis,
   ]);
 
   const insertEmoji = useCallback((textEmoji: string, isForce?: boolean) => {
@@ -116,6 +139,25 @@ export default function useEmojiTooltip(
     const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
     if (atIndex !== -1) {
       onUpdateHtml(`${currentHtml.substr(0, atIndex)}${renderText(textEmoji, ['emoji_html'])}`);
+      let messageInput: HTMLDivElement;
+      if (inputId === EDITABLE_INPUT_ID) {
+        messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
+      } else {
+        messageInput = document.getElementById(inputId) as HTMLDivElement;
+      }
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput, true, true);
+      });
+    }
+
+    unmarkIsOpen();
+  }, [htmlRef, inputId, onUpdateHtml, unmarkIsOpen]);
+
+  const insertCustomEmoji = useCallback((emoji: ApiSticker, isForce?: boolean) => {
+    const currentHtml = htmlRef.current;
+    const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
+    if (atIndex !== -1) {
+      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${buildCustomEmojiHtml(emoji)}`);
       let messageInput: HTMLDivElement;
       if (inputId === EDITABLE_INPUT_ID) {
         messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
@@ -140,7 +182,9 @@ export default function useEmojiTooltip(
     isEmojiTooltipOpen: isOpen,
     closeEmojiTooltip: unmarkIsOpen,
     filteredEmojis,
+    filteredCustomEmojis,
     insertEmoji,
+    insertCustomEmoji,
   };
 }
 

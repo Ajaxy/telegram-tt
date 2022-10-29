@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import renderText from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getTranslation } from '../../../util/langProvider';
+import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
@@ -480,6 +481,8 @@ function processEntityAsHtml(
         class="spoiler"
         data-entity-type="${ApiMessageEntityTypes.Spoiler}"
         >${renderedContent}</span>`;
+    case ApiMessageEntityTypes.CustomEmoji:
+      return buildCustomEmojiHtmlFromEntity(rawEntityText, entity);
     default:
       return renderedContent;
   }

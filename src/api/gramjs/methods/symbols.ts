@@ -28,7 +28,7 @@ export async function fetchCustomEmojiSets({ hash = '0' }: { hash?: string }) {
   }
 
   allStickers.sets.forEach((stickerSet) => {
-    if (stickerSet.thumbs?.length) {
+    if (stickerSet.thumbs?.length || stickerSet.thumbDocumentId) {
       localDb.stickerSets[String(stickerSet.id)] = stickerSet;
     }
   });
@@ -93,6 +93,25 @@ export async function fetchFeaturedStickers({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
+    isPremium: Boolean(result.premium),
+    sets: result.sets.map(buildStickerSetCovered),
+  };
+}
+
+export async function fetchFeaturedEmojiStickers() {
+  const result = await invokeRequest(new GramJs.messages.GetFeaturedEmojiStickers({ hash: BigInt(0) }));
+
+  if (!result || result instanceof GramJs.messages.FeaturedStickersNotModified) {
+    return undefined;
+  }
+
+  result.sets.forEach(({ set }) => {
+    if (set.thumbDocumentId) {
+      localDb.stickerSets[String(set.id)] = set;
+    }
+  });
+
+  return {
     isPremium: Boolean(result.premium),
     sets: result.sets.map(buildStickerSetCovered),
   };

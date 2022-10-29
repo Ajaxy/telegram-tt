@@ -598,21 +598,40 @@ class TelegramClient {
     }
 
     downloadStickerSetThumb(stickerSet) {
-        if (!stickerSet.thumbs || !stickerSet.thumbs.length) {
+        if (!stickerSet.thumbs?.length && !stickerSet.thumbDocumentId) {
             return undefined;
         }
 
         const { thumbVersion } = stickerSet;
-        return this.downloadFile(
-            new constructors.InputStickerSetThumb({
-                stickerset: new constructors.InputStickerSetID({
-                    id: stickerSet.id,
-                    accessHash: stickerSet.accessHash,
+
+        if (!stickerSet.thumbDocumentId) {
+            return this.downloadFile(
+                new constructors.InputStickerSetThumb({
+                    stickerset: new constructors.InputStickerSetID({
+                        id: stickerSet.id,
+                        accessHash: stickerSet.accessHash,
+                    }),
+                    thumbVersion,
                 }),
-                thumbVersion,
+                { dcId: stickerSet.thumbDcId },
+            );
+        }
+
+        return this.invoke(new constructors.messages.GetCustomEmojiDocuments({
+            documentId: [stickerSet.thumbDocumentId],
+        })).then((docs) => {
+            const doc = docs[0];
+            return this.downloadFile(new constructors.InputDocumentFileLocation({
+                id: doc.id,
+                accessHash: doc.accessHash,
+                fileReference: doc.fileReference,
+                thumbSize: '',
             }),
-            { dcId: stickerSet.thumbDcId },
-        );
+            {
+                fileSize: doc.size.toJSNumber(),
+                dcId: doc.dcId,
+            });
+        });
     }
 
     _pickFileSize(sizes, sizeType) {

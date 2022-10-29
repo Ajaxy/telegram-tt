@@ -1,0 +1,14 @@
+.root:global(.composer-tooltip) {
+  display: flex;
+  padding-left: 0.25rem;
+
+  overflow-x: auto;
+  @supports (overflow-x: overlay) {
+    overflow-x: overlay;
+  }
+  overflow-y: hidden;
+
+  .emojiButton {
+    flex: 0 0 2.5rem;
+  }
+}

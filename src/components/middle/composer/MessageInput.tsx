@@ -297,6 +297,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       && (!textContent || !textContent.length)
       // When emojis are not supported, innerHTML contains an emoji img tag that doesn't exist in the textContext
       && !(!IS_EMOJI_SUPPORTED && innerHTML.includes('emoji-small'))
+      && !(innerHTML.includes('custom-emoji'))
     ) {
       const selection = window.getSelection()!;
       if (selection) {

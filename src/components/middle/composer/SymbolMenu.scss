@@ -181,8 +181,8 @@
   &-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     color: rgba(var(--color-text-secondary-rgb), 0.75);
-    align-self: center;
   }
 
   &-name {
@@ -196,7 +196,6 @@
     text-overflow: ellipsis;
     text-align: center;
     unicode-bidi: plaintext;
-    flex-grow: 1;
     z-index: 1;
     background-color: var(--color-background);
   }

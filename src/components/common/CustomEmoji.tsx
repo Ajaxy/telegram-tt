@@ -11,14 +11,16 @@ import renderText from './helpers/renderText';
 import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
+import { getStickerPreviewHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji, selectIsDefaultEmojiStatusPack } from '../../global/selectors';
+import safePlay from '../../util/safePlay';
 
 import useMedia from '../../hooks/useMedia';
 import useEnsureCustomEmoji from '../../hooks/useEnsureCustomEmoji';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useThumbnail from '../../hooks/useThumbnail';
 import useCustomEmoji from './hooks/useCustomEmoji';
-import safePlay from '../../util/safePlay';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -28,9 +30,11 @@ import styles from './CustomEmoji.module.scss';
 type OwnProps = {
   documentId: string;
   children?: TeactNode;
+  size?: number;
   className?: string;
   loopLimit?: number;
   withGridFix?: boolean;
+  withPreview?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: NoneToVoidFunction;
 };
@@ -40,9 +44,11 @@ const STICKER_SIZE = 24;
 const CustomEmoji: FC<OwnProps> = ({
   documentId,
   children,
+  size = STICKER_SIZE,
   className,
   loopLimit,
   withGridFix,
+  withPreview,
   observeIntersection,
   onClick,
 }) => {
@@ -51,9 +57,17 @@ const CustomEmoji: FC<OwnProps> = ({
   // An alternative to `withGlobal` to avoid adding numerous global containers
   const customEmoji = useCustomEmoji(documentId);
   const isUnsupportedVideo = customEmoji?.isVideo && !IS_WEBM_SUPPORTED;
-  const mediaHash = customEmoji && `sticker${customEmoji.id}${isUnsupportedVideo ? '?size=m' : ''}`;
+  const mediaHash = customEmoji && `sticker${customEmoji.id}`;
   const mediaData = useMedia(mediaHash);
+
+  const shouldLoadPreview = !mediaData && (withPreview || isUnsupportedVideo);
+  const previewMediaHash = shouldLoadPreview && customEmoji && getStickerPreviewHash(customEmoji.id);
+  const previewMediaData = useMedia(previewMediaHash);
   const thumbDataUri = useThumbnail(customEmoji);
+
+  const shouldDisplayPreview = Boolean(mediaData ? isUnsupportedVideo : previewMediaData);
+  const transitionClassNames = useMediaTransition(shouldDisplayPreview ? previewMediaData : mediaData);
+
   const loopCountRef = useRef(0);
   const [shouldLoop, setShouldLoop] = useState(true);
   const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
@@ -108,15 +122,15 @@ const CustomEmoji: FC<OwnProps> = ({
       return (children && renderText(children, ['emoji']));
     }
 
-    if (!mediaData) {
+    if (!mediaData && !previewMediaData) {
       return (
         <img className={styles.media} src={thumbDataUri} alt={customEmoji.emoji} />
       );
     }
 
-    if (isUnsupportedVideo || (!customEmoji.isVideo && !customEmoji.isLottie)) {
+    if (shouldDisplayPreview || isUnsupportedVideo || (!customEmoji.isVideo && !customEmoji.isLottie)) {
       return (
-        <img className={styles.media} src={mediaData} alt={customEmoji.emoji} />
+        <img className={styles.media} src={previewMediaData || mediaData} alt={customEmoji.emoji} />
       );
     }
 
@@ -137,9 +151,9 @@ const CustomEmoji: FC<OwnProps> = ({
 
     return (
       <AnimatedSticker
+        size={size}
         key={mediaData}
         className={styles.sticker}
-        size={STICKER_SIZE}
         tgsUrl={mediaData}
         play={isIntersecting}
         color={customColor}
@@ -160,6 +174,7 @@ const CustomEmoji: FC<OwnProps> = ({
         'emoji',
         hasCustomColor && 'custom-color',
         withGridFix && styles.withGridFix,
+        ...transitionClassNames,
       )}
       onClick={onClick}
     >

@@ -1,6 +1,5 @@
 import type { ApiMessageEntity, ApiFormattedText } from '../api/types';
 import { ApiMessageEntityTypes } from '../api/types';
-import { IS_EMOJI_SUPPORTED } from './environment';
 import { RE_LINK_TEMPLATE } from '../config';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
@@ -15,7 +14,6 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
   CODE: ApiMessageEntityTypes.Code,
   PRE: ApiMessageEntityTypes.Pre,
   BLOCKQUOTE: ApiMessageEntityTypes.Blockquote,
-  'CUSTOM-EMOJI': ApiMessageEntityTypes.CustomEmoji,
 };
 
 const MAX_TAG_DEEPNESS = 3;
@@ -23,6 +21,7 @@ const MAX_TAG_DEEPNESS = 3;
 export default function parseMessageInput(html: string, withMarkdownLinks = false): ApiFormattedText {
   const fragment = document.createElement('div');
   fragment.innerHTML = withMarkdownLinks ? parseMarkdown(parseMarkdownLinks(html)) : parseMarkdown(html);
+  fixImageContent(fragment);
   const text = fragment.innerText.trim().replace(/\u200b+/g, '');
   let textIndex = 0;
   let recursionDeepness = 0;
@@ -59,13 +58,18 @@ export default function parseMessageInput(html: string, withMarkdownLinks = fals
   };
 }
 
+function fixImageContent(fragment: HTMLDivElement) {
+  fragment.querySelectorAll('img').forEach((node) => {
+    if (node.dataset.documentId) { // Custom Emoji
+      node.textContent = (node as HTMLImageElement).alt || '';
+    } else { // Regular emoji with image fallback
+      node.replaceWith(node.alt || '');
+    }
+  });
+}
+
 function parseMarkdown(html: string) {
   let parsedHtml = html.slice(0);
-
-  if (!IS_EMOJI_SUPPORTED) {
-    // Emojis
-    parsedHtml = parsedHtml.replace(/<img[^>]+alt="([^"]+)"[^>]*>/gm, '$1');
-  }
 
   // Strip redundant nbsp's
   parsedHtml = parsedHtml.replace(/&nbsp;/g, ' ');
@@ -94,7 +98,7 @@ function parseMarkdown(html: string) {
   // Custom Emoji markdown tag
   parsedHtml = parsedHtml.replace(
     /(^|\s)(?!<(?:code|pre)[^<]*|<\/)\[([^\]\n]+)\]\(customEmoji:(\d+)\)(?![^<]*<\/(?:code|pre)>)(\s|$)/g,
-    '$1<custom-emoji document-id="$3" alt="$2">$2</custom-emoji>$4',
+    '$1<img alt="$2" data-document-id="$3">$4',
   );
 
   // Other simple markdown
@@ -131,6 +135,7 @@ function getEntityDataFromNode(
   textIndex: number,
 ): { index: number; entity?: ApiMessageEntity } {
   const type = getEntityTypeFromNode(node);
+
   if (!type || !node.textContent) {
     return {
       index: textIndex,
@@ -187,7 +192,7 @@ function getEntityDataFromNode(
         type,
         offset,
         length,
-        documentId: (node as HTMLElement).getAttribute('document-id')!,
+        documentId: (node as HTMLImageElement).dataset.documentId!,
       },
     };
   }
@@ -230,6 +235,12 @@ function getEntityTypeFromNode(node: ChildNode): ApiMessageEntityTypes | undefin
 
   if (node.nodeName === 'SPAN') {
     return (node as HTMLElement).dataset.entityType as any;
+  }
+
+  if (node.nodeName === 'IMG') {
+    if ((node as HTMLImageElement).dataset.documentId) {
+      return ApiMessageEntityTypes.CustomEmoji;
+    }
   }
 
   return undefined;

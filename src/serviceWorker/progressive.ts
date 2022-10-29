@@ -100,7 +100,7 @@ export async function respondForProgressive(e: FetchEvent) {
   const partSize = Math.min(end - start + 1, arrayBuffer.byteLength);
   end = start + partSize - 1;
   const arrayBufferPart = arrayBuffer.slice(0, partSize);
-  const headers = [
+  const headers: [string, string][] = [
     ['Content-Range', `bytes ${start}-${end}/${fullSize}`],
     ['Accept-Ranges', 'bytes'],
     ['Content-Length', String(partSize)],

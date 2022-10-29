@@ -280,13 +280,26 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
       added: {},
       byId: {},
       lastRendered: [],
+      forEmoji: {},
     };
+  }
+
+  if (!cached.recentCustomEmojis) {
+    cached.recentCustomEmojis = [];
+  }
+
+  if (cached.settings.byKey.shouldSuggestCustomEmoji === undefined) {
+    cached.settings.byKey.shouldSuggestCustomEmoji = true;
   }
 
   if (!cached.stickers.premiumSet) {
     cached.stickers.premiumSet = {
       stickers: [],
     };
+  }
+
+  if (!cached.customEmojis.forEmoji) {
+    cached.customEmojis.forEmoji = {};
   }
 
   // TODO Remove in Jan 2023 (this was re-designed but can be hardcoded in cache)
@@ -396,6 +409,7 @@ function reduceCustomEmojis(global: GlobalState): GlobalState['customEmojis'] {
   return {
     byId: byIdToSave,
     lastRendered: idsToSave,
+    forEmoji: {},
     added: {},
   };
 }

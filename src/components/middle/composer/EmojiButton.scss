@@ -30,4 +30,8 @@
     width: 2rem;
     height: 2rem;
   }
+
+  & > .custom-emoji {
+    --custom-emoji-size: 2rem;
+  }
 }

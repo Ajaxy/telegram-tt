@@ -1,3 +1,5 @@
+const fragmentEl = document.createElement('div');
+
 export function insertHtmlInSelection(html: string) {
   const selection = window.getSelection();
 
@@ -17,4 +19,17 @@ export function insertHtmlInSelection(html: string) {
     selection.removeAllRanges();
     selection.addRange(range);
   }
+}
+
+export function getHtmlBeforeSelection(container?: HTMLElement, useCommonAncestor?: boolean) {
+  if (!container) return '';
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return container.innerHTML;
+  const range = sel.getRangeAt(0).cloneRange();
+  if (!range.intersectsNode(container)) return container.innerHTML;
+  if (!useCommonAncestor && !container.contains(range.commonAncestorContainer)) return '';
+  range.collapse(true);
+  range.setStart(container, 0);
+  fragmentEl.replaceChildren(range.cloneContents());
+  return fragmentEl.innerHTML;
 }

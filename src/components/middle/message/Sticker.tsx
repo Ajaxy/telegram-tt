@@ -5,7 +5,7 @@ import type { ApiMessage } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
-import { getMessageMediaFormat, getMessageMediaHash } from '../../../global/helpers';
+import { getMessageMediaFormat, getMessageMediaHash, getStickerPreviewHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getActions } from '../../../global';
@@ -63,7 +63,7 @@ const Sticker: FC<OwnProps> = ({
   const mediaHashEffect = `sticker${sticker.id}?size=f`;
 
   const previewMediaHash = isVideo && !canDisplayVideo && (
-    sticker.isPreloadedGlobally ? `sticker${sticker.id}?size=m` : getMessageMediaHash(message, 'pictogram'));
+    sticker.isPreloadedGlobally ? getStickerPreviewHash(sticker.id) : getMessageMediaHash(message, 'pictogram'));
   const previewBlobUrl = useMedia(previewMediaHash);
   const thumbDataUri = useThumbnail(sticker);
   const previewUrl = previewBlobUrl || thumbDataUri;

@@ -75,6 +75,10 @@
           left: 0;
         }
       }
+
+      &.activated {
+        background-color: var(--color-background-selected);
+      }
     }
   }
 

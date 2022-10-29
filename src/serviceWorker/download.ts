@@ -51,7 +51,7 @@ export async function respondForDownload(e: FetchEvent) {
   const filenameHeader = matchedFilename ? `filename="${decodeURIComponent(matchedFilename[1])}"` : '';
   const { fullSize, mimeType } = partInfo;
 
-  const headers = [
+  const headers: [string, string][] = [
     ['Content-Length', String(fullSize)],
     ['Content-Type', mimeType],
     ['Content-Disposition', `attachment; ${filenameHeader}`],

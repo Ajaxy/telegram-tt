@@ -547,6 +547,11 @@
     vertical-align: 0;
     pointer-events: none;
   }
+
+  .custom-emoji {
+    --custom-emoji-size: 1.25rem;
+    vertical-align: text-top;
+  }
 }
 
 #caption-input-text {
