@@ -19,16 +19,20 @@
 
     .contact-name {
       font-size: 1rem;
-      line-height: 1rem;
       margin-bottom: 0.25rem;
       font-weight: 500;
     }
 
     .contact-phone {
-      line-height: 1rem;
       color: var(--secondary-color);
+    }
+
+    .contact-name,
+    .contact-phone {
+      line-height: 1rem;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 }
-
-
