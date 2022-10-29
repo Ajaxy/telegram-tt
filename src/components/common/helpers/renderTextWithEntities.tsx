@@ -253,7 +253,7 @@ function organizeEntity(
   const parsedNestedEntities = entities
     .filter((e, i) => i > index && e.offset >= offset && e.offset < offset + length)
     .map((e) => organizeEntity(e, entities.indexOf(e), entities, organizedEntityIndexes))
-    .filter<IOrganizedEntity>(Boolean as any);
+    .filter(Boolean);
 
   parsedNestedEntities.forEach((parsedEntity) => {
     let isChanged = false;

@@ -113,7 +113,7 @@ export function renderActionMessageText(
     unprocessed,
     '%target_user%',
     targetUsers
-      ? targetUsers.map((user) => renderUserContent(user, noLinks)).filter<TextPart>(Boolean as any)
+      ? targetUsers.map((user) => renderUserContent(user, noLinks)).filter(Boolean)
       : 'User',
   );
 

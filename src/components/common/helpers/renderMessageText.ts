@@ -77,5 +77,5 @@ export function renderMessageSummary(
   return [
     ...renderText(emojiWithSpace),
     ...(Array.isArray(description) ? description : [description]),
-  ].filter<TextPart>(Boolean);
+  ].filter(Boolean);
 }

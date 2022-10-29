@@ -287,7 +287,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
 
   const actionTargetUsers = actionTargetUserIds
     ? actionTargetUserIds.map((userId) => selectUser(global, userId))
-      .filter<ApiUser>(Boolean as any)
+      .filter(Boolean)
     : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
   const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;

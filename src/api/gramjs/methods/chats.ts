@@ -104,7 +104,7 @@ export async function fetchChats({
   const lastMessagesByChatId = buildCollectionByKey(
     (resultPinned ? resultPinned.messages : []).concat(result.messages)
       .map(buildApiMessage)
-      .filter<ApiMessage>(Boolean as any),
+      .filter(Boolean),
     'chatId',
   );
   const peersByKey: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {
@@ -218,7 +218,7 @@ export async function searchChats({ query }: { query: string }) {
   const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
   const allChats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
-    .filter<ApiChat>(Boolean as any);
+    .filter(Boolean);
   const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
 
   return {

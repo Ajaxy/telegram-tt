@@ -42,8 +42,8 @@ export async function getGroupCall({
   addEntitiesWithPhotosToLocalDb(result.users);
   addEntitiesWithPhotosToLocalDb(result.chats);
 
-  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
   return {
     groupCall: buildApiGroupCall(result.call),
@@ -129,8 +129,8 @@ export async function fetchGroupCallParticipants({
   addEntitiesWithPhotosToLocalDb(result.users);
   addEntitiesWithPhotosToLocalDb(result.chats);
 
-  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter<ApiChat>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
   onUpdate({
     '@type': 'updateGroupCallParticipants',

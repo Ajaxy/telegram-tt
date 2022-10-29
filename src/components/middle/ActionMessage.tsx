@@ -116,7 +116,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   const targetUsers = useMemo(() => {
     return targetUserIds
-      ? targetUserIds.map((userId) => usersById?.[userId]).filter<ApiUser>(Boolean as any)
+      ? targetUserIds.map((userId) => usersById?.[userId]).filter(Boolean)
       : undefined;
   }, [targetUserIds, usersById]);
 

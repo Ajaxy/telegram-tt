@@ -618,7 +618,7 @@ addActionHandler('forwardMessages', (global, action, payload) => {
   const messages = fromChatId && messageIds
     ? messageIds
       .sort((a, b) => a - b)
-      .map((id) => selectChatMessage(global, fromChatId, id)).filter<ApiMessage>(Boolean as any)
+      .map((id) => selectChatMessage(global, fromChatId, id)).filter(Boolean)
     : undefined;
 
   if (!fromChat || !toChat || !messages) {

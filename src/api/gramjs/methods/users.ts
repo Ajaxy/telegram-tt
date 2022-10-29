@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import type {
-  OnApiUpdate, ApiUser, ApiChat, ApiPhoto,
+  OnApiUpdate, ApiUser, ApiChat,
 } from '../../types';
 
 import { COMMON_CHATS_LIMIT, PROFILE_PHOTOS_LIMIT } from '../../../config';
@@ -138,7 +138,7 @@ export async function fetchContactList() {
   return {
     users,
     userStatusesById,
-    chats: result.users.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any),
+    chats: result.users.map((user) => buildApiChatFromPreview(user)).filter(Boolean),
   };
 }
 
@@ -268,7 +268,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   const { messages, users } = result;
 
   return {
-    photos: messages.map((message) => message.content.action!.photo).filter<ApiPhoto>(Boolean as any),
+    photos: messages.map((message) => message.content.action!.photo).filter(Boolean),
     users,
   };
 }

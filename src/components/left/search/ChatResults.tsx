@@ -152,7 +152,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
         return globalMessagesByChatId?.[chatId]?.byId[Number(messageId)];
       })
-      .filter<ApiMessage>(Boolean as any)
+      .filter(Boolean)
       .sort((a, b) => b.date - a.date);
   }, [foundIds, globalMessagesByChatId, searchQuery, searchDate]);
 

@@ -149,7 +149,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    return actionTargetUserIds.map((userId) => usersById[userId]).filter<ApiUser>(Boolean as any);
+    return actionTargetUserIds.map((userId) => usersById[userId]).filter(Boolean);
   }, [actionTargetUserIds]);
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.

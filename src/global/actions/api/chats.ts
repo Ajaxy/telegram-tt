@@ -272,7 +272,7 @@ addActionHandler('createChannel', (global, actions, payload) => {
 
   const members = (memberIds as string[])
     .map((id) => selectUser(global, id))
-    .filter<ApiUser>(Boolean as any);
+    .filter(Boolean);
 
   void createChannel(title, members, about, photo);
 });
@@ -372,7 +372,7 @@ addActionHandler('createGroupChat', (global, actions, payload) => {
   const { title, memberIds, photo } = payload!;
   const members = (memberIds as string[])
     .map((id) => selectUser(global, id))
-    .filter<ApiUser>(Boolean as any);
+    .filter(Boolean);
 
   void createGroupChat(title, members, photo);
 });
@@ -1063,7 +1063,7 @@ addActionHandler('loadMoreMembers', async (global) => {
 addActionHandler('addChatMembers', async (global, actions, payload) => {
   const { chatId, memberIds } = payload;
   const chat = selectChat(global, chatId);
-  const users = (memberIds as string[]).map((userId) => selectUser(global, userId)).filter<ApiUser>(Boolean as any);
+  const users = (memberIds as string[]).map((userId) => selectUser(global, userId)).filter(Boolean);
 
   if (!chat || !users.length) {
     return;

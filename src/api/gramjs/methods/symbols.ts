@@ -318,7 +318,7 @@ export async function searchGifs({ query, offset = '' }: { query: string; offset
 
       return undefined;
     })
-    .filter<GramJs.TypeDocument>(Boolean as any);
+    .filter(Boolean);
 
   return {
     nextOffset: result.nextOffset,
@@ -382,5 +382,5 @@ function processGifResult(gifs: GramJs.TypeDocument[]) {
 
       return undefined;
     })
-    .filter<ApiVideo>(Boolean as any);
+    .filter(Boolean);
 }
