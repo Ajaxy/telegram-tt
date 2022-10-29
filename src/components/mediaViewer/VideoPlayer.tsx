@@ -7,11 +7,13 @@ import { getActions } from '../../global';
 import type { ApiDimensions } from '../../api/types';
 
 import useBuffering from '../../hooks/useBuffering';
-import useFullscreenStatus from '../../hooks/useFullscreen';
+import useFullscreen from '../../hooks/useFullscreen';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import {
+  IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV, IS_YA_BROWSER,
+} from '../../util/environment';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
 
@@ -36,6 +38,7 @@ type OwnProps = {
   playbackRate: number;
   isProtected?: boolean;
   areControlsVisible: boolean;
+  shouldCloseOnClick?: boolean;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
@@ -58,6 +61,7 @@ const VideoPlayer: FC<OwnProps> = ({
   onClose,
   toggleControls,
   areControlsVisible,
+  shouldCloseOnClick,
   isProtected,
 }) => {
   const {
@@ -70,10 +74,18 @@ const VideoPlayer: FC<OwnProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(!IS_TOUCH_ENV || !IS_IOS);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreenStatus(videoRef, setIsPlaying);
+  const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreen(videoRef, setIsPlaying);
 
-  const handleEnterFullscreen = useCallback(() => setMediaViewerHidden(true), [setMediaViewerHidden]);
-  const handleLeaveFullscreen = useCallback(() => setMediaViewerHidden(false), [setMediaViewerHidden]);
+  const handleEnterFullscreen = useCallback(() => {
+    // Yandex browser doesn't support PIP when video is hidden
+    if (IS_YA_BROWSER) return;
+    setMediaViewerHidden(true);
+  }, [setMediaViewerHidden]);
+
+  const handleLeaveFullscreen = useCallback(() => {
+    if (IS_YA_BROWSER) return;
+    setMediaViewerHidden(false);
+  }, [setMediaViewerHidden]);
 
   const [
     isPictureInPictureSupported,
@@ -142,6 +154,14 @@ const VideoPlayer: FC<OwnProps> = ({
       setIsPlaying(true);
     }
   }, [isPlaying]);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
+    if (shouldCloseOnClick) {
+      onClose(e);
+    } else {
+      togglePlayState(e);
+    }
+  }, [onClose, shouldCloseOnClick, togglePlayState]);
 
   useVideoCleanup(videoRef, []);
 
@@ -231,7 +251,7 @@ const VideoPlayer: FC<OwnProps> = ({
           style={videoStyle}
           onPlay={() => setIsPlaying(true)}
           onEnded={handleEnded}
-          onClick={!IS_SINGLE_COLUMN_LAYOUT ? togglePlayState : undefined}
+          onClick={!IS_SINGLE_COLUMN_LAYOUT ? handleClick : undefined}
           onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}

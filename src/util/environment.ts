@@ -44,6 +44,8 @@ export const IS_MAC_OS = PLATFORM_ENV === 'macOS';
 export const IS_IOS = PLATFORM_ENV === 'iOS';
 export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
+
 export const IS_PWA = (
   window.matchMedia('(display-mode: standalone)').matches
   || (window.navigator as any).standalone

@@ -82,6 +82,7 @@
   }
 
   .player-time {
+    color: rgba(255, 255, 255, 0.5);
     white-space: nowrap;
   }
 
@@ -149,12 +150,23 @@
   }
 
   .playback-rate-menu {
+    color: var(--color-text);
     .bubble {
       min-width: 3.5rem;
-      margin-right: 3.5rem;
-      bottom: 4.1875rem
+      margin-right: 5.8125rem;
+      bottom: 4.1875rem;
+      @media (max-width: 600px) {
+        bottom: 4.6875rem;
+      }
     }
-    &.no-fullscreen {
+
+    &.no-fullscreen, &.no-pip {
+      .bubble {
+        margin-right: 3.3125rem;
+      }
+    }
+
+    &.no-fullscreen.no-pip {
       .bubble {
         margin-right: 0.8125rem;
       }

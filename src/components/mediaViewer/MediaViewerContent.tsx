@@ -130,6 +130,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             noPlay={!isActive}
             onClose={onClose}
             isMuted
+            shouldCloseOnClick
             volume={0}
             playbackRate={1}
           />
