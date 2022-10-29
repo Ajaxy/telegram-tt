@@ -129,6 +129,7 @@ module.exports = (_env, { mode = 'production' }) => {
         os: require.resolve('os-browserify/browser'),
         buffer: require.resolve('buffer/'),
         fs: false,
+        crypto: false,
       },
     },
 

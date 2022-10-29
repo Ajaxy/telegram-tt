@@ -99,6 +99,7 @@
     "replace-in-file": "^6.3.2",
     "sass": "^1.50.0",
     "sass-loader": "^12.6.0",
+    "script-loader": "^0.7.2",
     "serve": "^13.0.2",
     "style-loader": "^3.3.1",
     "stylelint": "^14.6.1",
