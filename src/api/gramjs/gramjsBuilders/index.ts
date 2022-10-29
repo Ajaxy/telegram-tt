@@ -237,15 +237,15 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
   } = folder;
 
   const pinnedPeers = pinnedChatIds
-    ? pinnedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    ? pinnedChatIds.map(buildInputPeerFromLocalDb).filter(Boolean)
     : [];
 
   const includePeers = includedChatIds
-    ? includedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    ? includedChatIds.map(buildInputPeerFromLocalDb).filter(Boolean)
     : [];
 
   const excludePeers = excludedChatIds
-    ? excludedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    ? excludedChatIds.map(buildInputPeerFromLocalDb).filter(Boolean)
     : [];
 
   return new GramJs.DialogFilter({

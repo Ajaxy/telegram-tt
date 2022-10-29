@@ -331,7 +331,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       return message && message instanceof GramJs.MessageService && 'photo' in message.action
         ? String(message.action.photo.id)
         : undefined;
-    }).filter<string>(Boolean as any);
+    }).filter(Boolean);
 
     if (existingIds.length) {
       onUpdate({

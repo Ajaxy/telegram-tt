@@ -178,7 +178,7 @@ export function processStickerPackResult(packs: GramJs.StickerPack[]) {
   return packs.reduce((acc, { emoticon, documents }) => {
     acc[emoticon] = documents.map((documentId) => buildStickerFromDocument(
       localDb.documents[String(documentId)],
-    )).filter<ApiSticker>(Boolean as any);
+    )).filter(Boolean);
     return acc;
   }, {} as Record<string, ApiSticker[]>);
 }

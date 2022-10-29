@@ -295,10 +295,10 @@ export function buildChatMembers(
 ) {
   // Duplicate code because of TS union-type shenanigans
   if (participants instanceof GramJs.ChatParticipants) {
-    return participants.participants.map(buildChatMember).filter<ApiChatMember>(Boolean as any);
+    return participants.participants.map(buildChatMember).filter(Boolean);
   }
   if (participants instanceof GramJs.channels.ChannelParticipants) {
-    return participants.participants.map(buildChatMember).filter<ApiChatMember>(Boolean as any);
+    return participants.participants.map(buildChatMember).filter(Boolean);
   }
 
   return undefined;
@@ -362,9 +362,9 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
       'excludeMuted', 'excludeRead', 'excludeArchived',
     ]),
     channels: filter.broadcasts,
-    pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
-    includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
-    excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter<string>(Boolean as any),
+    pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
   };
 }
 
