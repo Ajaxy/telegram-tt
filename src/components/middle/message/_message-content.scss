@@ -226,6 +226,7 @@
     & > .interactive {
       overflow: hidden;
       text-overflow: ellipsis;
+      unicode-bidi: plaintext;
     }
 
     &.interactive,
