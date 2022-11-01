@@ -1,0 +1,21 @@
+.thumb {
+  width: 100%;
+  height: 100%;
+
+  &:global(.closing) {
+    transition-delay: 150ms;
+  }
+}
+
+.media {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.thumb, .media {
+  // @optimization
+  &:not(:global(.shown)) {
+    display: block !important;
+  }
+}

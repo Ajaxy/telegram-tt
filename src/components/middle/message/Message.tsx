@@ -919,7 +919,8 @@ const Message: FC<OwnProps & StateProps> = ({
               <CustomEmoji
                 documentId={senderEmojiStatus.documentId}
                 loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-                observeIntersection={observeIntersectionForAnimatedStickers}
+                observeIntersection={observeIntersectionForMedia}
+                observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
               />
             )}
             {!asForwarded && !senderEmojiStatus && senderIsPremium && <PremiumIcon />}

@@ -21,13 +21,18 @@ const updateLastRendered = throttle(() => {
   RENDER_HISTORY.clear();
 }, THROTTLE, false);
 
-export default function useEnsureCustomEmoji(id: string) {
-  RENDER_HISTORY.add(id);
+export function notifyCustomEmojiRender(emojiId: string) {
+  RENDER_HISTORY.add(emojiId);
   updateLastRendered();
+}
+
+export default function useEnsureCustomEmoji(id: string) {
+  notifyCustomEmojiRender(id);
 
   if (getGlobal().customEmojis.byId[id]) {
     return;
   }
+
   LOAD_QUEUE.add(id);
   loadFromQueue();
 }

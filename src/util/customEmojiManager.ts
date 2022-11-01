@@ -1,18 +1,23 @@
 import { ApiMediaFormat } from '../api/types';
 
 import { getStickerPreviewHash } from '../global/helpers';
+import { notifyCustomEmojiRender } from '../hooks/useEnsureCustomEmoji';
 import * as mediaLoader from './mediaLoader';
 import { throttle } from './schedulers';
 
 const DOM_PROCESS_THROTTLE = 500;
 
 function processDomForCustomEmoji() {
-  const emojis = document.querySelectorAll<HTMLImageElement>('img[data-document-id]:not([src])');
+  const emojis = document.querySelectorAll<HTMLImageElement>('.custom-emoji.placeholder');
   emojis.forEach((emoji) => {
-    const mediaHash = getStickerPreviewHash(emoji.dataset.documentId!);
+    const emojiId = emoji.dataset.documentId!;
+    const mediaHash = getStickerPreviewHash(emojiId);
     const mediaData = mediaLoader.getFromMemory(mediaHash);
     if (mediaData) {
       emoji.src = mediaData;
+      emoji.classList.remove('placeholder');
+
+      notifyCustomEmojiRender(emojiId);
     }
   });
 }
@@ -23,6 +28,7 @@ export function getCustomEmojiPreviewMediaData(emojiId: string) {
   const mediaHash = getStickerPreviewHash(emojiId);
   const data = mediaLoader.getFromMemory(mediaHash);
   if (data) {
+    notifyCustomEmojiRender(emojiId);
     return data;
   }
 

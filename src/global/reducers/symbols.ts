@@ -85,8 +85,7 @@ export function updateStickerSet(
     setIds = setIds.filter((id) => id !== stickerSetId);
   }
 
-  const customEmojiById = isCustomEmoji && currentStickerSet.stickers
-    && buildCollectionByKey(currentStickerSet.stickers, 'id');
+  const customEmojiById = isCustomEmoji && update.stickers && buildCollectionByKey(update.stickers, 'id');
 
   return {
     ...global,
