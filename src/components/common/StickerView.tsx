@@ -93,8 +93,8 @@ const StickerView: FC<OwnProps> = ({
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData));
   const isFullMediaReady = fullMediaData && (isStatic || isPlayerReady);
 
+  const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
-  const thumbClassNames = useMediaTransition(!isFullMediaReady);
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
@@ -108,8 +108,9 @@ const StickerView: FC<OwnProps> = ({
       />
       {isLottie ? (
         <AnimatedSticker
+          key={customColor?.join(',')}
+          id={id}
           size={size}
-          key={fullMediaData}
           className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
           tgsUrl={fullMediaData}
           play={shouldPlay}
