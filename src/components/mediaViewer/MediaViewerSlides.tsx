@@ -554,6 +554,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         setTransform(transform);
       },
       onClick(e) {
+        setIsMouseDown(false);
         const [isInThreshold, hasNextSlide] = changeSlideOnClick(e as MouseEvent);
         if (isInThreshold) {
           e.preventDefault();
@@ -676,6 +677,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const offsetX = transformRef.current.x;
   const offsetY = transformRef.current.y;
   const { scale } = transformRef.current;
+  const isMoving = isMouseDown && scale > 1;
 
   return (
     <div className="MediaViewerSlides" ref={containerRef}>
@@ -685,6 +687,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
             animationLevel={animationLevel}
+            isMoving={isMoving}
             areControlsVisible={areControlsVisible}
             mediaId={prevMediaId}
           />
@@ -694,7 +697,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         className={buildClassName(
           'MediaViewerSlide',
           'MediaViewerSlide--active',
-          isMouseDown && scale > 1 && 'MediaViewerSlide--moving',
+          isMoving && 'MediaViewerSlide--moving',
         )}
         onClick={handleControlsVisibility}
         ref={activeSlideRef}
@@ -707,6 +710,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           animationLevel={animationLevel}
           isActive={isActiveRef.current}
           setControlsVisible={setControlsVisible}
+          isMoving={isMoving}
           areControlsVisible={areControlsVisible && scale === 1}
         />
       </div>
@@ -716,6 +720,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
             animationLevel={animationLevel}
+            isMoving={isMoving}
             areControlsVisible={areControlsVisible}
             mediaId={nextMediaId}
           />
