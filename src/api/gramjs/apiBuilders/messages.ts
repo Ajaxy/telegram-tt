@@ -56,6 +56,7 @@ import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildApiCallDiscardReason } from './calls';
+import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -170,6 +171,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
+  const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
 
   return {
     id: mtpMessage.id,
@@ -183,6 +185,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     isFromScheduled: mtpMessage.fromScheduled,
     isSilent: mtpMessage.silent,
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
+    ...(emojiOnlyCount && { emojiOnlyCount }),
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
@@ -1197,6 +1200,7 @@ export function buildLocalMessage(
   const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
+  const emojiOnlyCount = text && parseEmojiOnlyString(text);
 
   return {
     id: localId,
@@ -1217,6 +1221,7 @@ export function buildLocalMessage(
     date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
+    ...(emojiOnlyCount && { emojiOnlyCount }),
     ...(replyingTo && { replyToMessageId: replyingTo }),
     ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
     ...(groupedId && {
@@ -1256,6 +1261,7 @@ export function buildLocalForwardedMessage(
     text: content.text.text,
     entities: content.text.entities?.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
   } : content.text;
+  const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
 
   const updatedContent = {
     ...content,
@@ -1272,6 +1278,7 @@ export function buildLocalForwardedMessage(
     sendingState: 'messageSendingStatePending',
     groupedId,
     isInAlbum,
+    ...(emojiOnlyCount && { emojiOnlyCount }),
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(senderId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {

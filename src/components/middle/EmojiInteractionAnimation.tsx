@@ -83,7 +83,8 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     }, PLAYING_DURATION);
   }, [stop]);
 
-  const effectTgsUrl = useMedia(`sticker${effectAnimationId}`, !effectAnimationId);
+  const effectHash = effectAnimationId && `sticker${effectAnimationId}`;
+  const effectTgsUrl = useMedia(effectHash, !effectAnimationId);
 
   if (!activeEmojiInteraction.startSize) {
     return undefined;

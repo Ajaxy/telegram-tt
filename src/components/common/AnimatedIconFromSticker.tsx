@@ -20,7 +20,7 @@ function AnimatedIconFromSticker(props: OwnProps) {
   } = props;
 
   const thumbDataUri = sticker?.thumbnail?.dataUri;
-  const localMediaHash = `sticker${sticker?.id}`;
+  const localMediaHash = sticker && `sticker${sticker.id}`;
   const previewBlobUrl = useMedia(
     sticker ? getStickerPreviewHash(sticker.id) : undefined,
     noLoad && !forcePreview,

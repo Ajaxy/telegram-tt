@@ -380,16 +380,18 @@ class RLottie {
             ctx, onLoad, isOnLoadFired, isPaused,
           } = containerData;
 
+          if (onLoad && !isOnLoadFired) {
+            containerData.isOnLoadFired = true;
+            onLoad();
+
+            ctx.putImageData(imageData, 0, 0); // Always render first frame
+          }
+
           if (isPaused) {
             return;
           }
 
           ctx.putImageData(imageData, 0, 0);
-
-          if (onLoad && !isOnLoadFired) {
-            containerData.isOnLoadFired = true;
-            onLoad();
-          }
         });
 
         this.prevFrameIndex = frameIndex;

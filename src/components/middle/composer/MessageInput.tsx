@@ -20,7 +20,7 @@ import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevD
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
-import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
+import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import renderText from '../../common/helpers/renderText';
 

@@ -67,19 +67,20 @@ import {
   isChatWithRepliesBot,
   getMessageCustomShape,
   isChatChannel,
-  getMessageSingleEmoji,
+  getMessageSingleRegularEmoji,
   getSenderTitle,
   getUserColorKey,
   areReactionsEmpty,
   getMessageHtmlId,
   isGeoLiveExpired,
+  getMessageSingleCustomEmoji,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
-import { buildContentClassName, isEmojiOnlyMessage } from './helpers/buildContentClassName';
+import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
@@ -94,6 +95,7 @@ import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
+import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -104,6 +106,7 @@ import MessageMeta from './MessageMeta';
 import ContextMenuContainer from './ContextMenuContainer.async';
 import Sticker from './Sticker';
 import AnimatedEmoji from './AnimatedEmoji';
+import AnimatedCustomEmoji from './AnimatedCustomEmoji';
 import Photo from './Photo';
 import Video from './Video';
 import Contact from './Contact';
@@ -182,6 +185,7 @@ type StateProps = {
   serverTimeOffset: number;
   highlight?: string;
   animatedEmoji?: string;
+  animatedCustomEmoji?: string;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
@@ -272,6 +276,7 @@ const Message: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   highlight,
   animatedEmoji,
+  animatedCustomEmoji,
   isInSelectMode,
   isSelected,
   isGroupSelected,
@@ -348,7 +353,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const customShape = getMessageCustomShape(message);
-  const hasAnimatedEmoji = animatedEmoji;
+  const hasAnimatedEmoji = animatedEmoji || animatedCustomEmoji;
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
     forwardInfo
@@ -513,10 +518,11 @@ const Message: FC<OwnProps & StateProps> = ({
   });
 
   const withAppendix = contentClassName.includes('has-appendix');
+  const emojiSize = message.emojiOnlyCount && getCustomEmojiSize(message.emojiOnlyCount);
   const textParts = renderMessageText(
     message,
     highlight,
-    isEmojiOnlyMessage(customShape),
+    emojiSize,
     undefined,
     undefined,
     isProtected,
@@ -528,7 +534,7 @@ const Message: FC<OwnProps & StateProps> = ({
     metaPosition = 'none';
   } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
-  } else if (textParts && !hasAnimatedEmoji && !webPage) {
+  } else if (textParts && !webPage && !hasAnimatedEmoji) {
     metaPosition = 'in-text';
   } else {
     metaPosition = 'standalone';
@@ -538,7 +544,7 @@ const Message: FC<OwnProps & StateProps> = ({
   if (areReactionsInMeta) {
     reactionsPosition = 'in-meta';
   } else if (hasReactions) {
-    if (customShape || ((photo || video || hasAnimatedEmoji) && !textParts)) {
+    if (customShape || ((photo || video) && !textParts)) {
       reactionsPosition = 'outside';
     } else if (asForwarded) {
       metaPosition = 'standalone';
@@ -698,6 +704,19 @@ const Message: FC<OwnProps & StateProps> = ({
             ) || undefined}
             onPlayEffect={startStickerEffect}
             onStopEffect={stopStickerEffect}
+          />
+        )}
+        {animatedCustomEmoji && (
+          <AnimatedCustomEmoji
+            customEmojiId={animatedCustomEmoji}
+            withEffects={isUserId(chatId)}
+            isOwn={isOwn}
+            observeIntersection={observeIntersectionForMedia}
+            lastSyncTime={lastSyncTime}
+            forceLoadPreview={isLocal}
+            messageId={messageId}
+            chatId={chatId}
+            activeEmojiInteractions={activeEmojiInteractions}
           />
         )}
         {animatedEmoji && (
@@ -1114,10 +1133,11 @@ export default memo(withGlobal<OwnProps>(
 
     const { query: highlight } = selectCurrentTextSearch(global) || {};
 
-    const singleEmoji = getMessageSingleEmoji(message);
+    const singleEmoji = getMessageSingleRegularEmoji(message);
     const animatedEmoji = singleEmoji && (
       selectAnimatedEmoji(global, singleEmoji) || selectLocalAnimatedEmoji(global, singleEmoji)
     ) ? singleEmoji : undefined;
+    const animatedCustomEmoji = getMessageSingleCustomEmoji(message);
 
     let isSelected: boolean;
     if (album?.messages) {
@@ -1167,6 +1187,7 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset,
       highlight,
       animatedEmoji,
+      animatedCustomEmoji,
       isInSelectMode: selectIsInSelectMode(global),
       isSelected,
       isGroupSelected: (

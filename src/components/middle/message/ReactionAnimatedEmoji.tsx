@@ -36,8 +36,12 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   const availableReaction = availableReactions?.find((r) => r.reaction === reaction);
   const centerIconId = availableReaction?.centerIcon?.id;
   const effectId = availableReaction?.aroundAnimation?.id;
-  const mediaDataCenterIcon = useMedia(`sticker${centerIconId}`, !centerIconId);
-  const mediaDataEffect = useMedia(`sticker${effectId}`, !effectId);
+
+  const mediaHashCenterIcon = centerIconId && `sticker${centerIconId}`;
+  const mediaHashEffect = effectId && `sticker${effectId}`;
+
+  const mediaDataCenterIcon = useMedia(mediaHashCenterIcon, !centerIconId);
+  const mediaDataEffect = useMedia(mediaHashEffect, !effectId);
 
   const shouldPlay = Boolean(activeReaction?.reaction === reaction && mediaDataCenterIcon && mediaDataEffect);
   const {

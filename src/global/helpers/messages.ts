@@ -13,7 +13,6 @@ import {
 import { getUserFullName } from './users';
 import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/environment';
 import { getChatTitle, isUserId } from './chats';
-import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
 import { getGlobal } from '../index';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -69,34 +68,45 @@ export function getMessageText(message: ApiMessage) {
   return CONTENT_NOT_SUPPORTED;
 }
 
-export function getMessageCustomShape(message: ApiMessage): boolean | number {
+export function getMessageCustomShape(message: ApiMessage): boolean {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
+    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, action, game, invoice, location,
   } = message.content;
 
   if (sticker || (video?.isRound)) {
     return true;
   }
 
-  if (!text || text.entities?.length || photo || video || audio || voice || document || poll || webPage || contact) {
+  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game || invoice
+    || location) {
     return false;
   }
 
-  // This is a "dual-intent" method used to limit calls of `parseEmojiOnlyString`.
-  return parseEmojiOnlyString(text.text) || false;
+  const hasOtherFormatting = text?.entities?.some((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji);
+
+  return Boolean(message.emojiOnlyCount && !hasOtherFormatting);
 }
 
-export function getMessageSingleEmoji(message: ApiMessage) {
+export function getMessageSingleRegularEmoji(message: ApiMessage) {
   const { text } = message.content;
-  if (!(text && text.text.length <= 6) || text.entities?.length) {
+
+  if (text?.entities?.length || message.emojiOnlyCount !== 1) {
     return undefined;
   }
 
-  if (getMessageCustomShape(message) !== 1) {
+  return text!.text;
+}
+
+export function getMessageSingleCustomEmoji(message: ApiMessage): string | undefined {
+  const { text } = message.content;
+
+  if (text?.entities?.length !== 1
+    || text.entities[0].type !== ApiMessageEntityTypes.CustomEmoji
+    || message.emojiOnlyCount !== 1) {
     return undefined;
   }
 
-  return text.text;
+  return text.entities[0].documentId;
 }
 
 export function getFirstLinkInMessage(message: ApiMessage) {

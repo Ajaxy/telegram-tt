@@ -3,8 +3,8 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../../../config';
+import { REM } from '../../common/helpers/mediaDimensions';
 
-const REM = 16; // px
 const MAX_TOOLBAR_WIDTH = 32 * REM;
 const MAX_MESSAGES_LIST_WIDTH = 45.5 * REM;
 export const SIDE_COLUMN_MAX_WIDTH = 26.5 * REM;

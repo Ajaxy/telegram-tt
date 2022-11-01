@@ -48,6 +48,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
       fileReference: Buffer.from(atob(l.file_reference_base64
         .replace(/-/g, '+')
         .replace(/_/g, '/'))),
+      size: BigInt(0),
     } as GramJs.Document);
 
     acc[key] = l.id;

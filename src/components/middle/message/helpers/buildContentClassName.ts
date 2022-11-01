@@ -1,10 +1,7 @@
 import type { ApiMessage } from '../../../../api/types';
 
+import { EMOJI_SIZES } from '../../../../config';
 import { getMessageContent } from '../../../../global/helpers';
-
-export function isEmojiOnlyMessage(customShape?: boolean | number) {
-  return typeof customShape === 'number';
-}
 
 export function buildContentClassName(
   message: ApiMessage,
@@ -44,8 +41,11 @@ export function buildContentClassName(
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
 
-  if (isEmojiOnlyMessage(customShape)) {
-    classNames.push(`emoji-only emoji-only-${customShape}`);
+  if (message.emojiOnlyCount) {
+    classNames.push('emoji-only');
+    if (message.emojiOnlyCount <= EMOJI_SIZES) {
+      classNames.push(`emoji-only-${message.emojiOnlyCount}`);
+    }
   } else if (hasText) {
     classNames.push('text');
   }
