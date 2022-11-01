@@ -1,5 +1,8 @@
 import { getActions, getGlobal } from '../global';
+
 import { throttle } from '../util/schedulers';
+
+import useLastSyncTime from './useLastSyncTime';
 
 const LOAD_QUEUE = new Set<string>();
 const RENDER_HISTORY = new Set<string>();
@@ -27,6 +30,7 @@ export function notifyCustomEmojiRender(emojiId: string) {
 }
 
 export default function useEnsureCustomEmoji(id: string) {
+  const lastSyncTime = useLastSyncTime();
   notifyCustomEmojiRender(id);
 
   if (getGlobal().customEmojis.byId[id]) {
@@ -34,5 +38,7 @@ export default function useEnsureCustomEmoji(id: string) {
   }
 
   LOAD_QUEUE.add(id);
-  loadFromQueue();
+  if (lastSyncTime) {
+    loadFromQueue();
+  }
 }

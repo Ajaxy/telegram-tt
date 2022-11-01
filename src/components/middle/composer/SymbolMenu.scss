@@ -228,6 +228,16 @@
   }
 
   .symbol-set-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    // Fix for the last row alignment
+    &::after {
+      content: "";
+      flex: auto;
+    }
+
     &:not(.shown) {
       display: block;
     }

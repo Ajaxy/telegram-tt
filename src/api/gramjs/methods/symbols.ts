@@ -169,6 +169,8 @@ export async function fetchStickers(
     return undefined;
   }
 
+  localDb.stickerSets[String(result.set.id)] = result.set;
+
   return {
     set: buildStickerSet(result.set),
     stickers: processStickerResult(result.documents),

@@ -353,7 +353,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
   const customShape = getMessageCustomShape(message);
-  const hasAnimatedEmoji = animatedEmoji || animatedCustomEmoji;
+  const hasAnimatedEmoji = customShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
     forwardInfo
@@ -706,7 +706,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onStopEffect={stopStickerEffect}
           />
         )}
-        {animatedCustomEmoji && (
+        {hasAnimatedEmoji && animatedCustomEmoji && (
           <AnimatedCustomEmoji
             customEmojiId={animatedCustomEmoji}
             withEffects={isUserId(chatId)}
@@ -719,7 +719,7 @@ const Message: FC<OwnProps & StateProps> = ({
             activeEmojiInteractions={activeEmojiInteractions}
           />
         )}
-        {animatedEmoji && (
+        {hasAnimatedEmoji && animatedEmoji && (
           <AnimatedEmoji
             emoji={animatedEmoji}
             withEffects={isUserId(chatId)}
