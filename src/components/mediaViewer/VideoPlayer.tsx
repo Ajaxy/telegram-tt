@@ -41,6 +41,7 @@ type OwnProps = {
   shouldCloseOnClick?: boolean;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  isClickDisabled?: boolean;
 };
 
 const MOBILE_VERSION_CONTROL_WIDTH = 400;
@@ -63,6 +64,7 @@ const VideoPlayer: FC<OwnProps> = ({
   areControlsVisible,
   shouldCloseOnClick,
   isProtected,
+  isClickDisabled,
 }) => {
   const {
     setMediaViewerVolume,
@@ -156,12 +158,13 @@ const VideoPlayer: FC<OwnProps> = ({
   }, [isPlaying]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
+    if (isClickDisabled) return;
     if (shouldCloseOnClick) {
       onClose(e);
     } else {
       togglePlayState(e);
     }
-  }, [onClose, shouldCloseOnClick, togglePlayState]);
+  }, [onClose, shouldCloseOnClick, togglePlayState, isClickDisabled]);
 
   useVideoCleanup(videoRef, []);
 

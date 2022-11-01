@@ -36,6 +36,7 @@ type OwnProps = {
   onFooterClick: () => void;
   setControlsVisible?: (isVisible: boolean) => void;
   areControlsVisible: boolean;
+  isMoving?: boolean;
 };
 
 type StateProps = {
@@ -73,6 +74,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     onClose,
     onFooterClick,
     setControlsVisible,
+    isMoving,
   } = props;
 
   const isGhostAnimation = animationLevel === 2;
@@ -132,6 +134,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             isMuted
             shouldCloseOnClick
             volume={0}
+            isClickDisabled={isMoving}
             playbackRate={1}
           />
         </div>
@@ -176,6 +179,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           isHidden={isHidden}
           isProtected={isProtected}
           volume={volume}
+          isClickDisabled={isMoving}
           playbackRate={playbackRate}
         />
       ))}
