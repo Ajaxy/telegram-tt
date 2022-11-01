@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { FC } from '../../lib/teact/teact';
@@ -11,7 +11,6 @@ import useLang from '../../hooks/useLang';
 
 import ListItem from '../ui/ListItem';
 import Button from '../ui/Button';
-import StickerSetCoverAnimated from '../middle/composer/StickerSetCoverAnimated';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import StickerButton from './StickerButton';
 
@@ -19,6 +18,7 @@ import './StickerSetCard.scss';
 
 type OwnProps = {
   stickerSet?: ApiStickerSet;
+  noAnimate?: boolean;
   className?: string;
   observeIntersection: ObserveFn;
   onClick: (value: ApiSticker) => void;
@@ -26,6 +26,7 @@ type OwnProps = {
 
 const StickerSetCard: FC<OwnProps> = ({
   stickerSet,
+  noAnimate,
   className,
   observeIntersection,
   onClick,
@@ -38,7 +39,11 @@ const StickerSetCard: FC<OwnProps> = ({
     if (firstSticker) onClick(firstSticker);
   }, [firstSticker, onClick]);
 
-  const preview = useMemo(() => {
+  if (!stickerSet || !stickerSet.stickers) {
+    return undefined;
+  }
+
+  function renderPreview() {
     if (!stickerSet) return undefined;
     if (stickerSet.hasThumbnail || !firstSticker) {
       return (
@@ -47,18 +52,12 @@ const StickerSetCard: FC<OwnProps> = ({
           color="translucent"
           isRtl={lang.isRtl}
         >
-          {stickerSet.isLottie ? (
-            <StickerSetCoverAnimated
-              size={STICKER_SIZE_GENERAL_SETTINGS}
-              stickerSet={stickerSet}
-              observeIntersection={observeIntersection}
-            />
-          ) : (
-            <StickerSetCover
-              stickerSet={stickerSet}
-              observeIntersection={observeIntersection}
-            />
-          )}
+          <StickerSetCover
+            stickerSet={stickerSet}
+            size={STICKER_SIZE_GENERAL_SETTINGS}
+            noAnimate={noAnimate}
+            observeIntersection={observeIntersection}
+          />
         </Button>
       );
     } else {
@@ -67,17 +66,14 @@ const StickerSetCard: FC<OwnProps> = ({
           sticker={firstSticker}
           size={STICKER_SIZE_GENERAL_SETTINGS}
           title={stickerSet.title}
+          noAnimate={noAnimate}
           observeIntersection={observeIntersection}
-          clickArg={undefined}
           noContextMenu
           isCurrentUserPremium
+          clickArg={undefined}
         />
       );
     }
-  }, [firstSticker, lang.isRtl, observeIntersection, stickerSet]);
-
-  if (!stickerSet || !stickerSet.stickers) {
-    return undefined;
   }
 
   return (
@@ -87,7 +83,7 @@ const StickerSetCard: FC<OwnProps> = ({
       inactive={!firstSticker}
       onClick={handleCardClick}
     >
-      {preview}
+      {renderPreview()}
       <div className="multiline-menu-item">
         <div className="title">{stickerSet.title}</div>
         <div className="subtitle">{lang('StickerPack.StickerCount', stickerSet.count, 'i')}</div>

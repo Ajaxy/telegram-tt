@@ -29,13 +29,13 @@ type OwnProps<T> = {
   noAnimate?: boolean;
   title?: string;
   className?: string;
-  clickArg: T;
   noContextMenu?: boolean;
   isSavedMessages?: boolean;
   canViewSet?: boolean;
   isCurrentUserPremium?: boolean;
   observeIntersection: ObserveFn;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
+  clickArg: T;
   onFaveClick?: (sticker: ApiSticker) => void;
   onUnfaveClick?: (sticker: ApiSticker) => void;
   onRemoveRecentClick?: (sticker: ApiSticker) => void;

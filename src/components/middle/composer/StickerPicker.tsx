@@ -35,7 +35,6 @@ import Button from '../../ui/Button';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from './StickerSet';
 import StickerSetCover from './StickerSetCover';
-import StickerSetCoverAnimated from './StickerSetCoverAnimated';
 import PremiumIcon from '../../common/PremiumIcon';
 
 import './StickerPicker.scss';
@@ -56,7 +55,7 @@ type StateProps = {
   premiumStickers: ApiSticker[];
   stickerSetsById: Record<string, ApiStickerSet>;
   addedSetIds?: string[];
-  shouldPlay?: boolean;
+  canAnimate?: boolean;
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
 };
@@ -78,7 +77,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   premiumStickers,
   addedSetIds,
   stickerSetsById,
-  shouldPlay,
+  canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
   onStickerSelect,
@@ -286,14 +285,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             <i className="icon-favorite" />
           ) : stickerSet.id === CHAT_STICKER_SET_ID ? (
             <Avatar chat={chat} size="small" />
-          ) : stickerSet.isLottie ? (
-            <StickerSetCoverAnimated
-              stickerSet={stickerSet as ApiStickerSet}
-              observeIntersection={observeIntersectionForCovers}
-            />
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
+              noAnimate={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
             />
           )}
@@ -307,11 +302,12 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           size={STICKER_SIZE_PICKER_HEADER}
           title={stickerSet.title}
           className={buttonClassName}
+          noAnimate={!canAnimate || !loadAndPlay}
           observeIntersection={observeIntersectionForCovers}
-          onClick={selectStickerSet}
-          clickArg={index}
           noContextMenu
           isCurrentUserPremium
+          onClick={selectStickerSet}
+          clickArg={index}
         />
       );
     }
@@ -350,17 +346,17 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           <StickerSet
             key={stickerSet.id}
             stickerSet={stickerSet}
-            loadAndPlay={Boolean(shouldPlay && loadAndPlay)}
+            loadAndPlay={Boolean(canAnimate && loadAndPlay)}
             index={i}
             observeIntersection={observeIntersection}
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+            favoriteStickers={favoriteStickers}
+            isSavedMessages={isSavedMessages}
+            isCurrentUserPremium={isCurrentUserPremium}
             onStickerSelect={handleStickerSelect}
             onStickerUnfave={handleStickerUnfave}
             onStickerFave={handleStickerFave}
             onStickerRemoveRecent={handleRemoveRecentSticker}
-            favoriteStickers={favoriteStickers}
-            isSavedMessages={isSavedMessages}
-            isCurrentUserPremium={isCurrentUserPremium}
           />
         ))}
       </div>
@@ -388,7 +384,7 @@ export default memo(withGlobal<OwnProps>(
       premiumStickers: premiumSet.stickers,
       stickerSetsById: setsById,
       addedSetIds: added.setIds,
-      shouldPlay: global.settings.byKey.shouldLoopStickers,
+      canAnimate: global.settings.byKey.shouldLoopStickers,
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
