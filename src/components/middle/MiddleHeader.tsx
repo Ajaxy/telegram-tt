@@ -48,6 +48,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
+import usePrevious from '../../hooks/usePrevious';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -262,6 +263,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const renderingCanUnpin = useCurrentOrPrev(canUnpin, true);
   const renderingPinnedMessageTitle = useCurrentOrPrev(topMessageTitle);
 
+  const prevTransitionKey = usePrevious(currentTransitionKey);
+  const cleanupExceptionKey = (
+    prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
+  );
+
   const canRevealTools = (shouldRenderPinnedMessage && renderingPinnedMessage)
     || (shouldRenderAudioPlayer && renderingAudioMessage);
 
@@ -388,6 +394,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       <Transition
         name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
         activeKey={currentTransitionKey}
+        shouldCleanup
+        cleanupExceptionKey={cleanupExceptionKey}
       >
         {renderInfo()}
       </Transition>
