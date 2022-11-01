@@ -2,11 +2,30 @@ import { addActionHandler } from '../../index';
 
 import { IS_PRODUCTION_HOST } from '../../../util/environment';
 import { clearPayment } from '../../reducers';
+import * as langProvider from '../../../util/langProvider';
+import { formatCurrency } from '../../../util/formatCurrency';
+import { selectChatMessage } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
     case 'updatePaymentStateCompleted': {
       const { inputInvoice } = global.payment;
+
+      if (inputInvoice && 'chatId' in inputInvoice && 'messageId' in inputInvoice) {
+        const message = selectChatMessage(global, inputInvoice.chatId, inputInvoice.messageId);
+
+        if (message && message.content.invoice) {
+          const { amount, currency, title } = message.content.invoice;
+
+          actions.showNotification({
+            message: langProvider.getTranslation('PaymentInfoHint', [
+              formatCurrency(amount, currency, langProvider.getTranslation.code),
+              title,
+            ]),
+          });
+        }
+      }
+
       // On the production host, the payment frame receives a message with the payment event,
       // after which the payment form closes. In other cases, the payment form must be closed manually.
       if (!IS_PRODUCTION_HOST) {

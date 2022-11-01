@@ -3,7 +3,7 @@ import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiShippingAddress, ApiStickerSet, ApiWebDocument,
+  ApiLanguage, ApiMessage, ApiStickerSet,
 } from '../api/types';
 
 export type TextPart = TeactNode;
@@ -129,34 +129,17 @@ export interface Price {
   amount: number;
 }
 
-export interface Invoice {
+export interface ApiInvoiceContainer {
+  isTest?: boolean;
+  isNameRequested?: boolean;
+  isPhoneRequested?: boolean;
+  isEmailRequested?: boolean;
+  isShippingAddressRequested?: boolean;
+  isFlexible?: boolean;
+  shouldSendPhoneToProvider?: boolean;
+  shouldSendEmailToProvider?: boolean;
   currency?: string;
-  emailRequested?: boolean;
-  emailToProvider?: boolean;
-  flexible?: boolean;
-  nameRequested?: boolean;
-  phoneRequested?: boolean;
-  phoneToProvider?: boolean;
   prices?: Price[];
-  shippingAddressRequested?: boolean;
-  test?: boolean;
-}
-
-export interface Receipt {
-  currency: string;
-  prices: Price[];
-  info?: {
-    shippingAddress?: ApiShippingAddress;
-    phone?: string;
-    name?: string;
-  };
-  totalAmount: number;
-  credentialsTitle: string;
-  shippingPrices?: Price[];
-  shippingMethod?: string;
-  photo?: ApiWebDocument;
-  text?: string;
-  title?: string;
 }
 
 export enum SettingsScreens {
@@ -346,10 +329,12 @@ export enum ProfileState {
 }
 
 export enum PaymentStep {
+  Checkout,
+  SavedPayments,
+  ConfirmPassword,
+  PaymentInfo,
   ShippingInfo,
   Shipping,
-  PaymentInfo,
-  Checkout,
   ConfirmPayment,
 }
 

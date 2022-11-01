@@ -153,14 +153,16 @@ const PaymentInfo: FC<OwnProps> = ({
             error={formErrors.billingZip}
           />
         )}
-        { canSaveCredentials && (
-          <Checkbox
-            label={lang('PaymentCardSavePaymentInformation')}
-            checked={state.saveCredentials}
-            tabIndex={0}
-            onChange={handleChangeSaveCredentials}
-          />
-        ) }
+        <Checkbox
+          label={lang('PaymentCardSavePaymentInformation')}
+          checked={canSaveCredentials ? state.saveCredentials : false}
+          tabIndex={0}
+          onChange={handleChangeSaveCredentials}
+          disabled={!canSaveCredentials}
+        />
+        <p className="description">
+          {lang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
+        </p>
       </form>
     </div>
   );

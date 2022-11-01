@@ -4,37 +4,29 @@ import type {
   ApiInvoice, ApiMessage, ApiPaymentForm, ApiReceipt,
 } from '../../api/types';
 
+export function updatePayment(global: GlobalState, update: Partial<GlobalState['payment']>): GlobalState {
+  return {
+    ...global,
+    payment: {
+      ...global.payment,
+      ...update,
+    },
+  };
+}
+
 export function updateShippingOptions(
   global: GlobalState,
   shippingOptions: ShippingOption[],
 ): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      shippingOptions,
-    },
-  };
+  return updatePayment(global, { shippingOptions });
 }
 
 export function setRequestInfoId(global: GlobalState, id: string): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      requestId: id,
-    },
-  };
+  return updatePayment(global, { requestId: id });
 }
 
 export function setPaymentStep(global: GlobalState, step: PaymentStep): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      step,
-    },
-  };
+  return updatePayment(global, { step });
 }
 
 export function setInvoiceInfo(global: GlobalState, invoice: ApiInvoice): GlobalState {
@@ -47,71 +39,43 @@ export function setInvoiceInfo(global: GlobalState, invoice: ApiInvoice): Global
     photo,
     isRecurring,
     recurringTermsUrl,
+    maxTipAmount,
+    suggestedTipAmounts,
   } = invoice;
 
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      invoiceContent: {
-        title,
-        text,
-        photo,
-        amount,
-        currency,
-        isTest,
-        isRecurring,
-        recurringTermsUrl,
-      },
+  return updatePayment(global, {
+    invoice: {
+      title,
+      text,
+      photo,
+      amount,
+      currency,
+      isTest,
+      isRecurring,
+      recurringTermsUrl,
+      maxTipAmount,
+      suggestedTipAmounts,
     },
-  };
+  });
 }
 
 export function setStripeCardInfo(global: GlobalState, cardInfo: { type: string; id: string }): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      stripeCredentials: {
-        ...cardInfo,
-      },
-    },
-  };
+  return updatePayment(global, { stripeCredentials: { ...cardInfo } });
 }
 
 export function setSmartGlocalCardInfo(
   global: GlobalState,
   cardInfo: { type: string; token: string },
 ): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      smartGlocalCredentials: {
-        ...cardInfo,
-      },
-    },
-  };
+  return updatePayment(global, { smartGlocalCredentials: { ...cardInfo } });
 }
 
 export function setPaymentForm(global: GlobalState, form: ApiPaymentForm): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      ...form,
-    },
-  };
+  return updatePayment(global, { ...form });
 }
 
 export function setConfirmPaymentUrl(global: GlobalState, url?: string): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      confirmPaymentUrl: url,
-    },
-  };
+  return updatePayment(global, { confirmPaymentUrl: url });
 }
 
 export function setReceipt(
@@ -120,13 +84,7 @@ export function setReceipt(
   message?: ApiMessage,
 ): GlobalState {
   if (!receipt || !message) {
-    return {
-      ...global,
-      payment: {
-        ...global.payment,
-        receipt: undefined,
-      },
-    };
+    return updatePayment(global, { receipt: undefined });
   }
 
   const { invoice: messageInvoice } = message.content;
@@ -134,18 +92,14 @@ export function setReceipt(
     photo, text, title,
   } = (messageInvoice || {});
 
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      receipt: {
-        ...receipt,
-        photo,
-        text,
-        title,
-      },
+  return updatePayment(global, {
+    receipt: {
+      ...receipt,
+      photo,
+      text,
+      title,
     },
-  };
+  });
 }
 
 export function clearPayment(global: GlobalState): GlobalState {
@@ -156,11 +110,5 @@ export function clearPayment(global: GlobalState): GlobalState {
 }
 
 export function closeInvoice(global: GlobalState): GlobalState {
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      isPaymentModalOpen: false,
-    },
-  };
+  return updatePayment(global, { isPaymentModalOpen: undefined });
 }

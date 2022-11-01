@@ -44,6 +44,8 @@ import type {
   ApiInvoice,
   ApiStickerSetInfo,
   ApiChatType,
+  ApiReceipt,
+  ApiPaymentCredentials,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -56,8 +58,7 @@ import type {
   ManagementProgress,
   PaymentStep,
   ShippingOption,
-  Invoice,
-  Receipt,
+  ApiInvoiceContainer,
   ApiPrivacyKey,
   ApiPrivacySettings,
   ThemeKey,
@@ -481,8 +482,8 @@ export type GlobalState = {
     requestId?: string;
     savedInfo?: ApiPaymentSavedInfo;
     canSaveCredentials?: boolean;
-    invoice?: Invoice;
-    invoiceContent?: Omit<ApiInvoice, 'receiptMsgId'>;
+    invoice?: ApiInvoice;
+    invoiceContainer?: Omit<ApiInvoiceContainer, 'receiptMsgId'>;
     nativeProvider?: string;
     providerId?: string;
     nativeParams?: ApiPaymentFormNativeParams;
@@ -495,18 +496,19 @@ export type GlobalState = {
       token: string;
     };
     passwordMissing?: boolean;
-    savedCredentials?: {
-      id: string;
-      title: string;
-    };
-    receipt?: Receipt;
+    savedCredentials?: ApiPaymentCredentials[];
+    receipt?: ApiReceipt;
     error?: {
       field?: string;
       message?: string;
-      description: string;
+      description?: string;
     };
     isPaymentModalOpen?: boolean;
     confirmPaymentUrl?: string;
+    temporaryPassword?: {
+      value: string;
+      validUntil: number;
+    };
   };
 
   chatCreation?: {
@@ -1107,6 +1109,15 @@ export interface ActionPayloads {
     url?: string;
   };
   closeUrlAuthModal: never;
+  showNotification: {
+    localId?: string;
+    title?: string;
+    message: string;
+    className?: string;
+    actionText?: string;
+    action?: NoneToVoidFunction;
+  };
+  dismissNotification: { localId: string };
 
   // Calls
   requestCall: {
@@ -1180,12 +1191,17 @@ export interface ActionPayloads {
 
   // Invoice
   openInvoice: ApiInputInvoice;
+
+  // Payment
+  validatePaymentPassword: {
+    password: string;
+  };
 }
 
 export type NonTypedActionNames = (
   // system
   'init' | 'reset' | 'disconnect' | 'initApi' | 'sync' | 'saveSession' |
-  'showNotification' | 'dismissNotification' | 'showDialog' | 'dismissDialog' |
+  'showDialog' | 'dismissDialog' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |

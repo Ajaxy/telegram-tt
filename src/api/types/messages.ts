@@ -187,6 +187,13 @@ export interface ApiInvoice {
   isTest?: boolean;
   isRecurring?: boolean;
   recurringTermsUrl?: string;
+  maxTipAmount?: number;
+  suggestedTipAmounts?: number[];
+}
+
+export interface ApiPaymentCredentials {
+  id: string;
+  title: string;
 }
 
 interface ApiGeoPoint {

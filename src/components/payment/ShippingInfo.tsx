@@ -4,8 +4,8 @@ import React, {
 } from '../../lib/teact/teact';
 
 import type { ApiCountry } from '../../api/types';
-
 import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import useLang from '../../hooks/useLang';
 

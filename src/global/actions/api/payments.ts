@@ -1,8 +1,10 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { callApi } from '../../../api/gramjs';
 
+import type { ApiChat, ApiInvoice, ApiRequestInputInvoice } from '../../../api/types';
 import { PaymentStep } from '../../../types';
-import type { ApiChat, ApiRequestInputInvoice } from '../../../api/types';
 
+import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 import {
   selectPaymentRequestId,
   selectProviderPublishableKey,
@@ -14,11 +16,8 @@ import {
   selectSmartGlocalCredentials,
   selectPaymentInputInvoice,
 } from '../../selectors';
-import { callApi } from '../../../api/gramjs';
 import { getStripeError } from '../../helpers';
 import { buildQueryString } from '../../../util/requestQuery';
-import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
-
 import {
   updateShippingOptions,
   setPaymentStep,
@@ -28,19 +27,25 @@ import {
   setReceipt,
   clearPayment,
   closeInvoice,
-  setSmartGlocalCardInfo, addUsers, setInvoiceInfo,
+  setSmartGlocalCardInfo, addUsers, setInvoiceInfo, updatePayment,
 } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('validateRequestedInfo', (global, actions, payload) => {
-  const { requestInfo, saveInfo } = payload;
   const inputInvoice = selectPaymentInputInvoice(global);
-  if (!inputInvoice) return;
+  if (!inputInvoice) {
+    return;
+  }
+
+  const { requestInfo, saveInfo } = payload;
   if ('slug' in inputInvoice) {
     void validateRequestedInfo(inputInvoice, requestInfo, saveInfo);
   } else {
     const chat = selectChat(global, inputInvoice.chatId);
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
+
     void validateRequestedInfo({
       chat,
       messageId: inputInvoice.messageId,
@@ -48,42 +53,25 @@ addActionHandler('validateRequestedInfo', (global, actions, payload) => {
   }
 });
 
-async function validateRequestedInfo(inputInvoice: ApiRequestInputInvoice, requestInfo: any, shouldSave?: true) {
-  const result = await callApi('validateRequestedInfo', {
-    inputInvoice, requestInfo, shouldSave,
-  });
-  if (!result) {
-    return;
-  }
-
-  const { id, shippingOptions } = result;
-  if (!id) {
-    return;
-  }
-
-  let global = setRequestInfoId(getGlobal(), id);
-  if (shippingOptions) {
-    global = updateShippingOptions(global, shippingOptions);
-    global = setPaymentStep(global, PaymentStep.Shipping);
-  } else {
-    global = setPaymentStep(global, PaymentStep.PaymentInfo);
-  }
-  setGlobal(global);
-}
-
 addActionHandler('openInvoice', async (global, actions, payload) => {
-  let invoice;
+  let invoice: ApiInvoice | undefined;
   if ('slug' in payload) {
     invoice = await getPaymentForm({ slug: payload.slug });
   } else {
     const chat = selectChat(global, payload.chatId);
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
+
     invoice = await getPaymentForm({
       chat,
       messageId: payload.messageId,
     });
   }
-  if (!invoice) return;
+
+  if (!invoice) {
+    return;
+  }
 
   global = getGlobal();
   global = setInvoiceInfo(global, invoice);
@@ -98,22 +86,18 @@ addActionHandler('openInvoice', async (global, actions, payload) => {
   });
 });
 
-async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
+async function getPaymentForm(inputInvoice: ApiRequestInputInvoice): Promise<ApiInvoice | undefined> {
   const result = await callApi('getPaymentForm', inputInvoice);
   if (!result) {
     return undefined;
   }
+
   const { form, invoice } = result;
+
   let global = setPaymentForm(getGlobal(), form);
-  let step = PaymentStep.PaymentInfo;
-  const {
-    shippingAddressRequested, nameRequested, phoneRequested, emailRequested,
-  } = global.payment.invoice || {};
-  if (shippingAddressRequested || nameRequested || phoneRequested || emailRequested) {
-    step = PaymentStep.ShippingInfo;
-  }
-  global = setPaymentStep(global, step);
+  global = setPaymentStep(global, PaymentStep.Checkout);
   setGlobal(global);
+
   return invoice;
 }
 
@@ -179,17 +163,19 @@ addActionHandler('sendCredentialsInfo', (global, actions, payload) => {
   }
 });
 
-addActionHandler('sendPaymentForm', (global, actions, payload) => {
-  const { shippingOptionId, saveCredentials } = payload;
+addActionHandler('sendPaymentForm', async (global, actions, payload) => {
+  const {
+    shippingOptionId, saveCredentials, savedCredentialId, tipAmount,
+  } = payload;
   const inputInvoice = selectPaymentInputInvoice(global);
   const formId = selectPaymentFormId(global);
   const requestInfoId = selectPaymentRequestId(global);
-  const { nativeProvider } = global.payment;
+  const { nativeProvider, temporaryPassword } = global.payment;
   const publishableKey = nativeProvider === 'stripe'
     ? selectProviderPublishableKey(global) : selectProviderPublicToken(global);
 
   if (!inputInvoice || !publishableKey || !formId || !nativeProvider) {
-    return undefined;
+    return;
   }
 
   let requestInputInvoice;
@@ -200,7 +186,7 @@ addActionHandler('sendPaymentForm', (global, actions, payload) => {
   } else {
     const chat = selectChat(global, inputInvoice.chatId);
     if (!chat) {
-      return undefined;
+      return;
     }
 
     requestInputInvoice = {
@@ -209,18 +195,32 @@ addActionHandler('sendPaymentForm', (global, actions, payload) => {
     };
   }
 
-  void sendPaymentForm(requestInputInvoice, formId, {
+  setGlobal(updatePayment(global, { status: 'pending' }));
+
+  const credentials = {
     save: saveCredentials,
     data: nativeProvider === 'stripe' ? selectStripeCredentials(global) : selectSmartGlocalCredentials(global),
-  }, requestInfoId, shippingOptionId);
-
-  return {
-    ...global,
-    payment: {
-      ...global.payment,
-      status: 'pending',
-    },
   };
+  const result = await callApi('sendPaymentForm', {
+    inputInvoice: requestInputInvoice,
+    formId,
+    credentials,
+    requestedInfoId: requestInfoId,
+    shippingOptionId,
+    savedCredentialId,
+    temporaryPassword: temporaryPassword?.value,
+    tipAmount,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = clearPayment(global);
+  global = updatePayment(global, { status: 'paid' });
+  global = closeInvoice(global);
+  setGlobal(global);
 });
 
 async function sendStripeCredentials(
@@ -288,10 +288,10 @@ async function sendSmartGlocalCredentials(
 ) {
   const params = {
     card: {
-      number: data.cardNumber.replace(/[^\d]+/g, ''),
+      number: data.cardNumber.replace(/\D+/g, ''),
       expiration_month: data.expiryMonth,
       expiration_year: data.expiryYear,
-      security_code: data.cvv.replace(/[^\d]+/g, ''),
+      security_code: data.cvv.replace(/\D+/g, ''),
     },
   };
   const url = DEBUG_PAYMENT_SMART_GLOCAL
@@ -334,32 +334,8 @@ async function sendSmartGlocalCredentials(
   setGlobal(global);
 }
 
-async function sendPaymentForm(
-  inputInvoice: ApiRequestInputInvoice,
-  formId: string,
-  credentials: any,
-  requestedInfoId?: string,
-  shippingOptionId?: string,
-) {
-  const result = await callApi('sendPaymentForm', {
-    inputInvoice, formId, credentials, requestedInfoId, shippingOptionId,
-  });
-
-  if (result === true) {
-    let global = clearPayment(getGlobal());
-    global = {
-      ...global,
-      payment: {
-        ...global.payment,
-        status: 'paid',
-      },
-    };
-    setGlobal(closeInvoice(global));
-  }
-}
-
 addActionHandler('setPaymentStep', (global, actions, payload = {}) => {
-  return setPaymentStep(global, payload.step || PaymentStep.ShippingInfo);
+  return setPaymentStep(global, payload.step ?? PaymentStep.Checkout);
 });
 
 addActionHandler('closePremiumModal', (global, actions, payload) => {
@@ -431,3 +407,39 @@ addActionHandler('closeGiftPremiumModal', (global) => {
     giftPremiumModal: { isOpen: false },
   });
 });
+
+addActionHandler('validatePaymentPassword', async (global, actions, { password }) => {
+  const result = await callApi('fetchTemporaryPaymentPassword', password);
+
+  global = getGlobal();
+
+  if (!result) {
+    global = updatePayment(global, { error: { message: 'Unknown Error', field: 'password' } });
+  } else if ('error' in result) {
+    global = updatePayment(global, { error: { message: result.error, field: 'password' } });
+  } else {
+    global = updatePayment(global, { temporaryPassword: result, step: PaymentStep.Checkout });
+  }
+
+  setGlobal(global);
+});
+
+async function validateRequestedInfo(inputInvoice: ApiRequestInputInvoice, requestInfo: any, shouldSave?: true) {
+  const result = await callApi('validateRequestedInfo', {
+    inputInvoice, requestInfo, shouldSave,
+  });
+  if (!result) {
+    return;
+  }
+
+  const { id, shippingOptions } = result;
+
+  let global = setRequestInfoId(getGlobal(), id);
+  if (shippingOptions) {
+    global = updateShippingOptions(global, shippingOptions);
+    global = setPaymentStep(global, PaymentStep.Shipping);
+  } else {
+    global = setPaymentStep(global, PaymentStep.Checkout);
+  }
+  setGlobal(global);
+}

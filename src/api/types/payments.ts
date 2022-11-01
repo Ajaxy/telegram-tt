@@ -1,4 +1,6 @@
-import type { ApiDocument, ApiMessageEntity } from './messages';
+import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
+import type { ApiWebDocument } from './bots';
+import type { ApiInvoiceContainer } from '../../types';
 
 export interface ApiShippingAddress {
   streetLine1: string;
@@ -18,22 +20,13 @@ export interface ApiPaymentSavedInfo {
 
 export interface ApiPaymentForm {
   canSaveCredentials?: boolean;
-  passwordMissing?: boolean;
+  isPasswordMissing?: boolean;
+  formId: string;
   providerId: string;
   nativeProvider?: string;
-  savedInfo: any;
-  invoice: {
-    test?: boolean;
-    nameRequested?: boolean;
-    phoneRequested?: boolean;
-    emailRequested?: boolean;
-    shippingAddressRequested?: boolean;
-    flexible?: boolean;
-    phoneToProvider?: boolean;
-    emailToProvider?: boolean;
-    currency?: string;
-    prices?: ApiLabeledPrice[];
-  };
+  savedInfo?: ApiPaymentSavedInfo;
+  savedCredentials?: ApiPaymentCredentials[];
+  invoiceContainer: ApiInvoiceContainer;
   nativeParams: ApiPaymentFormNativeParams;
 }
 
@@ -51,6 +44,9 @@ export interface ApiLabeledPrice {
 }
 
 export interface ApiReceipt {
+  photo?: ApiWebDocument;
+  text?: string;
+  title?: string;
   currency: string;
   prices: ApiLabeledPrice[];
   info?: {
@@ -58,6 +54,7 @@ export interface ApiReceipt {
     phone?: string;
     name?: string;
   };
+  tipAmount: number;
   totalAmount: number;
   credentialsTitle: string;
   shippingPrices?: ApiLabeledPrice[];

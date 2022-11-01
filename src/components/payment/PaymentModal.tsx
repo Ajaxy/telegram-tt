@@ -5,17 +5,19 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import type { ApiChat, ApiCountry } from '../../api/types';
-import type { ShippingOption, Price } from '../../types';
-import { PaymentStep } from '../../types';
+import type { ApiChat, ApiCountry, ApiPaymentCredentials } from '../../api/types';
+import type { Price, ShippingOption } from '../../types';
+import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 
+import { PaymentStep } from '../../types';
 import { selectChat } from '../../global/selectors';
 import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
-import type { FormState } from '../../hooks/reducers/usePaymentReducer';
-import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 
 import ShippingInfo from './ShippingInfo';
 import Shipping from './Shipping';
@@ -26,6 +28,8 @@ import Modal from '../ui/Modal';
 import Transition from '../ui/Transition';
 import Spinner from '../ui/Spinner';
 import ConfirmPayment from './ConfirmPayment';
+import SavedPaymentCredentials from './SavedPaymentCredentials';
+import PasswordConfirm from './PasswordConfirm';
 
 import './PaymentModal.scss';
 
@@ -40,13 +44,12 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  nameRequested?: boolean;
-  shippingAddressRequested?: boolean;
-  phoneRequested?: boolean;
-  emailRequested?: boolean;
-  flexible?: boolean;
-  phoneToProvider?: boolean;
-  emailToProvider?: boolean;
+  isNameRequested?: boolean;
+  isShippingAddressRequested?: boolean;
+  isPhoneRequested?: boolean;
+  isEmailRequested?: boolean;
+  shouldSendPhoneToProvider?: boolean;
+  shouldSendEmailToProvider?: boolean;
   currency?: string;
   prices?: Price[];
   isProviderError: boolean;
@@ -55,13 +58,20 @@ type StateProps = {
   needZip?: boolean;
   confirmPaymentUrl?: string;
   countryList: ApiCountry[];
+  hasShippingOptions: boolean;
+  requestId?: string;
+  smartGlocalToken?: string;
+  stripeId?: string;
+  savedCredentials?: ApiPaymentCredentials[];
+  passwordValidUntil?: number;
 };
 
 type GlobalStateProps = Pick<GlobalState['payment'], (
   'step' | 'shippingOptions' |
-  'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoiceContent' |
-  'error'
+  'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoice' | 'error'
 )>;
+
+const NETWORK_REQUEST_TIMEOUT_S = 3;
 
 const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   isOpen,
@@ -71,16 +81,16 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   shippingOptions,
   savedInfo,
   canSaveCredentials,
-  nameRequested,
-  shippingAddressRequested,
-  phoneRequested,
-  emailRequested,
-  phoneToProvider,
-  emailToProvider,
+  isNameRequested,
+  isShippingAddressRequested,
+  isPhoneRequested,
+  isEmailRequested,
+  shouldSendPhoneToProvider,
+  shouldSendEmailToProvider,
   currency,
   passwordMissing,
   isProviderError,
-  invoiceContent,
+  invoice,
   nativeProvider,
   prices,
   needCardholderName,
@@ -89,23 +99,47 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   confirmPaymentUrl,
   error,
   countryList,
+  hasShippingOptions,
+  requestId,
+  smartGlocalToken,
+  stripeId,
+  savedCredentials,
+  passwordValidUntil,
 }) => {
   const {
+    loadPasswordInfo,
     validateRequestedInfo,
     sendPaymentForm,
     setPaymentStep,
     sendCredentialsInfo,
     clearPaymentError,
+    validatePaymentPassword,
   } = getActions();
 
+  const lang = useLang();
+
+  const [isModalOpen, openModal, closeModal] = useFlag();
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);
   const [isTosAccepted, setIsTosAccepted] = useState(false);
-  const lang = useLang();
+  const [twoFaPassword, setTwoFaPassword] = useState('');
+
   const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
+  const setStep = useCallback((nextStep) => {
+    setPaymentStep({ step: nextStep });
+  }, [setPaymentStep]);
+
   useEffect(() => {
-    if (step || error) {
+    if (isOpen) {
+      setTwoFaPassword('');
+      loadPasswordInfo();
+      openModal();
+    }
+  }, [isOpen, loadPasswordInfo, openModal]);
+
+  useEffect(() => {
+    if (step !== undefined || error) {
       setIsLoading(false);
     }
   }, [step, error]);
@@ -148,6 +182,15 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     }
   }, [savedInfo, paymentDispatch, countryList]);
 
+  useEffect(() => {
+    if (savedCredentials?.length) {
+      paymentDispatch({
+        type: 'changeSavedCredentialId',
+        payload: savedCredentials[0].id,
+      });
+    }
+  }, [paymentDispatch, savedCredentials]);
+
   const handleErrorModalClose = useCallback(() => {
     clearPaymentError();
   }, [clearPaymentError]);
@@ -157,8 +200,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       return 0;
     }
 
-    return getTotalPrice(prices, shippingOptions, paymentState.shipping);
-  }, [step, paymentState.shipping, prices, shippingOptions]);
+    return getTotalPrice(prices, shippingOptions, paymentState.shipping, paymentState.tipAmount);
+  }, [step, prices, shippingOptions, paymentState.shipping, paymentState.tipAmount]);
 
   const checkoutInfo = useMemo(() => {
     if (step !== PaymentStep.Checkout) {
@@ -166,6 +209,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     }
     return getCheckoutInfo(paymentState, shippingOptions, nativeProvider || '');
   }, [step, paymentState, shippingOptions, nativeProvider]);
+
+  const handleNewCardClick = useCallback(() => {
+    setStep(PaymentStep.PaymentInfo);
+  }, [setStep]);
 
   function renderError() {
     if (!error) {
@@ -191,25 +238,43 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
 
   function renderModalContent(currentStep: PaymentStep) {
     switch (currentStep) {
-      case PaymentStep.ShippingInfo:
+      case PaymentStep.Checkout:
         return (
-          <ShippingInfo
-            state={paymentState}
+          <Checkout
+            chat={chat}
+            prices={prices}
             dispatch={paymentDispatch}
-            needAddress={Boolean(shippingAddressRequested)}
-            needEmail={Boolean(emailRequested || emailToProvider)}
-            needPhone={Boolean(phoneRequested || phoneToProvider)}
-            needName={Boolean(nameRequested)}
-            countryList={countryList}
+            shippingPrices={paymentState.shipping && shippingOptions
+              ? getShippingPrices(shippingOptions, paymentState.shipping)
+              : undefined}
+            totalPrice={totalPrice}
+            invoice={invoice}
+            checkoutInfo={checkoutInfo}
+            currency={currency!}
+            hasShippingOptions={hasShippingOptions}
+            tipAmount={paymentState.tipAmount}
+            needAddress={Boolean(isShippingAddressRequested)}
+            savedCredentials={savedCredentials}
+            isTosAccepted={isTosAccepted}
+            onAcceptTos={setIsTosAccepted}
           />
         );
-      case PaymentStep.Shipping:
+      case PaymentStep.SavedPayments:
         return (
-          <Shipping
+          <SavedPaymentCredentials
             state={paymentState}
+            savedCredentials={savedCredentials}
             dispatch={paymentDispatch}
-            shippingOptions={shippingOptions || []}
-            currency={currency!}
+            onNewCardClick={handleNewCardClick}
+          />
+        );
+      case PaymentStep.ConfirmPassword:
+        return (
+          <PasswordConfirm
+            state={paymentState}
+            savedCredentials={savedCredentials}
+            onPasswordChange={setTwoFaPassword}
+            isActive={currentStep === step}
           />
         );
       case PaymentStep.PaymentInfo:
@@ -224,20 +289,25 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             countryList={countryList}
           />
         );
-      case PaymentStep.Checkout:
+      case PaymentStep.ShippingInfo:
         return (
-          <Checkout
-            chat={chat}
-            prices={prices}
-            shippingPrices={paymentState.shipping && shippingOptions
-              ? getShippingPrices(shippingOptions, paymentState.shipping)
-              : undefined}
-            totalPrice={totalPrice}
-            invoiceContent={invoiceContent}
-            checkoutInfo={checkoutInfo}
+          <ShippingInfo
+            state={paymentState}
+            dispatch={paymentDispatch}
+            needAddress={Boolean(isShippingAddressRequested)}
+            needEmail={Boolean(isEmailRequested || shouldSendEmailToProvider)}
+            needPhone={Boolean(isPhoneRequested || shouldSendPhoneToProvider)}
+            needName={Boolean(isNameRequested)}
+            countryList={countryList}
+          />
+        );
+      case PaymentStep.Shipping:
+        return (
+          <Shipping
+            state={paymentState}
+            dispatch={paymentDispatch}
+            shippingOptions={shippingOptions || []}
             currency={currency!}
-            isTosAccepted={isTosAccepted}
-            onAcceptTos={setIsTosAccepted}
           />
         );
       case PaymentStep.ConfirmPayment:
@@ -268,48 +338,126 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     sendPaymentForm({
       shippingOptionId: paymentState.shipping,
       saveCredentials: paymentState.saveCredentials,
+      savedCredentialId: paymentState.savedCredentialId,
+      tipAmount: paymentState.tipAmount,
     });
   }, [sendPaymentForm, paymentState]);
 
-  const setStep = useCallback((nextStep) => {
-    setPaymentStep({ step: nextStep });
-  }, [setPaymentStep]);
-
   const handleButtonClick = useCallback(() => {
-    setIsLoading(true);
     switch (step) {
       case PaymentStep.ShippingInfo:
+        setIsLoading(true);
         validateRequest();
         break;
+
       case PaymentStep.Shipping:
-        setStep(PaymentStep.PaymentInfo);
+        setStep(PaymentStep.Checkout);
         break;
+
+      case PaymentStep.SavedPayments:
+        setStep(PaymentStep.ConfirmPassword);
+        break;
+
+      case PaymentStep.ConfirmPassword:
+        if (twoFaPassword === '') {
+          return;
+        }
+
+        setIsLoading(true);
+        validatePaymentPassword({ password: twoFaPassword });
+        break;
+
       case PaymentStep.PaymentInfo:
+        setIsLoading(true);
         sendCredentials();
+        paymentDispatch({ type: 'changeSavedCredentialId', payload: '' });
         break;
-      case PaymentStep.Checkout:
+
+      case PaymentStep.Checkout: {
+        if (savedInfo && !requestId && !paymentState.shipping) {
+          setIsLoading(true);
+          validateRequest();
+          return;
+        }
+
+        if (
+          paymentState.savedCredentialId
+          && (!passwordValidUntil || passwordValidUntil <= (Date.now() / 1000 - NETWORK_REQUEST_TIMEOUT_S))
+        ) {
+          setStep(PaymentStep.ConfirmPassword);
+          return;
+        }
+
+        if (
+          !paymentState.savedCredentialId
+          && (
+            (nativeProvider === DEFAULT_PROVIDER && !stripeId)
+            || (nativeProvider === DONATE_PROVIDER && !smartGlocalToken)
+          )
+        ) {
+          setStep(PaymentStep.PaymentInfo);
+          return;
+        }
+
+        const { phone, email, fullName } = paymentState;
+        const shouldFillRequestedData = (isEmailRequested && !email)
+          || (isPhoneRequested && !phone)
+          || (isNameRequested && !fullName);
+
+        if ((isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
+          setStep(PaymentStep.ShippingInfo);
+          return;
+        }
+
+        if (isShippingAddressRequested && !paymentState.shipping) {
+          setStep(PaymentStep.Shipping);
+          return;
+        }
+
+        setIsLoading(true);
         sendForm();
         break;
+      }
     }
-  }, [step, validateRequest, setStep, sendCredentials, sendForm]);
+  }, [
+    isEmailRequested, isNameRequested, isPhoneRequested, isShippingAddressRequested, nativeProvider, passwordValidUntil,
+    paymentDispatch, paymentState, requestId, savedInfo, sendCredentials, sendForm, setStep, smartGlocalToken, step,
+    stripeId, twoFaPassword, validatePaymentPassword, validateRequest,
+  ]);
+
+  useEffect(() => {
+    return step === PaymentStep.ConfirmPassword
+      ? captureKeyboardListeners({ onEnter: handleButtonClick })
+      : undefined;
+  },
+  [handleButtonClick, step]);
 
   const handleModalClose = useCallback(() => {
     paymentDispatch({
       type: 'resetState',
     });
     setIsTosAccepted(false);
-  }, [paymentDispatch]);
+    onClose();
+  }, [onClose, paymentDispatch]);
+
+  const handleBackClick = useCallback(() => {
+    setStep(step === PaymentStep.ConfirmPassword ? PaymentStep.SavedPayments : PaymentStep.Checkout);
+  }, [setStep, step]);
 
   const modalHeader = useMemo(() => {
     switch (step) {
+      case PaymentStep.Checkout:
+        return lang('PaymentCheckout');
       case PaymentStep.ShippingInfo:
         return lang('PaymentShippingInfo');
       case PaymentStep.Shipping:
         return lang('PaymentShippingMethod');
+      case PaymentStep.SavedPayments:
+        return lang('PaymentCheckoutMethod');
+      case PaymentStep.ConfirmPassword:
+        return lang('Checkout.PasswordEntry.Title');
       case PaymentStep.PaymentInfo:
         return lang('PaymentCardInfo');
-      case PaymentStep.Checkout:
-        return lang('PaymentCheckout');
       case PaymentStep.ConfirmPayment:
         return lang('Checkout.WebConfirmation.Title');
       default:
@@ -322,14 +470,15 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     : lang('Next');
 
   const isSubmitDisabled = isLoading
-    || Boolean(step === PaymentStep.Checkout && invoiceContent?.isRecurring && !isTosAccepted);
+    || Boolean(step === PaymentStep.Checkout && invoice?.isRecurring && !isTosAccepted);
 
   if (isProviderError) {
     return (
       <Modal
         className="error"
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onCloseAnimationEnd={handleModalClose}
       >
         <p>
           Sorry, Telegram WebZ doesn&apos;t support payments with this provider yet. <br />
@@ -337,7 +486,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         </p>
         <Button
           isText
-          onClick={onClose}
+          onClick={closeModal}
         >
           {lang('OK')}
         </Button>
@@ -347,9 +496,9 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
 
   return (
     <Modal
-      className={buildClassName('PaymentModal', invoiceContent?.isRecurring && 'recurring')}
-      isOpen={isOpen}
-      onClose={onClose}
+      className={buildClassName('PaymentModal', invoice?.isRecurring && 'recurring')}
+      isOpen={isModalOpen}
+      onClose={closeModal}
       onCloseAnimationEnd={handleModalClose}
     >
       <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -358,10 +507,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           color="translucent"
           round
           size="smaller"
-          onClick={onClose}
+          onClick={step === PaymentStep.Checkout ? closeModal : handleBackClick}
           ariaLabel="Close"
         >
-          <i className="icon-close" />
+          <i className={step === PaymentStep.Checkout ? 'icon-close' : 'icon-arrow-left'} />
         </Button>
         <h3>{modalHeader}</h3>
       </div>
@@ -401,29 +550,33 @@ export default memo(withGlobal<OwnProps>(
       savedInfo,
       canSaveCredentials,
       invoice,
-      invoiceContent,
+      invoiceContainer,
       nativeProvider,
       nativeParams,
       passwordMissing,
       error,
       confirmPaymentUrl,
       inputInvoice,
+      requestId,
+      stripeCredentials,
+      smartGlocalCredentials,
+      savedCredentials,
+      temporaryPassword,
     } = global.payment;
 
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
     const isProviderError = Boolean(invoice && (!nativeProvider || !SUPPORTED_PROVIDERS.has(nativeProvider)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const {
-      nameRequested,
-      phoneRequested,
-      emailRequested,
-      shippingAddressRequested,
-      flexible,
-      phoneToProvider,
-      emailToProvider,
+      isNameRequested,
+      isShippingAddressRequested,
+      isPhoneRequested,
+      isEmailRequested,
+      shouldSendPhoneToProvider,
+      shouldSendEmailToProvider,
       currency,
       prices,
-    } = (invoice || {});
+    } = (invoiceContainer || {});
 
     return {
       step,
@@ -433,23 +586,28 @@ export default memo(withGlobal<OwnProps>(
       canSaveCredentials,
       nativeProvider,
       passwordMissing,
-      nameRequested,
-      shippingAddressRequested,
-      phoneRequested,
-      emailRequested,
-      flexible,
-      phoneToProvider,
-      emailToProvider,
+      isNameRequested,
+      isShippingAddressRequested,
+      isPhoneRequested,
+      isEmailRequested,
+      shouldSendPhoneToProvider,
+      shouldSendEmailToProvider,
       currency,
       prices,
       isProviderError,
-      invoiceContent,
+      invoice,
       needCardholderName,
       needCountry,
       needZip,
       error,
       confirmPaymentUrl,
       countryList: global.countryList.general,
+      requestId,
+      hasShippingOptions: Boolean(shippingOptions?.length),
+      smartGlocalToken: smartGlocalCredentials?.token,
+      stripeId: stripeCredentials?.id,
+      savedCredentials,
+      passwordValidUntil: temporaryPassword?.validUntil,
     };
   },
 )(PaymentModal));
@@ -463,11 +621,16 @@ function getShippingPrices(shippingOptions: ShippingOption[], shippingOption: st
   return option?.prices;
 }
 
-function getTotalPrice(prices: Price[] = [], shippingOptions: ShippingOption[] | undefined, shippingOption: string) {
+function getTotalPrice(
+  prices: Price[] = [],
+  shippingOptions: ShippingOption[] | undefined,
+  shippingOption: string,
+  tipAmount: number,
+) {
   const shippingPrices = shippingOptions
     ? getShippingPrices(shippingOptions, shippingOption)
     : [];
-  let total = 0;
+  let total = tipAmount;
   const totalPrices = prices.concat(shippingPrices || []);
   total = totalPrices.reduce((acc, cur) => {
     return acc + cur.amount;
@@ -477,7 +640,7 @@ function getTotalPrice(prices: Price[] = [], shippingOptions: ShippingOption[] |
 
 function getCheckoutInfo(state: FormState, shippingOptions: ShippingOption[] | undefined, paymentProvider: string) {
   const cardTypeText = detectCardTypeText(state.cardNumber);
-  const paymentMethod = `${cardTypeText} *${state.cardNumber.slice(-4)}`;
+  const paymentMethod = cardTypeText && state.cardNumber ? `${cardTypeText} *${state.cardNumber.slice(-4)}` : undefined;
   const shippingAddress = state.streetLine1
     ? `${state.streetLine1}, ${state.city}, ${state.countryIso2}`
     : undefined;

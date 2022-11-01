@@ -1,6 +1,7 @@
 {
   "--color-primary": ["#3390EC", "#8774E1"],
-  "--color-primary-opacity": ["#50A2E980", "#8378DB80"],
+  "--color-primary-opacity": ["#50A2E940", "#8378DB80"],
+  "--color-primary-opacity-hover": ["#50A2E926", "#8378DBA0"],
   "--color-primary-shade": ["#4a95d6", "#7b71c6"],
   "--color-background": ["#FFFFFF", "#212121"],
   "--color-background-compact-menu": ["#FFFFFFBB", "#212121DD"],
