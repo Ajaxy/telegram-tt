@@ -336,7 +336,7 @@ class RLottie {
       }
 
       // Paused from outside
-      if (!this.isAnimating && Array.from(this.containers.values())[0]!.isOnLoadFired) {
+      if (!this.isAnimating) {
         return false;
       }
 
