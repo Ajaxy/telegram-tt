@@ -166,15 +166,15 @@ const StickerSet: FC<OwnProps> = ({
               size={itemSize}
               observeIntersection={observeIntersection}
               noAnimate={!loadAndPlay}
+              isSavedMessages={isSavedMessages}
+              canViewSet
+              isCurrentUserPremium={isCurrentUserPremium}
               onClick={onStickerSelect}
               clickArg={sticker}
               onUnfaveClick={stickerSet.id === FAVORITE_SYMBOL_SET_ID && favoriteStickerIdsSet?.has(sticker.id)
                 ? onStickerUnfave : undefined}
               onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
               onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
-              isSavedMessages={isSavedMessages}
-              canViewSet
-              isCurrentUserPremium={isCurrentUserPremium}
             />
           ))}
         {!isExpanded && stickerSet.count > itemsBeforeCutout && (

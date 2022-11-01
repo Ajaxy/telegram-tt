@@ -33,7 +33,6 @@ import Button from '../../ui/Button';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from './StickerSet';
 import StickerSetCover from './StickerSetCover';
-import StickerSetCoverAnimated from './StickerSetCoverAnimated';
 
 import './StickerPicker.scss';
 
@@ -50,7 +49,7 @@ type StateProps = {
   addedCustomEmojiIds?: string[];
   recentCustomEmoji: ApiSticker[];
   featuredCustomEmojiIds?: string[];
-  shouldPlay?: boolean;
+  canAnimate?: boolean;
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
 };
@@ -68,7 +67,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   recentCustomEmoji,
   stickerSetsById,
   featuredCustomEmojiIds,
-  shouldPlay,
+  canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
   onCustomEmojiSelect,
@@ -199,14 +198,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         >
           {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
             <i className="icon-recent" />
-          ) : stickerSet.isLottie ? (
-            <StickerSetCoverAnimated
-              stickerSet={stickerSet as ApiStickerSet}
-              observeIntersection={observeIntersectionForCovers}
-            />
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
+              noAnimate={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
             />
           )}
@@ -220,11 +215,12 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           size={STICKER_SIZE_PICKER_HEADER}
           title={stickerSet.title}
           className={buttonClassName}
+          noAnimate={!canAnimate || !loadAndPlay}
           observeIntersection={observeIntersectionForCovers}
-          onClick={selectStickerSet}
-          clickArg={index}
           noContextMenu
           isCurrentUserPremium
+          onClick={selectStickerSet}
+          clickArg={index}
         />
       );
     }
@@ -260,14 +256,14 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           <StickerSet
             key={stickerSet.id}
             stickerSet={stickerSet}
-            loadAndPlay={Boolean(shouldPlay && loadAndPlay)}
+            loadAndPlay={Boolean(canAnimate && loadAndPlay)}
             index={i}
             observeIntersection={observeIntersection}
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
-            onStickerSelect={handleEmojiSelect}
             isSavedMessages={isSavedMessages}
             isCustomEmojiPicker
             isCurrentUserPremium={isCurrentUserPremium}
+            onStickerSelect={handleEmojiSelect}
           />
         ))}
       </div>
@@ -288,7 +284,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       stickerSetsById: setsById,
       addedCustomEmojiIds: global.customEmojis.added.setIds,
-      shouldPlay: global.settings.byKey.shouldLoopStickers,
+      canAnimate: global.settings.byKey.shouldLoopStickers,
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       recentCustomEmoji,
