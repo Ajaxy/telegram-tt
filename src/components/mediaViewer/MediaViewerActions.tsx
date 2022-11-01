@@ -7,23 +7,31 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
+import type { MessageListType } from '../../global/types';
 
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import { selectIsDownloading, selectIsMessageProtected } from '../../global/selectors';
+import useFlag from '../../hooks/useFlag';
+import {
+  selectIsDownloading, selectIsMessageProtected, selectAllowedMessageActions, selectCurrentMessageList,
+} from '../../global/selectors';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
+import type { MenuItemProps } from '../ui/MenuItem';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import DeleteMessageModal from '../common/DeleteMessageModal';
 
 import './MediaViewerActions.scss';
 
 type StateProps = {
   isDownloading: boolean;
   isProtected?: boolean;
+  canDelete?: boolean;
+  messageListType?: MessageListType;
 };
 
 type OwnProps = {
@@ -53,8 +61,12 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   onCloseMediaViewer,
   zoomLevelChange,
   setZoomLevelChange,
+  canDelete,
   onForward,
+  messageListType,
 }) => {
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
+
   const {
     downloadMessageMedia,
     cancelMessageMediaDownload,
@@ -135,7 +147,48 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   }
 
   if (IS_SINGLE_COLUMN_LAYOUT) {
-    if (isProtected) {
+    const menuItems: MenuItemProps[] = [];
+    if (!isAvatar && !isProtected) {
+      menuItems.push({
+        icon: 'forward',
+        onClick: onForward,
+        children: lang('Forward'),
+      });
+    }
+    if (!isProtected) {
+      if (isVideo) {
+        menuItems.push({
+          icon: isDownloading ? 'cancel' : 'download',
+          onClick: handleDownloadClick,
+          children: isDownloading ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download',
+        });
+      } else {
+        menuItems.push({
+          icon: 'download',
+          href: mediaData,
+          download: fileName,
+          children: lang('AccActionDownload'),
+        });
+      }
+    }
+
+    if (canReport) {
+      menuItems.push({
+        icon: 'report',
+        onClick: onReport,
+        children: lang('ReportPeer.Report'),
+      });
+    }
+
+    if (canDelete) {
+      menuItems.push({
+        icon: 'delete',
+        onClick: openDeleteModal,
+        children: lang('Delete'),
+      });
+    }
+
+    if (menuItems.length === 0) {
       return undefined;
     }
 
@@ -145,40 +198,29 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           trigger={MenuButton}
           positionX="right"
         >
-          {!isAvatar && (
+          {menuItems.map(({
+            icon, onClick, href, download, children,
+          }) => (
             <MenuItem
-              icon="forward"
-              onClick={onForward}
+              key={icon}
+              icon={icon}
+              href={href}
+              download={download}
+              onClick={onClick}
             >
-              {lang('Forward')}
+              {children}
             </MenuItem>
-          )}
-          {isVideo ? (
-            <MenuItem
-              icon={isDownloading ? 'close' : 'download'}
-              onClick={handleDownloadClick}
-            >
-              {isDownloading ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download'}
-            </MenuItem>
-          ) : (
-            <MenuItem
-              icon="download"
-              href={mediaData}
-              download={fileName}
-            >
-              {lang('AccActionDownload')}
-            </MenuItem>
-          )}
-          {canReport && (
-            <MenuItem
-              icon="flag"
-              onClick={onReport}
-            >
-              {lang('ReportPeer.Report')}
-            </MenuItem>
-          )}
+          ))}
         </DropdownMenu>
         {isDownloading && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
+        {message && canDelete && (
+          <DeleteMessageModal
+            isOpen={isDeleteModalOpen}
+            isSchedule={messageListType === 'scheduled'}
+            onClose={closeDeleteModal}
+            message={message}
+          />
+        )}
       </div>
     );
   }
@@ -226,6 +268,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           <i className="icon-flag" />
         </Button>
       )}
+      {canDelete && (
+        <Button
+          round
+          size="smaller"
+          color="translucent-white"
+          ariaLabel={lang('Delete')}
+          onClick={openDeleteModal}
+        >
+          <i className="icon-delete" />
+        </Button>
+      )}
       <Button
         round
         size="smaller"
@@ -235,18 +288,32 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon-close" />
       </Button>
+      {message && canDelete && (
+        <DeleteMessageModal
+          isOpen={isDeleteModalOpen}
+          isSchedule={messageListType === 'scheduled'}
+          onClose={closeDeleteModal}
+          message={message}
+        />
+      )}
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
+    const currentMessageList = selectCurrentMessageList(global);
+    const { threadId } = selectCurrentMessageList(global) || {};
     const isDownloading = message ? selectIsDownloading(global, message) : false;
     const isProtected = selectIsMessageProtected(global, message);
+    const { canDelete } = (threadId && message && selectAllowedMessageActions(global, message, threadId)) || {};
+    const messageListType = currentMessageList?.type;
 
     return {
       isDownloading,
       isProtected,
+      canDelete,
+      messageListType,
     };
   },
 )(MediaViewerActions));

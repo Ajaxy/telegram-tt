@@ -10,7 +10,7 @@ import './MenuItem.scss';
 
 type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => void;
 
-type OwnProps = {
+export type MenuItemProps = {
   icon?: string;
   customIcon?: React.ReactNode;
   className?: string;
@@ -25,7 +25,7 @@ type OwnProps = {
   withWrap?: boolean;
 };
 
-const MenuItem: FC<OwnProps> = (props) => {
+const MenuItem: FC<MenuItemProps> = (props) => {
   const {
     icon,
     customIcon,
