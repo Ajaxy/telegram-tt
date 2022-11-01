@@ -230,6 +230,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         shouldPreloadPreview
         noLoad={!shouldLoad}
         noPlay={!shouldPlay}
+        withSharedAnimation
       />
       {isLocked && (
         <div

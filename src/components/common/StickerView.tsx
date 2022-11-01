@@ -8,6 +8,7 @@ import type { ApiSticker } from '../../api/types';
 import { IS_WEBM_SUPPORTED } from '../../util/environment';
 import * as mediaLoader from '../../util/mediaLoader';
 import buildClassName from '../../util/buildClassName';
+import generateIdFor from '../../util/generateIdFor';
 import { getStickerPreviewHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
@@ -39,12 +40,15 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
   noLoad?: boolean;
   noPlay?: boolean;
+  withSharedAnimation?: boolean;
   cacheBuster?: number;
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
 };
 
+const SHARED_PREFIX = 'shared';
 const STICKER_SIZE = 24;
+const ID_STORE = {};
 
 const StickerView: FC<OwnProps> = ({
   containerRef,
@@ -63,6 +67,7 @@ const StickerView: FC<OwnProps> = ({
   observeIntersectionForPlaying,
   noLoad,
   noPlay,
+  withSharedAnimation,
   cacheBuster,
   onVideoEnded,
   onAnimatedStickerLoop,
@@ -101,7 +106,10 @@ const StickerView: FC<OwnProps> = ({
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
 
-  const idKey = [id, size, customColor?.join(',')].filter(Boolean).join('_');
+  const [randomIdPrefix] = useState(generateIdFor(ID_STORE, true));
+  const idKey = [
+    (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, size, customColor?.join(','),
+  ].filter(Boolean).join('_');
 
   return (
     <>
@@ -124,6 +132,7 @@ const StickerView: FC<OwnProps> = ({
           isLowPriority={!selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}
+          onEnded={onAnimatedStickerLoop}
         />
       ) : isVideo ? (
         <OptimizedVideo

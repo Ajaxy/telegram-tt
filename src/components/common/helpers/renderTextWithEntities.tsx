@@ -323,9 +323,10 @@ function processEntity(
       return (
         <CustomEmoji
           documentId={entity.documentId}
-          observeIntersection={observeIntersection}
-          withGridFix={!emojiSize}
           size={emojiSize}
+          withSharedAnimation
+          withGridFix={!emojiSize}
+          observeIntersection={observeIntersection}
         />
       );
     }
@@ -436,9 +437,10 @@ function processEntity(
       return (
         <CustomEmoji
           documentId={entity.documentId}
-          observeIntersection={observeIntersection}
-          withGridFix={!emojiSize}
           size={emojiSize}
+          withSharedAnimation
+          withGridFix={!emojiSize}
+          observeIntersection={observeIntersection}
         />
       );
     default:

@@ -125,6 +125,7 @@ const Sticker: FC<OwnProps> = ({
         shouldLoop={shouldLoop}
         noLoad={!canLoad}
         noPlay={!canPlay}
+        withSharedAnimation
         cacheBuster={lastSyncTime}
       />
       {hasEffect && canLoad && isPlayingEffect && (
