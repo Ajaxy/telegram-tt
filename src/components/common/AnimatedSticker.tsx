@@ -102,12 +102,10 @@ const AnimatedSticker: FC<OwnProps> = ({
         return;
       }
 
-      const fullId = `${id || generateIdFor(ID_STORE, true)}_${size}${color ? `_${color.join(',')}` : ''}`;
-
       const newAnimation = RLottie.init(
         containerRef.current,
         onLoad,
-        fullId,
+        id || generateIdFor(ID_STORE, true),
         tgsUrl,
         {
           noLoop,
