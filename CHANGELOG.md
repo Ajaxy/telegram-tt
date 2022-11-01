@@ -2,13 +2,22 @@
 
 ### 👏 **Harder**
 * Sending custom emoji is now supported.
-* You can now access the app even when offline.
+* You can now view recent (cached) messages while offline.
+* Enjoy the beautifully redesigned payments screen with an option to add tips for certain invoices.
+* Media in chats can also be deleted via the Media Viewer.
+
+### 🤩 **Better**
+* Custom emoji sent without text are shown at a larger size.
+
+### 🚀 **Faster**
+* Optimized rendering for animated stickers and emoji.
 
 ### 💪 **Stronger**
-* Fix syncing after editing draft on another device.
-* Fix multiple notification sounds when waking up from background mode.
+* Improved sync after editing drafts on another device.
+* Fixed duplicate notification sounds when waking up from sleep.
+* Various fixes for the Media Viewer.
 * Various fixes for username input.
-* Various fixes for Media Viewer.
+* Various layout improvements.
 
 ## 1.54.0 (2022-10-17)
 
