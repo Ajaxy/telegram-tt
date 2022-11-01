@@ -132,11 +132,6 @@ class RLottie {
   play(forceRestart = false, container?: HTMLDivElement) {
     if (container) {
       this.containers.get(container)!.isPaused = false;
-
-      const areAllContainersPlaying = Array.from(this.containers.values()).every(({ isPaused }) => !isPaused);
-      if (!areAllContainersPlaying) {
-        return;
-      }
     }
 
     if (this.isEnded && forceRestart) {

@@ -38,7 +38,7 @@ const CustomEmojiButton: FC<OwnProps> = ({
       onMouseDown={handleClick}
       title={emoji.emoji}
     >
-      <CustomEmoji documentId={emoji.id} size={CUSTOM_EMOJI_SIZE} shouldPreloadPreview />
+      <CustomEmoji documentId={emoji.id} size={CUSTOM_EMOJI_SIZE} withSharedAnimation shouldPreloadPreview />
     </div>
   );
 };

@@ -62,12 +62,13 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
     <CustomEmoji
       ref={ref}
       documentId={customEmojiId}
+      className={buildClassName('AnimatedEmoji media-inner', sticker?.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
+      style={style}
       size={size}
+      withSharedAnimation
       forceOnHeavyAnimation
       observeIntersection={observeIntersection}
-      className={buildClassName('AnimatedEmoji media-inner', sticker?.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
       onClick={handleClick}
-      style={style}
     />
   );
 };

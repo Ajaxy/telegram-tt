@@ -42,7 +42,6 @@ let RLottie: RLottieClass;
 
 // Time for the main interface to completely load
 const LOTTIE_LOAD_DELAY = 3000;
-
 const ID_STORE = {};
 
 async function ensureLottie() {
