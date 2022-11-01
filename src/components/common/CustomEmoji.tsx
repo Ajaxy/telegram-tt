@@ -21,13 +21,16 @@ import styles from './CustomEmoji.module.scss';
 import svgPlaceholder from '../../assets/square.svg';
 
 type OwnProps = {
+  ref?: React.RefObject<HTMLDivElement>;
   documentId: string;
   children?: TeactNode;
   size?: number;
   className?: string;
   loopLimit?: number;
+  style?: string;
   withGridFix?: boolean;
   shouldPreloadPreview?: boolean;
+  forceOnHeavyAnimation?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
@@ -36,18 +39,24 @@ type OwnProps = {
 const STICKER_SIZE = 24;
 
 const CustomEmoji: FC<OwnProps> = ({
+  ref,
   documentId,
   size = STICKER_SIZE,
   className,
   loopLimit,
+  style,
   withGridFix,
   shouldPreloadPreview,
+  forceOnHeavyAnimation,
   observeIntersection,
   observeIntersectionForPlaying,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  let containerRef = useRef<HTMLDivElement>(null);
+  if (ref) {
+    containerRef = ref;
+  }
 
   // An alternative to `withGlobal` to avoid adding numerous global containers
   const customEmoji = useCustomEmoji(documentId);
@@ -60,11 +69,11 @@ const CustomEmoji: FC<OwnProps> = ({
   const hasCustomColor = customEmoji && selectIsDefaultEmojiStatusPack(getGlobal(), customEmoji.stickerSetInfo);
 
   useEffect(() => {
-    if (!hasCustomColor || !ref.current) {
+    if (!hasCustomColor || !containerRef.current) {
       setCustomColor(undefined);
       return;
     }
-    const hexColor = getPropertyHexColor(getComputedStyle(ref.current), '--emoji-status-color');
+    const hexColor = getPropertyHexColor(getComputedStyle(containerRef.current), '--emoji-status-color');
     if (!hexColor) {
       setCustomColor(undefined);
       return;
@@ -100,7 +109,7 @@ const CustomEmoji: FC<OwnProps> = ({
 
   return (
     <div
-      ref={ref}
+      ref={containerRef}
       className={buildClassName(
         styles.root,
         className,
@@ -110,12 +119,13 @@ const CustomEmoji: FC<OwnProps> = ({
         withGridFix && styles.withGridFix,
       )}
       onClick={onClick}
+      style={style}
     >
       {!customEmoji ? (
         <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" />
       ) : (
         <StickerView
-          containerRef={ref}
+          containerRef={containerRef}
           sticker={customEmoji}
           isSmall
           size={size}
@@ -126,6 +136,7 @@ const CustomEmoji: FC<OwnProps> = ({
           loopLimit={loopLimit}
           shouldPreloadPreview={shouldPreloadPreview}
           observeIntersection={observeIntersection}
+          forceOnHeavyAnimation={forceOnHeavyAnimation}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           onVideoEnded={handleVideoEnded}
           onAnimatedStickerLoop={handleStickerLoop}

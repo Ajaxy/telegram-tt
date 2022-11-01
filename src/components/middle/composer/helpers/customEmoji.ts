@@ -1,5 +1,9 @@
 import type { ApiMessageEntityCustomEmoji, ApiSticker } from '../../../../api/types';
+
+import { EMOJI_SIZES } from '../../../../config';
+import { REM } from '../../../common/helpers/mediaDimensions';
 import { getCustomEmojiPreviewMediaData } from '../../../../util/customEmojiManager';
+
 import placeholderSrc from '../../../../assets/square.svg';
 
 export const INPUT_CUSTOM_EMOJI_SELECTOR = 'img[data-document-id]';
@@ -26,4 +30,11 @@ export function buildCustomEmojiHtmlFromEntity(rawText: string, entity: ApiMessa
     data-document-id="${entity.documentId}"
     src="${mediaData || placeholderSrc}"
   />`;
+}
+
+export function getCustomEmojiSize(maxEmojisInLine: number): number | undefined {
+  if (maxEmojisInLine > EMOJI_SIZES) return undefined;
+
+  const size = (6 - (maxEmojisInLine * 0.625)) * REM; // Should be the same as in _message-content.scss
+  return size;
 }

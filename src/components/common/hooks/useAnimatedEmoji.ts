@@ -1,11 +1,15 @@
 import {
   useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import safePlay from '../../../util/safePlay';
 import { getActions } from '../../../global';
-import useMedia from '../../../hooks/useMedia';
+
 import type { ActiveEmojiInteraction } from '../../../global/types';
+
+import safePlay from '../../../util/safePlay';
 import { selectLocalAnimatedEmojiEffectByName } from '../../../global/selectors';
+import buildStyle from '../../../util/buildStyle';
+
+import useMedia from '../../../hooks/useMedia';
 
 const SIZE = 104;
 const INTERACTION_BUNCH_TIME = 1000;
@@ -20,6 +24,7 @@ export default function useAnimatedEmoji(
   isOwn?: boolean,
   localEffect?: string,
   emoji?: string,
+  preferredSize?: number,
 ) {
   const {
     interactWithAnimatedEmoji, sendEmojiInteraction, sendWatchingEmojiInteraction,
@@ -35,7 +40,8 @@ export default function useAnimatedEmoji(
 
   const soundMediaData = useMedia(soundId ? `document${soundId}` : undefined, !soundId);
 
-  const style = `width: ${SIZE}px; height: ${SIZE}px;`;
+  const size = preferredSize || SIZE;
+  const style = buildStyle(`width: ${size}px`, `height: ${size}px`, (emoji || localEffect) && 'cursor: pointer');
 
   const interactions = useRef<number[] | undefined>(undefined);
   const startedInteractions = useRef<number | undefined>(undefined);
@@ -87,7 +93,7 @@ export default function useAnimatedEmoji(
       emoji,
       x,
       y,
-      startSize: SIZE,
+      startSize: size,
       isReversed: !isOwn,
     });
 
@@ -102,7 +108,7 @@ export default function useAnimatedEmoji(
       : TIME_DEFAULT);
   }, [
     chatId, emoji, hasEffect, interactWithAnimatedEmoji, isOwn,
-    localEffect, messageId, play, sendInteractionBunch,
+    localEffect, messageId, play, sendInteractionBunch, size,
   ]);
 
   // Set an end anchor for remote activated interaction
@@ -126,7 +132,7 @@ export default function useAnimatedEmoji(
         id,
         chatId,
         emoticon: localEffect ? selectLocalAnimatedEmojiEffectByName(localEffect) : emoji,
-        startSize: SIZE,
+        startSize: size,
         x,
         y,
         isReversed: !isOwn,
@@ -134,12 +140,12 @@ export default function useAnimatedEmoji(
       play();
     });
   }, [
-    activeEmojiInteractions, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction,
+    activeEmojiInteractions, chatId, emoji, isOwn, localEffect, messageId, play, sendWatchingEmojiInteraction, size,
   ]);
 
   return {
     ref,
-    size: SIZE,
+    size,
     style,
     handleClick,
   };

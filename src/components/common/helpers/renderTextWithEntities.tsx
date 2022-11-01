@@ -25,11 +25,13 @@ interface IOrganizedEntity {
   nestedEntities: IOrganizedEntity[];
 }
 
+const HQ_EMOJI_THRESHOLD = 64;
+
 export function renderTextWithEntities(
   text: string,
   entities?: ApiMessageEntity[],
   highlight?: string,
-  shouldRenderHqEmoji?: boolean,
+  emojiSize?: number,
   shouldRenderAsHtml?: boolean,
   messageId?: number,
   isSimple?: boolean,
@@ -37,7 +39,7 @@ export function renderTextWithEntities(
   observeIntersection?: ObserveFn,
 ) {
   if (!entities || !entities.length) {
-    return renderMessagePart(text, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple);
+    return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
   }
 
   const result: TextPart[] = [];
@@ -66,7 +68,7 @@ export function renderTextWithEntities(
       }
       if (textBefore) {
         renderResult.push(...renderMessagePart(
-          textBefore, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple,
+          textBefore, highlight, emojiSize, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -110,7 +112,15 @@ export function renderTextWithEntities(
     const newEntity = shouldRenderAsHtml
       ? processEntityAsHtml(entity, entityContent, nestedEntityContent)
       : processEntity(
-        entity, entityContent, nestedEntityContent, highlight, messageId, isSimple, isProtected, observeIntersection,
+        entity,
+        entityContent,
+        nestedEntityContent,
+        highlight,
+        messageId,
+        isSimple,
+        isProtected,
+        observeIntersection,
+        emojiSize,
       );
 
     if (Array.isArray(newEntity)) {
@@ -128,7 +138,7 @@ export function renderTextWithEntities(
       }
       if (textAfter) {
         renderResult.push(...renderMessagePart(
-          textAfter, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple,
+          textAfter, highlight, emojiSize, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -181,7 +191,7 @@ export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
 function renderMessagePart(
   content: TextPart | TextPart[],
   highlight?: string,
-  shouldRenderHqEmoji?: boolean,
+  emojiSize?: number,
   shouldRenderAsHtml?: boolean,
   isSimple?: boolean,
 ) {
@@ -189,7 +199,7 @@ function renderMessagePart(
     const result: TextPart[] = [];
 
     content.forEach((c) => {
-      result.push(...renderMessagePart(c, highlight, shouldRenderHqEmoji, shouldRenderAsHtml, isSimple));
+      result.push(...renderMessagePart(c, highlight, emojiSize, shouldRenderAsHtml, isSimple));
     });
 
     return result;
@@ -199,7 +209,7 @@ function renderMessagePart(
     return renderText(content, ['escape_html', 'emoji_html', 'br_html']);
   }
 
-  const emojiFilter = shouldRenderHqEmoji ? 'hq_emoji' : 'emoji';
+  const emojiFilter = emojiSize && emojiSize > HQ_EMOJI_THRESHOLD ? 'hq_emoji' : 'emoji';
 
   const filters: TextFilter[] = [emojiFilter];
   if (!isSimple) {
@@ -288,6 +298,7 @@ function processEntity(
   isSimple?: boolean,
   isProtected?: boolean,
   observeIntersection?: ObserveFn,
+  emojiSize?: number,
 ) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -310,7 +321,12 @@ function processEntity(
 
     if (entity.type === ApiMessageEntityTypes.CustomEmoji) {
       return (
-        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection} withGridFix />
+        <CustomEmoji
+          documentId={entity.documentId}
+          observeIntersection={observeIntersection}
+          withGridFix={!emojiSize}
+          size={emojiSize}
+        />
       );
     }
     return text;
@@ -418,7 +434,12 @@ function processEntity(
       return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
     case ApiMessageEntityTypes.CustomEmoji:
       return (
-        <CustomEmoji documentId={entity.documentId} observeIntersection={observeIntersection} withGridFix />
+        <CustomEmoji
+          documentId={entity.documentId}
+          observeIntersection={observeIntersection}
+          withGridFix={!emojiSize}
+          size={emojiSize}
+        />
       );
     default:
       return renderNestedMessagePart();

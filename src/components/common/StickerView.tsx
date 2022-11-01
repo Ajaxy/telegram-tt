@@ -34,6 +34,7 @@ type OwnProps = {
   loopLimit?: number;
   shouldLoop?: boolean;
   shouldPreloadPreview?: boolean;
+  forceOnHeavyAnimation?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   noLoad?: boolean;
@@ -57,6 +58,7 @@ const StickerView: FC<OwnProps> = ({
   loopLimit,
   shouldLoop = false,
   shouldPreloadPreview,
+  forceOnHeavyAnimation,
   observeIntersection,
   observeIntersectionForPlaying,
   noLoad,
@@ -118,6 +120,7 @@ const StickerView: FC<OwnProps> = ({
           play={shouldPlay}
           color={customColor}
           noLoop={!shouldLoop}
+          forceOnHeavyAnimation={forceOnHeavyAnimation}
           isLowPriority={!selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}

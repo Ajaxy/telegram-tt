@@ -5,7 +5,7 @@ import type { ApiSticker } from '../../../../api/types';
 
 import { EMOJI_IMG_REGEX } from '../../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
-import parseEmojiOnlyString from '../../../common/helpers/parseEmojiOnlyString';
+import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
 const STARTS_ENDS_ON_EMOJI_IMG_REGEX = new RegExp(`^${EMOJI_IMG_REGEX.source}$`, 'g');

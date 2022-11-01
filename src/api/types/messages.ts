@@ -401,6 +401,7 @@ export interface ApiMessage {
   isProtected?: boolean;
   transcriptionId?: string;
   isTranscriptionError?: boolean;
+  emojiOnlyCount?: number;
   reactors?: {
     nextOffset?: string;
     count: number;

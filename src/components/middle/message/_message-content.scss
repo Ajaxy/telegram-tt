@@ -13,9 +13,11 @@
 
     &.has-action-button {
       max-width: min(29rem, calc(100vw - 7rem));
+
       .MessageList.no-avatars & {
         max-width: min(29rem, calc(100vw - 4.5rem));
       }
+
       .Message.own & {
         max-width: min(30rem, calc(100vw - 4.5rem));
       }
@@ -681,7 +683,7 @@
     }
   }
 
-  .emoji {
+  .emoji:not(.custom-emoji) {
     display: inline-block;
     color: transparent;
 
@@ -692,84 +694,52 @@
   }
 
   &.emoji-only {
+    --emoji-only-size: 1.25rem;
+    font-size: var(--emoji-only-size);
+    min-width: 6rem;
+
+    --custom-emoji-size: var(--emoji-only-size);
+
+    .emoji {
+      width: var(--emoji-only-size);
+      height: var(--emoji-only-size);
+    }
+
+    .custom-emoji {
+      line-height: 0;
+      vertical-align: bottom;
+    }
+
     .text-content {
-      margin-bottom: 0;
-      text-shadow: 1px 1px 0 white, -1px -1px 0 white, -1px 1px 0 white, 1px -1px 0 white;
+      margin-bottom: 1.25rem;
       word-break: normal;
-      img.emoji {
-        filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px -1px 0 white)
-          drop-shadow(-1px -1px 0 white);
-      }
+      line-height: var(--emoji-only-size);
 
       .MessageMeta {
         text-shadow: none;
+        bottom: 0;
+        right: 0;
+        line-height: normal;
       }
     }
   }
 
-  &.emoji-only-1 {
-    min-width: 8rem;
-    font-size: 4.5rem;
+  @for $i from 1 through 7 {
+    &.emoji-only-#{$i} {
+      $size: 6 - ($i * 0.625) + rem;
 
-    .content-inner {
-      height: 7rem;
-    }
+      --emoji-only-size: #{$size};
 
-    .text-content {
-      line-height: 1.5;
-      text-align: center;
-    }
+      @if $i <= 3 {
+        .text-content {
+          text-shadow: 1px 1px 0 white, -1px -1px 0 white, -1px 1px 0 white, 1px -1px 0 white;
+          margin-bottom: 0.25rem;
 
-    .Message.was-edited & {
-      min-width: 10rem;
-    }
-
-    .emoji {
-      width: 5rem;
-      height: 5rem;
-    }
-  }
-
-  &.emoji-only-2 {
-    font-size: 4rem;
-    margin-top: 0.5rem;
-    min-width: 10rem;
-    @media (max-width: 600px) {
-      margin-top: 0.375rem;
-    }
-
-    &.has-comments {
-      margin-top: 1.25rem;
-    }
-
-    .Message.was-edited & {
-      min-width: 12rem;
-    }
-
-    .emoji {
-      width: 4rem;
-      height: 4rem;
-      margin-right: 0.375rem;
-    }
-  }
-
-  &.emoji-only-3 {
-    font-size: 3rem;
-    margin-top: 1.75rem;
-    min-width: 12rem;
-
-    &.has-comments {
-      margin-top: 2.5rem;
-    }
-
-    .Message.was-edited & {
-      min-width: 14rem;
-    }
-
-    .emoji {
-      width: 3rem;
-      height: 3rem;
-      margin-right: 0.375rem;
+          img.emoji {
+            filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px -1px 0 white);
+          }
+        }
+      }
     }
   }
 

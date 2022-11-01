@@ -18,7 +18,7 @@ import trimText from '../../../util/trimText';
 export function renderMessageText(
   message: ApiMessage,
   highlight?: string,
-  shouldRenderHqEmoji?: boolean,
+  emojiSize?: number,
   isSimple?: boolean,
   truncateLength?: number,
   isProtected?: boolean,
@@ -35,7 +35,7 @@ export function renderMessageText(
     trimText(text, truncateLength),
     entities,
     highlight,
-    shouldRenderHqEmoji,
+    emojiSize,
     undefined,
     message.id,
     isSimple,

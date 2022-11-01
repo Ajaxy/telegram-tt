@@ -1,8 +1,7 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
@@ -10,6 +9,9 @@ import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import { getUserStatus, isUserOnline } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
@@ -79,7 +81,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     }
   }, [userId, loadFullUser, loadProfilePhotos, lastSyncTime, withFullInfo, withMediaViewer]);
 
-  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
+  const handleAvatarViewerOpen = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
     if (user && hasMedia) {
       e.stopPropagation();
       openMediaViewer({
@@ -101,7 +103,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       return withDots ? (
         <DotAnimation className="status" content={status} />
       ) : (
-        <span className="status" dir="auto">{status}</span>
+        <span className="status" dir="auto">{renderText(status)}</span>
       );
     }
 
@@ -120,7 +122,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <span className={`status ${isUserOnline(user, userStatus) ? 'online' : ''}`}>
+      <span className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
         {withUsername && user.username && <span className="handle">{user.username}</span>}
         <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
       </span>
