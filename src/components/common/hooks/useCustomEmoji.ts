@@ -10,14 +10,10 @@ const handlers = new Set<AnyToVoidFunction>();
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
-  const customEmojiById = global.customEmojis.byId;
-
-  if (customEmojiById === prevGlobal?.customEmojis.byId) {
-    return;
-  }
-
-  for (const handler of handlers) {
-    handler();
+  if (global.customEmojis.byId !== prevGlobal?.customEmojis.byId) {
+    for (const handler of handlers) {
+      handler();
+    }
   }
 
   prevGlobal = global;
@@ -30,13 +26,11 @@ export default function useCustomEmoji(documentId: string) {
     setCustomEmoji(getGlobal().customEmojis.byId[documentId]);
   }, [documentId]);
 
-  useEffect(() => {
-    if (!documentId) return;
-    handleGlobalChange();
-  }, [documentId, handleGlobalChange]);
+  useEffect(handleGlobalChange, [documentId, handleGlobalChange]);
 
   useEffect(() => {
     if (customEmoji) return undefined;
+
     handlers.add(handleGlobalChange);
 
     return () => {

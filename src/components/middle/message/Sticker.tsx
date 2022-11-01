@@ -5,7 +5,7 @@ import type { ApiMessage } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
-import { getMessageMediaFormat, getMessageMediaHash, getStickerPreviewHash } from '../../../global/helpers';
+import { getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getActions } from '../../../global';
@@ -13,13 +13,11 @@ import { getActions } from '../../../global';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
-import useMediaTransition from '../../../hooks/useMediaTransition';
 import useFlag from '../../../hooks/useFlag';
-import useThumbnail from '../../../hooks/useThumbnail';
 import useLang from '../../../hooks/useLang';
 
+import StickerView from '../../common/StickerView';
 import AnimatedSticker from '../../common/AnimatedSticker';
-import OptimizedVideo from '../../ui/OptimizedVideo';
 
 import './Sticker.scss';
 
@@ -45,56 +43,27 @@ const Sticker: FC<OwnProps> = ({
   const { showNotification, openStickerSet } = getActions();
 
   const lang = useLang();
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
   const sticker = message.content.sticker!;
-  const {
-    isLottie, stickerSetInfo, isVideo, hasEffect,
-  } = sticker;
-  const canDisplayVideo = IS_WEBM_SUPPORTED;
-  const isMemojiSticker = 'isMissing' in stickerSetInfo;
+  const { stickerSetInfo, isVideo, hasEffect } = sticker;
 
-  const [isPlayingEffect, startPlayingEffect, stopPlayingEffect] = useFlag();
-  const shouldLoad = useIsIntersecting(ref, observeIntersection);
-  const shouldPlay = useIsIntersecting(ref, observeIntersectionForPlaying);
-
-  const mediaHash = sticker.isPreloadedGlobally ? `sticker${sticker.id}` : getMessageMediaHash(message, 'inline')!;
-  const mediaHashEffect = `sticker${sticker.id}?size=f`;
-
-  const previewMediaHash = isVideo && !canDisplayVideo && (
-    sticker.isPreloadedGlobally ? getStickerPreviewHash(sticker.id) : getMessageMediaHash(message, 'pictogram'));
-  const previewBlobUrl = useMedia(previewMediaHash);
-  const thumbDataUri = useThumbnail(sticker);
-  const previewUrl = previewBlobUrl || thumbDataUri;
-
-  const mediaData = useMedia(
-    mediaHash,
-    !shouldLoad,
-    getMessageMediaFormat(message, 'inline'),
-    lastSyncTime,
+  const mediaHash = sticker.isPreloadedGlobally ? undefined : (
+    getMessageMediaHash(message, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')!
   );
 
+  const canLoad = useIsIntersecting(ref, observeIntersection);
+  const canPlay = useIsIntersecting(ref, observeIntersectionForPlaying);
+  const mediaHashEffect = `sticker${sticker.id}?size=f`;
   const effectBlobUrl = useMedia(
     mediaHashEffect,
-    !shouldLoad || !hasEffect,
+    !canLoad || !hasEffect,
     ApiMediaFormat.BlobUrl,
     lastSyncTime,
   );
-
-  const isMediaLoaded = Boolean(mediaData);
-  const [isLottieLoaded, markLottieLoaded] = useFlag(isMediaLoaded);
-  const isMediaReady = isLottie ? isLottieLoaded : isMediaLoaded;
-  const transitionClassNames = useMediaTransition(isMediaReady);
-
-  const { width, height } = getStickerDimensions(sticker);
-  const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
-
-  const stickerClassName = buildClassName(
-    'Sticker media-inner',
-    isMemojiSticker && 'inactive',
-    hasEffect && !message.isOutgoing && 'reversed',
-  );
+  const [isPlayingEffect, startPlayingEffect, stopPlayingEffect] = useFlag();
 
   const handleEffectEnded = useCallback(() => {
     stopPlayingEffect();
@@ -102,11 +71,11 @@ const Sticker: FC<OwnProps> = ({
   }, [onStopEffect, stopPlayingEffect]);
 
   useEffect(() => {
-    if (hasEffect && shouldPlay && shouldPlayEffect) {
+    if (hasEffect && canPlay && shouldPlayEffect) {
       startPlayingEffect();
       onPlayEffect?.();
     }
-  }, [hasEffect, shouldPlayEffect, onPlayEffect, shouldPlay, startPlayingEffect]);
+  }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, startPlayingEffect]);
 
   const openModal = useCallback(() => {
     openStickerSet({
@@ -132,50 +101,33 @@ const Sticker: FC<OwnProps> = ({
     openModal();
   }, [hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect]);
 
+  const isMemojiSticker = 'isMissing' in stickerSetInfo;
+  const { width, height } = getStickerDimensions(sticker);
+  const className = buildClassName(
+    'Sticker media-inner',
+    isMemojiSticker && 'inactive',
+    hasEffect && !message.isOutgoing && 'reversed',
+  );
+
   return (
-    <div ref={ref} className={stickerClassName} onClick={!isMemojiSticker ? handleClick : undefined}>
-      {(!isMediaReady || (isVideo && !canDisplayVideo)) && (
-        <img
-          src={previewUrl}
-          width={width}
-          height={height}
-          alt=""
-          className={thumbClassName}
-        />
-      )}
-      {!isLottie && !isVideo && (
-        <img
-          src={mediaData as string}
-          width={width}
-          height={height}
-          alt=""
-          className={buildClassName('full-media', transitionClassNames)}
-        />
-      )}
-      {isVideo && canDisplayVideo && isMediaReady && (
-        <OptimizedVideo
-          canPlay={shouldPlay}
-          src={mediaData as string}
-          width={width}
-          height={height}
-          playsInline
-          disablePictureInPicture
-          loop={shouldLoop}
-          muted
-        />
-      )}
-      {isLottie && isMediaLoaded && (
-        <AnimatedSticker
-          key={mediaHash}
-          className={buildClassName('full-media', transitionClassNames)}
-          tgsUrl={mediaData}
-          size={width}
-          play={shouldPlay}
-          noLoop={!shouldLoop}
-          onLoad={markLottieLoaded}
-        />
-      )}
-      {hasEffect && shouldLoad && isPlayingEffect && (
+    <div
+      ref={ref}
+      className={className}
+      style={`width: ${width}px; height: ${height}px;`}
+      onClick={!isMemojiSticker ? handleClick : undefined}
+    >
+      <StickerView
+        containerRef={ref}
+        sticker={sticker}
+        fullMediaHash={mediaHash}
+        fullMediaClassName="full-media"
+        size={width}
+        shouldLoop={shouldLoop}
+        noLoad={!canLoad}
+        noPlay={!canPlay}
+        cacheBuster={lastSyncTime}
+      />
+      {hasEffect && canLoad && isPlayingEffect && (
         <AnimatedSticker
           key={mediaHashEffect}
           className="effect-sticker"
