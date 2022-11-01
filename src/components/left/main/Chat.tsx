@@ -250,7 +250,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>
-          {renderTextWithEntities(draft.text, draft.entities)}
+          {renderTextWithEntities(draft.text, draft.entities, undefined, undefined, undefined, undefined, true)}
         </p>
       );
     }
