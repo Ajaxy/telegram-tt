@@ -99,6 +99,8 @@ const StickerView: FC<OwnProps> = ({
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
 
+  const idKey = [id, size, customColor?.join(',')].filter(Boolean).join('_');
+
   return (
     <>
       <img
@@ -108,8 +110,8 @@ const StickerView: FC<OwnProps> = ({
       />
       {isLottie ? (
         <AnimatedSticker
-          key={customColor?.join(',')}
-          id={id}
+          key={idKey}
+          id={idKey}
           size={size}
           className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
           tgsUrl={fullMediaData}
