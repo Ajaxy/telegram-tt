@@ -17,4 +17,11 @@
       display: flex;
     }
   }
+
+  .description {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: -0.75rem;
+    margin-bottom: 1.25rem;
+  }
 }

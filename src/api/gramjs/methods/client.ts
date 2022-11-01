@@ -309,6 +309,10 @@ export function updateTwoFaSettings(params: TwoFaParams) {
   return client.updateTwoFaSettings(params);
 }
 
+export function getTmpPassword(currentPassword: string, ttl?: number) {
+  return client.getTmpPassword(currentPassword, ttl);
+}
+
 export async function fetchCurrentUser() {
   const userFull = await invokeRequest(new GramJs.users.GetFullUser({
     id: new GramJs.InputUserSelf(),

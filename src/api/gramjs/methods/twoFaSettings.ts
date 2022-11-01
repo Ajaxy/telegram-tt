@@ -3,7 +3,7 @@ import { Api as GramJs, errors } from '../../../lib/gramjs';
 import type { OnApiUpdate } from '../../types';
 
 import { DEBUG } from '../../../config';
-import { invokeRequest, updateTwoFaSettings } from './client';
+import { invokeRequest, updateTwoFaSettings, getTmpPassword } from './client';
 
 const ApiErrors: { [k: string]: string } = {
   EMAIL_UNCONFIRMED: 'Email unconfirmed',
@@ -46,6 +46,10 @@ function onRequestEmailCode(length: number) {
     emailCodeController.resolve = resolve;
     emailCodeController.reject = reject;
   });
+}
+
+export function getTemporaryPaymentPassword(password: string, ttl?: number) {
+  return getTmpPassword(password, ttl);
 }
 
 export async function checkPassword(currentPassword: string) {

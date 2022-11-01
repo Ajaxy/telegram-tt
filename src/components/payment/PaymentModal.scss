@@ -17,12 +17,11 @@ $modalHeaderAndFooterHeight: 8.375rem;
     border-top-left-radius: var(--border-radius-default-small);
     border-top-right-radius: var(--border-radius-default-small);
     width: 100%;
-    padding: 0.25rem 1rem;
+    padding: 0.5rem 1rem 0.25rem;
     display: flex;
     align-items: center;
     flex-direction: row;
     background: var(--color-background);
-    border-bottom: 1px var(--color-borders) solid;
 
     h3 {
       margin-bottom: 0;
@@ -33,7 +32,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .Transition {
-    height: min(25rem, 60vh);
+    height: min(27rem, 60vh);
   }
 
   .empty-content {
@@ -51,6 +50,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
 
   .content {
     overflow: auto;
+    overflow-x: hidden;
     width: 100%;
     height: 100%;
     position: relative;
@@ -64,7 +64,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
     width: 100%;
     padding: 0.75rem 1rem;
     background: var(--color-background);
-    border-top: 1px var(--color-borders) solid;
+    border-top: 0.0625rem var(--color-borders) solid;
 
     button {
       text-transform: none;

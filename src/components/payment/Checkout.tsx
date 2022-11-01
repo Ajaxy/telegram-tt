@@ -1,9 +1,12 @@
+import React, { memo, useCallback } from '../../lib/teact/teact';
+import { getActions } from '../../global';
+
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
-
+import type { FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import type { LangCode, Price } from '../../types';
-import type { ApiChat, ApiWebDocument } from '../../api/types';
+import type { ApiChat, ApiInvoice, ApiPaymentCredentials } from '../../api/types';
 
+import { PaymentStep } from '../../types';
 import { getWebDocumentHash } from '../../global/helpers';
 import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
@@ -15,18 +18,13 @@ import useMedia from '../../hooks/useMedia';
 import Checkbox from '../ui/Checkbox';
 import Skeleton from '../ui/Skeleton';
 import SafeLink from '../common/SafeLink';
+import ListItem from '../ui/ListItem';
 
 import styles from './Checkout.module.scss';
 
 export type OwnProps = {
   chat?: ApiChat;
-  invoiceContent?: {
-    title?: string;
-    text?: string;
-    photo?: ApiWebDocument;
-    isRecurring?: boolean;
-    recurringTermsUrl?: string;
-  };
+  invoice?: ApiInvoice;
   checkoutInfo?: {
     paymentMethod?: string;
     paymentProvider?: string;
@@ -37,28 +35,41 @@ export type OwnProps = {
   };
   prices?: Price[];
   totalPrice?: number;
+  needAddress?: boolean;
+  hasShippingOptions?: boolean;
+  tipAmount?: number;
   shippingPrices?: Price[];
   currency: string;
   isTosAccepted?: boolean;
+  dispatch?: FormEditDispatch;
   onAcceptTos?: (isAccepted: boolean) => void;
+  savedCredentials?: ApiPaymentCredentials[];
 };
 
 const Checkout: FC<OwnProps> = ({
   chat,
-  invoiceContent,
+  invoice,
   prices,
   shippingPrices,
   checkoutInfo,
   currency,
   totalPrice,
   isTosAccepted,
+  dispatch,
   onAcceptTos,
+  tipAmount,
+  needAddress,
+  hasShippingOptions,
+  savedCredentials,
 }) => {
+  const { setPaymentStep } = getActions();
+
   const lang = useLang();
+  const isInteractive = Boolean(dispatch);
 
   const {
-    photo, title, text, isRecurring, recurringTermsUrl,
-  } = invoiceContent || {};
+    photo, title, text, isRecurring, recurringTermsUrl, suggestedTipAmounts, maxTipAmount,
+  } = invoice || {};
   const {
     paymentMethod,
     paymentProvider,
@@ -69,6 +80,48 @@ const Checkout: FC<OwnProps> = ({
   } = (checkoutInfo || {});
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
+
+  const handleTipsClick = useCallback((tips: number) => {
+    dispatch!({ type: 'setTipAmount', payload: maxTipAmount ? Math.min(tips, maxTipAmount) : tips });
+  }, [dispatch, maxTipAmount]);
+
+  const handlePaymentMethodClick = useCallback(() => {
+    setPaymentStep({ step: savedCredentials?.length ? PaymentStep.SavedPayments : PaymentStep.PaymentInfo });
+  }, [savedCredentials?.length, setPaymentStep]);
+
+  const handleShippingAddressClick = useCallback(() => {
+    setPaymentStep({ step: PaymentStep.ShippingInfo });
+  }, [setPaymentStep]);
+
+  const handleShippingMethodClick = useCallback(() => {
+    setPaymentStep({ step: PaymentStep.Shipping });
+  }, [setPaymentStep]);
+
+  function renderTips() {
+    return (
+      <>
+        <div className={styles.priceInfoItem}>
+          <div className={styles.priceInfoItemTitle}>
+            {title}
+          </div>
+          <div>
+            {formatCurrency(tipAmount!, currency, lang.code)}
+          </div>
+        </div>
+        <div className={styles.tipsList}>
+          {suggestedTipAmounts!.map((tip) => (
+            <div
+              key={tip}
+              className={buildClassName(styles.tipsItem, tip === tipAmount && styles.tipsItem_active)}
+              onClick={dispatch ? () => handleTipsClick(tip === tipAmount ? 0 : tip) : undefined}
+            >
+              {formatCurrency(tip, currency, lang.code, true)}
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
 
   function renderTosLink(url: string, isRtl?: boolean) {
     const langString = lang('PaymentCheckoutAcceptRecurrent', chat?.title);
@@ -125,26 +178,52 @@ const Checkout: FC<OwnProps> = ({
         {shippingPrices && shippingPrices.map((item) => (
           renderPaymentItem(lang.code, item.label, item.amount, currency)
         ))}
+        {suggestedTipAmounts && suggestedTipAmounts.length > 0 && renderTips()}
         {totalPrice !== undefined && (
           renderPaymentItem(lang.code, lang('Checkout.TotalAmount'), totalPrice, currency, true)
         )}
       </div>
       <div className={styles.invoiceInfo}>
-        {paymentMethod && renderCheckoutItem('icon-card', paymentMethod, lang('PaymentCheckoutMethod'))}
-        {paymentProvider && renderCheckoutItem(
-          buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
-          paymentProvider,
-          lang('PaymentCheckoutProvider'),
-        )}
-        {shippingAddress && renderCheckoutItem('icon-location', shippingAddress, lang('PaymentShippingAddress'))}
-        {name && renderCheckoutItem('icon-user', name, lang('PaymentCheckoutName'))}
-        {phone && renderCheckoutItem('icon-phone', phone, lang('PaymentCheckoutPhoneNumber'))}
-        {shippingMethod && renderCheckoutItem('icon-truck', shippingMethod, lang('PaymentCheckoutShippingMethod'))}
+        {renderCheckoutItem({
+          title: paymentMethod || savedCredentials?.[0].title,
+          label: lang('PaymentCheckoutMethod'),
+          icon: 'card',
+          onClick: isInteractive ? handlePaymentMethodClick : undefined,
+        })}
+        {paymentProvider && renderCheckoutItem({
+          title: paymentProvider,
+          label: lang('PaymentCheckoutProvider'),
+          customIcon: buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
+        })}
+        {(needAddress || !isInteractive) && renderCheckoutItem({
+          title: shippingAddress,
+          label: lang('PaymentShippingAddress'),
+          icon: 'location',
+          onClick: isInteractive ? handleShippingAddressClick : undefined,
+        })}
+        {name && renderCheckoutItem({
+          title: name,
+          label: lang('PaymentCheckoutName'),
+          icon: 'user',
+        })}
+        {phone && renderCheckoutItem({
+          title: phone,
+          label: lang('PaymentCheckoutPhoneNumber'),
+          icon: 'phone',
+        })}
+        {(hasShippingOptions || !isInteractive) && renderCheckoutItem({
+          title: shippingMethod,
+          label: lang('PaymentCheckoutShippingMethod'),
+          icon: 'truck',
+          onClick: isInteractive ? handleShippingMethodClick : undefined,
+        })}
         {isRecurring && renderTos(recurringTermsUrl!)}
       </div>
     </div>
   );
 };
+
+export default memo(Checkout);
 
 function renderPaymentItem(
   langCode: LangCode | undefined, title: string, value: number, currency: string, main = false,
@@ -161,20 +240,35 @@ function renderPaymentItem(
   );
 }
 
-function renderCheckoutItem(icon: string, title: string, data: string) {
+function renderCheckoutItem({
+  title,
+  label,
+  icon,
+  customIcon,
+  onClick,
+}: {
+  title : string | undefined;
+  label: string | undefined;
+  icon?: string;
+  onClick?: NoneToVoidFunction;
+  customIcon?: string;
+}) {
   return (
-    <div className={styles.checkoutInfoItem}>
-      <i className={buildClassName(icon, styles.checkoutInfoItemIcon)}> </i>
-      <div className={styles.checkoutInfoItemInfo}>
-        <div className={styles.checkoutInfoItemInfoTitle}>
-          {title}
-        </div>
-        <p className={styles.checkoutInfoItemInfoData}>
-          {data}
-        </p>
+    <ListItem
+      multiline={Boolean(title && label !== title)}
+      icon={icon}
+      inactive={!onClick}
+      onClick={onClick}
+    >
+      {customIcon && <i className={customIcon} />}
+      <div className={styles.checkoutInfoItemInfoTitle}>
+        {title || label}
       </div>
-    </div>
+      {title && label !== title && (
+        <p className={styles.checkoutInfoItemInfoData}>
+          {label}
+        </p>
+      )}
+    </ListItem>
   );
 }
-
-export default memo(Checkout);

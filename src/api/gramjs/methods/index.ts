@@ -74,7 +74,7 @@ export {
 } from './bots';
 
 export {
-  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo,
+  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
 } from './payments';
 
 export {

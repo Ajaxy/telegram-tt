@@ -59,29 +59,54 @@
   }
 }
 
-.invoice-info {
-  border-top: 1px var(--color-borders) solid;
-  padding: 1rem;
-}
-
-.checkout-info-item {
+.tipsList {
   display: flex;
-  padding: 0.75rem 0.5rem 1rem;
-  text-align: left;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem
 }
 
-.checkout-info-item-icon {
-  font-size: 1.5rem;
-  color: var(--color-text-secondary);
-  margin-right: 2rem;
-  width: 1.5rem;
+.tipsItem {
+  border-radius: 1.375rem;
+  padding: 0 0.75rem;
+  height: 2.5rem;
+  min-width: 5rem;
+  line-height: 2.5rem;
+  text-align: center;
+  background: var(--color-primary-opacity);
+  color: var(--color-primary);
+  transition: background-color 200ms, color 200ms;
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover,
+  &:focus {
+    background: var(--color-primary-opacity-hover);
+  }
+
+  &_active {
+    color: var(--color-white);
+    background: var(--color-primary) !important;
+  }
+
+  :global(.theme-dark) & {
+    color: var(--color-white);
+  }
+}
+
+.invoice-info {
+  border-top: 0.0625rem var(--color-borders) solid;
+  padding: 0.5rem;
 }
 
 .provider {
+  float: left;
   background: no-repeat center;
   background-size: 2rem;
   border-radius: 1rem;
+  width: 1.5rem;
   height: 1.5rem;
+  margin-right: 2rem;
 }
 
 .provider.stripe {

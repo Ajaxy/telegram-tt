@@ -102,7 +102,8 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
   --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
   --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
-  --color-primary-opacity: rgba(var(--color-primary), 0.5);
+  --color-primary-opacity: rgba(var(--color-primary), 0.25);
+  --color-primary-opacity-hover: rgba(var(--color-primary), 0.15);
   --color-green: #{$color-green};
   --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
 

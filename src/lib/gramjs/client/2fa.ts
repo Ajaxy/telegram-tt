@@ -1,4 +1,4 @@
-import TelegramClient from './TelegramClient';
+import type TelegramClient from './TelegramClient';
 // eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
 import { generateRandomBytes } from '../Helpers';
@@ -14,6 +14,8 @@ export interface TwoFaParams {
     emailCodeCallback?: (length: number) => Promise<string>;
     onEmailCodeError?: (err: Error) => void;
 }
+
+export type TmpPasswordResult = Api.account.TmpPassword | { error: string } | undefined;
 
 /**
  * Changes the 2FA settings of the logged in user.
@@ -119,5 +121,29 @@ export async function updateTwoFaSettings(
         } else {
             throw e;
         }
+    }
+}
+
+export async function getTmpPassword(client: TelegramClient, currentPassword: string, ttl = 60) {
+    const pwd = await client.invoke(new Api.account.GetPassword());
+
+    if (!pwd) {
+        return undefined;
+    }
+
+    const inputPassword = await computeCheck(pwd, currentPassword);
+    try {
+        const result = await client.invoke(new Api.account.GetTmpPassword({
+            password: inputPassword,
+            period: ttl,
+        }));
+
+        return result;
+    } catch (err: any) {
+        if (err.message === 'PASSWORD_HASH_INVALID') {
+            return { error: err.message };
+        }
+
+        throw err;
     }
 }

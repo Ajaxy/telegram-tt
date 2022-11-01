@@ -22,7 +22,7 @@ const {
 } = require('./auth');
 const { downloadFile } = require('./downloadFile');
 const { uploadFile } = require('./uploadFile');
-const { updateTwoFaSettings } = require('./2fa');
+const { updateTwoFaSettings, getTmpPassword } = require('./2fa');
 
 const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
@@ -925,6 +925,10 @@ class TelegramClient {
 
     updateTwoFaSettings(params) {
         return updateTwoFaSettings(this, params);
+    }
+
+    getTmpPassword(currentPassword, ttl) {
+        return getTmpPassword(this, currentPassword, ttl);
     }
 
     // event region

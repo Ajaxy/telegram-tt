@@ -752,8 +752,8 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
   } = media;
 
   return {
-    text,
     title,
+    text,
     photo: buildApiWebDocument(photo),
     receiptMsgId,
     amount: Number(totalAmount),

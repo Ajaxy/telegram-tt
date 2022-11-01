@@ -1,6 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import type { ApiError } from '../../../api/types';
+import type { ApiError, ApiNotification } from '../../../api/types';
 
 import { APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
@@ -244,7 +244,7 @@ addActionHandler('showNotification', (global, actions, payload) => {
     newNotifications.splice(existingNotificationIndex, 1);
   }
 
-  newNotifications.push(notification);
+  newNotifications.push(notification as ApiNotification);
 
   return {
     ...global,
