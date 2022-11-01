@@ -27,7 +27,7 @@ import {
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import windowSize from '../../util/windowSize';
@@ -151,8 +151,13 @@ const MediaViewer: FC<StateProps> = ({
   }, [isVisible]);
 
   useEffect(() => {
-    if (!IS_SINGLE_COLUMN_LAYOUT) return;
-    document.body.classList.toggle('is-media-viewer-open', isOpen);
+    if (IS_SINGLE_COLUMN_LAYOUT) {
+      document.body.classList.toggle('is-media-viewer-open', isOpen);
+    }
+    // Disable user selection if media viewer is open, to prevent accidental text selection
+    if (IS_TOUCH_ENV) {
+      document.body.classList.toggle('no-selection', isOpen);
+    }
   }, [isOpen]);
 
   const forceUpdate = useForceUpdate();
