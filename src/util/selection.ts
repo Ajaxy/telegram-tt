@@ -22,14 +22,40 @@ export function insertHtmlInSelection(html: string) {
 }
 
 export function getHtmlBeforeSelection(container?: HTMLElement, useCommonAncestor?: boolean) {
-  if (!container) return '';
+  if (!container) {
+    return '';
+  }
+
   const sel = window.getSelection();
-  if (!sel || !sel.rangeCount) return container.innerHTML;
+  if (!sel || !sel.rangeCount) {
+    return container.innerHTML;
+  }
+
   const range = sel.getRangeAt(0).cloneRange();
-  if (!range.intersectsNode(container)) return container.innerHTML;
-  if (!useCommonAncestor && !container.contains(range.commonAncestorContainer)) return '';
+  if (!range.intersectsNode(container)) {
+    return container.innerHTML;
+  }
+
+  if (!useCommonAncestor && !container.contains(range.commonAncestorContainer)) {
+    return '';
+  }
+
   range.collapse(true);
   range.setStart(container, 0);
-  fragmentEl.replaceChildren(range.cloneContents());
+  replaceChildren(fragmentEl, range.cloneContents());
+
   return fragmentEl.innerHTML;
+}
+
+function replaceChildren(el: HTMLElement, nodes?: DocumentFragment) {
+  if (el.replaceChildren === undefined) {
+    while (el.lastChild) {
+      el.removeChild(el.lastChild);
+    }
+    if (nodes !== undefined) {
+      el.append(nodes);
+    }
+  } else {
+    el.replaceChildren(nodes || '');
+  }
 }
