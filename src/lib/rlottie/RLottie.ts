@@ -39,9 +39,9 @@ class RLottie {
   private containers = new Map<HTMLDivElement, {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    onLoad?: NoneToVoidFunction;
-    isOnLoadFired?: boolean;
+    isLoaded?: boolean;
     isPaused?: boolean;
+    onLoad?: NoneToVoidFunction;
   }>();
 
   private imgSize!: number;
@@ -372,21 +372,17 @@ class RLottie {
 
         this.containers.forEach((containerData) => {
           const {
-            ctx, onLoad, isOnLoadFired, isPaused,
+            ctx, isLoaded, isPaused, onLoad,
           } = containerData;
 
-          if (onLoad && !isOnLoadFired) {
-            containerData.isOnLoadFired = true;
-            onLoad();
-
-            ctx.putImageData(imageData, 0, 0); // Always render first frame
+          if (!isLoaded || !isPaused) {
+            ctx.putImageData(imageData, 0, 0);
           }
 
-          if (isPaused) {
-            return;
+          if (!isLoaded) {
+            containerData.isLoaded = true;
+            onLoad?.();
           }
-
-          ctx.putImageData(imageData, 0, 0);
         });
 
         this.prevFrameIndex = frameIndex;
