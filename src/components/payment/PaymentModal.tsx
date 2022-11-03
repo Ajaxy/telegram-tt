@@ -138,6 +138,13 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     }
   }, [isOpen, loadPasswordInfo, openModal]);
 
+  // Modal window can be closed by an event from the server side
+  useEffect(() => {
+    if (!isOpen && isModalOpen) {
+      closeModal();
+    }
+  }, [closeModal, isModalOpen, isOpen]);
+
   useEffect(() => {
     if (step !== undefined || error) {
       setIsLoading(false);
