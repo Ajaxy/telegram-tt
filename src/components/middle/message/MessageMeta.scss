@@ -111,10 +111,6 @@
     right: 0.8125rem;
   }
 
-  .emoji-only & {
-    right: 0;
-  }
-
   .Message.own .has-solid-background & {
     color: var(--color-message-meta-own);
   }
@@ -152,17 +148,5 @@
     right: auto;
     left: 13.25rem;
     bottom: 0.25rem;
-  }
-
-  .emoji-only-1 .reply-message + .MessageMeta {
-    left: 2.5rem;
-  }
-
-  .emoji-only-2 .reply-message + .MessageMeta {
-    left: 5.5rem;
-  }
-
-  .emoji-only-3 .reply-message + .MessageMeta {
-    left: 6.5rem;
   }
 }
