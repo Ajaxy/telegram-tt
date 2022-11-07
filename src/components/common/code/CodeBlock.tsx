@@ -1,5 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
+
+import type { FC } from '../../../lib/teact/teact';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 
@@ -36,7 +38,7 @@ const CodeBlock: FC<OwnProps> = ({ text, language, noCopy }) => {
   const blockClass = buildClassName('code-block', !isWordWrap && 'no-word-wrap');
 
   return (
-    <pre className={blockClass}>
+    <pre className={blockClass} data-entity-type={ApiMessageEntityTypes.Pre} data-language={language}>
       {highlighted}
       <CodeOverlay
         text={text}

@@ -1,8 +1,9 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
+
+import type { FC } from '../../../lib/teact/teact';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { createClassNameBuilder } from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
@@ -34,7 +35,7 @@ const Spoiler: FC<OwnProps> = ({
 
   const [isRevealed, reveal, conceal] = useFlag();
 
-  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -74,6 +75,7 @@ const Spoiler: FC<OwnProps> = ({
         !isRevealed && Boolean(messageId) && 'animated',
       )}
       onClick={messageId && !isRevealed ? handleClick : undefined}
+      data-entity-type={ApiMessageEntityTypes.Spoiler}
     >
       <span className={buildClassName('content')} ref={contentRef}>
         {children}

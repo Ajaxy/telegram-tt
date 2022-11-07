@@ -5,7 +5,6 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
-import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
   selectChat,
@@ -23,7 +22,7 @@ import {
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
-import { isUserId } from '../../../global/helpers';
+import { isUserId, stripCustomEmoji } from '../../../global/helpers';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -164,18 +163,14 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     : undefined;
 
   const strippedMessage = useMemo(() => {
-    const textEntities = message?.content.text?.entities;
-    if (!message || !isForwarding || !textEntities?.length || !noAuthors || isCurrentUserPremium) return message;
+    if (!message || !isForwarding || !message.content.text || !noAuthors || isCurrentUserPremium) return message;
 
-    const filteredEntities = textEntities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji);
+    const strippedText = stripCustomEmoji(message.content.text);
     return {
       ...message,
       content: {
         ...message.content,
-        text: {
-          text: message.content.text!.text,
-          entities: filteredEntities,
-        },
+        text: strippedText,
       },
     };
   }, [isCurrentUserPremium, isForwarding, message, noAuthors]);

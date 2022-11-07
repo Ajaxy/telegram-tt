@@ -63,6 +63,7 @@ const MessageMeta: FC<OwnProps> = ({
       className={buildClassName('MessageMeta', withReactionOffset && 'reactions-offset')}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={onClick}
+      data-ignore-on-paste
     >
       {reactions && reactions.map((l) => (
         <ReactionAnimatedEmoji

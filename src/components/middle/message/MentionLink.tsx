@@ -3,6 +3,7 @@ import React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
 
@@ -17,6 +18,7 @@ type StateProps = {
 };
 
 const MentionLink: FC<OwnProps & StateProps> = ({
+  userId,
   username,
   userOrChat,
   children,
@@ -35,7 +37,12 @@ const MentionLink: FC<OwnProps & StateProps> = ({
   };
 
   return (
-    <a onClick={handleClick} className="text-entity-link" dir="auto">
+    <a
+      onClick={handleClick}
+      className="text-entity-link"
+      dir="auto"
+      data-entity-type={userId ? ApiMessageEntityTypes.MentionName : ApiMessageEntityTypes.Mention}
+    >
       {children}
     </a>
   );

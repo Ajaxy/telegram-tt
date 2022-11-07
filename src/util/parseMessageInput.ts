@@ -2,7 +2,7 @@ import type { ApiMessageEntity, ApiFormattedText } from '../api/types';
 import { ApiMessageEntityTypes } from '../api/types';
 import { RE_LINK_TEMPLATE } from '../config';
 
-const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
+export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
   B: ApiMessageEntityTypes.Bold,
   STRONG: ApiMessageEntityTypes.Bold,
   I: ApiMessageEntityTypes.Italic,
@@ -18,16 +18,21 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
 
 const MAX_TAG_DEEPNESS = 3;
 
-export default function parseMessageInput(html: string, withMarkdownLinks = false): ApiFormattedText {
+export default function parseMessageInput(
+  html: string, withMarkdownLinks = false, skipMarkdown = false,
+): ApiFormattedText {
   const fragment = document.createElement('div');
-  fragment.innerHTML = withMarkdownLinks ? parseMarkdown(parseMarkdownLinks(html)) : parseMarkdown(html);
+  fragment.innerHTML = skipMarkdown ? html
+    : withMarkdownLinks ? parseMarkdown(parseMarkdownLinks(html)) : parseMarkdown(html);
   fixImageContent(fragment);
   const text = fragment.innerText.trim().replace(/\u200b+/g, '');
-  let textIndex = 0;
+  const trimShift = fragment.innerText.indexOf(text[0]);
+  let textIndex = -trimShift;
   let recursionDeepness = 0;
   const entities: ApiMessageEntity[] = [];
 
   function addEntity(node: ChildNode) {
+    if (node.nodeType === Node.COMMENT_NODE) return;
     const { index, entity } = getEntityDataFromNode(node, text, textIndex);
 
     if (entity) {
@@ -208,6 +213,10 @@ function getEntityDataFromNode(
 }
 
 function getEntityTypeFromNode(node: ChildNode): ApiMessageEntityTypes | undefined {
+  if (node instanceof HTMLElement && node.dataset.entityType) {
+    return node.dataset.entityType as ApiMessageEntityTypes;
+  }
+
   if (ENTITY_CLASS_BY_NODE_NAME[node.nodeName]) {
     return ENTITY_CLASS_BY_NODE_NAME[node.nodeName];
   }

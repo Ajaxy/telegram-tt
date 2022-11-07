@@ -78,6 +78,7 @@ import { getServerTime } from '../../../util/serverTime';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { buildCustomEmojiHtml } from './helpers/customEmoji';
 import { processMessageInputForCustomEmoji } from '../../../util/customEmojiManager';
+import { getTextWithEntitiesAsHtml } from '../../common/helpers/renderTextWithEntities';
 
 import useFlag from '../../../hooks/useFlag';
 import usePrevious from '../../../hooks/usePrevious';
@@ -512,6 +513,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   }, [htmlRef, setHtml]);
 
+  const insertFormattedTextAndUpdateCursor = useCallback((
+    text: ApiFormattedText, inputId: string = EDITABLE_INPUT_ID,
+  ) => {
+    const newHtml = getTextWithEntitiesAsHtml(text);
+    insertHtmlAndUpdateCursor(newHtml, inputId);
+  }, [insertHtmlAndUpdateCursor]);
+
   const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
     const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
       .join('')
@@ -565,6 +573,24 @@ const Composer: FC<OwnProps & StateProps> = ({
     };
   }, [chatId, resetComposer, stopRecordingVoiceRef]);
 
+  const showCustomEmojiPremiumNotification = useCallback(() => {
+    const notificationNumber = customEmojiNotificationNumber.current;
+    if (!notificationNumber) {
+      showNotification({
+        message: lang('UnlockPremiumEmojiHint'),
+        action: () => openPremiumModal({ initialSection: 'animated_emoji' }),
+        actionText: lang('PremiumMore'),
+      });
+    } else {
+      showNotification({
+        message: lang('UnlockPremiumEmojiHint2'),
+        action: () => openChat({ id: currentUserId, shouldReplaceHistory: true }),
+        actionText: lang('Open'),
+      });
+    }
+    customEmojiNotificationNumber.current = Number(!notificationNumber);
+  }, [currentUserId, lang, openChat, openPremiumModal, showNotification]);
+
   const [handleEditComplete, handleEditCancel] = useEditing(
     htmlRef,
     setHtml,
@@ -578,7 +604,14 @@ const Composer: FC<OwnProps & StateProps> = ({
     editingDraft,
   );
   useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage, lastSyncTime);
-  useClipboardPaste(isForCurrentMessageList, insertTextAndUpdateCursor, handleSetAttachments, editingMessage);
+  useClipboardPaste(
+    isForCurrentMessageList,
+    insertFormattedTextAndUpdateCursor,
+    handleSetAttachments,
+    editingMessage,
+    !isCurrentUserPremium && !isChatWithSelf,
+    showCustomEmojiPremiumNotification,
+  );
 
   const handleEmbeddedClear = useCallback(() => {
     if (editingMessage) {
@@ -775,29 +808,12 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
     if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
-      const notificationNumber = customEmojiNotificationNumber.current;
-      if (!notificationNumber) {
-        showNotification({
-          message: lang('UnlockPremiumEmojiHint'),
-          action: () => openPremiumModal({ initialSection: 'animated_emoji' }),
-          actionText: lang('PremiumMore'),
-        });
-      } else {
-        showNotification({
-          message: lang('UnlockPremiumEmojiHint2'),
-          action: () => openChat({ id: currentUserId, shouldReplaceHistory: true }),
-          actionText: lang('Open'),
-        });
-      }
-      customEmojiNotificationNumber.current = Number(!notificationNumber);
+      showCustomEmojiPremiumNotification();
       return;
     }
 
     insertCustomEmojiAndUpdateCursor(emoji);
-  }, [
-    currentUserId, insertCustomEmojiAndUpdateCursor, isChatWithSelf, isCurrentUserPremium, lang,
-    openChat, openPremiumModal, showNotification,
-  ]);
+  }, [insertCustomEmojiAndUpdateCursor, isChatWithSelf, isCurrentUserPremium, showCustomEmojiPremiumNotification]);
 
   const handleStickerSelect = useCallback((
     sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean, shouldPreserveInput = false,
@@ -1396,7 +1412,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId } = global;
     const defaultSendAsId = chat?.fullInfo ? chat?.fullInfo?.sendAsId || currentUserId : undefined;
     const sendAsId = chat?.sendAsPeerIds && defaultSendAsId
-     && chat.sendAsPeerIds.some((peer) => peer.id === defaultSendAsId) ? defaultSendAsId
+      && chat.sendAsPeerIds.some((peer) => peer.id === defaultSendAsId) ? defaultSendAsId
       : (chat?.adminRights?.anonymous ? chat?.id : undefined);
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;

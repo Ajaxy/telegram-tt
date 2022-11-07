@@ -1,4 +1,5 @@
 import type { ApiMessageEntityCustomEmoji, ApiSticker } from '../../../../api/types';
+import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { EMOJI_SIZES } from '../../../../config';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -16,6 +17,7 @@ export function buildCustomEmojiHtml(emoji: ApiSticker) {
     draggable="false"
     alt="${emoji.emoji}"
     data-document-id="${emoji.id}"
+    data-entity-type="${ApiMessageEntityTypes.CustomEmoji}"
     src="${mediaData || placeholderSrc}"
   />`;
 }
@@ -28,6 +30,7 @@ export function buildCustomEmojiHtmlFromEntity(rawText: string, entity: ApiMessa
     draggable="false"
     alt="${rawText}"
     data-document-id="${entity.documentId}"
+    data-entity-type="${ApiMessageEntityTypes.CustomEmoji}"
     src="${mediaData || placeholderSrc}"
   />`;
 }

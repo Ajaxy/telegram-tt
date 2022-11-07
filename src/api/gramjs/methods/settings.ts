@@ -3,7 +3,6 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiAppConfig,
-  ApiChat,
   ApiError,
   ApiLangString,
   ApiLanguage,
