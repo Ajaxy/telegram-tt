@@ -1295,17 +1295,17 @@ const Composer: FC<OwnProps & StateProps> = ({
               onClose={closeBotCommandMenu}
             />
           )}
-          <StickerTooltip
-            chatId={chatId}
-            threadId={threadId}
-            isOpen={isStickerTooltipOpen}
-            onStickerSelect={handleStickerSelect}
-          />
           <CustomEmojiTooltip
             chatId={chatId}
             isOpen={isCustomEmojiTooltipOpen}
             onCustomEmojiSelect={insertCustomEmoji}
             addRecentCustomEmoji={addRecentCustomEmoji}
+          />
+          <StickerTooltip
+            chatId={chatId}
+            threadId={threadId}
+            isOpen={isStickerTooltipOpen}
+            onStickerSelect={handleStickerSelect}
           />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}

@@ -139,6 +139,7 @@ export const STICKER_SIZE_AUTH = 160;
 export const STICKER_SIZE_AUTH_MOBILE = 120;
 export const STICKER_SIZE_PICKER = 64;
 export const EMOJI_SIZE_PICKER = 40;
+export const COMPOSER_EMOJI_SIZE_PICKER = 32;
 export const STICKER_SIZE_GENERAL_SETTINGS = 48;
 export const STICKER_SIZE_PICKER_HEADER = 32;
 export const STICKER_SIZE_SEARCH = 64;

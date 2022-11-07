@@ -7,7 +7,7 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 import type { GlobalActions } from '../../../global/types';
 
-import { EMOJI_SIZE_PICKER } from '../../../config';
+import { COMPOSER_EMOJI_SIZE_PICKER } from '../../../config';
 import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -90,7 +90,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
             key={sticker.id}
             sticker={sticker}
             className={styles.emojiButton}
-            size={EMOJI_SIZE_PICKER}
+            size={COMPOSER_EMOJI_SIZE_PICKER}
             observeIntersection={observeIntersection}
             onClick={handleCustomEmojiSelect}
             clickArg={sticker}

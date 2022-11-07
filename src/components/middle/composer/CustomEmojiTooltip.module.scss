@@ -1,14 +1,21 @@
 .root:global(.composer-tooltip) {
   display: flex;
-  padding-left: 0.25rem;
+  padding: 0;
+  z-index: 1;
 
+  overflow-y: hidden;
   overflow-x: auto;
   @supports (overflow-x: overlay) {
     overflow-x: overlay;
   }
-  overflow-y: hidden;
 
   .emojiButton {
     flex: 0 0 2.5rem;
+    --custom-emoji-size: 2rem;
+    margin: 0.5rem 0 0.5rem 0.25rem;
+  }
+
+  &:global(.shown + .StickerTooltip) {
+    transform: translateY(-1.75rem);
   }
 }
