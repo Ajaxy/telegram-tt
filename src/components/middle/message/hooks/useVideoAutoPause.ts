@@ -1,33 +1,31 @@
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 
 import { fastRaf } from '../../../../util/schedulers';
-import safePlay from '../../../../util/safePlay';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck from '../../../../hooks/useHeavyAnimationCheck';
+import usePlayPause from '../../../../hooks/usePlayPause';
 
 export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement | null }, canPlay: boolean) {
   const canPlayRef = useRef();
   canPlayRef.current = canPlay;
+
+  const { play, pause } = usePlayPause(playerRef);
 
   const isFrozenRef = useRef();
 
   const freezePlaying = useCallback(() => {
     isFrozenRef.current = true;
 
-    playerRef.current?.pause();
-  }, [playerRef]);
+    pause();
+  }, [pause]);
 
   const unfreezePlaying = useCallback(() => {
     isFrozenRef.current = false;
 
-    if (
-      playerRef.current && canPlayRef.current
-      // At this point `HTMLVideoElement` can be unmounted from the DOM
-      && document.body.contains(playerRef.current)
-    ) {
-      safePlay(playerRef.current);
+    if (canPlayRef.current) {
+      play();
     }
-  }, [playerRef]);
+  }, [play]);
 
   const unfreezePlayingOnRaf = useCallback(() => {
     fastRaf(unfreezePlaying);
@@ -38,23 +36,19 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
 
   const handlePlaying = useCallback(() => {
     if (!canPlayRef.current || isFrozenRef.current) {
-      playerRef.current!.pause();
+      pause();
     }
-  }, [playerRef]);
+  }, [pause]);
 
   useEffect(() => {
-    if (!playerRef.current) {
-      return;
-    }
-
     if (canPlay) {
       if (!isFrozenRef.current) {
-        safePlay(playerRef.current);
+        play();
       }
     } else {
-      playerRef.current!.pause();
+      pause();
     }
-  }, [canPlay, playerRef]);
+  }, [canPlay, play, pause]);
 
   return { handlePlaying };
 }
