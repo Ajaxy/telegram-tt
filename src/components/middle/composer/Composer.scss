@@ -391,6 +391,17 @@
   }
 }
 
+@media (min-width: 600px) {
+  .symbol-menu-button {
+    width: 2rem !important;
+    margin-left: 0.75rem !important;
+
+    .Button + & {
+      margin-left: -0.25rem !important;
+    }
+  }
+}
+
 #message-input-text,
 #caption-input-text {
   position: relative;
@@ -437,11 +448,19 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+
+    @media (min-width: 600px) {
+      left: 0.75rem;
+    }
   }
 
   .forced-placeholder {
     z-index: var(--z-below);
     left: 0;
+
+    @media (min-width: 600px) {
+      left: 0.75rem;
+    }
   }
 
   &[dir="rtl"] .placeholder-text {
@@ -530,6 +549,10 @@
     .form-control {
       padding-left: 0;
       padding-right: 0;
+
+      @media (min-width: 600px) {
+        padding-left: 0.75rem;
+      }
     }
   }
 
