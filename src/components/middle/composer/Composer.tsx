@@ -1211,7 +1211,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             </Button>
           ) : (
             <ResponsiveHoverButton
-              className={isSymbolMenuOpen ? 'activated' : ''}
+              className={buildClassName('symbol-menu-button', isSymbolMenuOpen && 'activated')}
               round
               color="translucent"
               onActivate={handleActivateSymbolMenu}
