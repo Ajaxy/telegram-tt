@@ -32,7 +32,10 @@ type ActionHandler = (
   payload: any,
 ) => GlobalState | void | Promise<void>;
 
-type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral);
+type DetachWhenChanged = (current: any) => void;
+type MapStateToProps<OwnProps = undefined> = (
+  (global: GlobalState, ownProps: OwnProps, detachWhenChanged: DetachWhenChanged) => AnyLiteral
+);
 
 let currentGlobal = {} as GlobalState;
 
@@ -52,6 +55,9 @@ const containers = new Map<string, {
   mappedProps?: Props;
   forceUpdate: Function;
   areMappedPropsChanged: boolean;
+  isDetached: boolean;
+  detachReason: any;
+  detachWhenChanged: DetachWhenChanged;
   DEBUG_updates: number;
   DEBUG_componentName: string;
 }>();
@@ -139,13 +145,21 @@ function updateContainers() {
   // eslint-disable-next-line no-restricted-syntax
   for (const container of containers.values()) {
     const {
-      mapStateToProps, ownProps, mappedProps, forceUpdate,
+      mapStateToProps, ownProps, mappedProps, forceUpdate, isDetached, detachWhenChanged,
     } = container;
+
+    if (isDetached) {
+      continue;
+    }
 
     let newMappedProps;
 
     try {
-      newMappedProps = mapStateToProps(currentGlobal, ownProps);
+      newMappedProps = mapStateToProps(currentGlobal, ownProps, detachWhenChanged);
+
+      if (container.isDetached) {
+        continue;
+      }
     } catch (err: any) {
       handleError(err);
 
@@ -213,7 +227,7 @@ export function removeCallback(cb: Function) {
   }
 }
 
-export function withGlobal<OwnProps>(
+export function withGlobal<OwnProps extends AnyLiteral>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
 ) {
   return (Component: FC) => {
@@ -229,13 +243,25 @@ export function withGlobal<OwnProps>(
         };
       }, [id]);
 
-      let container = containers.get(id);
+      let container = containers.get(id)!;
       if (!container) {
         container = {
           mapStateToProps,
           ownProps: props,
           areMappedPropsChanged: false,
           forceUpdate,
+          isDetached: false,
+          detachReason: undefined,
+          // This allows to ignore changes in global during animation before unmount
+          detachWhenChanged: (current) => {
+            const { detachReason } = container!;
+
+            if (detachReason === undefined && current !== undefined) {
+              container!.detachReason = current;
+            } else if (detachReason !== undefined && detachReason !== current) {
+              container!.isDetached = true;
+            }
+          },
           DEBUG_updates: 0,
           DEBUG_componentName: Component.name,
         };
@@ -251,7 +277,7 @@ export function withGlobal<OwnProps>(
         container.ownProps = props;
 
         try {
-          container.mappedProps = mapStateToProps(currentGlobal, props);
+          container.mappedProps = mapStateToProps(currentGlobal, props, container.detachWhenChanged);
         } catch (err: any) {
           handleError(err);
         }
@@ -297,8 +323,9 @@ export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames e
       name: ActionName,
       handler: ActionHandlers[ActionName],
     ) => void,
-    withGlobal: withGlobal as <OwnProps>(
-      mapStateToProps: ((global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral),
+    withGlobal: withGlobal as <OwnProps extends AnyLiteral>(
+      mapStateToProps: (
+        (global: ProjectGlobalState, ownProps: OwnProps, detachWhenChanged: DetachWhenChanged) => AnyLiteral),
     ) => (Component: FC) => FC<OwnProps>,
   };
 }
