@@ -103,6 +103,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const prevPopupParams = usePrevious(popupParams);
   const renderingPopupParams = popupParams || prevPopupParams;
 
+  // eslint-disable-next-line no-null/no-null
+  const frameRef = useRef<HTMLIFrameElement>(null);
+
   const lang = useLang();
   const {
     url, buttonText, queryId,
@@ -191,8 +194,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   ]);
 
   const {
-    ref, reloadFrame, sendEvent, sendViewport, sendTheme,
-  } = useWebAppFrame(isOpen, isSimple, handleEvent);
+    reloadFrame, sendEvent, sendViewport, sendTheme,
+  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent);
 
   const shouldShowMainButton = mainButton?.isVisible && mainButton.text.trim().length > 0;
 
@@ -237,6 +240,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       },
     });
   }, [sendEvent]);
+
+  const handlePopupModalClose = useCallback(() => {
+    handlePopupClose();
+  }, [handlePopupClose]);
 
   // Notify view that height changed
   useOnChange(() => {
@@ -427,13 +434,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       {isOpen && (
         <>
           <iframe
-            ref={ref}
             className={buildClassName('web-app-frame', shouldDecreaseWebFrameSize && 'with-button')}
             src={url}
             title={`${bot?.firstName} Web App`}
             sandbox={SANDBOX_ATTRIBUTES}
             allow="camera; microphone; geolocation;"
             allowFullScreen
+            ref={frameRef}
           />
           <Button
             className={buildClassName(
@@ -465,7 +472,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         <Modal
           isOpen={Boolean(popupParams)}
           title={renderingPopupParams.title || NBSP}
-          onClose={handlePopupClose}
+          onClose={handlePopupModalClose}
           hasCloseButton
           className={buildClassName('web-app-popup', !renderingPopupParams.title?.trim().length && 'without-title')}
         >
