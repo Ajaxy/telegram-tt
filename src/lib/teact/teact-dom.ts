@@ -108,7 +108,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   if (!$current && $new) {
     if (isNewComponent || isNewFragment) {
       if (isNewComponent) {
-        $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as typeof $new;
+        $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as unknown as typeof $new;
       }
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
@@ -127,7 +127,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       if (isNewComponent || isNewFragment) {
         if (isNewComponent) {
-          $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as typeof $new;
+          $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as unknown as typeof $new;
         }
 
         remount(parentEl, $current, undefined);
@@ -262,6 +262,8 @@ function createNode($element: VirtualElementReal): Node {
 
   if (typeof props.ref === 'object') {
     props.ref.current = element;
+  } else if (typeof props.ref === 'function') {
+    props.ref(element);
   }
 
   processControlled(tag, props);
@@ -557,7 +559,20 @@ function processControlled(tag: string, props: AnyLiteral) {
     onChange?.(e);
 
     if (value !== undefined) {
-      e.currentTarget.value = value;
+      const { selectionStart, selectionEnd } = e.currentTarget;
+
+      if (e.currentTarget.value !== value) {
+        e.currentTarget.value = value;
+
+        if (selectionStart !== undefined && selectionEnd !== undefined) {
+          e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
+
+          // eslint-disable-next-line no-underscore-dangle
+          e.currentTarget.dataset.__teactSelectionStart = String(selectionStart);
+          // eslint-disable-next-line no-underscore-dangle
+          e.currentTarget.dataset.__teactSelectionEnd = String(selectionEnd);
+        }
+      }
     }
 
     if (checked !== undefined) {
@@ -616,7 +631,15 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
     // An optimization attempt
   } else if (key === 'value') {
     if ((element as HTMLInputElement).value !== value) {
+      const {
+        __teactSelectionStart: selectionStart, __teactSelectionEnd: selectionEnd,
+      } = (element as HTMLInputElement).dataset;
+
       (element as HTMLInputElement).value = value;
+
+      if (selectionStart !== undefined && selectionEnd !== undefined) {
+        (element as HTMLInputElement).setSelectionRange(Number(selectionStart), Number(selectionEnd));
+      }
     }
   } else if (key === 'style') {
     element.style.cssText = value;
