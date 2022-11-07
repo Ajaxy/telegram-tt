@@ -44,8 +44,9 @@ import versionNotification from '../../../versionNotification.txt';
 import parseMessageInput from '../../../util/parseMessageInput';
 import { getMessageSummaryText, getSenderTitle } from '../../helpers';
 import * as langProvider from '../../../util/langProvider';
-import { copyTextToClipboard } from '../../../util/clipboard';
+import { copyHtmlToClipboard } from '../../../util/clipboard';
 import type { GlobalState } from '../../types';
+import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
@@ -750,11 +751,21 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
 
   const result = messages.reduce((acc, message) => {
     const sender = selectSender(global, message);
+
+    acc.push(`> ${sender ? getSenderTitle(lang, sender) : ''}:`);
+    acc.push(`${renderMessageSummaryHtml(lang, message)}\n`);
+
+    return acc;
+  }, [] as string[]);
+
+  const resultText = messages.reduce((acc, message) => {
+    const sender = selectSender(global, message);
+
     acc.push(`> ${sender ? getSenderTitle(lang, sender) : ''}:`);
     acc.push(`${getMessageSummaryText(lang, message, false, 0, undefined, true)}\n`);
 
     return acc;
   }, [] as string[]);
 
-  copyTextToClipboard(result.join('\n'));
+  copyHtmlToClipboard(result.join('\n'), resultText.join('\n'));
 }

@@ -335,15 +335,16 @@ function processEntity(
 
   switch (entity.type) {
     case ApiMessageEntityTypes.Bold:
-      return <strong>{renderNestedMessagePart()}</strong>;
+      return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
-      return <blockquote>{renderNestedMessagePart()}</blockquote>;
+      return <blockquote data-entity-type={entity.type}>{renderNestedMessagePart()}</blockquote>;
     case ApiMessageEntityTypes.BotCommand:
       return (
         <a
           onClick={handleBotCommandClick}
           className="text-entity-link"
           dir="auto"
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </a>
@@ -354,6 +355,7 @@ function processEntity(
           onClick={handleHashtagClick}
           className="text-entity-link"
           dir="auto"
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </a>
@@ -364,6 +366,7 @@ function processEntity(
           onClick={handleHashtagClick}
           className="text-entity-link"
           dir="auto"
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </a>
@@ -375,6 +378,7 @@ function processEntity(
           onClick={!isProtected ? handleCodeClick : undefined}
           role="textbox"
           tabIndex={0}
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </code>
@@ -387,12 +391,13 @@ function processEntity(
           rel="noopener noreferrer"
           className="text-entity-link"
           dir="auto"
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </a>
       );
     case ApiMessageEntityTypes.Italic:
-      return <em>{renderNestedMessagePart()}</em>;
+      return <em data-entity-type={entity.type}>{renderNestedMessagePart()}</em>;
     case ApiMessageEntityTypes.MentionName:
       return (
         <MentionLink userId={entity.userId}>
@@ -411,6 +416,7 @@ function processEntity(
           href={`tel:${entityText}`}
           className="text-entity-link"
           dir="auto"
+          data-entity-type={entity.type}
         >
           {renderNestedMessagePart()}
         </a>
@@ -418,7 +424,7 @@ function processEntity(
     case ApiMessageEntityTypes.Pre:
       return <CodeBlock text={entityText} language={entity.language} noCopy={isProtected} />;
     case ApiMessageEntityTypes.Strike:
-      return <del>{renderNestedMessagePart()}</del>;
+      return <del data-entity-type={entity.type}>{renderNestedMessagePart()}</del>;
     case ApiMessageEntityTypes.TextUrl:
     case ApiMessageEntityTypes.Url:
       return (
@@ -430,7 +436,7 @@ function processEntity(
         </SafeLink>
       );
     case ApiMessageEntityTypes.Underline:
-      return <ins>{renderNestedMessagePart()}</ins>;
+      return <ins data-entity-type={entity.type}>{renderNestedMessagePart()}</ins>;
     case ApiMessageEntityTypes.Spoiler:
       return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
     case ApiMessageEntityTypes.CustomEmoji:

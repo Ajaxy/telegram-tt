@@ -12,8 +12,13 @@ import {
   getMessageWebPageVideo,
   hasMessageLocalBlobUrl,
 } from '../../../../global/helpers';
-import { CLIPBOARD_ITEM_SUPPORTED, copyImageToClipboard, copyTextToClipboard } from '../../../../util/clipboard';
+import {
+  CLIPBOARD_ITEM_SUPPORTED,
+  copyHtmlToClipboard,
+  copyImageToClipboard,
+} from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
+import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {
   label: string;
@@ -65,9 +70,13 @@ export function getMessageCopyOptions(
         const messageIds = getMessageIdsForSelectedText();
         if (messageIds?.length && onCopyMessages) {
           onCopyMessages(messageIds);
+        } else if (hasSelection) {
+          document.execCommand('copy');
         } else {
-          const clipboardText = hasSelection && selection ? selection.toString() : getMessageTextWithSpoilers(message)!;
-          copyTextToClipboard(clipboardText);
+          const clipboardText = renderMessageText(
+            message, undefined, undefined, undefined, undefined, undefined, undefined, true,
+          );
+          if (clipboardText) copyHtmlToClipboard(clipboardText.join(''), getMessageTextWithSpoilers(message)!);
         }
 
         afterEffect?.();

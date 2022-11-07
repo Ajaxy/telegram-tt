@@ -856,10 +856,10 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
 
         {!hasAnimatedEmoji && textParts && (
-          <p className={textContentClass} dir="auto">
+          <div className={textContentClass} dir="auto">
             {textParts}
             {metaPosition === 'in-text' && renderReactionsAndMeta()}
-          </p>
+          </div>
         )}
 
         {webPage && (

@@ -38,7 +38,7 @@ const BaseResult: FC<OwnProps> = ({
 
   if (thumbUrl) {
     content = (
-      <img src={thumbUrl} className={transitionClassNames} alt="" decoding="async" draggable="false" />
+      <img src={thumbUrl} className={transitionClassNames} alt="" decoding="async" draggable={false} />
     );
   } else if (title) {
     content = getFirstLetters(title, 1);

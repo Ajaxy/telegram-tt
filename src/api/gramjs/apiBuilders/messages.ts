@@ -1259,7 +1259,7 @@ export function buildLocalForwardedMessage(
   const shouldDropCustomEmoji = !isCurrentUserPremium;
   const strippedText = content.text?.entities && shouldDropCustomEmoji ? {
     text: content.text.text,
-    entities: content.text.entities?.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
+    entities: content.text.entities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
   } : content.text;
   const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
 

@@ -27,6 +27,20 @@ export const copyTextToClipboard = (str: string): void => {
   document.body.removeChild(textCopyEl);
 };
 
+export const copyHtmlToClipboard = (html: string, text: string): void => {
+  if (!window.navigator.clipboard?.write) {
+    copyTextToClipboard(text);
+    return;
+  }
+
+  window.navigator.clipboard.write([
+    new ClipboardItem({
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+      'text/html': new Blob([html], { type: 'text/html' }),
+    }),
+  ]);
+};
+
 export const copyImageToClipboard = (imageUrl?: string) => {
   if (!imageUrl) return;
   const canvas = document.createElement('canvas');

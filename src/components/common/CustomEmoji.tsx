@@ -5,6 +5,7 @@ import { getGlobal } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { ApiMessageEntityTypes } from '../../api/types';
 
 import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
@@ -19,6 +20,7 @@ import StickerView from './StickerView';
 
 import styles from './CustomEmoji.module.scss';
 import svgPlaceholder from '../../assets/square.svg';
+import blankImg from '../../assets/blank.png';
 
 type OwnProps = {
   ref?: React.RefObject<HTMLDivElement>;
@@ -121,8 +123,12 @@ const CustomEmoji: FC<OwnProps> = ({
         withGridFix && styles.withGridFix,
       )}
       onClick={onClick}
+      data-entity-type={ApiMessageEntityTypes.CustomEmoji}
+      data-document-id={documentId}
+      data-alt={customEmoji?.emoji}
       style={style}
     >
+      <img className={styles.highlightCatch} src={blankImg} alt={customEmoji?.emoji} draggable={false} />
       {!customEmoji ? (
         <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" />
       ) : (

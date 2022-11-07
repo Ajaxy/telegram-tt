@@ -23,6 +23,7 @@ export function renderMessageText(
   truncateLength?: number,
   isProtected?: boolean,
   observeIntersection?: ObserveFn,
+  shouldRenderAsHtml?: boolean,
 ) {
   const { text, entities } = message.content.text || {};
 
@@ -36,7 +37,7 @@ export function renderMessageText(
     entities,
     highlight,
     emojiSize,
-    undefined,
+    shouldRenderAsHtml,
     message.id,
     isSimple,
     isProtected,
