@@ -1,6 +1,6 @@
-import useWindowSize from '../../../hooks/useWindowSize';
 import { useCallback, useEffect, useRef } from '../../../lib/teact/teact';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
+import useWindowSize from '../../../hooks/useWindowSize';
 
 export type PopupOptions = {
   title: string;
@@ -84,6 +84,7 @@ type WebAppOutboundEvent = {
     height: number;
     width?: number;
     is_expanded?: boolean;
+    is_state_stable?: boolean;
   };
 } | {
   eventType: 'theme_changed';
@@ -141,10 +142,14 @@ const SCROLLBAR_STYLE = `* {
   background-color: transparent;
 }`;
 
-const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event: WebAppInboundEvent) => void) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLIFrameElement>(null);
+const useWebAppFrame = (
+  ref: React.RefObject<HTMLIFrameElement>,
+  isOpen: boolean,
+  isSimpleView: boolean,
+  onEvent: (event: WebAppInboundEvent) => void,
+) => {
   const ignoreEventsRef = useRef<boolean>(false);
+  const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
 
   const reloadFrame = useCallback((url: string) => {
@@ -154,14 +159,14 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
     frame.addEventListener('load', () => {
       frame.src = url;
     }, { once: true });
-  }, []);
+  }, [ref]);
 
   const sendEvent = useCallback((event: WebAppOutboundEvent) => {
     if (!ref.current?.contentWindow) return;
     ref.current.contentWindow.postMessage(JSON.stringify(event), '*');
-  }, []);
+  }, [ref]);
 
-  const sendViewport = useCallback(() => {
+  const sendViewport = useCallback((isNonStable?: boolean) => {
     if (!ref.current) {
       return;
     }
@@ -172,9 +177,10 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
         width,
         height,
         is_expanded: true,
+        is_state_stable: !isNonStable,
       },
     });
-  }, [sendEvent]);
+  }, [sendEvent, ref]);
 
   const sendTheme = useCallback(() => {
     sendEvent({
@@ -201,7 +207,7 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
       const data = JSON.parse(event.data) as WebAppInboundEvent;
       // Handle some app requests here to simplify hook usage
       if (data.eventType === 'web_app_request_viewport') {
-        sendViewport();
+        sendViewport(windowSize.isResizing);
       }
 
       if (data.eventType === 'web_app_request_theme') {
@@ -221,12 +227,14 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
     } catch (err) {
       // Ignore other messages
     }
-  }, [isSimpleView, onEvent, sendCustomStyle, sendTheme, sendViewport]);
+  }, [isSimpleView, onEvent, sendCustomStyle, sendTheme, sendViewport, windowSize]);
 
   useEffect(() => {
-    if (windowSize) {
-      sendViewport();
-    }
+    const { width, height, isResizing } = windowSize;
+    if (lastFrameSizeRef.current && lastFrameSizeRef.current.width === width
+      && lastFrameSizeRef.current.height === height && !lastFrameSizeRef.current.isResizing) return;
+    lastFrameSizeRef.current = { width, height, isResizing };
+    sendViewport(isResizing);
   }, [sendViewport, windowSize]);
 
   useEffect(() => {
@@ -238,11 +246,13 @@ const useWebAppFrame = (isOpen: boolean, isSimpleView: boolean, onEvent: (event:
     if (isOpen && ref.current?.contentWindow) {
       sendViewport();
       ignoreEventsRef.current = false;
+    } else {
+      lastFrameSizeRef.current = undefined;
     }
-  }, [isOpen, sendViewport]);
+  }, [isOpen, sendViewport, ref]);
 
   return {
-    ref, sendEvent, reloadFrame, sendViewport, sendTheme,
+    sendEvent, reloadFrame, sendViewport, sendTheme,
   };
 };
 
