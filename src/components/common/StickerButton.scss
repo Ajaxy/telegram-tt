@@ -1,4 +1,6 @@
 .StickerButton {
+  --custom-emoji-size: 2.5rem;
+
   display: inline-block;
   width: 4rem;
   height: 4rem;
@@ -11,8 +13,8 @@
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
   &.custom-emoji {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--custom-emoji-size);
+    height: var(--custom-emoji-size);
     margin: 0.3125rem;
   }
 
