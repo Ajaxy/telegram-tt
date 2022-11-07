@@ -36,7 +36,7 @@ export function buildContentClassName(
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
-  const isMedia = photo || video || location;
+  const isMedia = photo || video || location || invoice?.extendedMedia;
   const hasText = text || location?.type === 'venue' || isGeoLiveActive;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
@@ -87,7 +87,7 @@ export function buildContentClassName(
     }
   }
 
-  if (invoice) {
+  if (invoice && !invoice.extendedMedia) {
     classNames.push('invoice');
   }
 

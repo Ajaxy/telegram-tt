@@ -353,7 +353,7 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
       media instanceof GramJs.MessageMediaGame
       && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
     ) || (
-      media instanceof GramJs.MessageMediaInvoice && media.photo
+      media instanceof GramJs.MessageMediaInvoice && (media.photo || media.extendedMedia)
     )
   );
 }

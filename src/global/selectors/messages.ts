@@ -901,7 +901,11 @@ export function selectLastServiceNotification(global: GlobalState) {
 }
 
 export function selectIsMessageProtected(global: GlobalState, message?: ApiMessage) {
-  return message ? message.isProtected || selectChat(global, message.chatId)?.isProtected : false;
+  return Boolean(message && (message.isProtected || selectIsChatProtected(global, message.chatId)));
+}
+
+export function selectIsChatProtected(global: GlobalState, chatId: string) {
+  return selectChat(global, chatId)?.isProtected || false;
 }
 
 export function selectHasProtectedMessage(global: GlobalState, chatId: string, messageIds?: number[]) {

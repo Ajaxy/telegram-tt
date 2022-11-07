@@ -320,7 +320,6 @@ const MediaViewer: FC<StateProps> = ({
           onForward={handleForward}
           zoomLevelChange={zoomLevelChange}
           setZoomLevelChange={setZoomLevelChange}
-          isAvatar={Boolean(avatarOwner)}
         />
         <ReportModal
           isOpen={isReportModalOpen}

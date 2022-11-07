@@ -157,6 +157,7 @@
     "messages.hideAllChatJoinRequests",
     "messages.toggleNoForwards",
     "messages.saveDefaultSendAs",
+    "messages.getExtendedMedia",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",
