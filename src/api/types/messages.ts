@@ -187,8 +187,16 @@ export interface ApiInvoice {
   isTest?: boolean;
   isRecurring?: boolean;
   recurringTermsUrl?: string;
+  extendedMedia?: ApiMessageExtendedMediaPreview;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];
+}
+
+export interface ApiMessageExtendedMediaPreview {
+  width?: number;
+  height?: number;
+  thumbnail?: ApiThumbnail;
+  duration?: number;
 }
 
 export interface ApiPaymentCredentials {
@@ -406,6 +414,7 @@ export interface ApiMessage {
   isSilent?: boolean;
   seenByUserIds?: string[];
   isProtected?: boolean;
+  isForwardingAllowed?: boolean;
   transcriptionId?: string;
   isTranscriptionError?: boolean;
   emojiOnlyCount?: number;

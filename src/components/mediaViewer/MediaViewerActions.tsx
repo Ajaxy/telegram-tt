@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo,
   useCallback,
@@ -6,21 +5,27 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage } from '../../api/types';
 import type { MessageListType } from '../../global/types';
+import type { MenuItemProps } from '../ui/MenuItem';
 
+import {
+  selectIsDownloading,
+  selectIsMessageProtected,
+  selectAllowedMessageActions,
+  selectCurrentMessageList,
+  selectIsChatProtected,
+} from '../../global/selectors';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaFormat, getMessageMediaHash } from '../../global/helpers';
+
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useFlag from '../../hooks/useFlag';
-import {
-  selectIsDownloading, selectIsMessageProtected, selectAllowedMessageActions, selectCurrentMessageList,
-} from '../../global/selectors';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
-import type { MenuItemProps } from '../ui/MenuItem';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import DeleteMessageModal from '../common/DeleteMessageModal';
@@ -30,6 +35,7 @@ import './MediaViewerActions.scss';
 type StateProps = {
   isDownloading: boolean;
   isProtected?: boolean;
+  isChatProtected?: boolean;
   canDelete?: boolean;
   messageListType?: MessageListType;
 };
@@ -40,7 +46,6 @@ type OwnProps = {
   zoomLevelChange: number;
   message?: ApiMessage;
   fileName?: string;
-  isAvatar?: boolean;
   canReport?: boolean;
   onReport: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
@@ -53,17 +58,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   isVideo,
   message,
   fileName,
-  isAvatar,
+  isChatProtected,
   isDownloading,
   isProtected,
   canReport,
+  zoomLevelChange,
+  canDelete,
+  messageListType,
   onReport,
   onCloseMediaViewer,
-  zoomLevelChange,
-  setZoomLevelChange,
-  canDelete,
   onForward,
-  messageListType,
+  setZoomLevelChange,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
 
@@ -148,7 +153,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   if (IS_SINGLE_COLUMN_LAYOUT) {
     const menuItems: MenuItemProps[] = [];
-    if (!isAvatar && !isProtected) {
+    if (!message?.isForwardingAllowed && !isChatProtected) {
       menuItems.push({
         icon: 'forward',
         onClick: onForward,
@@ -227,7 +232,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="MediaViewerActions">
-      {!isAvatar && !isProtected && (
+      {message?.isForwardingAllowed && !isChatProtected && (
         <Button
           round
           size="smaller"
@@ -306,12 +311,14 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const isDownloading = message ? selectIsDownloading(global, message) : false;
     const isProtected = selectIsMessageProtected(global, message);
+    const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete } = (threadId && message && selectAllowedMessageActions(global, message, threadId)) || {};
     const messageListType = currentMessageList?.type;
 
     return {
       isDownloading,
       isProtected,
+      isChatProtected,
       canDelete,
       messageListType,
     };

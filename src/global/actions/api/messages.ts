@@ -608,6 +608,14 @@ addActionHandler('loadPollOptionResults', (global, actions, payload) => {
   void loadPollOptionResults(chat, messageId, option, offset, limit, shouldResetVoters);
 });
 
+addActionHandler('loadExtendedMedia', (global, actions, payload) => {
+  const { chatId, ids } = payload;
+  const chat = selectChat(global, chatId);
+  if (chat) {
+    void callApi('fetchExtendedMedia', { chat, ids });
+  }
+});
+
 addActionHandler('forwardMessages', (global, action, payload) => {
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions,

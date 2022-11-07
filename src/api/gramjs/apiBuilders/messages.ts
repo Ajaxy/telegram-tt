@@ -1,7 +1,4 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
-  ApiMessageEntityTypes,
-} from '../../types';
 import type {
   ApiMessage,
   ApiMessageForwardInfo,
@@ -36,6 +33,10 @@ import type {
   PhoneCallAction,
   ApiWebDocument,
   ApiMessageEntityDefault,
+  ApiMessageExtendedMediaPreview,
+} from '../../types';
+import {
+  ApiMessageEntityTypes,
 } from '../../types';
 
 import {
@@ -161,16 +162,21 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     content.action = action;
   }
 
+  const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
+    && Boolean(mtpMessage.media.extendedMedia);
+
   const { replyToMsgId, replyToTopId, replyToPeerId } = mtpMessage.replyTo || {};
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse,
-  } = buildReplyButtons(mtpMessage) || {};
+  } = buildReplyButtons(mtpMessage, isInvoiceMedia) || {};
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
   const { replies, mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
+  const isProtected = mtpMessage.noforwards || isInvoiceMedia;
+  const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
 
   return {
@@ -205,7 +211,8 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
     ...(replies?.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { adminTitle: postAuthor }),
-    ...(mtpMessage.noforwards && { isProtected: true }),
+    isProtected,
+    isForwardingAllowed,
   };
 }
 
@@ -334,6 +341,10 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
 export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMessage['content'] | undefined {
   if ('ttlSeconds' in media && media.ttlSeconds) {
     return undefined;
+  }
+
+  if ('extendedMedia' in media && media.extendedMedia instanceof GramJs.MessageExtendedMedia) {
+    return buildMessageMediaContent(media.extendedMedia.media);
   }
 
   const sticker = buildSticker(media);
@@ -748,8 +759,11 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
 
 export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
   const {
-    description: text, title, photo, test, totalAmount, currency, receiptMsgId,
+    description: text, title, photo, test, totalAmount, currency, receiptMsgId, extendedMedia,
   } = media;
+
+  const preview = extendedMedia instanceof GramJs.MessageExtendedMediaPreview
+    ? buildApiMessageExtendedMediaPreview(extendedMedia) : undefined;
 
   return {
     title,
@@ -759,6 +773,7 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
     amount: Number(totalAmount),
     currency,
     isTest: test,
+    extendedMedia: preview,
   };
 }
 
@@ -1007,7 +1022,7 @@ function buildAction(
   };
 }
 
-function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefined {
+function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: boolean): ApiReplyKeyboard | undefined {
   const { replyMarkup, media } = message;
 
   // TODO Move to the proper button inside preview
@@ -1033,7 +1048,7 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
   }
 
   const markup = replyMarkup.rows.map(({ buttons }) => {
-    return buttons.map((button): ApiKeyboardButton => {
+    return buttons.map((button): ApiKeyboardButton | undefined => {
       const { text } = button;
 
       if (button instanceof GramJs.KeyboardButton) {
@@ -1096,6 +1111,7 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
             receiptMessageId: media.receiptMsgId,
           };
         }
+        if (shouldSkipBuyButton) return undefined;
         return {
           type: 'buy',
           text,
@@ -1155,8 +1171,10 @@ function buildReplyButtons(message: UniversalMessage): ApiReplyKeyboard | undefi
         type: 'unsupported',
         text,
       };
-    });
+    }).filter(Boolean);
   });
+
+  if (markup.every((row) => !row.length)) return undefined;
 
   return {
     [replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? 'keyboardButtons' : 'inlineButtons']: markup,
@@ -1365,6 +1383,21 @@ function buildUploadingMedia(
       size,
       ...(previewBlobUrl && { previewBlobUrl }),
     },
+  };
+}
+
+export function buildApiMessageExtendedMediaPreview(
+  preview: GramJs.MessageExtendedMediaPreview,
+): ApiMessageExtendedMediaPreview {
+  const {
+    w, h, thumb, videoDuration,
+  } = preview;
+
+  return {
+    width: w,
+    height: h,
+    duration: videoDuration,
+    thumbnail: thumb ? buildApiThumbnailFromStripped([thumb]) : undefined,
   };
 }
 

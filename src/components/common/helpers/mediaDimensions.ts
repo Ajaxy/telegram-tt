@@ -81,7 +81,7 @@ function getAvailableHeight(isGif?: boolean, aspectRatio?: number) {
   return 27 * REM;
 }
 
-function calculateDimensionsForMessageMedia({
+export function calculateDimensionsForMessageMedia({
   width,
   height,
   fromOwnMessage,

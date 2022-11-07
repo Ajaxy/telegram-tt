@@ -511,6 +511,37 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       break;
     }
 
+    case 'updateMessageExtendedMedia': {
+      const {
+        chatId, id, media, preview,
+      } = update;
+      const message = selectChatMessage(global, chatId, id);
+      const chat = selectChat(global, update.chatId);
+
+      if (!chat || !message) return;
+
+      if (preview) {
+        if (!message.content.invoice) return;
+        setGlobal(updateChatMessage(global, chatId, id, {
+          content: {
+            ...message.content,
+            invoice: {
+              ...message.content.invoice,
+              extendedMedia: preview,
+            },
+          },
+        }));
+      } else if (media) {
+        setGlobal(updateChatMessage(global, chatId, id, {
+          content: {
+            ...media,
+          },
+        }));
+      }
+
+      break;
+    }
+
     case 'updateTranscribedAudio': {
       const { transcriptionId, text, isPending } = update;
 

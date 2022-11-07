@@ -13,7 +13,14 @@ import type {
   ApiChatFolder,
 } from './chats';
 import type {
-  ApiFormattedText, ApiMessage, ApiPhoto, ApiPoll, ApiReactions, ApiStickerSet, ApiThreadInfo,
+  ApiFormattedText,
+  ApiMessage,
+  ApiMessageExtendedMediaPreview,
+  ApiPhoto,
+  ApiPoll,
+  ApiReactions,
+  ApiStickerSet,
+  ApiThreadInfo,
 } from './messages';
 import type {
   ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
@@ -309,6 +316,14 @@ export type ApiUpdateMessageReactions = {
   reactions: ApiReactions;
 };
 
+export type ApiUpdateMessageExtendedMedia = {
+  '@type': 'updateMessageExtendedMedia';
+  id: number;
+  chatId: string;
+  media?: ApiMessage['content'];
+  preview?: ApiMessageExtendedMediaPreview;
+};
+
 export type ApiDeleteContact = {
   '@type': 'deleteContact';
   id: string;
@@ -556,7 +571,8 @@ export type ApiUpdate = (
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
-  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus
+  ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
+  ApiUpdateMessageExtendedMedia
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

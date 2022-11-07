@@ -1122,6 +1122,18 @@ export async function loadPollOptionResults({
   };
 }
 
+export async function fetchExtendedMedia({
+  chat, ids,
+} : {
+  chat: ApiChat;
+  ids: number[];
+}) {
+  await invokeRequest(new GramJs.messages.GetExtendedMedia({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: ids,
+  }));
+}
+
 export async function forwardMessages({
   fromChat,
   toChat,

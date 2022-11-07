@@ -1,6 +1,8 @@
 import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
-import type { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
+import type {
+  ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdateConnectionStateType, OnApiUpdate,
+} from '../types';
 
 import { pick } from '../../util/iteratees';
 import {
@@ -14,6 +16,7 @@ import {
   buildApiMessageFromNotification,
   buildMessageDraft,
   buildMessageReactions,
+  buildApiMessageExtendedMediaPreview,
 } from './apiBuilders/messages';
 import {
   buildChatMember,
@@ -40,6 +43,7 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
   log,
+  swapLocalInvoiceMedia,
 } from './helpers';
 import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
 import { buildApiPhoto } from './apiBuilders/common';
@@ -308,6 +312,30 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       id: update.msgId,
       chatId: getApiChatIdFromMtpPeer(update.peer),
       reactions: buildMessageReactions(update.reactions),
+    });
+  } else if (update instanceof GramJs.UpdateMessageExtendedMedia) {
+    let media: ApiMessage['content'] | undefined;
+    if (update.extendedMedia instanceof GramJs.MessageExtendedMedia) {
+      media = buildMessageMediaContent(update.extendedMedia.media);
+    }
+
+    let preview: ApiMessageExtendedMediaPreview | undefined;
+    if (update.extendedMedia instanceof GramJs.MessageExtendedMediaPreview) {
+      preview = buildApiMessageExtendedMediaPreview(update.extendedMedia);
+    }
+
+    if (!media && !preview) return;
+
+    const chatId = getApiChatIdFromMtpPeer(update.peer);
+
+    swapLocalInvoiceMedia(chatId, update.msgId, update.extendedMedia);
+
+    onUpdate({
+      '@type': 'updateMessageExtendedMedia',
+      id: update.msgId,
+      chatId,
+      media,
+      preview,
     });
   } else if (update instanceof GramJs.UpdateDeleteMessages) {
     onUpdate({

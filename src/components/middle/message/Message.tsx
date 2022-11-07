@@ -56,6 +56,7 @@ import {
   selectAnimatedEmoji,
   selectLocalAnimatedEmoji,
   selectIsCurrentUserPremium,
+  selectIsChatProtected,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -79,7 +80,7 @@ import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
-import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
+import { calculateDimensionsForMessageMedia, ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
@@ -113,6 +114,7 @@ import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
 import Invoice from './Invoice';
+import InvoiceMediaPreview from './InvoiceMediaPreview';
 import Location from './Location';
 import Game from './Game';
 import Album from './Album';
@@ -172,6 +174,7 @@ type StateProps = {
   uploadProgress?: number;
   isInDocumentGroup: boolean;
   isProtected?: boolean;
+  isChatProtected?: boolean;
   isFocused?: boolean;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
@@ -263,6 +266,7 @@ const Message: FC<OwnProps & StateProps> = ({
   uploadProgress,
   isInDocumentGroup,
   isProtected,
+  isChatProtected,
   isFocused,
   focusDirection,
   noFocusHighlight,
@@ -371,7 +375,7 @@ const Message: FC<OwnProps & StateProps> = ({
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && !isInDocumentGroupNotLast
   );
-  const canForward = isChannel && !isScheduled && !isProtected;
+  const canForward = isChannel && !isScheduled && message.isForwardingAllowed && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
       && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat)
@@ -579,7 +583,7 @@ const Message: FC<OwnProps & StateProps> = ({
   }, [isAlbum, isOwn, asForwarded, noAvatars, album]);
 
   const extraPadding = asForwarded ? 28 : 0;
-  if (!isAlbum && (photo || video)) {
+  if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
     let width: number | undefined;
     if (photo) {
       width = calculateMediaDimensions(message, noAvatars).width;
@@ -589,6 +593,17 @@ const Message: FC<OwnProps & StateProps> = ({
       } else {
         width = calculateMediaDimensions(message, noAvatars).width;
       }
+    } else if (invoice?.extendedMedia && (
+      invoice.extendedMedia.width && invoice.extendedMedia.height
+    )) {
+      const { width: previewWidth, height: previewHeight } = invoice.extendedMedia;
+      width = calculateDimensionsForMessageMedia({
+        width: previewWidth,
+        height: previewHeight,
+        fromOwnMessage: isOwn,
+        isForwarded: isForwarding,
+        noAvatars,
+      }).width;
     }
 
     if (width) {
@@ -840,6 +855,12 @@ const Message: FC<OwnProps & StateProps> = ({
             lastSyncTime={lastSyncTime}
           />
         )}
+        {invoice?.extendedMedia && (
+          <InvoiceMediaPreview
+            message={message}
+            lastSyncTime={lastSyncTime}
+          />
+        )}
 
         {withVoiceTranscription && (
           <p
@@ -877,7 +898,7 @@ const Message: FC<OwnProps & StateProps> = ({
             theme={theme}
           />
         )}
-        {invoice && (
+        {invoice && !invoice.extendedMedia && (
           <Invoice
             message={message}
             shouldAffectAppendix={hasCustomAppendix}
@@ -1176,6 +1197,7 @@ export default memo(withGlobal<OwnProps>(
       replyMessageSender,
       isInDocumentGroup,
       isProtected: selectIsMessageProtected(global, message),
+      isChatProtected: selectIsChatProtected(global, chatId),
       isFocused,
       isForwarding,
       reactionMessage,

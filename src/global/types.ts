@@ -790,6 +790,11 @@ export interface ActionPayloads {
     messageId: number;
   };
 
+  loadExtendedMedia: {
+    chatId: string;
+    ids: number[];
+  };
+
   // Media Viewer & Audio Player
   openMediaViewer: {
     chatId?: string;

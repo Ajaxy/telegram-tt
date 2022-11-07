@@ -166,7 +166,7 @@ export function getMessageSummaryDescription(
   }
 
   if (invoice) {
-    summary = `${lang('PaymentInvoice')}: ${invoice.text}`;
+    summary = invoice.extendedMedia ? invoice.title : `${lang('PaymentInvoice')}: ${invoice.text}`;
   }
 
   if (text) {
