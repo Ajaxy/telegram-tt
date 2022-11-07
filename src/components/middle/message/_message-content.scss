@@ -457,18 +457,29 @@
   &.custom-shape.is-via-bot {
     font-size: inherit !important;
 
-    .content-inner > .message-title {
-      display: inline-flex;
-      position: relative;
-      top: 0.125rem;
-      max-width: calc(100% - 3rem);
-      margin-left: calc(100% - 3rem);
-      padding: 0 0.5rem;
-      background-color: var(--background-color);
-      border-radius: var(--border-radius-messages);
+    .content-inner {
+      display: flex;
+      align-items: flex-start;
+      flex-direction: row-reverse;
+      direction: ltr;
+      gap: 0.5rem;
+
+      & > .message-title {
+        display: inline-flex;
+        position: relative;
+        top: 0.125rem;
+        max-width: calc(100% - 3rem);
+        padding: 0 0.5rem;
+        background-color: var(--background-color);
+        border-radius: var(--border-radius-messages);
+
+        .Message.own & {
+          margin-left: -3rem;
+        }
+      }
 
       .Message.own & {
-        margin-left: -3rem;
+        flex-direction: row;
       }
     }
 
@@ -729,17 +740,6 @@
       $size: 6 - ($i * 0.625) + rem;
 
       --emoji-only-size: #{$size};
-
-      @if $i <= 3 {
-        .text-content {
-          text-shadow: 1px 1px 0 white, -1px -1px 0 white, -1px 1px 0 white, 1px -1px 0 white;
-          margin-bottom: 0.25rem;
-
-          img.emoji {
-            filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px -1px 0 white);
-          }
-        }
-      }
     }
   }
 
