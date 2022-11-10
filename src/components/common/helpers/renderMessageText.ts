@@ -22,7 +22,8 @@ export function renderMessageText(
   isSimple?: boolean,
   truncateLength?: number,
   isProtected?: boolean,
-  observeIntersection?: ObserveFn,
+  observeIntersectionForLoading?: ObserveFn,
+  observeIntersectionForPlaying?: ObserveFn,
   shouldRenderAsHtml?: boolean,
 ) {
   const { text, entities } = message.content.text || {};
@@ -41,7 +42,8 @@ export function renderMessageText(
     message.id,
     isSimple,
     isProtected,
-    observeIntersection,
+    observeIntersectionForLoading,
+    observeIntersectionForPlaying,
   );
 }
 

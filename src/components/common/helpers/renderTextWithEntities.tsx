@@ -36,7 +36,8 @@ export function renderTextWithEntities(
   messageId?: number,
   isSimple?: boolean,
   isProtected?: boolean,
-  observeIntersection?: ObserveFn,
+  observeIntersectionForLoading?: ObserveFn,
+  observeIntersectionForPlaying?: ObserveFn,
 ) {
   if (!entities || !entities.length) {
     return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
@@ -119,7 +120,8 @@ export function renderTextWithEntities(
         messageId,
         isSimple,
         isProtected,
-        observeIntersection,
+        observeIntersectionForLoading,
+        observeIntersectionForPlaying,
         emojiSize,
       );
 
@@ -297,7 +299,8 @@ function processEntity(
   messageId?: number,
   isSimple?: boolean,
   isProtected?: boolean,
-  observeIntersection?: ObserveFn,
+  observeIntersectionForLoading?: ObserveFn,
+  observeIntersectionForPlaying?: ObserveFn,
   emojiSize?: number,
 ) {
   const entityText = typeof entityContent === 'string' && entityContent;
@@ -326,7 +329,8 @@ function processEntity(
           size={emojiSize}
           withSharedAnimation
           withGridFix={!emojiSize}
-          observeIntersection={observeIntersection}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
         />
       );
     }
@@ -446,7 +450,8 @@ function processEntity(
           size={emojiSize}
           withSharedAnimation
           withGridFix={!emojiSize}
-          observeIntersection={observeIntersection}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
         />
       );
     default:

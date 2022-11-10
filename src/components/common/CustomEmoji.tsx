@@ -34,7 +34,7 @@ type OwnProps = {
   withGridFix?: boolean;
   shouldPreloadPreview?: boolean;
   forceOnHeavyAnimation?: boolean;
-  observeIntersection?: ObserveFn;
+  observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
 };
@@ -52,7 +52,7 @@ const CustomEmoji: FC<OwnProps> = ({
   shouldPreloadPreview,
   forceOnHeavyAnimation,
   withSharedAnimation,
-  observeIntersection,
+  observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
 }) => {
@@ -143,8 +143,8 @@ const CustomEmoji: FC<OwnProps> = ({
           shouldLoop={shouldLoop}
           loopLimit={loopLimit}
           shouldPreloadPreview={shouldPreloadPreview}
-          observeIntersection={observeIntersection}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
+          observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withSharedAnimation={withSharedAnimation}
           onVideoEnded={handleVideoEnded}

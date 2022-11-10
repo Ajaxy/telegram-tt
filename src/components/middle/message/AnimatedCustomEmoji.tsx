@@ -67,7 +67,7 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
       size={size}
       withSharedAnimation
       forceOnHeavyAnimation
-      observeIntersection={observeIntersection}
+      observeIntersectionForLoading={observeIntersection}
       onClick={handleClick}
     />
   );
