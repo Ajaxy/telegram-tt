@@ -1,7 +1,7 @@
 import { addActionHandler } from '../../index';
 
 import { IS_PRODUCTION_HOST } from '../../../util/environment';
-import { clearPayment } from '../../reducers';
+import { closeInvoice } from '../../reducers';
 import * as langProvider from '../../../util/langProvider';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { selectChatMessage } from '../../selectors';
@@ -28,8 +28,9 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       // On the production host, the payment frame receives a message with the payment event,
       // after which the payment form closes. In other cases, the payment form must be closed manually.
+      // Closing the invoice will cause the closing of the Payment Modal dialog and then closing the payment.
       if (!IS_PRODUCTION_HOST) {
-        global = clearPayment(global);
+        global = closeInvoice(global);
       }
 
       if (update.slug && inputInvoice && 'slug' in inputInvoice && inputInvoice.slug !== update.slug) {

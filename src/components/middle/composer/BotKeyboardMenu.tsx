@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
@@ -7,7 +7,6 @@ import type { ApiMessage } from '../../../api/types';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useFlag from '../../../hooks/useFlag';
 
 import Menu from '../../ui/Menu';
 import Button from '../../ui/Button';
@@ -31,16 +30,6 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};
-  const [forceOpen, markForceOpen, unmarkForceOpen] = useFlag(true);
-
-  const handleClose = useCallback(() => {
-    unmarkForceOpen();
-    onClose();
-  }, [onClose, unmarkForceOpen]);
-
-  useEffect(() => {
-    markForceOpen();
-  }, [markForceOpen, message?.keyboardButtons]);
 
   if (!message || !message.keyboardButtons) {
     return undefined;
@@ -48,13 +37,13 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
 
   return (
     <Menu
-      isOpen={isOpen || forceOpen}
+      isOpen={isOpen}
       autoClose={isKeyboardSingleUse}
       positionX="right"
       positionY="bottom"
-      onClose={handleClose}
+      onClose={onClose}
       className="BotKeyboardMenu"
-      onCloseAnimationEnd={handleClose}
+      onCloseAnimationEnd={onClose}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCompact

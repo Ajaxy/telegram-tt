@@ -25,7 +25,6 @@ import {
   setPaymentForm,
   setStripeCardInfo,
   setReceipt,
-  clearPayment,
   closeInvoice,
   setSmartGlocalCardInfo, addUsers, setInvoiceInfo, updatePayment,
 } from '../../reducers';
@@ -82,6 +81,7 @@ addActionHandler('openInvoice', async (global, actions, payload) => {
       inputInvoice: payload,
       isPaymentModalOpen: true,
       status: 'cancelled',
+      isExtendedMedia: (payload as any).isExtendedMedia,
     },
   });
 });
@@ -217,7 +217,6 @@ addActionHandler('sendPaymentForm', async (global, actions, payload) => {
   }
 
   global = getGlobal();
-  global = clearPayment(global);
   global = updatePayment(global, { status: 'paid' });
   global = closeInvoice(global);
   setGlobal(global);
