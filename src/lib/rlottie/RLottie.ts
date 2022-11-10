@@ -340,7 +340,10 @@ class RLottie {
       const chunk = this.chunks[chunkIndex];
 
       if (!chunk || chunk.length === 0) {
-        this.requestChunk(chunkIndex);
+        if (!chunk) {
+          this.requestChunk(chunkIndex);
+        }
+
         this.isAnimating = false;
         this.isWaiting = true;
         return false;
@@ -471,7 +474,7 @@ class RLottie {
   }
 
   private requestChunk(chunkIndex: number) {
-    if (this.chunks[chunkIndex] && this.chunks[chunkIndex]?.length !== 0) {
+    if (this.chunks[chunkIndex]) {
       return;
     }
 
