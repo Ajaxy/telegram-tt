@@ -10,6 +10,8 @@ import './ConfirmPayment.scss';
 
 export type OwnProps = {
   url: string;
+  noRedirect?: boolean;
+  onClose: NoneToVoidFunction;
 };
 
 interface IframeCallbackEvent {
@@ -19,8 +21,8 @@ interface IframeCallbackEvent {
   };
 }
 
-const ConfirmPayment: FC<OwnProps> = ({ url }) => {
-  const { closePaymentModal, openTelegramLink } = getActions();
+const ConfirmPayment: FC<OwnProps> = ({ url, noRedirect, onClose }) => {
+  const { openTelegramLink } = getActions();
 
   const lang = useLang();
 
@@ -33,13 +35,16 @@ const ConfirmPayment: FC<OwnProps> = ({ url }) => {
         return;
       }
 
-      const linkUrl = TME_LINK_PREFIX + eventData.path_full;
-      openTelegramLink({ url: linkUrl });
-      closePaymentModal();
+      if (!noRedirect) {
+        const linkUrl = TME_LINK_PREFIX + eventData.path_full;
+        openTelegramLink({ url: linkUrl });
+      }
+
+      onClose();
     } catch (err) {
       // Ignore other messages
     }
-  }, [closePaymentModal, openTelegramLink]);
+  }, [onClose, noRedirect, openTelegramLink]);
 
   useEffect(() => {
     window.addEventListener('message', handleMessage);

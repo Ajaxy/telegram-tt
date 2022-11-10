@@ -4,7 +4,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
   &.recurring {
     .Transition {
       height: 33rem;
-      max-height: calc(90vh - $modalHeaderAndFooterHeight);
+      max-height: calc(92vh - $modalHeaderAndFooterHeight);
     }
   }
 
@@ -32,7 +32,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .Transition {
-    height: min(27rem, 60vh);
+    height: min(27rem, 68vh);
   }
 
   .empty-content {

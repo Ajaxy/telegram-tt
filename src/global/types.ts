@@ -504,6 +504,7 @@ export type GlobalState = {
       description?: string;
     };
     isPaymentModalOpen?: boolean;
+    isExtendedMedia?: boolean;
     confirmPaymentUrl?: string;
     temporaryPassword?: {
       value: string;

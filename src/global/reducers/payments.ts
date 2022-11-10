@@ -110,5 +110,5 @@ export function clearPayment(global: GlobalState): GlobalState {
 }
 
 export function closeInvoice(global: GlobalState): GlobalState {
-  return updatePayment(global, { isPaymentModalOpen: undefined });
+  return updatePayment(global, { isPaymentModalOpen: undefined, isExtendedMedia: undefined });
 }

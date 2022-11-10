@@ -39,7 +39,7 @@ const SUPPORTED_PROVIDERS = new Set([DEFAULT_PROVIDER, DONATE_PROVIDER]);
 
 export type OwnProps = {
   isOpen?: boolean;
-  onClose: () => void;
+  onClose: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -64,6 +64,7 @@ type StateProps = {
   stripeId?: string;
   savedCredentials?: ApiPaymentCredentials[];
   passwordValidUntil?: number;
+  isExtendedMedia?: boolean;
 };
 
 type GlobalStateProps = Pick<GlobalState['payment'], (
@@ -105,6 +106,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   stripeId,
   savedCredentials,
   passwordValidUntil,
+  isExtendedMedia,
 }) => {
   const {
     loadPasswordInfo,
@@ -321,6 +323,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         return (
           <ConfirmPayment
             url={confirmPaymentUrl!}
+            noRedirect={isExtendedMedia}
+            onClose={closeModal}
           />
         );
       default:
@@ -476,8 +480,27 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     ? lang('Checkout.PayPrice', formatCurrency(totalPrice, currency!, lang.code))
     : lang('Next');
 
-  const isSubmitDisabled = isLoading
-    || Boolean(step === PaymentStep.Checkout && invoice?.isRecurring && !isTosAccepted);
+  function getIsSubmitDisabled() {
+    if (isLoading) {
+      return true;
+    }
+
+    switch (step) {
+      case PaymentStep.Checkout:
+        return Boolean(invoice?.isRecurring && !isTosAccepted);
+
+      case PaymentStep.PaymentInfo:
+        return Boolean(
+          paymentState.cardNumber === ''
+          || (needCardholderName && paymentState.cardholder === '')
+          || paymentState.cvv === ''
+          || paymentState.expiry === '',
+        );
+
+      default:
+        return false;
+    }
+  }
 
   if (isProviderError) {
     return (
@@ -500,6 +523,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       </Modal>
     );
   }
+
+  const isSubmitDisabled = getIsSubmitDisabled();
 
   return (
     <Modal
@@ -569,6 +594,7 @@ export default memo(withGlobal<OwnProps>(
       smartGlocalCredentials,
       savedCredentials,
       temporaryPassword,
+      isExtendedMedia,
     } = global.payment;
 
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
@@ -615,6 +641,7 @@ export default memo(withGlobal<OwnProps>(
       stripeId: stripeCredentials?.id,
       savedCredentials,
       passwordValidUntil: temporaryPassword?.validUntil,
+      isExtendedMedia,
     };
   },
 )(PaymentModal));

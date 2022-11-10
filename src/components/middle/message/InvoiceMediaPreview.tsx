@@ -56,6 +56,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
     openInvoice({
       chatId,
       messageId: id,
+      isExtendedMedia: true,
     });
   }, [chatId, id, openInvoice]);
 

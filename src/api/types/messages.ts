@@ -166,6 +166,7 @@ export interface ApiPoll {
 export type ApiInputInvoice = {
   chatId: string;
   messageId: number;
+  isExtendedMedia?: boolean;
 } | {
   slug: string;
 };

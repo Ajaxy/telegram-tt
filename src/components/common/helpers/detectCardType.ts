@@ -1,6 +1,6 @@
-const VISA = /^4[0-9]{12}(?:[0-9]{1,3})?$/;
-const MASTERCARD1 = /^5[1-5][0-9]{11,14}$/;
-const MASTERCARD2 = /^2[2-7][0-9]{11,14}$/;
+const VISA = /^4\d/;
+const MASTERCARD1 = /^5[1-5]/;
+const MASTERCARD2 = /^2[2-7]\d{2}/;
 const MIR = /^220[0-4]/;
 
 export enum CardType {
