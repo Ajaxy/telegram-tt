@@ -36,7 +36,7 @@ type OwnProps = {
   shouldLoop?: boolean;
   shouldPreloadPreview?: boolean;
   forceOnHeavyAnimation?: boolean;
-  observeIntersection?: ObserveFn;
+  observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   noLoad?: boolean;
   noPlay?: boolean;
@@ -63,7 +63,7 @@ const StickerView: FC<OwnProps> = ({
   shouldLoop = false,
   shouldPreloadPreview,
   forceOnHeavyAnimation,
-  observeIntersection,
+  observeIntersectionForLoading,
   observeIntersectionForPlaying,
   noLoad,
   noPlay,
@@ -80,9 +80,12 @@ const StickerView: FC<OwnProps> = ({
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerPreviewHash(sticker.id);
 
-  const isIntersectingForLoad = useIsIntersecting(containerRef, observeIntersection);
-  const shouldLoad = isIntersectingForLoad && !noLoad;
-  const isIntersectingForPlaying = useIsIntersecting(containerRef, observeIntersectionForPlaying);
+  const isIntersectingForLoading = useIsIntersecting(containerRef, observeIntersectionForLoading);
+  const shouldLoad = isIntersectingForLoading && !noLoad;
+  const isIntersectingForPlaying = (
+    useIsIntersecting(containerRef, observeIntersectionForPlaying)
+    && isIntersectingForLoading
+  );
   const shouldPlay = isIntersectingForPlaying && !noPlay;
 
   const thumbDataUri = useThumbnail(sticker);

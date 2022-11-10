@@ -64,7 +64,7 @@ const FullNameTitle: FC<OwnProps> = ({
         <CustomEmoji
           documentId={emojiStatus.documentId}
           loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-          observeIntersection={observeIntersection}
+          observeIntersectionForLoading={observeIntersection}
           onClick={onEmojiStatusClick}
         />
       )}

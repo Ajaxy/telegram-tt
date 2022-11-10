@@ -530,6 +530,7 @@ const Message: FC<OwnProps & StateProps> = ({
     undefined,
     undefined,
     isProtected,
+    observeIntersectionForMedia,
     observeIntersectionForAnimatedStickers,
   );
 
@@ -959,7 +960,7 @@ const Message: FC<OwnProps & StateProps> = ({
               <CustomEmoji
                 documentId={senderEmojiStatus.documentId}
                 loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-                observeIntersection={observeIntersectionForMedia}
+                observeIntersectionForLoading={observeIntersectionForMedia}
                 observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
               />
             )}
