@@ -1247,6 +1247,7 @@ export function buildLocalMessage(
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
     }),
     ...(scheduledAt && { isScheduled: true }),
+    isForwardingAllowed: true,
   };
 }
 
@@ -1298,7 +1299,7 @@ export function buildLocalForwardedMessage(
     isInAlbum,
     ...(emojiOnlyCount && { emojiOnlyCount }),
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
-    ...(senderId !== currentUserId && !isAudio && !noAuthors && {
+    ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {
         date: message.date,
         isChannelPost: false,
@@ -1307,7 +1308,9 @@ export function buildLocalForwardedMessage(
         senderUserId: senderId,
       },
     }),
+    ...(message.chatId === currentUserId && !noAuthors && { forwardInfo: message.forwardInfo }),
     ...(scheduledAt && { isScheduled: true }),
+    isForwardingAllowed: true,
   };
 }
 
