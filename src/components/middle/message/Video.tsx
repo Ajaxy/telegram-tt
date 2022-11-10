@@ -93,7 +93,9 @@ const Video: FC<OwnProps> = ({
   );
   const fullMediaData = localBlobUrl || mediaData;
   const isInline = Boolean(isIntersecting && fullMediaData);
-  // Thumbnail is always rendered so we can only disable blur if we have preview
+
+  // Thumbnail is always rendered, so we can only disable blur if we have a preview
+  const [withThumb] = useState(!previewBlobUrl);
   const thumbRef = useBlurredMediaThumbRef(message, previewBlobUrl);
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
@@ -159,18 +161,21 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      <canvas
-        ref={thumbRef}
-        className="thumbnail"
-        style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-      />
-      <img
-        src={previewBlobUrl}
-        className={buildClassName('thumbnail', previewClassNames)}
-        style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-        alt=""
-        draggable={!isProtected}
-      />
+      {withThumb ? (
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
+        />
+      ) : (
+        <img
+          src={previewBlobUrl}
+          className={buildClassName('thumbnail', previewClassNames)}
+          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
+          alt=""
+          draggable={!isProtected}
+        />
+      )}
       {isInline && (
         <OptimizedVideo
           ref={videoRef}
