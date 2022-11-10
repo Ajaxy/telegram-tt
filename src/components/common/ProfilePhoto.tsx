@@ -2,8 +2,8 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
-import { ApiMediaFormat } from '../../api/types';
 
+import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -18,6 +18,9 @@ import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import useMediaTransition from '../../hooks/useMediaTransition';
+import useCanvasBlur from '../../hooks/useCanvasBlur';
 
 import Spinner from '../ui/Spinner';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -27,7 +30,6 @@ import './ProfilePhoto.scss';
 type OwnProps = {
   chat?: ApiChat;
   user?: ApiUser;
-  isFirstPhoto?: boolean;
   isSavedMessages?: boolean;
   photo?: ApiPhoto;
   lastSyncTime?: number;
@@ -39,7 +41,6 @@ const ProfilePhoto: FC<OwnProps> = ({
   chat,
   user,
   photo,
-  isFirstPhoto,
   isSavedMessages,
   canPlayVideo,
   lastSyncTime,
@@ -49,44 +50,38 @@ const ProfilePhoto: FC<OwnProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const lang = useLang();
+
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
+  const userOrChat = user || chat;
+  const currentPhoto = photo || userOrChat?.fullInfo?.profilePhoto;
+  const canHaveMedia = userOrChat && !isSavedMessages && !isDeleted && !isRepliesChat;
+  const { isVideo } = currentPhoto || {};
 
-  function getMediaHash(size: 'normal' | 'big', type: 'photo' | 'video' = 'photo') {
-    const userOrChat = user || chat;
-    const profilePhoto = photo || userOrChat?.fullInfo?.profilePhoto;
-    const hasVideo = profilePhoto?.isVideo;
-    const forceAvatar = isFirstPhoto;
+  const avatarHash = canHaveMedia && getChatAvatarHash(userOrChat, 'normal', 'photo');
+  const avatarBlobUrl = useMedia(avatarHash, undefined, undefined, lastSyncTime);
 
-    if (type === 'video' && !hasVideo) return undefined;
+  const photoHash = canHaveMedia && currentPhoto && !isVideo && `photo${currentPhoto.id}?size=c`;
+  const photoBlobUrl = useMedia(photoHash, undefined, undefined, lastSyncTime);
 
-    if (photo && !forceAvatar) {
-      if (hasVideo && type === 'video') {
-        return getVideoAvatarMediaHash(photo);
-      }
-      if (type === 'photo') {
-        return `photo${photo.id}?size=c`;
-      }
-    }
+  const videoHash = canHaveMedia && currentPhoto && isVideo && getVideoAvatarMediaHash(currentPhoto);
+  const videoBlobUrl = useMedia(videoHash, undefined, undefined, lastSyncTime);
 
-    if (!isSavedMessages && !isDeleted && !isRepliesChat && userOrChat) {
-      return getChatAvatarHash(userOrChat, size, type);
-    }
-
-    return undefined;
-  }
+  const fullMediaData = videoBlobUrl || photoBlobUrl;
+  const [isVideoReady, markVideoReady] = useFlag();
+  const isFullMediaReady = Boolean(fullMediaData && (!isVideo || isVideoReady));
+  const transitionClassNames = useMediaTransition(isFullMediaReady);
+  const isBlurredThumb = canHaveMedia && !isFullMediaReady && !avatarBlobUrl && currentPhoto?.thumbnail?.dataUri;
+  const blurredThumbCanvasRef = useCanvasBlur(
+    currentPhoto?.thumbnail?.dataUri, !isBlurredThumb, IS_SINGLE_COLUMN_LAYOUT && !IS_CANVAS_FILTER_SUPPORTED,
+  );
+  const hasMedia = currentPhoto || avatarBlobUrl || isBlurredThumb;
 
   useEffect(() => {
     if (videoRef.current && !canPlayVideo) {
       videoRef.current.currentTime = 0;
     }
   }, [canPlayVideo]);
-
-  const photoHash = getMediaHash('big', 'photo');
-  const photoBlobUrl = useMedia(photoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const videoHash = getMediaHash('normal', 'video');
-  const videoBlobUrl = useMedia(videoHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const imageSrc = videoBlobUrl || photoBlobUrl || photo?.thumbnail?.dataUri;
 
   let content: TeactNode | undefined;
 
@@ -96,23 +91,37 @@ const ProfilePhoto: FC<OwnProps> = ({
     content = <i className="icon-avatar-deleted-account" />;
   } else if (isRepliesChat) {
     content = <i className="icon-reply-filled" />;
-  } else if (imageSrc) {
-    if (videoBlobUrl) {
-      content = (
-        <OptimizedVideo
-          canPlay={canPlayVideo}
-          ref={videoRef}
-          src={imageSrc}
-          className="avatar-media"
-          muted
-          disablePictureInPicture
-          loop
-          playsInline
-        />
-      );
-    } else {
-      content = <img src={imageSrc} className="avatar-media" alt="" />;
-    }
+  } else if (hasMedia) {
+    content = (
+      <>
+        {isBlurredThumb ? (
+          <canvas ref={blurredThumbCanvasRef} className="thumb" />
+        ) : (
+          <img src={avatarBlobUrl} className="thumb" alt="" />
+        )}
+        {currentPhoto && (
+          isVideo ? (
+            <OptimizedVideo
+              canPlay={canPlayVideo}
+              ref={videoRef}
+              src={fullMediaData}
+              className={buildClassName('avatar-media', transitionClassNames)}
+              muted
+              disablePictureInPicture
+              loop
+              playsInline
+              onPlay={markVideoReady}
+            />
+          ) : (
+            <img
+              src={fullMediaData}
+              className={buildClassName('avatar-media', transitionClassNames)}
+              alt=""
+            />
+          )
+        )}
+      </>
+    );
   } else if (user) {
     const userFullName = getUserFullName(user);
     content = userFullName ? getFirstLetters(userFullName, 2) : undefined;
@@ -133,11 +142,11 @@ const ProfilePhoto: FC<OwnProps> = ({
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',
-    (!isSavedMessages && !imageSrc) && 'no-photo',
+    (!isSavedMessages && !hasMedia) && 'no-photo',
   );
 
   return (
-    <div className={fullClassName} onClick={imageSrc ? onClick : undefined}>
+    <div className={fullClassName} onClick={hasMedia ? onClick : undefined}>
       {typeof content === 'string' ? renderText(content, ['hq_emoji']) : content}
     </div>
   );

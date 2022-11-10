@@ -185,7 +185,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         chat={chat}
         photo={photo}
         isSavedMessages={isSavedMessages}
-        isFirstPhoto={isFirst}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
         onClick={handleProfilePhotoClick}
       />
