@@ -109,7 +109,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
           {viewportIds.map((id, i) => (
             <ListItem
               key={id}
-              className="chat-item-clickable force-rounded-corners"
+              className="chat-item-clickable force-rounded-corners small-icon"
               style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onSelectChatOrUser(id)}

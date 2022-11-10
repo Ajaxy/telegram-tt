@@ -9,9 +9,9 @@
       bottom: 0;
       left: 4.5rem;
       right: 0;
+      height: 1px;
       /* stylelint-disable-next-line plugin/whole-pixel */
-      height: 0.5px;
-      background: var(--color-dividers);
+      box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers);
     }
 
     &.small-icon::after {
