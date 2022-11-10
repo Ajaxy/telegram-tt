@@ -122,7 +122,7 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasReply || asForwarded || !isMediaWithNoText || forceSenderName) {
+    if (hasReply || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName) {
       classNames.push('has-solid-background');
     }
 
