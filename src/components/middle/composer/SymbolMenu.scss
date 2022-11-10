@@ -126,6 +126,8 @@
   }
 
   .bubble {
+    --offset-y: 4rem;
+
     width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
     padding: 0;
     overflow: hidden;
