@@ -7,20 +7,21 @@ import type { MessageListType } from '../../global/types';
 import {
   selectCanDeleteSelectedMessages,
   selectCanDownloadSelectedMessages,
+  selectCanForwardMessages,
   selectCanReportSelectedMessages,
   selectCurrentMessageList,
   selectHasProtectedMessage,
   selectSelectedMessagesCount,
 } from '../../global/selectors';
-import useFlag from '../../hooks/useFlag';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import buildClassName from '../../util/buildClassName';
+
+import useFlag from '../../hooks/useFlag';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
 import Button from '../ui/Button';
-
 import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
 import ReportModal from '../common/ReportModal';
 
@@ -38,6 +39,7 @@ type StateProps = {
   canDeleteMessages?: boolean;
   canReportMessages?: boolean;
   canDownloadMessages?: boolean;
+  canForwardMessages?: boolean;
   hasProtectedMessage?: boolean;
   isAnyModalOpen?: boolean;
   selectedMessageIds?: number[];
@@ -52,6 +54,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   canDeleteMessages,
   canReportMessages,
   canDownloadMessages,
+  canForwardMessages,
   hasProtectedMessage,
   isAnyModalOpen,
   selectedMessageIds,
@@ -107,7 +110,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   );
 
   const renderButton = (
-    icon: string, label: string, onClick: AnyToVoidFunction, disabled?: boolean, destructive?: boolean,
+    icon: string, label: string, onClick: AnyToVoidFunction, destructive?: boolean,
   ) => {
     return (
       <div
@@ -115,10 +118,9 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         tabIndex={0}
         className={buildClassName(
           'item',
-          disabled && 'disabled',
           destructive && 'destructive',
         )}
-        onClick={!disabled ? onClick : undefined}
+        onClick={onClick}
         title={label}
       >
         <i className={`icon-${icon}`} />
@@ -143,19 +145,23 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
         {Boolean(selectedMessagesCount) && (
           <div className="MessageSelectToolbar-actions">
-            {messageListType !== 'scheduled' && (
+            {messageListType !== 'scheduled' && canForwardMessages && (
               renderButton(
-                'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages, hasProtectedMessage,
+                'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages,
               )
             )}
             {canReportMessages && (
               renderButton('flag', lang('Conversation.ReportMessages'), openReportModal)
             )}
-            {canDownloadMessages && (
-              renderButton('download', lang('lng_media_download'), handleDownload, hasProtectedMessage)
+            {canDownloadMessages && !hasProtectedMessage && (
+              renderButton('download', lang('lng_media_download'), handleDownload)
             )}
-            {renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy, hasProtectedMessage)}
-            {renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, !canDeleteMessages, true)}
+            {!hasProtectedMessage && (
+              renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
+            )}
+            {canDeleteMessages && (
+              renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, true)
+            )}
           </div>
         )}
       </div>
@@ -182,6 +188,7 @@ export default memo(withGlobal<OwnProps>(
     const canDownload = selectCanDownloadSelectedMessages(global);
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
+    const canForward = chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
     const isForwardModalOpen = global.forwardMessages.isModalShown;
     const isAnyModalOpen = Boolean(isForwardModalOpen || global.requestedDraft
       || global.requestedAttachBotInChat || global.requestedAttachBotInstall);
@@ -192,6 +199,7 @@ export default memo(withGlobal<OwnProps>(
       canDeleteMessages: canDelete,
       canReportMessages: canReport,
       canDownloadMessages: canDownload,
+      canForwardMessages: canForward,
       selectedMessageIds,
       hasProtectedMessage,
       isAnyModalOpen,
