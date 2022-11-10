@@ -8,7 +8,6 @@ import { getMessageInvoice } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
-import { DPR } from '../../../util/environment';
 
 import useLang from '../../../hooks/useLang';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
@@ -66,7 +65,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
       onClick={handleClick}
     >
       <canvas ref={canvasRef} className={styles.canvas} width={width} height={height} />
-      <div className={buildClassName(styles.dots, DPR > 1 && styles.highres)} />
+      <div className={styles.dots} />
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
         <i className={buildClassName('icon-lock', styles.lock)} />

@@ -399,7 +399,7 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
       || getServerTime(global.serverTimeOffset) - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
-      || (content.video?.isRound) || content.location
+      || (content.video?.isRound) || content.location || content.invoice
     )
     && !isForwardedMessage(message)
     && !message.viaBotId
@@ -920,6 +920,20 @@ export function selectHasProtectedMessage(global: GlobalState, chatId: string, m
   const messages = selectChatMessages(global, chatId);
 
   return messageIds.some((messageId) => messages[messageId]?.isProtected);
+}
+
+export function selectCanForwardMessages(global: GlobalState, chatId: string, messageIds?: number[]) {
+  if (selectChat(global, chatId)?.isProtected) {
+    return false;
+  }
+
+  if (!messageIds) {
+    return false;
+  }
+
+  const messages = selectChatMessages(global, chatId);
+
+  return messageIds.every((messageId) => messages[messageId]?.isForwardingAllowed);
 }
 
 export function selectSponsoredMessage(global: GlobalState, chatId: string) {
