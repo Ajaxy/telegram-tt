@@ -84,6 +84,8 @@ const Photo: FC<OwnProps> = ({
     mediaData, loadProgress,
   } = useMediaWithLoadProgress(getMessageMediaHash(message, size), !shouldLoad);
   const fullMediaData = localBlobUrl || mediaData;
+
+  const [withThumb] = useState(!fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(message, fullMediaData);
 
   const {
@@ -163,11 +165,13 @@ const Photo: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      <canvas
-        ref={thumbRef}
-        className="thumbnail"
-        style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-      />
+      {withThumb && (
+        <canvas
+          ref={thumbRef}
+          className="thumbnail"
+          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
+        />
+      )}
       <img
         src={fullMediaData}
         className={`full-media ${transitionClassNames}`}

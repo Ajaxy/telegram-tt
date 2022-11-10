@@ -74,6 +74,8 @@ const RoundVideo: FC<OwnProps> = ({
     ApiMediaFormat.BlobUrl,
     lastSyncTime,
   );
+
+  const [withThumb] = useState(!mediaData);
   const thumbRef = useBlurredMediaThumbRef(message, mediaData);
 
   const { isBuffered, bufferingHandlers } = useBuffering();
@@ -186,16 +188,17 @@ const RoundVideo: FC<OwnProps> = ({
       className="RoundVideo media-inner"
       onClick={handleClick}
     >
-      <div className="thumbnail-wrapper">
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-          style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
-        />
-      </div>
+      {withThumb && (
+        <div className="thumbnail-wrapper">
+          <canvas
+            ref={thumbRef}
+            className="thumbnail"
+            style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
+          />
+        </div>
+      )}
       {mediaData && (
         <div className="video-wrapper">
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <OptimizedVideo
             canPlay={shouldPlay}
             ref={playerRef}

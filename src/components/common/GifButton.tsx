@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import type { ApiVideo } from '../../api/types';
@@ -51,12 +51,12 @@ const GifButton: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const hasThumbnail = Boolean(gif.thumbnail?.dataUri);
   const localMediaHash = `gif${gif.id}`;
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const loadAndPlay = isIntersecting && !isDisabled;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !loadAndPlay, ApiMediaFormat.BlobUrl);
-  const thumbRef = useCanvasBlur(gif.thumbnail?.dataUri, Boolean(previewBlobUrl));
+  const [withThumb] = useState(gif.thumbnail?.dataUri && !previewBlobUrl);
+  const thumbRef = useCanvasBlur(gif.thumbnail?.dataUri, !withThumb);
   const videoData = useMedia(localMediaHash, !loadAndPlay, ApiMediaFormat.BlobUrl);
   const shouldRenderVideo = Boolean(loadAndPlay && videoData);
   const { isBuffered, bufferingHandlers } = useBuffering(true);
@@ -157,7 +157,7 @@ const GifButton: FC<OwnProps> = ({
           <i className="icon-close gif-unsave-button-icon" />
         </Button>
       )}
-      {hasThumbnail && (
+      {withThumb && (
         <canvas
           ref={thumbRef}
           className="thumbnail"
@@ -187,7 +187,7 @@ const GifButton: FC<OwnProps> = ({
         />
       )}
       {shouldRenderSpinner && (
-        <Spinner color={previewBlobUrl || hasThumbnail ? 'white' : 'black'} />
+        <Spinner color={previewBlobUrl || withThumb ? 'white' : 'black'} />
       )}
       {onClick && contextMenuPosition !== undefined && (
         <Menu
