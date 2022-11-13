@@ -16,8 +16,8 @@ interface Params {
   coords?: { x: number; y: number };
 }
 
-type Frames = ArrayBuffer[];
-type Chunks = (Frames | undefined)[];
+type Frame = ImageBitmap;
+type Chunks = (Frame[] | undefined)[];
 
 // TODO Consider removing chunks
 const CHUNK_SIZE = 1;
@@ -48,6 +48,8 @@ class RLottie {
   }>();
 
   private imgSize!: number;
+
+  private imageData!: ImageData;
 
   private msPerFrame = 1000 / 60;
 
@@ -263,6 +265,7 @@ class RLottie {
 
     if (!this.imgSize) {
       this.imgSize = imgSize;
+      this.imageData = new ImageData(imgSize, imgSize);
     }
 
     if (this.isRendererInited) {
@@ -299,6 +302,7 @@ class RLottie {
         this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority,
+        this.customColor,
         this.onRendererInit.bind(this),
       ],
     });
@@ -407,26 +411,14 @@ class RLottie {
           return false;
         }
 
-        const arr = new Uint8ClampedArray(frame);
-        if (this.customColor) {
-          for (let i = 0; i < arr.length; i += 4) {
-            /* eslint-disable prefer-destructuring */
-            arr[i] = this.customColor[0];
-            arr[i + 1] = this.customColor[1];
-            arr[i + 2] = this.customColor[2];
-            /* eslint-enable prefer-destructuring */
-          }
-        }
-
-        const imageData = new ImageData(arr, this.imgSize, this.imgSize);
-
         this.containers.forEach((containerData) => {
           const {
             ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
           } = containerData;
 
           if (!isLoaded || !isPaused) {
-            ctx.putImageData(imageData, x || 0, y || 0);
+            ctx.clearRect(x || 0, y || 0, this.imgSize, this.imgSize);
+            ctx.drawImage(frame, x || 0, y || 0);
           }
 
           if (!isLoaded) {
@@ -511,6 +503,17 @@ class RLottie {
     return chunk[indexInChunk];
   }
 
+  private setFrame(frameIndex: number, frame: Frame) {
+    const chunkIndex = this.getChunkIndex(frameIndex);
+    const indexInChunk = this.getFrameIndexInChunk(frameIndex);
+    const chunk = this.chunks[chunkIndex];
+    if (!chunk) {
+      return;
+    }
+
+    chunk[indexInChunk] = frame;
+  }
+
   private getFrameIndexInChunk(frameIndex: number) {
     const chunkIndex = this.getChunkIndex(frameIndex);
     return frameIndex - chunkIndex * this.chunkSize;
@@ -557,7 +560,7 @@ class RLottie {
     }
   }
 
-  private onFrameLoad(frameIndex: number, arrayBuffer: ArrayBuffer) {
+  private onFrameLoad(frameIndex: number, imageBitmap: ImageBitmap) {
     const chunkIndex = this.getChunkIndex(frameIndex);
     const chunk = this.chunks[chunkIndex];
     // Frame can be skipped and chunk can be already cleaned up
@@ -565,7 +568,7 @@ class RLottie {
       return;
     }
 
-    chunk[this.getFrameIndexInChunk(frameIndex)] = arrayBuffer;
+    chunk[this.getFrameIndexInChunk(frameIndex)] = imageBitmap;
 
     if (this.isWaiting) {
       this.doPlay();
