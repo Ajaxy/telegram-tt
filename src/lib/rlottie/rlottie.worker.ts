@@ -113,7 +113,7 @@ function calcParams(json: string, isLowPriority: boolean, framesCount: number) {
 }
 
 async function renderFrames(
-  key: string, fromIndex: number, toIndex: number, onProgress: CancellableCallback,
+  key: string, frameIndex: number, onProgress: CancellableCallback,
 ) {
   if (!rLottieApi) {
     await rLottieApiPromise;
@@ -123,25 +123,23 @@ async function renderFrames(
     imgSize, reduceFactor, handle, imageData, customColor,
   } = renderers.get(key)!;
 
-  for (let i = fromIndex; i <= toIndex; i++) {
-    const realIndex = i * reduceFactor;
+  const realIndex = frameIndex * reduceFactor;
 
-    rLottieApi.render(handle, realIndex);
-    const bufferPointer = rLottieApi.buffer(handle);
-    const data = Module.HEAPU8.subarray(bufferPointer, bufferPointer + (imgSize * imgSize * 4));
+  rLottieApi.render(handle, realIndex);
+  const bufferPointer = rLottieApi.buffer(handle);
+  const data = Module.HEAPU8.subarray(bufferPointer, bufferPointer + (imgSize * imgSize * 4));
 
-    if (customColor) {
-      const arr = new Uint8ClampedArray(data);
-      applyColor(arr, customColor);
-      imageData.data.set(arr);
-    } else {
-      imageData.data.set(data);
-    }
-
-    const imageBitmap = await createImageBitmap(imageData);
-
-    onProgress(i, imageBitmap);
+  if (customColor) {
+    const arr = new Uint8ClampedArray(data);
+    applyColor(arr, customColor);
+    imageData.data.set(arr);
+  } else {
+    imageData.data.set(data);
   }
+
+  const imageBitmap = await createImageBitmap(imageData);
+
+  onProgress(frameIndex, imageBitmap);
 }
 
 function applyColor(arr: Uint8ClampedArray, color: [number, number, number]) {
