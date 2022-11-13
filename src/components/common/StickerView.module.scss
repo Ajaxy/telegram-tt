@@ -7,6 +7,10 @@
   }
 }
 
+.noTransition {
+  transition: none !important;
+}
+
 .media {
   position: absolute;
   top: 0;
