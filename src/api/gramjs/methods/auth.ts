@@ -27,6 +27,12 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
+export function onWebAuthTokenFailed() {
+  onUpdate({
+    '@type': 'updateWebAuthTokenFailed',
+  });
+}
+
 export function onRequestPhoneNumber() {
   onUpdate(buildAuthStateUpdate('authorizationStateWaitPhoneNumber'));
 

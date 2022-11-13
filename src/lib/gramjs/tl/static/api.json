@@ -8,6 +8,7 @@
     "auth.resetAuthorizations",
     "auth.exportAuthorization",
     "auth.importAuthorization",
+    "auth.importWebTokenAuthorization",
     "auth.bindTempAuthKey",
     "auth.checkPassword",
     "auth.requestPasswordRecovery",

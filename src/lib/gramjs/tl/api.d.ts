@@ -293,6 +293,7 @@ namespace Api {
   export type TypePremiumSubscriptionOption = PremiumSubscriptionOption;
   export type TypeSendAsPeer = SendAsPeer;
   export type TypeMessageExtendedMedia = MessageExtendedMediaPreview | MessageExtendedMedia;
+  export type TypeStickerKeyword = StickerKeyword;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -4772,10 +4773,12 @@ namespace Api {
   export class StickerSetFullCovered extends VirtualClass<{
     set: Api.TypeStickerSet;
     packs: Api.TypeStickerPack[];
+    keywords: Api.TypeStickerKeyword[];
     documents: Api.TypeDocument[];
   }> {
     set: Api.TypeStickerSet;
     packs: Api.TypeStickerPack[];
+    keywords: Api.TypeStickerKeyword[];
     documents: Api.TypeDocument[];
   };
   export class MaskCoords extends VirtualClass<{
@@ -5846,6 +5849,7 @@ namespace Api {
     groupCall?: true;
     invites?: true;
     send?: true;
+    forums?: true;
   } | void> {
     // flags: undefined;
     join?: true;
@@ -5865,6 +5869,7 @@ namespace Api {
     groupCall?: true;
     invites?: true;
     send?: true;
+    forums?: true;
   };
   export class PopularContact extends VirtualClass<{
     clientId: long;
@@ -7587,6 +7592,13 @@ namespace Api {
   }> {
     media: Api.TypeMessageMedia;
   };
+  export class StickerKeyword extends VirtualClass<{
+    documentId: long;
+    keyword: string[];
+  }> {
+    documentId: long;
+    keyword: string[];
+  };
   export class ResPQ extends VirtualClass<{
     nonce: int128;
     serverNonce: int128;
@@ -8321,10 +8333,12 @@ namespace Api {
     export class StickerSet extends VirtualClass<{
       set: Api.TypeStickerSet;
       packs: Api.TypeStickerPack[];
+      keywords: Api.TypeStickerKeyword[];
       documents: Api.TypeDocument[];
     }> {
       set: Api.TypeStickerSet;
       packs: Api.TypeStickerPack[];
+      keywords: Api.TypeStickerKeyword[];
       documents: Api.TypeDocument[];
     };
     export class StickerSetNotModified extends VirtualClass<void> {};
@@ -9839,6 +9853,15 @@ namespace Api {
       code: string;
     }>, Bool> {
       code: string;
+    };
+    export class ImportWebTokenAuthorization extends Request<Partial<{
+      apiId: int;
+      apiHash: string;
+      webAuthToken: string;
+    }>, auth.TypeAuthorization> {
+      apiId: int;
+      apiHash: string;
+      webAuthToken: string;
     };
   }
 
@@ -13355,7 +13378,7 @@ namespace Api {
   }
 
   export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
-    | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword
+    | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors
     | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone

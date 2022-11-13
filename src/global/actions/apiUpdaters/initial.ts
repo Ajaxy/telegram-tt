@@ -18,6 +18,7 @@ import { setLanguage } from '../../../util/langProvider';
 import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
+import { clearWebTokenAuth } from '../../../util/routing';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
@@ -31,6 +32,10 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
     case 'updateAuthorizationError':
       onUpdateAuthorizationError(update);
+      break;
+
+    case 'updateWebAuthTokenFailed':
+      onUpdateWebAuthTokenFailed();
       break;
 
     case 'updateConnectionState':
@@ -139,6 +144,15 @@ function onUpdateAuthorizationError(update: ApiUpdateAuthorizationError) {
   setGlobal({
     ...getGlobal(),
     authError: update.message,
+  });
+}
+
+function onUpdateWebAuthTokenFailed() {
+  clearWebTokenAuth();
+
+  setGlobal({
+    ...getGlobal(),
+    hasWebAuthTokenFailed: true,
   });
 }
 

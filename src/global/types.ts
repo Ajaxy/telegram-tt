@@ -140,6 +140,7 @@ export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
 export type GlobalState = {
   appConfig?: ApiAppConfig;
   canInstall?: boolean;
+  hasWebAuthTokenFailed?: boolean;
   isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;

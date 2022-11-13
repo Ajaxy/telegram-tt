@@ -70,6 +70,7 @@ class TelegramClient {
         useWSS: false,
         additionalDcsDisabled: false,
         testServers: false,
+        dcId: DEFAULT_DC_ID,
     };
 
     /**
@@ -86,6 +87,7 @@ class TelegramClient {
         const args = { ...TelegramClient.DEFAULT_OPTIONS, ...opts };
         this.apiId = apiId;
         this.apiHash = apiHash;
+        this.defaultDcId = args.dcId || DEFAULT_DC_ID;
         this._useIPV6 = args.useIPV6;
         // this._entityCache = new Set()
         if (typeof args.baseLogger === 'string') {
@@ -221,7 +223,7 @@ class TelegramClient {
         await this.session.load();
 
         if (!this.session.serverAddress || (this.session.serverAddress.includes(':') !== this._useIPV6)) {
-            this.session.setDC(DEFAULT_DC_ID, this._useIPV6
+            this.session.setDC(this.defaultDcId, this._useIPV6
                 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, this._args.useWSS ? 443 : 80);
         }
     }
