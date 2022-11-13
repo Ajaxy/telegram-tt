@@ -42,6 +42,11 @@ function MessageText({
 
   const { text, entities } = message.content.text || {};
   const withSharedCanvas = useMemo(() => {
+    const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
+    if (hasSpoilers) {
+      return false;
+    }
+
     const customEmojisCount = entities?.filter((e) => e.type === ApiMessageEntityTypes.CustomEmoji).length || 0;
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS;
   }, [entities]) || 0;
