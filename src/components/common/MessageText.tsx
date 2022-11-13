@@ -21,7 +21,7 @@ interface OwnProps {
   shouldRenderAsHtml?: boolean;
 }
 
-const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 1;
+const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
 
 function MessageText({
   message,
