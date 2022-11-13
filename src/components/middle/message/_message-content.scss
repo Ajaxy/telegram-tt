@@ -445,7 +445,9 @@
     }
 
     .custom-emoji {
-      --custom-emoji-size: calc(1.25 * var(--message-text-size, 1rem));
+      --custom-emoji-size: max(calc(1.25 * var(--message-text-size, 1rem)), 20px);
+      width: var(--custom-emoji-size);
+      height: var(--custom-emoji-size);
     }
   }
 
