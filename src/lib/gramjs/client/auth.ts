@@ -88,7 +88,7 @@ async function signInUserWithWebToken(
         }
     } catch (err: any) {
         authParams.webAuthTokenFailed();
-        client._log.error('Failed to login with web token', err);
+        client._log.error(`Failed to login with web token: ${err}`);
         if (err.message === 'SESSION_PASSWORD_NEEDED') {
             return signInWithPassword(client, apiCredentials, authParams);
         } else {
