@@ -209,10 +209,16 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [unfreezeAnimation]);
 
   useOnChange(([prevNoLoop]) => {
-    if (noLoop !== undefined && noLoop !== prevNoLoop) {
+    if (prevNoLoop !== undefined && noLoop !== prevNoLoop) {
       animation?.setNoLoop(noLoop);
     }
   }, [noLoop, animation]);
+
+  useOnChange(([prevSharedCanvasCoords]) => {
+    if (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords) {
+      animation?.setSharedCanvasCoords(containerId, sharedCanvasCoords);
+    }
+  }, [sharedCanvasCoords, containerId, animation]);
 
   useEffect(() => {
     if (!animation) {

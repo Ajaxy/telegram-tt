@@ -7,6 +7,7 @@ import {
 import WorkerConnector from '../../util/WorkerConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
+import { fastRaf } from '../../util/schedulers';
 
 interface Params {
   noLoop?: boolean;
@@ -120,9 +121,14 @@ class RLottie {
   }
 
   public removeContainer(containerId: string) {
-    const containerData = this.containers.get(containerId)!;
-    if (!containerData.isSharedCanvas) {
-      this.containers.get(containerId)!.canvas.remove();
+    const {
+      canvas, ctx, isSharedCanvas, coords,
+    } = this.containers.get(containerId)!;
+
+    if (isSharedCanvas) {
+      ctx.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
+    } else {
+      canvas.remove();
     }
 
     this.containers.delete(containerId);
@@ -167,9 +173,8 @@ class RLottie {
     }
 
     if (!this.params.isLowPriority) {
-      const currentFrameIndex = Math.floor(this.approxFrameIndex);
       this.frames = this.frames.map((frame, i) => {
-        if (i === currentFrameIndex) {
+        if (i === this.prevFrameIndex) {
           return frame;
         } else {
           if (frame && frame !== WAITING) {
@@ -193,8 +198,39 @@ class RLottie {
     this.speed = speed;
   }
 
-  setNoLoop(noLoop: boolean) {
+  setNoLoop(noLoop?: boolean) {
     this.params.noLoop = noLoop;
+  }
+
+  setSharedCanvasCoords(containerId: string, newCoords: Params['coords']) {
+    const containerInfo = this.containers.get(containerId)!;
+    const {
+      canvas, ctx, isPaused, coords,
+    } = containerInfo;
+
+    if (!canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false') {
+      const { isLowPriority, quality = isLowPriority ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY } = this.params;
+      const sizeFactor = Math.max(DPR * quality, 1);
+      ensureCanvasSize(canvas, sizeFactor);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.dataset.isJustCleaned = 'true';
+      fastRaf(() => {
+        canvas.dataset.isJustCleaned = 'false';
+      });
+    }
+
+    containerInfo.coords = {
+      x: Math.round((newCoords?.x || 0) * canvas.width),
+      y: Math.round((newCoords?.y || 0) * canvas.height),
+    };
+
+    if (isPaused || !this.isPlaying()) {
+      const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
+
+      if (frame && frame !== WAITING) {
+        ctx.drawImage(frame, coords!.x, coords!.y);
+      }
+    }
   }
 
   private addContainer(
@@ -251,14 +287,9 @@ class RLottie {
       const canvas = container;
       const ctx = canvas.getContext('2d')!;
 
-      imgSize = Math.round(this.params.size! * sizeFactor);
+      ensureCanvasSize(canvas, sizeFactor);
 
-      const expectedWidth = Math.round(canvas.offsetWidth * sizeFactor);
-      const expectedHeight = Math.round(canvas.offsetHeight * sizeFactor);
-      if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-        canvas.width = expectedWidth;
-        canvas.height = expectedHeight;
-      }
+      imgSize = Math.round(this.params.size! * sizeFactor);
 
       this.containers.set(containerId, {
         canvas,
@@ -534,6 +565,15 @@ class RLottie {
     if (this.isWaiting) {
       this.doPlay();
     }
+  }
+}
+
+function ensureCanvasSize(canvas: HTMLCanvasElement, sizeFactor: number) {
+  const expectedWidth = Math.round(canvas.offsetWidth * sizeFactor);
+  const expectedHeight = Math.round(canvas.offsetHeight * sizeFactor);
+  if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+    canvas.width = expectedWidth;
+    canvas.height = expectedHeight;
   }
 }
 
