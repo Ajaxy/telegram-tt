@@ -13,6 +13,7 @@ interface Params {
   size?: number;
   quality?: number;
   isLowPriority?: boolean;
+  coords?: { x: number; y: number };
 }
 
 type Frames = ArrayBuffer[];
@@ -36,11 +37,13 @@ let lastWorkerIndex = -1;
 class RLottie {
   // Config
 
-  private containers = new Map<HTMLDivElement, {
+  private containers = new Map<string, {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isLoaded?: boolean;
     isPaused?: boolean;
+    isSharedCanvas?: boolean;
+    coords?: Params['coords'];
     onLoad?: NoneToVoidFunction;
   }>();
 
@@ -87,7 +90,7 @@ class RLottie {
   private lastRenderAt?: number;
 
   static init(...args: ConstructorParameters<typeof RLottie>) {
-    const [container, onLoad, id] = args;
+    const [container, canvas, onLoad, id, , params] = args;
     let instance = instancesById.get(id);
 
     if (!instance) {
@@ -95,14 +98,15 @@ class RLottie {
       instance = new RLottie(...args);
       instancesById.set(id, instance);
     } else {
-      instance.addContainer(container, onLoad);
+      instance.addContainer(container, canvas, onLoad, params?.coords);
     }
 
     return instance;
   }
 
   constructor(
-    container: HTMLDivElement,
+    containerId: string,
+    container: HTMLDivElement | HTMLCanvasElement,
     onLoad: NoneToVoidFunction | undefined,
     private id: string,
     private tgsUrl: string,
@@ -111,14 +115,18 @@ class RLottie {
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
   ) {
-    this.addContainer(container, onLoad);
+    this.addContainer(containerId, container, onLoad, params.coords);
     this.initConfig();
     this.initRenderer();
   }
 
-  public removeContainer(container: HTMLDivElement) {
-    this.containers.get(container)!.canvas.remove();
-    this.containers.delete(container);
+  public removeContainer(containerId: string) {
+    const containerData = this.containers.get(containerId)!;
+    if (!containerData.isSharedCanvas) {
+      this.containers.get(containerId)!.canvas.remove();
+    }
+
+    this.containers.delete(containerId);
 
     if (!this.containers.size) {
       this.destroy();
@@ -129,9 +137,9 @@ class RLottie {
     return this.isAnimating || this.isWaiting;
   }
 
-  play(forceRestart = false, container?: HTMLDivElement) {
-    if (container) {
-      this.containers.get(container)!.isPaused = false;
+  play(forceRestart = false, containerId?: string) {
+    if (containerId) {
+      this.containers.get(containerId)!.isPaused = false;
     }
 
     if (this.isEnded && forceRestart) {
@@ -143,9 +151,9 @@ class RLottie {
     this.doPlay();
   }
 
-  pause(container?: HTMLDivElement) {
-    if (container) {
-      this.containers.get(container)!.isPaused = true;
+  pause(containerId?: string) {
+    if (containerId) {
+      this.containers.get(containerId)!.isPaused = true;
 
       const areAllContainersPaused = Array.from(this.containers.values()).every(({ isPaused }) => isPaused);
       if (!areAllContainersPaused) {
@@ -178,46 +186,84 @@ class RLottie {
     this.params.noLoop = noLoop;
   }
 
-  private addContainer(container: HTMLDivElement, onLoad?: NoneToVoidFunction) {
-    if (!(container.parentNode instanceof HTMLElement)) {
-      throw new Error('[RLottie] Container is not mounted');
-    }
+  private addContainer(
+    containerId: string,
+    container: HTMLDivElement | HTMLCanvasElement,
+    onLoad?: NoneToVoidFunction,
+    coords?: Params['coords'],
+  ) {
+    const { isLowPriority, quality = isLowPriority ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY } = this.params;
+    let imgSize: number;
+    // Reduced quality only looks acceptable on high DPR screens
+    const sizeFactor = Math.max(DPR * quality, 1);
 
-    let { size } = this.params;
+    if (container instanceof HTMLDivElement) {
+      if (!(container.parentNode instanceof HTMLElement)) {
+        throw new Error('[RLottie] Container is not mounted');
+      }
 
-    if (!size) {
-      size = (
-        container.offsetWidth
-        || parseInt(container.style.width, 10)
-        || container.parentNode.offsetWidth
-      );
+      let { size } = this.params;
 
       if (!size) {
-        throw new Error('[RLottie] Failed to detect width from container');
+        size = (
+          container.offsetWidth
+          || parseInt(container.style.width, 10)
+          || container.parentNode.offsetWidth
+        );
+
+        if (!size) {
+          throw new Error('[RLottie] Failed to detect width from container');
+        }
       }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
+
+      imgSize = Math.round(size * sizeFactor);
+
+      canvas.width = imgSize;
+      canvas.height = imgSize;
+
+      container.appendChild(canvas);
+
+      this.containers.set(containerId, {
+        canvas, ctx, onLoad,
+      });
+    } else {
+      if (!container.offsetParent) {
+        throw new Error('[RLottie] Shared canvas is not mounted');
+      }
+
+      const canvas = container;
+      const ctx = canvas.getContext('2d')!;
+
+      imgSize = Math.round(this.params.size! * sizeFactor);
+
+      const expectedWidth = Math.round(canvas.offsetWidth * sizeFactor);
+      const expectedHeight = Math.round(canvas.offsetHeight * sizeFactor);
+      if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+        canvas.width = expectedWidth;
+        canvas.height = expectedHeight;
+      }
+
+      this.containers.set(containerId, {
+        canvas,
+        ctx,
+        isSharedCanvas: true,
+        coords: {
+          x: Math.round((coords?.x || 0) * canvas.width),
+          y: Math.round((coords?.y || 0) * canvas.height),
+        },
+        onLoad,
+      });
     }
-
-    const canvas = document.createElement('canvas');
-    canvas.dataset.id = this.id;
-    const ctx = canvas.getContext('2d')!;
-
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-
-    const { isLowPriority, quality = isLowPriority ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY } = this.params;
-    // Reduced quality only looks acceptable on high DPR screens
-    const imgSize = Math.round(size * Math.max(DPR * quality, 1));
-
-    canvas.width = imgSize;
-    canvas.height = imgSize;
-
-    container.appendChild(canvas);
 
     if (!this.imgSize) {
       this.imgSize = imgSize;
     }
-
-    this.containers.set(container, { canvas, ctx, onLoad });
 
     if (this.isRendererInited) {
       this.doPlay();
@@ -371,15 +417,16 @@ class RLottie {
             /* eslint-enable prefer-destructuring */
           }
         }
+
         const imageData = new ImageData(arr, this.imgSize, this.imgSize);
 
         this.containers.forEach((containerData) => {
           const {
-            ctx, isLoaded, isPaused, onLoad,
+            ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
           } = containerData;
 
           if (!isLoaded || !isPaused) {
-            ctx.putImageData(imageData, 0, 0);
+            ctx.putImageData(imageData, x || 0, y || 0);
           }
 
           if (!isLoaded) {

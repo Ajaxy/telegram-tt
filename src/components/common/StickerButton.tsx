@@ -33,6 +33,7 @@ type OwnProps<T> = {
   isSavedMessages?: boolean;
   canViewSet?: boolean;
   isCurrentUserPremium?: boolean;
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   observeIntersection: ObserveFn;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
   clickArg: T;
@@ -47,16 +48,17 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   noAnimate,
   title,
   className,
-  clickArg,
   noContextMenu,
   isSavedMessages,
   canViewSet,
   observeIntersection,
+  isCurrentUserPremium,
+  sharedCanvasRef,
   onClick,
+  clickArg,
   onFaveClick,
   onUnfaveClick,
   onRemoveRecentClick,
-  isCurrentUserPremium,
 }: OwnProps<T>) => {
   const { openStickerSet, openPremiumModal } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -231,6 +233,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         noLoad={!shouldLoad}
         noPlay={!shouldPlay}
         withSharedAnimation
+        sharedCanvasRef={sharedCanvasRef}
       />
       {isLocked && (
         <div

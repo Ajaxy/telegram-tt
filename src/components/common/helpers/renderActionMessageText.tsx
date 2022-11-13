@@ -4,8 +4,9 @@ import type {
   ApiChat, ApiMessage, ApiUser, ApiGroupCall,
 } from '../../../api/types';
 import type { TextPart } from '../../../types';
-
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../../hooks/useLang';
+
 import {
   getChatTitle,
   getMessageSummaryText,
@@ -13,17 +14,17 @@ import {
 } from '../../../global/helpers';
 import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { renderMessageSummary } from './renderMessageText';
 import renderText from './renderText';
 
 import UserLink from '../UserLink';
 import MessageLink from '../MessageLink';
 import ChatLink from '../ChatLink';
 import GroupCallLink from '../GroupCallLink';
+import MessageSummary from '../MessageSummary';
 
 interface RenderOptions {
   asPlainText?: boolean;
-  asTextWithSpoilers?: boolean;
+  isEmbedded?: boolean;
 }
 
 const MAX_LENGTH = 32;
@@ -38,6 +39,8 @@ export function renderActionMessageText(
   targetMessage?: ApiMessage,
   targetChatId?: string,
   options: RenderOptions = {},
+  observeIntersectionForLoading?: ObserveFn,
+  observeIntersectionForPlaying?: ObserveFn,
 ) {
   if (!message.content.action) {
     return [];
@@ -47,7 +50,7 @@ export function renderActionMessageText(
     text, translationValues, amount, currency, call, score,
   } = message.content.action;
   const content: TextPart[] = [];
-  const noLinks = options.asPlainText || options.asTextWithSpoilers;
+  const noLinks = options.asPlainText || options.isEmbedded;
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
@@ -124,7 +127,9 @@ export function renderActionMessageText(
     unprocessed,
     '%message%',
     targetMessage
-      ? renderMessageContent(lang, targetMessage, options)
+      ? renderMessageContent(
+        lang, targetMessage, options, observeIntersectionForLoading, observeIntersectionForPlaying,
+      )
       : 'a message',
   );
   unprocessed = processed.pop() as string;
@@ -168,19 +173,32 @@ function renderProductContent(message: ApiMessage) {
     : 'a product';
 }
 
-function renderMessageContent(lang: LangFn, message: ApiMessage, options: RenderOptions = {}) {
-  const { asPlainText, asTextWithSpoilers } = options;
+function renderMessageContent(
+  lang: LangFn,
+  message: ApiMessage,
+  options: RenderOptions = {},
+  observeIntersectionForLoading?: ObserveFn,
+  observeIntersectionForPlaying?: ObserveFn,
+) {
+  const { asPlainText, isEmbedded } = options;
 
   if (asPlainText) {
     return getMessageSummaryText(lang, message, undefined, MAX_LENGTH);
   }
 
-  const messageSummary = renderMessageSummary(lang, message, undefined, undefined, MAX_LENGTH);
+  const messageSummary = (
+    <MessageSummary
+      lang={lang}
+      message={message}
+      truncateLength={MAX_LENGTH}
+      observeIntersectionForLoading={observeIntersectionForLoading}
+      observeIntersectionForPlaying={observeIntersectionForPlaying}
+      withTranslucentThumbs
+    />
+  );
 
-  if (asTextWithSpoilers) {
-    return (
-      <span>{messageSummary}</span>
-    );
+  if (isEmbedded) {
+    return messageSummary;
   }
 
   return (

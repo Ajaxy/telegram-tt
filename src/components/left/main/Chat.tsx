@@ -37,7 +37,6 @@ import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
-import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useChatContextActions from '../../../hooks/useChatContextActions';
@@ -56,6 +55,7 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import MessageSummary from '../../common/MessageSummary';
 
 import './Chat.scss';
 
@@ -272,7 +272,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,
-            { asTextWithSpoilers: true },
+            { isEmbedded: true },
           )}
         </p>
       );
@@ -379,15 +379,19 @@ const Chat: FC<OwnProps & StateProps> = ({
 function renderSummary(
   lang: LangFn, message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
 ) {
+  const messageSummary = (
+    <MessageSummary lang={lang} message={message} observeIntersectionForLoading={observeIntersection} />
+  );
+
   if (!blobUrl) {
-    return renderMessageSummary(lang, message, undefined, undefined, undefined, observeIntersection);
+    return messageSummary;
   }
 
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
       {getMessageVideo(message) && <i className="icon-play" />}
-      {renderMessageSummary(lang, message, true, undefined, undefined, observeIntersection)}
+      {messageSummary}
     </span>
   );
 }

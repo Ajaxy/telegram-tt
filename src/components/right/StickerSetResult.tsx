@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, memo, useMemo, useCallback,
+  useEffect, memo, useMemo, useCallback, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -35,6 +35,9 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
   isModalOpen, isCurrentUserPremium,
 }) => {
   const { loadStickers, toggleStickerSet, openStickerSet } = getActions();
+
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const lang = useLang();
   const isAdded = set && Boolean(set.installedDate);
@@ -96,7 +99,8 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
           {lang(isAdded ? 'Stickers.Installed' : 'Stickers.Install')}
         </Button>
       </div>
-      <div className="sticker-set-main">
+      <div className="sticker-set-main shared-canvas-container">
+        <canvas ref={sharedCanvasRef} className="shared-canvas" />
         {!canRenderStickers && <Spinner />}
         {canRenderStickers && displayedStickers.map((sticker) => (
           <StickerButton
@@ -108,6 +112,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
             onClick={handleStickerClick}
             noContextMenu
             isCurrentUserPremium={isCurrentUserPremium}
+            sharedCanvasRef={sharedCanvasRef}
           />
         ))}
       </div>

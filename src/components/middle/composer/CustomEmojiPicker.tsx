@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+import { getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStickerSet, ApiSticker, ApiChat } from '../../../api/types';
 import type { StickerSetOrRecent } from '../../../types';
@@ -12,7 +12,7 @@ import {
   FAVORITE_SYMBOL_SET_ID,
   PREMIUM_STICKER_SET_ID,
   RECENT_SYMBOL_SET_ID,
-  SLIDE_TRANSITION_DURATION,
+  SLIDE_TRANSITION_DURATION, STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -21,7 +21,11 @@ import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 import { pickTruthy } from '../../../util/iteratees';
-import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
+import {
+  selectIsAlwaysHighPriorityEmoji,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
+} from '../../../global/selectors';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -76,6 +80,11 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const headerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
+
   const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
 
   const { observe: observeIntersection } = useIntersectionObserver({
@@ -179,12 +188,16 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       index === activeSetIndex && 'activated',
     );
 
+    const withSharedCanvas = index < STICKER_PICKER_MAX_SHARED_COVERS;
+    const isHq = selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSet as ApiStickerSet);
+
     if (stickerSet.id === RECENT_SYMBOL_SET_ID
       || stickerSet.id === FAVORITE_SYMBOL_SET_ID
       || stickerSet.id === CHAT_STICKER_SET_ID
       || stickerSet.id === PREMIUM_STICKER_SET_ID
       || stickerSet.hasThumbnail
-      || !firstSticker) {
+      || !firstSticker
+    ) {
       return (
         <Button
           key={stickerSet.id}
@@ -203,6 +216,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               stickerSet={stickerSet as ApiStickerSet}
               noAnimate={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
+              sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
             />
           )}
         </Button>
@@ -219,6 +233,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           observeIntersection={observeIntersectionForCovers}
           noContextMenu
           isCurrentUserPremium
+          sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
           onClick={selectStickerSet}
           clickArg={index}
         />
@@ -246,7 +261,11 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         ref={headerRef}
         className="StickerPicker-header no-selection no-scrollbar"
       >
-        {allSets.map(renderCover)}
+        <div className="shared-canvas-container">
+          <canvas ref={sharedCanvasRef} className="shared-canvas" />
+          <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
+          {allSets.map(renderCover)}
+        </div>
       </div>
       <div
         ref={containerRef}

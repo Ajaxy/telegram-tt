@@ -6,7 +6,6 @@ import type { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageSingleInlineButton } from '../../global/helpers';
-import { renderMessageSummary } from '../common/helpers/renderMessageText';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/environment';
 
@@ -19,6 +18,7 @@ import RippleEffect from '../ui/RippleEffect';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
 import PinnedMessageNavigation from './PinnedMessageNavigation';
+import MessageSummary from '../common/MessageSummary';
 
 type OwnProps = {
   message: ApiMessage;
@@ -39,7 +39,6 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   const mediaThumbnail = useThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 
-  const text = renderMessageSummary(lang, message, Boolean(mediaThumbnail));
   const [isUnpinDialogOpen, openUnpinDialog, closeUnpinDialog] = useFlag();
 
   const handleUnpinMessage = useCallback(() => {
@@ -107,7 +106,9 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           <div className="title" dir="auto">
             {customTitle || `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
           </div>
-          <p dir="auto">{text}</p>
+          <p dir="auto">
+            <MessageSummary lang={lang} message={message} noEmoji={Boolean(mediaThumbnail)} />
+          </p>
           <RippleEffect />
         </div>
         {inlineButton && (

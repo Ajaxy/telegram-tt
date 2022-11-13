@@ -80,6 +80,15 @@
         background-color: var(--color-background-selected);
       }
     }
+
+    .shared-canvas-container {
+      display: inline-block;
+    }
+
+    .shared-canvas {
+      max-width: 1280px; // STICKER_PICKER_MAX_SHARED_COVERS * (STICKER_SIZE_PICKER_HEADER + 10 * 2)
+      z-index: 1;
+    }
   }
 
   .symbol-set-container {

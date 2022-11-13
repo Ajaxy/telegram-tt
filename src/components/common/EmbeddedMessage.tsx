@@ -13,7 +13,6 @@ import {
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
-import { renderMessageSummary } from './helpers/renderMessageText';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
@@ -22,11 +21,11 @@ import useThumbnail from '../../hooks/useThumbnail';
 import useLang from '../../hooks/useLang';
 
 import ActionMessage from '../middle/ActionMessage';
+import MessageSummary from './MessageSummary';
 
 import './EmbeddedMessage.scss';
 
 type OwnProps = {
-  observeIntersection?: ObserveFn;
   className?: string;
   message?: ApiMessage;
   sender?: ApiUser | ApiChat;
@@ -35,6 +34,8 @@ type OwnProps = {
   noUserColors?: boolean;
   isProtected?: boolean;
   hasContextMenu?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onClick: NoneToVoidFunction;
 };
 
@@ -49,12 +50,13 @@ const EmbeddedMessage: FC<OwnProps> = ({
   isProtected,
   noUserColors,
   hasContextMenu,
-  observeIntersection,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const isIntersecting = useIsIntersecting(ref, observeIntersectionForLoading);
 
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
   const mediaThumbnail = useThumbnail(message);
@@ -80,9 +82,20 @@ const EmbeddedMessage: FC<OwnProps> = ({
           {!message ? (
             customText || NBSP
           ) : isActionMessage(message) ? (
-            <ActionMessage message={message} isEmbedded />
+            <ActionMessage
+              message={message}
+              isEmbedded
+              observeIntersectionForLoading={observeIntersectionForLoading}
+              observeIntersectionForPlaying={observeIntersectionForPlaying}
+            />
           ) : (
-            renderMessageSummary(lang, message, Boolean(mediaThumbnail))
+            <MessageSummary
+              lang={lang}
+              message={message}
+              noEmoji={Boolean(mediaThumbnail)}
+              observeIntersectionForLoading={observeIntersectionForLoading}
+              observeIntersectionForPlaying={observeIntersectionForPlaying}
+            />
           )}
         </p>
         <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>

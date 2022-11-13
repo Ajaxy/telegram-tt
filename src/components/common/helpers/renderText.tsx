@@ -1,8 +1,9 @@
 import React from '../../../lib/teact/teact';
-import EMOJI_REGEX from '../../../lib/twemojiRegex';
 
+import type { TeactNode } from '../../../lib/teact/teact';
 import type { TextPart } from '../../../types';
 
+import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 import {
@@ -29,7 +30,7 @@ export default function renderText(
   part: TextPart,
   filters: Array<TextFilter> = ['emoji'],
   params?: { highlight: string | undefined },
-): TextPart[] {
+): TeactNode[] {
   if (typeof part !== 'string') {
     return [part];
   }

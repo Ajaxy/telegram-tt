@@ -71,6 +71,9 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const lang = useLang();
 
   const prevStickerSet = usePrevious(stickerSet);
@@ -148,17 +151,21 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
       {renderingStickerSet?.stickers ? (
         <>
           <div ref={containerRef} className="stickers custom-scroll">
-            {renderingStickerSet.stickers.map((sticker) => (
-              <StickerButton
-                sticker={sticker}
-                size={isEmoji ? EMOJI_SIZE_MODAL : STICKER_SIZE_MODAL}
-                observeIntersection={observeIntersection}
-                onClick={canSendStickers && !isEmoji ? handleSelect : undefined}
-                clickArg={sticker}
-                isSavedMessages={isSavedMessages}
-                isCurrentUserPremium={isCurrentUserPremium}
-              />
-            ))}
+            <div className="shared-canvas-container">
+              <canvas ref={sharedCanvasRef} className="shared-canvas" />
+              {renderingStickerSet.stickers.map((sticker) => (
+                <StickerButton
+                  sticker={sticker}
+                  size={isEmoji ? EMOJI_SIZE_MODAL : STICKER_SIZE_MODAL}
+                  observeIntersection={observeIntersection}
+                  onClick={canSendStickers && !isEmoji ? handleSelect : undefined}
+                  clickArg={sticker}
+                  isSavedMessages={isSavedMessages}
+                  isCurrentUserPremium={isCurrentUserPremium}
+                  sharedCanvasRef={sharedCanvasRef}
+                />
+              ))}
+            </div>
           </div>
           <div className="button-wrapper">
             <Button

@@ -33,8 +33,9 @@ import AnimatedIconFromSticker from '../common/AnimatedIconFromSticker';
 
 type OwnProps = {
   message: ApiMessage;
-  observeIntersection?: ObserveFn;
-  observeIntersectionForAnimation?: ObserveFn;
+  observeIntersectionForReading?: ObserveFn;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   isEmbedded?: boolean;
   appearanceOrder?: number;
   isLastInList?: boolean;
@@ -58,8 +59,9 @@ const APPEARANCE_DELAY = 10;
 
 const ActionMessage: FC<OwnProps & StateProps> = ({
   message,
-  observeIntersection,
-  observeIntersectionForAnimation,
+  observeIntersectionForReading,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   isEmbedded,
   appearanceOrder = 0,
   isLastInList,
@@ -82,7 +84,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  useOnIntersect(ref, observeIntersection);
+  useOnIntersect(ref, observeIntersectionForReading);
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight);
 
@@ -98,7 +100,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
 
-  const isVisible = useIsIntersecting(ref, observeIntersectionForAnimation);
+  const isVisible = useIsIntersecting(ref, observeIntersectionForPlaying);
 
   const shouldShowConfettiRef = useRef((() => {
     const isUnread = memoFirstUnreadIdRef?.current && message.id >= memoFirstUnreadIdRef.current;
@@ -128,7 +130,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     targetUsers,
     targetMessage,
     targetChatId,
-    { asTextWithSpoilers: isEmbedded },
+    { isEmbedded },
+    observeIntersectionForLoading,
+    observeIntersectionForPlaying,
   );
   const {
     isContextMenuOpen, contextMenuPosition,

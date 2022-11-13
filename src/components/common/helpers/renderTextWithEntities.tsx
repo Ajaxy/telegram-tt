@@ -38,6 +38,9 @@ export function renderTextWithEntities(
   isProtected?: boolean,
   observeIntersectionForLoading?: ObserveFn,
   observeIntersectionForPlaying?: ObserveFn,
+  withTranslucentThumbs?: boolean,
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
+  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>,
 ) {
   if (!entities || !entities.length) {
     return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
@@ -122,7 +125,10 @@ export function renderTextWithEntities(
         isProtected,
         observeIntersectionForLoading,
         observeIntersectionForPlaying,
+        withTranslucentThumbs,
         emojiSize,
+        sharedCanvasRef,
+        sharedCanvasHqRef,
       );
 
     if (Array.isArray(newEntity)) {
@@ -301,7 +307,10 @@ function processEntity(
   isProtected?: boolean,
   observeIntersectionForLoading?: ObserveFn,
   observeIntersectionForPlaying?: ObserveFn,
+  withTranslucentThumbs?: boolean,
   emojiSize?: number,
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
+  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>,
 ) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -328,9 +337,12 @@ function processEntity(
           documentId={entity.documentId}
           size={emojiSize}
           withSharedAnimation
+          sharedCanvasRef={sharedCanvasRef}
+          sharedCanvasHqRef={sharedCanvasHqRef}
           withGridFix={!emojiSize}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
+          withTranslucentThumb={withTranslucentThumbs}
         />
       );
     }
@@ -449,9 +461,12 @@ function processEntity(
           documentId={entity.documentId}
           size={emojiSize}
           withSharedAnimation
+          sharedCanvasRef={sharedCanvasRef}
+          sharedCanvasHqRef={sharedCanvasHqRef}
           withGridFix={!emojiSize}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
+          withTranslucentThumb={withTranslucentThumbs}
         />
       );
     default:

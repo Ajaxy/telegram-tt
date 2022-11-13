@@ -1,9 +1,19 @@
+:root {
+  --thumbs-background: var(--color-background);
+}
+
 .thumb {
   width: 100%;
   height: 100%;
+  z-index: 1;
 
   &:global(.closing) {
     transition-delay: 150ms;
+  }
+
+  &_opaque {
+    background: var(--thumbs-background);
+    transition-delay: 0s;
   }
 }
 
