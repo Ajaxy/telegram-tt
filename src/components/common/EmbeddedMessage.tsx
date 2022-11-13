@@ -120,7 +120,7 @@ function renderPictogram(
         width={width}
         height={height}
         alt=""
-        className={isRoundVideo ? 'round' : ''}
+        className={buildClassName('pictogram', isRoundVideo && 'round')}
         draggable={!isProtected}
       />
       {isProtected && <span className="protector" />}

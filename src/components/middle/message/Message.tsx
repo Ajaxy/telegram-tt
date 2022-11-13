@@ -95,6 +95,7 @@ import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
+import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -126,10 +127,9 @@ import DotAnimation from '../../common/DotAnimation';
 import CustomEmoji from '../../common/CustomEmoji';
 import PremiumIcon from '../../common/PremiumIcon';
 import FakeIcon from '../../common/FakeIcon';
+import MessageText from '../../common/MessageText';
 
 import './Message.scss';
-import MessageText from '../../common/MessageText';
-import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 
 type MessagePositionProperties = {
   isFirstInGroup: boolean;

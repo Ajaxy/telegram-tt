@@ -263,7 +263,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
 
       return (
-        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
+        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
             lang,
             lastMessage,
@@ -281,7 +281,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
 
     return (
-      <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
+      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
         {senderName && (
           <>
             <span className="sender-name">{renderText(senderName)}</span>

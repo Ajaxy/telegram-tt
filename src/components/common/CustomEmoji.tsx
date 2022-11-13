@@ -7,7 +7,6 @@ import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { REM } from './helpers/mediaDimensions';
 import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
@@ -79,8 +78,6 @@ const CustomEmoji: FC<OwnProps> = ({
   const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
   const hasCustomColor = customEmoji && selectIsDefaultEmojiStatusPack(getGlobal(), customEmoji.stickerSetInfo);
 
-  const [realSize, setRealSize] = useState<number>(size);
-
   useEffect(() => {
     if (!hasCustomColor) {
       setCustomColor(undefined);
@@ -94,13 +91,6 @@ const CustomEmoji: FC<OwnProps> = ({
     const customColorRgb = hexToRgb(hexColor);
     setCustomColor([customColorRgb.r, customColorRgb.g, customColorRgb.b]);
   }, [hasCustomColor]);
-
-  useEffect(() => {
-    const computedSize = getComputedStyle(containerRef.current!).getPropertyValue('--custom-emoji-size');
-    if (computedSize) {
-      setRealSize(Math.round(Number(computedSize.replace(/[^\d.]/g, '')) * REM));
-    }
-  }, []);
 
   const handleVideoEnded = useCallback((e) => {
     if (!loopLimit) return;
@@ -154,7 +144,7 @@ const CustomEmoji: FC<OwnProps> = ({
           containerRef={containerRef}
           sticker={customEmoji}
           isSmall
-          size={realSize}
+          size={size}
           customColor={customColor}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
