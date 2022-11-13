@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 
 import React, {
-  useEffect, useRef, memo, useCallback, useState,
+  useEffect, useRef, memo, useCallback, useState, useMemo,
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';
@@ -16,7 +16,7 @@ import generateIdFor from '../../util/generateIdFor';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
-  id?: string;
+  animationId?: string;
   className?: string;
   style?: string;
   tgsUrl?: string;
@@ -26,9 +26,11 @@ export type OwnProps = {
   noLoop?: boolean;
   size: number;
   quality?: number;
+  color?: [number, number, number];
   isLowPriority?: boolean;
   forceOnHeavyAnimation?: boolean;
-  color?: [number, number, number];
+  sharedCanvas?: HTMLCanvasElement;
+  sharedCanvasCoords?: { x: number; y: number };
   onClick?: NoneToVoidFunction;
   onLoad?: NoneToVoidFunction;
   onEnded?: NoneToVoidFunction;
@@ -57,7 +59,7 @@ setTimeout(ensureLottie, LOTTIE_LOAD_DELAY);
 
 const AnimatedSticker: FC<OwnProps> = ({
   ref,
-  id,
+  animationId,
   className,
   style,
   tgsUrl,
@@ -70,6 +72,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   isLowPriority,
   color,
   forceOnHeavyAnimation,
+  sharedCanvas,
+  sharedCanvasCoords,
   onClick,
   onLoad,
   onEnded,
@@ -80,6 +84,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   if (ref) {
     containerRef = ref;
   }
+
+  const containerId = useMemo(() => generateIdFor(ID_STORE, true), []);
 
   const [animation, setAnimation] = useState<RLottieInstance>();
   const wasPlaying = useRef(false);
@@ -92,25 +98,28 @@ const AnimatedSticker: FC<OwnProps> = ({
   playSegmentRef.current = playSegment;
 
   useEffect(() => {
-    if (animation || !tgsUrl) {
+    if (animation || !tgsUrl || (sharedCanvas && !sharedCanvasCoords)) {
       return;
     }
 
     const exec = () => {
-      if (!containerRef.current) {
+      const container = containerRef.current || sharedCanvas;
+      if (!container) {
         return;
       }
 
       const newAnimation = RLottie.init(
-        containerRef.current,
+        containerId,
+        container,
         onLoad,
-        id || generateIdFor(ID_STORE, true),
+        animationId || generateIdFor(ID_STORE, true),
         tgsUrl,
         {
           noLoop,
           size,
           quality,
           isLowPriority,
+          coords: sharedCanvasCoords,
         },
         color,
         onEnded,
@@ -135,7 +144,10 @@ const AnimatedSticker: FC<OwnProps> = ({
         });
       });
     }
-  }, [color, animation, tgsUrl, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop, id]);
+  }, [
+    animation, animationId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop,
+    containerId, sharedCanvas, sharedCanvasCoords,
+  ]);
 
   useEffect(() => {
     if (!animation) return;
@@ -144,32 +156,30 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [color, animation]);
 
   useEffect(() => {
-    const container = containerRef.current!;
-
     return () => {
       if (animation) {
-        animation.removeContainer(container);
+        animation.removeContainer(containerId);
       }
     };
-  }, [animation]);
+  }, [animation, containerId]);
 
   const playAnimation = useCallback((shouldRestart = false) => {
     if (animation && (playRef.current || playSegmentRef.current)) {
       if (playSegmentRef.current) {
         animation.playSegment(playSegmentRef.current);
       } else {
-        animation.play(shouldRestart, containerRef.current!);
+        animation.play(shouldRestart, containerId);
       }
     }
-  }, [animation]);
+  }, [animation, containerId]);
 
   const pauseAnimation = useCallback(() => {
     if (!animation) {
       return;
     }
 
-    animation.pause(containerRef.current!);
-  }, [animation]);
+    animation.pause(containerId);
+  }, [animation, containerId]);
 
   const freezeAnimation = useCallback(() => {
     isFrozen.current = true;
@@ -240,6 +250,10 @@ const AnimatedSticker: FC<OwnProps> = ({
   // so we need to make sure it happens right after focusing,
   // then we can play again.
   useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf);
+
+  if (sharedCanvas) {
+    return undefined;
+  }
 
   return (
     <div

@@ -1,4 +1,4 @@
-import React, { memo, useState } from '../../lib/teact/teact';
+import React, { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -17,6 +17,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useThumbnail from '../../hooks/useThumbnail';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
+import useSharedCanvasCoords from '../../hooks/useSharedCanvasCoords';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -41,6 +42,8 @@ type OwnProps = {
   noLoad?: boolean;
   noPlay?: boolean;
   withSharedAnimation?: boolean;
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
   cacheBuster?: number;
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
@@ -68,6 +71,8 @@ const StickerView: FC<OwnProps> = ({
   noLoad,
   noPlay,
   withSharedAnimation,
+  withTranslucentThumb,
+  sharedCanvasRef,
   cacheBuster,
   onVideoEnded,
   onAnimatedStickerLoop,
@@ -104,14 +109,17 @@ const StickerView: FC<OwnProps> = ({
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !preloadedPreviewData));
   const isFullMediaReady = fullMediaData && (isStatic || isPlayerReady);
 
+  const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
   const noTransition = isLottie && preloadedPreviewData;
 
+  const sharedCanvasCoords = useSharedCanvasCoords(containerRef, sharedCanvasRef);
+
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
 
-  const [randomIdPrefix] = useState(generateIdFor(ID_STORE, true));
+  const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
   const idKey = [
     (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, size, customColor?.join(','),
   ].filter(Boolean).join('_');
@@ -120,16 +128,25 @@ const StickerView: FC<OwnProps> = ({
     <>
       <img
         src={thumbData}
-        className={buildClassName(styles.thumb, noTransition && styles.noTransition, thumbClassName, thumbClassNames)}
+        className={buildClassName(
+          styles.thumb,
+          noTransition && styles.noTransition,
+          isThumbOpaque && styles.thumb_opaque,
+          thumbClassName,
+          thumbClassNames,
+        )}
         alt=""
       />
       {isLottie ? (
         <AnimatedSticker
           key={idKey}
-          id={idKey}
+          animationId={idKey}
           size={size}
           className={buildClassName(
-            styles.media, noTransition && styles.noTransition, fullMediaClassName, fullMediaClassNames,
+            styles.media,
+            (noTransition || isThumbOpaque) && styles.noTransition,
+            fullMediaClassName,
+            fullMediaClassNames,
           )}
           tgsUrl={fullMediaData}
           play={shouldPlay}
@@ -137,6 +154,8 @@ const StickerView: FC<OwnProps> = ({
           noLoop={!shouldLoop}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
+          sharedCanvas={sharedCanvasRef?.current || undefined}
+          sharedCanvasCoords={sharedCanvasCoords}
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}
           onEnded={onAnimatedStickerLoop}

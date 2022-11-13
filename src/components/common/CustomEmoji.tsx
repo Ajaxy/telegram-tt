@@ -12,7 +12,7 @@ import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
-import { selectIsDefaultEmojiStatusPack } from '../../global/selectors';
+import { selectIsAlwaysHighPriorityEmoji, selectIsDefaultEmojiStatusPack } from '../../global/selectors';
 
 import useEnsureCustomEmoji from '../../hooks/useEnsureCustomEmoji';
 import useCustomEmoji from './hooks/useCustomEmoji';
@@ -31,8 +31,11 @@ type OwnProps = {
   className?: string;
   loopLimit?: number;
   style?: string;
-  withSharedAnimation?: boolean;
   withGridFix?: boolean;
+  withSharedAnimation?: boolean;
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  withTranslucentThumb?: boolean;
   shouldPreloadPreview?: boolean;
   forceOnHeavyAnimation?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -40,7 +43,7 @@ type OwnProps = {
   onClick?: NoneToVoidFunction;
 };
 
-const STICKER_SIZE = 24;
+const STICKER_SIZE = 20;
 
 const CustomEmoji: FC<OwnProps> = ({
   ref,
@@ -50,9 +53,12 @@ const CustomEmoji: FC<OwnProps> = ({
   loopLimit,
   style,
   withGridFix,
+  withSharedAnimation,
+  sharedCanvasRef,
+  sharedCanvasHqRef,
+  withTranslucentThumb,
   shouldPreloadPreview,
   forceOnHeavyAnimation,
-  withSharedAnimation,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
@@ -121,6 +127,8 @@ const CustomEmoji: FC<OwnProps> = ({
     }
   }, [loopLimit]);
 
+  const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(getGlobal(), customEmoji.stickerSetInfo);
+
   return (
     <div
       ref={containerRef}
@@ -157,6 +165,8 @@ const CustomEmoji: FC<OwnProps> = ({
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withSharedAnimation={withSharedAnimation}
+          sharedCanvasRef={isHq ? sharedCanvasHqRef : sharedCanvasRef}
+          withTranslucentThumb={withTranslucentThumb}
           onVideoEnded={handleVideoEnded}
           onAnimatedStickerLoop={handleStickerLoop}
         />

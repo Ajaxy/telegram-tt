@@ -7,7 +7,7 @@ export function buildContentClassName(
   message: ApiMessage,
   {
     hasReply,
-    customShape,
+    isCustomShape,
     isLastInGroup,
     asForwarded,
     hasThread,
@@ -19,7 +19,7 @@ export function buildContentClassName(
     withVoiceTranscription,
   }: {
     hasReply?: boolean;
-    customShape?: boolean | number;
+    isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
     asForwarded?: boolean;
     hasThread?: boolean;
@@ -54,7 +54,7 @@ export function buildContentClassName(
     classNames.push('has-action-button');
   }
 
-  if (customShape) {
+  if (isCustomShape) {
     classNames.push('custom-shape');
     if (video?.isRound) {
       classNames.push('round');
@@ -115,7 +115,7 @@ export function buildContentClassName(
     classNames.push('force-sender-name');
   }
 
-  if (!customShape) {
+  if (!isCustomShape) {
     classNames.push('has-shadow');
 
     if (isMedia && hasComments) {

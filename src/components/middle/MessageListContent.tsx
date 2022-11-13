@@ -143,8 +143,9 @@ const MessageListContent: FC<OwnProps> = ({
           <ActionMessage
             key={message.id}
             message={message}
-            observeIntersection={observeIntersectionForReading}
-            observeIntersectionForAnimation={observeIntersectionForAnimatedStickers}
+            observeIntersectionForReading={observeIntersectionForReading}
+            observeIntersectionForLoading={observeIntersectionForMedia}
+            observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isLastInList={isLastInList}

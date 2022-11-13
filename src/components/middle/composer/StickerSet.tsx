@@ -1,7 +1,7 @@
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
@@ -15,7 +15,7 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import buildClassName from '../../../util/buildClassName';
-import { selectIsSetPremium } from '../../../global/selectors';
+import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -68,10 +68,16 @@ const StickerSet: FC<OwnProps> = ({
     openPremiumModal,
     toggleStickerSet,
   } = getActions();
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvas2Ref = useRef<HTMLCanvasElement>(null);
+
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
-  const [isExpanded, expand] = useFlag(!stickerSet.isEmoji);
   const lang = useLang();
 
   useOnIntersect(ref, observeIntersection);
@@ -79,6 +85,7 @@ const StickerSet: FC<OwnProps> = ({
   const transitionClassNames = useMediaTransition(shouldRender);
 
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
+  const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
   const isPremiumSet = !isRecent && selectIsSetPremium(stickerSet);
 
@@ -113,11 +120,11 @@ const StickerSet: FC<OwnProps> = ({
     ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (itemSize + margin))
     : itemsPerRow;
 
-  const shouldCutSet = isEmoji && !isExpanded && !stickerSet.installedDate && stickerSet.id !== RECENT_SYMBOL_SET_ID;
-  const itemsBeforeCutout = shouldCutSet ? stickersPerRow * 3 : Infinity;
-  const height = Math.ceil((
-    !shouldCutSet ? stickerSet.count : Math.min(itemsBeforeCutout, stickerSet.count))
-    / stickersPerRow) * (itemSize + margin);
+  const canCut = !stickerSet.installedDate && stickerSet.id !== RECENT_SYMBOL_SET_ID;
+  const [isCut, , expand] = useFlag(canCut);
+  const itemsBeforeCutout = stickersPerRow * 3 - 1;
+  const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, stickerSet.count) / stickersPerRow) * (itemSize + margin);
+  const height = isCut ? heightWhenCut : Math.ceil(stickerSet.count / stickersPerRow) * (itemSize + margin);
 
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
@@ -154,32 +161,46 @@ const StickerSet: FC<OwnProps> = ({
         )}
       </div>
       <div
-        className={buildClassName('symbol-set-container', transitionClassNames)}
+        className={buildClassName('symbol-set-container shared-canvas-container', transitionClassNames)}
         style={`height: ${height}px;`}
       >
+        <canvas
+          ref={sharedCanvasRef}
+          className="shared-canvas"
+          style={canCut ? `height: ${heightWhenCut}px;` : undefined}
+        />
+        {(isRecent || isFavorite || canCut) && <canvas ref={sharedCanvas2Ref} className="shared-canvas" />}
         {shouldRender && stickerSet.stickers && stickerSet.stickers
-          .slice(0, !isExpanded ? (itemsBeforeCutout - 1) : stickerSet.stickers.length)
-          .map((sticker) => (
-            <StickerButton
-              key={sticker.id}
-              sticker={sticker}
-              size={itemSize}
-              observeIntersection={observeIntersection}
-              noAnimate={!loadAndPlay}
-              isSavedMessages={isSavedMessages}
-              canViewSet
-              isCurrentUserPremium={isCurrentUserPremium}
-              onClick={onStickerSelect}
-              clickArg={sticker}
-              onUnfaveClick={stickerSet.id === FAVORITE_SYMBOL_SET_ID && favoriteStickerIdsSet?.has(sticker.id)
-                ? onStickerUnfave : undefined}
-              onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
-              onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
-            />
-          ))}
-        {!isExpanded && stickerSet.count > itemsBeforeCutout && (
+          .slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
+          .map((sticker, i) => {
+            const isHqEmoji = (isRecent || isFavorite)
+              && selectIsAlwaysHighPriorityEmoji(getGlobal(), sticker.stickerSetInfo);
+            const canvasRef = (canCut && i >= itemsBeforeCutout) || isHqEmoji
+              ? sharedCanvas2Ref
+              : sharedCanvasRef;
+
+            return (
+              <StickerButton
+                key={sticker.id}
+                sticker={sticker}
+                size={itemSize}
+                observeIntersection={observeIntersection}
+                noAnimate={!loadAndPlay}
+                isSavedMessages={isSavedMessages}
+                canViewSet
+                isCurrentUserPremium={isCurrentUserPremium}
+                sharedCanvasRef={canvasRef}
+                onClick={onStickerSelect}
+                clickArg={sticker}
+                onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
+                onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
+                onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
+              />
+            );
+          })}
+        {isCut && stickerSet.count > itemsBeforeCutout && (
           <Button className="StickerButton custom-emoji set-expand" round color="translucent" onClick={expand}>
-            +{stickerSet.count - itemsBeforeCutout + 1}
+            +{stickerSet.count - itemsBeforeCutout}
           </Button>
         )}
       </div>

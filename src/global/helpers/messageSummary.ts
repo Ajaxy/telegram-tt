@@ -1,8 +1,8 @@
+import type { TeactNode } from '../../lib/teact/teact';
 import type { ApiMessage } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 
-import type { TextPart } from '../../types';
 import type { LangFn } from '../../hooks/useLang';
 
 import trimText from '../../util/trimText';
@@ -108,7 +108,7 @@ export function getMessageSummaryEmoji(message: ApiMessage, noReactions = true) 
 export function getMessageSummaryDescription(
   lang: LangFn,
   message: ApiMessage,
-  truncatedText?: string | TextPart[],
+  truncatedText?: string | TeactNode,
   noReactions = true,
   isExtended = false,
 ) {
@@ -127,7 +127,7 @@ export function getMessageSummaryDescription(
     game,
   } = message.content;
 
-  let summary: string | TextPart[] | undefined;
+  let summary: string | TeactNode | undefined;
 
   if (message.groupedId) {
     summary = truncatedText || lang('lng_in_dlg_album');

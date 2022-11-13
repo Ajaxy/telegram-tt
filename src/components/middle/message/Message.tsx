@@ -74,12 +74,11 @@ import {
   areReactionsEmpty,
   getMessageHtmlId,
   isGeoLiveExpired,
-  getMessageSingleCustomEmoji,
+  getMessageSingleCustomEmoji, hasMessageText,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import { renderMessageText } from '../../common/helpers/renderMessageText';
 import { calculateDimensionsForMessageMedia, ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
@@ -96,7 +95,6 @@ import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
-import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -130,6 +128,8 @@ import PremiumIcon from '../../common/PremiumIcon';
 import FakeIcon from '../../common/FakeIcon';
 
 import './Message.scss';
+import MessageText from '../../common/MessageText';
+import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 
 type MessagePositionProperties = {
   isFirstInGroup: boolean;
@@ -356,15 +356,15 @@ const Message: FC<OwnProps & StateProps> = ({
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
   const hasReply = isReplyMessage(message) && !shouldHideReply;
   const hasThread = Boolean(threadInfo) && messageListType === 'thread';
-  const customShape = getMessageCustomShape(message);
-  const hasAnimatedEmoji = customShape && (animatedEmoji || animatedCustomEmoji);
+  const isCustomShape = getMessageCustomShape(message);
+  const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
     forwardInfo
     && (!isChatWithSelf || isScheduled)
     && !isRepliesChat
     && !forwardInfo.isLinkedChannelPost
-    && !customShape
+    && !isCustomShape
   );
   const isAlbum = Boolean(album) && album!.messages.length > 1
     && !album?.messages.some((msg) => Object.keys(msg.content).length === 0);
@@ -509,7 +509,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const contentClassName = buildContentClassName(message, {
     hasReply,
-    customShape,
+    isCustomShape,
     isLastInGroup,
     asForwarded,
     hasThread,
@@ -522,24 +522,15 @@ const Message: FC<OwnProps & StateProps> = ({
   });
 
   const withAppendix = contentClassName.includes('has-appendix');
+  const hasText = hasMessageText(message);
   const emojiSize = message.emojiOnlyCount && getCustomEmojiSize(message.emojiOnlyCount);
-  const textParts = renderMessageText(
-    message,
-    highlight,
-    emojiSize,
-    undefined,
-    undefined,
-    isProtected,
-    observeIntersectionForMedia,
-    observeIntersectionForAnimatedStickers,
-  );
 
   let metaPosition!: MetaPosition;
   if (phoneCall) {
     metaPosition = 'none';
   } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
-  } else if (textParts && !webPage && !hasAnimatedEmoji) {
+  } else if (hasText && !webPage && !hasAnimatedEmoji) {
     metaPosition = 'in-text';
   } else {
     metaPosition = 'standalone';
@@ -549,7 +540,7 @@ const Message: FC<OwnProps & StateProps> = ({
   if (areReactionsInMeta) {
     reactionsPosition = 'in-meta';
   } else if (hasReactions) {
-    if (customShape || ((photo || video) && !textParts)) {
+    if (isCustomShape || ((photo || video) && !hasText)) {
       reactionsPosition = 'outside';
     } else if (asForwarded) {
       metaPosition = 'standalone';
@@ -686,7 +677,7 @@ const Message: FC<OwnProps & StateProps> = ({
       hasReply && 'reply-message',
       noMediaCorners && 'no-media-corners',
     );
-    const hasCustomAppendix = isLastInGroup && !textParts && !asForwarded && !hasThread;
+    const hasCustomAppendix = isLastInGroup && !hasText && !asForwarded && !hasThread;
     const textContentClass = buildClassName(
       'text-content',
       metaPosition === 'in-text' && 'with-meta',
@@ -702,7 +693,8 @@ const Message: FC<OwnProps & StateProps> = ({
             noUserColors={isOwn}
             isProtected={isProtected}
             sender={replyMessageSender}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersectionForLoading={observeIntersectionForMedia}
+            observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
             onClick={handleReplyClick}
           />
         )}
@@ -877,9 +869,17 @@ const Message: FC<OwnProps & StateProps> = ({
           </p>
         )}
 
-        {!hasAnimatedEmoji && textParts && (
+        {!hasAnimatedEmoji && hasText && (
           <div className={textContentClass} dir="auto">
-            {textParts}
+            <MessageText
+              message={message}
+              emojiSize={emojiSize}
+              highlight={highlight}
+              isProtected={isProtected}
+              observeIntersectionForLoading={observeIntersectionForMedia}
+              observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+              withTranslucentThumbs={isCustomShape}
+            />
             {metaPosition === 'in-text' && renderReactionsAndMeta()}
           </div>
         )}
@@ -925,9 +925,9 @@ const Message: FC<OwnProps & StateProps> = ({
 
   function renderSenderName() {
     const media = photo || video || location;
-    const shouldRender = !(customShape && !viaBotId) && (
+    const shouldRender = !(isCustomShape && !viaBotId) && (
       (withSenderName && !media) || asForwarded || viaBotId || forceSenderName
-    ) && !isInDocumentGroupNotFirst && !(hasReply && customShape);
+    ) && !isInDocumentGroupNotFirst && !(hasReply && isCustomShape);
 
     if (!shouldRender) {
       return undefined;
@@ -935,7 +935,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     let senderTitle;
     let senderColor;
-    if (senderPeer && !(customShape && viaBotId)) {
+    if (senderPeer && !(isCustomShape && viaBotId)) {
       senderTitle = getSenderTitle(lang, senderPeer);
 
       if (!asForwarded) {

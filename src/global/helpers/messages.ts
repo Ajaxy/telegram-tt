@@ -50,22 +50,20 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function getMessageText(message: ApiMessage) {
+export function hasMessageText(message: ApiMessage) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
     game, action,
   } = message.content;
 
-  if (text) {
-    return text.text;
-  }
+  return Boolean(text) || !(
+    sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
+    || game || action?.phoneCall
+  );
+}
 
-  if (sticker || photo || video || audio || voice || document
-    || contact || poll || webPage || invoice || location || game || action?.phoneCall) {
-    return undefined;
-  }
-
-  return CONTENT_NOT_SUPPORTED;
+export function getMessageText(message: ApiMessage) {
+  return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {

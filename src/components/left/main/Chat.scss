@@ -1,5 +1,6 @@
 .Chat {
   --background-color: var(--color-background);
+  --thumbs-background: var(--background-color);
 
   body.is-ios &,
   body.is-macos & {
