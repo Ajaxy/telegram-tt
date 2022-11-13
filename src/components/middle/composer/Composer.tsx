@@ -406,9 +406,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
   } = useMentionTooltip(
     !attachments.length,
-    htmlRef,
+    EDITABLE_INPUT_CSS_SELECTOR,
     setHtml,
-    undefined,
     groupChatMembers,
     topInlineBotIds,
     currentUserId,

@@ -104,9 +104,8 @@ const AttachmentModal: FC<OwnProps> = ({
     isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
   } = useMentionTooltip(
     isOpen,
-    captionRef,
+    `#${EDITABLE_INPUT_MODAL_ID}`,
     onCaptionUpdate,
-    EDITABLE_INPUT_MODAL_ID,
     groupChatMembers,
     undefined,
     currentUserId,
