@@ -24,9 +24,17 @@ export function animateSingle(tick: Function, instance?: AnimationInstance) {
 }
 
 export function animate(tick: Function) {
+  fastRaf(() => {
+    if (tick()) {
+      animate(tick);
+    }
+  });
+}
+
+export function animateInstantly(tick: Function) {
   if (tick()) {
     fastRaf(() => {
-      animate(tick);
+      animateInstantly(tick);
     });
   }
 }
@@ -72,7 +80,7 @@ export function animateNumber({
   const t0 = Date.now();
   let canceled = false;
 
-  animate(() => {
+  animateInstantly(() => {
     if (canceled) return false;
     const t1 = Date.now();
     let t = (t1 - t0) / duration;
