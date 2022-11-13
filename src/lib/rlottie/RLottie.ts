@@ -16,11 +16,12 @@ interface Params {
   coords?: { x: number; y: number };
 }
 
-type Frame = ImageBitmap;
-type Chunks = (Frame[] | undefined)[];
+const WAITING = Symbol('WAITING');
+type Frame =
+  undefined
+  | typeof WAITING
+  | ImageBitmap;
 
-// TODO Consider removing chunks
-const CHUNK_SIZE = 1;
 const MAX_WORKERS = 4;
 const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
@@ -57,15 +58,11 @@ class RLottie {
 
   private cacheModulo!: number;
 
-  private chunkSize!: number;
-
   private workerIndex!: number;
 
-  private chunks: Chunks = [];
+  private frames: Frame[] = [];
 
   private framesCount?: number;
-
-  private chunksCount?: number;
 
   // State
 
@@ -169,8 +166,20 @@ class RLottie {
       this.isAnimating = false;
     }
 
-    const currentChunkIndex = this.getChunkIndex(this.approxFrameIndex);
-    this.chunks = this.chunks.map((chunk, i) => (i === currentChunkIndex ? chunk : undefined));
+    if (!this.params.isLowPriority) {
+      const currentFrameIndex = Math.floor(this.approxFrameIndex);
+      this.frames = this.frames.map((frame, i) => {
+        if (i === currentFrameIndex) {
+          return frame;
+        } else {
+          if (frame && frame !== WAITING) {
+            frame.close();
+          }
+
+          return undefined;
+        }
+      });
+    }
   }
 
   playSegment([startFrameIndex, stopFrameIndex]: [number, number]) {
@@ -276,16 +285,28 @@ class RLottie {
   private destroy() {
     this.isDestroyed = true;
     this.pause();
+    this.clearCache();
     this.destroyRenderer();
 
     instancesById.delete(this.id);
+  }
+
+  private clearCache() {
+    this.frames.forEach((frame) => {
+      if (frame && frame !== WAITING) {
+        frame.close();
+      }
+    });
+
+    // Help GC
+    this.imageData = undefined as any;
+    this.frames = [];
   }
 
   private initConfig() {
     const { isLowPriority } = this.params;
 
     this.cacheModulo = isLowPriority ? LOW_PRIORITY_CACHE_MODULO : HIGH_PRIORITY_CACHE_MODULO;
-    this.chunkSize = CHUNK_SIZE;
   }
 
   setColor(newColor: [number, number, number] | undefined) {
@@ -320,7 +341,6 @@ class RLottie {
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
     this.framesCount = framesCount;
-    this.chunksCount = Math.ceil(framesCount / this.chunkSize);
 
     if (this.isWaiting) {
       this.doPlay();
@@ -347,7 +367,6 @@ class RLottie {
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
     this.framesCount = framesCount;
-    this.chunksCount = Math.ceil(framesCount / this.chunkSize);
     this.isWaiting = false;
     this.isAnimating = false;
 
@@ -386,12 +405,10 @@ class RLottie {
       }
 
       const frameIndex = Math.round(this.approxFrameIndex);
-      const chunkIndex = this.getChunkIndex(frameIndex);
-      const chunk = this.chunks[chunkIndex];
-
-      if (!chunk || chunk.length === 0) {
-        if (!chunk) {
-          this.requestChunk(chunkIndex);
+      const frame = this.getFrame(frameIndex);
+      if (!frame || frame === WAITING) {
+        if (!frame) {
+          this.requestFrame(frameIndex);
         }
 
         this.isAnimating = false;
@@ -399,18 +416,11 @@ class RLottie {
         return false;
       }
 
-      if (this.cacheModulo && chunkIndex % this.cacheModulo === 0) {
-        this.cleanupPrevChunk(chunkIndex);
+      if (this.cacheModulo && frameIndex % this.cacheModulo === 0) {
+        this.cleanupPrevFrame(frameIndex);
       }
 
       if (frameIndex !== this.prevFrameIndex) {
-        const frame = this.getFrame(frameIndex);
-        if (!frame) {
-          this.isAnimating = false;
-          this.isWaiting = true;
-          return false;
-        }
-
         this.containers.forEach((containerData) => {
           const {
             ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
@@ -482,7 +492,7 @@ class RLottie {
       const nextFrameIndex = Math.round(this.approxFrameIndex);
 
       if (!this.getFrame(nextFrameIndex)) {
-        this.requestChunk(this.getChunkIndex(nextFrameIndex));
+        this.requestFrame(nextFrameIndex);
         this.isWaiting = true;
         this.isAnimating = false;
         return false;
@@ -493,82 +503,33 @@ class RLottie {
   }
 
   private getFrame(frameIndex: number) {
-    const chunkIndex = this.getChunkIndex(frameIndex);
-    const indexInChunk = this.getFrameIndexInChunk(frameIndex);
-    const chunk = this.chunks[chunkIndex];
-    if (!chunk) {
-      return undefined;
-    }
-
-    return chunk[indexInChunk];
+    return this.frames[frameIndex];
   }
 
-  private setFrame(frameIndex: number, frame: Frame) {
-    const chunkIndex = this.getChunkIndex(frameIndex);
-    const indexInChunk = this.getFrameIndexInChunk(frameIndex);
-    const chunk = this.chunks[chunkIndex];
-    if (!chunk) {
-      return;
-    }
-
-    chunk[indexInChunk] = frame;
-  }
-
-  private getFrameIndexInChunk(frameIndex: number) {
-    const chunkIndex = this.getChunkIndex(frameIndex);
-    return frameIndex - chunkIndex * this.chunkSize;
-  }
-
-  private getChunkIndex(frameIndex: number) {
-    return Math.floor(frameIndex / this.chunkSize);
-  }
-
-  private requestChunk(chunkIndex: number) {
-    if (this.chunks[chunkIndex]) {
-      return;
-    }
-
-    this.chunks[chunkIndex] = [];
-
-    const fromIndex = chunkIndex * this.chunkSize;
-    const toIndex = Math.min(fromIndex + this.chunkSize - 1, this.framesCount! - 1);
+  private requestFrame(frameIndex: number) {
+    this.frames[frameIndex] = WAITING;
 
     workers[this.workerIndex].request({
       name: 'renderFrames',
-      args: [this.id, fromIndex, toIndex, this.onFrameLoad.bind(this)],
+      args: [this.id, frameIndex, this.onFrameLoad.bind(this)],
     });
   }
 
-  private cleanupPrevChunk(chunkIndex: number) {
-    if (this.chunksCount! < 3) {
+  private cleanupPrevFrame(frameIndex: number) {
+    if (this.framesCount! < 3) {
       return;
     }
 
-    const prevChunkIndex = cycleRestrict(this.chunksCount!, chunkIndex - 1);
-    this.chunks[prevChunkIndex] = undefined;
-  }
-
-  private requestNextChunk(chunkIndex: number) {
-    if (this.chunksCount === 1) {
-      return;
-    }
-
-    const nextChunkIndex = cycleRestrict(this.chunksCount!, chunkIndex + 1);
-
-    if (!this.chunks[nextChunkIndex]) {
-      this.requestChunk(nextChunkIndex);
-    }
+    const prevFrameIndex = cycleRestrict(this.framesCount!, frameIndex - 1);
+    this.frames[prevFrameIndex] = undefined;
   }
 
   private onFrameLoad(frameIndex: number, imageBitmap: ImageBitmap) {
-    const chunkIndex = this.getChunkIndex(frameIndex);
-    const chunk = this.chunks[chunkIndex];
-    // Frame can be skipped and chunk can be already cleaned up
-    if (!chunk) {
+    if (this.frames[frameIndex] !== WAITING) {
       return;
     }
 
-    chunk[this.getFrameIndexInChunk(frameIndex)] = imageBitmap;
+    this.frames[frameIndex] = imageBitmap;
 
     if (this.isWaiting) {
       this.doPlay();
