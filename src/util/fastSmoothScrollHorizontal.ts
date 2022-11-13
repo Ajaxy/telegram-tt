@@ -2,7 +2,6 @@ import { getGlobal } from '../global';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';
-import { fastRaf } from './schedulers';
 
 const DEFAULT_DURATION = 300;
 
@@ -62,23 +61,21 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
   });
   const startAt = Date.now();
 
-  fastRaf(() => {
-    animate(() => {
-      if (isStopped) return false;
+  animate(() => {
+    if (isStopped) return false;
 
-      const t = Math.min((Date.now() - startAt) / duration, 1);
+    const t = Math.min((Date.now() - startAt) / duration, 1);
 
-      const currentPath = path * (1 - transition(t));
-      container.scrollLeft = Math.round(target - currentPath);
+    const currentPath = path * (1 - transition(t));
+    container.scrollLeft = Math.round(target - currentPath);
 
-      if (t >= 1) {
-        container.style.scrollSnapType = '';
-        container.dataset.scrollId = undefined;
-        stopById.delete(id);
-        resolve();
-      }
-      return t < 1;
-    });
+    if (t >= 1) {
+      container.style.scrollSnapType = '';
+      container.dataset.scrollId = undefined;
+      stopById.delete(id);
+      resolve();
+    }
+    return t < 1;
   });
 
   return promise;
