@@ -17,7 +17,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useThumbnail from '../../hooks/useThumbnail';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
-import useSharedCanvasCoords from '../../hooks/useSharedCanvasCoords';
+import useBoundsInSharedCanvas from '../../hooks/useBoundsInSharedCanvas';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -114,14 +114,15 @@ const StickerView: FC<OwnProps> = ({
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
   const noTransition = isLottie && preloadedPreviewData;
 
-  const sharedCanvasCoords = useSharedCanvasCoords(containerRef, sharedCanvasRef);
+  const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
+  const realSize = bounds.size || size;
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
 
   const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
   const idKey = [
-    (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, size, customColor?.join(','),
+    (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, realSize, customColor?.join(','),
   ].filter(Boolean).join('_');
 
   return (
@@ -141,7 +142,7 @@ const StickerView: FC<OwnProps> = ({
         <AnimatedSticker
           key={idKey}
           animationId={idKey}
-          size={size}
+          size={realSize}
           className={buildClassName(
             styles.media,
             (noTransition || isThumbOpaque) && styles.noTransition,
@@ -155,7 +156,7 @@ const StickerView: FC<OwnProps> = ({
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           sharedCanvas={sharedCanvasRef?.current || undefined}
-          sharedCanvasCoords={sharedCanvasCoords}
+          sharedCanvasCoords={bounds.coords}
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}
           onEnded={onAnimatedStickerLoop}

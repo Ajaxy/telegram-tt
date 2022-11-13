@@ -28,6 +28,7 @@ const rLottieApiPromise = new Promise<void>((resolve) => {
 
 const HIGH_PRIORITY_MAX_FPS = 60;
 const LOW_PRIORITY_MAX_FPS = 30;
+const DESTROY_REPEAT_DELAY = 1000;
 
 const renderers = new Map<string, {
   imgSize: number;
@@ -150,12 +151,17 @@ function applyColor(arr: Uint8ClampedArray, color: [number, number, number]) {
   }
 }
 
-function destroy(key: string) {
-  const renderer = renderers.get(key)!;
-
-  rLottieApi.destroy(renderer.handle);
-
-  renderers.delete(key);
+function destroy(key: string, isRepeated = false) {
+  try {
+    const renderer = renderers.get(key)!;
+    rLottieApi.destroy(renderer.handle);
+    renderers.delete(key);
+  } catch (err) {
+    // `destroy` sometimes can be called before the initialization is finished
+    if (!isRepeated) {
+      setTimeout(() => destroy(key, true), DESTROY_REPEAT_DELAY);
+    }
+  }
 }
 
 createWorkerInterface({

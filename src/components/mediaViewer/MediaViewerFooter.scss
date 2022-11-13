@@ -73,10 +73,6 @@
       vertical-align: -2px;
     }
 
-    .custom-emoji {
-      --custom-emoji-size: 1.25rem;
-    }
-
     &.multiline {
       &::before {
         content: "";

@@ -36,7 +36,7 @@
       bottom: 0.625rem;
     }
 
-    img:not(.emoji) {
+    .pictogram {
       margin-inline-start: 0.5rem;
     }
 
@@ -120,7 +120,7 @@
     opacity: 0.75;
   }
 
-  img:not(.emoji) {
+  .pictogram {
     width: 2rem;
     height: 2rem;
     object-fit: cover;
@@ -144,7 +144,7 @@
       bottom: 0.3125rem;
     }
 
-    img:not(.emoji) {
+    .pictogram {
       margin-left: 0.125rem;
     }
 
