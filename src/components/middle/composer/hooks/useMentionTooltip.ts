@@ -5,14 +5,17 @@ import { getGlobal } from '../../../../global';
 
 import type { ApiChatMember, ApiUser } from '../../../../api/types';
 import { ApiMessageEntityTypes } from '../../../../api/types';
-import { EDITABLE_INPUT_ID } from '../../../../config';
+
 import { filterUsersByName, getUserFirstOrLastName } from '../../../../global/helpers';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
+import { getHtmlBeforeSelection } from '../../../../util/selection';
 
 import useFlag from '../../../../hooks/useFlag';
+import useCacheBuster from '../../../../hooks/useCacheBuster';
+import useOnSelectionChange from '../../../../hooks/useOnSelectionChange';
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 let RE_USERNAME_SEARCH: RegExp;
@@ -26,14 +29,14 @@ try {
 
 export default function useMentionTooltip(
   canSuggestMembers: boolean | undefined,
-  htmlRef: { current: string },
+  inputSelector: string,
   onUpdateHtml: (html: string) => void,
-  inputId: string = EDITABLE_INPUT_ID,
   groupChatMembers?: ApiChatMember[],
   topInlineBotIds?: string[],
   currentUserId?: string,
 ) {
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
+  const [htmlBeforeSelection, setHtmlBeforeSelection] = useState('');
   const [usersToMention, setUsersToMention] = useState<ApiUser[] | undefined>();
 
   const updateFilteredUsers = useCallback((filter, withInlineBots: boolean) => {
@@ -64,22 +67,35 @@ export default function useMentionTooltip(
     });
   }, [currentUserId, groupChatMembers, topInlineBotIds]);
 
-  const html = htmlRef.current;
+  const [cacheBuster, updateCacheBuster] = useCacheBuster();
+
+  const handleSelectionChange = useCallback((range: Range) => {
+    if (range.collapsed) {
+      updateCacheBuster(); // Update tooltip on cursor move
+    }
+  }, [updateCacheBuster]);
+
+  useOnSelectionChange(document.querySelector<HTMLDivElement>(inputSelector), handleSelectionChange);
+
   useEffect(() => {
-    if (!canSuggestMembers || !html.length) {
+    setHtmlBeforeSelection(getHtmlBeforeSelection(document.querySelector<HTMLDivElement>(inputSelector)!));
+  }, [inputSelector, cacheBuster]);
+
+  useEffect(() => {
+    if (!canSuggestMembers || !htmlBeforeSelection.length) {
       unmarkIsOpen();
       return;
     }
 
-    const usernameFilter = html.includes('@') && getUsernameFilter(html);
+    const usernameFilter = htmlBeforeSelection.includes('@') && getUsernameFilter(htmlBeforeSelection);
 
     if (usernameFilter) {
       const filter = usernameFilter ? usernameFilter.substr(1) : '';
-      updateFilteredUsers(filter, canSuggestInlineBots(html));
+      updateFilteredUsers(filter, canSuggestInlineBots(htmlBeforeSelection));
     } else {
       unmarkIsOpen();
     }
-  }, [canSuggestMembers, updateFilteredUsers, markIsOpen, unmarkIsOpen, html]);
+  }, [canSuggestMembers, updateFilteredUsers, markIsOpen, unmarkIsOpen, htmlBeforeSelection]);
 
   useEffect(() => {
     if (usersToMention?.length) {
@@ -104,18 +120,21 @@ export default function useMentionTooltip(
           dir="auto"
         >${getUserFirstOrLastName(user)}</a>`;
 
-    const currentHtml = htmlRef.current;
-    const atIndex = currentHtml.lastIndexOf('@');
+    const containerEl = document.querySelector<HTMLDivElement>(inputSelector)!;
+
+    const atIndex = htmlBeforeSelection.lastIndexOf('@');
     if (atIndex !== -1) {
-      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${insertedHtml}&nbsp;`);
-      const messageInput = document.getElementById(inputId)!;
+      const newHtml = `${htmlBeforeSelection.substr(0, atIndex)}${insertedHtml}&nbsp;`;
+      const htmlAfterSelection = containerEl.innerHTML.substring(htmlBeforeSelection.length);
+      onUpdateHtml(`${newHtml}${htmlAfterSelection}`);
+
       requestAnimationFrame(() => {
-        focusEditableElement(messageInput, forceFocus);
+        focusEditableElement(containerEl, forceFocus);
       });
     }
 
     unmarkIsOpen();
-  }, [htmlRef, inputId, onUpdateHtml, unmarkIsOpen]);
+  }, [htmlBeforeSelection, inputSelector, onUpdateHtml, unmarkIsOpen]);
 
   return {
     isMentionTooltipOpen: isOpen,
