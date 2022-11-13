@@ -1,8 +1,8 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
@@ -14,19 +14,21 @@ import {
   isOwnMessage,
   isUserId,
 } from '../../../global/helpers';
-import useMedia from '../../../hooks/useMedia';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
-import useLang from '../../../hooks/useLang';
-import useForceUpdate from '../../../hooks/useForceUpdate';
-import useTimeout from '../../../hooks/useTimeout';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl, prepareMapUrl,
 } from '../../../util/map';
+import { getServerTime } from '../../../util/serverTime';
+
+import useMedia from '../../../hooks/useMedia';
+import useLang from '../../../hooks/useLang';
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useTimeout from '../../../hooks/useTimeout';
 import buildClassName from '../../../util/buildClassName';
 import usePrevious from '../../../hooks/usePrevious';
 import useInterval from '../../../hooks/useInterval';
-import { getServerTime } from '../../../util/serverTime';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/Skeleton';
@@ -143,17 +145,23 @@ const Location: FC<OwnProps> = ({
     }
   }, [updateCountdown]);
 
-  useLayoutEffect(() => {
-    if (shouldRenderText) return;
-    const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
+  useLayoutEffectWithPrevDeps(([prevShouldRenderText]) => {
+    if (shouldRenderText) {
+      if (!prevShouldRenderText) {
+        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+      }
+      return;
+    }
+
     if (mapBlobUrl) {
+      const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
       getCustomAppendixBg(mapBlobUrl, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.classList.add('has-appendix-thumb');
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });
     }
-  }, [isOwn, isInSelectMode, isSelected, theme, mapBlobUrl, shouldRenderText]);
+  }, [shouldRenderText, isOwn, isInSelectMode, isSelected, theme, mapBlobUrl] as const);
 
   useEffect(() => {
     // Prevent map refetching for slight location changes
