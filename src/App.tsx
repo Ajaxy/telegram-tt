@@ -20,12 +20,14 @@ import LockScreen from './components/main/LockScreen.async';
 import AppInactive from './components/main/AppInactive';
 import Transition from './components/ui/Transition';
 import UiLoader from './components/common/UiLoader';
+import { parseInitialLocationHash } from './util/routing';
 // import Test from './components/test/TestNoRedundancy';
 
 type StateProps = {
   authState: GlobalState['authState'];
   isScreenLocked?: boolean;
   hasPasscode?: boolean;
+  hasWebAuthTokenFailed?: boolean;
 };
 
 enum AppScreens {
@@ -39,6 +41,7 @@ const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
   hasPasscode,
+  hasWebAuthTokenFailed,
 }) => {
   const { disconnect } = getActions();
 
@@ -130,6 +133,15 @@ const App: FC<StateProps> = ({
     activeKey = AppScreens.auth;
   }
 
+  if (activeKey !== AppScreens.lock
+    && activeKey !== AppScreens.inactive
+    && activeKey !== AppScreens.main
+    && parseInitialLocationHash()?.tgWebAuthToken
+    && !hasWebAuthTokenFailed) {
+    page = 'main';
+    activeKey = AppScreens.main;
+  }
+
   const prevActiveKey = usePrevious(activeKey);
 
   // eslint-disable-next-line consistent-return
@@ -169,6 +181,7 @@ export default withGlobal(
       authState: global.authState,
       isScreenLocked: global.passcode?.isScreenLocked,
       hasPasscode: global.passcode?.hasPasscode,
+      hasWebAuthTokenFailed: global.hasWebAuthTokenFailed,
     };
   },
 )(App);

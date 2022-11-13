@@ -64,6 +64,10 @@ export type ApiUpdateAuthorizationState = {
   qrCode?: { token: string; expires: number };
 };
 
+export type ApiUpdateWebAuthTokenFailed = {
+  '@type': 'updateWebAuthTokenFailed';
+};
+
 export type ApiUpdateSession = {
   '@type': 'updateSession';
   sessionData?: ApiSessionData;
@@ -549,7 +553,7 @@ export type ApiUpdateTranscribedAudio = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateReady | ApiUpdateSession |
+  ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |

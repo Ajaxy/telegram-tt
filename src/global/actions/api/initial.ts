@@ -30,6 +30,7 @@ import { forceWebsync } from '../../../util/websync';
 import { clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { serializeGlobal } from '../../cache';
+import { parseInitialLocationHash } from '../../../util/routing';
 
 addActionHandler('initApi', async (global, actions) => {
   if (!IS_TEST) {
@@ -37,14 +38,18 @@ addActionHandler('initApi', async (global, actions) => {
     void clearLegacySessions();
   }
 
+  const initialLocationHash = parseInitialLocationHash();
+
   void initApi(actions.apiUpdate, {
     userAgent: navigator.userAgent,
     platform: PLATFORM_ENV,
     sessionData: loadStoredSession(),
-    isTest: window.location.search.includes('test'),
+    isTest: window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1',
     isMovSupported: IS_MOV_SUPPORTED,
     isWebmSupported: IS_WEBM_SUPPORTED,
     maxBufferSize: MAX_BUFFER_SIZE,
+    webAuthToken: initialLocationHash?.tgWebAuthToken,
+    dcId: initialLocationHash?.tgWebAuthDcId ? Number(initialLocationHash?.tgWebAuthDcId) : undefined,
   });
 });
 

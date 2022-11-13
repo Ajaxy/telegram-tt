@@ -36,10 +36,10 @@ import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useOnChange from '../../hooks/useOnChange';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { LOCATION_HASH } from '../../hooks/useHistoryBack';
 import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
+import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -193,6 +193,7 @@ const Main: FC<StateProps> = ({
     closePaymentModal,
     clearReceipt,
     checkAppVersion,
+    openChat,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -276,10 +277,24 @@ const Main: FC<StateProps> = ({
 
   // Parse deep link
   useEffect(() => {
-    if (lastSyncTime && LOCATION_HASH.startsWith('#?tgaddr=')) {
-      processDeepLink(decodeURIComponent(LOCATION_HASH.substr('#?tgaddr='.length)));
+    const parsedInitialLocationHash = parseInitialLocationHash();
+    if (lastSyncTime && parsedInitialLocationHash?.tgaddr) {
+      processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));
     }
   }, [lastSyncTime]);
+
+  useEffectWithPrevDeps(([prevLastSyncTime]) => {
+    const parsedLocationHash = parseLocationHash();
+    if (!parsedLocationHash) return;
+
+    if (!prevLastSyncTime && lastSyncTime) {
+      openChat({
+        id: parsedLocationHash.chatId,
+        threadId: parsedLocationHash.threadId,
+        type: parsedLocationHash.type,
+      });
+    }
+  }, [lastSyncTime] as const);
 
   // Prevent refresh by accidentally rotating device when listening to a voice chat
   useEffect(() => {

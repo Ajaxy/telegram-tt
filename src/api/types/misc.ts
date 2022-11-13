@@ -10,6 +10,8 @@ export interface ApiInitialArgs {
   isMovSupported?: boolean;
   isWebmSupported?: boolean;
   maxBufferSize?: number;
+  webAuthToken?: string;
+  dcId?: number;
 }
 
 export interface ApiOnProgress {

@@ -1,11 +1,12 @@
 import Api from '../tl/api';
-import TelegramClient from './TelegramClient';
+import type TelegramClient from './TelegramClient';
 import utils from '../Utils';
 import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
+    webAuthTokenFailed: VoidFunction;
     phoneCode: (isCodeViaApp?: boolean) => Promise<string>;
     password: (hint?: string) => Promise<string>;
     firstAndLastNames: () => Promise<[string, string?]>;
@@ -14,6 +15,7 @@ export interface UserAuthParams {
     forceSMS?: boolean;
     initialMethod?: 'phoneNumber' | 'qrCode';
     shouldThrowIfUnauthorized?: boolean;
+    webAuthToken?: string;
 }
 
 export interface BotAuthParams {
@@ -37,17 +39,25 @@ export async function authFlow(
 
     if ('botAuthToken' in authParams) {
         me = await signInBot(client, apiCredentials, authParams);
+    } else if ('webAuthToken' in authParams && authParams.webAuthToken) {
+        me = await signInUserWithWebToken(client, apiCredentials, authParams);
     } else {
-        const { initialMethod = DEFAULT_INITIAL_METHOD } = authParams;
-
-        if (initialMethod === 'phoneNumber') {
-            me = await signInUser(client, apiCredentials, authParams);
-        } else {
-            me = await signInUserWithQrCode(client, apiCredentials, authParams);
-        }
+        me = await signInUserWithPreferredMethod(client, apiCredentials, authParams);
     }
 
     client._log.info('Signed in successfully as', utils.getDisplayName(me));
+}
+
+export async function signInUserWithPreferredMethod(
+    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
+): Promise<Api.TypeUser> {
+    const { initialMethod = DEFAULT_INITIAL_METHOD } = authParams;
+
+    if (initialMethod === 'phoneNumber') {
+        return signInUser(client, apiCredentials, authParams);
+    } else {
+        return signInUserWithQrCode(client, apiCredentials, authParams);
+    }
 }
 
 export async function checkAuthorization(client: TelegramClient, shouldThrow = false) {
@@ -57,6 +67,36 @@ export async function checkAuthorization(client: TelegramClient, shouldThrow = f
     } catch (e: any) {
         if (e.message === 'Disconnect' || shouldThrow) throw e;
         return false;
+    }
+}
+
+async function signInUserWithWebToken(
+    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
+): Promise<Api.TypeUser> {
+    try {
+        const { apiId, apiHash } = apiCredentials;
+        const sendResult = await client.invoke(new Api.auth.ImportWebTokenAuthorization({
+            webAuthToken: authParams.webAuthToken,
+            apiId,
+            apiHash,
+        }));
+
+        if (sendResult instanceof Api.auth.Authorization) {
+            return sendResult.user;
+        } else {
+            throw new Error('SIGN_UP_REQUIRED');
+        }
+    } catch (err: any) {
+        authParams.webAuthTokenFailed();
+        client._log.error('Failed to login with web token', err);
+        if (err.message === 'SESSION_PASSWORD_NEEDED') {
+            return signInWithPassword(client, apiCredentials, authParams);
+        } else {
+            return signInUserWithPreferredMethod(client, apiCredentials, {
+                ...authParams,
+                webAuthToken: undefined,
+            });
+        }
     }
 }
 
