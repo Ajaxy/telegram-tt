@@ -1,6 +1,6 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useLayoutEffect, useRef } from '../../../lib/teact/teact';
+import React, { memo, useRef } from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
@@ -10,6 +10,7 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 
@@ -49,20 +50,22 @@ const Invoice: FC<OwnProps> = ({
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
 
-  useLayoutEffect(() => {
+  useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
+      if (prevShouldAffectAppendix) {
+        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+      }
       return;
     }
 
-    const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
-
     if (photoUrl) {
+      const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
       getCustomAppendixBg(photoUrl, false, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });
     }
-  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
+  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme] as const);
 
   return (
     <div

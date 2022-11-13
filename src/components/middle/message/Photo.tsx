@@ -1,11 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useCallback, useLayoutEffect, useRef, useState,
+  useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
 import {
@@ -16,16 +17,17 @@ import {
   isOwnMessage,
   getMessageMediaFormat,
 } from '../../../global/helpers';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import buildClassName from '../../../util/buildClassName';
+import getCustomAppendixBg from './helpers/getCustomAppendixBg';
+import { calculateMediaDimensions } from './helpers/mediaDimensions';
+
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import usePrevious from '../../../hooks/usePrevious';
 import useMediaTransition from '../../../hooks/useMediaTransition';
-import buildClassName from '../../../util/buildClassName';
-import getCustomAppendixBg from './helpers/getCustomAppendixBg';
-import { calculateMediaDimensions } from './helpers/mediaDimensions';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -126,13 +128,15 @@ const Photo: FC<OwnProps> = ({
   }, [fullMediaData, isUploading, message, onCancelUpload, onClick]);
 
   const isOwn = isOwnMessage(message);
-  useLayoutEffect(() => {
+  useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
+      if (prevShouldAffectAppendix) {
+        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+      }
       return;
     }
 
     const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
-
     if (fullMediaData) {
       getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
@@ -141,7 +145,7 @@ const Photo: FC<OwnProps> = ({
     } else {
       contentEl.classList.add('has-appendix-thumb');
     }
-  }, [fullMediaData, isOwn, shouldAffectAppendix, isInSelectMode, isSelected, theme]);
+  }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme] as const);
 
   const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, noAvatars);
 
