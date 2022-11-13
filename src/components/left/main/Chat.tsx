@@ -380,7 +380,12 @@ function renderSummary(
   lang: LangFn, message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
 ) {
   const messageSummary = (
-    <MessageSummary lang={lang} message={message} observeIntersectionForLoading={observeIntersection} />
+    <MessageSummary
+      lang={lang}
+      message={message}
+      noEmoji={Boolean(blobUrl)}
+      observeIntersectionForLoading={observeIntersection}
+    />
   );
 
   if (!blobUrl) {
