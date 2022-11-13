@@ -100,11 +100,13 @@ const StickerView: FC<OwnProps> = ({
   const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && preloadedPreviewData);
 
   const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia, undefined, cacheBuster);
-  const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData));
+  // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
+  const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !preloadedPreviewData));
   const isFullMediaReady = fullMediaData && (isStatic || isPlayerReady);
 
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
+  const noTransition = isLottie && preloadedPreviewData;
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
@@ -118,7 +120,7 @@ const StickerView: FC<OwnProps> = ({
     <>
       <img
         src={thumbData}
-        className={buildClassName(styles.thumb, thumbClassName, thumbClassNames)}
+        className={buildClassName(styles.thumb, noTransition && styles.noTransition, thumbClassName, thumbClassNames)}
         alt=""
       />
       {isLottie ? (
@@ -126,7 +128,9 @@ const StickerView: FC<OwnProps> = ({
           key={idKey}
           id={idKey}
           size={size}
-          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
+          className={buildClassName(
+            styles.media, noTransition && styles.noTransition, fullMediaClassName, fullMediaClassNames,
+          )}
           tgsUrl={fullMediaData}
           play={shouldPlay}
           color={customColor}
