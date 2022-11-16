@@ -30,7 +30,7 @@ import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
   selectChatFolder, selectSupportChat, selectChatByUsername, selectThreadTopMessageId,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
-  selectVisibleUsers, selectUserByPhoneNumber,
+  selectVisibleUsers, selectUserByPhoneNumber, selectDraft,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -209,7 +209,7 @@ addActionHandler('loadAllChats', async (global, actions, payload) => {
         .sort((chat1, chat2) => getOrderDate(chat1)! - getOrderDate(chat2)!)[0]
       : undefined;
 
-    await loadChats(listType, oldestChat?.id, oldestChat ? getOrderDate(oldestChat) : undefined, shouldReplace);
+    await loadChats(listType, oldestChat?.id, oldestChat ? getOrderDate(oldestChat) : undefined, shouldReplace, true);
 
     if (shouldReplace) {
       onReplace?.();
@@ -1174,7 +1174,11 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload) 
 });
 
 async function loadChats(
-  listType: 'active' | 'archived', offsetId?: string, offsetDate?: number, shouldReplace = false,
+  listType: 'active' | 'archived',
+  offsetId?: string,
+  offsetDate?: number,
+  shouldReplace = false,
+  isFullDraftSync?: boolean,
 ) {
   let global = getGlobal();
   const lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
@@ -1245,13 +1249,17 @@ async function loadChats(
 
   global = updateChatListSecondaryInfo(global, listType, result);
 
-  Object.keys(result.draftsById).forEach((chatId) => {
-    global = replaceThreadParam(
-      global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
-    );
+  const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
+  idsToUpdateDraft.forEach((chatId) => {
+    if (!selectDraft(global, chatId, MAIN_THREAD_ID)?.isLocal) {
+      global = replaceThreadParam(
+        global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
+      );
+    }
   });
 
-  Object.keys(result.replyingToById).forEach((chatId) => {
+  const idsToUpdateReplyingToId = isFullDraftSync ? result.chatIds : Object.keys(result.replyingToById);
+  idsToUpdateReplyingToId.forEach((chatId) => {
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
     );
