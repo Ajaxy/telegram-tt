@@ -110,7 +110,7 @@ const fromLine = (line, isFunction) => {
             .replace(/(:|\?)bytes /g, '$1string ')
             .replace(/</g, ' ')
             .replace(/>|{|}/g, '')
-            .replace(/ \w+:flags\.\d+\?true/g, '');
+            .replace(/ \w+:flags\d*\.\d+\?true/g, '');
 
         if (currentConfig.name === 'inputMediaInvoice') {
             // eslint-disable-next-line no-empty
@@ -147,6 +147,7 @@ function buildArgConfig(name, argType) {
         isVector: false,
         isFlag: false,
         skipConstructorId: false,
+        flagGroup: 0,
         flagIndex: -1,
         flagIndicator: true,
         type: undefined,
@@ -159,17 +160,18 @@ function buildArgConfig(name, argType) {
         // Strip the exclamation mark always to have only the name
         currentConfig.type = argType.replace(/^!+/, '');
 
-        // The type may be a flag (flags.IDX?REAL_TYPE)
+        // The type may be a flag (flags[N].IDX?REAL_TYPE)
         // Note that 'flags' is NOT the flags name; this
         // is determined by a previous argument
-        // However, we assume that the argument will always be called 'flags'
-        const flagMatch = currentConfig.type.match(/flags.(\d+)\?([\w<>.]+)/);
+        // However, we assume that the argument will always be called 'flags[N]'
+        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
 
         if (flagMatch) {
             currentConfig.isFlag = true;
-            currentConfig.flagIndex = Number(flagMatch[1]);
+            currentConfig.flagGroup = Number(flagMatch[1] || 1);
+            currentConfig.flagIndex = Number(flagMatch[2]);
             // Update the type to match the exact type, not the "flagged" one
-            [, , currentConfig.type] = flagMatch;
+            [, , , currentConfig.type] = flagMatch;
         }
 
         // Then check if the type is a Vector<REAL_TYPE>
@@ -210,7 +212,7 @@ function buildArgConfig(name, argType) {
     return currentConfig;
 }
 
-function* parseTl(content, layer, methods = [], ignoreIds = CORE_TYPES) {
+function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
     (methods || []).reduce((o, m) => ({
         ...o,
         [m.name]: m,

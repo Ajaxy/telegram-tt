@@ -89,7 +89,7 @@ function mergeWithNamespaces(obj1, obj2) {
 }
 
 function extractParams(fileContent) {
-    const f = parseTl(fileContent, 109);
+    const f = parseTl(fileContent);
     const constructors = [];
     const functions = [];
     for (const d of f) {
@@ -259,21 +259,15 @@ function createClasses(classesType, params) {
                     if (argsConfig.hasOwnProperty(argName)) {
                         const arg = argsConfig[argName];
                         if (arg.isFlag) {
-                            const flagValue = arg.flagIndex > 30
-                                ? args.flags2 & (1 << (arg.flagIndex - 31)) : args.flags & (1 << arg.flagIndex);
+                            const flagGroupSuffix = arg.flagGroup > 1 ? arg.flagGroup : '';
+                            const flagValue = args[`flags${flagGroupSuffix}`] & (1 << arg.flagIndex);
                             if (arg.type === 'true') {
                                 args[argName] = Boolean(flagValue);
                                 continue;
                             }
-                            if (flagValue) {
-                                args[argName] = getArgFromReader(reader, arg);
-                            } else {
-                                args[argName] = undefined;
-                            }
+
+                            args[argName] = flagValue ? getArgFromReader(reader, arg) : undefined;
                         } else {
-                            if (arg.flagIndicator) {
-                                arg.name = 'flags';
-                            }
                             args[argName] = getArgFromReader(reader, arg);
                         }
                     }
