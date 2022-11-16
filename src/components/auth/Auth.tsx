@@ -24,21 +24,21 @@ type OwnProps = {
   isActive: boolean;
 };
 
-type StateProps = Pick<GlobalState, 'authState' | 'hasWebAuthTokenPasswordRequired'>;
+type StateProps = Pick<GlobalState, 'authState'>;
 
 const Auth: FC<OwnProps & StateProps> = ({
-  isActive, authState, hasWebAuthTokenPasswordRequired,
+  isActive, authState,
 }) => {
   const {
     reset, initApi, returnToAuthPhoneNumber, goToAuthQrCode,
   } = getActions();
 
   useEffect(() => {
-    if (isActive && !hasWebAuthTokenPasswordRequired) {
+    if (isActive) {
       reset();
       initApi();
     }
-  }, [isActive, reset, initApi, hasWebAuthTokenPasswordRequired]);
+  }, [isActive, reset, initApi]);
 
   const isMobile = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
@@ -113,5 +113,5 @@ const Auth: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => pick(global, ['authState', 'hasWebAuthTokenPasswordRequired']),
+  (global): StateProps => pick(global, ['authState']),
 )(Auth));

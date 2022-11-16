@@ -181,7 +181,7 @@ export default withGlobal(
       authState: global.authState,
       isScreenLocked: global.passcode?.isScreenLocked,
       hasPasscode: global.passcode?.hasPasscode,
-      hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
+      hasWebAuthTokenFailed: global.hasWebAuthTokenFailed,
     };
   },
 )(App);
