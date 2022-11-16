@@ -326,30 +326,35 @@ addActionHandler('cancelSendingMessage', (global, actions, payload) => {
   });
 });
 
-addActionHandler('saveDraft', (global, actions, payload) => {
+addActionHandler('saveDraft', async (global, actions, payload) => {
   const { chatId, threadId, draft } = payload!;
   if (!draft) {
-    return undefined;
+    return;
   }
 
   const { text, entities } = draft;
   const chat = selectChat(global, chatId)!;
   const user = selectUser(global, chatId)!;
-  if (user && isDeletedUser(user)) return undefined;
+  if (user && isDeletedUser(user)) return;
 
   if (threadId === MAIN_THREAD_ID) {
-    void callApi('saveDraft', {
+    const result = await callApi('saveDraft', {
       chat,
       text,
       entities,
       replyToMsgId: selectReplyingToId(global, chatId, threadId),
     });
+
+    if (!result) {
+      draft.isLocal = true;
+    }
   }
+  global = getGlobal();
 
   global = replaceThreadParam(global, chatId, threadId, 'draft', draft);
   global = updateChat(global, chatId, { draftDate: Math.round(Date.now() / 1000) });
 
-  return global;
+  setGlobal(global);
 });
 
 addActionHandler('clearDraft', (global, actions, payload) => {

@@ -113,7 +113,7 @@ export interface Thread {
   editingScheduledId?: number;
   editingDraft?: ApiFormattedText;
   editingScheduledDraft?: ApiFormattedText;
-  draft?: ApiFormattedText;
+  draft?: ApiFormattedText & { isLocal?: boolean };
   noWebPage?: boolean;
   threadInfo?: ApiThreadInfo;
   firstMessageId?: number;
