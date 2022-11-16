@@ -59,6 +59,7 @@ type StateProps = {
   mediaId?: number;
   senderId?: string;
   isChatWithSelf?: boolean;
+  canDeleteMedia?: boolean;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
   message?: ApiMessage;
@@ -77,6 +78,7 @@ const MediaViewer: FC<StateProps> = ({
   mediaId,
   senderId,
   isChatWithSelf,
+  canDeleteMedia,
   origin,
   avatarOwner,
   message,
@@ -144,6 +146,12 @@ const MediaViewer: FC<StateProps> = ({
   if (isOpen && (!prevSenderId || prevSenderId !== senderId || !animationKey.current)) {
     animationKey.current = selectedMediaIndex;
   }
+
+  useEffect(() => {
+    if (isOpen && !mediaIds.length) {
+      closeMediaViewer();
+    }
+  }, [isOpen, closeMediaViewer, mediaIds.length]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -279,12 +287,23 @@ const MediaViewer: FC<StateProps> = ({
     return undefined;
   }, [mediaIds]);
 
+  const handleBeforeDelete = useCallback(() => {
+    if (mediaIds.length <= 1) {
+      handleClose();
+      return;
+    }
+    let index = mediaId ? mediaIds.indexOf(mediaId) : -1;
+    // Before deleting, select previous media or the first one
+    index = index > 0 ? index - 1 : 0;
+    selectMedia(mediaIds[index]);
+  }, [handleClose, mediaId, mediaIds, selectMedia]);
+
   const lang = useLang();
 
   function renderSenderInfo() {
     return avatarOwner ? (
       <SenderInfo
-        key={avatarOwner.id}
+        key={mediaId}
         chatId={avatarOwner.id}
         isAvatar
       />
@@ -324,8 +343,12 @@ const MediaViewer: FC<StateProps> = ({
           mediaData={fullMediaBlobUrl || previewBlobUrl}
           isVideo={isVideo}
           message={message}
+          canDeleteAvatar={canDeleteMedia && !!avatarPhoto}
+          avatarPhoto={avatarPhoto}
+          avatarOwnerId={avatarOwner?.id}
           fileName={fileName}
           canReport={canReport}
+          onBeforeDelete={handleBeforeDelete}
           onReport={openReportModal}
           onCloseMediaViewer={handleClose}
           onForward={handleForward}
@@ -377,8 +400,7 @@ export default memo(withGlobal(
       animationLevel,
     } = global.settings.byKey;
 
-    const { shouldSkipHistoryAnimations } = global;
-
+    const { shouldSkipHistoryAnimations, currentUserId } = global;
     let isChatWithSelf = !!chatId && selectIsChatWithSelf(global, chatId);
 
     if (origin === MediaViewerOrigin.SearchResult) {
@@ -405,14 +427,20 @@ export default memo(withGlobal(
     }
 
     if (avatarOwnerId) {
-      const sender = selectUser(global, avatarOwnerId) || selectChat(global, avatarOwnerId);
+      const user = selectUser(global, avatarOwnerId);
+      const chat = selectChat(global, avatarOwnerId);
+      let canDeleteMedia = false;
+      if (user) canDeleteMedia = avatarOwnerId === currentUserId;
+      // TODO Support deleting chat photos
+      // if (chat) canDeleteMedia = isChatAdmin(chat);
       isChatWithSelf = selectIsChatWithSelf(global, avatarOwnerId);
 
       return {
         mediaId,
         senderId: avatarOwnerId,
-        avatarOwner: sender,
+        avatarOwner: user || chat,
         isChatWithSelf,
+        canDeleteMedia,
         animationLevel,
         origin,
         shouldSkipHistoryAnimations,

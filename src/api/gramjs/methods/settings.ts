@@ -6,7 +6,7 @@ import type {
   ApiError,
   ApiLangString,
   ApiLanguage,
-  ApiNotifyException,
+  ApiNotifyException, ApiPhoto,
 } from '../../types';
 import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 
@@ -26,7 +26,9 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildAppConfig } from '../apiBuilders/appConfig';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
-import { buildInputEntity, buildInputPeer, buildInputPrivacyKey } from '../gramjsBuilders';
+import {
+  buildInputEntity, buildInputPeer, buildInputPrivacyKey, buildInputPhoto,
+} from '../gramjsBuilders';
 import { getClient, invokeRequest, uploadFile } from './client';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -77,6 +79,16 @@ export async function uploadProfilePhoto(file: File) {
   await invokeRequest(new GramJs.photos.UploadProfilePhoto({
     file: inputFile,
   }));
+}
+
+export async function deleteProfilePhoto(photo: ApiPhoto) {
+  const photoId = buildInputPhoto(photo);
+  if (!photoId) return false;
+  const isDeleted = await invokeRequest(new GramJs.photos.DeletePhotos({ id: [photoId] }), true);
+  if (isDeleted) {
+    delete localDb.photos[photo.id];
+  }
+  return isDeleted;
 }
 
 export async function fetchWallpapers() {

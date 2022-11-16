@@ -6,7 +6,9 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiMessage } from '../../api/types';
+import type {
+  ApiMessage, ApiPhoto,
+} from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { MenuItemProps } from '../ui/MenuItem';
 
@@ -29,6 +31,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import DeleteMessageModal from '../common/DeleteMessageModal';
+import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
 
 import './MediaViewerActions.scss';
 
@@ -45,9 +48,13 @@ type OwnProps = {
   isVideo: boolean;
   zoomLevelChange: number;
   message?: ApiMessage;
+  canDeleteAvatar?: boolean;
+  avatarPhoto?: ApiPhoto;
+  avatarOwnerId?: string;
   fileName?: string;
   canReport?: boolean;
   onReport: NoneToVoidFunction;
+  onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
   setZoomLevelChange: (change: number) => void;
@@ -57,6 +64,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   mediaData,
   isVideo,
   message,
+  avatarPhoto,
+  avatarOwnerId,
   fileName,
   isChatProtected,
   isDownloading,
@@ -67,6 +76,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   messageListType,
   onReport,
   onCloseMediaViewer,
+  onBeforeDelete,
   onForward,
   setZoomLevelChange,
 }) => {
@@ -117,6 +127,28 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       </Button>
     );
   }, []);
+
+  function renderDeleteModals() {
+    return message
+      ? (
+        <DeleteMessageModal
+          isOpen={isDeleteModalOpen}
+          isSchedule={messageListType === 'scheduled'}
+          onClose={closeDeleteModal}
+          onConfirm={onBeforeDelete}
+          message={message}
+        />
+      )
+      : (avatarOwnerId && avatarPhoto) ? (
+        <DeleteProfilePhotoModal
+          isOpen={isDeleteModalOpen}
+          onClose={closeDeleteModal}
+          onConfirm={onBeforeDelete}
+          profileId={avatarOwnerId}
+          photo={avatarPhoto}
+        />
+      ) : undefined;
+  }
 
   function renderDownloadButton() {
     if (isProtected) {
@@ -218,14 +250,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ))}
         </DropdownMenu>
         {isDownloading && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
-        {message && canDelete && (
-          <DeleteMessageModal
-            isOpen={isDeleteModalOpen}
-            isSchedule={messageListType === 'scheduled'}
-            onClose={closeDeleteModal}
-            message={message}
-          />
-        )}
+        {canDelete && renderDeleteModals()}
       </div>
     );
   }
@@ -293,26 +318,21 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon-close" />
       </Button>
-      {message && canDelete && (
-        <DeleteMessageModal
-          isOpen={isDeleteModalOpen}
-          isSchedule={messageListType === 'scheduled'}
-          onClose={closeDeleteModal}
-          message={message}
-        />
-      )}
+      {canDelete && renderDeleteModals()}
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message, canDeleteAvatar }): StateProps => {
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
     const isDownloading = message ? selectIsDownloading(global, message) : false;
     const isProtected = selectIsMessageProtected(global, message);
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
-    const { canDelete } = (threadId && message && selectAllowedMessageActions(global, message, threadId)) || {};
+    const { canDelete: canDeleteMessage } = (threadId
+      && message && selectAllowedMessageActions(global, message, threadId)) || {};
+    const canDelete = canDeleteMessage || canDeleteAvatar;
     const messageListType = currentMessageList?.type;
 
     return {
