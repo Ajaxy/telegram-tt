@@ -1237,6 +1237,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           )}
           <MessageInput
             id="message-input-text"
+            editableInputId={EDITABLE_INPUT_ID}
             chatId={chatId}
             threadId={threadId}
             html={!attachments.length ? html : ''}
@@ -1247,6 +1248,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             }
             forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && !attachments.length}
+            noFocusInterception={attachments.length > 0}
             shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
             shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onUpdate={setHtml}

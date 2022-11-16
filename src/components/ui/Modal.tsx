@@ -7,6 +7,7 @@ import type { TextPart } from '../../types';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
+import { enableDirectTextInput, disableDirectTextInput } from '../../util/directInputManager';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useShowTransition from '../../hooks/useShowTransition';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -62,6 +63,16 @@ const Modal: FC<OwnProps & StateProps> = ({
   );
   // eslint-disable-next-line no-null/no-null
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    disableDirectTextInput();
+
+    return enableDirectTextInput;
+  }, [isOpen]);
 
   useEffect(() => (isOpen
     ? captureKeyboardListeners({ onEsc: onClose, onEnter })
