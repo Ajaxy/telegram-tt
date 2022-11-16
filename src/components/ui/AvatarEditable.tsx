@@ -45,11 +45,11 @@ const AvatarEditable: FC<OwnProps> = ({
     setSelectedFile(undefined);
     onChange(croppedImg);
 
-    if (croppedBlobUrl) {
+    if (croppedBlobUrl && croppedBlobUrl !== currentAvatarBlobUrl) {
       URL.revokeObjectURL(croppedBlobUrl);
     }
     setCroppedBlobUrl(URL.createObjectURL(croppedImg));
-  }, [croppedBlobUrl, onChange]);
+  }, [croppedBlobUrl, currentAvatarBlobUrl, onChange]);
 
   const handleModalClose = useCallback(() => {
     setSelectedFile(undefined);

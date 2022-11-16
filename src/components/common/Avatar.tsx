@@ -127,7 +127,7 @@ const Avatar: FC<OwnProps> = ({
 
   const userId = user?.id;
   useEffect(() => {
-    if (shouldShowVideo && !profilePhoto) {
+    if (userId && shouldShowVideo && !profilePhoto) {
       loadFullUser({ userId });
     }
   }, [loadFullUser, profilePhoto, userId, shouldShowVideo]);

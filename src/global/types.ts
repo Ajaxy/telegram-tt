@@ -736,18 +736,19 @@ export interface ActionPayloads {
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
   };
-
+  loadFullChat: {
+    chatId: string;
+    force?: boolean;
+  };
   openChatWithDraft: {
     chatId?: string;
     text: string;
   };
   resetOpenChatWithDraft: never;
-
   toggleJoinToSend: {
     chatId: string;
     isEnabled: boolean;
   };
-
   toggleJoinRequest: {
     chatId: string;
     isEnabled: boolean;
@@ -857,6 +858,9 @@ export interface ActionPayloads {
   };
 
   // Users
+  loadFullUser: {
+    userId: string;
+  };
   openAddContactDialog: {
     userId?: string;
   };
@@ -873,6 +877,13 @@ export interface ActionPayloads {
     lastName?: string;
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
+  };
+  loadProfilePhotos: {
+    profileId: string;
+  };
+  deleteProfilePhoto: {
+    profileId: string;
+    photo: ApiPhoto;
   };
 
   // Forwards
@@ -1222,11 +1233,11 @@ export type NonTypedActionNames = (
   // chats
   'preloadTopChatMessages' | 'loadAllChats' | 'openChatWithInfo' | 'openLinkedChat' |
   'openSupportChat' | 'focusMessageInComments' | 'openChatByPhoneNumber' |
-  'loadChatSettings' | 'loadFullChat' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
+  'loadChatSettings' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
-  'loadProfilePhotos' | 'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' | 'setChatEnabledReactions' |
+  'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' | 'setChatEnabledReactions' |
   'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' | 'editChatFolders' | 'toggleIsProtected' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
@@ -1261,7 +1272,7 @@ export type NonTypedActionNames = (
   'togglePreHistoryHidden' | 'updateChatDefaultBannedRights' | 'updateChatMemberBannedRights' | 'updateChatAdmin' |
   'acceptInviteConfirmation' |
   // users
-  'loadFullUser' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   'loadCurrentUser' | 'updateProfile' | 'checkUsername' |
   'deleteContact' | 'loadUser' | 'setUserSearchQuery' | 'loadCommonChats' | 'reportSpam' |
   // chat creation

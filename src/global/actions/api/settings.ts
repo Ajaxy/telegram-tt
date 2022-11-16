@@ -39,7 +39,10 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
   });
 
   if (photo) {
-    await callApi('updateProfilePhoto', photo);
+    const result = await callApi('updateProfilePhoto', photo);
+    if (result) {
+      actions.loadProfilePhotos({ profileId: currentUserId });
+    }
   }
 
   if (firstName || lastName || about) {
@@ -78,6 +81,18 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
       progress: ProfileEditProgress.Complete,
     },
   });
+});
+
+addActionHandler('deleteProfilePhoto', async (global, actions, payload) => {
+  const { photo, profileId } = payload;
+  const result = await callApi('deleteProfilePhoto', photo);
+  if (!result) return;
+  if (isUserId(profileId)) {
+    actions.loadFullUser({ userId: profileId });
+  } else {
+    actions.loadFullChat({ chatId: profileId });
+  }
+  actions.loadProfilePhotos({ profileId });
 });
 
 addActionHandler('checkUsername', async (global, actions, payload) => {

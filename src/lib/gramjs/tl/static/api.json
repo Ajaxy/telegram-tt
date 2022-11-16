@@ -164,6 +164,7 @@
     "updates.getChannelDifference",
     "photos.uploadProfilePhoto",
     "photos.getUserPhotos",
+    "photos.deletePhotos",
     "upload.saveFilePart",
     "upload.getFile",
     "upload.saveBigFilePart",

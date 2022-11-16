@@ -54,7 +54,7 @@ export {
 
 export {
   updateProfile, checkUsername, updateUsername, fetchBlockedContacts, blockContact, unblockContact,
-  updateProfilePhoto, uploadProfilePhoto, fetchWallpapers, uploadWallpaper,
+  updateProfilePhoto, uploadProfilePhoto, deleteProfilePhoto, fetchWallpapers, uploadWallpaper,
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   fetchWebAuthorizations, terminateWebAuthorization, terminateAllWebAuthorizations,
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
