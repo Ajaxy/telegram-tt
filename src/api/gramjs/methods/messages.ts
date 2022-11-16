@@ -63,6 +63,7 @@ import {
 } from '../helpers';
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
+import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -486,6 +487,7 @@ export async function editMessage({
   serverTimeOffset: number;
 }) {
   const isScheduled = message.date * 1000 > Date.now() + serverTimeOffset * 1000;
+  const emojiOnlyCount = text ? parseEmojiOnlyString(text) : undefined;
   const messageUpdate: Partial<ApiMessage> = {
     content: {
       ...message.content,
@@ -496,6 +498,7 @@ export async function editMessage({
         },
       }),
     },
+    emojiOnlyCount: emojiOnlyCount || undefined,
   };
 
   onUpdate({

@@ -523,7 +523,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const withAppendix = contentClassName.includes('has-appendix');
   const hasText = hasMessageText(message);
-  const emojiSize = message.emojiOnlyCount && getCustomEmojiSize(message.emojiOnlyCount);
+  const emojiSize = getCustomEmojiSize(message.emojiOnlyCount);
 
   let metaPosition!: MetaPosition;
   if (phoneCall) {

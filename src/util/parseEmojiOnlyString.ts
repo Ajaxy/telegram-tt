@@ -29,9 +29,17 @@ const parseEmojiOnlyString = (text: string): number | false => {
     return emojiCount;
   });
 
-  if (countPerLine.some((count) => count === -1)) return false;
+  let max = lines.length;
+  for (let i = 0; i < countPerLine.length; i++) {
+    if (countPerLine[i] === -1) {
+      return false;
+    }
+    if (countPerLine[i] > max) {
+      max = countPerLine[i];
+    }
+  }
 
-  return Math.max(...countPerLine);
+  return max;
 };
 
 export default parseEmojiOnlyString;
