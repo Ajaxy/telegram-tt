@@ -148,12 +148,6 @@ const MediaViewer: FC<StateProps> = ({
   }
 
   useEffect(() => {
-    if (isOpen && !mediaIds.length) {
-      closeMediaViewer();
-    }
-  }, [isOpen, closeMediaViewer, mediaIds.length]);
-
-  useEffect(() => {
     if (!isOpen) {
       return undefined;
     }
