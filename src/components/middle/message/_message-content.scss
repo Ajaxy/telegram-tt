@@ -706,7 +706,7 @@
   }
 
   &.emoji-only {
-    --emoji-only-size: 1.25rem;
+    --emoji-only-size: 2.25rem;
     font-size: var(--emoji-only-size);
     min-width: 6rem;
 
@@ -738,7 +738,7 @@
 
   @for $i from 1 through 7 {
     &.emoji-only-#{$i} {
-      $size: 6 - ($i * 0.625) + rem;
+      $size: 6 - ($i * 0.5) + rem;
 
       --emoji-only-size: #{$size};
     }

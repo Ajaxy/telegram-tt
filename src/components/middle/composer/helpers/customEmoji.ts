@@ -35,8 +35,10 @@ export function buildCustomEmojiHtmlFromEntity(rawText: string, entity: ApiMessa
   />`;
 }
 
-export function getCustomEmojiSize(maxEmojisInLine: number): number | undefined {
-  if (maxEmojisInLine > EMOJI_SIZES) return undefined;
+export function getCustomEmojiSize(maxEmojisInLine?: number): number | undefined {
+  if (!maxEmojisInLine) return undefined;
 
-  return (6 - (maxEmojisInLine * 0.625)) * REM; // Should be the same as in _message-content.scss
+  // Should be the same as in _message-content.scss
+  if (maxEmojisInLine > EMOJI_SIZES) return REM * 2.25;
+  return (6 - (maxEmojisInLine * 0.5)) * REM;
 }
