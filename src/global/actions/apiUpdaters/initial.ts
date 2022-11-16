@@ -114,6 +114,7 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       setGlobal({
         ...global,
         authHint: update.hint,
+        hasWebAuthTokenPasswordRequired: update.noReset,
       });
       break;
     case 'authorizationStateWaitQrCode':
