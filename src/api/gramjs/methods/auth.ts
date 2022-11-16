@@ -54,11 +54,10 @@ export function onRequestCode(isCodeViaApp = false) {
   });
 }
 
-export function onRequestPassword(hint?: string, noReset?: boolean) {
+export function onRequestPassword(hint?: string) {
   onUpdate({
     ...buildAuthStateUpdate('authorizationStateWaitPassword'),
     hint,
-    noReset,
   });
 
   return new Promise<string>((resolve) => {
