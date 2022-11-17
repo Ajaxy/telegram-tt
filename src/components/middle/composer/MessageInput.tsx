@@ -64,7 +64,9 @@ const SELECTION_RECALCULATE_DELAY_MS = 260;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
 // For some reason Safari inserts `<br>` after user removes text from input
 const SAFARI_BR = '<br>';
-const IGNORE_KEYS = ['Enter', 'PageUp', 'PageDown', 'Meta', 'Alt', 'Ctrl', 'ArrowDown', 'ArrowUp'];
+const IGNORE_KEYS = [
+  'Esc', 'Escape', 'Enter', 'PageUp', 'PageDown', 'Meta', 'Alt', 'Ctrl', 'ArrowDown', 'ArrowUp', 'Control', 'Shift',
+];
 
 function clearSelection() {
   const selection = window.getSelection();
