@@ -8,10 +8,11 @@ import type { ActiveEmojiInteraction } from '../../../global/types';
 import safePlay from '../../../util/safePlay';
 import { selectLocalAnimatedEmojiEffectByName } from '../../../global/selectors';
 import buildStyle from '../../../util/buildStyle';
+import { REM } from '../helpers/mediaDimensions';
 
 import useMedia from '../../../hooks/useMedia';
 
-const SIZE = 104;
+const SIZE = 7 * REM;
 const INTERACTION_BUNCH_TIME = 1000;
 const MS_DIVIDER = 1000;
 const TIME_DEFAULT = 0;

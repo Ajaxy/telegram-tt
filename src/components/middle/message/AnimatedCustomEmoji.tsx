@@ -23,7 +23,6 @@ type OwnProps = {
   customEmojiId: string;
   withEffects: boolean;
   isOwn?: boolean;
-  size?: 'large' | 'medium' | 'small';
   lastSyncTime?: number;
   forceLoadPreview?: boolean;
   messageId?: number;

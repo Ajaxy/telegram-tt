@@ -738,10 +738,14 @@
 
   @for $i from 1 through 7 {
     &.emoji-only-#{$i} {
-      $size: 6 - ($i * 0.5) + rem;
+      $size: min(7.5 - ($i * 0.75), 4) + rem;
 
       --emoji-only-size: #{$size};
     }
+  }
+
+  &.emoji-only-1 {
+    --emoji-only-size: 7rem;
   }
 
   .Message:not(.own) & {
