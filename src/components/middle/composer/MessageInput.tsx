@@ -8,7 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { selectReplyingToId } from '../../../global/selectors';
+import { selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
@@ -16,6 +16,7 @@ import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
 } from '../../../util/environment';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
+import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
@@ -40,6 +41,7 @@ type OwnProps = {
   html: string;
   placeholder: string;
   forcedPlaceholder?: string;
+  noFocusInterception?: boolean;
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
   shouldSuppressTextFormatter?: boolean;
@@ -51,7 +53,7 @@ type OwnProps = {
 
 type StateProps = {
   replyingToId?: number;
-  noTabCapture?: boolean;
+  isSelectModeActive?: boolean;
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
 };
 
@@ -62,6 +64,7 @@ const SELECTION_RECALCULATE_DELAY_MS = 260;
 const TEXT_FORMATTER_SAFE_AREA_PX = 90;
 // For some reason Safari inserts `<br>` after user removes text from input
 const SAFARI_BR = '<br>';
+const IGNORE_KEYS = ['Enter', 'PageUp', 'PageDown', 'Meta', 'Alt', 'Ctrl', 'ArrowDown', 'ArrowUp'];
 
 function clearSelection() {
   const selection = window.getSelection();
@@ -86,10 +89,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   placeholder,
   forcedPlaceholder,
   canAutoFocus,
+  noFocusInterception,
   shouldSuppressFocus,
   shouldSuppressTextFormatter,
   replyingToId,
-  noTabCapture,
+  isSelectModeActive,
   messageSendKeyCombo,
   onUpdate,
   onSuppressedFocus,
@@ -363,19 +367,68 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   }, [chatId, focusInput, replyingToId, canAutoFocus]);
 
   useEffect(() => {
-    if (noTabCapture) {
+    if (
+      !chatId
+      || editableInputId !== EDITABLE_INPUT_ID
+      || noFocusInterception
+      || (IS_TOUCH_ENV && IS_SINGLE_COLUMN_LAYOUT)
+      || isSelectModeActive
+    ) {
       return undefined;
     }
 
+    const handleDocumentKeyDown = (e: KeyboardEvent) => {
+      if (getIsDirectTextInputDisabled()) {
+        return;
+      }
+
+      const { key } = e;
+      const target = e.target as HTMLElement | undefined;
+
+      if (!target || IGNORE_KEYS.includes(key)) {
+        return;
+      }
+
+      const input = inputRef.current!;
+      const isSelectionCollapsed = document.getSelection()?.isCollapsed;
+
+      if (
+        ((key.startsWith('Arrow') || (e.shiftKey && key === 'Shift')) && !isSelectionCollapsed)
+        || (e.code === 'KeyC' && (e.ctrlKey || e.metaKey) && target.tagName !== 'INPUT')
+      ) {
+        return;
+      }
+
+      if (
+        input
+        && target !== input
+        && target.tagName !== 'INPUT'
+        && !target.isContentEditable
+      ) {
+        focusEditableElement(input, true, true);
+
+        const newEvent = new KeyboardEvent(e.type, e as any);
+        input.dispatchEvent(newEvent);
+      }
+    };
+
+    document.addEventListener('keydown', handleDocumentKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleDocumentKeyDown, true);
+    };
+  }, [chatId, editableInputId, isSelectModeActive, noFocusInterception]);
+
+  useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === 'Tab' && !getIsDirectTextInputDisabled()) {
         e.preventDefault();
         requestAnimationFrame(focusInput);
       }
     }, TAB_INDEX_PRIORITY_TIMEOUT, true, false);
 
     return captureKeyboardListeners({ onTab: captureFirstTab });
-  }, [focusInput, noTabCapture]);
+  }, [focusInput]);
 
   useEffect(() => {
     const input = inputRef.current!;
@@ -444,7 +497,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       messageSendKeyCombo,
       replyingToId: chatId && threadId ? selectReplyingToId(global, chatId, threadId) : undefined,
-      noTabCapture: global.pollModal.isOpen || global.payment.isPaymentModalOpen,
+      isSelectModeActive: selectIsInSelectMode(global),
     };
   },
 )(MessageInput));
