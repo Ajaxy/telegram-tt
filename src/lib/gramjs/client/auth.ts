@@ -6,9 +6,9 @@ import { computeCheck as computePasswordSrpCheck } from '../Password';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
-    webAuthTokenFailed: VoidFunction;
+    webAuthTokenFailed: () => void;
     phoneCode: (isCodeViaApp?: boolean) => Promise<string>;
-    password: (hint?: string) => Promise<string>;
+    password: (hint?: string, noReset?: boolean) => Promise<string>;
     firstAndLastNames: () => Promise<[string, string?]>;
     qrCode: (qrCode: { token: Buffer; expires: number }) => Promise<void>;
     onError: (err: Error) => void;
@@ -87,11 +87,11 @@ async function signInUserWithWebToken(
             throw new Error('SIGN_UP_REQUIRED');
         }
     } catch (err: any) {
-        authParams.webAuthTokenFailed();
-        client._log.error(`Failed to login with web token: ${err}`);
         if (err.message === 'SESSION_PASSWORD_NEEDED') {
-            return signInWithPassword(client, apiCredentials, authParams);
+            return signInWithPassword(client, apiCredentials, authParams, true);
         } else {
+            client._log.error(`Failed to login with web token: ${err}`);
+            authParams.webAuthTokenFailed();
             return signInUserWithPreferredMethod(client, apiCredentials, {
                 ...authParams,
                 webAuthToken: undefined,
@@ -344,13 +344,13 @@ async function sendCode(
 }
 
 async function signInWithPassword(
-    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
+    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams, noReset = false,
 ): Promise<Api.TypeUser> {
     // eslint-disable-next-line no-constant-condition
     while (1) {
         try {
             const passwordSrpResult = await client.invoke(new Api.account.GetPassword());
-            const password = await authParams.password(passwordSrpResult.hint);
+            const password = await authParams.password(passwordSrpResult.hint, noReset);
             if (!password) {
                 throw new Error('Password is empty');
             }
