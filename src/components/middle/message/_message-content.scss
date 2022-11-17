@@ -738,7 +738,7 @@
 
   @for $i from 1 through 7 {
     &.emoji-only-#{$i} {
-      $size: min(7.5 - ($i * 0.75), 4) + rem;
+      $size: min(7.5 - ($i * 0.75), 5.625) + rem;
 
       --emoji-only-size: #{$size};
     }
