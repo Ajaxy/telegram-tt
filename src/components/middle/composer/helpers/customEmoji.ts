@@ -41,5 +41,5 @@ export function getCustomEmojiSize(maxEmojisInLine?: number): number | undefined
   // Should be the same as in _message-content.scss
   if (maxEmojisInLine > EMOJI_SIZES) return 2.25 * REM;
   if (maxEmojisInLine === 1) return 7 * REM;
-  return Math.min(7.5 - (maxEmojisInLine * 0.75), 4) * REM;
+  return Math.min(7.5 - (maxEmojisInLine * 0.75), 5.625) * REM;
 }
