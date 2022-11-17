@@ -29,7 +29,6 @@ type OwnProps = {
   withEffects: boolean;
   isOwn?: boolean;
   observeIntersection?: ObserveFn;
-  size?: 'large' | 'medium' | 'small';
   lastSyncTime?: number;
   forceLoadPreview?: boolean;
   messageId?: number;
