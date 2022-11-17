@@ -141,7 +141,7 @@ export type GlobalState = {
   appConfig?: ApiAppConfig;
   canInstall?: boolean;
   hasWebAuthTokenFailed?: boolean;
-  hasWebAuthTokenPasswordRequired?: boolean;
+  hasWebAuthTokenPasswordRequired?: true;
   isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;

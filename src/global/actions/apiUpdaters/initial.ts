@@ -111,11 +111,19 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       });
       break;
     case 'authorizationStateWaitPassword':
-      setGlobal({
+      global = {
         ...global,
         authHint: update.hint,
-        hasWebAuthTokenPasswordRequired: update.noReset,
-      });
+      };
+
+      if (update.noReset) {
+        global = {
+          ...global,
+          hasWebAuthTokenPasswordRequired: true,
+        };
+      }
+
+      setGlobal(global);
       break;
     case 'authorizationStateWaitQrCode':
       setGlobal({
