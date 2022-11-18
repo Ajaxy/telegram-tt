@@ -22,7 +22,7 @@
   "--color-text-secondary-apple": ["#8E8E92", "#AAAAAA"],
   "--color-borders": ["#DADCE0", "#303030"],
   "--color-borders-input": ["#DADCE0", "#5B5B5A"],
-  "--color-dividers": ["#C8C6CC", "#404040"],
+  "--color-dividers": ["#C8C6CC", "#3B3B3D"],
   "--color-links": ["#3390EC", "#8774E1"],
   "--color-gray": ["#C4C9CC", "#717579"],
   "--color-pinned": ["#C4C9CC", "#707579"],
