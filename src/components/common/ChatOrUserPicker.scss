@@ -67,6 +67,11 @@
   .ListItem {
     position: absolute;
     width: 100%;
+
+    body.is-ios &:not(:last-of-type)::after,
+    body.is-android &:not(:last-of-type)::after {
+      right: -0.5rem;
+    }
   }
 
   .ListItem.chat-item-clickable {
