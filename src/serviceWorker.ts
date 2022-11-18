@@ -2,7 +2,13 @@ import { DEBUG } from './config';
 import { respondForProgressive } from './serviceWorker/progressive';
 import { respondForDownload } from './serviceWorker/download';
 import { respondWithCache, clearAssetCache, respondWithCacheNetworkFirst } from './serviceWorker/assetCache';
-import { handlePush, handleNotificationClick, handleClientMessage } from './serviceWorker/pushNotification';
+import {
+  handlePush,
+  handleNotificationClick,
+  handleClientMessage as handleNotificationMessage,
+} from './serviceWorker/pushNotification';
+import { respondForShare, handleClientMessage as handleShareMessage } from './serviceWorker/share';
+
 import { pause } from './util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
@@ -53,6 +59,10 @@ self.addEventListener('fetch', (e: FetchEvent) => {
     return true;
   }
 
+  if (url.includes('/share/')) {
+    e.respondWith(respondForShare(e));
+  }
+
   if (url.startsWith('http')) {
     if (NETWORK_FIRST_ASSETS.has(new URL(url).pathname)) {
       e.respondWith(respondWithCacheNetworkFirst(e));
@@ -70,4 +80,7 @@ self.addEventListener('fetch', (e: FetchEvent) => {
 
 self.addEventListener('push', handlePush);
 self.addEventListener('notificationclick', handleNotificationClick);
-self.addEventListener('message', handleClientMessage);
+self.addEventListener('message', (event) => {
+  handleNotificationMessage(event);
+  handleShareMessage(event);
+});

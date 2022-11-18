@@ -193,9 +193,18 @@ export function selectSendAs(global: GlobalState, chatId: string) {
   return selectUser(global, id) || selectChat(global, id);
 }
 
-export function selectRequestedText(global: GlobalState, chatId: string) {
-  if (global.requestedDraft?.chatId === chatId) {
-    return global.requestedDraft.text;
+export function selectRequestedDraftText(global: GlobalState, chatId: string) {
+  const { requestedDraft } = global;
+  if (requestedDraft?.chatId === chatId && !requestedDraft.files?.length) {
+    return requestedDraft.text;
+  }
+  return undefined;
+}
+
+export function selectRequestedDraftFiles(global: GlobalState, chatId: string) {
+  const { requestedDraft } = global;
+  if (requestedDraft?.chatId === chatId) {
+    return requestedDraft.files;
   }
   return undefined;
 }

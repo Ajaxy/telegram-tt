@@ -71,7 +71,7 @@ addActionHandler('openChatWithInfo', (global, actions, payload) => {
 });
 
 addActionHandler('openChatWithDraft', (global, actions, payload) => {
-  const { chatId, text } = payload;
+  const { chatId, text, files } = payload;
 
   if (chatId) {
     actions.openChat({ id: chatId });
@@ -82,6 +82,7 @@ addActionHandler('openChatWithDraft', (global, actions, payload) => {
     requestedDraft: {
       chatId,
       text,
+      files,
     },
   };
 });

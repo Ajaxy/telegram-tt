@@ -132,6 +132,6 @@ export function parseChooseParameter(choose?: string) {
   return types.filter((type): type is ApiChatType => API_CHAT_TYPES.includes(type as ApiChatType));
 }
 
-export function formatShareText(url?: string, text?: string) {
-  return [url, text].filter(Boolean).join('\n');
+export function formatShareText(url?: string, text?: string, title?: string): string {
+  return [url, title, text].filter(Boolean).join('\n');
 }

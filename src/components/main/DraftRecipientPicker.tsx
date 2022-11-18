@@ -34,7 +34,7 @@ const DraftRecipientPicker: FC<OwnProps> = ({
   }, [isOpen, markIsShown]);
 
   const handleSelectRecipient = useCallback((recipientId: string) => {
-    openChatWithDraft({ chatId: recipientId, text: requestedDraft!.text });
+    openChatWithDraft({ chatId: recipientId, text: requestedDraft!.text, files: requestedDraft!.files });
   }, [openChatWithDraft, requestedDraft]);
 
   const handleClose = useCallback(() => {

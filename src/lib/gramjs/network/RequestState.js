@@ -1,4 +1,4 @@
-const { createDeferred } = require('../Helpers');
+const { default: Deferred } = require('../../../util/Deferred');
 
 class RequestState {
     constructor(request, after = undefined, pending = {}) {
@@ -9,7 +9,7 @@ class RequestState {
         this.after = after;
         this.result = undefined;
         this.pending = pending;
-        this.deferred = createDeferred();
+        this.deferred = new Deferred();
         this.promise = new Promise((resolve, reject) => {
             this.resolve = resolve;
             this.reject = reject;
