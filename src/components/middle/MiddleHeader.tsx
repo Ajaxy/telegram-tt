@@ -65,6 +65,7 @@ import './MiddleHeader.scss';
 
 const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
+const EMOJI_STATUS_SIZE = 22;
 
 type OwnProps = {
   chatId: string;
@@ -347,6 +348,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer
               withUpdatingStatus
               withVideoAvatar={isReady}
+              emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
             />
           ) : (
