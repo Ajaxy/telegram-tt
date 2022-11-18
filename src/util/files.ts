@@ -1,3 +1,4 @@
+import { CONTENT_TYPES_WITH_PREVIEW } from '../config';
 import { pause } from './schedulers';
 
 // Polyfill for Safari: `File` is not available in web worker
@@ -121,4 +122,8 @@ export function imgToCanvas(img: HTMLImageElement) {
   ctx.drawImage(img, 0, 0);
 
   return canvas;
+}
+
+export function hasPreview(file: File) {
+  return CONTENT_TYPES_WITH_PREVIEW.has(file.type);
 }

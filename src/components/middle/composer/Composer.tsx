@@ -50,11 +50,12 @@ import {
   selectCanScheduleUntilOnline,
   selectEditingScheduledDraft,
   selectEditingDraft,
-  selectRequestedText,
+  selectRequestedDraftText,
   selectTheme,
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectChatType,
+  selectRequestedDraftFiles,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -75,6 +76,7 @@ import windowSize from '../../../util/windowSize';
 import { isSelectionInsideInput } from './helpers/selection';
 import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 import { getServerTime } from '../../../util/serverTime';
+import { hasPreview } from '../../../util/files';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { buildCustomEmojiHtml } from './helpers/customEmoji';
 import { processMessageInputForCustomEmoji } from '../../../util/customEmojiManager';
@@ -175,7 +177,8 @@ type StateProps =
     sendAsChat?: ApiChat;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
-    requestedText?: string;
+    requestedDraftText?: string;
+    requestedDraftFiles?: File[];
     attachBots: GlobalState['attachMenu']['bots'];
     attachMenuPeerType?: ApiAttachMenuPeerType;
     theme: ISettings['theme'];
@@ -256,7 +259,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsChat,
   sendAsId,
   editingDraft,
-  requestedText,
+  requestedDraftText,
+  requestedDraftFiles,
   botMenuButton,
   attachBots,
   attachMenuPeerType,
@@ -795,15 +799,23 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [contentToBeScheduled, handleMessageSchedule, requestCalendar]);
 
   useEffect(() => {
-    if (requestedText) {
-      setHtml(requestedText);
+    if (requestedDraftText) {
+      setHtml(requestedDraftText);
       resetOpenChatWithDraft();
       requestAnimationFrame(() => {
         const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
         focusEditableElement(messageInput, true);
       });
     }
-  }, [requestedText, resetOpenChatWithDraft, setHtml]);
+  }, [requestedDraftText, resetOpenChatWithDraft, setHtml]);
+
+  useEffect(() => {
+    if (requestedDraftFiles?.length) {
+      const isQuick = requestedDraftFiles.every((file) => hasPreview(file));
+      handleFileSelect(requestedDraftFiles, isQuick);
+      resetOpenChatWithDraft();
+    }
+  }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
 
   const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
     if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
@@ -1417,7 +1429,8 @@ export default memo(withGlobal<OwnProps>(
       : (chat?.adminRights?.anonymous ? chat?.id : undefined);
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
-    const requestedText = selectRequestedText(global, chatId);
+    const requestedDraftText = selectRequestedDraftText(global, chatId);
+    const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
     const currentMessageList = selectCurrentMessageList(global);
     const isForCurrentMessageList = chatId === currentMessageList?.chatId
       && threadId === currentMessageList?.threadId
@@ -1472,7 +1485,8 @@ export default memo(withGlobal<OwnProps>(
       sendAsChat,
       sendAsId,
       editingDraft,
-      requestedText,
+      requestedDraftText,
+      requestedDraftFiles,
       attachBots: global.attachMenu.bots,
       attachMenuPeerType: selectChatType(global, chatId),
       theme: selectTheme(global),

@@ -7,7 +7,6 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment, ApiChatMember, ApiSticker } from '../../../api/types';
 
 import {
-  CONTENT_TYPES_WITH_PREVIEW,
   EDITABLE_INPUT_MODAL_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
@@ -16,6 +15,7 @@ import {
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
+import { hasPreview } from '../../../util/files';
 
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -185,11 +185,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
     const files = await getFilesFromDataTransferItems(dataTransfer.items);
     if (files?.length) {
-      const newFiles = isQuick
-        ? Array.from(files).filter((file) => {
-          return file.type && CONTENT_TYPES_WITH_PREVIEW.has(file.type);
-        })
-        : Array.from(files);
+      const newFiles = Array.from(files).filter((file) => !isQuick || hasPreview(file));
 
       onFileAppend(newFiles, isQuick);
     }

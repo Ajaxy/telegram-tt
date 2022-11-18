@@ -1,9 +1,10 @@
 import BigInt from 'big-integer';
 import Api from '../tl/api';
 import type TelegramClient from './TelegramClient';
-import { sleep, createDeferred } from '../Helpers';
+import { sleep } from '../Helpers';
 import { getDownloadPartSize } from '../Utils';
 import errors from '../errors';
+import Deferred from '../../../util/Deferred';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -23,11 +24,6 @@ export interface DownloadFileParams {
     start?: number;
     end?: number;
     progressCallback?: OnProgress;
-}
-
-interface Deferred {
-    promise: Promise<any>;
-    resolve: (value?: any) => void;
 }
 
 // Chunk sizes for `upload.getFile` must be multiple of the smallest size
@@ -51,7 +47,7 @@ class Foreman {
 
     requestWorker() {
         if (this.activeWorkers === this.maxWorkers) {
-            const deferred = createDeferred();
+            const deferred = new Deferred();
             this.deferreds.push(deferred);
             return deferred.promise;
         } else {
@@ -225,7 +221,7 @@ async function downloadFile2(
 
         if (deferred) await deferred.promise;
 
-        if (noParallel) deferred = createDeferred();
+        if (noParallel) deferred = new Deferred();
 
         if (hasEnded) {
             foremans[senderIndex].releaseWorker();

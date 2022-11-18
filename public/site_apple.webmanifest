@@ -26,6 +26,22 @@
       "sizes": "1280x802",
       "type": "image/jpeg"
     }],
+    "share_target": {
+      "action": "/share/",
+      "method": "POST",
+      "enctype": "multipart/form-data",
+      "params": {
+        "title": "title",
+        "text": "text",
+        "url": "url",
+        "files": [
+          {
+            "name": "files",
+            "accept": "*/*"
+          }
+        ]
+      }
+    },
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone"

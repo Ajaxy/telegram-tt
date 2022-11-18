@@ -601,6 +601,7 @@ export type GlobalState = {
   requestedDraft?: {
     chatId?: string;
     text: string;
+    files?: File[];
   };
 
   pollModal: {
@@ -743,6 +744,7 @@ export interface ActionPayloads {
   openChatWithDraft: {
     chatId?: string;
     text: string;
+    files?: File[];
   };
   resetOpenChatWithDraft: never;
   toggleJoinToSend: {
